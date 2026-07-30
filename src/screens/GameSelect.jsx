@@ -3,6 +3,7 @@ import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
+import { fetchGameJerseys } from '../api/uniforms.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -173,6 +174,22 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const sorted = useMemo(
     () => sortGames(data ?? [], favoriteTeamId, favoriteAffiliateIds),
     [data, favoriteTeamId, favoriteAffiliateIds],
+  )
+
+  // A same-day alternate/City Connect posting doesn't reach jerseysData
+  // (public/data/jerseys.json) until tomorrow night's cron — one batched live
+  // uniforms/game call for today's whole slate closes that gap, the same fix
+  // #448 gave the in-game masthead (useGameData.js's liveJerseyTreatment),
+  // just batched across every card instead of piggybacking on a per-game feed
+  // fetch that doesn't exist here. Only fetched for today: a past day's slate
+  // is already covered by the cron by the time anyone pages back to it.
+  const gamePksKey = useMemo(() => sorted.map((g) => g.gamePk).join(','), [sorted])
+  const liveJerseys = useAsync(
+    () =>
+      isToday && gamePksKey
+        ? fetchGameJerseys(gamePksKey.split(',').map(Number))
+        : Promise.resolve({}),
+    [isToday, gamePksKey],
   )
 
   // Every active club at this level (see fetchTeams), independent of the
@@ -597,6 +614,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     prospectCount={pCount}
                     gameScore={scoreFor(g.gamePk)}
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
+                    liveJerseys={liveJerseys.data}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                   />
@@ -607,6 +625,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     prospectCount={pCount}
                     gameScore={scoreFor(g.gamePk)}
                     liveLine={liveLineFor(g)}
+                    liveJerseys={liveJerseys.data}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={null}
                   />

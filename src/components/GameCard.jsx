@@ -7,6 +7,7 @@ import { humanDate } from '../lib/dates.js'
 import { doubleHeaderLabel } from '../lib/resultCards.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
+import { liveTreatmentFor } from '../api/uniforms.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals. The one
@@ -28,6 +29,12 @@ export function GameCard({
   // (Top Games, All-Star Rosters) leaves it null.
   liveLine = null,
   dateLabel = null,
+  // `{ [gamePk]: { [teamId]: { code, text } } }` from a same-day batched
+  // fetchGameJerseys call (see GameSelect.jsx) — today's slate only, so a
+  // same-day alternate/City Connect posting shows up before the next nightly
+  // cron writes it into jerseysData below. null for every other caller (Top
+  // Games, All-Star Rosters, a past day already covered by that cron).
+  liveJerseys = null,
   onSelect,
   onBoxScore,
 }) {
@@ -90,6 +97,7 @@ export function GameCard({
             gamePk={game.gamePk}
             gameDate={game.gameDate}
             jerseysData={jerseysData}
+            liveJerseys={liveJerseys}
           />
           <TeamMark
             team={game.home}
@@ -97,6 +105,7 @@ export function GameCard({
             gamePk={game.gamePk}
             gameDate={game.gameDate}
             jerseysData={jerseysData}
+            liveJerseys={liveJerseys}
           />
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
@@ -256,17 +265,22 @@ function ReadyPill({ game }) {
 // below: every tile (Main, Alternate, City Connect alike) gets its curated
 // background + scale + optional recolored mark from teams.js, so a team's
 // mark always reads legibly against its own fill.
-function TeamMark({ team, side, gamePk, gameDate, jerseysData }) {
+function TeamMark({ team, side, gamePk, gameDate, jerseysData, liveJerseys = null }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
-  // it's actually wearing this game (scripts/gen-jerseys.mjs, nightly).
-  // Coverage is partial by design — TeamLogo's own fallback chain quietly
-  // drops back to the base logo for any team without curated art. Before the
-  // night's uniform assignment has posted (jerseyTreatmentFor -> null),
-  // defaultTreatmentFor predicts the look instead: away grey/road by
-  // default, City Connect for a Friday home game if the club has one. The
-  // tile itself is the shared TeamTreatmentMark, the same square the
-  // in-game masthead shows.
+  // it's actually wearing this game. Preferred order: (1) `liveJerseys`, a
+  // same-day batched live fetch (GameSelect.jsx), classified via the exact
+  // same classifyUniformAsset the nightly cron uses — closes the gap where a
+  // same-day posting didn't show on the slate until tomorrow's cron run (see
+  // useGameData.js's liveJerseyTreatment, the same fix for the in-game
+  // masthead); (2) jerseyTreatmentFor's nightly precompute
+  // (scripts/gen-jerseys.mjs); (3) defaultTreatmentFor's guess for a game
+  // outside both sources' coverage: away grey/road by default, City Connect
+  // for a Friday home game if the club has one. Coverage is partial by
+  // design — TeamLogo's own fallback chain quietly drops back to the base
+  // logo for any team without curated art. The tile itself is the shared
+  // TeamTreatmentMark, the same square the in-game masthead shows.
   const treatment =
+    liveTreatmentFor(liveJerseys, gamePk, team.id, team.teamName) ??
     jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
     defaultTreatmentFor(team.id, side, (gameDate ?? '').slice(0, 10))
   return (

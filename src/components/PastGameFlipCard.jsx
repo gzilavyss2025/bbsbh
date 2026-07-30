@@ -21,6 +21,7 @@ export function PastGameFlipCard({
   prospectCount,
   gameScore = null,
   cardMeta = null,
+  liveJerseys = null,
   onSelect,
   onBoxScore,
 }) {
@@ -66,6 +67,7 @@ export function PastGameFlipCard({
           pinnedTeamId={pinnedTeamId}
           prospectCount={prospectCount}
           gameScore={gameScore}
+          liveJerseys={liveJerseys}
           onSelect={onSelect}
           onBoxScore={onBoxScore}
         />
