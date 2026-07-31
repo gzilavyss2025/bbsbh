@@ -23195,6 +23195,29 @@ body {
    ledger styling (see the Standings page above) rather than a parallel table
    skin — same right-aligned mono figures, left-aligned .team cell. Only the
    rank number riding the name cell is specific to this table. */
+/* Row for a plate umpire slated behind the dish TODAY — same amber "this is
+   today" wash as .tstatrow--today, applied per-<td> like .standings tr.is-me
+   above (border-collapse: separate keeps each cell's own border-top). */
+.umprank__row--today td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+/* Kraft-tape "assignment" chip beside a today-working umpire's name — same
+   pill as .umpage__levelchip, reused for "here's tonight's game" rather than
+   a level tag. */
+.umprank__todaychip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+  background: var(--seal);
+  vertical-align: middle;
+}
 .umprank__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
