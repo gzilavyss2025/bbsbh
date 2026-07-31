@@ -171,12 +171,26 @@ jobs:
         id: warm-previews
         continue-on-error: true
         run: node scripts/warm-previews.mjs
+      # Like warm-previews, not a gen-*.mjs data generator — but unlike it,
+      # this one DOES write committed files (recompressed curated logo PNGs +
+      # the rebuilt logo-art.json manifest), so it IS in the commit step's
+      # `git add` list below. Palette PNGs are skipped, so a night with no new
+      # Identity Lab uploads is a no-op. sharp is installed here on demand —
+      # the generators above deliberately run with no npm install at all
+      # (scripts/CLAUDE.md), and this keeps it that way for them.
+      - name: Compress curated logos
+        id: compress-logos
+        continue-on-error: true
+        run: |
+          npm install --no-save --no-audit --no-fund sharp
+          node scripts/compress-logos.mjs
+          node scripts/gen-logo-art.mjs
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal.json scripts/data/pitch-arsenal.sql 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal.json scripts/data/pitch-arsenal.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race, same shape as
@@ -217,7 +231,8 @@ jobs:
           steps.comeback-wins.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||
           steps.pitch-arsenal.outcome == 'failure' ||
-          steps.warm-previews.outcome == 'failure'
+          steps.warm-previews.outcome == 'failure' ||
+          steps.compress-logos.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1
