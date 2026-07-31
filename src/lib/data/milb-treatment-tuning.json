@@ -320,8 +320,44 @@
         "header": {
           "bar": "#0A2240",
           "accent": "#FF4D00",
-          "onBar": "#F8F8F5"
-        }
+          "onBar": "#ffffff"
+        },
+        "position": {
+          "scale": 0.99,
+          "offsetX": -3,
+          "offsetY": 0,
+          "bg": "#fe8200",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#0A2240"
+      },
+      "away": {
+        "position": {
+          "scale": 0.99,
+          "offsetX": -3,
+          "offsetY": 0,
+          "bg": "#FF4D00",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#FF4D00"
       }
     }
   },
@@ -547,6 +583,13 @@
           "bar": "#0D223F",
           "accent": "#73AA4F",
           "onBar": "#F8F8F5"
+        },
+        "position": {
+          "scale": 0.95,
+          "offsetX": 0,
+          "offsetY": 3,
+          "bg": "#0D223F",
+          "pinstripe": false
         }
       },
       "away": {
@@ -559,7 +602,14 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#73AA4F"
+        "band": "#73AA4F",
+        "position": {
+          "scale": 0.95,
+          "offsetX": 0,
+          "offsetY": 3,
+          "bg": "#73AA4F",
+          "pinstripe": false
+        }
       }
     }
   },
@@ -813,7 +863,7 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 1.08,
           "offsetX": 0,
           "offsetY": 0,
           "bg": "#F8F8F5",
@@ -824,11 +874,11 @@
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": -3,
+          "paddingX": 5,
+          "paddingY": -6,
           "rowShift": 0
         },
-        "band": "#F8F8F5",
+        "band": "#CD2132",
         "header": {
           "bar": "#00243A",
           "accent": "#CD2132",
@@ -841,11 +891,18 @@
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": -5,
+          "paddingX": 5,
+          "paddingY": -6,
           "rowShift": 0
         },
-        "band": "#CD2132"
+        "band": "#CD2132",
+        "position": {
+          "scale": 1.08,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#CD2132",
+          "pinstripe": false
+        }
       }
     }
   },
@@ -1450,9 +1507,45 @@
       "home": {
         "header": {
           "bar": "#002D62",
-          "accent": "#007DC3",
+          "accent": "#ef3e42",
           "onBar": "#F8F8F5"
-        }
+        },
+        "position": {
+          "scale": 1.05,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#007cc1",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#ef3e42"
+      },
+      "away": {
+        "position": {
+          "scale": 1.05,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#ef3e42",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 2,
+          "rowShift": 0
+        },
+        "band": "#007DC3"
       }
     }
   },
@@ -1790,9 +1883,16 @@
         },
         "band": "#000000",
         "header": {
-          "bar": "#A71930",
+          "bar": "#d31245",
           "accent": "#000000",
           "onBar": "#F8F8F5"
+        },
+        "position": {
+          "scale": 0.93,
+          "offsetX": 0,
+          "offsetY": -2,
+          "bg": "#000000",
+          "pinstripe": false
         }
       },
       "away": {
@@ -1805,7 +1905,14 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#A71930"
+        "band": "#A71930",
+        "position": {
+          "scale": 0.93,
+          "offsetX": 0,
+          "offsetY": -2,
+          "bg": "#A71930",
+          "pinstripe": false
+        }
       }
     }
   },
