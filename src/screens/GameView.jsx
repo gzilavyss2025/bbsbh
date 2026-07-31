@@ -225,6 +225,7 @@ export function GameView({ game, section, onSection }) {
           manager={managers.data?.away}
           uniform={uniformBrief.away}
           treatment={jerseyTreatments.away}
+          oppTreatment={jerseyTreatments.home}
           broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}
@@ -254,6 +255,7 @@ export function GameView({ game, section, onSection }) {
           manager={managers.data?.home}
           uniform={uniformBrief.home}
           treatment={jerseyTreatments.home}
+          oppTreatment={jerseyTreatments.away}
           broadcast={broadcast.data}
           scorebookWeather={weather.data}
           scorebookWeatherLoading={weather.loading}

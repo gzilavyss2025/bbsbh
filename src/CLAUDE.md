@@ -18,10 +18,12 @@ printable grayscale logo sheet for pencil-sketching, reached from the slate head
 
 `TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey
 that club is wearing that game (ADR-0030) — three CSS custom properties scoped to
-the `.teaminfo` subtree, resolved by `lib/headerTheme.js`. The innings viewer and
-box score are deliberately excluded: navy-and-kraft there *is* the seal metaphor.
-The theme's only inputs are `(teamId, treatment)` — identity, never game state;
-see `src/lib/CLAUDE.md`.
+the `.teaminfo` subtree, resolved by `lib/headerTheme.js`. One masthead is themed
+to the OTHER club: the Starting pitcher card shows the opposing starter, so it
+resolves the triad a second time against `(oppMeta.id, oppTreatment)` and scopes
+it to just that `<section>`. The innings viewer and box score are deliberately
+excluded: navy-and-kraft there *is* the seal metaphor. The theme's only inputs
+are `(teamId, treatment)` — identity, never game state; see `src/lib/CLAUDE.md`.
 
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 
