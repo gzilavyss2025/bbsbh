@@ -204,7 +204,47 @@
           "bar": "#005DAA",
           "accent": "#EF3E42",
           "onBar": "#F8F8F5"
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -29,
+          "rowShift": 0
+        },
+        "band": "#005DAA",
+        "wpaWordmark": true,
+        "position": {
+          "scale": 0.96,
+          "offsetX": 2,
+          "offsetY": 0,
+          "bg": "#005DAA",
+          "pinstripe": false,
+          "pinstripeBg": ""
         }
+      },
+      "away": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": 2,
+          "offsetY": -1,
+          "bg": "#EF3E42",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -28,
+          "rowShift": 0
+        },
+        "band": "#EF3E42",
+        "wpaWordmark": true
       }
     }
   },
@@ -1246,6 +1286,46 @@
           "bar": "#004A8D",
           "accent": "#B9976A",
           "onBar": "#F8F8F5"
+        },
+        "position": {
+          "scale": 1.07,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F5F3EE",
+          "pinstripe": true,
+          "pinstripeBg": "#FFFFFF"
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#004A8D",
+        "wpaWordmark": true
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#B9976A",
+        "wpaWordmark": true,
+        "position": {
+          "scale": 1.07,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#B9976A",
+          "pinstripe": false,
+          "pinstripeBg": ""
         }
       }
     }
@@ -1432,39 +1512,48 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 0.92,
           "offsetX": 0,
           "offsetY": 0,
-          "bg": "#F8F8F5",
+          "bg": "#071D49",
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 30,
+          "size": 78,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 21,
+          "paddingY": -46,
           "rowShift": 0
         },
-        "band": "#F8F8F5",
+        "band": "#C8102E",
         "header": {
           "bar": "#C8102E",
           "accent": "#071D49",
           "onBar": "#F8F8F5"
-        }
+        },
+        "wpaWordmark": true
       },
       "away": {
         "wpaLayout": {
-          "size": 30,
+          "size": 68,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 18,
+          "paddingY": -38,
           "rowShift": 0
         },
-        "band": "#F8F8F5"
+        "band": "#F8F8F5",
+        "position": {
+          "scale": 0.92,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#C8102E",
+          "pinstripe": false
+        },
+        "wpaWordmark": true
       }
     }
   },
@@ -1589,7 +1678,34 @@
           "bar": "#009A44",
           "accent": "#010101",
           "onBar": "#010101"
+        },
+        "position": {
+          "scale": 1.49,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#009A44",
+          "pinstripe": false
         }
+      },
+      "away": {
+        "position": {
+          "scale": 1.49,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#f05532",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#010101",
+        "wpaWordmark": true
       }
     }
   },

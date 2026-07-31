@@ -82,7 +82,7 @@ export const MILB_COLOR_LAB_LEVELS = [
 // these are derived from (ADR-0029), so a tuning session lands as a real diff
 // rather than a snippet to paste by hand.
 
-// `{ [teamId]: { [variant]: { scale, offsetX, offsetY, bg, pinstripe } } }`
+// `{ [teamId]: { [variant]: { scale, offsetX, offsetY, bg, pinstripe, pinstripeBg? } } }`
 export const MILB_LOGO_POS_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.position)
 
 // `{ [teamId]: { [variant]: { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } } }`
@@ -91,7 +91,9 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(
   (f) => f.wpaLayout,
 )
 
-// `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
+// `{ [teamId]: { [variant]: string | { pinstripe: true, color, bg? } } }` —
+// `bg` is the colored fill under the stripes (mlb.jsx's own `band.bg`
+// convention), omitted for the plain-white default.
 export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.band)
 
 // `{ [teamId]: { [variant]: boolean } }` — whether the WPA band tiles the
@@ -119,6 +121,11 @@ export function milbLogoPosition(teamId, variant, draft) {
     offsetY: draft?.offsetY ?? o?.offsetY ?? 0,
     bg: draft?.bg ?? o?.bg ?? bg,
     pinstripe: draft?.pinstripe ?? o?.pinstripe ?? false,
+    // The colored fill under the stripes, same "White Sox City Connect red"
+    // concept as the WPA band's own pinstripeBg/bandBg — '' (not undefined)
+    // when unset so HexField renders as a controlled input showing the
+    // plain-white default rather than the confusing raw CSS fallback.
+    pinstripeBg: draft?.pinstripeBg ?? o?.pinstripeBg ?? '',
   }
 }
 
@@ -164,6 +171,17 @@ export function milbWpaBandColor(teamId, variant, draft) {
   const overrideColor = override && typeof override === 'object' ? override.color : override
   if (overrideColor) return overrideColor
   return milbVariantColors(teamId, variant).bg
+}
+
+// The colored fill under a pinstriped WPA band's lines, or null for the
+// plain-white default — same draft-beats-curated chain as
+// milbWpaBandPinstripeColor, mirroring MLB's wpaBandPinstripeBg
+// (wpaBandColors.js).
+export function milbWpaBandFillColor(teamId, variant, draft) {
+  if (draft?.bandBg !== undefined) return draft.bandBg || null
+  const override = MILB_WPA_BAND_COLOR_OVERRIDES[teamId]?.[variant]
+  if (override && typeof override === 'object') return override.bg ?? null
+  return null
 }
 
 // Whether (teamId, variant)'s WPA band should tile the club's wordmark
