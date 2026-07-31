@@ -237,9 +237,16 @@ test('mainTreatmentRecolor is true only for teams whose Main mark swaps to the h
 // upload's own manifest (logo-art.json) says is on disk, so a new upload
 // needs no companion data or code change to take effect.
 test('mainOverrideLogoUrl and mainTreatmentRecolor resolve from disk presence alone, not a MAIN_OVERRIDES flag', () => {
-  assert.equal(MAIN_OVERRIDES[113].recolor, undefined) // recolor is no longer even a field this store carries
-  assert.equal(mainTreatmentRecolor(113), true) // Reds — CIN.png is on disk regardless
-  assert.equal(mainOverrideLogoUrl(113), '/team-logos/main-overrides/CIN.png')
+  assert.equal(MAIN_OVERRIDES[114].recolor, undefined) // recolor is no longer even a field this store carries
+  assert.equal(mainTreatmentRecolor(114), true) // Guardians — CLE.svg is on disk regardless
+  assert.equal(mainOverrideLogoUrl(114), '/team-logos/main-overrides/CLE.svg')
+})
+
+// A club's own custom-mark assignment (Team Identity Lab, ADR-0029) beats even
+// a procured main-overrides file, since assigning one is an explicit act about
+// that club — see mainOverrideLogoUrl's own comment.
+test('mainOverrideLogoUrl prefers an assigned custom mark over the procured main-overrides file', () => {
+  assert.equal(mainOverrideLogoUrl(113), '/team-logos/custom/113-basewhite.svg') // Reds — assigned over CIN.png
 })
 
 test('mainOverrideLogoUrl prefers a procured .png over a stale .svg of the same team', () => {

@@ -828,7 +828,52 @@
       "bytes": 1867
     }
   },
+  "wpa-alternate": {
+    "BAL.svg": {
+      "teamId": 110,
+      "bytes": 13821
+    },
+    "MIA.svg": {
+      "teamId": 146,
+      "bytes": 32751
+    }
+  },
+  "wpa-alternate-2": {
+    "ATH.svg": {
+      "teamId": 133,
+      "bytes": 2730
+    },
+    "AZ.svg": {
+      "teamId": 109,
+      "bytes": 18734
+    }
+  },
+  "wpa-alternate-3": {
+    "BAL.svg": {
+      "teamId": 110,
+      "bytes": 13821
+    },
+    "MIN.png": {
+      "teamId": 142,
+      "bytes": 12834,
+      "width": 512,
+      "height": 512,
+      "alpha": true
+    }
+  },
   "wpa-main": {
+    "AZ.svg": {
+      "teamId": 109,
+      "bytes": 18734
+    },
+    "CIN.svg": {
+      "teamId": 113,
+      "bytes": 1453
+    },
+    "LAD.svg": {
+      "teamId": 119,
+      "bytes": 3956
+    },
     "NYM.png": {
       "teamId": 121,
       "bytes": 40036,

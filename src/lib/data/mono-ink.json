@@ -1,4 +1,15 @@
 {
+  "108": {
+    "name": "Los Angeles Angels",
+    "art": "9:87bdd82a",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout"
+    }
+  },
   "109": {
     "name": "Arizona Diamondbacks",
     "art": "7:bbaee5f0",
@@ -9,12 +20,39 @@
       "6": "knockout"
     }
   },
+  "110": {
+    "name": "Baltimore Orioles",
+    "art": "8:d1e46bf6",
+    "parts": {
+      "2": "knockout",
+      "3": "ink",
+      "4": "knockout"
+    }
+  },
   "113": {
     "name": "Cincinnati Reds",
     "art": "3:f09df7d1",
     "parts": {
       "0": "knockout",
       "1": "knockout"
+    }
+  },
+  "115": {
+    "name": "Colorado Rockies",
+    "art": "4:aa012140",
+    "parts": {
+      "1": "knockout",
+      "3": "knockout"
+    }
+  },
+  "117": {
+    "name": "Houston Astros",
+    "art": "8:955ef065",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "5": "ink",
+      "6": "knockout"
     }
   },
   "144": {
@@ -30,6 +68,7 @@
     "art": "4:76b01228",
     "parts": {
       "0": "knockout",
+      "2": "ink",
       "3": "knockout"
     }
   }
