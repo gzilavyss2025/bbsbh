@@ -2,6 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Warm the connections the very first screen needs, overlapping DNS +
+         TCP + TLS (~200-400 ms each on mobile) with the HTML/JS download:
+         statsapi is every data call including the slate's blocking schedule
+         request; the two mlbstatic hosts serve team logos and headshots. The
+         crossorigin attribute must match how each origin is actually used —
+         statsapi is fetch() (CORS), the CDNs are plain <img> loads — or the
+         warmed socket goes unused. -->
+    <link rel="preconnect" href="https://statsapi.mlb.com" crossorigin />
+    <link rel="preconnect" href="https://www.mlbstatic.com" />
+    <link rel="preconnect" href="https://img.mlbstatic.com" />
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <!-- Use a new URL for the Tally mark so iOS does not reuse the old,
          aggressively cached home-screen icon. -->

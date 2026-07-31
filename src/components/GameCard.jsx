@@ -35,6 +35,9 @@ export function GameCard({
   // cron writes it into jerseysData below. null for every other caller (Top
   // Games, All-Star Rosters, a past day already covered by that cron).
   liveJerseys = null,
+  // True for the slate's first cards, whose marks are the page's largest
+  // above-the-fold images — threaded to TeamLogo to skip lazy loading there.
+  eager = false,
   onSelect,
   onBoxScore,
 }) {
@@ -98,6 +101,7 @@ export function GameCard({
             officialDate={game.officialDate}
             jerseysData={jerseysData}
             liveJerseys={liveJerseys}
+            eager={eager}
           />
           <TeamMark
             team={game.home}
@@ -106,6 +110,7 @@ export function GameCard({
             officialDate={game.officialDate}
             jerseysData={jerseysData}
             liveJerseys={liveJerseys}
+            eager={eager}
           />
           <TeamName team={game.away} side="away" />
           <TeamName team={game.home} side="home" />
@@ -265,7 +270,7 @@ function ReadyPill({ game }) {
 // below: every tile (Main, Alternate, City Connect alike) gets its curated
 // background + scale + optional recolored mark from teams.js, so a team's
 // mark always reads legibly against its own fill.
-function TeamMark({ team, side, gamePk, officialDate, jerseysData, liveJerseys = null }) {
+function TeamMark({ team, side, gamePk, officialDate, jerseysData, liveJerseys = null, eager = false }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
   // it's actually wearing this game. Preferred order: (1) `liveJerseys`, a
   // same-day batched live fetch (GameSelect.jsx), classified via the exact
@@ -292,6 +297,7 @@ function TeamMark({ team, side, gamePk, officialDate, jerseysData, liveJerseys =
       size={56}
       block="gamecard__logobox"
       className={`gamecard__logobox--${side}`}
+      eager={eager}
     />
   )
 }

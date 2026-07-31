@@ -26,6 +26,10 @@ export function TeamLogo({
   variant = 'base',
   className = '',
   crop = false,
+  // Above-the-fold marks (the slate's first cards) opt out of lazy loading —
+  // for them `loading="lazy"` defers the largest visible images past the
+  // initial layout pass, delaying the page's LCP for no bandwidth saved.
+  eager = false,
 }) {
   // 'stage' tracks how far down the fallback chain we are for the current
   // (teamId, variant). Reset whenever either changes so a re-picked mark starts
@@ -90,7 +94,8 @@ export function TeamLogo({
       alt=""
       width={isWordmark ? size * WORDMARK_ASPECT : size}
       height={size}
-      loading="lazy"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchPriority={eager ? 'high' : undefined}
       decoding="async"
       onError={onError}
       aria-hidden="true"

@@ -594,11 +594,16 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               <DerbyCard />
             </li>
           )}
-          {visibleGames.map((g) => {
+          {visibleGames.map((g, idx) => {
             const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
               ? favoriteTeamId
               : null
             const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+            // The first cards' marks are the slate's largest above-the-fold
+            // images — its LCP candidate — so they skip TeamLogo's default
+            // lazy loading (which would defer exactly the images the first
+            // paint is waiting on). Two cards ≈ one phone viewport.
+            const eager = idx < 2
             const isPastFinal =
               showPastDayTreatment &&
               g.abstractState === 'Final' &&
@@ -615,6 +620,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     gameScore={scoreFor(g.gamePk)}
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                     liveJerseys={liveJerseys.data}
+                    eager={eager}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={() => onPick(g, dateStr, 'boxscore')}
                   />
@@ -626,6 +632,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     gameScore={scoreFor(g.gamePk)}
                     liveLine={liveLineFor(g)}
                     liveJerseys={liveJerseys.data}
+                    eager={eager}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={null}
                   />

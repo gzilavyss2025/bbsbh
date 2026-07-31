@@ -390,6 +390,13 @@ export default defineConfig({
         // appeared in MLB (~1.3 MB and growing, see scripts/gen-rookies.mjs /
         // gen-rookies-backfill.mjs).
         globIgnores: [
+          // The curated club marks (~2.5 MB even after compress-logos.mjs,
+          // across ~10 treatment directories). One slate shows a handful and
+          // one game exactly two, so precaching the whole league's art on
+          // every install is pure cost — the same reasoning as the mono
+          // knockout SVGs below, 1.5x the bytes. The CacheFirst runtime rule
+          // below keeps every mark actually seen available offline.
+          '**/team-logos/**',
           '**/data/vs-team-splits.json',
           '**/data/umpires.json',
           '**/data/game-notes.json',
@@ -405,6 +412,13 @@ export default defineConfig({
           '**/data/top-prospects.json',
           '**/data/war-history.json',
           '**/data/minors-leaders.json',
+          '**/data/career-matchups.json',
+          '**/data/postseason-odds.json',
+          '**/data/postseason-history.json',
+          '**/data/team-score.json',
+          '**/data/season-score.json',
+          '**/data/milestones.json',
+          '**/data/savant-percentiles.json',
           // Every named All-Star since 1933 (~650 KB) — only read from the
           // All-Star Rosters page, see scripts/gen-all-star-rosters.mjs.
           '**/data/all-star-rosters.json',
@@ -442,7 +456,7 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal)\.json$/.test(
+              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
               ) || /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
@@ -451,7 +465,11 @@ export default defineConfig({
               cacheName: 'bbsbh-static-data',
               networkTimeoutSeconds: 3,
               expiration: {
-                maxEntries: 14,
+                // Room for one copy of every snapshot the pattern above can
+                // match (18 named + a few team-transactions seasons) — an
+                // undersized cap here silently evicts one page's data to
+                // admit another's.
+                maxEntries: 24,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },
@@ -469,6 +487,24 @@ export default defineConfig({
               cacheName: 'bbsbh-team-marks',
               expiration: {
                 maxEntries: 60,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            // The curated club marks (excluded from precache above), same
+            // static-art rationale as the mono knockouts: CacheFirst so a
+            // revisited club's mark comes off disk and survives going offline
+            // at the park; an updated upload lands on the next expiry. The
+            // cap covers a full league's worth of treatment tiles without
+            // letting the cache grow unbounded.
+            urlPattern: ({ url }) => /^\/team-logos\//.test(url.pathname),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-curated-logos',
+              expiration: {
+                maxEntries: 180,
                 maxAgeSeconds: 30 * 24 * 60 * 60,
               },
             },
