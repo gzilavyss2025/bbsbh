@@ -4428,16 +4428,16 @@ body {
 .teaminfo.is-themed > .teaminfo__head .teaminfo__namelink {
   color: var(--bar-text, var(--text-heading));
 }
-/* Away/Home and the Game Notes button ride the same bar, so they take its ink
-   too — at the muted weight they already read at, via a partial alpha over the
-   bar rather than a second hand-picked hex the contrast guard couldn't see. */
+/* Away/Home rides the bar directly (plain text, no background of its own), so
+   it takes the bar's ink too — at the muted weight it already reads at, via a
+   partial alpha over the bar rather than a second hand-picked hex the
+   contrast guard couldn't see. The Game Notes button is its own opaque card
+   (`--surface-card`) floating on the bar, not text sitting in it, so it stays
+   unthemed — recoloring just its text to the bar's ink went invisible
+   whenever that ink came out light (white-on-white against the card). */
 .teaminfo.is-themed > .teaminfo__head .teaminfo__side {
   color: var(--bar-text, var(--text-caption));
   opacity: 0.78;
-}
-.teaminfo.is-themed > .teaminfo__head .notesbtn {
-  color: var(--bar-text, var(--text-body));
-  border-color: color-mix(in srgb, var(--bar-text, currentColor) 45%, transparent);
 }
 
 /* The section mastheads on a themed page — same three properties, same
