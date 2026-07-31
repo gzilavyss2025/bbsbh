@@ -53,11 +53,11 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
-import { SectionTitle } from '../components/SectionTitle.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { InjuredMark } from '../components/InjuredMark.jsx'
 import { RookiePill } from '../components/RookiePill.jsx'
+import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../lib/headerTheme.js'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'
 import { PostseasonOddsModal } from '../components/PostseasonOddsModal.jsx'
@@ -864,6 +864,16 @@ export function TeamPage({ id, asOf, sportId }) {
   const navigate = useNav()
   const { loading, error, data } = useAsync(() => loadTeam(teamId, asOf), [teamId, asOf])
   useDocumentTitle(data?.team?.name || null)
+  // Not tied to any one game, so this page always wears the club's Main home
+  // jersey (MLB) / Home side (MiLB) — the same triad the hero's Main treatment
+  // mark already renders (see TeamTreatmentMark below). Null for a club with
+  // no curated triad, which leaves every bar below on the app's default navy
+  // chrome — coverage is partial by design (ADR-0030).
+  const teamMetaId = data?.team?.id
+  const theme = useMemo(
+    () => headerThemeFor(teamMetaId, themeKeyFor(teamMetaId, 'home', 'main')),
+    [teamMetaId],
+  )
   const back = () => window.history.back()
   // Postseason Odds modal — a plain boolean rather than the team-keyed
   // pattern below is fine here: it's a transient dialog, not persisted
@@ -932,7 +942,7 @@ export function TeamPage({ id, asOf, sportId }) {
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
-      <div className="screen team-hub">
+      <div className={`screen team-hub ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
         <SiteHeader />
         <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
@@ -947,7 +957,7 @@ export function TeamPage({ id, asOf, sportId }) {
               teamId={team.id}
               name={team.name}
               treatment="main"
-              size={64}
+              size={128}
               block="team-hub__logobox"
             />
           </div>
@@ -983,22 +993,21 @@ export function TeamPage({ id, asOf, sportId }) {
         </header>
 
         {standings.length > 0 && (
-          <>
-            <SectionTitle
-              title={team.division?.name || 'Standings'}
-              note={asOf ? 'entering today' : ''}
-              action={
-                divisionPostseasonOdds.length > 0 && (
-                  <button
-                    type="button"
-                    className="psodds-pill"
-                    onClick={() => setShowPostseasonOdds(true)}
-                  >
-                    Postseason Odds
-                  </button>
-                )
-              }
-            />
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>{team.division?.name || 'Standings'}</span>
+              {asOf && <em>entering today</em>}
+              {divisionPostseasonOdds.length > 0 && (
+                <button
+                  type="button"
+                  className="psodds-pill"
+                  onClick={() => setShowPostseasonOdds(true)}
+                >
+                  Postseason Odds
+                </button>
+              )}
+            </div>
+            <div className="thub-card__body">
             <div className="ledger-wrap">
               <table className="standings">
                 <thead>
@@ -1032,7 +1041,8 @@ export function TeamPage({ id, asOf, sportId }) {
                 </tbody>
               </table>
             </div>
-          </>
+            </div>
+          </div>
         )}
 
         {/* MLB gets the per-jersey catalog strip with its records; a MiLB
@@ -1069,15 +1079,19 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
 
         {schedule.length > 0 && (
-          <>
-            <SectionTitle title="Schedule" />
-            <SeriesStrip
-              key={`${team.id}-${asOf ?? ''}`}
-              games={schedule}
-              allStarGame={allStarGame}
-              refDate={asOf || isoToday()}
-            />
-          </>
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Schedule</span>
+            </div>
+            <div className="thub-card__body">
+              <SeriesStrip
+                key={`${team.id}-${asOf ?? ''}`}
+                games={schedule}
+                allStarGame={allStarGame}
+                refDate={asOf || isoToday()}
+              />
+            </div>
+          </div>
         )}
 
         {dayOfWeek && (
@@ -1118,11 +1132,16 @@ export function TeamPage({ id, asOf, sportId }) {
 
         {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
           <>
-            <SectionTitle
-              title="Roster"
-              note={!hasRecentRoster ? 'preferred lineup' : ''}
-              action={
-                hasRecentRoster && (
+            {/* One bordered soft-cream card (same convention as .tstats-card)
+                around all the projection subsections, so they read as one
+                group distinct from the actual 40-man list further down. The
+                masthead is bolted directly onto its own top border rather
+                than floating as a separate SectionTitle above it. */}
+            <div className="roster-super">
+              <div className="roster-super__head">
+                <span>Roster</span>
+                {!hasRecentRoster && <em>preferred lineup</em>}
+                {hasRecentRoster && (
                   <div className="roster-super__toggle" role="tablist" aria-label="Roster projection basis">
                     <button
                       type="button"
@@ -1143,13 +1162,9 @@ export function TeamPage({ id, asOf, sportId }) {
                       Last 10 Games
                     </button>
                   </div>
-                )
-              }
-            />
-            {/* One bordered soft-cream card (same convention as .tstats-card)
-                around all the projection subsections, so they read as one
-                group distinct from the actual 40-man list further down. */}
-            <div className="roster-super">
+                )}
+              </div>
+              <div className="roster-super__body">
               <div className="roster-super__row">
                 {/* Left column: the defensive nine, with the bench (Top
                     Substitutes) stacked directly beneath it. */}
@@ -1205,13 +1220,17 @@ export function TeamPage({ id, asOf, sportId }) {
                   )}
                 </div>
               </div>
+              </div>
             </div>
           </>
         )}
 
         {(position.length > 0 || pitchers.length > 0) && (
-          <>
-            <SectionTitle title="Current Roster" />
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Current Roster</span>
+            </div>
+            <div className="thub-card__body">
             <div className="roster-cols">
               {position.length > 0 && (
                 <div>
@@ -1238,12 +1257,16 @@ export function TeamPage({ id, asOf, sportId }) {
                 </div>
               )}
             </div>
-          </>
+            </div>
+          </div>
         )}
 
         {injured.length > 0 && (
-          <>
-            <SectionTitle title="Injured List" />
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Injured List</span>
+            </div>
+            <div className="thub-card__body">
             {showInjured ? (
               <RosterList
                 season={season}
@@ -1255,7 +1278,8 @@ export function TeamPage({ id, asOf, sportId }) {
                 Show {injured.length} injured
               </button>
             )}
-          </>
+            </div>
+          </div>
         )}
 
         {isMilb && affiliationHistory.length > 0 && (
@@ -1263,8 +1287,11 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
 
         {affiliateCards.length > 0 && (
-          <>
-            <SectionTitle title="Affiliates" />
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Affiliates</span>
+            </div>
+            <div className="thub-card__body">
             <div className="thub-affiliates">
               {affiliateCards.map((a) => (
                 <TeamLink key={a.id} id={a.id} className="thub-affiliate">
@@ -1279,12 +1306,17 @@ export function TeamPage({ id, asOf, sportId }) {
                 </TeamLink>
               ))}
             </div>
-          </>
+            </div>
+          </div>
         )}
 
         {!isMilb && prospects.length > 0 && (
-          <>
-            <SectionTitle title="Prospects" note="org rank" />
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Prospects</span>
+              <em>org rank</em>
+            </div>
+            <div className="thub-card__body">
             <div className="prospectshowcase">
               {prospects.slice(0, PROSPECT_SHOWCASE_COUNT).map((p) => (
                 <PlayerLink key={p.playerId} id={p.playerId} className="prospectshowcase__card">
@@ -1334,7 +1366,8 @@ export function TeamPage({ id, asOf, sportId }) {
                 </button>
               )}
             </div>
-          </>
+            </div>
+          </div>
         )}
 
         {showPostseasonOdds && (
@@ -1446,9 +1479,12 @@ function SeriesStrip({ games, allStarGame, refDate }) {
 
 function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
   return (
-    <>
-      <SectionTitle title={title} note={note} />
-      <div className="tstats-card">
+    <div className="tstats-card">
+      <div className="tstats-card__head">
+        <span>{title}</span>
+        {note && <em>{note}</em>}
+      </div>
+      <div className="tstats-card__body">
         <div className="tstats">
           {stats.map((s) => (
             <div
@@ -1462,7 +1498,7 @@ function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
           ))}
         </div>
       </div>
-    </>
+    </div>
   )
 }
 
@@ -1551,9 +1587,12 @@ function ComebackRail({ t, teamId, clubName }) {
 }
 function ComebackCard({ data, teamId, clubName }) {
   return (
-    <>
-      <SectionTitle title="Comeback wins" note="all 30 teams" />
-      <div className="tstats-card cbk">
+    <div className="tstats-card cbk">
+      <div className="tstats-card__head">
+        <span>Comeback wins</span>
+        <em>all 30 teams</em>
+      </div>
+      <div className="tstats-card__body">
         <p className="cbk__gloss">
           How often {clubName || 'they'} rallied to win after their chance of winning the game
           sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; ● is{' '}
@@ -1587,7 +1626,7 @@ function ComebackCard({ data, teamId, clubName }) {
           })}
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

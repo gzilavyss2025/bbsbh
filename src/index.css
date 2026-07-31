@@ -4484,6 +4484,116 @@ body {
   color: var(--bar-text, var(--text-on-ink));
 }
 
+/* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
+   always resolves the club's Main/Home triad rather than tonight's jersey (see
+   TeamPage.jsx's own theme useMemo). Scoped to .team-hub so it never leaks
+   onto the shared SectionTitle/section__title used by the player and
+   team-leaders pages, which stay unthemed.
+
+   The hero (.team-hub__id) itself stays UNTHEMED — no bar, no club-colored
+   box — the club's identity already rides on the big Main-treatment mark
+   (see .team-hub__logobox below) instead. Every OTHER themed section is a
+   masthead BOLTED onto the table/list/grid it labels — the same
+   metricbar+metriccard idiom the lineup page uses, not
+   a label floating disconnected above its content. `.thub-card` is the
+   shared shell for sections that had no card of their own (Standings,
+   Schedule, Team Leaders, Current Roster, Injured List, Affiliates,
+   Prospects, Logos & jerseys); `.tstats-card`, `.roster-super`, `.txcard`,
+   and `.team-score` already had one, so those just grow a `*__head` bolted
+   onto their existing border instead of a second wrapper. `overflow:hidden`
+   on every card lets the head's own square corners get clipped to the
+   card's radius for free, same trick `.team-score` already used. */
+.thub-card {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.thub-card__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.thub-card__head > span,
+.tstats-card__head > span,
+.roster-super__head > span {
+  font-size: 1.2em;
+}
+.thub-card__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.thub-card__body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.team-hub.is-themed .thub-card__head,
+.team-hub.is-themed .tstats-card__head,
+.team-hub.is-themed .roster-super__head,
+.team-hub.is-themed .team-score__head {
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+  color: var(--bar-text, var(--text-caption));
+}
+.team-hub.is-themed .thub-card__head em,
+.team-hub.is-themed .tstats-card__head em,
+.team-hub.is-themed .roster-super__head em {
+  color: var(--bar-text, var(--graphite-soft));
+}
+
+/* Transactions and Team Leaders each carry a swipeable deck that
+   deliberately bleeds past the card gutter (.txcard__scroll,
+   .tlead__grid--horizontal — see the .txcard comment above) — a bordered
+   card whose own content escapes its border reads as broken, not
+   deliberate, so these two stay unwrapped, plain-caption headers rather
+   than a bolted bar, same as before theming existed. */
+
+/* Header buttons/pills/toggles ride on a themed bar as neutral opaque
+   chips — the same "card floating on the bar" convention the lineup page's
+   Game Notes button already uses (this file, ~4440) — rather than
+   recoloring the app's own kraft/seal chrome per club, which would fight
+   some clubs' colors and vanish into others'. */
+.team-hub.is-themed .psodds-pill {
+  border-color: var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.team-hub.is-themed .roster-super__toggle {
+  border-color: var(--border-rule);
+}
+.team-hub.is-themed .roster-super__toggle-btn {
+  color: var(--bar-text, var(--text-caption));
+}
+.team-hub.is-themed .roster-super__toggle-btn + .roster-super__toggle-btn {
+  border-left-color: var(--border-rule);
+}
+.team-hub.is-themed .roster-super__toggle-btn.is-active {
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.team-hub.is-themed .team-score__howlink,
+.team-hub.is-themed .team-score__howsep {
+  color: var(--bar-text, var(--seal-hatch));
+  opacity: 0.85;
+}
+.team-hub.is-themed .team-score__howlink {
+  border-bottom-color: color-mix(in srgb, var(--bar-text, var(--seal-hatch)) 40%, transparent);
+}
 .teaminfo__headright {
   display: flex;
   align-items: center;
@@ -17745,7 +17855,7 @@ body {
    ============================================================ */
 .team-hub__id {
   display: grid;
-  grid-template-columns: 64px 1fr auto;
+  grid-template-columns: 128px 1fr auto;
   gap: var(--space-4);
   align-items: center;
   margin-top: 4px;
@@ -17827,8 +17937,8 @@ body {
    Fills the header grid's 64px logo column. */
 .team-hub__logobox {
   position: relative;
-  width: 64px;
-  height: 64px;
+  width: 128px;
+  height: 128px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17876,96 +17986,108 @@ body {
 }
 
 /* ------------------------------------------------- logo & jersey combinations
-   A horizontal, touch-draggable strip on the team page — one card per catalog
-   jersey (its logo treatment tile over the jersey's name, the club's record in
-   games it wore it below). Native overflow-x scroll gives touch/trackpad
-   panning; useDragScroll (JerseyCombos.jsx) adds mouse click-drag. */
-.jerseystrip {
-  display: grid;
-  /* Fixed column tracks (not flex-grow) so a trailing, partially-filled row
-     keeps the same card width as full rows — flex-wrap stretches a shorter
-     last row's cards wider (and, via aspect-ratio, taller), throwing off the
-     vertical rhythm between rows. */
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+   A horizontal, touch-draggable swipe deck on the team page — one fixed-size
+   card per catalog jersey, its own background tinted to that jersey's real
+   tile color (the same tint TeamTreatmentMark resolves for the slate card),
+   real logo art unaltered on top, name and the club's record in games it
+   wore it below. Native overflow-x scroll gives touch/trackpad panning;
+   useDragScroll (JerseyCombos.jsx) adds mouse click-drag. Same carousel
+   idiom as .tlead__grid--horizontal / .txcard__scroll elsewhere on this
+   page, rather than a fourth different scrolling pattern. */
+.jerseydeck {
+  display: flex;
   gap: var(--space-3);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
-  padding: 2px 0 var(--space-2);
+  padding: 12px var(--space-4) var(--space-4);
+  /* A fixed-width row always has more jerseys than fit, unlike the old
+     wrapping grid — fade the trailing edge so that reads as "swipe for
+     more," not a card cut off mid-frame. */
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
   /* Momentum panning shouldn't select the card text mid-drag. */
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
   touch-action: pan-x;
 }
-.jerseystrip:active {
+.jerseydeck:active {
   cursor: grabbing;
 }
-.jerseycombo {
-  /* Grow to fill the row instead of scrolling at a fixed 104px, but keep
-     the original card's proportions (104x123) as it scales up. */
-  aspect-ratio: 104 / 123;
+.jerseydeck__card {
+  flex: 0 0 auto;
   scroll-snap-align: start;
+  width: 124px;
+  height: 190px;
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: var(--space-3) var(--space-2);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
-}
-.jerseycombo__logobox {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 10px 12px;
   border-radius: var(--radius-md);
   background: var(--tint, var(--paper-1));
-  box-shadow: var(--inset-cell);
+  box-shadow: var(--shadow-card);
+  color: var(--ink, var(--text-heading));
 }
-.jerseycombo__logobox.jerseycombo__logobox--pinstripe {
+.jerseydeck__card.jerseydeck__card--pinstripe {
   background: repeating-linear-gradient(
     to right,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.14)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.14)) 1px,
     var(--pinstripe-bg, #fff) 1px,
-    var(--pinstripe-bg, #fff) 7px
+    var(--pinstripe-bg, #fff) 8px
   );
 }
-.jerseycombo__logobox::after {
+.jerseydeck__card::after {
   content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(
     155deg,
-    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.28) 0%,
     rgba(255, 255, 255, 0) 40%,
     rgba(0, 0, 0, 0) 60%,
-    rgba(0, 0, 0, 0.35) 100%
+    rgba(0, 0, 0, 0.22) 100%
   );
   pointer-events: none;
 }
-.jerseycombo__logobox .teamlogo {
+.jerseydeck__logobox {
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.jerseydeck__logobox .teamlogo {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
   border-radius: 0;
-  transform: scale(var(--scale, 1.32));
+  /* Every other surface that wears this tile (.gamecard__logobox, the
+     masthead, …) overscales+crops the mark to read as a patch printed on
+     the jersey — Identity Lab's EDGE_BLEED (TeamTreatmentMark.jsx). This
+     deck shows the mark itself off, so it stays at its own natural size
+     instead of inheriting that crop. */
+  transform: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
 }
-.jerseycombo__logobox .teamlogo--fallback {
+.jerseydeck__logobox .teamlogo--fallback {
   border: none;
   background: none;
   transform: none;
+  filter: none;
   font-size: var(--fs-h3);
 }
-.jerseycombo__name {
+.jerseydeck__name {
+  position: relative;
+  z-index: 1;
   text-align: center;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -17973,15 +18095,14 @@ body {
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   line-height: var(--lh-compact);
-  color: var(--text-heading);
   /* Draggable strip: don't let a pointer-drag turn into a text selection. */
   pointer-events: none;
 }
-.jerseycombo__rec {
-  margin-top: auto;
+.jerseydeck__rec {
+  position: relative;
+  z-index: 1;
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
-  color: var(--text-muted);
   pointer-events: none;
 }
 
@@ -18011,7 +18132,7 @@ body {
   display: flex;
   align-items: baseline;
   gap: 8px;
-  padding: 10px 12px 0;
+  padding: 10px 12px;
   color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -19581,10 +19702,39 @@ body {
    each row floating over the page's own graph-paper background — the grid
    lines behind an unbounded ledger made the rows hard to read at a glance. */
 .tstats-card {
-  padding: 4px 12px;
+  margin-top: var(--space-4);
   background: var(--surface-card);
-  border: var(--bw-hair) solid var(--seal);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+/* The masthead bolted onto the card's own top border — same title/note
+   layout as .thub-card__head, just kraft-bordered like the rest of this
+   card instead of the plain hairline the shared shell uses. */
+.tstats-card__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--seal);
+}
+.tstats-card__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.tstats-card__body {
+  padding: 4px 12px;
 }
 .tstats {
   display: grid;
@@ -20141,13 +20291,42 @@ body {
    projection subsections read as one group, distinct from the actual
    40-man Current Roster section below. */
 .roster-super {
+  margin-top: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+/* The masthead bolted onto the card's own top border, same title/note/action
+   layout as .thub-card__head — the Season/Last 10 Games toggle rides here as
+   the action slot. */
+.roster-super__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--seal);
+}
+.roster-super__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.roster-super__body {
   display: flex;
   flex-direction: column;
   gap: 18px;
   padding: 14px 12px;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--seal);
-  border-radius: var(--radius-sm);
 }
 /* Two columns pair up at the desktop/iPad breakpoint (see e.g.
    .standings__wide): the defensive nine + bench on the left, both pitching
