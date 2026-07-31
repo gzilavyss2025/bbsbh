@@ -29,7 +29,8 @@
     "check:dist-dev": "node scripts/check-dist-dev-routes.mjs",
     "lint:fix": "eslint . --fix",
     "prepare": "git config core.hooksPath .githooks || true",
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test --test-reporter=dot \"test/**/*.test.js\"",
+    "test:verbose": "node --test \"test/**/*.test.js\"",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"scripts/**\" \"test/**/*.test.js\"",
     "e2e": "playwright test"
   },
