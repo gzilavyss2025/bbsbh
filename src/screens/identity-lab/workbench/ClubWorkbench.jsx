@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { CrestStrip } from './CrestStrip.jsx'
+import { LogoRecolorEditor } from '../editors/LogoRecolorEditor.jsx'
+import { MonoInkEditor } from '../editors/MonoInkEditor.jsx'
 import { TwoBarsPanel } from './TwoBarsPanel.jsx'
 import { LogoShelf } from './LogoShelf.jsx'
 import { JerseyRack } from './JerseyRack.jsx'
@@ -25,6 +27,7 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
 
   const units = profile.headerUnits(team.id).map((unit) => ({
     ...unit,
+    teamId: team.id,
     name: team.name,
     anchorId: `idlab-bar-${team.id}-${unit.slot}`,
     header: profile.headerProps(team, unit.slot, drafts, extras, on),
@@ -33,6 +36,11 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
       .map((item) => ({ key: item.key, label: item.label, visual: profile.markVisual(team.id, item.treatment, drafts) })),
   }))
   const barBySlot = Object.fromEntries(units.map((u) => [u.slot, u.header.unset ? null : u.header.colors.bar]))
+  // The club's landed bar colors, shared by both mark editors below: the
+  // knockout previews sit ON them, and the recolor palette offers them.
+  const barColors = units
+    .filter((u) => !u.header.unset)
+    .map((u) => ({ label: u.label, bar: u.header.colors.bar, onBar: u.header.colors.onBar }))
 
   const rackItems = items.map((item) => {
     const slot = profile.headerSlotFor(item.treatment)
@@ -69,6 +77,19 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
       />
 
       <TwoBarsPanel units={units} onHover={setHoveredSlot} onSelectWearer={setSelectedKey} />
+
+      {/* The two mark editors share a row: both take a club's art apart shape
+          by shape, and both are half-width work. Left decides ink vs paper for
+          the ONE-COLOR masthead mark; right repaints shapes in full color to
+          build jersey art the CDN doesn't carry. Same shape numbering in both
+          (logoMono.js), so a shape means one thing across the row. */}
+      <div className="idlab__markspair">
+        {/* Club-level, not per-bar — one knockout mark rides every bar this
+            club has, which is why it sits under the pair of bars rather than
+            inside either one. */}
+        <MonoInkEditor key={`mono-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
+        <LogoRecolorEditor key={`art-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
+      </div>
 
       <LogoShelf marks={profile.shelfMarks?.(team.id) ?? []} onSelect={selectFromShelf} />
 

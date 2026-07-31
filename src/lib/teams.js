@@ -4,6 +4,7 @@ import { readableTextColor } from './contrast.js'
 import { isFriday } from './dates.js'
 import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
 import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
+import { customMarkFor } from './customMarks.js'
 import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
@@ -282,6 +283,11 @@ const ALT4_USES_BASE_LOGO = new Set([
 // TreatmentLogo) degrade gracefully, so there's no manifest to hand-maintain.
 // Never called for 'main' — that treatment renders the CDN base logo instead.
 export function localLogoUrl(teamId, treatment) {
+  // A mark recolored in the lab and ASSIGNED to this treatment wins, because
+  // an assignment is an override that leaves the procured file untouched
+  // (src/lib/customMarks.js) — clearing it brings the art below straight back.
+  const assigned = customMarkFor(teamId, treatment)
+  if (assigned) return assigned.url
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null
   const ext = ALT_LOGO_SVG.has(`${teamId}:${treatment}`) ? 'svg' : 'png'
@@ -833,6 +839,11 @@ const MAIN_USES_BASE_LOGO = new Set([115])
 // exceptions above; callers fall back to the normal CDN base logo
 // (teamLogoUrl(teamId, 'base')).
 export function mainOverrideLogoUrl(teamId) {
+  // Same override as localLogoUrl's, for the one treatment that doesn't go
+  // through it — a Main assignment beats even the MAIN_USES_BASE_LOGO
+  // exceptions, since assigning one is an explicit act about this club.
+  const assigned = customMarkFor(teamId, 'main')
+  if (assigned) return assigned.url
   if (MAIN_USES_BASE_LOGO.has(teamId)) return null
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null

@@ -13,7 +13,7 @@
 // no string in a request that reaches the filesystem — and resolveLogoFile()
 // below re-checks the result anyway.
 
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -24,9 +24,11 @@ import {
   MILB_LOGO_DIRS,
   describeLogoCaveat,
   describeLogoRejection,
+  LOGO_ART_URL_ROOT,
   logoUploadTarget,
   readPngHeader,
   teamIdForAbbr,
+  wpaArtTreatmentKey,
 } from '../../src/lib/logoArt.js'
 
 const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
@@ -69,8 +71,12 @@ export function resolveLogoFile(target) {
   // has to come out equal to the one the allowlist's own literals spell, so a
   // '..' anywhere in target.file lands somewhere else and fails here. A name is
   // either an MLB abbreviation or (MILB_LOGO_DIRS) a bare positive team id.
+  // `.svg` joins `.png` because a WPA slot can now be filled from the club's
+  // own vector art (fillWpaArt below) as well as by a PNG upload — several
+  // committed marks are already SVGs, so this is the file set that was always
+  // really allowed here.
   const expected = `${LOGO_ART_ROOT}/${target.dir}/${target.name}`
-  const validName = /^([A-Z]{2,3}|[1-9]\d*)\.png$/.test(target.name)
+  const validName = /^([A-Z]{2,3}|[1-9]\d*)\.(png|svg)$/.test(target.name)
   if (!LOGO_ART_DIRS.includes(target.dir) || !validName || rel !== expected) {
     throw new Error(`logo upload escapes the art directories: ${target.file}`)
   }
@@ -131,6 +137,115 @@ export async function copyLogoUpload({ teamId, from, to }) {
   const result = await saveLogoUpload({ teamId, treatment: to, bytes })
   if (result.problem) return result
   return { ...result, caveat: describeLogoCaveat(bytes) }
+}
+
+// ---------------------------------------------------------------------------
+// Filling a WPA slot from the club's own art
+//
+// A club's WPA band can tile a wholly separate mark from its jersey tile, and
+// until now the only way to put one there was to procure and upload a PNG. But
+// the material is nearly always already on hand — the CDN wordmark, a
+// treatment's procured art, a mark recolored in the lab — so the picker offers
+// all of it and this writes the chosen one in.
+//
+// It is a COPY, not a pointer, unlike a custom-mark assignment
+// (src/lib/customMarks.js). The WPA slot has no "original" to preserve: it is
+// itself the override, so filling it is the same act as re-uploading, and
+// keeping it a real file means wpaArtUrl stays a plain path with no second
+// resolution layer in the live app.
+
+// `kind:id`, the vocabulary src/lib/markSources.js builds and documents. Parsed
+// here with the same three closed prefixes; anything else is not a source, and
+// no part of the string ever becomes a path — `treatment` is looked up in the
+// LOGO_TREATMENT_DIRS allowlist and `custom` is re-slug-checked below.
+export function parseMarkSource(source) {
+  const [kind, ...rest] = String(source ?? '').split(':')
+  const id = rest.join(':')
+  if (!id) return null
+  if (kind === 'cdn' || kind === 'treatment' || kind === 'custom') return { kind, id }
+  return null
+}
+
+const LOGO_CDN_BASE = 'https://www.mlbstatic.com/team-logos'
+const CDN_VARIANT_PATHS = {
+  base: null,
+  primary: 'team-primary-on-light',
+  cap: 'team-cap-on-light',
+  wordmark: 'team-wordmark-on-light',
+}
+
+// The bytes a source resolves to, plus the extension they should be stored
+// under — or a `problem`. Every branch reads from a place this app already
+// owns: the CDN it fetches art from everywhere else, or a file under
+// public/team-logos/.
+async function readMarkSource(teamId, parsed) {
+  if (parsed.kind === 'cdn') {
+    if (!Object.hasOwn(CDN_VARIANT_PATHS, parsed.id)) return { problem: `"${parsed.id}" is not a CDN variant` }
+    const dir = CDN_VARIANT_PATHS[parsed.id]
+    const url = dir ? `${LOGO_CDN_BASE}/${dir}/${teamId}.svg` : `${LOGO_CDN_BASE}/${teamId}.svg`
+    const res = await fetch(url)
+    if (!res.ok) return { problem: `this club has no ${parsed.id} mark on the CDN (HTTP ${res.status})` }
+    return { bytes: Buffer.from(await res.arrayBuffer()), ext: 'svg' }
+  }
+
+  if (parsed.kind === 'custom') {
+    if (!/^[a-z0-9-]+$/.test(parsed.id)) return { problem: 'not a saved mark' }
+    const file = path.resolve(REPO_ROOT, 'public/team-logos/custom', `${teamId}-${parsed.id}.svg`)
+    try {
+      return { bytes: await readFile(file), ext: 'svg' }
+    } catch {
+      return { problem: `no saved mark "${parsed.id}" for this club` }
+    }
+  }
+
+  const source = logoUploadTarget(teamId, parsed.id)
+  if (!source) return { problem: `"${parsed.id}" is not a treatment` }
+  for (const ext of ['png', 'svg']) {
+    const named = { ...source, name: source.name.replace(/\.png$/, `.${ext}`) }
+    named.file = `${LOGO_ART_ROOT}/${named.dir}/${named.name}`
+    try {
+      return { bytes: await readFile(resolveLogoFile(named)), ext }
+    } catch {
+      // try the other extension
+    }
+  }
+  return { problem: `no art on disk for "${parsed.id}"` }
+}
+
+// Put `source`'s art in this treatment's WPA slot. `treatment` is the REAL
+// treatment ('main'), not the synthetic '-wpa' key — resolved here so a caller
+// can't aim this at a jersey tile by passing the wrong one.
+export async function fillWpaArt({ teamId, treatment, source }) {
+  const key = wpaArtTreatmentKey(treatment)
+  if (!key) return { problem: `treatment "${treatment}" has no WPA slot`, status: 400 }
+  const parsed = parseMarkSource(source)
+  if (!parsed) return { problem: `"${source}" is not a mark source`, status: 400 }
+
+  const target = logoUploadTarget(teamId, key)
+  if (!target) return { problem: `no WPA destination for team ${teamId}`, status: 400 }
+
+  const read = await readMarkSource(teamId, parsed)
+  if (read.problem) return { problem: read.problem, status: 400 }
+
+  const named = { ...target, name: target.name.replace(/\.png$/, `.${read.ext}`) }
+  named.file = `${LOGO_ART_ROOT}/${named.dir}/${named.name}`
+  const file = resolveLogoFile(named)
+  await mkdir(path.dirname(file), { recursive: true })
+  await writeFile(file, read.bytes)
+  // The sibling in the other extension has to go, or the manifest's PNG-first
+  // rule would keep serving the mark this just replaced (wpaArtUrl). Only ever
+  // the same club's own WPA slot — never a jersey tile's art.
+  const stale = { ...target, name: target.name.replace(/\.png$/, read.ext === 'png' ? '.svg' : '.png') }
+  stale.file = `${LOGO_ART_ROOT}/${stale.dir}/${stale.name}`
+  let replaced = null
+  try {
+    await rm(resolveLogoFile(stale))
+    replaced = stale.name
+  } catch {
+    // nothing there, which is the normal case
+  }
+  await writeLogoManifest()
+  return { file: named.file, url: `${LOGO_ART_URL_ROOT}/${named.dir}/${named.name}`, replaced }
 }
 
 // ---------------------------------------------------------------------------

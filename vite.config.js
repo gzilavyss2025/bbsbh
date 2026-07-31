@@ -13,8 +13,17 @@ import {
   DEV_LOGO_MAX_BODY_BYTES,
   DEV_LOGO_ROUTE,
   copyLogoUpload,
+  fillWpaArt,
   saveLogoUpload,
 } from './scripts/lib/dev-logo-upload.mjs'
+import {
+  DEV_CUSTOM_MARK_ASSIGN_ROUTE,
+  DEV_CUSTOM_MARK_MAX_BODY_BYTES,
+  DEV_CUSTOM_MARK_ROUTE,
+  assignCustomMark,
+  saveCustomMark,
+} from './scripts/lib/dev-custom-marks.mjs'
+import { writeMonoLogo } from './scripts/lib/mono-logo-art.mjs'
 import { describeLogoCaveat } from './src/lib/logoArt.js'
 
 // Dev-only save endpoint for the curation surfaces — the Team Identity Lab
@@ -160,6 +169,113 @@ async function handleLogoCopy(req, res, query) {
   }
 }
 
+// Rebuild one club's knockout mark from the pins just saved to mono-ink.json.
+// No body and no path: a numeric team id is the entire input, the destination
+// is a filename built from it inside the generator's own output directory, and
+// the bytes are produced by the same scripts/lib/mono-logo-art.mjs the nightly
+// generator uses — so the lab can never write art the generator wouldn't.
+async function handleMonoLogo(req, res, query) {
+  const teamId = Number(new URLSearchParams(query).get('teamId'))
+  if (!Number.isInteger(teamId) || teamId <= 0) {
+    res.statusCode = 400
+    res.end('teamId must be a positive integer')
+    return
+  }
+  try {
+    const { problem, file } = await writeMonoLogo(teamId)
+    if (problem) {
+      res.statusCode = 400
+      res.end(problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify({ file }))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
+const DEV_MONO_LOGO_ROUTE = 'mono-logo'
+const DEV_WPA_ART_ROUTE = 'wpa-art'
+
+// Fill a treatment's WPA slot from one of the club's own marks. No body — the
+// source is a `kind:id` key from the closed vocabulary src/lib/markSources.js
+// defines, resolved server-side to either a CDN fetch or a file already under
+// public/team-logos/ (scripts/lib/dev-logo-upload.mjs).
+async function handleWpaArt(req, res, query) {
+  const params = new URLSearchParams(query)
+  try {
+    const result = await fillWpaArt({
+      teamId: Number(params.get('teamId')),
+      treatment: params.get('treatment') ?? '',
+      source: params.get('source') ?? '',
+    })
+    if (result.problem) {
+      res.statusCode = result.status ?? 400
+      res.end(result.problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(result))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
+// The recolored-mark library. The SVG markup is the body (it's text, not a
+// JSON store), and the team id and display name ride the query string — the
+// name is slugified server-side, so nothing from the request reaches the
+// filesystem intact (scripts/lib/dev-custom-marks.mjs).
+async function handleCustomMark(req, res, query) {
+  const params = new URLSearchParams(query)
+  const teamId = Number(params.get('teamId'))
+  const name = params.get('name') ?? ''
+  const body = await readBody(req, res, DEV_CUSTOM_MARK_MAX_BODY_BYTES)
+  if (!body) return
+  try {
+    const result = await saveCustomMark({ teamId, name, svg: body.toString('utf8') })
+    if (result.problem) {
+      res.statusCode = result.status ?? 400
+      res.end(result.problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(result))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
+// Point a treatment at a library mark, or clear it (an empty slug). No body —
+// this writes a pointer, never art.
+async function handleCustomMarkAssign(req, res, query) {
+  const params = new URLSearchParams(query)
+  try {
+    const result = await assignCustomMark({
+      teamId: Number(params.get('teamId')),
+      treatment: params.get('treatment') ?? '',
+      slug: params.get('slug') ?? '',
+    })
+    if (result.problem) {
+      res.statusCode = result.status ?? 400
+      res.end(result.problem)
+      return
+    }
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'application/json')
+    res.end(JSON.stringify(result))
+  } catch (err) {
+    res.statusCode = 500
+    res.end(err.message)
+  }
+}
+
 function devDataSave() {
   return {
     name: 'dev-data-save',
@@ -171,8 +287,14 @@ function devDataSave() {
         const key = routePath.replace(/^\/+|\/+$/g, '')
         const isLogo = key === DEV_LOGO_ROUTE
         const isLogoCopy = key === DEV_LOGO_COPY_ROUTE
-        const store = isLogo || isLogoCopy ? null : devDataStore(key)
-        if (!isLogo && !isLogoCopy && !store) {
+        const isMonoLogo = key === DEV_MONO_LOGO_ROUTE
+        const isCustomMark = key === DEV_CUSTOM_MARK_ROUTE
+        const isCustomAssign = key === DEV_CUSTOM_MARK_ASSIGN_ROUTE
+        const isWpaArt = key === DEV_WPA_ART_ROUTE
+        const isArtRoute =
+          isLogo || isLogoCopy || isMonoLogo || isCustomMark || isCustomAssign || isWpaArt
+        const store = isArtRoute ? null : devDataStore(key)
+        if (!isArtRoute && !store) {
           res.statusCode = 404
           res.end('unknown store')
           return
@@ -184,6 +306,10 @@ function devDataSave() {
         }
         if (isLogo) handleLogoUpload(req, res, query)
         else if (isLogoCopy) handleLogoCopy(req, res, query)
+        else if (isMonoLogo) handleMonoLogo(req, res, query)
+        else if (isCustomMark) handleCustomMark(req, res, query)
+        else if (isCustomAssign) handleCustomMarkAssign(req, res, query)
+        else if (isWpaArt) handleWpaArt(req, res, query)
         else handleStoreSave(req, res, store)
       })
     },

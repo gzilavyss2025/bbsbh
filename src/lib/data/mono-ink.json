@@ -1,0 +1,36 @@
+{
+  "109": {
+    "name": "Arizona Diamondbacks",
+    "art": "7:bbaee5f0",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "6": "knockout"
+    }
+  },
+  "113": {
+    "name": "Cincinnati Reds",
+    "art": "3:f09df7d1",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout"
+    }
+  },
+  "144": {
+    "name": "Atlanta Braves",
+    "art": "3:3470dbfa",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout"
+    }
+  },
+  "158": {
+    "name": "Milwaukee Brewers",
+    "art": "4:76b01228",
+    "parts": {
+      "0": "knockout",
+      "3": "knockout"
+    }
+  }
+}

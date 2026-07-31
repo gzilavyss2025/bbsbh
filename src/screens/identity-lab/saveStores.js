@@ -64,6 +64,74 @@ export async function copyLogo({ teamId, from, to }) {
   }
 }
 
+// The middleware's fourth route: rebuild one club's knockout mark from the pins
+// just written to mono-ink.json. No body, no path — a team id, and the server
+// runs the same converter the nightly generator does
+// (scripts/lib/mono-logo-art.mjs), so approving a mark in the lab and
+// regenerating it in CI can't produce different art.
+export async function regenerateMonoLogo(teamId) {
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/mono-logo?teamId=${encodeURIComponent(teamId)}`, { method: 'POST' })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `regenerate failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the regenerate endpoint — is `npm run dev` running?' }
+  }
+}
+
+// Save a recolored mark into this club's library under a NAME. Refused with a
+// 409 if that name is already taken — saving never destroys a mark somebody
+// kept, which is why this returns the server's own message rather than
+// retrying under a mangled name (scripts/lib/dev-custom-marks.mjs).
+export async function saveCustomMark({ teamId, name, svg }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&name=${encodeURIComponent(name)}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/custom-mark?${query}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'image/svg+xml' },
+      body: svg,
+    })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `save failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the save endpoint — is `npm run dev` running?' }
+  }
+}
+
+// Point a treatment at a library mark, or clear it with an empty slug. Writes a
+// pointer, never art: the treatment's own curated file is untouched and comes
+// back the moment the assignment is cleared.
+export async function assignCustomMark({ teamId, treatment, slug }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&treatment=${encodeURIComponent(treatment)}&slug=${encodeURIComponent(slug ?? '')}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/custom-mark-assign?${query}`, { method: 'POST' })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `assign failed (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the assign endpoint — is `npm run dev` running?' }
+  }
+}
+
+// Fill this treatment's WPA slot from one of the club's own marks. `source` is
+// a `kind:id` key from src/lib/markSources.js — the client names a SOURCE, and
+// the server resolves what that means, so no URL or path travels in the
+// request. A COPY, unlike assignCustomMark above: the WPA slot is itself an
+// override with no original to protect (scripts/lib/dev-logo-upload.mjs).
+export async function fillWpaArt({ teamId, treatment, source }) {
+  const query = `teamId=${encodeURIComponent(teamId)}&treatment=${encodeURIComponent(treatment)}&source=${encodeURIComponent(source)}`
+  try {
+    const res = await fetch(`${DEV_SAVE_BASE}/wpa-art?${query}`, { method: 'POST' })
+    const text = await res.text()
+    if (!res.ok) return { error: text || `could not use that mark (${res.status})` }
+    return JSON.parse(text)
+  } catch {
+    return { error: 'could not reach the WPA art endpoint — is `npm run dev` running?' }
+  }
+}
+
 // Merge a draft's touched fields into a team-keyed store, returning a NEW store
 // object — the lab always posts the whole file, so an untouched team/treatment
 // has to survive the merge rather than being dropped.
