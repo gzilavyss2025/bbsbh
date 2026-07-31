@@ -600,7 +600,10 @@ function TeamSections({
         </section>
 
         {oppDefense.length > 0 && (
-          <section className="opp">
+          <section
+            className={`opp ${headerThemeClass(oppTheme)}`.trim()}
+            style={headerThemeStyle(oppTheme)}
+          >
             <SectionMasthead
               as="h3"
               title="Defense"
@@ -615,7 +618,10 @@ function TeamSections({
               }
             />
             {/* Drawn like the sheet's bottom-left diamond: surnames on writing
-                lines at their positions. The defense belongs to the OTHER side. */}
+                lines at their positions. The defense belongs to the OTHER side,
+                so — same as the Starting pitcher card above — its masthead
+                wears THAT club's jersey colors (oppTheme) rather than this
+                page's own. */}
             <DefenseDiamond defense={oppDefense} />
           </section>
         )}
