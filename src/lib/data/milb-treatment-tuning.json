@@ -1,4 +1,28 @@
 {
+  "102": {
+    "name": "Team 102",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#022f63",
+          "accent": "#a4aaaf",
+          "onBar": "#ffffff"
+        }
+      }
+    }
+  },
+  "105": {
+    "name": "Team 105",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#800032",
+          "accent": "#000000",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
   "106": {
     "name": "Erie SeaWolves",
     "treatments": {
@@ -52,9 +76,9 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
-          "offsetX": -12,
-          "offsetY": 11,
+          "scale": 0.84,
+          "offsetX": -5,
+          "offsetY": 1,
           "bg": "#0054A4",
           "pinstripe": false
         },
@@ -76,9 +100,9 @@
       },
       "away": {
         "position": {
-          "scale": 1,
-          "offsetX": -12,
-          "offsetY": 11,
+          "scale": 0.84,
+          "offsetX": -5,
+          "offsetY": 1,
           "bg": "#B15C12",
           "pinstripe": false
         },
@@ -92,6 +116,18 @@
           "rowShift": 0
         },
         "band": "#B15C12"
+      }
+    }
+  },
+  "235": {
+    "name": "Team 235",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#002B5C",
+          "accent": "#D31245",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -135,6 +171,18 @@
           "rowShift": 0
         },
         "band": "#fbb034"
+      }
+    }
+  },
+  "238": {
+    "name": "Team 238",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#005DAA",
+          "accent": "#EF3E42",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -265,6 +313,18 @@
       }
     }
   },
+  "400": {
+    "name": "Team 400",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#0A2240",
+          "accent": "#FF4D00",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
   "402": {
     "name": "Akron RubberDucks",
     "treatments": {
@@ -310,6 +370,18 @@
           "rowShift": 0
         },
         "band": "#010101"
+      }
+    }
+  },
+  "416": {
+    "name": "Team 416",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#151240",
+          "accent": "#EC1B2B",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -457,6 +529,40 @@
       }
     }
   },
+  "431": {
+    "name": "Team 431",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0D223F",
+        "header": {
+          "bar": "#0D223F",
+          "accent": "#73AA4F",
+          "onBar": "#F8F8F5"
+        }
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#73AA4F"
+      }
+    }
+  },
   "440": {
     "name": "Springfield Cardinals",
     "treatments": {
@@ -491,8 +597,8 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1.13,
-          "offsetX": -7,
+          "scale": 1,
+          "offsetX": 4,
           "offsetY": 0,
           "bg": "#002A5C",
           "pinstripe": false
@@ -515,8 +621,8 @@
       },
       "away": {
         "position": {
-          "scale": 1.13,
-          "offsetX": -7,
+          "scale": 1,
+          "offsetX": 4,
           "offsetY": 0,
           "bg": "#68ACDB",
           "pinstripe": false
@@ -531,6 +637,54 @@
           "rowShift": 0
         },
         "band": "#68ACDB"
+      }
+    }
+  },
+  "451": {
+    "name": "Team 451",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.85,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#0E3386",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0E3386",
+        "header": {
+          "bar": "#0E3386",
+          "accent": "#D12325",
+          "onBar": "#F8F8F5"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.85,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#D12325",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 55,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D12325"
       }
     }
   },
@@ -654,6 +808,47 @@
       }
     }
   },
+  "484": {
+    "name": "Team 484",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F8F8F5",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -3,
+          "rowShift": 0
+        },
+        "band": "#F8F8F5",
+        "header": {
+          "bar": "#00243A",
+          "accent": "#CD2132",
+          "onBar": "#F8F8F5"
+        }
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -5,
+          "rowShift": 0
+        },
+        "band": "#CD2132"
+      }
+    }
+  },
   "494": {
     "name": "Charlotte Knights",
     "treatments": {
@@ -666,12 +861,12 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 60,
+          "size": 40,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 8,
+          "paddingY": 6,
           "rowShift": 0
         },
         "band": "#000000",
@@ -866,6 +1061,18 @@
       }
     }
   },
+  "534": {
+    "name": "Team 534",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#454142",
+          "accent": "#EE3124",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
   "538": {
     "name": "Hartford Yard Goats",
     "treatments": {
@@ -949,6 +1156,18 @@
           "rowShift": 0
         },
         "band": "#F3ECD8"
+      }
+    }
+  },
+  "541": {
+    "name": "Team 541",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#004A8D",
+          "accent": "#B9976A",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -1129,6 +1348,47 @@
       }
     }
   },
+  "556": {
+    "name": "Team 556",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F8F8F5",
+          "pinstripe": false
+        },
+        "wpaLayout": {
+          "size": 30,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#F8F8F5",
+        "header": {
+          "bar": "#C8102E",
+          "accent": "#071D49",
+          "onBar": "#F8F8F5"
+        }
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 30,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#F8F8F5"
+      }
+    }
+  },
   "559": {
     "name": "Rocket City Trash Pandas",
     "treatments": {
@@ -1169,6 +1429,52 @@
           "rowShift": 0
         },
         "band": "#3378c2"
+      }
+    }
+  },
+  "561": {
+    "name": "Team 561",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#000000",
+          "accent": "#FDB913",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
+  "564": {
+    "name": "Team 564",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#002D62",
+          "accent": "#007DC3",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
+  "568": {
+    "name": "Team 568",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 42,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 0,
+          "rowShift": 0
+        },
+        "band": "#009A44",
+        "header": {
+          "bar": "#009A44",
+          "accent": "#010101",
+          "onBar": "#010101"
+        }
       }
     }
   },
@@ -1273,6 +1579,18 @@
       }
     }
   },
+  "1410": {
+    "name": "Team 1410",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#05173C",
+          "accent": "#C90116",
+          "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
   "1956": {
     "name": "Somerset Patriots",
     "treatments": {
@@ -1313,6 +1631,18 @@
           "rowShift": 0
         },
         "band": "#D0D0D0"
+      }
+    }
+  },
+  "2310": {
+    "name": "Team 2310",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#00285A",
+          "accent": "#D21146",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -1442,6 +1772,40 @@
           "rowShift": 0
         },
         "band": "#e20177"
+      }
+    }
+  },
+  "4904": {
+    "name": "Team 4904",
+    "treatments": {
+      "home": {
+        "wpaLayout": {
+          "size": 35,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#000000",
+        "header": {
+          "bar": "#A71930",
+          "accent": "#000000",
+          "onBar": "#F8F8F5"
+        }
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 35,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#A71930"
       }
     }
   },

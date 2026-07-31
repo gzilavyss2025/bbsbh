@@ -151,8 +151,7 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // Lab sessions landed more Main/City-Connect pairs (58 MLB records today,
   // all 30 clubs' Main headers landed). MiLB's own Home/Away collapse
   // (milbHeaderColorOverride) folded every already-tuned club's header onto
-  // the shared Home slot and dropped the redundant Away copy — 14 MiLB
-  // records today, one per club with a landed bar (Charlotte Knights newly
-  // landed).
-  assert.equal(checked, 72, 'expected the 72 landed triads — update this count deliberately')
+  // the shared Home slot and dropped the redundant Away copy — this tuning
+  // session landed a further batch of MiLB clubs, 32 MiLB records today.
+  assert.equal(checked, 90, 'expected the 90 landed triads — update this count deliberately')
 })
