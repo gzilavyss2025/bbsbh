@@ -15,6 +15,7 @@ import {
 import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
+import { clubMarkSources } from '../../../lib/markSources.js'
 import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
@@ -26,6 +27,11 @@ import {
   ALT3_COLORS,
   ALT4_COLORS,
   CITY_CONNECT_COLORS,
+  ALT_COLORS_STORE,
+  ALT2_COLORS_STORE,
+  ALT3_COLORS_STORE,
+  ALT4_COLORS_STORE,
+  CITY_CONNECT_COLORS_STORE,
   MLB_TREATMENT_TUNING,
   TREATMENT_SCALE,
   MAIN_OVERRIDES,
@@ -358,18 +364,16 @@ function headerColorsFor(colors, draft, override) {
 }
 
 // ---------------------------------------------------------------------------
-// Copy-text builders. Kept even though Save now lands most of these directly:
-// the background hex for a non-Main treatment lands in the colour tables
-// (ALT_COLORS and friends), which are still JS literals, and the
-// "copy all changes" button is still how a session's worth of poking gets
-// summarized into a prompt.
+// Copy-text builders. Save lands every one of these directly now (ADR-0029);
+// the "copy all changes" button remains as a plain-text summary of a
+// session's edits, not a hand-off for anything Save can't reach.
 
-const TREATMENT_COLOR_TABLE_NAME = {
-  alternate: 'ALT_COLORS',
-  'alternate-2': 'ALT2_COLORS',
-  'alternate-3': 'ALT3_COLORS',
-  'alternate-4': 'ALT4_COLORS',
-  'city-connect': 'CITY_CONNECT_COLORS',
+const TREATMENT_COLOR_STORE_FILE = {
+  alternate: 'src/lib/data/alt-colors.json',
+  'alternate-2': 'src/lib/data/alt2-colors.json',
+  'alternate-3': 'src/lib/data/alt3-colors.json',
+  'alternate-4': 'src/lib/data/alt4-colors.json',
+  'city-connect': 'src/lib/data/city-connect-colors.json',
 }
 
 function bgOverrideLocation(teamId, treatment, pinstripe) {
@@ -378,8 +382,8 @@ function bgOverrideLocation(teamId, treatment, pinstripe) {
       ? `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.pinstripe: true (the line color itself is the shared default unless pinstripeColor curates a per-team one)`
       : `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment}.pinstripeColor (plus pinstripeBg to also set the fill under the stripes)`
   }
-  const table = TREATMENT_COLOR_TABLE_NAME[treatment]
-  if (table) return `src/lib/teams.js — ${table}[${teamId}], the swatch flagged \`bg: true\` (background)`
+  const file = TREATMENT_COLOR_STORE_FILE[treatment]
+  if (file) return `${file} — ${teamId}.swatches, the one flagged \`bg: true\` (background)`
   return (
     `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.bgHex (a literal), or if it should ` +
     `instead track one of the club's three brand swatches, ${teamId}.treatments.main.bg ` +
@@ -544,11 +548,23 @@ function shelfMarks(teamId) {
   }
   // Marks recolored in the Logo art editor. They belong on the shelf whether or
   // not a jersey wears one yet — the shelf answers "what have we got for this
-  // club", and a saved mark is something we've got. `treatment: null` because a
-  // library mark isn't tied to a jersey until it's assigned, so clicking it
-  // selects nothing rather than opening an arbitrary tile.
+  // club", and a saved mark is something we've got. `wornBy` names every
+  // treatment CURRENTLY wearing it (LogoDropZone's assign select,
+  // customMarks.js) — otherwise a mark saved here reads as orphaned even after
+  // you've assigned it, with nothing on the shelf confirming the assignment
+  // stuck. `treatment` (which jersey clicking this opens) follows suit: the
+  // first treatment wearing it, or null for a mark nobody's assigned yet —
+  // clicking one of those still selects nothing rather than opening an
+  // arbitrary tile.
   for (const mark of customMarksFor(teamId)) {
-    marks.push({ key: `custom-${mark.slug}`, treatment: null, label: mark.name, url: mark.url })
+    const wornBy = treatments.filter((t) => customMarkAssignment(teamId, t.key) === mark.slug)
+    marks.push({
+      key: `custom-${mark.slug}`,
+      treatment: wornBy[0]?.key ?? null,
+      label: mark.name,
+      url: mark.url,
+      wornBy: wornBy.map((t) => t.label),
+    })
   }
   return marks
 }
@@ -923,6 +939,7 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
         caveat: uploadCaveat(teamId, treatment, logoUploadTarget(teamId, treatment)),
         copyTargets: treatmentsForTeam(teamId).filter((t) => t.key !== treatment),
         savedMarks: customMarksFor(teamId),
+        cdnMarks: clubMarkSources(teamId).filter((s) => s.kind === 'cdn'),
         assignedSlug: customMarkAssignment(teamId, treatment),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
@@ -1087,8 +1104,8 @@ function useMlbExtras() {
 
 // Which store fields a position draft lands in. `bg` only has a home here for
 // Main (MAIN_OVERRIDES' bgHex) and for a pinstripe line color; a flat
-// background for any other treatment belongs to ALT_COLORS and friends, which
-// are still JS literals — the copy snippet covers those.
+// background for any other treatment belongs to ALT_COLORS and friends
+// instead — mergeBgSwatchDraft below lands those into their own stores.
 function applyPositionDraft(record, fields, treatment) {
   const next = { ...record }
   if (fields.scale !== undefined) next.scale = fields.scale
@@ -1110,6 +1127,40 @@ function applyPositionDraft(record, fields, treatment) {
   if (treatment !== 'main' && fields.pinstripeBg !== undefined) {
     if (fields.pinstripeBg) next.pinstripeBg = fields.pinstripeBg
     else delete next.pinstripeBg
+  }
+  return next
+}
+
+// One (store, save-key) pair per non-Main treatment's background-swatch store
+// (ADR-0029) — the JS-literal tables (ALT_COLORS and friends) moved to
+// src/lib/data/*-colors.json so a bg edit here can save the same way scale and
+// offset already do.
+const BG_SWATCH_STORE_BY_TREATMENT = {
+  alternate: ['alt-colors', ALT_COLORS_STORE],
+  'alternate-2': ['alt2-colors', ALT2_COLORS_STORE],
+  'alternate-3': ['alt3-colors', ALT3_COLORS_STORE],
+  'alternate-4': ['alt4-colors', ALT4_COLORS_STORE],
+  'city-connect': ['city-connect-colors', CITY_CONNECT_COLORS_STORE],
+}
+
+// Merge every touched `bg` field for one treatment into a copy of that
+// treatment's swatch store — same "whole file, only touched fields change"
+// contract as mergeDraftIntoStore, but for the `{ teamId: { swatches, note } }`
+// shape rather than a `treatments`-nested one. A `bg` edit that arrived
+// alongside `pinstripe: true` is a pinstripe LINE color instead (already
+// landed in applyPositionDraft above), so it's skipped here — same guard that
+// function uses for Main's bgHex. A team with no swatch flagged `bg: true` (a
+// pinstripe-only entry, e.g. the White Sox in ALT_COLORS) has nothing for a
+// flat background edit to land on, so it's left alone too.
+function mergeBgSwatchDraft(store, draft, treatment) {
+  const next = structuredClone(store)
+  for (const [teamId, byTreatment] of Object.entries(draft ?? {})) {
+    const fields = byTreatment[treatment]
+    if (!fields || fields.pinstripe || fields.bg === undefined) continue
+    const entry = next[teamId]
+    const idx = entry?.swatches.findIndex((s) => s?.bg)
+    if (idx === undefined || idx === -1) continue
+    entry.swatches[idx] = { ...entry.swatches[idx], hex: fields.bg }
   }
   return next
 }
@@ -1200,11 +1251,17 @@ function buildSaves(drafts, extras) {
     { name },
   )
 
+  const bgSwatchSaves = Object.entries(BG_SWATCH_STORE_BY_TREATMENT).map(([treatment, [key, store]]) => ({
+    key,
+    body: mergeBgSwatchDraft(store, drafts.pos, treatment),
+  }))
+
   return [
     ...(merged ? [{ key: 'uniform-names', body: merged }] : []),
     { key: 'mlb-treatment-tuning', body: tuning },
     { key: 'wpa-tuning', body: wpa },
     { key: 'mlb-team-colors', body: colors },
+    ...bgSwatchSaves,
   ]
 }
 

@@ -128,9 +128,20 @@ export async function saveCustomMark({ teamId, name, svg }) {
   return { slug, name: String(name).trim(), file: `${CUSTOM_DIR}/${teamId}-${slug}.svg`, url: `/team-logos/custom/${teamId}-${slug}.svg` }
 }
 
-// Point a treatment at a library mark, or clear it with an empty slug. The
-// treatment key is checked against the same closed allowlist an upload
-// resolves through, so this can't invent a treatment the app doesn't have.
+// The CDN's four stock vectors (src/lib/teams.js's LOGO_VARIANTS plus
+// 'base') — the other way this route lets a treatment be assigned, no
+// recoloring required. Closed set: an unrecognized `cdn:` variant is refused
+// the same as an unknown treatment, rather than trusted through to
+// customMarks.js/teamLogoUrl.
+const CDN_VARIANTS = new Set(['base', 'primary', 'cap', 'wordmark'])
+const CDN_PREFIX = 'cdn:'
+
+// Point a treatment at a library mark or a CDN vector, or clear it with an
+// empty slug. The treatment key is checked against the same closed allowlist
+// an upload resolves through, so this can't invent a treatment the app
+// doesn't have. A `cdn:` assignment needs no prior save — unlike a library
+// mark, there's nothing to have saved first — so it creates the team's entry
+// on first use instead of requiring one already exist.
 export async function assignCustomMark({ teamId, treatment, slug }) {
   if (!Number.isInteger(teamId) || teamId <= 0) return { problem: 'teamId must be a positive integer', status: 400 }
   if (!Object.hasOwn(LOGO_TREATMENT_DIRS, treatment)) {
@@ -138,15 +149,32 @@ export async function assignCustomMark({ teamId, treatment, slug }) {
   }
   const store = await readStore()
   const key = String(teamId)
-  const entry = store[key]
-  if (!entry) return { problem: `team ${teamId} has no saved marks`, status: 404 }
-  entry.assignments ??= {}
 
   if (!slug) {
-    delete entry.assignments[treatment]
+    const entry = store[key]
+    if (entry?.assignments) delete entry.assignments[treatment]
+    // A team entry that exists ONLY to hold a now-cleared cdn: assignment
+    // (no saved marks, no other assignments) is noise, not data — drop it
+    // rather than leave an empty `{ marks: [], assignments: {} }` stub
+    // behind for the next save to diff against.
+    if (entry && entry.marks?.length === 0 && Object.keys(entry.assignments ?? {}).length === 0) {
+      delete store[key]
+    }
     await writeStore(store)
     return { treatment, slug: null }
   }
+  if (slug.startsWith(CDN_PREFIX)) {
+    const variant = slug.slice(CDN_PREFIX.length)
+    if (!CDN_VARIANTS.has(variant)) return { problem: `"${variant}" is not a CDN mark variant`, status: 400 }
+    const entry = (store[key] ??= { marks: [], assignments: {} })
+    entry.assignments ??= {}
+    entry.assignments[treatment] = slug
+    await writeStore(store)
+    return { treatment, slug }
+  }
+  const entry = store[key]
+  if (!entry) return { problem: `team ${teamId} has no saved marks`, status: 404 }
+  entry.assignments ??= {}
   if (!entry.marks?.some((m) => m.slug === slug)) {
     return { problem: `team ${teamId} has no mark "${slug}"`, status: 404 }
   }

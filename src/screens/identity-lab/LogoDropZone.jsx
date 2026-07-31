@@ -28,6 +28,11 @@ import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 // on disk untouched, and picking "Original art" hands it straight back
 // (src/lib/customMarks.js). Which is why this is a select rather than another
 // button: the choice is reversible and has a current value worth showing.
+// `cdnMarks` (markSources.js's `clubMarkSources`, filtered to `kind: 'cdn'`)
+// shares that same select and assignment mechanism — the CDN's own
+// base/primary/cap/wordmark vectors, needing no prior recolor, keyed
+// `cdn:<variant>` rather than a plain slug so the store can tell the two
+// apart (customMarks.js).
 export function LogoDropZone({
   teamId,
   treatment,
@@ -35,6 +40,7 @@ export function LogoDropZone({
   caveat,
   copyTargets,
   savedMarks,
+  cdnMarks,
   assignedSlug,
   onUploaded,
   children,
@@ -106,11 +112,11 @@ export function LogoDropZone({
         return
       }
       onUploaded?.()
+      const label =
+        savedMarks?.find((m) => m.slug === slug)?.name ?? cdnMarks?.find((m) => m.key === slug)?.label ?? slug
       setMessage({
         kind: 'ok',
-        text: slug
-          ? `now wearing the saved mark "${savedMarks.find((m) => m.slug === slug)?.name ?? slug}"`
-          : 'back to this treatment’s own art',
+        text: slug ? `now wearing "${label}"` : 'back to this treatment’s own art',
       })
     } finally {
       setBusy(false)
@@ -183,22 +189,35 @@ export function LogoDropZone({
           </button>
         </div>
       )}
-      {savedMarks?.length > 0 && (
+      {(savedMarks?.length > 0 || cdnMarks?.length > 0) && (
         <div className="colorlab__logocopyrow">
           <select
             className="colorlab__logocopyselect"
-            aria-label={`Which saved mark ${label} wears`}
+            aria-label={`Which mark ${label} wears`}
             value={assignedSlug ?? ''}
             onChange={(e) => handleAssign(e.target.value)}
             disabled={busy}
-            title="Wear a mark recolored in Logo art — the procured file stays on disk"
+            title="Wear a CDN mark or one recolored in Logo art — the procured file stays on disk"
           >
             <option value="">Original art</option>
-            {savedMarks.map((m) => (
-              <option key={m.slug} value={m.slug}>
-                {m.name}
-              </option>
-            ))}
+            {cdnMarks?.length > 0 && (
+              <optgroup label="CDN marks">
+                {cdnMarks.map((m) => (
+                  <option key={m.key} value={m.key}>
+                    {m.label}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+            {savedMarks?.length > 0 && (
+              <optgroup label="Saved marks">
+                {savedMarks.map((m) => (
+                  <option key={m.slug} value={m.slug}>
+                    {m.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
         </div>
       )}

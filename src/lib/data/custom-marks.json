@@ -1,4 +1,39 @@
 {
+  "113": {
+    "marks": [
+      {
+        "slug": "basewhite",
+        "name": "basewhite"
+      },
+      {
+        "slug": "baseredwhite",
+        "name": "baseredwhite"
+      }
+    ],
+    "assignments": {
+      "main": "basewhite"
+    }
+  },
+  "119": {
+    "marks": [
+      {
+        "slug": "wordmarkwhite",
+        "name": "WORDMARKWHITE"
+      }
+    ],
+    "assignments": {}
+  },
+  "142": {
+    "marks": [
+      {
+        "slug": "wordmarkwhite",
+        "name": "wordmarkwhite"
+      }
+    ],
+    "assignments": {
+      "alternate-3": "wordmarkwhite"
+    }
+  },
   "144": {
     "marks": [
       {
@@ -8,6 +43,17 @@
     ],
     "assignments": {
       "alternate-2": "atl1"
+    }
+  },
+  "556": {
+    "marks": [
+      {
+        "slug": "primary1",
+        "name": "PRIMARY1"
+      }
+    ],
+    "assignments": {
+      "milb-home": "primary1"
     }
   }
 }

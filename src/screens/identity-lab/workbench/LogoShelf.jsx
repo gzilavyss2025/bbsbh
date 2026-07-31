@@ -12,7 +12,10 @@ import { MarkImage } from './MarkImage.jsx'
 // a thumbnail in place rather than opening anything.
 //
 // Clicking a mark selects the jersey that wears it: the shelf doubles as
-// navigation for "I want to work on whatever uses THAT mark."
+// navigation for "I want to work on whatever uses THAT mark." A mark saved in
+// the Logo art editor but not yet assigned anywhere (`treatment: null`,
+// profiles/*.jsx's shelfMarks) has no jersey to open, so its button is inert —
+// same "nothing to select" contract those profiles already document.
 export function LogoShelf({ marks, onSelect }) {
   if (!marks?.length) return null
   return (
@@ -28,14 +31,27 @@ export function LogoShelf({ marks, onSelect }) {
           <button
             key={mark.key}
             type="button"
-            className="idlab__shelfitem"
+            className={`idlab__shelfitem${mark.wornBy?.length ? ' idlab__shelfitem--worn' : ''}`}
             onClick={() => onSelect(mark)}
-            title={`Work on the jersey that wears ${mark.label}`}
+            disabled={!mark.treatment}
+            title={
+              mark.wornBy?.length
+                ? `Worn by ${mark.wornBy.join(', ')} — click to work on it`
+                : mark.treatment
+                  ? `Work on the jersey that wears ${mark.label}`
+                  : `${mark.label} isn't assigned to any jersey yet — pick it from a jersey's "saved mark" select below`
+            }
           >
             <span className="idlab__shelfthumb">
               <MarkImage url={mark.url} alt="" />
             </span>
             <span className="idlab__shelflabel">{mark.label}</span>
+            {/* Only for a saved-mark entry with an assignment — the built-in
+                marks (base/treatment art) don't carry `wornBy` at all, since
+                which jersey they belong to is already the point of the row. */}
+            {mark.wornBy?.length > 0 && (
+              <span className="idlab__shelfworn">Worn by {mark.wornBy.join(', ')}</span>
+            )}
           </button>
         ))}
       </div>

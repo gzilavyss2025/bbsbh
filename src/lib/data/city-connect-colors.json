@@ -1,0 +1,311 @@
+{
+  "108": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#faf6eb",
+        "bg": true
+      }
+    ],
+    "note": "Angels"
+  },
+  "109": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#0097A9"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#523178",
+        "bg": true
+      }
+    ],
+    "note": "Diamondbacks"
+  },
+  "110": {
+    "swatches": [
+      {
+        "label": "Secondary",
+        "hex": "#E1D2BE",
+        "bg": true
+      }
+    ],
+    "note": "Orioles"
+  },
+  "111": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#5A8D84",
+        "bg": true
+      }
+    ],
+    "note": "Red Sox"
+  },
+  "113": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#C6011F"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Reds"
+  },
+  "114": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#00385D",
+        "bg": true
+      }
+    ],
+    "note": "Guardians — \"CLE\" wordmark"
+  },
+  "115": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#8ABFEB",
+        "bg": true
+      },
+      {
+        "label": "Secondary",
+        "hex": "#4F4FC9"
+      }
+    ],
+    "note": "Rockies"
+  },
+  "116": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#2c3357",
+        "bg": true
+      }
+    ],
+    "note": "Tigers"
+  },
+  "117": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#0F2948"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#CEC8B2",
+        "bg": true
+      },
+      {
+        "label": "Third",
+        "hex": "#FC7A1E"
+      }
+    ],
+    "note": "Astros"
+  },
+  "118": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#FFFFFF",
+        "bg": true
+      }
+    ],
+    "note": "Royals"
+  },
+  "120": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#5c82a5",
+        "bg": true
+      }
+    ],
+    "note": "Nationals — City Connect 2.0"
+  },
+  "121": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#383a35",
+        "bg": true
+      }
+    ],
+    "note": "Mets"
+  },
+  "133": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#003831",
+        "bg": true
+      },
+      {
+        "label": "Secondary",
+        "hex": "#EFB21E"
+      }
+    ],
+    "note": "Athletics"
+  },
+  "134": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#201a1c",
+        "bg": true
+      }
+    ],
+    "note": "Pirates — City Connect 2.0"
+  },
+  "135": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#111113",
+        "bg": true
+      }
+    ],
+    "note": "Padres — City Connect 2.0"
+  },
+  "136": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#203F79",
+        "bg": true
+      }
+    ],
+    "note": "Mariners — the trident mark"
+  },
+  "137": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#27251F",
+        "bg": true
+      }
+    ],
+    "note": "Giants — script \"SF\" mark, near-black brand secondary (temporary, pending real City Connect background)"
+  },
+  "138": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#C41E3A",
+        "bg": true
+      }
+    ],
+    "note": "Cardinals — \"The Lou\" mark on their standard red"
+  },
+  "139": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Rays"
+  },
+  "140": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#892535",
+        "bg": true
+      },
+      {
+        "label": "Secondary",
+        "hex": "#EBDFCB"
+      }
+    ],
+    "note": "Rangers — both sampled off the png itself (red field, cream T)"
+  },
+  "141": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#161827",
+        "bg": true
+      }
+    ],
+    "note": "Blue Jays"
+  },
+  "142": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#00549f",
+        "bg": true
+      }
+    ],
+    "note": "Twins"
+  },
+  "143": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#00163b",
+        "bg": true
+      }
+    ],
+    "note": "Phillies"
+  },
+  "144": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#D32826"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#374EA1"
+      },
+      {
+        "label": "Third",
+        "hex": "#7BA7D8",
+        "bg": true
+      }
+    ],
+    "note": "Braves"
+  },
+  "145": {
+    "swatches": [
+      {
+        "label": "Red",
+        "hex": "#C8102E"
+      }
+    ],
+    "note": "White Sox — procured mark (city-connect/CWS.png), a red pinstripe tile (TREATMENT_PINSTRIPE_COLOR below) instead of a flat fill; no `bg` flag, same footing as the Alternate entry above."
+  },
+  "146": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Marlins"
+  },
+  "158": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#0C436A"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#ff6c58",
+        "bg": true
+      }
+    ],
+    "note": "Brewers"
+  }
+}

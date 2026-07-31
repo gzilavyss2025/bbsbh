@@ -5,6 +5,7 @@ import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
 import { isMlbTeamId } from '../lib/teams.js'
 import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../lib/milbColors.js'
 import { useWpaLogo } from '../hooks/useWpaLogo.js'
+import { useMilbWpaLogo } from '../hooks/useMilbWpaLogo.js'
 import { ordinal } from '../lib/format.js'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
@@ -197,23 +198,40 @@ export function WinProbChart({
   // Callers with no such data (or a MiLB game outside jerseys.json's
   // coverage) simply omit the prop, and this falls back to 'main'.
   //
-  // useWpaLogo (hooks/useWpaLogo.js) resolves each band's mark AND whether a
-  // recolor override reaches it, dropping back to the club's Main mark for a
-  // treatment whose art isn't on file yet. Resolved ABOVE the empty-points
-  // early return below, since a hook can't be called conditionally.
+  // A MiLB affiliate (awayId/homeId isn't one of the 30 MLB clubs) reads its
+  // band/logo-tile geometry from milbColors.js's Home/Away tables instead of
+  // this file's MLB per-treatment ones — same "which system owns this team"
+  // split as TeamTreatmentMark's tile (components/TeamTreatmentMark.jsx). The
+  // role ('away'/'home') is fixed by which prop this is, not guessed. Computed
+  // here, above every hook call below, since both useWpaLogo AND
+  // useMilbWpaLogo must run unconditionally (a hook can't be called
+  // conditionally) and this decides which one's result actually gets used.
+  const awayMilb = !isMlbTeamId(awayId)
+  const homeMilb = !isMlbTeamId(homeId)
+
+  // useWpaLogo/useMilbWpaLogo (hooks/) resolve each band's mark AND whether a
+  // recolor override reaches it, dropping back to a club's normal mark for a
+  // treatment/variant whose art isn't on file yet. Resolved ABOVE the
+  // empty-points early return below, since a hook can't be called
+  // conditionally.
   const awayTreat = awayTreatment ?? 'main'
   const homeTreat = homeTreatment ?? 'main'
-  const { src: awayLogo, recolor: awayLogoOverride } = useWpaLogo(awayId, awayTreat)
-  const homeLogoResolved = useWpaLogo(homeId, homeTreat)
-  // `homeMarkOverride` — Team Identity Lab's own live "Use Logo Art" DRAFT
-  // state (an in-progress uncheck, or a just-uploaded file, cache-busted by
-  // the caller's own artVersion counter — WpaArtBox/WpaScenarios,
-  // profiles/mlb.jsx). Without this, the mockups would keep showing whatever
-  // mark is already SAVED until Save actually lands the `ownArt` flag —
-  // every other WPA field (layout, band color) already previews its own
-  // in-progress edit live via homeLayoutOverride/homeBandOverride; this is
-  // the same idea for which MARK tiles the band. `undefined` for every real
-  // game chart, so this is inert there.
+  const awayMlbLogo = useWpaLogo(awayId, awayTreat)
+  const awayMilbLogo = useMilbWpaLogo(awayId, 'away')
+  const { src: awayLogo, recolor: awayLogoOverride } = awayMilb ? awayMilbLogo : awayMlbLogo
+  const homeMlbLogo = useWpaLogo(homeId, homeTreat)
+  const homeMilbLogo = useMilbWpaLogo(homeId, 'home')
+  const homeLogoResolved = homeMilb ? homeMilbLogo : homeMlbLogo
+  // `homeMarkOverride` — Team Identity Lab's own live "Use Logo Art"/"Use
+  // wordmark" DRAFT state (an in-progress uncheck, or a just-uploaded file,
+  // cache-busted by the caller's own artVersion counter — WpaArtBox/
+  // WpaScenarios, profiles/mlb.jsx and profiles/milb.jsx). Without this, the
+  // mockups would keep showing whatever mark is already SAVED until Save
+  // actually lands the field — every other WPA field (layout, band color)
+  // already previews its own in-progress edit live via
+  // homeLayoutOverride/homeBandOverride; this is the same idea for which MARK
+  // tiles the band. `undefined` for every real game chart, so this is inert
+  // there.
   const homeLogo = homeMarkOverride ? homeMarkOverride.src : homeLogoResolved.src
   const homeLogoOverride = homeMarkOverride ? (homeMarkOverride.recolor ?? null) : homeLogoResolved.recolor
 
@@ -224,13 +242,6 @@ export function WinProbChart({
   const split = winProbSplit(points)
   const awayColors = chipColorsFor(awayId)
   const homeColors = chipColorsFor(homeId)
-  // A MiLB affiliate (awayId/homeId isn't one of the 30 MLB clubs) reads its
-  // band/logo-tile geometry from milbColors.js's Home/Away tables instead of
-  // this file's MLB per-treatment ones — same "which system owns this team"
-  // split as TeamTreatmentMark's tile (components/TeamTreatmentMark.jsx). The
-  // role ('away'/'home') is fixed by which prop this is, not guessed.
-  const awayMilb = !isMlbTeamId(awayId)
-  const homeMilb = !isMlbTeamId(homeId)
   const awayLayout = awayMilb ? milbWpaLogoLayout(awayId, 'away') : wpaLogoLayout(awayId, awayTreat)
   // `homeLayoutOverride` — Team Identity Lab's TreatmentWpaPreview draft
   // (merged over the shipped WPA_LOGO_LAYOUT_OVERRIDES default, same shape

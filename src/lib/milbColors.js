@@ -1,6 +1,8 @@
 import { WPA_LOGO_DEFAULTS } from './wpaLogo.js'
 import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
 import { byTreatment } from './tuningStore.js'
+import { teamLogoUrl } from './teams.js'
+import { customMarkFor } from './customMarks.js'
 import {
   MILB_COLORS,
   MILB_RESEARCHED_PAIRS,
@@ -92,6 +94,10 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
 export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.band)
 
+// `{ [teamId]: { [variant]: boolean } }` — whether the WPA band tiles the
+// club's wordmark instead of its usual mark (milbWpaMarkUrl below).
+export const MILB_WPA_WORDMARK_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.wpaWordmark)
+
 // `{ [teamId]: { [variant]: { bar, accent, onBar } } }` — the MiLB half of the
 // header chrome a themed lineup page wears (ADR-0030), same shape and same
 // role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/headerTheme.js` is
@@ -160,6 +166,27 @@ export function milbWpaBandColor(teamId, variant, draft) {
   return milbVariantColors(teamId, variant).bg
 }
 
+// Whether (teamId, variant)'s WPA band should tile the club's wordmark
+// instead of its normal mark — a draft toggle wins outright over a landed
+// override, absent means false (tile the normal mark, same as always). The
+// minimal MiLB counterpart to MLB's WPA_OWN_ART/WpaArtPicker: one on/off
+// switch rather than a whole second art-source library, since a wordmark is
+// the one alternate mark nearly every affiliate already has on the CDN.
+export function milbWpaWordmark(teamId, variant, draft) {
+  return draft?.wpaWordmark ?? Boolean(MILB_WPA_WORDMARK_OVERRIDES[teamId]?.[variant])
+}
+
+// The mark URL a (team, variant)'s WPA band actually tiles: the wordmark when
+// toggled on, else whatever the tile itself wears — the curated milb-home/away
+// art if procured, else the plain CDN base mark (same chain milbTreatmentTile
+// resolves for the real, non-WPA tile), so the band and the tile agree unless
+// wordmark is explicitly turned on.
+export function milbWpaMarkUrl(teamId, variant, draft) {
+  const side = variant === 'home' ? 'home' : 'away'
+  if (milbWpaWordmark(teamId, side, draft)) return teamLogoUrl(teamId, 'wordmark')
+  return milbHasLogoArt(teamId, side) ? teamLogoUrl(teamId, `milb-${side}`) : teamLogoUrl(teamId, 'base')
+}
+
 // Every affiliate's Home and Away jerseys share ONE header bar rather than
 // each owning its own — same idea as teams.js's treatmentHeaderColorOverride
 // collapsing MLB's five jerseys down to two (PR #453), except MiLB never had
@@ -211,6 +238,21 @@ export function milbHasLogoArt(teamId, variant) {
   return MILB_ART_COVERAGE[side].has(teamId)
 }
 
+// Whether `teamId`'s `variant` side has ANY real art to show, rather than the
+// plain tinted CDN base mark — either the curated procured file above, or a
+// mark recolored in the Logo art editor and ASSIGNED to this side
+// (LogoDropZone's assign select, customMarks.js). An affiliate with no
+// procured art at all still gets a real tile the moment one of its saved
+// marks is assigned — recoloring the CDN mark is often the only way a thin-
+// coverage MiLB club gets a second look, so a bare assignment can't be
+// invisible to the one check that decides whether to bother trying
+// teamLogoUrl's `milb-home`/`milb-away` variant (which itself resolves the
+// assigned mark, teams.js) instead of falling back to `base`.
+export function milbHasArt(teamId, variant) {
+  const side = variant === 'home' ? 'home' : 'away'
+  return milbHasLogoArt(teamId, side) || Boolean(customMarkFor(teamId, `milb-${side}`))
+}
+
 // The real game-card/masthead tile's shape (see teams.js's treatmentTile,
 // which TeamTreatmentMark reads for every MLB club) computed from this
 // module's Home/Away tables instead — the live wiring this lab was staged
@@ -223,7 +265,7 @@ export function milbTreatmentTile(teamId, variant) {
   const side = variant === 'home' ? 'home' : 'away'
   const pos = milbLogoPosition(teamId, side)
   return {
-    logoVariant: milbHasLogoArt(teamId, side) ? `milb-${side}` : 'base',
+    logoVariant: milbHasArt(teamId, side) ? `milb-${side}` : 'base',
     tint: pos.pinstripe ? null : pos.bg,
     offsetX: pos.offsetX,
     offsetY: pos.offsetY,

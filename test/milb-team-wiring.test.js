@@ -10,6 +10,7 @@ import {
   milbColorPair,
   milbVariantColors,
   milbHasLogoArt,
+  milbHasArt,
   MILB_LOGO_POS_OVERRIDES,
 } from '../src/lib/milbColors.js'
 import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
@@ -50,9 +51,10 @@ test('milbTreatmentTile treats an unrecognized variant as away, not a crash', ()
   assert.equal(milbTreatmentTile(teamId, undefined).tint, secondary)
 })
 
-// This PR ships with zero art (PRD 4.3), so today every affiliate falls
-// through to 'base' — pinned here so a future upload's effect on logoVariant
-// is a real regression to catch, not an assumption never exercised.
+// This PR ships with zero procured art (PRD 4.3), so today every affiliate
+// with no custom-mark assignment falls through to 'base' — pinned here so a
+// future upload's effect on logoVariant is a real regression to catch, not an
+// assumption never exercised.
 test('milbHasLogoArt reads coverage from the committed manifest, empty today', () => {
   assert.deepEqual(LOGO_ART['milb-home'] ?? {}, {})
   assert.deepEqual(LOGO_ART['milb-away'] ?? {}, {})
@@ -61,16 +63,33 @@ test('milbHasLogoArt reads coverage from the committed manifest, empty today', (
 })
 
 test('milbTreatmentTile would switch to the curated variant once a side has art', () => {
-  // milbHasLogoArt is the single gate milbTreatmentTile reads — proved by
-  // construction rather than by faking a manifest entry (a static JSON import
-  // can't be swapped mid-test): every teamId with no manifest coverage reads
-  // 'base', matching what milbTreatmentTile itself returns.
-  for (const teamId of [158, 402, 556]) {
+  // milbHasArt (procured art OR a custom-mark assignment) is the single gate
+  // milbTreatmentTile reads — proved by construction rather than by faking a
+  // manifest entry (a static JSON import can't be swapped mid-test): every
+  // teamId with neither reads 'base', matching what milbTreatmentTile itself
+  // returns. Deliberately excludes 556 (Nashville Sounds) — see the
+  // customMarkFor-assignment test below, which uses that club's real,
+  // currently-landed Home assignment on purpose.
+  for (const teamId of [158, 402, 400]) {
     for (const side of ['home', 'away']) {
-      assert.equal(milbHasLogoArt(teamId, side), false)
+      assert.equal(milbHasArt(teamId, side), false)
       assert.equal(milbTreatmentTile(teamId, side).logoVariant, 'base')
     }
   }
+})
+
+test('milbTreatmentTile switches to the curated variant for a side with a custom-mark assignment, even with no procured art', () => {
+  // Nashville Sounds (556) has no procured milb-home/milb-away file (the
+  // manifest is empty, per the test above) but a real, currently-landed Home
+  // assignment (src/lib/data/custom-marks.json) — the exact "no art procured
+  // yet, so a recolored mark is the only way to get a second one" case
+  // milbHasArt exists for.
+  assert.equal(milbHasLogoArt(556, 'home'), false)
+  assert.equal(milbHasArt(556, 'home'), true)
+  assert.equal(milbTreatmentTile(556, 'home').logoVariant, 'milb-home')
+  // Away has no assignment, so it still falls through to base.
+  assert.equal(milbHasArt(556, 'away'), false)
+  assert.equal(milbTreatmentTile(556, 'away').logoVariant, 'base')
 })
 
 test('milbVariantColors backs milbTreatmentTile for a team with no researched color at all', () => {

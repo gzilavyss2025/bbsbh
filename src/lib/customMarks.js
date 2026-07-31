@@ -46,13 +46,35 @@ export function customMarksFor(teamId) {
   return marks.map((m) => ({ slug: m.slug, name: m.name ?? m.slug, url: customMarkUrl(teamId, m.slug) }))
 }
 
+// An assignment can point at one of this club's own recolored marks (a bare
+// slug, the original and still the common case) OR at one of the CDN's four
+// stock vectors (`cdn:base`/`cdn:primary`/`cdn:cap`/`cdn:wordmark` — the
+// LogoDropZone "Replace art" select's second way to change what a jersey
+// wears, no recoloring required). Kept as a prefix on the same string rather
+// than a second field so an assignment stays one value everywhere it already
+// travels (this store, the select's value, the copy/save wire).
+const CDN_PREFIX = 'cdn:'
+
+// Split a stored assignment value into which of the two kinds it names —
+// pulled out on its own so the parsing itself is testable without needing a
+// real entry in the committed store. `null` for no assignment at all.
+export function parseMarkAssignmentKey(key) {
+  if (!key) return null
+  if (key.startsWith(CDN_PREFIX)) return { kind: 'cdn', variant: key.slice(CDN_PREFIX.length) }
+  return { kind: 'custom', slug: key }
+}
+
 // The library mark this treatment wears, or null. Read by teams.js AHEAD of
 // its normal disk-presence resolution, which is what makes an assignment an
-// override rather than a replacement.
+// override rather than a replacement. A `cdn:` assignment resolves to
+// `{ cdnVariant }` rather than a URL — teams.js's own teamLogoUrl already
+// knows how to turn a variant into one, and importing it here would close a
+// cycle (teams.js -> customMarks.js -> teams.js).
 export function customMarkFor(teamId, treatment) {
-  const slug = store[String(teamId)]?.assignments?.[treatment]
-  if (!slug) return null
-  const mark = customMarksFor(teamId).find((m) => m.slug === slug)
+  const parsed = parseMarkAssignmentKey(store[String(teamId)]?.assignments?.[treatment])
+  if (!parsed) return null
+  if (parsed.kind === 'cdn') return { cdnVariant: parsed.variant }
+  const mark = customMarksFor(teamId).find((m) => m.slug === parsed.slug)
   // An assignment pointing at a mark that is no longer in the library resolves
   // to nothing, so the treatment falls back to its real art instead of a 404.
   return mark ?? null

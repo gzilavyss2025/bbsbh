@@ -1,4 +1,15 @@
 {
+  "108": {
+    "name": "Los Angeles Angels",
+    "art": "9:87bdd82a",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout"
+    }
+  },
   "109": {
     "name": "Arizona Diamondbacks",
     "art": "7:bbaee5f0",
@@ -9,12 +20,39 @@
       "6": "knockout"
     }
   },
+  "110": {
+    "name": "Baltimore Orioles",
+    "art": "8:d1e46bf6",
+    "parts": {
+      "2": "knockout",
+      "3": "ink",
+      "4": "knockout"
+    }
+  },
   "113": {
     "name": "Cincinnati Reds",
     "art": "3:f09df7d1",
     "parts": {
       "0": "knockout",
       "1": "knockout"
+    }
+  },
+  "115": {
+    "name": "Colorado Rockies",
+    "art": "4:aa012140",
+    "parts": {
+      "1": "knockout",
+      "3": "knockout"
+    }
+  },
+  "117": {
+    "name": "Houston Astros",
+    "art": "8:955ef065",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "5": "ink",
+      "6": "knockout"
     }
   },
   "144": {
@@ -30,7 +68,131 @@
     "art": "4:76b01228",
     "parts": {
       "0": "knockout",
+      "2": "ink",
       "3": "knockout"
+    }
+  },
+  "234": {
+    "name": "Durham Bulls",
+    "art": "14:c968305e",
+    "parts": {
+      "0": "ink",
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "8": "ink",
+      "9": "ink",
+      "10": "ink",
+      "11": "knockout",
+      "12": "knockout",
+      "13": "ink"
+    }
+  },
+  "235": {
+    "name": "Memphis Redbirds",
+    "art": "7:2c89c33b",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "5": "knockout",
+      "6": "knockout"
+    }
+  },
+  "400": {
+    "name": "Las Vegas Aviators",
+    "art": "6:26af69cb",
+    "parts": {
+      "0": "knockout"
+    }
+  },
+  "416": {
+    "name": "Louisville Bats",
+    "art": "3:8fe6439a",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout"
+    }
+  },
+  "422": {
+    "name": "Buffalo Bisons",
+    "art": "23:d2f8a02d",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "9": "knockout",
+      "14": "knockout",
+      "18": "knockout",
+      "20": "knockout",
+      "21": "ink"
+    }
+  },
+  "431": {
+    "name": "Gwinnett Stripers",
+    "art": "21:5cd63bb5",
+    "parts": {
+      "1": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "11": "knockout",
+      "13": "knockout",
+      "15": "knockout"
+    }
+  },
+  "445": {
+    "name": "Columbus Clippers",
+    "art": "7:d5d5e59e",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "5": "knockout"
+    }
+  },
+  "494": {
+    "name": "Charlotte Knights",
+    "art": "9:2fa07b56",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "6": "ink"
+    }
+  },
+  "556": {
+    "name": "Nashville Sounds",
+    "art": "3:1342fa5a",
+    "parts": {
+      "1": "knockout"
+    }
+  },
+  "1410": {
+    "name": "Lehigh Valley IronPigs",
+    "art": "19:5935f05",
+    "parts": {
+      "1": "knockout",
+      "2": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "10": "knockout",
+      "13": "knockout",
+      "17": "knockout"
+    }
+  },
+  "4904": {
+    "name": "El Paso Chihuahuas",
+    "art": "19:42aae502",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "13": "knockout",
+      "16": "knockout"
     }
   }
 }
