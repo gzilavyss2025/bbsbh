@@ -498,6 +498,14 @@ Re-run only to fold in a new season.
   `test/logo-upload.test.js` compares the committed manifest against disk and
   names this script when they disagree, so a hand-dropped file can't sit
   unrecorded.
+- `compress-logos.mjs` — palette-quantizes (TinyPNG-style, via sharp) every
+  curated PNG under `public/team-logos/` in place, typically 60-80% smaller with
+  no visible change at rendered sizes. Runs nightly in `update-nightly-data.yml`
+  to sweep up new Identity Lab uploads, or by hand as `npm run compress-logos`
+  (which also rebuilds the manifest). **Skips palette PNGs (color type 3)** —
+  that guard is what stops the nightly run from re-quantizing its own output
+  and cumulatively degrading the art; don't remove it. Always regenerate
+  `logo-art.json` after a run that changed anything (it pins exact byte sizes).
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +
