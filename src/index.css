@@ -23195,6 +23195,33 @@ body {
    ledger styling (see the Standings page above) rather than a parallel table
    skin — same right-aligned mono figures, left-aligned .team cell. Only the
    rank number riding the name cell is specific to this table. */
+/* Row for a plate umpire slated behind the dish TODAY — same amber "this is
+   today" wash as .tstatrow--today, applied per-<td> like .standings tr.is-me
+   above (border-collapse: separate keeps each cell's own border-top). */
+.umprank__row--today td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+/* Home-plate glyph beside a today-working umpire's name — a small round
+   kraft-tape badge, same 21px dot as .umptier__glyph (the Umpires card's own
+   tap-glyph), reusing that same HomePlateIcon shape (UmpireTierGlyph.jsx) so
+   "home plate" reads as one consistent mark across the app rather than a
+   TEXT chip, which truncated illegibly on a narrow phone (the .standings td
+   `white-space: nowrap` a text label had to fight). Static, not a button —
+   this row has nothing to expand into. */
+.umprank__todaychip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  margin-left: 6px;
+  border-radius: 999px;
+  color: var(--seal-ink);
+  background: var(--seal);
+  vertical-align: middle;
+}
 .umprank__rank {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

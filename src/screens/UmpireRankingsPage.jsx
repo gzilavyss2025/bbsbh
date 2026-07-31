@@ -1,10 +1,13 @@
 import { loadUmpireRankings } from '../api/umpires.js'
+import { fetchTodayPlateUmpireIds } from '../api/schedule.js'
+import { toApiDate } from '../lib/dates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { HomePlateIcon } from '../components/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
@@ -13,10 +16,17 @@ const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 // accuracy, with the statistical tier (api/umpires.js's tierForZ — SD buckets
 // over the whole qualifying pool, not equal thirds) his accuracy falls into.
 // Ball/strike judgment counts carry no score, so — like the per-umpire page —
-// this needs no SealBox.
+// this needs no SealBox. A row for an umpire slated behind the plate TODAY
+// gets a highlight + chip (fetchTodayPlateUmpireIds) — a schedule assignment,
+// same spoiler-free footing as the rest of this page.
 export function UmpireRankingsPage() {
   useDocumentTitle('Home Plate Umpire Rankings')
   const { loading, error, data } = useAsync(() => loadUmpireRankings(), [])
+  const { data: todayIds } = useAsync(
+    () => fetchTodayPlateUmpireIds(toApiDate()),
+    [],
+  )
+  const todayPlateIds = todayIds ?? new Set()
   const ranked = data?.ranked ?? []
   const spread = ranked.length > 1 ? ranked[0].accuracy - ranked[ranked.length - 1].accuracy : null
 
@@ -58,10 +68,18 @@ export function UmpireRankingsPage() {
             </thead>
             <tbody>
               {ranked.map((u) => (
-                <tr key={u.id}>
+                <tr
+                  key={u.id}
+                  className={todayPlateIds.has(u.id) ? 'umprank__row--today' : undefined}
+                >
                   <td className="team">
                     <span className="umprank__rank">{u.rank}</span>
                     <UmpireLink id={u.id}>{u.name}</UmpireLink>
+                    {todayPlateIds.has(u.id) && (
+                      <span className="umprank__todaychip" role="img" aria-label="Behind the plate today">
+                        <HomePlateIcon />
+                      </span>
+                    )}
                   </td>
                   <td>
                     <UmpireTierPill tier={u.tier} />

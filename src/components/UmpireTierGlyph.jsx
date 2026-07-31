@@ -14,7 +14,7 @@ import { TIER_LABELS } from '../lib/statTiers.js'
 // a solid home-plate silhouette — a fine-lined strike-zone grid tried first,
 // but thin strokes at 12px muddy on a phone; a single filled shape reads at
 // any size.
-function HomePlateIcon() {
+export function HomePlateIcon() {
   return (
     <svg viewBox="0 0 20 20" width="12" height="12" aria-hidden="true">
       <polygon points="3,4 17,4 17,11 10,17 3,11" fill="currentColor" />

@@ -449,6 +449,37 @@ export async function fetchSlateScores(dateStr, sportId = 1) {
   }
 }
 
+// The set of umpire personIds slated as Home Plate for a given date's MLB
+// games — the Umpire Rankings page's "working today" highlight. A separate,
+// narrow fetch rather than reusing fetchSchedule: that call pulls the whole
+// slate's readiness payload (lineups/pitchers too) just to throw it away, and
+// this page only ever needs MLB. Assignments are typically posted a couple
+// hours before first pitch, not the moment a date turns over, so an empty
+// result (nobody posted yet) is the normal state for most of the day, not a
+// failure. Spoiler-free like every other umpire assignment fact in the app.
+const TODAY_PLATE_UMPS_FIELDS =
+  'dates,games,gamePk,officials,officialType,official,id'
+
+export async function fetchTodayPlateUmpireIds(dateStr, sportId = 1) {
+  if (!dateStr) return new Set()
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=officials&fields=${TODAY_PLATE_UMPS_FIELDS}`,
+    )
+    const ids = new Set()
+    for (const d of data.dates ?? []) {
+      for (const g of d.games ?? []) {
+        for (const o of g.officials ?? []) {
+          if (o.officialType === 'Home Plate' && o.official?.id) ids.add(o.official.id)
+        }
+      }
+    }
+    return ids
+  } catch {
+    return new Set()
+  }
+}
+
 // One team's full regular-season schedule, for the team page's monthly
 // calendar card. Dates/opponents/home-away are spoiler-free (same rationale as
 // fetchHeadToHead above). The raw schedule row also carries each side's
