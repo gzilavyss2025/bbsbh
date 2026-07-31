@@ -114,3 +114,10 @@ Applied only to art that is already a silhouette, only on a themed bar.
   and adding a fallback — not inventing a second resolver. If a new surface
   wants a colour that depends on anything but `(teamId, treatment)`, that is a
   new ADR, not a new argument.
+- **The Starting pitcher card is the one masthead on the page themed to the
+  OTHER club.** It shows the opposing starter, not this page's own team, so it
+  resolves `headerThemeFor` a second time against `(oppMeta.id, oppTreatment)`
+  and applies the result to just that `<section>` — same resolver, same three
+  properties, scoped narrower than the page. Still only `(teamId, treatment)`
+  in, still null-safe: with no curated pair for the opponent it falls through
+  to whatever the page's own theme (or default navy) already set.

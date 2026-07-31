@@ -93,6 +93,7 @@ export function TeamInfo({
   manager,
   uniform,
   treatment,
+  oppTreatment,
   broadcast,
   scorebookWeather,
   scorebookWeatherLoading,
@@ -113,8 +114,9 @@ export function TeamInfo({
   loading,
   lastUpdated,
 }) {
+  const oppSide = side === 'away' ? 'home' : 'away'
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
-  const oppMeta = useMemo(() => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'), [feed, side])
+  const oppMeta = useMemo(() => selectTeamMeta(feed, oppSide), [feed, oppSide])
   const officials = useMemo(() => selectOfficials(feed), [feed])
   const info = useMemo(() => selectGameInfo(feed), [feed])
   // Null for a club with no curated triad, which leaves every bar below on the
@@ -122,6 +124,13 @@ export function TeamInfo({
   const theme = useMemo(
     () => headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)),
     [meta.id, side, treatment],
+  )
+  // The Starting pitcher card shows the OTHER club's starter, so its own
+  // masthead wears THAT club's jersey colors rather than this page's — see
+  // OpposingStarterCard.
+  const oppTheme = useMemo(
+    () => headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment)),
+    [oppMeta.id, oppSide, oppTreatment],
   )
 
   return (
@@ -170,6 +179,7 @@ export function TeamInfo({
       <TeamSections
         feed={feed}
         side={side}
+        oppTheme={oppTheme}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
@@ -350,6 +360,7 @@ function BirthdayCake({ show }) {
 function TeamSections({
   feed,
   side,
+  oppTheme,
   oppPitcherLine,
   prospectsData,
   rookiesData,
@@ -449,6 +460,7 @@ function TeamSections({
         pitcherLine={oppPitcherLine}
         teamId={oppMeta.id}
         teamName={oppMeta.teamName}
+        theme={oppTheme}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
@@ -647,6 +659,7 @@ function OpposingStarterCard({
   pitcherLine,
   teamId,
   teamName,
+  theme,
   prospectsData,
   rookiesData,
   callouts,
@@ -654,7 +667,10 @@ function OpposingStarterCard({
   arsenal,
 }) {
   return (
-    <section className="startercard">
+    <section
+      className={`startercard ${headerThemeClass(theme)}`.trim()}
+      style={headerThemeStyle(theme)}
+    >
       <SectionMasthead
         as="h3"
         title="Starting pitcher"
