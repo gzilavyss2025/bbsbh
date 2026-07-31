@@ -15142,17 +15142,48 @@ body {
    `.pagenav` (20) so the floating advance bar never covers it. */
 .gamehud-dock {
   position: fixed;
-  top: calc(var(--space-3) + env(safe-area-inset-top));
-  right: calc(var(--space-3) + env(safe-area-inset-right));
   z-index: 21;
   opacity: 0;
   pointer-events: none;
+  cursor: pointer;
   transition: opacity 0.15s ease;
 }
 
 .gamehud-dock--show {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Tap/click-to-reposition corners (InningViewer's `cornerIdx`/`CORNERS`) —
+   each rule sets only the two edges that place that corner, leaving the
+   other two `auto` so switching corners never leaves a stale offset pinning
+   the dock away from its new edge. */
+.gamehud-dock--top-right {
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  right: calc(var(--space-3) + env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+}
+
+.gamehud-dock--bottom-right {
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  right: calc(var(--space-3) + env(safe-area-inset-right));
+  top: auto;
+  left: auto;
+}
+
+.gamehud-dock--bottom-left {
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  left: calc(var(--space-3) + env(safe-area-inset-left));
+  top: auto;
+  right: auto;
+}
+
+.gamehud-dock--top-left {
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  left: calc(var(--space-3) + env(safe-area-inset-left));
+  bottom: auto;
+  right: auto;
 }
 
 .gamehud {
@@ -15236,7 +15267,7 @@ body {
   display: flex;
   align-items: stretch;
   margin: 3px -10px 0;
-  min-height: 56px;
+  min-height: 67px;
   background: rgba(0, 0, 0, 0.15);
 }
 
@@ -15338,8 +15369,8 @@ body {
 }
 
 .gamehud__outdot {
-  width: 6px;
-  height: 6px;
+  width: 7.5px;
+  height: 7.5px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   border: var(--bw-hair) solid rgba(255, 255, 255, 0.28);
@@ -15352,8 +15383,6 @@ body {
 
 @media (min-width: 740px) {
   .gamehud-dock {
-    top: auto;
-    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
     opacity: 1;
     pointer-events: auto;
   }

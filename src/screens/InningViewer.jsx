@@ -31,6 +31,7 @@ import { DefenseSection, LineupSection } from '../components/EnteringReference.j
 import { RosterPanel } from '../components/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
+import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
@@ -40,6 +41,11 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 const RevealCloudSync = isClerkEnabled
   ? lazy(() => import('../components/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
   : null
+
+// The scorebug dock's tap-to-reposition corners, clockwise from top-right —
+// see the `cornerIdx` state in InningViewer and the matching
+// `.gamehud-dock--*` rules in index.css.
+const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left']
 
 // Stand-in for `revealTo` while the Scores Unlocked pass is on (see
 // effectiveReveal's `commitReveals`). Module-scope so its identity is stable
@@ -285,6 +291,18 @@ export function InningViewer({
     obs.observe(el)
     return () => obs.disconnect()
   }, [])
+
+  // Tap/click-to-reposition: the dock steps clockwise through the four
+  // screen corners (top-right → bottom-right → bottom-left → top-left → …).
+  // `cornerIdx` stays null until the user's first tap so the dock keeps its
+  // layout-driven default (top-right on mobile, bottom-right on desktop —
+  // see the CSS below) rather than jumping on mount; CORNERS[1] is that
+  // desktop default, so the first tap there advances to index 2 as expected.
+  const isWide = useMediaQuery(WIDE_QUERY)
+  const [cornerIdx, setCornerIdx] = useState(null)
+  const corner = CORNERS[cornerIdx ?? (isWide ? 1 : 0)]
+  const stepCorner = () =>
+    setCornerIdx((prev) => ((prev ?? (isWide ? 1 : 0)) + 1) % CORNERS.length)
 
   // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
   // turning over for real — the game moving forward while you're actually
@@ -764,9 +782,24 @@ export function InningViewer({
           no new fetch. Runs are the score AS OF the user's own reveal
           progress (committed halves via `revealRunsThrough`, plus the
           currently-stepped half's own running count from `runsInProgress`),
-          the same figure RollingLine's own totals column already shows. */}
+          the same figure RollingLine's own totals column already shows.
+          A tap/click steps the dock clockwise through the four corners
+          (`stepCorner`/`CORNERS` above) so it can be moved off whatever it's
+          covering. */}
       {started && curLiveState && (
-        <div className={`gamehud-dock ${pastLine ? 'gamehud-dock--show' : ''}`}>
+        <div
+          className={`gamehud-dock gamehud-dock--${corner} ${pastLine ? 'gamehud-dock--show' : ''}`}
+          role="button"
+          tabIndex={0}
+          aria-label="Move scorebug to next corner"
+          onClick={stepCorner}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              stepCorner()
+            }
+          }}
+        >
           <Scorebug
             awayName={meta.away.clubName}
             homeName={meta.home.clubName}
