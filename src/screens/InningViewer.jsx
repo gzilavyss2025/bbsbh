@@ -809,11 +809,19 @@ export function InningViewer({
             homeTreatment={winProbTreatment?.home}
             awayRuns={
               revealRunsThrough(feed, renderUnlocked, renderRevealedThrough, 'away') +
-              (runsInProgress && runsInProgress.idx % 2 === 0 ? runsInProgress.runs : 0)
+              (runsInProgress &&
+              runsInProgress.idx % 2 === 0 &&
+              runsInProgress.idx > renderRevealedThrough
+                ? runsInProgress.runs
+                : 0)
             }
             homeRuns={
               revealRunsThrough(feed, renderUnlocked, renderRevealedThrough, 'home') +
-              (runsInProgress && runsInProgress.idx % 2 === 1 ? runsInProgress.runs : 0)
+              (runsInProgress &&
+              runsInProgress.idx % 2 === 1 &&
+              runsInProgress.idx > renderRevealedThrough
+                ? runsInProgress.runs
+                : 0)
             }
             inning={curLiveState.inning}
             half={curLiveState.half}
