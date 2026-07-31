@@ -27,7 +27,7 @@ const EDGE_BLEED = 1.32
 
 const NO_TILE = { logoVariant: 'base', tint: null, offsetX: 0, offsetY: 0, pinstripeColor: null, pinstripeBg: null, scale: 1 }
 
-export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, className = '' }) {
+export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, className = '', eager = false }) {
   // A MiLB affiliate reads its tile from milbColors.js's Home/Away tables
   // instead — the MLB per-treatment system above has no coverage for it (see
   // milbColors.js's module doc for why the two stay separate). That table is
@@ -50,7 +50,7 @@ export function TeamTreatmentMark({ teamId, name, treatment, side, size, block, 
   const cls = [block, pinstripeColor ? `${block}--pinstripe` : '', className].filter(Boolean).join(' ')
   return (
     <div className={cls} style={style}>
-      <TeamLogo teamId={teamId} name={name} size={size} variant={logoVariant} />
+      <TeamLogo teamId={teamId} name={name} size={size} variant={logoVariant} eager={eager} />
     </div>
   )
 }

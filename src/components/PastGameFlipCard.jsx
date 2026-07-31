@@ -22,6 +22,7 @@ export function PastGameFlipCard({
   gameScore = null,
   cardMeta = null,
   liveJerseys = null,
+  eager = false,
   onSelect,
   onBoxScore,
 }) {
@@ -68,6 +69,7 @@ export function PastGameFlipCard({
           prospectCount={prospectCount}
           gameScore={gameScore}
           liveJerseys={liveJerseys}
+          eager={eager}
           onSelect={onSelect}
           onBoxScore={onBoxScore}
         />

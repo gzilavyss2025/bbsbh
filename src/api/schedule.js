@@ -96,7 +96,7 @@ export async function fetchSchedule(
   hydrate = 'team,venue(timezone),lineups,officials,probablePitcher',
 ) {
   const data = await getJson(
-    `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=${hydrate}`,
+    `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
   )
   const dates = data.dates ?? []
   const games = dates.flatMap((d) => d.games ?? [])
@@ -309,6 +309,15 @@ const GAMES_BY_PK_FIELDS =
 // would blank a Top Games card's status/date/tz.
 const GAME_CARDS_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,status,statusCode,detailedState,abstractGameState,reason,rescheduleDate,rescheduleGameDate,teams,away,home,team,id,name,teamName,abbreviation,sport,venue,timeZone,tz'
+// fetchSchedule is normalizeGame's read-set (GAME_CARDS_FIELDS) plus the
+// readiness hydrations it counts: the lineup player lists, the officials
+// crew, and each side's probablePitcher (its `id` is already in the shared
+// list). The full-slate hydrate was the home page's one unpruned blocking
+// request — 77 KB where this list fetches the identical read-set in 12.6 KB
+// (verified 2026-07-31 against a live MLB slate, value-for-value). Safe for
+// resolveGame's lighter `hydrate=team` calls too: `fields=` is an allowlist,
+// and names an un-hydrated response doesn't carry are simply absent.
+const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,officials,official,probablePitcher`
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
