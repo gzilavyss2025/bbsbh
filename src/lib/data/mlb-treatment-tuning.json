@@ -1400,10 +1400,12 @@
         }
       },
       "alternate-2": {
-        "note": "Home White",
         "colors": {
           "primary": "#F5F0E1"
-        }
+        },
+        "scale": 0.9,
+        "offsetY": 1,
+        "note": "Home White"
       },
       "alternate-3": {
         "colors": {

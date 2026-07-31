@@ -10716,6 +10716,391 @@ body {
   border-bottom: 3px solid var(--header-accent, var(--seal));
   border-radius: var(--radius-sm);
   background: var(--header-bar, var(--navy));
+  gap: var(--space-2);
+}
+
+/* The club's mono knockout mark, drawn exactly as the real masthead draws it —
+   white art, re-inked to black on a light bar (.idlab__barmock--darkmark, the
+   lab's copy of .is-themed--dark .metricbar__logo). Same caveat as there: this
+   is not the brightness(0) invert(1) whitening ADR-0031 forbids, because the
+   art arrives already flat. */
+.idlab__barmock__logo {
+  flex: 0 0 auto;
+}
+
+.idlab__barmock--darkmark .idlab__barmock__logo {
+  filter: brightness(0);
+}
+
+/* The knockout-mark picker: the club's real art on the left with every shape
+   clickable, the converted mark on each of its bars on the right, and one
+   button per shape below (the keyboard path — the art itself is a picture).
+   screens/identity-lab/editors/MonoInkEditor.jsx, ADR-0031. */
+/* Knockout mark and Marks on file share a row — each was leaving half a screen
+   of paper beside it. Equal halves (`1fr 1fr`, not auto-sized) so the picker's
+   column of bar previews can't squeeze the shelf as a club gains bars, and the
+   pair stacks on a narrow window rather than shrinking both past use. */
+.idlab__markspair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .idlab__markspair {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Half a row is narrow enough that the label, the hint, and two buttons stop
+   fitting on one line — wrap them rather than letting the heading crush into a
+   two-line stack beside a squeezed button. */
+.idlab__monoink .colorlab__wpapreviewhead,
+.idlab__recolor .colorlab__wpapreviewhead {
+  flex-wrap: wrap;
+}
+
+/* The Logo art editor — same frame as its Knockout mark neighbour, since the
+   pair reads as one row of "take this club's art apart".
+   screens/identity-lab/editors/LogoRecolorEditor.jsx. */
+.idlab__monoink,
+.idlab__recolor {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.idlab__monoinkrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  margin-top: var(--space-2);
+}
+
+/* The source marks a recolor can start from — every vector the club has (the
+   four CDN variants) plus anything already saved to its library, so a recolor
+   can build on a recolor. A horizontal scroller rather than a wrap: it's a
+   row of choices, and the picked one shouldn't move when the count changes. */
+.idlab__recolorsources {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.idlab__recolorsource {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 66px;
+  padding: var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+  cursor: pointer;
+}
+
+.idlab__recolorsource--on {
+  border-color: var(--accent-primary);
+  border-width: var(--bw-heavy);
+}
+
+.idlab__recolorsourceart {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.idlab__recolorsourcelabel {
+  font-size: var(--fs-micro);
+  color: var(--text-caption);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.idlab__recolorout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Deliberately the same box as the picker beside it: before and after are only
+   comparable at one size. */
+.idlab__recolorpreview {
+  width: 168px;
+  height: 140px;
+  object-fit: contain;
+  border: var(--bw-hair) solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+}
+
+/* The WPA art picker — every mark this club has, as click-to-apply swatches
+   under the WPA drop zone. screens/identity-lab/editors/WpaArtPicker.jsx. */
+.idlab__wpaart {
+  margin-top: var(--space-2);
+}
+
+.idlab__wpaarthint {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin: 0 0 var(--space-1);
+}
+
+.idlab__wpaartrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.idlab__wpaartitem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 58px;
+  padding: var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.idlab__wpaartitem:disabled {
+  cursor: progress;
+}
+
+.idlab__wpaartitem--busy {
+  border-color: var(--accent-primary);
+}
+
+/* The same paper checkerboard the shelf uses: these are transparent marks, and
+   a white edge against a white chip is invisible on an inspection surface. */
+.idlab__wpaartthumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-xs);
+  background-color: var(--paper-3);
+  background-image:
+    linear-gradient(45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--paper-1) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+}
+
+.idlab__wpaartthumb img {
+  max-width: 32px;
+  max-height: 32px;
+  object-fit: contain;
+}
+
+.idlab__wpaartlabel {
+  font-size: var(--fs-micro);
+  color: var(--text-caption);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.idlab__recolorpalette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.idlab__recolorswatch {
+  width: 26px;
+  height: 26px;
+  border: var(--bw-hair) solid var(--rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* Nothing selected yet: the swatches are inert, and they have to LOOK inert or
+   the first click reads as a broken control. */
+.idlab__recolorswatch:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Transparent, as a color you can pick. The same paper checkerboard the shelf
+   draws behind transparent art (.idlab__shelfthumb) — this app already says
+   "nothing here" that way, and a swatch that just showed the page background
+   would read as white paint. Smaller squares to suit a 26px chip. */
+.idlab__recolorswatch--none,
+.idlab__monoinkswatch.idlab__recolorswatch--none {
+  background-color: var(--paper-3);
+  background-image:
+    linear-gradient(45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--paper-1) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0;
+}
+
+/* Same reason, one level up: the RESULT preview has to show an erased shape as
+   see-through rather than as the panel's own cream, which is a color the art
+   might legitimately contain. */
+.idlab__recolorpreview {
+  background-color: var(--paper-3);
+  background-image:
+    linear-gradient(45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--paper-1) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--paper-1) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--paper-1) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.idlab__recolorsave {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-3);
+}
+
+.idlab__recolorname {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+}
+
+.idlab__monoinkart {
+  flex: 0 0 auto;
+  width: 168px;
+  padding: var(--space-2);
+  border: var(--bw-hair) dashed var(--rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+}
+
+.idlab__monoinkart svg {
+  width: 100%;
+  height: auto;
+}
+
+/* Every shape reports its own hover so the thing you are about to pin is the
+   thing lighting up — a whole-image hover would say nothing about which of a
+   dozen paths the click will land on. */
+.idlab__monoinkart [data-mono-part] {
+  cursor: pointer;
+}
+
+.idlab__monoinkart [data-mono-part]:hover {
+  opacity: 0.45;
+}
+
+.idlab__monoinkpreviews {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 180px;
+}
+
+.idlab__monoinkbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.idlab__monoinkmark {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+}
+
+/* Same re-inking the real masthead does on a light bar (.is-themed--dark
+   .metricbar__logo) — a white knockout on a pale bar is invisible, and a
+   preview that hid that would be worse than no preview. */
+.idlab__monoinkbar--darkmark .idlab__monoinkmark {
+  filter: brightness(0);
+}
+
+.idlab__monoinkbarlabel,
+.idlab__monoinkempty {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+}
+
+.idlab__monoinkempty {
+  color: var(--paper-3);
+}
+
+.idlab__monoinkhint,
+.idlab__monoinkwarn {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.idlab__monoinkwarn {
+  color: var(--accent-negative);
+}
+
+.idlab__monoinkparts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.idlab__monoinkpart {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+/* A pinned shape is the whole point of the row — it reads as decided, while an
+   automatic one stays quiet. */
+.idlab__monoinkpart--pinned {
+  border-color: var(--accent-primary);
+  border-width: var(--bw-heavy);
+}
+
+.idlab__monoinkpart--knockout .idlab__monoinkpartverdict {
+  color: var(--text-caption);
+}
+
+.idlab__monoinkswatch {
+  width: 12px;
+  height: 12px;
+  border: var(--bw-hair) solid var(--rule);
+  border-radius: 2px;
+}
+
+.idlab__monoinkpartnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Nothing landed and nothing drafted: an outline, not a painted bar, so "not

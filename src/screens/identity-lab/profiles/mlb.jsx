@@ -14,6 +14,7 @@ import {
 } from '../../../lib/wpaBandColors.js'
 import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
+import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
@@ -59,6 +60,7 @@ import {
 } from '../../../api/uniforms.js'
 import { JerseyBench } from '../workbench/JerseyBench.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
+import { WpaArtPicker } from '../editors/WpaArtPicker.jsx'
 import { draftFieldsMatchLanded } from '../useDraftStore.js'
 import { mergeDraftIntoStore, mergeTeamDraftIntoStore } from '../saveStores.js'
 import {
@@ -540,6 +542,14 @@ function shelfMarks(teamId) {
     const url = wpaArtUrl(teamId, t.key)
     if (url) marks.push({ key: `${t.key}-wpa`, treatment: t.key, label: `WPA · ${t.label}`, url, wpaOnly: true })
   }
+  // Marks recolored in the Logo art editor. They belong on the shelf whether or
+  // not a jersey wears one yet — the shelf answers "what have we got for this
+  // club", and a saved mark is something we've got. `treatment: null` because a
+  // library mark isn't tied to a jersey until it's assigned, so clicking it
+  // selects nothing rather than opening an arbitrary tile.
+  for (const mark of customMarksFor(teamId)) {
+    marks.push({ key: `custom-${mark.slug}`, treatment: null, label: mark.name, url: mark.url })
+  }
   return marks
 }
 
@@ -859,16 +869,25 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
   // in WpaPreview, same "absent rather than special-cased" convention
   // JerseyBench already follows for nameField/upload.
   const artUpload = wpaArtKey ? (
-    <LogoDropZone
-      teamId={teamId}
-      treatment={wpaArtKey}
-      label={`${name} ${label} WPA`}
-      onUploaded={() => setWpaArtVersion((v) => v + 1)}
-    >
-      <div className="colorlab__logobox colorlab__logobox--gloss">
-        <WpaArtBox teamId={teamId} treatment={treatment} name={name} version={wpaArtVersion} />
-      </div>
-    </LogoDropZone>
+    <>
+      <LogoDropZone
+        teamId={teamId}
+        treatment={wpaArtKey}
+        label={`${name} ${label} WPA`}
+        onUploaded={() => setWpaArtVersion((v) => v + 1)}
+      >
+        <div className="colorlab__logobox colorlab__logobox--gloss">
+          <WpaArtBox teamId={teamId} treatment={treatment} name={name} version={wpaArtVersion} />
+        </div>
+      </LogoDropZone>
+      {/* The upload is the fallback now, not the first move: nearly every WPA
+          mark someone wants is already among this club's own art. */}
+      <WpaArtPicker
+        teamId={teamId}
+        treatment={treatment}
+        onFilled={() => setWpaArtVersion((v) => v + 1)}
+      />
+    </>
   ) : null
   // The WpaScenarios mockups' own live preview of "Use Logo Art" — unchecked
   // (a draft in progress, or already landed) means those three chart
@@ -903,6 +922,8 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
         treatment,
         caveat: uploadCaveat(teamId, treatment, logoUploadTarget(teamId, treatment)),
         copyTargets: treatmentsForTeam(teamId).filter((t) => t.key !== treatment),
+        savedMarks: customMarksFor(teamId),
+        assignedSlug: customMarkAssignment(teamId, treatment),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
       wearDates={wearDates}

@@ -17,6 +17,7 @@
 // See src/lib/CLAUDE.md for the manifest this feeds and the upload contract.
 
 import { ALL_MLB_TEAM_IDS, teamAbbr } from './teams.js'
+import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
 // ---------------------------------------------------------------------------
 // The standard (PRD 4.1) — derived from the art already on disk, not invented.
@@ -231,5 +232,17 @@ export function wpaArtTreatmentKey(treatment) {
 // same upload.
 export function wpaArtUrl(teamId, treatment) {
   const key = wpaArtTreatmentKey(treatment)
-  return key ? (logoUploadTarget(teamId, key)?.url ?? null) : null
+  const target = key ? logoUploadTarget(teamId, key) : null
+  if (!target) return null
+  // A WPA slot used to be PNG by construction, because an upload is the only
+  // thing that could fill it. The lab can now put a mark there straight from
+  // the club's own art — including a recolored SVG or a CDN wordmark — so the
+  // extension is read off the manifest the writer rebuilds (logo-art.json),
+  // PNG first, exactly as mainOverrideLogoUrl resolves the same ambiguity.
+  // A slot the manifest knows nothing about still answers `.png`, so a
+  // hand-dropped file behaves as it always did.
+  const base = target.name.replace(/\.png$/, '')
+  const entries = LOGO_ART[target.dir] ?? {}
+  const ext = entries[`${base}.png`] ? 'png' : entries[`${base}.svg`] ? 'svg' : 'png'
+  return `${LOGO_ART_URL_ROOT}/${target.dir}/${base}.${ext}`
 }

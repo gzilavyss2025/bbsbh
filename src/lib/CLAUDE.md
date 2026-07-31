@@ -70,6 +70,9 @@ own `note`.
 | `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
 | `wpaBandColors.js` | That band's fill/pinstripe resolution |
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
+| `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
+| `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
+| `customMarks.js` | The library of those recolored marks, and which treatment wears one (`data/custom-marks.json`) |
 
 `treatmentTile(teamId, treatment)` is the single resolver behind the slate card
 (`GameCard`), the in-game masthead (`GameView`), and the lab's own grid — a club
@@ -89,6 +92,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | `milb-treatment-tuning.json` | `milbColors.js` |
 | `milb-colors.json` | `brandColors.js` |
 | `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
+| `mono-ink.json` | `monoInk.js` — and `scripts/gen-mono-logos.mjs`, which is what it actually changes |
 | `wpa-tuning.json` | `wpaLogo.js`, `wpaBandColors.js` |
 
 Every store has the same outer shape:
@@ -224,6 +228,31 @@ Two things that surprise people:
   mark.
 
 Existing `.svg` art stays as it is — the standard governs new uploads.
+
+## Recolored marks (`customMarks.js` + `data/custom-marks.json`)
+
+Uploading isn't the only way a treatment gets a mark. The CDN carries no
+alternate or City Connect art, and the real thing is often the SAME shapes in
+another palette — so `/identity-lab`'s **Logo art** editor recolors a source
+mark shape by shape (`logoRecolor.js`, sharing `logoMono.js`'s shape numbering
+so a shape means one thing in both editors) and saves the result to the club's
+library under a name.
+
+Two rules make this safe to use on a club whose art someone already procured:
+
+- **Saving never overwrites.** A name already in the library is refused with a
+  409; there is no merge and no silent rename.
+- **Wearing one is an ASSIGNMENT, not a copy.** `assignments` maps a treatment
+  to a library slug, and `localLogoUrl`/`mainOverrideLogoUrl` read it *first*.
+  The curated PNG that treatment had is untouched on disk, and picking "Original
+  art" in the Replace-art select hands it straight back. The alternative —
+  copying the SVG into `public/team-logos/{treatment}/` — would either shadow
+  that file or require deleting it, and `ALT_LOGO_SVG` would have needed a code
+  edit per assignment besides.
+
+Both halves are written server-side only (`scripts/lib/dev-custom-marks.mjs`),
+because the library is derived from what's actually in
+`public/team-logos/custom/` and two writers is how a manifest starts lying.
 
 ## `TeamLogo`'s own fallback chain
 

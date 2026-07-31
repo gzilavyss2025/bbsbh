@@ -144,6 +144,175 @@ function countInheriting(markup) {
   return n
 }
 
+// ---------------------------------------------------------------------------
+// PER-SHAPE OVERRIDES
+//
+// The classifier above is a heuristic over art nobody controls, and when it is
+// wrong it is wrong about a SHAPE — a brand color light enough to read as
+// paper, or paper dark enough to read as ink. So a club can pin individual
+// shapes, by their position in the art, in src/lib/data/mono-ink.json; the
+// Team Identity Lab is where those get picked by eye (ADR-0031).
+//
+// A part index is the shape's ordinal among the drawable elements, in document
+// order, counted the same way in all three functions below — which is why they
+// all walk DRAWABLE_TAG over the same body string rather than each having
+// their own idea of what a shape is. `monoLogoPickerSvg` hands the browser art
+// stamped with those exact indices, so a click can't mean a different shape
+// than a pin does.
+//
+// The indices only hold while the art holds still. `monoLogoFingerprint`
+// travels with a saved pin set so a club that rebrands into different art
+// drops back to the automatic pass instead of applying yesterday's answers to
+// today's shapes.
+// ---------------------------------------------------------------------------
+
+// An inline style beats both a presentation attribute and a `<style>` rule, so
+// this is the one place a pin can land and be sure to win. (A CSS rule beating
+// a `fill=` attribute is exactly why forcing the attribute wouldn't do.)
+const STYLE_ATTR = /(?<![\w-])style\s*=\s*(["'])([^"']*)\1/i
+const OWN_PAINT_DECL = /^\s*(?:fill|stroke)\s*:/i
+
+// A stroke is only re-painted when the element already draws one — handing a
+// stroke color to a shape that has none turns SVG's 1px default on and outlines
+// a shape that was never outlined.
+function forcePaint(tag, hex) {
+  const decl = `fill:${hex}${/(?<![\w-])stroke\s*[=:]/i.test(tag) ? `;stroke:${hex}` : ''}`
+  const existing = STYLE_ATTR.exec(tag)
+  if (existing) {
+    const kept = existing[2]
+      .split(';')
+      .filter((d) => d.trim() && !OWN_PAINT_DECL.test(d))
+      .join(';')
+    return tag.replace(STYLE_ATTR, `style="${kept ? `${kept};` : ''}${decl}"`)
+  }
+  const [, body, close] = /^(.*?)(\s*\/?)>$/s.exec(tag) ?? []
+  return body === undefined ? tag : `${body} style="${decl}"${close}>`
+}
+
+// Repaint selected shapes of `markup`, choosing each one's new color by its
+// part index. `colorFor(index)` returns a hex or null to leave that shape
+// alone. The one walk both this file's knockout pins and logoRecolor.js's
+// full-color repaints go through, so "shape 3" can't come to mean two
+// different shapes in the two editors that offer it.
+function paintParts(markup, colorFor) {
+  let out = ''
+  let last = 0
+  let index = 0
+  for (const match of markup.matchAll(DRAWABLE_TAG)) {
+    const color = colorFor(index)
+    index += 1
+    if (!color) continue
+    out += markup.slice(last, match.index) + forcePaint(match[0], color)
+    last = match.index + match[0].length
+  }
+  return out + markup.slice(last)
+}
+
+// `pins` is `{ [partIndex]: 'ink' | 'knockout' }`. Anything not pinned keeps
+// whatever the automatic pass decided, so a pin set stays a short list of
+// corrections rather than a full transcription of the art.
+function applyPins(markup, pins) {
+  if (!pins) return markup
+  return paintParts(markup, (i) => {
+    const verdict = pins[i]
+    return verdict === 'ink' ? '#fff' : verdict === 'knockout' ? '#000' : null
+  })
+}
+
+// The same repaint with arbitrary colors, for logoRecolor.js — kept here
+// because the shape numbering and the inline-style-wins rule live here, and
+// a second implementation of either is a second thing to keep in step.
+export function forceFill(markup, fills) {
+  return paintParts(markup, (i) => fills[i] ?? fills[String(i)] ?? null)
+}
+
+// `.cls-1{fill:#12284b}` -> { 'cls-1': '#12284b' }. Illustrator puts a mark's
+// real colors here as often as in an attribute, and a shape whose only paint is
+// a class needs its color shown in the picker like any other.
+function classFills(svg) {
+  const out = {}
+  for (const [, css] of svg.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi)) {
+    for (const [, selectors, block] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const fill = /(?<![\w-])fill\s*:\s*([^;]+)/i.exec(block)?.[1]?.trim()
+      if (!fill) continue
+      for (const [, name] of selectors.matchAll(/\.([\w-]+)/g)) out[name] = fill
+    }
+  }
+  return out
+}
+
+const ATTR = (tag, name) =>
+  new RegExp(`(?<![\\w-])${name}\\s*=\\s*(["'])([^"']*)\\1`, 'i').exec(tag)?.[2]
+
+// The shapes a club's art is made of, in the order a pin indexes them:
+// `{ index, tag, fill, auto }`, where `fill` is the paint the art declares
+// (null when the shape inherits one) and `auto` is what the classifier decides
+// on its own. The lab renders this beside the picker so a shape can be judged
+// before it is pinned — and so "why did that end up white" has an answer.
+export function monoLogoParts(svg) {
+  const source = String(svg ?? '')
+  const byClass = classFills(source)
+  const parts = []
+  for (const match of bodyOf(source).matchAll(DRAWABLE_TAG)) {
+    const tag = match[0]
+    const inline = /(?<![\w-])fill\s*:\s*([^;"']+)/i.exec(ATTR(tag, 'style') ?? '')?.[1]?.trim()
+    const fill = inline ?? ATTR(tag, 'fill') ?? byClass[(ATTR(tag, 'class') ?? '').trim().split(/\s+/)[0]] ?? null
+    parts.push({
+      index: parts.length,
+      tag: /^<(\w+)/.exec(tag)?.[1] ?? '',
+      fill,
+      // A shape that declares no paint inherits the wrapper group's, which
+      // monoLogoSvg makes ink — so "inherits" is an ink verdict, not a missing
+      // one, and the picker must not show it as undecided.
+      auto: (fill === null ? null : classifyPaint(fill)) ?? 'ink',
+    })
+  }
+  return parts
+}
+
+// The same art, every drawable element stamped with the `data-mono-part` index
+// a pin uses. Inlined by the lab so clicking a shape on screen and pinning a
+// shape in the store are the same act — nothing maps one numbering onto
+// another.
+//
+// Stamping only — this does NOT make markup safe to inline, and must not be
+// asked to. It used to strip `<script>` and `on*` handlers with a pair of regex
+// replaces, which is the technique that cannot be made correct: `</script\t\n
+// foo>` is a closing tag no such pattern matches, and one pass can re-form what
+// it removes (`<scr<script>ipt>`). Callers that inline the result sanitize at
+// FETCH time with a real parser instead (src/lib/svgSanitize.js) and pass the
+// sanitized markup here — which also keeps this function's shape numbering
+// counting the same elements the editor's other calls see.
+export function monoLogoPickerSvg(svg) {
+  const source = String(svg ?? '')
+  if (!source.includes('<svg')) return null
+  let index = 0
+  return source.replace(DRAWABLE_TAG, (tag) => {
+    const [, body, close] = /^(.*?)(\s*\/?)>$/s.exec(tag) ?? []
+    if (body === undefined) return tag
+    return `${body} data-mono-part="${index++}"${close}>`
+  })
+}
+
+// A cheap signature of the art's SHAPES — how many, of what kind, with what
+// geometry. Saved next to a pin set purely so drift can be detected: a club
+// that rebrands gets art whose shapes no longer mean what the pins say, and
+// silently re-inking the wrong ones is worse than falling back to automatic.
+// Not a security hash — FNV-1a is used because it's five lines and stable.
+export function monoLogoFingerprint(svg) {
+  let hash = 0x811c9dc5
+  let count = 0
+  for (const match of bodyOf(String(svg ?? '')).matchAll(DRAWABLE_TAG)) {
+    count += 1
+    const tag = match[0]
+    const geometry = `${/^<(\w+)/.exec(tag)?.[1] ?? ''}|${(ATTR(tag, 'd') ?? ATTR(tag, 'points') ?? '').slice(0, 64)}`
+    for (let i = 0; i < geometry.length; i += 1) {
+      hash = Math.imul(hash ^ geometry.charCodeAt(i), 0x01000193) >>> 0
+    }
+  }
+  return `${count}:${hash.toString(16)}`
+}
+
 // Namespace declarations on the source's own `<svg>` root. These MUST carry
 // over to the rewritten root: an SVG served as its own file is parsed as
 // strict XML, so a body that uses `xlink:href` — which Illustrator emits for
@@ -180,6 +349,19 @@ function parseViewBox(svg) {
   return parts
 }
 
+// Everything inside the `<svg>` root, minus a decorative `<title>`. The one
+// definition of "the art" all four functions below index into — the part
+// numbering a pin uses is only stable because none of them trims differently.
+function bodyOf(svg) {
+  return svg
+    .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+    .replace(/<\/svg\s*>[\s\S]*$/i, '')
+    // Decorative art inside an aria-hidden <img> — a <title> here only risks a
+    // stray tooltip on hover.
+    .replace(/<title\b[\s\S]*?<\/title\s*>/gi, '')
+    .trim()
+}
+
 // The one-color knockout SVG for `svg`, or null when the art can't be re-inked
 // (no viewBox, an embedded raster, or a mark that is entirely paper — nothing
 // would be left to draw). A null tells the caller to fall back rather than
@@ -187,22 +369,26 @@ function parseViewBox(svg) {
 //
 // `maskId` is scoped per club by the generator so several of these can be
 // inlined into one document without their mask ids colliding.
-export function monoLogoSvg(svg, { maskId = 'ink' } = {}) {
+//
+// `pins` is the club's hand-picked `{ [partIndex]: 'ink' | 'knockout' }` (see
+// PER-SHAPE OVERRIDES above), applied AFTER the automatic pass so a pin is a
+// correction to it rather than a replacement for it. A pin to ink also counts
+// toward the empty-mask bail below, so art the automatic pass reads as entirely
+// paper still converts once someone points at the shape that isn't. The reverse
+// isn't guarded: pinning away the last ink shape leaves an empty mark, which is
+// what was asked for rather than a case to second-guess.
+export function monoLogoSvg(svg, { maskId = 'ink', pins = null } = {}) {
   const source = String(svg ?? '')
   if (!source.includes('<svg') || UNCONVERTIBLE.test(source)) return null
   const box = parseViewBox(source)
   if (!box) return null
 
-  const body = source
-    .replace(/^[\s\S]*?<svg[^>]*>/i, '')
-    .replace(/<\/svg\s*>[\s\S]*$/i, '')
-    // Decorative art inside an aria-hidden <img> — a <title> here only risks a
-    // stray tooltip on hover.
-    .replace(/<title\b[\s\S]*?<\/title\s*>/gi, '')
-    .trim()
+  const body = bodyOf(source)
   if (!body) return null
 
-  const { markup, ink } = toMaskSpace(body)
+  const auto = toMaskSpace(body)
+  const markup = applyPins(auto.markup, pins)
+  const ink = auto.ink + Object.values(pins ?? {}).filter((v) => v === 'ink').length
   // Nothing to draw: no shape states an ink color and none inherits one
   // either, so the mask would come out empty. Bail rather than write a file
   // that renders as a blank box.
