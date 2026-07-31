@@ -21,6 +21,12 @@ export function normalizeGame(game, sportId) {
     sportId,
     sportLabel: SPORT_LABEL[sportId] ?? '',
     gameDate: game.gameDate,
+    // The calendar day MLB assigns the game, distinct from `gameDate` (a full
+    // UTC timestamp that rolls to the next calendar day for a West Coast night
+    // game) — see defaultTreatmentFor's Friday-City-Connect guess in teams.js,
+    // the reason this needs to ride alongside gameDate rather than be derived
+    // from it at the call site.
+    officialDate: game.officialDate ?? (game.gameDate ?? '').slice(0, 10),
     // 1 except for the second game of a doubleheader (2) — disambiguates the
     // matchup slug, since both games share a date and team pair.
     gameNumber: game.gameNumber ?? 1,

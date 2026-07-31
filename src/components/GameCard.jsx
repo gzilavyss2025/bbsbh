@@ -95,7 +95,7 @@ export function GameCard({
             team={game.away}
             side="away"
             gamePk={game.gamePk}
-            gameDate={game.gameDate}
+            officialDate={game.officialDate}
             jerseysData={jerseysData}
             liveJerseys={liveJerseys}
           />
@@ -103,7 +103,7 @@ export function GameCard({
             team={game.home}
             side="home"
             gamePk={game.gamePk}
-            gameDate={game.gameDate}
+            officialDate={game.officialDate}
             jerseysData={jerseysData}
             liveJerseys={liveJerseys}
           />
@@ -265,7 +265,7 @@ function ReadyPill({ game }) {
 // below: every tile (Main, Alternate, City Connect alike) gets its curated
 // background + scale + optional recolored mark from teams.js, so a team's
 // mark always reads legibly against its own fill.
-function TeamMark({ team, side, gamePk, gameDate, jerseysData, liveJerseys = null }) {
+function TeamMark({ team, side, gamePk, officialDate, jerseysData, liveJerseys = null }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
   // it's actually wearing this game. Preferred order: (1) `liveJerseys`, a
   // same-day batched live fetch (GameSelect.jsx), classified via the exact
@@ -282,7 +282,7 @@ function TeamMark({ team, side, gamePk, gameDate, jerseysData, liveJerseys = nul
   const treatment =
     liveTreatmentFor(liveJerseys, gamePk, team.id, team.teamName) ??
     jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
-    defaultTreatmentFor(team.id, side, (gameDate ?? '').slice(0, 10))
+    defaultTreatmentFor(team.id, side, officialDate)
   return (
     <TeamTreatmentMark
       teamId={team.id}
