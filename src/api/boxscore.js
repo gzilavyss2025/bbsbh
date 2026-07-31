@@ -15,7 +15,8 @@
 // club's boxscoreName, drop a trailing disambiguating initial, keep real
 // suffixes). Lives in select.js so this module and the spoiler-free selectors
 // can't drift apart.
-import { lastName as shortName } from './select.js'
+import { lastName as shortName, halfIndex } from './select.js'
+import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './playbyplay.js'
 
 // Context-neutral half of the three-stars blend (ADR-0013).
 import { contextNeutralPoints } from './performanceScore.js'
@@ -100,6 +101,69 @@ function battingRows(feed, side) {
 // Season AVG shown to the right of a batter's game line, mirroring MLB.com.
 function feedAvg(boxPlayer) {
   return boxPlayer.seasonStats?.batting?.avg ?? '.---'
+}
+
+// TRUE pre-game AVG — the scorebug's fallback for a batter with no revealed
+// plate appearance yet THIS game (see src/components/Scorebug.jsx). Unlike
+// feedAvg above, this must not read `seasonStats.batting.avg` directly:
+// `seasonStats` updates DURING the game, so once he's actually batted it
+// already bakes tonight's still-sealed result into what reads as "season"
+// AVG. Both his season line and his own line for THIS game sit on the same
+// boxscore player record (`seasonStats.batting` / `stats.batting`), so
+// subtracting one from the other recovers his AB/H entering tonight, spoiler-
+// safe regardless of what's been revealed. '.---' before he has any at-bat on
+// record at all (a 0-for-0 pre-game floor, same fallback feedAvg uses).
+export function preGameAvg(boxPlayer) {
+  const season = boxPlayer?.seasonStats?.batting ?? {}
+  const today = boxPlayer?.stats?.batting ?? {}
+  const ab = (season.atBats ?? 0) - (today.atBats ?? 0)
+  const h = (season.hits ?? 0) - (today.hits ?? 0)
+  if (ab <= 0) return '.---'
+  return (h / ab).toFixed(3).replace(/^0\./, '.')
+}
+
+const NOT_AN_AT_BAT = new Set([
+  'walk',
+  'intent_walk',
+  'hit_by_pitch',
+  'sac_bunt',
+  'sac_fly',
+  'sac_fly_double_play',
+  'sac_bunt_double_play',
+  'catcher_interf',
+])
+const HIT_EVENT_TYPES = new Set(['single', 'double', 'triple', 'home_run'])
+
+// The scorebug's "H-AB this game" line, reveal-gated — see
+// src/components/Scorebug.jsx. `feed.liveData.boxscore...stats.batting`
+// (what the box score itself renders) is the TRUE, always-live line, so
+// reading it directly for the scorebug — which is visible well before the
+// box score's own SealBox — would show a batter's actual, unrevealed at-bats
+// (e.g. "0-5" before his first revealed plate appearance). Instead walk
+// `allPlays` ourselves, same whole-game accumulation shape as
+// computePitcherLines, and only count a play whose half is at or before
+// `revealedThrough` — mirrors that function's `i > revealedThrough` skip.
+// (A batter's OWN still-in-progress plate appearance within the half
+// currently being stepped is intentionally NOT included here — it isn't a
+// completed at-bat yet, and the half itself only advances `revealedThrough`
+// on full commit, so this stays conservative rather than reaching ahead.)
+export function computeBatterLine(feed, batterId, revealedThrough) {
+  const plays = feed?.liveData?.plays?.allPlays ?? []
+  let atBats = 0
+  let hits = 0
+  for (const p of plays) {
+    const inn = p?.about?.inning
+    const half = p?.about?.halfInning
+    if (!inn || !half) continue
+    if (halfIndex(inn, half) > revealedThrough) continue
+    if (p?.matchup?.batter?.id !== batterId) continue
+    const ev = p.result?.eventType
+    if (p.result?.type !== 'atBat' || NON_PA_EVENT_TYPES.has(ev) || ev === GAME_ADVISORY_EVENT_TYPE) continue
+    if (NOT_AN_AT_BAT.has(ev)) continue
+    atBats += 1
+    if (HIT_EVENT_TYPES.has(ev)) hits += 1
+  }
+  return { hits, atBats }
 }
 
 function battingTotals(feed, side) {

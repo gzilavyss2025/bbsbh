@@ -31,6 +31,7 @@ export function RollingLine({
   curIdx,
   onSelect,
   disabled = false,
+  sectionRef,
 }) {
   const firstCol = Math.max(1, unlocked - regulation + 1)
   const cols = []
@@ -77,7 +78,7 @@ export function RollingLine({
   }
 
   return (
-    <section className="rolling" aria-label="Running line">
+    <section className="rolling" aria-label="Running line" ref={sectionRef}>
       <div className="rolling__scroll">
         <table className="rolling__grid">
           <thead>

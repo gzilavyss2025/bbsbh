@@ -16,11 +16,13 @@ import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
 import { buildMarginNotes } from '../api/pitcher-callouts.js'
 import { safeToShowEntering } from '../api/enteringHalf.js'
+import { revealRunsThrough } from '../api/linescore.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
 import { RollingLine } from '../components/RollingLine.jsx'
 import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
+import { Scorebug } from '../components/Scorebug.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PitchersSection } from '../components/PitchersSection.jsx'
@@ -45,6 +47,30 @@ const RevealCloudSync = isClerkEnabled
 // calls onReveal directly, not via `?.()` — the same reason InningPage.jsx keeps
 // its own `noop` for the page-turn preview.
 const noopReveal = () => {}
+
+// Value-equality check for the scorebug's live snapshot (see `liveState`
+// below) — `entries` is rebuilt fresh every render in PlayByPlay.jsx, so a
+// composite object arrives with a new identity every render even when
+// nothing in it actually changed; comparing every leaf field is what lets
+// the setState call that reports it become a true no-op on an unchanged
+// snapshot instead of triggering another render (and another report) forever.
+function sameLiveState(a, b) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return (
+    a.inning === b.inning &&
+    a.half === b.half &&
+    a.outs === b.outs &&
+    a.bases?.first === b.bases?.first &&
+    a.bases?.second === b.bases?.second &&
+    a.bases?.third === b.bases?.third &&
+    a.batter?.order === b.batter?.order &&
+    a.batter?.last === b.batter?.last &&
+    a.batter?.line === b.batter?.line &&
+    a.pitcher?.last === b.pitcher?.last &&
+    a.pitcher?.pitches === b.pitcher?.pitches
+  )
+}
 
 // Half-inning-by-half-inning viewer: each page is one half (top of the 1st,
 // then the bottom of the 1st, …), a single SealBox whose one tap reveals that
@@ -222,6 +248,44 @@ export function InningViewer({
     setRunsInProgress(null)
   }
 
+  // The persistent scorebug HUD's live snapshot (src/components/Scorebug.jsx):
+  // batter/pitcher/bases/outs for the half on screen, reported up from
+  // HalfInning (see its own onLiveState doc — the entering-fallback baseline
+  // before any of a half is revealed, PlayByPlay's own cap-respecting
+  // snapshot once stepping starts). Tagged with the half-index it belongs to
+  // (`forIdx`), same `forIdx`-tagged-and-trusted-only-on-match pattern
+  // `stepInfo` above already uses for an identical race: `entries` is
+  // rebuilt fresh every render in PlayByPlay.jsx (no memoization), so a
+  // composite snapshot object arrives with a new identity every render even
+  // when its content hasn't changed — `sameLiveState` below is the value-
+  // equality guard that keeps that from turning into a re-render loop
+  // (setState only actually replaces state when the CONTENT differs, not
+  // just the reference). A page-turn transition or half navigation lands on
+  // a fresh idx before that half's own effect has fired even once — reading
+  // `liveState` through `forIdx === curIdx` below naturally falls back to
+  // "nothing to show yet" rather than rendering the half just left behind.
+  const [liveState, setLiveState] = useState(null)
+  const curLiveState = liveState?.forIdx === curIdx ? liveState.data : null
+
+  // Mobile placement (< 740px, WIDE_QUERY): the scorebug is fixed top-right
+  // but stays invisible until the real linescore (RollingLine) has scrolled
+  // out of view — an IntersectionObserver on RollingLine's own <section>
+  // (forwarded via `sectionRef`, no wrapping div — see RollingLine.jsx).
+  // Desktop (>= 740px) ignores this entirely and stays always-visible via
+  // CSS (index.css's `.gamehud-dock` media query), so the observer simply
+  // runs harmlessly there too rather than branching on width in JS.
+  const rollingRef = useRef(null)
+  const [pastLine, setPastLine] = useState(false)
+  useEffect(() => {
+    const el = rollingRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const obs = new IntersectionObserver(([entry]) => setPastLine(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
   // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
   // turning over for real — the game moving forward while you're actually
   // watching it — pulls the VIEW along with it. Catching yourself up by
@@ -292,6 +356,11 @@ export function InningViewer({
         atBatCountFor={atBatCountFor}
         onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
         onRunsSoFar={(runs) => setRunsInProgress({ idx, runs })}
+        onLiveState={(data) =>
+          setLiveState((prev) =>
+            prev && prev.forIdx === idx && sameLiveState(prev.data, data) ? prev : { forIdx: idx, data: data ?? null },
+          )
+        }
         getDerived={getDerived}
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
@@ -595,6 +664,7 @@ export function InningViewer({
           curIdx={curIdx}
           onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
           disabled={turning}
+          sectionRef={rollingRef}
         />
 
         {/* The half's play-by-play (paired with its strike zone on the wide
@@ -680,6 +750,47 @@ export function InningViewer({
           />
         </div>
       </div>
+
+      {/* Persistent scorebug HUD (src/components/Scorebug.jsx) — desktop
+          bottom-right always, mobile top-right once RollingLine has scrolled
+          out of view (see `pastLine`/index.css's `.gamehud-dock`). Hidden
+          entirely pre-game (`started`) or when the half on screen has
+          nothing reveal-safe to show yet (`curLiveState` null — either not
+          reached, or a half jumped to via RollingLine's navigator ahead of
+          reveal progress; see HalfInning's own `hasContent` gate, the same
+          `revealed || isNextToReveal` check every other above-the-seal card
+          on this half already uses). Team marks are jersey-reactive off the
+          same `winProbTreatment` this page already threads to WinProbChart —
+          no new fetch. Runs are the score AS OF the user's own reveal
+          progress (committed halves via `revealRunsThrough`, plus the
+          currently-stepped half's own running count from `runsInProgress`),
+          the same figure RollingLine's own totals column already shows. */}
+      {started && curLiveState && (
+        <div className={`gamehud-dock ${pastLine ? 'gamehud-dock--show' : ''}`}>
+          <Scorebug
+            awayName={meta.away.clubName}
+            homeName={meta.home.clubName}
+            awayTeamId={meta.away.id}
+            homeTeamId={meta.home.id}
+            awayTreatment={winProbTreatment?.away}
+            homeTreatment={winProbTreatment?.home}
+            awayRuns={
+              revealRunsThrough(feed, renderUnlocked, renderRevealedThrough, 'away') +
+              (runsInProgress && runsInProgress.idx % 2 === 0 ? runsInProgress.runs : 0)
+            }
+            homeRuns={
+              revealRunsThrough(feed, renderUnlocked, renderRevealedThrough, 'home') +
+              (runsInProgress && runsInProgress.idx % 2 === 1 ? runsInProgress.runs : 0)
+            }
+            inning={curLiveState.inning}
+            half={curLiveState.half}
+            batter={curLiveState.batter}
+            pitcher={curLiveState.pitcher}
+            bases={curLiveState.bases}
+            outs={curLiveState.outs}
+          />
+        </div>
+      )}
 
       {/* Floating bar — the same fixed blue bar the lineup pages page forward
           with, and the same destination-named + trailing-› convention their

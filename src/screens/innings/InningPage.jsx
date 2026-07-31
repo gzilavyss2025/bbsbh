@@ -43,6 +43,7 @@ export function InningPage({
   atBatCountFor,
   onStepInfo,
   onRunsSoFar,
+  onLiveState,
   getDerived,
   runExpectancy,
   winProbPoints,
@@ -90,6 +91,7 @@ export function InningPage({
           revealedAtBatCount={atBatCountFor(inning, half)}
           onStepInfo={presentationOnly ? undefined : onStepInfo}
           onRunsSoFar={presentationOnly ? undefined : onRunsSoFar}
+          onLiveState={presentationOnly ? undefined : onLiveState}
         />
       </div>
 

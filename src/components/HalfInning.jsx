@@ -1,6 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../api/select.js'
 import { computePitcherLines } from '../api/pitchers.js'
+import { battingSlot, pitchingChangePitcher } from '../api/playbyplay.js'
+import { selectDueUpNow } from '../api/dueup.js'
+import { preGameAvg, computeBatterLine } from '../api/boxscore.js'
 import { highlightsByPlayId } from '../api/highlights.js'
 import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
@@ -40,6 +43,7 @@ export function HalfInning({
   revealedAtBatCount,
   onStepInfo,
   onRunsSoFar,
+  onLiveState,
 }) {
   // At-bat stepping (ADR-0016): a half being stepped through one plate
   // appearance at a time (the floating bar's "Next at-bat" button) has
@@ -101,6 +105,99 @@ export function HalfInning({
     : null
   const entering =
     enteringPitches != null ? { pitches: enteringPitches, halfLabel: `the start of the ${ordinal(inning)}` } : null
+
+  // The persistent scorebug HUD (src/components/Scorebug.jsx): a batter/
+  // pitcher/bases/outs snapshot reported UP to InningViewer, which owns
+  // whether it's actually mounted. `hasContent` is the SAME `revealed ||
+  // isNextToReveal` gate every other above-the-seal card on this half already
+  // uses (the Now Pitching card, the pre-pitch staging list) — a half the
+  // user has merely jumped past via RollingLine's navigator, without
+  // revealing it or its predecessor, reports nothing at all rather than an
+  // "entering" snapshot that would misrepresent a half that isn't actually
+  // current.
+  //
+  // `composeLive(live)` folds PlayByPlay's own cap-respecting snapshot (bases/
+  // outs/pitches-since-the-last-mid-half-change/current batter id) together
+  // with this half's already-computed entering baseline (nowPitching,
+  // enteringPitches) and, when nothing has been revealed in the half yet
+  // (`live` null), the spoiler-safe due-up batter (selectDueUpNow — same tier
+  // as nowPitching, safe before any of the half is revealed). A mid-half
+  // pitching change resets the pitch count to his own tally since entering
+  // (deliberately not carrying forward an earlier stint's count — see
+  // deriveLiveState's own doc).
+  const hasContent = revealed || isNextToReveal
+  const battingLineFor = (id) => {
+    const box = feed?.liveData?.boxscore?.teams?.[battingSide]?.players?.[`ID${id}`]
+    if (!box) return null
+    // Reveal-gated, NOT box.stats.batting (the always-live true line — see
+    // computeBatterLine's doc for why reading that directly here would show
+    // a batter's actual current-game at-bats before the user has revealed
+    // any of them, e.g. "0-5" before his first plate appearance of the night).
+    const { hits, atBats } = computeBatterLine(feed, id, revealedThrough)
+    if (atBats > 0 || hits > 0) return `${hits}-${atBats}`
+    return preGameAvg(box)
+  }
+  const composeLive = (live) => {
+    const bases = live?.bases ?? { first: false, second: false, third: false }
+    const outs = live?.outs ?? 0
+    let batter = null
+    // Once the last visible at-bat has actually FINISHED (batterDone — false
+    // only for a mid-count stoppage, where the same guy is still up) and the
+    // half isn't over, the "current" batter is whoever's next in the order,
+    // not the one who just finished (e.g. showing the batter who just
+    // doubled forever instead of advancing to the next slot).
+    if (live?.batter && live.batterDone && outs < 3) {
+      const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
+      const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
+      const upcoming =
+        nextSlot != null
+          ? selectDueUpNow(feed, inning, half, revealedThrough, 9)?.batters?.find((b) => b.slot === nextSlot)
+          : null
+      if (upcoming) batter = { order: upcoming.slot, last: upcoming.last, line: battingLineFor(upcoming.id) }
+    }
+    if (!batter && live?.batter) {
+      const slot = battingSlot(feed, battingSide, live.batter.id)
+      batter = { order: slot ?? '', last: live.batter.last, line: battingLineFor(live.batter.id) }
+    } else if (!batter) {
+      const due = selectDueUpNow(feed, inning, half, revealedThrough, 1)?.batters?.[0]
+      if (due) batter = { order: due.slot, last: due.last, line: battingLineFor(due.id) }
+    }
+    let pitcher = null
+    if (live?.midHalfPitcherId != null) {
+      const p = pitchingChangePitcher(feed, live.midHalfPitcherId)
+      if (p) pitcher = { last: p.name.split(',')[0], pitches: live.pitchesSoFar ?? 0 }
+    } else if (nowPitching) {
+      pitcher = { last: nowPitching.name.split(',')[0], pitches: (enteringPitches ?? 0) + (live?.pitchesSoFar ?? 0) }
+    }
+    // The half is over (3rd out) but the user hasn't navigated to the next
+    // one yet — this half's batter/pitcher/bases/outs no longer describe
+    // anything current, and the NEXT half's don't exist yet either. Rather
+    // than freeze on the half that just ended, blank the batter/pitcher and
+    // bases/outs and point the inning/half indicator at what's coming next.
+    if (outs >= 3) {
+      return {
+        bases: { first: false, second: false, third: false },
+        outs: 0,
+        batter: null,
+        pitcher: null,
+        inning: half === 'top' ? inning : inning + 1,
+        half: half === 'top' ? 'bottom' : 'top',
+      }
+    }
+    return { bases, outs, batter, pitcher, inning, half }
+  }
+
+  // The entering-state fallback: fires once (and again on any dep change)
+  // for as long as PlayByPlay hasn't mounted yet (`!startedRevealing`).
+  // The moment stepping starts, PlayByPlay mounts inside the SealBox below
+  // and its OWN onLiveState effect takes over reporting (child effects run
+  // before a parent's in the same commit, so there's no stale overwrite the
+  // render stepping actually begins).
+  useEffect(() => {
+    if (startedRevealing) return
+    onLiveState?.(hasContent ? composeLive(null) : null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startedRevealing, hasContent, feed, inning, half, revealedThrough, nowPitching, enteringPitches, battingSide])
 
   // The lineups + defense as they stand ENTERING this half — the pre-scoring
   // reference (see EnteringReference). On a phone it's positioned by reveal
@@ -260,6 +357,7 @@ export function HalfInning({
                 onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => onReveal(inning, half)}
+                onLiveState={(live) => onLiveState?.(composeLive(live))}
               />
             )
           }}

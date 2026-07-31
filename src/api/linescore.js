@@ -30,3 +30,23 @@ export function revealTotals(feed, side) {
     leftOnBase: t.leftOnBase ?? 0,
   }
 }
+
+// Runs THROUGH the reveal mark for one side — the "score as of your own
+// reveal progress" figure RollingLine's own running-line total already shows
+// (its per-side `totals()`), exposed here so another reveal-gated surface
+// (the scorebug) can read the same number without re-deriving it a second
+// way inline. Deliberately NOT `revealTotals` above, which is the FULL-GAME
+// final and would spoil a game the user hasn't finished revealing — this
+// sums only the innings whose BATTING half (the side's own half-type: top
+// for away, bottom for home) is at or below `revealedThrough`, same gate
+// RollingLine's `r`/`h` totals use.
+export function revealRunsThrough(feed, unlocked, revealedThrough, side) {
+  const battingHalf = side === 'away' ? 'top' : 'bottom'
+  let r = 0
+  for (let n = 1; n <= unlocked; n++) {
+    const idx = (n - 1) * 2 + (battingHalf === 'top' ? 0 : 1)
+    if (idx > revealedThrough) continue
+    r += revealInning(feed, n, side)?.runs ?? 0
+  }
+  return r
+}

@@ -1710,3 +1710,75 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
 
   return entries
 }
+
+// Cap-respecting live-state snapshot for the persistent scorebug HUD: base
+// occupancy, outs, how many pitches the pitcher CURRENTLY of record has
+// thrown, and which batter's card is the most recently visible one — folded
+// over the SAME cap-clamped `entries` array PlayByPlay.jsx already builds
+// (its own `visibleEntries`, i.e. `entries.slice(0, cap)` when stepping,
+// `entries` whole when a half is fully committed and `cap` is passed as
+// `entries.length`), never re-walking `feed.liveData.plays` a third time.
+//
+// Every field here only ever reflects entries strictly before `cap` — that's
+// the whole reason a caller can report this at ANY reveal state (a half being
+// stepped through one at-bat at a time, or fully committed at once) without
+// opening a second spoiler boundary of its own: it's exactly as safe as
+// PlayByPlay's own render, because it reads the same slice.
+//
+// Base occupancy: an `atbat`/`placed` entry's own `reached`/`scored`/
+// `outNumber` fields are already the runner's FINAL position as of `cap` (see
+// computeHalfInningFeed's `finalizeTrip` — every later play's effect on an
+// EARLIER runner's card, an advance or an out on the bases, is folded onto
+// that runner's own origin card, gated by the same `visible` check that
+// produces `entries` in the first place). So a runner is currently ON a base
+// exactly when his own card says he reached it, was never put out, and never
+// scored — no second walk of `runners[]` needed, and no risk of double-
+// counting: the feed enforces at most one runner per base, so at most one
+// visible card ever claims a given base.
+//
+// Pitches: reset to 0 at the last visible `pitching_substitution` note (a
+// mid-half change), so `pitchesSoFar` always means "by the pitcher currently
+// on the mound, within this half" — a caller who wants his FULL mound tally
+// adds `enteringPitches` (the half he entered with) only when there was NO
+// mid-half change (`midHalfPitcherId` is null); a reliever who just entered
+// starts counting from 0 in this half, a deliberate simplification (his own
+// carried-over game total from an earlier stint isn't tracked here).
+//
+// Current batter: the batter/runner named on the LAST visible `atbat`/
+// `placed` entry, plus `batterDone` — whether THAT entry's plate appearance
+// actually finished (false only for an `interrupted` entry — a stoppage
+// mid-count, where the same batter is still up). This is deliberately NOT
+// "peek at the next play's `matchup.batter`" — the same "never name a
+// substitute ahead of his own notice card" discipline HalfInning.jsx
+// documents for pitchers — it only reports the LAST resolved card's own
+// identity. It's the caller's job (HalfInning.jsx's composeLive, which has
+// the lineup/rotation data this module doesn't) to advance past a `batter`
+// whose `batterDone` is true to whoever's actually due up next.
+export function deriveLiveState(entries, cap) {
+  const visible = cap == null ? entries : entries.slice(0, Math.max(0, cap))
+  const bases = { first: false, second: false, third: false }
+  const BASE_KEY = { 1: 'first', 2: 'second', 3: 'third' }
+  let outs = 0
+  let pitchesSoFar = 0
+  let midHalfPitcherId = null
+  let batter = null
+  let batterDone = false
+  for (const e of visible) {
+    if (e.kind === 'event' && e.eventType === 'pitching_substitution') {
+      midHalfPitcherId = e.playerId ?? null
+      pitchesSoFar = 0
+      continue
+    }
+    if (e.kind !== 'atbat' && e.kind !== 'placed') continue
+    if (Array.isArray(e.pitches)) pitchesSoFar += e.pitches.length
+    if (e.outNumber != null && e.outNumber > outs) outs = e.outNumber
+    batter =
+      e.kind === 'placed'
+        ? { id: e.runnerId, last: e.runner?.last ?? '', first: e.runner?.first ?? '' }
+        : { id: e.batterId, last: e.batter?.last ?? '', first: e.batter?.first ?? '' }
+    batterDone = !e.interrupted
+    const key = BASE_KEY[e.reached]
+    if (key && e.outNumber == null && !e.scored) bases[key] = true
+  }
+  return { bases, outs, pitchesSoFar, midHalfPitcherId, batter, batterDone }
+}
