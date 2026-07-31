@@ -44,5 +44,16 @@
     "assignments": {
       "alternate-2": "atl1"
     }
+  },
+  "556": {
+    "marks": [
+      {
+        "slug": "primary1",
+        "name": "PRIMARY1"
+      }
+    ],
+    "assignments": {
+      "milb-home": "primary1"
+    }
   }
 }

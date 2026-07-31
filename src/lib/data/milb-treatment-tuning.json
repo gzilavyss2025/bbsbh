@@ -127,7 +127,29 @@
           "bar": "#002B5C",
           "accent": "#D31245",
           "onBar": "#F8F8F5"
-        }
+        },
+        "wpaLayout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D31245"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 39,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#002B5C"
       }
     }
   },
