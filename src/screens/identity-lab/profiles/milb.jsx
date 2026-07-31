@@ -8,6 +8,7 @@ import { TeamLogo } from '../../../components/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
+import { clubMarkSources } from '../../../lib/markSources.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   MILB_COLOR_LAB_LEVELS,
@@ -17,7 +18,7 @@ import {
   MILB_WPA_BAND_COLOR_OVERRIDES,
   MILB_WPA_WORDMARK_OVERRIDES,
   milbColorPair,
-  milbHasLogoArt,
+  milbHasArt,
   milbHasResearchedColor,
   milbLogoPosition,
   milbWpaLogoLayout,
@@ -220,7 +221,7 @@ function shelfMarks(teamId) {
     key: v.key,
     treatment: v.key,
     label: v.label,
-    url: milbHasLogoArt(teamId, v.key) ? teamLogoUrl(teamId, `milb-${v.key}`) : teamLogoUrl(teamId, 'base'),
+    url: milbHasArt(teamId, v.key) ? teamLogoUrl(teamId, `milb-${v.key}`) : teamLogoUrl(teamId, 'base'),
   }))
   // Marks recolored in the Logo art editor — same as the MLB shelf, `wornBy`
   // included: without it, a mark you've actually assigned to Home or Away
@@ -246,7 +247,7 @@ function markVisual(teamId, variant, drafts) {
   return {
     className: `colorlab__logobox colorlab__logobox--gloss${pos.pinstripe ? ' colorlab__logobox--pinstripe' : ''}`,
     style: logoBoxStyle(pos),
-    url: milbHasLogoArt(teamId, variant) ? teamLogoUrl(teamId, `milb-${variant}`) : teamLogoUrl(teamId, 'base'),
+    url: milbHasArt(teamId, variant) ? teamLogoUrl(teamId, `milb-${variant}`) : teamLogoUrl(teamId, 'base'),
   }
 }
 
@@ -290,7 +291,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
   const isHeaderOwner = variant === headerUnit.slot
   const [primary, secondary] = milbColorPair(teamId)
   const [artVersion, setArtVersion] = useState(0)
-  const hasArt = artVersion > 0 || milbHasLogoArt(teamId, variant)
+  const hasArt = artVersion > 0 || milbHasArt(teamId, variant)
   const pos = milbLogoPosition(teamId, variant, drafts.pos)
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
@@ -329,6 +330,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         treatment: `milb-${variant}`,
         caveat: null,
         savedMarks: customMarksFor(teamId),
+        cdnMarks: clubMarkSources(teamId).filter((s) => s.kind === 'cdn'),
         assignedSlug: customMarkAssignment(teamId, `milb-${variant}`),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
@@ -499,8 +501,8 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
   rowBadge: (teamId) => {
     const gaps = []
     if (!milbHasResearchedColor(teamId)) gaps.push('no researched color')
-    const hasHomeArt = milbHasLogoArt(teamId, 'home')
-    const hasAwayArt = milbHasLogoArt(teamId, 'away')
+    const hasHomeArt = milbHasArt(teamId, 'home')
+    const hasAwayArt = milbHasArt(teamId, 'away')
     if (!hasHomeArt && !hasAwayArt) gaps.push('no logo art')
     else if (!hasHomeArt) gaps.push('no home art')
     else if (!hasAwayArt) gaps.push('no away art')

@@ -2,6 +2,7 @@ import { WPA_LOGO_DEFAULTS } from './wpaLogo.js'
 import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
 import { byTreatment } from './tuningStore.js'
 import { teamLogoUrl } from './teams.js'
+import { customMarkFor } from './customMarks.js'
 import {
   MILB_COLORS,
   MILB_RESEARCHED_PAIRS,
@@ -237,6 +238,21 @@ export function milbHasLogoArt(teamId, variant) {
   return MILB_ART_COVERAGE[side].has(teamId)
 }
 
+// Whether `teamId`'s `variant` side has ANY real art to show, rather than the
+// plain tinted CDN base mark — either the curated procured file above, or a
+// mark recolored in the Logo art editor and ASSIGNED to this side
+// (LogoDropZone's assign select, customMarks.js). An affiliate with no
+// procured art at all still gets a real tile the moment one of its saved
+// marks is assigned — recoloring the CDN mark is often the only way a thin-
+// coverage MiLB club gets a second look, so a bare assignment can't be
+// invisible to the one check that decides whether to bother trying
+// teamLogoUrl's `milb-home`/`milb-away` variant (which itself resolves the
+// assigned mark, teams.js) instead of falling back to `base`.
+export function milbHasArt(teamId, variant) {
+  const side = variant === 'home' ? 'home' : 'away'
+  return milbHasLogoArt(teamId, side) || Boolean(customMarkFor(teamId, `milb-${side}`))
+}
+
 // The real game-card/masthead tile's shape (see teams.js's treatmentTile,
 // which TeamTreatmentMark reads for every MLB club) computed from this
 // module's Home/Away tables instead — the live wiring this lab was staged
@@ -249,7 +265,7 @@ export function milbTreatmentTile(teamId, variant) {
   const side = variant === 'home' ? 'home' : 'away'
   const pos = milbLogoPosition(teamId, side)
   return {
-    logoVariant: milbHasLogoArt(teamId, side) ? `milb-${side}` : 'base',
+    logoVariant: milbHasArt(teamId, side) ? `milb-${side}` : 'base',
     tint: pos.pinstripe ? null : pos.bg,
     offsetX: pos.offsetX,
     offsetY: pos.offsetY,

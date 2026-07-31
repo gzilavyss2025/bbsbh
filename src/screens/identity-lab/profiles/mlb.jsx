@@ -15,6 +15,7 @@ import {
 import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
+import { clubMarkSources } from '../../../lib/markSources.js'
 import {
   ALL_MLB_TEAM_IDS,
   teamFullName,
@@ -938,6 +939,7 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
         caveat: uploadCaveat(teamId, treatment, logoUploadTarget(teamId, treatment)),
         copyTargets: treatmentsForTeam(teamId).filter((t) => t.key !== treatment),
         savedMarks: customMarksFor(teamId),
+        cdnMarks: clubMarkSources(teamId).filter((s) => s.kind === 'cdn'),
         assignedSlug: customMarkAssignment(teamId, treatment),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}

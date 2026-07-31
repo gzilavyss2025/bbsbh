@@ -301,13 +301,23 @@ const ALT4_USES_BASE_LOGO = new Set([
 // dropping a new file into public/team-logos/{treatment}/ — a missing file
 // 404s and callers (TeamLogo's fallback chain, Team Identity Lab's
 // TreatmentLogo) degrade gracefully, so there's no manifest to hand-maintain.
+// customMarkFor's result, resolved to an actual URL — a bare `.url` for a
+// custom (recolored-in-the-lab) mark, or a `teamLogoUrl` lookup for a `cdn:`
+// assignment (LogoDropZone's "Replace art" select can point a treatment at
+// the CDN's own base/primary/cap/wordmark instead of a saved recolor;
+// customMarks.js can't resolve that variant itself without importing this
+// file right back, so it hands the variant name up instead).
+function resolveAssignedMark(teamId, assigned) {
+  return assigned.cdnVariant ? teamLogoUrl(teamId, assigned.cdnVariant) : assigned.url
+}
+
 // Never called for 'main' — that treatment renders the CDN base logo instead.
 export function localLogoUrl(teamId, treatment) {
   // A mark recolored in the lab and ASSIGNED to this treatment wins, because
   // an assignment is an override that leaves the procured file untouched
   // (src/lib/customMarks.js) — clearing it brings the art below straight back.
   const assigned = customMarkFor(teamId, treatment)
-  if (assigned) return assigned.url
+  if (assigned) return resolveAssignedMark(teamId, assigned)
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null
   const ext = ALT_LOGO_SVG.has(`${teamId}:${treatment}`) ? 'svg' : 'png'
@@ -334,8 +344,15 @@ export function teamLogoUrl(teamId, variant = 'base') {
   // tile (e.g. a navy-outlined mark on a navy fill).
   if (variant === 'main-recolor') return mainOverrideLogoUrl(teamId)
   // MiLB's own two variations (milbColors.js's milbTreatmentTile), keyed by
-  // team id rather than abbreviation — see logoArt.js's MILB_LOGO_DIRS.
-  if (variant === 'milb-home' || variant === 'milb-away') return `/team-logos/${variant}/${teamId}.png`
+  // team id rather than abbreviation — see logoArt.js's MILB_LOGO_DIRS. Same
+  // customMarkFor check localLogoUrl does above: a mark recolored in the lab
+  // and assigned to this side wins, since the assignment is an override that
+  // leaves the procured file untouched (src/lib/customMarks.js).
+  if (variant === 'milb-home' || variant === 'milb-away') {
+    const assigned = customMarkFor(teamId, variant)
+    if (assigned) return resolveAssignedMark(teamId, assigned)
+    return `/team-logos/${variant}/${teamId}.png`
+  }
   if (variant === 'mono') return `${MONO_LOGO_BASE}/${teamId}.svg`
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)
@@ -613,7 +630,7 @@ export function mainOverrideLogoUrl(teamId) {
   // through it — a Main assignment beats even the MAIN_USES_BASE_LOGO
   // exceptions, since assigning one is an explicit act about this club.
   const assigned = customMarkFor(teamId, 'main')
-  if (assigned) return assigned.url
+  if (assigned) return resolveAssignedMark(teamId, assigned)
   if (MAIN_USES_BASE_LOGO.has(teamId)) return null
   const abbr = teamAbbr({ id: teamId })
   if (!abbr) return null
