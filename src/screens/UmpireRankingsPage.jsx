@@ -7,6 +7,7 @@ import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { HomePlateIcon } from '../components/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
@@ -75,7 +76,9 @@ export function UmpireRankingsPage() {
                     <span className="umprank__rank">{u.rank}</span>
                     <UmpireLink id={u.id}>{u.name}</UmpireLink>
                     {todayPlateIds.has(u.id) && (
-                      <span className="umprank__todaychip">Behind the plate today</span>
+                      <span className="umprank__todaychip" role="img" aria-label="Behind the plate today">
+                        <HomePlateIcon />
+                      </span>
                     )}
                   </td>
                   <td>
