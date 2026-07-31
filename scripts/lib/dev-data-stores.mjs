@@ -229,6 +229,34 @@ function isUniformNamesMap(parsed) {
   return null
 }
 
+// alt-colors.json/alt2-colors.json/alt3-colors.json/alt4-colors.json/
+// city-connect-colors.json: a non-Main treatment's tile-background swatches
+// (src/lib/teams.js's ALT_COLORS and friends, ADR-0029) — one small swatch
+// list per team, at most one of which is flagged `bg: true` (the tile fill),
+// plus the curation `note` that used to be that entry's trailing JS comment.
+function isColorSwatchStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, entry] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
+    if (entry.note !== undefined && typeof entry.note !== 'string') {
+      return `team ${teamId}'s note is not a string`
+    }
+    if (!Array.isArray(entry.swatches) || entry.swatches.length === 0) {
+      return `team ${teamId}'s swatches is not a non-empty list`
+    }
+    for (const swatch of entry.swatches) {
+      if (!isPlainObject(swatch) || hasPoisonKey(swatch)) return `team ${teamId} has a malformed swatch`
+      if (typeof swatch.label !== 'string' || !swatch.label) return `team ${teamId} has an unlabeled swatch`
+      if (!isColorish(swatch.hex)) return `team ${teamId}'s "${swatch.label}" swatch is not a color`
+      if (swatch.bg !== undefined && typeof swatch.bg !== 'boolean') {
+        return `team ${teamId}'s "${swatch.label}" swatch has a non-boolean bg flag`
+      }
+    }
+  }
+  return null
+}
+
 // route key -> { file, validate }. `file` is a repo-relative literal; nothing
 // from a request ever contributes to it.
 export const DEV_DATA_STORES = {
@@ -259,6 +287,26 @@ export const DEV_DATA_STORES = {
   'mono-ink': {
     file: 'src/lib/data/mono-ink.json',
     validate: isMonoInkStore,
+  },
+  'alt-colors': {
+    file: 'src/lib/data/alt-colors.json',
+    validate: isColorSwatchStore,
+  },
+  'alt2-colors': {
+    file: 'src/lib/data/alt2-colors.json',
+    validate: isColorSwatchStore,
+  },
+  'alt3-colors': {
+    file: 'src/lib/data/alt3-colors.json',
+    validate: isColorSwatchStore,
+  },
+  'alt4-colors': {
+    file: 'src/lib/data/alt4-colors.json',
+    validate: isColorSwatchStore,
+  },
+  'city-connect-colors': {
+    file: 'src/lib/data/city-connect-colors.json',
+    validate: isColorSwatchStore,
   },
 }
 

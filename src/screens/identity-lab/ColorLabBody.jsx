@@ -132,9 +132,7 @@ export function ColorLabBody({ profile }) {
   // the same files this module's resolvers read, so the bench re-renders off the
   // landed value and useAutoClearLandedDrafts then drops the now-redundant
   // drafts on Vite's hot reload. Only fields the stores actually own are
-  // written; a flat background hex for a non-Main MLB treatment still belongs
-  // to the colour tables (ALT_COLORS and friends), still JS literals, so its
-  // copy snippet remains the way to land it.
+  // written.
   async function handleSave() {
     setSaveStatus('saving')
     const payloads = profile.buildSaves(drafts, extras)

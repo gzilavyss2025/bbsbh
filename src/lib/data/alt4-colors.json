@@ -1,0 +1,52 @@
+{
+  "111": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Red Sox — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Grey jersey"
+  },
+  "119": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Dodgers — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Road Grey \"Los Angeles\" jersey"
+  },
+  "135": {
+    "swatches": [
+      {
+        "label": "Gold",
+        "hex": "#FFC425",
+        "bg": true
+      }
+    ],
+    "note": "Padres — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Brown jersey"
+  },
+  "140": {
+    "swatches": [
+      {
+        "label": "Navy",
+        "hex": "#003278",
+        "bg": true
+      }
+    ],
+    "note": "Rangers — same plain CDN mark as Main (ALT4_USES_BASE_LOGO above), Away Grey jersey"
+  },
+  "141": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Blue Jays"
+  }
+}

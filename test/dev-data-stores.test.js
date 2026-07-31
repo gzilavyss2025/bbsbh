@@ -286,3 +286,36 @@ test('a mono-ink entry rejects a prototype-poisoning key at either level', () =>
   assert.match(monoInk(JSON.parse('{"__proto__": {"parts": {}}}')), /expected an object keyed by team id/)
   assert.match(monoInk(JSON.parse('{"158": {"parts": {"__proto__": "ink"}}}')), /parts is not an object/)
 })
+
+// --------------------------------------------------------------------------
+// alt/alt2/alt3/alt4/city-connect-colors — a non-Main treatment's tile
+// background swatches (src/lib/teams.js's ALT_COLORS and friends, ADR-0029),
+// the JS-literal tables the Team Identity Lab used to hand off as a copy-paste
+// snippet because there was nowhere for a Save to write them. Any one of the
+// four validators is the same shape, so exercising one exercises all four.
+// --------------------------------------------------------------------------
+const altColors = DEV_DATA_STORES['alt2-colors'].validate
+
+test('a color-swatch entry pins a non-empty swatch list, at most one flagged bg', () => {
+  assert.equal(altColors({}), null)
+  assert.equal(
+    altColors({ 139: { note: 'Rays', swatches: [{ label: 'Background', hex: '#F8F8F5', bg: true }] } }),
+    null,
+  )
+  assert.equal(altColors({ 158: { swatches: [{ label: 'Primary', hex: '#12284B' }] } }), null) // bg is optional
+  assert.match(altColors({ 139: { swatches: [] } }), /not a non-empty list/)
+  assert.match(altColors({ 139: { swatches: 'nope' } }), /not a non-empty list/)
+  assert.match(altColors({ 139: { swatches: [{ hex: '#000' }] } }), /unlabeled swatch/)
+  assert.match(altColors({ 139: { swatches: [{ label: 'Background', hex: '' }] } }), /not a color/)
+  assert.match(altColors({ 139: { swatches: [{ label: 'Background', hex: '#000', bg: 'yes' }] } }), /non-boolean bg flag/)
+  assert.match(altColors({ 139: { note: 7, swatches: [] } }), /note is not a string/)
+  assert.match(altColors({ rays: { swatches: [] } }), /not a team id/)
+})
+
+test('a color-swatch store rejects a prototype-poisoning key at either level', () => {
+  assert.match(altColors(JSON.parse('{"__proto__": {"swatches": []}}')), /expected an object keyed by team id/)
+  assert.match(
+    altColors(JSON.parse('{"139": {"swatches": [{"__proto__": "x", "label": "Background", "hex": "#000"}]}}')),
+    /malformed swatch/,
+  )
+})

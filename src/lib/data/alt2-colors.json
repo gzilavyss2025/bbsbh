@@ -1,0 +1,328 @@
+{
+  "108": {
+    "swatches": [
+      {
+        "label": "Red",
+        "hex": "#BA0021",
+        "bg": true
+      }
+    ],
+    "note": "Angels — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Red jersey"
+  },
+  "109": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#A71930"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#000000"
+      },
+      {
+        "label": "Background",
+        "hex": "#A29E9F",
+        "bg": true
+      }
+    ],
+    "note": "Diamondbacks — procured mark (alternate-2/AZ.png), Away Grey jersey"
+  },
+  "110": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#FFFFFF",
+        "bg": true
+      }
+    ],
+    "note": "Orioles — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Home White jersey"
+  },
+  "111": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#307FE2",
+        "bg": true
+      },
+      {
+        "label": "Secondary",
+        "hex": "#FFD100"
+      }
+    ],
+    "note": "Red Sox — new procured mark (alternate-2/BOS.png), Alt 2 Yellow jersey"
+  },
+  "112": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#7698CE",
+        "bg": true
+      }
+    ],
+    "note": "Cubs"
+  },
+  "113": {
+    "swatches": [
+      {
+        "label": "Black",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Reds — same mark as Alternate (alternate-2/CIN.png, copied), Alt 2 Black \"CINCY\" jersey"
+  },
+  "114": {
+    "swatches": [
+      {
+        "label": "Red",
+        "hex": "#E31937",
+        "bg": true
+      }
+    ],
+    "note": "Guardians — same mark as Alternate (alternate-2/CLE.png, copied), Alt 1 Red jersey"
+  },
+  "115": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Rockies — full circular \"COLORADO ROCKIES\" badge (alternate-2/COL.png), Away Grey jersey"
+  },
+  "116": {
+    "swatches": [
+      {
+        "label": "Navy",
+        "hex": "#0C2340",
+        "bg": true
+      }
+    ],
+    "note": "Tigers — same recolored-white Old English \"D\" as Main (alternate-2/DET.svg, ALT_LOGO_SVG above), Alt 2 Navy jersey"
+  },
+  "117": {
+    "swatches": [
+      {
+        "label": "Navy",
+        "hex": "#002D62",
+        "bg": true
+      }
+    ],
+    "note": "Astros — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt Blue jersey"
+  },
+  "118": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Royals"
+  },
+  "119": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#005A9C",
+        "bg": true
+      },
+      {
+        "label": "White",
+        "hex": "#FFFDF6"
+      }
+    ],
+    "note": "Dodgers — same mark as Alternate (alternate-2/LAD.png, copied), Alt 2 All Blue jersey"
+  },
+  "120": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#BD032B",
+        "bg": true
+      }
+    ],
+    "note": "Nationals — outlined script \"W\" mark (alternate-2/WSH.png), Alt 1 Red \"W\" jersey"
+  },
+  "121": {
+    "swatches": [
+      {
+        "label": "Blue",
+        "hex": "#002D72",
+        "bg": true
+      }
+    ],
+    "note": "Mets — same mark as Alternate (alternate-2/NYM.png, copied), Alt 2 Blue Pullover jersey"
+  },
+  "133": {
+    "swatches": [
+      {
+        "label": "Grey",
+        "hex": "#9EA2A2",
+        "bg": true
+      }
+    ],
+    "note": "Athletics — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Road Grey jersey"
+  },
+  "134": {
+    "swatches": [
+      {
+        "label": "Black",
+        "hex": "#27251F",
+        "bg": true
+      }
+    ],
+    "note": "Pirates — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 2 Black \"Pittsburgh\" jersey"
+  },
+  "135": {
+    "swatches": [
+      {
+        "label": "Green",
+        "hex": "#4B5320",
+        "bg": true
+      }
+    ],
+    "note": "Padres — same mark as Alternate (alternate-2/SD.png, copied), Alt 2 Green Camouflage jersey"
+  },
+  "136": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#0C2C56",
+        "bg": true
+      }
+    ],
+    "note": "Mariners — the outlined-S mark, for their Away Navy jersey"
+  },
+  "137": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Giants — the mark moved off City Connect, for their Alt 2 Black \"Gigantes\" jersey"
+  },
+  "138": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#FCEDD6",
+        "bg": true
+      }
+    ],
+    "note": "Cardinals"
+  },
+  "139": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#F8F8F5",
+        "bg": true
+      }
+    ],
+    "note": "Rays — same mark as Alternate (alternate-2/TB.png, copied), Alt 2 White \"Devil Rays\" jersey"
+  },
+  "140": {
+    "swatches": [
+      {
+        "label": "Secondary",
+        "hex": "#C0111F",
+        "bg": true
+      },
+      {
+        "label": "Primary",
+        "hex": "#003278"
+      }
+    ],
+    "note": "Rangers"
+  },
+  "141": {
+    "swatches": [
+      {
+        "label": "Baby Blue",
+        "hex": "#84BEE4",
+        "bg": true
+      }
+    ],
+    "note": "Blue Jays — jay-head mark (alternate-2/TOR.png), Alt 2 Baby Blue jersey"
+  },
+  "142": {
+    "swatches": [
+      {
+        "label": "Navy",
+        "hex": "#002B5C",
+        "bg": true
+      }
+    ],
+    "note": "Twins — Alt 1 Cream \"Twin Cities\" jersey"
+  },
+  "143": {
+    "swatches": [
+      {
+        "label": "Maroon",
+        "hex": "#6f263d",
+        "bg": true
+      }
+    ],
+    "note": "Phillies — same mark as Alternate (alternate-2/PHI.png, copied), Alt 2 Baby Blue jersey"
+  },
+  "144": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#F5F0E1",
+        "bg": true
+      }
+    ],
+    "note": "Braves — procured mark (alternate-2/ATL.png), off-white for their Home White jersey"
+  },
+  "145": {
+    "swatches": [
+      {
+        "label": "Background",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "White Sox — same plain CDN mark as Main (ALT2_USES_BASE_LOGO above), Alt 1 Black \"Sox\" jersey"
+  },
+  "146": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#00A3E0"
+      },
+      {
+        "label": "Secondary",
+        "hex": "#EF3340"
+      },
+      {
+        "label": "Third",
+        "hex": "#41748D"
+      },
+      {
+        "label": "Background",
+        "hex": "#000000",
+        "bg": true
+      }
+    ],
+    "note": "Marlins"
+  },
+  "158": {
+    "swatches": [
+      {
+        "label": "Primary",
+        "hex": "#12284B",
+        "bg": true
+      },
+      {
+        "label": "Secondary",
+        "hex": "#FEC52E"
+      }
+    ],
+    "note": "Brewers — the Wisconsin-state \"M\" mark on its own Primary navy"
+  }
+}
