@@ -21,6 +21,7 @@ import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
 import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
 import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
@@ -30,6 +31,7 @@ import { GameScoreCard } from '../components/GameScoreCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -212,6 +214,22 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
     for (const o of selectOfficials(feed)) byRole[o.role] = o.id
     return byRole
   }, [feed])
+
+  // Each club's batting/pitching card, ABS card, and Defense card wear the
+  // header colors of the jersey it's actually wearing that game — the same
+  // ADR-0030 mechanism TeamInfo.jsx's club-name bar uses, scoped per card here
+  // instead of to one page-wide `.teaminfo`. `winProbTreatment` is the same
+  // jersey-treatment pair already threaded to WinProbChart, so this is no new
+  // fetch. Null for a club with no curated triad, which leaves that card on
+  // the app's default navy chrome.
+  const awayTheme = useMemo(
+    () => headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away)),
+    [box.away.id, winProbTreatment?.away],
+  )
+  const homeTheme = useMemo(
+    () => headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home)),
+    [box.home.id, winProbTreatment?.home],
+  )
   const hpId = officialIdByRole.HP ?? null
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
@@ -343,22 +361,28 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
         {/* The line score spans the full section width (not squeezed into a
             duo column) on every breakpoint — the one row every scorebook page
             reads across in one line. */}
-        <Scoreboard away={box.away} home={box.home} innings={box.innings} onSection={onSection} />
-        <InningTally rows={inningDigest} away={box.away} home={box.home} />
+        <Scoreboard
+          away={box.away}
+          home={box.home}
+          innings={box.innings}
+          onSection={onSection}
+          treatments={winProbTreatment}
+        />
+        <InningTally rows={inningDigest} away={box.away} home={box.home} treatments={winProbTreatment} />
         <div className="bs__duo">
           <div className="bs__col">
             <InfoCard fields={awayFields} />
-            <TeamBlock side={box.away} />
+            <TeamBlock side={box.away} theme={awayTheme} />
             {/* Each own independent card, outside the batting/pitching card
                 above — not nested tail sections of it (see BoxAbs/BoxDefense). */}
-            <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} />
-            <BoxDefense feed={feed} sideKey="away" />
+            <BoxAbs feed={feed} sideKey="away" abbr={box.away.abbreviation} theme={awayTheme} />
+            <BoxDefense feed={feed} sideKey="away" theme={awayTheme} />
           </div>
           <div className="bs__col">
             <InfoCard fields={homeFields} />
-            <TeamBlock side={box.home} />
-            <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} />
-            <BoxDefense feed={feed} sideKey="home" />
+            <TeamBlock side={box.home} theme={homeTheme} />
+            <BoxAbs feed={feed} sideKey="home" abbr={box.home.abbreviation} theme={homeTheme} />
+            <BoxDefense feed={feed} sideKey="home" theme={homeTheme} />
           </div>
         </div>
         <GameInfo rows={box.footNotes} />
@@ -592,9 +616,9 @@ function InfoCard({ fields }) {
   )
 }
 
-function TeamBlock({ side }) {
+function TeamBlock({ side, theme }) {
   return (
-    <section className="bs__team">
+    <section className={`bs__team ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <SectionMasthead as="h3" title={<TeamLink id={side.id}>{side.teamName}</TeamLink>} />
 
       <div className="bs__scroll">
@@ -757,11 +781,11 @@ function TeamBlock({ side }) {
 // bs__abscard scopes the attached-header + card-frame treatment (see
 // index.css) to just this copy of the shared .abs/.abs__title markup; the
 // innings view's own AbsChallengesCard (StatBox.jsx) keeps its own look.
-function BoxAbs({ feed, sideKey, abbr }) {
+function BoxAbs({ feed, sideKey, abbr, theme }) {
   if (!gameHasAbs(feed)) return null
   const side = selectChallengeState(feed, Infinity, 'bottom')[sideKey]
   return (
-    <div className="abs bs__abscard">
+    <div className={`abs bs__abscard ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <span className="abs__title">ABS Challenges</span>
       <div className="abs__rows">
         <AbsRow teamId={side.teamId} abbr={abbr} outcomes={side.outcomes} />
@@ -782,11 +806,14 @@ function BoxAbs({ feed, sideKey, abbr }) {
 // standalone-card treatment (see index.css) to just this copy of the shared
 // .halfdefense/.defdiamond markup; the innings view's own DefenseSection
 // (EnteringReference.jsx) keeps its own floating header + bordered diamond.
-function BoxDefense({ feed, sideKey }) {
+function BoxDefense({ feed, sideKey, theme }) {
   const defense = defenseEntering(feed, sideKey, Infinity, 'bottom')
   if (defense.length === 0) return null
   return (
-    <section className="halfdefense bs__defensecard">
+    <section
+      className={`halfdefense bs__defensecard ${headerThemeClass(theme)}`.trim()}
+      style={headerThemeStyle(theme)}
+    >
       <h4 className="halfdefense__title">Defense</h4>
       <DefenseDiamond defense={defense} />
     </section>
@@ -837,10 +864,15 @@ function LineTotals({ away, home }) {
 // 0 included) is itself a button to that half-inning in the Innings view;
 // 'X' (the team never batted that half) isn't. (LOB and the winning pitcher
 // live elsewhere: the totals card up top and the decisions block above.)
-function Scoreboard({ away, home, innings, onSection }) {
+//
+// The logo sits on its jersey-tinted tile (TeamTreatmentMark, `treatments` ==
+// `winProbTreatment` from BoxScoreBody) — the same shared tile the scorebug
+// HUD (Scorebug.jsx), the slate card, and the in-game masthead all wear,
+// rather than a bare mark floating with no fill of its own.
+function Scoreboard({ away, home, innings, onSection, treatments }) {
   const rows = [
-    { side: away, cells: innings.map((i) => i.away), half: 'top' },
-    { side: home, cells: innings.map((i) => i.home), half: 'bottom' },
+    { side: away, gameSide: 'away', cells: innings.map((i) => i.away), half: 'top' },
+    { side: home, gameSide: 'home', cells: innings.map((i) => i.home), half: 'bottom' },
   ]
   return (
     <div className="bs__board">
@@ -860,11 +892,18 @@ function Scoreboard({ away, home, innings, onSection }) {
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ side, cells, half }) => (
+            {rows.map(({ side, gameSide, cells, half }) => (
               <tr key={side.teamName}>
                 <td className="bs__boardName">
                   <TeamLink id={side.id} className="bs__boardLogo" ariaLabel={side.teamName}>
-                    <TeamLogo teamId={side.id} name={side.teamName} size={28} />
+                    <TeamTreatmentMark
+                      teamId={side.id}
+                      name={side.teamName}
+                      treatment={treatments?.[gameSide]}
+                      side={gameSide}
+                      size={24}
+                      block="bs__boardLogobox"
+                    />
                   </TeamLink>
                 </td>
                 {cells.map((v, i) => {
@@ -906,57 +945,97 @@ function Scoreboard({ away, home, innings, onSection }) {
 }
 
 // A per-half-inning tally the printed line score never carries: pitches thrown,
-// whiffs (swing-and-miss), and runners left on base, one row per played half in
-// order (see computeInningDigest). Everything here is plain play-by-play, so
-// unlike the Statcast/win-prob cards it renders at MiLB parks too — the box
-// score's one enrichment that never goes dark below AAA. Hidden only if the
-// feed carried no plays at all. Collapsed by default — same toggle-with-
-// chevron idiom as the lineup page's RosterPanel (roster__toggle), styled to
-// this page's own card frame — since it's scorebook-nerd detail most readers
-// won't want open every time, unlike the line score above it.
-function InningTally({ rows, away, home }) {
-  const [open, setOpen] = useState(false)
+// whiffs (swing-and-miss), fouls, and runners left on base (see
+// computeInningDigest). Everything here is plain play-by-play, so unlike the
+// Statcast/win-prob cards it renders at MiLB parks too — the box score's one
+// enrichment that never goes dark below AAA. Hidden only if the feed carried
+// no plays at all.
+//
+// Laid out as a second line score (Scoreboard above it) rather than one row
+// per half-inning: each team gets its own row on its own jersey-tinted tile
+// (same TeamTreatmentMark as Scoreboard), and each inning column holds all
+// four figures as one slash-joined reading — "24/1/6/1" — instead of a bare
+// run count. TALLY_LEGEND is the one place that order is spelled out; it
+// reads directly above the grid rather than as column headers repeated once
+// per inning. Always open — unlike Scoreboard's run count this card adds
+// nothing spoiler-shaped, so there's no reason to default it collapsed the
+// way the old row-per-half table (with its own toggle) did.
+const TALLY_LEGEND = 'Pitches / Whiffs / Fouls / LOB'
+
+function InningTally({ rows, away, home, treatments }) {
   if (!rows || rows.length === 0) return null
-  const abbr = (side) => (side === 'away' ? away : home).abbreviation || (side === 'away' ? 'AWAY' : 'HOME')
+  const byInningAndSide = new Map()
+  for (const r of rows) {
+    if (!byInningAndSide.has(r.inning)) byInningAndSide.set(r.inning, {})
+    byInningAndSide.get(r.inning)[r.side] = r
+  }
+  const innings = [...byInningAndSide.keys()].sort((a, b) => a - b)
+  const cellFor = (num, side) => {
+    const r = byInningAndSide.get(num)?.[side]
+    return r ? `${r.pitches}/${r.whiffs}/${r.fouls}/${r.lob}` : 'X'
+  }
+  // Each side's own halves summed across the whole game — the same rows the
+  // inning columns already carry, just added up instead of read one at a time.
+  const totalFor = (side) => {
+    const t = { pitches: 0, whiffs: 0, fouls: 0, lob: 0 }
+    for (const r of rows) {
+      if (r.side !== side) continue
+      t.pitches += r.pitches
+      t.whiffs += r.whiffs
+      t.fouls += r.fouls
+      t.lob += r.lob
+    }
+    return `${t.pitches}/${t.whiffs}/${t.fouls}/${t.lob}`
+  }
+  const sideRows = [
+    { side: 'away', team: away, gameSide: 'away' },
+    { side: 'home', team: home, gameSide: 'home' },
+  ]
   return (
     <div className="bs__tally">
-      <button
-        type="button"
-        className="bs__tallyToggle"
-        onClick={() => setOpen((was) => !was)}
-        aria-expanded={open}
-      >
+      <div className="bs__tallyHead">
         <span className="bs__insightsTitle">By inning</span>
-        <span className="bs__tallyChevron" aria-hidden="true">{open ? '▾' : '▸'}</span>
-      </button>
-      {open && (
+        <span className="bs__tallyLegend">{TALLY_LEGEND}</span>
+      </div>
       <div className="bs__scroll bs__tallyBody">
-        <table className="bs__grid bs__grid--tally">
+        <table className="bs__grid bs__grid--board bs__grid--tally">
           <thead>
             <tr>
-              <th className="bs__nameCol">Half</th>
-              <th>P</th>
-              <th>Wh</th>
-              <th>F</th>
-              <th>LOB</th>
+              <th className="bs__boardName" />
+              {innings.map((num) => (
+                <th key={num} className="bs__boardInn">
+                  {num}
+                </th>
+              ))}
+              <th className="bs__boardFinal">Totals</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={`${r.inning}-${r.half}`}>
-                <td className="bs__nameCol">
-                  {r.half === 'top' ? '▲' : '▼'} {abbr(r.side)} {r.inning}
+            {sideRows.map(({ side, team, gameSide }) => (
+              <tr key={side}>
+                <td className="bs__boardName">
+                  <TeamLink id={team.id} className="bs__boardLogo" ariaLabel={team.teamName}>
+                    <TeamTreatmentMark
+                      teamId={team.id}
+                      name={team.teamName}
+                      treatment={treatments?.[gameSide]}
+                      side={gameSide}
+                      size={24}
+                      block="bs__boardLogobox"
+                    />
+                  </TeamLink>
                 </td>
-                <td>{r.pitches}</td>
-                <td>{r.whiffs}</td>
-                <td>{r.fouls}</td>
-                <td>{r.lob}</td>
+                {innings.map((num) => (
+                  <td key={num} className="bs__boardInn">
+                    {cellFor(num, side)}
+                  </td>
+                ))}
+                <td className="bs__boardFinal">{totalFor(side)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      )}
     </div>
   )
 }

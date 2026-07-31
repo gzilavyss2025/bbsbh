@@ -59,7 +59,8 @@ export function Scorebug({
             teamId={awayTeamId}
             name={awayName}
             treatment={awayTreatment}
-            size={20}
+            side="away"
+            size={24}
             block="gamehud__tile"
             className="gamehud__tile--away"
           />
@@ -68,7 +69,8 @@ export function Scorebug({
             teamId={homeTeamId}
             name={homeName}
             treatment={homeTreatment}
-            size={20}
+            side="home"
+            size={24}
             block="gamehud__tile"
             className="gamehud__tile--home"
           />
@@ -82,7 +84,7 @@ export function Scorebug({
         </div>
         <div className="gamehud__div" />
         <div className="gamehud__diamondwrap">
-          <BaseState bases={bases} />
+          <BaseState bases={bases} size={40} />
           <div className="gamehud__outs">
             {/* Only 2 dots: a half ends the instant the 3rd out happens, so
                 outs is always 0/1/2 by the time this renders — a 3rd dot

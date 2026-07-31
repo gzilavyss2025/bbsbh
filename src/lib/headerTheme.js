@@ -60,6 +60,17 @@ export function barMarkTone(onBar) {
 // resolvers collapse several jerseys onto fewer bars (MLB's treatment onto
 // Main/City-Connect, MiLB's Home/Away onto one shared bar) — see
 // treatmentHeaderColorOverride/milbHeaderColorOverride for the two collapses.
+// Which key a club's chrome is filed under. MLB clubs are keyed by treatment
+// ('city-connect'); MiLB affiliates have no uniform catalog to name a
+// treatment from, so their two-variation table is keyed by game side instead —
+// the same split src/lib/CLAUDE.md keeps everywhere else, resolved here rather
+// than merged into one fake vocabulary. Every caller of `headerThemeFor` needs
+// this same translation (TeamInfo.jsx's club-name bar, BoxScore.jsx's team
+// cards), so it lives beside the resolver rather than being copied per caller.
+export function themeKeyFor(teamId, side, treatment) {
+  return isMlbTeamId(teamId) ? treatment : side
+}
+
 export function headerThemeFor(teamId, treatment) {
   if (!teamId || !treatment) return null
   const landed = isMlbTeamId(teamId)
