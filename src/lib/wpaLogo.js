@@ -123,12 +123,32 @@ export const WPA_MARK_SOURCE_OVERRIDES = {
 // whatever wpaLogoFor already resolved before this feature existed.
 export const WPA_OWN_ART = byTreatment(WPA_TUNING, (f) => f.ownArt)
 
+// Which (team, treatment)s tile the club's wordmark instead of their usual
+// mark — the MLB counterpart to MiLB's MILB_WPA_WORDMARK_OVERRIDES
+// (lib/milbColors.js). Absent/false is the default, same convention as
+// WPA_OWN_ART above; every club's CDN wordmark already resolves via
+// teamLogoUrl(teamId, 'wordmark') (teams.js's LOGO_VARIANTS), so this needs
+// no separate art-procurement step the way ownArt does.
+export const WPA_WORDMARK_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.wpaWordmark)
+
+export function wpaWordmarkOn(teamId, treatment) {
+  return Boolean(WPA_WORDMARK_OVERRIDES[teamId]?.[treatment])
+}
+
 // The shared body of wpaLogoFor/wpaLogoWithFallback below. `allowOwnArt` is
 // false only on the fallback's OWN retry after a miss — if it stayed true, a
 // club whose uploaded WPA art 404s would "fall back" to re-resolving the
 // exact same missing URL and loop, the precise silent-blank-band failure this
 // whole chain exists to prevent (see wpaLogoWithFallback's doc below).
 function resolveMark(teamId, treatment, allowOwnArt) {
+  // Checked first, same top priority MiLB's own milbWpaMarkUrl gives its
+  // wordmark toggle — it says "tile THIS mark, full stop", ahead of even
+  // ownArt's uploaded WPA-only file. Gated on `allowOwnArt` (not a retry) for
+  // the same reason ownArt is below: a missing wordmark on 'main' itself
+  // would otherwise re-resolve to that same missing URL on the fallback's
+  // retry and loop, the exact silent-blank-band failure this chain exists to
+  // prevent.
+  if (allowOwnArt && wpaWordmarkOn(teamId, treatment)) return { src: teamLogoUrl(teamId, 'wordmark'), recolor: null }
   if (allowOwnArt && WPA_OWN_ART[teamId]?.[treatment]) {
     const src = wpaArtUrl(teamId, treatment)
     // Uploaded WPA art is procured art with its own colors, same footing as

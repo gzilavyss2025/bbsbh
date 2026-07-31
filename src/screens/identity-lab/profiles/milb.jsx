@@ -24,6 +24,7 @@ import {
   milbWpaLogoLayout,
   milbWpaBandColor,
   milbWpaBandPinstripeColor,
+  milbWpaBandFillColor,
   milbWpaWordmark,
   milbHeaderColorOverride,
   milbHeaderColorsFor,
@@ -56,12 +57,14 @@ function buildPosCopyText(name, teamId, variant, variantLabel, pos) {
     `Variant: ${variantLabel}\n` +
     `Where: src/lib/data/milb-treatment-tuning.json — ${teamId}.treatments.${variant}.position\n` +
     `{ "scale": ${pos.scale}, "offsetX": ${pos.offsetX}, "offsetY": ${pos.offsetY}, ` +
-    `"bg": "${pos.bg}", "pinstripe": ${pos.pinstripe} }`
+    `"bg": "${pos.bg}", "pinstripe": ${pos.pinstripe}, "pinstripeBg": "${pos.pinstripeBg}" }`
   )
 }
 
-function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor, wordmark) {
-  const band = pinstripe ? `{ "pinstripe": true, "color": "${bandColor}" }` : `"${bandColor}"`
+function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor, bandBg, wordmark) {
+  const band = pinstripe
+    ? `{ "pinstripe": true, "color": "${bandColor}"${bandBg ? `, "bg": "${bandBg}"` : ''} }`
+    : `"${bandColor}"`
   return (
     `Team: ${name} (id ${teamId}, MiLB)\n` +
     `Variant: ${variantLabel}\n` +
@@ -99,9 +102,20 @@ function buildAllChangesText(teams, drafts) {
         const layout = milbWpaLogoLayout(t.id, v.key, wd)
         const pinstripe = milbWpaBandPinstripeColor(t.id, v.key, wd)
         const band = milbWpaBandColor(t.id, v.key, wd)
+        const bandBg = milbWpaBandFillColor(t.id, v.key, wd)
         const wordmark = milbWpaWordmark(t.id, v.key, wd)
         sections.push(
-          buildWpaCopyText(t.name, t.id, v.key, v.label, layout, Boolean(pinstripe), pinstripe ?? band, wordmark),
+          buildWpaCopyText(
+            t.name,
+            t.id,
+            v.key,
+            v.label,
+            layout,
+            Boolean(pinstripe),
+            pinstripe ?? band,
+            bandBg,
+            wordmark,
+          ),
         )
       }
       const hd = drafts.header[t.id]?.[v.key]
@@ -128,6 +142,7 @@ function wpaLandedFlat(teamId, variant) {
     ...layout,
     pinstripe: isPinstripeObj ? Boolean(band.pinstripe) : false,
     bandColor: isPinstripeObj ? band.color : band,
+    bandBg: isPinstripeObj ? (band.bg ?? null) : null,
     wpaWordmark: Boolean(MILB_WPA_WORDMARK_OVERRIDES[teamId]?.[variant]),
   }
 }
@@ -258,7 +273,7 @@ function logoBoxStyle(pos) {
     '--offset-y': `${pos.offsetY}%`,
     '--origin-y': 'center',
     '--pinstripe-color': pos.pinstripe ? pos.bg : undefined,
-    '--pinstripe-bg': undefined,
+    '--pinstripe-bg': pos.pinstripeBg || undefined,
   }
 }
 
@@ -294,6 +309,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
   const pos = milbLogoPosition(teamId, variant, drafts.pos)
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
+  const wpaBandBg = milbWpaBandFillColor(teamId, variant, drafts.wpa)
   const wpaLayout = milbWpaLogoLayout(teamId, variant, drafts.wpa)
   const wpaWordmarkOn = milbWpaWordmark(teamId, variant, drafts.wpa)
   // Same idea as MLB's own live "Use Logo Art" preview (profiles/mlb.jsx) —
@@ -345,6 +361,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         offsetY: pos.offsetY,
         bg: pos.bg,
         pinstripe: pos.pinstripe,
+        pinstripeBg: pos.pinstripeBg,
         hasDraft: Boolean(drafts.pos && Object.keys(drafts.pos).length > 0),
         copyText: buildPosCopyText(name, teamId, variant, label, pos),
         onField: (field, value) => on.posField(variant, field, value),
@@ -356,6 +373,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         layout: wpaLayout,
         pinstripe: Boolean(wpaPinstripe),
         bandColor: wpaPinstripe ?? wpaBand,
+        bandBg: wpaBandBg ?? '',
         wordmark: wpaWordmarkOn,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
         copyText: buildWpaCopyText(
@@ -366,6 +384,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
           wpaLayout,
           Boolean(wpaPinstripe),
           wpaPinstripe ?? wpaBand,
+          wpaBandBg,
           wpaWordmarkOn,
         ),
         onField: (field, value) => on.wpaField(variant, field, value),
@@ -378,7 +397,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         lastOpponent,
         headerColors,
         wpaLayout,
-        wpaBandOverride: { pinstripe: Boolean(wpaPinstripe), color: wpaPinstripe ?? wpaBand },
+        wpaBandOverride: { pinstripe: Boolean(wpaPinstripe), color: wpaPinstripe ?? wpaBand, bg: wpaBandBg },
         wpaMarkOverride,
       }}
       headerPreview={{
@@ -435,10 +454,11 @@ function buildSaves(drafts) {
   store = mergeDraftIntoStore(store, drafts.wpa, (record, fields, variant, teamId) => {
     const pinstripe = milbWpaBandPinstripeColor(teamId, variant, fields)
     const color = pinstripe ?? milbWpaBandColor(teamId, variant, fields)
+    const bg = milbWpaBandFillColor(teamId, variant, fields)
     const next = {
       ...record,
       wpaLayout: milbWpaLogoLayout(teamId, variant, fields),
-      band: pinstripe ? { pinstripe: true, color } : color,
+      band: pinstripe ? { pinstripe: true, color, ...(bg ? { bg } : {}) } : color,
     }
     // Absent (not `false`) is the default — off is the same as never having
     // touched this, same "omit rather than write a stray false" rule the

@@ -165,11 +165,25 @@
       "6": "ink"
     }
   },
+  "541": {
+    "name": "Omaha Storm Chasers",
+    "art": "6:6ede8587",
+    "parts": {
+      "5": "knockout"
+    }
+  },
   "556": {
     "name": "Nashville Sounds",
     "art": "3:1342fa5a",
     "parts": {
       "1": "knockout"
+    }
+  },
+  "568": {
+    "name": "Norfolk Tides",
+    "art": "23:a331fd3a",
+    "parts": {
+      "8": "knockout"
     }
   },
   "1410": {

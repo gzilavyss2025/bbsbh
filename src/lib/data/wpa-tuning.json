@@ -1452,6 +1452,12 @@
           "rowShift": 0
         },
         "band": "#0C2340"
+      },
+      "main": {
+        "layout": {
+          "size": 35
+        },
+        "ownArt": true
       }
     }
   },
@@ -1460,15 +1466,16 @@
     "treatments": {
       "main": {
         "layout": {
-          "size": 40,
+          "size": 65,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 13,
+          "paddingY": -39,
           "rowShift": 0
         },
-        "band": "#F3ECD8"
+        "band": "#F3ECD8",
+        "wpaWordmark": true
       },
       "alternate": {
         "layout": {

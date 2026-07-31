@@ -12,7 +12,7 @@ import {
   wpaBandPinstripeColor,
   wpaBandPinstripeBg,
 } from '../../../lib/wpaBandColors.js'
-import { WPA_TUNING, WPA_OWN_ART, wpaLogoLayout } from '../../../lib/wpaLogo.js'
+import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
@@ -37,6 +37,7 @@ import {
   MAIN_OVERRIDES,
   mainOverrideLogoUrl,
   mainTreatmentPinstripeColor,
+  mainTreatmentPinstripeBg,
   treatmentPinstripeColor,
   treatmentPinstripeBg,
   treatmentOffsetX,
@@ -280,11 +281,10 @@ function resolvePositionState(teamId, treatment, posDraft, colors) {
         ? mainTreatmentPinstripeColor(teamId)
         : null
       : treatmentPinstripeColor(teamId, treatment)
-  // undefined (not '') for Main — the data model has no fill-color concept for
-  // Main's pinstripe (MAIN_OVERRIDES' pinstripe is line-color only), and
-  // LogoPositionControls gates its new "Fill" field on this being defined.
   const pinstripeBg =
-    treatment === 'main' ? undefined : posDraft?.pinstripeBg ?? treatmentPinstripeBg(teamId, treatment) ?? ''
+    treatment === 'main'
+      ? posDraft?.pinstripeBg ?? mainTreatmentPinstripeBg(teamId) ?? ''
+      : posDraft?.pinstripeBg ?? treatmentPinstripeBg(teamId, treatment) ?? ''
   const activeBgIndex = override?.bgHex || pinstripeColor
     ? -1
     : override
@@ -317,6 +317,14 @@ function resolveWpaBandState(teamId, treatment, wpaDraft) {
 // copy text, and the auto-clear matcher below can never disagree.
 function resolveWpaOwnArt(teamId, treatment, wpaDraft) {
   return wpaDraft?.ownArt ?? Boolean(WPA_OWN_ART[teamId]?.[treatment])
+}
+
+// Whether this (team, treatment)'s WPA band tiles the club's wordmark instead
+// of its usual mark — the MLB counterpart to MiLB's own milbWpaWordmark
+// (lib/milbColors.js), same draft-beats-landed chain as resolveWpaOwnArt
+// above.
+function resolveWpaWordmark(teamId, treatment, wpaDraft) {
+  return wpaDraft?.wpaWordmark ?? Boolean(WPA_WORDMARK_OVERRIDES[teamId]?.[treatment])
 }
 
 // The merged Size/Rotate/X/Y/H-Pad/V-Pad/Shift% for a (team, treatment) — a
@@ -379,7 +387,7 @@ const TREATMENT_COLOR_STORE_FILE = {
 function bgOverrideLocation(teamId, treatment, pinstripe) {
   if (pinstripe) {
     return treatment === 'main'
-      ? `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.pinstripe: true (the line color itself is the shared default unless pinstripeColor curates a per-team one)`
+      ? `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.main.pinstripe: true (the line color itself is the shared default unless pinstripeColor curates a per-team one, plus pinstripeBg to also set the fill under the stripes)`
       : `src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment}.pinstripeColor (plus pinstripeBg to also set the fill under the stripes)`
   }
   const file = TREATMENT_COLOR_STORE_FILE[treatment]
@@ -391,18 +399,20 @@ function bgOverrideLocation(teamId, treatment, pinstripe) {
   )
 }
 
-function buildPosCopyText(name, teamId, treatment, treatmentLabel, scale, offsetX, offsetY, bg, pinstripe) {
+function buildPosCopyText(name, teamId, treatment, treatmentLabel, scale, offsetX, offsetY, bg, pinstripe, pinstripeBg) {
   return (
     `Team: ${name} (id ${teamId})\n` +
     `Treatment: ${treatmentLabel}\n` +
     `Where: src/lib/data/mlb-treatment-tuning.json — ${teamId}.treatments.${treatment} ` +
     `(scale / offsetX / offsetY) / ${bgOverrideLocation(teamId, treatment, pinstripe)}\n` +
     `scale: ${scale}, offsetX: ${offsetX}, offsetY: ${offsetY}, ` +
-    (pinstripe ? `pinstripe: true, color: ${bg || '(none)'}` : `background: ${bg || '(none)'}`)
+    (pinstripe
+      ? `pinstripe: true, color: ${bg || '(none)'}, fill: ${pinstripeBg || '(white)'}`
+      : `background: ${bg || '(none)'}`)
   )
 }
 
-function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor, ownArt) {
+function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinstripe, bandColor, ownArt, wordmark) {
   const { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } = layout
   const band = pinstripe ? `{ "pinstripe": true, "color": "${bandColor}" }` : `"${bandColor}"`
   return (
@@ -413,7 +423,8 @@ function buildWpaCopyText(name, teamId, treatment, treatmentLabel, layout, pinst
     `"paddingX": ${paddingX}, "paddingY": ${paddingY}, "rowShift": ${rowShift} }\n` +
     `"band": ${band}\n` +
     `"ownArt": ${ownArt}` +
-    (ownArt ? ` (uploaded WPA-only mark: ${wpaArtUrl(teamId, treatment) ?? '(none uploaded yet)'})` : '')
+    (ownArt ? ` (uploaded WPA-only mark: ${wpaArtUrl(teamId, treatment) ?? '(none uploaded yet)'})` : '') +
+    `\n"wpaWordmark": ${Boolean(wordmark)}`
   )
 }
 
@@ -485,15 +496,18 @@ function buildAllChangesText(teams, drafts, extras) {
 
       const pd = drafts.pos[teamId]?.[t.key]
       if (pd && Object.keys(pd).length > 0) {
-        const { scale, offsetX, offsetY, pinstripe, bg } = resolvePositionState(teamId, t.key, pd, colors)
-        sections.push(buildPosCopyText(name, teamId, t.key, treatmentLabel, scale, offsetX, offsetY, bg, pinstripe))
+        const { scale, offsetX, offsetY, pinstripe, bg, pinstripeBg } = resolvePositionState(teamId, t.key, pd, colors)
+        sections.push(
+          buildPosCopyText(name, teamId, t.key, treatmentLabel, scale, offsetX, offsetY, bg, pinstripe, pinstripeBg),
+        )
       }
       const wd = drafts.wpa[teamId]?.[t.key]
       if (wd && Object.keys(wd).length > 0) {
         const layout = resolvedWpaLayout(teamId, t.key, wd)
         const { pinstripe, band } = resolveWpaBandState(teamId, t.key, wd)
         const ownArt = resolveWpaOwnArt(teamId, t.key, wd)
-        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band, ownArt))
+        const wordmark = resolveWpaWordmark(teamId, t.key, wd)
+        sections.push(buildWpaCopyText(name, teamId, t.key, treatmentLabel, layout, pinstripe, band, ownArt, wordmark))
       }
       const hd = drafts.header[teamId]?.[t.key]
       if (hd && Object.keys(hd).length > 0) {
@@ -879,6 +893,7 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
   const headerColors = headerUnit.props.colors
   const isHeaderOwner = treatment === headerUnit.slot
   const wpaOwnArt = resolveWpaOwnArt(teamId, treatment, drafts.wpa)
+  const wpaWordmarkOn = resolveWpaWordmark(teamId, treatment, drafts.wpa)
   const wpaArtKey = wpaArtTreatmentKey(treatment)
   // Absent (no `-wpa` destination — can't happen for a real MLB treatment,
   // but mirrors upload's own `caveat: null` shape) rather than special-cased
@@ -905,14 +920,17 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
       />
     </>
   ) : null
-  // The WpaScenarios mockups' own live preview of "Use Logo Art" — unchecked
-  // (a draft in progress, or already landed) means those three chart
-  // mockups should tile whatever the owner uploaded, not the tile's normal
-  // mark, and reflect a same-session upload immediately (?v= cache-bust,
-  // same idea as artVersion above) rather than only after Save. `null` when
-  // checked, so WinProbChart falls through to its own normal resolution.
-  const wpaMarkOverride =
-    wpaOwnArt && wpaArtKey
+  // The WpaScenarios mockups' own live preview of "Use Logo Art"/"Use
+  // wordmark" — unchecked (a draft in progress, or already landed) means
+  // those three chart mockups should tile whatever the owner picked, not the
+  // tile's normal mark, and reflect a same-session upload immediately (?v=
+  // cache-bust, same idea as artVersion above) rather than only after Save.
+  // `null` when neither is on, so WinProbChart falls through to its own
+  // normal resolution. Wordmark wins outright, same top priority
+  // lib/wpaLogo.js's own resolveMark gives it over ownArt.
+  const wpaMarkOverride = wpaWordmarkOn
+    ? { src: teamLogoUrl(teamId, 'wordmark'), recolor: null }
+    : wpaOwnArt && wpaArtKey
       ? { src: wpaArtVersion > 0 ? `${wpaArtUrl(teamId, treatment)}?v=${wpaArtVersion}` : wpaArtUrl(teamId, treatment), recolor: null }
       : null
 
@@ -1002,6 +1020,7 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
           treatmentOffsetYValue,
           treatmentBg,
           bgPinstripe,
+          pinstripeBg,
         ),
         onField: (field, value) => on.posField(treatment, field, value),
         onReset: () => on.posReset(treatment),
@@ -1015,8 +1034,19 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
         bandBg: wpaBandBg,
         ownArt: wpaOwnArt,
         artUpload,
+        wordmark: wpaWordmarkOn,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
-        copyText: buildWpaCopyText(name, teamId, treatment, label, wpaLayout, wpaPinstripe, wpaBand, wpaOwnArt),
+        copyText: buildWpaCopyText(
+          name,
+          teamId,
+          treatment,
+          label,
+          wpaLayout,
+          wpaPinstripe,
+          wpaBand,
+          wpaOwnArt,
+          wpaWordmarkOn,
+        ),
         onField: (field, value) => on.wpaField(treatment, field, value),
         onReset: () => on.wpaReset(treatment),
       }}
@@ -1124,7 +1154,7 @@ function applyPositionDraft(record, fields, treatment) {
     }
   }
   if (fields.bg !== undefined && !fields.pinstripe && treatment === 'main') next.bgHex = fields.bg
-  if (treatment !== 'main' && fields.pinstripeBg !== undefined) {
+  if (fields.pinstripeBg !== undefined) {
     if (fields.pinstripeBg) next.pinstripeBg = fields.pinstripeBg
     else delete next.pinstripeBg
   }
@@ -1239,6 +1269,10 @@ function buildSaves(drafts, extras) {
         if (fields.ownArt) next.ownArt = true
         else delete next.ownArt
       }
+      if (fields.wpaWordmark !== undefined) {
+        if (fields.wpaWordmark) next.wpaWordmark = true
+        else delete next.wpaWordmark
+      }
       return next
     },
     { name },
@@ -1328,7 +1362,8 @@ export const mlbProfile = {
       const layout = resolvedWpaLayout(teamId, treatment, null)
       const { pinstripe, band, bandBg } = resolveWpaBandState(teamId, treatment, null)
       const ownArt = resolveWpaOwnArt(teamId, treatment, null)
-      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt })
+      const wpaWordmark = resolveWpaWordmark(teamId, treatment, null)
+      return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt, wpaWordmark })
     },
     header: (teamId, treatment, fields) =>
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),

@@ -881,6 +881,13 @@
       "height": 512,
       "alpha": true
     },
+    "NYY.png": {
+      "teamId": 147,
+      "bytes": 8736,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
     "PIT.png": {
       "teamId": 134,
       "bytes": 3771,

@@ -64,10 +64,14 @@ test('a treatment routed back to the stock CDN mark keeps its override', () => {
 })
 
 test('a club with no override is untouched in every treatment', () => {
-  // Brewers (158) — no LOGO_COLOR_OVERRIDES entry.
-  assert.equal(wpaLogoFor(158, 'main').recolor, null)
-  assert.equal(wpaLogoFor(158, 'main').src, teamLogoUrl(158, 'base'))
-  assert.equal(wpaLogoFor(158, 'city-connect').src, '/team-logos/city-connect/MIL.png')
+  // Red Sox (111) — no LOGO_COLOR_OVERRIDES/WPA_MARK_SOURCE_OVERRIDES/
+  // WPA_WORDMARK_OVERRIDES/WPA_OWN_ART entry on Main, so Main resolves to the
+  // plain CDN base mark rather than any override. Not the Brewers (158) —
+  // Team Identity Lab landed a real Main wordmark override for them, which
+  // this fixture predates.
+  assert.equal(wpaLogoFor(111, 'main').recolor, null)
+  assert.equal(wpaLogoFor(111, 'main').src, teamLogoUrl(111, 'base'))
+  assert.equal(wpaLogoFor(111, 'city-connect').src, '/team-logos/city-connect/BOS.png')
 })
 
 test('defaults to main, and degrades to no tile for an unknown club', () => {
@@ -159,8 +163,9 @@ test('ownArt on a non-main treatment still falls back to Main on a miss', () => 
 })
 
 test('a club with no ownArt flag is completely unaffected by the feature', () => {
-  assert.equal(WPA_OWN_ART[158], undefined)
-  assert.equal(wpaLogoFor(158, 'main').src, teamLogoUrl(158, 'base'))
+  // Red Sox (111), not the Brewers (158) — see the fixture note above.
+  assert.equal(WPA_OWN_ART[111], undefined)
+  assert.equal(wpaLogoFor(111, 'main').src, teamLogoUrl(111, 'base'))
 })
 
 // --- tile geometry ---------------------------------------------------------
@@ -211,10 +216,13 @@ test('a negative padding still leaves a positive tile to repeat', () => {
 })
 
 test('layout falls back to the shared defaults, row shift off', () => {
-  // Yankees (147) — as of this test, the one MLB club with no Main WPA layout
-  // override at all; pick a fresh untouched club here if Team Identity Lab
-  // ever lands one for them too.
-  const layout = wpaLogoLayout(147, 'main')
+  // A synthetic team id, not a real club — every real MLB club now has a
+  // curated Main WPA layout of its own (Team Identity Lab's tuning eventually
+  // reaches all 30), so a real id here would eventually drift onto a real
+  // override and false-fail this fixture, same as it just did with the
+  // Yankees. 999999 can never be curated, so the default fallback it's
+  // actually testing stays pinned.
+  const layout = wpaLogoLayout(999999, 'main')
   assert.deepEqual(layout, WPA_LOGO_DEFAULTS)
   assert.equal(layout.rowShift, 0, 'bands ship as a plain grid until a team opts in')
   assert.equal(wpaTilePlacements(layout).images.length, 1, 'one logo per tile by default')

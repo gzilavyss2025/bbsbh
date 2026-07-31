@@ -326,6 +326,23 @@ export function localLogoUrl(teamId, treatment) {
 
 export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
+  // A custom-mark assignment (LogoDropZone's "Replace art" select — a saved
+  // recolor, or one of the CDN's own vectors) is an explicit override and
+  // must win outright, even for a treatment in one of the *_USES_BASE_LOGO
+  // sets below — those exist only to say "no procured local file", which an
+  // assignment supersedes exactly the way it does for every other team
+  // (localLogoUrl's own customMarkFor check). Checked first so this early
+  // return can't shadow it the way it used to (a real, landed assignment
+  // silently ignored — see the Athletics' Alternate 2).
+  if (
+    (variant === 'alternate' ||
+      variant === 'alternate-2' ||
+      variant === 'alternate-3' ||
+      variant === 'alternate-4') &&
+    customMarkFor(teamId, variant)
+  ) {
+    return localLogoUrl(teamId, variant)
+  }
   if (variant === 'alternate' && ALT_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (variant === 'alternate-2' && ALT2_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
   if (variant === 'alternate-3' && ALT3_USES_BASE_LOGO.has(teamId)) return `${LOGO_BASE}/${teamId}.svg`
@@ -567,7 +584,9 @@ export function treatmentTuningRecord(teamId, treatment) {
 // `scale` overrides the tile's default 1.32 edge-bleed for a mark
 // that's especially dense/large at that fill. `pinstripe` (Rockies, Yankees)
 // is a hand-styled background instead of a flat swatch — see
-// mainTreatmentPinstripe/mainTreatmentPinstripeColor. `bgHex` (Brewers only)
+// mainTreatmentPinstripe/mainTreatmentPinstripeColor; `pinstripeBg` optionally
+// colors the fill under those lines (mainTreatmentPinstripeBg), plain white
+// when absent. `bgHex` (Brewers only)
 // is a literal fill color that isn't any of the club's three brand
 // swatches — takes priority over `bg` in mainTreatmentTint. A team with no
 // entry here gets no tint, same as a missing Alternate/City Connect logo.
@@ -576,7 +595,7 @@ export function treatmentTuningRecord(teamId, treatment) {
 // which were never part of MAIN_OVERRIDES and must not leak into it — a team
 // whose only Main tuning is a header-color proposal has no Main tile override
 // at all, and gets no entry.
-const MAIN_OVERRIDE_FIELDS = ['bg', 'bgHex', 'pinstripe', 'pinstripeColor', 'scale']
+const MAIN_OVERRIDE_FIELDS = ['bg', 'bgHex', 'pinstripe', 'pinstripeColor', 'pinstripeBg', 'scale']
 
 function mainOverrideFields(main) {
   if (!main) return null
@@ -666,6 +685,14 @@ export function mainTreatmentPinstripe(teamId) {
 // home pinstripe.
 export function mainTreatmentPinstripeColor(teamId) {
   return MAIN_OVERRIDES[teamId]?.pinstripeColor ?? 'rgba(0, 0, 0, 0.16)'
+}
+
+// The colored fill under a pinstriped Main tile's lines, or null for the
+// plain-white default — same optional per-team curation as
+// mainTreatmentPinstripeColor, just for the fill instead of the line
+// (treatmentPinstripeBg's own counterpart for every other treatment).
+export function mainTreatmentPinstripeBg(teamId) {
+  return MAIN_OVERRIDES[teamId]?.pinstripeBg ?? null
 }
 
 // Whether `teamId`'s Main mark should swap to the locally hand-edited file

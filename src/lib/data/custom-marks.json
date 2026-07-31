@@ -23,6 +23,17 @@
     ],
     "assignments": {}
   },
+  "133": {
+    "marks": [
+      {
+        "slug": "base-white",
+        "name": "base-white"
+      }
+    ],
+    "assignments": {
+      "alternate-2": "base-white"
+    }
+  },
   "142": {
     "marks": [
       {
@@ -45,6 +56,12 @@
       "alternate-2": "atl1"
     }
   },
+  "238": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:cap"
+    }
+  },
   "556": {
     "marks": [
       {
@@ -59,7 +76,8 @@
   "568": {
     "marks": [],
     "assignments": {
-      "milb-home": "cdn:primary"
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
     }
   }
 }

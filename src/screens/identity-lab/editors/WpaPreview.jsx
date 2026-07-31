@@ -65,7 +65,25 @@ export function WpaPreview({
             <input
               type="checkbox"
               checked={wordmark}
-              onChange={(e) => onField('wpaWordmark', e.target.checked)}
+              onChange={(e) => {
+                const checked = e.target.checked
+                onField('wpaWordmark', checked)
+                // A wordmark reads at a very different scale/crop than the
+                // club's normal mark, so ticking this dials Size/H-Pad/V-Pad
+                // to values tuned for wordmark art. Unticking clears those
+                // three back to whatever the landed override/default chain
+                // would otherwise show (milbWpaLogoLayout), rather than
+                // guessing at a prior value to restore.
+                if (checked) {
+                  onField('size', 65)
+                  onField('paddingX', 10)
+                  onField('paddingY', -35)
+                } else {
+                  onField('size', undefined)
+                  onField('paddingX', undefined)
+                  onField('paddingY', undefined)
+                }
+              }}
             />
             <span>Use wordmark</span>
           </label>
