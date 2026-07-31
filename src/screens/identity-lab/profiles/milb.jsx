@@ -15,6 +15,7 @@ import {
   MILB_LOGO_POS_OVERRIDES,
   MILB_WPA_LOGO_LAYOUT_OVERRIDES,
   MILB_WPA_BAND_COLOR_OVERRIDES,
+  MILB_WPA_WORDMARK_OVERRIDES,
   milbColorPair,
   milbHasLogoArt,
   milbHasResearchedColor,
@@ -22,6 +23,7 @@ import {
   milbWpaLogoLayout,
   milbWpaBandColor,
   milbWpaBandPinstripeColor,
+  milbWpaWordmark,
   milbHeaderColorOverride,
   milbHeaderColorsFor,
 } from '../../../lib/milbColors.js'
@@ -57,7 +59,7 @@ function buildPosCopyText(name, teamId, variant, variantLabel, pos) {
   )
 }
 
-function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor) {
+function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe, bandColor, wordmark) {
   const band = pinstripe ? `{ "pinstripe": true, "color": "${bandColor}" }` : `"${bandColor}"`
   return (
     `Team: ${name} (id ${teamId}, MiLB)\n` +
@@ -66,7 +68,8 @@ function buildWpaCopyText(name, teamId, variant, variantLabel, layout, pinstripe
     `"wpaLayout": { "size": ${layout.size}, "rotate": ${layout.rotate}, "offsetX": ${layout.offsetX}, ` +
     `"offsetY": ${layout.offsetY}, "paddingX": ${layout.paddingX}, "paddingY": ${layout.paddingY}, ` +
     `"rowShift": ${layout.rowShift} }\n` +
-    `"band": ${band}`
+    `"band": ${band}\n` +
+    `"wpaWordmark": ${Boolean(wordmark)}`
   )
 }
 
@@ -95,8 +98,9 @@ function buildAllChangesText(teams, drafts) {
         const layout = milbWpaLogoLayout(t.id, v.key, wd)
         const pinstripe = milbWpaBandPinstripeColor(t.id, v.key, wd)
         const band = milbWpaBandColor(t.id, v.key, wd)
+        const wordmark = milbWpaWordmark(t.id, v.key, wd)
         sections.push(
-          buildWpaCopyText(t.name, t.id, v.key, v.label, layout, Boolean(pinstripe), pinstripe ?? band),
+          buildWpaCopyText(t.name, t.id, v.key, v.label, layout, Boolean(pinstripe), pinstripe ?? band, wordmark),
         )
       }
       const hd = drafts.header[t.id]?.[v.key]
@@ -123,6 +127,7 @@ function wpaLandedFlat(teamId, variant) {
     ...layout,
     pinstripe: isPinstripeObj ? Boolean(band.pinstripe) : false,
     bandColor: isPinstripeObj ? band.color : band,
+    wpaWordmark: Boolean(MILB_WPA_WORDMARK_OVERRIDES[teamId]?.[variant]),
   }
 }
 
@@ -217,11 +222,21 @@ function shelfMarks(teamId) {
     label: v.label,
     url: milbHasLogoArt(teamId, v.key) ? teamLogoUrl(teamId, `milb-${v.key}`) : teamLogoUrl(teamId, 'base'),
   }))
-  // Marks recolored in the Logo art editor — same as the MLB shelf. An
-  // affiliate is the likelier customer: MiLB art coverage is thinner, so
-  // recoloring the CDN mark is often the only way to get a second one.
+  // Marks recolored in the Logo art editor — same as the MLB shelf, `wornBy`
+  // included: without it, a mark you've actually assigned to Home or Away
+  // (LogoDropZone's assign select) shows up looking exactly as orphaned as one
+  // nobody's used yet. An affiliate is the likelier customer for this whole
+  // editor: MiLB art coverage is thinner, so recoloring the CDN mark is often
+  // the only way to get a second one.
   for (const mark of customMarksFor(teamId)) {
-    marks.push({ key: `custom-${mark.slug}`, treatment: null, label: mark.name, url: mark.url })
+    const wornBy = VARIANTS.filter((v) => customMarkAssignment(teamId, `milb-${v.key}`) === mark.slug)
+    marks.push({
+      key: `custom-${mark.slug}`,
+      treatment: wornBy[0]?.key ?? null,
+      label: mark.name,
+      url: mark.url,
+      wornBy: wornBy.map((v) => v.label),
+    })
   }
   return marks
 }
@@ -280,6 +295,13 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
   const wpaPinstripe = milbWpaBandPinstripeColor(teamId, variant, drafts.wpa)
   const wpaBand = milbWpaBandColor(teamId, variant, drafts.wpa)
   const wpaLayout = milbWpaLogoLayout(teamId, variant, drafts.wpa)
+  const wpaWordmarkOn = milbWpaWordmark(teamId, variant, drafts.wpa)
+  // Same idea as MLB's own live "Use Logo Art" preview (profiles/mlb.jsx) —
+  // without this, the WpaScenarios mockups would keep showing whatever mark
+  // is already saved until Save actually lands the toggle. `null` (not an
+  // override at all) when off, so WinProbChart falls through to its own
+  // normal mark resolution.
+  const wpaMarkOverride = wpaWordmarkOn ? { src: teamLogoUrl(teamId, 'wordmark'), recolor: null } : null
   // Resolved by the Header bars panel above rather than a second time here, so
   // the WPA mockups' own recolored chrome and the panel's bar can't disagree.
   const headerColors = headerUnit.props.colors
@@ -333,6 +355,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         layout: wpaLayout,
         pinstripe: Boolean(wpaPinstripe),
         bandColor: wpaPinstripe ?? wpaBand,
+        wordmark: wpaWordmarkOn,
         hasDraft: Boolean(drafts.wpa && Object.keys(drafts.wpa).length > 0),
         copyText: buildWpaCopyText(
           name,
@@ -342,6 +365,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
           wpaLayout,
           Boolean(wpaPinstripe),
           wpaPinstripe ?? wpaBand,
+          wpaWordmarkOn,
         ),
         onField: (field, value) => on.wpaField(variant, field, value),
         onReset: () => on.wpaReset(variant),
@@ -354,6 +378,7 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         headerColors,
         wpaLayout,
         wpaBandOverride: { pinstripe: Boolean(wpaPinstripe), color: wpaPinstripe ?? wpaBand },
+        wpaMarkOverride,
       }}
       headerPreview={{
         name,
@@ -409,11 +434,17 @@ function buildSaves(drafts) {
   store = mergeDraftIntoStore(store, drafts.wpa, (record, fields, variant, teamId) => {
     const pinstripe = milbWpaBandPinstripeColor(teamId, variant, fields)
     const color = pinstripe ?? milbWpaBandColor(teamId, variant, fields)
-    return {
+    const next = {
       ...record,
       wpaLayout: milbWpaLogoLayout(teamId, variant, fields),
       band: pinstripe ? { pinstripe: true, color } : color,
     }
+    // Absent (not `false`) is the default — off is the same as never having
+    // touched this, same "omit rather than write a stray false" rule the
+    // rest of this store follows (e.g. teams.js's offDayTreatment).
+    if (milbWpaWordmark(teamId, variant, fields)) next.wpaWordmark = true
+    else delete next.wpaWordmark
+    return next
   })
   store = mergeDraftIntoStore(store, drafts.header, (record, fields, variant, teamId) => ({
     ...record,

@@ -11291,6 +11291,35 @@ body {
   color: var(--text-caption);
 }
 
+/* A saved mark (Logo art editor) currently assigned to a jersey — same ring
+   language as .colorlab__swatchcell--active's "this is the one actually in
+   use" claim, so a mark you've just assigned reads as confirmed rather than
+   looking exactly as unused as one still sitting in the library. */
+.idlab__shelfitem--worn .idlab__shelfthumb {
+  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
+}
+
+.idlab__shelfworn {
+  max-width: 72px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--accent-positive);
+}
+
+/* A saved mark with no jersey to open (profiles/*.jsx's shelfMarks:
+   `treatment: null`) — dimmed rather than hidden, so it still reads as "we
+   have this" without inviting a click that goes nowhere. */
+.idlab__shelfitem:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.idlab__shelfitem:disabled .idlab__shelfthumb {
+  transform: none;
+}
+
 /* ---- the jersey rack ---- */
 .idlab__rack {
   position: relative;

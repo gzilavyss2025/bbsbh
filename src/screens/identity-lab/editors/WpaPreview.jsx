@@ -21,6 +21,7 @@ export function WpaPreview({
   bandBg,
   ownArt,
   artUpload,
+  wordmark,
   hasDraft,
   copyText,
   onField,
@@ -53,6 +54,20 @@ export function WpaPreview({
               onChange={(e) => onField('ownArt', !e.target.checked)}
             />
             <span>Use Logo Art</span>
+          </label>
+        )}
+        {/* MiLB-only (mlb.jsx never passes this prop) — the minimal
+            counterpart to MLB's own art-source picker above: one on/off
+            switch to tile the club's wordmark instead of its normal mark,
+            rather than a whole second upload/library system. */}
+        {wordmark !== undefined && (
+          <label className="colorlab__wpapreviewcolor colorlab__wpapreviewcheck">
+            <input
+              type="checkbox"
+              checked={wordmark}
+              onChange={(e) => onField('wpaWordmark', e.target.checked)}
+            />
+            <span>Use wordmark</span>
           </label>
         )}
         <LayoutField label="Size" field="size" value={size} onField={onField} />

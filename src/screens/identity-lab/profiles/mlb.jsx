@@ -547,11 +547,23 @@ function shelfMarks(teamId) {
   }
   // Marks recolored in the Logo art editor. They belong on the shelf whether or
   // not a jersey wears one yet — the shelf answers "what have we got for this
-  // club", and a saved mark is something we've got. `treatment: null` because a
-  // library mark isn't tied to a jersey until it's assigned, so clicking it
-  // selects nothing rather than opening an arbitrary tile.
+  // club", and a saved mark is something we've got. `wornBy` names every
+  // treatment CURRENTLY wearing it (LogoDropZone's assign select,
+  // customMarks.js) — otherwise a mark saved here reads as orphaned even after
+  // you've assigned it, with nothing on the shelf confirming the assignment
+  // stuck. `treatment` (which jersey clicking this opens) follows suit: the
+  // first treatment wearing it, or null for a mark nobody's assigned yet —
+  // clicking one of those still selects nothing rather than opening an
+  // arbitrary tile.
   for (const mark of customMarksFor(teamId)) {
-    marks.push({ key: `custom-${mark.slug}`, treatment: null, label: mark.name, url: mark.url })
+    const wornBy = treatments.filter((t) => customMarkAssignment(teamId, t.key) === mark.slug)
+    marks.push({
+      key: `custom-${mark.slug}`,
+      treatment: wornBy[0]?.key ?? null,
+      label: mark.name,
+      url: mark.url,
+      wornBy: wornBy.map((t) => t.label),
+    })
   }
   return marks
 }

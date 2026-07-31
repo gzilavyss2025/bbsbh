@@ -1,6 +1,7 @@
 import { WPA_LOGO_DEFAULTS } from './wpaLogo.js'
 import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
 import { byTreatment } from './tuningStore.js'
+import { teamLogoUrl } from './teams.js'
 import {
   MILB_COLORS,
   MILB_RESEARCHED_PAIRS,
@@ -92,6 +93,10 @@ export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color } } }`
 export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.band)
 
+// `{ [teamId]: { [variant]: boolean } }` — whether the WPA band tiles the
+// club's wordmark instead of its usual mark (milbWpaMarkUrl below).
+export const MILB_WPA_WORDMARK_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.wpaWordmark)
+
 // `{ [teamId]: { [variant]: { bar, accent, onBar } } }` — the MiLB half of the
 // header chrome a themed lineup page wears (ADR-0030), same shape and same
 // role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/headerTheme.js` is
@@ -158,6 +163,27 @@ export function milbWpaBandColor(teamId, variant, draft) {
   const overrideColor = override && typeof override === 'object' ? override.color : override
   if (overrideColor) return overrideColor
   return milbVariantColors(teamId, variant).bg
+}
+
+// Whether (teamId, variant)'s WPA band should tile the club's wordmark
+// instead of its normal mark — a draft toggle wins outright over a landed
+// override, absent means false (tile the normal mark, same as always). The
+// minimal MiLB counterpart to MLB's WPA_OWN_ART/WpaArtPicker: one on/off
+// switch rather than a whole second art-source library, since a wordmark is
+// the one alternate mark nearly every affiliate already has on the CDN.
+export function milbWpaWordmark(teamId, variant, draft) {
+  return draft?.wpaWordmark ?? Boolean(MILB_WPA_WORDMARK_OVERRIDES[teamId]?.[variant])
+}
+
+// The mark URL a (team, variant)'s WPA band actually tiles: the wordmark when
+// toggled on, else whatever the tile itself wears — the curated milb-home/away
+// art if procured, else the plain CDN base mark (same chain milbTreatmentTile
+// resolves for the real, non-WPA tile), so the band and the tile agree unless
+// wordmark is explicitly turned on.
+export function milbWpaMarkUrl(teamId, variant, draft) {
+  const side = variant === 'home' ? 'home' : 'away'
+  if (milbWpaWordmark(teamId, side, draft)) return teamLogoUrl(teamId, 'wordmark')
+  return milbHasLogoArt(teamId, side) ? teamLogoUrl(teamId, `milb-${side}`) : teamLogoUrl(teamId, 'base')
 }
 
 // Every affiliate's Home and Away jerseys share ONE header bar rather than
