@@ -684,6 +684,7 @@
         }
       },
       "city-connect": {
+        "scale": 1,
         "header": {
           "bar": "#131e29",
           "accent": "#5c82a5",
@@ -1279,11 +1280,12 @@
         "note": "Alt 1 Cream \"Twin Cities\""
       },
       "alternate-3": {
-        "scale": 0.85,
+        "scale": 0.94,
         "colors": {
           "primary": "#002B5C",
           "secondary": "#D31145"
         },
+        "offsetY": 3,
         "note": "Away Grey"
       },
       "city-connect": {
