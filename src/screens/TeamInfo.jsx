@@ -53,8 +53,8 @@ import { LineupStrengthCard } from '../components/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
-import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../lib/headerTheme.js'
+import { SPORT_LABEL } from '../lib/teams.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -70,22 +70,14 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../lib/heade
 // mastheads in the header colors of the jersey that club is actually wearing
 // tonight, so paging away -> home reads as two different clubs' sheets rather
 // than the same navy twice. The whole mechanism is three CSS custom properties
-// scoped to this subtree, which is also the containment: nothing outside a
-// `.teaminfo` sees them, so the innings viewer and the box score — where
-// navy-and-kraft IS the seal metaphor — are untouched.
+// scoped to whichever subtree carries `.is-themed` — here that's `.teaminfo`;
+// the box score's team cards (BoxScore.jsx) scope the same mechanism to each
+// card instead. The innings viewer, where navy-and-kraft IS the seal
+// metaphor, stays untouched because nothing there ever adds the class.
 //
 // The theme's only inputs are (teamId, treatment): identity, never state. See
 // lib/headerTheme.js for the full invariant and why "tint the page by whoever's
 // leading" is the version of this that would break the spoiler rule.
-
-// Which key this club's chrome is filed under. MLB clubs are keyed by
-// treatment ('city-connect'); MiLB affiliates have no uniform catalog to name a
-// treatment from, so their two-variation table is keyed by game side instead —
-// the same split src/lib/CLAUDE.md keeps everywhere else, resolved here rather
-// than merged into one fake vocabulary.
-function themeKeyFor(teamId, side, treatment) {
-  return isMlbTeamId(teamId) ? treatment : side
-}
 
 export function TeamInfo({
   feed,

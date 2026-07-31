@@ -4404,16 +4404,21 @@ body {
 }
 
 /* ------------------------------------------------------------- club theming
-   ADR-0030. `.is-themed` on a .teaminfo carries three custom properties
-   resolved from the jersey that club is wearing tonight — lib/headerTheme.js.
-   Every themed rule below reads them WITH the default as its fallback, so an
-   unthemed page (most of them — coverage is partial) renders byte-identically
-   to how it did before this feature existed.
+   ADR-0030. `.is-themed` carries three custom properties resolved from the
+   jersey that club is wearing tonight — lib/headerTheme.js. Every themed rule
+   below reads them WITH the default as its fallback, so an unthemed surface
+   (most of them — coverage is partial) renders byte-identically to how it did
+   before this feature existed.
 
-   Deliberately scoped to this subtree. The innings viewer and the box score
-   carry the seal metaphor — kraft amber on manila, navy chrome around it — and
-   recoloring those would put a club's brand in a fight with the spoiler UI's
-   own visual language. The properties simply never reach them.
+   Each themed surface adds `.is-themed` to its own root rather than one
+   page-wide ancestor: .teaminfo (the club-name bar + its section mastheads)
+   and, per card, the box score's .bs__team/.bs__abscard/.bs__defensecard
+   (BoxScore.jsx) — the same club, jersey, and triad as that club's lineup
+   page, just resolved a second time per card instead of once per page. The
+   innings viewer carries the seal metaphor — kraft amber on manila, navy
+   chrome around it — and stays untouched because nothing there ever adds the
+   class; recoloring it would put a club's brand in a fight with the spoiler
+   UI's own visual language.
 
    The club-name bar is the one surface that CHANGES shape when themed: unthemed
    it's a plain heading on the page canvas, themed it becomes a real bar so the
@@ -4463,6 +4468,20 @@ body {
    left to lose. Applied only here, only to art that is already a silhouette. */
 .is-themed--dark .metricbar__logo {
   filter: brightness(0);
+}
+
+/* The box score's ABS and Defense cards (.bs__abscard/.bs__defensecard,
+   BoxScore.jsx) carry no club mark of their own — just a text title — so
+   unlike .metricbar above there's no light/dark re-inking to do, only the
+   fill/edge/text triad. */
+.is-themed .abs__title,
+.is-themed .halfdefense__title {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+  color: var(--bar-text, var(--text-on-ink));
+}
+.is-themed .halfdefense__chevron {
+  color: var(--bar-text, var(--text-on-ink));
 }
 
 .teaminfo__headright {
@@ -13372,9 +13391,9 @@ body {
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* The by-inning tally: collapsed by default, same toggle-with-chevron idiom
-   as the lineup page's RosterPanel (.roster__toggle), styled to this page's
-   own card frame (matches .bs__insights) rather than the lineup page's. */
+/* The by-inning tally: a second line score (own card frame, matches
+   .bs__insights) always open — see InningTally's doc for why this one
+   doesn't default collapsed the way its old row-per-half layout did. */
 .bs__tally {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -13383,21 +13402,23 @@ body {
   margin-top: var(--space-3);
   overflow: hidden;
 }
-.bs__tallyToggle {
-  width: 100%;
+.bs__tallyHead {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--space-3);
   padding: 12px 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
 }
-.bs__tallyChevron {
+/* The legend spells out what the four slash-joined figures in each inning
+   cell mean, once, instead of repeating "P / Wh / F / LOB" column headers
+   above every inning the way Scoreboard repeats "R" once per team. */
+.bs__tallyLegend {
+  font-size: var(--fs-compact);
   color: var(--text-caption);
+  white-space: nowrap;
 }
 .bs__tallyBody {
-  padding: 10px 14px 12px;
+  padding: 0 14px 12px;
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 /* The box score's own Statcast Leaders card — its own full-width row
@@ -14967,15 +14988,55 @@ body {
   box-shadow: var(--shadow-card);
 }
 /* The club's logo, hard against the innings — shrink-to-fit so there's no
-   dead gap between it and inning 1. Linked (TeamLink) to the team page. */
-.bs__boardName {
-  width: 1%;
+   dead gap between it and inning 1. Linked (TeamLink) to the team page. A
+   fixed square footprint (rather than 1%-shrink-to-content) so the tile
+   below has a defined box to fill edge to edge, no gap on any side —
+   including the generic `.bs__grid td` bottom rule (overridden here at
+   higher specificity) and the first inning column's own left border, zeroed
+   below so the collapsed border between the two cells doesn't draw either. */
+.bs__grid .bs__boardName {
+  width: 30px;
+  height: 30px;
   white-space: nowrap;
   text-align: left !important;
-  padding: 3px 10px 3px 0 !important;
+  padding: 0 !important;
+  border: none;
+}
+.bs__boardName + .bs__boardInn {
+  border-left: none;
 }
 .bs__boardLogo {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+/* The line score's mark fills its cell edge to edge on its jersey-tinted
+   tile — the same TeamTreatmentMark/treatmentTile pair the scorebug HUD
+   (.gamehud__tile, Scorebug.jsx) wears, and the same "100% width/height, no
+   padding" block-class contract that tile documents — rather than sitting in
+   a bordered, padded box of its own inside the cell. The slate card
+   (.gamecard__logobox) and in-game masthead (.masthead__logobox) keep the
+   bordered-box look; this cell IS the frame instead. */
+.bs__boardLogobox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--tint, var(--paper-1));
+}
+.bs__boardLogobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.bs__boardLogobox .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 /* Each half-inning a fixed, equal-width bordered box regardless of the digits in
    it; a half that scored is inked bold seam-red. Deliberately compact — the
@@ -15035,6 +15096,16 @@ body {
 .bs__grid--board thead .bs__boardFinal {
   font-size: var(--fs-caption);
   color: var(--text-caption);
+}
+
+/* The by-inning tally's own cells are wider than Scoreboard's run-count boxes
+   above (26px) — each one reads four slash-joined figures ("24/1/6/1"), not a
+   single digit, and the Totals column carries the same reading, summed
+   (InningTally.jsx's `totalFor`). Same specificity as the rules above
+   (two classes), so this must come after them in the cascade to win. */
+.bs__grid--tally .bs__boardInn,
+.bs__grid--tally .bs__boardFinal {
+  width: 54px;
 }
 
 /* Fill-in header: the scorebook's labeled boxes (date, ballpark, umpires,

@@ -59,6 +59,7 @@ export function Scorebug({
             teamId={awayTeamId}
             name={awayName}
             treatment={awayTreatment}
+            side="away"
             size={24}
             block="gamehud__tile"
             className="gamehud__tile--away"
@@ -68,6 +69,7 @@ export function Scorebug({
             teamId={homeTeamId}
             name={homeName}
             treatment={homeTreatment}
+            side="home"
             size={24}
             block="gamehud__tile"
             className="gamehud__tile--home"
