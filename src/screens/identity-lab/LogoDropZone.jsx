@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { describeLogoRejection, LOGO_MAX_BYTES, LOGO_SIZE } from '../../lib/logoArt.js'
-import { copyLogo, uploadLogo } from './saveStores.js'
+import { assignCustomMark, copyLogo, uploadLogo } from './saveStores.js'
 
 // Drag a PNG onto a tile and it becomes that club's art. Wraps the tile's own
 // logo box (JerseyBench passes it as `children`) so the drop target is the
@@ -22,7 +22,23 @@ import { copyLogo, uploadLogo } from './saveStores.js'
 // of procuring/uploading the same mark again. Absent for any tile with
 // nothing else to copy from — mirrors `upload` itself being absent when a
 // treatment has no destination at all (JerseyBench.jsx).
-export function LogoDropZone({ teamId, treatment, label, caveat, copyTargets, onUploaded, children }) {
+// `savedMarks` (this club's Logo art library) adds a third way in, and the only
+// one that isn't an upload: WEAR a mark recolored in the lab. That's an
+// assignment, not a copy — the procured file this treatment already has stays
+// on disk untouched, and picking "Original art" hands it straight back
+// (src/lib/customMarks.js). Which is why this is a select rather than another
+// button: the choice is reversible and has a current value worth showing.
+export function LogoDropZone({
+  teamId,
+  treatment,
+  label,
+  caveat,
+  copyTargets,
+  savedMarks,
+  assignedSlug,
+  onUploaded,
+  children,
+}) {
   const [dragging, setDragging] = useState(false)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
@@ -75,6 +91,27 @@ export function LogoDropZone({ teamId, treatment, label, caveat, copyTargets, on
     setBusy(true)
     try {
       applyResult(await copyLogo({ teamId, from: copyFrom, to: treatment }))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleAssign(slug) {
+    setMessage(null)
+    setBusy(true)
+    try {
+      const result = await assignCustomMark({ teamId, treatment, slug })
+      if (result.error) {
+        setMessage({ kind: 'error', text: result.error })
+        return
+      }
+      onUploaded?.()
+      setMessage({
+        kind: 'ok',
+        text: slug
+          ? `now wearing the saved mark "${savedMarks.find((m) => m.slug === slug)?.name ?? slug}"`
+          : 'back to this treatment’s own art',
+      })
     } finally {
       setBusy(false)
     }
@@ -144,6 +181,25 @@ export function LogoDropZone({ teamId, treatment, label, caveat, copyTargets, on
           >
             Copy here
           </button>
+        </div>
+      )}
+      {savedMarks?.length > 0 && (
+        <div className="colorlab__logocopyrow">
+          <select
+            className="colorlab__logocopyselect"
+            aria-label={`Which saved mark ${label} wears`}
+            value={assignedSlug ?? ''}
+            onChange={(e) => handleAssign(e.target.value)}
+            disabled={busy}
+            title="Wear a mark recolored in Logo art — the procured file stays on disk"
+          >
+            <option value="">Original art</option>
+            {savedMarks.map((m) => (
+              <option key={m.slug} value={m.slug}>
+                {m.name}
+              </option>
+            ))}
+          </select>
         </div>
       )}
       {message && (

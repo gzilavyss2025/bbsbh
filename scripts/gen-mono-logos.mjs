@@ -32,7 +32,8 @@
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { monoLogoSvg } from '../src/lib/logoMono.js'
+import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logoMono.js'
+import { LOGO_CDN_BASE, pinsFor, readMonoInkStore } from './lib/mono-logo-art.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
@@ -42,7 +43,6 @@ const outDir = join(here, '..', 'public', 'data', 'logos', 'mono')
 const sheetDir = join(here, '..', '.scratch', 'mono-logos')
 const sheetPath = join(sheetDir, 'contact-sheet.html')
 
-const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
 const CONCURRENCY = 8
 
 const args = process.argv.slice(2)
@@ -81,10 +81,10 @@ async function teamList() {
   return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.id - b.id)
 }
 
-async function convert(team) {
+async function convert(team, inkStore) {
   let svg
   try {
-    const res = await fetch(`${LOGO_BASE}/${team.id}.svg`)
+    const res = await fetch(`${LOGO_CDN_BASE}/${team.id}.svg`)
     // A club with no art on the CDN isn't an error — MiLB coverage has always
     // been partial, and the app falls back on its own (see TeamLogo.jsx).
     if (!res.ok) return { ...team, skipped: `HTTP ${res.status}` }
@@ -92,9 +92,16 @@ async function convert(team) {
   } catch (err) {
     return { ...team, skipped: `fetch failed (${err.message})` }
   }
-  const mono = monoLogoSvg(svg, { maskId: `ink-${team.id}` })
+  // The hand-picked corrections to the automatic pass, when this club has any
+  // and they were picked against THIS art (src/lib/monoInk.js). A pin set the
+  // fingerprint rejects is reported below rather than silently ignored — it
+  // means a club rebranded and its mark wants another look in the lab.
+  const saved = inkStore[String(team.id)]?.parts
+  const pins = pinsFor(inkStore, team.id, svg)
+  const stalePins = Boolean(saved && Object.keys(saved).length && !pins)
+  const mono = monoLogoSvg(svg, { maskId: `ink-${team.id}`, pins })
   if (!mono) return { ...team, skipped: 'not convertible' }
-  return { ...team, svg, mono }
+  return { ...team, svg, mono, pinned: Boolean(pins), stalePins, art: monoLogoFingerprint(svg) }
 }
 
 function contactSheet(rows) {
@@ -126,7 +133,8 @@ ${cells}</table>`
 }
 
 const teams = await teamList()
-const rows = await mapConcurrent(teams, CONCURRENCY, convert)
+const inkStore = await readMonoInkStore()
+const rows = await mapConcurrent(teams, CONCURRENCY, (team) => convert(team, inkStore))
 
 await mkdir(outDir, { recursive: true })
 
@@ -151,7 +159,14 @@ if (wantSheet) {
 }
 
 const skipped = rows.filter((r) => r.skipped)
+const pinned = rows.filter((r) => r.pinned)
+const stale = rows.filter((r) => r.stalePins)
 console.log(`wrote ${written.size} mono logos to ${outDir}`)
+if (pinned.length) console.log(`${pinned.length} used hand-picked ink/knockout pins (src/lib/data/mono-ink.json)`)
+if (stale.length) {
+  console.log(`${stale.length} have pins picked against DIFFERENT art — converted automatically instead:`)
+  for (const s of stale) console.log(`  ${s.id} ${s.name} — re-pick in /identity-lab (art is now ${s.art})`)
+}
 if (skipped.length) {
   console.log(`skipped ${skipped.length} (app falls back to the full-color mark):`)
   for (const s of skipped) console.log(`  ${s.id} ${s.name} — ${s.skipped}`)

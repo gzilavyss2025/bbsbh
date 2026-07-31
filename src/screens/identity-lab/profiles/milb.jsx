@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
+import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   MILB_COLOR_LAB_LEVELS,
@@ -210,12 +211,19 @@ function headerProps(team, slot, drafts, extras, on) {
 // Coverage is thin at this level by design, so a shelf slot standing empty is
 // the useful answer rather than a missing row.
 function shelfMarks(teamId) {
-  return VARIANTS.map((v) => ({
+  const marks = VARIANTS.map((v) => ({
     key: v.key,
     treatment: v.key,
     label: v.label,
     url: milbHasLogoArt(teamId, v.key) ? teamLogoUrl(teamId, `milb-${v.key}`) : teamLogoUrl(teamId, 'base'),
   }))
+  // Marks recolored in the Logo art editor — same as the MLB shelf. An
+  // affiliate is the likelier customer: MiLB art coverage is thinner, so
+  // recoloring the CDN mark is often the only way to get a second one.
+  for (const mark of customMarksFor(teamId)) {
+    marks.push({ key: `custom-${mark.slug}`, treatment: null, label: mark.name, url: mark.url })
+  }
+  return marks
 }
 
 function markVisual(teamId, variant, drafts) {
@@ -298,6 +306,8 @@ function MilbJersey({ teamId, name, variant, label, lastOpponent, headerUnit, dr
         teamId,
         treatment: `milb-${variant}`,
         caveat: null,
+        savedMarks: customMarksFor(teamId),
+        assignedSlug: customMarkAssignment(teamId, `milb-${variant}`),
         onUploaded: () => setArtVersion((v) => v + 1),
       }}
       swatches={[

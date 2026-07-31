@@ -1,3 +1,5 @@
+import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { barMarkTone } from '../../../lib/headerTheme.js'
 import { HexField } from '../HexField.jsx'
 
 // The header chrome a lineup page wears when this club is in this jersey —
@@ -19,7 +21,16 @@ const AA_TEXT = 4.5
 // drafted for this bar, which the app answers with default navy chrome — drawn
 // as an empty outline rather than a painted bar, so "not set" can't be mistaken
 // for "set to navy".
-export function HeaderBarMock({ name, colors, unset }) {
+// The mock carries the club's MONO knockout mark, the same one the real
+// section mastheads wear (ADR-0031) — it's half of what a themed bar looks
+// like, and a flat silhouette that reads on navy can vanish or muddy on a
+// club's own fill, which is exactly the judgement this page exists to make.
+// Re-inked dark on a light bar by the same midpoint the app uses
+// (`barMarkTone`), so what shows here is what TeamInfo draws. A club with no
+// knockout art yet falls back to its full-color mark — TeamLogo's own chain,
+// unchanged, which is also the honest preview: that fallback is what the real
+// bar would show too.
+export function HeaderBarMock({ teamId, name, colors, unset }) {
   if (unset) {
     return (
       <div className="idlab__barmock idlab__barmock--unset">
@@ -27,11 +38,13 @@ export function HeaderBarMock({ name, colors, unset }) {
       </div>
     )
   }
+  const tone = barMarkTone(colors.onBar)
   return (
     <div
-      className="idlab__barmock"
+      className={`idlab__barmock${tone === 'dark' ? ' idlab__barmock--darkmark' : ''}`}
       style={{ '--header-bar': colors.bar, '--header-accent': colors.accent, '--header-onbar': colors.onBar }}
     >
+      <TeamLogo teamId={teamId} name={name} size={22} variant="mono" className="idlab__barmock__logo" />
       <span className="idlab__barmock__title">{name}</span>
     </div>
   )

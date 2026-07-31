@@ -60,6 +60,57 @@ Green's navy-on-orange monogram) still renders as a silhouette — one color
 genuinely cannot separate two mid-tones. That's the floor of the approach, not
 a regression: those marks flattened identically under the old filter.
 
+## Amendment (2026-07-31): the heuristic gets an escape hatch, per shape
+
+The bands above are right about most clubs and wrong about specific SHAPES of a
+few — and that wrongness is not the kind a threshold fixes, because moving a
+band to rescue one club's cream ground knocks out another club's gold. Retuning
+is a global act; the errors are local.
+
+So a club may now PIN individual shapes: `src/lib/data/mono-ink.json` maps a
+shape's ordinal in the art to `ink` or `knockout`, applied by `monoLogoSvg`
+AFTER the automatic pass — a pin set stays a short list of corrections rather
+than a transcription of the whole mark, so a later improvement to the bands
+still reaches every shape nobody pinned. Four decisions worth recording:
+
+- **Pins, not hand-edited art.** `gen-mono-logos.mjs` rewrites
+  `public/data/logos/mono/` from scratch on every run (a rebrand must not leave
+  a stale mark behind), so a hand-edited file would survive exactly until the
+  next nightly. The pins are the durable artifact; the SVG stays generated.
+- **Picked by eye, in the lab.** `/identity-lab`'s Knockout mark editor loads
+  the club's real CDN art, stamps every shape with the index a pin uses
+  (`monoLogoPickerSvg`), and previews the converted mark on that club's own
+  header bars. Save writes the store and asks the dev server to regenerate that
+  one file through the same `scripts/lib/mono-logo-art.mjs` the generator uses,
+  so what was approved on screen is what lands on disk. Judging a knockout mark
+  is a looking problem; the tool had to be a looking tool.
+- **Pins expire when the art moves.** A saved set carries a
+  `monoLogoFingerprint` of the source it was picked against — shape count and
+  geometry, so a recolor keeps the pins and a redraw doesn't. Different art
+  means the pins are dropped, the club converts automatically, and the run
+  reports it. Shape 3 of a rebranded logo is not the shape anybody looked at,
+  and a confidently wrong mark is worse than an unreviewed one.
+- **A pin lands as an inline `style`**, because a CSS rule in the art's own
+  `<style>` block beats a `fill=` attribute — it's the one paint that reliably
+  wins. A stroke is repainted only when the shape already draws one: handing a
+  stroke color to a shape without one turns SVG's 1px default on and outlines
+  something that was never outlined.
+
+The same shape-picking machinery grew a second use immediately: the **Logo art**
+editor beside it repaints shapes in FULL color to build the alternate / City
+Connect art the CDN doesn't carry (`src/lib/logoRecolor.js`,
+`src/lib/customMarks.js`). Both editors index shapes by the same ordinal, so a
+shape means one thing across the row; only the verdict differs — ink-vs-paper
+for a one-color mask, versus a hex. Wearing a recolored mark is an assignment
+teams.js resolves ahead of disk presence, never a copy over procured art; see
+`src/lib/CLAUDE.md`.
+
+This is also the one place the app inlines remote SVG markup into a document
+rather than pointing an `<img>` at it — the thing the "why precompute" section
+above lists as a cost of converting in the browser. It is confined to the
+dev-only lab, and `monoLogoPickerSvg` strips `<script>` elements and `on*`
+handlers before the markup goes in.
+
 The one remaining `brightness(0) invert(1)` in the app is `.gamestory__link`'s
 pointer-hover treatment, which recolors a card's logo to match a team-colored
 row. It has the same blind spot, but it's a transient desktop-hover state

@@ -42,6 +42,15 @@ import { contrastRatio } from './contrast.js'
 // WCAG range against white: an `onBar` that reads as ink rather than paper.
 const LIGHT_ON_BAR_MAX_CONTRAST_VS_WHITE = 2
 
+// 'light' | 'dark' — whether a bar with this ink leaves the white knockout mark
+// alone or re-inks it dark. Exported because /identity-lab previews that same
+// mark on its bar mocks off DRAFT colors, which never reach `headerThemeFor`
+// (nothing is landed yet): a second midpoint over there would let the lab show
+// a white mark on a bar the real page draws dark.
+export function barMarkTone(onBar) {
+  return contrastRatio(onBar, '#FFFFFF') <= LIGHT_ON_BAR_MAX_CONTRAST_VS_WHITE ? 'light' : 'dark'
+}
+
 // `{ bar, accent, onBar, onBarTone }` for a club in a given jersey, or null
 // when that pair has no curated triad. `treatment` is an MLB treatment key
 // ('main' | 'alternate' | 'alternate-2/3/4' | 'city-connect') for one of the 30
@@ -61,8 +70,7 @@ export function headerThemeFor(teamId, treatment) {
     bar: landed.bar,
     accent: landed.accent ?? landed.bar,
     onBar: landed.onBar,
-    onBarTone:
-      contrastRatio(landed.onBar, '#FFFFFF') <= LIGHT_ON_BAR_MAX_CONTRAST_VS_WHITE ? 'light' : 'dark',
+    onBarTone: barMarkTone(landed.onBar),
   }
 }
 

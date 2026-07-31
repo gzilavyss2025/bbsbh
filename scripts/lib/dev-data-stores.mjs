@@ -187,6 +187,35 @@ function isMlbTeamColorStore(parsed) {
   return null
 }
 
+// mono-ink.json: which SHAPES of a club's logo art are the mark and which are
+// the paper, when the automatic classifier is wrong (src/lib/monoInk.js). Keys
+// under `parts` are the shape's ordinal in the art, so they're digits like a
+// team id; the verdicts are a closed two-word set, and anything else here would
+// silently do nothing at generation time rather than fail.
+const INK_VERDICTS = new Set(['ink', 'knockout'])
+
+function isMonoInkStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, entry] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
+    for (const field of ['name', 'art', 'note']) {
+      const v = entry[field]
+      if (v !== undefined && typeof v !== 'string') return `team ${teamId}'s ${field} is not a string`
+    }
+    if (entry.parts !== undefined) {
+      if (!isPlainObject(entry.parts) || hasPoisonKey(entry.parts)) {
+        return `team ${teamId}'s parts is not an object`
+      }
+      for (const [part, verdict] of Object.entries(entry.parts)) {
+        if (!isTeamIdKey(part)) return `team ${teamId} has a bad part index "${part}"`
+        if (!INK_VERDICTS.has(verdict)) return `team ${teamId}'s part ${part} is not ink/knockout`
+      }
+    }
+  }
+  return null
+}
+
 // A flat uniformAssetCode -> display-name string map (src/api/uniforms.js's
 // fetchUniformNameOverrides). Rejects an array, nested objects, or non-string
 // values rather than writing a shape the app's readers don't expect.
@@ -226,6 +255,10 @@ export const DEV_DATA_STORES = {
   'mlb-team-colors': {
     file: 'src/lib/data/mlb-team-colors.json',
     validate: isMlbTeamColorStore,
+  },
+  'mono-ink': {
+    file: 'src/lib/data/mono-ink.json',
+    validate: isMonoInkStore,
   },
 }
 

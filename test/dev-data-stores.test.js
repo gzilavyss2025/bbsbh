@@ -258,3 +258,31 @@ test('a store with non-numeric keys keeps the order it was posted in', () => {
   const posted = { b_jersey_2: 'Away', a_jersey_1: 'Home' }
   assert.equal(serializeStore(posted), `${JSON.stringify(posted, null, 2)}\n`)
 })
+
+// --------------------------------------------------------------------------
+// mono-ink — which SHAPES of a club's logo art are the mark and which are the
+// paper (src/lib/monoInk.js). The keys are shape ordinals and the values a
+// closed two-word set, so a typo here would silently do nothing at generation
+// time rather than fail — which is exactly why the validator catches it.
+// --------------------------------------------------------------------------
+const monoInk = DEV_DATA_STORES['mono-ink'].validate
+
+test('a mono-ink entry pins numbered shapes to ink or knockout', () => {
+  assert.equal(monoInk({}), null)
+  assert.equal(
+    monoInk({ 158: { name: 'Milwaukee Brewers', art: '5:1a2b3c', parts: { 0: 'ink', 3: 'knockout' } } }),
+    null,
+  )
+  assert.match(monoInk({ 158: { parts: { 0: 'white' } } }), /not ink\/knockout/)
+  assert.match(monoInk({ 158: { parts: { glove: 'ink' } } }), /bad part index/)
+  assert.match(monoInk({ brewers: { parts: {} } }), /not a team id/)
+  assert.match(monoInk({ 158: { art: 5 } }), /art is not a string/)
+})
+
+test('a mono-ink entry rejects a prototype-poisoning key at either level', () => {
+  // Written through JSON.parse because an object LITERAL with a __proto__ key
+  // sets the prototype instead of the key — a request body arrives parsed, and
+  // that is the shape the validator has to answer for.
+  assert.match(monoInk(JSON.parse('{"__proto__": {"parts": {}}}')), /expected an object keyed by team id/)
+  assert.match(monoInk(JSON.parse('{"158": {"parts": {"__proto__": "ink"}}}')), /parts is not an object/)
+})

@@ -58,7 +58,7 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
         <CopyIconButton text={header.copyText} label={`Copy ${unit.name} ${unit.label} header-color context`} />
       </div>
 
-      <HeaderBarMock name={unit.name} colors={header.colors} unset={header.unset} />
+      <HeaderBarMock teamId={unit.teamId} name={unit.name} colors={header.colors} unset={header.unset} />
 
       <div className="idlab__wearers">
         {unit.wearers.map((wearer) => (

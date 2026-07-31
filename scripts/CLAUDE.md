@@ -478,7 +478,15 @@ Re-run only to fold in a new season.
   (`.scratch/mono-logos/contact-sheet.html`, gitignored) and LOOK at every mark
   beside its original; a bad conversion is a wrong-looking logo, not a crash,
   and a blank cell means that file doesn't decode as an image at all.
-  `--ids=158,498` spot-checks a few. Kept OUT of the PWA precache (~1.7 MB for
+  `--ids=158,498` spot-checks a few. A club the heuristic gets wrong is corrected
+  by SHAPE rather than by retuning the thresholds for everyone: `src/lib/data/mono-ink.json`
+  pins individual shapes to ink or knockout, picked by eye in `/identity-lab`'s
+  Knockout mark editor, and this script applies them (`scripts/lib/mono-logo-art.mjs`,
+  shared with the lab's dev-only regenerate route so both produce identical art).
+  Pins carry a fingerprint of the art they were picked against — a club that
+  rebrands drops back to automatic and is REPORTED at the end of a run rather
+  than having yesterday's answers applied to today's shapes.
+  Kept OUT of the PWA precache (~1.7 MB for
   the league, two marks per game) with a CacheFirst runtime rule instead — see
   `vite.config.js`.
 - `gen-logo-art.mjs` → `src/lib/data/logo-art.json` — the coverage manifest for the

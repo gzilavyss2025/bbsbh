@@ -7,7 +7,13 @@
 // image because a namespace prefix went undeclared.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { classifyPaint, monoLogoSvg } from '../src/lib/logoMono.js'
+import {
+  classifyPaint,
+  monoLogoFingerprint,
+  monoLogoParts,
+  monoLogoPickerSvg,
+  monoLogoSvg,
+} from '../src/lib/logoMono.js'
 
 const wrap = (body, attrs = '') =>
   `<svg xmlns="http://www.w3.org/2000/svg"${attrs} viewBox="0 0 100 100">${body}</svg>`
@@ -139,4 +145,102 @@ test('art that cannot be re-inked falls back instead of writing an empty mark', 
   // …and the non-answers.
   assert.equal(monoLogoSvg(''), null)
   assert.equal(monoLogoSvg(null), null)
+})
+
+// --------------------------------------------------------------------------
+// Per-shape pins — the hand correction picked in /identity-lab's Knockout mark
+// editor and applied by the generator (src/lib/monoInk.js,
+// scripts/lib/mono-logo-art.mjs). The classifier is a heuristic over art nobody
+// controls, so the escape hatch has to be exact about WHICH shape it moves.
+// --------------------------------------------------------------------------
+const twoShapes = wrap(
+  '<path d="M0 0h9v9H0z" fill="#12284b"/><circle cx="5" cy="5" r="3" fill="#ffc52f"/>',
+)
+
+test('parts report each shape\'s own fill and the verdict it gets automatically', () => {
+  const parts = monoLogoParts(twoShapes)
+  assert.deepEqual(
+    parts.map((p) => [p.index, p.tag, p.fill, p.auto]),
+    [
+      [0, 'path', '#12284b', 'ink'],
+      [1, 'circle', '#ffc52f', 'ink'],
+    ],
+  )
+})
+
+test('a fill stated only in a <style> rule still shows up as that shape\'s color', () => {
+  const parts = monoLogoParts(
+    wrap('<style>.cls-1{fill:#12284b}</style><path class="cls-1" d="M0 0h9v9H0z"/>'),
+  )
+  assert.equal(parts[0].fill, '#12284b')
+  assert.equal(parts[0].auto, 'ink')
+})
+
+test('a shape that states no paint at all inherits ink, not an undecided verdict', () => {
+  // The wrapper group monoLogoSvg builds makes the inherited default ink, so
+  // the picker must not offer this as unclassified.
+  const parts = monoLogoParts(wrap('<path d="M0 0h9v9H0z"/>'))
+  assert.equal(parts[0].fill, null)
+  assert.equal(parts[0].auto, 'ink')
+})
+
+test('pinning a shape to knockout punches it out of the mask', () => {
+  const out = monoLogoSvg(twoShapes, { pins: { 1: 'knockout' } })
+  // The pin lands as an inline style, which is the only paint that beats both
+  // an attribute and a <style> rule.
+  assert.match(out, /<circle[^>]*style="fill:#000"/)
+  // …and the shape nobody pinned keeps the automatic answer.
+  assert.match(out, /<path[^>]*fill="#fff"/)
+})
+
+test('pinning a shape to ink rescues art the automatic pass reads as all paper', () => {
+  // A mark drawn entirely in a pale brand color converts to nothing today —
+  // the bail that stops an empty file being written. One pin is enough to make
+  // it convertible again.
+  const allPaper = wrap('<path d="M0 0h9v9H0z" fill="#f4f1ea"/>')
+  assert.equal(monoLogoSvg(allPaper), null)
+  const out = monoLogoSvg(allPaper, { pins: { 0: 'ink' } })
+  assert.match(out, /<path[^>]*style="fill:#fff"/)
+})
+
+test('a pin replaces a conflicting fill in an existing style attribute, keeping the rest', () => {
+  const out = monoLogoSvg(
+    wrap('<path d="M0 0h9v9H0z" style="opacity:.5;fill:#12284b"/>'),
+    { pins: { 0: 'knockout' } },
+  )
+  assert.match(out, /style="opacity:\.5;fill:#000"/)
+  assert.doesNotMatch(out, /fill:#12284b/)
+})
+
+test('a pin repaints a stroke only when the shape already draws one', () => {
+  // Handing a stroke color to a shape that has none turns SVG's 1px default on
+  // and outlines something that was never outlined.
+  const stroked = monoLogoSvg(
+    wrap('<path d="M0 0h9v9H0z" fill="#12284b" stroke="#ffc52f"/>'),
+    { pins: { 0: 'ink' } },
+  )
+  assert.match(stroked, /style="fill:#fff;stroke:#fff"/)
+  const plain = monoLogoSvg(twoShapes, { pins: { 0: 'ink' } })
+  assert.doesNotMatch(plain, /stroke:/)
+})
+
+test('the picker stamps the same indices the pins use, and strips anything executable', () => {
+  const picker = monoLogoPickerSvg(
+    wrap('<script>alert(1)</script><path d="M0 0h9v9H0z" onclick="steal()" fill="#12284b"/><circle cx="5" cy="5" r="3"/>'),
+  )
+  assert.doesNotMatch(picker, /script|onclick/i)
+  assert.match(picker, /<path[^>]*data-mono-part="0"/)
+  assert.match(picker, /<circle[^>]*data-mono-part="1"/)
+  // Same numbering monoLogoParts hands the list of buttons beside the art.
+  assert.deepEqual(monoLogoParts(twoShapes).map((p) => p.index), [0, 1])
+})
+
+test('the fingerprint tracks the SHAPES, so pins survive a recolor but not a redraw', () => {
+  const recolored = wrap('<path d="M0 0h9v9H0z" fill="#000"/><circle cx="5" cy="5" r="3" fill="#fff"/>')
+  assert.equal(monoLogoFingerprint(twoShapes), monoLogoFingerprint(recolored))
+  const redrawn = wrap('<path d="M1 1h8v8H1z" fill="#12284b"/><circle cx="5" cy="5" r="3" fill="#ffc52f"/>')
+  assert.notEqual(monoLogoFingerprint(twoShapes), monoLogoFingerprint(redrawn))
+  // A shape added or removed moves it too — that's the case that would slide
+  // every pin onto the wrong shape.
+  assert.notEqual(monoLogoFingerprint(twoShapes), monoLogoFingerprint(wrap('<path d="M0 0h9v9H0z" fill="#12284b"/>')))
 })

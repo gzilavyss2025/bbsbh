@@ -163,7 +163,12 @@ export function JerseyBench({
           </div>
 
           <div className="idlab__benchbar">
-            <HeaderBarMock name={headerPreview.name} colors={headerPreview.colors} unset={headerPreview.unset} />
+            <HeaderBarMock
+              teamId={teamId}
+              name={headerPreview.name}
+              colors={headerPreview.colors}
+              unset={headerPreview.unset}
+            />
             <p className="idlab__lineagecaption">
               {headerPreview.lineage.caption}
               {/* An anchor, not a button: the bar unit it lands on takes focus
