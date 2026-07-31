@@ -275,16 +275,16 @@ export function monoLogoParts(svg) {
 // shape in the store are the same act — nothing maps one numbering onto
 // another.
 //
-// This is the ONE place remote SVG markup is put into a document rather than
-// pointed at with an <img> (the reason the app precomputes this art at all —
-// see the file header), so the two things that make inline SVG dangerous go
-// first: `<script>` elements and `on*` event-handler attributes. Dev-only
-// surface, off a first-party CDN, and still not worth injecting unexamined.
+// Stamping only — this does NOT make markup safe to inline, and must not be
+// asked to. It used to strip `<script>` and `on*` handlers with a pair of regex
+// replaces, which is the technique that cannot be made correct: `</script\t\n
+// foo>` is a closing tag no such pattern matches, and one pass can re-form what
+// it removes (`<scr<script>ipt>`). Callers that inline the result sanitize at
+// FETCH time with a real parser instead (src/lib/svgSanitize.js) and pass the
+// sanitized markup here — which also keeps this function's shape numbering
+// counting the same elements the editor's other calls see.
 export function monoLogoPickerSvg(svg) {
   const source = String(svg ?? '')
-    .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '')
-    .replace(/<script\b[^>]*\/?>/gi, '')
-    .replace(/(?<![\w-])on[a-z]+\s*=\s*(["'])[\s\S]*?\1/gi, '')
   if (!source.includes('<svg')) return null
   let index = 0
   return source.replace(DRAWABLE_TAG, (tag) => {

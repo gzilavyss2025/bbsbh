@@ -10,8 +10,21 @@ test('markup has to be an SVG, and one with nothing executable in it', () => {
   assert.equal(describeMarkRejection('<svg viewBox="0 0 1 1"><path d="M0 0h1v1H0z"/></svg>'), null)
   assert.match(describeMarkRejection('{"not":"art"}'), /not an SVG/)
   assert.match(describeMarkRejection('<svg viewBox="0 0 1 1"><path/>'), /truncated/)
-  assert.match(describeMarkRejection('<svg><script>x()</script></svg>'), /<script>/)
   assert.match(describeMarkRejection('<svg><path onclick="x()"/></svg>'), /event handler/)
+})
+
+test('anything script-shaped is refused, in whatever casing or spelling', () => {
+  // The gate is a substring test rather than a tag pattern on purpose — the
+  // shapes that defeat a tag pattern (odd casing, whitespace inside the closing
+  // tag, a nested tag that re-forms after a naive strip) all still land here.
+  for (const markup of [
+    '<svg><script>x()</script></svg>',
+    '<svg><SCRIPT>x()</SCRIPT></svg>',
+    '<svg><script\n>x()</script\t\n foo></svg>',
+    '<svg><scr<script>ipt>x()</svg>',
+  ]) {
+    assert.match(describeMarkRejection(markup), /script/, markup)
+  }
 })
 
 test('the destination is rebuilt from the id and slug, and refuses anything else', () => {

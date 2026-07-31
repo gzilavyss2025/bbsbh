@@ -107,9 +107,26 @@ teams.js resolves ahead of disk presence, never a copy over procured art; see
 
 This is also the one place the app inlines remote SVG markup into a document
 rather than pointing an `<img>` at it — the thing the "why precompute" section
-above lists as a cost of converting in the browser. It is confined to the
-dev-only lab, and `monoLogoPickerSvg` strips `<script>` elements and `on*`
-handlers before the markup goes in.
+above lists as a cost of converting in the browser. It has to: a shape can't be
+clicked through an `<img>`.
+
+**Sanitizing that markup is a PARSE, not a filter** (`src/lib/svgSanitize.js`),
+and the first version got this wrong. It stripped `<script>` elements and `on*`
+handlers with two regex replaces, which CodeQL flagged on the way in with two
+concrete holes: `</script\t\n foo>` is a valid closing tag no such pattern
+matches, and a single replace pass can CREATE what it removes
+(`<scr<script>ipt>` becomes `<script>`). Neither is fixable with a better
+pattern — the technique is the bug. `DOMParser` resolves the real tree first, so
+there is nothing left to smuggle past a pattern, and unparseable markup returns
+null rather than a best-effort string. Do not reintroduce a regex here.
+
+One consequence worth keeping straight: the knockout editor holds BOTH forms of
+the art. The fingerprint, the shape list, and the converted preview are taken
+from the RAW markup, because the generator converts raw CDN bytes and a
+fingerprint taken from anything else could read as stale server-side and
+silently drop that club's pins. Only the markup actually inlined is the
+sanitized form. The two enumerate the same shapes because sanitizing removes
+only script- and `foreignObject`-class elements, none of which are drawable.
 
 The one remaining `brightness(0) invert(1)` in the app is `.gamestory__link`'s
 pointer-hover treatment, which recolors a card's logo to match a team-colored

@@ -81,14 +81,23 @@ async function writeStore(store) {
 
 // The markup a save will accept. Not a schema — just the two things that make
 // the file useless or unsafe if wrong: it has to actually be an SVG, and it
-// must not carry script. The editor produces this markup from art it fetched
-// itself, so this guards a hand-crafted POST, not the normal path.
+// must not carry anything executable.
+//
+// This REJECTS; it does not strip. That distinction is the whole reason it can
+// be this blunt: the substring tests below are deliberately over-eager (they
+// bounce a file merely containing the word "script" anywhere, attribute or
+// text), which as a filter would be broken and as a gate is just strict. The
+// markup the editor posts has already been through a real parser
+// (src/lib/svgSanitize.js) with executable nodes removed, so this is the
+// backstop for a hand-crafted POST rather than the primary defense — and a
+// backstop that says no too often is the right kind of wrong.
 export function describeMarkRejection(svg) {
   const text = String(svg ?? '')
-  if (!/<svg[\s>]/i.test(text)) return 'not an SVG — expected markup with an <svg> root'
-  if (!/<\/svg\s*>/i.test(text)) return 'SVG markup is truncated — no closing </svg>'
-  if (/<script[\s>]/i.test(text)) return 'SVG carries a <script> element'
-  if (/(?<![\w-])on[a-z]+\s*=/i.test(text)) return 'SVG carries an inline event handler'
+  const lower = text.toLowerCase()
+  if (!lower.includes('<svg')) return 'not an SVG — expected markup with an svg root element'
+  if (!lower.includes('</svg')) return 'SVG markup is truncated — no closing svg tag'
+  if (lower.includes('script')) return 'SVG mentions script — refused'
+  if (/\son[a-z]+\s*=/i.test(text)) return 'SVG carries an inline event handler'
   return null
 }
 

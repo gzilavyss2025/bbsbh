@@ -224,15 +224,23 @@ test('a pin repaints a stroke only when the shape already draws one', () => {
   assert.doesNotMatch(plain, /stroke:/)
 })
 
-test('the picker stamps the same indices the pins use, and strips anything executable', () => {
-  const picker = monoLogoPickerSvg(
-    wrap('<script>alert(1)</script><path d="M0 0h9v9H0z" onclick="steal()" fill="#12284b"/><circle cx="5" cy="5" r="3"/>'),
-  )
-  assert.doesNotMatch(picker, /script|onclick/i)
+test('the picker stamps the same indices the pins use', () => {
+  const picker = monoLogoPickerSvg(twoShapes)
   assert.match(picker, /<path[^>]*data-mono-part="0"/)
   assert.match(picker, /<circle[^>]*data-mono-part="1"/)
   // Same numbering monoLogoParts hands the list of buttons beside the art.
   assert.deepEqual(monoLogoParts(twoShapes).map((p) => p.index), [0, 1])
+})
+
+test('the picker does NOT make markup safe to inline — that is a parser\'s job', () => {
+  // It stamps and nothing else. This used to strip <script> and on* handlers
+  // with regex replaces, which cannot be made correct (a closing tag may carry
+  // whitespace and attributes; one pass can re-form what it removes). Callers
+  // sanitize at fetch with src/lib/svgSanitize.js and pass the result here, so
+  // this asserts the narrowed contract rather than a filter that half-worked.
+  const stamped = monoLogoPickerSvg(wrap('<path d="M0 0h9v9H0z" onclick="x()"/>'))
+  assert.match(stamped, /onclick/)
+  assert.match(stamped, /data-mono-part="0"/)
 })
 
 test('the fingerprint tracks the SHAPES, so pins survive a recolor but not a redraw', () => {

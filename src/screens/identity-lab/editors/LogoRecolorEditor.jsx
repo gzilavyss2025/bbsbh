@@ -3,6 +3,7 @@ import { useAsync } from '../../../hooks/useAsync.js'
 import { monoLogoParts, monoLogoPickerSvg } from '../../../lib/logoMono.js'
 import { TRANSPARENT_PAINT, isRecolorHex, isRecolorPaint, recolorSvg } from '../../../lib/logoRecolor.js'
 import { customMarksFor } from '../../../lib/customMarks.js'
+import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'
 import { saveCustomMark } from '../saveStores.js'
@@ -42,11 +43,18 @@ export function LogoRecolorEditor({ teamId, name, bars }) {
   const [sourceKey, setSourceKey] = useState(sources[0]?.key ?? null)
   const source = sources.find((s) => s.key === sourceKey) ?? sources[0] ?? null
 
+  // Sanitized once at fetch, with a parser rather than a pattern
+  // (src/lib/svgSanitize.js) — this markup gets inlined so its shapes can be
+  // clicked, and everything downstream (parts, recolor, save) reads the same
+  // sanitized string, so a saved mark can't carry anything the picker refused
+  // to render either.
   const art = useAsync(async () => {
     if (!source) return null
     const res = await fetch(source.url)
     if (!res.ok) throw new Error(`could not load ${source.label} (HTTP ${res.status})`)
-    return res.text()
+    const clean = sanitizeSvgMarkup(await res.text())
+    if (!clean) throw new Error(`${source.label} didn't parse as SVG`)
+    return clean
   }, [source?.url])
 
   // Keyed by source: switching marks starts a fresh repaint rather than

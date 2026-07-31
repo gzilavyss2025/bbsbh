@@ -7,6 +7,7 @@ import {
   monoLogoSvg,
 } from '../../../lib/logoMono.js'
 import { monoInkFor, monoInkStore } from '../../../lib/monoInk.js'
+import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { barMarkTone } from '../../../lib/headerTheme.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 
@@ -44,16 +45,34 @@ const VERDICT_LABEL = {
 const DEFAULT_CHROME_BAR = '#12233F'
 
 export function MonoInkEditor({ teamId, name, bars }) {
+  // Both forms of the art, and the split between them matters.
+  //
+  // The RAW markup is what everything measured against the generator uses —
+  // the fingerprint, the shape list, the converted preview — because
+  // scripts/lib/mono-logo-art.mjs converts raw CDN bytes, and a fingerprint
+  // taken from anything else could read as stale server-side and silently drop
+  // this club's pins at generation time.
+  //
+  // The SANITIZED form is used for exactly one thing: the markup inlined into
+  // the document so shapes can be clicked (src/lib/svgSanitize.js — a parser,
+  // not a filter). Shape numbering survives the round trip because sanitizing
+  // only ever removes script/foreignObject-class elements and `on*` attributes,
+  // none of which are drawable, so the two forms enumerate the same shapes in
+  // the same order.
   const art = useAsync(async () => {
     const res = await fetch(`${LOGO_CDN}/${teamId}.svg`)
     if (!res.ok) throw new Error(`no art on the CDN for team ${teamId} (HTTP ${res.status})`)
-    return res.text()
+    const raw = await res.text()
+    const safe = sanitizeSvgMarkup(raw)
+    if (!safe) throw new Error(`this club's art didn't parse as SVG`)
+    return { raw, safe }
   }, [teamId])
 
-  const source = art.data ?? null
+  const source = art.data?.raw ?? null
+  const safe = art.data?.safe ?? null
   const fingerprint = useMemo(() => (source ? monoLogoFingerprint(source) : null), [source])
   const parts = useMemo(() => (source ? monoLogoParts(source) : []), [source])
-  const picker = useMemo(() => (source ? monoLogoPickerSvg(source) : null), [source])
+  const picker = useMemo(() => (safe ? monoLogoPickerSvg(safe) : null), [safe])
 
   // Saved pins are only adopted when they were picked against THIS art — the
   // same fingerprint rule the generator applies (src/lib/monoInk.js). A club
