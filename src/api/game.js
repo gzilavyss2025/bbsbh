@@ -5,9 +5,134 @@ import { getJson } from './statsapi.js'
 import { SPORT_LABEL, MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { applyJsonPatch } from '../lib/jsonPatch.js'
 
+// `options.fields` (array or comma-string) opts a caller into a pruned
+// response — see PAST_GAME_FEED_FIELDS below for the one such caller. Omitted
+// (GameView's useGameData, loadScorecard) the full feed comes back unchanged.
 export async function fetchGameFeed(gamePk, options) {
-  return getJson(`/api/v1.1/game/${gamePk}/feed/live`, options)
+  const { fields, ...rest } = options ?? {}
+  const query = fields
+    ? `?fields=${Array.isArray(fields) ? fields.join(',') : fields}`
+    : ''
+  return getJson(`/api/v1.1/game/${gamePk}/feed/live${query}`, rest)
 }
+
+// The COMPLETE feed read-set of the past-game "signals" path — the ONLY
+// consumers of usePastGameSignals' cache: dayHighlights.js's
+// classifyGameCards (slate pills), GameResultFace (flip-card back, which runs
+// selectBoxscore → computePitcherLines), computePlayOfTheGame, and
+// PostseasonSeriesPage. A full feed is ~760 KB and a revealed 16-game slate
+// fetches one per final game; this allowlist cuts each to a fraction while
+// keeping every field those consumers read (same fields=-prunes-the-payload
+// idea as WIN_PROB_FIELDS below, and the same failure mode: a name missing
+// here arrives `undefined` and blanks its surface with no error — verified
+// output-identical against live finals, and pinned by test/past-game-fields.test.js).
+// NOT for the in-game view: useGameData's feed reaches derive.js/playbyplay.js/
+// linescore.js, whose read-set (pitchData, hitData, per-pitch details, …) is
+// far wider and includes filter-opaque maps (docs/api-audit.md) — never pass
+// this list there.
+export const PAST_GAME_FEED_FIELDS = [
+  // envelope + gameData: identity, names, numbers, game info
+  'gamePk',
+  'gameData',
+  'teams',
+  'away',
+  'home',
+  'id',
+  'name',
+  'teamName',
+  'clubName',
+  'abbreviation',
+  'players',
+  'fullName',
+  'boxscoreName',
+  'lastFirstName',
+  'lastName',
+  'firstName',
+  'useName',
+  'primaryNumber',
+  'pitchHand',
+  'code',
+  'jerseyNumber',
+  'battingOrder',
+  'position',
+  'allPositions',
+  'person',
+  'gameInfo',
+  'gameDurationMinutes',
+  'delayDurationMinutes',
+  'venue',
+  'timeZone',
+  'tz',
+  // liveData: decisions, boxscore, linescore
+  'liveData',
+  'decisions',
+  'winner',
+  'loser',
+  'save',
+  'boxscore',
+  'info',
+  'label',
+  'value',
+  'title',
+  'fieldList',
+  'note',
+  'team',
+  'pitchers',
+  'stats',
+  'seasonStats',
+  'teamStats',
+  'batting',
+  'pitching',
+  'atBats',
+  'runs',
+  'hits',
+  'rbi',
+  'baseOnBalls',
+  'strikeOuts',
+  'homeRuns',
+  'triples',
+  'doubles',
+  'stolenBases',
+  'avg',
+  'inningsPitched',
+  'earnedRuns',
+  'numberOfPitches',
+  'pitchesThrown',
+  'battersFaced',
+  'wins',
+  'losses',
+  'saves',
+  'linescore',
+  'innings',
+  'num',
+  'errors',
+  'leftOnBase',
+  // plays: only what computePitcherLines + the signal scanners walk
+  'plays',
+  'allPlays',
+  'about',
+  'inning',
+  'halfInning',
+  'endTime',
+  'result',
+  'type',
+  'eventType',
+  'event',
+  'description',
+  'matchup',
+  'pitcher',
+  'playEvents',
+  'isPitch',
+  'runners',
+  'details',
+  'isScoringEvent',
+  'responsiblePitcher',
+  'earned',
+  'movement',
+  'end',
+  'count',
+  'outs',
+]
 
 // The undocumented diffPatch mode: returns an array of RFC 6902 patch
 // entries (`{ diff: [...] }`) covering everything that changed since

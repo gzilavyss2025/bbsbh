@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { fetchGameFeed, fetchWinProbability } from '../api/game.js'
+import { fetchGameFeed, fetchWinProbability, PAST_GAME_FEED_FIELDS } from '../api/game.js'
 
 // A past, Final game's result never changes, so once its feed + win
 // probability are fetched they're cached for the tab's lifetime — shared
@@ -10,8 +10,11 @@ const cache = new Map()
 
 function loadSignals(gamePk) {
   if (!cache.has(gamePk)) {
+    // Pruned to this path's exact read-set (see PAST_GAME_FEED_FIELDS' header)
+    // — a revealed slate fetches one feed per final game, so the full ~760 KB
+    // response × 16 games was the app's single largest network event.
     const pending = Promise.all([
-      fetchGameFeed(gamePk),
+      fetchGameFeed(gamePk, { fields: PAST_GAME_FEED_FIELDS }),
       fetchWinProbability(gamePk),
     ]).then(([feed, winProb]) => ({ feed, winProb }))
     // Only a FULFILLED result is the immutable Final we mean to cache for the

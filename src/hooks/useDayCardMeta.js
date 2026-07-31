@@ -25,6 +25,28 @@ import { usePastGameSignals } from './usePastGameSignals.js'
 // dep would just be a redundant trigger.
 const EMPTY_MAP = new Map()
 
+// A 16-game slate means 16 feed+winProb pairs; firing all 32 requests at once
+// contends with itself on a phone connection (and with the callouts fetch
+// below). A small worker pool keeps the pipe full without the stampede.
+// Results keep item order; per-item failures are the caller's catch's problem.
+const SIGNALS_CONCURRENCY = 6
+
+async function mapPool(items, limit, fn) {
+  const results = new Array(items.length)
+  let next = 0
+  const workers = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (next < items.length) {
+        const i = next++
+        results[i] = await fn(items[i], i)
+      }
+    },
+  )
+  await Promise.all(workers)
+  return results
+}
+
 export function useDayCardMeta(finals, dateStr, revealed) {
   const getSignals = usePastGameSignals()
   const [byGamePk, setByGamePk] = useState(EMPTY_MAP)
@@ -35,12 +57,10 @@ export function useDayCardMeta(finals, dateStr, revealed) {
     let cancelled = false
     ;(async () => {
       const [entries, calloutsData] = await Promise.all([
-        Promise.all(
-          finals.map((game) =>
-            getSignals(game.gamePk)
-              .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
-              .catch(() => null),
-          ),
+        mapPool(finals, SIGNALS_CONCURRENCY, (game) =>
+          getSignals(game.gamePk)
+            .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
+            .catch(() => null),
         ),
         fetchCallouts(apiDateToUrl(dateStr)),
       ])
