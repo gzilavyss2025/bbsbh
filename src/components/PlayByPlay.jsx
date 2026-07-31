@@ -14,6 +14,7 @@ import {
   pinchHittingBatter,
   nextStepBoundary,
   lastVisibleAtBatIndex,
+  deriveLiveState,
 } from '../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../api/callout-notes.js'
 import { PlayDiamond } from './PlayDiamond.jsx'
@@ -52,7 +53,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // full entries list (every entry shown, whether by tapping through or because
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -129,6 +130,18 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
       entries.filter((e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored).length,
     )
   }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The scorebug HUD's live snapshot (bases/outs/pitches/current batter),
+  // reported for the SCOREBUG'S benefit only — deliberately NOT gated on
+  // `stepping` the way onStepInfo/onRunsSoFar above are. Those two only fire
+  // while a half is being actively stepped through one at-bat at a time; the
+  // scorebug still needs a final snapshot once a half is fully committed
+  // (stepCap null, effectiveCap null) or the HUD would go blank the instant
+  // the last at-bat reveals. `deriveLiveState` itself is what keeps this
+  // spoiler-safe either way — it never reads past `effectiveCap`.
+  useEffect(() => {
+    onLiveState?.(deriveLiveState(entries, effectiveCap ?? entries.length))
+  }, [entries, effectiveCap]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // (This file used to report the currently-revealed pitcher back up to
   // HalfInning, which overrode its persistent "Now Pitching" header. That put
