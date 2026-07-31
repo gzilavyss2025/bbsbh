@@ -14,8 +14,11 @@ eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
 reveal-only in the same sense — a video clip's title/description narrate the
 play's outcome, so the map is built inside `HalfInning`'s `SealBox` reveal
 function (next to `revealDerived`), never at `InningViewer`'s top level; the
-fetch itself (`fetchHighlights`) is safe eagerly, same as `game.js`'s
-`fetchWinProbability`, since a raw fetch result produces no DOM on its own.
+fetch itself (`fetchHighlights`) is safe eagerly with respect to spoilers,
+same as `game.js`'s `fetchWinProbability` — a raw fetch result produces no DOM
+on its own — but `useGameData` still waits to fire either until its consuming
+surface is actually opened (`useEverActive`, see below), since "safe" here
+only ever meant spoiler-safe, not free.
 `select.js` is spoiler-**free**. In between sit
 **caller-gated pre-pitch selectors** (`selectPrePitchChanges` in `select.js`,
 `defenseEntering` in `defense.js`, `lineupEntering` in `battingorder.js`),
@@ -54,10 +57,13 @@ spoiler-free only when restricted to the half the user has reached
 - `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
   **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
   live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call
-  for per-play WPA — the sole source of the box score's three stars (the feed
-  carries no WPA). It's score-revealing, so `GameView` fetches it lazily and
-  the DOM only gets it inside the box-score seal; it's null-guarded (absent at
-  most MiLB parks). Also exports `fetchGameFeedDiff`/`mergeFeedDiff`, the
+  for per-play WPA — the sole source of the box score's three stars and the
+  innings view's WinProbChart band. It's score-revealing, so `GameView` fetches
+  it lazily (waiting on `useGameData`'s `useEverActive` for the innings view or
+  the box score to actually be opened, not merely the feed landing — a cold
+  open always starts on a lineup page, which reads neither) and the DOM only
+  gets it inside a seal/reveal clamp; it's null-guarded (absent at most MiLB
+  parks). Also exports `fetchGameFeedDiff`/`mergeFeedDiff`, the
   undocumented diffPatch polling path `useGameData` uses ONLY during the
   tight Follow Live/Scores Unlocked cadence (ADR-0032) — `mergeFeedDiff`
   never mutates its `base` argument (see `../lib/jsonPatch.js`) and never
@@ -68,9 +74,10 @@ spoiler-free only when restricted to the half the user has reached
   event's `playId` in `feed/live` (the only reliable join key; verified live
   against both batted-ball and strikeout-ending plays — see
   `.scratch/video-highlights/`). Reveal-only (see above): `useGameData`
-  fetches it lazily alongside the feed, same tier as `winProb`, but
-  `highlightsByPlayId` is only ever called inside `HalfInning`'s `SealBox`
-  reveal function. Degrades to `[]` on failure or off-MLB.
+  fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
+  the innings view specifically, its only consumer), but `highlightsByPlayId`
+  is only ever called inside `HalfInning`'s `SealBox` reveal function.
+  Degrades to `[]` on failure or off-MLB.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface.

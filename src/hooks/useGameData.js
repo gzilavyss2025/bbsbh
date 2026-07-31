@@ -30,6 +30,7 @@ import { fetchWorkload } from '../api/workload.js'
 import { fetchLineupValues } from '../api/lineupStrength.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
+import { nextEverActiveState } from './useGameDataCore.js'
 import { apiDateToUrl } from '../lib/route.js'
 import { SPORT_IDS, defaultTreatmentFor } from '../lib/teams.js'
 
@@ -54,13 +55,39 @@ const FEED_POLL_MS = 60 * 1000
 // battery cost is only paid where it was asked for.
 const FOLLOW_POLL_MS = 15 * 1000
 
+// Sticky "has `active` ever been true for the current `resetKey`" flag — lets
+// a fetch start lazily on first visit to its consuming surface (winProb: the
+// innings view or the box score; highlights: the innings view — see below),
+// then behave exactly like every other feed-derived fetch in this hook: fired
+// once, cached, and immune to a later visit toggling the surface off and back
+// on (navigating from the box score back to a lineup page must not drop
+// already-fetched win probability). Computed during render — the same
+// "adjust state while rendering" pattern as `enrichmentKey`/`prevEnrichmentKey`
+// below and `GameView`'s `lastInningSection` — rather than an effect, since a
+// ref read during render isn't reactive and can tear under concurrent
+// rendering; the transition rule itself is `useGameDataCore.js`'s
+// `nextEverActiveState` (React-free, unit-tested).
+function useEverActive(active, resetKey) {
+  const [state, setState] = useState({ resetKey, everActive: active })
+  const next = nextEverActiveState(state, active, resetKey)
+  if (next !== state) setState(next)
+  return next.everActive
+}
+
 // Owns every data fetch a game page needs: the feed itself plus the roughly
 // nine independent lookups derived from or alongside it (managers, weather,
 // starter lines, win probability, pitcher roles, prospects, callouts,
 // broadcast, former teammates). Pulling this out of GameView keeps that
 // component free to focus on section-routing and rendering; this hook is the
 // one place that reasons about fetch sequencing/keying/caching.
-export function useGameData(game, spoilersOff = false) {
+//
+// `activeStep` is GameView's own `sectionToStep(section).step` (0 lineup1 / 1
+// lineup2 / 2 innings / 3 box score) — used ONLY to decide WHEN a couple of
+// fetches below first fire (see `useEverActive`), never to change what ends
+// up in the DOM. A cold open always lands on step 0, and neither winProb nor
+// highlights has a consumer there, so paying for them before the user ever
+// reaches the innings/box-score view is wasted bytes on every game open.
+export function useGameData(game, spoilersOff = false, activeStep = null) {
   // Session-only cache of the last resolved feed + the timecode it was as-of,
   // used to poll via the MLB Stats API's diffPatch mode instead of always
   // refetching the full feed (ADR-0032). In-memory ONLY — never persisted to
@@ -229,12 +256,20 @@ export function useGameData(game, spoilersOff = false) {
     [game.gamePk],
   )
 
-  // Per-play win probability, the sole source of WPA for the box score's three
-  // stars (the feed carries none). Only the box-score view uses it, so it's
-  // fetched lazily once the feed exists — a live Refresh won't re-pull it,
-  // matching how the box score is really a post-game read. Resolves null
-  // off-MLB, hiding the card.
-  const winProb = useAsyncOnFeed(feed, () => fetchWinProbability(game.gamePk), [game.gamePk])
+  // Per-play win probability — the sole source of WPA for the box score's
+  // three stars, and of the innings view's WinProbChart band (both reveal-
+  // clamped to `revealedThrough`, never rendered before that). Neither
+  // consumer exists on the two lineup pages (step 0/1), so the fetch itself
+  // waits for the innings view or the box score to actually be opened
+  // (`useEverActive`) rather than firing on every cold game load — a live
+  // Refresh still won't re-pull it once fetched, matching how both consumers
+  // are really a post-reveal/post-game read. Resolves null off-MLB, hiding
+  // the card.
+  const winProbActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
+  const winProb = useAsync(
+    () => (feed && winProbActive ? fetchWinProbability(game.gamePk) : Promise.resolve(null)),
+    [game.gamePk, Boolean(feed), winProbActive],
+  )
 
   // Video highlight clips for this game (see api/highlights.js). Unlike the
   // rest of this hook's useAsyncOnFeed tier, clips keep posting THROUGHOUT a
@@ -247,9 +282,17 @@ export function useGameData(game, spoilersOff = false) {
   // a newly-posted clip surfaces on an already-revealed half with no other
   // wiring: nothing here is rendered until highlightsByPlayId is called
   // inside that reveal, so a poll landing mid-game is still spoiler-safe.
-  // Fetch itself is safe to start eagerly, same as before; resolves [] on failure or
-  // off-MLB (most MiLB games carry no clips).
-  const highlights = useAsyncOnFeed(feed, () => fetchHighlights(game.gamePk), [game.gamePk])
+  // The fetch is safe to start eagerly (a raw fetch result produces no DOM on
+  // its own), but its only consumer is the innings view's SealBox reveal, so
+  // it waits for that view to actually be opened (`useEverActive`), same
+  // reasoning as `winProb` above; the 5-minute poll below is a no-op while
+  // inactive. Resolves [] on failure or off-MLB (most MiLB games carry no
+  // clips).
+  const highlightsActive = useEverActive(activeStep === 2, game.gamePk)
+  const highlights = useAsync(
+    () => (feed && highlightsActive ? fetchHighlights(game.gamePk) : Promise.resolve(null)),
+    [game.gamePk, Boolean(feed), highlightsActive],
+  )
   const isLive = feed?.gameData?.status?.abstractGameState === 'Live'
   useEffect(() => {
     if (!isLive) return

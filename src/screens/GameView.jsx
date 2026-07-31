@@ -62,7 +62,7 @@ export function GameView({ game, section, onSection }) {
     lineupValuesData,
     jerseyTreatments,
     started,
-  } = useGameData(game, passActive)
+  } = useGameData(game, passActive, step)
 
   // Screen Wake Lock — keeps the phone's display on during a live game so it
   // stays readable propped up next to a scorebook (see useWakeLock). Opt-in
