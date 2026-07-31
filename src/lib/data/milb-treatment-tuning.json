@@ -1432,39 +1432,48 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 0.92,
           "offsetX": 0,
           "offsetY": 0,
-          "bg": "#F8F8F5",
+          "bg": "#071D49",
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 30,
+          "size": 78,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 21,
+          "paddingY": -46,
           "rowShift": 0
         },
-        "band": "#F8F8F5",
+        "band": "#C8102E",
         "header": {
           "bar": "#C8102E",
           "accent": "#071D49",
           "onBar": "#F8F8F5"
-        }
+        },
+        "wpaWordmark": true
       },
       "away": {
         "wpaLayout": {
-          "size": 30,
+          "size": 68,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 18,
+          "paddingY": -38,
           "rowShift": 0
         },
-        "band": "#F8F8F5"
+        "band": "#F8F8F5",
+        "position": {
+          "scale": 0.92,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#C8102E",
+          "pinstripe": false
+        },
+        "wpaWordmark": true
       }
     }
   },

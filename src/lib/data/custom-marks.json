@@ -55,5 +55,11 @@
     "assignments": {
       "milb-home": "primary1"
     }
+  },
+  "568": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary"
+    }
   }
 }

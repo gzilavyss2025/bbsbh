@@ -158,8 +158,7 @@ function MilbTreatmentLogo({ teamId, name, variant, hasArt, version }) {
       key={url}
       src={url}
       alt=""
-      width={64}
-      height={64}
+      className="colorlab__logoimg"
       loading="eager"
       decoding="async"
       onError={() => setFailed(true)}
