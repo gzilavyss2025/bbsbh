@@ -1,15 +1,37 @@
 import { useRef } from 'react'
 import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
-import { SectionTitle } from './SectionTitle.jsx'
+import { treatmentTile, isMlbTeamId } from '../lib/teams.js'
+import { milbTreatmentTile } from '../lib/milbColors.js'
+import { readableTextColor } from '../lib/contrast.js'
 
-// A horizontal, touch-draggable strip of one club's logo/jersey combinations —
-// every jersey in its uniform catalog, each shown as the logo TREATMENT it's
-// worn with (the same tinted "main logo card" tile the slate cards and Team
-// Color Lab use, via TeamTreatmentMark) over the jersey's name, with the
-// club's record in the games it actually wore that jersey underneath. A jersey
-// maps to exactly one logo, but several jerseys can share one (Home White and
-// Road Grey are both the Main mark), so a logo repeats down the strip once per
-// jersey assigned to it — see buildJerseyCombos (src/api/uniforms.js).
+// The two ink choices a card picks between — --text-heading and --paper-2,
+// literally, since readableTextColor needs real hex to run WCAG math against
+// (a CSS var reference isn't a color the contrast formula can read).
+const INK_DARK = '#16222F'
+const INK_LIGHT = '#FBF6E9'
+
+// A jersey's own tile color IS the card now (ADR-pending design pass) — no
+// small logo-sized swatch, no knockout recolor. `tint`/`pinstripeColor` are
+// the exact values TeamTreatmentMark resolves for its own (now transparent)
+// inner box, recomputed here because the component doesn't expose them; the
+// only new work is the ink pick, since a card whose own tint is the club's
+// navy needs light text same as one whose tint is paper needs dark.
+function cardTile(teamId, isMlb, treatment, side) {
+  const tile = isMlb ? treatmentTile(teamId, treatment) : side ? milbTreatmentTile(teamId, side) : {}
+  const ink = tile.pinstripeColor ? INK_DARK : tile.tint ? readableTextColor(tile.tint, INK_LIGHT, INK_DARK) : INK_DARK
+  return { tint: tile.tint, pinstripeColor: tile.pinstripeColor, pinstripeBg: tile.pinstripeBg, ink }
+}
+
+// A horizontal, touch-draggable swipe deck of one club's logo/jersey
+// combinations — every jersey in its uniform catalog, each card's own
+// background tinted to that jersey's actual tile color (the same tint
+// TeamTreatmentMark resolves for the slate card and Team Color Lab), with the
+// real logo art sitting directly on top — unaltered, even where the mark's
+// own navy sinks into a same-colored card. Name and the club's record in the
+// games it actually wore that jersey sit below. A jersey maps to exactly one
+// logo, but several jerseys can share one (Home White and Road Grey are both
+// the Main mark), so a logo repeats down the deck once per jersey assigned to
+// it — see buildJerseyCombos (src/api/uniforms.js).
 //
 // TWO MODES, because the two leagues genuinely carry different data:
 //
@@ -103,28 +125,44 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
   const { ref, handlers } = useDragScroll()
   if (!combos?.length) return null
   const showRecord = variant !== 'static'
+  const isMlb = isMlbTeamId(teamId)
   return (
-    <>
-      <SectionTitle
-        title="Logos & jerseys"
-        note={showRecord ? 'record by jersey' : 'home and away'}
-      />
-      <div className="jerseystrip" ref={ref} {...handlers}>
-        {combos.map((c) => (
-          <div key={c.code ?? c.side ?? c.name} className="jerseycombo">
-            <TeamTreatmentMark
-              teamId={teamId}
-              name={teamName}
-              treatment={c.treatment}
-              side={c.side}
-              size={56}
-              block="jerseycombo__logobox"
-            />
-            <span className="jerseycombo__name">{c.name}</span>
-            {showRecord && <span className="jerseycombo__rec mono">{recordLabel(c)}</span>}
-          </div>
-        ))}
+    <div className="thub-card">
+      <div className="thub-card__head">
+        <span>Logos & jerseys</span>
+        <em>{showRecord ? 'record by jersey' : 'home and away'}</em>
       </div>
-    </>
+      <div className="thub-card__body" style={{ padding: 0 }}>
+        <div className="jerseydeck" ref={ref} {...handlers}>
+          {combos.map((c) => {
+            const tile = cardTile(teamId, isMlb, c.treatment, c.side)
+            const style = {
+              '--tint': tile.tint || undefined,
+              '--pinstripe-color': tile.pinstripeColor || undefined,
+              '--pinstripe-bg': tile.pinstripeBg || undefined,
+              '--ink': tile.ink,
+            }
+            return (
+              <div
+                key={c.code ?? c.side ?? c.name}
+                className={`jerseydeck__card${tile.pinstripeColor ? ' jerseydeck__card--pinstripe' : ''}`}
+                style={style}
+              >
+                <TeamTreatmentMark
+                  teamId={teamId}
+                  name={teamName}
+                  treatment={c.treatment}
+                  side={c.side}
+                  size={88}
+                  block="jerseydeck__logobox"
+                />
+                <span className="jerseydeck__name">{c.name}</span>
+                {showRecord && <span className="jerseydeck__rec mono">{recordLabel(c)}</span>}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
   )
 }
