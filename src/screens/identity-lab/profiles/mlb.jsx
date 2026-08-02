@@ -49,6 +49,8 @@ import {
   hasCityConnect,
   treatmentHeaderColorOverride,
   treatmentTuningRecord,
+  defaultHomeTreatmentFor,
+  defaultAwayTreatmentFor,
 } from '../../../lib/teams.js'
 import { logoUploadTarget, wpaArtTreatmentKey, wpaArtUrl } from '../../../lib/logoArt.js'
 import { contrastRatio } from '../../../lib/contrast.js'
@@ -125,6 +127,36 @@ function OffDaySelect({ teamId, value, onChange }) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
+        {treatmentsForTeam(teamId).map((t) => (
+          <option key={t.key} value={t.key}>
+            {t.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+// Which treatment a club wears on the slate/masthead BEFORE that game's real
+// jersey has posted (teams.js's defaultTreatmentFor) — one pick per side,
+// since a club's away default is always the plain road look while its home
+// default is the one clubs actually want to override (a City Connect club
+// whose real Friday-night schedule doesn't match the heuristic's guess).
+// "Auto" clears the curated pick and falls back to defaultTreatmentFor's own
+// heuristic (Friday + City Connect, else Main) — same "picking the default
+// back deletes the field" rule OffDaySelect follows for Main. Limited to
+// treatmentsForTeam's list, same curated-art gate as every other picker here.
+function DefaultLogoSelect({ teamId, side, value, onChange }) {
+  return (
+    <label className="idlab__offday">
+      <span className="idlab__offdaylabel">{side === 'home' ? 'Default home:' : 'Default away:'}</span>
+      <select
+        className="idlab__offdayselect"
+        aria-label={`Default ${side} tile treatment`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">Auto</option>
         {treatmentsForTeam(teamId).map((t) => (
           <option key={t.key} value={t.key}>
             {t.label}
@@ -458,6 +490,14 @@ function buildOffDayCopyText(name, teamId, treatmentLabel) {
   )
 }
 
+function buildDefaultLogosCopyText(name, teamId, homeLabel, awayLabel) {
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Where: src/lib/data/mlb-team-colors.json — ${teamId}.defaultHomeTreatment / ${teamId}.defaultAwayTreatment\n` +
+    `default home: ${homeLabel}, default away: ${awayLabel}`
+  )
+}
+
 function buildTreatmentColorsCopyText(name, teamId, treatment, treatmentLabel, slots) {
   const byRole = Object.fromEntries(slots.map((s) => [s.role, s.hex]))
   return (
@@ -488,6 +528,11 @@ function buildAllChangesText(teams, drafts, extras) {
       const value = od.treatment || 'main'
       const label = TREATMENTS.find((t) => t.key === value)?.label ?? value
       sections.push(buildOffDayCopyText(name, teamId, label))
+    }
+    const dl = drafts.defaultlogos[teamId]
+    if (dl && Object.keys(dl).length > 0) {
+      const labelFor = (value) => (value ? (TREATMENTS.find((t) => t.key === value)?.label ?? value) : 'Auto')
+      sections.push(buildDefaultLogosCopyText(name, teamId, labelFor(dl.home), labelFor(dl.away)))
     }
     for (const t of treatmentsForTeam(teamId)) {
       const matches = jerseyMatchesFor(extras.catalog, teamId, t.key)
@@ -1217,6 +1262,34 @@ function offDayDraftMatchesLanded(fields, landed) {
   return draftValue === (landed.offDayTreatment ?? 'main')
 }
 
+// Merge a club's curated home/away predictive-fallback pick into its
+// mlb-team-colors.json entry (defaultHomeTreatmentFor/defaultAwayTreatmentFor,
+// teams.js). "Auto" (cleared to '') DELETES the field rather than writing it
+// out, same as clearing any other role in this store — that's what hands the
+// side back to defaultTreatmentFor's own Friday/City-Connect heuristic.
+function applyDefaultLogosDraft(record, fields) {
+  const next = { ...record }
+  if (fields.home !== undefined) {
+    if (fields.home) next.defaultHomeTreatment = fields.home
+    else delete next.defaultHomeTreatment
+  }
+  if (fields.away !== undefined) {
+    if (fields.away) next.defaultAwayTreatment = fields.away
+    else delete next.defaultAwayTreatment
+  }
+  return next
+}
+
+// The mirror of applyDefaultLogosDraft, for useAutoClearLandedDrafts — a
+// touched field matches landed once it equals whatever's already on disk (or
+// is cleared and nothing's on disk either).
+function defaultLogosDraftMatchesLanded(fields, landed) {
+  if (!landed) return false
+  if (fields.home !== undefined && fields.home !== (landed.defaultHomeTreatment ?? '')) return false
+  if (fields.away !== undefined && fields.away !== (landed.defaultAwayTreatment ?? '')) return false
+  return true
+}
+
 function buildSaves(drafts, extras) {
   // null when the names never loaded or nothing was edited — that payload is
   // then dropped entirely rather than posted, because a uniform-names write
@@ -1279,9 +1352,14 @@ function buildSaves(drafts, extras) {
   )
 
   const colors = mergeTeamDraftIntoStore(
-    mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name }),
-    drafts.offday,
-    applyOffDayDraft,
+    mergeTeamDraftIntoStore(
+      mergeTeamDraftIntoStore(MLB_TEAM_COLORS, drafts.colors, applyColorsDraft, { name }),
+      drafts.offday,
+      applyOffDayDraft,
+      { name },
+    ),
+    drafts.defaultlogos,
+    applyDefaultLogosDraft,
     { name },
   )
 
@@ -1349,7 +1427,21 @@ export const mlbProfile = {
   markVisual: logoBoxVisual,
   shelfMarks,
   crestExtra: (teamId, drafts, on) => (
-    <OffDaySelect teamId={teamId} value={drafts.offday?.treatment ?? MLB_TEAM_COLORS[teamId]?.offDayTreatment ?? 'main'} onChange={on.offDayField} />
+    <>
+      <OffDaySelect teamId={teamId} value={drafts.offday?.treatment ?? MLB_TEAM_COLORS[teamId]?.offDayTreatment ?? 'main'} onChange={on.offDayField} />
+      <DefaultLogoSelect
+        teamId={teamId}
+        side="home"
+        value={drafts.defaultlogos?.home ?? defaultHomeTreatmentFor(teamId) ?? ''}
+        onChange={(value) => on.defaultLogoField('home', value)}
+      />
+      <DefaultLogoSelect
+        teamId={teamId}
+        side="away"
+        value={drafts.defaultlogos?.away ?? defaultAwayTreatmentFor(teamId) ?? ''}
+        onChange={(value) => on.defaultLogoField('away', value)}
+      />
+    </>
   ),
   sidebar: <NeutralSwatchesSidebar />,
   matchesLanded: {
@@ -1369,6 +1461,7 @@ export const mlbProfile = {
       draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     offDay: (teamId, fields) => offDayDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
+    defaultLogos: (teamId, fields) => defaultLogosDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     treatmentColors: (teamId, treatment, fields) =>
       colorsDraftMatchesLanded(fields, treatmentTuningRecord(teamId, treatment)?.colors),
   },

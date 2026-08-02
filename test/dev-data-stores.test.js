@@ -188,6 +188,8 @@ test('a real mlb-team-colors entry is accepted, extras and all', () => {
         accent: '#FFC52F',
         accent2: '#6CACE4',
         offDayTreatment: 'alternate',
+        defaultHomeTreatment: 'city-connect',
+        defaultAwayTreatment: 'main',
         extras: [{ label: 'Powder Blue', hex: '#6CACE4' }],
         note: 'why this club is odd',
       },
@@ -213,6 +215,14 @@ test('an mlb-team-colors store rejects a non-object, a bad key, and a blank colo
   assert.match(
     mlbColors({ 158: { name: 'Brewers', offDayTreatment: 'throwback' } }),
     /offDayTreatment "throwback" is not a known treatment/,
+  )
+  assert.match(
+    mlbColors({ 158: { name: 'Brewers', defaultHomeTreatment: 'throwback' } }),
+    /defaultHomeTreatment "throwback" is not a known treatment/,
+  )
+  assert.match(
+    mlbColors({ 158: { name: 'Brewers', defaultAwayTreatment: 'throwback' } }),
+    /defaultAwayTreatment "throwback" is not a known treatment/,
   )
 })
 

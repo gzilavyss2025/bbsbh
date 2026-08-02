@@ -279,6 +279,20 @@ test('a curated offDayTreatment stays in the jerseys.json treatment vocabulary',
   }
 })
 
+// Same vocabulary guard as offDayTreatment above, for the per-side
+// predictive-fallback pick defaultTreatmentFor consults
+// (defaultHomeTreatmentFor/defaultAwayTreatmentFor).
+test('a curated defaultHomeTreatment/defaultAwayTreatment stays in the jerseys.json treatment vocabulary', () => {
+  for (const teamId of ALL_MLB_TEAM_IDS) {
+    for (const field of ['defaultHomeTreatment', 'defaultAwayTreatment']) {
+      const value = MLB_TEAM_COLORS[teamId][field]
+      if (value !== undefined) {
+        assert.ok(MLB_TREATMENT_KEYS.has(value), `${teamId} has an unknown ${field} "${value}"`)
+      }
+    }
+  }
+})
+
 // --------------------------------------------------------------------------
 // The lab's save merge (saveStores.js)
 // --------------------------------------------------------------------------

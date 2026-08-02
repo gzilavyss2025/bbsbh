@@ -17,6 +17,8 @@ import {
   hasAlternate3,
   hasCityConnect,
   defaultTreatmentFor,
+  defaultHomeTreatmentFor,
+  defaultAwayTreatmentFor,
   mainTreatmentTint,
   mainTreatmentScale,
   mainTreatmentPinstripe,
@@ -31,6 +33,7 @@ import {
   milbHeadshotUrl,
   coachHeadshotUrl,
 } from '../src/lib/teams.js'
+import { MLB_TEAM_COLORS } from '../src/lib/brandColors.js'
 
 // --------------------------------------------------------------------------
 // localLogoUrl
@@ -175,6 +178,27 @@ test('defaultTreatmentFor predicts Main for a home game on any other day of the 
 test('defaultTreatmentFor predicts Main for a missing/garbled date', () => {
   assert.equal(defaultTreatmentFor(158, 'home', null), 'main')
   assert.equal(defaultTreatmentFor(158, 'home', ''), 'main')
+})
+
+test('defaultHomeTreatmentFor/defaultAwayTreatmentFor return null for a club with no curated default', () => {
+  assert.equal(defaultHomeTreatmentFor(112), null) // Cubs — nothing set
+  assert.equal(defaultAwayTreatmentFor(112), null)
+  assert.equal(defaultHomeTreatmentFor(999999), null) // no mlb-team-colors.json entry at all
+})
+
+test('a curated defaultHomeTreatment/defaultAwayTreatment wins outright over defaultTreatmentFor\'s heuristic', () => {
+  const entry = MLB_TEAM_COLORS[158] // Brewers — Friday home game would otherwise predict City Connect
+  try {
+    entry.defaultHomeTreatment = 'alternate'
+    entry.defaultAwayTreatment = 'alternate-2'
+    assert.equal(defaultHomeTreatmentFor(158), 'alternate')
+    assert.equal(defaultAwayTreatmentFor(158), 'alternate-2')
+    assert.equal(defaultTreatmentFor(158, 'home', '2026-07-24'), 'alternate') // Friday, but the curated pick wins
+    assert.equal(defaultTreatmentFor(158, 'away', '2026-07-24'), 'alternate-2')
+  } finally {
+    delete entry.defaultHomeTreatment
+    delete entry.defaultAwayTreatment
+  }
 })
 
 // --------------------------------------------------------------------------
