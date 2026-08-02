@@ -270,6 +270,19 @@ found, or a not-yet-uploaded MiLB side) quietly falls back rather than
 erroring. This is orthogonal to `logo-art.json` — the manifest is a record for
 `test/logo-upload.test.js`, not something `TeamLogo` consults.
 
+**`variant: 'base'` (the default, and every bare `<TeamLogo>`) is intentionally
+override-blind.** `teamLogoUrl`'s `'base'` branch returns the plain mlbstatic CDN
+mark before any of the override branches above run, so nothing tuned in
+`/identity-lab` — a Main recolor, a custom-mark assignment, a treatment's
+scale/tint — reaches a decorative logo (standings, leaders, player/team bios,
+headshot fallbacks). That's correct, not a gap: those surfaces carry no
+jersey/treatment context for an override to key into. Only `TeamTreatmentMark`
+(routes through `treatmentTile`/`milbTreatmentTile`), the WPA resolvers
+(`wpaLogoFor`/`wpaLogoWithFallback`), and `variant="mono"` sites reflect Lab
+tuning. `LogoModal.jsx`'s sketch view is the same story on purpose — it cycles
+the CDN's own `primary`/`cap`/`wordmark` vectors for reference and says so in
+its caption, rather than showing the tuned tile.
+
 ## Club theming (`headerTheme.js`)
 
 The lineup page (`screens/TeamInfo.jsx`) dresses its club-name bar and that

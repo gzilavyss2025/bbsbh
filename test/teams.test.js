@@ -158,36 +158,69 @@ test('hasCityConnect is false only for NO_CITY_CONNECT teams', () => {
 // --------------------------------------------------------------------------
 // defaultTreatmentFor
 // --------------------------------------------------------------------------
+// Every club now carries a curated defaultHomeTreatment/defaultAwayTreatment
+// (Team Identity Lab), which always wins outright over the heuristic below —
+// see the "wins outright" test. So exercising the heuristic itself, or the
+// null-return case, needs a club with those fields temporarily cleared
+// rather than a real one that happens to lack them.
+function withoutCuratedDefault(teamId, fn) {
+  const entry = MLB_TEAM_COLORS[teamId]
+  const home = entry.defaultHomeTreatment
+  const away = entry.defaultAwayTreatment
+  delete entry.defaultHomeTreatment
+  delete entry.defaultAwayTreatment
+  try {
+    fn()
+  } finally {
+    if (home !== undefined) entry.defaultHomeTreatment = home
+    if (away !== undefined) entry.defaultAwayTreatment = away
+  }
+}
+
 test('defaultTreatmentFor predicts Main (away grey/road) for a road team', () => {
-  // 2026-07-24 is a Friday — even so, the away side never predicts City Connect.
-  assert.equal(defaultTreatmentFor(158, 'away', '2026-07-24'), 'main')
+  withoutCuratedDefault(158, () => {
+    // 2026-07-24 is a Friday — even so, the away side never predicts City Connect.
+    assert.equal(defaultTreatmentFor(158, 'away', '2026-07-24'), 'main')
+  })
 })
 
 test('defaultTreatmentFor predicts City Connect for a Friday home game when the club has one', () => {
-  assert.equal(defaultTreatmentFor(158, 'home', '2026-07-24'), 'city-connect') // Brewers
+  withoutCuratedDefault(158, () => {
+    assert.equal(defaultTreatmentFor(158, 'home', '2026-07-24'), 'city-connect') // Brewers
+  })
 })
 
 test('defaultTreatmentFor predicts Main for a Friday home game when the club has no City Connect', () => {
-  assert.equal(defaultTreatmentFor(147, 'home', '2026-07-24'), 'main') // Yankees — opted out
+  withoutCuratedDefault(147, () => {
+    assert.equal(defaultTreatmentFor(147, 'home', '2026-07-24'), 'main') // Yankees — opted out
+  })
 })
 
 test('defaultTreatmentFor predicts Main for a home game on any other day of the week', () => {
-  assert.equal(defaultTreatmentFor(158, 'home', '2026-07-23'), 'main') // Thursday
+  withoutCuratedDefault(158, () => {
+    assert.equal(defaultTreatmentFor(158, 'home', '2026-07-23'), 'main') // Thursday
+  })
 })
 
 test('defaultTreatmentFor predicts Main for a missing/garbled date', () => {
-  assert.equal(defaultTreatmentFor(158, 'home', null), 'main')
-  assert.equal(defaultTreatmentFor(158, 'home', ''), 'main')
+  withoutCuratedDefault(158, () => {
+    assert.equal(defaultTreatmentFor(158, 'home', null), 'main')
+    assert.equal(defaultTreatmentFor(158, 'home', ''), 'main')
+  })
 })
 
 test('defaultHomeTreatmentFor/defaultAwayTreatmentFor return null for a club with no curated default', () => {
-  assert.equal(defaultHomeTreatmentFor(112), null) // Cubs — nothing set
-  assert.equal(defaultAwayTreatmentFor(112), null)
+  withoutCuratedDefault(112, () => {
+    assert.equal(defaultHomeTreatmentFor(112), null) // Cubs, with its curated fields cleared
+    assert.equal(defaultAwayTreatmentFor(112), null)
+  })
   assert.equal(defaultHomeTreatmentFor(999999), null) // no mlb-team-colors.json entry at all
 })
 
 test('a curated defaultHomeTreatment/defaultAwayTreatment wins outright over defaultTreatmentFor\'s heuristic', () => {
   const entry = MLB_TEAM_COLORS[158] // Brewers — Friday home game would otherwise predict City Connect
+  const originalHome = entry.defaultHomeTreatment
+  const originalAway = entry.defaultAwayTreatment
   try {
     entry.defaultHomeTreatment = 'alternate'
     entry.defaultAwayTreatment = 'alternate-2'
@@ -196,8 +229,8 @@ test('a curated defaultHomeTreatment/defaultAwayTreatment wins outright over def
     assert.equal(defaultTreatmentFor(158, 'home', '2026-07-24'), 'alternate') // Friday, but the curated pick wins
     assert.equal(defaultTreatmentFor(158, 'away', '2026-07-24'), 'alternate-2')
   } finally {
-    delete entry.defaultHomeTreatment
-    delete entry.defaultAwayTreatment
+    entry.defaultHomeTreatment = originalHome
+    entry.defaultAwayTreatment = originalAway
   }
 })
 

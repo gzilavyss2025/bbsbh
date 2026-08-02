@@ -73,6 +73,7 @@ export function LogoModal({ teamId, name, onClose }) {
         <TeamLink id={teamId} className="logomodal__name">
           {name}
         </TeamLink>
+        <p className="logomodal__caption">Reference marks — not the tuned jersey tile</p>
       </div>
     </div>
   )
