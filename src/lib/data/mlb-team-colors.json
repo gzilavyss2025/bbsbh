@@ -4,7 +4,9 @@
     "primary": "#003263",
     "secondary": "#BA0021",
     "accent": "#BA0021",
-    "accent2": "#C4CED4"
+    "accent2": "#C4CED4",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "109": {
     "name": "Arizona Diamondbacks",
@@ -12,104 +14,136 @@
     "secondary": "#E3D4AD",
     "accent": "#000000",
     "accent2": "#30CED8",
-    "offDayTreatment": "alternate-3"
+    "offDayTreatment": "alternate-3",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "110": {
     "name": "Baltimore Orioles",
     "primary": "#DF4601",
     "secondary": "#000000",
-    "accent": "#DF4601"
+    "accent": "#DF4601",
+    "defaultHomeTreatment": "alternate-2",
+    "defaultAwayTreatment": "alternate-3"
   },
   "111": {
     "name": "Boston Red Sox",
     "primary": "#BD3039",
     "secondary": "#0C2340",
-    "accent": "#BD3039"
+    "accent": "#BD3039",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "112": {
     "name": "Chicago Cubs",
     "primary": "#0E3386",
     "secondary": "#CC3433",
-    "accent": "#0E3386"
+    "accent": "#0E3386",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "113": {
     "name": "Cincinnati Reds",
     "primary": "#C6011F",
     "secondary": "#000000",
-    "accent": "#C6011F"
+    "accent": "#C6011F",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "114": {
     "name": "Cleveland Guardians",
     "primary": "#00385D",
     "secondary": "#E50022",
     "accent": "#E31937",
-    "offDayTreatment": "alternate"
+    "offDayTreatment": "alternate",
+    "defaultHomeTreatment": "alternate",
+    "defaultAwayTreatment": "alternate-3"
   },
   "115": {
     "name": "Colorado Rockies",
     "primary": "#333366",
     "secondary": "#C4CED4",
     "accent": "#333366",
-    "accent2": "#000000"
+    "accent2": "#000000",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-2"
   },
   "116": {
     "name": "Detroit Tigers",
     "primary": "#0C2340",
     "secondary": "#FA4616",
-    "accent": "#0C2340"
+    "accent": "#0C2340",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "117": {
     "name": "Houston Astros",
     "primary": "#002D62",
     "secondary": "#EB6E1F",
     "accent": "#EB6E1F",
-    "accent2": "#F4911E"
+    "accent2": "#F4911E",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "118": {
     "name": "Kansas City Royals",
     "primary": "#004687",
     "secondary": "#BD9B60",
-    "accent": "#BD9B60"
+    "accent": "#BD9B60",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "119": {
     "name": "Los Angeles Dodgers",
     "primary": "#005A9C",
     "secondary": "#EF3E42",
     "accent": "#005A9C",
-    "accent2": "#A5ACAF"
+    "accent2": "#A5ACAF",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-4"
   },
   "120": {
     "name": "Washington Nationals",
     "primary": "#AB0003",
     "secondary": "#14225A",
     "accent": "#AB0003",
-    "offDayTreatment": "alternate-2"
+    "offDayTreatment": "alternate-2",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "121": {
     "name": "New York Mets",
     "primary": "#002D72",
     "secondary": "#FF5910",
-    "accent": "#002D72"
+    "accent": "#002D72",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-2"
   },
   "133": {
     "name": "Athletics",
     "primary": "#003831",
     "secondary": "#EFB21E",
     "accent": "#EFB21E",
-    "accent2": "#A2AAAD"
+    "accent2": "#A2AAAD",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "134": {
     "name": "Pittsburgh Pirates",
     "primary": "#27251F",
     "secondary": "#FDB827",
-    "accent": "#FFFFFF"
+    "accent": "#FFFFFF",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "135": {
     "name": "San Diego Padres",
     "primary": "#2F241D",
     "secondary": "#FFC425",
     "accent": "#2F241D",
-    "offDayTreatment": "alternate"
+    "offDayTreatment": "alternate",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "136": {
     "name": "Seattle Mariners",
@@ -123,7 +157,9 @@
       }
     ],
     "accent2": "#C4CED4",
-    "offDayTreatment": "alternate"
+    "offDayTreatment": "alternate",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "137": {
     "name": "San Francisco Giants",
@@ -136,60 +172,78 @@
         "hex": "#AE8F6F"
       }
     ],
-    "accent2": "#e8e7d2"
+    "accent2": "#e8e7d2",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "138": {
     "name": "St. Louis Cardinals",
     "primary": "#C41E3A",
     "secondary": "#0C2340",
     "accent": "#C41E3A",
-    "accent2": "#FEDB00"
+    "accent2": "#FEDB00",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "139": {
     "name": "Tampa Bay Rays",
     "primary": "#092C5C",
     "secondary": "#8FBCE6",
-    "accent": "#F5D130"
+    "accent": "#F5D130",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "140": {
     "name": "Texas Rangers",
     "primary": "#003278",
     "secondary": "#C0111F",
-    "accent": "#C0111F"
+    "accent": "#C0111F",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "main"
   },
   "141": {
     "name": "Toronto Blue Jays",
     "primary": "#134A8E",
     "secondary": "#1D2D5C",
     "accent": "#E8291C",
-    "offDayTreatment": "alternate-2"
+    "offDayTreatment": "alternate-2",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-4"
   },
   "142": {
     "name": "Minnesota Twins",
     "primary": "#002B5C",
     "secondary": "#D31145",
     "accent": "#D31145",
-    "accent2": "#B9975B"
+    "accent2": "#B9975B",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   },
   "143": {
     "name": "Philadelphia Phillies",
     "primary": "#E81828",
     "secondary": "#002D72",
-    "accent": "#E81828"
+    "accent": "#E81828",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "144": {
     "name": "Atlanta Braves",
     "primary": "#CE1141",
     "secondary": "#13274F",
     "accent": "#CE1141",
-    "accent2": "#EAAA00"
+    "accent2": "#EAAA00",
+    "defaultHomeTreatment": "alternate-2",
+    "defaultAwayTreatment": "alternate-3"
   },
   "145": {
     "name": "Chicago White Sox",
     "primary": "#27251F",
     "secondary": "#C4CED4",
     "accent": "#27251F",
-    "offDayTreatment": "alternate"
+    "offDayTreatment": "alternate",
+    "defaultHomeTreatment": "alternate",
+    "defaultAwayTreatment": "main"
   },
   "146": {
     "name": "Miami Marlins",
@@ -202,7 +256,9 @@
         "hex": "#000000"
       }
     ],
-    "accent2": "#41748D"
+    "accent2": "#41748D",
+    "defaultHomeTreatment": "alternate",
+    "defaultAwayTreatment": "alternate"
   },
   "147": {
     "name": "New York Yankees",
@@ -215,7 +271,9 @@
         "hex": "#C4CED3"
       }
     ],
-    "accent2": "#F8F8F5"
+    "accent2": "#F8F8F5",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate"
   },
   "158": {
     "name": "Milwaukee Brewers",
@@ -230,6 +288,8 @@
     ],
     "note": "Powder Blue is the 2026 alternate road jersey; Gold is that jersey’s secondary.",
     "accent2": "#6CACE4",
-    "offDayTreatment": "alternate"
+    "offDayTreatment": "alternate",
+    "defaultHomeTreatment": "main",
+    "defaultAwayTreatment": "alternate-3"
   }
 }
