@@ -121,11 +121,15 @@ its `TEAM_LEVEL_STORES` list so they still get every outer-shape guard.
 `mlb-team-colors.json` — a club's brand colours, the store behind
 `TEAM_COLOR_PAIRS`, `TEAM_COLORS`, and `teamColorExtras`, plus the club-level
 (not per-treatment) `offDayTreatment` pick `offDayTreatmentFor` reads for
-`OffDaySection.jsx`'s tile — absent means Main:
+`OffDaySection.jsx`'s tile — absent means Main — and the same idea per side,
+`defaultHomeTreatment`/`defaultAwayTreatment` (`defaultHomeTreatmentFor`/
+`defaultAwayTreatmentFor`), which `defaultTreatmentFor` consults before its own
+Friday/City-Connect heuristic — absent means "guess" rather than "Main":
 
 ```json
 { "158": { "name": "…", "primary": "#12284B", "secondary": "#FFC52F",
            "accent": "#FFC52F", "offDayTreatment": "alternate",
+           "defaultHomeTreatment": "city-connect", "defaultAwayTreatment": "main",
            "extras": [{ "label": "Powder Blue", "hex": "#6CACE4" }], "note": "…" } }
 ```
 

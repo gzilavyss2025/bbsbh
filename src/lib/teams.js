@@ -242,19 +242,35 @@ export function hasCityConnect(teamId) {
   return !NO_CITY_CONNECT.has(teamId)
 }
 
+// A club's own curated pick for its home/away predictive fallback
+// (mlb-team-colors.json's `defaultHomeTreatment`/`defaultAwayTreatment`,
+// edited from the Team Identity Lab) — the side-scoped counterpart to
+// offDayTreatmentFor below. Absent for every club that hasn't set one, so
+// defaultTreatmentFor falls through to its own Friday/City-Connect heuristic.
+export function defaultHomeTreatmentFor(teamId) {
+  return MLB_TEAM_COLORS[teamId]?.defaultHomeTreatment ?? null
+}
+
+export function defaultAwayTreatmentFor(teamId) {
+  return MLB_TEAM_COLORS[teamId]?.defaultAwayTreatment ?? null
+}
+
 // Predictive fallback tile for a game whose actual worn jersey hasn't posted
 // yet (jerseyTreatmentFor/api/jerseys.js returns null pre-game) — a best
 // guess, not a fact, so jerseyTreatmentFor's real data always overrides it
 // the moment it posts, including a confirmed-standard game (gen-jerseys.mjs
 // stores 'main' explicitly rather than omitting it, precisely so a guess
 // this function gets wrong — e.g. a Friday city-connect club that wore its
-// plain jersey that night — doesn't stand uncorrected once Final). Away
-// always predicts the plain Main mark (the away
-// grey/road look — several clubs' Main tile is already re-paired with a grey
-// fill for exactly that jersey, see ALT_USES_BASE_LOGO above). A home game on
-// a Friday predicts City Connect for any club that has one, since Friday is
-// most clubs' scheduled City Connect night.
+// plain jersey that night — doesn't stand uncorrected once Final). A club's
+// own curated default for that side (above) wins outright over the
+// heuristic below it. Absent that, away always predicts the plain Main mark
+// (the away grey/road look — several clubs' Main tile is already re-paired
+// with a grey fill for exactly that jersey, see ALT_USES_BASE_LOGO above). A
+// home game on a Friday predicts City Connect for any club that has one,
+// since Friday is most clubs' scheduled City Connect night.
 export function defaultTreatmentFor(teamId, side, apiDate) {
+  const curated = side === 'home' ? defaultHomeTreatmentFor(teamId) : defaultAwayTreatmentFor(teamId)
+  if (curated) return curated
   if (side === 'home' && isFriday(apiDate) && hasCityConnect(teamId)) return 'city-connect'
   return 'main'
 }

@@ -47,6 +47,9 @@ export function ColorLabBody({ profile }) {
   const [colorsDraft, setColorField, resetColorsDraft] = useTeamDraftStore(profile.storeKey('colors'))
   const [tcolorsDraft, setTcolorField, resetTcolorsDraft] = useDraftStore(profile.storeKey('treatmentcolors'))
   const [offDayDraft, setOffDayField, resetOffDayDraft] = useTeamDraftStore(profile.storeKey('offday'))
+  const [defaultLogosDraft, setDefaultLogoField, resetDefaultLogosDraft] = useTeamDraftStore(
+    profile.storeKey('defaultlogos'),
+  )
   const [saveStatus, setSaveStatus] = useState(null) // 'saving' | 'saved' | 'error' | null
   const [selectedId, setSelectedId] = useState(() => loadSelectedClub(profile.storeKey('club')))
   const [opponents, setOpponents] = useState({}) // teamId -> opponent | null
@@ -70,6 +73,12 @@ export function ColorLabBody({ profile }) {
       draft: offDayDraft,
       reset: resetOffDayDraft,
       matchesLanded: profile.matchesLanded.offDay ?? NEVER_LANDED,
+      teamScoped: true,
+    },
+    {
+      draft: defaultLogosDraft,
+      reset: resetDefaultLogosDraft,
+      matchesLanded: profile.matchesLanded.defaultLogos ?? NEVER_LANDED,
       teamScoped: true,
     },
   ])
@@ -126,6 +135,7 @@ export function ColorLabBody({ profile }) {
     colors: colorsDraft,
     tcolors: tcolorsDraft,
     offday: offDayDraft,
+    defaultlogos: defaultLogosDraft,
   }
 
   // Save lands every pending draft in the JSON stores on disk (ADR-0029) —
@@ -186,6 +196,7 @@ export function ColorLabBody({ profile }) {
           colors: colorsDraft[team.id],
           tcolors: tcolorsDraft[team.id],
           offday: offDayDraft[team.id],
+          defaultlogos: defaultLogosDraft[team.id],
         }}
         on={{
           posField: (treatment, field, value) => setPosField(team.id, treatment, field, value),
@@ -200,6 +211,8 @@ export function ColorLabBody({ profile }) {
           tcolorReset: (treatment) => resetTcolorsDraft(team.id, treatment),
           offDayField: (value) => setOffDayField(team.id, 'treatment', value),
           offDayReset: () => resetOffDayDraft(team.id),
+          defaultLogoField: (side, value) => setDefaultLogoField(team.id, side, value),
+          defaultLogoReset: () => resetDefaultLogosDraft(team.id),
         }}
       />
 
@@ -234,7 +247,8 @@ function pendingClubIds(teams, drafts) {
     if (
       perTreatment ||
       Object.keys(drafts.colors[team.id] ?? {}).length > 0 ||
-      Object.keys(drafts.offday[team.id] ?? {}).length > 0
+      Object.keys(drafts.offday[team.id] ?? {}).length > 0 ||
+      Object.keys(drafts.defaultlogos[team.id] ?? {}).length > 0
     )
       ids.add(team.id)
   }

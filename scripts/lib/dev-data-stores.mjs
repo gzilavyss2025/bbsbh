@@ -35,6 +35,8 @@ const isTreatmentKey = (k) => /^[a-z0-9-]+$/.test(k)
 // club already gets with no offDayTreatment field at all, so a hand-crafted
 // POST setting it explicitly would be a no-op write, not a rejection.
 const OFF_DAY_TREATMENTS = new Set(['main', 'alternate', 'alternate-2', 'alternate-3', 'alternate-4', 'city-connect'])
+// Same vocabulary, for the per-side predictive-fallback pick below.
+const DEFAULT_LOGO_TREATMENTS = OFF_DAY_TREATMENTS
 // Hex, rgb(a), or a CSS color keyword — the pinstripe tables carry
 // 'rgba(0, 0, 0, 0.16)', so this can't be hex-only.
 const isColorish = (v) => typeof v === 'string' && v.length > 0 && v.length <= 64
@@ -146,14 +148,18 @@ function isMilbColorStore(parsed) {
 
 // mlb-team-colors.json: one club's Primary/Secondary/Accent brand colors,
 // an optional 4th `accent2` (a promoted single extra — see
-// mlbColorRoles.js), any REMAINING researched `extras`, and an optional
+// mlbColorRoles.js), any REMAINING researched `extras`, an optional
 // `offDayTreatment` (which jersey OffDaySection.jsx's tile wears on a day the
-// club has no game, teams.js's offDayTreatmentFor — absent means Main) — the
-// Team Identity Lab's editable counterpart to teams.js's real
-// TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras/offDayTreatmentFor resolvers,
-// which read this store (src/lib/CLAUDE.md). Team-level, no `treatments` —
-// same footing as milb-colors.json, since none of these vary by treatment the
-// way a logo tile's tuning does.
+// club has no game, teams.js's offDayTreatmentFor — absent means Main), and
+// optional `defaultHomeTreatment`/`defaultAwayTreatment` (the per-side
+// predictive-fallback pick teams.js's defaultTreatmentFor consults before its
+// own Friday/City-Connect heuristic, when a game's real jersey hasn't posted
+// yet — absent means "guess") — the Team Identity Lab's editable counterpart
+// to teams.js's real TEAM_COLOR_PAIRS/TEAM_COLORS/teamColorExtras/
+// offDayTreatmentFor/defaultHomeTreatmentFor/defaultAwayTreatmentFor
+// resolvers, which read this store (src/lib/CLAUDE.md). Team-level, no
+// `treatments` — same footing as milb-colors.json, since none of these vary
+// by treatment the way a logo tile's tuning does.
 //
 // A role the club doesn't have is an ABSENT field, never `''` — isColorish
 // rejects the empty string on purpose, and the lab's applyColorsDraft deletes
@@ -182,6 +188,12 @@ function isMlbTeamColorStore(parsed) {
     }
     if (entry.offDayTreatment !== undefined && !OFF_DAY_TREATMENTS.has(entry.offDayTreatment)) {
       return `team ${teamId}'s offDayTreatment "${entry.offDayTreatment}" is not a known treatment`
+    }
+    for (const field of ['defaultHomeTreatment', 'defaultAwayTreatment']) {
+      const v = entry[field]
+      if (v !== undefined && !DEFAULT_LOGO_TREATMENTS.has(v)) {
+        return `team ${teamId}'s ${field} "${v}" is not a known treatment`
+      }
     }
   }
   return null
