@@ -7,6 +7,7 @@ import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningS
 import { customMarkFor } from './customMarks.js'
 import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
+import MONO_LOGO_MANIFEST from './data/mono-logo-manifest.json' with { type: 'json' }
 import ALT_COLORS_STORE from './data/alt-colors.json' with { type: 'json' }
 import ALT2_COLORS_STORE from './data/alt2-colors.json' with { type: 'json' }
 import ALT3_COLORS_STORE from './data/alt3-colors.json' with { type: 'json' }
@@ -208,6 +209,17 @@ export const LOGO_VARIANTS = [
 // exists.
 const MONO_LOGO_BASE = '/data/logos/mono'
 
+// mono-logo-manifest.json (also written by gen-mono-logos.mjs) maps teamId to
+// a content hash of that club's precomputed knockout SVG, appended below as
+// `?v=`. The deployed PWA caches these SVGs CacheFirst for up to 30 days
+// (vite.config.js) — without a version in the URL, a browser that already
+// visited a club would keep serving its stale cached mark until that cache
+// entry's own expiry, long after a corrected file (approved in
+// `/identity-lab`, landed via mono-ink.json) had actually shipped. The hash
+// changing the URL means a corrected mark reaches every visitor on the very
+// next deploy instead. A team missing from the manifest (not yet generated)
+// just gets an unversioned URL, same as before this existed.
+
 // Teams/treatments whose local art is a hand-flattened/recolored SVG (every
 // path recolored off the official multicolor logo) rather than a
 // photographed/cropped PNG like every other curated treatment. Keyed
@@ -370,7 +382,10 @@ export function teamLogoUrl(teamId, variant = 'base') {
     if (assigned) return resolveAssignedMark(teamId, assigned)
     return `/team-logos/${variant}/${teamId}.png`
   }
-  if (variant === 'mono') return `${MONO_LOGO_BASE}/${teamId}.svg`
+  if (variant === 'mono') {
+    const hash = MONO_LOGO_MANIFEST[String(teamId)]
+    return hash ? `${MONO_LOGO_BASE}/${teamId}.svg?v=${hash}` : `${MONO_LOGO_BASE}/${teamId}.svg`
+  }
   if (variant === 'base') return `${LOGO_BASE}/${teamId}.svg`
   const v = LOGO_VARIANTS.find((x) => x.key === variant)
   return v ? `${LOGO_BASE}/${v.path}/${teamId}.svg` : `${LOGO_BASE}/${teamId}.svg`

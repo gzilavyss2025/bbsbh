@@ -18,6 +18,15 @@
 // appears, and until this file exists for a team the app falls back to the
 // full-color CDN mark on its own.
 //
+// Also writes src/lib/data/mono-logo-manifest.json — one content hash per
+// club, appended by teams.js as the mono URL's `?v=`. The deployed PWA caches
+// these SVGs CacheFirst for up to 30 days (vite.config.js); without a
+// version in the URL, a browser that already visited a club would keep
+// serving its stale cached mark until that cache entry expired, long after a
+// corrected file (from the lab, via mono-ink.json) had shipped. Changing the
+// hash changes the URL, so a corrected mark reaches every visitor on the
+// very next deploy instead of waiting on expiry.
+//
 //   node scripts/gen-mono-logos.mjs            # every club in teams.json
 //   node scripts/gen-mono-logos.mjs --ids=158,498   # spot-check a few
 //   node scripts/gen-mono-logos.mjs --sheet    # + a contact sheet to eyeball
@@ -33,7 +42,13 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logoMono.js'
-import { LOGO_CDN_BASE, pinsFor, readMonoInkStore } from './lib/mono-logo-art.mjs'
+import {
+  LOGO_CDN_BASE,
+  MONO_LOGO_MANIFEST_PATH,
+  monoLogoHash,
+  pinsFor,
+  readMonoInkStore,
+} from './lib/mono-logo-art.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const teamsPath = join(here, '..', 'public', 'data', 'teams.json')
@@ -142,16 +157,33 @@ await mkdir(outDir, { recursive: true })
 // unconvertible art (or leaves the team list) can't leave a stale mark behind
 // that the app would keep rendering.
 const written = new Set()
+const hashes = new Map()
 for (const row of rows) {
   if (!row.mono) continue
   await writeFile(join(outDir, `${row.id}.svg`), row.mono)
   written.add(`${row.id}.svg`)
+  hashes.set(row.id, monoLogoHash(row.mono))
 }
 if (!onlyIds) {
   for (const name of await readdir(outDir)) {
     if (name.endsWith('.svg') && !written.has(name)) await rm(join(outDir, name))
   }
 }
+
+// A --ids= spot-check only touches those clubs' entries, same as the SVG
+// directory above leaving the rest of the league's files alone; a full run
+// rewrites the manifest from scratch so a club that drops out loses its
+// stale entry too.
+const existingManifest = onlyIds ? JSON.parse(await readFile(MONO_LOGO_MANIFEST_PATH, 'utf8').catch(() => '{}')) : {}
+const manifest = { ...existingManifest }
+for (const [id, hash] of hashes) manifest[String(id)] = hash
+if (!onlyIds) for (const id of Object.keys(manifest)) if (!written.has(`${id}.svg`)) delete manifest[id]
+const sortedManifest = Object.fromEntries(
+  Object.keys(manifest)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((id) => [id, manifest[id]]),
+)
+await writeFile(MONO_LOGO_MANIFEST_PATH, `${JSON.stringify(sortedManifest, null, 2)}\n`)
 
 if (wantSheet) {
   await mkdir(sheetDir, { recursive: true })

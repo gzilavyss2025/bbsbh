@@ -133,3 +133,28 @@ pointer-hover treatment, which recolors a card's logo to match a team-colored
 row. It has the same blind spot, but it's a transient desktop-hover state
 (`@media (hover: hover)`, so never on the phone this app is built for) on a
 surface whose fallback is simply the plain card look.
+
+## Amendment (2026-08-02): a version in the URL, so a deploy doesn't wait on cache expiry
+
+The deployed PWA serves these SVGs `CacheFirst` (`vite.config.js`) so a
+revisited club's mark works offline at the park. That collided with the pin
+workflow above: a browser that had already cached a club's mark kept serving
+the OLD file until that cache entry's own 30-day expiry, even though the
+corrected art (approved in the lab, landed via `mono-ink.json`, regenerated,
+and deployed) was already sitting on the server. The lab itself never showed
+this — it fetches and converts fresh in the browser on every load — so the
+divergence only ever showed up as "the site doesn't match the lab," and only
+on a device that had visited before.
+
+`scripts/gen-mono-logos.mjs` now also writes `src/lib/data/mono-logo-manifest.json`,
+a `teamId -> content hash` of that club's converted SVG. `teamLogoUrl`
+(`teams.js`) appends it to the `mono` URL as `?v=`. Workbox keys its cache on
+the full request URL including the query string, so a club whose art changed
+gets a new URL and therefore a guaranteed cache MISS — the old entry is
+simply never requested again — while a club whose art didn't change keeps the
+same URL and stays a cache HIT, costing nothing. The version in the URL IS
+the cache-busting mechanism; nothing reaches for `skipWaiting`, `clientsClaim`,
+or an `ignoreSearch` override. The dev-only regenerate route (`writeMonoLogo`,
+`scripts/lib/mono-logo-art.mjs`) updates the same manifest for the one club it
+touches, so a local save and a full generator run can never disagree about a
+hash.

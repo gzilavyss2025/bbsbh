@@ -36,6 +36,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/teams.json public/data/logos/mono
+          git add public/data/teams.json public/data/logos/mono src/lib/data/mono-logo-manifest.json
           git diff --cached --quiet || git commit -m "Update teams data"
           git push

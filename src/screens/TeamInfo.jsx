@@ -472,7 +472,7 @@ function TeamSections({
               <TeamLogo
                 teamId={meta.id}
                 name={meta.teamName}
-                size={20}
+                size={22}
                 variant="mono"
                 className="metricbar__logo"
               />
@@ -603,7 +603,7 @@ function TeamSections({
                 <TeamLogo
                   teamId={oppMeta.id}
                   name={oppMeta.teamName}
-                  size={20}
+                  size={22}
                   variant="mono"
                   className="metricbar__logo"
                 />
@@ -676,7 +676,7 @@ function OpposingStarterCard({
           <TeamLogo
             teamId={teamId}
             name={teamName}
-            size={20}
+            size={22}
             variant="mono"
             className="metricbar__logo"
           />
