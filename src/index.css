@@ -17127,6 +17127,21 @@ body {
   color: var(--accent-primary);
 }
 
+/* FoulCard's "League foul tracker ›" — a destination-named chevron link out
+   of the card, same register as .tlead__seeall's "See all ›". Compound to
+   beat .plink's `font: inherit`/`color: inherit` reset (same fix as
+   .plink.lineup__name/.plink.startercard__name above). */
+.plink.foulcard__more {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+
 /* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): a
    marquee (.plaque) for the single most prestigious honor, then everything
    else as ledger groups below it. Sits in the achievements zone alongside
