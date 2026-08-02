@@ -11,6 +11,7 @@
 // route runs inside a long-lived Vite process, and an ESM import would hand it
 // whatever mono-ink.json said when the server booted, so the first save would
 // regenerate with the PREVIOUS pins and look like an off-by-one bug.
+import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -21,6 +22,43 @@ const repoRoot = join(here, '..', '..')
 
 export const MONO_LOGO_DIR = join(repoRoot, 'public', 'data', 'logos', 'mono')
 const inkStorePath = join(repoRoot, 'src', 'lib', 'data', 'mono-ink.json')
+// A short content hash per club, appended to teamLogoUrl's `mono` URL as
+// `?v=` (teams.js). The deployed PWA serves these SVGs CacheFirst
+// (vite.config.js) so a revisited team's mark survives going offline at the
+// park — but that same rule means a corrected file only reaches a browser
+// that already cached the old one on the CURRENT art's cache expiry (up to
+// 30 days), not the next deploy. Changing the URL whenever the art changes
+// sidesteps that: the old URL's cache entry is simply never requested again,
+// so what's approved in the lab is what a fresh page load gets, the moment
+// the corrected file ships — no wait for expiry.
+export const MONO_LOGO_MANIFEST_PATH = join(repoRoot, 'src', 'lib', 'data', 'mono-logo-manifest.json')
+
+export function monoLogoHash(monoSvg) {
+  return createHash('sha1').update(monoSvg).digest('hex').slice(0, 10)
+}
+
+export async function readMonoLogoManifest() {
+  try {
+    return JSON.parse(await readFile(MONO_LOGO_MANIFEST_PATH, 'utf8'))
+  } catch {
+    return {}
+  }
+}
+
+// Rewrites just this one club's entry and leaves every other club's hash
+// untouched — the dev route regenerates one team at a time and must not
+// clobber the rest of the manifest with whatever was on disk when the long-
+// lived Vite process started (same reasoning as readMonoInkStore below).
+export async function writeMonoLogoManifestEntry(teamId, hash) {
+  const manifest = await readMonoLogoManifest()
+  manifest[String(teamId)] = hash
+  const sorted = Object.fromEntries(
+    Object.keys(manifest)
+      .sort((a, b) => Number(a) - Number(b))
+      .map((id) => [id, manifest[id]]),
+  )
+  await writeFile(MONO_LOGO_MANIFEST_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
+}
 
 export const LOGO_CDN_BASE = 'https://www.mlbstatic.com/team-logos'
 
@@ -62,5 +100,7 @@ export async function writeMonoLogo(teamId, { store, svg } = {}) {
   if (!mono) return { problem: 'not convertible' }
   const file = join(MONO_LOGO_DIR, `${teamId}.svg`)
   await writeFile(file, mono)
-  return { file: `public/data/logos/mono/${teamId}.svg`, mono }
+  const hash = monoLogoHash(mono)
+  await writeMonoLogoManifestEntry(teamId, hash)
+  return { file: `public/data/logos/mono/${teamId}.svg`, mono, hash }
 }

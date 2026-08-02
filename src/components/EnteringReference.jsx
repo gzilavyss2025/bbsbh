@@ -74,7 +74,7 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
         <TeamLogo
           teamId={fieldingTeamId}
           name={fieldingName}
-          size={20}
+          size={22}
           variant="mono"
           className="metricbar__logo"
         />

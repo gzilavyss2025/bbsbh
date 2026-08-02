@@ -488,7 +488,11 @@ Re-run only to fold in a new season.
   than having yesterday's answers applied to today's shapes.
   Kept OUT of the PWA precache (~1.7 MB for
   the league, two marks per game) with a CacheFirst runtime rule instead — see
-  `vite.config.js`.
+  `vite.config.js`. Also writes `src/lib/data/mono-logo-manifest.json` (a
+  `teamId -> content hash` map), which `teamLogoUrl` (`teams.js`) appends to
+  the mono URL as `?v=` so a corrected mark's changed hash busts that
+  CacheFirst rule immediately instead of waiting on its 30-day expiry — see
+  ADR-0031's amendment.
 - `gen-logo-art.mjs` → `src/lib/data/logo-art.json` — the coverage manifest for the
   curated club marks under `public/team-logos/`. Fetches nothing; the source of
   truth is the working tree. Normally you never run it: the Team Identity Lab's

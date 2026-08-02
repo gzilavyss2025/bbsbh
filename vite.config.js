@@ -479,7 +479,12 @@ export default defineConfig({
             // art that only changes when a club rebrands, and carries no game
             // data at all — CacheFirst, so a revisited team's mark comes off
             // disk and the two marks a game needs survive going offline at the
-            // park. A rebrand lands on the next expiry.
+            // park. teamLogoUrl (teams.js) appends a `?v=` content hash from
+            // mono-logo-manifest.json, so this rule matching on `pathname`
+            // alone is deliberate — Workbox still keys the cache on the full
+            // URL including that query string, so a corrected mark's changed
+            // hash is a cache MISS (fresh network fetch) rather than waiting
+            // on this rule's own 30-day expiry.
             urlPattern: ({ url }) => /^\/data\/logos\/mono\/\d+\.svg$/.test(url.pathname),
             handler: 'CacheFirst',
             method: 'GET',
