@@ -32,9 +32,8 @@
 // drift from the rest of the app's team identity. `leagueId` per series is
 // the one exception: it's bracket TOPOLOGY (which side of the World Series a
 // round belongs on), not team identity, so it's stored the same way `level`/
-// `gameType` tags ride along in umpires.json/game-score.json rather than
-// forcing the client to hardcode a 30-team AL/NL map that would drift on the
-// next realignment.
+// `gameType` tags ride along in umpires.json rather than forcing the client
+// to hardcode a 30-team AL/NL map that would drift on the next realignment.
 //
 // SEEDING (1-6 per league): statsapi carries no "seed" field anywhere —
 // verified live against schedule/feed/standings for a 2024 gamePk. Derived

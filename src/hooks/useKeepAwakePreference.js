@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 
 // Whether to hold the screen-wake lock on a live game page, persisted across
-// visits like useGameScoreVisible. Off by default — an always-on screen for a
+// visits like useFavoriteTeam. Off by default — an always-on screen for a
 // 3-hour game is a real battery cost, so this stays opt-in rather than
 // automatic just because a game is live.
 const KEEP_AWAKE_KEY = 'bbsbh:keepAwake'

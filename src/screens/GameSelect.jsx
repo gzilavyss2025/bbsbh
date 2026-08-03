@@ -8,11 +8,9 @@ import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
-import { useGameScoreVisible } from '../hooks/useGameScoreVisible.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
-import { fetchGameScores, gameScoreFor } from '../api/gameScore.js'
 import { GameCard } from '../components/GameCard.jsx'
 import { DerbyCard } from '../components/DerbyCard.jsx'
 import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
@@ -84,7 +82,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const navigate = useNav()
   const [sportId, setSportId] = useState(readLevel)
   const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
-  const { gameScoreVisible, setGameScoreVisible } = useGameScoreVisible()
   const [showWelcome, setShowWelcome] = useState(isFirstVisit && !welcomeSuppressed())
   const pickLevel = (id) => {
     setSportId(id)
@@ -128,15 +125,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
-
-  // Game Score badges — only fetched at all when the preference is on (see
-  // useGameScoreVisible), same-origin static file, degrades to {} on failure.
-  const gameScores = useAsync(
-    () => (gameScoreVisible ? fetchGameScores() : Promise.resolve({})),
-    [gameScoreVisible],
-  )
-  const scoreFor = (gamePk) =>
-    gameScoreVisible ? gameScoreFor(gameScores.data, gamePk) : null
 
   // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
   // are on today's slate (a past day has its own reveal-all path). The default
@@ -617,7 +605,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     revealed={slateRevealAll}
                     pinnedTeamId={pinnedTeamId}
                     prospectCount={pCount}
-                    gameScore={scoreFor(g.gamePk)}
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                     liveJerseys={liveJerseys.data}
                     eager={eager}
@@ -629,7 +616,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     game={g}
                     pinnedTeamId={pinnedTeamId}
                     prospectCount={pCount}
-                    gameScore={scoreFor(g.gamePk)}
                     liveLine={liveLineFor(g)}
                     liveJerseys={liveJerseys.data}
                     eager={eager}
@@ -658,8 +644,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         onShowLogos={onShowLogos}
         favoriteTeamId={favoriteTeamId}
         onSetFavoriteTeam={setFavoriteTeam}
-        gameScoreVisible={gameScoreVisible}
-        onSetGameScoreVisible={setGameScoreVisible}
       />
 
       {showWelcome && (
@@ -668,8 +652,6 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           favoriteTeamId={favoriteTeamId}
           onSave={setFavoriteTeam}
           onClose={() => setShowWelcome(false)}
-          gameScoreVisible={gameScoreVisible}
-          onSetGameScoreVisible={setGameScoreVisible}
         />
       )}
 

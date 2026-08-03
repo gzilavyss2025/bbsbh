@@ -1,5 +1,9 @@
 # Game Score is the one score-derived number allowed outside a SealBox
 
+**Status: retired.** The Game Score feature was removed from the app; this
+ADR is kept as a historical record of the mitigation that made the exception
+safe while it existed.
+
 Every other number derived from a game's outcome is reveal-only (ADR-0001):
 computed lazily inside a `SealBox`'s render function, never touched until the
 user taps. Game Score (`FINAL · 7.5` on a slate card, `scripts/gen-game-score.mjs`

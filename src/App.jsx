@@ -82,7 +82,6 @@ const UmpireRankingsPage = lazyNamed(
   'UmpireRankingsPage',
 )
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
-const TopGamesPage = lazyNamed(() => import('./screens/TopGamesPage.jsx'), 'TopGamesPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
   'GameNotesDebugPage',
@@ -209,8 +208,6 @@ export default function App() {
     content = <UmpireRankingsPage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
-  } else if (route.name === 'top-games') {
-    content = <TopGamesPage />
   } else if (route.name === 'game-notes-debug') {
     content = <GameNotesDebugPage />
   } else if (route.name === 'animation-lab') {

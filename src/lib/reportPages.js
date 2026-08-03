@@ -3,12 +3,12 @@
 // (SiteMenu.jsx) and the slate footer's "More Baseball" list
 // (SiteFooter.jsx). Both screens spread this same array rather than keeping
 // their own copy, so the two lists can't drift apart the way they once did
-// (Top Games was missing from the menu; Foul Tracker and My First Scorebook
-// were missing from the footer) — see scripts/check-report-pages.mjs, which
-// fails lint if either file stops importing this.
+// (Foul Tracker and My First Scorebook were missing from the footer) — see
+// scripts/check-report-pages.mjs, which fails lint if either file stops
+// importing this.
 //
 // Order is "current-season and busiest first, archival/meta last": live
-// standings/leaders/Top Games/fouls (what's happening now) → player-
+// standings/leaders/fouls (what's happening now) → player-
 // trajectory pages (prospects/rehab/milestones) → the deeper-cut umpire
 // stats → season-culminating history → the two personal/unsealed pages (My
 // First Scorebook, a retrospective; Game Photos, an unsealed CDN photo finder
@@ -23,7 +23,6 @@
 export const REPORT_PAGES = [
   { label: 'Standings', path: '/standings' },
   { label: 'League Leaders', path: '/leaders' },
-  { label: 'Top Games', path: '/top-games' },
   { label: 'Foul Tracker', path: '/fouls' },
   { label: 'Top MLB Prospects', path: '/prospects' },
   { label: 'Rehab Assignments', path: '/rehab' },

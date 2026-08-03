@@ -57,10 +57,13 @@ jobs:
         with:
           # main requires the lint-and-build status check, which the default
           # GITHUB_TOKEN can never satisfy on a bare push (no PR = no check
-          # run for that commit) — every run since 2026-07-13 had its commit
-          # silently rejected at the final push, discarding that night's
-          # generator output. GH_BOT_TOKEN is the same fine-grained PAT
-          # update-game-score.yml already uses to bypass this.
+          # run for that commit, and a PR opened with GITHUB_TOKEN doesn't
+          # even trigger CI — GitHub suppresses workflow-triggered-workflow
+          # chains) — every run since 2026-07-13 had its commit silently
+          # rejected at the final push, discarding that night's generator
+          # output. GH_BOT_TOKEN is a fine-grained PAT for the repo owner
+          # (admin), so pushes with it bypass the required check the same
+          # way the maintainer's own direct pushes already do.
           token: ${{ secrets.GH_BOT_TOKEN }}
       - uses: actions/setup-node@v4
         with:
@@ -193,10 +196,9 @@ jobs:
           git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json public/data/lineup-values.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal.json scripts/data/pitch-arsenal.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
-          # Retry with a rebase on a push race, same shape as
-          # update-game-score.yml — this workflow's push (now anywhere from
-          # ~7:00 to ~11:00 UTC depending on the wait-for-Final backoff above)
-          # can collide with that one's every-10-minutes cron.
+          # Retry with a rebase on a push race — a concurrent push to main
+          # (a manual workflow_dispatch run, a maintainer's own direct push,
+          # another cron) would otherwise get silently rejected here.
           for i in 1 2 3 4 5; do
             git push && exit 0
             git fetch origin "$(git rev-parse --abbrev-ref HEAD)"

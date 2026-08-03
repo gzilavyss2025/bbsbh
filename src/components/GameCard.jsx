@@ -10,10 +10,7 @@ import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { liveTreatmentFor } from '../api/uniforms.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
-// and coarse status only — never the score, even for finals. The one
-// exception is `gameScore` — the blended, capped-factor Game Score rating
-// (see ADR-0015) — which the caller passes in already gated by the
-// useGameScoreVisible preference and null when not yet computed.
+// and coarse status only — never the score, even for finals.
 //
 // Layout: two team columns (away, then home), each a large grayscale logo above
 // a stacked name — location over mascot (MILWAUKEE / BREWERS), like a scorebook.
@@ -21,7 +18,6 @@ export function GameCard({
   game,
   pinnedTeamId,
   prospectCount = 0,
-  gameScore = null,
   // Pre-formatted { score, inning } for the "Scores Unlocked" day pass, or null
   // (the default) — see api/schedule.js fetchSlateScores + lib/slateScoreLine.js.
   // Null keeps this card byte-identical to today; the caller (GameSelect) passes
@@ -32,8 +28,8 @@ export function GameCard({
   // `{ [gamePk]: { [teamId]: { code, text } } }` from a same-day batched
   // fetchGameJerseys call (see GameSelect.jsx) — today's slate only, so a
   // same-day alternate/City Connect posting shows up before the next nightly
-  // cron writes it into jerseysData below. null for every other caller (Top
-  // Games, All-Star Rosters, a past day already covered by that cron).
+  // cron writes it into jerseysData below. null for every other caller
+  // (All-Star Rosters, a past day already covered by that cron).
   liveJerseys = null,
   // True for the slate's first cards, whose marks are the page's largest
   // above-the-fold images — threaded to TeamLogo to skip lazy loading there.
@@ -64,9 +60,9 @@ export function GameCard({
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
       style={style}
     >
-      {/* Full-width date strip for a cross-date list (Top Games) where each
-          card needs its own day, unlike the slate (one date heads the whole
-          page). Absent on every ordinary slate card. */}
+      {/* Full-width date strip for a cross-date list where each card needs
+          its own day, unlike the slate (one date heads the whole page).
+          Absent on every ordinary slate card. */}
       {dateLabel && <div className="gamecard__datebanner">{dateLabel}</div>}
       {pinned && (
         <span className="gamecard__pinbadge" aria-label="Pinned team">
@@ -130,9 +126,9 @@ export function GameCard({
         )}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
-          {/* Only shown in a cross-level list (Top Games, All-Star Rosters —
-              the callers that also pass dateLabel, since a single date-per-
-              page assumption doesn't hold there either). The ordinary slate
+          {/* Only shown in a cross-level list (All-Star Rosters — the caller
+              that also passes dateLabel, since a single date-per-page
+              assumption doesn't hold there either). The ordinary slate
               never passes dateLabel: the level toggle already scopes the
               whole page to one level, so repeating it on every card would
               just be noise. */}
@@ -150,7 +146,7 @@ export function GameCard({
             {!postponed && game.abstractState !== 'Final' && (
               <ReadyPill game={game} />
             )}
-            <StatusText game={game} gameScore={gameScore} />
+            <StatusText game={game} />
           </span>
         </div>
       </button>
@@ -322,25 +318,12 @@ function TeamName({ team, side }) {
 // starts on-site. The parenthetical is dropped when the feed carries no venue
 // timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
 // the park's zone) — no redundant "(7:10 CDT)".
-// `gameScore`: the pre-formatted ("7.5") Game Score badge, already gated by
-// the useGameScoreVisible preference and null when this gamePk hasn't been
-// scored yet (see api/gameScore.js) — this component just renders whatever
-// it's handed, dot-joined after "Final". A deliberate, narrow exception to
-// "never spoiler-revealing" (see ADR-0015): the number is a blended,
-// capped-factor rating, never the score itself.
-function StatusText({ game, gameScore }) {
+function StatusText({ game }) {
   const status = selectGameStatus(game)
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
   if (s === 'Final') {
-    return (
-      <span className="gamecard__status">
-        Final
-        {gameScore && (
-          <span className="gamecard__gamescore"> · {gameScore}</span>
-        )}
-      </span>
-    )
+    return <span className="gamecard__status">Final</span>
   }
   if (s === 'Live') return null // the LIVE pill carries it; no redundant text
   let local

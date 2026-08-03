@@ -20,9 +20,9 @@ function pct(n) {
 // title — the full division table (one row per team, same order/rows the
 // standings table above already lists) instead of the old single-team card,
 // so a visitor can compare the whole division's odds at a glance. Same
-// dialog contract as GameScoreModal/UmpireAccuracyModal: Escape and a
-// backdrop tap close it, focus moves to the close button on open and back to
-// the trigger on close.
+// dialog contract as UmpireAccuracyModal: Escape and a backdrop tap close
+// it, focus moves to the close button on open and back to the trigger on
+// close.
 export function PostseasonOddsModal({ divisionName, rows, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()

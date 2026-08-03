@@ -407,7 +407,6 @@ export default defineConfig({
           // last successful copy available for offline browsing.
           '**/data/manager-history.json',
           '**/data/umpire-accuracy.json',
-          '**/data/game-score.json',
           '**/data/former-teammates.json',
           '**/data/top-prospects.json',
           '**/data/war-history.json',
@@ -456,7 +455,7 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|umpire-accuracy|game-score|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
+              /^\/data\/(?:manager-history|umpire-accuracy|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
               ) || /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname),
             handler: 'NetworkFirst',

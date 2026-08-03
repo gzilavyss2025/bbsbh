@@ -7,27 +7,22 @@
 // database from schema.sql + every group's dump, writes to it, then
 // re-dumps only the group(s) it owns.
 //
-// Dumps are split ONE FILE PER GROUP, not one shared file, because two of
-// these tables are written by generators on DIFFERENT, independently
-// scheduled cron workflows: game_scores by gen-game-score.mjs (every 10
-// minutes, update-game-score.yml) and team_snapshots by
-// gen-team-score.mjs/gen-season-score.mjs (once nightly,
-// update-nightly-data.yml). A single shared dump, fully rewritten on every
-// run, would let whichever workflow pushes second silently clobber the
-// other's table with a stale copy it read before the other's push landed —
-// the exact class of collision update-nightly-data.yml's own header comment
-// describes having already happened once with separate JSON-committing
-// crons. Splitting by group means each workflow's commit only ever touches
-// the file(s) it owns, restoring the same per-file isolation the all-JSON
-// setup had. openDb() still loads every group's dump so cross-table queries
-// (e.g. the season_grade view) see the full picture; only dumpGroup() is
-// scoped.
+// Dumps are split ONE FILE PER GROUP, not one shared file, so two generators
+// on independently scheduled cron workflows can never silently clobber each
+// other's table: a single shared dump, fully rewritten on every run, would
+// let whichever workflow pushes second overwrite the other's table with a
+// stale copy it read before the other's push landed — the exact class of
+// collision update-nightly-data.yml's own header comment describes having
+// already happened once with separate JSON-committing crons. Splitting by
+// group means each workflow's commit only ever touches the file(s) it owns,
+// restoring the same per-file isolation the all-JSON setup had. openDb()
+// still loads every group's dump so cross-table queries (e.g. the
+// season_grade view) see the full picture; only dumpGroup() is scoped.
 //
 // Uses node:sqlite (built into Node >=22.5, stable since Node 26) rather
-// than better-sqlite3 specifically because the nightly/game-score workflows
-// run `node scripts/gen-*.mjs` directly with no `npm install` step — a
-// built-in avoids adding install latency to the 10-minute game-score cron
-// and avoids native-binary platform risk.
+// than better-sqlite3 specifically because the nightly workflows run `node
+// scripts/gen-*.mjs` directly with no `npm install` step — a built-in avoids
+// adding install latency and avoids native-binary platform risk.
 import { DatabaseSync } from 'node:sqlite'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -40,13 +35,11 @@ const dataDir = join(here, '..', 'data')
 // Add a new group when a new table lands (docs/adr/0021's Phase 2/3 tables).
 // A table belongs to exactly one group, matching the workflow that owns it.
 export const GROUPS = {
-  'game-scores': { file: join(dataDir, 'game-scores.sql'), tables: ['game_scores'] },
   'team-snapshots': { file: join(dataDir, 'team-snapshots.sql'), tables: ['team_snapshots'] },
   'player-snapshots': { file: join(dataDir, 'player-snapshots.sql'), tables: ['player_snapshots'] },
   // Both tables are written by the SAME single hand-run script
-  // (gen-postseason-leaders.mjs) — unlike game-scores/team-snapshots'
-  // split, there's no cross-cron collision risk to isolate here, so one
-  // group covers both.
+  // (gen-postseason-leaders.mjs) — there's no cross-cron collision risk to
+  // isolate here, so one group covers both.
   'postseason-player-stats': {
     file: join(dataDir, 'postseason-player-stats.sql'),
     tables: ['postseason_ingested_games', 'postseason_batting_totals', 'postseason_pitching_totals'],

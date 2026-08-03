@@ -14,11 +14,10 @@ const AccountPitch = isClerkEnabled
   : null
 
 // Settings modal, shared by the first-visit welcome flow (GameSelect, `intro`)
-// and the footer's "Settings" button: the favorite-team picker plus the Game
-// Score visibility toggle, each under its own sub-heading. The team picker
-// reuses the Splits vs Team card's tray/strip styling (vsteam__* — see
-// index.css) rather than a new one: the same finger-scrollable row of every
-// MLB club's logo, grayscaled except the pick.
+// and the footer's "Settings" button: the favorite-team picker. It reuses the
+// Splits vs Team card's tray/strip styling (vsteam__* — see index.css) rather
+// than a new one: the same finger-scrollable row of every MLB club's logo,
+// grayscaled except the pick.
 //
 // Tapping a club applies it immediately (no separate Save step), and closing
 // by any route — backdrop tap, the X, Escape, or (in `intro` mode) the "Get
@@ -31,8 +30,6 @@ export function FavoriteTeamModal({
   intro = false,
   onSave,
   onClose,
-  gameScoreVisible = false,
-  onSetGameScoreVisible,
 }) {
   const [selId, setSelId] = useState(favoriteTeamId ?? PINNED_TEAM_ID)
   const mlbTeams = useAsync(() => fetchTeams(SPORT_IDS.MLB), [])
@@ -154,32 +151,6 @@ export function FavoriteTeamModal({
             </div>
           </div>
         </section>
-
-        {onSetGameScoreVisible && (
-          <section className="favteamsheet__section favteamsheet__section--divider">
-            <h3 className="favteamsheet__sectionTitle">Game Score</h3>
-            <div className="favteamsheet__pref">
-              <div className="favteamsheet__prefText">
-                <span className="favteamsheet__prefLabel">
-                  Show Game Score on FINAL cards
-                </span>
-                <span className="hint hint--prose favteamsheet__prefHint">
-                  A 0–10 rating of how exciting a finished game was — never the
-                  score itself.
-                </span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={gameScoreVisible}
-                className={`favteamsheet__prefToggle${gameScoreVisible ? ' is-on' : ''}`}
-                onClick={() => onSetGameScoreVisible(!gameScoreVisible)}
-              >
-                {gameScoreVisible ? 'On' : 'Off'}
-              </button>
-            </div>
-          </section>
-        )}
 
         {AccountPitch && (
           <Suspense fallback={null}>

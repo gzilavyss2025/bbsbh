@@ -3,15 +3,6 @@
 -- in-memory database on every generator run, before the committed dump
 -- (scripts/data/bbsbh.sql) replays its INSERT statements on top.
 
-CREATE TABLE IF NOT EXISTS game_scores (
-  game_pk    INTEGER PRIMARY KEY,
-  score      REAL NOT NULL,
-  sport_id   INTEGER,
-  home_id    INTEGER,
-  away_id    INTEGER,
-  updated_at TEXT NOT NULL
-);
-
 -- Collapses team-score.json's and season-score.json's parallel
 -- season -> team -> date structures into one table. `metric` distinguishes
 -- the three snapshot kinds that used to live in two separate files:

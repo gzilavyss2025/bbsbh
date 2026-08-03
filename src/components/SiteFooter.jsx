@@ -14,8 +14,8 @@ const YEAR = new Date().getFullYear()
 
 // The slate's footer: the past-matchup finder (tucked behind a modal so its
 // two team pickers + results don't have to live inline), the Settings modal
-// (favorite team + Game Score visibility, see FavoriteTeamModal.jsx), the
-// printable logo sheet, and the standard small print. Site-wide player/team
+// (favorite team, see FavoriteTeamModal.jsx), the printable logo sheet, and
+// the standard small print. Site-wide player/team
 // search used to live here as two boxes; it's now the single header search
 // button (see SiteSearch.jsx), reachable from every screen rather than just
 // the slate. Nothing here is score-revealing — the favorite-team pick
@@ -33,8 +33,6 @@ export function SiteFooter({
   onShowLogos,
   favoriteTeamId,
   onSetFavoriteTeam,
-  gameScoreVisible,
-  onSetGameScoreVisible,
 }) {
   const [showFinder, setShowFinder] = useState(false)
   const [showFavoriteTeam, setShowFavoriteTeam] = useState(false)
@@ -85,8 +83,6 @@ export function SiteFooter({
           favoriteTeamId={favoriteTeamId}
           onSave={onSetFavoriteTeam}
           onClose={() => setShowFavoriteTeam(false)}
-          gameScoreVisible={gameScoreVisible}
-          onSetGameScoreVisible={onSetGameScoreVisible}
         />
       )}
 
