@@ -19166,6 +19166,19 @@ body {
 .last10__track::-webkit-scrollbar {
   display: none;
 }
+/* Invisible IntersectionObserver target at the leading edge of the track —
+   scrolling it into view is what grows the rendered window toward Opening
+   Day (see LastTenGamesStrip). Needs a nonzero size to register reliably;
+   never rendered, styled, or otherwise visible. */
+.last10__sentinel {
+  flex: 0 0 1px;
+  width: 1px;
+  height: 150px;
+  /* A snap target of its own — without one, proximity snapping settles on
+     the first CARD instead, which can rest just past this sentinel and
+     leave it (and its IntersectionObserver) never actually reached. */
+  scroll-snap-align: start;
+}
 /* Ticket-stub card: a torn calendar leaf (date) over a dashed tear-line over
    a full-width win/loss ink stamp, the score printed last. Left-aligned, not
    centered, even when the strip is short — the ragged right edge is itself
