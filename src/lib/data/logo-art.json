@@ -829,6 +829,10 @@
     }
   },
   "wpa-alternate": {
+    "ATL.svg": {
+      "teamId": 144,
+      "bytes": 2652
+    },
     "BAL.svg": {
       "teamId": 110,
       "bytes": 13821
@@ -836,6 +840,10 @@
     "MIA.svg": {
       "teamId": 146,
       "bytes": 32751
+    },
+    "MIN.svg": {
+      "teamId": 142,
+      "bytes": 2265
     }
   },
   "wpa-alternate-2": {
@@ -843,12 +851,27 @@
       "teamId": 133,
       "bytes": 2730
     },
+    "ATL.png": {
+      "teamId": 144,
+      "bytes": 43966,
+      "width": 512,
+      "height": 512,
+      "alpha": false
+    },
     "AZ.svg": {
       "teamId": 109,
       "bytes": 18734
+    },
+    "MIN.svg": {
+      "teamId": 142,
+      "bytes": 2265
     }
   },
   "wpa-alternate-3": {
+    "ATL.svg": {
+      "teamId": 144,
+      "bytes": 2341
+    },
     "BAL.svg": {
       "teamId": 110,
       "bytes": 13821
@@ -873,6 +896,10 @@
     "LAD.svg": {
       "teamId": 119,
       "bytes": 3956
+    },
+    "MIA.svg": {
+      "teamId": 146,
+      "bytes": 32751
     },
     "NYM.png": {
       "teamId": 121,
