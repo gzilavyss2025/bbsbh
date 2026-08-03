@@ -18,7 +18,7 @@ import {
   buildJerseyCombos,
 } from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
-import { fetchTeamSchedule, fetchAllStarGame, fetchTeams, recentDecidedGames } from '../api/schedule.js'
+import { fetchTeamSchedule, fetchAllStarGame, fetchTeams, recentDecidedGames, allDecidedGames } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
@@ -932,9 +932,13 @@ export function TeamPage({ id, asOf, sportId }) {
     recentStartingPitchers.length > 0 ||
     recentBullpen.length > 0
   // Last 10 Games card, oldest -> newest — see recentDecidedGames' own header
-  // for why this filters on `won != null` rather than Final status.
+  // for why this filters on `won != null` rather than Final status. The
+  // header's W-L stays pinned to the true last 10 (recentGames); the strip
+  // itself gets the FULL season's decided games so scrolling back keeps
+  // going all the way to Opening Day instead of dead-ending at 10.
   const recentGames = recentDecidedGames(schedule)
   const recentWins = recentGames.filter((g) => g.won).length
+  const seasonGames = allDecidedGames(schedule)
   // Defaults to Last 10 Games whenever that data exists; a club with no
   // completed games yet (or every boxscore fetch failing) has no recent data
   // to default to, so it always renders the season card instead.
@@ -1117,7 +1121,11 @@ export function TeamPage({ id, asOf, sportId }) {
               </em>
             </div>
             <div className="thub-card__body">
-              <LastTenGamesStrip key={`${team.id}-${asOf ?? ''}`} games={recentGames} />
+              <LastTenGamesStrip
+                key={`${team.id}-${asOf ?? ''}`}
+                games={seasonGames}
+                initialCount={recentGames.length}
+              />
             </div>
           </div>
         )}
@@ -1434,21 +1442,54 @@ function last10DateParts(apiDate) {
   return { dow: DOW_LABELS[d.getUTCDay()], month: MONTH_LABELS[d.getUTCMonth()], day: d.getUTCDate() }
 }
 
+// How many additional (older) games to reveal each time the user scrolls
+// back to the growing window's leading edge — same page size as the initial
+// "Last 10" default, just repeated all the way back to Opening Day.
+const LAST10_GROW_STEP = 10
+
+// A setup jump, not a user-visible scroll gesture — bypasses the track's own
+// `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
+// the animated glide from position 0 briefly leaves the leading-edge sentinel
+// on screen mid-flight, which the IntersectionObserver below reads as "scrolled
+// back" and grows the window before the user has touched anything.
+function jumpScrollLeft(el, value) {
+  const prev = el.style.scrollBehavior
+  el.style.scrollBehavior = 'auto'
+  el.scrollLeft = value
+  el.style.scrollBehavior = prev
+}
+
 // Last 10 Games — a horizontally-scrolling strip of ticket-stub cards, one
-// per recently DECIDED game (`games` is already `won != null`-filtered by
-// the caller — see the recentGames comment above — never re-derived from
-// Final status here, which would bypass the fetchTeamSchedule cutoff and
-// leak the very game a mid-scoring visitor opened this page from). Ordered
-// oldest -> newest, same reading direction as the Schedule strip below it;
-// opens pre-scrolled to the newest (rightmost) card. Each card routes to
+// per DECIDED game this season (`games` is already `won != null`-filtered by
+// the caller — see the recentGames/seasonGames comments above — never
+// re-derived from Final status here, which would bypass the
+// fetchTeamSchedule cutoff and leak the very game a mid-scoring visitor
+// opened this page from). Ordered oldest -> newest, same reading direction
+// as the Schedule strip below it; opens pre-scrolled to the newest
+// (rightmost) card, showing only the last `initialCount` (the true last 10).
+// Scrolling back toward the start reveals `LAST10_GROW_STEP` more games at a
+// time, all the way back to Opening Day — `games` already holds the whole
+// season (fetchTeamSchedule's single per-page fetch), so growing the window
+// is a pure client-side slice, never a fresh request. Each card routes to
 // that game's box score, the one destination that already shows the score
 // this card just displayed.
-function LastTenGamesStrip({ games }) {
+function LastTenGamesStrip({ games, initialCount = 10 }) {
   const navigate = useNav()
   const trackRef = useRef(null)
+  const sentinelRef = useRef(null)
+  const didInitialScroll = useRef(false)
+  // Captured scrollLeft/scrollWidth just before growing the window, so the
+  // layout effect below can compensate for the older cards landing BEFORE
+  // the ones already on screen — without it, prepending content shoves the
+  // user's current view further right instead of leaving it visually still.
+  const pendingGrowRef = useRef(null)
+  const [visibleCount, setVisibleCount] = useState(() => Math.min(initialCount, games.length))
   const [canScroll, setCanScroll] = useState(false)
   const [atStart, setAtStart] = useState(true)
   const [atEnd, setAtEnd] = useState(true)
+
+  const visibleGames = games.slice(-visibleCount)
+  const hasMore = visibleCount < games.length
 
   useLayoutEffect(() => {
     const el = trackRef.current
@@ -1462,13 +1503,27 @@ function LastTenGamesStrip({ games }) {
       ro.disconnect()
       window.removeEventListener('resize', check)
     }
-  }, [games.length])
+  }, [visibleGames.length])
 
+  // Opens pre-scrolled to the newest (rightmost) card — once, on mount only;
+  // growing the window later must NOT re-trigger this or every scroll-back
+  // would snap straight back to the end.
   useLayoutEffect(() => {
     const el = trackRef.current
-    if (!el) return
-    el.scrollLeft = el.scrollWidth
-  }, [games.length, canScroll])
+    if (!el || didInitialScroll.current) return
+    jumpScrollLeft(el, el.scrollWidth)
+    didInitialScroll.current = true
+  }, [canScroll])
+
+  // Restores the pre-growth scroll position after older games are
+  // prepended (see pendingGrowRef above).
+  useLayoutEffect(() => {
+    const el = trackRef.current
+    const pending = pendingGrowRef.current
+    if (!el || !pending) return
+    jumpScrollLeft(el, pending.scrollLeft + (el.scrollWidth - pending.scrollWidth))
+    pendingGrowRef.current = null
+  }, [visibleGames.length])
 
   useEffect(() => {
     const el = trackRef.current
@@ -1480,7 +1535,25 @@ function LastTenGamesStrip({ games }) {
     update()
     el.addEventListener('scroll', update)
     return () => el.removeEventListener('scroll', update)
-  }, [games.length, canScroll])
+  }, [visibleGames.length, canScroll])
+
+  // Scrolling (or paging via the < button) into the sentinel at the front of
+  // the track grows the window toward Opening Day.
+  useEffect(() => {
+    const el = trackRef.current
+    const sentinel = sentinelRef.current
+    if (!el || !sentinel || !hasMore) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        pendingGrowRef.current = { scrollLeft: el.scrollLeft, scrollWidth: el.scrollWidth }
+        setVisibleCount((c) => Math.min(c + LAST10_GROW_STEP, games.length))
+      },
+      { root: el, threshold: 0 },
+    )
+    io.observe(sentinel)
+    return () => io.disconnect()
+  }, [hasMore, games.length])
 
   const scroll = (dir) => {
     const el = trackRef.current
@@ -1506,7 +1579,8 @@ function LastTenGamesStrip({ games }) {
         </button>
       )}
       <div className="last10__track" ref={trackRef}>
-        {games.map((g) => {
+        {hasMore && <div ref={sentinelRef} className="last10__sentinel" aria-hidden="true" />}
+        {visibleGames.map((g) => {
           const { dow, month, day } = last10DateParts(g.apiDate)
           const hasScore = g.runs != null && g.oppRuns != null
           const winRuns = g.won ? g.runs : g.oppRuns
