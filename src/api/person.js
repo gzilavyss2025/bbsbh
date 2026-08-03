@@ -164,16 +164,37 @@ export function personBio(person) {
 // Stat aggregation
 // ---------------------------------------------------------------------------
 
+// A stats fetch spanning a TEAM CHANGE returns the per-team stints AND a
+// synthetic, team-less row equal to their sum. Verified live on both byDateRange
+// and yearByYear (Marinaccio's 2026 SD -> PIT: Padres 33 G / 47.0 IP + Pirates
+// 4 G / 5.1 IP + a team-less row of 37 G / 52.1 IP). Summing every row
+// double-counts the whole span — which is what printed that season as
+// 74 G / 104.2 IP on the career register.
+//
+// The roll-up's signature is: no `team`, and `numTeams` above 1. Both halves
+// matter — an ordinary stint carries a `team` and no `numTeams` at all, while
+// the `stats=career` line carries the same `numTeams` but arrives ALONE and
+// legitimately spans teams. So requiring a team-tagged SIBLING is the actual
+// test: drop the roll-up only when the rows it summarizes are present to be
+// summed instead. That also leaves alone the team-less rows callers synthesize
+// by hand (mlbCareerThroughCutoff, and the register's own footer totals).
+function withoutMultiTeamAggregate(splits) {
+  const rows = splits ?? []
+  if (!rows.some((s) => s.team?.id)) return rows
+  return rows.filter((s) => s.team?.id || !(Number(s.numTeams) > 1))
+}
+
 // byDateRange emits duplicate rows (verified: two identical splits for a
 // single-team player); a genuinely traded player would return distinct stints.
-// So: dedupe identical rows, then if more than one remains, SUM counting stats
-// and RECOMPUTE rates from the sums (never average rates). One row → passthrough
-// (exact API values). Returns a single stat-like object, or null.
+// So: drop the multi-team roll-up (above), dedupe identical rows, then if more
+// than one remains, SUM counting stats and RECOMPUTE rates from the sums (never
+// average rates). One row → passthrough (exact API values). Returns a single
+// stat-like object, or null.
 function statSig(s) {
   return [s.atBats, s.hits, s.inningsPitched, s.strikeOuts, s.gamesPlayed].join('|')
 }
 export function aggregateSplits(splits, group) {
-  const stats = (splits ?? []).map((s) => s.stat).filter(Boolean)
+  const stats = withoutMultiTeamAggregate(splits).map((s) => s.stat).filter(Boolean)
   if (stats.length === 0) return null
   const seen = new Set()
   const uniq = stats.filter((s) => {
@@ -891,15 +912,16 @@ function yearByYearCells(st, group, showSaves) {
   return [num(st.gamesPlayed), num(st.atBats), st.avg ?? DASH, num(st.homeRuns), num(st.rbi)]
 }
 
-// A season's yearByYear splits at one level can include a synthetic,
-// team-less aggregate row alongside the per-team rows when a same-level trade
-// happened mid-season (verified live: Soto's 2022 trade returned Nationals +
-// Padres + a third team-less row equal to their sum). Summing every row
-// double-counts that season, so: prefer summing the per-team rows, and only
-// fall back to the lone aggregate row when no team-tagged row exists.
+// A season's yearByYear splits at one level can include the same synthetic,
+// team-less roll-up row a mid-season trade adds to any other stats fetch
+// (verified live: Soto's 2022 trade returned Nationals + Padres + a third
+// team-less row equal to their sum). Dropping it is `aggregateSplits`'s job
+// now — deliberately ONE implementation of that rule, since the register used
+// to be the only path that applied it and every other path (the current
+// season's date-cut row, the milestone career total) double-counted a traded
+// season. Kept as a named seam because the register reads season-at-one-level.
 export function levelSeasonStat(rows, group) {
-  const teamRows = (rows ?? []).filter((s) => s.team?.id)
-  return aggregateSplits(teamRows.length ? teamRows : rows, group)
+  return aggregateSplits(rows, group)
 }
 
 // Display order for a season's per-level sub-rows: MLB first (for the rare
@@ -975,7 +997,8 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   }
   // One stint per (season, level): the current level's current season uses the
   // date-cut aggregate; every other stint is the deduped per-team sum
-  // (levelSeasonStat drops the synthetic team-less row a mid-season trade emits).
+  // (aggregateSplits drops the synthetic roll-up row a mid-season trade emits —
+  // and so does the `currentStat` the caller hands in, built the same way).
   const stints = []
   for (const [yr, byLevel] of bySeason) {
     for (const [sid, rows] of byLevel) {
