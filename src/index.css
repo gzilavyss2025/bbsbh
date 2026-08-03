@@ -3105,58 +3105,62 @@ body {
 }
 
 /* "Scores Unlocked" score + inning row (ADR-0026). Rendered below the matchup
-   only while the day pass is on. No chrome at all — the earlier kraft-amber
-   pill read as one more badge competing with the card; instead each run total
-   is a big mono ledger numeral penciled directly under its own team column
-   (same 1fr/1fr + gap grid as .gamecard__teams, so the numbers land under the
-   marks), with the inning state absolutely centered between them — centered
-   against the CARD, not squeezed between grid tracks, so the numerals stay
-   exactly under the tile centers. All content is uppercase-safe (digits,
-   TOP/BOT/…, F/n). */
+   only while the day pass is on. No pill, no fill — the earlier kraft-amber
+   bar read as one more badge, and kraft is the SEAL's material, exactly wrong
+   for a value the user just unsealed. Instead: a hairline totals rule (the
+   scorebook's bottom-of-the-column line) with each run total penciled as a
+   mono ledger numeral directly under its own team column (same 1fr/1fr + gap
+   grid as .gamecard__teams, so the numbers land under the marks), and the
+   game-state token absolutely centered between them — centered against the
+   CARD, not squeezed between grid tracks, so its width never nudges the
+   numerals off the tile centers. The token is always present (TOP 7 / LIVE /
+   FINAL / F/10): the center is what binds two bare digits into one score.
+   All content is uppercase-safe (digits, TOP/BOT/…, FINAL, F/n). */
 .gamecard__scoreline {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   column-gap: var(--space-3);
-  align-items: baseline;
   margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  /* Soft hairline, not --border-rule — the card's own edge uses that token,
+     and an internal divider shouldn't out-ink its container. */
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* One team's run total. Regular navy ink by default (a tie); --lead inks the
-   side that's ahead bold, --trail drops the side that's behind to graphite —
-   who's winning is carried by weight+tone alone, no extra glyph. */
+/* One team's run total, composing .t-num (mono, tabular). Semibold navy for
+   both sides while live — no mid-game winner inking, the hierarchy shouldn't
+   repaint on every lead change. Only a FINAL settles it: --winner goes bold,
+   --loser fades to graphite (still 8:1 on the card surface). */
 .gamecard__runs {
   justify-self: center;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-hero-sm);
+  font-size: var(--fs-num-lg);
   line-height: var(--lh-score);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-num);
+  font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 
-.gamecard__runs--lead {
+.gamecard__runs--winner {
   font-weight: var(--w-bold);
 }
 
-.gamecard__runs--trail {
+.gamecard__runs--loser {
   color: var(--text-muted);
 }
 
-/* The live half ("BOT 7") or extras-final marker ("F/10"), centered between
-   the two totals. Absolutely positioned so its own width never shifts the
-   numerals off the team-column centers. */
+/* The game-state token between the totals, composing .t-label (condensed
+   caps). Bold + graphite (not caption gray) so the inning — one of the three
+   things this row exists to say — reads as ink, not a footnote. */
 .gamecard__scorestate {
   position: absolute;
   left: 50%;
-  top: 50%;
+  /* 50% centers on the padding box, whose top 8px is the totals rule's
+     breathing room — nudge down half of it to sit on the numerals' own
+     optical center. */
+  top: calc(50% + var(--space-2) / 2);
   transform: translate(-50%, -50%);
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
   white-space: nowrap;
 }
 

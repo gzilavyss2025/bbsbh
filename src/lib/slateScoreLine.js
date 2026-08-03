@@ -18,17 +18,24 @@ function liveInningLabel(entry) {
   return abbr ? `${abbr} ${n}` : String(n)
 }
 
-// Returns { awayRuns, homeRuns, inning, label } or null. The run totals are
-// separate numbers (not one pre-joined string) because the card sets each one
-// directly under its own team column — the logos and names above already say
-// whose number is whose, so the visual line never repeats the abbreviations.
-// `inning` is the live half ("BOT 7") for a game in progress, an extra-innings
-// marker ("F/10") for an extras Final, and null for a regulation Final (the
-// card's own "FINAL" status already carries that — no duplication). `label` is
-// the full sentence for screen readers ("MIL 4 – AZ 2, BOT 7"), which DOES need
-// the abbreviations the visual layout drops. Returns null when there is nothing
-// meaningful to show (no entry, or a lean feed with no runs posted), so the card
-// renders exactly as it does today.
+// Returns { awayRuns, homeRuns, state, final, label } or null. The run totals
+// are separate numbers (not one pre-joined string) because the card sets each
+// one directly under its own team column — the logos and names above already
+// say whose number is whose, so the visual line never repeats the
+// abbreviations. `state` is the game-state token centered between the totals,
+// and it is ALWAYS non-empty — the center slot is what binds two bare numerals
+// into one score, so a blank there must never happen: the live half ("BOT 7"),
+// "LIVE" for a live lean feed that posts no inning (MiLB), "F/10" for an
+// extras Final, "FINAL" for a regulation one (the card suppresses its own
+// bottom-right Final text while this line renders — relocated, not repeated).
+// `awayResult`/`homeResult` are 'winner'/'loser' once a Final has settled it —
+// and BOTH null while live (no mid-game inking; the hierarchy shouldn't
+// repaint on every lead change) or on a tie (a called game can end level, and
+// marking both sides 'loser' would read as "both lost"). `label` is the
+// sentence for screen readers ("MIL 4, AZ 2, BOT 7"), which DOES need the
+// abbreviations the visual layout drops. Returns null when there is nothing
+// meaningful to show (no entry, or a lean feed with no runs posted), so the
+// card renders exactly as it does today.
 //
 // Only a game that has actually STARTED gets a line. The schedule row's shape
 // before first pitch isn't something we can assume (the MLB feed is
@@ -45,14 +52,17 @@ export function slateScoreLine(entry, game) {
   if (!Number.isFinite(a) || !Number.isFinite(h)) return null
   const awayAbbr = game?.away?.abbreviation || 'AWAY'
   const homeAbbr = game?.home?.abbreviation || 'HOME'
-  let inning = null
-  if (state === 'Final') {
+  const final = state === 'Final'
+  let stateToken
+  if (final) {
     const n = entry.currentInning
-    inning = Number.isFinite(n) && n > 9 ? `F/${n}` : null
-  } else if (state === 'Live') {
-    inning = liveInningLabel(entry)
+    stateToken = Number.isFinite(n) && n > 9 ? `F/${n}` : 'FINAL'
+  } else {
+    stateToken = liveInningLabel(entry) || 'LIVE'
   }
-  const score = `${awayAbbr} ${a} – ${homeAbbr} ${h}`
-  const label = inning ? `${score}, ${inning}` : score
-  return { awayRuns: a, homeRuns: h, inning, label }
+  const settled = final && a !== h
+  const awayResult = settled ? (a > h ? 'winner' : 'loser') : null
+  const homeResult = settled ? (h > a ? 'winner' : 'loser') : null
+  const label = `${awayAbbr} ${a}, ${homeAbbr} ${h}, ${stateToken}`
+  return { awayRuns: a, homeRuns: h, state: stateToken, final, awayResult, homeResult, label }
 }

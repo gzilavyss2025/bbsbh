@@ -123,20 +123,42 @@ test('slateScoreLine: a live game shows per-team runs and the live half', () => 
   )
   assert.equal(out.awayRuns, 4)
   assert.equal(out.homeRuns, 2)
-  assert.equal(out.inning, 'BOT 7')
+  assert.equal(out.state, 'BOT 7')
+  assert.equal(out.final, false)
+  // No winner inking while live, whoever leads — the card's hierarchy must
+  // not repaint on every lead change.
+  assert.equal(out.awayResult, null)
+  assert.equal(out.homeResult, null)
   // The screen-reader sentence keeps the abbreviations the visual drops.
-  assert.equal(out.label, 'MIL 4 – AZ 2, BOT 7')
+  assert.equal(out.label, 'MIL 4, AZ 2, BOT 7')
 })
 
-test('slateScoreLine: a regulation Final shows the runs, no inning tag', () => {
+test('slateScoreLine: a regulation Final centers FINAL as the state token', () => {
   const out = slateScoreLine(
     { awayScore: 3, homeScore: 5, currentInning: 9, inningState: 'End' },
     game('Final'),
   )
   assert.equal(out.awayRuns, 3)
   assert.equal(out.homeRuns, 5)
-  assert.equal(out.inning, null) // the card's own FINAL status carries it
-  assert.equal(out.label, 'MIL 3 – AZ 5')
+  // Always non-empty — the center slot binds the two numerals into one score,
+  // and the card suppresses its own bottom-right Final text while this shows.
+  assert.equal(out.state, 'FINAL')
+  assert.equal(out.final, true)
+  assert.equal(out.awayResult, 'loser')
+  assert.equal(out.homeResult, 'winner')
+  assert.equal(out.label, 'MIL 3, AZ 5, FINAL')
+})
+
+// A called game CAN end level. Neither side gets 'loser' — muting both
+// numerals would read as "both lost".
+test('slateScoreLine: a tied Final inks neither side', () => {
+  const out = slateScoreLine(
+    { awayScore: 3, homeScore: 3, currentInning: 6, inningState: 'End' },
+    game('Final'),
+  )
+  assert.equal(out.awayResult, null)
+  assert.equal(out.homeResult, null)
+  assert.equal(out.state, 'FINAL')
 })
 
 test('slateScoreLine: an extras Final marks F/{n}', () => {
@@ -144,7 +166,8 @@ test('slateScoreLine: an extras Final marks F/{n}', () => {
     { awayScore: 6, homeScore: 5, currentInning: 11, inningState: 'End' },
     game('Final'),
   )
-  assert.equal(out.inning, 'F/11')
+  assert.equal(out.state, 'F/11')
+  assert.equal(out.final, true)
 })
 
 test('slateScoreLine: a lean feed with no runs yields no line', () => {
@@ -172,10 +195,14 @@ test('slateScoreLine: no entry yields no line', () => {
   assert.equal(slateScoreLine(undefined, game('Live')), null)
 })
 
-test('slateScoreLine: a live game with no posted inning still shows the runs', () => {
+// A live MiLB lean feed may post runs but no currentInning. The state token
+// falls back to LIVE rather than rendering blank — an empty center would be
+// the same pixels a regulation Final used to show, two opposite meanings.
+test('slateScoreLine: a live game with no posted inning falls back to LIVE', () => {
   const out = slateScoreLine({ awayScore: 0, homeScore: 0 }, game('Live'))
   assert.equal(out.awayRuns, 0)
   assert.equal(out.homeRuns, 0)
-  assert.equal(out.inning, null)
-  assert.equal(out.label, 'MIL 0 – AZ 0')
+  assert.equal(out.state, 'LIVE')
+  assert.equal(out.final, false)
+  assert.equal(out.label, 'MIL 0, AZ 0, LIVE')
 })
