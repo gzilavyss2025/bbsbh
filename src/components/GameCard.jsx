@@ -18,7 +18,8 @@ export function GameCard({
   game,
   pinnedTeamId,
   prospectCount = 0,
-  // Pre-formatted { score, inning } for the "Scores Unlocked" day pass, or null
+  // Pre-formatted { awayRuns, homeRuns, inning, label } for the "Scores
+  // Unlocked" day pass, or null
   // (the default) — see api/schedule.js fetchSlateScores + lib/slateScoreLine.js.
   // Null keeps this card byte-identical to today; the caller (GameSelect) passes
   // a value only while the pass is on AND for today's slate. Every other caller
@@ -114,16 +115,15 @@ export function GameCard({
         {/* Additive score line, present ONLY under an active Scores Unlocked
             pass (liveLine non-null). It renders BELOW the matchup — the team
             colors, cap/jersey marks, and names above are untouched — so a card
-            keeps its identity and just gains today's number. All tokens are
-            uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…), no exemption. */}
-        {liveLine && (
-          <div className="gamecard__unlockline">
-            <span className="gamecard__unlockscore">{liveLine.score}</span>
-            {liveLine.inning && (
-              <span className="gamecard__unlockinning">{liveLine.inning}</span>
-            )}
-          </div>
-        )}
+            keeps its identity and just gains today's number. Each run total
+            sits under its own team column (the marks and names above already
+            say whose it is — no repeated abbreviations), penciled as a big
+            ledger numeral; the inning state rides centered between them. The
+            leading side is inked bold, the trailing side fades to graphite;
+            a tie leaves both at regular ink. Screen readers get the full
+            sentence (liveLine.label) instead of two bare digits. All tokens
+            are uppercase-safe (digits, TOP/BOT/…, F/n), no exemption. */}
+        {liveLine && <ScoreLine liveLine={liveLine} />}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
           {/* Only shown in a cross-level list (All-Star Rosters — the caller
@@ -159,6 +159,35 @@ export function GameCard({
           Box score ›
         </button>
       )}
+    </div>
+  )
+}
+
+// The Scores Unlocked run totals, one per team column (away left, home right,
+// matching the marks above), with the inning state centered between them on
+// the same baseline row. `lead`/`trail` modifiers ink the side that's ahead
+// and mute the side that's behind — a glanceable "who's winning" without any
+// extra glyph. The visual spans are aria-hidden as a group and the full
+// screen-reader sentence rides in one .sr-only span, because "4 … BOT 7 … 2"
+// read aloud in DOM order carries no team context.
+function ScoreLine({ liveLine }) {
+  const { awayRuns, homeRuns, inning, label } = liveLine
+  const mod = (mine, theirs) =>
+    mine > theirs ? ' gamecard__runs--lead' : mine < theirs ? ' gamecard__runs--trail' : ''
+  return (
+    <div className="gamecard__scoreline">
+      <span className="sr-only">{label}</span>
+      <span aria-hidden="true" className={`gamecard__runs gamecard__runs--away${mod(awayRuns, homeRuns)}`}>
+        {awayRuns}
+      </span>
+      {inning && (
+        <span aria-hidden="true" className="gamecard__scorestate">
+          {inning}
+        </span>
+      )}
+      <span aria-hidden="true" className={`gamecard__runs gamecard__runs--home${mod(homeRuns, awayRuns)}`}>
+        {homeRuns}
+      </span>
     </div>
   )
 }

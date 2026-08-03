@@ -116,22 +116,27 @@ const game = (abstractState) => ({
   home: { abbreviation: 'AZ' },
 })
 
-test('slateScoreLine: a live game shows the score and the live half', () => {
+test('slateScoreLine: a live game shows per-team runs and the live half', () => {
   const out = slateScoreLine(
     { awayScore: 4, homeScore: 2, currentInning: 7, inningState: 'Bottom' },
     game('Live'),
   )
-  assert.equal(out.score, 'MIL 4 – AZ 2')
+  assert.equal(out.awayRuns, 4)
+  assert.equal(out.homeRuns, 2)
   assert.equal(out.inning, 'BOT 7')
+  // The screen-reader sentence keeps the abbreviations the visual drops.
+  assert.equal(out.label, 'MIL 4 – AZ 2, BOT 7')
 })
 
-test('slateScoreLine: a regulation Final shows the score, no inning tag', () => {
+test('slateScoreLine: a regulation Final shows the runs, no inning tag', () => {
   const out = slateScoreLine(
     { awayScore: 3, homeScore: 5, currentInning: 9, inningState: 'End' },
     game('Final'),
   )
-  assert.equal(out.score, 'MIL 3 – AZ 5')
+  assert.equal(out.awayRuns, 3)
+  assert.equal(out.homeRuns, 5)
   assert.equal(out.inning, null) // the card's own FINAL status carries it
+  assert.equal(out.label, 'MIL 3 – AZ 5')
 })
 
 test('slateScoreLine: an extras Final marks F/{n}', () => {
@@ -167,8 +172,10 @@ test('slateScoreLine: no entry yields no line', () => {
   assert.equal(slateScoreLine(undefined, game('Live')), null)
 })
 
-test('slateScoreLine: a live game with no posted inning still shows the score', () => {
+test('slateScoreLine: a live game with no posted inning still shows the runs', () => {
   const out = slateScoreLine({ awayScore: 0, homeScore: 0 }, game('Live'))
-  assert.equal(out.score, 'MIL 0 – AZ 0')
+  assert.equal(out.awayRuns, 0)
+  assert.equal(out.homeRuns, 0)
   assert.equal(out.inning, null)
+  assert.equal(out.label, 'MIL 0 – AZ 0')
 })

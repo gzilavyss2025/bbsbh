@@ -18,11 +18,15 @@ function liveInningLabel(entry) {
   return abbr ? `${abbr} ${n}` : String(n)
 }
 
-// Returns { score, inning } or null. `score` is e.g. "MIL 4 – AZ 2" (away first,
-// matching the card's left-away / right-home column order). `inning` is the live
-// half ("BOT 7") for a game in progress, an extra-innings marker ("F/10") for an
-// extras Final, and null for a regulation Final (the card's own "FINAL" status
-// already carries that — no duplication). Returns null when there is nothing
+// Returns { awayRuns, homeRuns, inning, label } or null. The run totals are
+// separate numbers (not one pre-joined string) because the card sets each one
+// directly under its own team column — the logos and names above already say
+// whose number is whose, so the visual line never repeats the abbreviations.
+// `inning` is the live half ("BOT 7") for a game in progress, an extra-innings
+// marker ("F/10") for an extras Final, and null for a regulation Final (the
+// card's own "FINAL" status already carries that — no duplication). `label` is
+// the full sentence for screen readers ("MIL 4 – AZ 2, BOT 7"), which DOES need
+// the abbreviations the visual layout drops. Returns null when there is nothing
 // meaningful to show (no entry, or a lean feed with no runs posted), so the card
 // renders exactly as it does today.
 //
@@ -41,7 +45,6 @@ export function slateScoreLine(entry, game) {
   if (!Number.isFinite(a) || !Number.isFinite(h)) return null
   const awayAbbr = game?.away?.abbreviation || 'AWAY'
   const homeAbbr = game?.home?.abbreviation || 'HOME'
-  const score = `${awayAbbr} ${a} – ${homeAbbr} ${h}`
   let inning = null
   if (state === 'Final') {
     const n = entry.currentInning
@@ -49,5 +52,7 @@ export function slateScoreLine(entry, game) {
   } else if (state === 'Live') {
     inning = liveInningLabel(entry)
   }
-  return { score, inning }
+  const score = `${awayAbbr} ${a} – ${homeAbbr} ${h}`
+  const label = inning ? `${score}, ${inning}` : score
+  return { awayRuns: a, homeRuns: h, inning, label }
 }

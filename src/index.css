@@ -3104,34 +3104,60 @@ body {
   color: var(--text-muted);
 }
 
-/* "Scores Unlocked" score + inning line (ADR-0026). Rendered below the matchup
-   only while the day pass is on, so it wears the same kraft-amber seal treatment
-   as the slate's unlock banner — a deliberate "this is the thing you unsealed"
-   tint, distinct from the card's own team colors above, which stay untouched.
-   All content is uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…). */
-.gamecard__unlockline {
-  display: flex;
+/* "Scores Unlocked" score + inning row (ADR-0026). Rendered below the matchup
+   only while the day pass is on. No chrome at all — the earlier kraft-amber
+   pill read as one more badge competing with the card; instead each run total
+   is a big mono ledger numeral penciled directly under its own team column
+   (same 1fr/1fr + gap grid as .gamecard__teams, so the numbers land under the
+   marks), with the inning state absolutely centered between them — centered
+   against the CARD, not squeezed between grid tracks, so the numerals stay
+   exactly under the tile centers. All content is uppercase-safe (digits,
+   TOP/BOT/…, F/n). */
+.gamecard__scoreline {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-3);
   align-items: baseline;
-  justify-content: center;
-  gap: var(--space-2);
   margin-top: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
 }
 
-.gamecard__unlockscore {
+/* One team's run total. Regular navy ink by default (a tie); --lead inks the
+   side that's ahead bold, --trail drops the side that's behind to graphite —
+   who's winning is carried by weight+tone alone, no extra glyph. */
+.gamecard__runs {
+  justify-self: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-hero-sm);
+  line-height: var(--lh-score);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+.gamecard__runs--lead {
+  font-weight: var(--w-bold);
+}
+
+.gamecard__runs--trail {
+  color: var(--text-muted);
+}
+
+/* The live half ("BOT 7") or extras-final marker ("F/10"), centered between
+   the two totals. Absolutely positioned so its own width never shifts the
+   numerals off the team-column centers. */
+.gamecard__scorestate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   font-family: var(--font-display);
-  font-weight: var(--w-bold);
+  font-weight: var(--w-semibold);
   font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
-}
-
-.gamecard__unlockinning {
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  opacity: 0.85;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
 }
 
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
