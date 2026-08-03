@@ -320,6 +320,79 @@ export function splitsView(lrSplits, group) {
 }
 
 // ---------------------------------------------------------------------------
+// Situational splits (pitching) — a curated slice of the API's sitCodes menu
+// (base state, count leverage, two strikes), same splitSide shape and ledger
+// columns as the vs-L/R card so the two read as one family. Full-season
+// figures, same spoiler footing as splitsView. The base-state trio comes
+// first (empty → on → RISP mirrors escalating danger), then count leverage.
+// ---------------------------------------------------------------------------
+
+const SITUATIONAL_CODES = [
+  ['r0', 'Bases empty'],
+  ['ron', 'Runners on'],
+  ['risp', 'RISP'],
+  ['ac', 'Ahead in count'],
+  ['bc', 'Behind in count'],
+  ['2s', 'Two strikes'],
+]
+export const SITUATIONAL_SIT_CODES = SITUATIONAL_CODES.map(([code]) => code).join(',')
+
+export function situationalSplitsView(splits, group) {
+  const byCode = {}
+  for (const s of splits ?? []) {
+    const code = s.split?.code
+    if (code) byCode[code] = s.stat
+  }
+  const rows = SITUATIONAL_CODES.filter(([code]) => byCode[code]).map(([code, label]) => ({
+    code,
+    label,
+    side: splitSide(byCode[code], group),
+  }))
+  // A couple of stray rows (a September call-up who's barely pitched) read
+  // as noise, not a table — require most of the set before rendering.
+  return rows.length >= 4 ? rows : null
+}
+
+// ---------------------------------------------------------------------------
+// League ranks (pitching) — stats=rankings returns the player's rank within
+// his own league for each standard stat. Curated to the headline stats and
+// gated to top-10 ranks: "1st in NL ERA" is a fact worth a chip; "38th in
+// wins" is not. Live full-season ranks with no as-of history, so the strip
+// is current-day only (loadPlayer skips the fetch under a spoiler cutoff,
+// same rule as FoulCard/Recent workload).
+// ---------------------------------------------------------------------------
+
+const RANK_STATS = [
+  ['era', 'ERA'],
+  ['whip', 'WHIP'],
+  ['strikeOuts', 'K'],
+  ['wins', 'Wins'],
+  ['saves', 'Saves'],
+  ['avg', 'Opp. AVG'],
+  ['inningsPitched', 'IP'],
+]
+const RANK_FLOOR = 10
+const RANK_MAX_CHIPS = 4
+
+export function pitchingRanksView(splits) {
+  const s = (splits ?? [])[0]
+  if (!s?.stat) return null
+  const leagueName = s.league?.name ?? ''
+  const league =
+    leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
+  const items = []
+  for (const [key, label] of RANK_STATS) {
+    const rank = Number(s.stat[key])
+    if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
+      items.push({ label, rank, text: ordinal(rank) })
+    }
+  }
+  if (!items.length) return null
+  items.sort((a, b) => a.rank - b.rank)
+  return { league, items: items.slice(0, RANK_MAX_CHIPS) }
+}
+
+// ---------------------------------------------------------------------------
 // Game log — the back-of-the-card ledger, spoiler-safe by date cutoff
 // ---------------------------------------------------------------------------
 
@@ -402,6 +475,10 @@ export function gameLogView(splits, group, cutoff, limit = 8, { tagLevel = false
         // so every row isn't stamped with a redundant "MLB".
         level: tagLevel ? SPORT_LABEL[s.sport?.id] ?? '' : '',
         line: group === 'pitching' ? pitcherLine(st) : hitterLine(st),
+        // Quality start (6+ IP, ≤3 ER, as a starter) — a small pill beside the
+        // opponent so a run of strong starts reads at a glance.
+        qs: group === 'pitching' && num(st.gamesStarted) > 0 &&
+          ipToOuts(st.inningsPitched) >= 18 && num(st.earnedRuns) <= 3,
       }
     })
   if (!rows.length) return null
@@ -723,6 +800,67 @@ export function arsenalView(splits) {
     })
     .sort((a, b) => (b.usage ?? 0) - (a.usage ?? 0))
   return rows.length ? rows : null
+}
+
+// ---------------------------------------------------------------------------
+// Advanced pitching card — the run-prevention rates behind the headline tiles,
+// from person-fetch's fetchPitchingAdvanced bundle (standard season +
+// seasonAdvanced + sabermetrics, one request). Full-season aggregates, same
+// spoiler footing as the vs-L/R season splits: no single game's line is
+// derivable from a season rate, and the card is labeled "full season" (the
+// page's asOf caveat covers it alongside the splits). MLB-only at the source
+// (the sabermetrics/seasonAdvanced types return nothing for MiLB) — degrades
+// to null and the card doesn't render.
+// ---------------------------------------------------------------------------
+
+// A proportion field (the API sends ".406" strings) as a one-decimal percent.
+function propPct(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : null
+}
+function fixed2(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n.toFixed(2) : null
+}
+function roundInt(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? String(Math.round(n)) : null
+}
+
+export function advancedPitchingView(bundle) {
+  const seasonStat = bundle?.season
+  const adv = bundle?.advanced
+  const saber = bundle?.saber
+  if (!adv && !saber) return null
+  const facts = []
+  const push = (label, value) => {
+    if (value != null) facts.push({ label, value })
+  }
+  push('FIP', fixed2(saber?.fip))
+  push('ERA−', roundInt(saber?.eraMinus))
+  push('K%', propPct(adv?.strikeoutsPerPlateAppearance))
+  push('BB%', propPct(adv?.walksPerPlateAppearance))
+  push('K−BB%', propPct(adv?.strikeoutsMinusWalksPercentage))
+  // Ground-ball share of balls in play — seasonAdvanced carries the
+  // out/hit batted-ball counts rather than a ready-made percentage.
+  const bip = num(adv?.ballsInPlay)
+  if (bip > 0) {
+    push('Ground ball %', `${Math.round(((num(adv?.groundOuts) + num(adv?.groundHits)) / bip) * 100)}%`)
+  }
+  const oppAvg = seasonStat?.avg
+  const oppOps = adv?.ops
+  if (oppAvg || oppOps) push('Opp. AVG / OPS', `${oppAvg ?? DASH} / ${oppOps ?? DASH}`)
+  // Role-aware last cell: a starter's quality-start count, a reliever's
+  // inherited-runners record. A swing man with starts gets the QS cell.
+  const gs = num(seasonStat?.gamesStarted)
+  if (gs > 0 && adv?.qualityStarts != null) {
+    push('Quality starts', `${num(adv.qualityStarts)} of ${gs}`)
+  } else if (num(adv?.inheritedRunners) > 0) {
+    push('Inherited scored', `${num(adv?.inheritedRunnersScored)} of ${num(adv?.inheritedRunners)}`)
+  }
+  // A sparse bundle (a cup-of-coffee arm the sabermetrics feed hasn't rated)
+  // would render a lonely two-cell card — skip below four facts.
+  return facts.length >= 4 ? { facts } : null
 }
 
 // ---------------------------------------------------------------------------
