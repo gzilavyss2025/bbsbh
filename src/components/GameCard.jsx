@@ -46,6 +46,12 @@ export function GameCard({
   // positioned corner pill leak through mirrored on iOS. There's also no result
   // to reveal: the game didn't happen.
   const postponed = status.isPostponed
+  // One flag for everything the Scores Unlocked line displaces while it's
+  // showing: the corner Final text (relocated into its center slot) and the
+  // readiness pips (a pre-game checklist — once runs and an inning are on the
+  // card, "is the scorebook ready" is answered). Pre-game cards keep both:
+  // no line renders before first pitch.
+  const hasScoreLine = !!liveLine && !postponed
   const dhLabel = doubleHeaderLabel(game)
   const pinned = !!pinnedTeamId
   // Sets --pin-accent for the pinned border/gradient + star (see index.css);
@@ -127,7 +133,7 @@ export function GameCard({
             uppercase-safe (digits, TOP/BOT/…, FINAL, F/n), no exemption.
             Suppressed for a game called off after it started (postponed) —
             run totals stacked over a POSTPONED stamp would be noise. */}
-        {liveLine && !postponed && <ScoreLine liveLine={liveLine} />}
+        {hasScoreLine && <ScoreLine liveLine={liveLine} />}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
           {/* Only shown in a cross-level list (All-Star Rosters — the caller
@@ -147,10 +153,10 @@ export function GameCard({
             </span>
           )}
           <span className="gamecard__metaright">
-            {!postponed && game.abstractState !== 'Final' && (
+            {!postponed && game.abstractState !== 'Final' && !hasScoreLine && (
               <ReadyPill game={game} />
             )}
-            <StatusText game={game} hasScoreLine={!!liveLine && !postponed} />
+            <StatusText game={game} hasScoreLine={hasScoreLine} />
           </span>
         </div>
       </button>
