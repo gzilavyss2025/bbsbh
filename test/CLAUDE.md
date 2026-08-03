@@ -33,7 +33,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | fresh-pitcher.test.js | 4 | src/api/select.js | selectIsFreshPitcher |
 | game-feed-diff.test.js | 6 | src/api/game.js | mergeFeedDiff |
 | game-notes-regressions.test.js | 3 | src/api/whatsBrewing.js | "What's Brewing" / Game Notes extraction |
-| game-photos.test.js | 7 | src/api/gamePhotos.js | /photos page (unsealed, non-spoiler) |
+| game-photos.test.js | 20 | src/api/gamePhotos.js | /photos page: photographer/broadcast/graphic classification + subject attribution (unsealed, non-spoiler) |
 | gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/loadScorecard.js | Full relay-chain double-play display |
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
