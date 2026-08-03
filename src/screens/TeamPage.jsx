@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useLayoutEffect, useRef } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -18,7 +18,7 @@ import {
   buildJerseyCombos,
 } from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
-import { fetchTeamSchedule, fetchAllStarGame, fetchTeams } from '../api/schedule.js'
+import { fetchTeamSchedule, fetchAllStarGame, fetchTeams, recentDecidedGames } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
@@ -181,6 +181,7 @@ function roleFromCounts(gamesStarted, gamesPitched, saves) {
 }
 // Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
 const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 // Record by day of week, off the same cutoff-gated `schedule` rows the
 // Schedule section below already renders (fetchTeamSchedule only sets `won`
 // once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
@@ -930,6 +931,10 @@ export function TeamPage({ id, asOf, sportId }) {
     recentSubstitutes.length > 0 ||
     recentStartingPitchers.length > 0 ||
     recentBullpen.length > 0
+  // Last 10 Games card, oldest -> newest — see recentDecidedGames' own header
+  // for why this filters on `won != null` rather than Final status.
+  const recentGames = recentDecidedGames(schedule)
+  const recentWins = recentGames.filter((g) => g.won).length
   // Defaults to Last 10 Games whenever that data exists; a club with no
   // completed games yet (or every boxscore fetch failing) has no recent data
   // to default to, so it always renders the season card instead.
@@ -1103,6 +1108,20 @@ export function TeamPage({ id, asOf, sportId }) {
           />
         )}
 
+        {recentGames.length > 0 && (
+          <div className="thub-card">
+            <div className="thub-card__head">
+              <span>Last 10 Games</span>
+              <em>
+                {recentWins}-{recentGames.length - recentWins}
+              </em>
+            </div>
+            <div className="thub-card__body">
+              <LastTenGamesStrip key={`${team.id}-${asOf ?? ''}`} games={recentGames} />
+            </div>
+          </div>
+        )}
+
         {schedule.length > 0 && (
           <div className="thub-card">
             <div className="thub-card__head">
@@ -1184,7 +1203,7 @@ export function TeamPage({ id, asOf, sportId }) {
                       className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
                       onClick={() => setSeasonRosterTeamId(null)}
                     >
-                      Last 10 Games
+                      Current
                     </button>
                   </div>
                 )}
@@ -1404,6 +1423,159 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
       </div>
     </LinkScope>
+  )
+}
+
+// Ticket-stub day/month/date parts for a Last 10 Games card. Same UTC-parse
+// convention as dayOfWeekRecord/todayDowLabel above, so the weekday can't
+// drift across a DST edge.
+function last10DateParts(apiDate) {
+  const d = new Date(`${apiDate}T00:00:00Z`)
+  return { dow: DOW_LABELS[d.getUTCDay()], month: MONTH_LABELS[d.getUTCMonth()], day: d.getUTCDate() }
+}
+
+// Last 10 Games — a horizontally-scrolling strip of ticket-stub cards, one
+// per recently DECIDED game (`games` is already `won != null`-filtered by
+// the caller — see the recentGames comment above — never re-derived from
+// Final status here, which would bypass the fetchTeamSchedule cutoff and
+// leak the very game a mid-scoring visitor opened this page from). Ordered
+// oldest -> newest, same reading direction as the Schedule strip below it;
+// opens pre-scrolled to the newest (rightmost) card. Each card routes to
+// that game's box score, the one destination that already shows the score
+// this card just displayed.
+function LastTenGamesStrip({ games }) {
+  const navigate = useNav()
+  const trackRef = useRef(null)
+  const [canScroll, setCanScroll] = useState(false)
+  const [atStart, setAtStart] = useState(true)
+  const [atEnd, setAtEnd] = useState(true)
+
+  useLayoutEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
+    check()
+    const ro = new ResizeObserver(check)
+    ro.observe(el)
+    window.addEventListener('resize', check)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', check)
+    }
+  }, [games.length])
+
+  useLayoutEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    el.scrollLeft = el.scrollWidth
+  }, [games.length, canScroll])
+
+  useEffect(() => {
+    const el = trackRef.current
+    if (!el) return
+    const update = () => {
+      setAtStart(el.scrollLeft <= 1)
+      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
+    }
+    update()
+    el.addEventListener('scroll', update)
+    return () => el.removeEventListener('scroll', update)
+  }, [games.length, canScroll])
+
+  const scroll = (dir) => {
+    const el = trackRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
+  }
+
+  const openGame = (g) => {
+    navigate(gamePath(g.apiDate, g.away.abbreviation, g.home.abbreviation, 'boxscore', g.gameNumber))
+  }
+
+  return (
+    <div className="last10">
+      {canScroll && (
+        <button
+          type="button"
+          className="last10__nav"
+          onClick={() => scroll(-1)}
+          disabled={atStart}
+          aria-label="Scroll to older games"
+        >
+          &lsaquo;
+        </button>
+      )}
+      <div className="last10__track" ref={trackRef}>
+        {games.map((g) => {
+          const { dow, month, day } = last10DateParts(g.apiDate)
+          const hasScore = g.runs != null && g.oppRuns != null
+          const winRuns = g.won ? g.runs : g.oppRuns
+          const lossRuns = g.won ? g.oppRuns : g.runs
+          const extraInnings = g.innings && g.innings > 9 ? `${g.innings} inn` : null
+          const gmTag = g.doubleHeader !== 'N' ? `Gm ${g.gameNumber}` : null
+          const meta = extraInnings || gmTag
+          const scoreWords = hasScore
+            ? `${g.won ? 'won' : 'lost'} ${g.runs} to ${g.oppRuns}`
+            : g.won
+              ? 'won'
+              : 'lost'
+          const label = `${dow}, ${month} ${day}, ${g.isHome ? 'versus' : 'at'} ${g.opponent.name}, ${scoreWords}${extraInnings ? ` in ${g.innings} innings` : ''}`
+          return (
+            <button
+              key={g.gamePk}
+              type="button"
+              className={`last10__card${g.won ? ' last10__card--win' : ' last10__card--loss'}${g.isHome ? ' last10__card--home' : ''}`}
+              onClick={() => openGame(g)}
+              aria-label={label}
+            >
+              <div className="last10__stub">
+                <div className="last10__cap">
+                  {dow} &middot; {month}
+                </div>
+                <div className="last10__daynum">{day}</div>
+              </div>
+              <div className="last10__band">
+                <span className="last10__wl">{g.won ? 'W' : 'L'}</span>
+                <TeamLogo
+                  teamId={g.opponent.id}
+                  name={g.opponent.name}
+                  size={30}
+                  variant="mono"
+                  className="last10__logo"
+                />
+                <span className="last10__oppcap">
+                  {g.isHome ? '' : '@ '}
+                  {g.opponent.abbreviation}
+                </span>
+              </div>
+              <div className="last10__foot">
+                {hasScore ? (
+                  <div className="last10__score">
+                    {winRuns}
+                    <span className="last10__sep">&ndash;</span>
+                    {lossRuns}
+                  </div>
+                ) : (
+                  <div className="last10__score last10__score--final">Final</div>
+                )}
+                {meta && <div className="last10__meta">{meta}</div>}
+              </div>
+            </button>
+          )
+        })}
+      </div>
+      {canScroll && (
+        <button
+          type="button"
+          className="last10__nav"
+          onClick={() => scroll(1)}
+          disabled={atEnd}
+          aria-label="Scroll to more recent games"
+        >
+          &rsaquo;
+        </button>
+      )}
+    </div>
   )
 }
 

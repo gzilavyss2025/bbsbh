@@ -321,7 +321,7 @@ const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,of
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,teams,away,home,team,id,name,teamName,abbreviation,status,abstractGameState,isWinner,score,linescore,currentInning'
 
 // Every regular-season meeting between two clubs in one season, for the
 // footer's "find a past matchup" search. The schedule endpoint has no
@@ -481,25 +481,26 @@ export async function fetchTodayPlateUmpireIds(dateStr, sportId = 1) {
 }
 
 // One team's full regular-season schedule, for the team page's monthly
-// calendar card. Dates/opponents/home-away are spoiler-free (same rationale as
-// fetchHeadToHead above). The raw schedule row also carries each side's
-// score/isWinner/leagueRecord — score is never copied into the returned shape
-// below, but `won` IS, gated by `resultsCutoff`: the same day-level cutoff the
-// team page already freezes its standings table to (`dayBefore(asOf)` when
-// reached from inside a sealed game, `null`/unbounded on a bare visit — see
-// TeamPage.jsx). A game on or after the cutoff gets `won: null` regardless of
-// what the feed says, so the specific game the caller opened this page from
-// (and anything same-day or later) never has its own result attached to the
-// object handed back — mirrors "deliberately never copied" for the case that
-// actually needs protecting, rather than stripping `won` unconditionally.
-// `hydrate=team` gets real abbreviations instead of the teamAbbr()
-// name-derived fallback. Regular season only ('R'), like fetchHeadToHead.
-// Degrades to [].
+// calendar card and its Last 10 Games strip. Dates/opponents/home-away are
+// spoiler-free (same rationale as fetchHeadToHead above). `won`, `runs`,
+// `oppRuns`, and `innings` are all gated together by `resultsCutoff`: the
+// same day-level cutoff the team page already freezes its standings table to
+// (`dayBefore(asOf)` when reached from inside a sealed game, `null`/unbounded
+// on a bare visit — see TeamPage.jsx). A game on or after the cutoff gets
+// `won: null` (and no score) regardless of what the feed says, so the
+// specific game the caller opened this page from (and anything same-day or
+// later) never has a result attached to the object handed back. Score used
+// to be deliberately never copied here — Last 10 Games (rev. 2026-08) added
+// it under this same gate rather than a new one, since anything visible to
+// `won` is equally safe for the number next to it. `hydrate=team,linescore`
+// gets real abbreviations (instead of the teamAbbr() name-derived fallback)
+// and each final's actual inning count. Regular season only ('R'), like
+// fetchHeadToHead. Degrades to [].
 export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCutoff = null) {
   if (!teamId || !season) return []
   try {
     const data = await getJson(
-      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team&fields=${TEAM_SCHEDULE_FIELDS}`,
+      `/api/v1/schedule?sportId=${sportId}&teamId=${teamId}&season=${season}&gameType=R&hydrate=team,linescore&fields=${TEAM_SCHEDULE_FIELDS}`,
     )
     const games = (data.dates ?? []).flatMap((d) => d.games ?? [])
     const byPk = new Map()
@@ -515,6 +516,7 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
       const final = g.status?.abstractGameState === 'Final'
       const resultVisible = final && (!resultsCutoff || apiDate <= resultsCutoff)
       const mySide = isHome ? homeSide : awaySide
+      const oppSide = isHome ? awaySide : homeSide
       byPk.set(g.gamePk, {
         gamePk: g.gamePk,
         apiDate,
@@ -525,6 +527,9 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
         home: { abbreviation: teamAbbr(home) },
         opponent: { id: opponent.id, name: opponent.name, abbreviation: teamAbbr(opponent) },
         won: resultVisible && typeof mySide?.isWinner === 'boolean' ? mySide.isWinner : null,
+        runs: resultVisible ? (mySide?.score ?? null) : null,
+        oppRuns: resultVisible ? (oppSide?.score ?? null) : null,
+        innings: resultVisible ? (g.linescore?.currentInning ?? null) : null,
       })
     }
     return [...byPk.values()].sort(
@@ -533,6 +538,18 @@ export async function fetchTeamSchedule(teamId, season, sportId = 1, resultsCuto
   } catch {
     return []
   }
+}
+
+// The Last 10 Games card's window (TeamPage.jsx's LastTenGamesStrip) — the
+// most recently DECIDED games from a team's fetchTeamSchedule() list, oldest
+// -> newest (the list is already sorted ascending). Filters on `won != null`,
+// which fetchTeamSchedule already cutoff-gates, NEVER on Final status
+// directly — that would bypass the cutoff and could surface the very game a
+// mid-scoring visitor opened this page from. Pulled out as its own pure
+// function (rather than left inline in the component) specifically so this
+// invariant is pinned by a test, not just a comment.
+export function recentDecidedGames(schedule, limit = 10) {
+  return schedule.filter((g) => g.won != null).slice(-limit)
 }
 
 // The opponent from a team's most recently COMPLETED game — the Team Identity

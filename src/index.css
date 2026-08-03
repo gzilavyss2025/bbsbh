@@ -18802,6 +18802,212 @@ body {
   font-size: var(--fs-caption);
 }
 
+/* Last 10 Games — ticket-stub cards, one per recently decided game, in a
+   horizontally-scrolling strip above the Schedule strip below (LastTenGamesStrip
+   in TeamPage.jsx). Nav chrome and scroll wiring mirror .seasonseries__nav/
+   __strip exactly. Ordered oldest -> newest, same direction as .sstrip below
+   it, so the two strips never scan in mirror directions; opens pre-scrolled
+   to the newest card. */
+.last10 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.last10__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.last10__nav:hover:not(:disabled) {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.last10__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.last10__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.last10__track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  /* scrollbar-width is Firefox-only, same fix as .seasonseries__strip. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.last10__track::-webkit-scrollbar {
+  display: none;
+}
+/* Ticket-stub card: a torn calendar leaf (date) over a dashed tear-line over
+   a full-width win/loss ink stamp, the score printed last. Left-aligned, not
+   centered, even when the strip is short — the ragged right edge is itself
+   the "season just started" signal on a club with fewer than 10 decided
+   games. */
+.last10__card {
+  flex: 0 0 100px;
+  width: 100px;
+  height: 150px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.last10__card:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.last10__stub {
+  flex: 0 0 auto;
+  padding: 7px var(--space-2) 6px;
+  border-bottom: 1px dashed var(--border-rule);
+  text-align: right;
+}
+@media (hover: hover) {
+  .last10__card:hover .last10__stub {
+    background: var(--surface-inset);
+  }
+}
+/* Home/away, mimicking the schedule strip's own convention right below this
+   card (.sstrip__cell--home): a solid kraft fill for home, plain paper for
+   away. The schedule strip spends that fill on the whole cell because an
+   undecided cell has no result color competing for it; every Last 10 Games
+   card IS decided, so the two zones not already carrying the win/loss ink
+   stamp — the stub above the band and the score below it — carry the kraft
+   instead, reading as one continuous kraft ticket the band is stamped onto. */
+.last10__card--home .last10__stub,
+.last10__card--home .last10__foot {
+  background: color-mix(in srgb, var(--seal) 80%, transparent);
+}
+.last10__card--home .last10__stub {
+  border-bottom-color: var(--seal-hatch);
+}
+.last10__card--home .last10__cap,
+.last10__card--home .last10__daynum,
+.last10__card--home .last10__score,
+.last10__card--home .last10__score--final,
+.last10__card--home .last10__sep,
+.last10__card--home .last10__meta {
+  color: var(--seal-ink);
+}
+@media (hover: hover) {
+  .last10__card--home:hover .last10__stub,
+  .last10__card--home:hover .last10__foot {
+    background: color-mix(in srgb, var(--seal) 92%, transparent);
+  }
+}
+.last10__cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.last10__daynum {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+  margin-top: 2px;
+}
+/* The win/loss ink stamp — the same diagonal hatch as the kraft seal cover
+   and IL tape (see --win-texture/--il-texture, tokens/effects.css), so a
+   result reads as a stamp pressed on the stub rather than a flat color
+   swatch. Knocked-out mono team mark (TeamLogo variant="mono", ADR-0031)
+   plus a small text abbreviation, since the mono asset alone isn't enough
+   for a colorblind-safe read at this size — see the W/L letter below too. */
+.last10__band {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--win-texture);
+}
+.last10__card--loss .last10__band {
+  background: var(--il-texture);
+}
+.last10__wl {
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink);
+}
+.last10__logo {
+  filter: drop-shadow(0 1px 1px rgba(22, 34, 47, 0.25));
+}
+.last10__oppcap {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
+  color: var(--text-on-ink);
+  white-space: nowrap;
+}
+.last10__foot {
+  flex: 0 0 auto;
+  padding: 7px var(--space-2) 8px;
+}
+.last10__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+}
+.last10__score--final {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+}
+.last10__sep {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.last10__meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  margin-top: 2px;
+}
+
 /* team-hub schedule strip — one block per series (run of consecutive games
    vs. the same opponent), wrapping left-to-right/top-to-bottom instead of
    paging by month; see SeriesStrip in TeamPage.jsx. */

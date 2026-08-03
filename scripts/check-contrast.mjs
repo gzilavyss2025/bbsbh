@@ -86,6 +86,15 @@ const PAIRINGS = [
   // Injured-list tape: white banner text over BOTH stripes of --il-texture.
   { fg: '#FFFFFF', bg: 'clay', min: TEXT, note: 'white on IL clay base stripe' },
   { fg: '#FFFFFF', bg: 'clay-deep', min: TEXT, note: 'white on IL clay hatch stripe' },
+  // Last 10 Games win stamp: knockout text/W-L letter over BOTH stripes of
+  // --win-texture. The loss stamp reuses --il-texture, already asserted above.
+  { fg: 'text-on-ink', bg: 'field', min: TEXT, note: 'knockout text on win stamp base stripe' },
+  { fg: 'text-on-ink', bg: 'field-deep', min: TEXT, note: 'knockout text on win stamp hatch stripe' },
+  // Last 10 Games home-game stub: seal-ink over the composite color
+  // `color-mix(in srgb, var(--seal) 80%, transparent)` renders as against
+  // --surface-card (the literal hex is that composite, precomputed by hand
+  // since this checker doesn't parse color-mix()).
+  { fg: 'seal-ink', bg: '#C3996A', min: TEXT, note: 'seal ink on Last 10 Games home-game stub' },
   // Core semantic text roles on their intended surfaces.
   { fg: 'text-body', bg: 'bg-canvas', min: TEXT, note: 'body text on app canvas' },
   { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'heading on raised card' },

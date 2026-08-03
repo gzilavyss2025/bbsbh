@@ -57,6 +57,14 @@
       -45deg,
       var(--clay) 0px, var(--clay) 6px,
       var(--clay-deep) 6px, var(--clay-deep) 8px);
+
+  /* Win stamp — the same diagonal-hatch weave, in the field-green family, for
+     the Team Page's Last 10 Games card (a loss card reuses --il-texture
+     directly, same clay/clay-deep pairing, rather than a second red token). */
+  --win-texture: repeating-linear-gradient(
+      -45deg,
+      var(--field) 0px, var(--field) 6px,
+      var(--field-deep) 6px, var(--field-deep) 8px);
 }
 
 /* Faint scorebook grid-paper texture — apply to canvas backgrounds */
