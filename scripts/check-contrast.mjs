@@ -115,6 +115,10 @@ const PAIRINGS = [
   // the card pill (.flipback__pill--crown) and on the filter chip that selects
   // it (FILTER_CHIPS, src/lib/resultCards.js) — same pairing, asserted once.
   { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
+  // The slate's Scores Unlocked live band: run totals (heading ink) and the
+  // centered state token (muted ink) over the field-green wash.
+  { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },
+  { fg: 'text-muted', bg: 'field-soft', min: TEXT, note: 'live score band state token' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
 ]

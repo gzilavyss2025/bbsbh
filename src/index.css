@@ -3140,6 +3140,26 @@ body {
   color: var(--text-heading);
 }
 
+/* An in-progress game's row wears a quiet field-green wash — green is
+   already this card's "happening now" family (the READY pill's own
+   --field-soft), so a tinted band reads as "on the field right now" while a
+   final's row stays plain paper. A wash, not a badge: full-bleed across the
+   card (no inline padding, so the numerals stay dead on the column centers),
+   and the totals rule just re-inks toward field green. */
+.gamecard__scoreline--live {
+  padding-bottom: var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--field-soft);
+  border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+}
+
+/* The band's extra bottom padding moves the box center below the numerals'
+   own — re-nudge the state token back onto their optical center (same
+   arithmetic as the base rule, minus half the new bottom padding). */
+.gamecard__scoreline--live .gamecard__scorestate {
+  top: calc(50% + (var(--space-2) - var(--space-1)) / 2);
+}
+
 .gamecard__runs--winner {
   font-weight: var(--w-bold);
 }

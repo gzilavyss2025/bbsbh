@@ -183,12 +183,12 @@ export function GameCard({
 // context. (.sr-only's absolute positioning is also what keeps that span from
 // becoming the grid's first item and shoving both numerals a track over.)
 function ScoreLine({ liveLine }) {
-  const { awayRuns, homeRuns, state, awayResult, homeResult, label } = liveLine
+  const { awayRuns, homeRuns, state, final, awayResult, homeResult, label } = liveLine
   // 'winner'/'loser' only once a Final settles it; null (no modifier) while
   // live and on a tie — the formatter owns that rule (slateScoreLine.js).
   const mod = (result) => (result ? ` gamecard__runs--${result}` : '')
   return (
-    <div className="gamecard__scoreline">
+    <div className={`gamecard__scoreline${final ? '' : ' gamecard__scoreline--live'}`}>
       <span className="sr-only">{label}</span>
       <span aria-hidden="true" className={`gamecard__runs t-num gamecard__runs--away${mod(awayResult)}`}>
         {awayRuns}
