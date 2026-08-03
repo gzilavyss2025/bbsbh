@@ -833,30 +833,64 @@ export function advancedPitchingView(bundle) {
   const saber = bundle?.saber
   if (!adv && !saber) return null
   const facts = []
-  const push = (label, value) => {
-    if (value != null) facts.push({ label, value })
+  // Each fact carries its own one-line explainer, shown when the card's
+  // per-fact "i" glyph is tapped open (AdvancedPitchingCard.jsx) — colocated
+  // with the value it explains rather than string-matched by label in the
+  // component, so a relabel here can't silently orphan its note.
+  const push = (label, value, note) => {
+    if (value != null) facts.push({ label, value, note })
   }
-  push('FIP', fixed2(saber?.fip))
-  push('ERA−', roundInt(saber?.eraMinus))
-  push('K%', propPct(adv?.strikeoutsPerPlateAppearance))
-  push('BB%', propPct(adv?.walksPerPlateAppearance))
-  push('K−BB%', propPct(adv?.strikeoutsMinusWalksPercentage))
+  push(
+    'FIP',
+    fixed2(saber?.fip),
+    'Counts what a pitcher alone controls — strikeouts, walks, and home runs allowed.',
+  )
+  push(
+    'ERA−',
+    roundInt(saber?.eraMinus),
+    'His ERA measured against the league: 100 is average, lower is better.',
+  )
+  push('K%', propPct(adv?.strikeoutsPerPlateAppearance), 'Share of plate appearances that ended in a strikeout.')
+  push('BB%', propPct(adv?.walksPerPlateAppearance), 'Share of plate appearances that ended in a walk.')
+  push(
+    'K−BB%',
+    propPct(adv?.strikeoutsMinusWalksPercentage),
+    'Strikeout rate minus walk rate — one number for command and stuff combined.',
+  )
   // Ground-ball share of balls in play — seasonAdvanced carries the
   // out/hit batted-ball counts rather than a ready-made percentage.
   const bip = num(adv?.ballsInPlay)
   if (bip > 0) {
-    push('Ground ball %', `${Math.round(((num(adv?.groundOuts) + num(adv?.groundHits)) / bip) * 100)}%`)
+    push(
+      'Ground ball %',
+      `${Math.round(((num(adv?.groundOuts) + num(adv?.groundHits)) / bip) * 100)}%`,
+      'Share of balls put in play that were hit on the ground.',
+    )
   }
   const oppAvg = seasonStat?.avg
   const oppOps = adv?.ops
-  if (oppAvg || oppOps) push('Opp. AVG / OPS', `${oppAvg ?? DASH} / ${oppOps ?? DASH}`)
+  if (oppAvg || oppOps) {
+    push(
+      'Opp. AVG / OPS',
+      `${oppAvg ?? DASH} / ${oppOps ?? DASH}`,
+      'What opposing hitters have batted / slugged against him this season.',
+    )
+  }
   // Role-aware last cell: a starter's quality-start count, a reliever's
   // inherited-runners record. A swing man with starts gets the QS cell.
   const gs = num(seasonStat?.gamesStarted)
   if (gs > 0 && adv?.qualityStarts != null) {
-    push('Quality starts', `${num(adv.qualityStarts)} of ${gs}`)
+    push(
+      'Quality starts',
+      `${num(adv.qualityStarts)} of ${gs}`,
+      'Starts of at least 6 innings with 3 or fewer earned runs allowed.',
+    )
   } else if (num(adv?.inheritedRunners) > 0) {
-    push('Inherited scored', `${num(adv?.inheritedRunnersScored)} of ${num(adv?.inheritedRunners)}`)
+    push(
+      'Inherited scored',
+      `${num(adv?.inheritedRunnersScored)} of ${num(adv?.inheritedRunners)}`,
+      'Runners on base when he entered a game who came around to score.',
+    )
   }
   // A sparse bundle (a cup-of-coffee arm the sabermetrics feed hasn't rated)
   // would render a lonely two-cell card — skip below four facts.

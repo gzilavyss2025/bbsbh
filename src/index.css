@@ -4547,6 +4547,56 @@ body {
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
+
+/* The Advanced pitching card's per-fact "i" glyph + unfold note (see
+   AdvancedPitchingCard.jsx) — same tap-glyph idiom as .attendance__glyph
+   above, just anchored next to the fact's LABEL instead of its value, since
+   every cell here carries its own glyph rather than one card carrying just
+   one. */
+.fact__label--info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fact__infoglyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--seal);
+  cursor: pointer;
+}
+.fact__infoglyph:hover {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.fact__infoglyph--open {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--seal-ink);
+}
+.fact__infoglyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.fact__infonote {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-body);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
 .section__title {
   font-family: var(--font-display);
   font-size: var(--fs-label);

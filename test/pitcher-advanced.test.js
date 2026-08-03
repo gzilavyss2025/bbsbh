@@ -48,6 +48,8 @@ test('advancedPitchingView shapes the starter card from a live-shaped bundle', (
   assert.equal(byLabel['Ground ball %'], '47%')
   assert.equal(byLabel['Opp. AVG / OPS'], '.145 / .445')
   assert.equal(byLabel['Quality starts'], '13 of 21')
+  // Every fact carries its own explainer for the card's per-fact "i" glyph.
+  assert.ok(view.facts.every((f) => typeof f.note === 'string' && f.note.length > 0))
 })
 
 test('advancedPitchingView gives a reliever the inherited-runners cell, not QS', () => {
