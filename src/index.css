@@ -3198,6 +3198,33 @@ body {
   opacity: 1;
 }
 
+/* National-broadcast flag: a small TV-screen glyph on .gamecard__metaright,
+   between the ready pips and the start time/FINAL — the blackout-relevant
+   fact that this game airs on a national network (FOX/ESPN/TBS/Apple TV+/…)
+   rather than only the local regional feed. Muted like the pips' unchecked
+   state rather than an alert color — this is informational, not a warning. */
+.gamecard__nationaltv {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gamecard__nationaltv rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.gamecard__nationaltv path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
 /* ---------------------------------------------------------------- buttons */
 .btn {
   min-height: var(--tap-min);

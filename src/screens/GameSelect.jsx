@@ -4,6 +4,7 @@ import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
+import { fetchNationalBroadcasts } from '../api/broadcast.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -178,6 +179,22 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         ? fetchGameJerseys(gamePksKey.split(',').map(Number))
         : Promise.resolve({}),
     [isToday, gamePksKey],
+  )
+
+  // Which of today's slate cards carry a national-TV assignment (FOX/ESPN/
+  // TBS/Apple TV+/…) — one batched ESPN scoreboard call per date, unlike
+  // liveJerseys above this isn't today-only: a past day's national broadcast
+  // is a fixed historical fact, not something a nightly cron needs to catch
+  // up on, so it's worth fetching whatever day is on screen. MLB only (ESPN
+  // has no MiLB scoreboard); fetchNationalBroadcasts degrades to {} for a
+  // MiLB games list anyway, but skipping the call outright avoids a wasted
+  // fetch every time a MiLB level is paged through.
+  const nationalBroadcasts = useAsync(
+    () =>
+      sportId === SPORT_IDS.MLB && sorted.length
+        ? fetchNationalBroadcasts(dateStr, sorted)
+        : Promise.resolve({}),
+    [sportId, dateStr, gamePksKey],
   )
 
   // Every active club at this level (see fetchTeams), independent of the
@@ -607,6 +624,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     prospectCount={pCount}
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                     liveJerseys={liveJerseys.data}
+                    national={nationalBroadcasts.data?.[g.gamePk]}
                     eager={eager}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={() => onPick(g, dateStr, 'boxscore')}
@@ -618,6 +636,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     prospectCount={pCount}
                     liveLine={liveLineFor(g)}
                     liveJerseys={liveJerseys.data}
+                    national={nationalBroadcasts.data?.[g.gamePk]}
                     eager={eager}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={null}

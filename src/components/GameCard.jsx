@@ -31,6 +31,11 @@ export function GameCard({
   // cron writes it into jerseysData below. null for every other caller
   // (All-Star Rosters, a past day already covered by that cron).
   liveJerseys = null,
+  // National TV network name ("FOX", "ESPN", …) for this gamePk, from a
+  // same-day-or-any-day batched fetchNationalBroadcasts call (see
+  // GameSelect.jsx) — undefined/'' for the vast majority of games, which
+  // carry no national assignment.
+  national = '',
   // True for the slate's first cards, whose marks are the page's largest
   // above-the-fold images — threaded to TeamLogo to skip lazy loading there.
   eager = false,
@@ -146,6 +151,7 @@ export function GameCard({
             {!postponed && game.abstractState !== 'Final' && (
               <ReadyPill game={game} />
             )}
+            {!postponed && national && <NationalTvIcon network={national} />}
             <StatusText game={game} />
           </span>
         </div>
@@ -244,6 +250,27 @@ function ReadyPill({ game }) {
           </span>
         ))}
       </span>
+    </span>
+  )
+}
+
+// A small TV-screen glyph + the network name (FOX/ESPN/TBS/Apple TV+/…) —
+// the fact a local viewer needs to know their own regional feed of this game
+// is blacked out. Rides the same .gamecard__metaright line as the ready pill
+// and start time/FINAL, between the two (after the pips, before the time —
+// the pips only show pre-game, so this is the first thing on the line for a
+// Final). The name prints as-is (ESPN's own casing) with CSS text-transform
+// doing the visual uppercase, per the ALL-CAPS invariant (no per-component
+// .toUpperCase() — scripts/check-name-casing.mjs).
+function NationalTvIcon({ network }) {
+  return (
+    <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+        <rect x="1.5" y="3" width="13" height="9" rx="1.5" />
+        <path d="M5 14.5h6" />
+        <path d="M8 12v2.5" />
+      </svg>
+      {network}
     </span>
   )
 }
