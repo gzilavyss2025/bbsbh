@@ -19765,6 +19765,19 @@ body {
   background: var(--surface-card);
   min-width: 116px;
 }
+/* Safari drops `position: sticky` on a table cell whose OWN `display` has
+   been changed away from `table-cell` (a WebKit quirk — Chromium tolerates
+   it fine, which is why this only ever showed up on an iPhone): the shared
+   `.standings td.team { display: flex }` above — needed by boards like Umpire
+   Rankings that lay a rank number and the name out as sibling children of the
+   cell itself — silently un-stuck this column while scrolling. Standings' own
+   `.team` cell has exactly one child (`TeamLink`, already flexed by the `> *`
+   half of that same rule), so putting the TD back to its native table-cell
+   display here costs nothing and restores stickiness. */
+.standings--full td.team {
+  display: table-cell;
+  vertical-align: middle;
+}
 .standings--full thead th.team {
   z-index: 2;
   background: var(--bg-page);
