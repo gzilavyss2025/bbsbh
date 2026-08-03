@@ -130,10 +130,10 @@ test('milbBrandPair stops at null where milbColorPair paints the neutral pair', 
 // --------------------------------------------------------------------------
 
 test('an MLB club still reads its own tables, chain or no chain', () => {
-  // teamTintColor keeps using the rival-distinguishing accent (#FFC52F gold)
+  // teamTintColor keeps using the rival-distinguishing accent (#F3ECD8 cream)
   // rather than the Brewers' primary navy — a different table for a different
   // purpose, and the chain must not have quietly merged the two.
-  assert.equal(teamTintColor(158), 'rgba(255, 197, 47, 0.22)')
+  assert.equal(teamTintColor(158), 'rgba(243, 236, 216, 0.22)')
   assert.equal(teamPrimaryColor(158), '#12284B')
   assert.deepEqual(TEAM_COLOR_PAIRS[158], ['#12284B', '#FFC52F'])
 })
