@@ -15903,6 +15903,12 @@ body {
   /* Grid items default to min-width:auto, which lets long names push this
      column (and the logo after it) past the viewport edge on mobile. */
   min-width: 0;
+  /* Size container so .player__name-last--long can scale to the column's
+     ACTUAL width (cqw) — the headshot and hero logo are fixed-px, so this
+     column shrinks faster than the viewport and a vw-based size can't track
+     it. Safe here: the column is the grid's 1fr track, so its width never
+     depends on its own contents. */
+  container-type: inline-size;
 }
 /* The affiliate mark — the parent MLB org's wordmark, drawn small below a
    MiLB player's own team logo, like a jersey's affiliation patch. Only
@@ -15994,6 +16000,20 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* A long surname-plus-number ("Misiorowski #32", "Contreras #24") steps the
+   display size down — the jersey number with it — rather than ellipsizing the
+   player's own name on his own page (PlayerPage adds the modifier when the
+   combined length reaches 11 units). Container-relative (cqw, see
+   .player__ident) so the size tracks the hero's middle column, which shrinks
+   faster than the viewport; 11.4cqw fits an 11-char surname plus number down
+   to ~360px phones (verified 320–430px; at 320 the ellipsis safety net still
+   applies). */
+.player__name-last--long {
+  font-size: clamp(14px, 11.4cqw, 25px);
+}
+.player__name-last--long .player__num {
+  font-size: var(--fs-ui);
 }
 .player__num {
   font-family: var(--font-mono);
@@ -17250,6 +17270,121 @@ body {
   font-weight: var(--w-semibold);
   color: var(--text-muted);
   margin-left: 3px;
+}
+
+/* ---- pitch mix (player page "Pitches"): a family-colored usage bar over
+   per-pitch rows. The bar is decorative (aria-hidden in PitchMix.jsx) — every
+   number it encodes repeats in the labeled rows beneath, each led by a family
+   chip, so the low-chroma --arsenal-* inks never carry identity alone. The
+   2px gaps between segments are the chart convention for stacked fills. ---- */
+.pitchmix {
+  margin: 0 0 18px;
+}
+.pitchmix__bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.pitchmix__seg {
+  flex-basis: 0;
+  min-width: 3px;
+}
+.pitchmix__seg--fastball, .pitchmix__chip--fastball { background: var(--arsenal-fastball); }
+.pitchmix__seg--breaking, .pitchmix__chip--breaking { background: var(--arsenal-breaking); }
+.pitchmix__seg--offspeed, .pitchmix__chip--offspeed { background: var(--arsenal-offspeed); }
+.pitchmix__seg--other,    .pitchmix__chip--other    { background: var(--arsenal-other); }
+.pitchmix__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pitchmix__row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) max-content max-content;
+  align-items: center;
+  column-gap: 8px;
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pitchmix__row:first-child {
+  border-top: 0;
+}
+.pitchmix__chip {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+}
+.pitchmix__name {
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pitchmix__usage {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+  min-width: 40px;
+  text-align: right;
+}
+.pitchmix__velo {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  min-width: 86px;
+  text-align: right;
+}
+
+/* ---- league-rank chips under the season tiles ("1st NL · ERA") ---- */
+.leaguerank {
+  margin: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.leaguerank__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 9px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.leaguerank__ord {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+
+/* Quality-start pill in the game log — the .gamelog__level pill's geometry
+   with the positive accent ink, so a run of strong starts reads at a glance. */
+.gamelog__qs {
+  margin-left: 5px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--accent-positive);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-positive);
+  vertical-align: middle;
 }
 
 /* ---- 2026 All-Star banner — blue tape across the top of the card ---- */

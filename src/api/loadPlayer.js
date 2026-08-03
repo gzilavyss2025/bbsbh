@@ -23,6 +23,7 @@ import {
   fetchMilbFieldingSeason,
   fetchMilbStarterRelieverSeason,
   fetchMilbGameLog,
+  fetchPitchingAdvanced,
   fetchTransactions,
   fetchPlayerAwards,
   fetchTradeCohort,
@@ -37,6 +38,10 @@ import {
   personBio,
   signedFallback,
   personSportId,
+  advancedPitchingView,
+  situationalSplitsView,
+  pitchingRanksView,
+  SITUATIONAL_SIT_CODES,
   aggregateSplits,
   pitcherRole,
   buildBlock,
@@ -225,7 +230,7 @@ export async function loadPlayer(id, asOf) {
               ...milb,
             ])
           : fetchPersonStats(id, { type: 'gameLog', group, season, sportId: currentActivitySportId })
-        const [seasonSplits, careerSplits, lrSplits, gameLogSplits, mlbYbySplits, milbYbySplits, arsenalSplits] =
+        const [seasonSplits, careerSplits, lrSplits, gameLogSplits, mlbYbySplits, milbYbySplits, arsenalSplits, advancedBundle, situationalSplits, rankSplits] =
           await Promise.all([
             // Current-activity sections track his current-activity level (his
             // live level, or MLB while he's on a rehab assignment)...
@@ -245,6 +250,22 @@ export async function loadPlayer(id, asOf) {
             fetchMilbYearByYear(id, group),
             group === 'pitching'
               ? fetchPersonStats(id, { type: 'pitchArsenal', group, season, sportId: currentActivitySportId })
+              : Promise.resolve([]),
+            // The Advanced card's season/seasonAdvanced/sabermetrics bundle —
+            // MLB-only at the source, so skip the request entirely for a
+            // player whose current activity is a MiLB level.
+            group === 'pitching' && currentActivitySportId === 1
+              ? fetchPitchingAdvanced(id, season)
+              : Promise.resolve(null),
+            // Situational splits (base state / count leverage) — full-season
+            // figures like the vs-L/R card, MLB only.
+            group === 'pitching' && currentActivitySportId === 1
+              ? fetchPersonStats(id, { type: 'statSplits', group, sitCodes: SITUATIONAL_SIT_CODES, season, sportId: 1 })
+              : Promise.resolve([]),
+            // League ranks — live current ranks with no as-of history, so a
+            // spoiler-cutoff view skips them (same rule as FoulCard).
+            group === 'pitching' && currentActivitySportId === 1 && !cutoff
+              ? fetchPersonStats(id, { type: 'rankings', group, season, sportId: 1 })
               : Promise.resolve([]),
           ])
         const seasonStat = aggregateSplits(seasonSplits, group)
@@ -269,6 +290,12 @@ export async function loadPlayer(id, asOf) {
         // Pure passthrough lookup, not a derivation — attached here rather
         // than threaded into buildBlock's (pure-shaping) signature.
         block.savant = savantPercentilesFor(savantData, id, group)
+        // Same attach-after pattern: the Advanced card's shaped view rides
+        // the block rather than widening buildBlock's signature, as do the
+        // situational-splits ledger and the league-rank strip.
+        block.advanced = group === 'pitching' ? advancedPitchingView(advancedBundle) : null
+        block.situational = group === 'pitching' ? situationalSplitsView(situationalSplits, group) : null
+        block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : null
         return { group, mlbYbySplits, milbYbySplits, block }
       }),
     ),

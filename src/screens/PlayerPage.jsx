@@ -20,6 +20,8 @@ import { spanCell } from '../lib/ledger.js'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
+import { AdvancedPitchingCard } from '../components/AdvancedPitchingCard.jsx'
+import { PitchMix } from '../components/PitchMix.jsx'
 import { FoulCard } from '../components/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/PitcherWorkloadCard.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -73,6 +75,12 @@ export function PlayerPage({ id, asOf, sportId }) {
     : [bio.bats && `Bats ${bio.bats}`, bio.throws && `Throws ${bio.throws}`].filter(Boolean).join(' / ')
   const enteringLabel = asOf ? `entering ${monthDay(asOf)}` : 'season to date'
   const { first: firstName, last: lastName } = splitDisplayName(bio.fullName)
+  // What actually has to fit on the hero's one line is surname + jersey
+  // number ("Contreras" alone fits; "Contreras #24" doesn't), so the
+  // long-name step-down keys on their combined length — see
+  // .player__name-last--long. Eleven units is where the base size starts
+  // ellipsizing at phone width.
+  const nameUnits = lastName.length + (bio.number ? String(bio.number).length + 1 : 0)
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
@@ -114,7 +122,10 @@ export function PlayerPage({ id, asOf, sportId }) {
           <div className="player__ident">
             <h1 className="player__name">
               {firstName && <span className="player__name-first">{firstName}</span>}
-              <span className="player__name-last">
+              {/* A long surname-plus-number would ellipsize at phone width —
+                  step the display size down instead of truncating the man's
+                  own name on his own page. */}
+              <span className={`player__name-last${nameUnits >= 11 ? ' player__name-last--long' : ''}`}>
                 {lastName}
                 {bio.number && <span className="player__num">#{bio.number}</span>}
               </span>
@@ -230,6 +241,22 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
             <StatGrid tiles={block.tiles} />
 
+            {/* League-rank chips right under the tiles they contextualize —
+                "1st in NL ERA" is the second-screen fact a reader wants next
+                to the raw 1.63. Top-10 ranks only (see pitchingRanksView);
+                current-day only, so the strip vanishes under a spoiler asOf
+                (loadPlayer skips the fetch). */}
+            {block.ranks && (
+              <p className="leaguerank">
+                {block.ranks.items.map((it) => (
+                  <span className="leaguerank__chip" key={it.label}>
+                    <strong className="leaguerank__ord">{it.text}</strong>
+                    {` ${block.ranks.league} · ${it.label}`}
+                  </span>
+                ))}
+              </p>
+            )}
+
             {/* No header — sitting right beneath Current season's tiles,
                 a vs-LHP/RHP (or vs-LHB/RHB) breakdown of the same season
                 is self-explanatory without its own "Season splits" label.
@@ -250,6 +277,23 @@ export function PlayerPage({ id, asOf, sportId }) {
                   }))}
                 />
               </div>
+            )}
+
+            {/* Situational splits — base state, then count leverage; the same
+                columns as the vs-L/R ledger above so the two read as one
+                family. Full-season figures (the page caveat covers both). */}
+            {block.situational && (
+              <>
+                <SectionTitle title="Situational" note="full season" />
+                <Ledger
+                  leftCols={1}
+                  head={['Split', 'BF', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                  rows={block.situational.map((r) => ({
+                    key: r.code,
+                    cells: [r.label, r.side.count, r.side.slash, r.side.hr, r.side.rbi, r.side.xbh, r.side.soPct, r.side.bbPct],
+                  }))}
+                />
+              </>
             )}
 
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
@@ -281,6 +325,11 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             <StatcastPercentiles savant={block.savant} group={block.group} />
 
+            {/* The run-prevention rates behind the headline tiles (FIP, ERA−,
+                K%/BB%, ground balls, opponents' line) — beside Statcast's
+                percentiles as its absolute-numbers sibling. */}
+            <AdvancedPitchingCard adv={block.advanced} />
+
             {/* Season foul-ball line (gen-fouls.mjs) + recent pitcher
                 workload (gen-workload.mjs) — both current-day-only cards
                 that hide under a spoiler asOf cutoff, like the Milestone
@@ -292,19 +341,8 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             {block.arsenal && (
               <>
-                <SectionTitle title="Pitches" />
-                <Ledger
-                  leftCols={1}
-                  head={['Pitch', 'Velo', 'Usage']}
-                  rows={block.arsenal.map((p) => ({
-                    key: p.code,
-                    cells: [
-                      p.name,
-                      p.velo != null ? <>{p.velo.toFixed(1)} <span className="pitch__unit">mph</span></> : DASH,
-                      p.usage != null ? `${Math.round(p.usage * 100)}%` : DASH,
-                    ],
-                  }))}
-                />
+                <SectionTitle title="Pitches" note="share of pitches · avg velo" />
+                <PitchMix arsenal={block.arsenal} />
               </>
             )}
 
@@ -320,6 +358,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                           {r.home ? 'vs' : '@'}{' '}
                           <GameLink path={r.boxscorePath}>{r.opp}</GameLink>
                           {r.level && <span className="gamelog__level">{r.level}</span>}
+                          {r.qs && <span className="gamelog__qs" title="Quality start">QS</span>}
                         </span>
                       </div>
                       <div className="gamelog__line">{r.line}</div>
@@ -396,7 +435,7 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {asOf && (
           <p className="hint hint--prose player__caveat">
-            Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row and the splits are full-season figures.
+            Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row, the splits and the Advanced rates are full-season figures.
           </p>
         )}
       </div>
