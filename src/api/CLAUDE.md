@@ -495,6 +495,10 @@ for each generator; the reader modules:
   `keywordsAll` ids — never name matching), which is what `photosForPlayer`/
   `photosForTeam` query. `withoutGraphics` is the camera-only filter both the
   page and `GamePhotosStrip` apply; it deliberately keeps `unknown`.
+  Those two query helpers are **groundwork with no screen calling them yet** —
+  the cross-game "photos by player / by team" index they exist for is scoped in
+  `.scratch/game-photos-by-subject/` (PRD + issue 01), which also records the
+  design decisions already settled. Read it before extending any of this.
 
 ## Leader boards (live)
 
