@@ -777,6 +777,11 @@ body {
    element can only stay stuck for as long as its own parent stays in the
    scrollport, and `.slatehead` alone is only ever one short row tall. */
 .slatehead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   margin: 0 calc(-1 * var(--app-gutter));
   padding: 0 var(--app-gutter) 8px;
   border-bottom: var(--bw-hair) solid var(--border-rule);
@@ -1011,18 +1016,12 @@ body {
   color: var(--text-body);
 }
 
-/* The slate's date stepper sits on its own full-width row under the topbar so
-   it never crowds the title/Logos button on a narrow phone. */
+/* The slate's date stepper shares .slatehead's row with the Live Scores/Reveal
+   chip cluster (.daystate below) rather than stacking below it — see
+   GameSelect.jsx. */
 .datenav--row {
   justify-content: center;
   gap: 8px;
-}
-
-/* The level toggle now shares the topbar row (see .topbar--slate), so the date
-   stepper sits just below it with a small gap and no trailing margin. */
-.slatehead .datenav--row {
-  margin-top: 4px;
-  margin-bottom: 0;
 }
 
 /* The slate's date stepper is a compact control, not a primary tap target —
@@ -1070,25 +1069,22 @@ body {
 }
 
 /* Day-state row on the slate (GameSelect): whichever of {Live Scores, Reveal
-   All} applies to the current date, riding beside the date stepper instead
-   of stacking below it. Two families, matching the app's existing kraft
-   vocabulary rather than inventing a third: Live Scores OFF is a quiet ghost
-   chip (same rectangular shape + hover-inverts/press-scales as .datenav__today
-   and the arrow buttons above); Live Scores ON promotes to the flat kraft
-   "mode" fill .modestrip elsewhere in the app also uses for "an unsealed
-   screen says why it's unsealed" (a MODE you're in); Reveal All reuses
-   .btn--reveal's hatched "peel the tape" texture (an ACTION you take) rather
-   than a third look. At phone width the ON/action states run edge-to-edge as
-   a strip (see the negative-margin bleed below); the 740px block further
-   down turns them into contained rounded chips once there's room beside the
-   date stepper. Defined here (ahead of the 740px block) rather than down by
-   the old .slateunlock location, so the desktop overrides there — same
-   selector, equal specificity — actually win the cascade by source order. */
+   All} applies to the current date, riding beside the date stepper in
+   .slatehead's own row (see .slatehead above) rather than stacking below it.
+   Two families, matching the app's existing kraft vocabulary rather than
+   inventing a third: Live Scores OFF is a quiet ghost chip (same rectangular
+   shape + hover-inverts/press-scales as .datenav__today and the arrow buttons
+   above); Live Scores ON promotes to the flat kraft "mode" fill .modestrip
+   elsewhere in the app also uses for "an unsealed screen says why it's
+   unsealed" (a MODE you're in); Reveal All reuses .btn--reveal's hatched
+   "peel the tape" texture (an ACTION you take) rather than a third look.
+   Defined here (ahead of the 740px block) rather than down by the old
+   .slateunlock location, so the desktop overrides there — same selector,
+   equal specificity — actually win the cascade by source order. */
 .daystate {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-2);
 }
 .daystate__chip {
   display: flex;
@@ -1107,7 +1103,6 @@ body {
 /* OFF — the default, most-common state, so it stays ordinary chrome rather
    than banner weight. */
 .daystate__chip--live {
-  align-self: flex-start;
   padding: 4px 10px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
@@ -1124,14 +1119,12 @@ body {
   color: var(--text-on-ink);
 }
 
-/* ON — edge-to-edge kraft strip at phone width; the 740px block below turns
-   this into a contained rounded chip instead. */
+/* ON — a contained kraft chip, same footprint as OFF, so switching it on
+   never pushes the date stepper or forces a wrap onto its own row. */
 .daystate__chip--live-on {
-  width: 100%;
-  margin: 0 calc(-1 * var(--app-gutter));
-  padding: 8px var(--app-gutter);
-  border-top: var(--bw-hair) solid var(--seal-hatch);
-  border-bottom: var(--bw-hair) solid var(--seal-hatch);
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  border-radius: var(--radius-sm);
   background: var(--seal-cover);
   color: var(--seal-cover-ink);
   font-family: var(--font-display);
@@ -15442,12 +15435,12 @@ body {
   }
 
   /* ---- slate: the date stepper and the day-state row (Live Scores toggle
-     and/or Reveal All) share one row instead of stacking, closing the dead
-     vertical gap between them. A 3-column grid (not flex space-between)
-     keeps the date stepper truly centered whether or not the third column is
-     occupied: on a plain day with neither control, the outer 1fr columns
-     still balance evenly and the date stepper doesn't drift toward whichever
-     side a control would have occupied. */
+     and/or Reveal All) already share .slatehead's row at every width (base
+     rule further up); a 3-column grid replaces the base flex space-between
+     here so the date stepper reads as truly centered once there's room to
+     spare — on a plain day with neither control, the outer 1fr columns still
+     balance evenly and the date stepper doesn't drift toward whichever side
+     a control would have occupied. */
   .slatehead {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -15460,28 +15453,14 @@ body {
     max-width: 560px;
   }
 
-  /* Rides in the grid's third column, right of the centered date stepper,
-     instead of dropping to its own row below (base rule further up still
-     stacks it on phone width). Both chips can be present at once (today,
-     every game gone Final, pass still off — see the JSX comment), so this
-     stays a row that can hold either or both rather than a single slot. */
+  /* Rides in the grid's third column, right of the centered date stepper.
+     Both chips can be present at once (today, every game gone Final, pass
+     still off — see the JSX comment), so this stays a row that can hold
+     either or both rather than a single slot. */
   .daystate {
     grid-column: 3;
-    flex-direction: row;
     flex-wrap: wrap;
     justify-content: flex-end;
-    margin-top: 0;
-  }
-  /* Once it's a contained row item instead of a lone full-bleed strip, the
-     ON state and Reveal All both become rounded chips like everything else
-     in this row, instead of the phone-width edge-to-edge banner/hatched
-     full-width button. */
-  .daystate__chip--live-on {
-    width: auto;
-    margin: 0;
-    padding: 4px 10px;
-    border: var(--bw-hair) solid var(--seal-hatch);
-    border-radius: var(--radius-sm);
   }
   .daystate__chip--reveal {
     display: inline-flex;
