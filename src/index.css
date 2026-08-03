@@ -3153,6 +3153,43 @@ body {
   border-radius: var(--radius-sm);
   background: var(--field-soft);
   border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  /* Root a stacking context so the hover sheen below can sit at z -1 —
+     above this band's own fill, below its ink. */
+  z-index: 0;
+}
+
+/* Hover detail for the live band: outfield mow stripes. The band's green
+   already says "this game is on the field right now" — resting the pointer
+   on the card brings up the freshly-cut look: wide alternating rows of
+   barely-deeper green, leaned to the same slight angle as the '@' watermark
+   (skewX(-8deg) ≈ 98deg here). Kin to the pinstripe tile's hand-styled
+   stripes, but far wider and softer — mow rows, not pinstripes. Painted
+   UNDER the numerals/token (z -1 within the band's stacking context) so
+   hovering never dims the ink; the stripe-over-wash composite is asserted
+   against both inks in check-contrast.mjs (precomputed hex — the checker
+   doesn't parse color-mix). Opacity-only fade (GPU-cheap, fine under
+   reduced motion), hover-capable fine pointers only — on touch, a tap is
+   navigation, and stuck post-tap stripes are noise. */
+.gamecard__scoreline--live::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    98deg,
+    color-mix(in srgb, var(--field) 10%, transparent) 0 14px,
+    transparent 14px 28px
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gamecard__open:hover .gamecard__scoreline--live::after {
+    opacity: 1;
+  }
 }
 
 /* Symmetric padding puts the box center back on the numerals' own center,

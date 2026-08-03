@@ -119,6 +119,11 @@ const PAIRINGS = [
   // centered state token (muted ink) over the field-green wash.
   { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },
   { fg: 'text-muted', bg: 'field-soft', min: TEXT, note: 'live score band state token' },
+  // The band's hover mow stripe: `color-mix(in srgb, var(--field) 10%,
+  // transparent)` over --field-soft — precomputed by hand like the Last 10
+  // Games stub above, since this checker doesn't parse color-mix().
+  { fg: 'text-heading', bg: '#D1E0D3', min: TEXT, note: 'live band numerals on hover mow stripe' },
+  { fg: 'text-muted', bg: '#D1E0D3', min: TEXT, note: 'live band state token on hover mow stripe' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
 ]
