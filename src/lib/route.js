@@ -25,7 +25,6 @@
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
 //   '/manager/{id}'                     -> { name: 'manager', id }
-//   '/top-games'                        -> { name: 'top-games' }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
@@ -96,7 +95,6 @@ export function parseRoute(url) {
   // the generic game route.
   if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
-  if (parts.length === 1 && parts[0] === 'top-games') return { name: 'top-games' }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }

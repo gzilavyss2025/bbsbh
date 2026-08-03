@@ -101,9 +101,9 @@ A test only has impact if a failure *stops* something. The chain here:
 
 ### The nightly crons and branch protection (important)
 
-The data crons (`update-nightly-data.yml`, `update-game-score.yml`,
-`update-teams.yml`, …) **push generated `public/data/*.json` straight to
-`main`** — they don't open PRs. A required status check would normally reject
+The data crons (`update-nightly-data.yml`, `update-teams.yml`, …) **push
+generated `public/data/*.json` straight to `main`** — they don't open PRs. A
+required status check would normally reject
 those pushes (the default `GITHUB_TOKEN` can't satisfy a check on a bare push,
 and a PR opened by `GITHUB_TOKEN` doesn't even trigger CI). They get around this
 by checking out with **`GH_BOT_TOKEN`**, a fine-grained PAT owned by the repo

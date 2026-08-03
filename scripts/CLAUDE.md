@@ -30,25 +30,24 @@ the one long-lived example spec; write and delete throwaway specs alongside it.
 
 ## The SQLite data layer (`lib/schema.sql`, `lib/db.js`)
 
-`gen-game-score.mjs`, `gen-team-score.mjs`, `gen-season-score.mjs`, and
-`gen-postseason-leaders.mjs` write into a shared SQLite database instead of
-hand-rolling their own JSON read-merge-write cycle, then export the same JSON
-shapes the reader modules already expect — see `docs/adr/0021`. `openDb()`
-reconstitutes an in-memory database from committed TEXT
-dumps (`scripts/data/*.sql`, plain `INSERT` statements — never a binary `.db`, so
-PR diffs stay reviewable); `dumpGroup(db, name)` re-dumps only the table-group a
-generator owns. **Dumps are split one file per group, not shared**, because
-`game_scores` and `team_snapshots` are written by generators on independently
-scheduled crons (every 10 minutes vs. once nightly) — a shared file would let
-whichever workflow pushes second silently clobber the other's table with a stale
-copy. Add a new table = add a new group in `db.js` + extend `schema.sql`; a new
-generator that needs to join against existing tables is the reason this layer
-exists, so wire it in rather than adding another bespoke JSON merge. Uses
-`node:sqlite` (Node ≥22.5, stable since Node 26) rather than `better-sqlite3` —
-the workflows run generators with no `npm install` step, and a built-in avoids
-adding install latency to the 10-minute game-score cron. `migrate-json-to-sqlite.mjs`
-is the one-time backfill that seeded the dumps from the pre-migration JSON files;
-it's not part of any cron.
+`gen-team-score.mjs`, `gen-season-score.mjs`, and `gen-postseason-leaders.mjs`
+write into a shared SQLite database instead of hand-rolling their own JSON
+read-merge-write cycle, then export the same JSON shapes the reader modules
+already expect — see `docs/adr/0021`. `openDb()` reconstitutes an in-memory
+database from committed TEXT dumps (`scripts/data/*.sql`, plain `INSERT`
+statements — never a binary `.db`, so PR diffs stay reviewable);
+`dumpGroup(db, name)` re-dumps only the table-group a generator owns.
+**Dumps are split one file per group, not shared**, so two generators on
+independently scheduled crons can never silently clobber each other's table —
+whichever workflow pushes second to a shared file would overwrite the other's
+table with a stale copy. Add a new table = add a new group in `db.js` +
+extend `schema.sql`; a new generator that needs to join against existing
+tables is the reason this layer exists, so wire it in rather than adding
+another bespoke JSON merge. Uses `node:sqlite` (Node ≥22.5, stable since
+Node 26) rather than `better-sqlite3` — the workflows run generators with no
+`npm install` step, and a built-in avoids adding install latency.
+`migrate-json-to-sqlite.mjs` is the one-time backfill that seeded the dumps
+from the pre-migration JSON files; it's not part of any cron.
 
 ## Nightly-cron generators (`update-nightly-data.yml`)
 
@@ -197,7 +196,7 @@ don't run these by hand.
   ATTEMPT (`att10/att20/att30`) and, if it won, a comeback WIN (`sub10/sub20/
   sub30`) — the club's claw-back rate is `sub/att`, `sub <= att`, both pairs
   nested. SQLite-backed (`comeback-wins` group, ADR-0021) APPEND-ONLY incremental
-  sweep of newly-Final MLB regular-season games like `gen-game-score.mjs`
+  sweep of newly-Final MLB regular-season games like `gen-umpire-accuracy.mjs`
   (`--days` trailing window / backfill); `comeback_ingested_games` is the
   idempotency guard. Both minimums come from the MLB-only `/winProbability`
   endpoint (home share directly; away = `100 − home max`). A schema change (the
@@ -317,36 +316,6 @@ don't run these by hand.
 
 ## Own-cadence generators (not the nightly batch)
 
-- `gen-game-score.mjs` → `public/data/game-score.json` — the 0.0–10.0 "how
-  exciting was this game" rating shown unsealed next to FINAL on the slate
-  (`FINAL · 7.5`). Each entry is `{ score, sportId, homeId, awayId }` — the
-  level + both team ids come straight off the same feed already fetched to
-  score the game (no extra call), so the Top Games page can filter its pool by
-  level/team. Regular season only (`gameType 'R'`; spring training/exhibition
-  are skipped). APPEND-ONLY/incremental like `gen-umpire-accuracy.mjs`: each
-  run sweeps a trailing window of dates (`--days`, default 3) across MLB + the
-  four full-season MiLB levels, fetches the live feed for every newly-Final
-  gamePk not yet scored, and merges the result in (deduped by gamePk — a
-  Final game's score never changes). Runs on its OWN tight cron
-  (`.github/workflows/update-game-score.yml`, every 10 minutes), not
-  `update-nightly-data.yml` — the whole point is a score within minutes of a
-  game going Final, which the once-nightly batch can't deliver. Self-contained
-  except for `selectRegulationInnings` (`src/api/select.js`), reused so
-  "extra innings" never drifts from what the innings viewer itself calls
-  extra. The five-bucket formula (drama, action, spectacle, **dominance**, dud)
-  scores from the feed's linescore + play-by-play + **boxscore** (individual
-  pitching/batting lines drive the dominance axis) + **gameData** bios
-  (`birthDate`/`mlbDebutDate` for the career-arc modifier). See
-  `docs/game-score.md` for the factor table + calibration anchors, and ADR-0015
-  for why this is the one score-derived number allowed to render outside a
-  `SealBox`. App reads it via `src/api/gameScore.js`. A full backfill (new
-  season, schema change, or **formula change** — a Final game is never
-  recomputed otherwise) is a hand-run **`--rescore`**: re-scores every gamePk
-  already in the file plus the trailing window, checkpointing every 200 so a
-  long run resumes cleanly. `computeGameScore` is exported and the sweep is
-  entry-point-guarded, so the formula is importable for tests. Backed by the
-  SQLite layer above (`game_scores`); `public/data/game-score.json` is
-  exported from the table.
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
   no entry in the nightly commit step). Runs in `update-nightly-data.yml`
   alongside the generators above, but is the one script here that calls

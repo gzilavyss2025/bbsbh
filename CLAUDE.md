@@ -69,7 +69,7 @@ npm run e2e        # playwright test — browser verification harness, not CI-ga
 the next numbered one, `npm run dev:2..5` (`5172`→`5169`) / `preview:2..5`
 (`4172`→`4169`). Rationale + the tally-nfl band split are in `vite.config.js`.
 
-The `scripts/gen-*.mjs` data generators (WAR, rehab, umpires, callouts, game-score,
+The `scripts/gen-*.mjs` data generators (WAR, rehab, umpires, callouts,
 …) are documented in `scripts/CLAUDE.md`. The `npm test` unit suite (`test/*.test.js`,
 CI-gated) covers the pure data layer — reveal-only derivations, spoiler gates,
 routing, run-expectancy/tiering math — including the spoiler invariant pinned on a

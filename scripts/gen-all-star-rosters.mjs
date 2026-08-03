@@ -12,8 +12,8 @@
 // Each season's game (for the box-score link) comes from
 // GET /api/v1/schedule?sportId=1&season=YYYY&gameType=A — this file stores
 // only the gamePk; the screen resolves live team/date info from it via
-// fetchGameCardsByPk (src/api/schedule.js), same pattern as TopGamesPage, so
-// the JSON never goes stale on a franchise rename. 1959–1962 played two
+// fetchGameCardsByPk (src/api/schedule.js), so the JSON never goes stale on
+// a franchise rename. 1959–1962 played two
 // games a year; like fetchAllStarBoxscoreIds's existing fallback, this just
 // takes dates[0]'s first game and drops the second, rather than modeling
 // doubleheader-style multi-game seasons no other part of the route grammar

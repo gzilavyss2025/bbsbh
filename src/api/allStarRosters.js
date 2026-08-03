@@ -14,8 +14,7 @@
 // selections, not a boxscore scan, so he still shows (in bullpen/substitutes
 // when he never played). `games` is season -> gamePk only; the screen
 // resolves each game's live team/date info via fetchGameCardsByPk
-// (schedule.js), same as TopGamesPage, so a franchise rename never goes
-// stale in this file.
+// (schedule.js), so a franchise rename never goes stale in this file.
 //
 // Roster membership carries no individual game's score — same footing as
 // Awards History/League Leaders/WAR — so this file needs no spoiler cutoff.

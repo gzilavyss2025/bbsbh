@@ -60,18 +60,12 @@
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
        `.favteamsheet__accountpitch` (the section title + button stay uppercase)
      - the About page body copy — `.aboutpage .caps-exempt`
-     - the Game Score modal's explainer prose — `.gsmodal .sheet__body`, the
-       quiet factor glosses `.gsfactor__note`, and the example lines
-       `.gsexample__line` (the shouted group subheadings + bold factor labels
-       stay uppercase)
      - the Team Score modal's headline + explainer paragraphs —
        `.tscoremodal__title`, `.tscoremodal__body p` (+ inline children) —
        the figures table and section sub-kicker stay shouted
-     - the Top Games page's Game Score explanation — `.topgames__definition`
-       (+ its embedded `.topgames__formula-link` button)
      - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
        (the blurb title above it stays uppercase, same shouted-heading/
-       natural-case-body split as the Game Score modal above)
+       natural-case-body split as the Team Score modal above)
      - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
@@ -80,7 +74,8 @@
      - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
      - the spoiler-consent modal's explainer prose — `.consent__body`,
        `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
-       buttons stay uppercase, same split as the Game Score modal)
+       buttons stay uppercase, same shouted-heading/natural-case-body split
+       as the Team Score modal above)
      - the copy editor's natural-case fields + preview — `.admincopy__lede`,
        `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
        `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
@@ -1550,8 +1545,7 @@ body {
 }
 
 /* Screen-wake-lock toggle (GameView.jsx's KeepAwakeToggle) — a compact icon
-   pill riding next to Watch, only shown while the game is Live. Same
-   on/off-state coloring convention as .favteamsheet__prefToggle.is-on. */
+   pill riding next to Watch, only shown while the game is Live. */
 .awaketoggle {
   display: inline-flex;
   align-items: center;
@@ -2117,9 +2111,8 @@ body {
   text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
 }
 
-/* An inline text-link riding inside a .hint paragraph (e.g. "How's this
-   calculated?" on the Top Games page) — underlined, no button chrome, so it
-   reads as part of the sentence. */
+/* An inline text-link riding inside a .hint paragraph — underlined, no
+   button chrome, so it reads as part of the sentence. */
 .hint__link {
   padding: 0;
   border: none;
@@ -2306,259 +2299,6 @@ body {
   gap: 10px;
 }
 
-/* ------------------------------------------------------------- top games page
-   The page is a small season archive: a calm identity block, a clearly scoped
-   filter surface, then a leaderboard where rank and Game Score sit together
-   above each spoiler-free matchup card. */
-.topgames__topbar {
-  align-items: flex-end;
-  padding-bottom: var(--space-4);
-  border-bottom: var(--bw-rule) solid var(--text-heading);
-}
-.topgames__topbar .topbar__title {
-  margin-top: 4px;
-}
-.topgames__eyebrow {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.topgames__archivecount,
-.topgames__shownstat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  padding-left: var(--space-3);
-  border-left: var(--bw-hair) solid var(--border-rule);
-}
-.topgames__archivecount-value,
-.topgames__shownstat-value {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-solid);
-  font-variant-numeric: tabular-nums;
-  color: var(--accent-primary);
-}
-.topgames__archivecount-label,
-.topgames__shownstat-label {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-
-.topgames__intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--space-4);
-  padding: var(--space-4) 0;
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-}
-.topgames__introcopy {
-  min-width: 0;
-}
-.topgames__introcopy .topgames__eyebrow {
-  font-size: var(--fs-ui);
-  color: var(--text-heading);
-}
-.topgames__definition {
-  max-width: 58ch;
-  margin: 6px 0 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  letter-spacing: var(--ls-text);
-  color: var(--text-muted);
-}
-#root .topgames__definition,
-#root .topgames__formula-link {
-  text-transform: none; /* caps-exempt: this is explanatory sentence copy, not app chrome */
-}
-.topgames__formula-link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent-primary);
-  font: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
-.topgames__formula-link:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
-  border-radius: var(--radius-xs);
-}
-
-.topgames__shownstat {
-  min-width: 70px;
-}
-
-.topgames__filters {
-  padding: var(--space-4) 0 var(--space-3);
-}
-.topgames__sectionhead,
-.topgames__resultsbar {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.topgames__sectiontitle,
-.topgames__resultstitle {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-title);
-  letter-spacing: var(--ls-title);
-  color: var(--text-heading);
-}
-.topgames__filtersummary,
-.topgames__resultsmeta {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-caption);
-}
-.topgames__filterrow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  padding: 6px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--surface-card) 72%, var(--bg-page));
-  box-shadow: var(--inset-cell);
-}
-.topgames__levels {
-  flex: 1 1 auto;
-  min-width: 0;
-  margin: 0;
-}
-.topgames__levels .levelnav__btn {
-  min-width: 0;
-}
-.topgames__favtoggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  flex: 0 1 auto;
-  min-height: 34px;
-  padding: 0 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  color: var(--text-muted);
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  cursor: pointer;
-  box-shadow: var(--inset-cell);
-  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) ease;
-}
-.topgames__favtoggle:active {
-  transform: scale(0.97);
-}
-.topgames__favtoggle.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  box-shadow: none;
-}
-
-.topgames__resultsbar {
-  align-items: end;
-  margin-top: var(--space-4);
-  padding-bottom: var(--space-2);
-  border-bottom: var(--bw-rule) solid var(--text-heading);
-}
-.topgames__resultsmeta {
-  padding-bottom: 2px;
-}
-.topgames__list {
-  margin-top: var(--space-3);
-}
-.topgames__row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.topgames__rowhead {
-  display: flex;
-  align-items: end;
-  gap: var(--space-2);
-  min-height: 30px;
-  padding: 0 2px;
-}
-.topgames__rankgroup {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-}
-.topgames__rank {
-  font-family: var(--font-mono);
-  font-size: var(--fs-small);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-num);
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-.topgames__tier {
-  flex: 0 0 auto;
-}
-.topgames__score {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-left: auto;
-  line-height: var(--lh-solid);
-}
-.topgames__scorenum {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  color: var(--accent-primary);
-}
-.topgames__scorelabel {
-  margin-top: 3px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.topgames__row--leader .topgames__scorenum {
-  color: var(--accent-positive);
-}
-
-@media (max-width: 600px) {
-  .topgames__filterrow {
-    flex-wrap: wrap;
-  }
-  .topgames__levels {
-    flex-basis: 100%;
-  }
-  .topgames__favtoggle {
-    width: 100%;
-  }
-}
-
 .gamecard {
   position: relative;
   width: 100%;
@@ -2573,9 +2313,9 @@ body {
   box-shadow: var(--shadow-card);
 }
 
-/* Full-width date banner (Top Games page — see GameCard.jsx's `dateLabel`
-   prop). Negative margin cancels the card's own padding so the strip reaches
-   edge to edge, radius matched to the card's own top corners. */
+/* Full-width date banner (All-Star Rosters page — see GameCard.jsx's
+   `dateLabel` prop). Negative margin cancels the card's own padding so the
+   strip reaches edge to edge, radius matched to the card's own top corners. */
 .gamecard__datebanner {
   margin: -14px -16px 0;
   padding: 5px 16px;
@@ -3364,15 +3104,6 @@ body {
   color: var(--text-muted);
 }
 
-/* Game Score badge trailing "Final" ("FINAL · 7.5") — see ADR-0015. A bonus
-   fact, not a status, so it gets the same plain-weight/muted treatment as
-   .gamecard__prospects rather than riding the bold weight .gamecard__status
-   picked up above — FINAL stays the one bolded word on the line. */
-.gamecard__gamescore {
-  font-weight: var(--w-regular);
-  color: var(--text-muted);
-}
-
 /* "Scores Unlocked" score + inning line (ADR-0026). Rendered below the matchup
    only while the day pass is on, so it wears the same kraft-amber seal treatment
    as the slate's unlock banner — a deliberate "this is the thing you unsealed"
@@ -4141,10 +3872,8 @@ body {
   color: var(--text-caption);
 }
 
-/* Settings modal's two sections (favorite team, Game Score) — each gets its
-   own sub-heading; --divider adds the rule + top gap that separates the
-   second section from the first, in place of a border on .favteamsheet__pref
-   itself (which now sits below its own heading). */
+/* Settings modal's account-pitch section (AccountPitch.jsx) — --divider adds
+   the rule + top gap that separates it from the favorite-team section above. */
 .favteamsheet__section--divider {
   margin-top: var(--space-4);
   padding-top: var(--space-3);
@@ -4196,52 +3925,6 @@ body {
 .favteamsheet .vsteam__strip {
   padding-left: calc(50% - 23px);
   padding-right: calc(50% - 23px);
-}
-
-/* Game Score visibility toggle row, shared by both the intro welcome modal
-   and the footer-reopened Settings modal (see FavoriteTeamModal.jsx) — sits
-   under its own "Game Score" sub-heading (.favteamsheet__section--divider). */
-.favteamsheet__pref {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.favteamsheet__prefText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.favteamsheet__prefLabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  color: var(--text-heading);
-}
-.favteamsheet__prefHint {
-  margin: 0;
-  font-size: var(--fs-compact);
-}
-.favteamsheet__prefToggle {
-  flex: 0 0 auto;
-  min-width: 52px;
-  min-height: 30px;
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.favteamsheet__prefToggle.is-on {
-  background: var(--accent-positive);
-  border-color: var(--accent-positive);
-  color: var(--surface-card);
 }
 
 /* --------------------------------------------------------------- legal */
@@ -9151,7 +8834,7 @@ body {
   line-height: var(--lh-ui);
   text-align: left;
   /* Natural-case explainer prose reads better than shouted caps for a full
-     sentence — same convention as .gsmodal .sheet__body. */
+     sentence — same convention as .tscoremodal__body p. */
   text-transform: none; /* caps-exempt */
 }
 .umpmodal__gtitle {
@@ -13538,7 +13221,7 @@ body {
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 /* The box score's own Statcast Leaders card — its own full-width row
-   between the linescore/Game Score column and the two team cards (see
+   between the linescore column and the two team cards (see
    BoxScoreBody), each superlative rendered as a .playercard__bucket +
    .playercard__list, the same "baseball card" tile (headshot, team, stat
    line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
@@ -13663,9 +13346,9 @@ body {
 }
 
 /* Three stars of the game — WPA leaders under the decisions. Card matches
-   the decisions block above it. The top mover gets the Game Score card's
-   hero treatment (an inset gradient panel — see .stars3__hero below,
-   modeled on .team-score__grade); #2/#3 fall into compact rows underneath,
+   the decisions block above it. The top mover gets its own hero treatment
+   (an inset gradient panel — see .stars3__hero below, modeled on the Team
+   Score card's .team-score__grade); #2/#3 fall into compact rows underneath,
    same idiom as .team-score__row--compact. */
 .bs__stars {
   padding: 12px 14px;
@@ -16065,7 +15748,7 @@ body {
 
   /* GamePhotosStrip.jsx, stacked under Three Stars in .bs__col above: three
      rows tall instead of one, so it fills the column's leftover height
-     beside the left column's Decisions/Game Score instead of leaving a gap. */
+     beside the left column's totals/win-prob arc instead of leaving a gap. */
   .photostrip__body {
     grid-template-rows: repeat(3, 163px);
   }
@@ -18168,14 +17851,6 @@ body {
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
 }
-/* GameScoreCard's head: "GAME SCORE · HOW THIS IS CALCULATED" as one run —
-   the link sits inline right after the label rather than pinned to the
-   card's footer. */
-.team-score__head-title {
-  display: flex;
-  align-items: baseline;
-  min-width: 0;
-}
 .team-score__grade {
   min-width: 0;
   margin: 0 10px;
@@ -18187,9 +17862,8 @@ body {
     var(--surface-inset);
   box-shadow: var(--inset-cell);
 }
-/* GameScoreCard has nothing below the gradient card (no driver rows, no
-   footer link — that moved into the head) — without its own bottom margin
-   the card's outer border sits right on top of it. */
+/* Keeps a bottom margin when this is the card's last child, so the outer
+   border doesn't sit flush against whatever follows. */
 .team-score__grade:last-child {
   margin-bottom: 10px;
 }
@@ -18217,14 +17891,6 @@ body {
 .team-score__grade-button:focus-visible {
   outline: none;
   box-shadow: var(--ring);
-}
-/* GameScoreCard's hero has no toggle behind it (one game, nothing to expand)
-   — same layout, without implying it's clickable. */
-.team-score__grade-button--static {
-  cursor: default;
-}
-.team-score__grade-button--static:active {
-  transform: none;
 }
 .team-score__grade-copy,
 .team-score__grade-result {
@@ -18793,18 +18459,6 @@ body {
   border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
   cursor: pointer;
 }
-/* Sits inline right after "Game Score" in .team-score__head-title instead of
-   the card's footer — the surrounding uppercase/caption styling comes from
-   .team-score__head, this just drops the footer variant's own margin. The
-   middot separator itself is a plain sibling span (.team-score__howsep,
-   GameScoreCard.jsx), not part of this button — a ::before on the button
-   would render the dot INSIDE the clickable/underlined link. */
-.team-score__howlink--inline {
-  margin: 0;
-}
-.team-score__howsep {
-  color: var(--seal-hatch);
-}
 .team-score__howlink:focus-visible {
   outline: none;
   box-shadow: var(--ring);
@@ -19034,10 +18688,10 @@ body {
 
 /* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
    light text is the app's existing convention for a colored badge on a photo
-   (see .favteamsheet__prefToggle.is-on / .sstrip__cell--win), reused here
-   rather than the softer outline-chip look .txntl__chip uses on the player
-   page's own transaction timeline (this card is deliberately a different
-   visual language from that component — see scope.md). */
+   (see .sstrip__cell--win), reused here rather than the softer outline-chip
+   look .txntl__chip uses on the player page's own transaction timeline (this
+   card is deliberately a different visual language from that component —
+   see scope.md). */
 .banner {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -23730,18 +23384,6 @@ body {
   text-align: center;
 }
 
-/* ---------------------------------------------------------- game score sheet
-   "How Game Score works" bottom sheet, opened from the Top Games hint. Same
-   .scrim/.sheet dialog contract as the ballpark sheet — docked, slide-up,
-   safe-area padding, scrollable if content runs long on a short phone. */
-.gsmodal {
-  max-height: min(90vh, 720px);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
-}
-
 .gsmodal__head {
   display: flex;
   align-items: baseline;
@@ -23763,127 +23405,6 @@ body {
   font-size: var(--fs-num-md);
   line-height: var(--lh-solid);
   cursor: pointer;
-}
-
-/* The four plain-language factor groups (drama / action / standout / dud),
-   each a small shouted subheading over its own list of factor rows. */
-.gsgroups {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0 0 16px;
-  padding: 14px 0 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-.gsgroup__title {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--accent-primary);
-}
-
-.gsgroup__factors {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  margin: 0;
-}
-
-/* Each factor reads as one wrapping line: a shouted label, a middot, then a
-   quiet natural-case gloss. Running the eye down the bold caps labels scans
-   the whole list at a glance; the gloss is there when you want it. (The old
-   left-label / right-aligned-note split read as a run-on wall.) */
-.gsfactor {
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-}
-
-.gsfactor__label {
-  display: inline;
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-.gsfactor__label::after {
-  content: " · ";
-  font-weight: var(--w-regular);
-  color: var(--text-caption);
-}
-
-.gsfactor--negative .gsfactor__label {
-  color: var(--accent-negative);
-}
-
-.gsfactor__note {
-  display: inline;
-  margin: 0;
-  color: var(--text-caption);
-}
-
-/* Made-up example games: a big Game Score chip on the left, a one-line plain-
-   language reason on the right — the calibration anchors, shown not told. */
-.gsexamples {
-  margin: 0 0 16px;
-  padding: 14px 0 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-.gsexamples__title {
-  margin: 0 0 10px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--accent-primary);
-}
-
-.gsexample {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 8px 0;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-.gsexample:first-of-type {
-  border-top: none;
-  padding-top: 0;
-}
-
-.gsexample__score {
-  flex: 0 0 auto;
-  min-width: 3ch;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  font-variant-numeric: tabular-nums;
-  color: var(--accent-primary);
-}
-
-.gsexample__line {
-  font-size: var(--fs-compact);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
-}
-
-.gsmodal__tiers {
-  padding-top: 12px;
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-
-/* Explainer prose reads as natural sentences — the intro paragraphs, the
-   quiet factor glosses, the example lines, and the tier readout. Only the
-   shouted chrome (group subheadings + the bold factor labels themselves) stays
-   uppercase. The `.sheet__body *` descendant selector keeps inline emphasis
-   (`<em>`) from being re-shouted by the global `#root *` rule, which otherwise
-   matches the child directly and beats the parent's inherited value. */
-#root .gsmodal .sheet__body,
-#root .gsmodal .sheet__body *,
-#root .gsfactor__note,
-#root .gsexample__line {
-  text-transform: none; /* caps-exempt: Game Score modal's explainer prose + factor glosses read as natural sentences */
 }
 
 /* ---------------------------------------------------- postseason odds pill
@@ -23911,9 +23432,9 @@ body {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* Same bottom-sheet + head/close chrome as .gsmodal (.sheet, .gsmodal__head,
-   .gsmodal__close, all reused as-is) — only the subtitle and table below the
-   head are specific to this modal. */
+/* Same bottom-sheet head/close chrome as .gsmodal__head/.gsmodal__close
+   (.sheet, both reused as-is) — only the subtitle and table below the head
+   are specific to this modal. */
 .psoddsmodal {
   max-height: 86vh;
   overflow-y: auto;
@@ -23980,7 +23501,7 @@ body {
   text-wrap: balance;
 }
 #root .tscoremodal__title {
-  text-transform: none; /* caps-exempt: Team Score modal's headline reads as a natural sentence, like the Game Score modal's body */
+  text-transform: none; /* caps-exempt: Team Score modal's headline reads as a natural sentence */
 }
 .tscoremodal__body {
   font-family: var(--font-read);
@@ -24046,11 +23567,10 @@ body {
 /* Only the prose paragraphs (and inline strong/em within them) read as
    natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
    shouted like every other card detail, and the section sub-kicker stays
-   shouted like the top kicker — same split gsmodal draws between its
-   explainer body and its still-shouted factor table. */
+   shouted like the top kicker. */
 #root .tscoremodal__body p,
 #root .tscoremodal__body p * {
-  text-transform: none; /* caps-exempt: Team Score modal's explainer paragraphs read as natural sentences, same treatment as the Game Score modal */
+  text-transform: none; /* caps-exempt: Team Score modal's explainer paragraphs read as natural sentences */
 }
 #root .tscoremodal__body p.tscoremodal__subkicker {
   text-transform: uppercase;
@@ -25758,7 +25278,7 @@ body {
 /* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment in
    this file's header and scripts/check-caps.mjs) — the page's opening
    explainer reads as a natural-case sentence rather than shouted app chrome,
-   same idea as the About page body / Game Score modal prose. The #root-scoped
+   same idea as the About page body. The #root-scoped
    selector (1 id + 1 class) is what actually outranks the global `#root *`
    uppercase; a plain .foultracker__intro selector alone can't. */
 #root .foultracker__intro {
@@ -26567,7 +26087,7 @@ button.gamehigh-matchup:active {
    row of larger thumbnails on phone, three rows from the wide breakpoint up
    (BoxScore.jsx renders this stacked under Three Stars in the box score's
    right-hand column, where the extra rows fill the space that column's
-   shorter content leaves beside the left column's Decisions/Game Score) —
+   shorter content leaves beside the left column's totals/win-prob arc) —
    then scrolls horizontally through however many photos the game has, same
    square-nav-button idiom as .seasonseries__strip. */
 .photostrip__viewall {

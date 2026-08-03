@@ -27,7 +27,6 @@ import { UmpireAccuracyModal } from '../components/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
 import { ManagerLink } from '../components/ManagerLink.jsx'
-import { GameScoreCard } from '../components/GameScoreCard.jsx'
 import { SectionMasthead } from '../components/SectionMasthead.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballparkData.js'
@@ -190,8 +189,8 @@ export function BoxScore({
 }
 
 // Two sections, since this page has grown well past the literal box score:
-// HIGHLIGHTS is the night's story — final totals, decisions, Game Score, the
-// win-prob arc, Play of the Game, Three Stars, Statcast Leaders, Insights,
+// HIGHLIGHTS is the night's story — final totals, decisions, the win-prob
+// arc, Play of the Game, Three Stars, Statcast Leaders, Insights,
 // and now each team's own Game Story write-ups — everything you'd want above
 // the fold before you get into the scorebook itself. BOX SCORE is the literal
 // #22-page transcription: the line score (full-width, not squeezed into a
@@ -304,18 +303,11 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
         {/* The duo/col wrappers are transparent on a phone (display: contents
             — everything keeps stacking in this order on .bs__section's own
             gap) and become a two-up grid at the wide breakpoint: the left
-            column runs totals above Game Score above the win-prob arc, the
-            right column runs the decisions above Play of the Game above
-            Three Stars. */}
+            column runs totals above the win-prob arc, the right column runs
+            the decisions above Play of the Game above Three Stars. */}
         <div className="bs__duo">
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
-            {/* Directly under the R/H/E/LOB totals — how tonight's game rated
-                for excitement against the rest of the day's slate at this
-                level, in the same visual family as the Team Page's Season
-                Grade card. Renders nothing until the 10-minute Game Score
-                cron has scored this game. */}
-            <GameScoreCard feed={feed} />
             {/* The game's win-probability arc — the retrospective companion
                 to the three stars (both are the WPA story). Renders nothing
                 at a park with no win-prob feed. */}
@@ -337,9 +329,8 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
             {/* Stacked under Three Stars in this same right-hand column
                 (rather than a full-width row of its own) so on desktop/ipad
                 it fills the space the shorter right column leaves beside the
-                left column's totals/Game Score/win-prob arc — see
-                GamePhotosStrip.jsx for why it's safe here (inside the seal)
-                but not above it. */}
+                left column's totals/win-prob arc — see GamePhotosStrip.jsx
+                for why it's safe here (inside the seal) but not above it. */}
             <GamePhotosStrip gamePk={feed?.gamePk} />
           </div>
         </div>
@@ -466,8 +457,8 @@ function statcastCards(feed, insights) {
 // ball, the longest ball, whoever owns each — rendered as the same
 // PerformerCard "baseball card" tile the past-day recap's Top
 // Performers/Statcast Leaders use (headshot, team, stat line). Its own
-// full-width card between the linescore/Game Score column and the two team
-// cards (see BoxScoreBody) rather than folded into the Insights card below,
+// full-width card between the linescore column and the two team cards (see
+// BoxScoreBody) rather than folded into the Insights card below,
 // so the three tiles can lay out as their own row instead of competing with
 // the callout-notes waterfall for width. Hidden entirely when the feed
 // carried no tracking data (most MiLB parks), same graceful-degrade as the
@@ -1142,9 +1133,9 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
 
 // The three stars of the game — the hockey-tradition nod, ranked by
 // win-probability added (see computeThreeStars). Hidden entirely when WPA
-// isn't available (most MiLB parks). The top mover gets the Game Score
-// card's hero treatment (.team-score__grade's inset gradient panel, borrowed
-// as .stars3__hero) since it's the single most important line on the card;
+// isn't available (most MiLB parks). The top mover gets its own hero
+// treatment (.team-score__grade's inset gradient panel, borrowed as
+// .stars3__hero) since it's the single most important line on the card;
 // #2/#3 fall into compact rows below, same idiom as .team-score__row--compact.
 function ThreeStars({ stars }) {
   if (!stars || stars.length === 0) return null

@@ -484,8 +484,8 @@ function LeagueTrack({ league, ownScore, teamId, compact = false }) {
 
 // "How this is calculated" — a beat-writer-voiced explainer rather than a
 // formula dump, opened from the card's footer link. Same .scrim/.sheet dialog
-// contract as GameScoreModal (Escape + backdrop-tap close, focus moves to the
-// close button and back to the trigger on close).
+// contract as UmpireAccuracyModal (Escape + backdrop-tap close, focus moves
+// to the close button and back to the trigger on close).
 function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()

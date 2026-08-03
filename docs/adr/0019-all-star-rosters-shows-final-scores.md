@@ -28,5 +28,6 @@ app — including the box score reachable from this same page — still renders
 through the ordinary `SealBox`/reveal-only path. If a future surface wants to
 show a score outside a seal, it needs its own ADR justifying why that surface's
 subject, like this one, carries no individual game's stakes — it should not be
-read as opening the invariant generally (see also ADR-0015 for Game Score's
-narrower, opt-in exception on the live slate).
+read as opening the invariant generally (see also ADR-0015, retired, for the
+narrower, opt-in exception the now-removed Game Score feature once carried on
+the live slate).

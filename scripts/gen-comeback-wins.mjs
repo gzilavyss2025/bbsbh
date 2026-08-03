@@ -12,7 +12,7 @@
 // (same footing as WAR / the team-score aggregates), so the Team-page card needs
 // no SealBox. Only the in-game per-play win prob (src/api/winprob.js) is sealed.
 //
-// APPEND-ONLY / incremental, same shape as gen-game-score.mjs / gen-fouls.mjs:
+// APPEND-ONLY / incremental, same shape as gen-fouls.mjs:
 // each run sweeps a small trailing window of dates, and for every newly-Final
 // MLB regular-season game not already ingested, fetches its win-probability
 // history, buckets BOTH sides' minimum win %, and folds attempts (both sides) +
