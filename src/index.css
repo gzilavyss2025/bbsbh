@@ -3104,34 +3104,122 @@ body {
   color: var(--text-muted);
 }
 
-/* "Scores Unlocked" score + inning line (ADR-0026). Rendered below the matchup
-   only while the day pass is on, so it wears the same kraft-amber seal treatment
-   as the slate's unlock banner — a deliberate "this is the thing you unsealed"
-   tint, distinct from the card's own team colors above, which stay untouched.
-   All content is uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…). */
-.gamecard__unlockline {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: var(--space-2);
+/* "Scores Unlocked" score + inning row (ADR-0026). Rendered below the matchup
+   only while the day pass is on. No pill, no fill — the earlier kraft-amber
+   bar read as one more badge, and kraft is the SEAL's material, exactly wrong
+   for a value the user just unsealed. Instead: a hairline totals rule (the
+   scorebook's bottom-of-the-column line) with each run total penciled as a
+   mono ledger numeral directly under its own team column (same 1fr/1fr + gap
+   grid as .gamecard__teams, so the numbers land under the marks), and the
+   game-state token absolutely centered between them — centered against the
+   CARD, not squeezed between grid tracks, so its width never nudges the
+   numerals off the tile centers. The token is always present (TOP 7 / LIVE /
+   FINAL / F/10): the center is what binds two bare digits into one score.
+   All content is uppercase-safe (digits, TOP/BOT/…, FINAL, F/n). */
+.gamecard__scoreline {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-3);
   margin-top: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding-top: var(--space-2);
+  /* Soft hairline, not --border-rule — the card's own edge uses that token,
+     and an internal divider shouldn't out-ink its container. */
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* One team's run total, composing .t-num (mono, tabular). Semibold navy for
+   both sides while live — no mid-game winner inking, the hierarchy shouldn't
+   repaint on every lead change. Only a FINAL settles it: --winner goes bold,
+   --loser fades to graphite (still 8:1 on the card surface). */
+.gamecard__runs {
+  justify-self: center;
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-score);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+/* An in-progress game's row wears a quiet field-green wash — green is
+   already this card's "happening now" family (the READY pill's own
+   --field-soft), so a tinted band reads as "on the field right now" while a
+   final's row stays plain paper. A wash, not a badge: full-bleed across the
+   card (no inline padding, so the numerals stay dead on the column centers),
+   and the totals rule just re-inks toward field green. */
+.gamecard__scoreline--live {
+  /* Match the base rule's top padding — a fill makes lopsided padding
+     visible in a way the bare paper row never showed. */
+  padding-bottom: var(--space-2);
   border-radius: var(--radius-sm);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
+  background: var(--field-soft);
+  border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  /* Root a stacking context so the hover sheen below can sit at z -1 —
+     above this band's own fill, below its ink. */
+  z-index: 0;
 }
 
-.gamecard__unlockscore {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-caps);
+/* Hover detail for the live band: outfield mow stripes. The band's green
+   already says "this game is on the field right now" — resting the pointer
+   on the card brings up the freshly-cut look: wide alternating rows of
+   barely-deeper green, leaned to the same slight angle as the '@' watermark
+   (skewX(-8deg) ≈ 98deg here). Kin to the pinstripe tile's hand-styled
+   stripes, but far wider and softer — mow rows, not pinstripes. Painted
+   UNDER the numerals/token (z -1 within the band's stacking context) so
+   hovering never dims the ink; the stripe-over-wash composite is asserted
+   against both inks in check-contrast.mjs (precomputed hex — the checker
+   doesn't parse color-mix). Opacity-only fade (GPU-cheap, fine under
+   reduced motion), hover-capable fine pointers only — on touch, a tap is
+   navigation, and stuck post-tap stripes are noise. */
+.gamecard__scoreline--live::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    98deg,
+    color-mix(in srgb, var(--field) 10%, transparent) 0 14px,
+    transparent 14px 28px
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
 }
 
-.gamecard__unlockinning {
-  font-size: var(--fs-caption);
+@media (hover: hover) and (pointer: fine) {
+  .gamecard__open:hover .gamecard__scoreline--live::after {
+    opacity: 1;
+  }
+}
+
+/* Symmetric padding puts the box center back on the numerals' own center,
+   so the base rule's half-padding nudge would now sit the token low. */
+.gamecard__scoreline--live .gamecard__scorestate {
+  top: 50%;
+}
+
+.gamecard__runs--winner {
   font-weight: var(--w-bold);
-  opacity: 0.85;
+}
+
+.gamecard__runs--loser {
+  color: var(--text-muted);
+}
+
+/* The game-state token between the totals, composing .t-label (condensed
+   caps). Bold + graphite (not caption gray) so the inning — one of the three
+   things this row exists to say — reads as ink, not a footnote. */
+.gamecard__scorestate {
+  position: absolute;
+  left: 50%;
+  /* 50% centers on the padding box, whose top 8px is the totals rule's
+     breathing room — nudge down half of it to sit on the numerals' own
+     optical center. */
+  top: calc(50% + var(--space-2) / 2);
+  transform: translate(-50%, -50%);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* Scorebook-readiness pill: four small checkbox pips for whether the basics
