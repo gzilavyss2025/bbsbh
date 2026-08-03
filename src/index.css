@@ -3147,17 +3147,18 @@ body {
    card (no inline padding, so the numerals stay dead on the column centers),
    and the totals rule just re-inks toward field green. */
 .gamecard__scoreline--live {
-  padding-bottom: var(--space-1);
+  /* Match the base rule's top padding — a fill makes lopsided padding
+     visible in a way the bare paper row never showed. */
+  padding-bottom: var(--space-2);
   border-radius: var(--radius-sm);
   background: var(--field-soft);
   border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
 }
 
-/* The band's extra bottom padding moves the box center below the numerals'
-   own — re-nudge the state token back onto their optical center (same
-   arithmetic as the base rule, minus half the new bottom padding). */
+/* Symmetric padding puts the box center back on the numerals' own center,
+   so the base rule's half-padding nudge would now sit the token low. */
 .gamecard__scoreline--live .gamecard__scorestate {
-  top: calc(50% + (var(--space-2) - var(--space-1)) / 2);
+  top: 50%;
 }
 
 .gamecard__runs--winner {
