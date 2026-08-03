@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchGamePhotos } from '../api/gamePhotos.js'
+import { fetchGamePhotos, withoutGraphics } from '../api/gamePhotos.js'
 import { fetchTeamSchedule } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -22,9 +22,17 @@ function monthDay(iso) {
 
 // A personal tool for pulling MLB's full-resolution, watermark-free editorial
 // photos for a specific game — pick a club and a game, then open or save any
-// photo MLB's content package carries for it (recap art, hero images,
-// galleries). See api/gamePhotos.js for how the CDN's resize transforms get
-// stripped back to the photographer's original upload.
+// photo MLB's content package carries for it. See api/gamePhotos.js for how
+// the CDN's resize transforms get stripped back to the photographer's original
+// upload.
+//
+// Shows only what a camera took: photographer stills first, then frame grabs
+// off the broadcast. MLB's content package is mostly rendered cards — Statcast
+// visualizations, bullpen/lineup availability, GAME HIGHLIGHTS recap art — and
+// `withoutGraphics` drops those, since they're the least interesting thing here
+// and the ones that print the final score in the artwork. The classification
+// and the per-photo subject both come from gamePhotos.js; that module's header
+// documents the evidence behind each signal.
 //
 // Deliberately NOT part of the spoiler-safe scored-game flow (root
 // CLAUDE.md) — a recap/celebration photo narrates the outcome just by
@@ -67,7 +75,21 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
     () => (gamePk ? fetchGamePhotos(gamePk) : Promise.resolve([])),
     [gamePk],
   )
-  const photos = photosState.data ?? []
+  const photos = withoutGraphics(photosState.data)
+  // The split is worth naming rather than showing a bare total: a game whose
+  // gallery is all frame grabs looks identical to one with real stills until
+  // you count them. Counted per kind rather than as a remainder, so an
+  // `unknown` (the shape probe failed) isn't miscounted as a broadcast grab.
+  const countOf = (kind) => photos.filter((p) => p.kind === kind).length
+  const shotCount = countOf('photographer')
+  const frameCount = countOf('broadcast')
+  const foundLabel =
+    [
+      shotCount > 0 && `${shotCount} photo${shotCount === 1 ? '' : 's'}`,
+      frameCount > 0 && `${frameCount} broadcast`,
+    ]
+      .filter(Boolean)
+      .join(' · ') || `${photos.length} found`
 
   return (
     <div className="screen gamephotos">
@@ -163,7 +185,7 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
             <h2 className="gamephotos__sectiontitle">Photos</h2>
             <span className="gamephotos__galleryactions">
               {photos.length > 0 && (
-                <span className="gamephotos__resultsmeta">{photos.length} found</span>
+                <span className="gamephotos__resultsmeta">{foundLabel}</span>
               )}
               {!browsing && (
                 <button type="button" className="gamephotos__browsebtn" onClick={browseAllGames}>
@@ -182,19 +204,38 @@ export function GamePhotosPage({ initialGamePk = null } = {}) {
           />
           {photos.length > 0 && (
             <ul className="gamephotos__grid">
-              {photos.map((photo) => (
-                <li key={photo.id}>
-                  <a
-                    href={photo.original}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Open full-resolution photo in a new tab"
-                  >
-                    <img src={photo.thumb} alt="" loading="lazy" />
-                    <span className="gamephotos__expand" aria-hidden="true">⤢</span>
-                  </a>
-                </li>
-              ))}
+              {photos.map((photo) => {
+                const { playerName, teamId, teamName } = photo.focus
+                return (
+                  <li key={photo.id}>
+                    <a
+                      className="gamephotos__tile"
+                      href={photo.original}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={
+                        playerName
+                          ? `Open full-resolution photo of ${playerName} in a new tab`
+                          : 'Open full-resolution photo in a new tab'
+                      }
+                    >
+                      <img src={photo.thumb} alt={photo.headline} loading="lazy" />
+                      <span className="gamephotos__expand" aria-hidden="true">⤢</span>
+                    </a>
+                    {/* Who the photo is OF, per the feed's own player/team tags
+                        — the subject, not everyone in frame (gamePhotos.js).
+                        Left out entirely rather than shown blank when a photo
+                        carries no tags, which is most often a stray swept up
+                        from outside the highlight items. */}
+                    {(playerName || teamId) && (
+                      <p className="gamephotos__subject">
+                        {teamId && <TeamLogo teamId={teamId} name={teamName} size={16} />}
+                        <span className="gamephotos__subjectname">{playerName || teamName}</span>
+                      </p>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
         </section>

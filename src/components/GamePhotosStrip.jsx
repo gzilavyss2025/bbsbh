@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { fetchGamePhotos } from '../api/gamePhotos.js'
+import { fetchGamePhotos, withoutGraphics } from '../api/gamePhotos.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePhotosPath } from '../lib/route.js'
@@ -32,7 +32,10 @@ import { SectionMasthead } from './SectionMasthead.jsx'
 // fetch failure, or for a game with no editorial photo package yet.
 export function GamePhotosStrip({ gamePk }) {
   const navigate = useNav()
-  const { data: photos } = useAsync(() => fetchGamePhotos(gamePk), [gamePk])
+  const { data } = useAsync(() => fetchGamePhotos(gamePk), [gamePk])
+  // Same camera-only filter the Game Photos page applies, so "View all" opens
+  // the set this strip was previewing rather than a longer, different one.
+  const photos = data ? withoutGraphics(data) : null
   const stripRef = useRef(null)
   const [canScroll, setCanScroll] = useState(false)
 
@@ -96,7 +99,11 @@ export function GamePhotosStrip({ gamePk }) {
               target="_blank"
               rel="noreferrer"
               className="photostrip__thumb"
-              aria-label="Open full-resolution photo in a new tab"
+              aria-label={
+                photo.focus?.playerName
+                  ? `Open full-resolution photo of ${photo.focus.playerName} in a new tab`
+                  : 'Open full-resolution photo in a new tab'
+              }
             >
               <img src={photo.thumb} alt="" loading="lazy" />
             </a>

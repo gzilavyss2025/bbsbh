@@ -9209,7 +9209,19 @@ body {
   gap: 10px;
 }
 
+/* The tile geometry lives on the anchor rather than the li so the subject
+   caption below it (.gamephotos__subject) sits outside the cropped frame. */
 .gamephotos__grid li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gamephotos__tile {
+  position: relative;
+  display: block;
+  width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -9217,18 +9229,36 @@ body {
   background: var(--surface-card);
 }
 
-.gamephotos__grid a {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.gamephotos__grid img {
+/* Scoped to the tile, not the whole grid item — the subject caption below it
+   carries a team logo that must keep its own intrinsic size. */
+.gamephotos__tile img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* Who the photo is of — the feed's own player/team tag, set quiet so the grid
+   still reads as photography with a caption rather than a data table. */
+.gamephotos__subject {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gamephotos__subject img {
+  flex: 0 0 auto;
+}
+
+.gamephotos__subjectname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
 }
 
 /* A quiet "this opens elsewhere" affordance — invisible until hover/focus, so
@@ -9249,11 +9279,11 @@ body {
   opacity: 0;
   transition: opacity var(--dur-fast) var(--ease-standard);
 }
-.gamephotos__grid a:hover .gamephotos__expand,
-.gamephotos__grid a:focus-visible .gamephotos__expand {
+.gamephotos__tile:hover .gamephotos__expand,
+.gamephotos__tile:focus-visible .gamephotos__expand {
   opacity: 1;
 }
-.gamephotos__grid a:focus-visible {
+.gamephotos__tile:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }

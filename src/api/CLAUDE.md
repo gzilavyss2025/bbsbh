@@ -473,14 +473,32 @@ for each generator; the reader modules:
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
   uses for video. MLB serves every editorial photo through img.mlbstatic.com
   with a Cloudinary resize transform baked into the URL path;
-  `fetchGamePhotos` walks the whole content JSON, strips each URL's transform
-  segment back to the photographer's original upload, and dedupes by photo id.
+  `fetchGamePhotos` strips each URL's transform segment back to the
+  photographer's original upload and dedupes by photo id.
   Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
   narrates the outcome just by looking at it, same risk as a highlight clip's
   title, but this is a standalone personal tool outside the scored-game flow
   (its page carries its own disclaimer instead). See root CLAUDE.md's spoiler
   section for why that's a deliberate, narrow exception rather than a hole in
   the rule.
+  Every image is a video THUMBNAIL (`editorial` has been empty on every game
+  checked), so each carries a `kind` — `photographer` (a Getty/AP/MLB
+  Photos-Greenfly still), `broadcast` (a frame off the TV feed), `graphic` (a
+  Statcast darkroom card or GAME HIGHLIGHTS recap art), or `unknown`. The
+  decisive test is the ORIGINAL asset's aspect ratio, which Cloudinary reports
+  without serving the file (`fl_getinfo`): cameras shoot 3:2, video is 16:9.
+  `image.title` (the asset filename) is checked first as a free shortcut but is
+  NOT sufficient alone, and taxonomy keywords describe the VIDEO not the image
+  — **read the module header before touching `classifyPhotoAsset`**, it records
+  which signals were tried and the specific ways each one fails on its own.
+  Each photo also carries `focus` (subject player + team, from the item's own
+  `keywordsAll` ids — never name matching), which is what `photosForPlayer`/
+  `photosForTeam` query. `withoutGraphics` is the camera-only filter both the
+  page and `GamePhotosStrip` apply; it deliberately keeps `unknown`.
+  Those two query helpers are **groundwork with no screen calling them yet** —
+  the cross-game "photos by player / by team" index they exist for is scoped in
+  `.scratch/game-photos-by-subject/` (PRD + issue 01), which also records the
+  design decisions already settled. Read it before extending any of this.
 
 ## Leader boards (live)
 
