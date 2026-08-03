@@ -308,6 +308,16 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // pass off the same day collapses this straight back to `revealedAll`.
   const slateRevealAll = revealedAll || scoresUnlocked
 
+  // A paged-back day whose every Final has been revealed has nothing left in
+  // the chip cluster beside the date stepper (Live Scores is today-only, and
+  // Reveal All has been used up), so the stepper takes that freed room and
+  // steps up a size — see .datenav--lg. Deliberately not today: today keeps a
+  // chip in that row either way (Live Scores, or its own Reveal All once every
+  // game has gone Final), so there's no room to give. `finals.length > 0`
+  // keeps a day with nothing to reveal — a future date, an off day, a slate of
+  // nothing but postponements — from growing on a vacuously-true condition.
+  const dayFullyRevealed = !isToday && finals.length > 0 && slateRevealAll
+
   // The floating bottom "Reveal all results" bar (RevealAllBar, mobile-only —
   // see its own comment below) would otherwise sit on screen at the same time
   // as the header's inline .daystate__chip--reveal, right below the date
@@ -493,7 +503,9 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           .slatehead in index.css), so it scrolls away under the pinned
           topbar above rather than nagging "you're on {date}" forever. */}
       <div className="slatehead">
-        <div className="datenav datenav--row">
+        <div
+          className={`datenav datenav--row${dayFullyRevealed ? ' datenav--lg' : ''}`}
+        >
           <button onClick={() => pageDay(-1)} aria-label="Previous day">
             ‹
           </button>

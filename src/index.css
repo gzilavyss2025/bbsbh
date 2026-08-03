@@ -1044,6 +1044,35 @@ body {
   font-size: var(--fs-compact);
 }
 
+/* Paged-back day, every result revealed: the chip cluster that normally shares
+   this row is empty (Live Scores is today-only; Reveal All has been used up),
+   so the stepper claims the room and grows — arrows back up to a full tap
+   target, the date up to the row's own UI size. Gated in GameSelect.jsx
+   (dayFullyRevealed), never on today, so the compact stepper above stays the
+   default everywhere the row still carries a chip. */
+.datenav--lg > button {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  font-size: var(--fs-title-md);
+}
+
+.datenav--lg .datenav__label {
+  max-width: 320px;
+  gap: 8px;
+  font-size: var(--fs-ui);
+}
+
+/* Today drops back to a genuine secondary size here. In the compact row it
+   inherits .datenav--row button's body size and ends up matching the date it
+   sits beside; with the date promoted there's finally room for the quiet chip
+   .datenav__today above describes, so it takes its own label size rather than
+   scaling up alongside. */
+.datenav--lg .datenav__today {
+  min-height: 24px;
+  padding: 2px 9px;
+  font-size: var(--fs-compact);
+}
+
 /* One-tap return to today once the date has been paged away from. Kept small —
    a quiet secondary chip beside the date, not a button competing with it. Same
    rectangular shape as the date stepper's own arrow buttons (above) and the
