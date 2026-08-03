@@ -18,7 +18,7 @@ import {
   buildJerseyCombos,
 } from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
-import { fetchTeamSchedule, fetchAllStarGame } from '../api/schedule.js'
+import { fetchTeamSchedule, fetchAllStarGame, fetchTeams } from '../api/schedule.js'
 import { fetchWarData } from '../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
@@ -35,12 +35,13 @@ import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
 import { SPORT_LABEL, SPORT_IDS, favoriteAccentColor, teamClubName } from '../lib/teams.js'
 import { beeswarmRows } from '../lib/beeswarm.js'
-import { gamePath } from '../lib/route.js'
+import { gamePath, teamPath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
 import { useNav } from '../lib/nav.js'
 import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
 import { JerseyCombos, MilbUniformStrip } from '../components/JerseyCombos.jsx'
 import { Headshot } from '../components/Headshot.jsx'
@@ -874,6 +875,12 @@ export function TeamPage({ id, asOf, sportId }) {
     () => headerThemeFor(teamMetaId, themeKeyFor(teamMetaId, 'home', 'main')),
     [teamMetaId],
   )
+  // Same finger-scrollable nav strip GameSelect's slate header uses to jump
+  // between clubs (TeamFilterStrip, showMlbPin=false/showArrows/nav
+  // styling) — sourced from this club's own level so it re-lists on every
+  // level switch, same as there.
+  const navSportId = data?.team?.sport?.id ?? sportId ?? null
+  const levelTeams = useAsync(() => (navSportId ? fetchTeams(navSportId) : Promise.resolve([])), [navSportId])
   const back = () => window.history.back()
   // Postseason Odds modal — a plain boolean rather than the team-keyed
   // pattern below is fine here: it's a transient dialog, not persisted
@@ -1043,6 +1050,24 @@ export function TeamPage({ id, asOf, sportId }) {
             </div>
             </div>
           </div>
+        )}
+
+        {/* Same finger-scrollable club-logo strip GameSelect's slate header
+            uses to jump between teams (TeamFilterStrip) — nothing here is
+            ever "selected" (selectedTeamId null, nav styling), tapping a
+            logo jumps straight to that club's team page, and centerTeamId
+            lands on the club currently being viewed. */}
+        {levelTeams.data?.length > 0 && (
+          <TeamFilterStrip
+            teams={levelTeams.data}
+            selectedTeamId={null}
+            onSelect={(navId) => navigate(teamPath(navId))}
+            showMlbPin={false}
+            showArrows
+            centerTeamId={team.id}
+            ariaLabel={`Browse ${SPORT_LABEL[team.sport?.id] ?? ''} teams`}
+            className="teamfilterstrip--nav"
+          />
         )}
 
         {/* MLB gets the per-jersey catalog strip with its records; a MiLB
