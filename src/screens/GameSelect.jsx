@@ -495,14 +495,14 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             has gone Final (see showPastDayTreatment), BOTH can apply at once
             (the pass is still off and the day hasn't been reveal-alled), so
             this holds up to two chips rather than assuming only one. */}
-        {(isToday || (finals.length > 0 && !slateRevealAll)) && (
+        {((isToday && !todayAllFinal) || (finals.length > 0 && !slateRevealAll)) && (
           <div className="daystate">
             {/* Live-scores day pass — today's slate only. The reset time is no
                 longer spelled out visually (it's implied: the pass always
                 clears at 8am), but stays in the accessible name for screen
                 reader users. Tapping again while on turns it off — the chip
                 is its own off-switch, no separate banner needed. */}
-            {isToday && (
+            {isToday && !todayAllFinal && (
               <button
                 type="button"
                 role="switch"

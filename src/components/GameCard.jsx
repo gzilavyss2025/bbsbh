@@ -18,7 +18,8 @@ export function GameCard({
   game,
   pinnedTeamId,
   prospectCount = 0,
-  // Pre-formatted { score, inning } for the "Scores Unlocked" day pass, or null
+  // Pre-formatted { awayRuns, homeRuns, inning, label } for the "Scores
+  // Unlocked" day pass, or null
   // (the default) — see api/schedule.js fetchSlateScores + lib/slateScoreLine.js.
   // Null keeps this card byte-identical to today; the caller (GameSelect) passes
   // a value only while the pass is on AND for today's slate. Every other caller
@@ -50,6 +51,12 @@ export function GameCard({
   // positioned corner pill leak through mirrored on iOS. There's also no result
   // to reveal: the game didn't happen.
   const postponed = status.isPostponed
+  // One flag for everything the Scores Unlocked line displaces while it's
+  // showing: the corner Final text (relocated into its center slot) and the
+  // readiness pips (a pre-game checklist — once runs and an inning are on the
+  // card, "is the scorebook ready" is answered). Pre-game cards keep both:
+  // no line renders before first pitch.
+  const hasScoreLine = !!liveLine && !postponed
   const dhLabel = doubleHeaderLabel(game)
   const pinned = !!pinnedTeamId
   // Sets --pin-accent for the pinned border/gradient + star (see index.css);
@@ -119,16 +126,19 @@ export function GameCard({
         {/* Additive score line, present ONLY under an active Scores Unlocked
             pass (liveLine non-null). It renders BELOW the matchup — the team
             colors, cap/jersey marks, and names above are untouched — so a card
-            keeps its identity and just gains today's number. All tokens are
-            uppercase-safe (abbrevs, digits, en-dash, TOP/BOT/…), no exemption. */}
-        {liveLine && (
-          <div className="gamecard__unlockline">
-            <span className="gamecard__unlockscore">{liveLine.score}</span>
-            {liveLine.inning && (
-              <span className="gamecard__unlockinning">{liveLine.inning}</span>
-            )}
-          </div>
-        )}
+            keeps its identity and just gains today's number. Each run total
+            sits under its own team column (the marks and names above already
+            say whose it is — no repeated abbreviations), penciled as a ledger
+            numeral over a scorebook totals rule; the game state (live half,
+            FINAL, F/10) always rides centered between them. On a final the
+            winner is inked bold and the loser fades to graphite; while live
+            both sides stay equal so the card's hierarchy doesn't repaint on
+            every lead change. Screen readers get the full sentence
+            (liveLine.label) instead of two bare digits. All tokens are
+            uppercase-safe (digits, TOP/BOT/…, FINAL, F/n), no exemption.
+            Suppressed for a game called off after it started (postponed) —
+            run totals stacked over a POSTPONED stamp would be noise. */}
+        {hasScoreLine && <ScoreLine liveLine={liveLine} />}
         {postponed && <PostponedBanner game={game} status={status} />}
         <div className="gamecard__meta">
           {/* Only shown in a cross-level list (All-Star Rosters — the caller
@@ -148,11 +158,11 @@ export function GameCard({
             </span>
           )}
           <span className="gamecard__metaright">
-            {!postponed && game.abstractState !== 'Final' && (
+            {!postponed && game.abstractState !== 'Final' && !hasScoreLine && (
               <ReadyPill game={game} />
             )}
             {!postponed && national && <NationalTvIcon network={national} />}
-            <StatusText game={game} />
+            <StatusText game={game} hasScoreLine={hasScoreLine} />
           </span>
         </div>
       </button>
@@ -165,6 +175,36 @@ export function GameCard({
           Box score ›
         </button>
       )}
+    </div>
+  )
+}
+
+// The Scores Unlocked run totals, one per team column (away left, home right,
+// matching the marks above), with the game-state token optically centered
+// between them (absolutely positioned, so its width never nudges the numerals
+// off the column centers). Winner/loser inking applies only once the game is
+// FINAL — the settled scorebook convention — never mid-game. The visual spans
+// are aria-hidden and the full screen-reader sentence rides in one .sr-only
+// span, because "4 … BOT 7 … 2" read aloud in DOM order carries no team
+// context. (.sr-only's absolute positioning is also what keeps that span from
+// becoming the grid's first item and shoving both numerals a track over.)
+function ScoreLine({ liveLine }) {
+  const { awayRuns, homeRuns, state, final, awayResult, homeResult, label } = liveLine
+  // 'winner'/'loser' only once a Final settles it; null (no modifier) while
+  // live and on a tie — the formatter owns that rule (slateScoreLine.js).
+  const mod = (result) => (result ? ` gamecard__runs--${result}` : '')
+  return (
+    <div className={`gamecard__scoreline${final ? '' : ' gamecard__scoreline--live'}`}>
+      <span className="sr-only">{label}</span>
+      <span aria-hidden="true" className={`gamecard__runs t-num gamecard__runs--away${mod(awayResult)}`}>
+        {awayRuns}
+      </span>
+      <span aria-hidden="true" className="gamecard__scorestate t-label">
+        {state}
+      </span>
+      <span aria-hidden="true" className={`gamecard__runs t-num gamecard__runs--home${mod(homeResult)}`}>
+        {homeRuns}
+      </span>
     </div>
   )
 }
@@ -345,11 +385,15 @@ function TeamName({ team, side }) {
 // starts on-site. The parenthetical is dropped when the feed carries no venue
 // timezone (lean MiLB rows) or when the two clocks read the same (viewer is in
 // the park's zone) — no redundant "(7:10 CDT)".
-function StatusText({ game }) {
+function StatusText({ game, hasScoreLine = false }) {
   const status = selectGameStatus(game)
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
   if (s === 'Final') {
+    // While the Scores Unlocked line renders, its centered state slot already
+    // says FINAL (or F/n) right between the run totals — the corner text here
+    // would be the same word orphaned a row below, so it moves, not repeats.
+    if (hasScoreLine) return null
     return <span className="gamecard__status">Final</span>
   }
   if (s === 'Live') return null // the LIVE pill carries it; no redundant text
