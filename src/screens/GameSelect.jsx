@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNav } from '../lib/nav.js'
 import { slatePath, teamPath } from '../lib/route.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
@@ -307,6 +307,33 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // either. A day never consented to keeps its own tap-to-reveal-all. Turning the
   // pass off the same day collapses this straight back to `revealedAll`.
   const slateRevealAll = revealedAll || scoresUnlocked
+
+  // The floating bottom "Reveal all results" bar (RevealAllBar, mobile-only —
+  // see its own comment below) would otherwise sit on screen at the same time
+  // as the header's inline .daystate__chip--reveal, right below the date
+  // stepper — redundant when both are already in view. Same
+  // IntersectionObserver-on-a-ref pattern as InningViewer's scorebug dock
+  // (`pastLine`/`.gamehud-dock--show`): the floating bar stays hidden while
+  // the header chip is visible, and only appears once scrolling has carried
+  // that chip out of view.
+  const revealChipRef = useRef(null)
+  const [revealChipOutOfView, setRevealChipOutOfView] = useState(false)
+  // The chip itself only exists once the async schedule fetch resolves with
+  // at least one Final game (see the render condition below), so the observer
+  // can't just attach once on mount — it has to re-attach whenever the chip's
+  // presence flips, or a chip that mounts after this effect's first (and
+  // only, with `[]` deps) run would never get observed.
+  const showRevealChip = finals.length > 0 && !slateRevealAll
+  useEffect(() => {
+    const el = revealChipRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const obs = new IntersectionObserver(([entry]) => setRevealChipOutOfView(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [showRevealChip])
+
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
@@ -522,6 +549,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             )}
             {finals.length > 0 && !slateRevealAll && (
               <button
+                ref={revealChipRef}
                 type="button"
                 className="btn btn--reveal daystate__chip--reveal"
                 onClick={() => setRevealedAll(true)}
@@ -575,7 +603,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         </div>
       )}
 
-      {finals.length > 0 && !slateRevealAll && (
+      {finals.length > 0 && !slateRevealAll && revealChipOutOfView && (
         <RevealAllBar onReveal={() => setRevealedAll(true)} />
       )}
 
@@ -705,8 +733,11 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 // results" chip (see .daystate in the slatehead render above) — the same
 // floating-bar convention InningViewer uses for "Reveal {half}"
 // (.pagenav/.btn--reveal), so the action stays in thumb reach on a long
-// single-column list. Desktop has no floating duplicate: the header chip is
-// already inline and reachable there, same split as .pagenav--boxscore's
+// single-column list. Only rendered once the header chip has scrolled out of
+// view (`revealChipOutOfView`) — while it's still on screen near the top,
+// showing this floating duplicate too would just be the same button twice.
+// Desktop has no floating duplicate: the header chip is already inline and
+// reachable there, same split as .pagenav--boxscore's
 // Refresh control. One tap flips every Final game's card, which also
 // triggers useDayCardMeta's batched classification pass — there's no
 // per-card unlock.
