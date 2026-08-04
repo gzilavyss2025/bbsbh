@@ -335,19 +335,21 @@ export async function loadPlayer(id, asOf) {
   ])
   // Transaction timeline enrichment — everything the raw player-scoped feed
   // can't give on its own: each affiliate club's level (for CALLED UP / SENT
-  // DOWN + the level tags), the other players in each trade (named only as free
-  // text on the player's own row), and his draft record. Gathered here, then
-  // shaped by transactionTimelineView. The same awards fetch also feeds the
-  // Trophy Case card (trophyCaseView, below) — awards are MLB-only, so only
-  // fetch them for a debuted player (a pure prospect has none in either
-  // allowlist).
+  // DOWN + the level tags, and for naming an Injured List rehab stop by level
+  // rather than affiliate name — see person.js's ilArcClause), the other
+  // players in each trade (named only as free text on the player's own row),
+  // and his draft record. Gathered here, then shaped by
+  // transactionTimelineView. The same awards fetch also feeds the Trophy Case
+  // card (trophyCaseView, below) — awards are MLB-only, so only fetch them for
+  // a debuted player (a pure prospect has none in either allowlist).
   const asgTeamIds = new Set()
   const trades = []
   for (const t of txns) {
-    if (
-      t.typeCode === 'ASG' && t.fromTeam?.id && t.toTeam?.id &&
-      !/rehab/i.test(t.description || '')
-    ) {
+    // Every ASG row's clubs go in, rehab included — the "real affiliate move"
+    // vs. "rehab assignment" distinction only matters to transactionTimelineView's
+    // own CALLED UP / SENT DOWN labeling (which re-checks the rehab regex
+    // itself), not to gathering the ids a level lookup needs.
+    if (t.typeCode === 'ASG' && t.fromTeam?.id && t.toTeam?.id) {
       asgTeamIds.add(t.fromTeam.id)
       asgTeamIds.add(t.toTeam.id)
     }

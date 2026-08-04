@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { injuredListStints, transactionTimelineView } from '../src/api/person.js'
+import { SPORT_IDS } from '../src/lib/teams.js'
 
 // ---------------------------------------------------------------------------
 // Injured-list stints on the career transaction timeline.
@@ -23,6 +24,11 @@ const RED_SOX = { id: 111, name: 'Boston Red Sox' }
 const SOMERSET = { id: 1958, name: 'Somerset Patriots' }
 const SCRANTON = { id: 531, name: 'Scranton/Wilkes-Barre RailRiders' }
 
+// A rehab row's level (not its affiliate name) is what ilArcClause renders —
+// see person.js. Tests that render a stint row supply this the same way
+// loadPlayer does: a plain teamId -> sportId map.
+const AA_AAA_LEVELS = new Map([[SOMERSET.id, SPORT_IDS.AA], [SCRANTON.id, SPORT_IDS.AAA]])
+
 const sc = (date, description, toTeam = YANKEES) => ({
   typeCode: 'SC', date, effectiveDate: date, toTeam, description,
 })
@@ -44,8 +50,12 @@ test('a placement, its rehab stops and its activation fold into one stint', () =
   assert.equal(stints[0].start, '2024-03-28')
   assert.equal(stints[0].end, '2024-06-19')
   assert.equal(stints[0].days, 83)
-  // Repeated rehab rows for the same club collapse to one visit.
-  assert.deepEqual(stints[0].rehabClubs, ['Somerset Patriots', 'Scranton/Wilkes-Barre RailRiders'])
+  // Repeated rehab rows for the same club collapse to one visit. id travels
+  // with the name so the row renderer can resolve its level (see AA_AAA_LEVELS).
+  assert.deepEqual(stints[0].rehabClubs, [
+    { id: SOMERSET.id, name: 'Somerset Patriots' },
+    { id: SCRANTON.id, name: 'Scranton/Wilkes-Barre RailRiders' },
+  ])
 })
 
 test('a same-day duplicate placement at a second day count is one stint, not two', () => {
@@ -126,16 +136,29 @@ test('the stint row keeps the feed\'s wording, minus the redundant subject, plus
     sc('2024-03-28', 'New York Yankees placed RHP Gerrit Cole on the 60-day injured list. Right elbow inflammation.'),
     rehab('2024-06-04', SOMERSET, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Somerset Patriots.'),
     sc('2024-06-19', 'New York Yankees activated RHP Gerrit Cole from the 60-day injured list.'),
-  ])
+  ], { levelByTeamId: AA_AAA_LEVELS })
   assert.equal(row.date, '2024-03-28')
   assert.equal(row.label, 'Injured List')
   assert.equal(row.tone, 'out')
   assert.deepEqual(row.club, { id: 147, name: 'New York Yankees' })
   // The club/player prefix is dropped — the club is the mark beside the chip
-  // and the player is whose page this is.
+  // and the player is whose page this is. The rehab stop reads as its LEVEL
+  // (AA), not the affiliate name — see ilArcClause.
   assert.equal(
     row.description,
-    '60-day injured list. Right elbow inflammation. Rehabbed with Somerset Patriots, then activated Jun 19 after 83 days.',
+    '60-day injured list. Right elbow inflammation. Rehabbed with AA team, then activated Jun 19 after 83 days.',
+  )
+})
+
+test('a rehab stop with no resolvable level drops out of the clause rather than guessing', () => {
+  const [row] = ilRows([
+    sc('2024-03-28', 'New York Yankees placed RHP Gerrit Cole on the 60-day injured list. Right elbow inflammation.'),
+    rehab('2024-06-04', SOMERSET, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Somerset Patriots.'),
+    sc('2024-06-19', 'New York Yankees activated RHP Gerrit Cole from the 60-day injured list.'),
+  ]) // no levelByTeamId passed — same as an id the level lookup failed on
+  assert.equal(
+    row.description,
+    '60-day injured list. Right elbow inflammation. Activated Jun 19 after 83 days.',
   )
 })
 
@@ -176,18 +199,34 @@ test('the feed\'s own repeated sentence and missing period are tidied', () => {
   )
 })
 
-test('a long rehab tour lists three clubs and counts the rest', () => {
-  const stops = ['Somerset Patriots', 'Hudson Valley Renegades', 'Scranton/Wilkes-Barre RailRiders', 'Tampa Tarpons']
+test('a rehab tour through four affiliates names each LEVEL once, not four affiliate names', () => {
+  const stops = [
+    { name: 'Somerset Patriots', sportId: SPORT_IDS.AA },
+    { name: 'Hudson Valley Renegades', sportId: SPORT_IDS.A },
+    { name: 'Scranton/Wilkes-Barre RailRiders', sportId: SPORT_IDS.AAA },
+    { name: 'Tampa Tarpons', sportId: SPORT_IDS['A+'] },
+  ]
+  const levelByTeamId = new Map(stops.map((s, i) => [900 + i, s.sportId]))
   const [row] = ilRows([
     sc('2026-03-25', 'New York Yankees placed RHP Gerrit Cole on the 15-day injured list. Tommy John surgery recovery.'),
-    ...stops.map((name, i) =>
-      rehab(`2026-04-0${i + 1}`, { id: 900 + i, name }, `New York Yankees sent RHP Gerrit Cole on a rehab assignment to ${name}.`)),
+    ...stops.map((s, i) =>
+      rehab(`2026-04-0${i + 1}`, { id: 900 + i, name: s.name }, `New York Yankees sent RHP Gerrit Cole on a rehab assignment to ${s.name}.`)),
     sc('2026-05-22', 'New York Yankees activated RHP Gerrit Cole from the 15-day injured list.'),
-  ])
-  assert.match(
-    row.description,
-    /Rehabbed with Somerset Patriots, Hudson Valley Renegades, Scranton\/Wilkes-Barre RailRiders and 1 more club, then activated/,
-  )
+  ], { levelByTeamId })
+  // Visit order, deduped to unique levels — no "+N more" needed since a farm
+  // system only has so many rungs.
+  assert.match(row.description, /Rehabbed with AA, A, AAA and A\+ teams, then activated/)
+})
+
+test('two rehab stops at the same level collapse to one level, not "and"', () => {
+  const levelByTeamId = new Map([[SOMERSET.id, SPORT_IDS.AAA], [SCRANTON.id, SPORT_IDS.AAA]])
+  const [row] = ilRows([
+    sc('2026-03-25', 'New York Yankees placed RHP Gerrit Cole on the 15-day injured list. Elbow.'),
+    rehab('2026-04-01', SOMERSET, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Somerset Patriots.'),
+    rehab('2026-04-10', SCRANTON, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Scranton/Wilkes-Barre RailRiders.'),
+    sc('2026-04-20', 'New York Yankees activated RHP Gerrit Cole from the 15-day injured list.'),
+  ], { levelByTeamId })
+  assert.match(row.description, /Rehabbed with AAA team, then activated/)
 })
 
 test('a rehab tour with no recorded activation yet reads as its own clause', () => {
@@ -195,10 +234,10 @@ test('a rehab tour with no recorded activation yet reads as its own clause', () 
     sc('2026-06-02', 'New York Yankees placed RHP Gerrit Cole on the 15-day injured list. Elbow.'),
     rehab('2026-06-20', SOMERSET, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Somerset Patriots.'),
     rehab('2026-06-27', SCRANTON, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Scranton/Wilkes-Barre RailRiders.'),
-  ])
+  ], { levelByTeamId: AA_AAA_LEVELS })
   assert.equal(
     row.description,
-    '15-day injured list. Elbow. Rehabbing with Somerset Patriots and Scranton/Wilkes-Barre RailRiders.',
+    '15-day injured list. Elbow. Rehabbing with AA and AAA teams.',
   )
 })
 

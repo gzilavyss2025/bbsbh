@@ -1718,7 +1718,8 @@ export function signedFallback(transactions) {
 // Curate + shape the career roster-move ledger. `transactions` is the raw
 // player-scoped feed; the rest is async-resolved enrichment the caller gathers
 // (see loadPlayer): `levelByTeamId` maps a club id to its sportId (for the
-// CALLED UP / SENT DOWN direction and the level tags), `tradeOthers` maps a
+// CALLED UP / SENT DOWN direction and the level tags, plus each Injured List
+// row's rehab-stop levels — see ilArcClause), `tradeOthers` maps a
 // tradeKey to the other players in that swap (for the in-description links),
 // `draft` is the shaped draft record, and `rookieUntil` is the date (from
 // public/data/rookies.json) he exceeded the rookie limit, if ever. Rows dated
@@ -1801,7 +1802,7 @@ export function transactionTimelineView(
 
   // Injured list — one row per STINT, folded from the placement / transfer /
   // rehab / activation rows the loop above deliberately skipped.
-  for (const stint of injuredListStints(transactions)) push(ilStintRow(stint))
+  for (const stint of injuredListStints(transactions)) push(ilStintRow(stint, levelByTeamId))
 
   // Draft — a synthetic row on that year's first-round date, alongside (not
   // instead of) the signing the raw feed already carries.
@@ -2082,7 +2083,12 @@ export function injuredListStints(transactions) {
     if (!open) continue
     if (isRehabTxn(t)) {
       const name = t.toTeam?.name
-      if (name && !open.rehabClubs.includes(name)) open.rehabClubs.push(name)
+      // id travels alongside the name so the row renderer can resolve each
+      // stop's LEVEL (AAA/AA/A+/A/ROK) rather than naming the affiliate — see
+      // ilArcClause. Deduped by name, same as before.
+      if (name && !open.rehabClubs.some((c) => c.name === name)) {
+        open.rehabClubs.push({ id: t.toTeam?.id ?? null, name })
+      }
       continue
     }
     if (date > open.start && isIlEndingTxn(t)) close(date)
@@ -2135,14 +2141,7 @@ function ilPlacementProse(t) {
   return full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
 }
 
-// A long rehab tour is a detail, not the headline — three affiliate names is
-// already a full line on a phone, so the rest becomes a count, folded into the
-// same "and N more" phrasing humanJoin uses for the shown names.
-const REHAB_CLUBS_SHOWN = 3
-
-// "A", "A and B", "A, B and C" — never an Oxford-comma-less runon, and never a
-// bare "+N" — an unnamed remainder gets counted out loud instead ("and 2 more
-// clubs") so the sentence still parses as a sentence.
+// "A", "A and B", "A, B and C" — never an Oxford-comma-less runon.
 function humanJoin(items) {
   if (items.length === 0) return ''
   if (items.length === 1) return items[0]
@@ -2150,13 +2149,21 @@ function humanJoin(items) {
   return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
 }
 
-function rehabNames(clubs) {
-  if (!clubs.length) return ''
-  const shown = clubs.slice(0, REHAB_CLUBS_SHOWN)
-  const rest = clubs.length - REHAB_CLUBS_SHOWN
-  return rest > 0
-    ? humanJoin([...shown, `${rest} more club${rest === 1 ? '' : 's'}`])
-    : humanJoin(shown)
+// The affiliate's NAME is a detail the reader has to decode ("is Somerset
+// higher or lower than Hudson Valley?"); its LEVEL is the fact that actually
+// answers "how far back was he." levelByTeamId (built in loadPlayer from a
+// live-or-static team lookup per rehab stop's toTeam id — see its own header)
+// resolves each stop to a SPORT_LABEL; a still-unresolved id (a lookup that
+// failed) is dropped rather than guessed. Deduped to unique LEVELS, in visit
+// order — a five-affiliate tour still tops out around AAA/AA/A+/A/ROK, so
+// unlike the old per-club list this never needs a "+N more" overflow.
+function rehabLevels(clubs, levelByTeamId) {
+  const levels = []
+  for (const c of clubs) {
+    const label = SPORT_LABEL[levelByTeamId.get(c.id)]
+    if (label && !levels.includes(label)) levels.push(label)
+  }
+  return levels
 }
 
 // Rehab and activation are one clause, not two independent bolt-ons — they're
@@ -2167,8 +2174,9 @@ function rehabNames(clubs) {
 // computed span → no "after N days" (see injuredListStints on why a missed
 // closer's days stays null rather than invented). A rehab with no recorded
 // activation yet reads as its own present-tense clause instead of vanishing.
-function ilArcClause(s) {
-  const rehab = rehabNames(s.rehabClubs)
+function ilArcClause(s, levelByTeamId) {
+  const levels = rehabLevels(s.rehabClubs, levelByTeamId)
+  const rehab = levels.length ? `${humanJoin(levels)} team${levels.length === 1 ? '' : 's'}` : ''
   if (!s.end) return rehab ? `Rehabbing with ${rehab}.` : ''
   const span = s.days != null ? ` after ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
   return rehab
@@ -2176,12 +2184,12 @@ function ilArcClause(s) {
     : `Activated ${ilMonthDay(s.end)}${span}.`
 }
 
-function ilStintRow(s) {
+function ilStintRow(s, levelByTeamId) {
   const parts = [ilPlacementProse(s.placement)]
   if (s.days60 && s.days60 !== injuredListDays(s.placement)) {
     parts.push(`Later transferred to the ${s.days60}-day list.`)
   }
-  const arc = ilArcClause(s)
+  const arc = ilArcClause(s, levelByTeamId)
   if (arc) parts.push(arc)
   return {
     sig: `IL|${s.start}`,
