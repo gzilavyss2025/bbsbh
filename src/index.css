@@ -18190,9 +18190,13 @@ body {
   cursor: grabbing;
 }
 .jerseydeck__card {
-  flex: 0 0 auto;
+  /* Grow to fill the deck's width when the catalog is short (no dead
+     whitespace after the last card), but never shrink below the floor a
+     logo needs to read — once more jerseys than fit at that floor are in
+     the catalog, the deck overflows and scrolls instead of squeezing. */
+  flex: 1 1 124px;
   scroll-snap-align: start;
-  width: 124px;
+  min-width: 124px;
   height: 190px;
   position: relative;
   overflow: hidden;
