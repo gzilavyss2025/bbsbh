@@ -22,6 +22,7 @@ import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
 import { AdvancedPitchingCard } from '../components/AdvancedPitchingCard.jsx'
 import { PitchMix } from '../components/PitchMix.jsx'
+import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
 import { FoulCard } from '../components/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/PitcherWorkloadCard.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
@@ -343,6 +344,18 @@ export function PlayerPage({ id, asOf, sportId }) {
               <>
                 <SectionTitle title="Pitches" note="share of pitches · avg velo" />
                 <PitchMix arsenal={block.arsenal} />
+              </>
+            )}
+
+            {/* Directly under the mix it's derived from — the three arms whose
+                own mix looks most like the rows just above, which only reads
+                as an answer if the question is still on screen. Renders
+                nothing for a hitter, below AAA, or when nobody clears the
+                match floor (see lib/pitcherSimilarity.js). */}
+            {block.similar?.length > 0 && (
+              <>
+                <SectionTitle title="Pitches like" note="closest arsenals" />
+                <SimilarPitchers similar={block.similar} />
               </>
             )}
 
