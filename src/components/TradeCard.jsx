@@ -155,6 +155,14 @@ function badgeLabel(trade) {
 // stacked one-row-per-team layout for a real 3+-team blockbuster, since
 // forcing extra teams into two columns reads worse than just listing each
 // side in turn.
+//
+// The two columns stay side by side at EVERY width, phone included — the
+// swap only reads as a swap while both clubs are in view at once, so on a
+// phone the column pair holds and it's each player ROW that restacks
+// (headshot above the name instead of beside it). Collapsing to one
+// column per club, which this used to do, spends the exchange to buy
+// width the rows don't need. See the @media block by .tradecard__swap in
+// index.css.
 export function TradeCard({ trade }) {
   const badge = badgeLabel(trade)
   const isSwap = trade.teams.length === 2
