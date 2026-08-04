@@ -27722,3 +27722,139 @@ button.gamehigh-matchup:active {
   animation-play-state: paused;
   animation-delay: var(--animlab-delay, 0s);
 }
+
+
+/* ==== TEAM HUB: SHELL + TAB BAR + SHELF ==== */
+/* The only new chrome the team-page IA rebuild introduces: the tab bar under
+   the pinned identity header, and the collapsible shelf a tab uses for its
+   secondary modules. Existing card chrome (.thub-card and friends) carries over
+   unchanged — this effort moves modules, it does not restyle them. */
+
+/* Five tabs, phone-first: they fit across a phone at this size, and scroll
+   sideways rather than wrap if a longer label or a large text size pushes them
+   past the frame. Modelled on .stepnav (the in-game section nav) so the two
+   read as the same control. */
+.teamtabs {
+  margin: var(--space-3) 0 var(--space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.teamtabs::-webkit-scrollbar {
+  display: none;
+}
+.teamtabs__row {
+  display: flex;
+  gap: 6px;
+  min-width: min-content;
+}
+.teamtabs__btn {
+  flex: 1 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.teamtabs__btn:active {
+  transform: scale(0.96);
+}
+.teamtabs__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.teamtabs__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+
+/* The shelf: closed, one row carrying a title and its headline figure; open,
+   the module itself. The closed row deliberately reads lighter than a
+   .thub-card head — a shelf is a secondary module, and the hierarchy is the
+   whole point of collapsing it. */
+.teamshelf {
+  margin: 0 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+.teamshelf__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  cursor: pointer;
+}
+.teamshelf__row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.teamshelf__title {
+  flex: 1 1 auto;
+}
+/* The headline figure the closed row carries ("4", "7–3") — the reason a shelf
+   can stay shut without hiding the one number someone came for. */
+.teamshelf__sum {
+  flex: 0 0 auto;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-num);
+}
+.teamshelf__chev {
+  flex: 0 0 auto;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.teamshelf.is-open .teamshelf__chev {
+  transform: rotate(90deg);
+}
+.teamshelf__body {
+  padding: 0 var(--space-3) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teamtabs__btn,
+  .teamshelf__chev {
+    transition: none;
+  }
+}
+
+
+/* ==== TEAM HUB: ROSTER TAB ==== */
+
+
+/* ==== TEAM HUB: GAMES TAB ==== */
+
+
+/* ==== TEAM HUB: NUMBERS TAB ==== */
+
+
+/* ==== TEAM HUB: ORG TAB ==== */

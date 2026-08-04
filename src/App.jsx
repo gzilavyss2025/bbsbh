@@ -75,6 +75,14 @@ const TeamLeadersPage = lazyNamed(
   () => import('./screens/TeamLeadersPage.jsx'),
   'TeamLeadersPage',
 )
+// The team hub's four new tabs. Each is its own route and its own loader — a
+// tab must not pull another tab's data, which is half the reason the team page
+// was split at all (see .scratch/team-page-ia/PRD.md). Lazily loaded like every
+// other screen, so a visitor who opens one tab never downloads the other four.
+const RosterTab = lazyNamed(() => import('./screens/team/RosterTab.jsx'), 'RosterTab')
+const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTab')
+const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
+const OrgTab = lazyNamed(() => import('./screens/team/OrgTab.jsx'), 'OrgTab')
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const UmpireRankingsPage = lazyNamed(
@@ -230,6 +238,14 @@ export default function App() {
     content = <UniformNamesPage />
   } else if (route.name === 'team-leaders') {
     content = <TeamLeadersPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-roster') {
+    content = <RosterTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-games') {
+    content = <GamesTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-numbers') {
+    content = <NumbersTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-org') {
+    content = <OrgTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage
