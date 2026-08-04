@@ -9,7 +9,7 @@
 // Spoiler note: roster moves and their dates carry no score, so nothing here
 // is reveal-only — this module is as spoiler-free as rehab.js/rookies.js.
 
-import { txnDate } from './rehab-policy.js'
+import { txnDate, mentionsInjuredList } from './rehab-policy.js'
 
 // ---------------------------------------------------------------------------
 // §2 De-dupe
@@ -113,18 +113,25 @@ export function dedupeTransactions(rows) {
 // never had to. Deliberately a small, self-contained copy rather than an
 // export added to person.js (this pass doesn't touch person.js — same
 // convention as gen-rehab.mjs mirroring detectRehabAssignment).
+//
+// The one thing NOT copied is the list-NAME test: that's mentionsInjuredList
+// (rehab-policy.js), shared with person.js so the pre-2019 "disabled list"
+// wording can't be repaired in one consumer and left broken in the other.
+// Only the verb frames below stay local. Today's generated files start at
+// 2026, so the disabled-list era is out of range in practice — this keeps the
+// two copies honest rather than changing live output.
 function isIlTransferTxn(t) {
   return (
     t.typeCode === 'SC' &&
     /transferred/i.test(t.description || '') &&
-    /injured list/i.test(t.description || '')
+    mentionsInjuredList(t)
   )
 }
 function isIlPlacementTxn(t) {
   return (
     t.typeCode === 'SC' &&
     /placed/i.test(t.description || '') &&
-    /injured list/i.test(t.description || '') &&
+    mentionsInjuredList(t) &&
     !isIlTransferTxn(t)
   )
 }
@@ -132,7 +139,7 @@ function isIlEndingTxn(t) {
   return (
     t.typeCode === 'SC' &&
     /activat/i.test(t.description || '') &&
-    /injured list/i.test(t.description || '') &&
+    mentionsInjuredList(t) &&
     !/all-stars? activated/i.test(t.description || '')
   )
 }

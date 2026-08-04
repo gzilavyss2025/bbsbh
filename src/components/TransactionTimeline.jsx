@@ -29,11 +29,12 @@ function linkifyNames(text, links) {
 }
 
 // The career roster-move ledger at the foot of the player page — trades,
-// signings, call-ups, options, waivers, releases, the draft and (for a
-// prospect) the climb up the farm system, NEWEST first so it reads
-// top-to-bottom as most-recent to least-recent (see api/person.js
-// transactionTimelineView for the curation that trims the raw feed's IL /
-// number-change noise). Career honors live in the Trophy Case card instead,
+// signings, call-ups, options, waivers, releases, injured-list stints, the
+// draft and (for a prospect) the climb up the farm system, NEWEST first so it
+// reads top-to-bottom as most-recent to least-recent (see api/person.js
+// transactionTimelineView for the curation that trims the raw feed's
+// number-change / roster-status noise and folds the IL rows into one row per
+// stint). Career honors live in the Trophy Case card instead,
 // not here. Rendered as a vertical timeline: a graphite rail down the middle
 // with a tone-colored node per move — field green when a club gained him, clay
 // when one lost him, neutral for a lateral move — the date penciled to its
@@ -45,13 +46,32 @@ function linkifyNames(text, links) {
 // dozens of rows deep, so it opens collapsed to the most recent VISIBLE_LIMIT
 // with a real "show all" action — never an always-open list dominating the
 // bottom of the page (same convention as Trophy Case's dense-career collapse).
+//
+// That collapse STRETCHES rather than truncating blind, because IL stints ride
+// this timeline now and a tenured star who hasn't changed clubs in years can
+// have nothing else on top: measured against live feeds, five of the top five
+// rows are IL stints for Christian Yelich and Mookie Betts, four of five for
+// Aaron Judge and Gerrit Cole. Cutting at five would turn a career ledger into
+// an injury log for exactly the players most likely to be looked up. So the
+// collapsed view runs down to the first roster move, in strict
+// reverse-chronological order (never reordered — that would make the dates
+// jump), bounded by VISIBLE_CEILING so a long injury run can't prise the card
+// open anyway. Worst case in the sample was Yelich, at seven rows.
 const VISIBLE_LIMIT = 5
+const VISIBLE_CEILING = 8
+
+function collapsedCount(rows) {
+  const firstMove = rows.findIndex((r) => r.code !== 'IL')
+  if (firstMove < 0) return VISIBLE_LIMIT
+  return Math.min(Math.max(VISIBLE_LIMIT, firstMove + 1), VISIBLE_CEILING)
+}
 
 export function TransactionTimeline({ rows }) {
   const [expanded, setExpanded] = useState(false)
   if (!rows?.length) return null
-  const dense = rows.length > VISIBLE_LIMIT
-  const visible = dense && !expanded ? rows.slice(0, VISIBLE_LIMIT) : rows
+  const shown = collapsedCount(rows)
+  const dense = rows.length > shown
+  const visible = dense && !expanded ? rows.slice(0, shown) : rows
   // Precompute the year-divider flag per row (rather than mutating a `let`
   // while mapping) so this stays a pure render pass.
   const withYearFlag = visible.map((r, i) => ({
