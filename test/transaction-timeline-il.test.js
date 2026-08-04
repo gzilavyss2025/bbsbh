@@ -135,7 +135,7 @@ test('the stint row keeps the feed\'s wording, minus the redundant subject, plus
   // and the player is whose page this is.
   assert.equal(
     row.description,
-    '60-day injured list. Right elbow inflammation. Rehab: Somerset Patriots. Activated Jun 19 — 83 days.',
+    '60-day injured list. Right elbow inflammation. Rehabbed with Somerset Patriots, then activated Jun 19 after 83 days.',
   )
 })
 
@@ -151,7 +151,7 @@ test('a one-day stint says "1 day", not "1 days"', () => {
     sc('2026-06-02', 'New York Yankees placed RF Aaron Judge on the 10-day injured list. Wrist.'),
     sc('2026-06-03', 'New York Yankees activated RF Aaron Judge from the 10-day injured list.'),
   ])
-  assert.match(row.description, /Activated Jun 3 — 1 day\.$/)
+  assert.match(row.description, /Activated Jun 3 after 1 day\.$/)
 })
 
 test('the feed\'s own repeated sentence and missing period are tidied', () => {
@@ -163,7 +163,7 @@ test('the feed\'s own repeated sentence and missing period are tidied', () => {
   ])
   assert.equal(
     repeated.description,
-    '10-day injured list. Right hip inflammation. Activated Aug 26 — 15 days.',
+    '10-day injured list. Right hip inflammation. Activated Aug 26 after 15 days.',
   )
 
   const [unpunctuated] = ilRows([
@@ -172,7 +172,7 @@ test('the feed\'s own repeated sentence and missing period are tidied', () => {
   ])
   assert.equal(
     unpunctuated.description,
-    '7-day disabled list. Concussion symptoms. Activated Aug 11 — 13 days.',
+    '7-day disabled list. Concussion symptoms. Activated Aug 11 after 13 days.',
   )
 })
 
@@ -186,7 +186,19 @@ test('a long rehab tour lists three clubs and counts the rest', () => {
   ])
   assert.match(
     row.description,
-    /Rehab: Somerset Patriots, Hudson Valley Renegades, Scranton\/Wilkes-Barre RailRiders \+1 more\./,
+    /Rehabbed with Somerset Patriots, Hudson Valley Renegades, Scranton\/Wilkes-Barre RailRiders and 1 more club, then activated/,
+  )
+})
+
+test('a rehab tour with no recorded activation yet reads as its own clause', () => {
+  const [row] = ilRows([
+    sc('2026-06-02', 'New York Yankees placed RHP Gerrit Cole on the 15-day injured list. Elbow.'),
+    rehab('2026-06-20', SOMERSET, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Somerset Patriots.'),
+    rehab('2026-06-27', SCRANTON, 'New York Yankees sent RHP Gerrit Cole on a rehab assignment to Scranton/Wilkes-Barre RailRiders.'),
+  ])
+  assert.equal(
+    row.description,
+    '15-day injured list. Elbow. Rehabbing with Somerset Patriots and Scranton/Wilkes-Barre RailRiders.',
   )
 })
 

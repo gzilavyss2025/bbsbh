@@ -2098,14 +2098,17 @@ function ilMonthDay(iso) {
 }
 
 // One timeline row per stint, in the feed's own voice: the placement's raw
-// description IS the sentence (it already names the club, position, player, day
-// count and the injury — "New York Yankees placed RHP Gerrit Cole on the 60-day
-// injured list. Tommy John surgery recovery."), same as every other row type on
-// this timeline, with the stint's own arc appended. A 15-day → 60-day transfer
-// earns a clause because that upgrade is the season-threatening signal; the
-// rehab stops earn one because a rehab is where the stint was actually spent.
-// The span is omitted when no closer was recorded rather than guessed — see
-// injuredListStints.
+// description IS the opening sentence (it already names the club, position,
+// player, day count and the injury — "New York Yankees placed RHP Gerrit Cole
+// on the 60-day injured list. Tommy John surgery recovery."), same as every
+// other row type on this timeline, with the stint's own arc told as a second,
+// connected sentence (`ilArcClause`) rather than a string of bolted-on
+// fragments — a duration figure reads as part of "activated May 23 after 60
+// days," not an em-dash afterthought. A 15-day → 60-day transfer earns its own
+// clause because that upgrade is the season-threatening signal; the rehab
+// stops fold into the activation clause because a rehab is where the stint was
+// actually spent. The span is omitted when no closer was recorded rather than
+// guessed — see injuredListStints.
 // The feed's own prose needs two small repairs before anything is appended to
 // it: some descriptions end without terminal punctuation ("…on the 7-day
 // disabled list. Concussion symptoms"), which would run straight into the next
@@ -2133,26 +2136,53 @@ function ilPlacementProse(t) {
 }
 
 // A long rehab tour is a detail, not the headline — three affiliate names is
-// already a full line on a phone, so the rest becomes a count.
+// already a full line on a phone, so the rest becomes a count, folded into the
+// same "and N more" phrasing humanJoin uses for the shown names.
 const REHAB_CLUBS_SHOWN = 3
-function rehabClause(clubs) {
+
+// "A", "A and B", "A, B and C" — never an Oxford-comma-less runon, and never a
+// bare "+N" — an unnamed remainder gets counted out loud instead ("and 2 more
+// clubs") so the sentence still parses as a sentence.
+function humanJoin(items) {
+  if (items.length === 0) return ''
+  if (items.length === 1) return items[0]
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
+}
+
+function rehabNames(clubs) {
   if (!clubs.length) return ''
-  const shown = clubs.slice(0, REHAB_CLUBS_SHOWN).join(', ')
+  const shown = clubs.slice(0, REHAB_CLUBS_SHOWN)
   const rest = clubs.length - REHAB_CLUBS_SHOWN
-  return rest > 0 ? `Rehab: ${shown} +${rest} more.` : `Rehab: ${shown}.`
+  return rest > 0
+    ? humanJoin([...shown, `${rest} more club${rest === 1 ? '' : 's'}`])
+    : humanJoin(shown)
+}
+
+// Rehab and activation are one clause, not two independent bolt-ons — they're
+// really one fact ("how the stint ended") — so the total-days figure is folded
+// in as "after N days" rather than dash-appended like a data field. Degrades
+// by omission at every joint: no rehab stops → no "Rehabbed with" lead-in, no
+// recorded closer → no "activated" clause at all (never a guessed date), no
+// computed span → no "after N days" (see injuredListStints on why a missed
+// closer's days stays null rather than invented). A rehab with no recorded
+// activation yet reads as its own present-tense clause instead of vanishing.
+function ilArcClause(s) {
+  const rehab = rehabNames(s.rehabClubs)
+  if (!s.end) return rehab ? `Rehabbing with ${rehab}.` : ''
+  const span = s.days != null ? ` after ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
+  return rehab
+    ? `Rehabbed with ${rehab}, then activated ${ilMonthDay(s.end)}${span}.`
+    : `Activated ${ilMonthDay(s.end)}${span}.`
 }
 
 function ilStintRow(s) {
   const parts = [ilPlacementProse(s.placement)]
   if (s.days60 && s.days60 !== injuredListDays(s.placement)) {
-    parts.push(`Transferred to the ${s.days60}-day list.`)
+    parts.push(`Later transferred to the ${s.days60}-day list.`)
   }
-  const rehab = rehabClause(s.rehabClubs)
-  if (rehab) parts.push(rehab)
-  if (s.end) {
-    const span = s.days != null ? ` — ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
-    parts.push(`Activated ${ilMonthDay(s.end)}${span}.`)
-  }
+  const arc = ilArcClause(s)
+  if (arc) parts.push(arc)
   return {
     sig: `IL|${s.start}`,
     date: s.start,
