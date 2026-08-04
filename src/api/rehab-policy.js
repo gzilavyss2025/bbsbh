@@ -91,5 +91,30 @@ export function isRehabEndingTxn(t) {
   const c = t.typeCode
   if (REHAB_END_CODES.has(c)) return true
   if (c === 'ASG' && !isRehabTxn(t)) return true
-  return c === 'SC' && /injured list/i.test(t.description || '')
+  return c === 'SC' && mentionsInjuredList(t)
+}
+
+// --- injured-list WORDING -----------------------------------------------------
+// The injured list was called the DISABLED list until 2019, and statsapi never
+// rewrote its history — a pre-2019 row still reads "…on the 10-day disabled
+// list". The feed is not even self-consistent within one stint: Mookie Betts is
+// PLACED on a 2018 "disabled list" and ACTIVATED from an "injured list" thirteen
+// days later. A 2021 Framber Valdez row drops the hyphen entirely ("the 10 day
+// disabled list").
+//
+// Testing only /injured list/ therefore made every consumer blind to the whole
+// pre-2019 era: a player genuinely on the DL read as healthy, and a season lost
+// to injury could not earn the career register's "Injured — missed season" note.
+// The name test lives here ONCE rather than as a literal at each call site —
+// person.js's IL detector and gap note, teamTransactions.js's story filter, and
+// isRehabEndingTxn above all key on it, and that is exactly the drift this
+// module exists to prevent (see the header). Extend here, never re-inline.
+export function mentionsInjuredList(t) {
+  return /(injured|disabled) list/i.test(t.description || '')
+}
+
+// The "N-day" qualifier off a placement, hyphenated or not — '7' | '10' | '15' |
+// '60', or null for a plain / full-season list with no day count at all.
+export function injuredListDays(t) {
+  return (t.description || '').match(/(\d+)[- ]day (?:injured|disabled) list/i)?.[1] ?? null
 }

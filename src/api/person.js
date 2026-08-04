@@ -22,6 +22,8 @@ import {
   txnDate,
   isRehabTxn,
   isRehabEndingTxn,
+  mentionsInjuredList,
+  injuredListDays,
 } from './rehab-policy.js'
 
 const DASH = '—'
@@ -1858,18 +1860,32 @@ export function detectRehabAssignment(transactions, debutYear, asOf) {
 // rehab detector already treats as closers — or a roster-removing move (release /
 // free agency / DFA / retirement).
 //
-// Deliberately NOT a bare "activated" (without "injured list"): an All-Star or
+// Deliberately NOT a bare "activated" (without a named list): an All-Star or
 // international-tournament roster emits "American League All-Stars activated …"
 // mid-season, which must NOT be read as coming off the IL (it wrongly cleared
 // Buxton's live 10-day stint when we tried it). The All-Star form is excluded
 // even WHEN it names the injured list ("American League All-Stars activated RF
 // Aaron Judge from the 10-day injured list" is a phantom reinstatement generated
 // by an injured player's All-Star selection — he's still hurt).
+//
+// The list NAME test is mentionsInjuredList (rehab-policy.js), shared so the
+// pre-2019 "disabled list" era can't go missing from one consumer and not
+// another. The RESERVE list is the third name that can close a stint, and it is
+// the reason an injured All-Star used to stay flagged hurt all year: a selection
+// re-parks him on the All-Star club's reserve list ("National League All-Stars
+// placed RF Mookie Betts on the reserve list"), and his own club then activates
+// him from THAT list ("Los Angeles Dodgers activated RF Mookie Betts from the
+// reserve list") — so the stint never gets an "activated from the injured list"
+// row at all and hung open until the season-boundary reset. Verified on Betts
+// (2024), Trout (2022), Alvarez (2022) and Kershaw (2023). Only the ACTIVATION
+// side accepts "reserve list": a PLACEMENT on one is either that same All-Star
+// parking or a winter-ball club's roster move (Aguilas Cibaenas, Cangrejeros de
+// Santurce), never an injury.
 const IL_END_CODES = new Set(['CU', 'OPT', 'SE', 'REL', 'RET', 'DFA', 'SFA', 'FA', 'DES'])
 function isIlPlacementTxn(t) {
   return (
     t.typeCode === 'SC' &&
-    /injured list/i.test(t.description || '') &&
+    mentionsInjuredList(t) &&
     /(placed|transferred)/i.test(t.description || '')
   )
 }
@@ -1878,7 +1894,7 @@ function isIlEndingTxn(t) {
   return (
     t.typeCode === 'SC' &&
     /activat/i.test(t.description || '') &&
-    /injured list/i.test(t.description || '') &&
+    (mentionsInjuredList(t) || /reserve list/i.test(t.description || '')) &&
     !/all-stars? activated/i.test(t.description || '')
   )
 }
@@ -1938,7 +1954,7 @@ export function detectInjuredList(transactions, asOf) {
   if (asOf && start.slice(0, 4) < asOf.slice(0, 4)) return null
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isIlEndingTxn(t))
   if (ends) return null
-  const days = (latest.description || '').match(/(\d+)-day injured list/i)?.[1] ?? null
+  const days = injuredListDays(latest)
   return { days, label: days ? `${days}-Day` : 'Injured List' }
 }
 
