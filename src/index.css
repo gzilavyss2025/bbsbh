@@ -81,7 +81,9 @@
        `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
        and previews sentence-case copy; labels + preview title stay uppercase)
      - the Identity Lab's about-this-lab explainer prose — `.idlabhint__body`
-       (the modal title stays uppercase) */
+       (the modal title stays uppercase)
+     - the Trade Deadline card's cutline prose — `.tradecard__cutline` (the
+       shape badge, team names, and player names above it stay uppercase) */
 #root * {
   text-transform: uppercase;
 }
@@ -27858,3 +27860,257 @@ button.gamehigh-matchup:active {
 
 
 /* ==== TEAM HUB: ORG TAB ==== */
+
+
+/* ================================================================ trade deadline
+   TradeDeadlinePage (season index) + TradeDeadlineSeasonPage (per-year list) +
+   TradeCard — a season-culminating historical report, same footing as Awards
+   History/Postseason History (no SealBox: completed trades carry no score —
+   see src/api/tradeDeadline.js's module header). Medal-amber (--award-*) marks
+   the season tiles and sticky date rail, matching that "honors/ceremonial
+   history" family elsewhere; a trade's own accents stay the app's plain
+   graphite/caption tones, same restraint as .rehabcard. */
+
+.tradedl__seasongrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.tradedl__seasontile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--award-line);
+  border-radius: var(--radius-md);
+  background: var(--award-soft);
+  text-align: left;
+}
+.tradedl__seasontile:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.tradedl__seasonyear {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--award-ink);
+}
+.tradedl__seasondeadline {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.tradedl__seasoncount {
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+}
+
+/* One sticky date header per group of same-day trades on the season page —
+   the changelog/activity-feed grouping pattern from the non-sports UX pass
+   (a persistent date rail beats re-reading a date per card while scrolling
+   a season's worth of deadline activity). */
+.tradedl__daterail {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-top: var(--space-5);
+  padding: 6px var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--award-line);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.tradedl__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+.tradecard {
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.tradecard__badge {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* The ordinary 2-team case: a swap card, one column per club with a
+   connector glyph between them — the Venmo/Cash App and swap-UI pattern
+   for an A <-> B exchange, kept identical card to card so a reader can
+   pattern-match while scrolling instead of re-reading each one. */
+.tradecard__swap {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: var(--space-2);
+}
+.tradecard__connector {
+  align-self: center;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+}
+/* 3+-team fallback (a real one is the 2024-07-29 Dodgers/White Sox/
+   Cardinals blockbuster — see tradeDeadline.js's grouping header): one
+   stacked row per club rather than forcing extra teams into two columns. */
+.tradecard__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tradecard__side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.tradecard__teamhead.tradecard__teamhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+.tradecard__teamname {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+
+.tradecard__players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tradecard__player {
+  display: block;
+}
+.tradecard__playerlink.tradecard__playerlink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+/* One rung up from the app's small (54x88) headshot tier — a trade card's
+   photo is the page's primary content, not a secondary mention alongside a
+   stat line, so it earns the same shot-md size .tlead__shot (the league
+   leaders' hero photo) uses. */
+.shot.tradecard__shot {
+  flex: 0 0 auto;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+}
+/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
+   this outranks the base .shot--fallback's much larger display-size default
+   — same shot-md-w/h box, same override .tlead__shot.shot--fallback uses. */
+.shot.tradecard__shot.shot--fallback {
+  font-size: var(--fs-hero-lg);
+}
+.tradecard__playername {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+.tradecard__pos {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding-left: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* Cash / a player to be named later reads as its own row, same weight as a
+   real player (ConsiderationRow in TradeCard.jsx) — a dashed frame in place
+   of the headshot marks it as "not a real photo" rather than a broken image,
+   with a plain glyph standing in for the missing face. */
+.tradecard__considerationicon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--graphite-soft);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-hero-lg);
+}
+/* Cash is an unambiguous, already-in-hand gain (unlike a PTBNL, still just a
+   promise) — the app's positive/acquired green, same family
+   TeamTransactionsCard tints a trade's "in" rail slot with. */
+.tradecard__considerationicon--cash {
+  border-style: solid;
+  border-color: var(--field-deep);
+  background: var(--field-soft);
+  color: var(--field-deep);
+}
+.tradecard__considerationlink {
+  cursor: default;
+}
+
+.tradecard__cutline {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+.tradecard__cutline + .tradecard__cutline {
+  margin-top: 6px;
+  padding-top: 0;
+  border-top: none;
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .tradecard__cutline selector can't outrank #root * (see that block
+   comment at the top of this file). */
+#root .tradecard__cutline {
+  text-transform: none; /* caps-exempt: trade cutline prose reads as a natural sentence */
+}
+
+@media (max-width: 420px) {
+  .tradecard__swap {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .tradecard__connector {
+    transform: rotate(90deg);
+  }
+}

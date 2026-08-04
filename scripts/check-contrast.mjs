@@ -126,6 +126,9 @@ const PAIRINGS = [
   { fg: 'text-muted', bg: '#D1E0D3', min: TEXT, note: 'live band state token on hover mow stripe' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
+  // Trade Deadline's cash-consideration icon frame — the positive/acquired
+  // green tint (TradeCard.jsx's ConsiderationRow, tone="cash").
+  { fg: 'field-deep', bg: 'field-soft', min: TEXT, note: 'Trade Deadline cash consideration icon' },
 ]
 
 const failures = []
