@@ -83,7 +83,8 @@
      - the Identity Lab's about-this-lab explainer prose — `.idlabhint__body`
        (the modal title stays uppercase)
      - the Trade Deadline card's cutline prose — `.tradecard__cutline` (the
-       shape badge, team names, and player names above it stay uppercase) */
+       shape badge, team names, and player names above it stay uppercase) —
+       and its stats-to-date lines — `.tradecard__statline` */
 #root * {
   text-transform: uppercase;
 }
@@ -28074,10 +28075,19 @@ button.gamehigh-matchup:active {
 }
 .tradecard__player {
   display: block;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+/* Zebra stripe every other player row so a long acquisition list is easier
+   to scan — same --surface-inset convention .awardhistory__list--zebra
+   uses, scoped per side so the stripe count restarts in each team column. */
+.tradecard__players > .tradecard__player:nth-child(even) {
+  background: var(--surface-inset);
 }
 .tradecard__playerlink.tradecard__playerlink {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 6px;
   width: 100%;
   text-align: left;
@@ -28101,15 +28111,14 @@ button.gamehigh-matchup:active {
 .tradecard__playername {
   min-width: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-small);
+  font-size: var(--fs-body);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
   overflow-wrap: break-word;
 }
 .tradecard__pos {
   flex: 0 0 auto;
-  margin-left: auto;
-  padding-left: 6px;
+  margin-left: 10px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -28147,9 +28156,17 @@ button.gamehigh-matchup:active {
 }
 .tradecard__statline {
   font-family: var(--font-read);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-muted);
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity (see
+   .tradecard__cutline below) — a MiLB player's entry/level-games/stat trio
+   reads as natural sentence case ("International signee, 2019") rather than
+   shouted; an MLB player's one-liner is unaffected since it's all-caps stat
+   shorthand (AVG/HR/RBI) either way. */
+#root .tradecard__statline {
+  text-transform: none; /* caps-exempt: Trade Deadline stats-to-date lines read as natural sentence case */
 }
 
 /* Cash / a player to be named later reads as its own row, same weight as a

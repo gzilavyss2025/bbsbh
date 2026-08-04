@@ -71,13 +71,16 @@ function PlayerRow({ player, teamId }) {
 }
 
 // The glyph shown in a consideration's photo-sized frame — decorative only,
-// the label text next to it is what actually names the thing.
+// the label text next to it is what actually names the thing. Cash is the
+// one already-in-hand asset (its own '$' + the green tone below); every
+// other consideration is a still-pending promise between the two clubs, so
+// they share a handshake glyph rather than each getting its own symbol.
 const CONSIDERATION_ICONS = {
   cash: '$',
-  ptbnl: '?',
-  futureConsiderations: '…',
-  intlBonus: '$',
-  draftPick: '#',
+  ptbnl: '🤝',
+  futureConsiderations: '🤝',
+  intlBonus: '🤝',
+  draftPick: '🤝',
 }
 
 // Cash, a player to be named later, future considerations, international
@@ -100,7 +103,7 @@ function ConsiderationRow({ consideration }) {
           className={`tradecard__considerationicon${tone ? ` tradecard__considerationicon--${tone}` : ''}`}
           aria-hidden="true"
         >
-          {CONSIDERATION_ICONS[consideration.type] ?? '?'}
+          {CONSIDERATION_ICONS[consideration.type] ?? '🤝'}
         </span>
         <span className="tradecard__playername">{consideration.label}</span>
         {consideration.detail && <span className="tradecard__pos">{consideration.detail}</span>}

@@ -15,7 +15,7 @@
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
-//   '/trade-deadline'                   -> { name: 'trade-deadline' }
+//   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
