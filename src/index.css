@@ -28025,6 +28025,20 @@ button.gamehigh-matchup:active {
   width: 100%;
   text-align: left;
 }
+/* The whole row is the PlayerLink button here, not just the name, so
+   .plink:hover's dotted underline propagates down into the stats-to-date
+   lines (and a MiLB player's entry/level-games/season trio) — striping
+   the entire card on hover. A descendant can't refuse an inherited
+   decoration, so the underline has to be declined at the button and
+   re-declared on the name alone: it's the name that navigates somewhere,
+   and the name that should look like it does. */
+.tradecard__playerlink.tradecard__playerlink:hover {
+  text-decoration: none;
+}
+.tradecard__playerlink.tradecard__playerlink:hover .tradecard__playername {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
 /* One rung up from the app's small (54x88) headshot tier — a trade card's
    photo is the page's primary content, not a secondary mention alongside a
    stat line, so it earns the same shot-md size .tlead__shot (the league
