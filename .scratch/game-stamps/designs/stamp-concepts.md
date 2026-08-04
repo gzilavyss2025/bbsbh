@@ -1,10 +1,11 @@
-# Game Stamp — three design concepts
+# Game Stamp — three design concepts (rev 2: with team marks)
 
 Collectible commemorative mark for a game the user watched/scored. Constraints
-honored by all three: 300×300 canvas, single ink (`currentColor` — team-tintable
-or fixed navy), score is mandatory and legible, must read tiled at ~72px and
-reward a close look at 300px. Sample game throughout: **Cubs 3 at Brewers 5,
-American Family Field, Aug 2 2026**.
+honored by all three: 300×300 canvas (viewBox only — no width/height attributes,
+so CSS controls size in a grid), single ink (`currentColor` — team-tintable or
+fixed navy), score is mandatory and legible, must read tiled at ~72px and reward
+a close look at 300px. Sample game throughout: **Cubs 3 at Brewers 5, American
+Family Field, Aug 2 2026** (gamePk sample `778241`).
 
 Type vocabulary is borrowed from the app's tokens (`src/tokens/typography.css`):
 **IBM Plex Sans Condensed** (semibold, tracked caps) for chrome/labels,
@@ -12,7 +13,8 @@ Type vocabulary is borrowed from the app's tokens (`src/tokens/typography.css`):
 SVG declares those families with generic fallbacks (`Arial Narrow`,
 `ui-monospace`), so the stamps degrade sanely if rendered outside the app.
 
-Files:
+Files (all verified by rendering a Playwright contact sheet at 300/110/72/48px —
+`contact-sheet.html` / `contact-sheet-2.png` alongside):
 
 - `stamp-concept-1.svg` — The Cancellation
 - `stamp-concept-2.svg` — The Stub
@@ -20,107 +22,137 @@ Files:
 
 ---
 
+## Team marks — the one-color logo system (shared by all three)
+
+Identity is now carried by the project's precomputed mono knockout marks:
+`public/data/logos/mono/{teamId}.svg` (150 clubs, built by
+`scripts/gen-mono-logos.mjs`; see `src/lib/logoMono.js` and ADR-0031). Each file
+is white ink on transparent — already a luminance mask — so recoloring to any
+single ink is:
+
+```svg
+<mask id="c1h-{gamePk}">
+  <image href="/data/logos/mono/158.svg" x="…" y="…" width="…" height="…"
+         preserveAspectRatio="xMidYMid meet"/>
+</mask>
+<rect x="…" y="…" width="…" height="…" fill="currentColor" mask="url(#c1h-{gamePk})"/>
+```
+
+Rules the renderer must follow (all encoded in the sample files):
+
+1. **Non-uniform viewBoxes.** Marks are not square (Brewers 157×172 portrait,
+   Cubs 234×234). Every concept reserves a *square slot* and letterboxes with
+   `preserveAspectRatio="xMidYMid meet"`. Never assume aspect.
+2. **Instance-unique ids.** Every mask/filter/path id is suffixed with the
+   gamePk (`c1a-778241`, `ink-778241`, …) so a grid of many stamps on one page
+   never collides.
+3. **Rendering-mode caveat.** External `href` resolves only when the stamp SVG
+   is inline in the DOM (or is itself the document, e.g. in an iframe). Rendered
+   via `<img>`, in an OG card, or exported to PNG, external refs are blocked and
+   the mark vanishes → an **inlined-logo variant is required for export/share**
+   (fetch the mono file at generation time and embed its contents in the mask).
+4. **Prefer the `<image>` reference for grids.** Mono files run 1–59 KB; two
+   inlined logos can push a single stamp past 100 KB, while the reference form
+   lets the browser cache each club's file once across the whole collection.
+5. **Fallback is the abbreviation.** Not every club has a mono file (MiLB
+   coverage is partial). Per project convention (degrade, don't crash), every
+   logo slot has a defined text fallback — noted per concept below.
+6. **Production URL** comes from `teamLogoUrl(teamId, 'mono')` in
+   `src/lib/teams.js` (adds the `?v=` content hash). The hardcoded
+   `/data/logos/mono/…` paths in these samples are for preview only.
+
+**The logos changed the small-size calculus everywhere**: a knockout silhouette
+at 8–12px is far more recognizable than 3-letter condensed type at 5px. All
+three concepts are now identifiable at 48px, which none reliably was before.
+
+---
+
 ## Concept 1 — "The Cancellation"
 
-**Thesis:** the national-park-passport cancellation stamp, but the slot where a
-cancellation carries its date instead carries a two-row winner-first score
-ledger — the score *is* the postmark.
+**Thesis:** the national-park-passport cancellation stamp, with the club marks
+as the central emblem pair — away AT home — and the run totals stacked directly
+beneath each mark, so the score reads as the postmark's payload.
 
 ### Organizing geometry
 
-A double concentric circle, centered at (150,150): outer ring r=140 at 3.5px
-stroke, inner ring r=118 at 1.5px. The 22px annulus between them is the text
-ring; everything score-bearing lives inside the inner circle. The stamp fills
-~93% of the canvas — this is the "hero" round stamp of the set.
+Double concentric circle centered (150,150): outer ring r=140 at 3.5px, inner
+ring r=118 at 1.5px; text ring in the 22px annulus, everything score-bearing
+inside the inner circle.
 
 ### Layout (precise)
 
 | Element | Geometry | Type | Data? |
 |---|---|---|---|
 | Outer/inner rings | r=140 (3.5px), r=118 (1.5px) | — | fixed |
-| Venue arc (top) | baseline on r=122 arc, `M 28,150 A 122,122 0 0 1 272,150`, centered | Condensed 600, 13.5px, +2.2px tracking, caps | venue |
-| Date arc (bottom) | baseline on r=135 arc, `M 15,150 A 135,135 0 0 0 285,150`, centered (sweep 0 keeps glyphs upright; the larger radius makes caps grow *inward*, so both arcs occupy the same 118–140 annulus) | same as venue arc | date, long form `AUGUST 2 · 2026` |
-| Diamond separators | filled 12px rotated squares at (21,150) and (279,150) — 9 and 3 o'clock, mid-annulus | — | fixed |
-| Status word | `FINAL` centered, baseline y=104 | Condensed 600, 11px, +3px tracking | innings (see below) |
-| Upper rule | chord y=114, x 70→230, 1.5px | — | fixed |
-| **Winner row** | abbrev at x=76 baseline y=152; run total right-aligned to x=224 baseline y=153; dotted leader between (y=144, 2.5px stroke, dash `0.5 6.5`, round caps) | Plex Mono 700; abbrev 27px, numeral 31px | winner abbrev + runs |
-| **Loser row** | abbrev x=76 baseline y=182; total right-aligned x=224; lighter leader (1.8px) | Plex Mono 400; abbrev 20px, numeral 22px | loser abbrev + runs |
-| Lower rule | chord y=196, x 82→218, 1.5px | — | fixed |
-| Orientation line | `CHC AT MIL` centered baseline y=215 | Condensed 600, 11px, +2px tracking | away/home abbrevs |
+| Venue arc (top) | baseline on r=122 arc `M 28,150 A 122,122 0 0 1 272,150`, centered | Condensed 600, 13.5px, +2.2px tracking, caps | venue |
+| Date arc (bottom) | baseline on r=135 arc `M 15,150 A 135,135 0 0 0 285,150` (sweep 0 keeps glyphs upright; larger radius makes caps grow inward so both arcs share the annulus) | same | date, `AUGUST 2 · 2026` |
+| Diamond separators | filled 12px rotated squares at (21,150), (279,150) | — | fixed |
+| Status word | `FINAL` centered, baseline y=97 (`FINAL / 10` in extras) | Condensed 600, 11px, +3px | innings |
+| **Away mark** | square slot (84,104) 54×54, mask+rect recipe | — | away teamId |
+| `AT` | centered (150,134) | Condensed 600, 10px | fixed |
+| **Home mark** | slot (162,104) 54×54 | — | home teamId |
+| Rule | chord y=170, x 80→220, 1.5px | — | fixed |
+| Away total | `3` centered x=111, baseline y=202 | Mono 400, 24px | away runs |
+| Home total (winner) | `5` centered x=189, baseline y=204, underscore x 175→203 y=211 2.5px | Mono 700, 32px | home runs + winner side |
+| Abbrev captions | `CHC` / `MIL` centered under totals, baseline y=226 | Condensed 600, 8.5px, +1.5px | abbrevs |
 
 ### How the score is expressed
 
-A two-row ledger, **winner always on top**, regardless of home/away. Hierarchy
-is carried three ways at once: position (top), weight (700 vs 400), and size
-(27/31px vs 20/22px). Because winner-ordering destroys the away-at-home
-information, the footer line `CHC AT MIL` restores it — that's why it's
-non-optional chrome. The dotted leaders are doing the passport-stamp "fill the
-line" job while keeping abbrev and numeral optically connected at any score
-width (a 2-digit total just eats leader dots; leaders are drawn between fixed
-x-endpoints minus measured text, so `12` and `5` both work).
+Per-team totals sit directly beneath each mark — the logo-to-number column
+binding *is* the score statement, so away-at-home order is preserved (the old
+winner-first reordering and its `CHC AT MIL` footer are gone). Winner hierarchy:
+bold + 33% larger numeral + a scorer's underscore. Extras go in the status word
+(`FINAL / 10`); a shutout loser column reads `0` under its mark; margin reads
+numerically only — the cancellation is a record, not a headline.
 
-- **Extra innings:** the status word becomes `FINAL / 10` (or `/ 11`…). Nothing
-  else moves.
-- **Shutout:** loser row reads `CHC 0`; optionally swap the status word to
-  `SHUTOUT` — the slot is sized for ≤8 characters.
-- **Walk-off / blowout:** no special treatment; margin reads directly from the
-  numerals. Deliberate — the cancellation is a record, not a headline.
+### Identity, redundancy, fallback
 
-### Team identity in one color
-
-Three-letter club abbreviations in mono caps. No logos: MLB marks can't be
-reproduced, and a knockout mark at one color inside a busy ring stamp turns to
-mud at 72px. The abbreviation IS the identity, and the ink hue (team-tinted via
-`currentColor`) does the rest when the collection tints stamps per team.
+Logo is primary; the 8.5px abbrev captions are kept deliberately — they anchor
+which mark is which for unfamiliar clubs *and* they are the graceful fallback
+(a missing mono file promotes the caption into the slot as 25px bold mono).
+The redundancy costs one small text row and pays for itself.
 
 ### 72px behavior
 
-At 72px the ring text is ~3.2px — an unreadable texture band, which is exactly
-what a distant cancellation looks like, so it degrades honestly. What survives:
-the double-ring silhouette, `MIL 5` at ~6.5px bold (legible), `CHC 3`
-marginally. If tested legibility fails on device, ship a `size="sm"` variant:
-drop both arcs and the diamonds, thicken the inner ring to 2.5px, scale the two
-score rows up ~20%. Same data, two renderers.
+Much improved: the emblem pair survives as two recognizable silhouettes
+(~13px each) with the bold `5` beside a lighter `3`. At 48px the marks still
+read; ring text is texture (honestly stamp-like). The simplified small variant
+is now optional rather than necessary; if shipped, drop arcs/diamonds and
+enlarge the emblem-and-totals block ~20%.
 
-### Wear treatment
+### Wear
 
-`feTurbulence` (fractalNoise, baseFrequency 0.55, 2 octaves) +
-`feDisplacementMap` (scale 1.8) over the whole group — pure vector, no raster.
-Gives every edge the slightly chewed look of rubber on paper. Seed the
-turbulence from `gamePk` so each game's stamp is chewed *differently but
-deterministically* — two stamps of the same game always match. For a stronger
-"bad ink day" effect, add a second feTurbulence-driven alpha mask that drops
-ink coverage in patches; omitted from the sample to keep it legible.
+`feTurbulence` fractalNoise (baseFrequency 0.55, 2 octaves) +
+`feDisplacementMap` scale 1.8 over the whole group — pure vector. Seed from
+gamePk for deterministic per-game chew. The displacement also roughens the
+masked logo rects, which sells "one rubber die" nicely.
 
 ### Data fields
 
-`winnerAbbrev, winnerRuns, loserAbbrev, loserRuns, awayAbbrev, homeAbbrev,
-venueName, dateLong, totalInnings, gamePk (distress seed)`.
+`awayTeamId, homeTeamId, awayAbbrev, homeAbbrev, awayRuns, homeRuns,
+winnerSide, venueName, dateLong, totalInnings, gamePk (ids + distress seed)`.
 
 ### Honest weaknesses
 
-- Least differentiated concept: every passport/brewery/park stamp is a double
-  ring with arc text. In a grid of *other apps'* stamps it's generic; in a grid
-  of its own siblings only the ink hue and numerals vary.
-- Long venue names (`THE BALLPARK AT AMERICA FIRST SQUARE…`) overflow the top
-  arc; needs a truncation/abbreviation table above ~26 characters.
-- Winner-first ordering fights the box-score instinct (away on top); the
-  footer line mitigates but costs a read.
+- Still the most generic silhouette in a mixed grid — round with arc text.
+- Long venue names (>~26 chars) overflow the top arc; needs an abbreviation
+  table or font-size step-down.
+- Two adjacent dark marks of similar mass (two roundel clubs) can read as one
+  blob at 48px; the `AT` between them is illegibly small at that size.
 
 ---
 
 ## Concept 2 — "The Stub"
 
-**Thesis:** not a rubber stamp at all — a ticket stub crossed with the final
-"R" column of a scorebook linescore: the score lives in ruled cells, and the
-winner's cell is double-ruled the way a scorer boxes the winning total.
+**Thesis:** a ticket stub crossed with the final "R" column of a scorebook
+linescore — crest, club code, and a ruled run cell per row; the winner's cell
+is double-ruled the way a scorer boxes the winning total.
 
 ### Organizing geometry
 
-A landscape rounded rectangle, 264×172, at x 18–282, y 64–236 (rx=6, 3px
-stroke) — deliberately breaking the round-stamp convention. A vertical
-perforation (2px dashed line, dash `1 7`, round caps, at x=222) tears off a
-60px-wide stub on the right. Main panel ≈ 204px wide, stub ≈ 60px.
+Landscape rounded rectangle 264×172 (x 18–282, y 64–236, rx 6, 3px stroke) —
+deliberately not round. Vertical perforation (2px dashed, dash `1 7`, x=222)
+tears off a 60px stub.
 
 ### Layout (precise)
 
@@ -128,198 +160,181 @@ perforation (2px dashed line, dash `1 7`, round caps, at x=222) tears off a
 
 | Element | Geometry | Type | Data? |
 |---|---|---|---|
-| Brand | `TALLY BASEBALL`, x=30 baseline y=86 | Condensed 600 10.5px +1.8px tracking | fixed |
+| Brand | `TALLY BASEBALL` x=30 baseline y=86 | Condensed 600 **9px** +1.2px | fixed |
 | Status | `FINAL / 9` right-aligned x=210 y=86 | same | innings |
 | Top rule | y=94, x 30–210, 1.25px | — | fixed |
-| Column header | `R` centered on x=183, y=103 | Condensed 600 9px | fixed |
-| Away row | abbrev `CHC` x=46 baseline y=134 (Mono 700 26px); run cell rect (160,106) 46×40, 1.25px hairline; numeral centered x=183 baseline y=135 (Mono 400 25px) | | away abbrev + runs |
+| Column header | `R` centered x=183, y=103 | Condensed 600 9px | fixed |
+| Away row | mark slot (30,107) 38×38; abbrev `CHC` x=78 baseline y=135 (Mono 700 22px); cell rect (160,106) 46×40 hairline 1.25px; numeral centered x=183 y=135 (Mono 400 25px) | | away teamId, abbrev, runs |
 | Row divider | y=152, x 30–210, 0.75px | — | fixed |
-| Home row | abbrev `MIL` x=46 y=186; run cell (160,158) 46×40 | | home abbrev + runs |
-| Winner marks | filled 11px diamond bug left of winner abbrev (center ≈ (36,178)); winner cell double-ruled — outer 2.25px + inner rect (164,162) 38×32 at 0.75px; winner numeral Mono 700 27px | | which side won |
-| Bottom rule | y=210, x 30–210, 1.25px | — | fixed |
-| Venue | `AMERICAN FAMILY FIELD` x=30 baseline y=226 | Condensed 600 10.5px +1.5px | venue |
+| Home row (winner) | mark slot (30,159) 38×38; abbrev `MIL` x=78 y=187; double cell (160,158) 46×40 @2.25px + (164,162) 38×32 @0.75px; numeral Mono 700 27px | | home teamId, abbrev, runs, winner side |
+| Bottom rule / venue | y=210; `AMERICAN FAMILY FIELD` x=30 y=226 | Condensed 600 10.5px +1.5px | venue |
 
-**Stub (x 222–282), all text rotated −90° (reads bottom-to-top):**
+**Stub (x 222–282), text rotated −90°:** punch-hole circle (254,84) r=8 @2.5px;
+date centered on (246,158) Mono 600 14px; serial `NO. {gamePk}` on (269,158)
+Mono 400 8.5px +2.5px.
 
-| Element | Geometry | Type | Data? |
-|---|---|---|---|
-| Punch hole | stroke-only circle (254,84) r=8, 2.5px — an empty circle on paper reads as a punched hole, no knockout needed | — | fixed |
-| Date | centered on (246,158) | Mono 600 14px +1px | date, `AUG 2, 2026` |
-| Serial | centered on (269,158) | Mono 400 8.5px +2.5px | `NO. {gamePk}` |
-
-The gamePk-as-serial-number is the concept's best authenticity move: it's real
-data pretending to be ticket chrome, unique per game, and it gives the
-collector something to squint at.
+Revision notes: the top band's two texts collided at 10.5px across 180px — both
+dropped to 9px (brand ends ≈x 112, status starts ≈x 155; verified clear in the
+render). The winner diamond bug was removed: its slot is now the logo, and the
+double box + bold numeral carry the winner unambiguously.
 
 ### How the score is expressed
 
-Scorebook convention: **away on top, home below** — no reordering, so the
-matchup reads naturally. Winner is marked, not moved: the filled diamond bug,
-the double-ruled cell, and the bold numeral all point at the same row. This is
-the scorer's own habit (boxing the winning total) made into system.
+Scorebook convention — away over home, never reordered. Winner is *marked, not
+moved*: double-ruled cell + bold numeral (the scorer's boxed total). Extras →
+`FINAL / 11`; shutout → hairline `0` cell against the winner's double box;
+doubleheader → serial disambiguates (optionally `· GM 2` in status).
 
-- **Extra innings:** `FINAL / 11` in the status slot.
-- **Shutout:** loser cell shows `0`; the empty-feeling hairline cell against
-  the winner's double box is itself expressive.
-- **Doubleheader:** the serial line naturally disambiguates; optionally append
-  `· GM 2` to the status slot.
-- **Blowout vs one-run:** carried numerically only; the double box is binary.
+### Identity, redundancy, fallback
 
-### Team identity in one color
-
-Abbreviations again, but here the *rows* give each team a place, so identity
-is positional as well as textual. City/nickname text was cut deliberately —
-at 26px mono bold the abbrevs are the strongest identity signal the panel can
-afford.
+The only concept that keeps **both** mark and abbreviation, deliberately: a
+ticket prints a crest *and* a station code, the utilitarian register supports
+it, and the abbrev doubles as the always-present fallback — a missing mono file
+simply leaves the crest slot empty and the row still works (per the project's
+degrade-gracefully convention). No layout shift needed.
 
 ### 72px behavior
 
-Best-in-set. The landscape rectangle is instantly differentiable from round
-stamps in a grid; the two 26px abbrevs and boxed numerals scale to ~6.2px bold
-and stay legible; the double-box winner cell survives as a visibly heavier
-square. Casualties: serial, `R` header, tracking nuance — all texture. The
-perforation dash collapses to a faint line, still enough to say "ticket."
-No simplified variant needed; ship one renderer.
+Still best-in-set, now stronger: crest + bold code + boxed numeral per row all
+survive (~9px crest, ~5.6px bold code, boxed digits), and the landscape shape
+is instantly separable from round stamps in a grid. At 48px the crests and
+boxed digits still read; serial/`R`/perforation collapse to texture. No
+simplified variant needed.
 
-### Wear treatment
+### Wear
 
-Same feTurbulence/feDisplacementMap recipe at reduced scale (1.2 — the stub
-carries 8.5px type that a 1.8 displacement would mangle). The tear line and
-punch hole do most of the authenticity work structurally rather than
-texturally. Optional upgrade: jitter the rect corners by drawing the border as
-a path with gamePk-seeded ±1px vertex offsets — "cut slightly off square."
+Same displacement recipe at scale 1.2 (the stub carries 8.5px serial type that
+scale 1.8 would mangle). Tear line + punch hole do the authenticity work
+structurally. Optional: gamePk-seeded ±1px corner jitter on the border path.
 
 ### Data fields
 
-`awayAbbrev, awayRuns, homeAbbrev, homeRuns, winnerSide, venueName, dateShort,
-totalInnings, gamePk (serial + distress seed)`.
+`awayTeamId, homeTeamId, awayAbbrev, homeAbbrev, awayRuns, homeRuns,
+winnerSide, venueName, dateShort, totalInnings, gamePk (serial + ids + seed)`.
 
 ### Honest weaknesses
 
-- Least "stampy": it reads as a ticket, which slightly betrays the
-  rubber-stamp brief even as it wins the differentiability battle. In a
-  passport-page collection it may look like it wandered in from a scrapbook.
-- Landscape aspect inside a square canvas wastes ~35% of the vertical box;
-  tiled grids of mixed concepts will show it smaller than the round stamps.
-- The rotated stub text is illegible below ~150px render size and the punch
-  hole can read as a printing error at small sizes.
+- Least "stampy" — reads as ticket ephemera, which may sit oddly on a
+  passport-page collection fantasy.
+- Landscape aspect wastes ~35% of the square canvas; in a mixed grid it
+  renders visually smaller than the round/pentagon stamps.
+- Rotated stub text illegible below ~150px; the punch hole can read as a
+  printing artifact when tiny.
 
 ---
 
 ## Concept 3 — "The Tally Plate"
 
-**Thesis:** the app is called *Tally* Baseball — so the score is drawn the way
-a scorer actually keeps it: literal tally strokes, four-and-a-slash, inside a
-home-plate silhouette, with the winning total ringed in pencil.
+**Thesis:** the app is called *Tally* Baseball — the score is drawn the way a
+scorer keeps it: literal four-and-a-slash tally strokes beside each club's
+mark, inside a home-plate silhouette, winner's total ringed in pencil.
 
 ### Organizing geometry
 
-A point-down home plate pentagon: `M 48,52 L 252,52 L 252,158 L 150,254 L
-48,158 Z`, 5px stroke, rounded joins. The rectangular upper zone (y 52–158)
-holds the two team/tally rows; the triangular lower zone holds venue, date, and
-a plate-tip diamond ornament at (150,232). No shape in stampdom looks like
-this; it's the concept a Tally Baseball user would recognize as *theirs*.
+Point-down home plate: `M 48,52 L 252,52 L 252,158 L 150,254 L 48,158 Z`, 5px
+stroke, rounded joins. Wide upper rectangle (y 52–158) holds venue band + two
+tally rows; lower triangle holds status, date, tip diamond.
 
 ### Layout (precise)
 
 | Element | Geometry | Type | Data? |
 |---|---|---|---|
 | Plate outline | pentagon above, 5px | — | fixed |
-| Status | `FINAL — 9` centered baseline y=72; rule y=80, x 64–236, 1px | Condensed 600 11px +3px | innings |
-| Away row | abbrev x=62 baseline y=122 (Mono 700 21px); tally strokes from x=123, 9px pitch, 28px tall, 3px stroke, round caps, each with ±1–2px endpoint jitter; numeral centered x=224 (Mono 400 22px) | | away abbrev + runs |
+| **Venue band** | `AMERICAN FAMILY FIELD` centered baseline y=72; rule y=80 x 64–236 | Condensed 600 10px +1px | venue |
+| Away row | mark slot (58,92) 34×34; tallies from x=112 (9px pitch, 28px tall, 3px stroke, round caps, ±1–2px hand jitter); numeral `3` centered x=224 baseline y=122 | Mono 400 22px | away teamId, runs |
 | Row divider | y=132, x 66–234, 0.75px | — | fixed |
-| Home row (winner) | abbrev x=62 y=165; tallies same grid at 3.5px stroke, fifth stroke a slash (115,163)→(157,141); numeral Mono 700 26px centered in a 2.2px circle r=16 at (224,151) | | home abbrev + runs |
+| Home row (winner) | mark slot (58,136) 34×34; tallies @3.5px, slash (105,163)→(147,141); circle (224,151) r=16 @2.2px; numeral `5` centered baseline y=160 | Mono 700 26px | home teamId, runs, winner side |
 | Zone divider | y=178, x 72–228, 1px | — | fixed |
-| Venue | centered y=198 | Condensed 600 9px +0.8px | venue |
-| Date | centered y=214 | Mono 600 11.5px +1px | `AUG 2, 2026` |
-| Tip diamond | filled 9px rotated square at (150,232) | — | fixed |
+| Status | `FINAL — 9` centered y=196 | Condensed 600 11px +3px | innings |
+| Date | `AUG 2, 2026` centered baseline y=210 | Mono 600 **10.5px** +0.5px | date |
+| Tip diamond | filled 9px rotated square at (150,230) | — | fixed |
 
-Tally construction rule for the renderer: runs `n` → `floor(n/5)` complete
-five-bundles (4 verticals + slash) plus `n mod 5` verticals, on a 9px pitch
-with a 6px gap between bundles. Winner's tallies at 3.5px, loser's at 3px.
-The numeral always accompanies the tallies — the strokes are texture and
-delight, the digit is the guarantee of legibility.
+Revision notes: venue moved from the narrow lower triangle (where
+`AMERICAN FAMILY FIELD` visibly overflowed the plate edges) to the full-width
+top band; `FINAL — 9` demoted to the triangle, which its ~75px width fits
+easily. The date initially still grazed the sloping edge under the wobble
+filter's ±2px displacement — reduced to 10.5px/+0.5px tracking at y=210
+(~71px wide vs ~94px available); verified clear in the re-render.
+
+**Venue truncation strategy:** the top band affords ~172px ⇒ ~28 chars at
+10px. Longer names step down to 9px (~31 chars); beyond that, apply a
+short-name table for known long venues (e.g. sponsor-prefix stripping), and as
+a last resort middle-ellipsize. Never wrap — the band is single-line by design.
 
 ### How the score is expressed
 
-Twice, redundantly: pictographically (the tallies — you can *count* the runs)
-and numerically (the digit). Winner hierarchy comes from the scorer's-pencil
-gesture: the winning total is **circled**, its tallies are heavier, its digit
-bold. Home/away keeps scorebook order (away top). This is the only concept
-where a blowout and a squeaker *look* structurally different at a glance — 12
-runs is a visibly long fence of strokes, 1 run is a lone mark. That's the
-concept's emotional payload.
+Redundantly: pictographically (countable tally strokes — 5 is four-and-a-slash)
+and numerically (the digit, guaranteed legible). Winner = circled total
+(scorer's ring), heavier tallies, bold digit. Away/home order preserved. Still
+the only concept where blowout vs. squeaker differ *structurally* — 12 runs is
+a long fence, 1 run a lone stroke; a shutout is an empty fence line plus `0`.
 
-- **Extra innings:** `FINAL — 11`; nothing else moves.
-- **Shutout:** the loser row has an empty tally field — a blank fence line —
-  plus the digit `0`. Genuinely evocative.
-- **High-scoring games:** see weaknesses.
+### Identity, redundancy, fallback
 
-### Team identity in one color
-
-Abbreviations, same rationale as the others — but the plate silhouette itself
-is a *shared* identity (baseball, this app), which frees the ink hue to do
-per-team work in a tinted collection.
+The marks fully replace the abbreviations (the row was too crowded for both,
+and the mark + tallies + digit is the concept's whole sentence). Fallback: a
+missing mono file renders the abbrev in the slot as 20px Mono 700, vertically
+centered — the row grid is unchanged.
 
 ### 72px behavior
 
-The pentagon silhouette is the most recognizable shape in the set at thumbnail
-size — nothing else in a stamp grid is plate-shaped. The tallies collapse into
-a texture bar (fine — they read as "marks were made"), and legibility falls to
-the abbrevs (~5px bold, marginal) and digits (~5.3–6.2px, the circled winner
-digit survives best). Recommendation: ship a simplified small variant below
-~110px — drop venue, tallies, and the status rule; keep plate, `CHC 3 / MIL 5`
-in two enlarged rows, and the winner circle. This concept genuinely needs the
-two-renderer split; the other two can get away without it.
+The pentagon silhouette remains the most recognizable shape in any grid, and
+the marks now rescue identity at small sizes (the old 5px abbrevs were the
+weak point). Verified at 72px: marks and digits read, tallies become texture
+(fine — "marks were made"), status/date illegible. At 48px the plate + two
+marks + circled digit still just read. The simplified sub-~100px variant (drop
+venue, tallies, status rule; enlarge marks and digits) is still recommended,
+but no longer strictly required.
 
-### Wear treatment
+### Wear
 
-Different register from concepts 1–2: not rubber-stamp chew but **hand
-wobble** — feTurbulence at low frequency (0.045, 2 octaves) with displacement
-scale 2, so long slow waves bend the straight lines the way a pencil does,
-rather than roughening edges. Plus structural jitter: the tally endpoints are
-individually offset ±1–2px in the geometry itself (in production, seeded from
-gamePk so it's deterministic). The result should look drawn, not stamped —
-matching the app's "you keep score on paper" soul.
+Hand wobble, not rubber chew: feTurbulence baseFrequency 0.045 (2 octaves),
+displacement scale 2 — long slow waves bend lines like pencil work — plus
+per-stroke endpoint jitter baked into the tally geometry (gamePk-seeded in
+production). Note the wobble displaces text too, which is why interior text
+needs ≥5px of slack to the plate's sloping edges (the date bug above).
 
 ### Data fields
 
-`awayAbbrev, awayRuns, homeAbbrev, homeRuns, winnerSide, venueName, dateShort,
-totalInnings, gamePk (jitter seed)`.
+`awayTeamId, homeTeamId, awayAbbrev (fallback), homeAbbrev (fallback),
+awayRuns, homeRuns, winnerSide, venueName, dateShort, totalInnings,
+gamePk (ids + jitter seed)`.
 
 ### Honest weaknesses
 
-- **Score capacity is bounded.** The tally field is ~120px wide; at 9px pitch
-  + bundle gaps that's ~12 runs before overflow. Beyond that the renderer must
-  shrink pitch (down to ~6px ≈ 17 runs) and then fall back to bundles-count
-  notation (`卌 ×3 + ||`) — added renderer complexity for rare games, and the
-  rare 20-run game (the one you'd most want to commemorate) gets the most
-  compromised stamp.
-- Weakest small-size legibility of the three; requires the simplified variant.
-- The circled winner digit crowds the plate's right edge (circle edge at
-  x=240 vs. plate edge sloping in below y=158); a 2-digit circled total needs
-  the circle widened to an ellipse and nudged left — fiddly.
-- Least "official-looking": the charm is hand-made, which may undercut the
-  passport-validation fantasy for collectors who want the ranger-desk moment.
+- **Score capacity bounded.** Tally field is now ~96px (x 112–208 before the
+  circle) ⇒ ~10 runs at 9px pitch; the renderer must shrink pitch (to ~6px ≈
+  14 runs) then fall back to `卌 ×N` bundle notation. The 20-run game you'd
+  most want to commemorate gets the most compromised stamp.
+- Circled totals ≥10 need the circle widened to an ellipse and nudged left.
+- Sloped edges + wobble filter make every lower-triangle string a clearance
+  calculation; new fields can't be added there casually.
+- Least "official-looking"; the charm is hand-made.
 
 ---
 
 ## Cross-cutting notes
 
-- **One-color discipline:** every element is `fill="currentColor"` /
-  `stroke="currentColor"`; the `style="color:#1B2A3A"` on each svg root is a
-  preview default (the app's `--ink-1`), overridable per team or theme. No
-  opacity tricks were used — value contrast comes from stroke weight, size,
-  and (available if wanted) hatch patterns.
-- **Fonts:** rendering these as in-app SVG gets the bundled Fontsource faces
-  for free. If stamps must ever be exported standalone (share images), either
-  convert text to paths at generation time or subset-embed the two faces —
-  arc text especially shifts if a fallback face has different metrics.
-- **Determinism:** all randomness (turbulence seed, jitter) derives from
-  `gamePk`. Same game → identical stamp, forever. That's what makes it a
-  collectible rather than a render.
-- **As a set:** the three are complementary, not competing skins — round
-  cancellation (official), rectangular stub (ephemera), plate tally
-  (hand-made). If only one ships, Concept 2 is the safest all-scales workhorse,
-  Concept 3 is the most *Tally Baseball*, Concept 1 is the most conventionally
-  collectible.
+- **One-color discipline:** every element, logos included, is `currentColor`
+  (the mono files are luminance masks, not colored artwork). The
+  `style="color:#1B2A3A"` on each svg root is a preview default (`--ink-1`),
+  overridable per team or theme. No opacity tricks; value contrast comes from
+  stroke weight, size, and mass.
+- **Sizing:** viewBox-only roots — the grid sizes stamps with CSS; nothing
+  fights the container.
+- **Fonts:** in-app inline rendering gets the bundled Fontsource faces free.
+  Standalone export must convert text to paths or subset-embed — and (see logo
+  rule 3) must also inline the logo masks. The export pipeline is a distinct
+  render mode, not a copy of the inline SVG.
+- **Determinism:** all randomness (turbulence seeds, tally jitter) derives from
+  `gamePk`. Same game → identical stamp, forever.
+- **Verification:** all three were rendered via a served contact sheet
+  (external logo hrefs require an HTTP origin + inline/document context) and
+  screenshotted at 300/110/72/48px; the top-band collision (concept 2) and two
+  plate-edge overflows (concept 3) were caught and fixed this way.
+- **Ranking, revised:** the logos narrowed the gap. Concept 2 remains the
+  all-scales workhorse, but Concept 1 gained the most — its emblem-pair center
+  is now genuinely distinctive at thumbnail size, and it's the strongest pick
+  if only one ships (official stamp feel + best small-size identity). Concept 3
+  is still the most *Tally Baseball* and the best 300px close-look, weakest
+  under data extremes (high scores, long venue names).
