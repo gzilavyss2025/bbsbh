@@ -27,7 +27,7 @@ export function PitcherWorkloadCard({ playerId, asOf }) {
 
   return (
     <div className="loadcard">
-      <h3 className="section__title">
+      <h3 className="section__title section__title--bar">
         <span>Recent workload</span>
         <em>{load.role === 'SP' ? 'starter' : 'reliever'}</em>
       </h3>
