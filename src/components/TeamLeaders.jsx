@@ -231,8 +231,9 @@ function LeaderCategory({
 // since every row already shares the one team the page is about. `injuredIds`:
 // a Set of person ids currently on that team's IL, flagging a leader's name
 // with the same ✚ mark as the
-// player page's il-banner — TeamPage passes its own already-fetched IL list
-// (see loadTeam's `injured`); null everywhere else (see InjuredMark above).
+// player page's il-banner — the team hub passes its own already-fetched IL id
+// set (see the Overview's and the Numbers tab's loaders); null everywhere else
+// (see InjuredMark above).
 // `horizontal`: swipeable full-bleed card deck (same idiom as the Team
 // Transactions card) instead of the responsive wrap grid — opt-in, TeamPage's
 // own small fixed-size FEATURED_CATEGORIES set only. TeamLeadersPage/

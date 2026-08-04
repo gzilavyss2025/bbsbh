@@ -27840,6 +27840,36 @@ button.gamehigh-matchup:active {
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
+/* The Overview's preview door — the link that ends each preview card and
+   carries on to the tab holding the whole thing. Deliberately a bare text link
+   in exactly the register of .tlead__seeall (TeamLeaders' own built-in "See
+   all ›", which the Leaders preview reuses rather than doubling up), NOT a
+   second card: the tab bar, the shelf row and the Org index tile stay the only
+   new chrome the IA rebuild introduces. Right-aligned and tucked up under the
+   card it belongs to, so it reads as that card's footer rather than as a
+   free-floating control between two cards. */
+.thub-door {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px 0 var(--space-4);
+}
+.thub-door__btn {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+.thub-door__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .teamtabs__btn,
   .teamshelf__chev {

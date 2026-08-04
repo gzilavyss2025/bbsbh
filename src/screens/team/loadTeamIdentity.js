@@ -1,5 +1,6 @@
 import { fetchTeam, fetchStandings } from '../../api/team.js'
 import { fetchManager } from '../../api/game.js'
+import { seasonOf, cutoffFor, teamRecordFor } from './data/shared.js'
 
 // The team hub's shared header data — everything TeamHubShell draws above the
 // tab bar, and NOTHING else.
@@ -10,51 +11,36 @@ import { fetchManager } from '../../api/game.js'
 // loaders instead — the whole point of the tab split is that a visitor who wants
 // one section doesn't pay for the other four (see .scratch/team-page-ia/PRD.md).
 //
+// The Overview is the one tab that does NOT call this: its Standing preview
+// already needs the standings response, so it shapes the header's three fields
+// off that same fetch rather than paying for a second identical request (see
+// data/loadOverview.js). The shaping itself is shared, so the two can't drift.
+//
 // Degrades the way every MiLB-facing loader here does: a thin feed with no
 // standings row yields `record: null` and the record line simply hides, and
 // fetchManager already swallows its own failure and answers null.
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
-// Standings as of the morning of a dated page: the day BEFORE the game whose
-// link carried `?d=`, so a visitor mid-scoring never sees a record that already
-// counts tonight's result. Same cutoff loadTeam uses.
-function dayBefore(iso) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
 
 export async function loadTeamIdentity(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
-  const season = Number((asOf || isoToday()).slice(0, 4))
-  const standingsDate = asOf ? dayBefore(asOf) : null
+  const season = seasonOf(asOf)
 
   const [standings, manager] = await Promise.all([
+    // Standings as of the morning of a dated page — the day BEFORE the game
+    // whose link carried `?d=`, so a visitor mid-scoring never sees a record
+    // that already counts tonight's result (see cutoffFor).
     team.league?.id
-      ? fetchStandings(team.league.id, season, standingsDate)
+      ? fetchStandings(team.league.id, season, cutoffFor(asOf))
       : Promise.resolve([]),
     fetchManager(id, season),
   ])
-
-  const div = standings.find((r) => r.division?.id === team.division?.id)
-  const myRec = div?.teamRecords?.find((t) => t.team.id === id)
 
   return {
     team,
     season,
     sportId,
-    record: myRec
-      ? {
-          wins: myRec.wins,
-          losses: myRec.losses,
-          rank: myRec.divisionRank,
-          div: team.division?.name,
-        }
-      : null,
+    record: teamRecordFor(standings, team, id),
     manager,
   }
 }

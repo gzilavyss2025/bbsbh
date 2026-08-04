@@ -18,32 +18,22 @@ import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/person-fetch.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL, teamClubName } from '../../../lib/teams.js'
+import { seasonOf, cutoffFor } from './shared.js'
 
 const DASH = '—'
 
 // The Org tab's own loader — affiliates, org-wide prospects, jersey combos and
-// (MiLB only) affiliation history, copied out of TeamPage.jsx's loadTeam
-// rather than shared with it (see .scratch/team-page-ia/PRD.md — the
-// duplication is temporary and issue 07 deletes loadTeam once every tab has
-// its own copy). Fetches nothing else: roster, standings, schedule results,
-// league stats, transactions and odds all belong to other tabs.
-
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
-function dayBefore(iso) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
+// (MiLB only) affiliation history. Fetches nothing else: roster, standings,
+// schedule results, league stats, transactions and odds all belong to other
+// tabs.
 
 export async function loadOrg(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
-  const season = Number((asOf || isoToday()).slice(0, 4))
-  const standingsDate = asOf ? dayBefore(asOf) : null
+  const season = seasonOf(asOf)
+  const standingsDate = cutoffFor(asOf)
   // The MLB parent's own id — same value whether this page IS the parent or
   // one of its affiliates (team.parentOrgId rides along on a MiLB team's
   // /teams response). Every prospect belongs to the org, not to one specific

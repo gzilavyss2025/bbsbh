@@ -114,12 +114,24 @@ const REVEAL_BATCH = 8
 // involved; `asOf` only scopes which transactions load (see
 // loadMoreTeamTransactions), it isn't displayed.
 //
-// `initialDays`/`initialCursor`/`initialHasMore` come from the page's own
-// loadTeam() (the first loadMoreTeamTransactions page, fetched alongside
-// everything else); the caller remounts this component on team/asOf change
-// (key={`${teamId}-${asOf ?? ''}`}, the same technique TeamPage already uses
-// for SeriesStrip) rather than syncing props via an effect.
-export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor, initialHasMore }) {
+// `initialDays`/`initialCursor`/`initialHasMore` come from the caller's own
+// loader (the first loadMoreTeamTransactions page — the team hub's Overview and
+// its Games tab both fetch it); the caller remounts this component on team/asOf
+// change (key={`${teamId}-${asOf ?? ''}`}, the same technique the hub uses for
+// SeriesStrip) rather than syncing props via an effect.
+// `limit` (the Overview's Latest moves door) caps the deck at that many of the
+// newest stories and turns paging off entirely — no "Load more" button, no
+// trailing sentinel, so a preview can never quietly page the whole season in
+// behind a swipe. The card is otherwise identical; the Games tab is where the
+// full timeline lives.
+export function TeamTransactionsCard({
+  teamId,
+  asOf,
+  initialDays,
+  initialCursor,
+  initialHasMore,
+  limit = null,
+}) {
   const [days, setDays] = useState(initialDays)
   const [cursor, setCursor] = useState(initialCursor)
   const [hasMore, setHasMore] = useState(initialHasMore)
@@ -133,7 +145,8 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
     () => days.flatMap((day) => day.stories.map((story) => ({ ...story, date: day.date }))),
     [days],
   )
-  const visibleStories = flatStories.slice(0, visibleCount)
+  const visibleStories = flatStories.slice(0, limit ?? visibleCount)
+  const canRevealMore = !limit && (visibleCount < flatStories.length || hasMore)
 
   const scrollRef = useRef(null)
   const sentinelRef = useRef(null)
@@ -175,7 +188,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
   useEffect(() => {
     const root = scrollRef.current
     const target = sentinelRef.current
-    if (!root || !target || typeof IntersectionObserver === 'undefined') return
+    if (limit || !root || !target || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) revealMore()
@@ -184,7 +197,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
     )
     observer.observe(target)
     return () => observer.disconnect()
-  }, [revealMore])
+  }, [limit, revealMore])
 
   if (!flatStories.length) return null
 
@@ -204,7 +217,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
         {visibleStories.map((story) => (
           <TxStory key={story.id} story={story} />
         ))}
-        {(visibleCount < flatStories.length || hasMore) && (
+        {canRevealMore && (
           <button
             type="button"
             className="txcard__more"
@@ -215,7 +228,7 @@ export function TeamTransactionsCard({ teamId, asOf, initialDays, initialCursor,
             {loadingMore ? 'Loading transactions…' : loadError ? 'Try loading again' : 'Load more transactions'}
           </button>
         )}
-        <div className="txcard__sentinel" ref={sentinelRef} aria-hidden="true" />
+        {!limit && <div className="txcard__sentinel" ref={sentinelRef} aria-hidden="true" />}
       </div>
     </section>
   )

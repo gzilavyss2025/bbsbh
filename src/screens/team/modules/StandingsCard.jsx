@@ -4,13 +4,30 @@ import { TeamLink } from '../../../components/TeamLink.jsx'
 import { TeamLogo } from '../../../components/TeamLogo.jsx'
 import { PostseasonOddsModal } from '../../../components/PostseasonOddsModal.jsx'
 
-export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds }) {
+// The three rows a preview shows: the club's own, plus the team above and the
+// team below it. A club at the top or bottom of its division still gets three
+// (the window slides rather than shrinking), and a division the club somehow
+// isn't listed in falls back to the top three rather than rendering nothing.
+function previewRows(standings) {
+  const me = standings.findIndex((s) => s.isMe)
+  if (me < 0) return standings.slice(0, 3)
+  const start = Math.min(Math.max(me - 1, 0), Math.max(standings.length - 3, 0))
+  return standings.slice(start, start + 3)
+}
+
+// `preview` (the Overview's Standing door) cuts the table to the club's own row
+// plus its two neighbours; the Postseason Odds modal still lists the whole
+// division, since that pill is the Overview's, not the Numbers tab's (see the
+// PRD's module table). Everything else — chrome, columns, tones — is identical
+// in both modes: this is one module in two sizes, not two modules.
+export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, preview = false }) {
   // Postseason Odds modal — a plain boolean rather than the team-keyed
   // pattern used elsewhere on this page is fine here: it's a transient
   // dialog, not persisted per-team UI state, so it's safe (and correct) for
   // it to close on any client-side team nav same as every other modal in the
   // app.
   const [showPostseasonOdds, setShowPostseasonOdds] = useState(false)
+  const rows = preview ? previewRows(standings) : standings
 
   return (
     <>
@@ -41,7 +58,7 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds })
               </tr>
             </thead>
             <tbody>
-              {standings.map((s) => (
+              {rows.map((s) => (
                 <tr
                   key={s.id}
                   className={s.isMe ? 'is-me' : ''}

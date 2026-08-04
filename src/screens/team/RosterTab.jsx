@@ -5,14 +5,15 @@ import { TeamHubShell } from './TeamHubShell.jsx'
 import { TeamShelf } from './TeamShelf.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadRoster } from './data/loadRoster.js'
+import { lineupDefenseFrom } from './data/shared.js'
 import { RosterProjection } from './modules/RosterProjection.jsx'
 import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
 import { InjuredListCard } from './modules/InjuredListCard.jsx'
 
 // Roster tab: the season roster projection (full, at the top — this is the
 // tab's headline), then the 40-man Current Roster and the Injured List as
-// shelves. Its own loadRoster.js is a strict subset of loadTeam's fetches —
-// see .scratch/team-page-ia/issues/03-roster-tab.md. Runs alongside
+// shelves. Its own loadRoster.js fetches only what those three need — see
+// .scratch/team-page-ia/issues/03-roster-tab.md. Runs alongside
 // loadTeamIdentity (the shell's own cheap loader every tab pays for) rather
 // than duplicating its fetches here.
 export function RosterTab({ id, asOf, sportId }) {
@@ -53,18 +54,10 @@ export function RosterTab({ id, asOf, sportId }) {
   } = roster.data
 
   const injuredIds = new Set(injured.map((p) => p.id))
-  const preferredLineupDefense = preferredLineup.map((p) => ({
-    position: p.position,
-    last: p.last,
-    id: p.id,
-    hurt: injuredIds.has(p.id),
-  }))
-  const recentPreferredLineupDefense = recentPreferredLineup.map((p) => ({
-    position: p.position,
-    last: p.last,
-    id: p.id,
-    hurt: injuredIds.has(p.id),
-  }))
+  // Same diamond row shape the Overview's lineup preview uses (shared.js), so
+  // the two surfaces can't drift on how a hurt player is flagged.
+  const preferredLineupDefense = lineupDefenseFrom(preferredLineup, injuredIds)
+  const recentPreferredLineupDefense = lineupDefenseFrom(recentPreferredLineup, injuredIds)
   const hasRecentRoster =
     recentPreferredLineup.length > 0 ||
     recentSubstitutes.length > 0 ||
