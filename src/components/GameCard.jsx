@@ -8,6 +8,7 @@ import { doubleHeaderLabel } from '../lib/resultCards.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../api/jerseys.js'
 import { liveTreatmentFor } from '../api/uniforms.js'
+import { broadcastLogoFor } from '../lib/broadcastLogos.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -303,6 +304,14 @@ function ReadyPill({ game }) {
 // doing the visual uppercase, per the ALL-CAPS invariant (no per-component
 // .toUpperCase() — scripts/check-name-casing.mjs).
 function NationalTvIcon({ network }) {
+  const logo = broadcastLogoFor(network)
+  if (logo) {
+    return (
+      <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
+        <img className="gamecard__nationaltv-logo" src={logo} alt="" />
+      </span>
+    )
+  }
   return (
     <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">

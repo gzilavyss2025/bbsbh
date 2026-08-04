@@ -3345,6 +3345,19 @@ body {
   stroke-linecap: round;
 }
 
+/* A network's real wordmark, once one exists in broadcastLogos.js, replaces
+   the glyph+text pairing above entirely — the mark alone is the label. Height
+   is the pinned dimension (matched to the glyph it replaces); width floats
+   per wordmark, so FOX/TBS/Peacock/etc. each render at their own natural
+   proportions rather than being squashed to a shared box. */
+.gamecard__nationaltv-logo {
+  display: block;
+  height: 16px;
+  width: auto;
+  max-width: 56px;
+  object-fit: contain;
+}
+
 /* ---------------------------------------------------------------- buttons */
 .btn {
   min-height: var(--tap-min);
