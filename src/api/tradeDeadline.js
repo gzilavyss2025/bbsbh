@@ -475,6 +475,129 @@ export function groupTradeStories(dedupedTrRows, ctx = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Player stat-line formatting — pure, testable string builders consumed by
+// scripts/gen-trade-deadline.mjs's stats decoration pass (fetching + the
+// MLB-vs-MiLB/role decision live there, since they need live API data; only
+// the string formatting is pure enough to share + unit-test here). A draft
+// round reads as an ordinal ("1st Round Pick") to match how the deadline
+// page's other prose reads; a signing gets the ordinal-eligible-country
+// check below to distinguish a domestic undrafted free agent from an
+// international signee, since neither carries a structured flag of its own.
+// ---------------------------------------------------------------------------
+
+// byDateRange emits duplicate rows for an ordinary single-team stint, and a
+// mid-stint team change adds a synthetic, team-less roll-up row equal to the
+// sum of the real per-team rows — summing every row as-is double- or triple-
+// counts games/stats (verified live: person.js's aggregateSplits carries the
+// same two rules for the player page's own byDateRange reads, `person.js:183-207`).
+// This is the raw-splits-preserving counterpart: aggregateSplits collapses
+// straight to one formatted stat object, but the trade-deadline stat line
+// needs to keep summing raw fields (plateAppearances, battersFaced) that
+// aggregateSplits doesn't carry, and to combine several MiLB LEVELS' worth of
+// already-deduped splits afterward — so this returns the deduped splits list,
+// not a final stat object.
+function statSig(s) {
+  const stat = s.stat ?? {}
+  return [stat.atBats, stat.hits, stat.inningsPitched, stat.strikeOuts, stat.gamesPlayed].join('|')
+}
+export function dedupeStatSplits(splits) {
+  const rows = splits ?? []
+  const hasTeamRow = rows.some((s) => s.team?.id)
+  const withoutRollup = hasTeamRow ? rows.filter((s) => s.team?.id || !(Number(s.numTeams) > 1)) : rows
+  const seen = new Set()
+  return withoutRollup.filter((s) => {
+    const sig = statSig(s)
+    if (seen.has(sig)) return false
+    seen.add(sig)
+    return true
+  })
+}
+
+function ordinalRound(n) {
+  const num = Number(n)
+  if (!Number.isFinite(num) || num <= 0) return String(n ?? '')
+  const mod100 = num % 100
+  if (mod100 >= 11 && mod100 <= 13) return `${num}th`
+  switch (num % 10) {
+    case 1:
+      return `${num}st`
+    case 2:
+      return `${num}nd`
+    case 3:
+      return `${num}rd`
+    default:
+      return `${num}th`
+  }
+}
+
+// The amateur draft has only ever covered the US, Canada, and Puerto Rico —
+// a signee born anywhere else reads as an international signing rather than
+// a plain domestic "Signed {year}".
+const DRAFT_ELIGIBLE_COUNTRIES = new Set(['USA', 'Canada', 'Puerto Rico'])
+
+// How a MiLB player entered pro ball — drafted (with round/pick when known),
+// signed, or (unknown birth country/no signing record found) omitted
+// entirely rather than guessed at.
+export function buildEntryLine({ draft, signedYear, birthCountry }) {
+  if (draft?.year && draft?.round) {
+    const pick = draft.overall ? `, #${draft.overall}` : ''
+    return `${draft.year} ${ordinalRound(draft.round)} Round Pick${pick}`
+  }
+  if (draft?.year) return String(draft.year)
+  if (signedYear) {
+    const international = Boolean(birthCountry) && !DRAFT_ELIGIBLE_COUNTRIES.has(birthCountry)
+    return international ? `International signee, ${signedYear}` : `Signed ${signedYear}`
+  }
+  return null
+}
+
+// "{total} G (X G at Level, Y G at Level, …)" in MILB_LEVELS' low-to-high
+// order, dropping any level with zero games; a single level skips the
+// parenthetical (nothing to break out). `levelGames` is `[{ label, games }]`.
+export function buildLevelGamesLine(levelGames) {
+  const present = (levelGames ?? []).filter((l) => (l.games ?? 0) > 0)
+  if (!present.length) return null
+  const total = present.reduce((sum, l) => sum + l.games, 0)
+  if (present.length === 1) return `${total} G at ${present[0].label}`
+  return `${total} G (${present.map((l) => `${l.games} G at ${l.label}`).join(', ')})`
+}
+
+// ".302" style: three decimals, no leading zero (baseball convention) — same
+// shape as person.js's own (unexported) rate3.
+function avg3(x) {
+  return Number.isFinite(x) ? x.toFixed(3).replace(/^0(?=\.)/, '') : '.000'
+}
+
+function pct(n, d) {
+  return d > 0 ? Math.round((100 * n) / d) : 0
+}
+
+// One hitter's line-to-date: ".288 AVG, 34 HR, 78 RBI, 33% SO%, 15% BB%" —
+// same categories whether the hitter is MLB or MiLB. `strikeOuts`/
+// `baseOnBalls`/`plateAppearances` come straight off a summed hitting stat
+// (sumHitting in statsLevels.js already computes `avg`).
+export function formatHittingLine({ avg, homeRuns, rbi, strikeOuts, baseOnBalls, plateAppearances }) {
+  const soPct = pct(strikeOuts, plateAppearances)
+  const bbPct = pct(baseOnBalls, plateAppearances)
+  return `${avg3(avg)} AVG, ${homeRuns ?? 0} HR, ${rbi ?? 0} RBI, ${soPct}% SO%, ${bbPct}% BB%`
+}
+
+// One pitcher's line-to-date, role-gated: a starter's record is meaningful
+// (W-L), a reliever's mostly isn't (dropped), a closer's save count is the
+// headline number instead. `battersFaced` is summed by the caller alongside
+// sumPitching's own totals (sumPitching doesn't track it). `role` is
+// person.js's pitcherRole() output: 'SP' | 'RP' | 'CL' | null (treated as RP).
+export function formatPitchingLine(role, { era, wins, losses, saves, inningsPitched, strikeOuts, baseOnBalls, battersFaced }) {
+  const kPct = pct(strikeOuts, battersFaced)
+  const bbPct = pct(baseOnBalls, battersFaced)
+  const parts = [`${Number.isFinite(era) ? era.toFixed(2) : '0.00'} ERA`]
+  if (role === 'SP') parts.push(`${wins ?? 0}-${losses ?? 0}`)
+  if (role === 'CL') parts.push(`${saves ?? 0} SV`)
+  parts.push(`${inningsPitched ?? '0.0'} IP`, `${kPct}% SO%`, `${bbPct}% BB%`)
+  return parts.join(', ')
+}
+
+// ---------------------------------------------------------------------------
 // Reader — static, per-season files (mirrors team-transactions.js's own
 // reader half). Degrades to null on a confirmed historical 404 so the page
 // can show a friendly empty state rather than an error.

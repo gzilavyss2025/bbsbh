@@ -27956,6 +27956,26 @@ button.gamehigh-matchup:active {
   color: var(--text-body);
 }
 
+/* The season page's own year switcher, below the "TRADE DEADLINE" title —
+   reuses the slate's .levelnav look (same idiom as LeadersPage's ScopeNav);
+   wraps to a second row on a phone rather than squeezing six pills into one. */
+.tradedl__seasonnav {
+  flex-wrap: wrap;
+  margin: var(--space-2) 0 0;
+}
+
+/* A small caption above the team filter strip — reads as a blended-in label
+   for the control below it, not a section heading, so it stays a size down
+   from .section__title with no bottom rule. */
+.tradedl__filterlabel {
+  margin: var(--space-3) 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
 /* One sticky date header per group of same-day trades on the season page —
    the changelog/activity-feed grouping pattern from the non-sports UX pass
    (a persistent date rail beats re-reading a date per card while scrolling
@@ -28057,7 +28077,7 @@ button.gamehigh-matchup:active {
 }
 .tradecard__playerlink.tradecard__playerlink {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   width: 100%;
   text-align: left;
@@ -28095,6 +28115,41 @@ button.gamehigh-matchup:active {
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--text-caption);
+}
+
+/* The column beside a player's headshot: an optional ProspectPill, the
+   name + position row (was the whole playerlink row before stat lines
+   existed), then the stats-to-date block below. */
+.tradecard__playerinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.tradecard__playerinfo .prospectpill {
+  align-self: flex-start;
+}
+.tradecard__nameline {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+/* One MLB line, or a MiLB player's entry / games-by-level / season-stats
+   trio — small caption text under the name, same size/weight as the
+   consideration detail chip (.tradecard__pos) but left-aligned prose rather
+   than a right-pinned label. */
+.tradecard__playerstats {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 1px;
+}
+.tradecard__statline {
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
 }
 
 /* Cash / a player to be named later reads as its own row, same weight as a

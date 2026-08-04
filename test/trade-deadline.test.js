@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
-import { groupTradeStories, seasonMeta, SEASONS } from '../src/api/tradeDeadline.js'
+import {
+  groupTradeStories,
+  seasonMeta,
+  SEASONS,
+  buildEntryLine,
+  buildLevelGamesLine,
+  formatHittingLine,
+  formatPitchingLine,
+  dedupeStatSplits,
+} from '../src/api/tradeDeadline.js'
 
 const hasType = (list, type) => list.some((c) => c.type === type)
 
@@ -380,4 +389,88 @@ test('SEASONS covers 2021-2026 with no gaps, and seasonMeta resolves each', () =
     assert.ok(meta.deadlineDate <= meta.windowEnd)
   }
   assert.equal(seasonMeta(2099), null)
+})
+
+// ---------------------------------------------------------------------------
+// Player stat-line formatting — buildEntryLine / buildLevelGamesLine /
+// formatHittingLine / formatPitchingLine
+// ---------------------------------------------------------------------------
+
+test('buildEntryLine formats a drafted player with round + pick as an ordinal round', () => {
+  assert.equal(
+    buildEntryLine({ draft: { year: 2023, round: 10, overall: 299 } }),
+    '2023 10th Round Pick, #299',
+  )
+  assert.equal(
+    buildEntryLine({ draft: { year: 2025, round: 1, overall: 20 } }),
+    '2025 1st Round Pick, #20',
+  )
+})
+
+test('buildEntryLine omits the pick number when unknown, and falls back to just the year with no round', () => {
+  assert.equal(buildEntryLine({ draft: { year: 2022, round: 3 } }), '2022 3rd Round Pick')
+  assert.equal(buildEntryLine({ draft: { year: 2022 } }), '2022')
+})
+
+test('buildEntryLine reads a signed player as domestic vs. international by birth country', () => {
+  assert.equal(buildEntryLine({ signedYear: 2018, birthCountry: 'USA' }), 'Signed 2018')
+  assert.equal(buildEntryLine({ signedYear: 2018, birthCountry: 'Puerto Rico' }), 'Signed 2018')
+  assert.equal(
+    buildEntryLine({ signedYear: 2018, birthCountry: 'Dominican Republic' }),
+    'International signee, 2018',
+  )
+  assert.equal(buildEntryLine({ signedYear: 2018 }), 'Signed 2018')
+})
+
+test('buildEntryLine returns null with no draft record and no signing year', () => {
+  assert.equal(buildEntryLine({}), null)
+})
+
+test('buildLevelGamesLine breaks out multiple levels in low-to-high order, single level has no parenthetical', () => {
+  assert.equal(
+    buildLevelGamesLine([
+      { label: 'A+', games: 54 },
+      { label: 'AA', games: 37 },
+    ]),
+    '91 G (54 G at A+, 37 G at AA)',
+  )
+  assert.equal(buildLevelGamesLine([{ label: 'AA', games: 91 }]), '91 G at AA')
+  assert.equal(buildLevelGamesLine([{ label: 'A+', games: 0 }]), null)
+  assert.equal(buildLevelGamesLine([]), null)
+})
+
+test('formatHittingLine matches the ".288 AVG, 34 HR, 78 RBI, 33% SO%, 15% BB%" example', () => {
+  const line = formatHittingLine({
+    avg: 0.288, homeRuns: 34, rbi: 78, strikeOuts: 132, baseOnBalls: 60, plateAppearances: 400,
+  })
+  assert.equal(line, '.288 AVG, 34 HR, 78 RBI, 33% SO%, 15% BB%')
+})
+
+test('dedupeStatSplits drops byDateRange\'s duplicate single-team row', () => {
+  const stat = { atBats: 10, hits: 3, gamesPlayed: 3, strikeOuts: 2, inningsPitched: '0.0' }
+  const splits = [{ stat }, { stat: { ...stat } }]
+  assert.equal(dedupeStatSplits(splits).length, 1)
+})
+
+test('dedupeStatSplits drops the team-less multi-team roll-up row, keeping the real per-team stints', () => {
+  const padres = { stat: { atBats: 10, hits: 3, gamesPlayed: 3, strikeOuts: 2, inningsPitched: '0.0' }, team: { id: 135 } }
+  const pirates = { stat: { atBats: 5, hits: 1, gamesPlayed: 1, strikeOuts: 1, inningsPitched: '0.0' }, team: { id: 134 } }
+  const rollup = { stat: { atBats: 15, hits: 4, gamesPlayed: 4, strikeOuts: 3, inningsPitched: '0.0' }, numTeams: 2 }
+  const deduped = dedupeStatSplits([padres, pirates, rollup])
+  assert.deepEqual(deduped, [padres, pirates])
+})
+
+test('dedupeStatSplits leaves a genuine single stint (no team field at all) alone', () => {
+  const stat = { atBats: 10, hits: 3, gamesPlayed: 3, strikeOuts: 2, inningsPitched: '0.0' }
+  assert.deepEqual(dedupeStatSplits([{ stat }]), [{ stat }])
+})
+
+test('formatPitchingLine includes a record for SP, drops it for RP, and shows saves for CL', () => {
+  const base = {
+    era: 3.15, wins: 9, losses: 6, saves: 2, inningsPitched: '142.0',
+    strikeOuts: 144, baseOnBalls: 42, battersFaced: 600,
+  }
+  assert.equal(formatPitchingLine('SP', base), '3.15 ERA, 9-6, 142.0 IP, 24% SO%, 7% BB%')
+  assert.equal(formatPitchingLine('RP', base), '3.15 ERA, 142.0 IP, 24% SO%, 7% BB%')
+  assert.equal(formatPitchingLine('CL', base), '3.15 ERA, 2 SV, 142.0 IP, 24% SO%, 7% BB%')
 })

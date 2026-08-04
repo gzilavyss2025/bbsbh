@@ -2,7 +2,34 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { Headshot } from './Headshot.jsx'
+import { ProspectPill } from './ProspectPill.jsx'
 import { teamFullName } from '../lib/teams.js'
+
+// The stats-to-date block under a traded player's name — one line for an MLB
+// player (role-gated hitting/SP/RP/CL line), or a MiLB player's three lines
+// (how he entered the league, games played per level, season stats). Shaped
+// by scripts/gen-trade-deadline.mjs's decoratePlayerStats (fetching + the
+// MLB-vs-MiLB/role decision) calling src/api/tradeDeadline.js's pure line
+// formatters. Renders nothing when there's no stats data at all (e.g. a
+// just-drafted player with no games and no signing record yet).
+function PlayerStatLines({ stats }) {
+  if (!stats) return null
+  if (stats.kind === 'mlb') {
+    return (
+      <span className="tradecard__playerstats">
+        <span className="tradecard__statline">{stats.line}</span>
+      </span>
+    )
+  }
+  if (!stats.entry && !stats.levelGamesLine && !stats.line) return null
+  return (
+    <span className="tradecard__playerstats">
+      {stats.entry && <span className="tradecard__statline">{stats.entry}</span>}
+      {stats.levelGamesLine && <span className="tradecard__statline">{stats.levelGamesLine}</span>}
+      {stats.line && <span className="tradecard__statline">{stats.line}</span>}
+    </span>
+  )
+}
 
 // One player landing on a team side, headshot-first per the non-sports
 // "A → B transfer" UX research (Venmo/Cash App, swap UIs): avatar + name is
@@ -15,7 +42,10 @@ import { teamFullName } from '../lib/teams.js'
 // always the MLB parent org even for a low-minors prospect swap, so
 // without this every player would read as "confirmed MLB" and Headshot
 // would skip straight from a missing silo photo to the team-logo fallback,
-// never trying his real MiLB photo.
+// never trying his real MiLB photo. The Top Prospect pill (rank, mostly only
+// ever populated on the current season — no historical snapshots) sits above
+// the name, per the deadline page's own layout ask, rather than inline after
+// it like the roster list's ProspectPill usage.
 function PlayerRow({ player, teamId }) {
   return (
     <li className="tradecard__player">
@@ -27,8 +57,14 @@ function PlayerRow({ player, teamId }) {
           isMlb={player.isMlb}
           className="tradecard__shot"
         />
-        <span className="tradecard__playername">{player.name}</span>
-        {player.pos && <span className="tradecard__pos">{player.pos}</span>}
+        <span className="tradecard__playerinfo">
+          {player.prospect && <ProspectPill {...player.prospect} />}
+          <span className="tradecard__nameline">
+            <span className="tradecard__playername">{player.name}</span>
+            {player.pos && <span className="tradecard__pos">{player.pos}</span>}
+          </span>
+          <PlayerStatLines stats={player.stats} />
+        </span>
       </PlayerLink>
     </li>
   )

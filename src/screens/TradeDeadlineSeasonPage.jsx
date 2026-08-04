@@ -1,15 +1,38 @@
 import { useState } from 'react'
-import { loadTradeDeadlineSeason } from '../api/tradeDeadline.js'
+import { loadTradeDeadlineSeason, SEASONS } from '../api/tradeDeadline.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
-import { tradeDeadlinePath } from '../lib/route.js'
+import { tradeDeadlinePath, tradeDeadlineSeasonPath } from '../lib/route.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 import { TradeCard } from '../components/TradeCard.jsx'
+
+// Newest year first, matching the season index page's own tile order.
+const SEASON_YEARS = [...SEASONS].map((s) => s.year).sort((a, b) => b - a)
+
+// The season switcher below the "TRADE DEADLINE" title — same `.levelnav`
+// pill-row look/deep-link idiom as LeadersPage's own ScopeNav.
+function SeasonNav({ year, navigate }) {
+  return (
+    <div className="levelnav tradedl__seasonnav" aria-label="Trade deadline season">
+      {SEASON_YEARS.map((y) => (
+        <button
+          key={y}
+          type="button"
+          aria-pressed={year === y}
+          className={`levelnav__btn ${year === y ? 'is-active' : ''}`}
+          onClick={() => navigate(tradeDeadlineSeasonPath(y))}
+        >
+          {y}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -64,11 +87,9 @@ export function TradeDeadlineSeasonPage({ season }) {
       <SiteHeader />
       <BackBtn onClick={() => navigate(tradeDeadlinePath())} />
       <header className="topbar">
-        <h1 className="topbar__title">Trade Deadline {year}</h1>
-        {data?.deadlineDate && (
-          <p className="hint">Deadline: {monthDayYear(data.deadlineDate)}</p>
-        )}
+        <h1 className="topbar__title">Trade Deadline</h1>
       </header>
+      <SeasonNav year={year} navigate={navigate} />
 
       <AsyncStatus
         loading={loading}
@@ -80,11 +101,14 @@ export function TradeDeadlineSeasonPage({ season }) {
       />
 
       {allTrades.length > 0 && (
-        <TeamFilterStrip
-          selectedTeamId={filterTeamId}
-          onSelect={setFilterTeamId}
-          ariaLabel="Filter trades by team"
-        />
+        <>
+          <p className="tradedl__filterlabel">Filter by team</p>
+          <TeamFilterStrip
+            selectedTeamId={filterTeamId}
+            onSelect={setFilterTeamId}
+            ariaLabel="Filter trades by team"
+          />
+        </>
       )}
 
       {allTrades.length > 0 && trades.length === 0 && (
