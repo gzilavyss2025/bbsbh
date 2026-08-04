@@ -1350,14 +1350,33 @@ export function careerTimelineView(splits, group, debutYear) {
 //     affiliate-to-affiliate promotions/demotions (a prospect's climb up the
 //     farm) while dropping rehab stints, spring-training invites, and All-Star /
 //     winter-ball / national-team call-ups (which all lack a fromTeam).
-//   • DROP everything else: Status Change (IL / roster / paternity), number
-//     changes, arbitration filings, and the rest.
+//   • KEEP the injured list, but as one row per STINT, never per raw row —
+//     see injuredListStints. The type whitelist alone used to drop it, which
+//     hid the defining stretch of a lot of careers: Gerrit Cole's ledger was
+//     EMPTY from 2023 through 2026, the Tommy John years, and Aaron Judge's
+//     stopped at his 2022 re-signing. It is also the one omission the app
+//     contradicted itself on — the page's own header banner, the career
+//     register's "Injured — missed season" note, and the Team Page's
+//     transaction card all show IL moves already.
+//   • DROP everything else: the rest of Status Change (roster status, bare
+//     activations, spring reassignments), number changes, arbitration filings.
+//     The paternity, bereavement, family-medical and restricted lists are
+//     dropped DELIBERATELY and are not an oversight to be "completed" later:
+//     they are a player's private life rather than roster strategy — a newborn,
+//     a death in the family, a sick child — and this app has no editorial hand
+//     to render them with care. The information cost is a couple of dozen rows
+//     across a career; the downside isn't symmetric.
 //
 // Then dedupe exact repeats (same type + date + teams) and sort NEWEST-first,
 // so the strip reads top-to-bottom as most-recent to least-recent. Synthetic
 // award and draft rows (which aren't in the raw feed) are merged in by the
 // caller-supplied enrichment before the sort. Degrades to null when nothing
 // survives.
+//
+// Spoiler footing: unchanged. An IL row carries a date, a club and an injury
+// ("Right elbow inflammation.") — never game state — and `push` already drops
+// anything after the caller's `endDate` cutoff, so a game-scoped view can't see
+// a placement that hasn't happened yet. No seal, no ADR exception.
 // ---------------------------------------------------------------------------
 
 // typeCode -> { label (short chip text), tone }. `tone` drives the chip/node
@@ -1434,10 +1453,10 @@ const INSEASON_AWARDS = {
   ALPOW: 'Player of the Week', NLPOW: 'Player of the Week',
 }
 
-const AWARD_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function awardMonthYear(iso) {
   const [y, m] = (iso || '').split('-')
-  return m ? `${AWARD_MONTHS[Number(m) - 1]} ${y}` : ''
+  return m ? `${MONTH_ABBR[Number(m) - 1]} ${y}` : ''
 }
 
 // The league a league-partitioned award's id belongs to (its own AL*/NL*
@@ -1780,6 +1799,10 @@ export function transactionTimelineView(
     })
   }
 
+  // Injured list — one row per STINT, folded from the placement / transfer /
+  // rehab / activation rows the loop above deliberately skipped.
+  for (const stint of injuredListStints(transactions)) push(ilStintRow(stint))
+
   // Draft — a synthetic row on that year's first-round date, alongside (not
   // instead of) the signing the raw feed already carries.
   if (draft && draft.year && draft.round && draft.overall) {
@@ -1956,6 +1979,190 @@ export function detectInjuredList(transactions, asOf) {
   if (ends) return null
   const days = injuredListDays(latest)
   return { days, label: days ? `${days}-Day` : 'Injured List' }
+}
+
+// ---------------------------------------------------------------------------
+// Injured-list STINTS — the career-ledger counterpart to detectInjuredList's
+// "is he hurt right now". Same feed, same predicates, different granularity:
+// that one answers a yes/no about today, this one folds the whole feed into one
+// entry per stay on the list.
+//
+// Granularity is the entire point. The raw feed spreads a single stint across
+// three to a dozen rows — a placement, sometimes a duplicate placement the same
+// day at a different day count (Ohtani, 2023-09-16, is placed on BOTH a 10-day
+// and a 15-day list), an optional transfer to the 60-day list, a rehab
+// assignment per affiliate visited (Cole's 2026 stint emits ten across four
+// clubs), and an activation. Admitting those as rows would bury a career's
+// trades under its injuries; folding them into stints is what makes the ledger
+// readable — see the transactionTimelineView header for why the timeline shows
+// injuries at all.
+//
+// Walks chronologically holding at most one open stint:
+//   • a placement OPENS one — unless a stint is already open on that same date
+//     (the duplicate-day-count case above), which is the same stint;
+//   • a transfer between lists EXTENDS the open one and upgrades its day count
+//     (15-day → 60-day is the season-threatening signal, worth keeping);
+//   • a rehab assignment records the affiliate, in visit order, deduped —
+//     a rehab is by definition part of the stint it's rehabbing;
+//   • any isIlEndingTxn CLOSES it, giving the stint an `end` and a `days` span.
+// A stint left open by a missed closer is closed WITHOUT an end rather than
+// running forward forever — the next placement, or a placement in a later
+// season, ends it. `days` stays null there rather than inventing a span: an
+// unclosed stint is a data hole, and a fabricated "693 days out" is worse than
+// no number (that exact figure is what a naive placement→next-closer pairing
+// produced for Betts's 2024 hand fracture while this was being written).
+// ---------------------------------------------------------------------------
+
+function isIlTransferTxn(t) {
+  return t.typeCode === 'SC' && mentionsInjuredList(t) && /transferred/i.test(t.description || '')
+}
+
+// A transfer names BOTH lists — "transferred RHP Gerrit Cole from the 15-day
+// injured list to the 60-day injured list" — so the shared injuredListDays,
+// which takes the first day count it sees, would report the list he LEFT.
+// The destination is the one that matters (15-day → 60-day is the
+// season-threatening signal), so it gets its own read of the "to the" clause.
+function transferDestinationDays(t) {
+  return (t.description || '').match(/to the (\d+)[- ]day/i)?.[1] ?? injuredListDays(t)
+}
+
+function daysBetween(from, to) {
+  const ms = Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)
+  return Number.isFinite(ms) ? Math.round(ms / 86400000) : null
+}
+
+export function injuredListStints(transactions) {
+  const rows = (transactions ?? []).filter((t) => txnDate(t)).slice()
+  // Stable sort by date — same-day rows keep feed order, which puts a placement
+  // ahead of the activation that can share its date on a one-day stint.
+  rows.sort((a, b) => (txnDate(a) < txnDate(b) ? -1 : txnDate(a) > txnDate(b) ? 1 : 0))
+
+  const stints = []
+  let open = null
+  const close = (end) => {
+    if (!open) return
+    open.end = end
+    open.days = end ? daysBetween(open.start, end) : null
+    stints.push(open)
+    open = null
+  }
+
+  for (const t of rows) {
+    const date = txnDate(t)
+    if (isIlTransferTxn(t)) {
+      if (open) open.days60 = transferDestinationDays(t) ?? open.days60
+      continue
+    }
+    if (isIlPlacementTxn(t)) {
+      if (open && open.start === date) continue // same-day duplicate placement
+      // A placement while a stint is still open is an ESCALATION, not a second
+      // stint — a player can't be put on the IL while already on it. MLB writes
+      // the 10-day → 60-day move as a fresh "placed … on the 60-day injured
+      // list" as often as it writes a "transferred" row (Judge's 2026 rib
+      // fracture is the placed form), and splitting on it produced two rows for
+      // one absence, the first of them showing no return at all. Guarded by
+      // season so a genuinely missed closer can't fuse two years into one stint
+      // — the same season-boundary reasoning detectInjuredList uses.
+      if (open && open.start.slice(0, 4) === date.slice(0, 4)) {
+        open.days60 = injuredListDays(t) ?? open.days60
+        continue
+      }
+      if (open) close(null) // a missed closer across a season — never span it
+      open = {
+        start: date,
+        end: null,
+        days: null,
+        days60: injuredListDays(t),
+        placement: t,
+        club: t.toTeam?.id ? { id: t.toTeam.id, name: t.toTeam.name || '' } : null,
+        rehabClubs: [],
+      }
+      continue
+    }
+    if (!open) continue
+    if (isRehabTxn(t)) {
+      const name = t.toTeam?.name
+      if (name && !open.rehabClubs.includes(name)) open.rehabClubs.push(name)
+      continue
+    }
+    if (date > open.start && isIlEndingTxn(t)) close(date)
+  }
+  if (open) close(null)
+
+  return stints
+}
+
+function ilMonthDay(iso) {
+  const [, m, d] = (iso || '').split('-')
+  return m ? `${MONTH_ABBR[Number(m) - 1]} ${Number(d)}` : ''
+}
+
+// One timeline row per stint, in the feed's own voice: the placement's raw
+// description IS the sentence (it already names the club, position, player, day
+// count and the injury — "New York Yankees placed RHP Gerrit Cole on the 60-day
+// injured list. Tommy John surgery recovery."), same as every other row type on
+// this timeline, with the stint's own arc appended. A 15-day → 60-day transfer
+// earns a clause because that upgrade is the season-threatening signal; the
+// rehab stops earn one because a rehab is where the stint was actually spent.
+// The span is omitted when no closer was recorded rather than guessed — see
+// injuredListStints.
+// The feed's own prose needs two small repairs before anything is appended to
+// it: some descriptions end without terminal punctuation ("…on the 7-day
+// disabled list. Concussion symptoms"), which would run straight into the next
+// clause, and some repeat the injury sentence verbatim ("Right hip
+// inflammation. Right hip inflammation." — Betts, 2021-08-11).
+function tidyFeedProse(text) {
+  const s = String(text ?? '').trim()
+  if (!s) return ''
+  const collapsed = s.replace(/([^.!?]+[.!?])(?:\s*\1)+/g, '$1')
+  return /[.!?]$/.test(collapsed) ? collapsed : `${collapsed}.`
+}
+
+// Every other row on this timeline keeps the feed's full sentence, subject and
+// all, because a trade or a signing genuinely needs to name the clubs. An IL
+// row doesn't: "New York Yankees placed RHP Gerrit Cole on the" is the club
+// already drawn as a mark beside the chip plus the player whose page this is,
+// and it opened all four of Cole's stints identically. Dropping it leaves the
+// part that differs — "60-day injured list. Tommy John surgery recovery." —
+// which is also what the INJURED LIST chip reads into. Worth roughly a line and
+// a half per row on a phone, on the longest rows the card has. Falls back to
+// the whole sentence if the prefix doesn't parse.
+function ilPlacementProse(t) {
+  const full = tidyFeedProse(t.description)
+  return full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
+}
+
+// A long rehab tour is a detail, not the headline — three affiliate names is
+// already a full line on a phone, so the rest becomes a count.
+const REHAB_CLUBS_SHOWN = 3
+function rehabClause(clubs) {
+  if (!clubs.length) return ''
+  const shown = clubs.slice(0, REHAB_CLUBS_SHOWN).join(', ')
+  const rest = clubs.length - REHAB_CLUBS_SHOWN
+  return rest > 0 ? `Rehab: ${shown} +${rest} more.` : `Rehab: ${shown}.`
+}
+
+function ilStintRow(s) {
+  const parts = [ilPlacementProse(s.placement)]
+  if (s.days60 && s.days60 !== injuredListDays(s.placement)) {
+    parts.push(`Transferred to the ${s.days60}-day list.`)
+  }
+  const rehab = rehabClause(s.rehabClubs)
+  if (rehab) parts.push(rehab)
+  if (s.end) {
+    const span = s.days != null ? ` — ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
+    parts.push(`Activated ${ilMonthDay(s.end)}${span}.`)
+  }
+  return {
+    sig: `IL|${s.start}`,
+    date: s.start,
+    code: 'IL',
+    label: 'Injured List',
+    tone: 'out',
+    description: parts.join(' '),
+    links: null,
+    club: s.club,
+  }
 }
 
 // The league-wide counterpart to detectRehabAssignment — every big leaguer
