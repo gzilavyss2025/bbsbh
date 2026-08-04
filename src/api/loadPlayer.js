@@ -32,7 +32,8 @@ import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
-import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentiles.js'
+import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor } from './savantPercentiles.js'
+import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import {
   personBio,
@@ -160,13 +161,18 @@ export async function loadPlayer(id, asOf) {
   // Statcast percentile ranks (the STATCAST card) are a fourth same-origin
   // static file, same session-cached, degrade-to-empty pattern — see
   // api/savantPercentiles.js.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookiesData] = await Promise.all([
+  // The league-wide pitch-type mix rides along on the same tier: another
+  // same-origin static file, session-cached after the first read anywhere in
+  // the app (TeamInfo's opposing-starter card already asks for it), and the
+  // source of the "Pitches like" card's comparison pool.
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, arsenalData, rookiesData] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(),
     fetchVsTeamSplits(),
     fetchSavantPercentiles(),
+    fetchPitchArsenal(),
     fetchRookiesData(),
   ])
   if (!person) return null
@@ -290,6 +296,15 @@ export async function loadPlayer(id, asOf) {
         // Pure passthrough lookup, not a derivation — attached here rather
         // than threaded into buildBlock's (pure-shaping) signature.
         block.savant = savantPercentilesFor(savantData, id, group)
+        // The raw season rates behind those percentiles, for the radar's spoke
+        // labels — same file, separate map (see savantRawFor).
+        block.savantRaw = savantRawFor(savantData, id, group)
+        // "Pitches like" — same attach-after-buildBlock pattern. Ranked
+        // against the level he's actually pitching at (see similarPitchersFor);
+        // [] for a hitter, a MiLB arm below AAA, or anyone under the sample
+        // floor, and the card then doesn't render.
+        block.similar =
+          group === 'pitching' ? similarPitchersFor(arsenalData, id, tileSportId === 1) : []
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the
         // situational-splits ledger and the league-rank strip.

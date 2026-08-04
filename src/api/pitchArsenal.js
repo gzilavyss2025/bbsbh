@@ -1,3 +1,5 @@
+import { similarPitchers } from '../lib/pitcherSimilarity.js'
+
 // Season pitch-type mix per pitcher, read from a static same-origin file
 // (public/data/pitch-arsenal.json) precomputed nightly by
 // scripts/gen-pitch-arsenal.mjs (the build-time-fetch pattern — see
@@ -49,6 +51,40 @@ export function pitchArsenalFor(data, personId, isMlb) {
   return types
     .map((t) => ({ ...t, pct: Math.round((t.pitches / total) * 1000) / 10 }))
     .sort((a, b) => b.pitches - a.pitches)
+}
+
+// "Pitches like" — the closest arms in ARSENAL space to one pitcher, for the
+// player page's SimilarPitchers card. The ranking model is pure and lives in
+// src/lib/pitcherSimilarity.js; this is only the part that knows how
+// pitch-arsenal.json is SHAPED, flattening its per-level entries into the flat
+// pool that module ranks.
+//
+// The pool is the SAME LEVEL as the subject, never both. MLB and AAA are kept
+// separate everywhere else this data is used (and in gen-pitch-arsenal.mjs
+// itself) because they're different peer pools — a AAA arm's nearest neighbour
+// should be another AAA arm, not a big leaguer he happens to resemble.
+//
+// Spoiler footing is unchanged from the rest of this module: a completed-game
+// season aggregate, no SealBox. Returns [] whenever it can't answer — file not
+// loaded, subject not in it, or subject under the similarity floor — so the
+// card simply doesn't render.
+export function similarPitchersFor(data, personId, isMlb, opts) {
+  const entries = data?.pit
+  if (!entries) return []
+  const key = isMlb ? 'mlb' : 'aaa'
+  const pool = []
+  for (const [id, entry] of Object.entries(entries)) {
+    const types = entry?.[key]
+    if (!types || types.length === 0) continue
+    pool.push({
+      personId: Number(id),
+      name: entry.name ?? '',
+      teamId: entry.teamId ?? null,
+      throws: entry.throws,
+      types,
+    })
+  }
+  return similarPitchers(pool, personId, opts)
 }
 
 // Coarse pitch family for the mix bar's color coding (tokens/colors.css's

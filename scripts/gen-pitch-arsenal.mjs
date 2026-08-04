@@ -26,9 +26,12 @@
 //   node scripts/gen-pitch-arsenal.mjs --days=7
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 [--until=2026-07-19]
 //   node scripts/gen-pitch-arsenal.mjs --since=2026-03-20 --sports=11   # backfill AAA alone
+//   node scripts/gen-pitch-arsenal.mjs --export-only                    # re-export, no sweep
 // The --since form is the one-time / full-season backfill; nightly runs use the
 // default trailing window. Checkpoints (dump + JSON export) every 100 games so a
-// long backfill resumes cleanly.
+// long backfill resumes cleanly. --export-only rebuilds the JSON view from the
+// rows already on file, for when a derived (not per-game) field like handedness
+// changes and re-fetching every ingested feed would change nothing in the DB.
 import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -146,8 +149,42 @@ async function ingestGame(db, stmts, gamePk, level, date, season) {
   }
 }
 
+// --- handedness --------------------------------------------------------------
+//
+// Which way each pitcher throws, for the player page's "Pitches like" card
+// (src/lib/pitcherSimilarity.js), where it's a hard filter — a lefty and a
+// righty with the same repertoire are not a useful answer to "who pitches like
+// this guy".
+//
+// Resolved at EXPORT time from one bulk call per level rather than stored per
+// game in pitch_arsenal_totals, which is why this needs no schema change and no
+// backfill: every pitcher already on file gains a hand on the very next run,
+// including every row swept before this existed. A per-game column would only
+// have filled in as each pitcher next happened to appear.
+//
+// ~50 KB per level and never fatal — a failed lookup means the card filters
+// more conservatively for a run (an unknown hand is skipped, never guessed),
+// not that the sweep fails.
+async function fetchPitcherHands(sportIds, season) {
+  const hands = {}
+  for (const sportId of sportIds) {
+    try {
+      const data = await getJson(
+        `/api/v1/sports/${sportId}/players?season=${season}&fields=people,id,pitchHand,code`,
+      )
+      for (const p of data?.people ?? []) {
+        const code = p?.pitchHand?.code
+        if (p?.id != null && (code === 'L' || code === 'R')) hands[p.id] = code
+      }
+    } catch (err) {
+      console.error(`pitcher hands (sportId ${sportId}): ${err.message}`)
+    }
+  }
+  return hands
+}
+
 // --- JSON export from the accumulated table ----------------------------------
-export function exportPitchArsenal(db) {
+export function exportPitchArsenal(db, hands = {}) {
   const ingested = db.prepare('SELECT game_pk, level, date FROM pitch_arsenal_ingested_games').all()
   const coverageSince = ingested.reduce((min, r) => (min == null || r.date < min ? r.date : min), null)
   const seasonRow = db.prepare('SELECT season FROM pitch_arsenal_totals LIMIT 1').get()
@@ -158,6 +195,10 @@ export function exportPitchArsenal(db) {
     const entry = pit[r.person_id] ?? (pit[r.person_id] = { name: r.name, teamId: r.team_id, mlb: [], aaa: [] })
     entry.name = r.name
     entry.teamId = r.team_id
+    // Absent rather than null for a pitcher with no hand on file — the reader
+    // treats a missing hand as "don't guess", and an omitted key keeps the
+    // committed file from growing a column of nulls.
+    if (hands[r.person_id]) entry.throws = hands[r.person_id]
     entry[r.level].push({
       code: r.code,
       description: r.description,
@@ -218,6 +259,22 @@ async function main() {
     mark: markIngested(db),
   }
 
+  // Resolved once up front and reused by every checkpoint write below.
+  const hands = await fetchPitcherHands(LEVELS.map((l) => l.sportId), new Date().getFullYear())
+  console.log(`resolved throwing hand for ${Object.keys(hands).length} pitchers`)
+
+  // Re-export the JSON view from the rows already on file, with no sweep. The
+  // use is a derived field that isn't stored per game (handedness above): after
+  // adding one, this refreshes the committed file in seconds instead of
+  // re-fetching every ingested game's feed to change nothing in the database.
+  if (args['export-only']) {
+    await mkdir(dirname(out), { recursive: true })
+    await writeFile(out, JSON.stringify(exportPitchArsenal(db, hands)))
+    console.log(`wrote ${out} (export only — no games swept)`)
+    db.close()
+    return
+  }
+
   const existing = new Set(
     db.prepare('SELECT game_pk, level FROM pitch_arsenal_ingested_games').all().map((r) => `${r.game_pk}:${r.level}`),
   )
@@ -244,7 +301,7 @@ async function main() {
   const writeOut = async () => {
     await dumpGroup(db, 'pitch-arsenal')
     await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, JSON.stringify(exportPitchArsenal(db)))
+    await writeFile(out, JSON.stringify(exportPitchArsenal(db, hands)))
   }
 
   let done = 0
