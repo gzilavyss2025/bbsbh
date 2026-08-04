@@ -191,15 +191,13 @@ export function MonoInkEditor({ teamId, name, bars }) {
               key={bar.label}
               className={`idlab__monoinkbar${barMarkTone(bar.onBar) === 'dark' ? ' idlab__monoinkbar--darkmark' : ''}`}
               style={{ background: bar.bar }}
+              aria-label={bar.label}
             >
               {mono ? (
                 <img className="idlab__monoinkmark" src={monoDataUrl(mono)} alt="" />
               ) : (
                 <span className="idlab__monoinkempty">Nothing left to draw</span>
               )}
-              <span className="idlab__monoinkbarlabel" style={{ color: bar.onBar }}>
-                {bar.label}
-              </span>
             </div>
           ))}
         </div>
