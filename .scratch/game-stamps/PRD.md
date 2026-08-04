@@ -56,6 +56,12 @@ feature is now usable end to end, signed in or out.
    `schedule.js`.** It is the one fetcher that asks statsapi FOR the score;
    every other one there prunes it out with `fields=`. Separating them is how a
    future caller doesn't reach for the wrong one by accident.
+6. **`playwright.config.js` takes `E2E_PORT`** — outside this document's scope,
+   done because it blocked verifying the work. `reuseExistingServer` plus a
+   hardcoded `5173` means a second worktree's specs silently run against
+   whichever branch started its dev server first; three specs on this branch
+   "failed" against `main`'s code before that was spotted. Pass your own slot
+   from the reserved band: `E2E_PORT=5172 npx playwright test …`.
 
 **Next up:** steps 6–7 — `src/api/logbookStats.js` Tier 1 + `LogbookStatsPage`,
 then `gen-game-digests.mjs` and Tier 2. `?digests=` (§3.3, §6 Tier 2) is still
