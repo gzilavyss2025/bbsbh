@@ -27963,6 +27963,15 @@ button.gamehigh-matchup:active {
   font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
 }
+/* TradeCard.jsx renders both glyphs — '⇄' for the side-by-side columns,
+   '⇅' for the stacked phone layout below — and each breakpoint hides the
+   one that points the wrong way. Deliberately not one glyph rotated in
+   CSS: the connector is a stretched grid item, so a rotate() turns its
+   full-column-width box into a column-HEIGHT sliver overlapping the first
+   team's header. */
+.tradecard__connectorglyph--down {
+  display: none;
+}
 /* 3+-team fallback (a real one is the 2024-07-29 Dodgers/White Sox/
    Cardinals blockbuster — see tradeDeadline.js's grouping header): one
    stacked row per club rather than forcing extra teams into two columns. */
@@ -28149,12 +28158,35 @@ button.gamehigh-matchup:active {
   text-transform: none; /* caps-exempt: trade cutline prose reads as a natural sentence */
 }
 
+/* Phone: the two columns stack, so the connector stops being a glyph
+   BETWEEN columns and becomes the seam between the two blocks — a
+   hairline rule running the card's width with the vertical-exchange
+   glyph centered on it. Same information the desktop '⇄' carries (this
+   is a two-way swap; each block is what THAT club acquired), read along
+   the axis the layout actually runs. */
 @media (max-width: 420px) {
   .tradecard__swap {
     grid-template-columns: 1fr;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
   .tradecard__connector {
-    transform: rotate(90deg);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    font-size: var(--fs-body);
+  }
+  .tradecard__connector::before,
+  .tradecard__connector::after {
+    content: '';
+    flex: 1 1 0;
+    height: var(--bw-hair);
+    background: var(--border-hairline);
+  }
+  .tradecard__connectorglyph--across {
+    display: none;
+  }
+  .tradecard__connectorglyph--down {
+    display: block;
   }
 }
