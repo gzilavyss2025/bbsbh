@@ -1148,7 +1148,15 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
 
         {seasonGames.length > 0 && (
-          <TeamPhotosRail key={`${team.id}-${asOf ?? ''}`} teamId={team.id} games={seasonGames} />
+          // `TeamTransactionsCard` just above is a direct sibling in this
+          // same children list and reuses the plain `${team.id}-${asOf}`
+          // key — giving this the same string caused React to warn
+          // ("two children with the same key") and, worse, actually
+          // duplicate the transactions card in the DOM. A distinct prefix
+          // keeps this remount-on-team/asOf-change behavior without
+          // colliding with a sibling that isn't nested one level deeper the
+          // way LastTenGamesStrip/SeriesStrip's copies of this key are.
+          <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={seasonGames} />
         )}
 
         {dayOfWeek && (
