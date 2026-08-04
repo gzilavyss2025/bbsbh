@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react'
+import { useMemo, useState } from 'react'
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -19,7 +19,6 @@ import {
 } from '../api/uniforms.js'
 import { fetchManager } from '../api/game.js'
 import { fetchTeamSchedule, fetchAllStarGame, fetchTeams, recentDecidedGames, allDecidedGames } from '../api/schedule.js'
-import { fetchGamePhotos, photosForTeam, onlyPhotographer } from '../api/gamePhotos.js'
 import { fetchWarData } from '../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../api/recentForm.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
@@ -34,9 +33,8 @@ import { lastName } from '../api/select.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap, prospectBadge } from '../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../api/rookies.js'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
-import { SPORT_LABEL, SPORT_IDS, favoriteAccentColor, teamClubName } from '../lib/teams.js'
-import { beeswarmRows } from '../lib/beeswarm.js'
-import { gamePath, teamPath } from '../lib/route.js'
+import { SPORT_LABEL, SPORT_IDS, teamClubName } from '../lib/teams.js'
+import { teamPath } from '../lib/route.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -45,35 +43,33 @@ import { TeamLogo } from '../components/TeamLogo.jsx'
 import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
 import { TeamTreatmentMark } from '../components/TeamTreatmentMark.jsx'
 import { JerseyCombos, MilbUniformStrip } from '../components/JerseyCombos.jsx'
-import { Headshot } from '../components/Headshot.jsx'
 import { CareerTimeline } from '../components/CareerTimeline.jsx'
 import { TeamLink } from '../components/TeamLink.jsx'
 import { ManagerLink } from '../components/ManagerLink.jsx'
-import { PlayerLink } from '../components/PlayerLink.jsx'
-import { ProspectPill } from '../components/ProspectPill.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
 import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
-import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
-import { InjuredMark } from '../components/InjuredMark.jsx'
-import { RookiePill } from '../components/RookiePill.jsx'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../lib/headerTheme.js'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'
-import { PostseasonOddsModal } from '../components/PostseasonOddsModal.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { loadCombinedPoolForTeams } from '../api/statsLevels.js'
 import { teamLeadersPath, orgLeadersPath } from '../lib/route.js'
+import { StandingsCard } from './team/modules/StandingsCard.jsx'
+import { TeamStats, dayOfWeekRecord, todayDowLabel } from './team/modules/TeamStatsCard.jsx'
+import { LastTenGames } from './team/modules/LastTenGames.jsx'
+import { SeasonSchedule } from './team/modules/SeasonSchedule.jsx'
+import { TeamPhotosRail } from './team/modules/TeamPhotosRail.jsx'
+import { ComebackCard } from './team/modules/ComebackCard.jsx'
+import { RosterProjection } from './team/modules/RosterProjection.jsx'
+import { CurrentRosterCard } from './team/modules/CurrentRosterCard.jsx'
+import { InjuredListCard } from './team/modules/InjuredListCard.jsx'
+import { AffiliatesCard } from './team/modules/AffiliatesCard.jsx'
+import { ProspectsCard } from './team/modules/ProspectsCard.jsx'
 
 const DASH = '—'
-// Org prospect list starts collapsed to the top 10, expandable to the full ~30.
-const PROSPECTS_PREVIEW_COUNT = 10
-// Headshot spotlight strip above the ranked table shows only the very top of
-// the list; how many of these actually render is viewport-width-driven (see
-// .prospectshowcase in index.css), this is just the outer cap.
-const PROSPECT_SHOWCASE_COUNT = 5
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
 // Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
 const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
@@ -179,38 +175,6 @@ function roleFromCounts(gamesStarted, gamesPitched, saves) {
   if (gs / g >= 0.5) return 'SP'
   if ((Number(saves) || 0) >= 8) return 'CL'
   return 'RP'
-}
-// Sunday-first, matching the calendar week Date.getUTCDay() indexes (0=Sun).
-const DOW_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// Record by day of week, off the same cutoff-gated `schedule` rows the
-// Schedule section below already renders (fetchTeamSchedule only sets `won`
-// once a game is Final AND on/before the asOf cutoff — see api/schedule.js —
-// so this reads no further ahead than the rest of the page). Days with no
-// decided games yet show DASH rather than "0-0".
-function dayOfWeekRecord(games) {
-  const tally = DOW_LABELS.map(() => ({ wins: 0, losses: 0 }))
-  for (const g of games) {
-    if (g.won == null) continue
-    const dow = new Date(`${g.apiDate}T00:00:00Z`).getUTCDay()
-    if (g.won) tally[dow].wins++
-    else tally[dow].losses++
-  }
-  return DOW_LABELS.map((label, i) => {
-    const { wins, losses } = tally[i]
-    const total = wins + losses
-    return {
-      k: label,
-      v: total ? `${wins}-${losses}` : DASH,
-      rank: total ? (wins / total).toFixed(3).replace(/^0/, '') : DASH,
-    }
-  })
-}
-// Same UTC-parse convention as dayOfWeekRecord's own apiDate → weekday
-// mapping (and isoToday() itself), so "today" lines up with whichever row
-// that same calendar date would have tallied into.
-function todayDowLabel() {
-  return DOW_LABELS[new Date(`${isoToday()}T00:00:00Z`).getUTCDay()]
 }
 function runDiff(rec) {
   const d = rec.runDifferential
@@ -884,11 +848,6 @@ export function TeamPage({ id, asOf, sportId }) {
   const navSportId = data?.team?.sport?.id ?? sportId ?? null
   const levelTeams = useAsync(() => (navSportId ? fetchTeams(navSportId) : Promise.resolve([])), [navSportId])
   const back = () => window.history.back()
-  // Postseason Odds modal — a plain boolean rather than the team-keyed
-  // pattern below is fine here: it's a transient dialog, not persisted
-  // per-team UI state, so it's safe (and correct) for it to close on any
-  // client-side team nav same as every other modal in the app.
-  const [showPostseasonOdds, setShowPostseasonOdds] = useState(false)
   // Store which team's list was expanded rather than a free-floating boolean,
   // so client-side navigation naturally starts every newly visited club at
   // the top-10 preview without a prop-syncing effect.
@@ -938,7 +897,6 @@ export function TeamPage({ id, asOf, sportId }) {
   // itself gets the FULL season's decided games so scrolling back keeps
   // going all the way to Opening Day instead of dead-ending at 10.
   const recentGames = recentDecidedGames(schedule)
-  const recentWins = recentGames.filter((g) => g.won).length
   const seasonGames = allDecidedGames(schedule)
   // Defaults to Last 10 Games whenever that data exists; a club with no
   // completed games yet (or every boxscore fetch failing) has no recent data
@@ -1010,56 +968,7 @@ export function TeamPage({ id, asOf, sportId }) {
         </header>
 
         {standings.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>{team.division?.name || 'Standings'}</span>
-              {asOf && <em>entering today</em>}
-              {divisionPostseasonOdds.length > 0 && (
-                <button
-                  type="button"
-                  className="psodds-pill"
-                  onClick={() => setShowPostseasonOdds(true)}
-                >
-                  Postseason Odds
-                </button>
-              )}
-            </div>
-            <div className="thub-card__body">
-            <div className="ledger-wrap">
-              <table className="standings">
-                <thead>
-                  <tr>
-                    <th className="team">Team</th>
-                    <th>W</th><th>L</th><th>GB</th><th>Streak</th><th>L10</th>
-                    <th className="standings__wide">Home</th>
-                    <th className="standings__wide">Away</th>
-                    <th>RD</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {standings.map((s) => (
-                    <tr
-                      key={s.id}
-                      className={s.isMe ? 'is-me' : ''}
-                      style={s.isMe ? { '--fav-accent': favoriteAccentColor(s.id) } : undefined}
-                    >
-                      <td className="team">
-                        <TeamLink id={s.isMe ? null : s.id}>
-                          <TeamLogo teamId={s.id} name={s.name} size={18} />{s.name}
-                        </TeamLink>
-                      </td>
-                      <td>{s.wins}</td><td>{s.losses}</td><td>{s.gb}</td>
-                      <td>{s.streak}</td><td>{s.l10}</td>
-                      <td className="standings__wide">{s.home}</td>
-                      <td className="standings__wide">{s.away}</td>
-                      <td className={s.diffTone}>{s.diff}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            </div>
-          </div>
+          <StandingsCard team={team} standings={standings} asOf={asOf} divisionPostseasonOdds={divisionPostseasonOdds} />
         )}
 
         {/* Same finger-scrollable club-logo strip GameSelect's slate header
@@ -1114,37 +1023,17 @@ export function TeamPage({ id, asOf, sportId }) {
         )}
 
         {recentGames.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Last 10 Games</span>
-              <em>
-                {recentWins}-{recentGames.length - recentWins}
-              </em>
-            </div>
-            <div className="thub-card__body">
-              <LastTenGamesStrip
-                key={`${team.id}-${asOf ?? ''}`}
-                games={seasonGames}
-                initialCount={recentGames.length}
-              />
-            </div>
-          </div>
+          <LastTenGames teamId={team.id} asOf={asOf} recentGames={recentGames} seasonGames={seasonGames} />
         )}
 
         {schedule.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Schedule</span>
-            </div>
-            <div className="thub-card__body">
-              <SeriesStrip
-                key={`${team.id}-${asOf ?? ''}`}
-                games={schedule}
-                allStarGame={allStarGame}
-                refDate={asOf || isoToday()}
-              />
-            </div>
-          </div>
+          <SeasonSchedule
+            teamId={team.id}
+            asOf={asOf}
+            schedule={schedule}
+            allStarGame={allStarGame}
+            refDate={asOf || isoToday()}
+          />
         )}
 
         {seasonGames.length > 0 && (
@@ -1196,1010 +1085,48 @@ export function TeamPage({ id, asOf, sportId }) {
         />
 
         {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
-          <>
-            {/* One bordered soft-cream card (same convention as .tstats-card)
-                around all the projection subsections, so they read as one
-                group distinct from the actual 40-man list further down. The
-                masthead is bolted directly onto its own top border rather
-                than floating as a separate SectionTitle above it. */}
-            <div className="roster-super">
-              <div className="roster-super__head">
-                <span>Roster</span>
-                {!hasRecentRoster && <em>preferred lineup</em>}
-                {hasRecentRoster && (
-                  <div className="roster-super__toggle" role="tablist" aria-label="Roster projection basis">
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={!showRecentRoster}
-                      className={`roster-super__toggle-btn${!showRecentRoster ? ' is-active' : ''}`}
-                      onClick={() => setSeasonRosterTeamId(teamId)}
-                    >
-                      Season
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={showRecentRoster}
-                      className={`roster-super__toggle-btn${showRecentRoster ? ' is-active' : ''}`}
-                      onClick={() => setSeasonRosterTeamId(null)}
-                    >
-                      Current
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div className="roster-super__body">
-              <div className="roster-super__row">
-                {/* Left column: the defensive nine, with the bench (Top
-                    Substitutes) stacked directly beneath it. */}
-                <div className="roster-super__col">
-                  {rosterLineup.length > 0 && (
-                    <section className="roster-sub">
-                      <h4 className="roster-sub__title">Preferred Lineup</h4>
-                      <DefenseDiamond defense={rosterLineup} />
-                    </section>
-                  )}
-                  {rosterSubs.length > 0 && (
-                    <section className="roster-sub">
-                      <h4 className="roster-sub__title">Top Substitutes</h4>
-                      <RosterList
-                        season={season}
-                        showProspect={isMilb}
-                        rows={rosterSubs.map((p) => ({
-                          ...p,
-                          hurt: injuredIds.has(p.id),
-                        }))}
-                      />
-                    </section>
-                  )}
-                </div>
-                {/* Right column: the two pitching staffs, Starting Pitchers
-                    over Bullpen. */}
-                <div className="roster-super__col">
-                  {rosterSP.length > 0 && (
-                    <section className="roster-sub">
-                      <h4 className="roster-sub__title">Starting Pitchers</h4>
-                      <RosterList
-                        season={season}
-                        showProspect={isMilb}
-                        rows={rosterSP.map((p) => ({
-                          ...p,
-                          hurt: injuredIds.has(p.id),
-                        }))}
-                      />
-                    </section>
-                  )}
-                  {rosterBullpen.length > 0 && (
-                    <section className="roster-sub">
-                      <h4 className="roster-sub__title">Bullpen</h4>
-                      <RosterList
-                        season={season}
-                        showProspect={isMilb}
-                        rows={rosterBullpen.map((p) => ({
-                          ...p,
-                          hurt: injuredIds.has(p.id),
-                        }))}
-                      />
-                    </section>
-                  )}
-                </div>
-              </div>
-              </div>
-            </div>
-          </>
+          <RosterProjection
+            hasRecentRoster={hasRecentRoster}
+            showRecentRoster={showRecentRoster}
+            onShowSeason={() => setSeasonRosterTeamId(teamId)}
+            onShowCurrent={() => setSeasonRosterTeamId(null)}
+            rosterLineup={rosterLineup}
+            rosterSubs={rosterSubs}
+            rosterSP={rosterSP}
+            rosterBullpen={rosterBullpen}
+            injuredIds={injuredIds}
+            season={season}
+            isMilb={isMilb}
+          />
         )}
 
         {(position.length > 0 || pitchers.length > 0) && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Current Roster</span>
-            </div>
-            <div className="thub-card__body">
-            <div className="roster-cols">
-              {position.length > 0 && (
-                <div>
-                  <h4 className="roster-sub__title">Position players{sportId === 1 ? ' · season WAR' : ''}</h4>
-                  <RosterList
-                    season={season}
-                    showProspect={isMilb}
-                    rows={position.map((p) => ({ ...p, badge: p.pos, badgeClass: 'thub-pos' }))}
-                  />
-                </div>
-              )}
-              {pitchers.length > 0 && (
-                <div>
-                  <h4 className="roster-sub__title">Pitchers · role inferred{sportId === 1 ? ' · season WAR' : ''}</h4>
-                  <RosterList
-                    season={season}
-                    showProspect={isMilb}
-                    rows={pitchers.map((p) => ({
-                      ...p,
-                      badge: p.role ?? DASH,
-                      badgeClass: `rolechip${p.role === 'RP' ? ' rolechip--rp' : p.role === 'CL' ? ' rolechip--cl' : ''}`,
-                    }))}
-                  />
-                </div>
-              )}
-            </div>
-            </div>
-          </div>
+          <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
         )}
 
         {injured.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Injured List</span>
-            </div>
-            <div className="thub-card__body">
-            {showInjured ? (
-              <RosterList
-                season={season}
-                showProspect={false}
-                rows={injured.map((p) => ({ ...p, badge: p.ilLabel, badgeClass: 'ilchip', war: undefined }))}
-              />
-            ) : (
-              <button type="button" className="pshistory__more" onClick={() => setExpandedInjuredTeamId(teamId)}>
-                Show {injured.length} injured
-              </button>
-            )}
-            </div>
-          </div>
+          <InjuredListCard
+            injured={injured}
+            season={season}
+            showInjured={showInjured}
+            onShowInjured={() => setExpandedInjuredTeamId(teamId)}
+          />
         )}
 
         {isMilb && affiliationHistory.length > 0 && (
           <CareerTimeline entries={affiliationHistory} title="Affiliation history" />
         )}
 
-        {affiliateCards.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Affiliates</span>
-            </div>
-            <div className="thub-card__body">
-            <div className="thub-affiliates">
-              {affiliateCards.map((a) => (
-                <TeamLink key={a.id} id={a.id} className="thub-affiliate">
-                  <span className="thub-affiliate__level">{SPORT_LABEL[a.sportId] ?? DASH}</span>
-                  <TeamLogo teamId={a.id} name={a.name} size={48} />
-                  <span className="thub-affiliate__name">{a.name}</span>
-                  {a.city && (
-                    <span className="thub-affiliate__loc">
-                      {a.city}{a.state ? `, ${a.state}` : ''}
-                    </span>
-                  )}
-                </TeamLink>
-              ))}
-            </div>
-            </div>
-          </div>
-        )}
+        {affiliateCards.length > 0 && <AffiliatesCard affiliates={affiliateCards} />}
 
         {!isMilb && prospects.length > 0 && (
-          <div className="thub-card">
-            <div className="thub-card__head">
-              <span>Prospects</span>
-              <em>org rank</em>
-            </div>
-            <div className="thub-card__body">
-            <div className="prospectshowcase">
-              {prospects.slice(0, PROSPECT_SHOWCASE_COUNT).map((p) => (
-                <PlayerLink key={p.playerId} id={p.playerId} className="prospectshowcase__card">
-                  <span className="prospectshowcase__shotwrap">
-                    <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="prospectshowcase__shot" />
-                    {p.position && <span className="prospectshowcase__posbadge">{p.position}</span>}
-                  </span>
-                  <span className="prospectshowcase__name">{p.name}</span>
-                </PlayerLink>
-              ))}
-            </div>
-            <div className="ledger-wrap">
-              <table className="ledger prospecttable">
-                <thead>
-                  <tr>
-                    <th className="lft">Rk</th>
-                    <th className="lft">Player</th>
-                    <th>Pos</th>
-                    <th>Level</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(showAllProspects ? prospects : prospects.slice(0, PROSPECTS_PREVIEW_COUNT)).map((p) => {
-                    const isTop = p.topRank != null
-                    return (
-                      <tr key={p.playerId}>
-                        <td className="lft yr">{p.orgRank}</td>
-                        <td className="lft ledger__sub">
-                          <PlayerLink id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>
-                          {isTop && <span className="prospecttable__top">#{p.topRank}</span>}
-                        </td>
-                        <td>{p.position || DASH}</td>
-                        <td className="prospecttable__level">
-                          <span>{p.levelLabel || DASH}</span>
-                          {p.affiliateTeamId && (
-                            <TeamLogo teamId={p.affiliateTeamId} name={p.levelLabel} size={16} crop />
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              {!showAllProspects && prospects.length > PROSPECTS_PREVIEW_COUNT && (
-                <button type="button" className="pshistory__more" onClick={() => setExpandedProspectsTeamId(teamId)}>
-                  Show all {prospects.length} prospects
-                </button>
-              )}
-            </div>
-            </div>
-          </div>
-        )}
-
-        {showPostseasonOdds && (
-          <PostseasonOddsModal
-            divisionName={team.division?.name || 'Standings'}
-            rows={divisionPostseasonOdds}
-            onClose={() => setShowPostseasonOdds(false)}
+          <ProspectsCard
+            prospects={prospects}
+            showAllProspects={showAllProspects}
+            onShowAll={() => setExpandedProspectsTeamId(teamId)}
           />
         )}
       </div>
     </LinkScope>
-  )
-}
-
-// Ticket-stub day/month/date parts for a Last 10 Games card. Same UTC-parse
-// convention as dayOfWeekRecord/todayDowLabel above, so the weekday can't
-// drift across a DST edge.
-function last10DateParts(apiDate) {
-  const d = new Date(`${apiDate}T00:00:00Z`)
-  return { dow: DOW_LABELS[d.getUTCDay()], month: MONTH_LABELS[d.getUTCMonth()], day: d.getUTCDate() }
-}
-
-// How many additional (older) games to reveal each time the user scrolls
-// back to the growing window's leading edge — same page size as the initial
-// "Last 10" default, just repeated all the way back to Opening Day.
-const LAST10_GROW_STEP = 10
-
-// A setup jump, not a user-visible scroll gesture — bypasses the track's own
-// `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
-// the animated glide from position 0 briefly leaves the leading-edge sentinel
-// on screen mid-flight, which the IntersectionObserver below reads as "scrolled
-// back" and grows the window before the user has touched anything.
-function jumpScrollLeft(el, value) {
-  const prev = el.style.scrollBehavior
-  el.style.scrollBehavior = 'auto'
-  el.scrollLeft = value
-  el.style.scrollBehavior = prev
-}
-
-// Last 10 Games — a horizontally-scrolling strip of ticket-stub cards, one
-// per DECIDED game this season (`games` is already `won != null`-filtered by
-// the caller — see the recentGames/seasonGames comments above — never
-// re-derived from Final status here, which would bypass the
-// fetchTeamSchedule cutoff and leak the very game a mid-scoring visitor
-// opened this page from). Ordered oldest -> newest, same reading direction
-// as the Schedule strip below it; opens pre-scrolled to the newest
-// (rightmost) card, showing only the last `initialCount` (the true last 10).
-// Scrolling back toward the start reveals `LAST10_GROW_STEP` more games at a
-// time, all the way back to Opening Day — `games` already holds the whole
-// season (fetchTeamSchedule's single per-page fetch), so growing the window
-// is a pure client-side slice, never a fresh request. Each card routes to
-// that game's box score, the one destination that already shows the score
-// this card just displayed.
-function LastTenGamesStrip({ games, initialCount = 10 }) {
-  const navigate = useNav()
-  const trackRef = useRef(null)
-  const sentinelRef = useRef(null)
-  const didInitialScroll = useRef(false)
-  // Captured scrollLeft/scrollWidth just before growing the window, so the
-  // layout effect below can compensate for the older cards landing BEFORE
-  // the ones already on screen — without it, prepending content shoves the
-  // user's current view further right instead of leaving it visually still.
-  const pendingGrowRef = useRef(null)
-  const [visibleCount, setVisibleCount] = useState(() => Math.min(initialCount, games.length))
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
-
-  const visibleGames = games.slice(-visibleCount)
-  const hasMore = visibleCount < games.length
-
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-    }
-  }, [visibleGames.length])
-
-  // Opens pre-scrolled to the newest (rightmost) card — once, on mount only;
-  // growing the window later must NOT re-trigger this or every scroll-back
-  // would snap straight back to the end.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || didInitialScroll.current) return
-    jumpScrollLeft(el, el.scrollWidth)
-    didInitialScroll.current = true
-  }, [canScroll])
-
-  // Restores the pre-growth scroll position after older games are
-  // prepended (see pendingGrowRef above).
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    const pending = pendingGrowRef.current
-    if (!el || !pending) return
-    jumpScrollLeft(el, pending.scrollLeft + (el.scrollWidth - pending.scrollWidth))
-    pendingGrowRef.current = null
-  }, [visibleGames.length])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [visibleGames.length, canScroll])
-
-  // Scrolling (or paging via the < button) into the sentinel at the front of
-  // the track grows the window toward Opening Day.
-  useEffect(() => {
-    const el = trackRef.current
-    const sentinel = sentinelRef.current
-    if (!el || !sentinel || !hasMore) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        pendingGrowRef.current = { scrollLeft: el.scrollLeft, scrollWidth: el.scrollWidth }
-        setVisibleCount((c) => Math.min(c + LAST10_GROW_STEP, games.length))
-      },
-      { root: el, threshold: 0 },
-    )
-    io.observe(sentinel)
-    return () => io.disconnect()
-  }, [hasMore, games.length])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
-
-  const openGame = (g) => {
-    navigate(gamePath(g.apiDate, g.away.abbreviation, g.home.abbreviation, 'boxscore', g.gameNumber))
-  }
-
-  return (
-    <div className="last10">
-      {canScroll && (
-        <button
-          type="button"
-          className="last10__nav"
-          onClick={() => scroll(-1)}
-          disabled={atStart}
-          aria-label="Scroll to older games"
-        >
-          &lsaquo;
-        </button>
-      )}
-      <div className="last10__track" ref={trackRef}>
-        {hasMore && <div ref={sentinelRef} className="last10__sentinel" aria-hidden="true" />}
-        {visibleGames.map((g) => {
-          const { dow, month, day } = last10DateParts(g.apiDate)
-          const hasScore = g.runs != null && g.oppRuns != null
-          const winRuns = g.won ? g.runs : g.oppRuns
-          const lossRuns = g.won ? g.oppRuns : g.runs
-          const extraInnings = g.innings && g.innings > 9 ? `${g.innings} inn` : null
-          const gmTag = g.doubleHeader !== 'N' ? `Gm ${g.gameNumber}` : null
-          const meta = extraInnings || gmTag
-          const scoreWords = hasScore
-            ? `${g.won ? 'won' : 'lost'} ${g.runs} to ${g.oppRuns}`
-            : g.won
-              ? 'won'
-              : 'lost'
-          const label = `${dow}, ${month} ${day}, ${g.isHome ? 'versus' : 'at'} ${g.opponent.name}, ${scoreWords}${extraInnings ? ` in ${g.innings} innings` : ''}`
-          return (
-            <button
-              key={g.gamePk}
-              type="button"
-              className={`last10__card${g.won ? ' last10__card--win' : ' last10__card--loss'}${g.isHome ? ' last10__card--home' : ''}`}
-              onClick={() => openGame(g)}
-              aria-label={label}
-            >
-              <div className="last10__stub">
-                <div className="last10__cap">
-                  {dow} &middot; {month}
-                </div>
-                <div className="last10__daynum">{day}</div>
-              </div>
-              <div className="last10__band">
-                <span className="last10__wl">{g.won ? 'W' : 'L'}</span>
-                <TeamLogo
-                  teamId={g.opponent.id}
-                  name={g.opponent.name}
-                  size={30}
-                  variant="mono"
-                  className="last10__logo"
-                />
-                <span className="last10__oppcap">
-                  {g.isHome ? '' : '@ '}
-                  {g.opponent.abbreviation}
-                </span>
-              </div>
-              <div className="last10__foot">
-                {hasScore ? (
-                  <div className="last10__score">
-                    {winRuns}
-                    <span className="last10__sep">&ndash;</span>
-                    {lossRuns}
-                  </div>
-                ) : (
-                  <div className="last10__score last10__score--final">Final</div>
-                )}
-                {meta && <div className="last10__meta">{meta}</div>}
-              </div>
-            </button>
-          )
-        })}
-      </div>
-      {canScroll && (
-        <button
-          type="button"
-          className="last10__nav"
-          onClick={() => scroll(1)}
-          disabled={atEnd}
-          aria-label="Scroll to more recent games"
-        >
-          &rsaquo;
-        </button>
-      )}
-    </div>
-  )
-}
-
-const PHOTO_INITIAL_TARGET = 10
-const PHOTO_GROW_STEP = 10
-const PHOTO_BATCH_GAMES = 8
-const PHOTO_MAX_BATCHES_PER_CALL = 6
-
-// Team Page's Photos rail — professional camera stills only
-// (`onlyPhotographer`, gamePhotos.js; drops both TV broadcast frame grabs and
-// rendered graphic cards like Statcast darkroom cards or ABS challenge result
-// cards) whose subject is this club (`photosForTeam`). Walks `games` (==
-// seasonGames, the same oldest -> newest, cutoff-filtered list
-// LastTenGamesStrip renders off) backward from the newest game. Unlike that
-// strip, the data isn't preloaded — each game's photos are a real fetch
-// (fetchGamePhotos), so "scroll back" here grows the window by fetching more
-// games on demand rather than slicing an array already in memory.
-//
-// Spoiler footing: gamePhotos.js is deliberately NOT reveal-only (a
-// recap/celebration photo narrates the outcome just by looking at it, same
-// risk as a highlight clip's title — see that module's header) and today's
-// other two consumers get away with that because /photos is a standalone
-// unsealed tool and GamePhotosStrip only ever renders inside the box score's
-// SealBox. This rail leans on the same precedent LastTenGamesStrip already
-// uses instead of either of those: `games` is `seasonGames`
-// (allDecidedGames(schedule)), which fetchTeamSchedule has already cut off at
-// the page's `asOf` (`won` is only ever non-null for a game at/before that
-// cutoff) — so a photo here can never come from a game the rest of this page
-// hasn't already revealed the result of. Never hand this component the raw
-// `schedule`, which still carries not-yet-decided/future games.
-//
-// Deliberately does NOT read a precomputed cross-game index. One was scoped
-// in .scratch/game-photos-by-subject/issues/01-cross-game-photo-index.md for
-// a cheap "every team/player's photos from anywhere" lookup, but this page
-// already has the one team's full decided-game list in memory, so a bounded
-// live walk-back is enough; that index stays open for a future surface (a
-// player page, say) that has no such list already loaded.
-function TeamPhotosRail({ teamId, games }) {
-  const trackRef = useRef(null)
-  const sentinelRef = useRef(null)
-  // Flips true the first time the user actually scrolls back (the sentinel
-  // fires) — see the two effects below. Named for what stops the auto-snap,
-  // not for "has the initial load finished," since the initial load can span
-  // several async batches with no single moment to key off of.
-  const userScrolledBackRef = useRef(false)
-  const pendingGrowRef = useRef(null)
-  const consumedRef = useRef(0)
-  const photosRef = useRef([])
-  const cacheRef = useRef(new Map())
-  const inFlightRef = useRef(false)
-  const activeRef = useRef(true)
-
-  const [photos, setPhotos] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [exhausted, setExhausted] = useState(false)
-  const [canScroll, setCanScroll] = useState(false)
-  const [atStart, setAtStart] = useState(true)
-  const [atEnd, setAtEnd] = useState(true)
-
-  useEffect(() => {
-    activeRef.current = true
-    return () => {
-      activeRef.current = false
-    }
-  }, [])
-
-  // Walks `games` backward from consumedRef's cursor in small batches,
-  // fetching + filtering each batch's photos concurrently, until either
-  // `targetCount` is met or every game has been scanned (Opening Day). Caps
-  // the number of batches a single call will chase so one interaction can't
-  // stall the UI scanning a whole quiet season — if the target still isn't
-  // met when the cap is hit, the sentinel (still in view, since nothing new
-  // rendered to push it off) simply re-fires the next call.
-  const growPhotos = useCallback(
-    async (targetCount) => {
-      if (inFlightRef.current || !activeRef.current) return
-      inFlightRef.current = true
-      setLoading(true)
-      let rounds = 0
-      while (
-        activeRef.current &&
-        consumedRef.current < games.length &&
-        photosRef.current.length < targetCount &&
-        rounds < PHOTO_MAX_BATCHES_PER_CALL
-      ) {
-        rounds++
-        const end = games.length - consumedRef.current
-        const start = Math.max(0, end - PHOTO_BATCH_GAMES)
-        const batch = games.slice(start, end)
-        consumedRef.current += batch.length
-        const results = await Promise.all(
-          batch.map(async (game) => {
-            if (cacheRef.current.has(game.gamePk)) return cacheRef.current.get(game.gamePk)
-            const raw = await fetchGamePhotos(game.gamePk)
-            const filtered = onlyPhotographer(photosForTeam(raw, teamId)).map((photo) => ({
-              ...photo,
-              gamePk: game.gamePk,
-              apiDate: game.apiDate,
-            }))
-            cacheRef.current.set(game.gamePk, filtered)
-            return filtered
-          }),
-        )
-        if (!activeRef.current) break
-        photosRef.current = [...results.flat(), ...photosRef.current]
-        setPhotos(photosRef.current)
-      }
-      if (activeRef.current) {
-        if (consumedRef.current >= games.length) setExhausted(true)
-        setLoading(false)
-      }
-      inFlightRef.current = false
-    },
-    [games, teamId],
-  )
-
-  useEffect(() => {
-    growPhotos(PHOTO_INITIAL_TARGET)
-  }, [growPhotos])
-
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
-    check()
-    const ro = new ResizeObserver(check)
-    ro.observe(el)
-    window.addEventListener('resize', check)
-    return () => {
-      ro.disconnect()
-      window.removeEventListener('resize', check)
-    }
-  }, [photos.length])
-
-  // Opens pre-scrolled to the newest (rightmost) photo — mirrors
-  // LastTenGamesStrip's own mount-only jump, but `photos` starts empty (the
-  // first fetch hasn't landed yet), the initial load can span several async
-  // batches (growPhotos keeps walking backward until it hits
-  // PHOTO_INITIAL_TARGET), and `canScroll` flipping true (once there's
-  // enough content to overflow) shrinks the track to make room for the nav
-  // arrows, moving the true right edge. So rather than jump once on a single
-  // signal, this keeps re-snapping to the current end on every relevant
-  // change (new photos, canScroll settling) until the user actually scrolls
-  // back — at which point the sentinel handler below flips
-  // userScrolledBackRef and this stops for good, handing off to the
-  // pendingGrowRef effect's position-preserving compensation instead.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || userScrolledBackRef.current || photos.length === 0) return
-    jumpScrollLeft(el, el.scrollWidth)
-  }, [photos.length, canScroll])
-
-  // Restores the pre-growth scroll position after older photos are prepended
-  // (see pendingGrowRef below), same compensation LastTenGamesStrip does.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    const pending = pendingGrowRef.current
-    if (!el || !pending) return
-    jumpScrollLeft(el, pending.scrollLeft + (el.scrollWidth - pending.scrollWidth))
-    pendingGrowRef.current = null
-  }, [photos.length])
-
-  useEffect(() => {
-    const el = trackRef.current
-    if (!el) return
-    const update = () => {
-      setAtStart(el.scrollLeft <= 1)
-      setAtEnd(el.scrollLeft >= el.scrollWidth - el.clientWidth - 1)
-    }
-    update()
-    el.addEventListener('scroll', update)
-    return () => el.removeEventListener('scroll', update)
-  }, [photos.length, canScroll])
-
-  // Scrolling (or paging via the < button) into the sentinel at the front of
-  // the track grows the window toward Opening Day.
-  useEffect(() => {
-    const el = trackRef.current
-    const sentinel = sentinelRef.current
-    if (!el || !sentinel || exhausted || loading) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        userScrolledBackRef.current = true
-        pendingGrowRef.current = { scrollLeft: el.scrollLeft, scrollWidth: el.scrollWidth }
-        growPhotos(photosRef.current.length + PHOTO_GROW_STEP)
-      },
-      { root: el, threshold: 0 },
-    )
-    io.observe(sentinel)
-    return () => io.disconnect()
-  }, [exhausted, loading, growPhotos])
-
-  const scroll = (dir) => {
-    const el = trackRef.current
-    if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
-
-  if (exhausted && photos.length === 0 && !loading) return null
-
-  return (
-    <div className="thub-card">
-      <div className="thub-card__head">
-        <span>Photos</span>
-      </div>
-      <div className="thub-card__body">
-        <div className="teamphotos">
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(-1)}
-              disabled={atStart}
-              aria-label="Scroll to older photos"
-            >
-              &lsaquo;
-            </button>
-          )}
-          <div className="teamphotos__track" ref={trackRef}>
-            {!exhausted && <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />}
-            {photos.length === 0 && loading && (
-              <div className="teamphotos__loading" aria-hidden="true">
-                Loading&hellip;
-              </div>
-            )}
-            {photos.map((photo) => (
-              <a
-                key={photo.id}
-                href={photo.original}
-                target="_blank"
-                rel="noreferrer"
-                className="teamphotos__thumb"
-                aria-label={
-                  photo.focus?.playerName
-                    ? `Open full-resolution photo of ${photo.focus.playerName} in a new tab`
-                    : 'Open full-resolution photo in a new tab'
-                }
-              >
-                <img src={photo.thumb} alt="" loading="lazy" />
-              </a>
-            ))}
-          </div>
-          {canScroll && (
-            <button
-              type="button"
-              className="teamphotos__nav"
-              onClick={() => scroll(1)}
-              disabled={atEnd}
-              aria-label="Scroll to more recent photos"
-            >
-              &rsaquo;
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Season progress strip for the team page — one block per series (a run of
-// consecutive games against the same opponent), one small cell per game
-// within it, in chronological order left-to-right/top-to-bottom (wraps on
-// narrow screens rather than paging by month). `games` is spoiler-free
-// (dates, opponents, home/away — see fetchTeamSchedule) plus a `won` flag
-// that's already cutoff-gated by the caller (null for anything not yet safe
-// to show), so every game renders regardless of whether it's already been
-// played, and a played game's cell tints green/won or red/loss only once
-// `won` isn't null; the destination page (lineup1) still manages its own
-// sealing independently for anyone who taps through. `refDate` marks the
-// series the page was opened from (or today's) so it can be highlighted.
-function SeriesStrip({ games, allStarGame, refDate }) {
-  const navigate = useNav()
-
-  const series = useMemo(() => {
-    const out = []
-    for (const g of games) {
-      const last = out[out.length - 1]
-      if (last && last.opponent.id === g.opponent.id) {
-        last.games.push(g)
-      } else {
-        out.push({ opponent: g.opponent, games: [g] })
-      }
-    }
-    return out
-  }, [games])
-
-  // Splice the All-Star Game in chronologically — right before the first
-  // series that resumes after the break (a team's own schedule has no games
-  // during the break itself, so there's no series to attach it to).
-  const items = useMemo(() => {
-    const list = series.map((s) => ({ type: 'series', key: `${s.opponent.id}-${s.games[0].apiDate}`, ...s }))
-    if (allStarGame) {
-      const card = { type: 'allstar', key: `allstar-${allStarGame.apiDate}`, ...allStarGame }
-      const idx = list.findIndex((it) => it.games[0].apiDate > allStarGame.apiDate)
-      if (idx === -1) list.push(card)
-      else list.splice(idx, 0, card)
-    }
-    return list
-  }, [series, allStarGame])
-
-  const openGame = (g) => {
-    navigate(gamePath(g.apiDate, g.away.abbreviation, g.home.abbreviation, 'lineup1', g.gameNumber))
-  }
-
-  return (
-    <div className="sstrip">
-      {items.map((it) => {
-        if (it.type === 'allstar') {
-          return (
-            <button
-              key={it.key}
-              type="button"
-              className="sstrip__series sstrip__series--allstar"
-              onClick={() => openGame(it)}
-              title={`${it.apiDate} · All-Star Game · ${it.away.name} vs ${it.home.name}`}
-            >
-              <div className="sstrip__opp">
-                <TeamLogo teamId={it.away.id} name={it.away.name} size={18} />
-                <TeamLogo teamId={it.home.id} name={it.home.name} size={18} />
-              </div>
-              <span className="sstrip__opplabel">All-Star Break</span>
-            </button>
-          )
-        }
-        const isCurrent = it.games.some((g) => g.apiDate === refDate)
-        return (
-          <div key={it.key} className={`sstrip__series${isCurrent ? ' sstrip__series--current' : ''}`}>
-            <div className="sstrip__opp" title={it.opponent.name}>
-              <TeamLogo teamId={it.opponent.id} name={it.opponent.name} size={18} />
-              <span className="sstrip__opplabel">{it.opponent.abbreviation}</span>
-            </div>
-            <div className="sstrip__cells">
-              {it.games.map((g) => {
-                const resultClass =
-                  g.won === true ? ' sstrip__cell--win' : g.won === false ? ' sstrip__cell--loss' : ''
-                const resultLabel = g.won === true ? ' · W' : g.won === false ? ' · L' : ''
-                return (
-                  <button
-                    key={g.gamePk}
-                    type="button"
-                    className={`sstrip__cell${g.isHome ? ' sstrip__cell--home' : ''}${resultClass}`}
-                    onClick={() => openGame(g)}
-                    title={`${g.apiDate} · ${g.isHome ? 'vs' : 'at'} ${g.opponent.name}${g.doubleHeader !== 'N' ? ` · Gm ${g.gameNumber}` : ''}${resultLabel}`}
-                  />
-                )
-              })}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function TeamStats({ title, stats, note = 'rank out of 30', highlightKey }) {
-  return (
-    <div className="tstats-card">
-      <div className="tstats-card__head">
-        <span>{title}</span>
-        {note && <em>{note}</em>}
-      </div>
-      <div className="tstats-card__body">
-        <div className="tstats">
-          {stats.map((s) => (
-            <div
-              key={s.k}
-              className={`tstatrow${s.extreme ? ` tstatrow--${s.extreme}` : ''}${s.k === highlightKey ? ' tstatrow--today' : ''}`}
-            >
-              <span className="tstatrow__k">{s.k}</span>
-              <span className="tstatrow__v">{s.v}</span>
-              <span className={`tstatrow__r${s.tone ? ` tstatrow__r--${s.tone}` : ''}`}>{s.rank}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Comeback wins — one rail per depth (≤10/20/30% win probability). Each rail is a
-// distribution plot of all 30 clubs' comeback RATE at that depth (wins ÷ times
-// they sank that low), scaled 0 → the MLB leader, so the dot cloud IS the league
-// context: this club's dot (●) reads against the whole field and a tick at the
-// pooled MLB average. The numeric line keeps the honest sample size (N of M).
-const CBK_LABELS = {
-  sub10: 'Down to ≤10%',
-  sub20: 'Down to ≤20%',
-  sub30: 'Down to ≤30%',
-}
-function pctLabel(rate) {
-  return rate == null ? DASH : `${Math.round(rate * 100)}%`
-}
-// One depth's rail: every club plotted 0 → the league leader (maxRate), this
-// club's dot emphasized, a tick at the MLB average. Reuses the team-score rail's
-// dot/tooltip visuals + the shared beeswarm packer (via a 0–10 pseudo-score, so
-// a dot lands at rate ÷ maxRate of the width) so it can't drift from that rail.
-function ComebackRail({ t, teamId, clubName }) {
-  const [activeId, setActiveId] = useState(null)
-  const dismissTimer = useRef(null)
-  useEffect(() => () => window.clearTimeout(dismissTimer.current), [])
-
-  const max = t.maxRate > 0 ? t.maxRate : 1
-  const toPct = (rate) => (rate / max) * 100
-  const dots = beeswarmRows(
-    t.field
-      .filter((r) => r.teamId !== teamId)
-      .map((r) => ({ ...r, score: (r.rate / max) * 10 })),
-  )
-  const active = activeId != null ? t.field.find((r) => r.teamId === activeId) : null
-  const show = (id) => setActiveId(id)
-  const hide = () => setActiveId(null)
-  const tap = (id) => {
-    setActiveId(id)
-    window.clearTimeout(dismissTimer.current)
-    dismissTimer.current = window.setTimeout(
-      () => setActiveId((current) => (current === id ? null : current)),
-      2200,
-    )
-  }
-  const nameFor = (tid) => (tid === teamId ? clubName : teamClubName(tid)) ?? DASH
-
-  return (
-    <div className="team-score__track team-score__track--compact cbk__rail">
-      <div className="team-score__track-base" />
-      {t.leagueRate != null && (
-        <div className="cbk__avg" style={{ left: `${toPct(t.leagueRate)}%` }} aria-hidden="true" />
-      )}
-      {active && (
-        <div className="team-score__tooltip" style={{ left: `${toPct(active.rate)}%` }}>
-          {nameFor(active.teamId)} · {pctLabel(active.rate)}
-        </div>
-      )}
-      {dots.map((r) => (
-        <button
-          key={r.teamId}
-          type="button"
-          className="team-score__dot"
-          style={{ left: `${toPct(r.rate)}%`, top: `calc(11px + ${r.rowOffset}px)` }}
-          aria-label={`${nameFor(r.teamId)} ${pctLabel(r.rate)}`}
-          onMouseEnter={() => show(r.teamId)}
-          onMouseLeave={hide}
-          onFocus={() => show(r.teamId)}
-          onBlur={hide}
-          onClick={(e) => {
-            e.stopPropagation()
-            tap(r.teamId)
-          }}
-        />
-      ))}
-      {t.rate != null && (
-        <button
-          type="button"
-          className="team-score__dot team-score__dot--us"
-          style={{ left: `${toPct(t.rate)}%`, top: '11px' }}
-          aria-label={`${clubName || 'This team'} ${pctLabel(t.rate)}`}
-          onClick={(e) => e.stopPropagation()}
-          tabIndex={-1}
-        />
-      )}
-    </div>
-  )
-}
-function ComebackCard({ data, teamId, clubName }) {
-  return (
-    <div className="tstats-card cbk">
-      <div className="tstats-card__head">
-        <span>Comeback wins</span>
-        <em>all 30 teams</em>
-      </div>
-      <div className="tstats-card__body">
-        <p className="cbk__gloss">
-          How often {clubName || 'they'} rallied to win after their chance of winning the game
-          sank this low. Each rail plots all 30 clubs from 0% to the MLB leader; ● is{' '}
-          {clubName || 'this club'}, and the tick marks the MLB average.
-        </p>
-        <div className="cbk__rows">
-          {data.thresholds.map((t) => {
-            const beatsLeague = t.rate != null && t.leagueRate != null && t.rate > t.leagueRate
-            return (
-              <div key={t.key} className="cbk__row">
-                <div className="cbk__head">
-                  <span className="cbk__label">{CBK_LABELS[t.key]}</span>
-                  <span className="cbk__frac">
-                    <span className={`cbk__rate${beatsLeague ? ' cbk__rate--over' : ''}`}>
-                      {pctLabel(t.rate)}
-                    </span>
-                    <span className="cbk__of"> · {t.wins} of {t.att || DASH}</span>
-                    {t.rank === 1 && t.wins > 0 && (
-                      <span className="cbk__badge">{t.tied ? 'T-MLB best' : 'MLB best'}</span>
-                    )}
-                  </span>
-                </div>
-                <ComebackRail t={t} teamId={teamId} clubName={clubName} />
-                <div className="cbk__scale">
-                  <span>0%</span>
-                  <span className="cbk__scale-avg">MLB avg {pctLabel(t.leagueRate)}</span>
-                  <span>{pctLabel(t.maxRate)}</span>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function RosterList({ rows, season, showProspect }) {
-  return (
-    <ul className="thub-roster">
-      {rows.map((r) => (
-        <li key={`${r.id}-${r.jersey}`} className="thub-row">
-          <span className="thub-jersey">{r.jersey}</span>
-          <span className="thub-namewrap">
-            <PlayerLink id={r.id} className="thub-name">
-              {r.name}
-              {r.allStar && (
-                <span className="thub-allstar" title={`${season} All Star`}>★</span>
-              )}
-            </PlayerLink>
-            <InjuredMark hurt={r.hurt} />
-            {showProspect && <ProspectPill {...r.prospect} />}
-            <RookiePill active={r.rookie} />
-          </span>
-          {r.war !== undefined && (
-            <span
-              className={`rankchip${r.war == null ? '' : r.war >= 3 ? ' rankchip--good' : r.war < 0 ? ' rankchip--bad' : ''}`}
-              title="Season WAR (FanGraphs)"
-            >
-              {r.war == null ? DASH : r.war.toFixed(1)}
-            </span>
-          )}
-          {r.badge && <span className={r.badgeClass}>{r.badge}</span>}
-          <span className="thub-chev">›</span>
-        </li>
-      ))}
-    </ul>
   )
 }
