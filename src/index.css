@@ -2155,10 +2155,13 @@ body {
 }
 
 /* ---------------------------------------------------------------- loader
-   Manual-scoreboard loading indicator (Loader.jsx) — one cream score plate
-   advances through 0–9 inside a field-green frame, like a scorekeeper has
-   posted it from behind the board. The rest of the board stays still, so the
-   wait reads as a quiet update rather than a looping sports-action graphic. */
+   Manual-scoreboard loading indicator (Loader.jsx) — a mini National League
+   linescore (MILWAUKEE over CUBS, five columns) inside a field-green frame,
+   one cream score plate (Milwaukee's inning 2) advancing through 1–9 like a
+   scorekeeper posting it from behind the board. The rest of the board stays
+   still, so the wait reads as a quiet update rather than a looping
+   sports-action graphic. `message` rides the container's aria-live status
+   but is visually sr-only — the board is self-explanatory on its own. */
 .loader {
   display: flex;
   align-items: center;
@@ -2168,24 +2171,26 @@ body {
 
 .loader__stage {
   flex: none;
-  width: 96px;
 }
 
 .loader__scoreboard {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Number / team-name / three inning columns — the team-name column is the
+     only one that needs real room (MILWAUKEE is the widest cell on the
+     board); the rest size to a two-digit number. */
+  grid-template-columns: auto minmax(82px, auto) repeat(3, auto);
   overflow: hidden;
   border: 2px solid var(--field-deep);
-  /* Every grid cell is a real element (the linescore row runs the full three
+  /* Every grid cell is a real element (each row runs the full five
      columns), so this only shows through the 1px cell borders — kept at the
      deep field tone that grounds the whole plate. */
   background: var(--field-deep);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
 }
 
-.loader__inning-label {
+.loader__league {
   grid-column: 1 / -1;
-  padding: 2px 0 1px;
+  padding: 2px 2px 1px;
   color: var(--paper-2);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -2195,21 +2200,18 @@ body {
   text-align: center;
 }
 
-.loader__inning-grid {
-  display: contents;
-}
-
-.loader__inning-grid span,
+.loader__colhead,
+.loader__num,
+.loader__team,
+.loader__score,
 .loader__plate-window,
-.loader__zero,
 .loader__blank {
   display: grid;
   min-height: 23px;
   place-items: center;
+  padding: 0 2px;
   border-top: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
-  background: var(--field);
-  color: var(--paper-2);
   font-family: var(--font-mono);
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
@@ -2217,39 +2219,45 @@ body {
   line-height: var(--lh-solid);
 }
 
-/* Rightmost inning box — no border-right; the container edge closes it. The
-   cell directly below it (.loader__blank) draws the row divider with its own
-   border-top, so the boundary lines up with the zero/plate dividers to the
-   left instead of riding a pixel high on a border-bottom here. */
-.loader__inning-grid span:last-child {
+/* The "1 / 2 / 3" inning-number header row — lighter field tone, same as the
+   old single-row header, now spanning three of the five columns. */
+.loader__colhead {
+  padding: 0 6px;
+  background: var(--field);
+  color: var(--paper-2);
+}
+
+/* Rightmost header box — no border-right; the container edge closes it. */
+.loader__colhead:last-of-type {
   border-right: 0;
 }
 
-/* A static zero under inning 1, same darker-green/off-white treatment as the
-   plate window it sits beside — grounds the plate window (the one cell
-   that's actually animating) as "the rest of the board already reads zero,"
-   rather than looking like an unlabeled odometer on its own. */
-.loader__zero {
-  grid-column: 1;
+/* The jersey-number and team-name columns — same darker-green/off-white
+   "already posted" treatment as the score cells they sit beside, left-aligned
+   like a real linescore rather than centered like a single digit. */
+.loader__num,
+.loader__team {
+  place-items: center start;
+  padding: 0 6px;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+.loader__score {
   background: var(--field-deep);
   color: var(--text-on-ink);
 }
 
 .loader__plate-window {
-  grid-column: 2;
   overflow: hidden;
-  /* Keeps its inherited border-right — it now divides the plate window from the
-     blank column-3 cell, matching the "2"/"3" divider directly above. */
   background: var(--field-deep);
   color: var(--text-on-ink);
 }
 
-/* The column-3 cell of the bottom row (below the "3" box). A real cell — same
-   deep-green fill as the zero and plate window beside it — so the row runs the
-   full three columns like a proper linescore. Its border-top sits on the
-   row-2/row-3 boundary, exactly level with the zero/plate dividers. */
+/* The rightmost cell of each team row — a real cell, same deep-green fill as
+   the rest of the row, so the row runs the full five columns like a proper
+   linescore, with no border-right of its own (the container edge closes it). */
 .loader__blank {
-  grid-column: 3;
   border-right: 0;
   background: var(--field-deep);
 }
@@ -2262,6 +2270,8 @@ body {
   animation: loader-plate-settle 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Only rendered when a caller passes an explicit `message` (the board has no
+   visible caption by default — see the Loader.jsx header comment). */
 .loader__label {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
@@ -2276,9 +2286,6 @@ body {
 .loader--inline {
   gap: var(--space-2);
   padding: 8px 2px;
-}
-.loader--inline .loader__stage {
-  width: 76px;
 }
 .loader--inline .loader__label {
   font-size: var(--fs-ui);
