@@ -324,7 +324,7 @@ export function PlayerPage({ id, asOf, sportId }) {
               <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
             )}
 
-            <StatcastPercentiles savant={block.savant} group={block.group} />
+            <StatcastPercentiles savant={block.savant} raw={block.savantRaw} group={block.group} />
 
             {/* The run-prevention rates behind the headline tiles (FIP, ERA−,
                 K%/BB%, ground balls, opponents' line) — beside Statcast's

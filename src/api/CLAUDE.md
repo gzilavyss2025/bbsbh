@@ -385,6 +385,36 @@ for each generator; the reader modules:
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
   wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling
   the space the name/stats column leaves open on a wide screen.
+  `similarPitchersFor(data, personId, isMlb)` is the SECOND surface — the
+  player page's "Pitches like" card. It only flattens the file's per-level
+  entries into a pool (same level as the subject, never both — MLB and AAA are
+  different peer pools); the ranking itself is `src/lib/pitcherSimilarity.js`,
+  pure and unit-tested. Runs at RUNTIME with no precompute: ~500 arms × ~4 pitch
+  types is one pass over a file the page has already loaded, so a neighbour-table
+  generator would buy nothing. Handedness is a hard FILTER (not a distance term,
+  which a big enough arsenal match would eventually outvote) from the file's
+  `throws`, resolved at export time — see `scripts/CLAUDE.md`; an unknown hand is
+  skipped, never guessed. Two floors guard against overclaiming —
+  `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
+  is dropped — so an unusual arsenal returns a SHORT list or none rather than
+  filler. See `.scratch/player-profile-card/scope.md` §4.
+- `savantPercentiles.js` — season Statcast percentile ranks, from
+  `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
+  MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`
+  (same footing as `war.js`). Savant computes the percentiles AND its own
+  qualification floor, and PRE-FLIPS them so a higher percentile is always the
+  good direction even where a low raw number is the good one (xERA, BB%, chase).
+  Two maps per group: `savantPercentilesFor` (the ranks) and `savantRawFor` (the
+  RAW season rates behind them — a SEPARATE Savant leaderboard, because the
+  percentile board carries no raw values at all, every column already a rank).
+  `BATTER_METRICS`/`PITCHER_METRICS` hold display order, labels, plain-language
+  definitions, per-metric raw formatting and the `lowerIsBetter` flag;
+  `RADAR_KEYS` + `radarSpokes` join the two maps into the spoke list
+  `lib/radarGeometry.js` consumes. Surfaces: `StatcastPercentiles.jsx`'s flip
+  cards and the percentile radar (`components/playercard/StatRadar.jsx`) above
+  them. That pre-flip is exactly what makes a radar possible — it's what lets
+  five metrics in five different units share one "farther out is better" axis —
+  so read `radarGeometry.js`'s header before changing how any of it is scaled.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`

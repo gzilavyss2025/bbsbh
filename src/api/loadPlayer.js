@@ -32,7 +32,7 @@ import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
-import { fetchSavantPercentiles, savantPercentilesFor } from './savantPercentiles.js'
+import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor } from './savantPercentiles.js'
 import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import {
@@ -296,6 +296,9 @@ export async function loadPlayer(id, asOf) {
         // Pure passthrough lookup, not a derivation — attached here rather
         // than threaded into buildBlock's (pure-shaping) signature.
         block.savant = savantPercentilesFor(savantData, id, group)
+        // The raw season rates behind those percentiles, for the radar's spoke
+        // labels — same file, separate map (see savantRawFor).
+        block.savantRaw = savantRawFor(savantData, id, group)
         // "Pitches like" — same attach-after-buildBlock pattern. Ranked
         // against the level he's actually pitching at (see similarPitchersFor);
         // [] for a hitter, a MiLB arm below AAA, or anyone under the sample

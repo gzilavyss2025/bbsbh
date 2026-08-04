@@ -1,6 +1,7 @@
 # Player profile card — scope
 
-**Status:** scoping · no implementation scheduled
+**Status:** in progress — **E (Pitches like)** and **B (the polygon)** are built;
+A, C and D are not
 **Slug:** `player-profile-card`
 **Prompted by:** a dtwbaseball.com pitcher card (Clay Holmes, 2026), asking what it
 would take to do "this kind of analysis" on our player detail pages — specifically
@@ -217,6 +218,43 @@ is the `asOf` cutoff: like `FoulCard` and the Milestone Watch projection, a nigh
 precompute can't be cut back to "entering today," so **the whole card should hide
 under a spoiler `asOf`** rather than show full-season numbers on a page frozen to a
 past date.
+
+## 6a. What shipped, and what the build changed about this plan
+
+**E1 — Pitches like** and **B — the polygon** are built. Both landed close to
+the estimate; four things came out differently from the scoping above.
+
+1. **Handedness needed a data change after all.** §4 assumed the filter was free.
+   `pitch-arsenal.json` carried no `throws`, and no other league-wide file has it
+   either. Resolved by joining one bulk `/sports/{id}/players` call per level at
+   the generator's EXPORT step — no schema change, no backfill, and every pitcher
+   already on file gained a hand immediately (1,023 of 1,025). A new
+   `--export-only` flag rebuilds the JSON from rows already on disk, which is how
+   the committed file was refreshed without re-sweeping 582 games.
+2. **The `custom` leaderboard's selection ids are not the percentile board's
+   column names**, and a wrong one returns blanks rather than an error —
+   `chase_percent`, `exit_velocity` and `brl_percent` all silently blank. Working
+   ids: `oz_swing_percent`, `exit_velocity_avg`, `barrel_batted_rate`,
+   `fastball_avg_speed`. The generator now warns on mostly-empty coverage so a
+   future rename surfaces in the job log.
+3. **The radar needed a non-square viewBox.** SVG text runs outward from its
+   anchor, so an anchor comfortably inside the box can still have most of its
+   label clipped — which is exactly what happened to "Hard-hit ↓" on the left
+   edge, while every bounds assertion passed. Fixed with a horizontal gutter, a
+   fixed (not radius-proportional) label offset, and a `LABEL_ROOM` test that
+   asserts room for the TEXT rather than the anchor.
+4. **Two floors were added that the scope didn't call for**, both against
+   overclaiming: a 100-pitch sample floor to enter the comparison pool, and a
+   match floor of 50 below which a pairing is dropped rather than shown. A
+   pitcher with an unusual arsenal gets a short list or none instead of filler —
+   Kenley Jansen's 94%-cutter profile honestly tops out at a 67 match.
+
+Two things the estimate got right: the polygon really was a column-add plus pure
+geometry, and similarity really did need no new pipeline.
+
+Still open from §4: `pitch-arsenal.json` covers only games since 2026-07-09, so
+the comparison pool is a partial season. The card is correct but improves
+automatically after a `--since=<opening day>` backfill (open decision 5).
 
 ## 7. Recommended order
 

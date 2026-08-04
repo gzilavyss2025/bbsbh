@@ -233,9 +233,38 @@ don't run these by hand.
   `--sports=1,11` restricts the sweep, its real use being `--since=…
   --sports=11` to backfill AAA alone into a file that already has MLB).
   SQLite-backed (`pitch-arsenal` group, ADR-0021); `pitch_arsenal_ingested_games`
-  is the idempotency guard, keyed `(game_pk, level)`. App reads it via
-  `src/api/pitchArsenal.js` (the opposing-starter card's pitch-mix bar,
-  `PitchArsenalMix.jsx`).
+  is the idempotency guard, keyed `(game_pk, level)`. Each pitcher also carries
+  `throws`, the hard filter behind the player page's "Pitches like" card — but it
+  is resolved at EXPORT time from one bulk
+  `/sports/{id}/players?fields=people,id,pitchHand,code` call per level (~50 KB),
+  NOT stored per game. That's deliberate and worth keeping: an export-time join
+  needs no schema change and no backfill, so every pitcher already on file gained
+  a hand on the first run, where a per-game column would only have filled in as
+  each pitcher next happened to appear. A failed lookup is logged and skipped,
+  never fatal (the card just filters more conservatively — an unknown hand is
+  never guessed). `--export-only` rebuilds the JSON view from rows already on
+  disk with no sweep: the mode for whenever a derived, non-per-game field like
+  this one changes and re-fetching every ingested feed would change nothing in
+  the database. App reads it via `src/api/pitchArsenal.js` (the opposing-starter
+  card's pitch-mix bar `PitchArsenalMix.jsx`, and the player page's
+  `SimilarPitchers`).
+- `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
+  Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
+  Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile
+  math AND the qualification filtering itself, so this script does none of either.
+  TWO leaderboards, not one: that board reports percentiles ONLY — every column
+  in it is already a 0–100 rank — so the RAW season rates the player page's radar
+  prints beside each spoke come from a second call to Savant's `custom` board
+  (`rawBat`/`rawPit`). **The `custom` selection ids are NOT the percentile
+  board's column names**, which is the trap here: `chase_percent`,
+  `exit_velocity` and `brl_percent` are all accepted by `custom` and all come
+  back silently EMPTY (the working ids are `oz_swing_percent`,
+  `exit_velocity_avg`, `barrel_batted_rate`, `fastball_avg_speed`). A renamed id
+  therefore fails as blank cells rather than as an error, so the script logs
+  per-metric coverage and WARNS when a metric returns mostly empty — check that
+  warning first if spoke labels go missing. The raw fetch is never fatal; on
+  failure the radar plots its shape with no labels. App reads it via
+  `src/api/savantPercentiles.js`.
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record

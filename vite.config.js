@@ -433,7 +433,8 @@ export default defineConfig({
           '**/data/workload.json',
           // Season pitch-type mix per pitcher (~400 KB and growing across the
           // season — see scripts/gen-pitch-arsenal.mjs), read on demand by the
-          // opposing-starter card's pitch-mix bar only.
+          // opposing-starter card's pitch-mix bar and by the player page's
+          // "Pitches like" card, which ranks the whole league-wide pool.
           '**/data/pitch-arsenal.json',
           // The precomputed one-color club marks (~150 files, ~1.7 MB all
           // told — scripts/gen-mono-logos.mjs). One game shows exactly two of

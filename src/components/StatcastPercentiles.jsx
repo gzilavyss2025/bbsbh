@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { BATTER_METRICS, PITCHER_METRICS } from '../api/savantPercentiles.js'
+import { BATTER_METRICS, PITCHER_METRICS, radarSpokes } from '../api/savantPercentiles.js'
 import { FlipCard } from './FlipCard.jsx'
 import { StatcastCard } from './StatcastCard.jsx'
+import { StatRadar } from './playercard/StatRadar.jsx'
 
 // STATCAST — season percentile ranks (Baseball Savant), one small card per
 // metric rather than a bar chart mimicking Savant's own — reuses the
@@ -23,15 +24,26 @@ import { StatcastCard } from './StatcastCard.jsx'
 // — to a plain-language definition (`m.def`) on the back. Unlike the slate's
 // flip, there's no score to guard here, so each card is free to flip back and
 // forth on its own; MetricFlipCard just owns a local open/closed boolean.
-export function StatcastPercentiles({ savant, group }) {
+export function StatcastPercentiles({ savant, raw, group }) {
   if (!savant) return null
   const metrics = group === 'pitching' ? PITCHER_METRICS : BATTER_METRICS
   const rows = metrics.filter((m) => savant[m.key] != null)
   if (!rows.length) return null
 
+  // The polygon summarises five of the same percentiles the cards below list
+  // individually — shape first, then the numbers. It's the same data twice on
+  // purpose: the radar is for recognising a TYPE of player at a glance, the
+  // cards for reading any one metric. Null (too few known spokes) just leaves
+  // the cards, which is what this section has always been.
+  const spokes = radarSpokes(savant, raw, group)
+
   return (
     <section className="statcast-section">
-      <h3 className="section__title"><span>Statcast</span></h3>
+      <h3 className="section__title">
+        <span>Statcast</span>
+        <em>percentile rank</em>
+      </h3>
+      {spokes && <StatRadar spokes={spokes} />}
       <div className="statcast">
         {rows.map((m) => (
           <MetricFlipCard key={m.key} metric={m} pct={savant[m.key]} />

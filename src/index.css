@@ -16400,6 +16400,68 @@ body {
   padding-top: 0;
   border-top: none;
 }
+
+/* ---- the percentile polygon, above the cards it summarises. Navy ink on
+   manila with a graphite dashed ring for the average player: no seal amber
+   anywhere, that ink means "score cover" (see CLAUDE.md's spoiler rule) and
+   this is spoiler-free season data. Geometry is all computed in
+   lib/radarGeometry.js — nothing here positions anything, it only inks. ---- */
+.statradar {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 4px;
+}
+.statradar__svg {
+  width: 100%;
+  max-width: 400px; /* = radarGeometry's viewBox WIDTH (size 320 + 2×40 gutter) */
+  height: auto;
+}
+/* The rim is "best in the league" — a quiet boundary, not a feature. */
+.statradar__rim {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 1;
+}
+.statradar__axis {
+  stroke: var(--border-rule);
+  stroke-width: 0.5;
+}
+/* The league-average ring, dashed the way a pencilled reference line would be. */
+.statradar__avg {
+  fill: none;
+  stroke: var(--text-caption);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+/* The player himself, in ink. The translucent fill is what makes the silhouette
+   readable where it crosses the average ring. */
+.statradar__shape {
+  fill: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+/* The type tokens work here because the viewBox is 400 user units wide and the
+   svg is capped at 400px, so one user unit is one CSS pixel — see
+   radarGeometry's `size`/`gutter` note before changing either number. */
+.statradar__label {
+  font-family: var(--font-condensed);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  fill: var(--text-muted);
+}
+.statradar__down {
+  fill: var(--text-caption);
+}
+.statradar__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  fill: var(--text-heading);
+}
 .statcast-section .statcast > * {
   flex: 1 1 84px;
   min-width: 84px;
