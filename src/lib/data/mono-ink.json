@@ -1,4 +1,22 @@
 {
+  "103": {
+    "name": "Lake Elsinore Storm",
+    "art": "8:41a2d55d",
+    "parts": {
+      "3": "knockout",
+      "5": "knockout"
+    }
+  },
+  "105": {
+    "name": "Sacramento River Cats",
+    "art": "6:e787eee1",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "3": "knockout",
+      "4": "knockout"
+    }
+  },
   "108": {
     "name": "Los Angeles Angels",
     "art": "9:87bdd82a",
@@ -72,6 +90,18 @@
       "3": "knockout"
     }
   },
+  "233": {
+    "name": "Charleston RiverDogs",
+    "art": "16:f2e3fc42",
+    "parts": {
+      "2": "knockout",
+      "4": "knockout",
+      "6": "knockout",
+      "8": "knockout",
+      "11": "knockout",
+      "13": "knockout"
+    }
+  },
   "234": {
     "name": "Durham Bulls",
     "art": "14:c968305e",
@@ -100,11 +130,78 @@
       "6": "knockout"
     }
   },
+  "249": {
+    "name": "Wilson Warbirds",
+    "art": "14:c5d70efd",
+    "parts": {
+      "0": "knockout",
+      "1": "ink",
+      "3": "ink",
+      "4": "ink",
+      "6": "knockout",
+      "7": "knockout"
+    }
+  },
+  "259": {
+    "name": "Fresno Grizzlies",
+    "art": "15:6603d8e5",
+    "parts": {
+      "3": "knockout",
+      "6": "ink",
+      "8": "ink",
+      "10": "ink"
+    }
+  },
+  "279": {
+    "name": "Palm Beach Cardinals",
+    "art": "17:7f2ac91a",
+    "parts": {
+      "1": "ink",
+      "2": "knockout",
+      "3": "ink",
+      "4": "knockout",
+      "8": "ink",
+      "10": "ink",
+      "12": "knockout",
+      "13": "ink",
+      "16": "ink"
+    }
+  },
   "400": {
     "name": "Las Vegas Aviators",
     "art": "6:26af69cb",
     "parts": {
       "0": "knockout"
+    }
+  },
+  "401": {
+    "name": "Inland Empire 66ers",
+    "art": "22:713dd540",
+    "parts": {
+      "0": "knockout",
+      "4": "knockout",
+      "8": "knockout",
+      "10": "knockout",
+      "11": "knockout",
+      "14": "knockout",
+      "16": "knockout",
+      "17": "knockout",
+      "19": "knockout"
+    }
+  },
+  "414": {
+    "name": "Salem RidgeYaks",
+    "art": "20:e6e4e891",
+    "parts": {
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "10": "knockout",
+      "13": "knockout",
+      "14": "ink",
+      "15": "knockout",
+      "17": "knockout"
     }
   },
   "416": {
@@ -130,6 +227,15 @@
       "21": "ink"
     }
   },
+  "424": {
+    "name": "Dunedin Blue Jays",
+    "art": "10:7987726d",
+    "parts": {
+      "1": "ink",
+      "2": "knockout",
+      "3": "knockout"
+    }
+  },
   "431": {
     "name": "Gwinnett Stripers",
     "art": "21:5cd63bb5",
@@ -144,6 +250,14 @@
       "15": "knockout"
     }
   },
+  "436": {
+    "name": "Fredericksburg Nationals",
+    "art": "3:bc11af0c",
+    "parts": {
+      "0": "knockout",
+      "1": "ink"
+    }
+  },
   "445": {
     "name": "Columbus Clippers",
     "art": "7:d5d5e59e",
@@ -152,6 +266,92 @@
       "2": "knockout",
       "3": "knockout",
       "5": "knockout"
+    }
+  },
+  "448": {
+    "name": "Hickory Crawdads",
+    "art": "13:45210639",
+    "parts": {
+      "2": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "9": "knockout",
+      "11": "knockout"
+    }
+  },
+  "450": {
+    "name": "Daytona Tortugas",
+    "art": "17:e34fbea3",
+    "parts": {
+      "1": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "16": "ink"
+    }
+  },
+  "453": {
+    "name": "Brooklyn Cyclones",
+    "art": "6:77228800",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "3": "ink",
+      "5": "knockout"
+    }
+  },
+  "478": {
+    "name": "Augusta GreenJackets",
+    "art": "34:8336d7f3",
+    "parts": {
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "11": "knockout",
+      "20": "knockout",
+      "21": "knockout",
+      "22": "knockout",
+      "23": "ink",
+      "26": "ink"
+    }
+  },
+  "479": {
+    "name": "Jupiter Hammerheads",
+    "art": "24:f782799f",
+    "parts": {
+      "2": "knockout",
+      "5": "knockout",
+      "11": "knockout",
+      "13": "knockout",
+      "22": "knockout"
+    }
+  },
+  "481": {
+    "name": "Hill City Howlers",
+    "art": "16:3d07c105",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "10": "knockout",
+      "11": "knockout"
+    }
+  },
+  "487": {
+    "name": "Kannapolis Cannon Ballers",
+    "art": "14:2ceb49c2",
+    "parts": {
+      "3": "knockout",
+      "8": "knockout",
+      "10": "knockout",
+      "11": "knockout",
+      "12": "knockout"
     }
   },
   "494": {
@@ -165,11 +365,136 @@
       "6": "ink"
     }
   },
+  "507": {
+    "name": "St. Lucie Mets",
+    "art": "5:2d020cba",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "2": "knockout"
+    }
+  },
+  "509": {
+    "name": "Fort Myers Mighty Mussels",
+    "art": "23:1fba8d32",
+    "parts": {
+      "0": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "10": "knockout",
+      "13": "ink",
+      "14": "knockout",
+      "16": "knockout",
+      "17": "knockout",
+      "18": "knockout",
+      "19": "ink",
+      "20": "ink"
+    }
+  },
+  "512": {
+    "name": "Toledo Mud Hens",
+    "art": "14:ac97ebcb",
+    "parts": {
+      "2": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "13": "knockout"
+    }
+  },
+  "516": {
+    "name": "Visalia Rawhide",
+    "art": "2:c9d543a9",
+    "parts": {
+      "0": "knockout"
+    }
+  },
+  "521": {
+    "name": "Myrtle Beach Pelicans",
+    "art": "7:304d04a9",
+    "parts": {
+      "0": "knockout",
+      "1": "ink"
+    }
+  },
+  "524": {
+    "name": "Stockton Ports",
+    "art": "23:aafe2afe",
+    "parts": {
+      "10": "knockout"
+    }
+  },
+  "526": {
+    "name": "Rancho Cucamonga Quakes",
+    "art": "8:df811df5",
+    "parts": {
+      "5": "knockout"
+    }
+  },
+  "529": {
+    "name": "Tacoma Rainiers",
+    "art": "3:5209b913",
+    "parts": {
+      "0": "knockout"
+    }
+  },
+  "531": {
+    "name": "Scranton/Wilkes-Barre RailRiders",
+    "art": "7:30d5085f",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout"
+    }
+  },
+  "533": {
+    "name": "Worcester Red Sox",
+    "art": "4:5b7e274",
+    "parts": {
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout"
+    }
+  },
   "541": {
     "name": "Omaha Storm Chasers",
     "art": "6:6ede8587",
     "parts": {
       "5": "knockout"
+    }
+  },
+  "548": {
+    "name": "Delmarva Shorebirds",
+    "art": "9:fdfba43",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "7": "knockout"
+    }
+  },
+  "552": {
+    "name": "Syracuse Mets",
+    "art": "3:66d5dd5d",
+    "parts": {
+      "2": "knockout"
+    }
+  },
+  "554": {
+    "name": "Beloit Sky Carp",
+    "art": "50:2907b33",
+    "parts": {
+      "0": "ink",
+      "8": "ink",
+      "16": "knockout",
+      "21": "knockout",
+      "31": "ink",
+      "32": "ink",
+      "33": "ink",
+      "46": "knockout",
+      "49": "knockout"
     }
   },
   "556": {
@@ -179,11 +504,58 @@
       "1": "knockout"
     }
   },
+  "561": {
+    "name": "Salt Lake Bees",
+    "art": "9:899e3ac7",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "ink",
+      "8": "knockout"
+    }
+  },
+  "566": {
+    "name": "Clearwater Threshers",
+    "art": "8:7e01cfb2",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "6": "knockout",
+      "7": "knockout"
+    }
+  },
   "568": {
     "name": "Norfolk Tides",
     "art": "23:a331fd3a",
     "parts": {
       "8": "knockout"
+    }
+  },
+  "573": {
+    "name": "Asheville Tourists",
+    "art": "14:45366607",
+    "parts": {
+      "1": "knockout",
+      "4": "ink",
+      "5": "knockout",
+      "6": "ink",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "ink",
+      "12": "ink",
+      "13": "knockout"
+    }
+  },
+  "587": {
+    "name": "Tampa Tarpons",
+    "art": "11:5a90ef5d",
+    "parts": {
+      "1": "knockout",
+      "3": "ink",
+      "6": "ink",
+      "7": "ink"
     }
   },
   "1410": {
@@ -199,6 +571,53 @@
       "17": "knockout"
     }
   },
+  "1960": {
+    "name": "St. Paul Saints",
+    "art": "3:e68b9160",
+    "parts": {
+      "0": "knockout"
+    }
+  },
+  "2498": {
+    "name": "Bowling Green Hot Rods",
+    "art": "3:4c158bf7",
+    "parts": {
+      "1": "knockout",
+      "2": "knockout"
+    }
+  },
+  "3390": {
+    "name": "Bradenton Marauders",
+    "art": "15:ba88ccf3",
+    "parts": {
+      "1": "knockout",
+      "2": "ink",
+      "5": "ink",
+      "7": "ink",
+      "13": "ink"
+    }
+  },
+  "3705": {
+    "name": "Columbia Fireflies",
+    "art": "9:bfdbf4f3",
+    "parts": {
+      "2": "knockout",
+      "4": "knockout",
+      "6": "knockout",
+      "7": "knockout"
+    }
+  },
+  "3712": {
+    "name": "Fayetteville Woodpeckers",
+    "art": "15:12077c77",
+    "parts": {
+      "1": "ink",
+      "3": "knockout",
+      "4": "knockout",
+      "11": "knockout",
+      "12": "knockout"
+    }
+  },
   "4904": {
     "name": "El Paso Chihuahuas",
     "art": "19:42aae502",
@@ -207,6 +626,22 @@
       "2": "knockout",
       "13": "knockout",
       "16": "knockout"
+    }
+  },
+  "5434": {
+    "name": "Sugar Land Space Cowboys",
+    "art": "70:768e7fe8",
+    "parts": {
+      "3": "ink",
+      "11": "knockout",
+      "12": "knockout",
+      "14": "knockout",
+      "15": "ink",
+      "18": "ink",
+      "21": "ink",
+      "30": "ink",
+      "40": "ink",
+      "67": "ink"
     }
   }
 }

@@ -11108,32 +11108,22 @@ body {
   opacity: 0.45;
 }
 
-.idlab__monoinkpreviews {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  min-width: 180px;
-}
-
+/* Sized to match .idlab__monoinkart exactly — this is the same mark at the
+   same scale, just re-inked, so a shape's size next to its clickable original
+   is a true comparison rather than an eyeballed one. */
 .idlab__monoinkbar {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 168px;
+  padding: var(--space-2);
   border-radius: var(--radius-sm);
 }
 
 .idlab__monoinkmark {
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-}
-
-/* Same re-inking the real masthead does on a light bar (.is-themed--dark
-   .metricbar__logo) — a white knockout on a pale bar is invisible, and a
-   preview that hid that would be worse than no preview. */
-.idlab__monoinkbar--darkmark .idlab__monoinkmark {
-  filter: brightness(0);
+  width: 100%;
+  height: auto;
 }
 
 .idlab__monoinkbarlabel,
