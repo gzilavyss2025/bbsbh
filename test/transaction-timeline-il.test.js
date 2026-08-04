@@ -146,7 +146,7 @@ test('the stint row keeps the feed\'s wording, minus the redundant subject, plus
   // (AA), not the affiliate name — see ilArcClause.
   assert.equal(
     row.description,
-    '60-day injured list. Right elbow inflammation. Rehabbed with AA team, then activated Jun 19 after 83 days.',
+    '60-day injured list (right elbow inflammation). Rehabbed with AA team, then activated Jun 19 after 83 days.',
   )
 })
 
@@ -158,7 +158,7 @@ test('a rehab stop with no resolvable level drops out of the clause rather than 
   ]) // no levelByTeamId passed — same as an id the level lookup failed on
   assert.equal(
     row.description,
-    '60-day injured list. Right elbow inflammation. Activated Jun 19 after 83 days.',
+    '60-day injured list (right elbow inflammation). Activated Jun 19 after 83 days.',
   )
 })
 
@@ -166,7 +166,14 @@ test('an open stint carries no activation clause and no invented span', () => {
   const [row] = ilRows([
     sc('2026-06-02', 'New York Yankees placed RF Aaron Judge on the 10-day injured list. Right rib stress fracture.'),
   ])
-  assert.equal(row.description, '10-day injured list. Right rib stress fracture.')
+  assert.equal(row.description, '10-day injured list (right rib stress fracture).')
+})
+
+test('a retroactive placement puts the injury ahead of the "retroactive to" clause', () => {
+  const [row] = ilRows([
+    sc('2025-03-24', 'Milwaukee Brewers placed LHP Aaron Ashby on the 15-day injured list retroactive to March 24, 2025. Right oblique.'),
+  ])
+  assert.equal(row.description, '15-day injured list (right oblique) retroactive to March 24, 2025.')
 })
 
 test('a one-day stint says "1 day", not "1 days"', () => {
@@ -186,7 +193,7 @@ test('the feed\'s own repeated sentence and missing period are tidied', () => {
   ])
   assert.equal(
     repeated.description,
-    '10-day injured list. Right hip inflammation. Activated Aug 26 after 15 days.',
+    '10-day injured list (right hip inflammation). Activated Aug 26 after 15 days.',
   )
 
   const [unpunctuated] = ilRows([
@@ -195,7 +202,7 @@ test('the feed\'s own repeated sentence and missing period are tidied', () => {
   ])
   assert.equal(
     unpunctuated.description,
-    '7-day disabled list. Concussion symptoms. Activated Aug 11 after 13 days.',
+    '7-day disabled list (concussion symptoms). Activated Aug 11 after 13 days.',
   )
 })
 
@@ -237,7 +244,7 @@ test('a rehab tour with no recorded activation yet reads as its own clause', () 
   ], { levelByTeamId: AA_AAA_LEVELS })
   assert.equal(
     row.description,
-    '15-day injured list. Elbow. Rehabbing with AA and AAA teams.',
+    '15-day injured list (elbow). Rehabbing with AA and AAA teams.',
   )
 })
 

@@ -2134,11 +2134,25 @@ function tidyFeedProse(text) {
 // and it opened all four of Cole's stints identically. Dropping it leaves the
 // part that differs — "60-day injured list. Tommy John surgery recovery." —
 // which is also what the INJURED LIST chip reads into. Worth roughly a line and
-// a half per row on a phone, on the longest rows the card has. Falls back to
-// the whole sentence if the prefix doesn't parse.
+// a half per row on a phone, on the longest rows the card has.
+//
+// The feed writes the day count and the injury as two separate sentences
+// ("60-day injured list. Right elbow inflammation."), which reads like two
+// unrelated facts bumping into each other. The injury is a modifier of the
+// list, not its own clause, so it moves inline as a parenthetical —
+// "60-day injured list (right elbow inflammation)." — ahead of any
+// "retroactive to" date the feed also carries. Falls back to the whole
+// (subject-stripped) sentence if this shape doesn't parse — a placement type
+// the regex hasn't seen should degrade to the old wording, not vanish.
 function ilPlacementProse(t) {
   const full = tidyFeedProse(t.description)
-  return full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
+  const stripped = full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
+  const m = stripped.match(/^((?:\d+[- ]day )?(?:injured|disabled) list)(\s+retroactive to [^.]+)?\.\s*(.*)$/is)
+  if (!m) return stripped
+  const [, listPhrase, retro = '', injury = ''] = m
+  const injuryText = injury.trim().replace(/\.$/, '')
+  const paren = injuryText ? ` (${injuryText.charAt(0).toLowerCase()}${injuryText.slice(1)})` : ''
+  return `${listPhrase}${paren}${retro}.`
 }
 
 // "A", "A and B", "A, B and C" — never an Oxford-comma-less runon.
