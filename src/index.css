@@ -14555,11 +14555,14 @@ body {
 .tlead {
   margin-top: 4px;
 }
-/* A "See all ›" link that rides in the section header's right slot. */
-.tlead__seeall {
+/* .chevron-link — the shared "See all ›" text-button primitive (see
+   ChevronLink.jsx), composed by TeamLeaders' header action, TeamPage's
+   PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
+   for all three, so a tweak here reaches every placement. */
+.chevron-link {
   border: none;
   background: none;
-  padding: 0;
+  padding: 4px 2px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -14567,6 +14570,10 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
+}
+.chevron-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 /* Groups DeckNudge alongside "See all ›" in the header's right slot when
    TeamLeaders renders horizontal. */
@@ -14577,7 +14584,7 @@ body {
 }
 /* DeckNudge — the desktop "‹ ›" step control shared by TeamLeaders'
    horizontal deck and TeamTransactionsCard. Bare text, same quiet register
-   as .tlead__seeall/.inningnav's chevron labels, not a floating icon button:
+   as .chevron-link/.inningnav's chevron labels, not a floating icon button:
    no border, no background, no shadow. Mouse/trackpad only — a deck you can
    swipe never needs a click alternative, so this only exists where hover is
    possible at all. */
@@ -17102,7 +17109,7 @@ body {
 }
 
 /* FoulCard's "League foul tracker ›" — a destination-named chevron link out
-   of the card, same register as .tlead__seeall's "See all ›". Compound to
+   of the card, same register as .chevron-link's "See all ›". Compound to
    beat .plink's `font: inherit`/`color: inherit` reset (same fix as
    .plink.lineup__name/.plink.startercard__name above). */
 .plink.foulcard__more {
@@ -20835,7 +20842,7 @@ body {
 }
 /* Roster super-section's Season / Last 10 Games toggle, in the SectionTitle
    `action` slot — a two-button segmented control, same caps/tracking as
-   .tlead__seeall so it reads as part of the same header row. */
+   .chevron-link so it reads as part of the same header row. */
 .roster-super__toggle {
   display: flex;
   border: var(--bw-hair) solid var(--seal);
@@ -27724,11 +27731,12 @@ button.gamehigh-matchup:active {
 }
 
 
-/* ==== TEAM HUB: SHELL + TAB BAR + SHELF ==== */
+/* ==== TEAM HUB: SHELL + TAB BAR ==== */
 /* The only new chrome the team-page IA rebuild introduces: the tab bar under
-   the pinned identity header, and the collapsible shelf a tab uses for its
-   secondary modules. Existing card chrome (.thub-card and friends) carries over
-   unchanged — this effort moves modules, it does not restyle them. */
+   the pinned identity header. Secondary modules render as full cards, same as
+   any other module — no separate collapsed treatment. Existing card chrome
+   (.thub-card and friends) carries over unchanged — this effort moves
+   modules, it does not restyle them. */
 
 /* Five tabs, phone-first: they fit across a phone at this size, and scroll
    sideways rather than wrap if a longer label or a large text size pushes them
@@ -27780,99 +27788,22 @@ button.gamehigh-matchup:active {
   box-shadow: none;
 }
 
-/* The shelf: closed, one row carrying a title and its headline figure; open,
-   the module itself. The closed row deliberately reads lighter than a
-   .thub-card head — a shelf is a secondary module, and the hierarchy is the
-   whole point of collapsing it. */
-.teamshelf {
-  margin: 0 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  overflow: hidden;
-}
-.teamshelf__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border: 0;
-  background: none;
-  color: var(--text-heading);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-align: left;
-  cursor: pointer;
-}
-.teamshelf__row:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -2px;
-}
-.teamshelf__title {
-  flex: 1 1 auto;
-}
-/* The headline figure the closed row carries ("4", "7–3") — the reason a shelf
-   can stay shut without hiding the one number someone came for. */
-.teamshelf__sum {
-  flex: 0 0 auto;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-num);
-}
-.teamshelf__chev {
-  flex: 0 0 auto;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.teamshelf.is-open .teamshelf__chev {
-  transform: rotate(90deg);
-}
-.teamshelf__body {
-  padding: 0 var(--space-3) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-
 /* The Overview's preview door — the link that ends each preview card and
-   carries on to the tab holding the whole thing. Deliberately a bare text link
-   in exactly the register of .tlead__seeall (TeamLeaders' own built-in "See
-   all ›", which the Leaders preview reuses rather than doubling up), NOT a
-   second card: the tab bar, the shelf row and the Org index tile stay the only
-   new chrome the IA rebuild introduces. Right-aligned and tucked up under the
-   card it belongs to, so it reads as that card's footer rather than as a
-   free-floating control between two cards. */
+   carries on to the tab holding the whole thing. Wraps a .chevron-link (the
+   same shared "See all ›" primitive TeamLeaders' own header action and
+   NumbersTab's "Org leaders ›" use), NOT a second card: the tab bar and the
+   Org index tile stay the only new chrome the IA rebuild introduces.
+   Right-aligned; `.thub-card` carries no bottom margin of its own, so the
+   door's own top margin is what keeps it from reading as glued to the
+   card/table above. */
 .thub-door {
   display: flex;
   justify-content: flex-end;
-  margin: -6px 0 var(--space-4);
-}
-.thub-door__btn {
-  border: none;
-  background: none;
-  padding: 4px 2px;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  color: var(--accent-link);
-}
-.thub-door__btn:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  margin: var(--space-2) 0 var(--space-4);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .teamtabs__btn,
-  .teamshelf__chev {
+  .teamtabs__btn {
     transition: none;
   }
 }
@@ -27887,48 +27818,8 @@ button.gamehigh-matchup:active {
 /* ==== TEAM HUB: NUMBERS TAB ==== */
 
 
-/* ==== TEAM HUB: ORG TAB ==== */
-/* The index grid the Org tab opens with — affiliates/prospects/jerseys/history
-   are a browse-by-tile list, not a reading order (see PRD "shape we're
-   building"). Two columns fit a phone; a tile scrolls to its own section
-   below rather than navigating anywhere, so it needs no active/selected
-   state of its own. */
-.orgindex {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-  margin: 0 0 var(--space-4);
-}
-.orgindex__tile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  text-align: left;
-  cursor: pointer;
-}
-.orgindex__tile:active {
-  transform: scale(0.97);
-}
-.orgindex__tile:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.orgindex__count {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.orgindex__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
+/* ==== TEAM HUB: MINORS TAB ==== */
+/* No tab-specific chrome — a plain reading order (Affiliation history,
+   Affiliates, Prospects), each an existing card component. The index grid
+   this tab (formerly "Org") used to open with is gone; every section renders
+   in full now rather than behind a jump-tile. */

@@ -4,16 +4,23 @@ import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.j
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { rankTeam, ordinal } from '../../../api/person.js'
+import {
+  fetchTeamUniformCatalog,
+  fetchGameJerseys,
+  fetchUniformNameOverrides,
+  buildJerseyCombos,
+} from '../../../api/uniforms.js'
+import { teamClubName } from '../../../lib/teams.js'
 import { dayOfWeekRecord } from '../modules/TeamStatsCard.jsx'
 import { seasonOf, cutoffFor, scoreCutoffFor, standingsRowsFor, injuredIdsFrom } from './shared.js'
 
 const DASH = '—'
 
 // The Numbers tab's own data: standings, team batting/pitching ranks, the
-// leaderboard pool, comeback-win rates, and the day-of-week record — see
-// .scratch/team-page-ia/issues/05-numbers-tab.md.
+// leaderboard pool, comeback-win rates, the day-of-week record, and jersey
+// combos — see .scratch/team-page-ia/issues/05-numbers-tab.md.
 //
-// Fetches nothing else — no roster, 40-man, WAR, uniforms, photos, prospects,
+// Fetches nothing else — no roster, 40-man, WAR, photos, prospects,
 // affiliates or transactions. Those belong to the other tabs.
 
 function statRank(rows, teamId, key, label, lowerBetter) {
@@ -28,25 +35,36 @@ export async function loadNumbers(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
+  const isMilb = sportId !== 1
   const season = seasonOf(asOf)
   const standingsDate = cutoffFor(asOf)
   const scoreCutoff = scoreCutoffFor(asOf)
 
-  const [standings, league, leaderPool, postseasonOddsData, comebackWinsData, schedule, ilRoster] =
-    await Promise.all([
-      team.league?.id
-        ? fetchStandings(team.league.id, season, standingsDate)
-        : Promise.resolve([]),
-      sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
-      loadCombinedPoolForTeams([{ id }], season),
-      sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
-      sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
-      // Cutoff-gated rows only — `won` stays null past standingsDate (see
-      // fetchTeamSchedule), which is what keeps the day-of-week record from
-      // looking ahead. Don't re-derive it from Final status.
-      fetchTeamSchedule(id, season, sportId, standingsDate),
-      fetchTeamIL(id, season),
-    ])
+  const [
+    standings,
+    league,
+    leaderPool,
+    postseasonOddsData,
+    comebackWinsData,
+    schedule,
+    ilRoster,
+    uniformCatalog,
+    uniformNameOverrides,
+  ] = await Promise.all([
+    team.league?.id ? fetchStandings(team.league.id, season, standingsDate) : Promise.resolve([]),
+    sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
+    loadCombinedPoolForTeams([{ id }], season),
+    sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
+    sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
+    // Cutoff-gated rows only — `won` stays null past standingsDate (see
+    // fetchTeamSchedule), which is what keeps the day-of-week record from
+    // looking ahead. Don't re-derive it from Final status. Also feeds the
+    // jersey-record join below (MLB only).
+    fetchTeamSchedule(id, season, sportId, standingsDate),
+    fetchTeamIL(id, season),
+    isMilb ? Promise.resolve({}) : fetchTeamUniformCatalog([id], season),
+    isMilb ? Promise.resolve({}) : fetchUniformNameOverrides(),
+  ])
 
   const standingsRows = standingsRowsFor(standings, team, id)
   const divisionPostseasonOdds =
@@ -93,6 +111,34 @@ export async function loadNumbers(id, asOf) {
 
   const dayOfWeek = schedule.some((g) => g.won != null) ? dayOfWeekRecord(schedule) : null
 
+  // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
+  // with its logo treatment and the club's W-L in the games it wore it. The
+  // worn-jersey join needs the per-game uniform assignment, one extra batched
+  // /uniforms/game call over just the games with a VISIBLE result (`won`
+  // already cutoff-gated by fetchTeamSchedule above), so an `asOf` team page
+  // never counts a game past its own spoiler cutoff. Skipped for a club with
+  // no catalog (MiLB) — buildJerseyCombos then returns [].
+  const decidedGames = schedule.filter((g) => g.won != null)
+  const wornByGame =
+    !isMilb && decidedGames.length ? await fetchGameJerseys(decidedGames.map((g) => g.gamePk)) : {}
+  const jerseyCombos = isMilb
+    ? []
+    : buildJerseyCombos({
+        catalogAssets: uniformCatalog[id] ?? [],
+        clubName: teamClubName(id),
+        schedule,
+        wornByGame,
+        teamId: id,
+        nameOverrides: uniformNameOverrides,
+      })
+
+  // This club's own home/away split, off the standings row — feeds the
+  // Home/Away jersey cards below (MiLB only; an MLB club's cards carry a
+  // real per-jersey-worn record instead, from buildJerseyCombos above).
+  const myStanding = standingsRows.find((s) => s.isMe)
+  const homeRecord = myStanding?.homeRecord ?? { wins: 0, losses: 0 }
+  const awayRecord = myStanding?.awayRecord ?? { wins: 0, losses: 0 }
+
   return {
     team,
     standings: standingsRows,
@@ -102,6 +148,9 @@ export async function loadNumbers(id, asOf) {
     leaderPool,
     comeback,
     dayOfWeek,
+    jerseyCombos,
+    homeRecord,
+    awayRecord,
     injuredIds: injuredIdsFrom(ilRoster),
   }
 }

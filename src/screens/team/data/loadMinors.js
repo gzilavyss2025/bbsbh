@@ -6,34 +6,26 @@ import {
   fetchRosterIdsForTeams,
   fetchTeamRosterIds,
 } from '../../../api/team.js'
-import {
-  fetchTeamUniformCatalog,
-  fetchGameJerseys,
-  fetchUniformNameOverrides,
-  buildJerseyCombos,
-} from '../../../api/uniforms.js'
-import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../../../api/prospects.js'
 import { parentOrgHistory } from '../../../api/milbHistory.js'
 import { fetchTeamLogoTint } from '../../../api/person-fetch.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
-import { SPORT_LABEL, teamClubName } from '../../../lib/teams.js'
-import { seasonOf, cutoffFor } from './shared.js'
+import { SPORT_LABEL } from '../../../lib/teams.js'
+import { seasonOf } from './shared.js'
 
 const DASH = '—'
 
-// The Org tab's own loader — affiliates, org-wide prospects, jersey combos and
-// (MiLB only) affiliation history. Fetches nothing else: roster, standings,
-// schedule results, league stats, transactions and odds all belong to other
-// tabs.
+// The Minors tab's own loader — affiliates, org-wide prospects and (MiLB only)
+// affiliation history. Fetches nothing else: roster, standings, schedule
+// results, league stats, jersey combos, transactions and odds all belong to
+// other tabs (jersey combos moved to the Numbers tab — see loadNumbers.js).
 
-export async function loadOrg(id, asOf) {
+export async function loadMinors(id, asOf) {
   const team = await fetchTeam(id)
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
   const season = seasonOf(asOf)
-  const standingsDate = cutoffFor(asOf)
   // The MLB parent's own id — same value whether this page IS the parent or
   // one of its affiliates (team.parentOrgId rides along on a MiLB team's
   // /teams response). Every prospect belongs to the org, not to one specific
@@ -41,23 +33,18 @@ export async function loadOrg(id, asOf) {
   // same org-wide leaderboard.
   const orgId = isMilb ? team.parentOrgId ?? null : id
 
-  const [roster, affiliates, complexAffiliates, prospectsSnapshot, schedule, uniformCatalog, uniformNameOverrides] =
-    await Promise.all([
-      // Only needed to seed this org's own roster ids below (MLB clubs only —
-      // a MiLB affiliate's org roster comes from fetchTeamRosterIds instead).
-      isMilb ? Promise.resolve([]) : fetchTeamRoster(id, season, { sportId }),
-      // The affiliate tree is keyed off the ORG id (not `id`), so an
-      // affiliate's own page gets the same tree its MLB parent would.
-      orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
-      // Complex/rookie-level clubs, resolved separately — see
-      // fetchComplexAffiliates for why they can't just join AFFILIATE_SPORT_IDS.
-      orgId ? fetchComplexAffiliates(orgId, season) : Promise.resolve([]),
-      fetchTopProspects(),
-      // Only needed for the MLB jersey-record join below.
-      isMilb ? Promise.resolve([]) : fetchTeamSchedule(id, season, sportId, standingsDate),
-      isMilb ? Promise.resolve({}) : fetchTeamUniformCatalog([id], season),
-      isMilb ? Promise.resolve({}) : fetchUniformNameOverrides(),
-    ])
+  const [roster, affiliates, complexAffiliates, prospectsSnapshot] = await Promise.all([
+    // Only needed to seed this org's own roster ids below (MLB clubs only —
+    // a MiLB affiliate's org roster comes from fetchTeamRosterIds instead).
+    isMilb ? Promise.resolve([]) : fetchTeamRoster(id, season, { sportId }),
+    // The affiliate tree is keyed off the ORG id (not `id`), so an
+    // affiliate's own page gets the same tree its MLB parent would.
+    orgId ? fetchAffiliates(orgId, season) : Promise.resolve([]),
+    // Complex/rookie-level clubs, resolved separately — see
+    // fetchComplexAffiliates for why they can't just join AFFILIATE_SPORT_IDS.
+    orgId ? fetchComplexAffiliates(orgId, season) : Promise.resolve([]),
+    fetchTopProspects(),
+  ])
 
   // Each org prospect's CURRENT level, resolved by live roster membership
   // (not the scraped, sometimes-ambiguous level string, e.g. "ALL (2)") — a
@@ -132,27 +119,6 @@ export async function loadOrg(id, asOf) {
       )
     : []
 
-  // Record-by-jersey strip (MLB only) — one card per catalog jersey, tagged
-  // with its logo treatment and the club's W-L in the games it wore it. The
-  // worn-jersey join needs the per-game uniform assignment, one extra batched
-  // /uniforms/game call over just the games with a VISIBLE result (`won`
-  // already cutoff-gated by fetchTeamSchedule above), so an `asOf` team page
-  // never counts a game past its own spoiler cutoff. Skipped for a club with
-  // no catalog (MiLB) — buildJerseyCombos then returns [].
-  const decidedGames = schedule.filter((g) => g.won != null)
-  const wornByGame =
-    !isMilb && decidedGames.length ? await fetchGameJerseys(decidedGames.map((g) => g.gamePk)) : {}
-  const jerseyCombos = isMilb
-    ? []
-    : buildJerseyCombos({
-        catalogAssets: uniformCatalog[id] ?? [],
-        clubName: teamClubName(id),
-        schedule,
-        wornByGame,
-        teamId: id,
-        nameOverrides: uniformNameOverrides,
-      })
-
   // On a MiLB affiliate page, lead the Affiliates section with a card for the
   // parent MLB club (which fetchAffiliates deliberately omits from the farm
   // tree). Location is unavailable from the static team record, so the card
@@ -169,7 +135,6 @@ export async function loadOrg(id, asOf) {
     isMilb,
     affiliateCards,
     prospects,
-    jerseyCombos,
     affiliationHistory,
   }
 }

@@ -9,7 +9,7 @@ import { lastName } from '../../../api/select.js'
 // code", not "two loaders look similar". Anything a single tab owns stays in that
 // tab's loader: the recent-form window and the per-pitcher game-log fixup are
 // only ever the Roster tab's, the postseason-odds join only the Numbers tab's and
-// the Overview's, the prospect-level resolution only the Org tab's.
+// the Overview's, the prospect-level resolution only the Minors tab's.
 
 const DASH = '—'
 
@@ -63,6 +63,15 @@ function splitWL(rec, type) {
   const t = (rec.records?.splitRecords ?? []).find((s) => s.type === type)
   return t ? `${t.wins}-${t.losses}` : DASH
 }
+// The same split, as raw { wins, losses } rather than a formatted string — for
+// a caller that wants to feed it through its own W-L formatter (the Numbers
+// tab's home/away jersey cards). Absent split degrades to { wins: 0, losses: 0 }
+// rather than null, since every consumer's own formatter already reads 0-0 as
+// "no games yet".
+function splitRecord(rec, type) {
+  const t = (rec.records?.splitRecords ?? []).find((s) => s.type === type)
+  return { wins: t?.wins ?? 0, losses: t?.losses ?? 0 }
+}
 function runDiff(rec) {
   const d = rec.runDifferential
   if (!Number.isFinite(d)) return DASH
@@ -103,6 +112,8 @@ export function standingsRowsFor(standings, team, id) {
     l10: splitWL(t, 'lastTen'),
     home: splitWL(t, 'home'),
     away: splitWL(t, 'away'),
+    homeRecord: splitRecord(t, 'home'),
+    awayRecord: splitRecord(t, 'away'),
     diff: runDiff(t),
     diffTone: runDiffTone(t),
     isMe: t.team.id === id,

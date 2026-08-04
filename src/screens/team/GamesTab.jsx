@@ -2,7 +2,6 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncGate } from '../../components/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/TeamTransactionsCard.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
-import { TeamShelf } from './TeamShelf.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadGames } from './data/loadGames.js'
 import { LastTenGames } from './modules/LastTenGames.jsx'
@@ -14,9 +13,8 @@ function isoToday() {
 }
 
 // The Games tab: season schedule (the tab's headline), the last-ten strip,
-// and two shelves — Photos and Transactions — both closed by default so
-// their fetches never happen on a visitor who doesn't open them. See
-// data/loadGames.js for what this tab fetches and why.
+// then Photos and Transactions, each its own full card. See data/loadGames.js
+// for what this tab fetches and why.
 export function GamesTab({ id, asOf, sportId }) {
   const teamId = Number(id)
   const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
@@ -60,30 +58,20 @@ export function GamesTab({ id, asOf, sportId }) {
       )}
 
       {seasonGames.length > 0 && (
-        <TeamShelf teamId={teamId} title="Photos">
-          {() => (
-            // A closed shelf never mounts this, so the photo walk-back only
-            // starts once someone opens it — the single biggest first-load
-            // saving on this tab. `seasonGames` (not the raw schedule) keeps
-            // this spoiler-safe, see loadGames.js.
-            <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={seasonGames} />
-          )}
-        </TeamShelf>
+        // `seasonGames` (not the raw schedule) keeps this spoiler-safe, see
+        // loadGames.js.
+        <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={seasonGames} />
       )}
 
       {transactionsPage.days.length > 0 && (
-        <TeamShelf teamId={teamId} title="Transactions" summary={String(transactionsPage.days.length)}>
-          {() => (
-            <TeamTransactionsCard
-              key={`${team.id}-${asOf ?? ''}`}
-              teamId={team.id}
-              asOf={asOf}
-              initialDays={transactionsPage.days}
-              initialCursor={transactionsPage.cursor}
-              initialHasMore={transactionsPage.hasMore}
-            />
-          )}
-        </TeamShelf>
+        <TeamTransactionsCard
+          key={`${team.id}-${asOf ?? ''}`}
+          teamId={team.id}
+          asOf={asOf}
+          initialDays={transactionsPage.days}
+          initialCursor={transactionsPage.cursor}
+          initialHasMore={transactionsPage.hasMore}
+        />
       )}
     </TeamHubShell>
   )

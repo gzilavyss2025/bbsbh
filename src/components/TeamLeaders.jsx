@@ -10,6 +10,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
 import { InjuredMark } from './InjuredMark.jsx'
 import { DeckNudge } from './DeckNudge.jsx'
+import { ChevronLink } from './ChevronLink.jsx'
 
 // The horizontal deck's per-card scroll step (card width + gap, both from
 // .tlead__grid--horizontal in index.css) — DeckNudge's click target.
@@ -242,7 +243,8 @@ function LeaderCategory({
 // worse than the page's own vertical scroll, so they leave this off.
 // `secondaryAction`: optional extra node rendered after "See all ›" in the
 // same header slot — TeamPage's only use is its "Organization leaders ›"
-// link, styled to match via the shared .tlead__seeall class.
+// link, built from the same shared ChevronLink as this component's own
+// "See all ›".
 export function TeamLeaders({
   pool,
   categories,
@@ -289,11 +291,7 @@ export function TeamLeaders({
               {horizontal && (
                 <DeckNudge scrollRef={scrollRef} cardStep={HORIZONTAL_CARD_STEP} label="team leaders" />
               )}
-              {onSeeAll && (
-                <button type="button" className="tlead__seeall" onClick={onSeeAll}>
-                  See all ›
-                </button>
-              )}
+              {onSeeAll && <ChevronLink onClick={onSeeAll}>See all</ChevronLink>}
               {secondaryAction}
             </span>
           ) : null

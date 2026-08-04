@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncGate } from '../../components/AsyncGate.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
-import { TeamShelf } from './TeamShelf.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadRoster } from './data/loadRoster.js'
 import { lineupDefenseFrom } from './data/shared.js'
@@ -11,8 +10,9 @@ import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
 import { InjuredListCard } from './modules/InjuredListCard.jsx'
 
 // Roster tab: the season roster projection (full, at the top — this is the
-// tab's headline), then the 40-man Current Roster and the Injured List as
-// shelves. Its own loadRoster.js fetches only what those three need — see
+// tab's headline), then the 40-man Current Roster and the Injured List, each
+// its own full card. Its own loadRoster.js fetches only what those three
+// need — see
 // .scratch/team-page-ia/issues/03-roster-tab.md. Runs alongside
 // loadTeamIdentity (the shell's own cheap loader every tab pays for) rather
 // than duplicating its fetches here.
@@ -97,17 +97,11 @@ export function RosterTab({ id, asOf, sportId }) {
       )}
 
       {(position.length > 0 || pitchers.length > 0) && (
-        <TeamShelf teamId={teamId} title="Current Roster" summary={position.length + pitchers.length}>
-          {() => (
-            <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
-          )}
-        </TeamShelf>
+        <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
       )}
 
       {injured.length > 0 && (
-        <TeamShelf teamId={teamId} title="Injured List" summary={injured.length}>
-          {() => <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />}
-        </TeamShelf>
+        <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />
       )}
     </TeamHubShell>
   )

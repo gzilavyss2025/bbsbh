@@ -5,6 +5,7 @@ import { AsyncGate } from '../components/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'
+import { ChevronLink } from '../components/ChevronLink.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'
@@ -18,17 +19,15 @@ import { RosterProjection } from './team/modules/RosterProjection.jsx'
 const PREVIEW_LEADER_CATEGORIES = 3
 const PREVIEW_TRANSACTIONS = 3
 
-// The door itself: one text link under a preview, in the same caps/tracking
-// register as .tlead__seeall (which is TeamLeaders' own built-in door, reused
-// as-is below rather than doubled up). It is a link, not a card — the tab bar,
-// the shelf row and the Org index tile remain the only new chrome this rebuild
-// introduces (see the PRD's non-negotiable 4).
+// The door itself: one text link under a preview, built from the same shared
+// ChevronLink TeamLeaders' own built-in door uses (reused as-is below rather
+// than doubled up). It is a link, not a card — the tab bar, the shelf row and
+// the Org index tile remain the only new chrome this rebuild introduces (see
+// the PRD's non-negotiable 4).
 function PreviewDoor({ label, onClick }) {
   return (
     <div className="thub-door">
-      <button type="button" className="thub-door__btn" onClick={onClick}>
-        {label} ›
-      </button>
+      <ChevronLink onClick={onClick}>{label}</ChevronLink>
     </div>
   )
 }

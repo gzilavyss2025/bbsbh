@@ -33,8 +33,8 @@ only its own data:
 /team/{id}            Overview   six previews, each a door into a tab
 /team/{id}/roster     Roster     projection, 40-man, injured list
 /team/{id}/games      Games      schedule, last ten, photos, transactions
-/team/{id}/numbers    Numbers    standings, batting, pitching, leaders, splits
-/team/{id}/org        Org        affiliates, prospects, jerseys, history
+/team/{id}/numbers    Numbers    standings, batting, pitching, leaders, jerseys, splits
+/team/{id}/minors     Minors     affiliates, prospects, history (was "Org")
 /team/{id}/leaders    (predates the rebuild — the pattern being copied)
 ```
 
@@ -53,15 +53,24 @@ door re-fetch everything, the front door has become the old page again.
 
 Two behaviours carry the hierarchy inside a tab:
 
-- **Shelves** (`TeamShelf.jsx`). A tab's secondary modules render collapsed to
-  one row carrying their headline figure ("Injured · 4"), expanding in place. A
-  shelf takes its children as a render function, so a closed shelf never mounts
-  them and never fires their fetches — that is how the Games tab's photo
-  walk-back costs nothing until someone asks for photos. It borrows `SealBox`'s
-  shape for that mechanical reason only: **a shelf is not a seal**, nothing on
-  the team page is sealed, and it must never be described or relied on as one.
-- **An index grid** opens the Org tab, because affiliates / prospects / jerseys
-  / history genuinely are a browse-by-tile list rather than a reading order.
+- **Shelves** (`TeamShelf.jsx`, removed 2026-08-04). A tab's secondary modules
+  originally rendered collapsed to one row carrying their headline figure
+  ("Injured · 4"), expanding in place; a shelf took its children as a render
+  function, so a closed shelf never mounted them and never fired their
+  fetches. Superseded — every module now renders as a full card, same as the
+  tab's headline module, with no collapsed state. The Games tab's photo
+  walk-back (previously deferred until a shelf opened) now fires on tab load.
+- **An index grid** (`.orgindex`, removed 2026-08-04) originally opened the
+  Org tab (`OrgTab.jsx` → `MinorsTab.jsx`, renamed the same day), because
+  affiliates / prospects / history genuinely were a browse-by-tile list
+  rather than a reading order. Jersey combos moved to the Numbers tab (below
+  Team Leaders) the same day — they read as "the club's numbers" more than as
+  an org-browse tile, and Numbers' own `loadNumbers.js` already fetched that
+  tab's schedule, which the jersey-record join reuses instead of re-fetching
+  it. Affiliates and Prospects then dropped their own index tiles, leaving
+  Affiliation History (MiLB-only) as the grid's one tile — at which point the
+  grid itself was removed too: Affiliation History now leads the tab as a
+  plain section, ahead of Affiliates and Prospects, with no jump-tile at all.
 
 ## Why ownership-by-file, and why the loaders were duplicated on purpose
 
@@ -103,10 +112,10 @@ redundancy to fall back on.
 ## What was not done
 
 No visual redesign. Existing card chrome, tokens and typography carry over
-untouched; the new chrome is exactly four things — the tab bar, the shelf row,
-the Org index tile, and the Overview's preview door (`.thub-door`, a text link
-in `.tlead__seeall`'s register, not a card). This effort moved modules; it did
-not restyle them.
+untouched; the new chrome was exactly four things — the tab bar, the shelf row
+(since removed, see above), the Org/Minors index tile, and the Overview's
+preview door (`.thub-door`, a text link built from the shared `.chevron-link`
+primitive, not a card). This effort moved modules; it did not restyle them.
 
 Previews are **props on the existing modules** (`preview` on `StandingsCard` and
 `RosterProjection`, `previewCount` on `LastTenGames`, `limit` on

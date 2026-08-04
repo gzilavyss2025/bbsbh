@@ -152,7 +152,7 @@ export async function fetchTeamRosterEntries(teamId, rosterType = 'active') {
 // prospects on this roster" badge (rosterType='active', the default: who's on
 // the field now), which only needs to know who's on the roster, not their
 // stats. Lighter than fetchTeamRoster. TeamPage's prospect-affiliate
-// resolution (see the Org tab's loadOrg) passes '40Man' instead, so an injured prospect
+// resolution (see the Minors tab's loadMinors) passes '40Man' instead, so an injured prospect
 // still resolves to his real affiliate — 'active' alone was dropping any
 // prospect on a 7-/60-day IL to the scraped level text with no logo (see
 // prospects.js). Derives from fetchTeamRosterEntries' shared cache rather
