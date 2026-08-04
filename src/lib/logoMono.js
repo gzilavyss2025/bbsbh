@@ -155,53 +155,16 @@ function countInheriting(markup) {
 //
 // A part index is the shape's ordinal among the drawable elements, in document
 // order, counted the same way in all three functions below — which is why they
-// all walk DRAWABLE_TAG over the same body string (by way of `bodyOf`, which
-// runs it through `splitCompoundPaths` first) rather than each having their
-// own idea of what a shape is. `monoLogoPickerSvg` hands the browser art
+// all walk DRAWABLE_TAG over the same body string rather than each having
+// their own idea of what a shape is. `monoLogoPickerSvg` hands the browser art
 // stamped with those exact indices, so a click can't mean a different shape
 // than a pin does.
 //
 // The indices only hold while the art holds still. `monoLogoFingerprint`
 // travels with a saved pin set so a club that rebrands into different art
 // drops back to the automatic pass instead of applying yesterday's answers to
-// today's shapes — and since splitting changes what counts as a shape, it
-// also retires every pin set that predates it, the same way a redrawn logo
-// would.
+// today's shapes.
 // ---------------------------------------------------------------------------
-
-// Illustrator commonly draws several disconnected pieces as ONE compound
-// <path> — SVG's shorthand for "these share a fill", not a claim they're one
-// shape (Chattanooga's octagon frame plus several accent squiggles on its
-// letters, all one path, one fill). A part index addresses a whole element,
-// so a shape merged this way could never be corrected on its own. Splitting
-// each path's subpaths into sibling <path> elements turns every disconnected
-// piece back into its own pinnable part.
-//
-// Deliberately conservative about where it splits: only an ABSOLUTE `M`
-// starts a new piece. A subpath opening with a relative `m` is positioned
-// relative to the PREVIOUS subpath's end point — information a standalone
-// element wouldn't have — so those stay merged rather than risk moving the
-// shape. The one real cost: a subpath pair that relied on shared winding to
-// cut a hole (a ring, a letter's counter) renders as two solid shapes once
-// split, same as pinning them to different verdicts always would have —
-// visible immediately in the lab's own preview, and correctable by pinning
-// the inner piece to knockout.
-const PATH_ELEMENT = /<path\b([^>]*?)\/?>/gi
-
-// Exported for logoRecolor.js: `forceFill` walks the same DRAWABLE_TAG
-// ordinal as this file's own part functions, so a repaint has to start from
-// split markup too, or "shape 5" would mean a subpath here and the old
-// merged element there.
-export function splitCompoundPaths(markup) {
-  return markup.replace(PATH_ELEMENT, (tag, attrs) => {
-    const d = /(?<![\w-])d\s*=\s*(["'])([^"']*)\1/i.exec(attrs)
-    if (!d) return tag
-    const pieces = d[2].split(/(?=M)/).map((piece) => piece.trim()).filter(Boolean)
-    if (pieces.length <= 1) return tag
-    const rest = attrs.slice(0, d.index) + attrs.slice(d.index + d[0].length)
-    return pieces.map((piece) => `<path${rest} d="${piece}"/>`).join('')
-  })
-}
 
 // An inline style beats both a presentation attribute and a `<style>` rule, so
 // this is the one place a pin can land and be sure to win. (A CSS rule beating
@@ -321,7 +284,7 @@ export function monoLogoParts(svg) {
 // sanitized markup here — which also keeps this function's shape numbering
 // counting the same elements the editor's other calls see.
 export function monoLogoPickerSvg(svg) {
-  const source = splitCompoundPaths(String(svg ?? ''))
+  const source = String(svg ?? '')
   if (!source.includes('<svg')) return null
   let index = 0
   return source.replace(DRAWABLE_TAG, (tag) => {
@@ -390,15 +353,13 @@ function parseViewBox(svg) {
 // definition of "the art" all four functions below index into — the part
 // numbering a pin uses is only stable because none of them trims differently.
 function bodyOf(svg) {
-  return splitCompoundPaths(
-    svg
-      .replace(/^[\s\S]*?<svg[^>]*>/i, '')
-      .replace(/<\/svg\s*>[\s\S]*$/i, '')
-      // Decorative art inside an aria-hidden <img> — a <title> here only risks a
-      // stray tooltip on hover.
-      .replace(/<title\b[\s\S]*?<\/title\s*>/gi, '')
-      .trim(),
-  )
+  return svg
+    .replace(/^[\s\S]*?<svg[^>]*>/i, '')
+    .replace(/<\/svg\s*>[\s\S]*$/i, '')
+    // Decorative art inside an aria-hidden <img> — a <title> here only risks a
+    // stray tooltip on hover.
+    .replace(/<title\b[\s\S]*?<\/title\s*>/gi, '')
+    .trim()
 }
 
 // The one-color knockout SVG for `svg`, or null when the art can't be re-inked

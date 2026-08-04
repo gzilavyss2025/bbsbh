@@ -15,7 +15,7 @@
 // Pure string math over SVG markup, like its siblings — no DOM, so the unit
 // suite exercises it directly and the same function could run server-side.
 
-import { forceFill, splitCompoundPaths } from './logoMono.js'
+import { forceFill } from './logoMono.js'
 
 // Repaint `fills` ({ [partIndex]: paint }) onto `svg`, leaving every other
 // shape exactly as the art drew it. Returns null for markup with no `<svg>`.
@@ -27,7 +27,7 @@ export function recolorSvg(svg, fills) {
   const source = String(svg ?? '')
   if (!source.includes('<svg')) return null
   if (!fills || !Object.keys(fills).length) return source
-  return forceFill(splitCompoundPaths(source), fills)
+  return forceFill(source, fills)
 }
 
 // SVG's own word for "draw nothing here" — a real paint value, not the absence
