@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" style="color:#1B2A3A">
+  <title>Concept 3 — The Tally Plate: CHC 3 at MIL 5, American Family Field, Aug 2 2026</title>
+  <style>
+    text { fill: currentColor; }
+    .venue { font: 600 10px "IBM Plex Sans Condensed","Arial Narrow",sans-serif; letter-spacing: 1px; }
+    .label { font: 600 11px "IBM Plex Sans Condensed","Arial Narrow",sans-serif; letter-spacing: 3px; }
+    .num-l { font: 400 22px "IBM Plex Mono",ui-monospace,monospace; }
+    .num-w { font: 700 26px "IBM Plex Mono",ui-monospace,monospace; }
+    .date  { font: 600 10.5px "IBM Plex Mono",ui-monospace,monospace; letter-spacing: 0.5px; }
+  </style>
+  <defs>
+    <!-- Long-wave wobble: reads as hand-drawn pencil rather than machine-cut rubber -->
+    <filter id="hand-778241" x="-6%" y="-6%" width="112%" height="112%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="21" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="2"/>
+    </filter>
+    <mask id="c3a-778241">
+      <image href="/data/logos/mono/112.svg" x="58" y="92" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>
+    </mask>
+    <mask id="c3h-778241">
+      <image href="/data/logos/mono/158.svg" x="58" y="136" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>
+    </mask>
+  </defs>
+
+  <g filter="url(#hand-778241)">
+    <!-- Home plate, point-down: the organizing silhouette -->
+    <path d="M 48,52 L 252,52 L 252,158 L 150,254 L 48,158 Z"
+          fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+
+    <!-- Venue rides the wide top band (data-driven) -->
+    <text class="venue" x="150" y="72" text-anchor="middle">AMERICAN FAMILY FIELD</text>
+    <line x1="64" y1="80" x2="236" y2="80" stroke="currentColor" stroke-width="1"/>
+
+    <!-- Away row: mark, 3 runs = three tally strokes, plain numeral -->
+    <rect x="58" y="92" width="34" height="34" fill="currentColor" mask="url(#c3a-778241)"/>
+    <g stroke="currentColor" stroke-width="3" stroke-linecap="round">
+      <line x1="113" y1="96" x2="111" y2="124"/>
+      <line x1="122" y1="96" x2="121" y2="124"/>
+      <line x1="130" y1="97" x2="130" y2="124"/>
+    </g>
+    <text class="num-l" x="224" y="122" text-anchor="middle">3</text>
+
+    <line x1="66" y1="132" x2="234" y2="132" stroke="currentColor" stroke-width="0.75"/>
+
+    <!-- Home row (winner): mark, 5 runs = four strokes + the cross-stroke,
+         heavier weight, numeral circled the way a scorer rings the winning total -->
+    <rect x="58" y="136" width="34" height="34" fill="currentColor" mask="url(#c3h-778241)"/>
+    <g stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
+      <line x1="113" y1="138" x2="111" y2="166"/>
+      <line x1="122" y1="138" x2="121" y2="166"/>
+      <line x1="131" y1="139" x2="130" y2="166"/>
+      <line x1="140" y1="138" x2="139" y2="166"/>
+      <line x1="105" y1="163" x2="147" y2="141"/>
+    </g>
+    <circle cx="224" cy="151" r="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
+    <text class="num-w" x="224" y="160" text-anchor="middle">5</text>
+
+    <!-- Lower triangle: status, then date, then the plate-tip diamond -->
+    <line x1="72" y1="178" x2="228" y2="178" stroke="currentColor" stroke-width="1"/>
+    <text class="label" x="150" y="196" text-anchor="middle">FINAL — 9</text>
+    <text class="date" x="150" y="210" text-anchor="middle">AUG 2, 2026</text>
+    <path d="M 150,226 l 4.5,4.5 -4.5,4.5 -4.5,-4.5 z" fill="currentColor"/>
+  </g>
+</svg>
