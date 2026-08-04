@@ -1,4 +1,4 @@
-// Request-level coverage for the three `runtime: 'nodejs'` serverless functions.
+// Request-level coverage for the four `runtime: 'nodejs'` serverless functions.
 //
 // This is the test that was missing. The previous smoke check imported each
 // module and called it with a Web `Request` — a shape Vercel's Node runtime
@@ -16,6 +16,7 @@ import test from 'node:test'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
+import stampsHandler from '../api/stamps.js'
 
 // A stand-in for Node's (IncomingMessage, ServerResponse) pair.
 function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
@@ -97,6 +98,7 @@ test('every handler rejects an unsupported method without throwing', async () =>
     ['reveal', revealHandler, '/api/reveal?gamePk=1'],
     ['copy', copyHandler, '/api/copy'],
     ['spoiled-days', spoiledDaysHandler, '/api/spoiled-days'],
+    ['stamps', stampsHandler, '/api/stamps?season=2026'],
   ]) {
     const out = await call(handler, nodeReq(url, { method: 'PUT' }))
     assert.equal(out.status, 405, `${name} rejects PUT`)
@@ -135,4 +137,35 @@ test('authorization is read from Node plain-object headers', async () => {
     }),
   )
   assert.equal(out.status, 501) // store unconfigured; no TypeError en route
+})
+
+// --------------------------------------------------------------------------
+// Logbook stamps (ADR-0035)
+// --------------------------------------------------------------------------
+// The score-bearing endpoint, so the unconfigured path matters more here than
+// anywhere else: with no store it must refuse cleanly, and — the part worth
+// pinning — it must refuse BEFORE any statsapi fetch or reveal-gate work, so an
+// unconfigured deploy cannot be used to probe game data at all.
+test('stamps handler survives the bare path on every verb it accepts', async () => {
+  for (const [method, url, body] of [
+    ['GET', '/api/stamps?season=2026', undefined],
+    ['GET', '/api/stamps?seasons=1', undefined],
+    ['GET', '/api/stamps?export=1', undefined],
+    ['POST', '/api/stamps', { gamePk: 778241, mode: 'watched' }],
+    ['DELETE', '/api/stamps?gamePk=778241', undefined],
+  ]) {
+    const out = await call(
+      stampsHandler,
+      nodeReq(url, { method, body, headers: { 'content-type': 'application/json' } }),
+    )
+    assert.equal(out.status, 501, `${method} ${url}`)
+    assert.deepEqual(out.json, { error: 'sync not configured' })
+  }
+})
+
+test('stamps responses are never shared-cacheable', async () => {
+  // A stamp carries a final score. This is the one response in the codebase
+  // where a shared cache would leak one directly.
+  const out = await call(stampsHandler, nodeReq('/api/stamps?season=2026'))
+  assert.equal(out.headers['cache-control'], 'private, no-store')
 })

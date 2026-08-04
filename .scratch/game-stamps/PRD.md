@@ -1,6 +1,30 @@
 # Game stamps — backend scoping
 
-Status: needs-triage
+Status: in progress — build order steps 1–2 landed
+
+**Landed (2026-08-04):** the ADR (`docs/adr/0035-…`), the pure rules module
+(`src/lib/stamps.js`) and the endpoint (`api/stamps.js`) with the server-side
+reveal gate, covered by `test/stamps.test.js` + the stamps cases in
+`test/api-handlers.test.js`.
+
+**Three deliberate departures from what's written below**, each argued in the ADR:
+
+1. **The gate uses the game's ACTUAL last half-index, not `regulation × 2 − 1`**
+   (§5.1). That formula mints a stamp for an extra-inning game the user only
+   revealed through regulation — a game still tied when they stopped — and
+   demands a bottom half that never existed when the home club won without
+   batting in the ninth. `finalHalfIndex` settles both off `homeBattedLast`.
+2. **`mode` is `watched` | `followed` only.** `attended` (§3.1) is cut for v1 by
+   request: it wants its own overprint on the stamp art, and adding an enum value
+   later is cheap.
+3. **Records carry `updatedAt` alongside `stampedAt`** (§3.1). Last-write-wins
+   needs a clock that moves on an un-stamp, and `stampedAt` must NOT move when a
+   note is edited — one field cannot do both.
+
+**Next up:** steps 3–5 — `useStamps` + `StampsCloudSync` + `StampGameButton`
+inside the box-score seal, `GameStamp.jsx` from the locked Concept 1 art, and the
+`/logbook` grid. `?digests=` (§3.3, §6 Tier 2) is deliberately not implemented
+yet; it belongs with step 7's nightly generator.
 
 Scope of this document: **backend infrastructure only.** Stamp visual design is
 being scoped separately; UI surfacing (where the grid lives, how the button

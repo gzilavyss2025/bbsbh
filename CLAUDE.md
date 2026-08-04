@@ -138,8 +138,8 @@ under `bbsbh:reveal:{gamePk}` — only that half-index, never a score, so the sp
 rule still holds on return; a same-device tab picks up another tab's reveal via a
 `storage` listener in `useRevealProgress.js`.
 
-**Three narrow, opt-in exceptions (`api/`)**, all Vercel edge functions that never
-render or fetch a score. Link previews (`api/og.js` + `api/preview.js` +
+**Four narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
+unconfigured. **Three never render or fetch a score.** Link previews (`api/og.js` + `api/preview.js` +
 `api/_lib/cards.js`) render dynamic Open Graph cards for shared deep links, failing
 safe to the static default card — ADR-0012. Multi-device reveal sync (Clerk, off
 unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
@@ -149,7 +149,10 @@ user consented to spoil (consent, never a mark — a per-day on/off state map, s
 that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
 consent-pop-up wording (never a score, closed registry, public-cached read,
 allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
-ADR-0025.
+ADR-0025. **The fourth stores a score, by design**: Logbook game stamps
+(`api/stamps.js` + `src/lib/stamps.js`) — mintable only for a game the SERVER can
+prove this user already revealed, which is what keeps the Logbook from spoiling
+anything. Read ADR-0035 before touching that gate.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
