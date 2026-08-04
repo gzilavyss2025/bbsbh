@@ -10,6 +10,7 @@ import { JerseyCombos, MilbUniformStrip } from '../../components/JerseyCombos.js
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadNumbers } from './data/loadNumbers.js'
+import { hiddenTeamTabs } from './data/shared.js'
 import { StandingsCard } from './modules/StandingsCard.jsx'
 import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
@@ -49,6 +50,7 @@ export function NumbersTab({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="numbers"
+      hiddenTabs={hiddenTeamTabs(team)}
     >
       <AsyncStatus
         loading={numbers.loading}
