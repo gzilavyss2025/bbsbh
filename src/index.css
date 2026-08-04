@@ -19491,6 +19491,106 @@ body {
   margin-top: 2px;
 }
 
+/* Team Page Photos rail — professional camera stills of this club, lazily
+   fetched a few games at a time (TeamPhotosRail in TeamPage.jsx). Same
+   nav/track/sentinel structure as .last10 just above (single-row flex track,
+   IntersectionObserver-driven growth), thumbnail sizing/treatment borrowed
+   from .photostrip__thumb (GamePhotosStrip) since this rail shows photos,
+   not ticket-stub game cards. */
+.teamphotos {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.teamphotos__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.teamphotos__nav:hover:not(:disabled) {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.teamphotos__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.teamphotos__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.teamphotos__track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.teamphotos__track::-webkit-scrollbar {
+  display: none;
+}
+/* Invisible IntersectionObserver target at the leading (oldest) edge of the
+   track — scrolling it into view is what fetches the next batch of older
+   games' photos (see TeamPhotosRail). */
+.teamphotos__sentinel {
+  flex: 0 0 1px;
+  width: 1px;
+  height: 163px;
+  scroll-snap-align: start;
+}
+.teamphotos__thumb {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 163px;
+  height: 163px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+}
+.teamphotos__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.teamphotos__thumb:hover {
+  border-color: var(--seal);
+}
+.teamphotos__thumb:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.teamphotos__loading {
+  flex: 0 0 163px;
+  width: 163px;
+  height: 163px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) dashed var(--border-rule);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+
 /* team-hub schedule strip — one block per series (run of consecutive games
    vs. the same opponent), wrapping left-to-right/top-to-bottom instead of
    paging by month; see SeriesStrip in TeamPage.jsx. */

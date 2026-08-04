@@ -2,6 +2,20 @@ Status: ready-for-agent
 
 # Build the cross-game photo index so photos can be pulled by player and by team
 
+## Update: a Team Page surface shipped WITHOUT this index
+
+The Team Page's Photos rail (`TeamPhotosRail`, `src/screens/TeamPage.jsx`)
+shipped by walking that team's own already-in-memory `seasonGames` list
+backward from the newest game, fetching `fetchGamePhotos(gamePk)` per game
+lazily as the user scrolls back — no precompute. That page already had the
+one team's full decided-game list loaded for `LastTenGamesStrip`/the Schedule
+card, so a bounded live walk-back was cheap enough and matched the ask
+("lazy load ~10, let the user scroll back as far as the API will go"). This
+index is still worth building for a surface that has no such list already
+loaded — a player page pulling one person's photos across every team he's
+played for, say — where a live walk-back would mean scanning many teams'
+schedules just to find his games.
+
 ## Why this exists
 
 PR #487 shipped the per-photo half of this — every photo now carries a `kind`

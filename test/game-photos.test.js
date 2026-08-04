@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   classifyPhotoAsset,
   fetchGamePhotos,
+  onlyPhotographer,
   photosForPlayer,
   photosForTeam,
   withoutGraphics,
@@ -311,6 +312,26 @@ test('fetchGamePhotos classifies a mixed game and sorts photographer shots first
     assert.deepEqual(
       withoutGraphics(photos).map((p) => p.id),
       ['mlb/shot1.jpg', 'mlb/frame1.jpg'],
+    )
+  })
+})
+
+test('onlyPhotographer drops broadcast frames as well as graphic cards', async () => {
+  const body = gameWith([
+    item({ id: 'card1', title: 'Bullpen availability for Boston', taxonomy: ['darkroom-bullpen'] }),
+    item({ id: 'frame1', title: "Andy Pages' two-run single - thumbnail" }),
+    item({ id: 'shot1', title: 'GettyImages-2288816314' }),
+  ])
+  const shapes = {
+    'mlb/card1.jpg': STATCAST_CARD,
+    'mlb/frame1.jpg': BROADCAST_FRAME,
+    'mlb/shot1.jpg': SHOT_3x2,
+  }
+  await withMockedGame(body, shapes, async () => {
+    const photos = await fetchGamePhotos(823919)
+    assert.deepEqual(
+      onlyPhotographer(photos).map((p) => p.id),
+      ['mlb/shot1.jpg'],
     )
   })
 })
