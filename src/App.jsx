@@ -57,6 +57,14 @@ const PostseasonSeriesPage = lazyNamed(
   () => import('./screens/PostseasonSeriesPage.jsx'),
   'PostseasonSeriesPage',
 )
+const TradeDeadlinePage = lazyNamed(
+  () => import('./screens/TradeDeadlinePage.jsx'),
+  'TradeDeadlinePage',
+)
+const TradeDeadlineSeasonPage = lazyNamed(
+  () => import('./screens/TradeDeadlineSeasonPage.jsx'),
+  'TradeDeadlineSeasonPage',
+)
 const AllStarRostersPage = lazyNamed(
   () => import('./screens/AllStarRostersPage.jsx'),
   'AllStarRostersPage',
@@ -196,6 +204,10 @@ export default function App() {
     content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {
     content = <PostseasonSeriesPage seriesId={route.seriesId} />
+  } else if (route.name === 'trade-deadline') {
+    content = <TradeDeadlinePage />
+  } else if (route.name === 'trade-deadline-season') {
+    content = <TradeDeadlineSeasonPage season={route.season} />
   } else if (route.name === 'all-star-rosters') {
     content = <AllStarRostersPage />
   } else if (route.name === 'all-star-legacy') {

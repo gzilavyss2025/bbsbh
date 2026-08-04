@@ -15,6 +15,8 @@
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
+//   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
+//   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
@@ -98,6 +100,8 @@ export function parseRoute(url) {
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
+  if (parts.length === 1 && parts[0] === 'trade-deadline')
+    return { name: 'trade-deadline' }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
     return { name: 'all-star-rosters' }
   if (parts.length === 1 && parts[0] === 'all-star-legacy')
@@ -161,6 +165,14 @@ export function parseRoute(url) {
   // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
   if (parts.length === 2 && parts[0] === 'postseason')
     return { name: 'postseason-series', seriesId: parts[1] }
+  // The year matches the precomputed file's own name 1:1 (public/data/
+  // trade-deadline/{year}.json) — no separate slug scheme, same idea as the
+  // postseason series id above. A non-numeric segment falls back to the
+  // season index rather than stranding the page with nothing to show.
+  if (parts.length === 2 && parts[0] === 'trade-deadline') {
+    const season = Number(parts[1])
+    return Number.isFinite(season) ? { name: 'trade-deadline-season', season } : { name: 'trade-deadline' }
+  }
   // Umpires carry no spoiler-cutoff hint: assignments/dates are never
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
   if (parts.length === 2 && parts[0] === 'umpire')
@@ -270,6 +282,12 @@ export function teamPath(id, opts = {}) {
 }
 export function postseasonSeriesPath(seriesId) {
   return `/postseason/${seriesId}`
+}
+export function tradeDeadlinePath() {
+  return '/trade-deadline'
+}
+export function tradeDeadlineSeasonPath(year) {
+  return `/trade-deadline/${year}`
 }
 export function umpirePath(id) {
   return `/umpire/${id}`

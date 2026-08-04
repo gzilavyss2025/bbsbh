@@ -31,6 +31,7 @@ export const REPORT_PAGES = [
   { label: 'Awards History', path: '/awards' },
   { label: 'Postseason History', path: '/postseason-history' },
   { label: 'Postseason Leaders', path: '/postseason-leaders' },
+  { label: 'Trade Deadline', path: '/trade-deadline' },
   { label: 'All Star Game', path: '/all-star-rosters' },
   { label: 'All-Star Legacy', path: '/all-star-legacy' },
   { label: 'My First Scorebook', path: '/first-scorebook' },

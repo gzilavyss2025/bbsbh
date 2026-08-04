@@ -125,6 +125,15 @@ test('umpire and manager routes carry no cutoff query (never score-revealing)', 
   })
 })
 
+test('trade deadline routes: index, per-season, and a non-numeric season falls back to the index', () => {
+  assert.deepEqual(parseRoute('/trade-deadline'), { name: 'trade-deadline' })
+  assert.deepEqual(parseRoute('/trade-deadline/2022'), {
+    name: 'trade-deadline-season',
+    season: 2022,
+  })
+  assert.deepEqual(parseRoute('/trade-deadline/nope'), { name: 'trade-deadline' })
+})
+
 // --------------------------------------------------------------------------
 // parseRoute — leaders scopes (the ordering-sensitive branches)
 // --------------------------------------------------------------------------
