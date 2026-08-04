@@ -147,6 +147,27 @@ This blob is the exact set of fields the stamp SVG needs. Rendering a Logbook
 page is `HGETALL stamps:{userId}:{season}` + one `MGET` of the referenced
 `game:final:*` keys — two round trips regardless of collection size.
 
+**The stamps carry team logos, and this costs the backend nothing.** `away.id` /
+`home.id` are already here, and team ids are the universal key (root
+`CLAUDE.md`) — the mark resolves from the id alone against the precomputed
+one-color knockout art at `public/data/logos/mono/{teamId}.svg`
+(`scripts/gen-mono-logos.mjs`, ADR-0031), served same-origin and already
+versioned by `mono-logo-manifest.json`. No new stored field, no new fetch, no
+CDN dependency at mint time. Two consequences worth recording:
+
+- **Coverage is partial** — 150 clubs have a mono file and MiLB coverage is
+  incomplete, so the stamp must fall back to the abbreviation, which this blob
+  also already carries. Standard graceful-degradation, no schema change.
+- **Export/share needs a different render path.** In the browser the mark can be
+  referenced (`<image href>` inside a `<mask>` over a `currentColor` rect —
+  verified working, and it keeps each club's file browser-cached once across a
+  whole grid). But external references are blocked when an SVG is loaded as a
+  standalone `<img>`, which is exactly what an OG card or a PNG export is. Any
+  server-side stamp rendering must **inline** the logo markup instead. That is a
+  real fork in the renderer, and it belongs in `api/_lib/cards.js` territory
+  alongside the existing OG card code — see §5.2 on why a Logbook OG card must
+  not carry a score regardless.
+
 ### 3.3 `digest:{gamePk}` — STRING (JSON), shared, long TTL
 
 The richer per-game blob that powers the retrospective's *player-level* stats.
@@ -363,7 +384,7 @@ this right:
 | `src/lib/stamps.js` | `src/lib/spoiledDays.js` | Pure: local store shape, validation, `applyRemoteStates` merge |
 | `src/hooks/useStamps.js` | `src/hooks/useRevealProgress.js` | Local-first state, `localStorage` under `bbsbh:stamps`, cross-tab `storage` listener |
 | `src/components/StampsCloudSync.jsx` | `src/components/RevealCloudSync.jsx` | Headless Clerk sync, GET-merge on mount, POST on change |
-| `src/components/GameStamp.jsx` | — | Data → one-color SVG (design scoped separately) |
+| `src/components/GameStamp.jsx` | — | Data → one-color SVG, incl. the mono team marks via `teamLogoUrl(teamId, 'mono')` (design scoped separately) |
 | `src/components/StampGameButton.jsx` | — | The mint affordance, **inside** the box-score seal |
 | `src/screens/LogbookPage.jsx` | — | The grid |
 | `src/screens/LogbookStatsPage.jsx` | `src/screens/FirstScorebookPage.jsx` | The retrospective |
@@ -422,3 +443,8 @@ Steps 1–5 are the feature. 6–8 are the payoff.
   returning the full JSON is ~10 lines and worth doing at v1.
 - Un-stamping: silent, or does the Logbook show a "removed" ghost? Tombstones
   make either possible; pick before the UI lands.
+- Is a shareable/exportable stamp image in scope? If yes it needs the inlined-
+  logo render path from §3.2 and a decision about what a Logbook OG card may
+  show — and "a stamp" is inherently a score, so the answer is probably that a
+  shared stamp is fine (the sharer consented) but a shared *Logbook index* card
+  is not.

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" style="color:#1B2A3A">
+  <title>Concept 1 — The Cancellation: CHC at MIL, Final MIL 5 CHC 3, American Family Field, Aug 2 2026</title>
+  <style>
+    text { fill: currentColor; }
+    .ring   { font: 600 13.5px "IBM Plex Sans Condensed","Arial Narrow",sans-serif; letter-spacing: 2.2px; }
+    .label  { font: 600 11px "IBM Plex Sans Condensed","Arial Narrow",sans-serif; letter-spacing: 3px; }
+    .foot   { font: 600 11px "IBM Plex Sans Condensed","Arial Narrow",sans-serif; letter-spacing: 2px; }
+    .abbr-w { font: 700 27px "IBM Plex Mono",ui-monospace,monospace; }
+    .num-w  { font: 700 31px "IBM Plex Mono",ui-monospace,monospace; }
+    .abbr-l { font: 400 20px "IBM Plex Mono",ui-monospace,monospace; }
+    .num-l  { font: 400 22px "IBM Plex Mono",ui-monospace,monospace; }
+  </style>
+  <defs>
+    <!-- Rubber-stamp ink roughening: pure-vector displacement, no raster texture -->
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/>
+    </filter>
+    <!-- Text baselines: top text sits on r=122 (caps grow outward), bottom text on r=135 (caps grow inward-up) -->
+    <path id="arcTop" d="M 28,150 A 122,122 0 0 1 272,150" fill="none"/>
+    <path id="arcBot" d="M 15,150 A 135,135 0 0 0 285,150" fill="none"/>
+  </defs>
+
+  <g filter="url(#ink)">
+    <!-- Chrome: double bounding ring -->
+    <circle cx="150" cy="150" r="140" fill="none" stroke="currentColor" stroke-width="3.5"/>
+    <circle cx="150" cy="150" r="118" fill="none" stroke="currentColor" stroke-width="1.5"/>
+
+    <!-- Ring text: venue above, date below (data-driven) -->
+    <text class="ring"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">AMERICAN FAMILY FIELD</textPath></text>
+    <text class="ring"><textPath href="#arcBot" startOffset="50%" text-anchor="middle">AUGUST 2 · 2026</textPath></text>
+
+    <!-- Fixed chrome: diamond separators at 9 and 3 o'clock -->
+    <path d="M 21,144 l 6,6 -6,6 -6,-6 z" fill="currentColor"/>
+    <path d="M 279,144 l 6,6 -6,6 -6,-6 z" fill="currentColor"/>
+
+    <!-- Status word: FINAL, or FINAL / 10 for extras (data-driven) -->
+    <text class="label" x="150" y="104" text-anchor="middle">FINAL</text>
+    <line x1="70" y1="114" x2="230" y2="114" stroke="currentColor" stroke-width="1.5"/>
+
+    <!-- Winner row: bold, always on top -->
+    <text class="abbr-w" x="76" y="152">MIL</text>
+    <line x1="136" y1="144" x2="196" y2="144" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-dasharray="0.5 6.5"/>
+    <text class="num-w" x="224" y="153" text-anchor="end">5</text>
+
+    <!-- Loser row: lighter, smaller -->
+    <text class="abbr-l" x="76" y="182">CHC</text>
+    <line x1="126" y1="176" x2="200" y2="176" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-dasharray="0.5 6"/>
+    <text class="num-l" x="224" y="182" text-anchor="end">3</text>
+
+    <line x1="82" y1="196" x2="218" y2="196" stroke="currentColor" stroke-width="1.5"/>
+
+    <!-- Away-at-home orientation, since score rows are winner-ordered -->
+    <text class="foot" x="150" y="215" text-anchor="middle">CHC AT MIL</text>
+  </g>
+</svg>
