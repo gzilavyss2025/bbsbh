@@ -1,3 +1,5 @@
+import { similarHitters } from '../lib/hitterSimilarity.js'
+
 // Season Statcast percentile ranks, read from a static same-origin file
 // (public/data/savant-percentiles.json) rather than fetched live from
 // Baseball Savant. That file is regenerated nightly by
@@ -39,6 +41,26 @@ export function savantPercentilesFor(data, personId, group) {
 export function savantRawFor(data, personId, group) {
   const key = group === 'pitching' ? 'rawPit' : 'rawBat'
   return data?.[key]?.[personId] ?? null
+}
+
+// "Hits like" — the closest bats in Statcast SKILL space to one hitter, for
+// the player page's SimilarHitters card. The ranking model is pure and lives
+// in src/lib/hitterSimilarity.js; this is only the part that knows how
+// savant-percentiles.json is SHAPED, flattening its `bat` map into the flat
+// pool that module ranks.
+//
+// No level split, unlike pitchArsenal.js's similarPitchersFor: Savant has no
+// minor-league board, so `bat` is one MLB pool and there is no second peer
+// group to keep it away from.
+//
+// Spoiler footing is unchanged from the rest of this module: season aggregates
+// off a nightly file, no SealBox. Returns [] whenever it can't answer — file
+// not loaded, or subject not in it — so the card simply doesn't render.
+export function similarHittersFor(data, personId, opts) {
+  const entries = data?.bat
+  if (!entries) return []
+  const pool = Object.entries(entries).map(([id, pct]) => ({ personId: Number(id), pct }))
+  return similarHitters(pool, personId, opts)
 }
 
 // How many qualified players a group's percentiles are ranked against — lets

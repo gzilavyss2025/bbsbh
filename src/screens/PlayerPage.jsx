@@ -22,11 +22,14 @@ import { spanCell } from '../lib/ledger.js'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
-import { AdvancedPitchingCard } from '../components/AdvancedPitchingCard.jsx'
+import { AdvancedStatsCard } from '../components/AdvancedStatsCard.jsx'
 import { PitchMix } from '../components/PitchMix.jsx'
+import { BattedBallMix } from '../components/BattedBallMix.jsx'
 import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
+import { SimilarHitters } from '../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../components/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/PitcherWorkloadCard.jsx'
+import { RecentFormCard } from '../components/RecentFormCard.jsx'
 import { PlayerPhotosRail } from '../components/PlayerPhotosRail.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
@@ -301,10 +304,10 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             <StatcastPercentiles savant={block.savant} raw={block.savantRaw} group={block.group} />
 
-            {/* The run-prevention rates behind the headline tiles (FIP, ERA−,
-                K%/BB%, ground balls, opponents' line) — beside Statcast's
+            {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
+                K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's
                 percentiles as its absolute-numbers sibling. */}
-            <AdvancedPitchingCard adv={block.advanced} />
+            <AdvancedStatsCard adv={block.advanced} />
 
             {/* Season foul-ball line (gen-fouls.mjs) — a current-day-only
                 card that hides under a spoiler asOf cutoff, like the
@@ -318,16 +321,36 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
 
-            {/* Directly under the mix it's derived from — the three arms whose
-                own mix looks most like the rows just above, which only reads
-                as an answer if the question is still on screen. Renders
-                nothing for a hitter, below AAA, or when nobody clears the
-                match floor (see lib/pitcherSimilarity.js). */}
-            {block.similar?.length > 0 && (
+            {/* The hitter's counterpart to the pitch mix — what happens when
+                he connects, in the same bar-over-rows dress (BattedBallMix
+                reuses the pitchmix classes on purpose). Shares the Advanced
+                card's fetch; null below the balls-in-play floor. */}
+            {block.battedBall && (
               <>
-                <SectionTitle title="Pitches like" note="closest arsenals" />
-                <SimilarPitchers similar={block.similar} />
+                <SectionTitle title="Batted balls" note="share of contact · average when hit" />
+                <BattedBallMix battedBall={block.battedBall} />
               </>
+            )}
+
+            {/* Directly under the mix it's derived from — the three players
+                whose own profile looks most like the rows just above, which
+                only reads as an answer if the question is still on screen.
+                A pitcher's neighbours are arsenal-space (what he throws, see
+                lib/pitcherSimilarity.js); a hitter's are Statcast-skill-space
+                (how he hits, see lib/hitterSimilarity.js). Renders nothing
+                below the sample floors or when nobody clears the match floor. */}
+            {block.similar?.length > 0 && (
+              block.group === 'pitching' ? (
+                <>
+                  <SectionTitle title="Pitches like" note="closest arsenals" />
+                  <SimilarPitchers similar={block.similar} />
+                </>
+              ) : (
+                <>
+                  <SectionTitle title="Hits like" note="closest Statcast profiles" />
+                  <SimilarHitters similar={block.similar} />
+                </>
+              )
             )}
 
             {block.gameLog && (
@@ -357,6 +380,14 @@ export function PlayerPage({ id, asOf, sportId }) {
                 FoulCard/Milestone Watch. */}
             {block.group === 'pitching' && (
               <PitcherWorkloadCard playerId={bio.id} asOf={asOf} />
+            )}
+
+            {/* The hitter's occupant of the same slot — Recent form, his
+                last-7/15/30 lines instead of a pitch-count ledger. Same
+                current-day-only rule; MLB tiles only (a MiLB bat's lastXGames
+                pull would answer with stale major-league rows or nothing). */}
+            {block.group === 'hitting' && block.tileSportId === 1 && (
+              <RecentFormCard playerId={bio.id} asOf={asOf} season={data.season} />
             )}
 
             {/* Splits — the vs-L/R breakdown, situational splits, and career
@@ -391,7 +422,7 @@ export function PlayerPage({ id, asOf, sportId }) {
                     <SectionTitle title="Situational" note="full season" />
                     <Ledger
                       leftCols={1}
-                      head={['Split', 'BF', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                      head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
                       rows={block.situational.map((r) => ({
                         key: r.code,
                         cells: [r.label, r.side.count, r.side.slash, r.side.hr, r.side.rbi, r.side.xbh, r.side.soPct, r.side.bbPct],
@@ -667,7 +698,8 @@ function StatGrid({ tiles }) {
 
 // `bar` marks one of the page's eight top-level sections (2026 Stats,
 // Analytics, Game log, Splits, Career stats, Player history — Recent
-// workload and Photos opt in the same way from their own components) so it
+// workload / Recent form and Photos opt in the same way from their own
+// components; the workload/form pair share one slot, split by group) so it
 // wears the club bar (.section__title--bar in index.css); their sub-card
 // headings underneath render through this same component without it.
 function SectionTitle({ title, note, primary = false, bar = false }) {

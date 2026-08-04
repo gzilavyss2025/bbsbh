@@ -127,6 +127,30 @@ export async function fetchPitchingAdvanced(personId, season) {
   }
 }
 
+// The hitter "Advanced" card's bundle — mirrors fetchPitchingAdvanced above:
+// one multi-type request for the standard season line, seasonAdvanced
+// (BABIP/ISO, the per-plate-appearance K/BB/pitch rates, and the batted-ball
+// outs/hits buckets), and sabermetrics (wOBA, wRC+). Same live footing as the
+// vs-L/R season splits (see advancedHittingView). MLB-only at the source;
+// degrades to null per field, and the card then simply doesn't render.
+export async function fetchHittingAdvanced(personId, season) {
+  if (!personId || !season) return null
+  try {
+    const data = await getJson(
+      `/api/v1/people/${personId}/stats?stats=season,seasonAdvanced,sabermetrics&group=hitting&season=${season}`,
+    )
+    const statFor = (name) =>
+      (data.stats ?? []).find((s) => s.type?.displayName === name)?.splits?.[0]?.stat ?? null
+    return {
+      season: statFor('season'),
+      seasonAdvanced: statFor('seasonAdvanced'),
+      sabermetrics: statFor('sabermetrics'),
+    }
+  } catch {
+    return null
+  }
+}
+
 // Every yearByYear split for a person across every MiLB level. The live API
 // accepts exactly one sportId per request (a comma-list silently returns no
 // stats), so this fans out in parallel across MILB_LEVELS — the same
