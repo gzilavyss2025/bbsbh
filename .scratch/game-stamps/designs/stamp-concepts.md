@@ -338,3 +338,73 @@ gamePk (ids + jitter seed)`.
   if only one ships (official stamp feel + best small-size identity). Concept 3
   is still the most *Tally Baseball* and the best 300px close-look, weakest
   under data extremes (high scores, long venue names).
+
+---
+
+## Round 2 — Concept 1 locked (`stamp-concept-1-v2.svg`)
+
+Concept 1 ("The Cancellation") was picked to keep iterating; Concepts 2 and 3
+are archived as-is above, not being pursued further right now. This round's
+sample file is `stamp-concept-1-v2.svg`; `stamp-concept-1-v2-preview.html` is
+the interactive scratch page the iteration actually happened in — a
+self-contained page (fonts inlined as base64 `@font-face` data URIs, team mono
+logos inlined as SVG for the same reason) with the locked hero stamp plus a
+"Variations" grid exercising walk-off, extra innings, doubleheader Game 2,
+postseason, a lopsided 2-digit score, a shutout, a missing-logo fallback, and
+a long venue name — open it directly in a browser, no dev server needed.
+
+Changes from round 1, in order:
+
+1. **Marks enlarged** from a small fixed 54×54 box to 150×150, clipped to the
+   inner ring (r=117) instead of sized to always fit inside it — they now
+   bleed off the ring's left/right edge, occupying ~64% of its vertical space
+   rather than ~47%. The `CHC`/`MIL` abbreviation captions under the marks are
+   gone entirely.
+2. **`AT` replaced with the app's own `@` mark** — Big Shoulders Display 900,
+   doubled ghost+ink offset layers, the same screen-print misregistration
+   treatment as `.masthead__at` on the home masthead — sitting in the gap
+   between the two marks.
+3. **Ring text switched from the condensed sans + forced `textLength`/
+   `lengthAdjust="spacingAndGlyphs"` stretch to fixed-size IBM Plex Mono**,
+   left to run its natural length. The forced stretch read as rubbery/
+   conditionally-expanding; fixed-width monospace gives the "typewriter" rhythm
+   instead, at the cost of no longer guaranteeing zero overflow for an
+   arbitrarily long venue name — accepted as an honest tradeoff, not solved
+   with a truncation system this round.
+4. **The two diamond separators are no longer fixed at 9/3 o'clock.** Each
+   stamp estimates the rendered pixel-width of its venue text vs. its date (or
+   postseason series) text at the ring font's own metrics (16px, ~0.6em
+   advance + 2.4px tracking, ≈12px/char) and swings both diamonds — together,
+   mirrored left/right — to an angle proportional to that share (clamped
+   32–68%), so the arc's leftover white space stays roughly balanced instead
+   of a long venue name crowding a fixed 180° while the date has room to
+   spare. A postseason game passes a `seriesText` ("2026 NLDS GAME 3") that
+   substitutes for the date in that same bottom-arc slot rather than adding a
+   second line.
+5. **Run totals**: no more winner's underscore, no more divider line between
+   the logo band and the score band. Both totals share one size — 62px bold
+   IBM Plex Mono normally, dropping together to 48px if either team reaches
+   double digits, so the pair stays visually matched and the winner's ink
+   never reads as clipping into the venue/date band above it.
+6. **`FINAL` (or `FINAL / 11`, `FINAL — GM 2`, …) demoted to a small footer**
+   inside the bottom lens rather than sitting on the removed divider line.
+
+**Known gaps, carried forward deliberately:**
+
+- **Missing-logo fallback** (a club with no mono file drops a bold
+  abbreviation into the same clipped box) was built to unblock exploring the
+  case, but not polished — MiLB knockout mono logos are in progress
+  separately (Identity Lab), expected to close most of this gap before it
+  matters in production.
+- **Very long venue names** (`stamp-concepts.md`'s original ~26-char worry,
+  now more like ~31 chars before crowding, per the Oakland–Alameda County
+  Coliseum stress test in the preview page's Variations grid) still have no
+  size-step-down or truncation strategy — the diamond-rebalancing in change 4
+  buys some room but doesn't fully solve it.
+- The diamond-balancing share estimate is a rough character-count heuristic,
+  not a real text-measurement pass — fine for this static-sample preview, but
+  a production renderer should measure actual glyph advances (or accept the
+  same estimate if it's close enough in practice).
+
+**Not yet started:** wiring this into `GameStamp.jsx` / the Logbook feature
+per `.scratch/game-stamps/PRD.md` — this round was design-only.

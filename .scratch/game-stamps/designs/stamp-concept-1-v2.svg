@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" style="color:#1B2A3A">
+  <title>Concept 1 v2 — The Cancellation (locked): CHC at MIL, Final MIL 5 CHC 3, American Family Field, Sunday, August 2 2026</title>
+  <style>
+    text { fill: currentColor; }
+    .ring   { font: 400 16px "IBM Plex Mono",ui-monospace,monospace; letter-spacing: 2.4px; }
+    .label  { font: 400 9px "IBM Plex Mono",ui-monospace,monospace; letter-spacing: 2.5px; }
+    .num    { font: 700 62px "IBM Plex Mono",ui-monospace,monospace; }
+    .num-2d { font: 700 48px "IBM Plex Mono",ui-monospace,monospace; }
+    .at-ghost, .at-ink { font: 900 36px "Big Shoulders Display","IBM Plex Sans Condensed",sans-serif; }
+    .at-ghost { opacity: 0.28; }
+    .at-ink { opacity: 1; }
+  </style>
+  <defs>
+    <!-- Rubber-stamp ink roughening: pure-vector displacement, no raster texture -->
+    <filter id="ink-778241" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/>
+    </filter>
+
+    <!-- Ring text arcs. Endpoints are NOT fixed at 9/3 o'clock: both diamonds
+         (and these arc endpoints) sit at ±theta from top-dead-center, where
+         theta = venueTextShare * 180deg, venueTextShare = venue's estimated
+         rendered width / (venue + date/series width), clamped to 32-68%, at
+         the .ring font's own metrics (16px, ~0.6em advance, 2.4px tracking
+         -> ~12px/char). A long venue name gets more of the ring; a long date
+         or series line gets more of the other side. This sample's venue and
+         date happen to be the same length (22 chars each), so theta=90 and
+         these paths/diamonds land exactly on 9/3 o'clock — the generator
+         must recompute both per game, not hardcode these coordinates. -->
+    <path id="arcTop-778241" d="M 28,150 A 122,122 0 0 1 272,150" fill="none"/>
+    <path id="arcBot-778241" d="M 15,150 A 135,135 0 0 0 285,150" fill="none"/>
+
+    <!-- Club marks are letterboxed into a square slot and clipped to the
+         inner ring, so they can bleed off its left/right edge rather than
+         being confined to a small fixed box. -->
+    <clipPath id="c1clip-778241"><circle cx="150" cy="150" r="117"/></clipPath>
+    <mask id="c1a-778241">
+      <image href="/data/logos/mono/112.svg" x="-18" y="44" width="150" height="150" preserveAspectRatio="xMidYMid meet"/>
+    </mask>
+    <mask id="c1h-778241">
+      <image href="/data/logos/mono/158.svg" x="162" y="44" width="150" height="150" preserveAspectRatio="xMidYMid meet"/>
+    </mask>
+  </defs>
+
+  <g filter="url(#ink-778241)">
+    <!-- Chrome: double bounding ring -->
+    <circle cx="150" cy="150" r="140" fill="none" stroke="currentColor" stroke-width="3.5"/>
+    <circle cx="150" cy="150" r="118" fill="none" stroke="currentColor" stroke-width="1.5"/>
+
+    <!-- Ring text: venue, a diamond, then the full date (or, for a postseason
+         game, a series/game line in the same slot instead of the date) -->
+    <text class="ring"><textPath href="#arcTop-778241" startOffset="50%" text-anchor="middle">AMERICAN FAMILY FIELD</textPath></text>
+    <text class="ring"><textPath href="#arcBot-778241" startOffset="50%" text-anchor="middle">SUNDAY, AUGUST 2, 2026</textPath></text>
+    <path d="M 21,144 l 6,6 -6,6 -6,-6 z" fill="currentColor"/>
+    <path d="M 279,144 l 6,6 -6,6 -6,-6 z" fill="currentColor"/>
+
+    <!-- Top half: the two club marks, ~64% of the inner ring's vertical
+         space, clipped so they bleed off the left/right edge. A club with no
+         mono file falls back to a bold abbreviation in the same slot
+         (unstyled placeholder here — the identity lab's forthcoming MiLB
+         knockout marks are expected to close most of that gap). -->
+    <g clip-path="url(#c1clip-778241)">
+      <rect x="-18" y="44" width="150" height="150" fill="currentColor" mask="url(#c1a-778241)"/>
+      <rect x="162" y="44" width="150" height="150" fill="currentColor" mask="url(#c1h-778241)"/>
+    </g>
+
+    <!-- The app's own screen-print '@' (Big Shoulders Display, doubled/offset
+         like the home masthead's .masthead__at), in the gap between the marks -->
+    <g transform="translate(150,128) skewX(-8) rotate(-2)">
+      <text class="at-ghost" x="2" y="1.5" text-anchor="middle">@</text>
+      <text class="at-ink" x="0" y="0" text-anchor="middle">@</text>
+    </g>
+
+    <!-- Bottom half: run totals. No divider rule, no winner's underscore.
+         Both faces the same weight/size — 62px bold, or 48px together if
+         either team is in double digits, so a big inning never clips into
+         the venue/date band above. -->
+    <text class="num" x="108" y="243" text-anchor="middle">3</text>
+    <text class="num" x="192" y="243" text-anchor="middle">5</text>
+
+    <!-- Game-state footer -->
+    <text class="label" x="150" y="258" text-anchor="middle">FINAL</text>
+  </g>
+</svg>
