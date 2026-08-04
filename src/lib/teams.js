@@ -574,16 +574,15 @@ export function treatmentScale(teamId, treatment) {
 
 // Horizontal nudge (percent of the tile's own width, negative = left) for a
 // mark whose visual weight sits off-center once scaled up — CSS translateX,
-// applied before scale. Lab-only so far: no shipped surface renders these
-// tiles large enough for the off-center weight to matter, so the game card and
-// masthead never ask for it. Kept here rather than in the lab (where it lived
-// as a page-local literal) so the whole per-treatment record has one home.
+// applied before scale. Read by treatmentTile, so every surface that resolves
+// a tile through it (the slate card, the in-game masthead, Team Identity Lab's
+// own grid) applies the same nudge. Kept here rather than in the lab (where it
+// lived as a page-local literal) so the whole per-treatment record has one home.
 export function treatmentOffsetX(teamId, treatment) {
   return treatmentTuning(teamId, treatment)?.offsetX ?? 0
 }
 
-// The vertical counterpart to treatmentOffsetX, same units and same lab-only
-// footing.
+// The vertical counterpart to treatmentOffsetX, same units.
 export function treatmentOffsetY(teamId, treatment) {
   return treatmentTuning(teamId, treatment)?.offsetY ?? 0
 }
@@ -759,6 +758,8 @@ export function treatmentTile(teamId, treatment) {
       pinstripeColor: pinstriped ? mainTreatmentPinstripeColor(teamId) : null,
       pinstripeBg: null,
       scale: mainTreatmentScale(teamId),
+      offsetX: treatmentOffsetX(teamId, 'main'),
+      offsetY: treatmentOffsetY(teamId, 'main'),
     }
   }
   const pinstripeColor = treatmentPinstripeColor(teamId, treatment)
@@ -768,6 +769,8 @@ export function treatmentTile(teamId, treatment) {
     pinstripeColor,
     pinstripeBg: pinstripeColor ? treatmentPinstripeBg(teamId, treatment) : null,
     scale: treatmentScale(teamId, treatment),
+    offsetX: treatmentOffsetX(teamId, treatment),
+    offsetY: treatmentOffsetY(teamId, treatment),
   }
 }
 
