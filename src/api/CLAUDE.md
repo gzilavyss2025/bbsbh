@@ -524,11 +524,22 @@ for each generator; the reader modules:
   Each photo also carries `focus` (subject player + team, from the item's own
   `keywordsAll` ids — never name matching), which is what `photosForPlayer`/
   `photosForTeam` query. `withoutGraphics` is the camera-only filter both the
-  page and `GamePhotosStrip` apply; it deliberately keeps `unknown`.
-  Those two query helpers are **groundwork with no screen calling them yet** —
-  the cross-game "photos by player / by team" index they exist for is scoped in
-  `.scratch/game-photos-by-subject/` (PRD + issue 01), which also records the
-  design decisions already settled. Read it before extending any of this.
+  page and `GamePhotosStrip` apply (keeps `broadcast` + `unknown`, drops
+  `graphic`); `onlyPhotographer` is stricter still — `kind === 'photographer'`
+  only, dropping broadcast frames too — for a surface that wants camera stills
+  alone, e.g. an ABS-challenge result card (`graphic`, from a taxonomy/shape
+  match) or a broadcast frame grab slipping in.
+  `photosForPlayer` is still unused groundwork; `photosForTeam` now backs the
+  Team Page's Photos rail (`TeamPhotosRail`, `src/screens/TeamPage.jsx`),
+  which walks that team's own `seasonGames` (already `asOf`-cutoff-filtered,
+  same list `LastTenGamesStrip` renders off) backward from the newest game,
+  fetching `fetchGamePhotos` per game on demand rather than reading a
+  precomputed index — that page already has the one team's full decided-game
+  list in memory, so a bounded live walk-back was enough. The cross-game
+  "photos by player / by team, from anywhere" index scoped in
+  `.scratch/game-photos-by-subject/` (PRD + issue 01) is still open for a
+  surface with no such list already loaded (a player page, say) — read that
+  doc, including its note on what shipped without it, before building it.
 
 ## Leader boards (live)
 

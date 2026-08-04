@@ -290,6 +290,8 @@ export function withoutGraphics(photos) {
 
 // Subject lookups, matched against every tagged id rather than just the
 // primary, so a montage tagging three players is found under all three.
+// `photosForTeam` backs the Team Page's Photos rail (TeamPage.jsx); no
+// screen calls `photosForPlayer` yet.
 export function photosForPlayer(photos, personId) {
   if (personId == null) return []
   return (photos ?? []).filter((photo) => photo.focus?.playerIds?.includes(Number(personId)))
@@ -298,4 +300,13 @@ export function photosForPlayer(photos, personId) {
 export function photosForTeam(photos, teamId) {
   if (teamId == null) return []
   return (photos ?? []).filter((photo) => photo.focus?.teamIds?.includes(Number(teamId)))
+}
+
+// The Team Page's Photos rail's stricter filter: camera stills only,
+// dropping BOTH broadcast frame grabs and rendered graphic cards (Statcast
+// darkroom cards, ABS challenge result cards, GAME HIGHLIGHTS recap art —
+// all `kind: 'graphic'`). `withoutGraphics` above keeps broadcast frames;
+// this is for a surface that wants photographer work only.
+export function onlyPhotographer(photos) {
+  return (photos ?? []).filter((photo) => photo.kind === 'photographer')
 }
