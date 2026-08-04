@@ -116,39 +116,47 @@ export function PassportCover({ onOpen }) {
       // the foot of the cover shows (ADR-0017's button-copy convention).
       aria-label="Open your logbook"
     >
-      <span className="passcover__crest">
-        {hasMark ? (
-          <svg
-            viewBox={`0 0 ${CREST_BOX} ${CREST_BOX}`}
-            className="passcover__mark"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <defs>
-              <mask id={maskId}>
-                <image
-                  href={teamLogoUrl(favoriteTeamId, 'mono')}
-                  x="0"
-                  y="0"
-                  width={CREST_BOX}
-                  height={CREST_BOX}
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </mask>
-            </defs>
-            <rect
-              x="0"
-              y="0"
-              width={CREST_BOX}
-              height={CREST_BOX}
-              fill="currentColor"
-              mask={`url(#${maskId})`}
-            />
-          </svg>
-        ) : (
-          abbr && <span className="passcover__abbr">{abbr}</span>
-        )}
-      </span>
+      {/* No knockout mark AND no abbreviation (an unrecognised id) — the crest
+          slot is dropped entirely rather than left as an empty square, and the
+          cover reads as the wordmark alone. */}
+      {(hasMark || abbr) && (
+        <span className="passcover__crest">
+          {hasMark ? (
+            <svg
+              viewBox={`0 0 ${CREST_BOX} ${CREST_BOX}`}
+              className="passcover__mark"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <defs>
+                <mask id={maskId}>
+                  <image
+                    href={teamLogoUrl(favoriteTeamId, 'mono')}
+                    x="0"
+                    y="0"
+                    width={CREST_BOX}
+                    height={CREST_BOX}
+                    // Marks are not square (Brewers 157x172 portrait, Cubs
+                    // 234x234), so the slot is square and the mark letterboxes
+                    // into it. Never assume aspect.
+                    preserveAspectRatio="xMidYMid meet"
+                  />
+                </mask>
+              </defs>
+              <rect
+                x="0"
+                y="0"
+                width={CREST_BOX}
+                height={CREST_BOX}
+                fill="currentColor"
+                mask={`url(#${maskId})`}
+              />
+            </svg>
+          ) : (
+            <span className="passcover__abbr">{abbr}</span>
+          )}
+        </span>
+      )}
 
       <TallyWordmark
         height={28}

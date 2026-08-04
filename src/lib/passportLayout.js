@@ -23,10 +23,16 @@
 // stampArt.js) rendered at whatever CSS box it is given, so this module only
 // ever reasons about its size as a fraction of the page too.
 
-// How many stamps a page holds. Ten is the brief ("about 8 to 10"), and it is
-// also about what fits at STAMP_WIDTH without the page reading as a sheet of
-// stickers — two columns of five, loosely, with room for the hand to wander.
-export const PAGE_CAPACITY = 10
+// How many stamps a page holds. NINE, laid out three across and three down,
+// and the number is arithmetic rather than taste: at STAMP_WIDTH a page has
+// about 0.67 of its height free for stamp CENTRES once the margins are taken,
+// so five rows would sit 0.24 page-widths apart — inside MIN_SEPARATION, i.e.
+// overlapping by this module's own definition. Ten in two columns therefore
+// produced auto-layouts that `nudgeFromCollisions` would have refused, which
+// is the kind of disagreement between two functions in one file that only a
+// test catches. Three by three clears it with room: 0.29 across, 0.47 down.
+// Still inside the brief's "about 8 to 10".
+export const PAGE_CAPACITY = 9
 
 // Bounds the page count so a hostile or hand-edited client can't mint a book
 // with 40,000 pages in it. 60 pages x 10 is 600, comfortably past the 500
@@ -74,7 +80,12 @@ export function stampHeightFraction() {
 // somebody already arranged.)
 export function tiltFor(gamePk) {
   const pk = Number(gamePk)
-  if (!Number.isFinite(pk)) return 0
+  // `> 0`, not `Number.isFinite` — `Number(null)` and `Number(0)` are finite
+  // zeros, and zero hashes to the extreme end of the range, so a missing gamePk
+  // would come back as a hard -7° tilt rather than the neutral 0 the caller
+  // expects. Zero is not a valid gamePk anywhere in this codebase (`toGamePk`
+  // rejects it), so treating it as absent is the honest reading.
+  if (!Number.isFinite(pk) || pk <= 0) return 0
   // A cheap integer hash — the low digits of a gamePk run in sequence for
   // games on the same day, and using them raw would tilt a whole homestand the
   // same way.
@@ -95,11 +106,22 @@ export function clampToPage(x, y) {
 }
 
 // Distance between two centres, measured in PAGE-WIDTH fractions so one number
-// compares against MIN_SEPARATION. The vertical leg is scaled by the aspect
-// because a y-fraction covers less real distance than an x-fraction does.
+// compares against MIN_SEPARATION.
+//
+// The vertical leg is DIVIDED by the aspect, and the direction of that is the
+// easiest thing in this file to get backwards (it was, once — the test
+// "a stamp a clear stamp-height below is not a collision" is what caught it).
+// The page is taller than it is wide, so a y-fraction covers MORE real distance
+// than the same x-fraction: 0.1 of the height is `0.1 * height`, which in
+// width-units is `0.1 * height / width` = `0.1 / PAGE_ASPECT`. Multiplying
+// instead understates every vertical gap, and stamps stacked down the page get
+// shoved apart when they were never touching.
+//
+// (Contrast `stampHeightFraction`, which genuinely multiplies: there the
+// conversion runs the other way, from a width-fraction to a height-fraction.)
 function separation(a, b) {
   const dx = a.x - b.x
-  const dy = (a.y - b.y) * PAGE_ASPECT
+  const dy = (a.y - b.y) / PAGE_ASPECT
   return Math.sqrt(dx * dx + dy * dy)
 }
 
@@ -125,9 +147,15 @@ export function nudgeFromCollisions(point, taken) {
     const radius = (MIN_SEPARATION / 4) * ring
     for (let step = 0; step < 12; step += 1) {
       const angle = (step / 12) * Math.PI * 2 + ring * 0.4
+      // `radius` is in width-units (the same units MIN_SEPARATION is in), so
+      // the vertical leg converts back the other way from `separation`'s:
+      // width-units -> y-fraction MULTIPLIES by the aspect. Getting this
+      // backwards doesn't break the search — it still terminates on a valid
+      // spot — it just stretches the spiral into an ellipse, so a nudged stamp
+      // drifts further down the page than it needed to.
       const candidate = clampToPage(
         start.x + Math.cos(angle) * radius,
-        start.y + (Math.sin(angle) * radius) / PAGE_ASPECT,
+        start.y + Math.sin(angle) * radius * PAGE_ASPECT,
       )
       if (fits(candidate)) return candidate
       // Track the roomiest spot seen, so a genuinely full page still returns
@@ -146,13 +174,21 @@ export function nudgeFromCollisions(point, taken) {
 // `taken` is the placements already on that page.
 export function placementFor(gamePk, page, tap, taken) {
   const spot = nudgeFromCollisions({ x: tap?.x, y: tap?.y }, taken)
-  return { page, x: spot.x, y: spot.y, tilt: tiltFor(gamePk) }
+  // Clamped here as well as in normalizePlacement. The bound existing in only
+  // one of the two would mean this function could hand back a placement the
+  // store then silently refuses, and the stamp would vanish on confirm.
+  const onBook = clamp(Math.trunc(page) || 1, 1, MAX_PAGES)
+  return { page: onBook, x: spot.x, y: spot.y, tilt: tiltFor(gamePk) }
 }
 
-// Every live stamp already placed on a page, in a stable order.
+// Every LIVE stamp already placed on a page, in a stable order. The state
+// filter is not decoration: `removeStamp` keeps the placement on the 'off'
+// tombstone it writes, so a raw collection passed in here would let an
+// un-stamped game go on occupying a slot and counting toward `pageIsFull`.
+// No caller does that today; this makes it impossible rather than lucky.
 export function stampsOnPage(stamps, page) {
   return (stamps ?? [])
-    .filter((s) => s?.placement?.page === page)
+    .filter((s) => s?.state !== 'off' && s?.placement?.page === page)
     .sort((a, b) => a.placement.y - b.placement.y || a.placement.x - b.placement.x)
 }
 
@@ -190,7 +226,9 @@ export function pageCountFor(stamps, added = 1) {
 export function autoLayout(stamps, { startPage = 1 } = {}) {
   const out = []
   const perPage = PAGE_CAPACITY
-  const columns = 2
+  // Three across, matching the geometry PAGE_CAPACITY is derived from — a
+  // two-column rhythm at this capacity overlaps (see that constant's note).
+  const columns = 3
   const rows = Math.ceil(perPage / columns)
 
   ;(stamps ?? []).forEach((stamp, i) => {

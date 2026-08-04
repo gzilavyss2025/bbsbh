@@ -12,15 +12,21 @@ import { halfIndex } from '../src/api/select.js'
 import {
   DEFAULT_STAMP_MODE,
   MAX_NOTE_LENGTH,
+  MAX_PLACEMENT_PAGE,
+  MAX_PLACEMENT_TILT,
   MAX_STAMPS_PER_SEASON,
   addStamp,
   applyRemoteStamps,
   finalHalfIndex,
   isStamped,
   meetsRevealGate,
+  normalizePlacement,
   normalizeStamp,
   parseStamps,
+  placeStamp,
+  placeStamps,
   removeStamp,
+  samePlacement,
   sanitizeNote,
   seasonCounts,
   seasonFromDate,
@@ -29,6 +35,7 @@ import {
   stampFor,
   stampsForSeason,
   toGamePk,
+  unplaceStamp,
 } from '../src/lib/stamps.js'
 
 const NINE = { gamePk: 1, status: 'Final', date: '2026-05-18', innings: 9, homeBattedLast: true }
@@ -229,6 +236,193 @@ test('season views count and order only live stamps', () => {
 })
 
 // ---------------------------------------------------------------------------
+// Placement — where a stamp sits in the passport book
+// ---------------------------------------------------------------------------
+// A page number and two fractions. Nothing score-bearing, so a forged one has
+// moved a picture rather than minted a score — which is why the rules here are
+// about staying READABLE (clamp, don't reject) rather than about failing
+// closed, the opposite posture from the reveal gate above.
+
+const SPOT = { page: 2, x: 0.42, y: 0.61, tilt: 3.5 }
+
+test('normalizePlacement takes a readable spot and refuses an unreadable one', () => {
+  assert.deepEqual(normalizePlacement(SPOT), SPOT)
+  // The page is an integer inside the book — the bound a hostile client would
+  // otherwise use to mint a 40,000-page one.
+  assert.equal(normalizePlacement({ ...SPOT, page: 0 }), null)
+  assert.equal(normalizePlacement({ ...SPOT, page: -1 }), null)
+  assert.equal(normalizePlacement({ ...SPOT, page: 2.5 }), null)
+  assert.equal(normalizePlacement({ ...SPOT, page: MAX_PLACEMENT_PAGE + 1 }), null)
+  assert.equal(normalizePlacement({ ...SPOT, page: 'two' }), null)
+  assert.equal(normalizePlacement({ ...SPOT, page: MAX_PLACEMENT_PAGE }).page, MAX_PLACEMENT_PAGE)
+  // A coordinate that isn't a number is not a spot on a page.
+  assert.equal(normalizePlacement({ ...SPOT, x: NaN }), null)
+  assert.equal(normalizePlacement({ ...SPOT, y: Infinity }), null)
+  assert.equal(normalizePlacement({ ...SPOT, y: 'middle' }), null)
+  assert.equal(normalizePlacement(null), null)
+  assert.equal(normalizePlacement(undefined), null)
+  assert.equal(normalizePlacement('page 2'), null)
+  assert.equal(normalizePlacement(7), null)
+  // The numeric strings a Redis hash field hands back are the same spot.
+  assert.deepEqual(normalizePlacement({ page: '2', x: '0.42', y: '0.61', tilt: '3.5' }), SPOT)
+})
+
+test('normalizePlacement clamps a spot onto the page rather than dropping it', () => {
+  assert.deepEqual(normalizePlacement({ page: 1, x: -3, y: 12, tilt: 0 }), {
+    page: 1,
+    x: 0,
+    y: 1,
+    tilt: 0,
+  })
+  // Tilt is bounded both ways...
+  assert.equal(normalizePlacement({ ...SPOT, tilt: 90 }).tilt, MAX_PLACEMENT_TILT)
+  assert.equal(normalizePlacement({ ...SPOT, tilt: -90 }).tilt, -MAX_PLACEMENT_TILT)
+  // ...and a missing or unreadable one is simply straight.
+  assert.equal(normalizePlacement({ page: 1, x: 0.5, y: 0.5 }).tilt, 0)
+  assert.equal(normalizePlacement({ ...SPOT, tilt: 'sideways' }).tilt, 0)
+})
+
+test('a placement is rounded so a round trip cannot read as a move', () => {
+  const spot = normalizePlacement({ page: 1, x: 0.123456789, y: 0.5, tilt: 1.23456 })
+  assert.equal(spot.x, 0.1235)
+  assert.equal(spot.tilt, 1.23)
+  assert.equal(samePlacement(spot, normalizePlacement(JSON.parse(JSON.stringify(spot)))), true)
+})
+
+test('samePlacement compares the spot, not the object', () => {
+  assert.equal(samePlacement(null, null), true)
+  assert.equal(samePlacement(null, undefined), true)
+  assert.equal(samePlacement(SPOT, null), false)
+  assert.equal(samePlacement(null, SPOT), false)
+  assert.equal(samePlacement(SPOT, { ...SPOT }), true)
+  assert.equal(samePlacement(SPOT, { ...SPOT, page: 3 }), false)
+  assert.equal(samePlacement(SPOT, { ...SPOT, x: 0.43 }), false)
+  assert.equal(samePlacement(SPOT, { ...SPOT, y: 0.62 }), false)
+  assert.equal(samePlacement(SPOT, { ...SPOT, tilt: -3.5 }), false)
+})
+
+test('every record carries a placement, and an unreadable one never voids it', () => {
+  const bare = normalizeStamp({ stampedAt: 5, date: '2026-05-18' })
+  assert.ok('placement' in bare)
+  assert.equal(bare.placement, null)
+  assert.deepEqual(normalizeStamp({ stampedAt: 5, date: '2026-05-18', placement: SPOT }).placement, SPOT)
+  // The keepsake outranks its position: garbage sends the stamp back to the
+  // tray, it does not throw the record away.
+  const junk = normalizeStamp({ stampedAt: 5, date: '2026-05-18', placement: { page: 0 } })
+  assert.ok(junk)
+  assert.equal(junk.placement, null)
+  assert.equal(normalizeStamp({ stampedAt: 5, placement: 'page 2' }).placement, null)
+})
+
+test('a new stamp starts in the tray, and a named spot places it', () => {
+  const plain = addStamp({}, 1, { date: '2026-05-18', now: 1000 })
+  assert.equal(stampFor(plain, 1).placement, null)
+  const placed = addStamp({}, 2, { date: '2026-05-18', now: 1000, placement: SPOT })
+  assert.deepEqual(stampFor(placed, 2).placement, SPOT)
+})
+
+test('re-stamping to edit a note does not knock the stamp off its page', () => {
+  // The regression that matters: the note editor calls addStamp again, and a
+  // book somebody arranged by hand has to survive it.
+  const placed = addStamp({}, 1, { date: '2026-05-18', now: 1000, placement: SPOT })
+  const edited = addStamp(placed, 1, { date: '2026-05-18', now: 2000, note: 'rain delay' })
+  assert.deepEqual(stampFor(edited, 1).placement, SPOT)
+  assert.equal(stampFor(edited, 1).note, 'rain delay')
+})
+
+test('re-stamping a removed game starts it back in the tray', () => {
+  // You un-stamped it, so where it used to sit is not where this keepsake goes.
+  const placed = addStamp({}, 1, { date: '2026-05-18', now: 1000, placement: SPOT })
+  const removed = removeStamp(placed, 1, { now: 2000 })
+  const again = addStamp(removed, 1, { date: '2026-05-18', now: 3000 })
+  assert.equal(stampFor(again, 1).placement, null)
+})
+
+test('placeStamp places, moves, and bumps the sync clock', () => {
+  const stamped = addStamp({}, 1, { date: '2026-05-18', now: 1000 })
+  const placed = placeStamp(stamped, 1, SPOT, { now: 2000 })
+  assert.deepEqual(stampFor(placed, 1).placement, SPOT)
+  assert.equal(stampFor(placed, 1).updatedAt, 2000)
+  // Moving a stamp is not re-stamping it — the keepsake's own date holds.
+  assert.equal(stampFor(placed, 1).stampedAt, 1000)
+  const moved = placeStamp(placed, 1, { ...SPOT, page: 3 }, { now: 3000 })
+  assert.equal(stampFor(moved, 1).placement.page, 3)
+  assert.equal(stampFor(moved, 1).updatedAt, 3000)
+  // The input map is never mutated.
+  assert.deepEqual(stampFor(placed, 1).placement, SPOT)
+})
+
+test('placeStamp is a no-op for anything it has no business moving', () => {
+  const stamped = addStamp({}, 1, { date: '2026-05-18', now: 1000 })
+  // You cannot place a keepsake you do not hold.
+  assert.deepEqual(placeStamp(stamped, 999, SPOT, { now: 2000 }), stamped)
+  assert.deepEqual(placeStamp(stamped, 'abc', SPOT, { now: 2000 }), stamped)
+  // A tombstone stays a tombstone — placing one would half-revive it.
+  const removed = removeStamp(stamped, 1, { now: 1500 })
+  assert.deepEqual(placeStamp(removed, 1, SPOT, { now: 2000 }), removed)
+  // An unreadable spot, or no clock to date the change by.
+  assert.deepEqual(placeStamp(stamped, 1, { page: 0 }, { now: 2000 }), stamped)
+  assert.deepEqual(placeStamp(stamped, 1, null, { now: 2000 }), stamped)
+  assert.deepEqual(placeStamp(stamped, 1, SPOT), stamped)
+})
+
+test('placing a stamp where it already sits does not republish it', () => {
+  // What stops the sync republishing forever: a placement that merely
+  // round-tripped is not a change, so updatedAt must not move.
+  const placed = placeStamp(addStamp({}, 1, { date: '2026-05-18', now: 1000 }), 1, SPOT, {
+    now: 2000,
+  })
+  const again = placeStamp(placed, 1, { ...SPOT }, { now: 5000 })
+  assert.equal(stampFor(again, 1).updatedAt, 2000)
+  assert.deepEqual(again, placed)
+})
+
+test('unplaceStamp returns the stamp to the tray without losing it', () => {
+  const placed = placeStamp(addStamp({}, 1, { date: '2026-05-18', now: 1000 }), 1, SPOT, {
+    now: 2000,
+  })
+  const cleared = unplaceStamp(placed, 1, { now: 3000 })
+  assert.equal(stampFor(cleared, 1).placement, null)
+  assert.equal(stampFor(cleared, 1).updatedAt, 3000)
+  // Taking a stamp off the page is not un-stamping the game.
+  assert.equal(isStamped(cleared, 1), true)
+  assert.equal(stampFor(cleared, 1).stampedAt, 1000)
+  // Already in the tray: nothing to take back, nothing to publish.
+  assert.deepEqual(unplaceStamp(cleared, 1, { now: 4000 }), cleared)
+  assert.deepEqual(unplaceStamp(cleared, 999, { now: 4000 }), cleared)
+})
+
+test('placeStamps lays out a whole batch in one pass', () => {
+  // The shape autoLayout (src/lib/passportLayout.js) returns — the "place them
+  // all for me" control, and what an upgrading collection needs.
+  let map = addStamp({}, 1, { date: '2026-05-18', now: 1000 })
+  map = addStamp(map, 2, { date: '2026-05-19', now: 1000 })
+  map = addStamp(map, 3, { date: '2026-05-20', now: 1000 })
+  const laid = placeStamps(
+    map,
+    [
+      { gamePk: 1, placement: { page: 1, x: 0.25, y: 0.2, tilt: 0 } },
+      { gamePk: 2, placement: { page: 1, x: 0.75, y: 0.2, tilt: -2 } },
+      { gamePk: 999, placement: SPOT }, // not in the collection — skipped
+    ],
+    { now: 2000 },
+  )
+  assert.equal(stampFor(laid, 1).placement.x, 0.25)
+  assert.equal(stampFor(laid, 2).placement.tilt, -2)
+  // A stamp the batch didn't name is left in the tray, not swept somewhere.
+  assert.equal(stampFor(laid, 3).placement, null)
+  assert.equal(isStamped(laid, 999), false)
+  assert.deepEqual(placeStamps(map, null, { now: 2000 }), map)
+})
+
+test('a placement survives the localStorage round trip', () => {
+  const map = addStamp({}, 824680, { date: '2026-05-18', now: 1000, placement: SPOT })
+  const back = parseStamps(serializeStamps(map))
+  assert.deepEqual(back, map)
+  assert.deepEqual(stampFor(back, 824680).placement, SPOT)
+})
+
+// ---------------------------------------------------------------------------
 // Sync merge
 // ---------------------------------------------------------------------------
 
@@ -255,6 +449,26 @@ test('a newer remote removal propagates over a local stamp', () => {
     1: { state: 'off', mode: 'watched', stampedAt: 1000, updatedAt: 5000, date: '2026-05-18' },
   })
   assert.equal(isStamped(merged, 1), false)
+})
+
+test('a newer remote record brings its placement with it', () => {
+  // The book is part of the collection, not a second sync channel: a stamp
+  // moved on the phone reaches the laptop by exactly the last-write-wins path
+  // every other change takes.
+  const remote = {
+    state: 'on',
+    mode: 'watched',
+    stampedAt: 1000,
+    updatedAt: 5000,
+    date: '2026-05-18',
+    placement: SPOT,
+  }
+  const local = addStamp({}, 1, { date: '2026-05-18', now: 1000 })
+  const merged = applyRemoteStamps(local, { 1: remote })
+  assert.deepEqual(stampFor(merged, 1).placement, SPOT)
+  // ...and once this device moves it, the same stale remote cannot drag it back.
+  const moved = placeStamp(merged, 1, { ...SPOT, page: 4 }, { now: 9000 })
+  assert.equal(stampFor(applyRemoteStamps(moved, { 1: remote }), 1).placement.page, 4)
 })
 
 test('a garbled remote payload degrades to no change', () => {

@@ -194,6 +194,32 @@ read the linked ADRs before refactoring:
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024.
 
+## The Logbook's passport book (`src/components/passport/`, ADR-0036)
+
+`/logbook` is a passport book: a club-coloured cover, cream pages, and stamps
+you place by tapping the page. Three rules, each with a reason:
+
+- **Geometry lives in `src/lib/passportLayout.js`**, not in these components.
+  Capacity, page aspect, margins, the deterministic per-game tilt, the
+  collision nudge and the auto-layout are all pure and unit-tested
+  (`test/passport-layout.test.js`). A component that types a coordinate has put
+  it somewhere nothing can check. Two conversions in that module are easy to
+  invert and one already was: a y-fraction converts to width-units by
+  **dividing** by `PAGE_ASPECT`, while a stamp's width-fraction converts to a
+  height-fraction by **multiplying**.
+- **A placement is `{ page, x, y, tilt }` with x/y as FRACTIONS**, stored on the
+  stamp record and synced (`src/lib/stamps.js`). Pixels would be a fact about
+  one screen; the same book has to render on a phone page and a desktop spread,
+  and on both of one user's devices.
+- **Minting and placing are separate.** The mint stays in the box score's
+  `SealBox` (ADR-0035); placing happens here via `?place={gamePk}`. An unplaced
+  stamp waits in the book's tray, so abandoning the flow never loses a keepsake.
+
+`PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
+allowlist since that guard was written — justified because a page's entire input
+is the user's own collection. `/logbook/stats` renders no stamp art and stays
+off it. Read ADR-0036 before adding a third name.
+
 ## Notification cards, casing, color, and button copy (ADR-0017)
 
 Every mid-inning "something happened" moment in `PlayByPlay.jsx` sorts into one
