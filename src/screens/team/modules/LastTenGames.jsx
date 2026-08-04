@@ -223,14 +223,16 @@ function LastTenGamesStrip({ games, initialCount = 10 }) {
   )
 }
 
-// `previewCount` (the Overview's Last 10 door) hands the strip only that many of
-// the newest stubs instead of the whole season, which also stops it growing back
-// toward Opening Day — scrolling all the way back is what the Games tab is for.
-// The header's W-L is unaffected either way: it stays pinned to the true last
-// ten, since "Last 10 Games · 6-4" is the figure the card exists to carry.
-export function LastTenGames({ teamId, asOf, recentGames, seasonGames, previewCount = null }) {
+// `preview` (the Overview's Last 10 door) hands the strip the true last ten and
+// nothing older, so it can't grow back toward Opening Day — scrolling all the
+// way back is what the Games tab is for. It still shows all ten: the card is
+// titled "Last 10 Games" and its header carries a ten-game W-L, so a strip
+// holding fewer than that would make the card contradict its own masthead (and,
+// on a viewport wide enough to fit them, would show no scroll arrows to suggest
+// anything was missing).
+export function LastTenGames({ teamId, asOf, recentGames, seasonGames, preview = false }) {
   const recentWins = recentGames.filter((g) => g.won).length
-  const games = previewCount ? seasonGames.slice(-previewCount) : seasonGames
+  const games = preview ? seasonGames.slice(-recentGames.length) : seasonGames
   return (
     <div className="thub-card">
       <div className="thub-card__head">
@@ -243,7 +245,7 @@ export function LastTenGames({ teamId, asOf, recentGames, seasonGames, previewCo
         <LastTenGamesStrip
           key={`${teamId}-${asOf ?? ''}`}
           games={games}
-          initialCount={previewCount ?? recentGames.length}
+          initialCount={recentGames.length}
         />
       </div>
     </div>

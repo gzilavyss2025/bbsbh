@@ -16,7 +16,6 @@ import { RosterProjection } from './team/modules/RosterProjection.jsx'
 // duplicate — every one of these ends in a link to the tab that holds the whole
 // thing, and none of them is the last word on anything.
 const PREVIEW_LEADER_CATEGORIES = 3
-const PREVIEW_LAST_TEN = 5
 const PREVIEW_TRANSACTIONS = 3
 
 // The door itself: one text link under a preview, in the same caps/tracking
@@ -122,8 +121,9 @@ export function TeamPage({ id, asOf, sportId }) {
         </>
       )}
 
-      {/* Last 10 — five stubs, newest last, matching the Games tab's own
-          reading direction. Scrolling back to Opening Day is that tab's job. */}
+      {/* Last 10 — the true last ten, newest last, matching the Games tab's own
+          reading direction. Scrolling back past them to Opening Day is that
+          tab's job, and is the only thing this preview holds back. */}
       {recentGames.length > 0 && (
         <>
           <LastTenGames
@@ -131,7 +131,7 @@ export function TeamPage({ id, asOf, sportId }) {
             asOf={asOf}
             recentGames={recentGames}
             seasonGames={seasonGames}
-            previewCount={PREVIEW_LAST_TEN}
+            preview
           />
           <PreviewDoor label="Season schedule" onClick={() => go('games')} />
         </>
