@@ -1,33 +1,121 @@
+import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncGate } from '../../components/AsyncGate.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { TeamShelf } from './TeamShelf.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
+import { loadRoster } from './data/loadRoster.js'
+import { RosterProjection } from './modules/RosterProjection.jsx'
+import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
+import { InjuredListCard } from './modules/InjuredListCard.jsx'
 
-// STUB. Issue 03 fills this in (roster projection, 40-man, injured list) with
-// its own loadRoster.js beside this file; everything below the shell is
-// placeholder. The shell + its identity loader are the part that is real, and
-// they are what lets issues 03–06 build their four tabs in parallel.
+// Roster tab: the season roster projection (full, at the top — this is the
+// tab's headline), then the 40-man Current Roster and the Injured List as
+// shelves. Its own loadRoster.js is a strict subset of loadTeam's fetches —
+// see .scratch/team-page-ia/issues/03-roster-tab.md. Runs alongside
+// loadTeamIdentity (the shell's own cheap loader every tab pays for) rather
+// than duplicating its fetches here.
 export function RosterTab({ id, asOf, sportId }) {
   const teamId = Number(id)
-  const { loading, error, data } = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
+  const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
+  const roster = useAsync(() => loadRoster(teamId, asOf), [teamId, asOf])
   const back = () => window.history.back()
 
-  const gate = AsyncGate({ loading, error, data, screenClass: 'team-hub', noun: 'team', onBack: back })
+  // Season / Current toggle, keyed by team id so client-side navigation to a
+  // different club naturally resets to the Current default rather than
+  // inheriting the last club's chosen view (same idiom TeamPage.jsx used).
+  const [seasonRosterTeamId, setSeasonRosterTeamId] = useState(null)
+
+  const gate = AsyncGate({
+    loading: identity.loading || roster.loading,
+    error: identity.error || roster.error,
+    data: identity.data && roster.data ? true : null,
+    screenClass: 'team-hub',
+    noun: 'team',
+    onBack: back,
+  })
   if (gate) return gate
+
+  const {
+    season,
+    isMilb,
+    position,
+    pitchers,
+    injured,
+    preferredLineup,
+    substitutes,
+    startingPitchers,
+    bullpen,
+    recentPreferredLineup,
+    recentSubstitutes,
+    recentStartingPitchers,
+    recentBullpen,
+  } = roster.data
+
+  const injuredIds = new Set(injured.map((p) => p.id))
+  const preferredLineupDefense = preferredLineup.map((p) => ({
+    position: p.position,
+    last: p.last,
+    id: p.id,
+    hurt: injuredIds.has(p.id),
+  }))
+  const recentPreferredLineupDefense = recentPreferredLineup.map((p) => ({
+    position: p.position,
+    last: p.last,
+    id: p.id,
+    hurt: injuredIds.has(p.id),
+  }))
+  const hasRecentRoster =
+    recentPreferredLineup.length > 0 ||
+    recentSubstitutes.length > 0 ||
+    recentStartingPitchers.length > 0 ||
+    recentBullpen.length > 0
+  // Defaults to the Current window whenever that data exists — a club with no
+  // completed games yet always renders the Season card instead.
+  const showRecentRoster = hasRecentRoster && seasonRosterTeamId !== teamId
+  const rosterLineup = showRecentRoster ? recentPreferredLineupDefense : preferredLineupDefense
+  const rosterSubs = showRecentRoster ? recentSubstitutes : substitutes
+  const rosterSP = showRecentRoster ? recentStartingPitchers : startingPitchers
+  const rosterBullpen = showRecentRoster ? recentBullpen : bullpen
 
   return (
     <TeamHubShell
-      team={data.team}
-      record={data.record}
-      manager={data.manager}
+      team={identity.data.team}
+      record={identity.data.record}
+      manager={identity.data.manager}
       asOf={asOf}
       sportId={sportId}
       active="roster"
     >
-      <TeamShelf teamId={teamId} title="Roster">
-        {() => <p className="hint">Nothing here yet.</p>}
-      </TeamShelf>
+      {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
+        <RosterProjection
+          hasRecentRoster={hasRecentRoster}
+          showRecentRoster={showRecentRoster}
+          onShowSeason={() => setSeasonRosterTeamId(teamId)}
+          onShowCurrent={() => setSeasonRosterTeamId(null)}
+          rosterLineup={rosterLineup}
+          rosterSubs={rosterSubs}
+          rosterSP={rosterSP}
+          rosterBullpen={rosterBullpen}
+          injuredIds={injuredIds}
+          season={season}
+          isMilb={isMilb}
+        />
+      )}
+
+      {(position.length > 0 || pitchers.length > 0) && (
+        <TeamShelf teamId={teamId} title="Current Roster" summary={position.length + pitchers.length}>
+          {() => (
+            <CurrentRosterCard position={position} pitchers={pitchers} season={season} isMilb={isMilb} sportId={sportId} />
+          )}
+        </TeamShelf>
+      )}
+
+      {injured.length > 0 && (
+        <TeamShelf teamId={teamId} title="Injured List" summary={injured.length}>
+          {() => <InjuredListCard injured={injured} season={season} showInjured onShowInjured={() => {}} />}
+        </TeamShelf>
+      )}
     </TeamHubShell>
   )
 }
