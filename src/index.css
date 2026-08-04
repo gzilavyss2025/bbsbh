@@ -27858,3 +27858,47 @@ button.gamehigh-matchup:active {
 
 
 /* ==== TEAM HUB: ORG TAB ==== */
+/* The index grid the Org tab opens with — affiliates/prospects/jerseys/history
+   are a browse-by-tile list, not a reading order (see PRD "shape we're
+   building"). Two columns fit a phone; a tile scrolls to its own section
+   below rather than navigating anywhere, so it needs no active/selected
+   state of its own. */
+.orgindex {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+.orgindex__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  text-align: left;
+  cursor: pointer;
+}
+.orgindex__tile:active {
+  transform: scale(0.97);
+}
+.orgindex__tile:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.orgindex__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.orgindex__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
