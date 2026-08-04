@@ -37,7 +37,7 @@
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
-//   '/team/{id}/{roster|games|numbers|org}'
+//   '/team/{id}/{roster|games|numbers|minors}'
 //                                       -> { name: 'team-{tab}', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
@@ -71,7 +71,7 @@ const TEAM_TAB_ROUTES = {
   roster: 'team-roster',
   games: 'team-games',
   numbers: 'team-numbers',
-  org: 'team-org',
+  minors: 'team-minors',
 }
 
 export function parseRoute(url) {
@@ -307,8 +307,9 @@ export function gamePhotosPath(gamePk) {
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
 }
-// Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' / 'org'
-// / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs hang off.
+// Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
+// 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs
+// hang off.
 // Goes through linkQuery like every other team link, because a team page opened
 // from a game carries `?d=` (the spoiler cutoff) and `?s=` — a tab switch that
 // dropped them would show stats past the half-inning the visitor has reached,

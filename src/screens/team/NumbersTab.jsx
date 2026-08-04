@@ -5,24 +5,21 @@ import { teamLeadersPath, orgLeadersPath } from '../../lib/route.js'
 import { teamClubName } from '../../lib/teams.js'
 import { FEATURED_CATEGORIES } from '../../api/teamLeaders.js'
 import { TeamLeaders } from '../../components/TeamLeaders.jsx'
+import { ChevronLink } from '../../components/ChevronLink.jsx'
+import { JerseyCombos, MilbUniformStrip } from '../../components/JerseyCombos.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
-import { TeamShelf } from './TeamShelf.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadNumbers } from './data/loadNumbers.js'
 import { StandingsCard } from './modules/StandingsCard.jsx'
 import { TeamStats, todayDowLabel } from './modules/TeamStatsCard.jsx'
 import { ComebackCard } from './modules/ComebackCard.jsx'
 
-function pctLabel(rate) {
-  return rate == null ? null : `${Math.round(rate * 100)}%`
-}
-
-// Standings, team batting/pitching ranks and team leaders (full), plus the
-// day-of-week record and comeback wins shelved — see
-// .scratch/team-page-ia/issues/05-numbers-tab.md. The identity header comes
-// from the same loadTeamIdentity every tab shares; loadNumbers.js is this
-// tab's own body data, fetched independently so switching to this tab never
-// pays for another tab's data.
+// Standings, team batting/pitching ranks and team leaders (full), plus jersey
+// combos, the day-of-week record and comeback wins, each its own full card —
+// see .scratch/team-page-ia/issues/05-numbers-tab.md. The identity header
+// comes from the same loadTeamIdentity every tab shares; loadNumbers.js is
+// this tab's own body data, fetched independently so switching to this tab
+// never pays for another tab's data.
 export function NumbersTab({ id, asOf, sportId }) {
   const teamId = Number(id)
   const navigate = useNav()
@@ -43,11 +40,6 @@ export function NumbersTab({ id, asOf, sportId }) {
   const { team, record, manager } = identity.data
   const isMilb = (team.sport?.id ?? 1) !== 1
   const n = numbers.data
-
-  const todayRow = n?.dayOfWeek?.find((r) => r.k === todayDowLabel())
-  const dowSummary = todayRow ? `${todayRow.k} ${todayRow.v}` : null
-  const sub30 = n?.comeback?.thresholds?.find((t) => t.key === 'sub30')
-  const comebackSummary = sub30 ? pctLabel(sub30.rate) ?? `${sub30.wins} win${sub30.wins === 1 ? '' : 's'}` : null
 
   return (
     <TeamHubShell
@@ -88,36 +80,40 @@ export function NumbersTab({ id, asOf, sportId }) {
             horizontal
             secondaryAction={
               (!isMilb || team.parentOrgId) && (
-                <button
-                  type="button"
-                  className="tlead__seeall"
+                <ChevronLink
                   onClick={() =>
                     navigate(orgLeadersPath(isMilb ? team.parentOrgId : teamId, { d: asOf, s: sportId }))
                   }
                 >
-                  Org leaders ›
-                </button>
+                  Org leaders
+                </ChevronLink>
               )
             }
           />
 
+          {(isMilb || n.jerseyCombos.length > 0) &&
+            (isMilb ? (
+              <MilbUniformStrip
+                teamId={team.id}
+                teamName={team.name}
+                homeRecord={n.homeRecord}
+                awayRecord={n.awayRecord}
+              />
+            ) : (
+              <JerseyCombos combos={n.jerseyCombos} teamId={team.id} teamName={team.name} />
+            ))}
+
           {n.dayOfWeek && (
-            <TeamShelf teamId={teamId} title="Record by day of week" summary={dowSummary}>
-              {() => (
-                <TeamStats
-                  title="Record by Day of Week"
-                  stats={n.dayOfWeek}
-                  note="win pct"
-                  highlightKey={todayDowLabel()}
-                />
-              )}
-            </TeamShelf>
+            <TeamStats
+              title="Record by Day of Week"
+              stats={n.dayOfWeek}
+              note="win pct"
+              highlightKey={todayDowLabel()}
+            />
           )}
 
           {n.comeback && (
-            <TeamShelf teamId={teamId} title="Comeback wins" summary={comebackSummary}>
-              {() => <ComebackCard data={n.comeback} teamId={teamId} clubName={teamClubName(team)} />}
-            </TeamShelf>
+            <ComebackCard data={n.comeback} teamId={teamId} clubName={teamClubName(team)} />
           )}
         </>
       )}

@@ -53,15 +53,16 @@ export function AnimationLab() {
       <section className="animlab__entry">
         <h2 className="animlab__title">Scoreboard number flip</h2>
         <p className="hint hint--prose">
-          The shared cold-load Loader (src/components/Loader.jsx) — a hand-set manual scoreboard
-          plate that cycles 0–9, each digit settling in with a quick drop-and-catch.
+          The shared cold-load Loader (src/components/Loader.jsx) — a mini National League
+          linescore where Milwaukee&rsquo;s inning-2 cell cycles 1&ndash;9, each digit settling in
+          with a quick drop-and-catch.
         </p>
         <div className="animlab__live">
-          <Loader message="Stepping up to the plate…" size="inline" />
+          <Loader size="inline" />
         </div>
         <span className="animlab__stagelabel">Every digit it cycles through</span>
         <div className="animlab__frozen">
-          {Array.from({ length: 10 }, (_, digit) => (
+          {Array.from({ length: 9 }, (_, i) => i + 1).map((digit) => (
             <Frame key={digit} label={String(digit)}>
               <StaticScoreboardPlate digit={digit} />
             </Frame>
@@ -154,21 +155,30 @@ function Frame({ label, delayMs, children }) {
 
 // The same markup Loader.jsx renders for one digit, minus its own setInterval
 // — a fixed digit that plays its entrance once on mount and rests, so the
-// frozen strip can show every digit 0–9 side by side instead of racing
+// frozen strip can show every digit 1–9 side by side instead of racing
 // Loader's own 750ms cycle.
 function StaticScoreboardPlate({ digit }) {
   return (
     <div className="loader__scoreboard" aria-hidden="true">
-      <div className="loader__inning-label">INN</div>
-      <div className="loader__inning-grid">
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-      </div>
-      <span className="loader__zero">0</span>
+      <div className="loader__league">NATIONAL</div>
+      <span className="loader__colhead" />
+      <span className="loader__colhead" />
+      <span className="loader__colhead">1</span>
+      <span className="loader__colhead">2</span>
+      <span className="loader__colhead">3</span>
+
+      <span className="loader__num">32</span>
+      <span className="loader__team">MILWAUKEE</span>
+      <span className="loader__score">0</span>
       <div className="loader__plate-window">
         <span className="loader__plate">{digit}</span>
       </div>
+      <span className="loader__blank" />
+
+      <span className="loader__num">18</span>
+      <span className="loader__team">CUBS</span>
+      <span className="loader__score">0</span>
+      <span className="loader__score">0</span>
       <span className="loader__blank" />
     </div>
   )

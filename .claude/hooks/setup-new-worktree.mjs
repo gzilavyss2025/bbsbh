@@ -61,7 +61,7 @@ try {
     process.platform === 'win32'
       ? ['/c', 'npm install --no-audit --no-fund && npx playwright install chromium']
       : ['-c', 'npm install --no-audit --no-fund && npx playwright install chromium'],
-    { cwd: worktreePath, stdio: ['ignore', out, out], detached: true },
+    { cwd: worktreePath, stdio: ['ignore', out, out], detached: true, windowsHide: true },
   )
   child.unref()
 

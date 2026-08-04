@@ -10,6 +10,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { ProspectPill } from './ProspectPill.jsx'
 import { InjuredMark } from './InjuredMark.jsx'
 import { DeckNudge } from './DeckNudge.jsx'
+import { ChevronLink } from './ChevronLink.jsx'
 
 // The horizontal deck's per-card scroll step (card width + gap, both from
 // .tlead__grid--horizontal in index.css) — DeckNudge's click target.
@@ -231,8 +232,9 @@ function LeaderCategory({
 // since every row already shares the one team the page is about. `injuredIds`:
 // a Set of person ids currently on that team's IL, flagging a leader's name
 // with the same ✚ mark as the
-// player page's il-banner — TeamPage passes its own already-fetched IL list
-// (see loadTeam's `injured`); null everywhere else (see InjuredMark above).
+// player page's il-banner — the team hub passes its own already-fetched IL id
+// set (see the Overview's and the Numbers tab's loaders); null everywhere else
+// (see InjuredMark above).
 // `horizontal`: swipeable full-bleed card deck (same idiom as the Team
 // Transactions card) instead of the responsive wrap grid — opt-in, TeamPage's
 // own small fixed-size FEATURED_CATEGORIES set only. TeamLeadersPage/
@@ -241,7 +243,8 @@ function LeaderCategory({
 // worse than the page's own vertical scroll, so they leave this off.
 // `secondaryAction`: optional extra node rendered after "See all ›" in the
 // same header slot — TeamPage's only use is its "Organization leaders ›"
-// link, styled to match via the shared .tlead__seeall class.
+// link, built from the same shared ChevronLink as this component's own
+// "See all ›".
 export function TeamLeaders({
   pool,
   categories,
@@ -288,11 +291,7 @@ export function TeamLeaders({
               {horizontal && (
                 <DeckNudge scrollRef={scrollRef} cardStep={HORIZONTAL_CARD_STEP} label="team leaders" />
               )}
-              {onSeeAll && (
-                <button type="button" className="tlead__seeall" onClick={onSeeAll}>
-                  See all ›
-                </button>
-              )}
+              {onSeeAll && <ChevronLink onClick={onSeeAll}>See all</ChevronLink>}
               {secondaryAction}
             </span>
           ) : null

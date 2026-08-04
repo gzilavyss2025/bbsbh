@@ -90,7 +90,7 @@ const TeamLeadersPage = lazyNamed(
 const RosterTab = lazyNamed(() => import('./screens/team/RosterTab.jsx'), 'RosterTab')
 const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTab')
 const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
-const OrgTab = lazyNamed(() => import('./screens/team/OrgTab.jsx'), 'OrgTab')
+const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'MinorsTab')
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const UmpireRankingsPage = lazyNamed(
@@ -256,8 +256,8 @@ export default function App() {
     content = <GamesTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-numbers') {
     content = <NumbersTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
-  } else if (route.name === 'team-org') {
-    content = <OrgTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-minors') {
+    content = <MinorsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage

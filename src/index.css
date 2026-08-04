@@ -2158,10 +2158,13 @@ body {
 }
 
 /* ---------------------------------------------------------------- loader
-   Manual-scoreboard loading indicator (Loader.jsx) — one cream score plate
-   advances through 0–9 inside a field-green frame, like a scorekeeper has
-   posted it from behind the board. The rest of the board stays still, so the
-   wait reads as a quiet update rather than a looping sports-action graphic. */
+   Manual-scoreboard loading indicator (Loader.jsx) — a mini National League
+   linescore (MILWAUKEE over CUBS, five columns) inside a field-green frame,
+   one cream score plate (Milwaukee's inning 2) advancing through 1–9 like a
+   scorekeeper posting it from behind the board. The rest of the board stays
+   still, so the wait reads as a quiet update rather than a looping
+   sports-action graphic. `message` rides the container's aria-live status
+   but is visually sr-only — the board is self-explanatory on its own. */
 .loader {
   display: flex;
   align-items: center;
@@ -2171,24 +2174,26 @@ body {
 
 .loader__stage {
   flex: none;
-  width: 96px;
 }
 
 .loader__scoreboard {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Number / team-name / three inning columns — the team-name column is the
+     only one that needs real room (MILWAUKEE is the widest cell on the
+     board); the rest size to a two-digit number. */
+  grid-template-columns: auto minmax(82px, auto) repeat(3, auto);
   overflow: hidden;
   border: 2px solid var(--field-deep);
-  /* Every grid cell is a real element (the linescore row runs the full three
+  /* Every grid cell is a real element (each row runs the full five
      columns), so this only shows through the 1px cell borders — kept at the
      deep field tone that grounds the whole plate. */
   background: var(--field-deep);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
 }
 
-.loader__inning-label {
+.loader__league {
   grid-column: 1 / -1;
-  padding: 2px 0 1px;
+  padding: 2px 2px 1px;
   color: var(--paper-2);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -2198,21 +2203,18 @@ body {
   text-align: center;
 }
 
-.loader__inning-grid {
-  display: contents;
-}
-
-.loader__inning-grid span,
+.loader__colhead,
+.loader__num,
+.loader__team,
+.loader__score,
 .loader__plate-window,
-.loader__zero,
 .loader__blank {
   display: grid;
   min-height: 23px;
   place-items: center;
+  padding: 0 2px;
   border-top: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
   border-right: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
-  background: var(--field);
-  color: var(--paper-2);
   font-family: var(--font-mono);
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
@@ -2220,39 +2222,45 @@ body {
   line-height: var(--lh-solid);
 }
 
-/* Rightmost inning box — no border-right; the container edge closes it. The
-   cell directly below it (.loader__blank) draws the row divider with its own
-   border-top, so the boundary lines up with the zero/plate dividers to the
-   left instead of riding a pixel high on a border-bottom here. */
-.loader__inning-grid span:last-child {
+/* The "1 / 2 / 3" inning-number header row — lighter field tone, same as the
+   old single-row header, now spanning three of the five columns. */
+.loader__colhead {
+  padding: 0 6px;
+  background: var(--field);
+  color: var(--paper-2);
+}
+
+/* Rightmost header box — no border-right; the container edge closes it. */
+.loader__colhead:last-of-type {
   border-right: 0;
 }
 
-/* A static zero under inning 1, same darker-green/off-white treatment as the
-   plate window it sits beside — grounds the plate window (the one cell
-   that's actually animating) as "the rest of the board already reads zero,"
-   rather than looking like an unlabeled odometer on its own. */
-.loader__zero {
-  grid-column: 1;
+/* The jersey-number and team-name columns — same darker-green/off-white
+   "already posted" treatment as the score cells they sit beside, left-aligned
+   like a real linescore rather than centered like a single digit. */
+.loader__num,
+.loader__team {
+  place-items: center start;
+  padding: 0 6px;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+.loader__score {
   background: var(--field-deep);
   color: var(--text-on-ink);
 }
 
 .loader__plate-window {
-  grid-column: 2;
   overflow: hidden;
-  /* Keeps its inherited border-right — it now divides the plate window from the
-     blank column-3 cell, matching the "2"/"3" divider directly above. */
   background: var(--field-deep);
   color: var(--text-on-ink);
 }
 
-/* The column-3 cell of the bottom row (below the "3" box). A real cell — same
-   deep-green fill as the zero and plate window beside it — so the row runs the
-   full three columns like a proper linescore. Its border-top sits on the
-   row-2/row-3 boundary, exactly level with the zero/plate dividers. */
+/* The rightmost cell of each team row — a real cell, same deep-green fill as
+   the rest of the row, so the row runs the full five columns like a proper
+   linescore, with no border-right of its own (the container edge closes it). */
 .loader__blank {
-  grid-column: 3;
   border-right: 0;
   background: var(--field-deep);
 }
@@ -2265,6 +2273,8 @@ body {
   animation: loader-plate-settle 260ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Only rendered when a caller passes an explicit `message` (the board has no
+   visible caption by default — see the Loader.jsx header comment). */
 .loader__label {
   font-family: var(--font-body);
   font-weight: var(--w-semibold);
@@ -2279,9 +2289,6 @@ body {
 .loader--inline {
   gap: var(--space-2);
   padding: 8px 2px;
-}
-.loader--inline .loader__stage {
-  width: 76px;
 }
 .loader--inline .loader__label {
   font-size: var(--fs-ui);
@@ -14558,11 +14565,14 @@ body {
 .tlead {
   margin-top: 4px;
 }
-/* A "See all ›" link that rides in the section header's right slot. */
-.tlead__seeall {
+/* .chevron-link — the shared "See all ›" text-button primitive (see
+   ChevronLink.jsx), composed by TeamLeaders' header action, TeamPage's
+   PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
+   for all three, so a tweak here reaches every placement. */
+.chevron-link {
   border: none;
   background: none;
-  padding: 0;
+  padding: 4px 2px;
   cursor: pointer;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -14570,6 +14580,10 @@ body {
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
+}
+.chevron-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 /* Groups DeckNudge alongside "See all ›" in the header's right slot when
    TeamLeaders renders horizontal. */
@@ -14580,7 +14594,7 @@ body {
 }
 /* DeckNudge — the desktop "‹ ›" step control shared by TeamLeaders'
    horizontal deck and TeamTransactionsCard. Bare text, same quiet register
-   as .tlead__seeall/.inningnav's chevron labels, not a floating icon button:
+   as .chevron-link/.inningnav's chevron labels, not a floating icon button:
    no border, no background, no shadow. Mouse/trackpad only — a deck you can
    swipe never needs a click alternative, so this only exists where hover is
    possible at all. */
@@ -17105,7 +17119,7 @@ body {
 }
 
 /* FoulCard's "League foul tracker ›" — a destination-named chevron link out
-   of the card, same register as .tlead__seeall's "See all ›". Compound to
+   of the card, same register as .chevron-link's "See all ›". Compound to
    beat .plink's `font: inherit`/`color: inherit` reset (same fix as
    .plink.lineup__name/.plink.startercard__name above). */
 .plink.foulcard__more {
@@ -20838,7 +20852,7 @@ body {
 }
 /* Roster super-section's Season / Last 10 Games toggle, in the SectionTitle
    `action` slot — a two-button segmented control, same caps/tracking as
-   .tlead__seeall so it reads as part of the same header row. */
+   .chevron-link so it reads as part of the same header row. */
 .roster-super__toggle {
   display: flex;
   border: var(--bw-hair) solid var(--seal);
@@ -27727,11 +27741,12 @@ button.gamehigh-matchup:active {
 }
 
 
-/* ==== TEAM HUB: SHELL + TAB BAR + SHELF ==== */
+/* ==== TEAM HUB: SHELL + TAB BAR ==== */
 /* The only new chrome the team-page IA rebuild introduces: the tab bar under
-   the pinned identity header, and the collapsible shelf a tab uses for its
-   secondary modules. Existing card chrome (.thub-card and friends) carries over
-   unchanged — this effort moves modules, it does not restyle them. */
+   the pinned identity header. Secondary modules render as full cards, same as
+   any other module — no separate collapsed treatment. Existing card chrome
+   (.thub-card and friends) carries over unchanged — this effort moves
+   modules, it does not restyle them. */
 
 /* Five tabs, phone-first: they fit across a phone at this size, and scroll
    sideways rather than wrap if a longer label or a large text size pushes them
@@ -27783,69 +27798,22 @@ button.gamehigh-matchup:active {
   box-shadow: none;
 }
 
-/* The shelf: closed, one row carrying a title and its headline figure; open,
-   the module itself. The closed row deliberately reads lighter than a
-   .thub-card head — a shelf is a secondary module, and the hierarchy is the
-   whole point of collapsing it. */
-.teamshelf {
-  margin: 0 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  overflow: hidden;
-}
-.teamshelf__row {
+/* The Overview's preview door — the link that ends each preview card and
+   carries on to the tab holding the whole thing. Wraps a .chevron-link (the
+   same shared "See all ›" primitive TeamLeaders' own header action and
+   NumbersTab's "Org leaders ›" use), NOT a second card: the tab bar and the
+   Org index tile stay the only new chrome the IA rebuild introduces.
+   Right-aligned; `.thub-card` carries no bottom margin of its own, so the
+   door's own top margin is what keeps it from reading as glued to the
+   card/table above. */
+.thub-door {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border: 0;
-  background: none;
-  color: var(--text-heading);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-align: left;
-  cursor: pointer;
-}
-.teamshelf__row:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: -2px;
-}
-.teamshelf__title {
-  flex: 1 1 auto;
-}
-/* The headline figure the closed row carries ("4", "7–3") — the reason a shelf
-   can stay shut without hiding the one number someone came for. */
-.teamshelf__sum {
-  flex: 0 0 auto;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-num);
-}
-.teamshelf__chev {
-  flex: 0 0 auto;
-  color: var(--text-caption);
-  font-size: var(--fs-num-md);
-  line-height: var(--lh-solid);
-  transition: transform var(--dur-fast) var(--ease-standard);
-}
-.teamshelf.is-open .teamshelf__chev {
-  transform: rotate(90deg);
-}
-.teamshelf__body {
-  padding: 0 var(--space-3) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
+  justify-content: flex-end;
+  margin: var(--space-2) 0 var(--space-4);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .teamtabs__btn,
-  .teamshelf__chev {
+  .teamtabs__btn {
     transition: none;
   }
 }
@@ -27860,51 +27828,11 @@ button.gamehigh-matchup:active {
 /* ==== TEAM HUB: NUMBERS TAB ==== */
 
 
-/* ==== TEAM HUB: ORG TAB ==== */
-/* The index grid the Org tab opens with — affiliates/prospects/jerseys/history
-   are a browse-by-tile list, not a reading order (see PRD "shape we're
-   building"). Two columns fit a phone; a tile scrolls to its own section
-   below rather than navigating anywhere, so it needs no active/selected
-   state of its own. */
-.orgindex {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-2);
-  margin: 0 0 var(--space-4);
-}
-.orgindex__tile {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  box-shadow: var(--shadow-card);
-  text-align: left;
-  cursor: pointer;
-}
-.orgindex__tile:active {
-  transform: scale(0.97);
-}
-.orgindex__tile:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.orgindex__count {
-  font-family: var(--font-mono);
-  font-size: var(--fs-num-md);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.orgindex__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
+/* ==== TEAM HUB: MINORS TAB ==== */
+/* No tab-specific chrome — a plain reading order (Affiliation history,
+   Affiliates, Prospects), each an existing card component. The index grid
+   this tab (formerly "Org") used to open with is gone; every section renders
+   in full now rather than behind a jump-tile. */
 
 
 /* ================================================================ trade deadline

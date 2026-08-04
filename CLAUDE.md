@@ -154,7 +154,8 @@ ADR-0025.
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
   InningViewer`), routing (`src/lib/route.js`, `src/App.jsx`), fetching (`useAsync`),
-  the token-based design system, and the UI-side spoiler enforcement.
+  the token-based design system, and the UI-side spoiler enforcement. `/team/{id}`
+  is a five-tab hub, each tab a real route loading only its own data — ADR-0034.
 - **`src/api/CLAUDE.md`** — the data layer: per-topic fetch wrappers/selectors over
   statsapi, the reveal-only vs. spoiler-free split, and the **build-time-fetch
   pattern** (static `public/data/*.json` precomputed by `scripts/gen-*.mjs`, read
