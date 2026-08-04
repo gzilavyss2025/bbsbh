@@ -4314,11 +4314,47 @@ body {
   color: var(--bar-text, var(--text-on-ink));
 }
 
+/* The player page's section headers — same club bar idiom as
+   .teaminfo.is-themed above, but opt-in via `.section__title--bar` rather
+   than blanket-applied to every `.section__title` on the page: the eight
+   top-level sections (2026 Stats, Analytics, Game log, Recent workload,
+   Splits, Career stats, Photos, Player history) carry the modifier and get
+   the club bar; their sub-card headings underneath (Statcast, Advanced,
+   Foul Balls, Pitches, Pitches Like under Analytics; Situational, Splits vs
+   Team under Splits; Innings by position, Firsts, Path to the Majors, Team
+   history, Transactions under Player history) stay the plain unthemed
+   label, same as Trophy Case and Milestone Watch. Not tied to any one game,
+   so PlayerPage.jsx always resolves the club's Main/Home triad rather than
+   a jersey actually worn tonight. */
+.player.is-themed .section__title--bar {
+  padding: 10px var(--app-gutter);
+  margin-left: calc(-1 * var(--app-gutter));
+  margin-right: calc(-1 * var(--app-gutter));
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+}
+.player.is-themed .section__title--bar span {
+  color: var(--bar-text, var(--text-caption));
+}
+.player.is-themed .section__title--bar em {
+  color: var(--bar-text, var(--graphite-soft));
+  opacity: 0.78;
+}
+/* "2026 Stats" keeps its own larger size (see .section__title--primary
+   below) but still takes the bar's ink rather than the accent color that
+   role normally carries — the accent-primary/bar-fill pairing isn't a
+   reviewed combination. */
+.player.is-themed .section__title--bar.section__title--primary span {
+  color: var(--bar-text, var(--accent-primary));
+}
+
 /* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
    always resolves the club's Main/Home triad rather than tonight's jersey (see
    TeamPage.jsx's own theme useMemo). Scoped to .team-hub so it never leaks
    onto the shared SectionTitle/section__title used by the player and
-   team-leaders pages, which stay unthemed.
+   team-leaders pages — the player page now themes that shared class itself
+   via an opt-in modifier (see `.player.is-themed .section__title--bar`
+   above); team-leaders is the one surface still deliberately unthemed.
 
    The hero (.team-hub__id) itself stays UNTHEMED — no bar, no club-colored
    box — the club's identity already rides on the big Main-treatment mark
@@ -4637,13 +4673,24 @@ body {
   color: var(--text-caption);
   margin: 18px 0 8px;
 }
-/* "Current season" is the player page's primary mid-game glance — every
-   other SectionTitle reads as an equal, generic label, so this one alone
-   gets bumped a size and inked in the accent color to read as the page's
-   headline stat block, not just another section among many. */
+/* "2026 Stats" is the player page's primary mid-game glance — every other
+   SectionTitle reads as an equal, generic label, so this one alone gets
+   inked in the accent color to read as the page's headline stat block, not
+   just another section among many. */
 .section__title--primary {
   font-size: var(--fs-h2);
   color: var(--accent-primary);
+}
+/* The player page's eight top-level bar headings (2026 Stats, Analytics,
+   Game log, Recent workload, Splits, Career stats, Photos, Player history —
+   see .section__title--bar theming above) share one consistent size, split
+   the difference between the generic label's fs-label and "2026 Stats"'s
+   own fs-h2 — overrides --primary's font-size on that heading (same
+   specificity, declared after it) so the whole set of bar headings reads as
+   one visual tier despite "2026 Stats" alone also carrying the accent-color
+   treatment above. */
+.section__title--bar {
+  font-size: var(--fs-h3);
 }
 
 .umps__list {
