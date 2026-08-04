@@ -1695,7 +1695,11 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 function TeamPhotosRail({ teamId, games }) {
   const trackRef = useRef(null)
   const sentinelRef = useRef(null)
-  const didInitialScroll = useRef(false)
+  // Flips true the first time the user actually scrolls back (the sentinel
+  // fires) — see the two effects below. Named for what stops the auto-snap,
+  // not for "has the initial load finished," since the initial load can span
+  // several async batches with no single moment to key off of.
+  const userScrolledBackRef = useRef(false)
   const pendingGrowRef = useRef(null)
   const consumedRef = useRef(0)
   const photosRef = useRef([])
@@ -1785,14 +1789,23 @@ function TeamPhotosRail({ teamId, games }) {
     }
   }, [photos.length])
 
-  // Opens pre-scrolled to the newest (rightmost) photo, once — mirrors
-  // LastTenGamesStrip's own mount-only jump.
+  // Opens pre-scrolled to the newest (rightmost) photo — mirrors
+  // LastTenGamesStrip's own mount-only jump, but `photos` starts empty (the
+  // first fetch hasn't landed yet), the initial load can span several async
+  // batches (growPhotos keeps walking backward until it hits
+  // PHOTO_INITIAL_TARGET), and `canScroll` flipping true (once there's
+  // enough content to overflow) shrinks the track to make room for the nav
+  // arrows, moving the true right edge. So rather than jump once on a single
+  // signal, this keeps re-snapping to the current end on every relevant
+  // change (new photos, canScroll settling) until the user actually scrolls
+  // back — at which point the sentinel handler below flips
+  // userScrolledBackRef and this stops for good, handing off to the
+  // pendingGrowRef effect's position-preserving compensation instead.
   useLayoutEffect(() => {
     const el = trackRef.current
-    if (!el || didInitialScroll.current) return
+    if (!el || userScrolledBackRef.current || photos.length === 0) return
     jumpScrollLeft(el, el.scrollWidth)
-    didInitialScroll.current = true
-  }, [canScroll])
+  }, [photos.length, canScroll])
 
   // Restores the pre-growth scroll position after older photos are prepended
   // (see pendingGrowRef below), same compensation LastTenGamesStrip does.
@@ -1825,6 +1838,7 @@ function TeamPhotosRail({ teamId, games }) {
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return
+        userScrolledBackRef.current = true
         pendingGrowRef.current = { scrollLeft: el.scrollLeft, scrollWidth: el.scrollWidth }
         growPhotos(photosRef.current.length + PHOTO_GROW_STEP)
       },
