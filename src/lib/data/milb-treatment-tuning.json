@@ -291,6 +291,42 @@
       }
     }
   },
+  "259": {
+    "name": "Team 259",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.29,
+          "offsetX": 26,
+          "offsetY": 7,
+          "bg": "#BA0C2F",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.29,
+          "offsetX": 26,
+          "offsetY": 7,
+          "bg": "#a87450",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": -14,
+          "rowShift": 0
+        },
+        "band": "#010101",
+        "wpaWordmark": true
+      }
+    }
+  },
   "260": {
     "name": "Tulsa Drillers",
     "treatments": {

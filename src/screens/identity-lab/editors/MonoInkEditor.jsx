@@ -8,7 +8,6 @@ import {
 } from '../../../lib/logoMono.js'
 import { monoInkFor, monoInkStore } from '../../../lib/monoInk.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
-import { barMarkTone } from '../../../lib/headerTheme.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 
 // Pick, by eye, which SHAPES of a club's logo are the mark and which are the
@@ -18,10 +17,12 @@ import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 //
 // The loop this closes: the club's real art is loaded here, clicking a shape
 // pins it to ink or knockout, the preview beside it is the ACTUAL converted
-// mark on that club's real header bar, and Save writes the pins plus asks the
-// dev server to regenerate public/data/logos/mono/{teamId}.svg with them. Same
-// converter in all three places, so nothing shown here is a mock-up of what the
-// real file would be.
+// mark on the navy chrome most of the app's unthemed mastheads actually use,
+// and Save writes the pins plus asks the dev server to regenerate
+// public/data/logos/mono/{teamId}.svg with them. Same converter in both
+// places, so nothing shown here is a mock-up of what the real file would be.
+// Deliberately just the one background — a club's own header-bar colors are
+// LogoRecolorEditor's job (full-color jersey art), not this one's.
 //
 // Dev-only, like the rest of the lab (ADR-0029): the save endpoint only exists
 // under `vite dev`, and the screen itself is DEV-gated in App.jsx.
@@ -44,7 +45,7 @@ const VERDICT_LABEL = {
 // gets judged there as well as on this club's own bar.
 const DEFAULT_CHROME_BAR = '#12233F'
 
-export function MonoInkEditor({ teamId, name, bars }) {
+export function MonoInkEditor({ teamId, name }) {
   // Both forms of the art, and the split between them matters.
   //
   // The RAW markup is what everything measured against the generator uses —
@@ -185,21 +186,12 @@ export function MonoInkEditor({ teamId, name, bars }) {
           dangerouslySetInnerHTML={{ __html: picker }}
         />
 
-        <div className="idlab__monoinkpreviews">
-          {[{ label: 'Default navy chrome', bar: DEFAULT_CHROME_BAR, onBar: '#FBF6E9' }, ...bars].map((bar) => (
-            <div
-              key={bar.label}
-              className={`idlab__monoinkbar${barMarkTone(bar.onBar) === 'dark' ? ' idlab__monoinkbar--darkmark' : ''}`}
-              style={{ background: bar.bar }}
-              aria-label={bar.label}
-            >
-              {mono ? (
-                <img className="idlab__monoinkmark" src={monoDataUrl(mono)} alt="" />
-              ) : (
-                <span className="idlab__monoinkempty">Nothing left to draw</span>
-              )}
-            </div>
-          ))}
+        <div className="idlab__monoinkbar" style={{ background: DEFAULT_CHROME_BAR }} aria-label="Default navy chrome">
+          {mono ? (
+            <img className="idlab__monoinkmark" src={monoDataUrl(mono)} alt="" />
+          ) : (
+            <span className="idlab__monoinkempty">Nothing left to draw</span>
+          )}
         </div>
       </div>
 
