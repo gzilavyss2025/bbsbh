@@ -62,6 +62,12 @@
       "milb-away": "cdn:cap"
     }
   },
+  "505": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary"
+    }
+  },
   "556": {
     "marks": [
       {

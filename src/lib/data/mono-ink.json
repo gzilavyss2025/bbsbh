@@ -1,4 +1,14 @@
 {
+  "105": {
+    "name": "Sacramento River Cats",
+    "art": "6:e787eee1",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "3": "knockout",
+      "4": "knockout"
+    }
+  },
   "108": {
     "name": "Los Angeles Angels",
     "art": "9:87bdd82a",
@@ -165,6 +175,43 @@
       "6": "ink"
     }
   },
+  "512": {
+    "name": "Toledo Mud Hens",
+    "art": "14:ac97ebcb",
+    "parts": {
+      "2": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "13": "knockout"
+    }
+  },
+  "529": {
+    "name": "Tacoma Rainiers",
+    "art": "3:5209b913",
+    "parts": {
+      "0": "knockout"
+    }
+  },
+  "531": {
+    "name": "Scranton/Wilkes-Barre RailRiders",
+    "art": "7:30d5085f",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout"
+    }
+  },
+  "533": {
+    "name": "Worcester Red Sox",
+    "art": "4:5b7e274",
+    "parts": {
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout"
+    }
+  },
   "541": {
     "name": "Omaha Storm Chasers",
     "art": "6:6ede8587",
@@ -172,11 +219,30 @@
       "5": "knockout"
     }
   },
+  "552": {
+    "name": "Syracuse Mets",
+    "art": "3:66d5dd5d",
+    "parts": {
+      "2": "knockout"
+    }
+  },
   "556": {
     "name": "Nashville Sounds",
     "art": "3:1342fa5a",
     "parts": {
       "1": "knockout"
+    }
+  },
+  "561": {
+    "name": "Salt Lake Bees",
+    "art": "9:899e3ac7",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "ink",
+      "8": "knockout"
     }
   },
   "568": {
@@ -199,6 +265,13 @@
       "17": "knockout"
     }
   },
+  "1960": {
+    "name": "St. Paul Saints",
+    "art": "3:e68b9160",
+    "parts": {
+      "0": "knockout"
+    }
+  },
   "4904": {
     "name": "El Paso Chihuahuas",
     "art": "19:42aae502",
@@ -207,6 +280,22 @@
       "2": "knockout",
       "13": "knockout",
       "16": "knockout"
+    }
+  },
+  "5434": {
+    "name": "Sugar Land Space Cowboys",
+    "art": "70:768e7fe8",
+    "parts": {
+      "3": "ink",
+      "11": "knockout",
+      "12": "knockout",
+      "14": "knockout",
+      "15": "ink",
+      "18": "ink",
+      "21": "ink",
+      "30": "ink",
+      "40": "ink",
+      "67": "ink"
     }
   }
 }

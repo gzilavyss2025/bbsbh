@@ -591,20 +591,21 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 60,
+          "size": 65,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 13,
+          "paddingY": -33,
           "rowShift": 0
         },
-        "band": "#CE1141",
+        "band": "#0054A4",
         "header": {
           "bar": "#0054A4",
           "accent": "#CE1141",
           "onBar": "#FBF6E9"
-        }
+        },
+        "wpaWordmark": true
       },
       "away": {
         "position": {
@@ -615,15 +616,16 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 60,
+          "size": 65,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 10,
+          "paddingY": -35,
           "rowShift": 0
         },
-        "band": "#0054A4"
+        "band": "#0054A4",
+        "wpaWordmark": true
       }
     }
   },
@@ -716,12 +718,12 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 55,
+          "size": 86,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 6,
-          "paddingY": -1,
+          "paddingX": 14,
+          "paddingY": -53,
           "rowShift": 0
         },
         "band": "#002A5C",
@@ -729,7 +731,8 @@
           "bar": "#002A5C",
           "accent": "#68ACDB",
           "onBar": "#FBF6E9"
-        }
+        },
+        "wpaWordmark": true
       },
       "away": {
         "position": {
@@ -740,15 +743,16 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 55,
+          "size": 87,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 6,
-          "paddingY": -1,
+          "paddingX": 16,
+          "paddingY": -55,
           "rowShift": 0
         },
-        "band": "#68ACDB"
+        "band": "#68ACDB",
+        "wpaWordmark": true
       }
     }
   },
@@ -980,20 +984,21 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 40,
+          "size": 65,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 8,
-          "paddingY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
           "rowShift": 0
         },
-        "band": "#000000",
+        "band": "#00AEDB",
         "header": {
           "bar": "#000000",
           "accent": "#00AEDB",
           "onBar": "#FFFDF6"
-        }
+        },
+        "wpaWordmark": true
       },
       "away": {
         "position": {
@@ -1004,15 +1009,16 @@
           "pinstripe": false
         },
         "wpaLayout": {
-          "size": 50,
+          "size": 65,
           "rotate": -14,
           "offsetX": 8,
           "offsetY": 6,
-          "paddingX": 4,
-          "paddingY": 4,
+          "paddingX": 10,
+          "paddingY": -35,
           "rowShift": 0
         },
-        "band": "#000000"
+        "band": "#00AEDB",
+        "wpaWordmark": true
       }
     }
   },
