@@ -36,13 +36,16 @@ function cardTile(teamId, isMlb, treatment, side) {
 // TWO MODES, because the two leagues genuinely carry different data:
 //
 //   variant="record" (default, MLB) — the strip above, one card per catalog
-//     jersey with its W-L.
-//   variant="static" (MiLB) — a two-card Home/Away strip and NO record. There
-//     is no MiLB uniform feed at all (docs/uniforms-and-logos.md), so there is
-//     no per-game jersey assignment to attribute a win to; a MiLB affiliate has
-//     exactly two variations, keyed by game side (src/lib/CLAUDE.md). Inventing
-//     a record here would mean inventing the data under it, so the cards simply
-//     don't carry one.
+//     jersey with its per-jersey-worn W-L (buildJerseyCombos' game-by-game
+//     join, since an MLB club can wear several different jerseys at the same
+//     home/away game).
+//   variant="static" (MiLB) — a two-card Home/Away strip. There is no MiLB
+//     uniform feed at all (docs/uniforms-and-logos.md), so there is no
+//     per-game jersey assignment to join a win to the way MLB's does — but a
+//     MiLB affiliate wears exactly one jersey at home and one on the road
+//     (src/lib/CLAUDE.md), so its home/away W-L (the standings split, not an
+//     invented per-jersey tally) IS the record in each jersey. Each combo
+//     simply carries wins/losses straight from the caller (MilbUniformStrip).
 //
 // Touch drag is native (overflow-x + momentum scrolling); useDragScroll adds
 // click-and-drag panning for a mouse so the strip works the same on desktop.
@@ -111,26 +114,27 @@ function useDragScroll() {
 
 // The two cards a MiLB affiliate's strip shows. `side` (not `treatment`) is
 // what TeamTreatmentMark needs to reach milbTreatmentTile — the MLB treatment
-// path would answer with the club's plain paper tile instead.
-const MILB_COMBOS = [
-  { side: 'home', name: 'Home' },
-  { side: 'away', name: 'Away' },
-]
-
-export function MilbUniformStrip({ teamId, teamName }) {
-  return <JerseyCombos combos={MILB_COMBOS} teamId={teamId} teamName={teamName} variant="static" />
+// path would answer with the club's plain paper tile instead. `homeRecord` /
+// `awayRecord` are the club's own standings splits ({ wins, losses } —
+// data/shared.js's splitRecord), degrading to a games-not-yet-played dash via
+// recordLabel same as an MLB club's unworn jersey.
+export function MilbUniformStrip({ teamId, teamName, homeRecord, awayRecord }) {
+  const combos = [
+    { side: 'home', name: 'Home', ...(homeRecord ?? { wins: 0, losses: 0 }) },
+    { side: 'away', name: 'Away', ...(awayRecord ?? { wins: 0, losses: 0 }) },
+  ]
+  return <JerseyCombos combos={combos} teamId={teamId} teamName={teamName} variant="static" />
 }
 
 export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
   const { ref, handlers } = useDragScroll()
   if (!combos?.length) return null
-  const showRecord = variant !== 'static'
   const isMlb = isMlbTeamId(teamId)
   return (
     <div className="thub-card">
       <div className="thub-card__head">
         <span>Logos & jerseys</span>
-        <em>{showRecord ? 'record by jersey' : 'home and away'}</em>
+        <em>{variant === 'static' ? 'home and away' : 'record by jersey'}</em>
       </div>
       <div className="thub-card__body" style={{ padding: 0 }}>
         <div className="jerseydeck" ref={ref} {...handlers}>
@@ -157,7 +161,7 @@ export function JerseyCombos({ combos, teamId, teamName, variant = 'record' }) {
                   block="jerseydeck__logobox"
                 />
                 <span className="jerseydeck__name">{c.name}</span>
-                {showRecord && <span className="jerseydeck__rec mono">{recordLabel(c)}</span>}
+                <span className="jerseydeck__rec mono">{recordLabel(c)}</span>
               </div>
             )
           })}

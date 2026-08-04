@@ -18,7 +18,7 @@ const TABS = [
   { key: 'roster', label: 'Roster' },
   { key: 'games', label: 'Games' },
   { key: 'numbers', label: 'Numbers' },
-  { key: 'org', label: 'Org' },
+  { key: 'minors', label: 'Minors' },
 ]
 
 export function TeamTabBar({ teamId, active, asOf = null, sportId = null, hidden }) {

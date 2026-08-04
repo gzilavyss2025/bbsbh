@@ -7,8 +7,8 @@ import { SPORT_IDS } from '../lib/teams.js'
 // Basic team identity, incl. league + division ids (needed to pull the right
 // standings). Team identity barely ever changes mid-season, so this looks the
 // id up across every level in the static weekly snapshot (see
-// teams-static.js) first — synthesizing the same shape TeamPage's loadTeam()
-// reads (name, sport.id, league.id/name, division.id/name, parentOrgId/Name)
+// teams-static.js) first — synthesizing the same shape the team hub's loaders
+// read (name, sport.id, league.id/name, division.id/name, parentOrgId/Name)
 // — and only falls back to the live endpoint if the id isn't found there
 // (e.g. a team too new for a stale static file). Degrades to null.
 export async function fetchTeam(teamId) {
@@ -152,7 +152,7 @@ export async function fetchTeamRosterEntries(teamId, rosterType = 'active') {
 // prospects on this roster" badge (rosterType='active', the default: who's on
 // the field now), which only needs to know who's on the roster, not their
 // stats. Lighter than fetchTeamRoster. TeamPage's prospect-affiliate
-// resolution (see loadTeam) passes '40Man' instead, so an injured prospect
+// resolution (see the Minors tab's loadMinors) passes '40Man' instead, so an injured prospect
 // still resolves to his real affiliate — 'active' alone was dropping any
 // prospect on a 7-/60-day IL to the scraped level text with no logo (see
 // prospects.js). Derives from fetchTeamRosterEntries' shared cache rather

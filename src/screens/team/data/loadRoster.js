@@ -1,12 +1,9 @@
 // The Roster tab's own loader — the roster projection, the 40-man Current
 // Roster, and the Injured List, plus everything those need (WAR, All-Star
 // ids, prospect/rookie badges, the recent-form window, the per-pitcher
-// game-log fixup). Copied out of TeamPage.jsx's loadTeam rather than shared
-// with it (see .scratch/team-page-ia/PRD.md, "Order of work") — the
-// duplication is temporary and issue 07 deletes loadTeam once nothing uses
-// it. Fetch nothing another tab owns: no standings, schedule-for-display,
-// photos, uniforms, transactions, comebacks, odds, affiliates or prospects
-// table.
+// game-log fixup). Fetch nothing another tab owns: no standings,
+// schedule-for-display, photos, uniforms, transactions, comebacks, odds,
+// affiliates or prospects table.
 import {
   fetchTeam,
   fetchTeamRoster,
@@ -21,52 +18,19 @@ import { lastName } from '../../../api/select.js'
 import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
 import { fetchRookiesData, showRookiePill } from '../../../api/rookies.js'
 import { SPORT_IDS } from '../../../lib/teams.js'
+import {
+  seasonOf,
+  cutoffFor,
+  injuredListFrom,
+  ipToOuts,
+  preferredLineupFrom,
+  rosterHittingStat,
+  rosterPitchingStat,
+} from './shared.js'
 
 const DASH = '—'
 const ROLE_ORDER = { SP: 0, CL: 1, RP: 2 }
-// Injured-List sort: shortest stint first (7/10 → 15 → 60 → full-season), then name.
-const IL_ORDER = { 7: 0, 10: 1, 15: 2, 60: 3, IL: 4 }
-// The Preferred Lineup diamond's eight field spots plus DH, in no particular
-// order (DefenseDiamond itself lays the field spots out; DH rides beneath).
-const PREFERRED_LINEUP_POSITIONS = ['C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF', 'DH']
 
-function isoToday() {
-  return new Date().toISOString().slice(0, 10)
-}
-function dayBefore(iso) {
-  const d = new Date(`${iso}T00:00:00Z`)
-  d.setUTCDate(d.getUTCDate() - 1)
-  return d.toISOString().slice(0, 10)
-}
-// A player who's changed teams mid-season carries multiple stat splits, one
-// per team — narrow to the CURRENT team's own row(s) first, falling back to
-// the raw list only when nothing is team-tagged (see TeamPage.jsx's copy of
-// this same helper for the full incident writeup).
-function preferTeamSplits(splits, teamId) {
-  const teamRows = splits.filter((s) => s.team?.id === teamId)
-  return teamRows.length ? teamRows : splits
-}
-function rosterPitchingStat(r, teamId) {
-  const stats = r.person?.stats ?? []
-  const pit = stats.find((s) => s.group?.displayName === 'pitching') ?? stats[0]
-  const splits = preferTeamSplits(pit?.splits ?? [], teamId)
-  return splits[0]?.stat ?? null
-}
-function rosterFieldingSplits(r, teamId) {
-  const stats = r.person?.stats ?? []
-  const splits = stats.find((s) => s.group?.displayName === 'fielding')?.splits ?? []
-  return preferTeamSplits(splits, teamId)
-}
-function rosterHittingStat(r, teamId) {
-  const stats = r.person?.stats ?? []
-  const hit = stats.find((s) => s.group?.displayName === 'hitting')
-  const splits = preferTeamSplits(hit?.splits ?? [], teamId)
-  return splits[0]?.stat ?? null
-}
-function ipToOuts(ip) {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
-}
 function comparePitchers(a, b) {
   return (
     (ROLE_ORDER[a.role] ?? 3) - (ROLE_ORDER[b.role] ?? 3) ||
@@ -88,8 +52,8 @@ export async function loadRoster(id, asOf) {
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
-  const season = Number((asOf || isoToday()).slice(0, 4))
-  const standingsDate = asOf ? dayBefore(asOf) : null
+  const season = seasonOf(asOf)
+  const standingsDate = cutoffFor(asOf)
 
   const [roster, fullRoster, ilRoster, allStarIds, warData, prospectsSnapshot, rookiesData, schedule] =
     await Promise.all([
@@ -211,40 +175,9 @@ export async function loadRoster(id, asOf) {
   const bullpen = (closer ? [closer, ...setupCrew] : setupCrew).slice(0, 8)
 
   // Preferred Lineup — one player per field position, off the 40Man
-  // fullRoster, keyed first off each player's CURRENT primary position, with
-  // a second fallback pass by games-started for a position primary tags miss.
-  const gsAt = (r, pos) =>
-    Number(rosterFieldingSplits(r, id).find((s) => s.position?.abbreviation === pos)?.stat?.gamesStarted) || 0
-  const bestByPosition = {}
-  const claimed = new Set()
-  for (const pos of PREFERRED_LINEUP_POSITIONS) {
-    if (pos === 'DH') continue
-    const candidates = fullRoster.filter((r) => r.person?.id && r.position?.abbreviation === pos)
-    if (!candidates.length) continue
-    const best = candidates.reduce((a, b) => (gsAt(b, pos) > gsAt(a, pos) ? b : a))
-    bestByPosition[pos] = {
-      position: pos,
-      id: best.person.id,
-      last: lastName(best.person),
-      gs: gsAt(best, pos),
-    }
-    claimed.add(best.person.id)
-  }
-  for (const pos of PREFERRED_LINEUP_POSITIONS) {
-    if (bestByPosition[pos]) continue
-    let best = null
-    for (const r of fullRoster) {
-      const pid = r.person?.id
-      if (!pid || claimed.has(pid)) continue
-      const gs = gsAt(r, pos)
-      if (gs > 0 && (!best || gs > best.gs)) best = { position: pos, id: pid, last: lastName(r.person), gs }
-    }
-    if (best) {
-      bestByPosition[pos] = best
-      claimed.add(best.id)
-    }
-  }
-  const preferredLineup = PREFERRED_LINEUP_POSITIONS.map((pos) => bestByPosition[pos]).filter(Boolean)
+  // fullRoster. Shared with the Overview's lineup preview so both show the same
+  // nine; see preferredLineupFrom for how a spot is decided.
+  const preferredLineup = preferredLineupFrom(fullRoster, id)
 
   // Top Substitutes — position players who didn't win a diamond spot, ranked
   // by games played, capped at 6.
@@ -274,21 +207,7 @@ export async function loadRoster(id, asOf) {
   // Injured List — every injured player on the club's 40-man view, tagged
   // with which IL. Spoiler-free — roster membership reveals nothing about
   // the score.
-  const injured = ilRoster
-    .filter((r) => /^D\d+$/.test(r.status?.code ?? '') || r.status?.code === 'ILF')
-    .map((r) => {
-      const code = r.status?.code ?? ''
-      return {
-        id: r.person?.id,
-        name: firstLast(r.person),
-        jersey: r.jerseyNumber ?? '',
-        pos: r.position?.abbreviation ?? '',
-        ilLabel: code.match(/^D(\d+)$/)?.[1] ?? (code === 'ILF' ? 'IL' : DASH),
-      }
-    })
-    .sort(
-      (a, b) => (IL_ORDER[a.ilLabel] ?? 9) - (IL_ORDER[b.ilLabel] ?? 9) || a.name.localeCompare(b.name),
-    )
+  const injured = injuredListFrom(ilRoster, firstLast)
   const currentInjuredIds = new Set(injured.map((p) => p.id))
 
   // "Current" roster view — same four subsections as the Preferred Lineup

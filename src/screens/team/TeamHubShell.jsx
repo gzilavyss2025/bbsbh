@@ -26,7 +26,7 @@ const TAB_TITLE = {
   roster: 'Roster',
   games: 'Games',
   numbers: 'Numbers',
-  org: 'Org',
+  minors: 'Minors',
 }
 
 // The club's most recent official press-notes PDF — a direct link-out (never
