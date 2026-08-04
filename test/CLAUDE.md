@@ -13,7 +13,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | File | Tests | Modules under test | Feature |
 |---|---|---|---|
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
-| api-handlers.test.js | 8 | api/copy.js, api/reveal.js, api/spoiled-days.js | Node-runtime request-shape handling for edge functions |
+| api-handlers.test.js | 16 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes + the Logbook's tombstone read side (ADR-0035) |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 12 | src/api/careerMatchups.js | Career Matchups table (TeamInfo) |
 | career-register.test.js | 2 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels |
@@ -46,6 +46,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | lib-helpers.test.js | 14 | format.js, dates.js, statTiers.js, runExpectancy.js | General lib grab-bag |
 | lineup-strength.test.js | 32 | lineupSolver.js, lineupStrength.js, lineupStrengthTier.js | Lineup Strength grade (docs/lineup-strength.md) |
 | live-edge.test.js | 17 | liveEdge.js, select.js, revealProgressCore.js, scoresUnlocked.js | Follow-live-edge + reveal/unlock mechanism |
+| logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
 | logo-recolor.test.js | 9 | logoMono.js, logoRecolor.js | Logo recolor editor (shares shape numbering w/ logo-mono by design) |
 | logo-tint.test.js | 8 | src/lib/logoTint.js | Logo tint wash |
@@ -73,7 +74,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 13 | src/api/rookies.js | Rookie pill |
-| route.test.js | 24 | src/lib/route.js | Full router surface |
+| route.test.js | 32 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
 | scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |

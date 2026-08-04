@@ -154,6 +154,17 @@ spoiler-free only when restricted to the half the user has reached
   a stamp renders identically whichever source resolved it. Do not call it with
   an arbitrary game list.
 
+- `logbookStats.js` — the Logbook's retrospective, Tier 1 (`computeLogbookStats`),
+  ADR-0035. **Pure**: `(stamps, gameFacts) -> numbers`, no fetching, so the
+  record/streak/aggregation math lands in the CI-gated suite
+  (`test/logbook-stats.test.js`) instead of being verifiable only by eye —
+  deliberately unlike `FirstScorebookPage.jsx`, which derives the same family of
+  numbers inline in `useMemo`s where nothing can reach it. **Reveal-only by
+  classification** (it handles scores, so ADR-0001 applies); with no seal to sit
+  inside, the discipline is the INPUT — only ever the user's own stamps, never an
+  arbitrary game list. Rendered by `screens/LogbookStatsPage.jsx` at
+  `/logbook/stats`.
+
 Related research docs (read before wiring a new source):
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
   enrichment endpoints (statsapi season/matchup/standings stats, Baseball

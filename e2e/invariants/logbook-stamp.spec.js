@@ -68,3 +68,30 @@ test('minting files the game in the Logbook, and un-stamping takes it back', asy
   await page.goto('/logbook')
   await expect(page.locator('.logbook__cell')).toHaveCount(0)
 })
+
+// The retrospective (/logbook/stats) renders final scores plainly, on the same
+// argument as /logbook itself: every game it reads is one of this user's own
+// stamps. Two things worth pinning at runtime — that the route resolves to the
+// stats page at all (before the 'stats' branch was ordered ahead of the numeric
+// season one, it silently fell through to the bare Logbook), and that its
+// totals can only ever come from the collection.
+test('the Logbook retrospective counts your stamps, and nothing else', async ({ page }) => {
+  await page.goto('/logbook/stats')
+  // Empty collection: the page exists and says so, rather than resolving to
+  // the bare Logbook and leaving the wrong screen up.
+  await expect(page.getByRole('heading', { name: 'Stats' })).toBeVisible()
+  await expect(page.locator('.logbookstats__tally')).toHaveCount(0)
+
+  await page.goto(`${GAME}/boxscore`)
+  await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
+  await page.getByRole('button', { name: 'Stamp this game' }).click()
+  await expect(page.getByRole('button', { name: 'Remove stamp' })).toBeVisible()
+
+  await page.goto('/logbook/stats')
+  const games = page.locator('.logbookstats__tally').first().locator('strong').first()
+  await expect(games).toHaveText('1')
+  await expect(page.locator('.logbookstats__row').first()).toBeVisible()
+  // And no stamp art here: this page is numbers, so GameStamp.jsx stays off
+  // its import allowlist (scripts/check-stamp-surfaces.mjs).
+  await expect(page.locator('.gamestamp')).toHaveCount(0)
+})

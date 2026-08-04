@@ -125,6 +125,10 @@ const FirstScorebookPage = lazyNamed(
   'FirstScorebookPage',
 )
 const LogbookPage = lazyNamed(() => import('./screens/LogbookPage.jsx'), 'LogbookPage')
+const LogbookStatsPage = lazyNamed(
+  () => import('./screens/LogbookStatsPage.jsx'),
+  'LogbookStatsPage',
+)
 const GamePhotosPage = lazyNamed(
   () => import('./screens/GamePhotosPage.jsx'),
   'GamePhotosPage',
@@ -254,6 +258,10 @@ export default function App() {
     // `season: null` means "newest season with stamps" — only the local
     // collection knows which that is, so LogbookPage resolves it (see route.js).
     content = <LogbookPage season={route.season} />
+  } else if (route.name === 'logbook-stats') {
+    // Spans every season, so it takes no route params — see route.js for why
+    // this branch has to parse ahead of the numeric-season one.
+    content = <LogbookStatsPage />
   } else if (route.name === 'photos') {
     // Keyed on the deep-linked gamePk so navigating between `/photos` and
     // `/photos/{gamePk}` (e.g. the page's own footer link back to the plain

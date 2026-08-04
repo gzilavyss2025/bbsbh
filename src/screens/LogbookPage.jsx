@@ -4,7 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
-import { gamePath, logbookPath } from '../lib/route.js'
+import { gamePath, logbookPath, logbookStatsPath } from '../lib/route.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 import { GameStamp } from '../components/GameStamp.jsx'
@@ -89,6 +89,15 @@ export function LogbookPage({ season: requestedSeason = null }) {
           <p className="logbook__count">
             {stamps.length} {stamps.length === 1 ? 'stamp' : 'stamps'}
             {season ? ` · ${season}` : ''}
+            {/* The retrospective spans every season, not the one on screen —
+                see LogbookStatsPage.jsx. */}
+            <button
+              type="button"
+              className="logbook__statslink"
+              onClick={() => navigate(logbookStatsPath())}
+            >
+              What it adds up to ›
+            </button>
           </p>
 
           <ul className="logbook__grid">

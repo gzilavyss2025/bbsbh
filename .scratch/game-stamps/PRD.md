@@ -1,6 +1,6 @@
 # Game stamps — backend scoping
 
-Status: in progress — build order steps 1–5 and 8 landed; the feature ships
+Status: in progress — build order steps 1–6 and 8 landed; the feature ships
 
 **Landed (2026-08-04):** the ADR (`docs/adr/0035-…`), the pure rules module
 (`src/lib/stamps.js`) and the endpoint (`api/stamps.js`) with the server-side
@@ -63,11 +63,36 @@ feature is now usable end to end, signed in or out.
    "failed" against `main`'s code before that was spotted. Pass your own slot
    from the reserved band: `E2E_PORT=5172 npx playwright test …`.
 
-**Next up:** steps 6–7 — `src/api/logbookStats.js` Tier 1 + `LogbookStatsPage`,
-then `gen-game-digests.mjs` and Tier 2. `?digests=` (§3.3, §6 Tier 2) is still
-deliberately unimplemented; it belongs with that generator. One known sync gap
-is open and named in ADR-0035: an un-stamp does not propagate to a second
-device, because `GET /api/stamps` filters tombstones out of its response.
+**Landed (2026-08-04, third pass):** step 6 and the open sync gap.
+
+- `src/api/logbookStats.js` — Tier 1, pure, with `test/logbook-stats.test.js`
+  in the same PR. The whole point of its purity: the streak/record/aggregation
+  math is CI-gated rather than eyeballed on a page.
+- `src/screens/LogbookStatsPage.jsx` + `/logbook/stats`, with the route's
+  'stats' branch placed deliberately ABOVE `/logbook/{season}` — that one
+  parses `Number(parts[1])`, so before the reorder the URL resolved to season
+  NaN and silently rendered the bare Logbook. Pinned in `test/route.test.js`.
+- The un-stamp sync gap is CLOSED. `GET /api/stamps?export=1` (the sync
+  payload) now returns tombstones; `?season=`/`?seasons=1` (display payloads)
+  stay live-only. Every row states its own `state`, and `StampsCloudSync` reads
+  it instead of hardcoding `'on'` — that hardcode was the client half of the
+  same bug, so an endpoint-only fix would not have worked. The reveal gate is
+  untouched.
+
+**Two more departures worth recording:**
+
+7. **`computeLogbookStats` takes `(stamps, gameFacts)`, not
+   `(stamps, gameFacts, digests)`** (§6 "Where the math lives"). Tier 2's
+   digests do not exist yet, and a third parameter that is always `{}` invites
+   a caller to pass something it cannot use. It joins when Tier 2 lands.
+8. **The stats page renders no stamp art**, so `check-stamp-surfaces.mjs`'s
+   allowlist is unchanged. That guard IS the containment argument for a page
+   that shows final scores plainly; widening it for decoration would be the
+   wrong trade.
+
+**Next up:** step 7 — `scripts/gen-game-digests.mjs` and Tier 2. `?digests=`
+(§3.3, §6 Tier 2) is still deliberately unimplemented; it belongs with that
+generator.
 
 Scope of this document: **backend infrastructure only.** Stamp visual design is
 being scoped separately; UI surfacing (where the grid lives, how the button

@@ -139,12 +139,28 @@ a keepsake that vanishes on its own is a broken promise.
   feed. It is **not** closed by trusting a client-supplied claim, and must never
   be. Implemented in `src/components/StampsCloudSync.jsx`'s publish path: the
   reveal POST precedes the mint POST for every stamp it publishes.
-- **A second gap, named rather than hidden: removals propagate one way.** An
-  un-stamp reaches the server (DELETE writes a tombstone), but `GET /api/stamps`
-  filters tombstones out of its response, so a second device holding that stamp
-  never learns it was removed and keeps showing it until it changes that stamp
-  itself. Closing it means teaching the read side to return tombstones — an
-  endpoint change, not a client one. Not yet done.
+- **Removals propagate both ways** — a second gap, named here first and closed
+  after the fact. An un-stamp reached the server as a tombstone, but every
+  `GET /api/stamps` filtered tombstones out of its response, so the removal
+  stopped there: a second device saw the gamePk simply ABSENT, absence
+  correctly means "no opinion" to the merge, and it kept showing a stamp its
+  owner had taken back. `readSeason`/`seasonRows` now split the payloads by
+  purpose — `?export=1` is the SYNC payload and carries tombstones, while
+  `?season=` and `?seasons=1` stay live-only because a tombstone has nothing to
+  render or count. Every row states its own `state` (including `'on'`), and
+  `StampsCloudSync` reads it rather than assuming; hardcoding `'on'` there was
+  the client half of the same bug, so an endpoint-only fix would have merged
+  each tombstone straight back in as a live stamp. The reveal gate is
+  untouched — this is a read shape, not a permission. Pinned in
+  `test/api-handlers.test.js`, round trip through `applyRemoteStamps` included.
+- **The retrospective (`/logbook/stats`) inherits this containment argument,
+  and only it.** `src/api/logbookStats.js` is pure and reveal-only by
+  classification (ADR-0001): it handles scores, so it is callable only from the
+  Logbook screens, and its input must only ever be the user's own stamps.
+  Nothing on that page may involve a game the user has NOT stamped — no "recent
+  games you might stamp", no club's other results, no league context. It
+  renders no stamp art, so it stays off `check-stamp-surfaces.mjs`'s allowlist
+  deliberately rather than widening a guard that is the containment argument.
 - **The gate fails closed.** An unresolvable game, an unreadable Redis, a
   non-integer mark, a truthy-but-not-`true` consent flag all refuse the mint. A
   blip costs a retry; it never costs a stamp the gate did not allow.
