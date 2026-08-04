@@ -35,6 +35,8 @@
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
+//   '/team/{id}/{roster|games|numbers|org}'
+//                                       -> { name: 'team-{tab}', id, asOf, sportId }
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
@@ -55,6 +57,20 @@
 // `?s={sportId}` hints the level. Both are omitted on a bare shared link (which
 // has no game to spoil, so it defaults to current stats). Accepts a URL that
 // may include a `?query`.
+
+// The team hub's tabs, as `third URL segment -> route name`. Every one of these
+// is a real address (the URL changes, back/forward work, each tab is
+// shareable), and each loads only its own data — see .scratch/team-page-ia.
+// `leaders` predates the rebuild and is unchanged; it lives here so the whole
+// set is ONE parse branch rather than a growing stack of near-identical ones.
+// The Overview tab is the bare '/team/{id}', so it is deliberately absent.
+const TEAM_TAB_ROUTES = {
+  leaders: 'team-leaders',
+  roster: 'team-roster',
+  games: 'team-games',
+  numbers: 'team-numbers',
+  org: 'team-org',
+}
 
 export function parseRoute(url) {
   const [path, query = ''] = (url || '').split('?')
@@ -162,8 +178,8 @@ export function parseRoute(url) {
   // (date='leaders'/'team').
   if (parts.length === 3 && parts[0] === 'leaders' && parts[1] === 'org')
     return { name: 'leaders', scope: 'org', orgId: Number(parts[2]), asOf, sportId }
-  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'leaders')
-    return { name: 'team-leaders', id: parts[1], asOf, sportId }
+  if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
+    return { name: TEAM_TAB_ROUTES[parts[2]], id: parts[1], asOf, sportId }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -272,6 +288,15 @@ export function gamePhotosPath(gamePk) {
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
+}
+// Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' / 'org'
+// / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs hang off.
+// Goes through linkQuery like every other team link, because a team page opened
+// from a game carries `?d=` (the spoiler cutoff) and `?s=` — a tab switch that
+// dropped them would show stats past the half-inning the visitor has reached,
+// which is a spoiler bug, not a cosmetic one.
+export function teamTabPath(id, tab, opts = {}) {
+  return tab === 'overview' ? teamPath(id, opts) : `/team/${id}/${tab}${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.
