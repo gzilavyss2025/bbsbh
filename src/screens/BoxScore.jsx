@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
+import { revealStampFacts } from '../api/linescore.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
@@ -16,6 +17,7 @@ import { AbsRow } from '../components/StatBox.jsx'
 import { PerformerCard } from '../components/PerformerCard.jsx'
 import { CalloutNote } from '../components/CalloutNote.jsx'
 import { GameStoryCard } from '../components/GameStoryCard.jsx'
+import { StampGameButton } from '../components/StampGameButton.jsx'
 import { GamePhotosStrip } from '../components/GamePhotosStrip.jsx'
 import { Headshot } from '../components/Headshot.jsx'
 import { PlayerLink } from '../components/PlayerLink.jsx'
@@ -148,8 +150,16 @@ export function BoxScore({
           // innings view shows one at a time on the play they belong to,
           // rolled up here into the Insights card.
           const calloutNotes = computeGameCalloutNotes(feed, callouts, vsTeam)
+          // The Logbook stamp's game facts (ADR-0035) — the final score, the two
+          // clubs, the venue, the date. Reveal-only, computed HERE inside the
+          // reveal render for the same reason everything else on this line is:
+          // nothing score-revealing exists before the tap. See StampGameButton
+          // for why its placement inside this render function IS the client-side
+          // reveal gate.
+          const stampFacts = revealStampFacts(feed)
           return (
             <BoxScoreBody
+              stampFacts={stampFacts}
               feed={feed}
               box={box}
               stars={stars}
@@ -198,7 +208,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection }) {
+function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -378,6 +388,14 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
         </div>
         <GameInfo rows={box.footNotes} />
       </section>
+
+      {/* The Logbook stamp, last on the page — you finish reading the sheet,
+          then you keep the game. Deliberately NOT above the box score: it is a
+          keepsake, not a headline, and the sheet is what you came for.
+          Everything about why it is safe here (and only here) is in
+          StampGameButton.jsx's header — it renders inside this page's SealBox
+          reveal render, which is the whole client-side guarantee. */}
+      <StampGameButton game={stampFacts} />
 
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>

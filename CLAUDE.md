@@ -150,9 +150,10 @@ that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/
 consent-pop-up wording (never a score, closed registry, public-cached read,
 allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
 ADR-0025. **The fourth stores a score, by design**: Logbook game stamps
-(`api/stamps.js` + `src/lib/stamps.js`) — mintable only for a game the SERVER can
-prove this user already revealed, which is what keeps the Logbook from spoiling
-anything. Read ADR-0035 before touching that gate.
+(`api/stamps.js` + `src/lib/stamps.js`, surfaced at `/logbook` and inside the box
+score's seal) — mintable only for a game the SERVER can prove this user already
+revealed, which is what keeps the Logbook from spoiling anything. Read ADR-0035
+before touching that gate or the `check-stamp-surfaces` guard that contains it.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

@@ -34,6 +34,8 @@
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
+//   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
+//   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
@@ -146,6 +148,12 @@ export function parseRoute(url) {
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }
+  // The Logbook — this user's own collection of game stamps (ADR-0035). It
+  // renders scores plainly, which is safe for exactly one reason: a stamp only
+  // exists for a game its owner already finished revealing. `season: null` means
+  // "the newest season you have stamps in" and is resolved by the page, not
+  // here, since only the local collection knows.
+  if (parts.length === 1 && parts[0] === 'logbook') return { name: 'logbook', season: null }
   // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
@@ -156,6 +164,16 @@ export function parseRoute(url) {
   if (parts.length === 2 && parts[0] === 'photos') {
     const gamePk = Number(parts[1])
     return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
+  }
+  // One season of the Logbook. A non-numeric or out-of-range segment falls back
+  // to the bare page (same idea as the invalid-date fallback above) rather than
+  // stranding it on a season that cannot exist.
+  if (parts.length === 2 && parts[0] === 'logbook') {
+    const season = Number(parts[1])
+    return {
+      name: 'logbook',
+      season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
+    }
   }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
@@ -303,6 +321,11 @@ export function foulsPath() {
 }
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`
+}
+// The Logbook, optionally paged to one season. A bare `/logbook` lets the page
+// pick the newest season the local collection actually has.
+export function logbookPath(season = null) {
+  return season ? `/logbook/${season}` : '/logbook'
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

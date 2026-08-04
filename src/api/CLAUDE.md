@@ -117,6 +117,16 @@ spoiler-free only when restricted to the half the user has reached
   `hasPitchTracking(feed)` gates to MLB + AAA. See
   `.scratch/umpire-accuracy/consistency-favor-scope.md` §3.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
+  `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
+  (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
+  as `game:final:{gamePk}`. Its one caller is `StampGameButton` inside the box
+  score's `SealBox` reveal render — ADR-0035. Two fields there are load-bearing
+  for the SERVER's reveal gate, not decoration: `innings` and `homeBattedLast`
+  feed `finalHalfIndex` (`src/lib/stamps.js`), and they are derived by scanning
+  for the last half anyone actually batted in rather than off `innings.length`,
+  because the live feed pads its linescore out to `scheduledInnings` and the
+  schedule feed the server reads does not. A rain-shortened game is where those
+  two disagree; `test/stamp-art.test.js` pins it.
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
   at most MiLB parks, so every field is null-guarded and the UI hides the row.
@@ -132,6 +142,17 @@ spoiler-free only when restricted to the half the user has reached
   `.scratch/placed-runner-card/PRD.md`. `legAdvanceCode`'s per-runner advance
   codes (`ADVANCE_CODES`) have a couple of rare, deliberately-unresolved
   fallback gaps — see `docs/unresolved-scoring-conventions.md`.
+
+- `logbook.js` — the Logbook's game facts for a set of STAMPED gamePks
+  (`fetchStampGames`, `stampGameFacts`), ADR-0035. The one fetcher here that
+  deliberately asks statsapi FOR the score: every other schedule fetcher prunes
+  it out with `fields=` (see the `GAMES_BY_PK_FIELDS` block in `schedule.js`),
+  which is exactly why this one lives in its own file rather than beside them —
+  so nobody reaches for the wrong function. Safe only because its input is the
+  user's own stamps, and a stamp cannot exist for a game they have not finished
+  revealing. `stampGameFacts` produces the same blob `revealStampFacts` does, so
+  a stamp renders identically whichever source resolved it. Do not call it with
+  an arbitrary game list.
 
 Related research docs (read before wiring a new source):
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open

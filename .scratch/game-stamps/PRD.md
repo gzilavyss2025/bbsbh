@@ -1,6 +1,6 @@
 # Game stamps — backend scoping
 
-Status: in progress — build order steps 1–2 landed
+Status: in progress — build order steps 1–5 and 8 landed; the feature ships
 
 **Landed (2026-08-04):** the ADR (`docs/adr/0035-…`), the pure rules module
 (`src/lib/stamps.js`) and the endpoint (`api/stamps.js`) with the server-side
@@ -21,10 +21,47 @@ reveal gate, covered by `test/stamps.test.js` + the stamps cases in
    needs a clock that moves on an un-stamp, and `stampedAt` must NOT move when a
    note is edited — one field cannot do both.
 
-**Next up:** steps 3–5 — `useStamps` + `StampsCloudSync` + `StampGameButton`
-inside the box-score seal, `GameStamp.jsx` from the locked Concept 1 art, and the
-`/logbook` grid. `?digests=` (§3.3, §6 Tier 2) is deliberately not implemented
-yet; it belongs with step 7's nightly generator.
+**Landed (2026-08-04, second pass):** steps 3–5 and 8 — the whole client. The
+feature is now usable end to end, signed in or out.
+
+- `src/hooks/useStamps.js` — local-first store over the pure rules, cross-tab
+  `storage` listener plus a same-tab echo (two hook instances are genuinely
+  mounted at once: the mint affordance and the app-wide cloud sync).
+- `src/components/StampsCloudSync.jsx` — Clerk-gated, lazy, mounted in
+  `App.jsx`. GET-merges the whole collection via `?export=1` on sign-in, then
+  publishes each local change. **POSTs the local `revealedThrough` to
+  `/api/reveal` before every mint** — the sanctioned close for §5.1's known gap.
+- `src/components/StampGameButton.jsx` — inside the box-score `SealBox`'s reveal
+  render function, at the FOOT of the page. That `SealBox` still has no
+  `onReveal` and still persists nothing.
+- `src/components/GameStamp.jsx` + `src/lib/stampArt.js` — the locked Concept 1
+  art, geometry split out as pure math so it can be unit-tested and so the
+  component is a tracing with no numbers of its own. Mono marks via the
+  `<image>`-in-`<mask>` recipe, per-instance ids, abbreviation fallback.
+- `src/screens/LogbookPage.jsx` + `/logbook`, `/logbook/{season}`, and the
+  `Logbook` entry in `reportPages.js`. Facts resolved client-side by the new
+  `src/api/logbook.js`, so signed-out and signed-in render through one path.
+- `scripts/check-stamp-surfaces.mjs` (step 8, pulled forward — it is cheap and
+  it is the containment argument) plus `e2e/invariants/logbook-stamp.spec.js`
+  and `test/stamp-art.test.js`.
+
+**Two departures from this document worth recording, on top of the three above:**
+
+4. **`revealStampFacts` derives `innings` from the last half anyone BATTED in,
+   not `linescore.innings.length`.** The live feed pads that array out to
+   `scheduledInnings` with empty rows; the schedule feed the server reads does
+   not. Reading the length would make the client and the server's gate disagree
+   about a rain-shortened game (verified against gamePk 824807).
+5. **`src/api/logbook.js` is a new file rather than a function in
+   `schedule.js`.** It is the one fetcher that asks statsapi FOR the score;
+   every other one there prunes it out with `fields=`. Separating them is how a
+   future caller doesn't reach for the wrong one by accident.
+
+**Next up:** steps 6–7 — `src/api/logbookStats.js` Tier 1 + `LogbookStatsPage`,
+then `gen-game-digests.mjs` and Tier 2. `?digests=` (§3.3, §6 Tier 2) is still
+deliberately unimplemented; it belongs with that generator. One known sync gap
+is open and named in ADR-0035: an un-stamp does not propagate to a second
+device, because `GET /api/stamps` filters tombstones out of its response.
 
 Scope of this document: **backend infrastructure only.** Stamp visual design is
 being scoped separately; UI surfacing (where the grid lives, how the button

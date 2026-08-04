@@ -30,6 +30,19 @@ const SpoiledDaysCloudSync = isClerkEnabled
     )
   : null
 
+// Headless cross-device sync for the Logbook's game stamps (ADR-0035). Same
+// shape as the two above it: imports @clerk/clerk-react at its top, so it is
+// only ever dynamically imported and only on a deploy that configures Clerk.
+// App-wide rather than per screen, because a stamp minted in a box score has to
+// publish even after the user navigates away from that game.
+const StampsCloudSync = isClerkEnabled
+  ? lazy(() =>
+      import('./components/StampsCloudSync.jsx').then((m) => ({
+        default: m.StampsCloudSync,
+      })),
+    )
+  : null
+
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
@@ -111,6 +124,7 @@ const FirstScorebookPage = lazyNamed(
   () => import('./screens/FirstScorebookPage.jsx'),
   'FirstScorebookPage',
 )
+const LogbookPage = lazyNamed(() => import('./screens/LogbookPage.jsx'), 'LogbookPage')
 const GamePhotosPage = lazyNamed(
   () => import('./screens/GamePhotosPage.jsx'),
   'GamePhotosPage',
@@ -236,6 +250,10 @@ export default function App() {
     content = <WordmarkLab />
   } else if (route.name === 'first-scorebook') {
     content = <FirstScorebookPage />
+  } else if (route.name === 'logbook') {
+    // `season: null` means "newest season with stamps" — only the local
+    // collection knows which that is, so LogbookPage resolves it (see route.js).
+    content = <LogbookPage season={route.season} />
   } else if (route.name === 'photos') {
     // Keyed on the deep-linked gamePk so navigating between `/photos` and
     // `/photos/{gamePk}` (e.g. the page's own footer link back to the plain
@@ -310,6 +328,11 @@ export default function App() {
       {SpoiledDaysCloudSync && (
         <Suspense fallback={null}>
           <SpoiledDaysCloudSync />
+        </Suspense>
+      )}
+      {StampsCloudSync && (
+        <Suspense fallback={null}>
+          <StampsCloudSync />
         </Suspense>
       )}
       <Suspense
