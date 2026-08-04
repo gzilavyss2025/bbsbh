@@ -415,6 +415,37 @@ export function pitchingRanksView(splits) {
   return { league, items: items.slice(0, RANK_MAX_CHIPS) }
 }
 
+// Hitting counterpart to pitchingRanksView — same top-10-only gate and chip
+// cap, curated to the headline hitting stats instead. Shares RANK_FLOOR /
+// RANK_MAX_CHIPS with the pitching version rather than a hitting-specific
+// pair, since the "worth a chip" bar doesn't change by group.
+const HITTING_RANK_STATS = [
+  ['homeRuns', 'HR'],
+  ['rbi', 'RBI'],
+  ['avg', 'AVG'],
+  ['ops', 'OPS'],
+  ['stolenBases', 'SB'],
+  ['hits', 'H'],
+]
+
+export function hittingRanksView(rankSplits) {
+  const s = (rankSplits ?? [])[0]
+  if (!s?.stat) return null
+  const leagueName = s.league?.name ?? ''
+  const league =
+    leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
+  const items = []
+  for (const [key, label] of HITTING_RANK_STATS) {
+    const rank = Number(s.stat[key])
+    if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
+      items.push({ label, rank, text: ordinal(rank) })
+    }
+  }
+  if (!items.length) return null
+  items.sort((a, b) => a.rank - b.rank)
+  return { league, items: items.slice(0, RANK_MAX_CHIPS) }
+}
+
 // ---------------------------------------------------------------------------
 // Game log — the back-of-the-card ledger, spoiler-safe by date cutoff
 // ---------------------------------------------------------------------------
@@ -857,7 +888,7 @@ export function advancedPitchingView(bundle) {
   if (!adv && !saber) return null
   const facts = []
   // Each fact carries its own one-line explainer, shown when the card's
-  // per-fact "i" glyph is tapped open (AdvancedPitchingCard.jsx) — colocated
+  // per-fact "i" glyph is tapped open (AdvancedStatsCard.jsx) — colocated
   // with the value it explains rather than string-matched by label in the
   // component, so a relabel here can't silently orphan its note.
   const push = (label, value, note) => {
@@ -918,6 +949,106 @@ export function advancedPitchingView(bundle) {
   // A sparse bundle (a cup-of-coffee arm the sabermetrics feed hasn't rated)
   // would render a lonely two-cell card — skip below four facts.
   return facts.length >= 4 ? { facts } : null
+}
+
+// ---------------------------------------------------------------------------
+// Advanced hitting card — the plate-discipline/power rates behind the hitter
+// tiles, from person-fetch's fetchHittingAdvanced bundle (standard season +
+// seasonAdvanced + sabermetrics, one request). Same shape and spoiler footing
+// as advancedPitchingView (AdvancedStatsCard.jsx renders both, generically,
+// off `facts`): full-season aggregates, labeled "full season" by the UI.
+// MLB-only at the source — degrades to null and the card doesn't render.
+// ---------------------------------------------------------------------------
+
+// ".59" style rate: two decimals, no leading zero — BB/K reads like a
+// fractional average, not a whole-number ratio.
+function rate2(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n.toFixed(2).replace(/^0(?=\.)/, '') : null
+}
+
+export function advancedHittingView(bundle) {
+  const seasonAdvanced = bundle?.seasonAdvanced
+  const sabermetrics = bundle?.sabermetrics
+  if (!seasonAdvanced && !sabermetrics) return null
+  const facts = []
+  // Same per-fact note idiom as advancedPitchingView — colocated here rather
+  // than string-matched by label in the component.
+  const push = (label, value, note) => {
+    if (value != null) facts.push({ label, value, note })
+  }
+  push(
+    'wOBA',
+    sabermetrics?.woba != null ? rate3(Number(sabermetrics.woba)) : null,
+    "One number for the whole plate appearance — every walk, hit and out weighted by what it's actually worth in runs.",
+  )
+  push(
+    'wRC+',
+    roundInt(sabermetrics?.wRcPlus),
+    'His run creation measured against the league, park-adjusted: 100 is average, higher is better — the wRC+ to a hitter is what ERA− is to a pitcher.',
+  )
+  push(
+    'K%',
+    propPct(seasonAdvanced?.strikeoutsPerPlateAppearance),
+    'Share of plate appearances that ended in a strikeout.',
+  )
+  push(
+    'BB%',
+    propPct(seasonAdvanced?.walksPerPlateAppearance),
+    'Share of plate appearances that ended in a walk.',
+  )
+  push(
+    'BB/K',
+    rate2(seasonAdvanced?.walksPerStrikeout),
+    'Walks drawn for every strikeout — a quick read on his command of the strike zone as a hitter.',
+  )
+  push(
+    'ISO',
+    seasonAdvanced?.iso ?? null,
+    'Extra bases per at-bat — power with the singles stripped out.',
+  )
+  push('BABIP', seasonAdvanced?.babip ?? null, 'His batting average on balls put in play.')
+  push(
+    'P/PA',
+    fixed2(seasonAdvanced?.pitchesPerPlateAppearance),
+    'Pitches seen per trip to the plate — how hard he makes the pitcher work.',
+  )
+  // Same sparse-bundle floor as advancedPitchingView.
+  return facts.length >= 4 ? { facts } : null
+}
+
+// ---------------------------------------------------------------------------
+// Batted-ball profile — the ground/line/fly/pop mix from seasonAdvanced's
+// per-bucket outs+hits counts (fetchHittingAdvanced), each bucket's share of
+// balls in play and the AVG on that bucket. The four buckets sum exactly to
+// ballsInPlay (verified live: 145+83+83+30 = 341), so `share` always adds to 1.
+// ---------------------------------------------------------------------------
+
+// A sample floor so a September call-up's dozen balls in play doesn't render
+// a confident-looking batted-ball profile — same idea as the pitch arsenal's
+// MIN_ARSENAL_PITCHES qualifier floor (pitchArsenal.js).
+const MIN_BATTED_BALL_SAMPLE = 50
+
+const BATTED_BALL_BUCKETS = [
+  ['ground', 'Ground balls', 'groundOuts', 'groundHits'],
+  ['line', 'Line drives', 'lineOuts', 'lineHits'],
+  ['fly', 'Fly balls', 'flyOuts', 'flyHits'],
+  ['pop', 'Pop-ups', 'popOuts', 'popHits'],
+]
+
+export function battedBallView(seasonAdvanced) {
+  const bip = num(seasonAdvanced?.ballsInPlay)
+  if (!seasonAdvanced || bip < MIN_BATTED_BALL_SAMPLE) return null
+  const rows = BATTED_BALL_BUCKETS.map(([key, name, outsKey, hitsKey]) => {
+    const total = num(seasonAdvanced[outsKey]) + num(seasonAdvanced[hitsKey])
+    return {
+      key,
+      name,
+      share: total / bip,
+      avg: total > 0 ? num(seasonAdvanced[hitsKey]) / total : null,
+    }
+  })
+  return { rows, ballsInPlay: bip }
 }
 
 // ---------------------------------------------------------------------------

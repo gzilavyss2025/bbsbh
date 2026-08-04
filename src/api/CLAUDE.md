@@ -415,6 +415,24 @@ for each generator; the reader modules:
   them. That pre-flip is exactly what makes a radar possible — it's what lets
   five metrics in five different units share one "farther out is better" axis —
   so read `radarGeometry.js`'s header before changing how any of it is scaled.
+  `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
+  "Hits like" card, the batter counterpart of `pitchArsenal.js`'s
+  `similarPitchersFor`: it flattens the `bat` percentile map into a pool and
+  ranks it with `src/lib/hitterSimilarity.js` (pure, unit-tested, calibration
+  constants documented against the real file's measured distance
+  distributions). Skill space only (ev/hardHit/brl/chase/sprintSpeed —
+  deliberately NOT xwoba, which would double-count contact quality), no
+  handedness filter (contact/discipline/speed don't invert with batting
+  side), and the file carries no names — `SimilarHitters.jsx` resolves its
+  three rows' names/clubs itself with one batched
+  `people?personIds=…&hydrate=currentTeam` call.
+- `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
+  slot the pitcher page fills with `workload.js`'s Recent workload): live
+  `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
+  out in one `Promise.all`; `hitterFormView` is the pure facts-list shaping.
+  Current-day only (the card skips under a spoiler `asOf`), and NOT
+  `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
+  projection — the name differs on purpose so the two never collide.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`

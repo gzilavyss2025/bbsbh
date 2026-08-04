@@ -4629,8 +4629,8 @@ body {
   color: var(--text-caption);
 }
 
-/* The Advanced pitching card's per-fact "i" glyph + unfold note (see
-   AdvancedPitchingCard.jsx) — same tap-glyph idiom as .attendance__glyph
+/* The Advanced card's per-fact "i" glyph + unfold note (see
+   AdvancedStatsCard.jsx) — same tap-glyph idiom as .attendance__glyph
    above, just anchored next to the fact's LABEL instead of its value, since
    every cell here carries its own glyph rather than one card carrying just
    one. */
@@ -17638,6 +17638,14 @@ body {
 .pitchmix__seg--breaking, .pitchmix__chip--breaking { background: var(--arsenal-breaking); }
 .pitchmix__seg--offspeed, .pitchmix__chip--offspeed { background: var(--arsenal-offspeed); }
 .pitchmix__seg--other,    .pitchmix__chip--other    { background: var(--arsenal-other); }
+/* The hitter page's Batted balls card wears the same bar in batted-ball
+   dress (BattedBallMix.jsx) — same segments/chips, its own --batted-*
+   aliases (tokens/colors.css) so the two vocabularies can drift apart
+   later without a find-and-replace. */
+.pitchmix__seg--ground, .pitchmix__chip--ground { background: var(--batted-ground); }
+.pitchmix__seg--line,   .pitchmix__chip--line   { background: var(--batted-line); }
+.pitchmix__seg--fly,    .pitchmix__chip--fly    { background: var(--batted-fly); }
+.pitchmix__seg--pop,    .pitchmix__chip--pop    { background: var(--batted-pop); }
 .pitchmix__list {
   list-style: none;
   margin: 0;

@@ -24,6 +24,7 @@ import {
   fetchMilbStarterRelieverSeason,
   fetchMilbGameLog,
   fetchPitchingAdvanced,
+  fetchHittingAdvanced,
   fetchTransactions,
   fetchPlayerAwards,
   fetchTradeCohort,
@@ -32,7 +33,7 @@ import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
-import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor } from './savantPercentiles.js'
+import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
 import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import {
@@ -40,8 +41,11 @@ import {
   signedFallback,
   personSportId,
   advancedPitchingView,
+  advancedHittingView,
+  battedBallView,
   situationalSplitsView,
   pitchingRanksView,
+  hittingRanksView,
   SITUATIONAL_SIT_CODES,
   aggregateSplits,
   pitcherRole,
@@ -259,18 +263,21 @@ export async function loadPlayer(id, asOf) {
               : Promise.resolve([]),
             // The Advanced card's season/seasonAdvanced/sabermetrics bundle —
             // MLB-only at the source, so skip the request entirely for a
-            // player whose current activity is a MiLB level.
-            group === 'pitching' && currentActivitySportId === 1
-              ? fetchPitchingAdvanced(id, season)
+            // player whose current activity is a MiLB level. One fetcher per
+            // group; both return the same three-stat bundle shape.
+            currentActivitySportId === 1
+              ? (group === 'pitching' ? fetchPitchingAdvanced(id, season) : fetchHittingAdvanced(id, season))
               : Promise.resolve(null),
             // Situational splits (base state / count leverage) — full-season
-            // figures like the vs-L/R card, MLB only.
-            group === 'pitching' && currentActivitySportId === 1
+            // figures like the vs-L/R card, MLB only. The sitCodes set and the
+            // shaping are group-generic (ahead/behind in count reads from
+            // whichever side `group` asks for).
+            currentActivitySportId === 1
               ? fetchPersonStats(id, { type: 'statSplits', group, sitCodes: SITUATIONAL_SIT_CODES, season, sportId: 1 })
               : Promise.resolve([]),
             // League ranks — live current ranks with no as-of history, so a
             // spoiler-cutoff view skips them (same rule as FoulCard).
-            group === 'pitching' && currentActivitySportId === 1 && !cutoff
+            currentActivitySportId === 1 && !cutoff
               ? fetchPersonStats(id, { type: 'rankings', group, season, sportId: 1 })
               : Promise.resolve([]),
           ])
@@ -299,18 +306,28 @@ export async function loadPlayer(id, asOf) {
         // The raw season rates behind those percentiles, for the radar's spoke
         // labels — same file, separate map (see savantRawFor).
         block.savantRaw = savantRawFor(savantData, id, group)
-        // "Pitches like" — same attach-after-buildBlock pattern. Ranked
-        // against the level he's actually pitching at (see similarPitchersFor);
-        // [] for a hitter, a MiLB arm below AAA, or anyone under the sample
-        // floor, and the card then doesn't render.
+        // "Pitches like" / "Hits like" — same attach-after-buildBlock pattern,
+        // one field for both groups since a block only ever renders its own
+        // card. A pitcher ranks in arsenal space against the level he's
+        // actually pitching at (see similarPitchersFor); a hitter ranks in
+        // Statcast skill space against the savant file's qualified-MLB pool
+        // (see similarHittersFor — a MiLB bat isn't in the file, so the card
+        // simply doesn't render). [] under any sample floor.
         block.similar =
-          group === 'pitching' ? similarPitchersFor(arsenalData, id, tileSportId === 1) : []
+          group === 'pitching'
+            ? similarPitchersFor(arsenalData, id, tileSportId === 1)
+            : similarHittersFor(savantData, id)
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the
         // situational-splits ledger and the league-rank strip.
-        block.advanced = group === 'pitching' ? advancedPitchingView(advancedBundle) : null
-        block.situational = group === 'pitching' ? situationalSplitsView(situationalSplits, group) : null
-        block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : null
+        block.advanced =
+          group === 'pitching' ? advancedPitchingView(advancedBundle) : advancedHittingView(advancedBundle)
+        // The batted-ball profile shares the Advanced card's seasonAdvanced
+        // response — one fetch feeds both cards.
+        block.battedBall =
+          group === 'hitting' ? battedBallView(advancedBundle?.seasonAdvanced) : null
+        block.situational = situationalSplitsView(situationalSplits, group)
+        block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
         return { group, mlbYbySplits, milbYbySplits, block }
       }),
     ),
