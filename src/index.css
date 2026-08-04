@@ -27963,15 +27963,11 @@ button.gamehigh-matchup:active {
   font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
 }
-/* TradeCard.jsx renders both glyphs — '⇄' for the side-by-side columns,
-   '⇅' for the stacked phone layout below — and each breakpoint hides the
-   one that points the wrong way. Deliberately not one glyph rotated in
-   CSS: the connector is a stretched grid item, so a rotate() turns its
-   full-column-width box into a column-HEIGHT sliver overlapping the first
-   team's header. */
-.tradecard__connectorglyph--down {
-  display: none;
-}
+/* Never rotate this glyph to serve a narrower layout: the connector is a
+   stretched grid item, so a transform: rotate(90deg) turns its
+   full-column-width box into a column-HEIGHT sliver that renders over the
+   first team's header. The phone rules below keep the columns — and so
+   this glyph's orientation — as they are. */
 /* 3+-team fallback (a real one is the 2024-07-29 Dodgers/White Sox/
    Cardinals blockbuster — see tradeDeadline.js's grouping header): one
    stacked row per club rather than forcing extra teams into two columns. */
@@ -28158,35 +28154,66 @@ button.gamehigh-matchup:active {
   text-transform: none; /* caps-exempt: trade cutline prose reads as a natural sentence */
 }
 
-/* Phone: the two columns stack, so the connector stops being a glyph
-   BETWEEN columns and becomes the seam between the two blocks — a
-   hairline rule running the card's width with the vertical-exchange
-   glyph centered on it. Same information the desktop '⇄' carries (this
-   is a two-way swap; each block is what THAT club acquired), read along
-   the axis the layout actually runs. */
+/* Phone: the column PAIR is the point of the card — both clubs have to be
+   in view at once or there's no visible exchange — so it survives here
+   intact and each player ROW restacks instead: headshot above the name
+   rather than beside it, which hands the name and its stat lines the
+   column's full ~150px instead of the ~90px left over next to a photo.
+   Everything steps down one rung (shot-md -> shot-sm, body -> small,
+   small -> caption) and the card's own padding tightens, buying width for
+   the columns rather than for a photo.
+
+   Every row-level rule here is scoped to .tradecard__swap on purpose: the
+   3+-team .tradecard__stack fallback gives each club the card's FULL
+   width, so its rows have no narrow column to adapt to and keep the
+   ordinary photo-beside-name shape. */
 @media (max-width: 420px) {
+  .tradecard {
+    padding: var(--space-3) var(--space-2);
+  }
   .tradecard__swap {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
   .tradecard__connector {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+    font-size: var(--fs-num-md);
+  }
+  .tradecard__swap .tradecard__player {
+    padding: var(--space-1);
+  }
+  .tradecard__swap .tradecard__playerlink.tradecard__playerlink {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+  .tradecard__swap .shot.tradecard__shot,
+  .tradecard__swap .tradecard__considerationicon {
+    width: var(--shot-sm-w);
+    height: var(--shot-sm-h);
+  }
+  .tradecard__swap .shot.tradecard__shot.shot--fallback,
+  .tradecard__swap .tradecard__considerationicon {
+    font-size: var(--fs-h2);
+  }
+  .tradecard__swap .tradecard__playerinfo {
     width: 100%;
-    font-size: var(--fs-body);
   }
-  .tradecard__connector::before,
-  .tradecard__connector::after {
-    content: '';
-    flex: 1 1 0;
-    height: var(--bw-hair);
-    background: var(--border-hairline);
+  /* The position chip drops below a long name rather than squeezing it —
+     it's a 2-3 character label, so a wrapped second line costs almost
+     nothing next to a truncated surname. */
+  .tradecard__swap .tradecard__nameline {
+    flex-wrap: wrap;
+    gap: var(--space-1);
   }
-  .tradecard__connectorglyph--across {
-    display: none;
+  .tradecard__swap .tradecard__playername {
+    font-size: var(--fs-small);
   }
-  .tradecard__connectorglyph--down {
-    display: block;
+  .tradecard__swap .tradecard__pos {
+    margin-left: 0;
+  }
+  .tradecard__swap .tradecard__statline {
+    font-size: var(--fs-caption);
+  }
+  .tradecard__swap .tradecard__teamname {
+    font-size: var(--fs-compact);
   }
 }

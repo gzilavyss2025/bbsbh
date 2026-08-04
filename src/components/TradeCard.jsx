@@ -156,13 +156,13 @@ function badgeLabel(trade) {
 // forcing extra teams into two columns reads worse than just listing each
 // side in turn.
 //
-// The connector carries BOTH glyphs and lets CSS pick one, because on a
-// phone the two columns stack and the axis of the exchange turns vertical:
-// a side-to-side '⇄' between two stacked blocks points the wrong way, and
-// CSS-rotating the one glyph (what this used to do) rotates a full-width
-// grid item into a column-height sliver that lands on top of the first
-// team's header. Two glyphs, no transform. See the .tradecard__connector
-// rules in index.css.
+// The two columns stay side by side at EVERY width, phone included — the
+// swap only reads as a swap while both clubs are in view at once, so on a
+// phone the column pair holds and it's each player ROW that restacks
+// (headshot above the name instead of beside it). Collapsing to one
+// column per club, which this used to do, spends the exchange to buy
+// width the rows don't need. See the @media block by .tradecard__swap in
+// index.css.
 export function TradeCard({ trade }) {
   const badge = badgeLabel(trade)
   const isSwap = trade.teams.length === 2
@@ -174,8 +174,7 @@ export function TradeCard({ trade }) {
         <div className="tradecard__swap">
           <TeamSide side={trade.teams[0]} />
           <span className="tradecard__connector" aria-hidden="true">
-            <span className="tradecard__connectorglyph tradecard__connectorglyph--across">⇄</span>
-            <span className="tradecard__connectorglyph tradecard__connectorglyph--down">⇅</span>
+            ⇄
           </span>
           <TeamSide side={trade.teams[1]} />
         </div>
