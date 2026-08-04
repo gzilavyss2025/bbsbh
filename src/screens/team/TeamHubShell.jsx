@@ -111,13 +111,18 @@ export function TeamHubShell({
         <header className="team-hub__id">
           {/* The club's Main "logo card" — its mark on the curated tinted tile
               (the same treatment tile the slate cards wear), rather than a bare
-              CDN logo. Degrades to the plain mark on paper for a MiLB club with
-              no curated Main override. */}
+              CDN logo. MLB reads it by `treatment`; MiLB has no treatment
+              vocabulary, so `side="home"` is what makes TeamTreatmentMark read
+              its curated tile from milbColors.js instead of falling back to
+              the plain paper mark — the same Home identity `theme` above
+              already resolves via themeKeyFor. Degrades to plain paper only
+              for a club neither table has been tuned for yet. */}
           <div className="team-hub__logo">
             <TeamTreatmentMark
               teamId={team.id}
               name={team.name}
               treatment="main"
+              side="home"
               size={128}
               block="team-hub__logobox"
             />
