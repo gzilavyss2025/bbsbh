@@ -45,14 +45,29 @@ export function pitchGroup(code) {
   return PITCH_GROUP[code] ?? code
 }
 
-// A pitcher needs enough pitches on file for his mix to mean anything. Set
-// against the real pool: at 100 pitches roughly 360 of the ~515 MLB arms in the
-// file qualify, which is a big enough neighbourhood to find a genuine match
-// without letting a two-outing cameo's 60% curveball rate top somebody's list.
-// Deliberately higher than pitchArsenalFor's MIN_ARSENAL_PITCHES (15) — that
-// floor only has to make a mix bar honest to LOOK at; this one has to make it
-// stable enough to RANK against 500 others.
-export const MIN_SIMILARITY_PITCHES = 100
+// A pitcher needs enough pitches on file for his mix to mean anything.
+//
+// Usage share is the dominant noise term in the distance below — velocity over
+// even a thin slice of one pitch type is stable to a few tenths, but a share is
+// a multinomial proportion and wobbles. That's what sets this number: at 200
+// pitches a 20%-usage pitch carries a standard error of 2.8 percentage points,
+// comfortably finer than the ~10pp usage gaps that separate a 90-match from a
+// 75-match. At 100 it's 4.0pp, which starts to be the same size as the signal.
+//
+// It buys that precision cheaply now: 536 of the 776 MLB arms in a full season
+// clear 200. It could NOT have been set here against a partial season — when
+// this card was first built the file held three weeks of games and only 151
+// arms cleared 200, so the floor sat at 100 out of necessity. Anyone re-tuning
+// it should re-check the pool size first.
+//
+// Consequence worth knowing: early in a season nobody clears this, so the card
+// is sparse through April and fills in as the year goes. That's honest rather
+// than broken — nobody's pitch mix is established in April either.
+//
+// Deliberately far above pitchArsenalFor's MIN_ARSENAL_PITCHES (15): that floor
+// only has to make a mix bar honest to LOOK at, this one has to make it stable
+// enough to RANK against 500 others.
+export const MIN_SIMILARITY_PITCHES = 200
 
 // How many mph apart two versions of the same pitch have to be before they
 // count as maximally different. Eight is about the full major-league spread of

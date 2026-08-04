@@ -252,9 +252,28 @@ the estimate; four things came out differently from the scoping above.
 Two things the estimate got right: the polygon really was a column-add plus pure
 geometry, and similarity really did need no new pipeline.
 
-Still open from §4: `pitch-arsenal.json` covers only games since 2026-07-09, so
-the comparison pool is a partial season. The card is correct but improves
-automatically after a `--since=<opening day>` backfill (open decision 5).
+**The full-season backfill (open decision 5) is done** — `--since=2026-03-25`,
+2,719 games swept with zero feed errors, 3,301 now on file. It roughly doubled
+the usable pool (776 MLB arms, median 495 pitches, up from 515 arms at a median
+of 140) and it visibly improved the comps: Skubal now pairs with Shane
+McClanahan at 84, and Clay Holmes — who had no MLB rows at all in the old
+three-week window — comes back with a mix of 50% sinker / 19% sweeper / 15%
+change / 9% curve against the reference card's 51/19/15/9, which is about as
+direct a confirmation as this data can give that we're reading the same season.
+
+It also forced a recalibration worth recording: `MIN_SIMILARITY_PITCHES` was
+100, a number chosen under duress because only 151 arms cleared 200 in the
+partial file. Usage share is a multinomial proportion and is the dominant noise
+term in the distance, so the floor should be set by its standard error — at 100
+pitches a 20%-usage pitch carries an SE of 4.0pp, about the size of the ~10pp
+gaps that separate a 90-match from a 75-match; at 200 it's 2.8pp. With a full
+season, 536 of 776 arms clear 200, so the precision is now cheap and the floor
+is 200. **A consequence to expect rather than debug:** early in a season nobody
+clears it, so the card is sparse through April and fills in as the year goes —
+honest, since nobody's mix is established in April either.
+
+File sizes after the backfill: `pitch-arsenal.json` 422 KB → 690 KB (already out
+of the PWA precache), `scripts/data/pitch-arsenal.sql` 1.2 MB → 2.2 MB.
 
 ## 7. Recommended order
 
@@ -285,8 +304,10 @@ reference, minus the proprietary headline metric and the letter grade.
 4. Does the hitter player page get the same treatment in the same pass, or does the
    pitcher card ship alone first? (`BATTER_METRICS` makes the hitter radar nearly
    free; hitter *similarity* is a separate model.)
-5. Backfill `gen-pitch-arsenal.mjs` to opening day before building similarity on it?
-   (§4, E1 caveat — recommend yes, independent of this feature.)
+5. ~~Backfill `gen-pitch-arsenal.mjs` to opening day before building similarity on
+   it?~~ **Done** — see §6a. Worth knowing for next season: the nightly cron only
+   sweeps a trailing window, so a fresh season's file grows from empty and the
+   card stays sparse until arms clear the sample floor.
 6. Where does this live on the page — one new card, or does it absorb the existing
    `StatcastPercentiles` + `PitchMix` sections? The reference is one dense card;
    our page is a long scroll of small sections.
