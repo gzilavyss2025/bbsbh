@@ -4,6 +4,7 @@ import { CareerTimeline } from '../../components/CareerTimeline.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadMinors } from './data/loadMinors.js'
+import { hiddenTeamTabs } from './data/shared.js'
 import { AffiliatesCard } from './modules/AffiliatesCard.jsx'
 import { ProspectsCard } from './modules/ProspectsCard.jsx'
 
@@ -41,6 +42,7 @@ export function MinorsTab({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="minors"
+      hiddenTabs={hiddenTeamTabs(data.team)}
     >
       {showHistory && <CareerTimeline entries={affiliationHistory} title="Affiliation history" />}
 

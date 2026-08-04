@@ -18,6 +18,7 @@ import {
   gamePath,
   playerPath,
   teamPath,
+  teamTabPath,
   leadersPath,
   orgLeadersPath,
   teamLeadersPath,
@@ -155,6 +156,65 @@ test('the 3-segment leaders/team branches win over the generic game branch', () 
   assert.equal(parseRoute('/leaders/org/158').name, 'leaders')
   assert.deepEqual(parseRoute('/team/158/leaders'), {
     name: 'team-leaders',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+})
+
+// --------------------------------------------------------------------------
+// teamTabPath / parseRoute — the team hub's five tabs
+// --------------------------------------------------------------------------
+test('teamTabPath builds each tab path and carries the spoiler cutoff through', () => {
+  assert.equal(teamTabPath(158, 'overview'), '/team/158')
+  assert.equal(teamTabPath(158, 'roster'), '/team/158/roster')
+  assert.equal(teamTabPath(158, 'games'), '/team/158/games')
+  assert.equal(teamTabPath(158, 'numbers'), '/team/158/numbers')
+  assert.equal(teamTabPath(158, 'minors'), '/team/158/minors')
+  assert.equal(teamTabPath(158, 'leaders'), '/team/158/leaders')
+  // The spoiler-relevant case: a tab switch must reproduce the same ?d=/?s=
+  // a dated team link arrived with — dropping either would show a visitor
+  // mid-scoring stats past the half-inning they've reached (PRD non-negotiable 1).
+  assert.equal(
+    teamTabPath(158, 'roster', { d: '2026-07-05', s: 11 }),
+    '/team/158/roster?d=2026-07-05&s=11',
+  )
+  assert.equal(
+    teamTabPath(158, 'overview', { d: '2026-07-05', s: 11 }),
+    '/team/158?d=2026-07-05&s=11',
+  )
+})
+
+test('parseRoute resolves all five team-hub tab URLs, carrying the cutoff query', () => {
+  for (const tab of ['roster', 'games', 'numbers', 'minors']) {
+    assert.deepEqual(
+      parseRoute(`/team/158/${tab}`),
+      { name: `team-${tab}`, id: '158', asOf: null, sportId: null },
+      tab,
+    )
+  }
+  assert.deepEqual(parseRoute('/team/158/leaders'), {
+    name: 'team-leaders',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/team/158'), { name: 'team', id: '158', asOf: null, sportId: null })
+  assert.deepEqual(parseRoute('/team/158/roster?d=2026-07-05&s=11'), {
+    name: 'team-roster',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+})
+
+test('a team tab segment is not mistaken for a date-first game route', () => {
+  // The ordering trap route.js's own header warns about: '/team/{id}/roster' is
+  // 3 segments, the same shape as '/{date}/{matchup}/{section}'. The
+  // TEAM_TAB_ROUTES branch must be checked before the generic game branch, or
+  // this parses as a bogus game with date='team', matchup='158', section='roster'.
+  assert.deepEqual(parseRoute('/team/158/roster'), {
+    name: 'team-roster',
     id: '158',
     asOf: null,
     sportId: null,

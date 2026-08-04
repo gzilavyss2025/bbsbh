@@ -4,7 +4,7 @@ import { AsyncGate } from '../../components/AsyncGate.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadRoster } from './data/loadRoster.js'
-import { lineupDefenseFrom } from './data/shared.js'
+import { lineupDefenseFrom, hiddenTeamTabs } from './data/shared.js'
 import { RosterProjection } from './modules/RosterProjection.jsx'
 import { CurrentRosterCard } from './modules/CurrentRosterCard.jsx'
 import { InjuredListCard } from './modules/InjuredListCard.jsx'
@@ -79,6 +79,7 @@ export function RosterTab({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="roster"
+      hiddenTabs={hiddenTeamTabs(identity.data.team)}
     >
       {(preferredLineup.length > 0 || substitutes.length > 0 || startingPitchers.length > 0 || bullpen.length > 0) && (
         <RosterProjection

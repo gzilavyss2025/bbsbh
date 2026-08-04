@@ -9,6 +9,7 @@ import { ChevronLink } from '../components/ChevronLink.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'
+import { hiddenTeamTabs } from './team/data/shared.js'
 import { StandingsCard } from './team/modules/StandingsCard.jsx'
 import { LastTenGames } from './team/modules/LastTenGames.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
@@ -84,6 +85,7 @@ export function TeamPage({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="overview"
+      hiddenTabs={hiddenTeamTabs(team)}
     >
       {/* Standing — the club's row plus the team above and below it. The
           Postseason Odds pill still opens the whole division's snapshot: that

@@ -4,6 +4,7 @@ import { TeamTransactionsCard } from '../../components/TeamTransactionsCard.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadGames } from './data/loadGames.js'
+import { hiddenTeamTabs } from './data/shared.js'
 import { LastTenGames } from './modules/LastTenGames.jsx'
 import { SeasonSchedule } from './modules/SeasonSchedule.jsx'
 import { TeamPhotosRail } from './modules/TeamPhotosRail.jsx'
@@ -42,6 +43,7 @@ export function GamesTab({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="games"
+      hiddenTabs={hiddenTeamTabs(team)}
     >
       {schedule.length > 0 && (
         <SeasonSchedule

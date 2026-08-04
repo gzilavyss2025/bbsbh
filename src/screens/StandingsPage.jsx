@@ -371,7 +371,7 @@ export function StandingsPage() {
                       {lg.leaders.map((t) => (
                         <tr key={t.id} {...rowProps(t)}>
                           <td className="team">
-                            <TeamLink id={t.id}>
+                            <TeamLink id={t.id} tab="numbers">
                               <TeamLogo teamId={t.id} name={t.name} size={18} />
                               {t.name}
                               <span className="wc-div">{t.division}</span>
@@ -403,7 +403,7 @@ export function StandingsPage() {
                             style={style}
                           >
                             <td className="team">
-                              <TeamLink id={t.id}>
+                              <TeamLink id={t.id} tab="numbers">
                                 <TeamLogo teamId={t.id} name={t.name} size={18} />
                                 {t.name}
                                 <span className="wc-div">{t.division}</span>
@@ -460,7 +460,7 @@ export function StandingsPage() {
                           {div.teams.map((t) => (
                             <tr key={t.id} {...rowProps(t)}>
                               <td className="team">
-                                <TeamLink id={t.id}>
+                                <TeamLink id={t.id} tab="numbers">
                                   <TeamLogo teamId={t.id} name={t.name} size={18} />
                                   {t.name}
                                 </TeamLink>
