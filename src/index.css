@@ -28289,3 +28289,290 @@ button.gamehigh-matchup:active {
     font-size: var(--fs-compact);
   }
 }
+
+/* ============================================================ logbook stamps
+   The Logbook (ADR-0035): the mint affordance at the foot of a revealed box
+   score, and the collection page itself. The stamp ARTWORK carries no CSS —
+   GameStamp.jsx is a self-contained SVG whose type sizes are user-space
+   coordinates in the locked design, not page typography (src/lib/stampArt.js).
+   All this file does is size it and set its ink; the stamp inherits `color`,
+   which is the whole one-colour discipline of the mark.
+   ============================================================ */
+
+.gamestamp {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--text-body);
+}
+
+/* ---- the mint card, foot of the box score ---- */
+.stampcard {
+  margin-top: var(--space-6);
+}
+
+.stampcard__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background: var(--surface-card);
+}
+
+/* Un-stamped, the stamp is a preview of what you'd keep — pale, like an
+   un-inked die. Once minted it comes up to full ink. */
+.stampcard__body--unstamped .gamestamp {
+  color: var(--graphite-soft);
+  opacity: 0.5;
+}
+
+.stampcard__art {
+  width: 100%;
+  max-width: 220px;
+  flex: none;
+}
+
+.stampcard__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.stampcard__lede {
+  margin: 0;
+  max-width: 40ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+.stampcard__mint {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+  color: var(--text-on-seal);
+}
+
+.stampcard__modes {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.stampcard__modes button {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.stampcard__modes button.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.stampcard__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 320px;
+}
+
+.stampcard__notelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.stampcard__note input {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-canvas);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+.stampcard__note input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.stampcard__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stampcard__remove {
+  border: 0;
+  background: none;
+  padding: var(--space-1) var(--space-2);
+  color: var(--accent-negative);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-decoration: underline;
+}
+
+.stampcard__remove:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Side by side once there's room for the stamp and its controls to sit
+   together rather than stacking down a phone. */
+@media (min-width: 640px) {
+  .stampcard__body {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+  }
+  .stampcard__side {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* ---- the collection page ---- */
+.logbook__seasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.logbook__seasons button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+.logbook__seasons button.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.logbook__seasons small {
+  font-size: var(--fs-caption);
+  opacity: 0.7;
+}
+
+.logbook__count {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbook__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logbook__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logbook__stampbtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.logbook__stampbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: var(--radius-pill);
+}
+
+/* A stamp whose game facts haven't resolved (offline, or a failed batch) holds
+   its place in the grid rather than dropping a keepsake off the page. */
+.logbook__pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  aspect-ratio: 1;
+  width: 100%;
+  border: var(--bw-rule) dashed var(--border-rule);
+  border-radius: var(--radius-pill);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  text-align: center;
+}
+
+.logbook__pending small {
+  font-size: var(--fs-caption);
+  opacity: 0.75;
+}
+
+.logbook__caption {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbook__mode {
+  color: var(--seal-cover-ink);
+  background: var(--award-soft);
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-2);
+}
+
+.logbook__note {
+  margin: 0;
+  max-width: 22ch;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+  text-align: center;
+}

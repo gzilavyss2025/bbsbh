@@ -209,6 +209,17 @@ export const LOGO_VARIANTS = [
 // exists.
 const MONO_LOGO_BASE = '/data/logos/mono'
 
+// Whether this club actually HAS a precomputed knockout mark. Most consumers
+// don't need to ask — TeamLogo's own variant -> base fallback (an <img> that
+// 404s retries the CDN mark) covers them. The Logbook stamp does, because its
+// mark is an <image> inside an SVG <mask>: a 404 there paints nothing at all
+// rather than falling back, so the stamp has to know in advance to draw the
+// club's abbreviation in that slot instead (the documented fallback, see
+// .scratch/game-stamps/designs/stamp-concepts.md's "Team marks" rules).
+export function hasMonoLogo(teamId) {
+  return Boolean(MONO_LOGO_MANIFEST[String(teamId)])
+}
+
 // mono-logo-manifest.json (also written by gen-mono-logos.mjs) maps teamId to
 // a content hash of that club's precomputed knockout SVG, appended below as
 // `?v=`. The deployed PWA caches these SVGs CacheFirst for up to 30 days

@@ -164,6 +164,27 @@ read the linked ADRs before refactoring:
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
   `selectLiveEdge` drives navigation only — under the pass everything already
   renders open, so there is nothing for a ratchet to advance.
+- **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
+  final score *plainly*, and it is safe for a structural reason rather than a
+  careful one: a stamp only exists for a game the server can prove this user
+  already finished revealing. Two mechanisms carry that into the UI.
+  `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
+  render function (`screens/BoxScore.jsx`), which IS the client-side gate —
+  ADR-0002 again, used a third time. That host `SealBox` still has **no
+  `onReveal` and persists nothing**, and must stay that way: give it one and a
+  box score opened under the Scores Unlocked pass would silently ratchet the
+  whole game's `revealedThrough`. `GameStamp.jsx` (the art) and
+  `StampGameButton.jsx` may be imported only from their allowlists —
+  `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
+  `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection
+  (`screens/LogbookPage.jsx`, `/logbook` + `/logbook/{season}`) and its store
+  (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
+  signed-out user has a real Logbook on that device, holding no scores at all —
+  the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
+  mirrors the collection across a signed-in user's devices, and is the one
+  place that pushes the local reveal mark to `/api/reveal` before minting; its
+  header says why that is the only sanctioned way to close ADR-0035's known gap.
+  The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own

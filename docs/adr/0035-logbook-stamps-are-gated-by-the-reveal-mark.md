@@ -123,9 +123,13 @@ a keepsake that vanishes on its own is a broken promise.
 - **Render-surface containment still matters**, the gate does not replace it. The
   stamp affordance lives inside the box-score `SealBox`'s reveal render function
   (ADR-0002), and a stamp must never render on the slate, on a game card, in
-  "Pick up your pencil", or in any list of unrevealed games. A
-  `scripts/check-stamp-surfaces.mjs` guard is planned to assert the import
-  allowlist, alongside the eight guards `npm run lint` already runs.
+  "Pick up your pencil", or in any list of unrevealed games.
+  `scripts/check-stamp-surfaces.mjs` (the ninth guard `npm run lint` runs) makes
+  that structural: `GameStamp.jsx` may be imported only by `StampGameButton.jsx`
+  and `LogbookPage.jsx`, `StampGameButton.jsx` only by `BoxScore.jsx`, and a
+  named set of unrevealed-game surfaces may not so much as mention either. Its
+  runtime half is `e2e/invariants/logbook-stamp.spec.js`, which asserts a stamp
+  is *absent from the DOM* — not merely hidden — before the box score is tapped.
 - **`/logbook` must not get an OG card that renders scores.** Crawler-visible,
   and users share links. Fail safe to the static default card (ADR-0012's path).
 - **Known gap, accepted explicitly.** Reveal sync is opt-in and only populated
@@ -133,7 +137,14 @@ a keepsake that vanishes on its own is a broken promise.
   server mark. The client closes this by POSTing its local `revealedThrough` to
   `/api/reveal` first — that endpoint is a one-directional ratchet and safe to
   feed. It is **not** closed by trusting a client-supplied claim, and must never
-  be.
+  be. Implemented in `src/components/StampsCloudSync.jsx`'s publish path: the
+  reveal POST precedes the mint POST for every stamp it publishes.
+- **A second gap, named rather than hidden: removals propagate one way.** An
+  un-stamp reaches the server (DELETE writes a tombstone), but `GET /api/stamps`
+  filters tombstones out of its response, so a second device holding that stamp
+  never learns it was removed and keeps showing it until it changes that stamp
+  itself. Closing it means teaching the read side to return tombstones — an
+  endpoint change, not a client one. Not yet done.
 - **The gate fails closed.** An unresolvable game, an unreadable Redis, a
   non-integer mark, a truthy-but-not-`true` consent flag all refuse the mint. A
   blip costs a retry; it never costs a stamp the gate did not allow.
