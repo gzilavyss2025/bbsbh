@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useStamps } from '../hooks/useStamps.js'
+import { samePlacement } from '../lib/stamps.js'
 import { revealMarkFor } from '../hooks/useRevealProgress.js'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -94,6 +95,11 @@ export function StampsCloudSync() {
             updatedAt: entry.updatedAt,
             note: entry.note,
             date: entry.date,
+            // Where it sits in the passport book. Built field by field here,
+            // so anything not listed is dropped on the way in — a placement
+            // left off this object would arrive as "unplaced" and empty the
+            // book on every sign-in.
+            placement: entry.placement ?? null,
           }
         }
         merging.current = true
@@ -131,6 +137,7 @@ export function StampsCloudSync() {
         before.state !== entry.state ||
         before.mode !== entry.mode ||
         before.note !== entry.note ||
+        !samePlacement(before.placement, entry.placement) ||
         before.updatedAt !== entry.updatedAt
       ) {
         changed.push([Number(gamePk), entry])
@@ -174,7 +181,12 @@ export function StampsCloudSync() {
             await fetch('/api/stamps', {
               method: 'POST',
               headers: { ...auth, 'content-type': 'application/json' },
-              body: JSON.stringify({ gamePk, mode: entry.mode, note: entry.note }),
+              body: JSON.stringify({
+                gamePk,
+                mode: entry.mode,
+                note: entry.note,
+                placement: entry.placement ?? null,
+              }),
             })
           } catch {
             // A failed publish costs this device nothing — its own local state

@@ -2,14 +2,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   STAMPS_KEY,
   addStamp,
+  allStamps,
   applyRemoteStamps,
   parseStamps,
+  placeStamp,
+  placeStamps,
   removeStamp,
   seasonCounts,
   seasonIsFull,
   serializeStamps,
   stampFor,
   stampsForSeason,
+  unplaceStamp,
 } from '../lib/stamps.js'
 
 // The Logbook's React entry point (ADR-0035). Mirrors useRevealProgress.js: the
@@ -24,10 +28,12 @@ import {
 // does for the reveal mark and the spoiled-day map.
 //
 // WHAT IS NOT IN HERE: the score. A local record is
-// `{ state, mode, stampedAt, updatedAt, note, date }` and nothing else, so
-// localStorage stays as non-score-bearing as `bbsbh:reveal:{gamePk}` already is.
-// The Logbook resolves runs, clubs, and venue from the game facts at render time
-// (src/api/logbook.js). Do not "cache the score here to save a fetch."
+// `{ state, mode, stampedAt, updatedAt, note, date, placement }` and nothing
+// else — `placement` being a page number and two fractions saying where the
+// stamp sits in the passport book, which is a picture, not a result. So
+// localStorage stays as non-score-bearing as `bbsbh:reveal:{gamePk}` already
+// is. The Logbook resolves runs, clubs, and venue from the game facts at render
+// time (src/api/logbook.js). Do not "cache the score here to save a fetch."
 
 function readStamps() {
   try {
@@ -115,6 +121,42 @@ export function useStamps() {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
+  // Put a stamp on a page of the passport book, or move one already there.
+  // Goes through the same commit path as every other change, so a placement
+  // syncs to the user's other devices exactly like a note edit does.
+  const place = useCallback(
+    (gamePk, placement) => {
+      commit((prev) => placeStamp(prev, gamePk, placement, { now: Date.now() }))
+    },
+    [commit],
+  )
+
+  // Take a placed stamp back off the page — "re-stamp the page". The keepsake
+  // survives; only its position is cleared, and it returns to the tray.
+  const unplace = useCallback(
+    (gamePk) => {
+      commit((prev) => unplaceStamp(prev, gamePk, { now: Date.now() }))
+    },
+    [commit],
+  )
+
+  // A whole batch at once — the book's "place them all for me" control, and
+  // what a collection that predates the book needs so nobody is made to place
+  // forty keepsakes by hand.
+  const placeAll = useCallback(
+    (placements) => {
+      commit((prev) => placeStamps(prev, placements, { now: Date.now() }))
+    },
+    [commit],
+  )
+
+  // Every live stamp, oldest first — the passport book's reading order, and
+  // the input the retrospective aggregates over.
+  const all = useMemo(() => allStamps(stamps), [stamps])
+  // Stamps minted but not yet put on a page. They wait in the book's tray;
+  // nothing is ever lost by not finishing the placement step.
+  const unplaced = useMemo(() => all.filter((s) => !s.placement), [all])
+
   const counts = useMemo(() => seasonCounts(stamps), [stamps])
   // Newest season first — the Logbook's season nav, and the default season the
   // bare /logbook route lands on.
@@ -131,8 +173,13 @@ export function useStamps() {
     isStamped: useCallback((gamePk) => stampFor(stamps, gamePk) != null, [stamps]),
     forSeason: useCallback((season) => stampsForSeason(stamps, season), [stamps]),
     seasonIsFull: useCallback((season) => seasonIsFull(stamps, season), [stamps]),
+    all,
+    unplaced,
     stamp,
     unstamp,
+    place,
+    unplace,
+    placeAll,
     mergeRemoteStamps,
   }
 }

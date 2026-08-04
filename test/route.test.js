@@ -26,6 +26,7 @@ import {
   gamePhotosPath,
   logbookPath,
   logbookStatsPath,
+  logbookPlacePath,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -331,19 +332,43 @@ test('a non-numeric photos gamePk segment falls back to the plain browse route',
 // The Logbook (ADR-0035) — where branch ORDER is the whole test
 // --------------------------------------------------------------------------
 test('the bare Logbook leaves the season for the page to resolve', () => {
-  assert.deepEqual(parseRoute('/logbook'), { name: 'logbook', season: null })
+  assert.deepEqual(parseRoute('/logbook'), { name: 'logbook', season: null, placing: null })
   assert.equal(logbookPath(), '/logbook')
 })
 
 test('a Logbook season segment parses, and an impossible one falls back to the bare page', () => {
-  assert.deepEqual(parseRoute('/logbook/2026'), { name: 'logbook', season: 2026 })
+  assert.deepEqual(parseRoute('/logbook/2026'), { name: 'logbook', season: 2026, placing: null })
   assert.equal(logbookPath(2026), '/logbook/2026')
-  assert.deepEqual(parseRoute(logbookPath(2026)), { name: 'logbook', season: 2026 })
+  assert.deepEqual(parseRoute(logbookPath(2026)), { name: 'logbook', season: 2026, placing: null })
   // Out of the 1876-2200 window, and not an integer at all: both land on the
   // bare page rather than stranding it on a season that cannot exist.
-  assert.deepEqual(parseRoute('/logbook/1200'), { name: 'logbook', season: null })
-  assert.deepEqual(parseRoute('/logbook/9999'), { name: 'logbook', season: null })
-  assert.deepEqual(parseRoute('/logbook/2026.5'), { name: 'logbook', season: null })
+  for (const bad of ['/logbook/1200', '/logbook/9999', '/logbook/2026.5']) {
+    assert.deepEqual(parseRoute(bad), { name: 'logbook', season: null, placing: null }, bad)
+  }
+})
+
+// `?place=` is a transient MODE of the book, not an address — the hand-off
+// from the box score's mint card into the placement flow.
+test('?place= puts the book into placement mode for one game', () => {
+  assert.equal(logbookPlacePath(823035), '/logbook?place=823035')
+  assert.deepEqual(parseRoute(logbookPlacePath(823035)), {
+    name: 'logbook',
+    season: null,
+    placing: 823035,
+  })
+  // It rides along on a season page too, so placing from a mint card doesn't
+  // throw away which season you were looking at.
+  assert.deepEqual(parseRoute('/logbook/2026?place=823035'), {
+    name: 'logbook',
+    season: 2026,
+    placing: 823035,
+  })
+})
+
+test('a mangled ?place= drops the mode rather than placing a game that is not real', () => {
+  for (const bad of ['/logbook?place=', '/logbook?place=abc', '/logbook?place=-4', '/logbook?place=0', '/logbook?place=1.5']) {
+    assert.deepEqual(parseRoute(bad), { name: 'logbook', season: null, placing: null }, bad)
+  }
 })
 
 // The regression this block exists for. `/logbook/{season}` parses its second
@@ -361,5 +386,5 @@ test('/logbook/stats is the retrospective, not season NaN falling through to /lo
 test('an unknown Logbook sub-segment still falls back to the bare page', () => {
   // 'stats' is matched by name, not by "non-numeric", so every other mangled
   // link keeps the old forgiving behavior instead of 404-ing.
-  assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null })
+  assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null, placing: null })
 })
