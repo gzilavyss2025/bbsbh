@@ -14,7 +14,7 @@ import {
   classifyGameCards,
   firstSentence,
 } from '../src/api/dayHighlights.js'
-import { reorderGameOfTheNight } from '../src/lib/resultCards.js'
+import { reorderGameOfTheNight, reorderNationalBroadcasts } from '../src/lib/resultCards.js'
 
 // A minimal live-feed shape carrying only what multiHrSignal reads: each side's
 // boxscore players (battingOrder + batting.homeRuns + person + position) plus
@@ -535,4 +535,40 @@ test('reorderGameOfTheNight: a slate with no crowned game is a no-op', () => {
   const games = slate(1, 2, 3)
   const meta = new Map([[2, { isGameOfTheNight: false }]])
   assert.equal(reorderGameOfTheNight(games, meta), games)
+})
+
+// --------------------------------------------------------------------------
+// reorderNationalBroadcasts — grouping every nationally-broadcast game right
+// behind the favorite team's own game.
+// --------------------------------------------------------------------------
+const slateWithState = (...entries) =>
+  entries.map(([gamePk, abstractState = 'Live']) => ({ gamePk, abstractState }))
+
+test('reorderNationalBroadcasts: with no pinned game, national games group at the front in relative order', () => {
+  const games = slateWithState([1], [2], [3], [4])
+  const national = { 2: 'FOX', 4: 'TBS' }
+  assert.deepEqual(pks(reorderNationalBroadcasts(games, national)), [2, 4, 1, 3])
+})
+
+test('reorderNationalBroadcasts: with a pinned game leading, national games sit right behind it', () => {
+  const games = slateWithState([1], [2], [3], [4])
+  const isPinned = (g) => g.gamePk === 1
+  const national = { 3: 'Peacock' }
+  assert.deepEqual(pks(reorderNationalBroadcasts(games, national, isPinned)), [1, 3, 2, 4])
+})
+
+test('reorderNationalBroadcasts: Final games are left in place, never promoted above still-playing games', () => {
+  const games = slateWithState([1], [2], [3, 'Final'], [4])
+  const national = { 3: 'FOX' }
+  assert.deepEqual(pks(reorderNationalBroadcasts(games, national)), [1, 2, 3, 4])
+})
+
+test('reorderNationalBroadcasts: no national games on the slate is a no-op', () => {
+  const games = slateWithState([1], [2], [3])
+  assert.equal(reorderNationalBroadcasts(games, {}), games)
+})
+
+test('reorderNationalBroadcasts: an empty/unloaded map is a no-op', () => {
+  const games = slateWithState([1], [2], [3])
+  assert.equal(reorderNationalBroadcasts(games, null), games)
 })
