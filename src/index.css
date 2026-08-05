@@ -29227,6 +29227,99 @@ button.gamehigh-matchup:active {
   border-radius: var(--radius-pill);
 }
 
+/* The stamp whose options bar is open above the book. Kraft amber rather than
+   --focus-ring, because this is a SELECTION that outlives the tap, not focus —
+   the two can be on different stamps at once, and they must not look alike.
+   The ring is drawn in the element's own coordinate space, so it tilts with
+   the stamp rather than sitting square against a crooked mark. */
+.passportpage__stamp--selected {
+  outline: var(--bw-rule) solid var(--seal-cover);
+  outline-offset: 4px;
+  border-radius: var(--radius-pill);
+}
+
+/* The stamp being re-placed, still sitting on its OLD spot — a move is not an
+   un-place, and cancelling one has to leave the keepsake exactly where it was.
+   Faded so the pending ghost reads as "here instead of there" rather than as a
+   second copy of the same stamp on one page. */
+.passportpage__stamp--moving {
+  opacity: 0.25;
+}
+
+/* ---- the stamp coming down ------------------------------------------- */
+
+/* Played once, on the stamp the user just confirmed — the impression of a
+   rubber stamp being pressed onto the page, and the ONLY moment in the book
+   that moves on its own.
+ *
+ * The physical story, which is what every number below is answering to. The
+ * mark is held above the paper, off its final angle the way a hand never quite
+ * lands square. It ACCELERATES downward (an ease-IN on the way down — a stamp
+ * is pushed, it does not coast), overshoots very slightly past its size as the
+ * rubber and the paper compress, and then releases to rest. Three ideas, one
+ * gesture; there is no bounce, no glow, and no second act.
+ *
+ * Values, all of them defensible:
+ *   scale 1.42 -> 0.96 -> 1   the descent, the compression, the release. The
+ *                             undershoot is 4%, felt rather than seen — a bigger
+ *                             one reads as a cartoon squash.
+ *   rotate -2.5deg -> 0       relative to the stamp's OWN stored tilt, so the
+ *                             rock resolves INTO the angle it keeps. This is why
+ *                             the keyframes restate the whole transform: the
+ *                             centring pull and the tilt are one transform with
+ *                             the scale, and animating a partial one would drop
+ *                             the others.
+ *   opacity 1 by 30%          the mark is fully inked well before it lands, so
+ *                             the impact is a movement, not an appearance.
+ *   62%                       where it meets the paper: 223ms of descent, 137ms
+ *                             of release, out of --dur-slow.
+ *
+ * transform and opacity only — both compositor properties, so this never
+ * rasterises the turbulence filter inside GameStamp mid-flight. */
+@keyframes passport-stamp-land {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(calc(var(--stamp-tilt, 0deg) - 2.5deg)) scale(1.42);
+    /* Coming down under the hand, gathering speed. */
+    animation-timing-function: var(--ease-press);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(calc(var(--stamp-tilt, 0deg) - 1.4deg)) scale(1.22);
+    animation-timing-function: var(--ease-press);
+  }
+
+  62% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--stamp-tilt, 0deg)) scale(0.96);
+    /* The paper pushing back — decisive, and over. */
+    animation-timing-function: var(--ease-out);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--stamp-tilt, 0deg)) scale(1);
+  }
+}
+
+.passportpage__stamp--landed {
+  /* `both` so the first frame is the held-above state rather than the settled
+     one — without it the stamp paints at rest for a frame and then jumps up to
+     start, which is the flicker this whole animation is meant to replace. */
+  animation: passport-stamp-land var(--dur-slow) both;
+  will-change: transform, opacity;
+}
+
+/* Skipped, not slowed — the same call the passport's page-turn makes. The
+   stamp simply is where it was put. */
+@media (prefers-reduced-motion: reduce) {
+  .passportpage__stamp--landed {
+    animation: none;
+    will-change: auto;
+  }
+}
+
 /* A stamp whose game facts haven't resolved (offline, a failed batch). The
    keepsake is still the user's, so it holds its exact spot on the page
    rather than leaving a gap — the same call .logbook__pending makes. */
@@ -29665,9 +29758,13 @@ button.gamehigh-matchup:active {
   color: var(--text-caption);
 }
 
-/* The placement bar. Sticky so the confirm control stays reachable while you
-   are scrolled down inside a tall book looking for a spot. */
-.logbook__placing {
+/* The placement bar, and the options bar a tapped stamp opens. One slot above
+   the book, one bar at a time, and the same look because they are the same
+   conversation — "this keepsake, and where it goes". Sticky so the confirm
+   control stays reachable while you are scrolled down inside a tall book
+   looking for a spot, or down at the grid that sent you here. */
+.logbook__placing,
+.logbook__selected {
   position: sticky;
   top: 0;
   z-index: 2;
@@ -29690,14 +29787,19 @@ button.gamehigh-matchup:active {
   color: var(--seal-cover-ink);
 }
 
+/* Wraps, because the options bar carries four controls and a phone column is
+   narrower than they are. Row-gap as well as column-gap, so a wrapped row
+   isn't touching the one above it. */
 .logbook__placingactions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
 }
 
-/* Which page a stamp sits on, in the grid below the book — and the control
-   that takes it back off (the "re-stamp the page" path). */
+/* Which page a stamp sits on, in the grid below the book — and the way back to
+   it: the control turns the book to that page and opens the stamp's options,
+   where moving it and returning it to the tray are both named. */
 .logbook__unplace,
 .logbook__unplaced {
   border: 0;

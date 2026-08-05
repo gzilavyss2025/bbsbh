@@ -60,6 +60,12 @@ import { usePageTurn } from './usePageTurn.js'
 //   onAddPage     () => void — offered on the LAST page only, and only while
 //                 the book is under MAX_PAGES.
 //   placing       truthy while the user is choosing where to stamp.
+//   selectedPk    the placed stamp whose options bar is open, ringed on its
+//                 page so the bar is visibly about that keepsake.
+//   movingPk      the placed stamp being re-placed, faded on its OLD spot so
+//                 the pending ghost reads as "here instead".
+//   landedPk      the stamp just confirmed, which plays the press once.
+//   onLanded      (gamePk) => void when that press finishes.
 //   coverSlot     React node rendered as the front cover.
 
 // The two-page breakpoint. Deliberately NOT the app's shared WIDE_QUERY
@@ -107,6 +113,10 @@ export function PassportBook({
   openPage = null,
   pending = null,
   pendingGamePk = null,
+  selectedPk = null,
+  movingPk = null,
+  landedPk = null,
+  onLanded,
 }) {
   const wide = useMediaQuery(BOOK_WIDE_QUERY)
   const perOpening = wide ? 2 : 1
@@ -195,10 +205,36 @@ export function PassportBook({
           // the page it was tapped on, and never on the turning leaf.
           pending={live && pending?.page === entry ? pending : null}
           pendingGamePk={pendingGamePk}
+          // Both are decoration on a LIVE page only. The turning leaf is a
+          // duplicate of content that is also mounted for real underneath, so
+          // a ring or a fade on a sheet in flight would read as a second copy
+          // of the same highlight sliding across the book.
+          selectedPk={live ? selectedPk : null}
+          movingPk={live ? movingPk : null}
+          // Likewise live-only, and for a sharper reason than the other two: a
+          // leaf face that replayed the press would stamp the page a second
+          // time in front of the user, mid-turn.
+          landedPk={live ? landedPk : null}
+          onLanded={live ? onLanded : undefined}
         />
       )
     },
-    [coverSlot, stamps, factsByPk, onStampClick, onPageTap, onAddPage, pages, placing, pending, pendingGamePk],
+    [
+      coverSlot,
+      stamps,
+      factsByPk,
+      onStampClick,
+      onPageTap,
+      onAddPage,
+      pages,
+      placing,
+      pending,
+      pendingGamePk,
+      selectedPk,
+      movingPk,
+      landedPk,
+      onLanded,
+    ],
   )
 
   // The two faces of the sheet in flight. See the physical model above; both

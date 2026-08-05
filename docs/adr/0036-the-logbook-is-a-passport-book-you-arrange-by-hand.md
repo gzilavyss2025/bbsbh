@@ -122,6 +122,46 @@ and a stale link to it degrades to the plain book.
   whatever this device has added.
 - **Reduced motion is honoured** — the page-turn is skipped, not slowed.
 
+## Addendum (2026-08-05) — a placement can be changed
+
+An arrangement you cannot correct is not an arrangement, so a placed stamp can
+be picked up and put somewhere else. Three notes, because each is a place the
+obvious implementation goes wrong:
+
+- **A move is the placing flow, not a second one.** `placeStamp` was already a
+  move as much as a first placement (§1), so what a move adds is only what the
+  user can see: the old spot fades while you choose, and the stamp is left out
+  of both the collision search and the page-capacity check on the page it is
+  leaving (`otherPlacementsOn` / `pageIsFullFor`, in the geometry module per §2,
+  not in JSX). Without the first, every small correction is shoved a stamp-width
+  away by the very stamp being corrected; without the second, a full page
+  refuses to take back a keepsake already sitting on it.
+- **Tapping a stamp in the book opens its options rather than its game.** All
+  three things you can do with a placed keepsake — open it, move it, send it
+  back to the tray — hang off one bar, in the slot the placing bar already
+  occupies. The cost is one extra tap to reach a game from the book; the grid
+  below still opens one directly. The grid's `p.{n}` control, which used to
+  silently un-place, now turns the book to that page and opens the same bar.
+- **A confirmed stamp presses onto the page** (`passport-stamp-land`): held
+  above the paper off its own angle, accelerating down — `--ease-press`, the
+  only ease-IN in the system, because a stamp is *pushed* rather than arriving —
+  compressing 4% on impact, releasing to rest, over `--dur-slow`. transform and
+  opacity only, so `GameStamp`'s turbulence filter never re-rasterises
+  mid-flight. Skipped rather than slowed under reduced motion, and deliberately
+  not fired by "place them all for me": nine at once is a flurry, not a
+  stamping.
+
+**A bug this uncovered, in the seam rather than in the book.** Placing a stamp
+persisted the placement and left the book looking untouched until a reload.
+`useStamps`'s `commit` writes inside its state updater — which React runs at
+render time — but dispatches its same-tab echo synchronously, so the listener's
+eager `readStamps()` ran BEFORE the write and queued the pre-change collection
+behind the change. Reading from inside the updater orders the two correctly. It
+predates this addendum and affected every mutation made on `/logbook`. No unit
+test could have caught it, because the store and the geometry were each already
+right; `e2e/logbook-passport.spec.js` now pins that a placement repaints the
+book it was made in.
+
 ## Alternatives considered
 
 - **Snap placement to a fixed grid of ten slots.** Rejected: only a slot index

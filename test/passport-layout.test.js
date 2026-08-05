@@ -22,8 +22,10 @@ import {
   clampToPage,
   firstOpenPage,
   nudgeFromCollisions,
+  otherPlacementsOn,
   pageCountFor,
   pageIsFull,
+  pageIsFullFor,
   placementFor,
   stampHeightFraction,
   stampsOnPage,
@@ -292,6 +294,68 @@ test('firstOpenPage finds the first page with room, or admits there is none', ()
   const everything = []
   for (let page = 1; page <= MAX_PAGES; page++) everything.push(...fill(page))
   assert.equal(firstOpenPage(everything, MAX_PAGES + 40), null)
+})
+
+// ---------------------------------------------------------------------------
+// Moving a stamp that is already on a page
+// ---------------------------------------------------------------------------
+// A re-placement differs from a first placement in exactly one respect: the
+// stamp must not be measured against its OWN current spot. Both halves of that
+// are the `exceptGamePk` argument below, and getting either wrong is something
+// the user feels on the first try — a small correction gets shoved a
+// stamp-width away by the very stamp being corrected, or the page it already
+// lives on refuses to take it back.
+
+const owned = (gamePk, page, x = 0.5, y = 0.5) => ({ gamePk, placement: { page, x, y, tilt: 0 } })
+
+test('otherPlacementsOn drops the stamp being moved, and only that one', () => {
+  const stamps = [owned(11, 1, 0.3, 0.3), owned(22, 1, 0.7, 0.7), owned(33, 2, 0.5, 0.5)]
+  assert.deepEqual(
+    otherPlacementsOn(stamps, 1, 22).map((p) => p.x),
+    [0.3],
+  )
+  // No stamp named: every placement on the page counts, which is the
+  // first-placement case and must stay identical to what it always did.
+  assert.deepEqual(otherPlacementsOn(stamps, 1).length, 2)
+  assert.deepEqual(otherPlacementsOn(stamps, 1, null).length, 2)
+  // A stamp on ANOTHER page is not on this one to begin with.
+  assert.deepEqual(otherPlacementsOn(stamps, 1, 33).length, 2)
+  // 0 is not a gamePk anywhere in this codebase (toGamePk rejects it), so it
+  // means "nobody" rather than matching a stamp whose id read as falsy.
+  assert.deepEqual(otherPlacementsOn(stamps, 1, 0).length, 2)
+})
+
+test('a move is not refused by the page it is already on', () => {
+  const full = Array.from({ length: PAGE_CAPACITY }, (_, i) => owned(100 + i, 1))
+  assert.equal(pageIsFull(full, 1), true)
+  // Nine keepsakes on a page, one of them the one being moved: there is still
+  // room for it to land somewhere else on that same page.
+  assert.equal(pageIsFullFor(full, 1, 104), false)
+  // A stamp that is NOT on the page gets the honest answer.
+  assert.equal(pageIsFullFor(full, 1, 999), true)
+  assert.equal(pageIsFullFor(full, 1), true)
+})
+
+test('firstOpenPage hands a moving stamp its own full page back', () => {
+  const fill = (page, base) => Array.from({ length: PAGE_CAPACITY }, (_, i) => owned(base + i, page))
+  const book = [...fill(1, 100), ...fill(2, 200)]
+  assert.equal(firstOpenPage(book, 2), null)
+  assert.equal(firstOpenPage(book, 2, 205), 2)
+  // Page 1 comes first for a stamp that lives there — the search order is
+  // unchanged, only what counts as full.
+  assert.equal(firstOpenPage(book, 2, 103), 1)
+})
+
+test('a move lands where it was tapped, not nudged off by its own old spot', () => {
+  const stamps = [owned(11, 1, 0.5, 0.5)]
+  const tap = { x: 0.52, y: 0.52 }
+  // Placing something NEW there is a collision: stamp 11 is sitting on it.
+  const fresh = placementFor(22, 1, tap, otherPlacementsOn(stamps, 1, 22))
+  assert.ok(separationOf(fresh, stamps[0].placement) >= MIN_SEPARATION)
+  // MOVING stamp 11 itself there is not — it is the thing being moved, so the
+  // tap is honoured to the pixel (clamped, never nudged).
+  const moved = placementFor(11, 1, tap, otherPlacementsOn(stamps, 1, 11))
+  assert.deepEqual({ x: moved.x, y: moved.y }, clampToPage(tap.x, tap.y))
 })
 
 test('pageCountFor shows enough pages for the placements AND for what was added', () => {

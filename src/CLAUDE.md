@@ -220,6 +220,19 @@ you place by tapping the page. Three rules, each with a reason:
 - **Minting and placing are separate.** The mint stays in the box score's
   `SealBox` (ADR-0035); placing happens here via `?place={gamePk}`. An unplaced
   stamp waits in the book's tray, so abandoning the flow never loses a keepsake.
+- **A placement is editable, and a move IS the placing flow.** Tapping a placed
+  stamp opens its options bar (open the game, move it, back to the tray) instead
+  of navigating; "Move it" re-enters placing mode on a stamp that already has a
+  placement. `placeStamp` was always a move as much as a first placement, so the
+  only things a move adds are `otherPlacementsOn`/`pageIsFullFor` in
+  `passportLayout.js` — the stamp must not collide with, or be counted against,
+  its OWN current spot. Do not build a second placement path.
+- **One thing in this book moves on its own**: the stamp you just confirmed
+  plays `passport-stamp-land` once — held above the paper, accelerating down
+  (`--ease-press`, the system's only ease-IN, because a stamp is *pushed*),
+  compressing 4% on impact, releasing to rest. Cleared by `animationend` so the
+  duration lives in the CSS alone, skipped rather than slowed under reduced
+  motion, and deliberately NOT fired by "place them all for me".
 
 `PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
 allowlist since that guard was written — justified because a page's entire input
