@@ -33,7 +33,6 @@
 // endpoint 501s, leaving the client local-only. Sync has always been opt-in.
 
 import { verifyToken } from '@clerk/backend'
-import { Redis } from '@upstash/redis'
 import {
   DEFAULT_STAMP_MODE,
   MAX_STAMPS_PER_SEASON,
@@ -47,6 +46,7 @@ import {
   toGamePk,
 } from '../src/lib/stamps.js'
 import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js:
 // @clerk/backend's verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -67,13 +67,6 @@ async function authenticate(req) {
   const { data, errors } = await verifyToken(token, { secretKey })
   if (errors || !data?.sub) return null
   return data.sub
-}
-
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return null
-  return new Redis({ url, token })
 }
 
 const stampsKey = (userId, season) => `stamps:${userId}:${season}`

@@ -13,6 +13,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
@@ -268,4 +269,87 @@ test('a tombstone from the endpoint removes the stamp on another device', () => 
     oldStyle[row.gamePk] = { ...row, state: 'on', game: undefined }
   }
   assert.equal(isStamped(applyRemoteStamps(local, oldStyle), 778242), true)
+})
+
+// --------------------------------------------------------------------------
+// Which env vars count as "a store is configured" (api/_lib/redis.js)
+// --------------------------------------------------------------------------
+// The bug this pins: connecting an Upstash database through Vercel's KV
+// integration injects the REST credentials as KV_REST_API_URL/KV_REST_API_TOKEN.
+// Every one of these endpoints read only the UPSTASH_* names, so a project with
+// a live, correctly-linked store 501'd on every request — indistinguishable from
+// a deploy that has no backend on purpose, which is why it went unnoticed.
+test('the Upstash-native name pair configures a store', () => {
+  assert.deepEqual(
+    redisConfigFromEnv({
+      UPSTASH_REDIS_REST_URL: 'https://native.upstash.io',
+      UPSTASH_REDIS_REST_TOKEN: 'native-token',
+    }),
+    { url: 'https://native.upstash.io', token: 'native-token' },
+  )
+})
+
+test('Vercel’s KV names configure the same store', () => {
+  assert.deepEqual(
+    redisConfigFromEnv({
+      KV_REST_API_URL: 'https://kv.upstash.io',
+      KV_REST_API_TOKEN: 'kv-token',
+    }),
+    { url: 'https://kv.upstash.io', token: 'kv-token' },
+  )
+})
+
+test('a pair is atomic — half of one never combines with half of another', () => {
+  // A URL from the KV integration and a token from a hand-set Upstash var is
+  // not a credential for anything. Answering null (a clean 501) beats handing
+  // the client a mismatched pair that fails at request time.
+  assert.equal(
+    redisConfigFromEnv({
+      KV_REST_API_URL: 'https://kv.upstash.io',
+      UPSTASH_REDIS_REST_TOKEN: 'native-token',
+    }),
+    null,
+  )
+})
+
+test('the connection-string and read-only vars are not credentials', () => {
+  // KV_URL/REDIS_URL are rediss:// strings for a TCP client, and the read-only
+  // token cannot write. None of them may satisfy the check.
+  assert.equal(
+    redisConfigFromEnv({
+      KV_URL: 'rediss://default:pw@kv.upstash.io:6379',
+      REDIS_URL: 'rediss://default:pw@kv.upstash.io:6379',
+      KV_REST_API_READ_ONLY_TOKEN: 'read-only',
+    }),
+    null,
+  )
+})
+
+test('the Upstash-native pair wins when a project carries both', () => {
+  assert.deepEqual(
+    redisConfigFromEnv({
+      UPSTASH_REDIS_REST_URL: 'https://native.upstash.io',
+      UPSTASH_REDIS_REST_TOKEN: 'native-token',
+      KV_REST_API_URL: 'https://kv.upstash.io',
+      KV_REST_API_TOKEN: 'kv-token',
+    }),
+    { url: 'https://native.upstash.io', token: 'native-token' },
+  )
+})
+
+test('a blank or whitespace value is not set', () => {
+  assert.equal(
+    redisConfigFromEnv({ KV_REST_API_URL: '  ', KV_REST_API_TOKEN: 'kv-token' }),
+    null,
+  )
+  // …and a real value that picked up whitespace in a dashboard field still works.
+  assert.deepEqual(
+    redisConfigFromEnv({ KV_REST_API_URL: ' https://kv.upstash.io\n', KV_REST_API_TOKEN: 'kv-token ' }),
+    { url: 'https://kv.upstash.io', token: 'kv-token' },
+  )
+})
+
+test('no store configured stays null, which is the 501 every caller renders', () => {
+  assert.equal(redisConfigFromEnv({}), null)
+  assert.equal(redisConfigFromEnv(null), null)
 })

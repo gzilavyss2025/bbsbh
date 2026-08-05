@@ -203,9 +203,24 @@ Everything works with none of these set — each feature they gate degrades to
 
 - `VITE_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — multi-device reveal sync
   (ADR-0022). Unset, no sign-in UI renders at all.
-- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — the reveal-sync
-  backing store (ADR-0022); `api/reveal.js` returns `501` without these even if
-  Clerk is configured.
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — the backing store for
+  every authenticated endpoint: reveal sync (ADR-0022), spoiled days (ADR-0026),
+  admin copy (ADR-0025) and the Logbook (ADR-0035). All four return `501 sync not
+  configured` without them, even if Clerk is configured.
+  `KV_REST_API_URL` / `KV_REST_API_TOKEN` are accepted as an equivalent pair —
+  Vercel's **KV** integration injects the same Upstash REST credentials under
+  those names, and reading only the `UPSTASH_*` pair meant a project with a
+  correctly-linked store still 501'd on every request, forever, looking exactly
+  like a deploy with no backend. `api/_lib/redis.js` is the single resolver; its
+  header explains why a pair is atomic and why `KV_URL`, `REDIS_URL` and
+  `KV_REST_API_READ_ONLY_TOKEN` are deliberately *not* accepted.
+
+  **Diagnosing "it doesn't sync":** curl any of the endpoints unauthenticated —
+  `curl https://bbsbh.vercel.app/api/stamps?seasons=1`. Every handler checks the
+  store *before* it authenticates, so `501 sync not configured` means the Redis
+  credentials aren't reaching the function, while `401 unauthorized` means the
+  store is live and the problem is elsewhere. Env changes only reach the
+  functions on a fresh deploy — redeploy after connecting a database.
 
 ## CI
 
