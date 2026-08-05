@@ -5,7 +5,7 @@ import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadGames } from './data/loadGames.js'
 import { hiddenTeamTabs } from './data/shared.js'
-import { LastTenGames } from './modules/LastTenGames.jsx'
+import { AllGames } from './modules/TeamGames.jsx'
 import { SeasonSchedule } from './modules/SeasonSchedule.jsx'
 import { TeamPhotosRail } from './modules/TeamPhotosRail.jsx'
 
@@ -13,9 +13,10 @@ function isoToday() {
   return new Date().toISOString().slice(0, 10)
 }
 
-// The Games tab: season schedule (the tab's headline), the last-ten strip,
-// then Photos and Transactions, each its own full card. See data/loadGames.js
-// for what this tab fetches and why.
+// The Games tab: season schedule (the tab's headline), then every decided game
+// so far as a grid of ticket stubs — the Overview keeps the last-ten strip, the
+// tab that owns games shows them all — then Photos and Transactions, each its
+// own full card. See data/loadGames.js for what this tab fetches and why.
 export function GamesTab({ id, asOf, sportId }) {
   const teamId = Number(id)
   const identity = useAsync(() => loadTeamIdentity(teamId, asOf), [teamId, asOf])
@@ -33,7 +34,7 @@ export function GamesTab({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, record, manager } = identity.data
-  const { schedule, allStarGame, recentGames, seasonGames, transactionsPage } = games.data
+  const { schedule, allStarGame, seasonGames, transactionsPage } = games.data
 
   return (
     <TeamHubShell
@@ -55,8 +56,10 @@ export function GamesTab({ id, asOf, sportId }) {
         />
       )}
 
-      {recentGames.length > 0 && (
-        <LastTenGames teamId={team.id} asOf={asOf} recentGames={recentGames} seasonGames={seasonGames} />
+      {seasonGames.length > 0 && (
+        // Keyed so switching club (or dated view) starts the list back at its
+        // first page instead of inheriting how far the last one was paged.
+        <AllGames key={`games-${team.id}-${asOf ?? ''}`} games={seasonGames} />
       )}
 
       {seasonGames.length > 0 && (

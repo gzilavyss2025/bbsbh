@@ -580,9 +580,9 @@ for each generator; the reader modules:
   alone, e.g. an ABS-challenge result card (`graphic`, from a taxonomy/shape
   match) or a broadcast frame grab slipping in.
   `photosForPlayer` is still unused groundwork; `photosForTeam` now backs the
-  Team Page's Photos rail (`TeamPhotosRail`, `src/screens/TeamPage.jsx`),
+  Team Page's Photos rail (`TeamPhotosRail`, on the hub's Games tab),
   which walks that team's own `seasonGames` (already `asOf`-cutoff-filtered,
-  same list `LastTenGamesStrip` renders off) backward from the newest game,
+  the same list the tab's `AllGames` grid renders off) backward from the newest game,
   fetching `fetchGamePhotos` per game on demand rather than reading a
   precomputed index — that page already has the one team's full decided-game
   list in memory, so a bounded live walk-back was enough. The cross-game

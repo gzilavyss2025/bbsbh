@@ -1,10 +1,10 @@
 import { fetchTeam } from '../../../api/team.js'
-import { fetchTeamSchedule, fetchAllStarGame, recentDecidedGames, allDecidedGames } from '../../../api/schedule.js'
+import { fetchTeamSchedule, fetchAllStarGame, allDecidedGames } from '../../../api/schedule.js'
 import { loadMoreTeamTransactions } from '../../../api/teamTransactions.js'
 import { seasonOf, cutoffFor } from './shared.js'
 
-// The Games tab's own data — the season schedule, the last-ten strip, the
-// All-Star game card, and the first transactions page. Fetch nothing else here:
+// The Games tab's own data — the season schedule, every decided game so far,
+// the All-Star game card, and the first transactions page. Fetch nothing else here:
 // roster, WAR, prospects, uniforms, league stats, standings and odds all belong
 // to other tabs.
 //
@@ -34,22 +34,19 @@ export async function loadGames(id, asOf) {
       : Promise.resolve({ days: [], cursor: null, hasMore: false }),
   ])
 
-  // Last 10 Games card, oldest -> newest — see recentDecidedGames' own header
-  // for why this filters on `won != null` rather than Final status. The
-  // header's W-L stays pinned to the true last 10 (recentGames); the strip
-  // itself gets the FULL season's decided games so scrolling back keeps going
-  // all the way to Opening Day instead of dead-ending at 10. `seasonGames` is
-  // also what the Photos shelf is handed — never the raw schedule, since
-  // `won` here is only ever non-null for a game at/before `asOf` (see
-  // TeamPhotosRail's own header comment for why that matters).
-  const recentGames = recentDecidedGames(schedule)
+  // The games grid, oldest -> newest (the grid reverses it for display) — see
+  // allDecidedGames'/recentDecidedGames' own headers for why this filters on
+  // `won != null` rather than Final status. The whole season's decided games,
+  // since this tab shows all of them rather than the Overview's last ten.
+  // `seasonGames` is also what the Photos shelf is handed — never the raw
+  // schedule, since `won` here is only ever non-null for a game at/before
+  // `asOf` (see TeamPhotosRail's own header comment for why that matters).
   const seasonGames = allDecidedGames(schedule)
 
   return {
     team,
     schedule,
     allStarGame,
-    recentGames,
     seasonGames,
     transactionsPage,
   }
