@@ -191,6 +191,11 @@ read the linked ADRs before refactoring:
   guard's allowlist, and the only one whose game is a fabricated literal). Read
   ADR-0035's amendment first: that store is consulted on every render, so
   retuning a club restyles its stamps in every Logbook that already holds one.
+  The stamp's **ink** is the winning club's darkest brand colour
+  (`lib/stampInk.js` → the `--stamp-ink` custom property `.gamestamp` falls back
+  from) — the one module in `src/lib/` that colours anything from game state,
+  contained by the same allowlist and safe for the same reason. ADR-0036's
+  second addendum has the argument; do not import it anywhere else.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
@@ -233,6 +238,17 @@ you place by tapping the page. Three rules, each with a reason:
   compressing 4% on impact, releasing to rest. Cleared by `animationend` so the
   duration lives in the CSS alone, skipped rather than slowed under reduced
   motion, and deliberately NOT fired by "place them all for me".
+- **The page is RULED into eight boxes** (`pageSlots()`, 2 across × 4 down),
+  drawn faintly so a blank page says where a stamp goes; it comes up while
+  placing and settles back after. `PAGE_CAPACITY` is `PAGE_COLUMNS * PAGE_ROWS`
+  and auto-layout fills those same boxes, so the guide, the tidy-up and "this
+  page holds 8" cannot disagree. It is a **guide, not a snap** — the tap still
+  decides (ADR-0036 rejected snapping and still does). The grid also absorbed
+  the dashed margin guide that used to be drawn on the tap target.
+- **A stamp is pressed in the winner's ink** — `lib/stampInk.js`, published as
+  `--stamp-ink` so any rule that sets `color` outright still wins (the mint
+  card's un-minted preview stays graphite). No winner, or a club with no colour
+  on file, means no property and the book's own navy.
 
 `PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
 allowlist since that guard was written — justified because a page's entire input

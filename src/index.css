@@ -28350,11 +28350,20 @@ button.gamehigh-matchup:active {
    which is the whole one-colour discipline of the mark.
    ============================================================ */
 
+/* `--stamp-ink` is written inline by GameStamp.jsx: the WINNING club's darkest
+   brand colour, resolved by src/lib/stampInk.js (which owns why darkest, and
+   the contrast floor under it). A game with no winner — a tie, a suspended
+   game, facts that never resolved — omits the property, and the book's own
+   navy ink is what the fallback answers.
+
+   Published as a custom property rather than as a `color` on purpose: any rule
+   below that sets `color` outright still wins, which is what lets the mint
+   card's un-inked preview stay graphite. */
 .gamestamp {
   display: block;
   width: 100%;
   height: auto;
-  color: var(--text-body);
+  color: var(--stamp-ink, var(--text-body));
 }
 
 /* ---- the mint card, foot of the box score ---- */
@@ -29204,6 +29213,43 @@ button.gamehigh-matchup:active {
   pointer-events: none;
 }
 
+/* ---- the ruled guide: eight boxes, one per stamp the page holds --------- */
+
+/* Every box's left/top/width/height is written inline from passportLayout's
+   pageSlots() — the same geometry PAGE_CAPACITY is derived from — so nothing
+   about the grid is stated here except how faintly it prints.
+
+   `pointer-events: none` is load-bearing, exactly as it is on the watermark:
+   the page beneath is a tap-to-place surface, and a guide that swallowed a tap
+   would make most of every page unstampable. Below the stamps, above the
+   watermark. */
+.passportpage__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* A pencilled box, not a table cell. Dashed at a hairline in the paper's own
+   rule colour, dropped to a fraction of its opacity — it has to be readable as
+   "a stamp goes here" on a blank page and to disappear under the first stamp
+   that lands on it. Deliberately far below any contrast threshold, for the
+   same reason the watermark is: it is a guide, not information, and raising it
+   until it "reads" would turn the book into a form. */
+.passportpage__cell {
+  position: absolute;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  opacity: 0.14;
+}
+
+/* While placing, the boxes are the answer to the question the user is holding
+   — "where does this go?" — so they come up just enough to aim at, and settle
+   back the moment the stamp is down. */
+.passportpage--placing .passportpage__cell {
+  opacity: 0.4;
+}
+
 /* A placed stamp. `left`/`top`/`width` are written inline as percentages of
    the page box from the placement's own fractions; the translate is what
    makes those fractions mean the stamp's CENTRE, and it shares one transform
@@ -29400,15 +29446,11 @@ button.gamehigh-matchup:active {
   outline-offset: -4px;
 }
 
-/* The margin passportLayout clamps every placement into, drawn as a guide.
-   `inset` is written inline from PAGE_MARGIN — this rule only says what it
-   looks like, never how far in it sits. */
-.passportpage__margin {
-  position: absolute;
-  border: var(--bw-hair) dashed var(--border-rule);
-  border-radius: var(--radius-sm);
-  pointer-events: none;
-}
+/* (`.passportpage__margin` used to live here — a dashed rectangle at
+   PAGE_MARGIN, drawn on the tap target while placing, to say where the art
+   would actually settle. The ruled guide above now draws that exact rectangle
+   and subdivides it, so keeping it meant two dashed rules on one line. Its job
+   was not dropped; it was absorbed.) */
 
 /* The crosshair, drawn at the size the stamp will actually be (--stamp-w is
    written inline from STAMP_WIDTH), so the affordance answers "how big" as

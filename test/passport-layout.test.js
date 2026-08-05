@@ -16,16 +16,20 @@ import {
   MIN_SEPARATION,
   PAGE_ASPECT,
   PAGE_CAPACITY,
+  PAGE_COLUMNS,
   PAGE_MARGIN,
+  PAGE_ROWS,
   STAMP_WIDTH,
   autoLayout,
   clampToPage,
+  clampToSlot,
   firstOpenPage,
   nudgeFromCollisions,
   otherPlacementsOn,
   pageCountFor,
   pageIsFull,
   pageIsFullFor,
+  pageSlots,
   placementFor,
   stampHeightFraction,
   stampsOnPage,
@@ -67,6 +71,110 @@ test('the stamp is a smaller fraction of the page vertically than horizontally',
   // has to go through stampHeightFraction().
   assert.equal(stampHeightFraction(), STAMP_WIDTH * PAGE_ASPECT)
   assert.ok(stampHeightFraction() < STAMP_WIDTH)
+})
+
+// ---------------------------------------------------------------------------
+// pageSlots — the eight boxes the page is ruled into, and the guide drawn on it
+// ---------------------------------------------------------------------------
+// PassportPage.jsx draws a faint box per slot so the user can see where a stamp
+// goes. That guide is only honest if three things hold, and all three are the
+// kind of thing an eye check passes and arithmetic fails: there are exactly
+// PAGE_CAPACITY of them, a STAMP FITS INSIDE ONE, and their centres are far
+// enough apart that a page laid out on them doesn't overlap by this module's
+// own definition.
+
+test('there is exactly one slot per stamp the page holds', () => {
+  const slots = pageSlots()
+  assert.equal(slots.length, PAGE_CAPACITY)
+  assert.equal(PAGE_CAPACITY, PAGE_COLUMNS * PAGE_ROWS)
+  // Reading order, across then down — what autoLayout fills in and what the
+  // guide draws.
+  assert.deepEqual(
+    slots.map((s) => [s.column, s.row]),
+    [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2], [1, 2], [0, 3], [1, 3]],
+  )
+  slots.forEach((slot, i) => assert.equal(slot.index, i))
+  // A fresh array each call — a shared one handed to a React render is a
+  // mutation bug waiting to happen.
+  assert.notEqual(pageSlots(), pageSlots())
+  assert.deepEqual(pageSlots(), pageSlots())
+})
+
+test('the grid is inset by the page margin and tiles it exactly', () => {
+  const slots = pageSlots()
+  const span = 1 - PAGE_MARGIN * 2
+  assert.ok(Math.abs(slots[0].left - PAGE_MARGIN) < 1e-9)
+  assert.ok(Math.abs(slots[0].top - PAGE_MARGIN) < 1e-9)
+  const last = slots[slots.length - 1]
+  assert.ok(Math.abs(last.left + last.width - (1 - PAGE_MARGIN)) < 1e-9)
+  assert.ok(Math.abs(last.top + last.height - (1 - PAGE_MARGIN)) < 1e-9)
+  // No gaps, no overlaps: the cells add up to the inset rectangle.
+  assert.ok(Math.abs(slots[0].width * PAGE_COLUMNS - span) < 1e-9)
+  assert.ok(Math.abs(slots[0].height * PAGE_ROWS - span) < 1e-9)
+  // And a centre is the middle of its own cell.
+  for (const slot of slots) {
+    assert.ok(Math.abs(slot.x - (slot.left + slot.width / 2)) < 1e-9)
+    assert.ok(Math.abs(slot.y - (slot.top + slot.height / 2)) < 1e-9)
+  }
+})
+
+test('a stamp fits inside its box, and a box centre is a spot the page allows', () => {
+  // The guide promising a box the art cannot fit in is the one way this
+  // feature is worse than no feature. The cell is barely taller than the stamp
+  // — that is the geometry, not slack to be spent.
+  const [slot] = pageSlots()
+  assert.ok(slot.width >= STAMP_WIDTH, `cell ${slot.width} narrower than stamp ${STAMP_WIDTH}`)
+  assert.ok(
+    slot.height >= stampHeightFraction(),
+    `cell ${slot.height} shorter than stamp ${stampHeightFraction()}`,
+  )
+  // Every centre has to survive clampToPage untouched, or the guide would be
+  // pointing at a spot the module itself refuses to put a stamp on.
+  for (const s of pageSlots()) {
+    assert.deepEqual(clampToPage(s.x, s.y), { x: s.x, y: s.y })
+    assert.ok(onPage(s))
+  }
+})
+
+test('slot centres are further apart than MIN_SEPARATION, in both directions', () => {
+  const slots = pageSlots()
+  for (let i = 0; i < slots.length; i += 1) {
+    for (let j = i + 1; j < slots.length; j += 1) {
+      assert.ok(
+        separationOf(slots[i], slots[j]) >= MIN_SEPARATION,
+        `slots ${i} and ${j} are ${separationOf(slots[i], slots[j]).toFixed(3)} apart`,
+      )
+    }
+  }
+})
+
+test('clampToSlot keeps a stamp inside one box, and centres what it cannot read', () => {
+  const slot = pageSlots()[3]
+  const halfW = STAMP_WIDTH / 2
+  const halfH = stampHeightFraction() / 2
+  const inside = (p) =>
+    p.x >= slot.left + halfW - 1e-9 &&
+    p.x <= slot.left + slot.width - halfW + 1e-9 &&
+    p.y >= slot.top + halfH - 1e-9 &&
+    p.y <= slot.top + slot.height - halfH + 1e-9
+
+  // Far outside in every direction, and the far corner of another cell.
+  for (const point of [
+    { x: -4, y: 9 },
+    { x: 2, y: -1 },
+    { x: 0.5, y: 0.5 },
+    { x: slot.x + 0.4, y: slot.y + 0.4 },
+  ]) {
+    const spot = clampToSlot(point.x, point.y, slot)
+    assert.ok(inside(spot), `${JSON.stringify(point)} -> ${JSON.stringify(spot)}`)
+    assert.ok(onPage(spot))
+  }
+  // A point already inside its box is left exactly where it is.
+  assert.deepEqual(clampToSlot(slot.x, slot.y, slot), { x: slot.x, y: slot.y })
+  // Nonsense, and a missing slot, both still land on the paper.
+  const junk = clampToSlot(NaN, undefined, slot)
+  assert.ok(inside(junk))
+  assert.deepEqual(clampToSlot(0.42, 0.61, null), clampToPage(0.42, 0.61))
 })
 
 // ---------------------------------------------------------------------------
@@ -434,14 +542,41 @@ test('autoLayout survives an empty or unreadable collection', () => {
   for (const entry of junk) assert.ok(onPage(entry.placement))
 })
 
+// "Place them all for me" has to fill the boxes the page is RULED into — a
+// tidy-up that ignored the guide the user is looking at would be the feature
+// arguing with itself. One stamp per box, in reading order, each inside its
+// own.
+test('autoLayout fills the ruled boxes, one stamp to a box, in order', () => {
+  const slots = pageSlots()
+  const laid = autoLayout(Array.from({ length: PAGE_CAPACITY }, (_, i) => ({ gamePk: 776100 + i })))
+  const halfW = STAMP_WIDTH / 2
+  const halfH = stampHeightFraction() / 2
+
+  laid.forEach(({ placement }, i) => {
+    const slot = slots[i]
+    assert.equal(placement.page, 1)
+    assert.ok(
+      placement.x >= slot.left + halfW - 1e-9 &&
+        placement.x <= slot.left + slot.width - halfW + 1e-9 &&
+        placement.y >= slot.top + halfH - 1e-9 &&
+        placement.y <= slot.top + slot.height - halfH + 1e-9,
+      `stamp ${i} landed at ${JSON.stringify(placement)}, outside box ${JSON.stringify(slot)}`,
+    )
+  })
+
+  // Not a print run, though: the seeded wobble has to actually move stamps off
+  // the nominal centres, or an auto-filled page reads as a table.
+  assert.ok(laid.some(({ placement }, i) => Math.abs(placement.x - slots[i].x) > 0.005))
+})
+
 // The disagreement this pins: `autoLayout` and `nudgeFromCollisions` are two
 // functions in one module with two different ideas of where a stamp may go, and
 // nothing structural stops them drifting apart. At PAGE_CAPACITY 10 in two
 // columns they genuinely did — auto-layout produced pages whose closest pair sat
 // at 0.165 page-widths, well inside MIN_SEPARATION, so the tidy-up button laid
-// out stamps that a hand placement would have been nudged off. Capacity and the
-// column count are now derived from that constraint; this is the assertion that
-// keeps them honest.
+// out stamps that a hand placement would have been nudged off. Capacity, the
+// column count and the ruled guide are now all one piece of geometry
+// (`pageSlots`); this is the assertion that keeps them honest.
 test('a full auto-laid page does not overlap by the module’s own definition', () => {
   const stamps = Array.from({ length: PAGE_CAPACITY }, (_, i) => ({ gamePk: 800000 + i * 7 }))
   const laid = autoLayout(stamps)

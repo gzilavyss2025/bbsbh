@@ -1,4 +1,5 @@
 import { hasMonoLogo, teamLogoUrl } from '../lib/teams.js'
+import { stampInkFor } from '../lib/stampInk.js'
 import { stampMarkPlacement } from '../lib/stampLogoTuning.js'
 import {
   INNER_RING_R,
@@ -45,11 +46,23 @@ import {
 // scripts/check-stamp-surfaces.mjs fails `npm run lint` if that drifts.
 //
 // ===========================================================================
-// One colour, and how the club marks get there
+// One colour — and WHICH colour (ADR-0036's addendum)
 // ===========================================================================
-// Every element including the logos is `currentColor` — the stamp inherits its
-// ink from whatever it sits on, so there are no opacity tricks and value
-// contrast comes from stroke weight, size, and mass alone. The club marks are
+// A stamp is drawn in ONE ink, and that ink is the WINNING club's darkest brand
+// colour: the mark a game leaves behind is in the colours of whoever won it, so
+// a page of keepsakes reads as a season rather than as a print run. The pick
+// itself is src/lib/stampInk.js — including why darkest rather than primary,
+// and the contrast floor under it — and it is published here as `--stamp-ink`
+// rather than as a `color`, so the CSS keeps the last word: a surface that
+// wants its own ink (the un-minted preview in the mint card, pale as an
+// un-inked die) simply sets `color` and wins. No winner on file — a tie, a
+// suspended game, facts that never resolved — omits the property entirely and
+// the stamp is pressed in the book's default navy.
+//
+// Everything else about the one-colour discipline is unchanged. Every element
+// including the logos is `currentColor` — the stamp inherits its ink from
+// whatever it sits on, so there are no opacity tricks and value contrast comes
+// from stroke weight, size, and mass alone. The club marks are
 // the project's precomputed mono knockout files (ADR-0031), which are white ink
 // on transparent, i.e. already luminance masks: an <image> of one inside a
 // <mask> over a currentColor rect recolours it to any single ink.
@@ -101,6 +114,10 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
   const labelFont = labelType(label)
   const numSize = runFontSize(game.away?.runs, game.home?.runs)
   const runText = (runs) => (typeof runs === 'number' ? String(runs) : '—')
+  // The winner's ink, or null for a game with no winner — which leaves the
+  // property off entirely rather than writing an empty one, so the CSS
+  // fallback in `.gamestamp` is what answers.
+  const ink = stampInkFor(game)
 
   const accessibleTitle =
     title ??
@@ -113,6 +130,7 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
       viewBox={`0 0 ${STAMP_SIZE} ${STAMP_SIZE}`}
       className={`gamestamp ${className}`.trim()}
       role="img"
+      {...(ink ? { style: { '--stamp-ink': ink } } : null)}
     >
       <title>{accessibleTitle}</title>
       <defs>
