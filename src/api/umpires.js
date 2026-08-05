@@ -1,4 +1,4 @@
-import { TIER_LABELS, tierForZ, meanAndSd } from '../lib/statTiers.js'
+import { tierForZ, meanAndSd } from '../lib/statTiers.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -42,16 +42,6 @@ const indexCached = new Map()
 // his peers — below it a hot/cold handful of games would swing the ordering
 // wildly. Tunable; a plate ump reaches it within the first few weeks of work.
 const MIN_RANK_GAMES = 5
-
-// The four accuracy tiers shown as a pill next to a plate umpire's name
-// (lineup card, his own page, the rankings table). Buckets are standard
-// deviations from the qualifying pool's mean (see accuracyIndex below), not
-// an even split — real season accuracy across ~90 plate umpires clusters in
-// a band just a few points wide, so a neat 1/3-1/3-1/3 split would put
-// umpires a fraction of a point apart in different tiers. See
-// lib/statTiers.js for the shared bucket definition (also used by Game Score
-// rankings) and the "Elite"/"Below Average" = 1 SD rationale.
-export const UMPIRE_TIER_LABELS = TIER_LABELS
 
 async function load() {
   if (cached) return cached
@@ -97,7 +87,13 @@ function seasonForLevel(u, level) {
 //     per-umpire lookups the other surfaces need; ranked is the same data
 //     shaped for "show me everyone").
 //   • mean / sd — the qualifying pool's season accuracy, population stats
-//     (tierForZ buckets off these).
+//     (tierForZ buckets off these). The four tiers shown as a pill beside a
+//     plate umpire's name are standard deviations from this mean rather than an
+//     even split, because real season accuracy across ~90 plate umpires clusters
+//     in a band a few points wide — a neat 1/3-1/3-1/3 split would put umpires a
+//     fraction of a point apart in different tiers. lib/statTiers.js holds the
+//     shared bucket definition (Game Score rankings use it too) and the
+//     "Elite"/"Below Average" = 1 SD rationale.
 //   • leagueShare — the league-wide distribution of MISSED calls across the
 //     3×3 zone grid, normalized to shares. It's the "typical umpire" baseline
 //     the zone map compares each umpire against (a cell where he misses a

@@ -39,22 +39,10 @@ export function beeswarmRows(rows) {
   })
 }
 
-// Thins a large pool down to a fixed count for display, sampling evenly by
-// RANK (not randomly) so the picked points still trace the pool's actual
-// shape — the min and max always survive, and the spacing between kept
-// points approximates the distribution's percentiles rather than skewing
-// toward whichever end happens to get picked. `beeswarmRows` was tuned for
-// small pools (~30 teams); a season's worth of games (1,000+) would still
-// overflow a fixed-height rail dot-for-dot even with packing, so a caller
-// with a pool that large should sample it down to roughly this size before
-// packing.
-export function sampleForDisplay(rows, max) {
-  if (rows.length <= max) return rows
-  const sorted = [...rows].sort((a, b) => a.score - b.score)
-  const step = sorted.length / max
-  const out = []
-  for (let i = 0; i < max; i++) {
-    out.push(sorted[Math.floor(i * step)])
-  }
-  return out
-}
+// NOTE: `beeswarmRows` above was tuned for small pools (~30 teams). A season's
+// worth of games (1,000+) would overflow a fixed-height rail dot-for-dot even
+// with packing, so a caller with a pool that large needs to thin it down first
+// — sampling evenly by RANK rather than randomly, so the kept points still
+// trace the distribution's shape. There was a `sampleForDisplay` helper here
+// that did exactly that; it was removed as dead code, never having had a
+// caller. Write it back if a pool that large ever turns up.

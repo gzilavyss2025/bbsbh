@@ -53,7 +53,6 @@ function byTreatment(pick, { includeMain = false } = {}) {
 // The user scores Brewers games most often, so we pin them to the top of the
 // slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
 export const PINNED_TEAM_ID = 158
-export const PINNED_TEAM_NAME = 'Milwaukee Brewers'
 
 // MLB Stats API sportId codes. sportId 1 is MLB; the minors use the codes
 // below. MiLB data quality varies, so screens that use these must degrade

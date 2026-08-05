@@ -42,7 +42,7 @@ const MAX_FILES = 12
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
-  'src/components': 126,
+  'src/components': 125,
   'src/api': 84,
   scripts: 67,
   'src/lib': 52,

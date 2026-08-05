@@ -624,10 +624,6 @@ async function loadJson(path) {
   return promise
 }
 
-export function loadTradeDeadlineIndex() {
-  return loadJson('/data/trade-deadline/index.json')
-}
-
 export function loadTradeDeadlineSeason(year) {
   return loadJson(`/data/trade-deadline/${year}.json`)
 }
