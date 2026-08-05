@@ -448,6 +448,19 @@ export default defineConfig({
           // the app-shell precache so it never lands on the install of a user
           // who never taps it; it's runtime-cached on first use instead (below).
           '**/assets/pdf*',
+          // One season-chunked Trade Deadline file per season (~535 KB across
+          // seven files — see scripts/gen-team-transactions.mjs's sibling
+          // gen-trade-deadline data), read one season at a time from the Trade
+          // Deadline page. Exactly the same shape and the same argument as the
+          // team-transactions seasons above; it was simply never added.
+          // Runtime-cached below.
+          '**/data/trade-deadline/*.json',
+          // The 1200x630 link-preview card. It is referenced ONLY by absolute
+          // URL from index.html's og:image/twitter:image tags, i.e. by social
+          // crawlers, which never run a service worker — and no app surface
+          // renders it. Precaching it put 85 KB on every install to serve a
+          // request that can never come from a page this worker controls.
+          '**/og-image.png',
         ],
         navigateFallback: '/index.html',
         runtimeCaching: [
@@ -458,7 +471,11 @@ export default defineConfig({
             urlPattern: ({ url }) =>
               /^\/data\/(?:manager-history|umpire-accuracy|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
-              ) || /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname),
+              ) ||
+              /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
+              // Trade Deadline is season-chunked the same way, plus an index.json
+              // the page reads first to learn which seasons exist.
+              /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: {
@@ -466,10 +483,10 @@ export default defineConfig({
               networkTimeoutSeconds: 3,
               expiration: {
                 // Room for one copy of every snapshot the pattern above can
-                // match (18 named + a few team-transactions seasons) — an
-                // undersized cap here silently evicts one page's data to
-                // admit another's.
-                maxEntries: 24,
+                // match (18 named + a few team-transactions seasons + the
+                // seven trade-deadline files, index included) — an undersized
+                // cap here silently evicts one page's data to admit another's.
+                maxEntries: 32,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },
