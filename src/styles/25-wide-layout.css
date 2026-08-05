@@ -1,0 +1,524 @@
+/* ============================================================
+   WIDE LAYOUT — tablet / desktop (min-width: 740px)
+   Phone-first stays the default: below the breakpoint nothing
+   here applies and every screen is the single 440px column.
+   From iPad portrait up, screens widen to ~960px and split into
+   two columns for the pages that use them (box score, innings).
+   Keep the breakpoint in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js.
+   ============================================================ */
+
+/* The box score's pairing wrappers are transparent by default — display:
+   contents lets their children keep stacking on .bs's own flex gap — and
+   only become real two-up grids inside the media query below. */
+.bs__duo,
+.bs__col {
+  display: contents;
+}
+
+@media (min-width: 740px) {
+  .screen {
+    max-width: 960px;
+  }
+
+  /* Pin the topbar (title, level toggle, search/menu icons) while the game
+     list scrolls beneath it — enough spare width here that a docked row
+     doesn't crowd the slate. The date stepper right below it is deliberately
+     left OUT: it's a per-day control, not a nav landmark worth nagging
+     "you're on {date}" through every scroll, and paging days already
+     reloads the slate under it anyway. Opaque backdrop so cards scroll
+     cleanly underneath instead of showing through (the phone-width
+     .slatehead comment above explains why no fill is needed there). */
+  .topbar--slate {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-canvas);
+  }
+
+  /* ---- slate: the date stepper and the day-state row (Live Scores toggle
+     and/or Reveal All) already share .slatehead's row at every width (base
+     rule further up); a 3-column grid replaces the base flex space-between
+     here so the date stepper reads as truly centered once there's room to
+     spare — on a plain day with neither control, the outer 1fr columns still
+     balance evenly and the date stepper doesn't drift toward whichever side
+     a control would have occupied. */
+  .slatehead {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: var(--space-3);
+  }
+
+  .datenav--row {
+    grid-column: 2;
+    max-width: 560px;
+  }
+
+  /* Rides in the grid's third column, right of the centered date stepper.
+     Both chips can be present at once (today, every game gone Final, pass
+     still off — see the JSX comment), so this stays a row that can hold
+     either or both rather than a single slot. */
+  .daystate {
+    grid-column: 3;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .daystate__chip--reveal {
+    display: inline-flex;
+    width: auto;
+    min-height: 28px;
+    margin-top: 0;
+    padding: 0 12px;
+    font-size: var(--fs-caption);
+  }
+
+  .gamelist {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  /* "Reveal all games" rides inline in the header's .daystate row once
+     there's room for it (see the .daystate__chip--reveal override above);
+     the mobile floating bottom bar hides here since there's no long scroll
+     to reach for. */
+  .pagenav--revealall {
+    display: none;
+  }
+
+  /* Same split for the box score's Refresh control (not Final games, which
+     drop it entirely — see BoxScore.jsx): inline in the header once there's
+     room, the mobile floating pill hides here. */
+  .boxscore__headright .refreshbtn {
+    display: inline-flex;
+  }
+  .pagenav--boxscore {
+    display: none;
+  }
+
+  /* W/L/S regroup into one wrapped row once the card has room; phone width
+     keeps them stacked one-per-line (see the base .flipback__decisions rule). */
+  .flipback__decisions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
+  /* Winners/Losers baseball-card tiles: back to the two-line first/last stack
+     next to the bigger headshot (phone keeps them on one row instead — see
+     the base .playercard__name rule — since there's no extra vertical room
+     to spend there). */
+  .playercard__namebreak {
+    display: block;
+  }
+  .playercard__name {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: var(--fs-small);
+  }
+
+  /* The result card's own Dominant Performance/Blowout/Extra-Innings
+     performer tile (.flipback__perfcard) has the same room problem as the
+     Top Performers rail above: it sits inside a full slate card, not the
+     narrow two-up grid the two-line stack was built for, so a stacked
+     "Jackson<br>Merrill" just wastes a line for no reason at this width.
+     Same override, same reasoning. */
+  .flipback__perfcard .playercard__name {
+    flex-direction: row;
+    align-items: baseline;
+    font-size: var(--fs-body);
+  }
+  .flipback__perfcard .playercard__namebreak {
+    display: none;
+  }
+
+  /* ---- slate footer: the action grid stays compact rather than stretching
+     each button full width. The cap holds the auto-fit cells to a tidy size
+     (the base rule wraps them across as many rows as fit); 720px keeps the
+     five stops on one or two rows without ballooning. */
+  .sitefooter__actions {
+    max-width: 720px;
+  }
+
+  /* ---- game chrome: the section tabs keep a readable width too. */
+  .stepnav {
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  /* ---- lineup page, wide layout: the batting order and the opposing defense
+     diamond run side by side rather than stacking — a 3fr/2fr split rather
+     than 50/50, since the order (nine rows of names) needs more room than the
+     diamond (a compact fielding chart). Falls back to a single column when
+     there's no defense card to show (oppDefense empty pregame). */
+  .teaminfo__lineupdefense {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    align-items: start;
+    gap: 0 var(--space-6);
+  }
+  .teaminfo__lineupdefense:has(> :only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  /* ---- opposing-starter card, wide layout: the pitch-mix bar (see
+     .startercard__arsenal above) fills the open space next to the
+     name/badges/stats column, which otherwise stretches full width for no
+     reason — cap it so the mix has real room rather than a sliver. */
+  .startercard__info {
+    flex: 0 1 320px;
+  }
+  .startercard__arsenal {
+    display: block;
+    flex: 1;
+    min-width: 0;
+    padding-left: var(--space-4);
+    border-left: var(--bw-hair) solid var(--border-hairline);
+  }
+
+  /* ---- innings, wide layout. Refresh rides in the floating bottom bar above
+     Next at every width now (see .pagenav--innings), so it's always one reach
+     from the primary action — the old top toolbar is gone. */
+
+  /* The base .pagenav .btn rule caps every floating-bar button to the phone
+     column's width (calc(440px - 2*gutter)) — fine for a single Next/Box
+     score button, but the reveal-split pair's longer "Reveal next at-bat" /
+     "Reveal whole {half}" labels wrap onto a second line at that width (see
+     .revealsplit__btn) when there's actually 780px of column (.inningchrome's
+     own measure) to give them and keep it to one line instead. Both rules
+     share this selector's specificity with the base one, so source order
+     here (after it) is what makes this win. */
+  .pagenav--innings .btn,
+  .pagenav--innings .revealsplit {
+    max-width: 780px;
+  }
+
+  /* Section tabs + the half navigator share ONE row here — LINEUPS / INNINGS /
+     BOX on the left, ‹ Back · Bottom 4th · Next › on the right — instead of two
+     stacked bars. Centered to a comfortable measure. The base rule sets
+     flex-direction: column for the phone-stacked layout; row must be
+     re-asserted here; a same-specificity rule that doesn't mention a
+     property never resets it, so without this the two bars silently kept
+     stacking (and centering, each far narrower than the 780px measure) at
+     every width. */
+  .inningchrome {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    max-width: 780px;
+    margin: 0 auto 14px;
+  }
+  .inningchrome .stepnav {
+    flex: 1 1 0;
+    max-width: none;
+    margin: 0;
+  }
+  .inningchrome .inningnav {
+    flex: 1 1 0;
+    margin: 0;
+  }
+
+  /* The grid is a plain flex column — source order already matches the row
+     layout (linescore, play-by-play, stat card + win-prob, reference band,
+     rosters), so no reordering is needed here. */
+  .innings__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  /* Row 2: the stat card and win-probability column side by side. The stat
+     card carries far more content here (R/H/E/LOB + pitch counts, the
+     umpire-favor/worst-call pair, and the three Statcast cards — ABS moves
+     OUT to the right column below) than the chart + ledger, so it gets the
+     larger share of the row rather than an even split. */
+  .innings__row2 {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  /* Left column: the stat card, then the due-up-next preview beneath it
+     (see DueUpNextCard) — both share the row's larger 3/5 share. */
+  .innings__row2-left {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 3 1 0;
+    min-width: 0;
+  }
+  .innings__row2-left > .statbox {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  /* ABS Challenges moves here from the stat card (see .statbox__abs below
+     and AbsCard's own header comment) — its own card stacked above the
+     chart, both sharing the right column's narrower share of the row. */
+  .innings__row2-right {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    flex: 2 1 0;
+    min-width: 0;
+  }
+  .innings__row2-right > .winprob {
+    flex: 1 1 auto;
+  }
+  .innings__statbox .statbox__abs {
+    display: none;
+  }
+  /* AbsCard's own card chrome — same recipe as .winprob/.marginnotes (border,
+     radius, background, shadow) since here it sits directly in the right
+     column rather than nested inside StatBox's card. No padding of its own —
+     SealBox's .statgrid wrapper already insets its content 14px, and the
+     title bar below bleeds past exactly that inset to cap the card flush
+     (same masthead recipe as .half__title), so overflow:hidden here clips it
+     to the card's own rounded corners instead of stacking a second, smaller
+     rounded shape inside the card's padding. */
+  .abscard {
+    display: block;
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  /* Same fix as .statbox .statgrid above: SealBox's own .statgrid wrapper
+     paints --surface-inset once revealed, which otherwise shows through as
+     a whiter patch inside this card's own background. */
+  .abscard .statgrid {
+    background: none;
+  }
+  .abscard .abs__title {
+    margin: -14px -14px 8px;
+    border-radius: 0;
+  }
+  .abscard .abs {
+    margin-top: 0;
+  }
+  /* Unlike the base rule's joined-card look (title's bottom corners squared
+     flush against the rows), this context already gives .abscard itself the
+     card chrome and floats the title flush off it via the negative margin
+     above — restore the rows' own full rounded pill/border so they don't
+     read as attached to nothing. */
+  .abscard .abs__rows {
+    border-top: var(--bw-hair) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+  }
+
+  /* Reference band: pitchers + fielding defense on the left, both lineups on
+     the right. Both inline entering copies (staged around the seal, and the
+     revealed half's own standalone card — see .halfentering) are hidden here
+     (see InningViewer / ADR-0010); the -defense / -lineups blocks — hidden on a
+     phone — carry it instead. */
+  .half__entering,
+  .halfentering {
+    display: none;
+  }
+  .innings__ref {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    align-items: start;
+  }
+  /* Reset to line the left column's own top edge up with the Lineups card's
+     on its right — .pitchers' margin-top is sized for the phone flow
+     (stacked below the running content above it), but here it's often the
+     left column's first element with nothing above it to space from
+     (.pitchers relies on a PRECEDING sibling's own margin-bottom for
+     spacing, same idiom .marginnotes/.innings__ref-defense use, so
+     unconditionally zeroing its top margin never loses a gap). Margin Notes
+     and Defense only sometimes land first — MarginNotes can be absent (no
+     notes that half) and Defense render nothing too (early in a game) —
+     hence the :first-child gate on those two instead of the same
+     unconditional reset. */
+  .innings__ref-left .pitchers,
+  .innings__ref-left > .marginnotes:first-child,
+  .innings__ref-left > .innings__ref-defense:first-child {
+    margin-top: 0;
+  }
+  /* One flush card, capped by the navy/gold masthead (same recipe as
+     .pitchers/.winprob/.abscard) — the diamond sheds its own border/shadow
+     below (like .opp .defdiamond's existing reset) rather than doubling up
+     as a second card nested inside this one. */
+  .innings__ref-defense {
+    display: block;
+    margin-top: var(--space-3);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .innings__ref-defense .halfdefense {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .innings__ref-defense .halfdefense__title {
+    border-radius: 0;
+  }
+  .innings__ref-defense .defdiamond {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    padding: 12px 10px;
+  }
+  /* Same recipe for the Lineups card. */
+  .innings__ref-lineups {
+    display: block;
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  /* Same flush-masthead recipe as .innings__ref-defense above: the outer card
+     supplies no padding of its own, so .lineupcard__title's own inset sits
+     flush against the card's edges (border-radius: 0 squares its corners off
+     against the card's), and .lineupcard__teams gets the inset instead —
+     mirrors .innings__ref-defense .defdiamond's own padding reset. */
+  .innings__ref-lineups .lineupcard {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .innings__ref-lineups .lineupcard__title {
+    border-radius: 0;
+  }
+  .innings__ref-lineups .lineupcard__teams {
+    padding: 12px 10px;
+  }
+
+  /* Rosters sit two-up beneath the reading pane. */
+  .innings__rosters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-6);
+    align-items: start;
+  }
+
+  /* Play-by-play pairs each card with its strike zone: the card on the left,
+     the zone + pitch list on the right, one grid row per at-bat. The pitch-
+     location pane gets the larger share of the row — the batter's-box
+     silhouette (see StrikeZone.jsx) widens it beyond a plain 50/50 split. The
+     phone icon button is redundant here, so it's hidden. */
+  .pbp__atbat {
+    display: grid;
+    grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
+    gap: 0 var(--space-4);
+    align-items: stretch;
+  }
+  .pbp__zonebtn {
+    display: none;
+  }
+  .pbp__zonecell {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    border: var(--bw-hair) solid var(--border-hairline);
+    border-radius: var(--radius-sm);
+    background: var(--paper-2);
+    padding: 6px 10px;
+  }
+  .pbp__zonecell .pitchlist {
+    flex: 1;
+    min-width: 0;
+    align-self: flex-start;
+  }
+  .strikezone--inline {
+    width: 142px;
+    flex: 0 0 auto;
+    margin-top: -6px;
+  }
+  .strikezone--inline.strikezone--withbatter {
+    width: 166px;
+  }
+
+  /* ---- box score: totals beside the decisions, line score beside the three
+     stars, then each club's header card + batting/pitching as its own column
+     (away beside home). */
+  .bs__duo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  /* When a pairing's partner didn't render (no decisions mid-game, no WPA off
+     MLB), the survivor takes the full row instead of leaving a hole. */
+  .bs__duo > :only-child {
+    grid-column: 1 / -1;
+  }
+
+  .bs__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  /* The Statcast Leaders card's three tiles: stacked on phone (the base
+     rule), one row of three columns from here up. */
+  .bs__statcastRow {
+    flex-direction: row;
+  }
+  .bs__statcastCol {
+    flex: 1 1 0;
+  }
+
+  /* GamePhotosStrip.jsx, stacked under Three Stars in .bs__col above: three
+     rows tall instead of one, so it fills the column's leftover height
+     beside the left column's totals/win-prob arc instead of leaving a gap. */
+  .photostrip__body {
+    grid-template-rows: repeat(3, 163px);
+  }
+
+  /* ---- player hero: a wide sheet has room to let the name lead, so the
+     headshot and both name lines scale up together instead of sitting at
+     phone size in the middle of an otherwise-roomy page. */
+  .player__hero {
+    grid-template-columns: 168px 1fr auto;
+    gap: var(--space-6);
+    padding-bottom: var(--space-4);
+  }
+  .shot {
+    width: 168px;
+    height: 224px;
+  }
+  .shot--fallback {
+    font-size: var(--fs-hero-2xl);
+  }
+  .player__name-first {
+    font-size: var(--fs-h1);
+  }
+  .player__name-last {
+    font-size: var(--fs-hero-xl);
+  }
+  .player__num {
+    font-size: var(--fs-hero-sm);
+    margin-left: 8px;
+  }
+  .player__meta {
+    margin-top: 10px;
+    font-size: var(--fs-num-md);
+  }
+  .player__herologo > .teamlogo {
+    width: 96px !important;
+    height: 96px !important;
+  }
+  .player__leaguemark {
+    width: 96px;
+    height: 96px;
+  }
+  .player__herologo-affiliate {
+    height: 32px !important;
+    width: 112px !important;
+  }
+}
+

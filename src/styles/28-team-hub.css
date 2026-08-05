@@ -1,0 +1,984 @@
+/* ============================================================
+   TEAM HUB
+   ============================================================ */
+.team-hub__id {
+  display: grid;
+  grid-template-columns: 128px 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: 4px;
+  padding-bottom: var(--space-4);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.team-hub__logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* The parent MLB club's primary mark, drawn right-aligned at 70% of the
+   affiliate's own logo — only on a MiLB team page (see TeamPage.jsx). Links
+   through to that club's page. */
+.team-hub__parent {
+  display: flex;
+  align-items: center;
+  opacity: 0.9;
+}
+/* Team name + its level pill (AAA/AA/… — MiLB pages only) on one baseline. */
+.team-hub__namerow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.team-hub__level {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+}
+.team-hub__id h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-num-lg);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
+}
+.team-hub__rec {
+  margin: 5px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.team-hub__rec .mono {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.team-hub__div {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--field-deep);
+  font-weight: var(--w-bold);
+}
+.team-hub__rec em {
+  font-style: normal;
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+
+/* The club's Main "logo card" in the team-page hero — its mark on the curated
+   tinted tile (TeamTreatmentMark treatment="main"), same framed/overscaled/
+   glossy recipe as the slate card's .gamecard__logobox and the off-day tile.
+   Fills the header grid's 64px logo column. */
+.team-hub__logobox {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.team-hub__logobox.team-hub__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.team-hub__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.team-hub__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: scale(var(--scale, 1.32));
+}
+.team-hub__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-display-lg);
+}
+
+/* ------------------------------------------------- logo & jersey combinations
+   A horizontal, touch-draggable swipe deck on the team page — one fixed-size
+   card per catalog jersey, its own background tinted to that jersey's real
+   tile color (the same tint TeamTreatmentMark resolves for the slate card),
+   real logo art unaltered on top, name and the club's record in games it
+   wore it below. Native overflow-x scroll gives touch/trackpad panning;
+   useDragScroll (JerseyCombos.jsx) adds mouse click-drag. Same carousel
+   idiom as .tlead__grid--horizontal / .txcard__scroll elsewhere on this
+   page, rather than a fourth different scrolling pattern. */
+.jerseydeck {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 12px var(--space-4) var(--space-4);
+  /* A fixed-width row always has more jerseys than fit, unlike the old
+     wrapping grid — fade the trailing edge so that reads as "swipe for
+     more," not a card cut off mid-frame. */
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  /* Momentum panning shouldn't select the card text mid-drag. */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  touch-action: pan-x;
+}
+.jerseydeck:active {
+  cursor: grabbing;
+}
+.jerseydeck__card {
+  /* Grow to fill the deck's width when the catalog is short (no dead
+     whitespace after the last card), but never shrink below the floor a
+     logo needs to read — once more jerseys than fit at that floor are in
+     the catalog, the deck overflows and scrolls instead of squeezing. */
+  flex: 1 1 124px;
+  scroll-snap-align: start;
+  min-width: 124px;
+  height: 190px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--shadow-card);
+  color: var(--ink, var(--text-heading));
+}
+.jerseydeck__card.jerseydeck__card--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.14)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.14)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 8px
+  );
+}
+.jerseydeck__card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  pointer-events: none;
+}
+.jerseydeck__logobox {
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.jerseydeck__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  /* Every other surface that wears this tile (.gamecard__logobox, the
+     masthead, …) overscales+crops the mark to read as a patch printed on
+     the jersey — Identity Lab's EDGE_BLEED (TeamTreatmentMark.jsx). This
+     deck shows the mark itself off, so it stays at its own natural size
+     instead of inheriting that crop. */
+  transform: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
+}
+.jerseydeck__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  filter: none;
+  font-size: var(--fs-h3);
+}
+.jerseydeck__name {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-compact);
+  /* Draggable strip: don't let a pointer-drag turn into a text selection. */
+  pointer-events: none;
+}
+.jerseydeck__rec {
+  position: relative;
+  z-index: 1;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  pointer-events: none;
+}
+
+.sitebar__wordmark,
+.topbar__home svg,
+.topbar__home img,
+.sitefooter__brand svg,
+.sitefooter__brand img {
+  display: block;
+  flex: none;
+}
+
+/* Season Grade leads with one verdict, then keeps its two inputs visible and
+   independently inspectable. Current Form is deliberately subordinate: it is
+   context for the season story, not a hidden ingredient in the verdict. */
+.team-score {
+  display: grid;
+  gap: 12px;
+  margin: 8px 0 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.team-score__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 12px;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__head em {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-style: normal;
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+}
+.team-score__grade {
+  min-width: 0;
+  margin: 0 10px;
+  padding: 12px 12px 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+/* Keeps a bottom margin when this is the card's last child, so the outer
+   border doesn't sit flush against whatever follows. */
+.team-score__grade:last-child {
+  margin-bottom: 10px;
+}
+.team-score__grade.is-active {
+  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
+}
+.team-score__grade-button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.team-score__grade-button:active {
+  transform: scale(.985);
+}
+.team-score__grade-button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.team-score__grade-copy,
+.team-score__grade-result {
+  display: flex;
+  flex-direction: column;
+}
+.team-score__grade-copy {
+  align-self: stretch;
+  justify-content: flex-end;
+  gap: 2px;
+  min-width: 0;
+}
+.team-score__grade-kicker {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__grade-copy strong {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+}
+.team-score__grade-copy > span:last-child {
+  margin-top: 4px;
+  color: var(--graphite-soft);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+.team-score__grade-result {
+  align-items: flex-end;
+  gap: 4px;
+}
+.team-score__grade-score {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-score-lg);
+  font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-display);
+}
+.team-score__grade-score small {
+  margin-left: 3px;
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+}
+.team-score__breakdown {
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__driver-group {
+  display: grid;
+  gap: 6px;
+  padding: 0 10px;
+}
+.team-score__driver-heading {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__drivers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.team-score__row {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+.team-score__row--driver {
+  min-width: 0;
+  padding: 9px;
+  border: var(--bw-hair) solid var(--rule-soft);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-inset) 62%, var(--surface-card));
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+.team-score__row--driver.is-active {
+  border-color: color-mix(in srgb, var(--seal-hatch) 55%, var(--border-rule));
+  background: color-mix(in srgb, var(--seal) 9%, var(--surface-inset));
+}
+.team-score__row--driver .team-score__rowtop {
+  display: grid;
+  gap: 4px;
+}
+.team-score__row--driver .team-score__rowright {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  /* Same baseline-vs-size mismatch as .team-score__row--compact above — a
+     much bigger score number next to a small pill hangs the pill low
+     against it unless the pair is center- rather than baseline-aligned. */
+  align-items: center;
+}
+.team-score__row--driver .team-score__score {
+  font-size: var(--fs-hero-sm);
+}
+.team-score__row--driver .team-score__rank {
+  padding: 2px 5px;
+  font-size: var(--fs-caption);
+}
+.team-score__row--driver .team-score__meta {
+  min-height: 2.5em;
+  line-height: var(--lh-snug);
+  text-overflow: unset;
+  white-space: normal;
+}
+.team-score__meter {
+  display: block;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--rule-soft);
+}
+.team-score__meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--seal-hatch);
+}
+.team-score__row--compact {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 9px 12px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  background: color-mix(in srgb, var(--surface-inset) 42%, transparent);
+}
+.team-score__row--compact .team-score__rowtop {
+  grid-column: 1 / -1;
+}
+.team-score__row--compact .team-score__label,
+.team-score__row--compact .team-score__meta {
+  color: var(--text-caption);
+}
+.team-score__row--compact .team-score__score {
+  font-size: var(--fs-title-sm);
+}
+/* The pill's own text is far smaller than the score number it sits next to
+   — baseline alignment (the .team-score__rowright default) hangs a small
+   pill low against a much taller number instead of centering it, which
+   reads as misaligned rather than paired. Center alignment fixes it for
+   this specific size mismatch. */
+.team-score__row--compact .team-score__rowright {
+  align-items: center;
+}
+.team-score__rowtop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.team-score__rowtop:active {
+  transform: scale(.98);
+}
+.team-score__rowtop:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.team-score__label {
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.team-score__label-phrase {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+.team-score__rowright {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.team-score__rank {
+  color: var(--seal-hatch);
+  background: color-mix(in srgb, var(--seal) 16%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  padding: 2px 6px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.team-score__score {
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-lg);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-score);
+}
+.team-score__meta {
+  overflow: hidden;
+  color: var(--graphite-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The league-distribution rail: every other team as a small dot at its own
+   score, ours as the larger marker — rank made visual instead of just a
+   number to read. */
+.team-score__track {
+  position: relative;
+  height: 44px;
+  margin: 4px 1px 0;
+}
+.team-score__track-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 21px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--rule-soft);
+}
+.team-score__track-mid {
+  position: absolute;
+  left: 50%;
+  top: 14px;
+  width: 1px;
+  height: 16px;
+  background: var(--rule);
+}
+.team-score__dot {
+  position: absolute;
+  top: 17px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--graphite-soft);
+  opacity: .6;
+  cursor: pointer;
+  transition: opacity var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+/* No transform on hover/focus — scaling a dot grows its hit-tested visual
+   box into densely-packed neighbors (30 teams over one 0–10 rail put many
+   dots within a few px of each other), which can steal the hover it's meant
+   to show. A box-shadow ring reads as emphasis without resizing anything. */
+.team-score__dot:hover,
+.team-score__dot:focus-visible {
+  opacity: 1;
+  background: var(--ink-2, var(--text-heading));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-heading) 20%, transparent); /* focus-ring-exempt — shared hover+focus emphasis on the dense dot rail, ink-tinted not the green ring */
+  outline: none;
+}
+.team-score__dot--us {
+  top: 17px;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  background: var(--text-heading);
+  border: 2px solid var(--surface-inset);
+  box-shadow: 0 0 0 1px var(--text-heading);
+  opacity: 1;
+  cursor: default;
+}
+.team-score__tooltip {
+  position: absolute;
+  bottom: 100%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  padding: 3px 7px;
+  background: var(--text-heading);
+  color: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Rank-context strip — five teams around the pill's own rank, as small logo
+   chips. Grayscale-vs-color follows .vsteam__team's picked-vs-unpicked
+   convention rather than inventing a new one; only the layout/scroll/nav
+   plumbing is new here. */
+.rankstrip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+/* The distribution track (LeagueTrack, .team-score__track) and the rank
+   strip both answer "where does this team stand," but on a phone-width card
+   there isn't room to do that side by side and still show more than a
+   couple of rank chips — each gets its own full-width row instead, so the
+   strip can show however many chips fit rather than a cramped fixed count.
+   Tablet/desktop has the width to spare, so from the WIDE_QUERY breakpoint
+   up they go back to sharing one row (see the override below) — the track
+   takes whatever width is left, the strip stays its own five-chip size. */
+.team-score__trackrow {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.team-score__trackrow .team-score__track {
+  flex: 0 0 auto;
+  margin: 0;
+  min-width: 0;
+}
+.team-score__trackrow .rankstrip {
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  .team-score__trackrow {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  .team-score__trackrow .team-score__track {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .team-score__trackrow .rankstrip {
+    width: auto;
+  }
+}
+.team-score__track--compact {
+  height: 26px;
+}
+.team-score__track--compact .team-score__track-base {
+  top: 13px;
+}
+.team-score__track--compact .team-score__track-mid {
+  top: 6px;
+  height: 14px;
+}
+.team-score__track--compact .team-score__dot {
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+.team-score__track--compact .team-score__dot--us {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+}
+.rankstrip__track {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  /* Below this, the track fills its full-width row above (however many
+     chips fit). At/above it, the strip shares a row with the distribution
+     track (see .team-score__trackrow), so it reverts to a fixed
+     --rankstrip-track-width (set inline per render, exactly five
+     chip-widths) rather than a stray full-width row with empty space
+     trailing off the end of it. */
+  .rankstrip__track {
+    width: var(--rankstrip-track-width);
+  }
+}
+.rankstrip__rail {
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 13px 0 0;
+}
+.rankstrip__rail::-webkit-scrollbar {
+  display: none;
+}
+.rankstrip__chip {
+  position: relative;
+  flex: 0 0 38px;
+  scroll-snap-align: start;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.rankstrip--compact .rankstrip__chip {
+  flex-basis: 28px;
+}
+.rankstrip__chip .teamlogo,
+.rankstrip__chip .teamlogo--fallback {
+  filter: grayscale(1);
+  opacity: 0.4;
+  transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip__chip--self .teamlogo,
+.rankstrip__chip--self .teamlogo--fallback {
+  filter: none;
+  opacity: 1;
+}
+@media (hover: hover) {
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo,
+  .rankstrip__chip:not(.rankstrip__chip--self):hover .teamlogo--fallback {
+    opacity: 0.7;
+  }
+}
+.rankstrip__chip:focus-visible {
+  outline: none;
+}
+.rankstrip__chip:focus-visible .teamlogo,
+.rankstrip__chip:focus-visible .teamlogo--fallback {
+  box-shadow: var(--ring);
+}
+.rankstrip__chip--self {
+  padding: 2px;
+  border-radius: var(--radius-xs);
+  background: color-mix(in srgb, var(--seal) 14%, transparent);
+  cursor: default;
+}
+.rankstrip__arrow {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--seal-hatch);
+}
+.rankstrip__n {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--graphite-soft);
+}
+.rankstrip__chip--self .rankstrip__n {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.rankstrip__fade {
+  position: absolute;
+  top: 13px;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+}
+.rankstrip__fade--l {
+  left: 0;
+  background: linear-gradient(to right, var(--surface-inset), transparent);
+}
+.rankstrip__fade--r {
+  right: 0;
+  background: linear-gradient(to left, var(--surface-inset), transparent);
+}
+.rankstrip--compact .rankstrip__fade--l {
+  background: linear-gradient(to right, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip--compact .rankstrip__fade--r {
+  background: linear-gradient(to left, color-mix(in srgb, var(--surface-inset) 90%, var(--surface-card)), transparent);
+}
+.rankstrip__fade.is-visible {
+  opacity: 1;
+}
+/* Prev/next — swipe covers touch, but a mouse or trackpad has no swipe
+   gesture over a card, so a hover-capable, fine pointer gets real buttons.
+   Gated on input capability (not a touch-event sniff, which is unreliable
+   on hybrid laptops), so a touchscreen never sees controls it doesn't need. */
+.rankstrip__nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: var(--bw-hair) solid var(--rule-soft);
+  border-radius: 50%;
+  background: var(--surface-card);
+  color: var(--graphite);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) ease, color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.rankstrip--compact .rankstrip__nav {
+  width: 18px;
+  height: 18px;
+}
+.rankstrip__nav::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-top: var(--bw-heavy) solid currentColor;
+  border-right: var(--bw-heavy) solid currentColor;
+}
+.rankstrip--compact .rankstrip__nav::before {
+  width: 5px;
+  height: 5px;
+}
+.rankstrip__nav--l::before {
+  transform: rotate(-135deg);
+  margin-left: 2px;
+}
+.rankstrip__nav--r::before {
+  transform: rotate(45deg);
+  margin-right: 2px;
+}
+.rankstrip__nav:hover:not(:disabled) {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+}
+.rankstrip__nav:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.rankstrip__nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rankstrip__nav {
+    display: inline-flex;
+  }
+}
+.team-score__howlink {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--seal-hatch) 40%, transparent);
+  cursor: pointer;
+}
+.team-score__howlink:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.team-score__detail {
+  margin: -2px 10px 0;
+  padding: 9px 10px 8px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  background: color-mix(in srgb, var(--surface-inset) 55%, transparent);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(.23, 1, .32, 1);
+}
+@starting-style {
+  .team-score__detail {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+.team-score__detail dl {
+  display: grid;
+  gap: 0;
+  margin: 3px 0 0;
+}
+.team-score__detail-title {
+  margin: 0;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.team-score__detail dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+.team-score__detail dt {
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+}
+.team-score__detail dd {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+@media (max-width: 420px) {
+  .team-score__grade-score {
+    font-size: var(--fs-score-md);
+  }
+}
+@media (max-width: 350px) {
+  .team-score__grade-button {
+    gap: 6px;
+  }
+  .team-score__grade-copy strong {
+    font-size: var(--fs-title-sm);
+  }
+  .team-score__grade-score {
+    font-size: var(--fs-display-lg);
+  }
+  .team-score__drivers {
+    grid-template-columns: 1fr;
+  }
+  .team-score__row--driver .team-score__meta {
+    min-height: 0;
+  }
+}

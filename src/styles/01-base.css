@@ -1,0 +1,109 @@
+:root {
+  color-scheme: light;
+  font-family: var(--font-body);
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Visually hidden but still announced — for a label a screen reader still
+   needs (e.g. a club's full name) once its visible text is replaced by a
+   decorative logo/icon. Standard clip-not-display technique so it stays in
+   the accessibility tree without affecting layout. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* === ALL-CAPS INVARIANT ===
+   Every page renders uppercase — including live API values, which arrive
+   mixed-case from statsapi (e.g. "Jackson Chourio"). This one rule is the
+   single source of truth; the per-component `text-transform: uppercase`
+   rules elsewhere are now redundant with it. Its `#root *` specificity
+   (1,0,1) beats any plain class selector, so nothing downstream can quietly
+   undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
+   guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
+   if you do. The sanctioned exceptions, each opting out with a `caps-exempt`
+   marker the guard recognizes (don't add another without the same
+   deliberate marker), all read as natural-case sentences rather than
+   shouted app chrome:
+     - play-by-play copy and its feed-sourced siblings — `.pbp__desc`,
+       `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
+       `.pitchernotice__eventtext` (mound visit / ejection / baserunning
+       notification cards), `.bs__potgDesc`, `.flipback__potg`,
+       `.psseries__potgDesc`
+     - the pre-half callout cards' fun-fact line — `.prehalf__text`
+     - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
+       `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
+       `.favteamsheet__accountpitch` (the section title + button stay uppercase)
+     - the About page body copy — `.aboutpage .caps-exempt`
+     - the Team Score modal's headline + explainer paragraphs —
+       `.tscoremodal__title`, `.tscoremodal__body p` (+ inline children) —
+       the figures table and section sub-kicker stay shouted
+     - the What's Brewing modal's Game Notes blurb prose — `.brewblurb__body`
+       (the blurb title above it stays uppercase, same shouted-heading/
+       natural-case-body split as the Team Score modal above)
+     - `.gamestory__headline` (a real MLB.com headline reads as a natural sentence)
+     - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
+       within it, the club-name link specifically — `.txstory__cutline .plink`
+       (a player's `.txstory__namelink` stays uppercase on purpose)
+     - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap`
+     - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
+     - the spoiler-consent modal's explainer prose — `.consent__body`,
+       `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
+       buttons stay uppercase, same shouted-heading/natural-case-body split
+       as the Team Score modal above)
+     - the copy editor's natural-case fields + preview — `.admincopy__lede`,
+       `.admincopy__help`, `.admincopy__input`, `.admincopy__historyWhen`,
+       `.admincopy__previewBody/__previewHumor/__previewReset` (the admin types
+       and previews sentence-case copy; labels + preview title stay uppercase)
+     - the Identity Lab's about-this-lab explainer prose — `.idlabhint__body`
+       (the modal title stays uppercase)
+     - the Trade Deadline card's cutline prose — `.tradecard__cutline` (the
+       shape badge, team names, and player names above it stay uppercase) —
+       and its stats-to-date lines — `.tradecard__statline` */
+#root * {
+  text-transform: uppercase;
+}
+
+/* Kills the 300ms double-tap-to-zoom gesture on controls so rapid seal taps
+   and inning hops never zoom — while pinch zoom stays available (the viewport
+   deliberately does not lock scaling). */
+button,
+a {
+  touch-action: manipulation;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text-body);
+  overscroll-behavior-y: none;
+  /* Faint 24px scorebook rule + a soft warm highlight up top over manila. */
+  background-color: var(--bg-canvas);
+  background-image:
+    radial-gradient(
+      120% 60% at 50% -10%,
+      rgba(255, 253, 246, 0.7),
+      transparent 60%
+    ),
+    linear-gradient(var(--rule-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background-attachment: fixed, scroll, scroll;
+}
+

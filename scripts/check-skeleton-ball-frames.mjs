@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Guards the box-score skeleton's rolling-ball sprite strip
 // (src/components/BoxScoreSkeleton.jsx + the .skel__ballFrames rule in
-// src/index.css) against the two files silently drifting apart. The CSS
+// src/styles/*.css) against the two files silently drifting apart. The CSS
 // hardcodes BALL_FRAME_COUNT * BALL_SPIN_LOOPS in three places (the frame
 // strip's width, the steps() count, and the skel-ball-spin keyframe's
 // translateX fraction) because CSS steps() needs a literal integer, not a
@@ -12,13 +12,18 @@
 //
 // Run by `npm run lint` (so it gates every push).
 
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const jsPath = join(ROOT, 'src/components/BoxScoreSkeleton.jsx')
-const cssPath = join(ROOT, 'src/index.css')
+// The rules live in one of the src/styles/*.css partials (today
+// 22-box-score-tables.css). Read them ALL and concatenate rather than naming
+// the partial: which one holds a given rule is an implementation detail of how
+// index.css was split, and pinning it here would make an ordinary re-cut of the
+// stylesheet look like a drift failure.
+const stylesDir = join(ROOT, 'src/styles')
 
 const errors = []
 
@@ -36,7 +41,15 @@ function readTarget(path) {
 }
 
 const js = readTarget(jsPath)
-const css = readTarget(cssPath)
+
+let css = null
+try {
+  const sheets = readdirSync(stylesDir).filter((f) => f.endsWith('.css')).sort()
+  if (!sheets.length) throw new Error('empty')
+  css = sheets.map((f) => readFileSync(join(stylesDir, f), 'utf8')).join('\n')
+} catch {
+  errors.push('src/styles/*.css — named in this guard but no stylesheet partials were found')
+}
 
 function extract(source, pattern, label) {
   const m = source.match(pattern)
@@ -63,7 +76,7 @@ if (css && frameCount != null && spinLoops != null) {
 
   const framesBlock = css.match(/\.skel__ballFrames\s*\{[^}]*\}/)?.[0]
   if (!framesBlock) {
-    errors.push("Couldn't find the .skel__ballFrames rule in src/index.css")
+    errors.push("Couldn't find the .skel__ballFrames rule in src/styles/*.css")
   } else {
     const width = extract(framesBlock, /width:\s*(\d+)%/, '.skel__ballFrames width')
     if (width != null && width !== totalSteps * 100) {
@@ -81,7 +94,7 @@ if (css && frameCount != null && spinLoops != null) {
 
   const spinBlock = css.match(/@keyframes skel-ball-spin\s*\{[\s\S]*?\n\}/)?.[0]
   if (!spinBlock) {
-    errors.push("Couldn't find the @keyframes skel-ball-spin rule in src/index.css")
+    errors.push("Couldn't find the @keyframes skel-ball-spin rule in src/styles/*.css")
   } else {
     const calcMatch = spinBlock.match(/calc\(-(\d+)\s*\/\s*(\d+)\s*\*\s*100%\)/)
     if (!calcMatch) {
@@ -101,7 +114,7 @@ if (css && frameCount != null && spinLoops != null) {
 if (errors.length) {
   console.error(
     '\n✗ Box-score skeleton ball-frame guard failed — BoxScoreSkeleton.jsx and\n' +
-      "  the .skel__ballFrames/skel-ball-spin rules in src/index.css have drifted\n" +
+      "  the .skel__ballFrames/skel-ball-spin rules in src/styles/*.css have drifted\n" +
       '  apart:\n',
   )
   for (const error of errors) console.error(`  ${error}`)

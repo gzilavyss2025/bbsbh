@@ -553,13 +553,13 @@ process automatically.
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
 - `check-caps.mjs` — guards the global ALL-CAPS invariant (no CSS `text-transform`
-  sneaks a caps-defeating value back in). See the block comment in `src/index.css`.
+  sneaks a caps-defeating value back in). See the block comment in `src/styles/01-base.css`.
 - `check-name-casing.mjs` — the JS half of the same invariant: fails if a
   component calls `.toUpperCase()`/`.toLowerCase()` on rendered text (redundant
   with the CSS invariant, and can drift from it on real Unicode names) without
   a `caps-js-exempt` marker comment on the same line. See ADR-0017.
 - `check-typography.mjs` — rejects ad hoc size, weight, line-height, and tracking
-  declarations in `src/index.css`; add or reuse the semantic roles in
+  declarations in `src/styles/*.css`; add or reuse the semantic roles in
   `src/tokens/typography.css` instead.
 - `check-focus-ring.mjs` — every `:focus-visible` rule that draws a ring must use
   `var(--focus-ring)` (outline) or `var(--ring)` (box-shadow), never a hand-rolled
@@ -589,7 +589,8 @@ process automatically.
   while splitting it is still cheap. Deliberately a **weaker** ratchet than its
   sibling: line counts churn every commit, so a budget here is a ceiling (growth
   fails, shrinkage is free) and rot is bounded from the other end — a file back
-  under 600 lines must surrender its entry. `src/index.css` is listed at 29,828 so
+  under 600 lines must surrender its entry. The 24 oversized `src/styles/*.css`
+  partials are listed individually so
   that splitting it FORCES one entry per oversized partial rather than laundering
   the debt. See ADR-0038.
 - `check-dist-dev-routes.mjs` — post-build (not part of `npm run lint`, since it

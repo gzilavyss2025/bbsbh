@@ -1,0 +1,397 @@
+/* ================================================================ trade deadline
+   TradeDeadlinePage (season index) + TradeDeadlineSeasonPage (per-year list) +
+   TradeCard — a season-culminating historical report, same footing as Awards
+   History/Postseason History (no SealBox: completed trades carry no score —
+   see src/api/tradeDeadline.js's module header). Medal-amber (--award-*) marks
+   the season tiles and sticky date rail, matching that "honors/ceremonial
+   history" family elsewhere; a trade's own accents stay the app's plain
+   graphite/caption tones, same restraint as .rehabcard. */
+
+.tradedl__seasongrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.tradedl__seasontile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--award-line);
+  border-radius: var(--radius-md);
+  background: var(--award-soft);
+  text-align: left;
+}
+.tradedl__seasontile:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.tradedl__seasonyear {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--award-ink);
+}
+.tradedl__seasondeadline {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.tradedl__seasoncount {
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+}
+
+/* The season page's own year switcher, below the "TRADE DEADLINE" title —
+   reuses the slate's .levelnav look (same idiom as LeadersPage's ScopeNav);
+   wraps to a second row on a phone rather than squeezing six pills into one. */
+.tradedl__seasonnav {
+  flex-wrap: wrap;
+  margin: var(--space-2) 0 0;
+}
+
+/* A small caption above the team filter strip — reads as a blended-in label
+   for the control below it, not a section heading, so it stays a size down
+   from .section__title with no bottom rule. */
+.tradedl__filterlabel {
+  margin: var(--space-3) 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* One sticky date header per group of same-day trades on the season page —
+   the changelog/activity-feed grouping pattern from the non-sports UX pass
+   (a persistent date rail beats re-reading a date per card while scrolling
+   a season's worth of deadline activity). */
+.tradedl__daterail {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-top: var(--space-5);
+  padding: 6px var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--award-line);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.tradedl__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 var(--space-6);
+}
+
+.tradecard {
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.tradecard__badge {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* The ordinary 2-team case: a swap card, one column per club with a
+   connector glyph between them — the Venmo/Cash App and swap-UI pattern
+   for an A <-> B exchange, kept identical card to card so a reader can
+   pattern-match while scrolling instead of re-reading each one. */
+.tradecard__swap {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: var(--space-2);
+}
+.tradecard__connector {
+  align-self: center;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+}
+/* Never rotate this glyph to serve a narrower layout: the connector is a
+   stretched grid item, so a transform: rotate(90deg) turns its
+   full-column-width box into a column-HEIGHT sliver that renders over the
+   first team's header. The phone rules below keep the columns — and so
+   this glyph's orientation — as they are. */
+/* 3+-team fallback (a real one is the 2024-07-29 Dodgers/White Sox/
+   Cardinals blockbuster — see tradeDeadline.js's grouping header): one
+   stacked row per club rather than forcing extra teams into two columns. */
+.tradecard__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tradecard__side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.tradecard__teamhead.tradecard__teamhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+.tradecard__teamname {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+
+.tradecard__players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tradecard__player {
+  display: block;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+/* Zebra stripe every other player row so a long acquisition list is easier
+   to scan — same --surface-inset convention .awardhistory__list--zebra
+   uses, scoped per side so the stripe count restarts in each team column. */
+.tradecard__players > .tradecard__player:nth-child(even) {
+  background: var(--surface-inset);
+}
+.tradecard__playerlink.tradecard__playerlink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+/* The whole row is the PlayerLink button here, not just the name, so
+   .plink:hover's dotted underline propagates down into the stats-to-date
+   lines (and a MiLB player's entry/level-games/season trio) — striping
+   the entire card on hover. A descendant can't refuse an inherited
+   decoration, so the underline has to be declined at the button and
+   re-declared on the name alone: it's the name that navigates somewhere,
+   and the name that should look like it does. */
+.tradecard__playerlink.tradecard__playerlink:hover {
+  text-decoration: none;
+}
+.tradecard__playerlink.tradecard__playerlink:hover .tradecard__playername {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+/* One rung up from the app's small (54x88) headshot tier — a trade card's
+   photo is the page's primary content, not a secondary mention alongside a
+   stat line, so it earns the same shot-md size .tlead__shot (the league
+   leaders' hero photo) uses. */
+.shot.tradecard__shot {
+  flex: 0 0 auto;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+}
+/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
+   this outranks the base .shot--fallback's much larger display-size default
+   — same shot-md-w/h box, same override .tlead__shot.shot--fallback uses. */
+.shot.tradecard__shot.shot--fallback {
+  font-size: var(--fs-hero-lg);
+}
+.tradecard__playername {
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+.tradecard__pos {
+  flex: 0 0 auto;
+  margin-left: 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* The column beside a player's headshot: an optional ProspectPill, the
+   name + position row (was the whole playerlink row before stat lines
+   existed), then the stats-to-date block below. */
+.tradecard__playerinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.tradecard__playerinfo .prospectpill {
+  align-self: flex-start;
+}
+.tradecard__nameline {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+/* One MLB line, or a MiLB player's entry / games-by-level / season-stats
+   trio — small caption text under the name, same size/weight as the
+   consideration detail chip (.tradecard__pos) but left-aligned prose rather
+   than a right-pinned label. */
+.tradecard__playerstats {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 1px;
+}
+.tradecard__statline {
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity (see
+   .tradecard__cutline below) — a MiLB player's entry/level-games/stat trio
+   reads as natural sentence case ("International signee, 2019") rather than
+   shouted; an MLB player's one-liner is unaffected since it's all-caps stat
+   shorthand (AVG/HR/RBI) either way. */
+#root .tradecard__statline {
+  text-transform: none; /* caps-exempt: Trade Deadline stats-to-date lines read as natural sentence case */
+}
+
+/* Cash / a player to be named later reads as its own row, same weight as a
+   real player (ConsiderationRow in TradeCard.jsx) — a dashed frame in place
+   of the headshot marks it as "not a real photo" rather than a broken image,
+   with a plain glyph standing in for the missing face. */
+.tradecard__considerationicon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--graphite-soft);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-hero-lg);
+}
+/* Cash is an unambiguous, already-in-hand gain (unlike a PTBNL, still just a
+   promise) — the app's positive/acquired green, same family
+   TeamTransactionsCard tints a trade's "in" rail slot with. */
+.tradecard__considerationicon--cash {
+  border-style: solid;
+  border-color: var(--field-deep);
+  background: var(--field-soft);
+  color: var(--field-deep);
+}
+.tradecard__considerationlink {
+  cursor: default;
+}
+
+.tradecard__cutline {
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+.tradecard__cutline + .tradecard__cutline {
+  margin-top: 6px;
+  padding-top: 0;
+  border-top: none;
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .tradecard__cutline selector can't outrank #root * (see that block
+   comment at the top of this file). */
+#root .tradecard__cutline {
+  text-transform: none; /* caps-exempt: trade cutline prose reads as a natural sentence */
+}
+
+/* Phone: the column PAIR is the point of the card — both clubs have to be
+   in view at once or there's no visible exchange — so it survives here
+   intact and each player ROW restacks instead: headshot above the name
+   rather than beside it, which hands the name and its stat lines the
+   column's full ~150px instead of the ~90px left over next to a photo.
+   Everything steps down one rung (shot-md -> shot-sm, body -> small,
+   small -> caption) and the card's own padding tightens, buying width for
+   the columns rather than for a photo.
+
+   Every row-level rule here is scoped to .tradecard__swap on purpose: the
+   3+-team .tradecard__stack fallback gives each club the card's FULL
+   width, so its rows have no narrow column to adapt to and keep the
+   ordinary photo-beside-name shape. */
+@media (max-width: 420px) {
+  .tradecard {
+    padding: var(--space-3) var(--space-2);
+  }
+  .tradecard__swap {
+    gap: var(--space-1);
+  }
+  .tradecard__connector {
+    font-size: var(--fs-num-md);
+  }
+  .tradecard__swap .tradecard__player {
+    padding: var(--space-1);
+  }
+  .tradecard__swap .tradecard__playerlink.tradecard__playerlink {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+  .tradecard__swap .shot.tradecard__shot,
+  .tradecard__swap .tradecard__considerationicon {
+    width: var(--shot-sm-w);
+    height: var(--shot-sm-h);
+  }
+  .tradecard__swap .shot.tradecard__shot.shot--fallback,
+  .tradecard__swap .tradecard__considerationicon {
+    font-size: var(--fs-h2);
+  }
+  .tradecard__swap .tradecard__playerinfo {
+    width: 100%;
+  }
+  /* The position chip drops below a long name rather than squeezing it —
+     it's a 2-3 character label, so a wrapped second line costs almost
+     nothing next to a truncated surname. */
+  .tradecard__swap .tradecard__nameline {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .tradecard__swap .tradecard__playername {
+    font-size: var(--fs-small);
+  }
+  .tradecard__swap .tradecard__pos {
+    margin-left: 0;
+  }
+  .tradecard__swap .tradecard__statline {
+    font-size: var(--fs-caption);
+  }
+  .tradecard__swap .tradecard__teamname {
+    font-size: var(--fs-compact);
+  }
+}
+

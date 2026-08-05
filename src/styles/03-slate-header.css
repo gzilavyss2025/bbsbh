@@ -1,0 +1,441 @@
+/* ------------------------------------------------------------- slate header
+   The date stepper's own banner, just below the topbar (title + level tabs,
+   `.topbar--slate` below — a SIBLING of this div, not a child; see
+   GameSelect.jsx), divided from the game cards by a bottom rule. Full-bleed
+   to the screen edges (the negative gutter margins) so the rule spans
+   edge-to-edge. On a phone this scrolls away with the cards — deliberately
+   NOT sticky, so a long slate reads as one continuous sheet rather than
+   pinning a row over the games. No solid fill here: the graph-paper grid is
+   faint enough to run underneath without needing a canvas-color patch to
+   separate it from the date row. Desktop/iPad pins the topbar above (not
+   this) once there's room to spare it — see `.topbar--slate` inside the
+   `min-width: 740px` block below. It has to live OUTSIDE this div: a sticky
+   element can only stay stuck for as long as its own parent stays in the
+   scrollport, and `.slatehead` alone is only ever one short row tall. */
+.slatehead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 0 var(--app-gutter) 8px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+/* ---------------------------------------------------------------- top bar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: calc(10px + env(safe-area-inset-top)) 0 10px;
+}
+
+/* A SiteHeader's .sitebar already clears the notch, so a topbar right below
+   it shouldn't stack a second safe-area inset on top of it. */
+.sitebar + .topbar {
+  padding-top: 10px;
+}
+
+.topbar__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  margin: 0;
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Slate header: the Tally wordmark taps home, and the level toggle rides on the
+   same row to its right rather than on its own line below. The title shrinks so
+   all five level buttons fit beside it on a narrow phone. */
+.topbar--slate {
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.topbar__home {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+/* The primary signature needs enough mass for its scorecard cuts to read as
+   deliberate geometry. */
+.tally-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tally-wordmark {
+  color: var(--clay);
+}
+
+.tally-lockup > svg {
+  display: block;
+  flex: none;
+}
+
+@media (max-width: 600px) {
+  .tally-lockup {
+    gap: 6px;
+  }
+
+  .tally-lockup__mark {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+.topbar--slate .topbar__title {
+  font-size: var(--fs-title-sm);
+  gap: 6px;
+}
+
+/* Groups the level toggle + search trigger as one flex item, so the topbar's
+   own space-between splits only title vs. this cluster (see GameSelect). */
+.topbar__slateactions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  row-gap: 6px;
+  min-width: 0;
+}
+
+/* The icon buttons (search, menu, and — when reveal sync is configured — the
+   account button) as ONE nowrap unit inside the wrapping actions row. Without
+   this sub-group, flex-wrap moves items individually, so whichever single
+   button no longer fits drops to its own row as an orphan — a lone account
+   avatar floating under the menu icon on a 402px-wide iPhone was the real
+   rendered bug. Grouped, either all the icons share the level-pill row or the
+   whole trio wraps below it together (the fallback the .levelnav comment
+   below describes). Guarded by e2e/slate-header.spec.js. */
+.topbar__iconcluster {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+/* When the icon cluster wraps, the actions block doubles in height and the
+   topbar's align-items: center would float the wordmark vertically centered
+   between the two rows. Pinning it to the top keeps it aligned with the
+   level pills (first row) instead; in the single-row case the home button is
+   already the tallest item, so this changes nothing there. */
+.topbar--slate .topbar__home {
+  align-self: flex-start;
+}
+
+/* The signed-out "Sign in" pill keeps its 44px tap-target height elsewhere,
+   but inside the slate topbar it rides the same condensed 30px row as the
+   search/menu icons (same reasoning as .topbar--slate .topbar__search). */
+.topbar--slate .accountbtn__signin {
+  min-height: 30px;
+}
+
+/* Condensed to fit beside the title: content-width (not full-bleed), tighter
+   gaps, and smaller pill buttons than the standalone level toggle. Natural
+   (unshrunk) size — on a narrow phone there isn't room to compress five level
+   pills AND the icon buttons onto one line without either overlapping or
+   clipping button labels, so the icon buttons wrap onto their own row instead
+   (as a unit — see .topbar__iconcluster above) rather than the level pills
+   losing their min-content floor. */
+.topbar--slate .levelnav {
+  flex: 0 0 auto;
+  gap: 4px;
+  margin: 0;
+}
+
+.topbar--slate .levelnav__btn {
+  min-height: 30px;
+  padding: 0 6px;
+  font-size: var(--fs-caption);
+}
+
+/* Two-class selector so this actually beats .sitesearch-btn/.sitemenu-btn's
+   own min-width/height (equal specificity, source order would otherwise let
+   the 44px tap-target size win here and crowd the level toggle beside it —
+   confirmed by rendered overlap before this fix). */
+.topbar--slate .topbar__search {
+  flex: none;
+  min-width: 30px;
+  min-height: 30px;
+}
+
+.topbar--game {
+  gap: 6px;
+}
+
+.topbar__back {
+  background: none;
+  border: none;
+  color: var(--field);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  padding: 8px 2px;
+  min-height: var(--tap-min);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.topbar__match {
+  flex: 1 1 auto;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar__action {
+  flex: 0 0 auto;
+}
+
+.datenav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.datenav button {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard), background 0.12s ease,
+    border-color 0.12s ease, color 0.12s ease;
+}
+
+.datenav button:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.datenav button:active {
+  transform: scale(0.94);
+}
+
+.datenav__label {
+  min-width: 92px;
+  text-align: center;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+/* The slate's date stepper shares .slatehead's row with the Live Scores/Reveal
+   chip cluster (.daystate below) rather than stacking below it — see
+   GameSelect.jsx. */
+.datenav--row {
+  justify-content: center;
+  gap: 8px;
+}
+
+/* The slate's date stepper is a compact control, not a primary tap target —
+   smaller arrows and label than the base .datenav so it reads as a quiet
+   header row rather than dominating it. */
+.datenav--row button {
+  min-width: 32px;
+  min-height: 32px;
+  font-size: var(--fs-body);
+}
+
+.datenav--row .datenav__label {
+  flex: 1 1 auto;
+  max-width: 220px;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: var(--fs-compact);
+}
+
+/* Paged-back day, every result revealed: the chip cluster that normally shares
+   this row is empty (Live Scores is today-only; Reveal All has been used up),
+   so the stepper claims the room and grows — arrows back up to a full tap
+   target, the date up to the row's own UI size. Gated in GameSelect.jsx
+   (dayFullyRevealed), never on today, so the compact stepper above stays the
+   default everywhere the row still carries a chip. */
+.datenav--lg > button {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  font-size: var(--fs-title-md);
+}
+
+.datenav--lg .datenav__label {
+  max-width: 320px;
+  gap: 8px;
+  font-size: var(--fs-ui);
+}
+
+/* Today drops back to a genuine secondary size here. In the compact row it
+   inherits .datenav--row button's body size and ends up matching the date it
+   sits beside; with the date promoted there's finally room for the quiet chip
+   .datenav__today above describes, so it takes its own label size rather than
+   scaling up alongside. */
+.datenav--lg .datenav__today {
+  min-height: 24px;
+  padding: 2px 9px;
+  font-size: var(--fs-compact);
+}
+
+/* One-tap return to today once the date has been paged away from. Kept small —
+   a quiet secondary chip beside the date, not a button competing with it. Same
+   rectangular shape as the date stepper's own arrow buttons (above) and the
+   Reveal All chip (.daystate below), so all three read as one species of
+   control rather than Today being an odd pill among rectangles. It's a
+   <button> inside .datenav, so the hover-inverts/press-scales feedback above
+   already applies here for free — no separate :hover/:active needed. */
+.datenav__today {
+  min-height: 20px;
+  padding: 1px 7px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
+    transform 0.08s ease;
+}
+
+/* Day-state row on the slate (GameSelect): whichever of {Live Scores, Reveal
+   All} applies to the current date, riding beside the date stepper in
+   .slatehead's own row (see .slatehead above) rather than stacking below it.
+   Two families, matching the app's existing kraft vocabulary rather than
+   inventing a third: Live Scores OFF is a quiet ghost chip (same rectangular
+   shape + hover-inverts/press-scales as .datenav__today and the arrow buttons
+   above); Live Scores ON promotes to the flat kraft "mode" fill .modestrip
+   elsewhere in the app also uses for "an unsealed screen says why it's
+   unsealed" (a MODE you're in); Reveal All reuses .btn--reveal's hatched
+   "peel the tape" texture (an ACTION you take) rather than a third look.
+   Defined here (ahead of the 740px block) rather than down by the old
+   .slateunlock location, so the desktop overrides there — same selector,
+   equal specificity — actually win the cascade by source order. */
+.daystate {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.daystate__chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease,
+    filter 0.12s ease, transform 0.08s ease;
+}
+.daystate__chip:active {
+  transform: scale(0.98);
+}
+
+/* OFF — the default, most-common state, so it stays ordinary chrome rather
+   than banner weight. */
+.daystate__chip--live {
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.daystate__chip--live:hover {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* ON — a contained kraft chip, same footprint as OFF, so switching it on
+   never pushes the date stepper or forces a wrap onto its own row. */
+.daystate__chip--live-on {
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  border-radius: var(--radius-sm);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.daystate__chip--live-on:hover {
+  filter: brightness(0.95);
+}
+
+/* The switch glyph: a small pill track, the dot sliding via currentColor so
+   it never needs its own ON/OFF color rules beyond the chip's own. */
+.daystate__dot {
+  position: relative;
+  width: 20px;
+  height: 12px;
+  flex: none;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+}
+.daystate__dot::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  transition: transform 0.15s ease;
+}
+.daystate__chip--live-on .daystate__dot::before {
+  transform: translateX(8px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .daystate__dot::before {
+    transition: none;
+  }
+}
+
+/* Reveal All rides in this row on desktop, replacing the old full-width
+   .revealall__top banner (see RevealAllBar in GameSelect.jsx) — hidden below
+   740px, where the floating bottom bar (same component) keeps the action in
+   thumb reach on a long scroll instead of duplicating it up here. */
+.daystate__chip--reveal {
+  display: none;
+}
+

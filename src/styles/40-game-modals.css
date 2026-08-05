@@ -1,0 +1,184 @@
+/* ------------------------------------------------------- team score modal
+   "How this is calculated" sheet, opened from the Team Score card's footer
+   link (TeamScoreCard.jsx). Same .scrim/.sheet dialog contract as the Game
+   Score modal, centered rather than docked (scrim--center) since this is a
+   read, not a quick reference — the editorial column treatment (drop cap,
+   pull quote, Newsreader body) leans into the "beat writer" voice the copy
+   is written in. */
+.tscoremodal {
+  max-height: min(88vh, 640px);
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.tscoremodal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.tscoremodal__kicker {
+  margin: 0;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.tscoremodal__title {
+  font-family: var(--font-read);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+  text-wrap: balance;
+}
+#root .tscoremodal__title {
+  text-transform: none; /* caps-exempt: Team Score modal's headline reads as a natural sentence */
+}
+.tscoremodal__body {
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-loose);
+}
+.tscoremodal__body p {
+  margin: 0 0 13px;
+}
+.tscoremodal__body p:first-of-type::first-letter {
+  float: left;
+  font-size: 2.4em;
+  line-height: var(--lh-hero);
+  font-weight: var(--w-semibold);
+  padding: .03em .06em 0 0;
+  color: var(--seal-hatch);
+}
+.tscoremodal__pull {
+  margin: 16px 0 !important;
+  padding-left: 12px;
+  border-left: 3px solid var(--seal);
+  color: var(--ink-2);
+  font-style: italic;
+}
+.tscoremodal__subkicker {
+  margin: 18px 0 8px !important;
+  color: var(--seal-hatch);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.tscoremodal__figs {
+  display: grid;
+  gap: 0;
+  margin: 4px 0 16px;
+  padding: 8px 0;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+}
+.tscoremodal__figs div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+.tscoremodal__figs dt {
+  color: var(--text-caption);
+}
+.tscoremodal__figs dd {
+  margin: 0;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-align: right;
+}
+.tscoremodal__foot {
+  margin: 4px 0 0 !important;
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+/* Only the prose paragraphs (and inline strong/em within them) read as
+   natural sentences; the figures table (.tscoremodal__figs dt/dd) stays
+   shouted like every other card detail, and the section sub-kicker stays
+   shouted like the top kicker. */
+#root .tscoremodal__body p,
+#root .tscoremodal__body p * {
+  text-transform: none; /* caps-exempt: Team Score modal's explainer paragraphs read as natural sentences */
+}
+#root .tscoremodal__body p.tscoremodal__subkicker {
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------- highlight sheet
+   The "Watch highlight" bottom sheet (see HighlightSheet.jsx). Same .scrim/
+   .sheet dialog contract as the ballpark sheet — docked, slide-up, safe-area
+   padding — carrying a 16:9 video instead of a diagram. */
+.hlsheet {
+  max-height: min(90vh, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.hlsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hlsheet__head .sheet__title {
+  margin: 0;
+  font-size: var(--fs-h3);
+}
+
+.hlsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.hlsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__video {
+  margin: 12px 0 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+}
+
+.hlsheet__video video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.hlsheet__empty {
+  margin: 12px 0 0;
+  padding: 32px 12px;
+  text-align: center;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  background: var(--surface-card);
+  border-radius: var(--radius-sm);
+}
+
+.hlsheet__desc {
+  margin: 12px 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+

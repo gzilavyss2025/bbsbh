@@ -1,0 +1,637 @@
+/* ---------------------------------------------------------------------------
+   TEAM LEADERS — per-category season leaderboards on the team page + the
+   dedicated /team/{id}/leaders page. The featured (rank-1) card mirrors the
+   slate's Top Performers card in spirit (headshot + logo ahead of a name/stat
+   column); the parallel `.tlead__*` classes keep this always-visible board's
+   own markup from coupling to `.playercard`, which the spoiler-gated Top
+   Performers/Day Recap/Insights cards share.
+   --------------------------------------------------------------------------- */
+.tlead {
+  margin-top: 4px;
+}
+/* .chevron-link — the shared "See all ›" text-button primitive (see
+   ChevronLink.jsx), composed by TeamLeaders' header action, TeamPage's
+   PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
+   for all three, so a tweak here reaches every placement. */
+.chevron-link {
+  border: none;
+  background: none;
+  padding: 4px 2px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+.chevron-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Groups DeckNudge alongside "See all ›" in the header's right slot when
+   TeamLeaders renders horizontal. */
+.tlead__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* DeckNudge — the desktop "‹ ›" step control shared by TeamLeaders'
+   horizontal deck and TeamTransactionsCard. Bare text, same quiet register
+   as .chevron-link/.inningnav's chevron labels, not a floating icon button:
+   no border, no background, no shadow. Mouse/trackpad only — a deck you can
+   swipe never needs a click alternative, so this only exists where hover is
+   possible at all. */
+.decknudge {
+  display: none;
+  align-items: center;
+  gap: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .decknudge {
+    display: inline-flex;
+  }
+}
+.decknudge__btn {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--accent-link);
+  line-height: var(--lh-solid);
+}
+/* Responsive card grid — one column on a phone, filling out as width allows. */
+.tlead__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 560px) {
+  .tlead__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+/* Horizontal deck variant (TeamPage's own compact FEATURED_CATEGORIES set
+   only — see the `horizontal` prop doc in TeamLeaders.jsx) — the same
+   full-bleed swipeable idiom .txcard__scroll uses for Team Transactions, so
+   the page's two card decks read as one consistent pattern. Equal
+   specificity to the plain .tlead__grid rules above (including inside the
+   560px media query), so this must stay textually AFTER them to win by
+   source order at every width. */
+.tlead__grid--horizontal {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.tlead__grid--horizontal::-webkit-scrollbar {
+  display: none;
+}
+.tlead__grid--horizontal .tlead__cat {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 280px;
+}
+.tlead__cat {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+}
+.tlead__cat-title {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Featured leader row — headshot + name/stat stack. */
+.tlead__featured {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Favorite-team highlight (league/level leader pages only, not team/org — see
+   TeamLeaders' favoriteTeamId doc) — tints a leader's row in that club's own
+   accent (--fav-accent, set inline from favoriteAccentColor()) so a fan's team
+   jumps out on a board otherwise full of strangers. */
+.tlead__featured--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 14%, var(--surface-card));
+  box-shadow: inset 3px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-sm);
+  margin: -4px -6px;
+  padding: 4px 6px;
+}
+/* The team filter's "everyone else" treatment (LeadersPage's TeamFilterStrip)
+   — dulled, not hidden, so a picked club's leaders stand out without the
+   board's overall category structure disappearing. Never set alongside
+   --fav, since a pick always supersedes the favorite-team tint. */
+.tlead__featured--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
+}
+/* Compound with .shot/.shot--fallback (both always set by Headshot) so this
+   outranks the base .shot sizing, same reason as .playercard__shot. Sized well
+   past that shared 52px baseline — the leader card is this component's one
+   hero image, so it earns a bigger, more readable frame. */
+.shot.tlead__shot {
+  flex: none;
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.tlead__shot.shot--fallback {
+  font-size: var(--fs-hero-lg);
+}
+/* Team tag — logo over abbreviation, pinned to the card's far right edge
+   (last flex child, after the flex:1 .tlead__who soaks up the rest of the
+   row). Always names the club the leader plays FOR (see FeaturedLeader's
+   displayTeamId/displayTeamAbbr). */
+.tlead__teamtag {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tlead__logo {
+  flex: none;
+}
+.tlead__teamabbr {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+.tlead__who {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+/* Two-line hero name — same idiom as PlayerPage's .player__name (a flex
+   column of first/last spans; being flex children blockifies the spans, so
+   the ellipsis trio below actually takes effect). Compound to beat .plink's
+   `font: inherit`/`text-align: inherit`. */
+.tlead__who .tlead__name {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+  width: 100%;
+}
+.tlead__name-first {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The surname gets its own full-width line rather than sharing one with the
+   stat value (the old layout's overflow bug — a long name like
+   "Adamczewski" ran into the stat beside it). Still falls back to an
+   ellipsis, same safety net as .player__name-last, for the rare name that
+   doesn't fit even with the full card width to itself. */
+.tlead__name-last {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Shared inline IL cross (see components/InjuredMark.jsx) — same glyph/color
+   as .il-banner__mark (player page), sized inline for a name rather than a
+   full banner. Base rule here; each context that uses it sets its own size. */
+.ilmark {
+  flex: none;
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+.tlead__name-last .ilmark {
+  font-size: var(--fs-small);
+  margin-left: 6px;
+}
+.tlead__row .ilmark {
+  font-size: var(--fs-caption);
+}
+.tlead__pos {
+  margin-left: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.tlead__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.tlead__statval {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.tlead__statlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Chasers (ranks 2–N) — plain rows: rank, name, value. */
+.tlead__rest {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tlead__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+/* Same favorite-team highlight as .tlead__featured--fav, sized down for a
+   chaser row. */
+.tlead__row--fav {
+  background: color-mix(in srgb, var(--fav-accent, var(--accent-primary)) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--fav-accent, var(--accent-primary));
+  border-radius: var(--radius-xs);
+  margin: 0 -6px;
+  padding: 1px 6px;
+}
+/* Same team-filter dim treatment as .tlead__featured--dim, for a chaser row. */
+.tlead__row--dim {
+  opacity: 0.35;
+  filter: grayscale(60%);
+}
+.tlead__rank {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: right;
+}
+.tlead__row .tlead__rowname {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tlead__rowval {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+/* Chaser-row team tag — same typography as .tlead__teamabbr (the featured
+   leader's abbreviation under its logo), set inline next to the name instead
+   of stacked, since a chaser row has no logo to sit under. */
+.tlead__rowteam {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+
+/* Leader badges (broader league/level/org pools only) — the featured card
+   stacks them under the name; the chaser rows tuck them just left of the value
+   (the flex:1 name keeps the value pinned right). */
+.tlead__badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tlead__badges:empty {
+  display: none;
+}
+.tlead__level {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+}
+/* On a chaser row the pill/level sit small and inline before the value. */
+.tlead__row .prospectpill {
+  flex: none;
+  font-size: var(--fs-caption);
+  padding: 1px 6px;
+}
+
+/* Leaders page (league/level/org). Reuses the .levelnav toggle look for its
+   scope switcher, just centered + allowed to wrap onto a second line on a
+   phone (seven scopes vs. the slate's five). */
+.leaders__scope {
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+.leaders__head {
+  margin-bottom: 12px;
+}
+.leaders__org {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.leaders__sub {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Game-info foot: WP, umpires, weather, T, Att… */
+.bs__info {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.bs__infoRow {
+  margin: 3px 0;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.bs__infoLabel {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+/* Throwing hand (R/L) column in the pitching table — a label, not a stat, so
+   it reads a touch lighter than the numbers around it. */
+.bs__hand {
+  color: var(--text-caption);
+}
+
+/* Final R/H/E/LOB card — the bottom-line tally lifted to the top of the page,
+   each club by abbreviation. Matches the other summary cards' frame. */
+.bs__totalsCard {
+  padding: 10px 14px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+/* Five equal columns (fixed layout), big enough to read across the room — the
+   abbreviation and the R/H/E/LOB figures are the headline of the page. The team
+   column shares the same width, so its abbreviation just sits with room to spare
+   on the left. */
+.bs__grid--totals {
+  table-layout: fixed;
+}
+.bs__grid--totals th,
+.bs__grid--totals td {
+  width: 20%;
+  padding: 8px 4px;
+  font-size: var(--fs-title-lg);
+}
+.bs__grid--totals thead th {
+  font-size: var(--fs-caption);
+}
+.bs__grid--totals .bs__nameCol {
+  width: 20%;
+}
+.bs__grid--totals .bs__pname {
+  font-size: var(--fs-num-lg);
+}
+.bs__grid--totals .bs__totCell {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* Line score: the inning-by-inning runs card. Reuses the box-score table styling
+   in a compact frame. */
+.bs__board {
+  padding: 10px 14px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+/* The club's logo, hard against the innings — shrink-to-fit so there's no
+   dead gap between it and inning 1. Linked (TeamLink) to the team page. A
+   fixed square footprint (rather than 1%-shrink-to-content) so the tile
+   below has a defined box to fill edge to edge, no gap on any side —
+   including the generic `.bs__grid td` bottom rule (overridden here at
+   higher specificity) and the first inning column's own left border, zeroed
+   below so the collapsed border between the two cells doesn't draw either. */
+.bs__grid .bs__boardName {
+  width: 30px;
+  height: 30px;
+  white-space: nowrap;
+  text-align: left !important;
+  padding: 0 !important;
+  border: none;
+}
+.bs__boardName + .bs__boardInn {
+  border-left: none;
+}
+.bs__boardLogo {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+/* The line score's mark fills its cell edge to edge on its jersey-tinted
+   tile — the same TeamTreatmentMark/treatmentTile pair the scorebug HUD
+   (.gamehud__tile, Scorebug.jsx) wears, and the same "100% width/height, no
+   padding" block-class contract that tile documents — rather than sitting in
+   a bordered, padded box of its own inside the cell. The slate card
+   (.gamecard__logobox) and in-game masthead (.masthead__logobox) keep the
+   bordered-box look; this cell IS the frame instead. */
+.bs__boardLogobox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--tint, var(--paper-1));
+}
+.bs__boardLogobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.bs__boardLogobox .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+}
+/* Each half-inning a fixed, equal-width bordered box regardless of the digits in
+   it; a half that scored is inked bold seam-red. Deliberately compact — the
+   line score is a quick-glance grid, not a headline number — at half the size
+   of the old --fs-title-lg reading. Needs the two-class
+   ".bs__grid--board .bs__boardInn" selector, not a bare ".bs__boardInn", to
+   out-specificity the generic ".bs__grid th, .bs__grid td" rule above. */
+.bs__boardInn {
+  width: 26px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-body);
+}
+.bs__grid--board .bs__boardInn {
+  font-size: var(--fs-compact);
+}
+.bs__grid--board thead th.bs__boardInn {
+  font-size: var(--fs-caption);
+}
+.bs__boardInn--scored {
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
+/* A played half (a real run count, 0 included) is a button straight to that
+   half-inning in the Innings view — filling the cell so the whole box is the
+   tap target, not just the digit. 'X' (never batted) stays plain text. */
+.bs__boardCellBtn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.bs__boardCellBtn:active {
+  transform: scale(0.92);
+}
+.bs__boardCellBtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+/* R/H/E totals to the right — the same equal-width bordered boxes as the innings
+   so the whole line reads as one grid, but on a subtly darker fill and bold to
+   mark them as the final tallies rather than an inning. Not a nav target (no
+   single half-inning to point at), so plain text, same bigger scale as the
+   inning cells beside them. */
+.bs__grid--board .bs__boardFinal {
+  width: 26px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--paper-1);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.bs__grid--board thead .bs__boardFinal {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* The by-inning tally's own cells are wider than Scoreboard's run-count boxes
+   above (26px) — each one reads four slash-joined figures ("24/1/6/1"), not a
+   single digit, and the Totals column carries the same reading, summed
+   (InningTally.jsx's `totalFor`). Same specificity as the rules above
+   (two classes), so this must come after them in the cascade to win. */
+.bs__grid--tally .bs__boardInn,
+.bs__grid--tally .bs__boardFinal {
+  width: 54px;
+}
+
+/* Fill-in header: the scorebook's labeled boxes (date, ballpark, umpires,
+   managers, weather, attendance…) — styled to match the lineup pages' fact grid,
+   a seamless two-column grid with hairline dividers (the 1px gap reveals the rule
+   beneath) rather than a strip of separately-bordered boxes. Wide fields span the
+   full row. */
+.bs__fill {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.bs__field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--surface-card);
+}
+.bs__field--wide {
+  grid-column: 1 / -1;
+}
+.bs__fieldLabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__fieldValue {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+/* The HP umpire's tier badge riding the "HP Umpire" fill-in field — reuses
+   .umps__tierbtn's reset, just needs inline spacing from the name text
+   instead of a flex row's gap. */
+.bs__tierbtn {
+  margin-left: 6px;
+  vertical-align: 1px;
+}
+

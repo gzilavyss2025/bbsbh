@@ -178,12 +178,12 @@ Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **Verify feed field paths against a live game.** The MLB feed shape is
   undocumented; `api/statsapi.js` notes paths were checked against a specific gamePk.
   Confirm a new field against a real response, don't guess.
-- **Styling is a token-based design system.** All CSS is `src/index.css` importing
-  `src/tokens/*.css`. The metaphor is a paper scorebook (manila paper, navy ink,
-  pencil graphite, kraft-tape amber seals). Use the semantic CSS variables, not raw
-  hex. See `src/CLAUDE.md`.
-- **Flat directories don't stay flat.** Before adding roughly the 10th file to a
-  directory, propose subdirectories instead of piling on.
+- **Styling is a token-based design system.** `src/index.css` is `@import`s only —
+  `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where rules live.
+  The metaphor is a paper scorebook (manila paper, navy ink, pencil graphite,
+  kraft-tape amber seals). Use semantic CSS variables, not raw hex. See `src/CLAUDE.md`.
+- **Flat directories don't stay flat.** Subdivide before roughly the 10th file in a
+  directory; `check-dir-size`/`check-file-size` enforce it (ADR-0038).
 
 ## Agent skills
 

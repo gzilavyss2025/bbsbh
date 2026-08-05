@@ -1,0 +1,850 @@
+/* ---------------------------------------------------------------- loader
+   Manual-scoreboard loading indicator (Loader.jsx) — a mini National League
+   linescore (MILWAUKEE over CUBS, five columns) inside a field-green frame,
+   one cream score plate (Milwaukee's inning 2) advancing through 1–9 like a
+   scorekeeper posting it from behind the board. The rest of the board stays
+   still, so the wait reads as a quiet update rather than a looping
+   sports-action graphic. `message` rides the container's aria-live status
+   but is visually sr-only — the board is self-explanatory on its own. */
+.loader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px 2px;
+}
+
+.loader__stage {
+  flex: none;
+}
+
+.loader__scoreboard {
+  display: grid;
+  /* Number / team-name / three inning columns — the team-name column is the
+     only one that needs real room (MILWAUKEE is the widest cell on the
+     board); the rest size to a two-digit number. */
+  grid-template-columns: auto minmax(82px, auto) repeat(3, auto);
+  overflow: hidden;
+  border: 2px solid var(--field-deep);
+  /* Every grid cell is a real element (each row runs the full five
+     columns), so this only shows through the 1px cell borders — kept at the
+     deep field tone that grounds the whole plate. */
+  background: var(--field-deep);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--paper-2) 28%, transparent);
+}
+
+.loader__league {
+  grid-column: 1 / -1;
+  padding: 2px 2px 1px;
+  color: var(--paper-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-align: center;
+}
+
+.loader__colhead,
+.loader__num,
+.loader__team,
+.loader__score,
+.loader__plate-window,
+.loader__blank {
+  display: grid;
+  min-height: 23px;
+  place-items: center;
+  padding: 0 2px;
+  border-top: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--paper-2) 74%, transparent);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-solid);
+}
+
+/* The "1 / 2 / 3" inning-number header row — lighter field tone, same as the
+   old single-row header, now spanning three of the five columns. */
+.loader__colhead {
+  padding: 0 6px;
+  background: var(--field);
+  color: var(--paper-2);
+}
+
+/* Rightmost header box — no border-right; the container edge closes it. */
+.loader__colhead:last-of-type {
+  border-right: 0;
+}
+
+/* The jersey-number and team-name columns — same darker-green/off-white
+   "already posted" treatment as the score cells they sit beside, left-aligned
+   like a real linescore rather than centered like a single digit. */
+.loader__num,
+.loader__team {
+  place-items: center start;
+  padding: 0 6px;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+.loader__score {
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+.loader__plate-window {
+  overflow: hidden;
+  background: var(--field-deep);
+  color: var(--text-on-ink);
+}
+
+/* The rightmost cell of each team row — a real cell, same deep-green fill as
+   the rest of the row, so the row runs the full five columns like a proper
+   linescore, with no border-right of its own (the container edge closes it). */
+.loader__blank {
+  border-right: 0;
+  background: var(--field-deep);
+}
+
+.loader__plate {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  animation: loader-plate-settle 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Only rendered when a caller passes an explicit `message` (the board has no
+   visible caption by default — see the Loader.jsx header comment). */
+.loader__label {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+  letter-spacing: var(--ls-title);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+/* Section-level placeholder — same board, smaller footprint so it sits inside
+   a card or column without shoving content around. */
+.loader--inline {
+  gap: var(--space-2);
+  padding: 8px 2px;
+}
+.loader--inline .loader__label {
+  font-size: var(--fs-ui);
+}
+
+/* Slate copy reads in scorebook all-caps (see .screen--slate .hint above);
+   the loader label follows suit there. */
+.screen--slate .loader__label {
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+@keyframes loader-plate-settle {
+  0% {
+    opacity: 0;
+    transform: translateY(-45%);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader__plate {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------- cards */
+.gamelist {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gamecard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-card);
+}
+
+/* Full-width date banner (All-Star Rosters page — see GameCard.jsx's
+   `dateLabel` prop). Negative margin cancels the card's own padding so the
+   strip reaches edge to edge, radius matched to the card's own top corners. */
+.gamecard__datebanner {
+  margin: -14px -16px 0;
+  padding: 5px 16px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  background: var(--surface-inset);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
+}
+
+/* The card's main tap target: everything but the optional box-score shortcut. */
+.gamecard__open {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+/* A quiet secondary action under the card — jumps straight to the box score for
+   a completed game on a past date. */
+.gamecard__box {
+  align-self: stretch;
+  min-height: var(--tap-min);
+  margin-top: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--paper-1);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.gamecard__box:active {
+  transform: translateY(1px);
+}
+
+/* The Home Run Derby hand-off card (DerbyCard.jsx) — the whole card is the
+   link (unlike .gamecard, which nests its tap target in .gamecard__open),
+   shown in place of the ordinary game list on the one night of the All-Star
+   break that has no game at all to show. */
+.derbycard {
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.derbycard:active {
+  transform: translateY(1px);
+}
+.derbycard__eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The 2026 Home Run Derby wordmark leading the card — a wide mark (~4.2:1),
+   so height-constrained with auto width and capped to the card so it never
+   overflows the manila tile. */
+.derbycard__logo {
+  display: block;
+  height: 40px;
+  width: auto;
+  max-width: 100%;
+  margin: 6px 0 2px;
+}
+.derbycard__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.derbycard__ext {
+  font-size: var(--fs-ui);
+  color: var(--accent-primary);
+}
+.derbycard__sub {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* In-progress badge, pinned to the card's top-right corner. z-index needed
+   because the home team's logo (see .gamecard__logobox .teamlogo) is scaled
+   with `transform`, which creates its own stacking context; that context
+   comes AFTER this badge in DOM order, so without an explicit z-index here
+   the logo paints on top of the badge despite the badge being position:
+   absolute — see .gamecard__delay below for the sibling badge this also
+   applies to. Pinned above .gamecard__logobox's own z-index: 1 (the tile
+   itself is positioned now too, for the '@' watermark behind it — see
+   .gamecard__atmark-* above), not just equal to it, so DOM order can't flip
+   which one wins. */
+.gamecard__live {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  /* Hide this badge's own back face too: on a flipped past-game card (see
+     FlipCard) the front face is rotated away, but iOS Safari would still paint
+     an absolutely-positioned, z-indexed child through it — mirrored. The face's
+     backface-visibility doesn't cascade to such a child, so it's set here as
+     well. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--clay, #c0392b);
+  color: #fff4f1;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.gamecard__live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Delayed/suspended/postponed badge — same corner and pill shape as
+   .gamecard__live above (the two are mutually exclusive), but in the kraft-
+   amber "on hold" color rather than live-game red. Flat fill, not the hatch
+   weave (--seal-texture) the spoiler covers use, so it doesn't read as a seal. */
+.gamecard__delay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--seal);
+  color: var(--seal-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* Favorite-team star, mirrored to the top-LEFT corner — same badge idiom as
+   .gamecard__live/.gamecard__delay's top-right pill, just a round coin
+   instead of a text pill (a single glyph doesn't need the label's width).
+   Used to sit inline in .gamecard__meta at the bottom of the card; moved up
+   here so it reads as a corner marker at a glance, the way the live/delay
+   status does on the opposite corner. A small opaque backing (rather than
+   bare colored text) keeps the star legible now that .gamecard__logobox's
+   fill is tinted per-team rather than a flat neutral paper. */
+.gamecard__pinbadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--paper-3);
+  box-shadow: var(--shadow-card);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  color: var(--pin-accent, var(--field));
+}
+
+/* ★'s glyph box is bounding-box-centered by the flex centering above, but a
+   5-pointed star's visual weight sits lower than its bounding box (a single
+   point on top, two full-width legs on the bottom), so bbox-centering reads
+   as sitting low in the coin. Nudge the glyph itself, not the coin. */
+.gamecard__pinbadge-star {
+  display: inline-block;
+  transform: translateY(-1px);
+}
+
+.gamecard__open:active {
+  transform: translateY(1px);
+}
+
+/* ---- Postponed game treatment ----------------------------------------------
+   A postponed game has no result to reveal, so instead of the corner delay pill
+   (+ a flip card that would only turn over to an empty 0-0 line) it gets a
+   kraft-tape strip under the matchup: a rubber-stamped POSTPONED, the cause,
+   and the make-up date it moved to. The matchup above is eased back a touch so
+   the stamp reads as the card's headline. */
+.gamecard--postponed .gamecard__teams {
+  opacity: 0.82;
+}
+
+.postponed {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 4px;
+  padding: 8px 12px 8px 10px;
+  border-radius: var(--radius-sm);
+  /* A faint wash of the kraft-seal amber rather than a full fill, edged with the
+     same hatch color as a dashed tape line — reads as "held" without shouting a
+     sealed cover. */
+  background: color-mix(in srgb, var(--seal) 15%, var(--surface-card));
+  border: var(--bw-hair) dashed var(--seal-hatch);
+  /* Rare, first-load-only event (a slate has few postponements) — so a small
+     entrance is warranted (see .agents/skills/review-animations): the strip
+     rises and fades in as one, ease-out, under 300ms. */
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+
+.postponed__stamp {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  color: var(--seal-ink);
+  padding: 4px 9px 3px;
+  /* Double rule + a slight tilt = a pressed rubber stamp, not a UI chip. */
+  border: 2px double var(--seal-ink);
+  border-radius: 3px;
+  transform: rotate(-4deg);
+  /* The stamp itself gets the hero motion: it presses DOWN onto the paper —
+     starting larger (nearer the eye) and motion-blurred, overshooting past its
+     resting size on contact, then settling. Slightly delayed so it lands just
+     after the tape appears. */
+  animation: stamp-press 300ms var(--ease-out) 60ms both;
+}
+
+.postponed__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.postponed__reason {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.postponed__makeup {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+@keyframes postponed-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stamp-press {
+  0% {
+    opacity: 0;
+    transform: rotate(-4deg) scale(1.35);
+    filter: blur(1.5px);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(0.96);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* The pinned favorite's border/gradient tint to that club's own accent color
+   (--pin-accent, a per-team hex set inline by GameCard from
+   favoriteAccentColor() — see lib/teams.js) rather than a fixed green, so an
+   Orioles fan's pin reads orange, a Reds fan's reads red, and so on. Falls
+   back to the original --field green for the rare pinned team with no known
+   accent (MiLB affiliates aren't in that color map). */
+.gamecard--pinned {
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+
+/* Two explicit rows: the framed marks on top, the names beneath — splitting
+   them means the names line up with each other regardless of how tall each
+   mark or name runs. `position: relative` roots the '@' watermark below
+   (.gamecard__atmark-*), which paints behind both marks; `overflow: hidden`
+   clips the watermark's own 158px glyph box to this container on a narrow
+   card, same idea as .gamecard__logobox clipping its own overscaled mark. */
+.gamecard__teams {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  row-gap: 8px;
+  align-items: center;
+}
+
+.gamecard__logobox--away {
+  grid-column: 1;
+  grid-row: 1;
+}
+.gamecard__logobox--home {
+  grid-column: 2;
+  grid-row: 1;
+}
+.gamecard__name--away {
+  grid-column: 1;
+  grid-row: 2;
+}
+.gamecard__name--home {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* The '@' mark: a screen-print-style watermark behind both logo tiles rather
+   than a small glyph between them (GameCard.jsx's .gamecard__atmark span,
+   decorative/aria-hidden). Big Shoulders Display — a face modeled on Chicago
+   stadium signage, not part of the app's ordinary type system, see
+   tokens/fonts.css — printed twice, a couple px out of register in
+   kraft-amber + navy, the misregistration real ballpark-program print runs
+   have. Faint enough to read as texture on the paper, not a shout. */
+.gamecard__atmark {
+  display: contents;
+}
+.gamecard__atmark-ghost,
+.gamecard__atmark-ink {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-watermark);
+  line-height: var(--lh-solid);
+  pointer-events: none;
+  /* This face's '@' carries more descent than ascent, so centering the line
+     box (top: 50% + -50% translate) alone left the glyph's own ink sitting
+     low and its tail clipped by .gamecard__teams' overflow: hidden. The
+     extra -12px nudges the visible ink, not just the box, to the center. */
+  transform: translate(-50%, calc(-50% - 12px)) skewX(-8deg) rotate(-2deg);
+}
+.gamecard__atmark-ghost {
+  color: var(--seal);
+  opacity: 0.1;
+  transform: translate(calc(-50% + 2px), calc(-50% - 11px)) skewX(-8deg) rotate(-2deg);
+}
+.gamecard__atmark-ink {
+  color: var(--navy);
+  opacity: 0.07;
+}
+
+/* A uniform framed tile for each club mark: a paper-filled square with a
+   hairline border and rounded corners. The mark is contained but slightly
+   overscaled and the tile clips overflow, so it just reaches the frame — a
+   gentle crop that makes mismatched source logos read at one consistent
+   size. `position: relative` + a z-index above the '@' watermark's 0 (see
+   .gamecard__atmark-* above) keeps the tile's own opaque fill painting over
+   the watermark rather than under it. (A universal per-team tinted fill for
+   the default/Main logo was tried and reverted here — see TeamMark's comment
+   in GameCard.jsx and .scratch/gamecard-team-colors/issues/01-solid-tile-colors.md.
+   `--tint`/`--scale` below are instead set narrowly, only when TeamMark swaps
+   in a curated Alternate/City Connect mark — same vars, same fallback
+   pattern as Team Identity Lab's own .colorlab__logobox.) */
+.gamecard__logobox {
+  position: relative;
+  z-index: 1;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  width: 100%;
+  max-width: 130px;
+  aspect-ratio: 1 / 1;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+
+/* A hand-styled pattern instead of a flat --tint swatch, same recipe as Team
+   Color Lab's own .colorlab__logobox--pinstripe. --pinstripe-color (Rockies'
+   black, Yankees' navy) picks the line color per team. */
+.gamecard__logobox.gamecard__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+/* A diagonal white-to-black sheen over every tile face (background AND mark
+   alike, via this ::after stacking above both) — reads as a glossy, slightly
+   domed badge instead of a flat paint chip. Same recipe as Team Identity Lab's
+   .colorlab__logobox--gloss, applied here to every team/treatment rather than
+   only a tinted one, so a plain paper tile gets the same finish as a colored
+   one. */
+.gamecard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+.gamecard__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  backface-visibility: hidden; /* see .gamecard__live — no mirrored leak on flip */
+  -webkit-backface-visibility: hidden;
+  /* Scaled well past the frame so the mark bleeds to the edges like a printed
+     badge; the tile clips the overflow. --scale lets a jersey-swap tint
+     (TeamMark, GameCard.jsx) shrink a dense mark so it doesn't read as "the
+     whole tile is this color" against its own new fill — same var Team Color
+     Lab's own tiles use. */
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+}
+
+/* The monogram fallback already is a bordered tile — drop its own chrome so it
+   doesn't double up inside the frame. */
+.gamecard__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-display-lg);
+}
+
+.gamecard__name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: var(--lh-compact);
+  min-width: 0;
+}
+
+.gamecard__loc {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamecard__mascot {
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+/* ------------------------------------------------------------------- off day
+   The clubs not playing today, below the games (above the Day Recap on a past
+   day). Each is a compact card reusing the slate matchup card's framed,
+   overscaled logo tile treatment (.gamecard__logobox), scaled down, over a
+   two-line location/mascot name. The favorite team's card carries the same
+   --pin-accent border tint + star as .gamecard--pinned. See OffDaySection.jsx. */
+.offday {
+  margin-top: 18px;
+}
+.offday__banner {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.offday__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Wide enough that an ordinary 9-10 letter mascot (CARDINALS, ROCKHOUNDS)
+     fits on one line — a truly long one (DIAMONDBACKS) still wraps, which
+     .offdaycard__name already handles cleanly (see overflow-wrap below). */
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+.offdaycard {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.offdaycard__logobox {
+  position: relative;
+  width: 100%;
+  max-width: 64px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  /* --tint (mainTreatmentTint, teams.js) fills with that club's curated
+     Main-tile background, same recipe as .gamecard__logobox — an off-day
+     team always shows its Main mark, never a jersey-swap variant. */
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+/* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
+   variant — --pinstripe-color picks the line color per team. */
+.offdaycard__logobox.offdaycard__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+/* Same diagonal gloss sheen as .gamecard__logobox::after, so an off-day tile
+   reads as the identical glossy badge as a slate card's. */
+.offdaycard__logobox::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+.offdaycard__logobox .teamlogo {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  /* Bleed to the frame like the slate tiles; the box clips the overflow.
+     --scale (mainTreatmentScale) shrinks a dense/large mark so it doesn't
+     read as "the whole tile is this color" against its own new fill. */
+  transform: scale(var(--scale, 1.32));
+}
+.offdaycard__logobox .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+  font-size: var(--fs-hero-sm);
+}
+.offdaycard__name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: var(--lh-title);
+  min-width: 0;
+  /* A long single-word mascot (DIAMONDBACKS) must wrap within the narrow card
+     rather than overflow its border. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.offdaycard__loc {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.offdaycard__mascot {
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+/* Favorite team's off-day card — same per-club accent tint as .gamecard--pinned. */
+.offdaycard--pinned {
+  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+.offdaycard__pin {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: var(--fs-caption);
+  color: var(--pin-accent, var(--field));
+}
+

@@ -1,0 +1,426 @@
+/* ------------------------------------------------ team identity lab: shell
+   The equipment room behind the scorebook: one club's gear pulled out onto a
+   workbench at a time, the other 29 waiting on a rail at the left edge, and a
+   dugout along the bottom holding what's pending, what's been lifted, and the
+   stamp that lands it. Replaced a 30-club accordion, which made every question
+   ("which clubs have I touched", "what marks do we have", "how does this band
+   read") a scroll problem.
+
+   Desktop-first and unapologetically so — unlisted, dev-only, never linked
+   (App.jsx gates it out of a production build entirely, ADR-0029). Below the
+   width where the fixed rail would overlap the page's own content it simply
+   hides, same breakpoint the old jump nav used, and the workbench reflows to
+   one column. */
+@media (min-width: 900px) {
+  /* Doubled selector for specificity over the `min-width: 740px` block far
+     below, which caps every .screen at the app's 960px reading column — this
+     one page is a workbench, not a reading column. */
+  .screen.screen--identitylab {
+    max-width: 1400px;
+  }
+
+  .screen--idlab-railed {
+    padding-left: calc(72px + var(--app-gutter));
+  }
+
+  /* Room for the neutrals sidebar the two colour dimensions pin at the right
+     (.milbneutrals) and for the dugout along the bottom. */
+  .screen--idlab-dugout {
+    padding-right: 200px;
+    padding-bottom: 120px;
+  }
+}
+
+/* The onboarding paragraph's trigger — round, quiet, sits at the far end of
+   the topbar row (.topbar's own space-between does the "next to the header"
+   placement) so it reads as a footnote on the title, not another nav item. */
+.idlab__infobtn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.idlab__infobtn:hover {
+  background: var(--paper-1);
+}
+
+.idlab__infobtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.idlabhint {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 640px;
+  width: calc(100% - 32px);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
+}
+
+.idlabhint__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: 10px;
+}
+
+.idlabhint__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+}
+
+/* Several sentences of explanatory copy, not app chrome — shouted caps make
+   it harder to read as prose. The #root-scoped selector (1 id + 1 class)
+   outweighs the global `#root *` uppercase (see the ALL-CAPS INVARIANT block
+   at the top of this file). */
+#root .idlabhint__body {
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+  text-transform: none; /* caps-exempt: the Identity Lab's about-this-lab explainer reads as a natural sentence, same split as every other modal's explainer prose registered above */
+}
+
+.idlab__rail {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .idlab__rail {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 72px;
+    padding: var(--space-2) 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--surface-card);
+    border-right: var(--bw-hair) solid var(--border-rule);
+  }
+}
+
+.idlab__railitem {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.idlab__railitem:hover {
+  background: var(--paper-1);
+}
+
+.idlab__railitem:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The drawer that's pulled out: ringed, raised onto the brightest paper, and
+   notched into the workbench beside it (the ::after triangle) so the rail and
+   the bench read as one continuous surface rather than two lists. */
+.idlab__railitem--on {
+  background: var(--paper-3);
+  border-color: var(--accent-primary);
+  border-width: var(--bw-heavy);
+}
+
+.idlab__railitem--on::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  margin-top: -6px;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 6px solid var(--accent-primary);
+}
+
+/* Which clubs this session has touched, answerable from anywhere on the page.
+   Shared by the rail (a club with any unsaved draft) and the rack (a jersey
+   with one of its own). */
+.idlab__dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--marker);
+  border: var(--bw-hair) solid var(--paper-0);
+}
+
+/* ---- dugout rail ---- */
+.idlab__dugout {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 48px;
+  padding: var(--space-2) var(--space-4);
+  background: var(--paper-2);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  box-shadow: var(--shadow-raised);
+  overflow-x: auto;
+}
+
+@media (min-width: 900px) {
+  .idlab__dugout {
+    left: 72px;
+    right: 184px;
+  }
+}
+
+.idlab__clean,
+.idlab__slotempty {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--graphite-soft);
+}
+
+/* The app's namesake, made literal: four graphite strokes and a diagonal
+   fifth. The numeral beside it stays authoritative — past a few gates only the
+   number is exact — but a glance at the marks answers "a nudge or a session's
+   worth" without reading it. */
+.idlab__tally {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--graphite);
+}
+
+.idlab__tallymarks {
+  flex: none;
+}
+
+.idlab__tallycount {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+
+/* ---- the style card ---- */
+.idlab__stylecard {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--paper-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  animation: idlab-card-drop var(--dur-med) var(--ease-out);
+}
+
+/* One rotated strip of kraft tape holding the card down — the same material
+   language as the taped rack tag: things being worked on are taped. */
+.idlab__stylecard::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: -5px;
+  width: 22px;
+  height: 10px;
+  transform: rotate(-24deg);
+  background: var(--seal-texture);
+  opacity: 0.85;
+}
+
+@keyframes idlab-card-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+.idlab__stylecard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.idlab__stylecard__source {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+
+.idlab__stylecard__discard {
+  margin-left: var(--space-1);
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+  cursor: pointer;
+}
+
+.idlab__stylecard__discard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.idlab__stylecard__chips {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.idlab__stylecard__chip {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-xs);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+.idlab__stylecard__pin,
+.idlab__carry {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.idlab__stylecard__carry {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.idlab__carry {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.idlab__copyall {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.idlab__copyalltext {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* ---- save stamp ---- */
+.idlab__save {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* A rubber stamp: heavy navy rule, letterpressed face. Landing a change is
+   the one act on this page that leaves the browser, so it gets the one
+   control that looks like an instrument. */
+.idlab__stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-4);
+  border: var(--bw-heavy) solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  background: var(--paper-3);
+  box-shadow: var(--inset-cell);
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.idlab__stamp:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.idlab__stamp:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Two seam stitches turning over while the write is in flight. */
+.idlab__stitch {
+  color: var(--clay);
+  animation: idlab-stitch 0.8s linear infinite;
+}
+
+@keyframes idlab-stitch {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.idlab__landed {
+  display: inline-block;
+  padding: 1px var(--space-2);
+  transform: rotate(-8deg);
+  border: var(--bw-heavy) solid var(--accent-positive);
+  border-radius: var(--radius-xs);
+  color: var(--accent-positive);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  animation: idlab-stamped 80ms var(--ease-out);
+}
+
+@keyframes idlab-stamped {
+  from {
+    opacity: 0;
+    transform: rotate(-8deg) scale(1.3);
+  }
+}
+
+.idlab__savemsg {
+  padding: 0;
+  font-size: var(--fs-caption);
+}
+

@@ -160,8 +160,9 @@ read the linked ADRs before refactoring:
   Either choice's **tap target is the dead space around it**, not just the
   button: `.pagenav` is click-through, so a missed thumb used to land on a
   player card under the fade instead. `.pagenav--innings .btn::after`
-  (`index.css`) claims the bar around each button — split down the middle
-  between the pair, Refresh excepted — and its offsets are measured from the
+  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button —
+  split down the middle between the pair, Refresh excepted — and its offsets are
+  measured from the
   button on purpose; anchoring them to the bar re-collapses the area mid-tap
   under `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins both that
   and what must stay click-through.
@@ -303,10 +304,27 @@ is the iOS auto-zoom floor, not a taste call. The recents shelf is pure and
 shape-gated in `lib/recentSearches.js` (identity fields only, never a score) with
 `hooks/useRecentSearches.js` over it; `e2e/site-search.spec.js` is the guard.
 
-## Design system (`src/index.css` + `src/tokens/*`)
+## Design system (`src/styles/*` + `src/tokens/*`)
 
-All CSS lives in `src/index.css`, which imports `src/tokens/*.css` (colors,
-typography, spacing, layout, effects, fonts). The tiers are layered Carbon-style
+`src/index.css` holds **no rules** — it is a banner comment and 55 `@import`s:
+the six `src/tokens/*.css` files (colors, typography, spacing, layout, effects,
+fonts), then the 49 `src/styles/NN-name.css` partials in cascade order. It was a
+single 30,326-line file until it was cut at verified brace-depth-0 boundaries;
+`cat src/styles/*.css` still reproduces that file's body byte-for-byte, and the
+built stylesheet is unchanged, because Vite inlines `@import` at build time.
+
+**Order is the contract.** The numeric prefix IS the cascade — later partials
+override earlier ones at equal specificity, exactly as later lines did in the
+old file. Never reorder the `@import` list to tidy it, and add a new partial at
+the position its rules belong in, not at the end. To find a rule, grep
+`src/styles/`; the file names say which surface each covers.
+
+`check-typography.mjs` and `check-focus-ring.mjs` read the whole directory (not
+a fixed list), so a new partial is covered the moment it exists — and both fail
+loudly if they are ever pointed at something with no rules in it, which is what
+caught this split rather than letting it silently disable them.
+
+The tiers are layered Carbon-style
 (ADR-0023): a **primitive** tier of raw values — `spacing.css` is the generic 4px
 scale + radii + border widths, `colors.css`'s `--paper-*`/`--ink-*`/`--seal` — and
 a **semantic alias** tier components consume (`--bg-canvas`, `--text-body`,
@@ -332,9 +350,9 @@ before changing how any of these render; the conversion itself lives in
 
 Type size, weight, leading, and tracking must use the semantic roles in
 `tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in
-`index.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
+`src/styles/*.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
 (`check-focus-ring.mjs`), and the documented text-on-background token pairings must
 hold WCAG AA (`check-contrast.mjs`) — see ADR-0023. The global ALL-CAPS invariant
-(see the block comment in `src/index.css`) is guarded by `scripts/check-caps.mjs`
+(see the block comment in `src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs`
 (the CSS half) and `scripts/check-name-casing.mjs` (the JS half — no per-component
 `.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via `npm run lint`.

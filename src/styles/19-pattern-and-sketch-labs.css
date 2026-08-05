@@ -1,0 +1,275 @@
+/* ------------------------------------------------------------ team pattern lab
+   Dev-only harness (screens/identity-lab/profiles/pattern.jsx) reviewing every club's
+   win-probability band pattern (WinProbChart.jsx) at full size, one league
+   level at a time. */
+.patternlab__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.patternlab__filterbtn {
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-compact);
+  cursor: pointer;
+}
+
+.patternlab__filterbtn.is-active {
+  background: var(--ink-0);
+  color: var(--text-on-ink);
+  border-color: var(--ink-0);
+}
+
+.patternlab__filterbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5);
+  padding-bottom: var(--space-6);
+}
+
+.patternlab__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.patternlab__teamname {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
+}
+
+.patternlab__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+/* Shared copy-to-clipboard block (components/CopyBox.jsx) — a pre-formatted
+   context block plus a copy button, first built for the WPA-pattern review grid
+   below and reused wherever a lab page needs to hand exact edit context back to
+   Claude (every Team Identity Lab editor, the compiled pattern feedback). */
+.copybox {
+  position: relative;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  padding: var(--space-2);
+}
+
+.copybox__text {
+  margin: 0;
+  padding-right: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.copybox__btn {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}
+
+.copybox__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Compact icon-only copy affordance for inline placement next to a single
+   line (Team Identity Lab's per-jersey match row, its WPA/position/header
+   panel heads) rather than a full CopyBox block. Fixed square (matching
+   .colorlab__wparesetbtn's own 22px height, same filled accent-primary/
+   text-on-ink treatment) and flex-centered rather than text padding, so the
+   ⧉ glyph sits dead-center instead of drifting off-axis at different label
+   lengths beside it. Only this page uses CopyIconButton today (its sibling
+   CopyBox is the one other pages reuse), so recoloring it site-wide is safe. */
+.copybox__iconbtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
+  padding: 0;
+  cursor: pointer;
+}
+
+.copybox__iconbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__notelabel {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.patternlab__notefield {
+  width: 100%;
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+}
+
+.patternlab__notefield:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.patternlab__compiled {
+  padding-bottom: var(--space-6);
+}
+
+.patternlab__compiledtitle {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-h2);
+  margin-bottom: var(--space-3);
+}
+
+/* -------------------------------------------------------------- logo sketch
+   Tap a grayscale team mark on a team page to blow it up for pencil tracing.
+   Reuses the .scrim backdrop but centers its card instead of docking a sheet. */
+.teaminfo__logobtn {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  line-height: var(--lh-zero);
+}
+.teaminfo__logobtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.scrim--center {
+  align-items: center;
+}
+
+.logomodal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: calc(100% - 32px);
+  max-width: 340px;
+  padding: 28px 20px 22px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  animation: slideup var(--dur-slow) var(--ease-out);
+}
+
+.logomodal__art {
+  width: 240px;
+  height: 240px;
+  max-width: 66vw;
+  max-height: 66vw;
+}
+
+.logomodal__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-align: center;
+}
+
+/* Segmented control to flip between a club's marks (primary / cap / wordmark). */
+.logomodal__variants {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.logomodal__variant {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logomodal__variant.is-active {
+  background: var(--surface-inset);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}
+
+.logomodal__caption {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: center;
+}
+
+.logomodal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: var(--fs-num-md);
+  color: var(--text-caption);
+  border-radius: var(--radius-pill);
+}
+

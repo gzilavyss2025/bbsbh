@@ -1,0 +1,309 @@
+/* ---- Standings page ------------------------------------------------------ */
+
+/* Room at the bottom so the last division table clears the fixed
+   .standings-daynav bar. Shorter than the 72px .pagenav clearance elsewhere —
+   this bar is condensed to the .standings-jump button height, not --tap-min. */
+.standings-screen {
+  padding-bottom: calc(56px + env(safe-area-inset-bottom));
+}
+
+/* Date controls: the "entering today / as of …" readout, the historical
+   quick-jumps, and the kraft-amber opt-in to reveal today's live standings. */
+.standings-ctrl {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 16px;
+}
+/* Readout + the kraft reveal chip share one row: the "as of" context reads left,
+   the spoiler opt-in sits right. Wraps the chip below on a very narrow phone. */
+.standings-ctrl__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+.standings-ctrl__asof {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.standings-ctrl__mode {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  color: var(--text-heading);
+}
+.standings-ctrl__detail {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+/* Date quick-jumps as flat scorebook index tabs — hairline-ruled, no drop
+   shadow or filled chip, so they read as pencil-ruled paper tabs rather than
+   heavy Material buttons. The active tab inks solid navy. */
+.standings-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+/* The date quick-jumps grow a new "Month 1" tab every month of the season —
+   left to wrap, that's an ever-taller control (already 3 lines by July; 7+
+   month tabs by October). Horizontal scroll instead, same full-bleed
+   edge-mask idiom as .txcard__scroll/.seasonseries__strip, keeps this row
+   pinned to exactly one line no matter how far the season has gone. */
+.standings-jumps--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.standings-jumps--scroll::-webkit-scrollbar {
+  display: none;
+}
+.standings-jumps--scroll .standings-jump {
+  flex: none;
+  scroll-snap-align: start;
+}
+.standings-jump {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: transparent;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    background var(--dur-fast) var(--ease-standard);
+}
+.standings-jump:hover {
+  color: var(--text-body);
+  border-color: var(--text-caption);
+}
+.standings-jump:active {
+  transform: scale(0.96);
+}
+.standings-jump.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+/* Reveal-today reads as a strip of kraft seal tape you peel — same amber as
+   SealBox, but a compact inline chip rather than a full-width block. */
+.standings-reveal {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--seal-deep);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.standings-reveal:active {
+  transform: scale(0.97);
+}
+.standings-reveal.is-on {
+  background: var(--surface-card);
+  border-color: var(--border-rule);
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+}
+/* Keep the last-good standings on screen, dimmed, while a new date loads. */
+.standings-body.is-refreshing {
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+
+/* Sticky day-stepper: same fixed-bar-off-the-bottom idea as .pagenav, but
+   styled and sized like the innings view's .inningnav (Back/label/Next row)
+   rather than a full-width .btn — condensed to the .standings-jump button
+   height (32px) so it stays unobtrusive on a phone. */
+.standings-daynav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  max-width: var(--app-width);
+  margin-inline: auto;
+  padding: 10px var(--app-gutter) calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--bg-canvas) 55%,
+    color-mix(in srgb, var(--bg-canvas) 0%, transparent)
+  );
+}
+
+.standings-daynav button {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+
+.standings-daynav button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.standings-daynav__label {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  .standings-daynav {
+    max-width: 960px;
+  }
+}
+
+.lgstand {
+  margin-bottom: 22px;
+}
+.lgstand__league {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.lgstand__div {
+  margin-bottom: 14px;
+}
+.lgstand__divname {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  margin: 0 0 6px;
+}
+
+/* Progressive disclosure. The content column is capped at 440px until the
+   app's 740px wide layout kicks in, so on a phone the full 11-number table
+   would overflow — instead the phone shows the essentials (W/L/Pct/GB + run
+   differential, the one compact "advanced" stat) with NO horizontal scroll,
+   and the wide layout reveals the rest (home/away splits, runs for/against,
+   streak, last-ten). `.st-ext` columns are hidden below the breakpoint. */
+.standings--full th,
+.standings--full td {
+  padding: 6px 6px;
+  font-size: var(--fs-compact);
+}
+.standings--full .st-ext {
+  display: none;
+}
+/* Opt-in escape hatch (StandingsPage's "More columns" toggle, phone-only):
+   reveal the extra columns anyway and let .ledger-wrap's existing
+   overflow-x:auto take over as real horizontal scroll — the sticky team
+   column (below) keeps the row identifiable while scrolled. Unguarded by the
+   740px query on purpose, so it also works below it; harmless at/above it
+   since .st-ext is already shown there regardless. */
+.standings--full.is-expanded .st-ext {
+  display: table-cell;
+}
+/* Team column pinned as a safety net: the phone set fits without scroll, but a
+   large accessibility font (or a very long club name) can still force overflow,
+   and a stuck team name keeps the row readable when it does. */
+.standings--full th.team,
+.standings--full td.team {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-card);
+  min-width: 116px;
+}
+/* Safari drops `position: sticky` on a table cell whose OWN `display` has
+   been changed away from `table-cell` (a WebKit quirk — Chromium tolerates
+   it fine, which is why this only ever showed up on an iPhone): the shared
+   `.standings td.team { display: flex }` above — needed by boards like Umpire
+   Rankings that lay a rank number and the name out as sibling children of the
+   cell itself — silently un-stuck this column while scrolling. Standings' own
+   `.team` cell has exactly one child (`TeamLink`, already flexed by the `> *`
+   half of that same rule), so putting the TD back to its native table-cell
+   display here costs nothing and restores stickiness. */
+.standings--full td.team {
+  display: table-cell;
+  vertical-align: middle;
+}
+.standings--full thead th.team {
+  z-index: 2;
+  background: var(--bg-page);
+  /* The wrap's own rounded top-left corner (.standings-wrap) clips a plain
+     static child fine, but a position:sticky element with its own z-index —
+     this cell — sits in its own compositor layer that some browsers don't
+     clip to an ancestor's border-radius. Left unrounded, its square corner
+     pokes a small notch of --bg-page (a visibly different tone from the
+     surrounding card) right where the outer curve should be, reading as a
+     stray misplaced rectangle. Round it directly instead of relying on the
+     ancestor's clip. */
+  border-top-left-radius: var(--radius-md);
+}
+.standings--full tbody tr:last-child td.team {
+  border-bottom-left-radius: var(--radius-md);
+}
+/* Solid (not the translucent row tint) so scrolled cells can't bleed through
+   the pinned column. With `border-collapse: separate` the cell keeps its own
+   `border-top` (from `.standings td`), so the row rule stays continuous across
+   the pinned/scrolling seam — no border hacks needed here. Same 10% as
+   `.standings tr.is-me td` above, just mixed directly into --surface-card
+   instead of transparent (mixing X% into transparent, then compositing over
+   a solid --surface-card background, is mathematically the same rendered
+   color as mixing that X% directly into --surface-card) — keep these two
+   percentages equal, or the pinned cell reads as a second, mismatched
+   highlight tint stacked on top of the row's own. */
+.standings--full tr.is-me td.team {
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, var(--surface-card));
+}
+

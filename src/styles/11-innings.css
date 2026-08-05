@@ -1,0 +1,435 @@
+/* ---------------------------------------------------------------- innings */
+/* Room at the bottom so the last roster panel clears the fixed .pagenav bar.
+   Taller than the generic 72px other screens use: .pagenav--innings stacks a
+   Refresh button above the primary Next/reveal-split row at every width now
+   (see InningViewer.jsx), so the floating bar itself runs closer to 130px
+   tall (14px top pad + 34px refresh + 8px gap + 44px button row + 14px
+   bottom pad) — 72px left the primary row, and sometimes Refresh too,
+   overlapping the last content above it. */
+.innings {
+  padding-bottom: calc(130px + env(safe-area-inset-bottom));
+}
+
+/* Phone-only: the floating bar's own Refresh (refreshbtn--float, fixed at the
+   page bottom) already covers this viewport, so the top toolbar's copy would
+   be a second Refresh sitting right above the half-inning nav's Next button.
+   Shown again at the wide breakpoint below, where the floating one hides. */
+/* Section tabs + half navigator wrapper. On a phone they stack (each child
+   keeps its own margins); the wide layout flips this to a single row (see the
+   740px media query). */
+.inningchrome {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Extra-innings team-record banner (see ExtrasBanner) — a slim, kraft-tinted
+   strip above the reading pane on any extra-inning page, reading each club's
+   season W-L in extras. Condensed uppercase like the app's other labels. */
+.innings__extras {
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border: var(--bw-hair) solid var(--seal-deep);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.innings__extras-icon {
+  margin-right: 4px;
+}
+.innings__extras-team {
+  white-space: nowrap;
+  color: var(--seal-deep);
+}
+
+.refreshbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.refreshbtn:active {
+  transform: scale(0.96);
+}
+
+.refreshbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.refreshbtn__icon {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
+/* "as of 7:42 PM" — the live-refresh staleness caption riding next to every
+   RefreshButton (TeamInfo.jsx). Reads how fresh the on-screen feed actually
+   is, whether it landed from a manual tap, the auto-refresh poll
+   (useGameData's FEED_POLL_MS), or a foreground re-fetch. Caption-scale and
+   muted so it never competes with the button itself. */
+.refreshstamp {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* Game Notes button (lineup page) — a compact pill riding in the team head,
+   right-aligned beside the Away/Home label (it took over the Refresh control's
+   old spot; Refresh moved to the floating bar). Links to the club's official
+   press-notes PDF (opens in a new tab), or opens the What's Brewing sheet for
+   the Brewers. See api/gameNotes.js / TeamInfo.jsx. */
+.notesbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  flex: none;
+  cursor: pointer;
+}
+
+.notesbtn:active {
+  transform: scale(0.96);
+}
+
+.notesbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.notesbtn__ext {
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
+}
+
+/* What's Brewing sheet — the Brewers' Game notes button opens this instead of
+   jumping straight to the PDF: the parsed narrative blurbs as scrollable text,
+   with the full PDF linked at the foot. Rides the shared .scrim/.sheet
+   bottom-sheet chrome (see below); these rules add the header row, the blurb
+   list, and the PDF footer link. */
+.brewsheet {
+  max-height: min(76vh, 640px);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.brewsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brewsheet__head .sheet__title {
+  margin: 0;
+}
+
+.brewsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.brewsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.brewsheet__status {
+  margin: 14px 0 4px;
+  font-size: var(--fs-ui);
+  color: var(--text-muted);
+}
+
+/* The shared bat/ball loader, same choreography as every other cold-load
+   wait in the app (see Loader.jsx) — replaces a bare "reading…" line with
+   continuous motion instead of a static one, same craft/consistency idea as
+   the rest of the app's loading states. */
+.brewsheet__loader {
+  margin: 10px 0 4px;
+}
+
+.brewsheet__list {
+  list-style: none;
+  margin: 12px 0 4px;
+  padding: 0 2px 0 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.brewblurb + .brewblurb {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.brewblurb__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-amber, var(--text-heading));
+}
+
+.brewblurb__body {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .brewblurb__body selector can't outrank #root * and would be
+   silently ignored. */
+#root .brewblurb__body {
+  text-transform: none; /* caps-exempt: Game Notes prose is several sentences long — shouted caps make a real paragraph much harder to scan than the app's short chrome labels; the blurb title above stays uppercase */
+}
+
+.brewsheet__pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 16px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.brewsheet__pdf:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.brewsheet__ext {
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
+}
+
+.inningnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 4px 0 10px;
+}
+
+/* Same button language as .stepnav__btn (the Lineups/Innings/Box row this
+   sits beside on the shared iPad/desktop chrome row, min-width:740px) —
+   condensed uppercase display type at a matching height, not the taller
+   sentence-case body-font button this used to be. */
+.inningnav button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.inningnav button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.inningnav button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.inningnav__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.inningnav__of {
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+}
+
+.inning {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
+   .innings__row2 pairing as .innings__grid's row-2 child. The active layer
+   sits in normal flow (so the scene's height still tracks its content, same
+   as before this feature existed); a preview of the destination half, only
+   ever present mid-turn, is absolutely positioned to sit exactly underneath
+   it. Stacking is local to .turnscene and kept below .pagenav's z-index: 20
+   (the floating bar must never be covered by an in-flight turn).
+
+   Corollary: `isolation: isolate` traps EVERY descendant z-index under this
+   box, a `.scrim` dialog's 100 included — so a modal opened from inside a
+   half-inning page paints below the floating bar unless it portals out to
+   <body> first. That's what ModalPortal.jsx is for; the highlight sheet, the
+   pitch-zone modal, and the pitch-color key all go through it. */
+.turnscene {
+  position: relative;
+  isolation: isolate;
+}
+.turnscene__layer--preview {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.turnscene__layer--active {
+  position: relative;
+  z-index: 2;
+}
+/* WAAPI drives the actual clip-path timeline (InningPageTurn.jsx) — this
+   only scopes `will-change` to the moment a turn is actually in flight, so
+   the browser isn't asked to keep a compositor layer warm for a page that's
+   sitting still 99% of the time. */
+.turnscene:has(.turnscene__layer--preview) .turnscene__layer--active {
+  will-change: clip-path;
+}
+
+/* The decorative curl overlay (PageCurlOverlay.jsx) — inline SVG only, never
+   real text/content. Sits above both layers, never intercepts a tap, and is
+   invisible to assistive tech; see the component's own header comment for
+   why a WAAPI-only transform/opacity timeline (no path morphing) is a hard
+   requirement here. */
+.pagecurl {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* The floating/inline nav's mid-turn state (InningViewer.jsx passes
+   aria-disabled, never the real `disabled` attribute, while a page turn is
+   preparing/turning, so focus never jumps). aria-disabled alone doesn't stop
+   clicks the way `disabled` does — pointer-events: none here is what
+   actually blocks a second tap from landing mid-animation; the reducer's
+   own first-request-wins guard (pageTurnState.js) is the real backstop. */
+.inningnav button[aria-disabled='true'],
+.rolling__pick[aria-disabled='true'],
+.pagenav--innings .btn[aria-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.half {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* SealBox's revealed wrapper (.statgrid, SealBox.jsx) defaults to
+   var(--surface-inset) — right for a reveal sitting directly on the plain
+   page (the box score's own top-level SealBox), but PlayByPlay's SealBox
+   nests inside .half, itself already a var(--surface-card) card, so that
+   brighter inset shade showed through the gaps between at-bat rows as a
+   mismatched white band. Match the card it's actually nested in instead. */
+.half .statgrid {
+  background: var(--surface-card);
+}
+
+.half__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 10px 14px;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+
+.half__team {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-on-ink);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.half__dot {
+  color: var(--seal);
+  font-weight: var(--w-bold);
+}
+
+/* The header's right side: the "X bats • Y pitches" line stacked over the
+   "Pitch colors" key button, right-aligned so both hug the header edge and the
+   pill never crowds the batting/pitching line on a narrow phone. */
+.half__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+.half__titlemain {
+  flex: 1 1 auto;
+}
+
