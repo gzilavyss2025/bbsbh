@@ -32,8 +32,12 @@ slight tilt so a filled page reads as pressed by hand rather than laid out by a
 grid. A **retrospective** (`/logbook/stats`) adds the collection up — clubs seen,
 your record watching them, the span of dates you covered.
 
-The Game Log is per-user and local-first. Signed out, it is a real, working
-collection on that device. Signed in, it mirrors across your own devices.
+The Game Log is per-user and local-first. On a Clerk-configured deployment,
+signed-out visitors see the feature pitch and account entry at `/logbook`;
+signing in opens the book and merges any stamps already minted on that device.
+Signed in, the collection mirrors across the user's own devices. A deployment
+without Clerk keeps the local book directly accessible, so the optional account
+dependency still degrades gracefully.
 
 ### What it is not
 
@@ -68,16 +72,17 @@ ever sees the path segment as a word.
 
 **Why the code keeps `logbook`:** a partial rename is worse than either whole.
 `logbook` appears in three dozen files across the client, the serverless function, the
-lint guard (`scripts/check-stamp-surfaces.mjs`), and both e2e specs; renaming
+lint guard (`scripts/check-stamp-surfaces.mjs`), and the e2e specs; renaming
 half of them leaves the next reader unsure which name means what.
 
-### The eight files display copy lives in
+### The nine files display copy lives in
 
 If you are changing the user-facing name or wording, these are all of them:
 
 | File | What it carries |
 |---|---|
 | `src/components/chrome/LogbookButton.jsx` | the slate header's labelled entry point |
+| `src/components/account/LogbookLanding.jsx` | the signed-out feature pitch, process, benefits, trust note, and account CTAs |
 | `src/lib/reportPages.js` | the label in the More menu, site footer, and report footer |
 | `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title, empty state, tray and placement ledes |
 | `src/screens/LogbookStatsPage.jsx` | retrospective tab title, back links, empty state |
@@ -148,6 +153,7 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Header entry point | `Game Log` (title-case in DOM, uppercased in CSS) |
 | Menu / footer label | `Game Log` |
 | Page title / `<h1>` | `Game Log` |
+| Signed-out pitch | *"A passport of the games you've scored."* → `Start your Game Log` / `I already have a book` |
 | Book cover | `Game Log`, the club name, `Open` |
 | OG card | eyebrow `GAME LOG` · title `Game Log` · sub *"A passport of the games you've scored — every stamp your own."* |
 | Empty collection | *"No stamps yet. Reveal a game's box score and stamp it — it lands here, and you choose where on the page it goes."* |
@@ -304,7 +310,7 @@ already sitting in every user's collection, the moment the change ships.
 
 | Route | Screen | Notes |
 |---|---|---|
-| `/logbook` | `LogbookPage.jsx` | the book; `season: null` means "newest season you have stamps in", resolved by the page |
+| `/logbook` | `LogbookPage.jsx` | signed out on a Clerk-configured deploy: feature pitch; signed in (or Clerk unavailable): the book. `season: null` means "newest season you have stamps in", resolved by the page |
 | `/logbook/{season}` | same | one season; out-of-range falls back to the bare book |
 | `/logbook?place={gamePk}` | same | placement mode for one stamp |
 | `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
