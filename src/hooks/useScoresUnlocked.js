@@ -90,6 +90,26 @@ export function useScoresUnlocked() {
   // Re-read storage and normalize: an expired/garbage expiry is cleared and
   // collapsed to null, so `passActive` below can trust `expiry`. The day list is
   // re-parsed at the same time so a cross-tab consent shows up here too.
+  //
+  // THE TWO READS ARE NOT SYMMETRIC, and the asymmetry is the load-bearing part.
+  // This function is the same-tab echo's landing point, so it runs SYNCHRONOUSLY
+  // inside `enable`/`disable`, right after those queue their state updates and
+  // before React has applied any of them:
+  //
+  //   - The EXPIRY key is written (or dropped) synchronously by both, BEFORE
+  //     they notify. Reading it eagerly here is therefore already correct.
+  //   - The DAY MAP is not. It is persisted from INSIDE the `setDays` updater
+  //     below, which React runs at render time — after this listener has already
+  //     run. An eager `parseSpoiledDays(readKey(...))` would read the map as it
+  //     stood BEFORE the change and queue that stale value behind the change,
+  //     so React would apply the updater and then revert it, leaving state stale
+  //     while localStorage held the new value.
+  //
+  // What that cost was the one thing this pass promises is cheap: turning it
+  // back off did not re-seal the day until a reload, because `days` still
+  // carried today and `spoilersOffFor` reads it. Same defect, same fix, as
+  // useStamps.js's storage listener — read from INSIDE the updater, which puts
+  // the read after the write rather than in front of it.
   const refresh = useCallback(() => {
     let cur = readKey(SCORES_UNLOCKED_KEY)
     if (cur != null && !isUnlocked(cur)) {
@@ -97,7 +117,7 @@ export function useScoresUnlocked() {
       cur = null
     }
     setExpiry(cur)
-    setDays(parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
+    setDays(() => parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
   }, [])
 
   // Consent: start the pass AND record today as a day the user agreed to see
