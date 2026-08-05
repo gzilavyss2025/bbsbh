@@ -129,6 +129,10 @@ const PAIRINGS = [
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
   // green tint (TradeCard.jsx's ConsiderationRow, tone="cash").
   { fg: 'field-deep', bg: 'field-soft', min: TEXT, note: 'Trade Deadline cash consideration icon' },
+  // The slate card's ESPN Unlimited "Unlmtd" tag (NationalTvIcon) — a
+  // third-party brand red, not a system token, so it needs the same check
+  // any other text-on-card color gets.
+  { fg: 'espn-red', bg: 'surface-card', min: TEXT, note: 'ESPN Unlimited badge text' },
 ]
 
 const failures = []
