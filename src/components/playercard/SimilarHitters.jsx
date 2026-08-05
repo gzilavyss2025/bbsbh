@@ -80,8 +80,8 @@ export function SimilarHitters({ similar }) {
     <SimilarPlayerGrid
       rows={rows}
       measure={MEASURE}
-      // No handedness clause, unlike the pitching version — there is no filter
-      // to explain, because nothing in this space inverts with batting side.
+      // The one thing the card has to disclaim: this compares the skills he
+      // SHOWS, not the line he puts up with them.
       note="How he hits, not how well he hits."
     />
   )

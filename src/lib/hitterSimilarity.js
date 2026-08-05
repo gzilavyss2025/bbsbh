@@ -28,13 +28,13 @@
 // (|r| ≤ .13 against every contact metric). It would also quietly turn the
 // card's claim from a skills statement into an outcomes one.
 //
-// NO HANDEDNESS FILTER, unlike the pitcher version. There the filter is
-// load-bearing: a lefty's ball moves the other way and the platoon math
-// inverts, so a mixed-hand list reads as a bug. Nothing here inverts with
-// batting side — contact quality, plate discipline and sprint speed mean the
-// same thing from either box, and a lefty and a righty who both hit it 110 and
-// never chase genuinely do hit alike. Filtering on bat side would halve the
-// pool for nothing.
+// NO HANDEDNESS FILTER. Nothing here inverts with batting side — contact
+// quality, plate discipline and sprint speed mean the same thing from either
+// box, and a lefty and a righty who both hit it 110 and never chase genuinely
+// do hit alike. Filtering on bat side would halve the pool for nothing. This
+// used to read as the difference between the two cards; the pitching side had
+// a hard same-hand filter until it was dropped in August 2026 (see
+// pitcherSimilarity.js), so neither one filters on hand now.
 
 // The five metrics the comparison runs on, in savant-percentiles.json's own
 // keys. All are PERCENTILES, 0-100, and all are pre-flipped by Savant so

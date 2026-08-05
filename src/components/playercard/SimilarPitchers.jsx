@@ -13,22 +13,18 @@ import { SimilarPlayerGrid } from './SimilarPlayerGrid.jsx'
 
 // What the grid's "Measured on" band names, in the same order the model
 // weights them: pitcherSimilarity.js scores SHAPE (per-type share of pitches)
-// against VELOCITY.
-//
-// The band lists what is MEASURED, so the same-hand restriction is left off it
-// even though it still applies — it's a filter on who enters the pool, not a
-// term in the distance, and naming it here read as a third thing being scored.
-// The pool restriction itself is unchanged and load-bearing (a lefty's ball
-// moves the other way, so a mixed-hand list reads as a bug); see
-// pitcherSimilarity.js and src/api/CLAUDE.md before touching THAT.
+// against VELOCITY. That is the whole list — handedness used to restrict the
+// pool and was dropped (see that module's header), so there is no third term
+// and no filter left to explain.
 const MEASURE = ['Pitch mix', 'Average velo']
 
 // The position line under each face. pitch-arsenal.json carries `throws` but
 // no position, and every arm in this pool is a pitcher, so "P" alone would
 // print the same letter three times and say nothing. The hand is the live
-// distinction, in the form a scorecard already uses. An unknown hand can't
-// reach here — similarPitchers skips a candidate the file has no hand for
-// rather than guessing — but the fallback stays for the day that changes.
+// distinction, in the form a scorecard already uses — and it does real work
+// now that the ranking no longer filters on it: a list CAN come back mixed,
+// and this line is the only place that says so. An unknown hand reaches here
+// (the ranking stopped skipping those too), which is what the fallback is for.
 function pitcherPos(throws) {
   if (throws === 'R') return 'RHP'
   if (throws === 'L') return 'LHP'

@@ -43,13 +43,13 @@ import { teamClubNameShort } from '../../lib/teams.js'
 // the "match" unit under it and the note beneath the grid both say so, and
 // neither may be dropped now that the figure carries a percent sign.
 //
-// `measure` is the accented band above the grid, and it is the point of the
-// card as much as the three faces are: "closest Statcast profiles" as a quiet
-// right-aligned section note left a reader guessing what "closest" was
-// measured on. Naming the actual inputs — and, for pitchers, the handedness
-// filter — turns the claim into something checkable. Callers derive those
-// terms from the ranking model's own key list where they can, so the band
-// can't drift from what the math actually compares.
+// `measure` is the legend's term list, and it is the point of the card as much
+// as the three faces are: "closest Statcast profiles" as a quiet right-aligned
+// section note left a reader guessing what "closest" was measured on. Naming
+// the actual inputs turns the claim into something checkable. Callers derive
+// those terms from the ranking model's own key list where they can, so the
+// legend can't drift from what the math actually compares — and it lists what
+// is SCORED, so a term belongs here only if the distance function reads it.
 export function SimilarPlayerGrid({ rows, measure, note }) {
   if (!rows?.length) return null
 

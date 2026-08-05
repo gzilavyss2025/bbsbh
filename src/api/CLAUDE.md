@@ -437,10 +437,16 @@ for each generator; the reader modules:
   different peer pools); the ranking itself is `src/lib/pitcherSimilarity.js`,
   pure and unit-tested. Runs at RUNTIME with no precompute: ~500 arms × ~4 pitch
   types is one pass over a file the page has already loaded, so a neighbour-table
-  generator would buy nothing. Handedness is a hard FILTER (not a distance term,
-  which a big enough arsenal match would eventually outvote) from the file's
-  `throws`, resolved at export time — see `scripts/CLAUDE.md`; an unknown hand is
-  skipped, never guessed. Two floors guard against overclaiming —
+  generator would buy nothing. Handedness does NOT enter the ranking — not as a
+  filter, not as a distance term. It was a hard filter until August 2026 and was
+  dropped deliberately (the claim is about the REPERTOIRE, not the platoon
+  matchup), so a mirror-image lefty can top a righty's card and a pitcher with
+  no `throws` on file is ranked like anyone else. Measured effect, before
+  re-arguing it: closer neighbours for 327 of 538 MLB arms, by ~1 match point,
+  and no change to coverage at all — see `pitcherSimilarity.js`. The file's
+  `throws` is still exported and still carried on every returned row — it is
+  what `SimilarPitchers.jsx` prints as the RHP/LHP line, now the only place the
+  hand appears. Two floors guard against overclaiming —
   `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
@@ -468,8 +474,9 @@ for each generator; the reader modules:
   constants documented against the real file's measured distance
   distributions). Skill space only (ev/hardHit/brl/chase/sprintSpeed —
   deliberately NOT xwoba, which would double-count contact quality), no
-  handedness filter (contact/discipline/speed don't invert with batting
-  side), and the file carries no names — `SimilarHitters.jsx` resolves its
+  handedness filter (nothing here inverts with batting side — and since
+  August 2026 the pitching side has none either), and the file carries no
+  names — `SimilarHitters.jsx` resolves its
   three rows' names/clubs itself with one batched
   `people?personIds=…&hydrate=currentTeam` call.
 - `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
