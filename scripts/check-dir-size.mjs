@@ -24,6 +24,15 @@
 // (3) is deliberate and is what makes this a ratchet rather than a high-water
 // mark that rots. The failure message prints the exact number to paste.
 //
+// A NOTE ON MERGE ORDER, learned the hard way. These numbers are measured
+// against the tree the branch was cut from, so a branch that sits behind `main`
+// while other work lands will carry stale ones — and if it merges last, it turns
+// `main` red for something no PR author did wrong. That is exactly how this
+// guard broke `main` on the day it landed. REBASE ONTO `main` AND RE-MEASURE
+// BEFORE MERGING anything that touches BUDGETS. Unlike its file-length sibling,
+// this guard cannot absorb the problem with a tolerance band: a directory gaining
+// one file IS the thing being watched for, so there is no slack to give.
+//
 // Run by `npm run lint` (so it gates every push).
 
 import { readdirSync, statSync } from 'node:fs'
@@ -45,9 +54,9 @@ const BUDGETS = {
   'src/components': 125,
   'src/api': 84,
   scripts: 67,
-  'src/lib': 50,
+  'src/lib': 52,
   'src/screens': 38,
-  'src/hooks': 19,
+  'src/hooks': 21,
   'src/screens/identity-lab': 15,
 }
 
@@ -90,8 +99,9 @@ for (const [dir, n] of [...counts].sort()) {
   } else if (n > budget) {
     problems.push(
       `${dir} grew to ${n} source files, past its budget of ${budget}. This ` +
-        `directory is already over ${MAX_FILES} and may not get worse — put the new ` +
-        `file in a subdirectory.`,
+        `directory is already over ${MAX_FILES} — put the new file in a ` +
+        `subdirectory, or, if it genuinely belongs here, raise the entry to ${n} ` +
+        `and say why in the PR.`,
     )
   }
 }
