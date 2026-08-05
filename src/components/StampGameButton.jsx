@@ -3,7 +3,7 @@ import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../lib/stamps.js'
 import { logbookPath, logbookPlacePath } from '../lib/route.js'
-import { SectionMasthead } from './SectionMasthead.jsx'
+import { SectionMasthead } from './ui/SectionMasthead.jsx'
 import { GameStamp } from './GameStamp.jsx'
 
 // The mint affordance for a Logbook stamp (ADR-0035).

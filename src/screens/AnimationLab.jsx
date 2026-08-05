@@ -1,7 +1,7 @@
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/BoxScoreSkeleton.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'
 import { PostponedBanner } from '../components/GameCard.jsx'
 import { CountBlink } from '../components/StatBox.jsx'

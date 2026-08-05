@@ -1,4 +1,4 @@
-import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { HexField } from '../HexField.jsx'
 import { shiftStepKeys } from './numberSteps.js'
 

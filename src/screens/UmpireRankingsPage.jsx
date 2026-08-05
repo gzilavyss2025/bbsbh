@@ -6,8 +6,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { UmpireLink } from '../components/UmpireLink.jsx'
-import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
-import { HomePlateIcon } from '../components/UmpireTierGlyph.jsx'
+import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
+import { HomePlateIcon } from '../components/badges/UmpireTierGlyph.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`

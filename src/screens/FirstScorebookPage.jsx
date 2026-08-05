@@ -6,7 +6,7 @@ import { gamePath } from '../lib/route.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { TeamLogo } from '../components/TeamLogo.jsx'
 import { Headshot } from '../components/Headshot.jsx'
-import { Loader } from '../components/Loader.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
 const FULL_DATE = new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' })

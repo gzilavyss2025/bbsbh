@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAsync } from '../hooks/useAsync.js'
-import { Loader } from '../components/Loader.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 import { Scorecard } from './Scorecard.jsx'
 import { loadScorecardGame, scorecardFull } from '../api/loadScorecard.js'
 

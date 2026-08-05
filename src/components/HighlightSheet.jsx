@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { highlightPlaybacks } from '../api/highlights.js'
-import { ModalPortal } from './ModalPortal.jsx'
+import { ModalPortal } from './ui/ModalPortal.jsx'
 
 // The video-highlight bottom sheet: opened from a "Watch highlight" button on
 // an already-revealed play (see PlayByPlay.jsx). Reuses the app's existing

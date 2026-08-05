@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { BATTER_METRICS, PITCHER_METRICS, radarSpokes } from '../api/savantPercentiles.js'
-import { FlipCard } from './FlipCard.jsx'
-import { StatcastCard } from './StatcastCard.jsx'
-import { StatRadar } from './playercard/StatRadar.jsx'
+import { BATTER_METRICS, PITCHER_METRICS, radarSpokes } from '../../api/savantPercentiles.js'
+import { FlipCard } from '../ui/FlipCard.jsx'
+import { StatcastCard } from '../StatcastCard.jsx'
+import { StatRadar } from '../playercard/StatRadar.jsx'
 
 // STATCAST — season percentile ranks (Baseball Savant), one small card per
 // metric rather than a bar chart mimicking Savant's own — reuses the

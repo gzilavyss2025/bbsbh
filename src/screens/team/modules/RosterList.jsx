@@ -1,7 +1,7 @@
 import { PlayerLink } from '../../../components/PlayerLink.jsx'
-import { InjuredMark } from '../../../components/InjuredMark.jsx'
-import { ProspectPill } from '../../../components/ProspectPill.jsx'
-import { RookiePill } from '../../../components/RookiePill.jsx'
+import { InjuredMark } from '../../../components/badges/InjuredMark.jsx'
+import { ProspectPill } from '../../../components/badges/ProspectPill.jsx'
+import { RookiePill } from '../../../components/badges/RookiePill.jsx'
 
 const DASH = '—'
 

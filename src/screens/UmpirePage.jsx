@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
 import { UmpireZoneMap } from '../components/UmpireAccuracyModal.jsx'
-import { UmpireTierPill } from '../components/UmpireTierPill.jsx'
+import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { gamePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'

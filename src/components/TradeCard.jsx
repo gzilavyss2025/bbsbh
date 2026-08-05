@@ -2,7 +2,7 @@ import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { Headshot } from './Headshot.jsx'
-import { ProspectPill } from './ProspectPill.jsx'
+import { ProspectPill } from './badges/ProspectPill.jsx'
 import { teamFullName } from '../lib/teams.js'
 
 // The stats-to-date block under a traded player's name — one line for an MLB

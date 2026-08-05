@@ -3,14 +3,14 @@ import { computeLeaders } from '../api/teamLeaders.js'
 import { splitDisplayName } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { SPORT_LABEL, favoriteAccentColor, isMlbTeamId } from '../lib/teams.js'
-import { SectionTitle } from './SectionTitle.jsx'
+import { SectionTitle } from './ui/SectionTitle.jsx'
 import { Headshot } from './Headshot.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
-import { ProspectPill } from './ProspectPill.jsx'
-import { InjuredMark } from './InjuredMark.jsx'
+import { ProspectPill } from './badges/ProspectPill.jsx'
+import { InjuredMark } from './badges/InjuredMark.jsx'
 import { DeckNudge } from './DeckNudge.jsx'
-import { ChevronLink } from './ChevronLink.jsx'
+import { ChevronLink } from './ui/ChevronLink.jsx'
 
 // The horizontal deck's per-card scroll step (card width + gap, both from
 // .tlead__grid--horizontal in index.css) — DeckNudge's click target.

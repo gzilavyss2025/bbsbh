@@ -4,7 +4,7 @@ import { resolveGame } from './api/schedule.js'
 import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
-import { Loader } from './components/Loader.jsx'
+import { Loader } from './components/ui/Loader.jsx'
 import {
   parseRoute,
   gamePath,

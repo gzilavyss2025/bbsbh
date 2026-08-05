@@ -2,7 +2,7 @@ import { Headshot } from './Headshot.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 import { TeamLink } from './TeamLink.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
-import { ProspectPill } from './ProspectPill.jsx'
+import { ProspectPill } from './badges/ProspectPill.jsx'
 import { isMlbTeamId } from '../lib/teams.js'
 
 // "Tyler Tolbert" -> ["Tyler", "Tolbert"] (everything after the first space).

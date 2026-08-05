@@ -1,6 +1,6 @@
 import { SiteHeader } from './SiteHeader.jsx'
 import { BackBtn } from './BackBtn.jsx'
-import { Loader } from './Loader.jsx'
+import { Loader } from './ui/Loader.jsx'
 
 // The cold-load loading/error/not-found screen shared by PlayerPage and
 // TeamPage: while there's no data yet, show "Loading {noun}…"; if the fetch

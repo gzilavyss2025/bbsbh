@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill } from '../api/rookies.js'
 import { PlayerLink } from './PlayerLink.jsx'
-import { ProspectPill } from './ProspectPill.jsx'
-import { RookiePill } from './RookiePill.jsx'
+import { ProspectPill } from './badges/ProspectPill.jsx'
+import { RookiePill } from './badges/RookiePill.jsx'
 
 // Persistent roster reference, collapsed by default: starters (who won't
 // enter once the rotation's set), the bullpen (with handedness as LHP/RHP),

@@ -1,5 +1,5 @@
-import { leagueLogoUrl } from '../lib/teams.js'
-import { TeamLogo } from './TeamLogo.jsx'
+import { leagueLogoUrl } from '../../lib/teams.js'
+import { TeamLogo } from '../TeamLogo.jsx'
 
 // A neutral "prospect" pill (not a performance judgment) for a game's own
 // pages (lineups, rosters): the MLB Pipeline mark + overall rank when the

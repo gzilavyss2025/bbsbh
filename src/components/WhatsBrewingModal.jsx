@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Loader } from './Loader.jsx'
+import { Loader } from './ui/Loader.jsx'
 
 // What's Brewing — a bottom-sheet modal that surfaces the narrative blurbs from
 // the Brewers' pre-game Game Notes PDF (Hulk Logan, Don't Pitch to Mitch, …) as

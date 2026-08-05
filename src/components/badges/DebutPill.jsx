@@ -1,4 +1,4 @@
-import { leagueLogoUrl } from '../lib/teams.js'
+import { leagueLogoUrl } from '../../lib/teams.js'
 
 // A minimal MLB-shield pill with no rank/text — marks that a roster/lineup
 // row's player has appeared in a Major League game before, so a name sitting

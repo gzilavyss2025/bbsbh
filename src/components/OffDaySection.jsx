@@ -1,5 +1,5 @@
 import { TeamLogo } from './TeamLogo.jsx'
-import { BreakableLocation } from './BreakableLocation.jsx'
+import { BreakableLocation } from './ui/BreakableLocation.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
 import { splitName } from '../lib/teamSplits.js'

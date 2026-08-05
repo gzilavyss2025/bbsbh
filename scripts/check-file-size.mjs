@@ -117,7 +117,7 @@ const BUDGETS = {
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629
   'scripts/gen-former-teammates.mjs': 700, // 614
-  'src/components/WinProbChart.jsx': 700, // 612
+  'src/components/charts/WinProbChart.jsx': 700, // 612
 }
 
 function walk(dir, out = []) {

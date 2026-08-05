@@ -3,7 +3,7 @@ import { fetchGamePhotos, withoutGraphics } from '../api/gamePhotos.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePhotosPath } from '../lib/route.js'
-import { SectionMasthead } from './SectionMasthead.jsx'
+import { SectionMasthead } from './ui/SectionMasthead.jsx'
 
 // This game's high-res photo thumbnails, capped by the same navy/gold
 // masthead as Lineup Strength / Bullpen Tonight, with a "VIEW ALL" shortcut

@@ -1,5 +1,5 @@
 import { ordinal } from '../lib/format.js'
-import { InjuredMark } from './InjuredMark.jsx'
+import { InjuredMark } from './badges/InjuredMark.jsx'
 import { PlayerLink } from './PlayerLink.jsx'
 
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:

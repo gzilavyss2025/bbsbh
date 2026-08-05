@@ -5,7 +5,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { monthDayYear } from '../lib/dates.js'
-import { SectionMasthead } from './SectionMasthead.jsx'
+import { SectionMasthead } from './ui/SectionMasthead.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
 // This season's other meetings between the two clubs, as a scrollable strip

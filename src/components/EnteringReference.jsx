@@ -7,8 +7,8 @@ import { showRookiePill } from '../api/rookies.js'
 import { ordinal } from '../lib/format.js'
 import { PlayerLink } from './PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
-import { ProspectPill } from './ProspectPill.jsx'
-import { RookiePill } from './RookiePill.jsx'
+import { ProspectPill } from './badges/ProspectPill.jsx'
+import { RookiePill } from './badges/RookiePill.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
 
 // The pre-scoring reference for a half: both teams' lineup cards + the fielding
