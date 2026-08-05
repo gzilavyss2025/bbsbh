@@ -90,6 +90,20 @@ A grep for `Logbook` that returns hits in `src/lib/stamps.js`, `src/lib/stampArt
 `api/stamps.js`, `src/hooks/useStamps.js`, or any `*.css` is finding **comments and
 identifiers**. Leave them.
 
+### Known collision: the player page's "Game log"
+
+**`PlayerPage.jsx` already renders a section titled "Game log"** — a player's
+game-by-game stat ledger, the back of his baseball card (`src/api/person/gameLog.js`).
+That is a completely different thing from this feature, and the two names now
+collide.
+
+They are distinguishable in practice — the player page's is a sentence-case
+section heading deep inside one player's page, this one is a title-case top-level
+destination in the site chrome — and no surface shows both. **It is nonetheless an
+unresolved product decision, not a settled one.** Options if it proves confusing:
+rename the player-page section (it is the back-of-the-card *ledger* or *game-by-game*),
+or rename this feature. Do not resolve it silently in either direction; raise it.
+
 ---
 
 ## 3. Narrative and marketing copy — read this twice
@@ -319,6 +333,8 @@ unknown to us.
 
 ## 7. Open threads
 
+- **The "Game log" name collision with the player page's stat ledger** — §2,
+  undecided.
 - `attended` as a third mode, with its own overprint on the stamp art (§4.2).
 - The retrospective is counts and records today; the PRD sketches more (who raked
   in the games you personally sat through) that has not been built.
