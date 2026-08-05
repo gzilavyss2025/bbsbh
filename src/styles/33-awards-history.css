@@ -330,13 +330,15 @@
 
 /* The By Award / By Year toggle — reuses the slate's .levelnav segmented
    control look rather than a bespoke switch, right-aligned beside the page
-   title on the same row (same convention as .topbar--slate's level toggle). */
+   title on the same row (same convention as .topbar--slate's level toggle).
+   Only two cells with dissimilar-length labels, so unlike the level toggle
+   this opts OUT of .levelnav's equal-width columns back to content sizing. */
 .awardhistory__grouptoggle {
+  grid-auto-columns: auto;
   flex: 0 0 auto;
   margin: 0;
 }
 .awardhistory__grouptoggle .levelnav__btn {
-  flex: 0 0 auto;
   min-height: 30px;
   padding: 0 10px;
   font-size: var(--fs-caption);

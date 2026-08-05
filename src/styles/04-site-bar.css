@@ -40,7 +40,8 @@
   gap: 2px;
 }
 .sitesearch-btn,
-.sitemenu-btn {
+.sitemenu-btn,
+.logbook-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -53,7 +54,8 @@
   cursor: pointer;
 }
 .sitesearch-btn:active,
-.sitemenu-btn:active {
+.sitemenu-btn:active,
+.logbook-btn:active {
   background: var(--surface-inset);
 }
 
