@@ -557,26 +557,3 @@
   text-decoration-thickness: 1.5px;
 }
 
-/* ---------------------------------------------------------------- reveal all */
-.revealscore {
-  border: var(--bw-rule) solid var(--clay);
-  background: var(--clay-soft);
-  color: var(--clay-deep);
-  border-radius: var(--radius-pill);
-  padding: 8px 14px;
-  min-height: 36px;
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.revealscore--done {
-  color: var(--text-caption);
-  border-color: var(--border-rule);
-  background: var(--surface-card);
-}
-

@@ -161,10 +161,6 @@ export const FIELDS = [
 const FIELD_BY_ID = new Map(FIELDS.map((f) => [f.id, f]))
 export const FIELD_IDS = FIELDS.map((f) => f.id)
 
-export function getField(id) {
-  return FIELD_BY_ID.get(id) || null
-}
-
 // The shipped defaults as a flat { id: text } map — what the app renders with
 // no copy store at all.
 export function defaultCopy() {

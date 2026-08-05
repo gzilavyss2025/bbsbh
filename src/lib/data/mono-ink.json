@@ -279,7 +279,9 @@
     "name": "Las Vegas Aviators",
     "art": "6:26af69cb",
     "parts": {
-      "0": "knockout"
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout"
     }
   },
   "401": {
@@ -353,9 +355,12 @@
       "5": "knockout",
       "6": "knockout",
       "7": "knockout",
+      "9": "knockout",
       "11": "knockout",
+      "12": "knockout",
       "13": "knockout",
-      "15": "knockout"
+      "15": "knockout",
+      "20": "knockout"
     }
   },
   "436": {
@@ -467,10 +472,11 @@
     "art": "9:2fa07b56",
     "parts": {
       "0": "knockout",
-      "2": "knockout",
-      "3": "knockout",
-      "4": "knockout",
-      "6": "ink"
+      "1": "knockout",
+      "3": "ink",
+      "6": "ink",
+      "7": "knockout",
+      "8": "knockout"
     }
   },
   "507": {
@@ -622,6 +628,23 @@
       "6": "knockout",
       "7": "knockout",
       "8": "knockout"
+    }
+  },
+  "564": {
+    "name": "Jacksonville Jumbo Shrimp",
+    "art": "19:8e147b50",
+    "parts": {
+      "0": "ink",
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "11": "knockout",
+      "13": "knockout",
+      "14": "knockout"
     }
   },
   "566": {
