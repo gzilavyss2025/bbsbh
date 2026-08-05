@@ -1,6 +1,7 @@
 import { useNav } from '../lib/nav.js'
 import { REPORT_PAGES } from '../lib/reportPages.js'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
+import { BuildStamp } from './ui/BuildStamp.jsx'
 
 // Same list + trailing About link SiteFooter.jsx uses — kept as its own
 // direct import (not re-exported from SiteFooter) so scripts/check-report-pages.mjs
@@ -44,7 +45,10 @@ export function ReportFooter() {
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
         <p>Built for keeping score by hand. Game results stay sealed until opened.</p>
-        <p>© {YEAR}</p>
+        <p>
+          © {YEAR}
+          <BuildStamp />
+        </p>
       </div>
     </footer>
   )
