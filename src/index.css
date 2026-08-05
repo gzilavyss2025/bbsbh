@@ -19403,11 +19403,17 @@ body {
 }
 
 /* Last 10 Games — ticket-stub cards, one per recently decided game, in a
-   horizontally-scrolling strip above the Schedule strip below (LastTenGamesStrip
-   in TeamPage.jsx). Nav chrome and scroll wiring mirror .seasonseries__nav/
-   __strip exactly. Ordered oldest -> newest, same direction as .sstrip below
-   it, so the two strips never scan in mirror directions; opens pre-scrolled
-   to the newest card. */
+   horizontally-scrolling strip on the Overview (LastTenGamesStrip in
+   modules/TeamGames.jsx). Nav chrome and scroll wiring mirror
+   .seasonseries__nav/__strip exactly. Ordered oldest -> newest, same direction
+   as .sstrip, so the two strips never scan in mirror directions; opens
+   pre-scrolled to the newest card.
+
+   TWO surfaces share the CARD half of this block (.last10__card and its
+   children): this strip, and the Games tab's .gamesgrid below — same ticket
+   stub, laid out in a wrapping grid instead of a rail. The `last10__` prefix
+   predates that split and is kept rather than renamed through ~40 rules; only
+   the rail chrome (.last10, __nav, __track) is actually last-ten-specific. */
 .last10 {
   display: flex;
   align-items: center;
@@ -19457,19 +19463,6 @@ body {
 .last10__track::-webkit-scrollbar {
   display: none;
 }
-/* Invisible IntersectionObserver target at the leading edge of the track —
-   scrolling it into view is what grows the rendered window toward Opening
-   Day (see LastTenGamesStrip). Needs a nonzero size to register reliably;
-   never rendered, styled, or otherwise visible. */
-.last10__sentinel {
-  flex: 0 0 1px;
-  width: 1px;
-  height: 150px;
-  /* A snap target of its own — without one, proximity snapping settles on
-     the first CARD instead, which can rest just past this sentinel and
-     leave it (and its IntersectionObserver) never actually reached. */
-  scroll-snap-align: start;
-}
 /* Ticket-stub card: a torn calendar leaf (date) over a dashed tear-line over
    a full-width win/loss ink stamp, the score printed last. Left-aligned, not
    centered, even when the strip is short — the ragged right edge is itself
@@ -19478,7 +19471,11 @@ body {
 .last10__card {
   flex: 0 0 100px;
   width: 100px;
-  height: 150px;
+  /* min-, not a fixed height: a game carrying a meta line ("Gm 2", "11 inn")
+     is ~14px taller than one without, and a hard 150px clipped that line off
+     under `overflow: hidden`. Both layouts stretch their items, so the row (or
+     the strip) still ends up with cards of one height — the tallest one's. */
+  min-height: 150px;
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
@@ -19619,6 +19616,55 @@ body {
   font-size: var(--fs-caption);
   color: var(--text-caption);
   margin-top: 2px;
+}
+
+/* Every decided game, on the Games tab (AllGames in modules/TeamGames.jsx) —
+   the same ticket stubs as the strip above, laid out IN the page instead of on
+   a rail: the tab that owns games shows the whole season, and a sideways rail
+   is the wrong shape for a hundred-odd of them. Deliberately heading-less (the
+   Schedule strip above it already names the season), and capped at a screenful
+   with a "Show more" underneath.
+
+   auto-fill at the stub's own 100px width settles on three columns on a phone
+   and more as the frame widens, so the card keeps its shape at every size and
+   the page scrolls DOWN through the season rather than sideways. */
+.gamesgrid {
+  margin-top: var(--space-4);
+}
+.gamesgrid__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+/* The stub is a fixed-width rail item by default (see .last10__card); in the
+   grid the track sizes it, and there's no scroll container left to snap to. */
+.gamesgrid .last10__card {
+  flex: initial;
+  width: auto;
+  scroll-snap-align: none;
+}
+/* Same full-width block affordance as .teammates__more / .marginnotes__more. */
+.gamesgrid__more {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.gamesgrid__more:hover {
+  color: var(--text-body);
+}
+.gamesgrid__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* Team Page Photos rail — professional camera stills of this club, lazily
