@@ -576,6 +576,22 @@ process automatically.
   when Claude works in that directory, so the always-loaded root stays cheap. When
   it fails, move detail into the relevant nested file or `docs/*` and leave a pointer
   in root — don't just raise the cap.
+- `check-dir-size.mjs` — caps source files per directory (`MAX_FILES` 12) across
+  `src/`, `api/`, `scripts/`, giving the "flat directories don't stay flat" rule in
+  root `CLAUDE.md` the enforcement it never had (that rule was broken to 126 files
+  in `src/components`). A **ratchet**: the seven directories already over the line
+  carry a `BUDGETS` entry pinned at today's count, editable DOWNWARD only, and it
+  fails if one grows past its budget *or* shrinks below it without the number being
+  tightened in the same commit — so a cleanup has to record itself and the table can
+  only shrink. See ADR-0038.
+- `check-file-size.mjs` — caps lines per source file (`MAX_LINES` 600, between p90
+  and p99 of the repo's 481 source files), to catch the next 2,620-line `person.js`
+  while splitting it is still cheap. Deliberately a **weaker** ratchet than its
+  sibling: line counts churn every commit, so a budget here is a ceiling (growth
+  fails, shrinkage is free) and rot is bounded from the other end — a file back
+  under 600 lines must surrender its entry. `src/index.css` is listed at 29,828 so
+  that splitting it FORCES one entry per oversized partial rather than laundering
+  the debt. See ADR-0038.
 - `check-dist-dev-routes.mjs` — post-build (not part of `npm run lint`, since it
   inspects `dist/`): fails if a dev-only save endpoint string reaches the
   production bundle, and equally if `dist/team-logos/` comes out empty. Both
