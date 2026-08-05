@@ -22,9 +22,10 @@ import {
 // disagree about what a valid stamp is); this hook owns only the storage I/O and
 // the React wiring.
 //
-// LOCAL-FIRST, and that is not a fallback posture — it is the design. A
-// signed-out user gets a working Logbook on this device; signing in merges the
-// collection upward through StampsCloudSync. Clerk stays optional, exactly as it
+// LOCAL-FIRST, and that is not a fallback posture — it is the design. Stamps
+// minted before sign-in still land on this device; signing in merges that local
+// collection upward through StampsCloudSync before LogbookPage renders the book.
+// A deploy without Clerk continues to use this store directly, exactly as it
 // does for the reveal mark and the spoiled-day map.
 //
 // WHAT IS NOT IN HERE: the score. A local record is
