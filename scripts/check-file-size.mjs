@@ -86,7 +86,7 @@ const BUDGETS = {
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
   'src/styles/26-player-page.css': 1400, // 1383
-  'src/styles/27-player-position-innings.css': 800, // 706
+  'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 50-similar-players.css
   'src/styles/28-team-hub.css': 1000, // 984
   'src/styles/29-team-transactions.css': 900, // 844
   'src/styles/31-wild-card.css': 1100, // 1088
