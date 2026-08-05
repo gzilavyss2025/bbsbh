@@ -106,4 +106,14 @@
   --batted-line:   #2F6E4F; /* outfield green */
   --batted-fly:    #1B2A3A; /* navy */
   --batted-pop:    #938C7C; /* graphite-soft */
+
+  /* ---- ESPN Unlimited badge (NationalTvIcon, GameCard.jsx) ---- a
+     third-party network's own brand red, not a paper-scorebook system color:
+     ESPN's Unlimited streaming tier shares the plain ESPN wordmark (no
+     distinct logo exists), so the "UNLMTD" tag appended after it borrows
+     ESPN's real red rather than an app accent, so it reads as ESPN's own
+     branding. Picked from among several cited hex values for the one that
+     also clears WCAG AA against --surface-card at --fs-caption size
+     (check-contrast.mjs). */
+  --espn-red: #D4001A;
 }
