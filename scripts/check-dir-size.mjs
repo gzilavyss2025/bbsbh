@@ -45,7 +45,7 @@ const BUDGETS = {
   'src/components': 125,
   'src/api': 84,
   scripts: 67,
-  'src/lib': 52,
+  'src/lib': 50,
   'src/screens': 38,
   'src/hooks': 19,
   'src/screens/identity-lab': 15,

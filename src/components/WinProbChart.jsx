@@ -1,7 +1,7 @@
 import { useId, useState } from 'react'
 import { winProbSplit } from '../api/winprob.js'
-import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../lib/wpaBandColors.js'
-import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpaLogo.js'
+import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../lib/wpa/wpaBandColors.js'
+import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpa/wpaLogo.js'
 import { isMlbTeamId } from '../lib/teams.js'
 import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../lib/milbColors.js'
 import { useWpaLogo } from '../hooks/useWpaLogo.js'
@@ -69,7 +69,7 @@ const PLOT_H = PLOT_B - PLOT_T
 // offset so it reads as wallpaper the eye stumbles into mid-pattern rather
 // than one anchored at the plot's corner. All of that geometry (the
 // per-(team, treatment) layout table, its defaults, and the tile placement
-// math) lives in lib/wpaLogo.js alongside the art resolver, pure and
+// math) lives in lib/wpa/wpaLogo.js alongside the art resolver, pure and
 // unit-tested (test/wpa-logo.test.js); the two dev labs that preview this
 // texture read the same helpers, so a preview can't drift from what ships.
 //
@@ -88,7 +88,7 @@ const PLOT_H = PLOT_B - PLOT_T
 //
 // The band fill/pinstripe resolution (WPA_PLOT_SIZE, BAND_COLOR_OVERRIDES,
 // WPA_TREATMENT_BAND_COLOR_OVERRIDES, wpaBandColor, wpaBandPinstripeColor,
-// chipColorsFor) lives in lib/wpaBandColors.js — pure data/functions kept out
+// chipColorsFor) lives in lib/wpa/wpaBandColors.js — pure data/functions kept out
 // of this file so it can stay component-only for Fast Refresh; the two dev
 // labs that preview this texture import the same helpers from there.
 

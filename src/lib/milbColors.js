@@ -1,5 +1,8 @@
-import { WPA_LOGO_DEFAULTS } from './wpaLogo.js'
-import { DEFAULT_PINSTRIPE_COLOR } from './wpaBandColors.js'
+// Both come from the dependency-free leaf rather than from wpa/wpaLogo.js /
+// wpa/wpaBandColors.js on purpose: this module is on the eager first-paint path
+// (headerTheme.js -> SiteHeader), and importing them from their home modules
+// pulled data/wpa-tuning.json into the entry chunk. See lib/wpaDefaults.js.
+import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from './wpa/wpaDefaults.js'
 import { byTreatment } from './tuningStore.js'
 import { teamLogoUrl } from './teams.js'
 import { customMarkFor } from './customMarks.js'
@@ -74,7 +77,7 @@ export const MILB_COLOR_LAB_LEVELS = [
 // ---------------------------------------------------------------------------
 // Hand-tuning tables (Phase 2) — same shape/naming convention as teams.js's
 // MLB tables (TREATMENT_SCALE/TREATMENT_OFFSET_X/Y, MAIN_OVERRIDES) and
-// lib/wpaLogo.js / lib/wpaBandColors.js's WPA_LOGO_LAYOUT_OVERRIDES /
+// lib/wpa/wpaLogo.js / lib/wpa/wpaBandColors.js's WPA_LOGO_LAYOUT_OVERRIDES /
 // WPA_TREATMENT_BAND_COLOR_OVERRIDES / TREATMENT_HEADER_COLOR_OVERRIDES —
 // just keyed by `'home'`/`'away'` instead of an MLB treatment key, and kept
 // in this MiLB-only file so nothing here can collide with or drift against
@@ -130,7 +133,7 @@ export function milbLogoPosition(teamId, variant, draft) {
 }
 
 // Same merge chain, for the WPA band's logo tile layout — mirrors
-// lib/wpaLogo.js's wpaLogoLayout, against MILB_WPA_LOGO_LAYOUT_OVERRIDES
+// lib/wpa/wpaLogo.js's wpaLogoLayout, against MILB_WPA_LOGO_LAYOUT_OVERRIDES
 // instead of that file's MLB-keyed table. `WPA_LOGO_DEFAULTS` (imported) is
 // the one piece of shared ground truth with the real chart, so a MiLB tile
 // with no override at all still renders at the exact same tile geometry a
@@ -176,7 +179,7 @@ export function milbWpaBandColor(teamId, variant, draft) {
 // The colored fill under a pinstriped WPA band's lines, or null for the
 // plain-white default — same draft-beats-curated chain as
 // milbWpaBandPinstripeColor, mirroring MLB's wpaBandPinstripeBg
-// (wpaBandColors.js).
+// (wpa/wpaBandColors.js).
 export function milbWpaBandFillColor(teamId, variant, draft) {
   if (draft?.bandBg !== undefined) return draft.bandBg || null
   const override = MILB_WPA_BAND_COLOR_OVERRIDES[teamId]?.[variant]

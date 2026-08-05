@@ -5,10 +5,11 @@
 // screens/identity-lab/profiles/pattern.jsx). Pure string/number math over teams.js's URL
 // builders, deliberately kept out of the chart's .jsx so it's unit-testable
 // (test/wpa-logo.test.js).
-import { teamLogoUrl } from './teams.js'
-import { byTreatment } from './tuningStore.js'
-import { wpaArtUrl } from './logoArt.js'
-import WPA_TUNING from './data/wpa-tuning.json' with { type: 'json' }
+import { teamLogoUrl } from '../teams.js'
+import { byTreatment } from '../tuningStore.js'
+import { wpaArtUrl } from '../logoArt.js'
+import { WPA_LOGO_DEFAULTS } from './wpaDefaults.js'
+import WPA_TUNING from '../data/wpa-tuning.json' with { type: 'json' }
 
 // The WPA band's own hand-tuned store (src/lib/data/wpa-tuning.json), shared
 // with wpaBandColors.js — one file per dimension, so a club's band color and
@@ -198,10 +199,10 @@ export function wpaLogoWithFallback(teamId, treatment, artMissing) {
 // patternTransform) tilt and shift the whole grid off-axis, so the wallpaper
 // reads as something the eye stumbles into mid-pattern rather than a grid
 // anchored at the plot's top-left corner.
-const LOGO_SIZE = 20
-const LOGO_ROTATE = -14
-const LOGO_OFFSET_X = 8
-const LOGO_OFFSET_Y = 6
+const LOGO_SIZE = WPA_LOGO_DEFAULTS.size
+const LOGO_ROTATE = WPA_LOGO_DEFAULTS.rotate
+const LOGO_OFFSET_X = WPA_LOGO_DEFAULTS.offsetX
+const LOGO_OFFSET_Y = WPA_LOGO_DEFAULTS.offsetY
 // The tile's margins — the gap between one logo and the next tile's logo
 // directly beside (paddingX) or above/below (paddingY) it, in the pattern's
 // own coordinate system, pre-rotation. The two are independent, so a tile can
@@ -209,29 +210,22 @@ const LOGO_OFFSET_Y = 6
 // Negative shrinks the tile smaller than the logo itself, so adjacent tiles'
 // marks overlap on purpose — a deliberate choice for a club whose mark wants
 // to run tighter than its own footprint.
-const LOGO_PADDING_X = 4
-const LOGO_PADDING_Y = 4
+const LOGO_PADDING_X = WPA_LOGO_DEFAULTS.paddingX
+const LOGO_PADDING_Y = WPA_LOGO_DEFAULTS.paddingY
 // How far each row is shifted sideways from the one above it, as a percent of
 // the tile's own width. 50 staggers alternating rows like brickwork; 0 (the
 // default — every club, every treatment) leaves a plain grid, whose columns
 // the pattern's own off-axis rotation already breaks up. Tunable per (team,
 // treatment) via WPA_LOGO_LAYOUT_OVERRIDES.rowShift, previewed as Team Color
 // Lab's "Shift %" field.
-const LOGO_ROW_SHIFT = 0
+const LOGO_ROW_SHIFT = WPA_LOGO_DEFAULTS.rowShift
 
-// The global layout numbers above, exported as one object so a caller (Team
-// Color Lab's WPA logo lab, screens/identity-lab/) can seed its per-team
-// controls at the same defaults this chart uses for every team without a
-// per-team override.
-export const WPA_LOGO_DEFAULTS = {
-  size: LOGO_SIZE,
-  rotate: LOGO_ROTATE,
-  offsetX: LOGO_OFFSET_X,
-  offsetY: LOGO_OFFSET_Y,
-  paddingX: LOGO_PADDING_X,
-  paddingY: LOGO_PADDING_Y,
-  rowShift: LOGO_ROW_SHIFT,
-}
+// Re-exported so this stays the module you import WPA layout defaults from —
+// the values themselves live in the dependency-free lib/wpaDefaults.js leaf, so
+// that a caller who wants ONLY these numbers (lib/milbColors.js, which is on the
+// eager first-paint path) doesn't drag this module and data/wpa-tuning.json into
+// the entry chunk with them. Read wpaDefaults.js before moving them back.
+export { WPA_LOGO_DEFAULTS }
 
 // Layout/color FINE-TUNING for a specific (team, treatment) pairing — e.g. a
 // wide City Connect wordmark needing more tile room than the standard crest.

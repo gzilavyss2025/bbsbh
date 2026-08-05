@@ -103,7 +103,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
-| wpa-logo.test.js | 18 | src/lib/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
+| wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 
 Last full audit: 2026-07-31 — all 88 files' imports resolved, all features traced to
 a currently-documented behavior, no dead code found. Two soft consolidation
