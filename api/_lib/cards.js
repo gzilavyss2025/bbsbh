@@ -152,7 +152,40 @@ async function playerCard(id, origin) {
   }
 }
 
-async function teamCard(id, origin, { leaders = false } = {}) {
+// The team-hub tab a card is built for (see src/CLAUDE.md's "the team hub" —
+// Overview/bare `/team/{id}` is the untagged default, plus the five real
+// tabs). Exported so its shape is unit-testable without a network call —
+// each tab needs a non-empty eyebrow and a description that's actually about
+// that tab, not a copy-paste of another one.
+export const TEAM_TABS = {
+  leaders: {
+    suffix: ' — Team Leaders',
+    eyebrow: 'TEAM LEADERS',
+    description: (name) => `${name} statistical leaders — spoiler-safe. Every level, every category.`,
+  },
+  roster: {
+    suffix: ' — Roster',
+    eyebrow: 'ROSTER',
+    description: (name) => `${name} active roster, injured list, and 40-man — a spoiler-safe scorecard companion.`,
+  },
+  games: {
+    suffix: ' — Games',
+    eyebrow: 'GAMES',
+    description: (name) => `${name} schedule and every decided game this season — a spoiler-safe scorecard companion.`,
+  },
+  numbers: {
+    suffix: ' — Numbers',
+    eyebrow: 'NUMBERS',
+    description: (name) => `${name} standings, ranks, and leaders — a spoiler-safe scorecard companion.`,
+  },
+  minors: {
+    suffix: ' — Minors',
+    eyebrow: 'MINORS',
+    description: (name) => `${name} affiliates and top prospects — a spoiler-safe scorecard companion.`,
+  },
+}
+
+async function teamCard(id, origin, { tab } = {}) {
   const data = await getJson(`/api/v1/teams/${id}`)
   const t = data.teams?.[0]
   if (!t) return null
@@ -165,11 +198,12 @@ async function teamCard(id, origin, { leaders = false } = {}) {
   const sub = [level, league].filter(Boolean).join(' | ')
   // Cosmetic descriptions still read the old league · division wording.
   const descBits = clean([t.league?.name, t.division?.name].filter(Boolean).join(' · '))
-  const eyebrow = leaders ? 'TEAM LEADERS' : ''
+  const cfg = tab ? TEAM_TABS[tab] : null
+  const eyebrow = cfg?.eyebrow || ''
   return {
-    title: `${name}${leaders ? ' — Team Leaders' : ''} — Tally Baseball`,
-    description: leaders
-      ? `${name} statistical leaders — spoiler-safe. Every level, every category.`
+    title: `${name}${cfg?.suffix || ''} — Tally Baseball`,
+    description: cfg
+      ? cfg.description(name)
       : descBits
         ? `${descBits}. Roster, leaders, and schedule — a spoiler-safe scorecard companion.`
         : `Roster, leaders, and schedule — a spoiler-safe scorecard companion.`,
@@ -220,6 +254,18 @@ const GENERIC = {
   rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
   about: { eyebrow: 'ABOUT', title: 'Tally Baseball', sub: 'Keep score. Keep the surprise.' },
   logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
+  fouls: { eyebrow: 'FOUL TRACKER', title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
+  milestones: { eyebrow: 'MILESTONE WATCH', title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
+  umpires: { eyebrow: 'UMPIRE RANKINGS', title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
+  awards: { eyebrow: 'AWARDS HISTORY', title: 'Awards History', sub: 'MVP, Cy Young, Rookie of the Year, and more — five seasons back.' },
+  'postseason-history': { eyebrow: 'POSTSEASON HISTORY', title: 'Postseason History', sub: 'Every bracket back to 2000, series by series.' },
+  'postseason-leaders': { eyebrow: 'POSTSEASON LEADERS', title: 'Postseason Leaders', sub: 'Career playoff batting and pitching leaders since 2000.' },
+  'trade-deadline': { eyebrow: 'TRADE DEADLINE', title: 'Trade Deadline', sub: "This year's deadline moves, tracked as they happen." },
+  'all-star-rosters': { eyebrow: 'ALL-STAR GAME', title: 'All-Star Rosters', sub: 'Every All-Star roster, year over year back to 1933.' },
+  'all-star-legacy': { eyebrow: 'ALL-STAR LEGACY', title: 'All-Star Legacy', sub: 'Career All-Star selections and honors, franchise by franchise.' },
+  logbook: { eyebrow: 'LOGBOOK', title: 'Logbook', sub: "A passport of the games you've scored — every stamp your own." },
+  'first-scorebook': { eyebrow: 'MY FIRST SCOREBOOK', title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
+  photos: { eyebrow: 'GAME PHOTOS', title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
 }
 
 function genericCard(route, origin) {
@@ -245,7 +291,15 @@ export async function buildCard(params, origin) {
       case 'team':
         return await teamCard(params.get('id'), origin)
       case 'team-leaders':
-        return await teamCard(params.get('id'), origin, { leaders: true })
+        return await teamCard(params.get('id'), origin, { tab: 'leaders' })
+      case 'team-roster':
+        return await teamCard(params.get('id'), origin, { tab: 'roster' })
+      case 'team-games':
+        return await teamCard(params.get('id'), origin, { tab: 'games' })
+      case 'team-numbers':
+        return await teamCard(params.get('id'), origin, { tab: 'numbers' })
+      case 'team-minors':
+        return await teamCard(params.get('id'), origin, { tab: 'minors' })
       case 'game':
         return await gameCard(params.get('date'), params.get('matchup'), origin)
       case 'leaders-org':
@@ -256,6 +310,18 @@ export async function buildCard(params, origin) {
       case 'rehab':
       case 'about':
       case 'logos':
+      case 'fouls':
+      case 'milestones':
+      case 'umpires':
+      case 'awards':
+      case 'postseason-history':
+      case 'postseason-leaders':
+      case 'trade-deadline':
+      case 'all-star-rosters':
+      case 'all-star-legacy':
+      case 'logbook':
+      case 'first-scorebook':
+      case 'photos':
         return genericCard(route, origin)
       default:
         return null
