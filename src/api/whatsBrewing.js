@@ -36,8 +36,6 @@
 
 import { BREWERS_ID, PIRATES_ID } from './whatsBrewingClubs.js'
 
-export { BREWERS_ID, PIRATES_ID }
-
 // Per-club parse calibration. `layout` selects the algorithm; the rest are that
 // layout's tunables (read off the club's PDF with the font/geometry dumper —
 // see docs/whats-brewing.md "Extending to other clubs"). Fonts are matched by
