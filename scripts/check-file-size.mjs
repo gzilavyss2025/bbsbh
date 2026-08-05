@@ -96,7 +96,6 @@ const BUDGETS = {
   'src/styles/44-pre-game-cards.css': 700, // 652
   'src/styles/49-passport-book.css': 1000, // 953
   'src/api/person.js': 2800, // 2706
-  'src/api/callout-notes.js': 2100, // 2080
   'src/api/playbyplay.js': 1800, // 1784
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483
