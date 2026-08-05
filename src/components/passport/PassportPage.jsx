@@ -38,7 +38,21 @@ import { PassportWatermark } from './PassportWatermark.jsx'
 //                 A missing entry is normal (offline, a failed batch), not an
 //                 error; the stamp holds its place with what the local record
 //                 carries, same as the Logbook grid does.
-//   onStampClick  (gamePk) => void — opening that game is the caller's job.
+//   onStampClick  (gamePk) => void — what a tap on a placed stamp MEANS is the
+//                 caller's job (today: open that stamp's options, from which
+//                 the game, a re-placement, and the tray all hang).
+//   selectedPk    the stamp whose options are open, ringed so the bar above
+//                 the book is visibly about THIS keepsake and not another.
+//   movingPk      the stamp being re-placed. It is still on the page — a move
+//                 is not an un-place, and abandoning one must leave the stamp
+//                 exactly where it was — so it is drawn faded. That is what
+//                 makes the ghost read as "here instead of there" rather than
+//                 as a second copy of the same stamp.
+//   landedPk      the stamp just confirmed, which plays the press once — the
+//                 only thing in the book that moves on its own.
+//   onLanded      (gamePk) => void when that press finishes, so the caller can
+//                 forget it. Driven by animationend rather than a timer here,
+//                 so the duration lives in the CSS and nowhere else.
 //   onPageTap     ({ x, y }) => void, fractions of this page box. Only ever
 //                 called while `placing`.
 //   onAddPage     () => void, from the "add a page" control.
@@ -96,6 +110,10 @@ export function PassportPage({
   placing = false,
   pending = null,
   pendingGamePk = null,
+  selectedPk = null,
+  movingPk = null,
+  landedPk = null,
+  onLanded,
 }) {
   const targetRef = useRef(null)
 
@@ -153,11 +171,31 @@ export function PassportPage({
         const placement = stamp?.placement
         if (!placement) return null
         const dateText = stampDate(stamp.date)
+        const selected = selectedPk != null && stamp.gamePk === selectedPk
+        const moving = movingPk != null && stamp.gamePk === movingPk
+        const landed = landedPk != null && stamp.gamePk === landedPk
         return (
           <button
             type="button"
             key={stamp.gamePk}
-            className="passportpage__stamp"
+            className={`passportpage__stamp${selected ? ' passportpage__stamp--selected' : ''}${
+              moving ? ' passportpage__stamp--moving' : ''
+            }${landed ? ' passportpage__stamp--landed' : ''}`}
+            // The press plays once and then this stamp is an ordinary stamp
+            // again. Told rather than timed: a duration written here would be a
+            // second copy of the one in the CSS, free to drift from it.
+            //
+            // `event.target === event.currentTarget` because an animationend
+            // from anything inside GameStamp would bubble to here and end the
+            // press early — the same guard, for the same reason, as the
+            // turning leaf's in PassportBook.jsx.
+            onAnimationEnd={
+              landed
+                ? (event) => {
+                    if (event.target === event.currentTarget) onLanded?.(stamp.gamePk)
+                  }
+                : undefined
+            }
             style={{
               left: `${placement.x * 100}%`,
               top: `${placement.y * 100}%`,

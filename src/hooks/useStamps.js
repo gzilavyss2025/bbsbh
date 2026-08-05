@@ -115,7 +115,17 @@ export function useStamps() {
     function onStorage(e) {
       // `key === null` is a whole-storage clear, which is also our business.
       if (e.key !== STAMPS_KEY && e.key !== null) return
-      setStamps(readStamps())
+      // `() => readStamps()`, NOT `readStamps()` — the difference is a bug, not
+      // a style point. `commit` above persists INSIDE its state updater, which
+      // React runs at render time, but it dispatches the same-tab echo
+      // synchronously right after QUEUEING that updater. An eager read here
+      // therefore runs before the write it is reacting to, and queues the
+      // pre-change collection behind the change: React applies the updater,
+      // then applies this, and the mutation is reverted in state while
+      // localStorage keeps the new value. On /logbook that looked like placing
+      // a stamp doing nothing at all until a reload. Reading from inside the
+      // updater puts the read after the write, where it belongs.
+      setStamps(() => readStamps())
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)

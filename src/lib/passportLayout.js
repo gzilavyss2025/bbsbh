@@ -192,14 +192,38 @@ export function stampsOnPage(stamps, page) {
     .sort((a, b) => a.placement.y - b.placement.y || a.placement.x - b.placement.x)
 }
 
+// The placements a landing spot has to clear on a page. `exceptGamePk` names
+// the stamp being MOVED, and leaving that one out is the whole difference
+// between re-placing a stamp and placing it the first time: a move collides
+// with everything on the page EXCEPT its own current spot, or
+// `nudgeFromCollisions` would shove every small correction a stamp-width off
+// the tap — which is precisely the nudge the user was trying to undo.
+export function otherPlacementsOn(stamps, page, exceptGamePk = null) {
+  const except = Number(exceptGamePk)
+  const skipSelf = Number.isFinite(except) && except > 0
+  return stampsOnPage(stamps, page)
+    .filter((s) => !(skipSelf && Number(s.gamePk) === except))
+    .map((s) => s.placement)
+}
+
+// Whether a page has no room left, from the point of view of the stamp about
+// to land on it. `exceptGamePk` again names the stamp being moved: a full page
+// is NOT full for a keepsake already sitting on it, so nudging one of nine
+// stamps an inch to the left must never be refused with "this page holds 9".
+export function pageIsFullFor(stamps, page, exceptGamePk = null) {
+  return otherPlacementsOn(stamps, page, exceptGamePk).length >= PAGE_CAPACITY
+}
+
 export function pageIsFull(stamps, page) {
-  return stampsOnPage(stamps, page).length >= PAGE_CAPACITY
+  return pageIsFullFor(stamps, page, null)
 }
 
 // The first page with room, or null when every page up to `pageCount` is full.
-export function firstOpenPage(stamps, pageCount) {
+// `exceptGamePk` is passed through for the same reason as above — a stamp
+// looking for somewhere to go must not be told its own page is out of room.
+export function firstOpenPage(stamps, pageCount, exceptGamePk = null) {
   for (let page = 1; page <= Math.min(pageCount, MAX_PAGES); page += 1) {
-    if (!pageIsFull(stamps, page)) return page
+    if (!pageIsFullFor(stamps, page, exceptGamePk)) return page
   }
   return null
 }

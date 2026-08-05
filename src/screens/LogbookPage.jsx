@@ -9,10 +9,10 @@ import {
   PAGE_CAPACITY,
   autoLayout,
   firstOpenPage,
+  otherPlacementsOn,
   pageCountFor,
-  pageIsFull,
+  pageIsFullFor,
   placementFor,
-  stampsOnPage,
 } from '../lib/passportLayout.js'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { ReportFooter } from '../components/ReportFooter.jsx'
@@ -48,6 +48,18 @@ import { PassportCover } from '../components/passport/PassportCover.jsx'
 // that has been minted but not placed waits in the tray above the book — never
 // lost, so abandoning the placement step costs nothing.
 //
+// A PLACEMENT IS NOT PERMANENT. Tapping a stamp that is already on a page opens
+// its options — open the game, move it, or send it back to the tray — and
+// "move it" re-enters the very same placing mode, on a stamp that happens to
+// have a placement already. That is deliberately not a second flow: `place`
+// (src/lib/stamps.js's `placeStamp`) has always been a move as much as a first
+// placement, so the only things a move adds are the three the user can see —
+// the old spot fades while you choose, the page you are moving off does not
+// count the stamp against its own capacity, and the collision nudge ignores
+// the spot you are leaving (otherwise every small correction would be shoved a
+// stamp-width away by the stamp you are correcting). All three live in
+// passportLayout's `otherPlacementsOn`/`pageIsFullFor`, not here.
+//
 // Every number the book is drawn with comes from src/lib/passportLayout.js.
 // Nothing in this file computes a position; if you find yourself typing a
 // coordinate here, it belongs there, where a test can reach it.
@@ -72,6 +84,17 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
   // "confirm or try again" is the whole interaction, and a stamp that landed
   // the moment you touched the page would have no try-again.
   const [pending, setPending] = useState(null)
+  // Which PLACED stamp has its options open. Tapping a stamp in the book used
+  // to navigate straight to its game; it now opens this instead, because a
+  // keepsake you can only ever leave has no way back off a spot you regret.
+  // The extra tap to reach the game is the price, and the grid below the book
+  // still opens one in a single tap.
+  const [selectedPk, setSelectedPk] = useState(null)
+  // The stamp that has JUST been put down, which plays the press once and then
+  // clears itself when the animation reports back. Only ever set by a confirm —
+  // "place them all for me" deliberately does not set it, because nine stamps
+  // pressing at once is a flurry, not a stamping.
+  const [landedPk, setLandedPk] = useState(null)
   // Which spread of the book is open, and how many blank pages this device has
   // added past the last placement. Page count is a local view preference — how
   // many empty pages you keep is not part of the collection (ADR-0036).
@@ -92,6 +115,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
     setSeenPlacing(placing)
     setPlacingPk(placing)
     setPending(null)
+    setSelectedPk(null)
   }
 
   // Facts for the WHOLE collection: the book spans every season, unlike the
@@ -112,6 +136,11 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
   const seasonStamps = useMemo(() => (season ? forSeason(season) : []), [season, forSeason])
 
   const placingStamp = placingPk ? all.find((s) => s.gamePk === placingPk) : null
+  const selectedStamp = selectedPk ? all.find((s) => s.gamePk === selectedPk) : null
+  // A move rather than a first placement — the stamp already sits somewhere.
+  // Every difference between the two is a wording change here plus the two
+  // `except` arguments below; the store makes no distinction at all.
+  const movingFrom = placingStamp?.placement ?? null
 
   // Tapping the page proposes a spot; passportLayout decides where it actually
   // lands, nudging off anything it would badly cover.
@@ -120,10 +149,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
       if (!placingPk) return
       // Everything already on that page counts as taken — except the stamp
       // being moved, which must not be nudged off its own current spot.
-      const taken = stampsOnPage(all, page)
-        .filter((s) => s.gamePk !== placingPk)
-        .map((s) => s.placement)
-      setPending(placementFor(placingPk, page, { x, y }, taken))
+      setPending(placementFor(placingPk, page, { x, y }, otherPlacementsOn(all, page, placingPk)))
     },
     [placingPk, all],
   )
@@ -133,6 +159,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
     place(placingPk, pending)
     setPending(null)
     setPlacingPk(null)
+    setLandedPk(placingPk)
     // Drop `?place=` so a refresh (or the back button) doesn't reopen the mode
     // for a stamp that is already on the page.
     if (placing) navigate(logbookPath(requestedSeason), { replace: true })
@@ -143,6 +170,23 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
     setPlacingPk(null)
     if (placing) navigate(logbookPath(requestedSeason), { replace: true })
   }, [placing, navigate, requestedSeason])
+
+  // The press is over; this is an ordinary stamp again. Driven by the
+  // animation ending rather than by a timer, so the duration lives in the CSS
+  // and nowhere else. Under reduced motion nothing fires and the mark simply
+  // stays set — the class is inert there, so there is nothing to clean up.
+  const forgetLanded = useCallback(() => setLandedPk(null), [])
+
+  // Pick a stamp up off the page it is on. The book turns to that page first,
+  // so the move starts with the old spot in view — you are correcting a
+  // position, not choosing one from nothing.
+  const startMove = useCallback((entry) => {
+    if (!entry?.placement) return
+    setSelectedPk(null)
+    setPending(null)
+    setPlacingPk(entry.gamePk)
+    setOpenPage(entry.placement.page)
+  }, [])
 
   const openGame = useCallback(
     (gamePk) => {
@@ -229,26 +273,82 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
             </section>
           )}
 
+          {/* A placed stamp's options. Tapping a stamp in the book opens this
+              rather than jumping straight to the game, which is what makes a
+              placement editable at all: the three things you can do with a
+              keepsake already on a page live in one place, and "Move it" is
+              just placing mode again. Never shown while placing — the two are
+              the same slot above the book, and one bar at a time. */}
+          {selectedStamp && !placingPk && (
+            <section className="logbook__selected" aria-live="polite">
+              <p className="logbook__placinglede">
+                {monthDay(selectedStamp.date)} · page {selectedStamp.placement?.page}
+              </p>
+              <div className="logbook__placingactions">
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => openGame(selectedStamp.gamePk)}
+                >
+                  Open game ›
+                </button>
+                <button
+                  type="button"
+                  className="btn stampcard__mint"
+                  onClick={() => startMove(selectedStamp)}
+                >
+                  Move it
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => {
+                    unplace(selectedStamp.gamePk)
+                    setSelectedPk(null)
+                  }}
+                >
+                  Back to the tray
+                </button>
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => setSelectedPk(null)}
+                >
+                  Done
+                </button>
+              </div>
+            </section>
+          )}
+
           {/* Placement mode: the page becomes a tap target, and the tapped spot
-              is a proposal until it is confirmed. */}
+              is a proposal until it is confirmed. The same mode runs a MOVE —
+              `movingFrom` only changes the wording, so there is one flow to
+              keep honest rather than two that can drift apart. */}
           {placingPk && (
             <section className="logbook__placing" aria-live="polite">
               <p className="logbook__placinglede">
                 {pending
-                  ? 'There? Confirm it, or tap somewhere else.'
-                  : `Tap the page where you want ${monthDay(placingStamp?.date)} to go.`}
+                  ? movingFrom
+                    ? 'There instead? Confirm it, or tap somewhere else.'
+                    : 'There? Confirm it, or tap somewhere else.'
+                  : movingFrom
+                    ? `Tap where ${monthDay(placingStamp?.date)} should go instead — any page.`
+                    : `Tap the page where you want ${monthDay(placingStamp?.date)} to go.`}
               </p>
               <div className="logbook__placingactions">
                 {pending && (
                   <button type="button" className="btn stampcard__mint" onClick={confirmPlacement}>
-                    Stamp it here
+                    {movingFrom ? 'Move it here' : 'Stamp it here'}
                   </button>
                 )}
                 <button type="button" className="btn btn--ghost" onClick={cancelPlacement}>
                   Cancel
                 </button>
               </div>
-              {pageIsFull(all, openPage) && !pending && (
+              {/* The stamp being moved does not count against the page it is
+                  moving off — nine keepsakes on a page, one of them this one,
+                  still leaves room for it to land somewhere else on that page. */}
+              {pageIsFullFor(all, openPage, placingPk) && !pending && (
                 <p className="hint hint--prose">
                   This page holds {PAGE_CAPACITY}. Turn to a new one, or add one from the
                   corner.
@@ -266,7 +366,11 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
             pending={pending}
             pendingGamePk={placingPk}
             placing={Boolean(placingPk)}
-            onStampClick={openGame}
+            selectedPk={selectedPk}
+            movingPk={placingPk}
+            landedPk={landedPk}
+            onLanded={forgetLanded}
+            onStampClick={setSelectedPk}
             onPageTap={onPageTap}
             onAddPage={addPage}
             coverSlot={<PassportCover onOpen={() => setOpenPage(1)} />}
@@ -329,10 +433,23 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
                     <span>{monthDay(entry.date)}</span>
                     <span className="logbook__mode">{entry.mode}</span>
                     {entry.placement ? (
+                      // Which page this keepsake sits on, and the way back to
+                      // it. Deliberately no longer an un-place: a control
+                      // labelled "p.3" that silently took the stamp off page 3
+                      // was the only thing here that could undo a placement,
+                      // and it read as a page number. It now turns the book to
+                      // that page and opens the stamp's options, where moving
+                      // it and returning it to the tray are both named.
                       <button
                         type="button"
                         className="logbook__unplace"
-                        onClick={() => unplace(entry.gamePk)}
+                        aria-label={`Options for the ${monthDay(entry.date)} stamp on page ${entry.placement.page}`}
+                        onClick={() => {
+                          setPlacingPk(null)
+                          setPending(null)
+                          setSelectedPk(entry.gamePk)
+                          setOpenPage(entry.placement.page)
+                        }}
                       >
                         p.{entry.placement.page}
                       </button>
