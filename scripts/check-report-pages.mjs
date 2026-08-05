@@ -24,11 +24,19 @@ const IMPORT_RE = /import\s*\{\s*REPORT_PAGES\s*\}\s*from\s*['"].*lib\/reportPag
 
 const problems = []
 for (const file of FILES) {
-  const src = readFileSync(file, 'utf8')
-  if (!IMPORT_RE.test(src)) {
-    const rel = file.slice(file.indexOf('src')).replace(/\\/g, '/')
-    problems.push(rel)
+  const rel = file.slice(file.indexOf('src')).replace(/\\/g, '/')
+  let src
+  try {
+    src = readFileSync(file, 'utf8')
+  } catch {
+    // Moved, renamed, or deleted. Report it in one line rather than dying on an
+    // ENOENT stack trace — and never pass quietly, which is what silently
+    // dropping the entry would amount to. Same failure shape as
+    // check-stamp-surfaces.mjs's named-but-missing branch.
+    problems.push(`${rel} — named in this guard but no longer exists`)
+    continue
   }
+  if (!IMPORT_RE.test(src)) problems.push(rel)
 }
 
 if (problems.length) {

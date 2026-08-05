@@ -24,6 +24,19 @@ import { resolve } from 'node:path'
 const cssPath = resolve('src/index.css')
 const raw = readFileSync(cssPath, 'utf8')
 
+// Same hazard as check-typography.mjs: this guard reads exactly one file, so
+// emptying that file (a split into partials) would turn every assertion below
+// into a no-op while still printing ✓. Fail loudly instead of guarding nothing.
+if (!/\{/.test(raw.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+  console.error(
+    '\n✗ Focus-ring guard has nothing to check — src/index.css contains zero\n' +
+      '  rules. If the stylesheet was split into partials, repoint this script at\n' +
+      '  all of them (e.g. every src/styles/*.css) IN THE SAME COMMIT as the\n' +
+      '  split. Do not delete this assertion — a vacuous pass still prints ✓.\n'
+  )
+  process.exit(1)
+}
+
 // Blank out /* ... */ comments while preserving every newline (and each line's
 // length), so char offsets and line numbers stay exact.
 const css = raw.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))

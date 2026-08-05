@@ -19,10 +19,24 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const jsPath = join(ROOT, 'src/components/BoxScoreSkeleton.jsx')
 const cssPath = join(ROOT, 'src/index.css')
-const js = readFileSync(jsPath, 'utf8')
-const css = readFileSync(cssPath, 'utf8')
 
 const errors = []
+
+// Both targets are addressed by hard-coded path, so either one moving would
+// otherwise kill this script with an ENOENT stack trace. Report it as a guard
+// failure instead — the check still fails (which is right; it has stopped
+// checking), but it says which file to repoint and why.
+function readTarget(path) {
+  try {
+    return readFileSync(path, 'utf8')
+  } catch {
+    errors.push(`${path.slice(path.indexOf('src')).replace(/\\/g, '/')} — named in this guard but no longer exists`)
+    return null
+  }
+}
+
+const js = readTarget(jsPath)
+const css = readTarget(cssPath)
 
 function extract(source, pattern, label) {
   const m = source.match(pattern)
@@ -33,10 +47,10 @@ function extract(source, pattern, label) {
   return Number(m[1])
 }
 
-const frameCount = extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
-const spinLoops = extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
+const frameCount = js && extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
+const spinLoops = js && extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
 
-if (frameCount != null && spinLoops != null) {
+if (css && frameCount != null && spinLoops != null) {
   const totalSteps = frameCount * spinLoops
 
   const framesBlock = css.match(/\.skel__ballFrames\s*\{[^}]*\}/)?.[0]
