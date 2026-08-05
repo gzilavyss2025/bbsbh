@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useStamps } from '../hooks/useStamps.js'
-import { samePlacement } from '../lib/stamps.js'
+import { stampsToPublish } from '../lib/stamps.js'
 import { revealMarkFor } from '../hooks/useRevealProgress.js'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
@@ -51,103 +51,135 @@ import { revealMarkFor } from '../hooks/useRevealProgress.js'
 // once the endpoint started returning tombstones, this would have merged them
 // straight back in as live stamps. Absence still means "no opinion" — only an
 // explicit 'off' is a removal.
+//
+// ---------------------------------------------------------------------------
+// WHAT A PULL LEAVES BEHIND — the baseline, and why it is the REMOTE
+// ---------------------------------------------------------------------------
+// `known` is what we believe the SERVER holds, and every pull overwrites it
+// with what the server just said. The publish step then asks
+// `stampsToPublish(local, known)` — "what do I have that it doesn't?" — so a
+// collection that predates sign-in backfills on the first pull instead of
+// sitting on one device forever. That module's header has the full argument;
+// the short version is that a change log can't describe a collection that never
+// changed, and a comparison can.
 export function StampsCloudSync() {
   const { isSignedIn, getToken } = useAuth()
   const { stamps, mergeRemoteStamps } = useStamps()
 
-  // The collection as of the last time we either published or merged, so a
-  // change can be diffed down to the specific games that moved. Starts null so
-  // the very first observation establishes a baseline instead of republishing
-  // everything this device already had.
+  // What the server held as of the last successful pull. Starts null for "we
+  // have not heard from the server yet", which suppresses publishing entirely —
+  // publishing against an unknown remote would either echo the whole collection
+  // back or, worse, act on a guess.
   const known = useRef(null)
-  // Set while a remote merge is being applied, so the resulting change to
-  // `stamps` isn't immediately echoed back to the server it came from.
-  const merging = useRef(false)
+  // One pull at a time. Two overlapping pulls would race to set `known`, and
+  // the loser could leave a stale baseline behind.
+  const pulling = useRef(false)
+
+  const pull = useCallback(async () => {
+    if (pulling.current) return
+    pulling.current = true
+    try {
+      const token = await getToken()
+      // The whole collection in one call rather than a season at a time: the
+      // merge has to see every season anyway to be correct, and the export
+      // route already returns exactly that.
+      const res = await fetch('/api/stamps?export=1', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) return
+      const data = await res.json()
+      if (!Array.isArray(data?.stamps)) return
+      // The endpoint returns a list joined against the shared facts cache;
+      // the local store is keyed by gamePk and holds no facts, so drop the
+      // `game` blob on the way in. (The Logbook resolves facts itself — see
+      // src/api/logbook.js — so nothing is lost by not keeping them.)
+      const remote = {}
+      for (const entry of data.stamps) {
+        if (entry?.gamePk == null) continue
+        remote[entry.gamePk] = {
+          // Whatever the row says. A pre-fix deploy sends no `state` at all
+          // and every row it sends is live, so the fallback is 'on'.
+          state: entry.state === 'off' ? 'off' : 'on',
+          mode: entry.mode,
+          stampedAt: entry.stampedAt,
+          updatedAt: entry.updatedAt,
+          note: entry.note,
+          date: entry.date,
+          // Where it sits in the passport book. Built field by field here,
+          // so anything not listed is dropped on the way in — a placement
+          // left off this object would arrive as "unplaced" and empty the
+          // book on every sign-in.
+          placement: entry.placement ?? null,
+        }
+      }
+      // Baseline BEFORE the merge: the publish effect below fires on the state
+      // change the merge causes, and it must already be comparing against what
+      // the server actually has.
+      known.current = remote
+      mergeRemoteStamps(remote)
+    } catch {
+      // Offline / unauthorized / store not configured on this deploy — local
+      // state stands, which is the whole offline-first contract. `known` keeps
+      // its previous value, so nothing publishes against a guess.
+    } finally {
+      pulling.current = false
+    }
+  }, [getToken, mergeRemoteStamps])
 
   useEffect(() => {
-    if (!isSignedIn) return undefined
-    let cancelled = false
-    ;(async () => {
-      try {
-        const token = await getToken()
-        // The whole collection in one call rather than a season at a time: the
-        // merge has to see every season anyway to be correct, and the export
-        // route already returns exactly that.
-        const res = await fetch('/api/stamps?export=1', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (!res.ok || cancelled) return
-        const data = await res.json()
-        if (cancelled || !Array.isArray(data?.stamps)) return
-        // The endpoint returns a list joined against the shared facts cache;
-        // the local store is keyed by gamePk and holds no facts, so drop the
-        // `game` blob on the way in. (The Logbook resolves facts itself — see
-        // src/api/logbook.js — so nothing is lost by not keeping them.)
-        const remote = {}
-        for (const entry of data.stamps) {
-          if (entry?.gamePk == null) continue
-          remote[entry.gamePk] = {
-            // Whatever the row says. A pre-fix deploy sends no `state` at all
-            // and every row it sends is live, so the fallback is 'on'.
-            state: entry.state === 'off' ? 'off' : 'on',
-            mode: entry.mode,
-            stampedAt: entry.stampedAt,
-            updatedAt: entry.updatedAt,
-            note: entry.note,
-            date: entry.date,
-            // Where it sits in the passport book. Built field by field here,
-            // so anything not listed is dropped on the way in — a placement
-            // left off this object would arrive as "unplaced" and empty the
-            // book on every sign-in.
-            placement: entry.placement ?? null,
-          }
-        }
-        merging.current = true
-        mergeRemoteStamps(remote)
-      } catch {
-        // Offline / unauthorized / store not configured on this deploy — local
-        // state stands, which is the whole offline-first contract.
-      }
-    })()
-    return () => {
-      cancelled = true
+    if (!isSignedIn) {
+      // Signing out forgets what we knew about the server. The next sign-in —
+      // possibly as a DIFFERENT user — must not publish this device's stamps
+      // against the previous account's baseline.
+      known.current = null
+      return
     }
-  }, [isSignedIn, getToken, mergeRemoteStamps])
+    pull()
+  }, [isSignedIn, pull])
+
+  // A phone and a laptop are both open; the phone stamps a game. Without this,
+  // the laptop shows the old collection until someone reloads it — which is the
+  // whole promise of the feature, quietly unmet. Re-pull whenever this device
+  // comes back to the foreground, which is exactly when a user looks at it.
+  useEffect(() => {
+    if (!isSignedIn) return undefined
+    const onFocus = () => {
+      if (document.visibilityState === 'hidden') return
+      pull()
+    }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onFocus)
+    return () => {
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onFocus)
+    }
+  }, [isSignedIn, pull])
 
   useEffect(() => {
     if (!isSignedIn) return
-    const prev = known.current
-    known.current = stamps
-    // First observation: nothing to publish, just establish the baseline.
-    if (prev === null) return
-    // The change we just applied came FROM the server — don't send it back.
-    if (merging.current) {
-      merging.current = false
-      return
-    }
+    // Nothing has been heard from the server yet, so there is no baseline to
+    // compare against. The pull above supplies one and this effect re-runs.
+    if (known.current === null) return
 
-    // Every gamePk whose record differs from the baseline, in either direction.
-    // Compared on the whole record (not just `state`) so editing a note or
-    // switching watched/followed publishes too.
-    const changed = []
-    for (const [gamePk, entry] of Object.entries(stamps)) {
-      const before = prev[gamePk]
-      if (
-        !before ||
-        before.state !== entry.state ||
-        before.mode !== entry.mode ||
-        before.note !== entry.note ||
-        !samePlacement(before.placement, entry.placement) ||
-        before.updatedAt !== entry.updatedAt
-      ) {
-        changed.push([Number(gamePk), entry])
-      }
-    }
+    // What this device holds that the server doesn't, or holds a newer version
+    // of. Whole-record comparison, so editing a note, switching
+    // watched/followed, or moving a stamp on its page all publish too.
+    //
     // A record that vanished locally (a hand-cleared key, a cross-version drop)
     // is deliberately NOT published as a removal: absence has to keep meaning
     // "no opinion", or a fresh device would erase the collection. Only an
     // explicit 'off' tombstone travels as a removal.
+    const changed = stampsToPublish(stamps, known.current)
+      .map((gamePk) => [gamePk, stamps[gamePk]])
+      .filter(([, entry]) => entry)
     if (changed.length === 0) return
+
+    // Assume these land. A publish that fails leaves the server without them,
+    // and the next pull's comparison finds them again — self-healing, where a
+    // pessimistic baseline would republish the whole collection on every render.
+    const published = { ...known.current }
+    for (const [gamePk, entry] of changed) published[gamePk] = entry
+    known.current = published
 
     ;(async () => {
       let token
