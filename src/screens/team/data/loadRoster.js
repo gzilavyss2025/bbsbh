@@ -52,6 +52,11 @@ export async function loadRoster(id, asOf) {
   if (!team) return null
   const sportId = team.sport?.id ?? 1
   const isMilb = sportId !== 1
+  // The org a prospect badge should match against: this club's own id when
+  // it's already the MLB parent, else its live parentOrgId — never the
+  // affiliate's own id, since orgProspects rows are always keyed by parent
+  // (see prospectBadge, api/prospects.js).
+  const currentOrgId = team.parentOrgId ?? id
   const season = seasonOf(asOf)
   const standingsDate = cutoffFor(asOf)
 
@@ -83,7 +88,7 @@ export async function loadRoster(id, asOf) {
       pos: r.position?.abbreviation ?? '',
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
-      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id, currentOrgId),
       rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
     }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
@@ -100,7 +105,7 @@ export async function loadRoster(id, asOf) {
       role: rosterPitcherRole(r),
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
-      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id, currentOrgId),
       rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
     }))
     .sort(comparePitchers)
@@ -118,7 +123,7 @@ export async function loadRoster(id, asOf) {
         jersey: r.jerseyNumber ?? '',
         allStar: allStarIds.has(r.person?.id),
         war: sportId === 1 ? warPit[r.person?.id] ?? null : undefined,
-        prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+        prospect: prospectBadge(prospectsSnapshot, r.person?.id, currentOrgId),
         rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
         gs: Number(stat?.gamesStarted) || 0,
         saves: Number(stat?.saves) || 0,
@@ -196,7 +201,7 @@ export async function loadRoster(id, asOf) {
       pos: r.position?.abbreviation ?? '',
       allStar: allStarIds.has(r.person?.id),
       war: sportId === 1 ? warBat[r.person?.id] ?? null : undefined,
-      prospect: prospectBadge(prospectsSnapshot, r.person?.id),
+      prospect: prospectBadge(prospectsSnapshot, r.person?.id, currentOrgId),
       rookie: showRookiePill(rookiesData, r.person?.id, sportId === 1),
       games: Number(rosterHittingStat(r, id)?.gamesPlayed) || 0,
     }))
@@ -229,7 +234,7 @@ export async function loadRoster(id, asOf) {
             jersey: r.jerseyNumber ?? '',
             allStar: allStarIds.has(r.person.id),
             war: sportId === 1 ? (isPitcher ? warPit[r.person.id] : warBat[r.person.id]) ?? null : undefined,
-            prospect: prospectBadge(prospectsSnapshot, r.person.id),
+            prospect: prospectBadge(prospectsSnapshot, r.person.id, currentOrgId),
             rookie: showRookiePill(rookiesData, r.person.id, sportId === 1),
           },
         ]

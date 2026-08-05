@@ -41,13 +41,21 @@ export function orgProspectRankById(orgProspects, playerId) {
 // resolution needed (unlike orgProspectsForTeam's table), since the
 // snapshot's own teamId field already IS the player's parent org. Both
 // rank fields are null when he's unranked anywhere.
-export function prospectBadge(snapshot, playerId) {
+//
+// `currentOrgTeamId`, when passed, is the player's CURRENT parent org (his own
+// id if he's on an MLB roster, else his affiliate's live parentOrgId) as of
+// render time — fresher than anything the weekly scrape can carry. A mismatch
+// against the snapshot row's baked-in `teamId` means the player was traded
+// since that scrape ran, so the org badge is suppressed rather than shown
+// under his old club's logo with a rank that's no longer his anyway.
+export function prospectBadge(snapshot, playerId, currentOrgTeamId) {
   const orgRow = (snapshot?.orgProspects ?? []).find((p) => p.playerId === playerId)
+  const stale = currentOrgTeamId != null && orgRow != null && orgRow.teamId !== currentOrgTeamId
   return {
     rank: prospectRankById(snapshot?.players, playerId),
-    orgRank: orgRow?.orgRank ?? null,
-    orgTeamId: orgRow?.teamId ?? null,
-    orgTeamName: orgRow?.team ?? null,
+    orgRank: stale ? null : orgRow?.orgRank ?? null,
+    orgTeamId: stale ? null : orgRow?.teamId ?? null,
+    orgTeamName: stale ? null : orgRow?.team ?? null,
   }
 }
 
