@@ -1,4 +1,4 @@
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { barMarkTone } from '../../../lib/headerTheme.js'
 import { HexField } from '../HexField.jsx'
 

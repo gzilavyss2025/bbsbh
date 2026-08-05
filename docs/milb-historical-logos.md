@@ -30,7 +30,7 @@ the app's "no backend" rule.
   box with a small margin (mirrors the "every club drawn to one square
   viewBox" convention in `teams.js`'s comment block). 512px covers the
   largest current on-screen use of `<TeamLogo>` at 2x pixel density — the
-  sketch/print modal (`components/LogoModal.jsx`) renders at `size={240}`;
+  sketch/print modal (`components/logo/LogoModal.jsx`) renders at `size={240}`;
   every other caller (career timeline `42`, team page `64`, game card `56`,
   etc.) is smaller. Don't ship anything below 256×256 or it'll look soft in
   that modal.
@@ -81,7 +81,7 @@ because:
    not a data-only one.
 
 Once art lands in `public/logos/historical/`, the shape of the fix in
-`src/components/CareerTimeline.jsx` (and optionally `TransactionTimeline.jsx`)
+`src/components/player/CareerTimeline.jsx` (and optionally `TransactionTimeline.jsx`)
 is: resolve `historicalClubName(e.teamId, e.minSeason)` alongside the existing
 `historicalParentOrg` call in `src/api/loadPlayer.js`, and when it returns a
 `logo`, pass `/logos/historical/{logo}` into a new `<TeamLogo>` prop (e.g.

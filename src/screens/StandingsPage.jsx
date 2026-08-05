@@ -15,11 +15,11 @@ import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TeamLink } from '../components/TeamLink.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TeamLink } from '../components/team/TeamLink.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // Rank-movement glyph: '' (not '—') when there's nothing to compare, since
 // this rides inline inside the always-visible GB/WCGB cell rather than its

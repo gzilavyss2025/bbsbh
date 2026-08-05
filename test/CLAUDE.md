@@ -66,7 +66,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
 | placed-runner.test.js | 11 | src/api/playbyplay.js | Placed-runner card |
-| play-diamond-out-geometry.test.js | 5 | src/components/playDiamondGeometry.js | outLegBases geometry |
+| play-diamond-out-geometry.test.js | 5 | src/components/scoring/playDiamondGeometry.js | outLegBases geometry |
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |

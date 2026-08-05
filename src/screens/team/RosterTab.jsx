@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
-import { AsyncGate } from '../../components/AsyncGate.jsx'
+import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadRoster } from './data/loadRoster.js'

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
 import { PAGE_ASPECT, STAMP_WIDTH, pageSlots } from '../../lib/passportLayout.js'
-import { GameStamp } from '../GameStamp.jsx'
+import { GameStamp } from '../logbook/GameStamp.jsx'
 import { PassportWatermark } from './PassportWatermark.jsx'
 
 // One page of the passport book (PassportBook.jsx) — the paper a stamp lands

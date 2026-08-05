@@ -17,7 +17,7 @@ next agent doesn't have to rediscover it.
 | `scripts/gen-lineup-values.mjs` | builds `public/data/lineup-values.json` — per-hitter bat, glove, eligible positions |
 | `src/lib/lineupSolver.js` | pure Hungarian assignment + the value function |
 | `src/api/lineupStrength.js` | grade, receipt grouping, catcher-rest rule |
-| `src/components/LineupStrengthCard.jsx` | the card |
+| `src/components/teamstats/LineupStrengthCard.jsx` | the card |
 | `test/lineup-strength.test.js` | pins every invariant below |
 
 ---

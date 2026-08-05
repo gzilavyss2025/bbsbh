@@ -1,4 +1,4 @@
-import { DefenseDiamond } from '../../../components/DefenseDiamond.jsx'
+import { DefenseDiamond } from '../../../components/scoring/DefenseDiamond.jsx'
 import { RosterList } from './RosterList.jsx'
 
 // One bordered soft-cream card (same convention as .tstats-card) around all

@@ -40,7 +40,7 @@ spoiler-free only when restricted to the half the user has reached
   the live feed; spoiler-free but empty until ~first pitch, so it rides the
   feed's fetch/reload in `GameView` and renders on the lineup pages + box
   score). Also `fetchTeamUniformCatalog` (per-team season catalog) and, for the
-  Team Page's record-by-jersey strip (`components/JerseyCombos.jsx`),
+  Team Page's record-by-jersey strip (`components/logo/JerseyCombos.jsx`),
   `fetchGameJerseys` (batched per-game worn-jersey join) + the pure
   `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
   club's W-L in games it wore it, joined by `uniformAssetCode`; the record is

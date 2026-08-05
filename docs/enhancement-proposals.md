@@ -126,7 +126,7 @@ render every card sealed the way past-slate cards already do
 
 **Likely touchpoints.** `src/hooks/useRevealProgress.js` (key enumeration,
 possibly a completion flag), a new `src/screens/` page, `src/lib/route.js`
-(new route), `src/components/SiteMenu.jsx` or the slate header (entry
+(new route), `src/components/chrome/SiteMenu.jsx` or the slate header (entry
 point), `fetchGamesByPk`.
 
 **Agent planning prompt (suggested model: Opus — the spoiler/persistence

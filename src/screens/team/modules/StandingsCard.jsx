@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { favoriteAccentColor } from '../../../lib/teams.js'
-import { TeamLink } from '../../../components/TeamLink.jsx'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
-import { PostseasonOddsModal } from '../../../components/PostseasonOddsModal.jsx'
+import { TeamLink } from '../../../components/team/TeamLink.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
+import { PostseasonOddsModal } from '../../../components/teamstats/PostseasonOddsModal.jsx'
 
 // The three rows a preview shows: the club's own, plus the team above and the
 // team below it. A club at the top or bottom of its division still gets three

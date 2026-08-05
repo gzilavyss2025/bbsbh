@@ -1,5 +1,5 @@
 // Regression coverage for the ABS challenge marker's wiring into the pitch
-// list (src/api/playbyplay.js's pitchCardInfo → src/components/StrikeZone.jsx's
+// list (src/api/playbyplay.js's pitchCardInfo → src/components/scoring/StrikeZone.jsx's
 // PitchList/ChallengeMark). challenges.js's challengeForPlay itself already
 // has direct unit coverage (test/challenges.test.js); this pins the piece that
 // PR #344 added on top — that pitchCardInfo actually calls it and stamps the
