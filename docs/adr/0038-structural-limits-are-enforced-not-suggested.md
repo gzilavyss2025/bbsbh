@@ -71,6 +71,40 @@ Both now fail when their target holds no rules. A guard that silently stops
 guarding is the failure mode this ADR exists to prevent, and two of the eleven
 were one refactor away from it.
 
+## Addendum: the day it landed, this guard broke `main`
+
+Worth recording, because the mistake is more instructive than the design.
+
+Both budget tables were measured against the commit this work branched from.
+Five other pull requests were open at the time and all of them merged first, each
+legitimately adding a few files and a few dozen lines — `src/hooks` 19 → 21,
+`src/lib` 50 → 52, `person.js` 2,620 → 2,706, `PlayerPage.jsx` 726 → 772. This
+branch then merged last, carrying numbers that had been true when they were
+written and were false by the time they landed. `main` went red, on a failure no
+PR author had caused and none could have seen coming.
+
+Two things came out of it.
+
+**A budget is now a band, not an exact count** — for file lengths. Rounded up to
+the next 100 lines, so ordinary growth inside the band costs nobody an edit and
+only a meaningful jump forces one. The original design failed on "this file grew
+by thirty lines", which in a repo where several agents merge concurrently is a
+normal Tuesday. That is precisely the cries-wolf failure this ADR already warned
+about one section above, arrived at from the other direction: the argument was
+made for *shrinkage* and not carried across to growth.
+
+**The directory guard keeps exact counts, and cannot be fixed the same way.** A
+directory gaining one file *is* the thing being watched for, so there is no slack
+to give without giving up the point. It carries the operational rule instead:
+rebase onto `main` and re-measure before merging anything that touches `BUDGETS`.
+That rule is written at the top of the script, where someone editing the table
+will actually be looking.
+
+The general lesson for any future guard here: a hard limit pinned to a number
+measured at branch time is a merge-order hazard, not just a policy. Either give
+it enough slack to survive concurrent work, or state plainly how it must be
+landed.
+
 ## What these guards do not do
 
 Neither reads code. They cannot tell a 600-line file that should be split from a
