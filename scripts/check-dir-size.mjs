@@ -58,7 +58,9 @@ const BUDGETS = {
   // break that ordering for no gain. See ADR-0038.
   'src/styles': 49,
   'src/api': 84,
-  scripts: 67,
+  // +1 for check-preview-coverage.mjs — one more zero-dep check-*.mjs lint
+  // guard alongside the dozen already flat here, not a new subsystem.
+  scripts: 68,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

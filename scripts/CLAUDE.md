@@ -603,6 +603,14 @@ process automatically.
   `SiteFooter.jsx` (the slate's "More Baseball" list) stops importing the shared
   `REPORT_PAGES` array from `src/lib/reportPages.js` — the guard against those two
   page lists silently drifting apart again.
+- `check-preview-coverage.mjs` — fails if a page in `REPORT_PAGES`
+  (`src/lib/reportPages.js`) or a team-hub tab (`TeamTabBar.jsx`'s `TABS`) is
+  missing any of the three things its dynamic Open Graph card needs (a
+  `vercel.json` rewrite to `/api/preview`, a matching `case` in
+  `api/_lib/cards.js`'s `buildCard()`, and a `GENERIC`/`TEAM_TABS` entry that
+  case reads) — the guard against the link-preview layer (ADR-0012) silently
+  losing coverage of a page again the way it did for 12 report pages and 4
+  team-hub tabs, fixed in #552.
 - `check-skeleton-ball-frames.mjs` — fails if `BoxScoreSkeleton.jsx`'s
   `BALL_FRAME_COUNT`/`BALL_SPIN_LOOPS` stop matching the hardcoded frame-strip
   width, `steps()` count, and `skel-ball-spin` keyframe fraction in the
