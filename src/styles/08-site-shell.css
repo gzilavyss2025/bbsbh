@@ -876,6 +876,27 @@
   letter-spacing: var(--ls-label);
 }
 
+/* Same idle/hover treatment as .sitefooter__link (pencil-sketch dotted
+   underline resolving solid on hover) at the legal block's smaller size —
+   this is what confirms which deploy is actually loaded (root CLAUDE.md's
+   testing note on checking you're looking at the version you just merged). */
+.sitefooter__build-link {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
+.sitefooter__build-link:hover {
+  color: var(--text-heading);
+  text-decoration-style: solid;
+}
+
+.sitefooter__build-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-xs);
+}
+
 /* ---------------------------------------------------------------- about page */
 .aboutpage {
   padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
