@@ -457,13 +457,6 @@ export function applyRemoteStamps(local, remote) {
   return normalizeAll(out)
 }
 
-// What this device would publish. Tombstones are INCLUDED — that is the whole
-// point of keeping them; an un-stamp that isn't published is an un-stamp the
-// next sync undoes.
-export function statesFromStamps(map) {
-  return normalizeAll(map)
-}
-
 // Are these the same record? Every field a device can change, compared. Used by
 // the sync diff below so a record that merely round-tripped through JSON isn't
 // republished.

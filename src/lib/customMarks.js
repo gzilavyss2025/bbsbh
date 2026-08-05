@@ -86,7 +86,3 @@ export function customMarkFor(teamId, treatment) {
 export function customMarkAssignment(teamId, treatment) {
   return store[String(teamId)]?.assignments?.[treatment] ?? ''
 }
-
-export function customMarkStore() {
-  return store
-}
