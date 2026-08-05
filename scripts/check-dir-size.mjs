@@ -60,7 +60,10 @@ const BUDGETS = {
   'src/styles': 49,
   'src/api': 84,
   scripts: 67,
-  'src/lib': 52,
+  // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
+  // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
+  // subdirectory.
+  'src/lib': 53,
   'src/screens': 38,
   'src/hooks': 21,
   'src/screens/identity-lab': 15,

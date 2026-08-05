@@ -4,6 +4,7 @@ import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { useNav } from '../lib/nav.js'
 import { REPORT_PAGES } from '../lib/reportPages.js'
+import { BUILD_COMMIT_SHORT, BUILD_COMMIT_URL } from '../lib/buildInfo.js'
 
 // Same REPORT_PAGES list the hamburger menu (SiteMenu.jsx) uses, plus About
 // as the trailing item — see reportPages.js for why Logo Sheet isn't here
@@ -94,7 +95,26 @@ export function SiteFooter({
         </p>
         <p>Data via the MLB Stats API. Not affiliated with MLB or any club.</p>
         <p>Built for keeping score by hand. Game results stay sealed until opened.</p>
-        <p>© {YEAR}</p>
+        <p>
+          © {YEAR}
+          {BUILD_COMMIT_SHORT && (
+            <>
+              {' · '}
+              {BUILD_COMMIT_URL ? (
+                <a
+                  className="sitefooter__build-link"
+                  href={BUILD_COMMIT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  build {BUILD_COMMIT_SHORT}
+                </a>
+              ) : (
+                `build ${BUILD_COMMIT_SHORT}`
+              )}
+            </>
+          )}
+        </p>
       </div>
     </footer>
   )
