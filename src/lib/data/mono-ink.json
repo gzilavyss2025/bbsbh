@@ -42,9 +42,20 @@
     "name": "Baltimore Orioles",
     "art": "8:d1e46bf6",
     "parts": {
+      "1": "ink",
       "2": "knockout",
-      "3": "ink",
-      "4": "knockout"
+      "3": "knockout",
+      "5": "ink"
+    }
+  },
+  "111": {
+    "name": "Boston Red Sox",
+    "art": "5:908948b0",
+    "parts": {
+      "0": "ink",
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout"
     }
   },
   "113": {
@@ -53,6 +64,13 @@
     "parts": {
       "0": "knockout",
       "1": "knockout"
+    }
+  },
+  "114": {
+    "name": "Cleveland Guardians",
+    "art": "2:cb4dadd9",
+    "parts": {
+      "0": "knockout"
     }
   },
   "115": {
@@ -73,11 +91,101 @@
       "6": "knockout"
     }
   },
+  "134": {
+    "name": "Pittsburgh Pirates",
+    "art": "2:931aff7c",
+    "parts": {
+      "1": "knockout"
+    }
+  },
+  "136": {
+    "name": "Seattle Mariners",
+    "art": "27:a32241fc",
+    "parts": {
+      "4": "knockout",
+      "13": "knockout",
+      "14": "knockout",
+      "17": "knockout",
+      "19": "knockout",
+      "21": "knockout",
+      "22": "knockout",
+      "23": "knockout",
+      "25": "knockout"
+    }
+  },
+  "137": {
+    "name": "San Francisco Giants",
+    "art": "2:715c36e1",
+    "parts": {
+      "1": "knockout"
+    }
+  },
+  "138": {
+    "name": "St. Louis Cardinals",
+    "art": "3:241cbcf6",
+    "parts": {
+      "2": "knockout"
+    }
+  },
+  "139": {
+    "name": "Tampa Bay Rays",
+    "art": "4:e9ba50c9",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout"
+    }
+  },
+  "140": {
+    "name": "Texas Rangers",
+    "art": "3:c3c4fc5e",
+    "parts": {
+      "2": "knockout"
+    }
+  },
+  "141": {
+    "name": "Toronto Blue Jays",
+    "art": "6:5d91fbd6",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "3": "ink",
+      "4": "ink",
+      "5": "knockout"
+    }
+  },
+  "143": {
+    "name": "Philadelphia Phillies",
+    "art": "3:13f121be",
+    "parts": {
+      "0": "knockout"
+    }
+  },
   "144": {
     "name": "Atlanta Braves",
     "art": "3:3470dbfa",
     "parts": {
       "0": "knockout",
+      "1": "knockout"
+    }
+  },
+  "146": {
+    "name": "Miami Marlins",
+    "art": "14:a57ae98",
+    "parts": {
+      "2": "ink",
+      "4": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "10": "knockout",
+      "11": "knockout"
+    }
+  },
+  "147": {
+    "name": "New York Yankees",
+    "art": "2:2eed7853",
+    "parts": {
       "1": "knockout"
     }
   },
