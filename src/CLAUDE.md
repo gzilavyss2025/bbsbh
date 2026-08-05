@@ -157,6 +157,14 @@ read the linked ADRs before refactoring:
   A step therefore ends mid-play, which is why the pinch-runner pencil-in keys
   on its notice's index rather than the play's `visible` gate — read ADR-0016
   before touching `nextStepBoundary`.
+  Either choice's **tap target is the dead space around it**, not just the
+  button: `.pagenav` is click-through, so a missed thumb used to land on a
+  player card under the fade instead. `.pagenav--innings .btn::after`
+  (`index.css`) claims the bar around each button — split down the middle
+  between the pair, Refresh excepted — and its offsets are measured from the
+  button on purpose; anchoring them to the bar re-collapses the area mid-tap
+  under `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins both that
+  and what must stay click-through.
 - **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
   `InningViewer` without touching its guarantees. `GameView` resolves
   `spoilersOffFor(officialDate)` — the pass is running, or this day was consented
