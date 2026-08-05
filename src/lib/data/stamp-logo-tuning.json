@@ -692,6 +692,108 @@
       }
     }
   },
+  "512": {
+    "name": "Toledo Mud Hens",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 9,
+        "offsetY": 12,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -3,
+        "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "529": {
+    "name": "Tacoma Rainiers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 19,
+        "offsetY": 6,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -16,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "531": {
+    "name": "Scranton/Wilkes-Barre RailRiders",
+    "treatments": {
+      "away": {
+        "scale": 0.93,
+        "offsetX": 26,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.93,
+        "offsetX": -18,
+        "offsetY": 17,
+        "rotation": 0
+      }
+    }
+  },
+  "533": {
+    "name": "Worcester Red Sox",
+    "treatments": {
+      "away": {
+        "scale": 0.92,
+        "offsetX": 24,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.89,
+        "offsetX": -15,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
+  "552": {
+    "name": "Syracuse Mets",
+    "treatments": {
+      "away": {
+        "scale": 0.95,
+        "offsetX": 28,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -19,
+        "offsetY": 4,
+        "rotation": 0
+      }
+    }
+  },
+  "561": {
+    "name": "Salt Lake Bees",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 23,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 0,
+        "rotation": 0
+      }
+    }
+  },
   "564": {
     "name": "Jacksonville Jumbo Shrimp",
     "treatments": {
@@ -726,6 +828,23 @@
       }
     }
   },
+  "1960": {
+    "name": "St. Paul Saints",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 22,
+        "offsetY": 16,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -25,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
   "4904": {
     "name": "El Paso Chihuahuas",
     "treatments": {
@@ -739,6 +858,23 @@
         "scale": 0.95,
         "offsetX": -9,
         "offsetY": 6,
+        "rotation": 0
+      }
+    }
+  },
+  "5434": {
+    "name": "Sugar Land Space Cowboys",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 22,
+        "offsetY": 18,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -15,
+        "offsetY": 8,
         "rotation": 0
       }
     }

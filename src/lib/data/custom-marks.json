@@ -62,6 +62,30 @@
       "milb-away": "cdn:cap"
     }
   },
+  "512": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:base"
+    }
+  },
+  "531": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:primary"
+    }
+  },
+  "533": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary"
+    }
+  },
+  "552": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:wordmark"
+    }
+  },
   "556": {
     "marks": [
       {
@@ -78,6 +102,12 @@
     "assignments": {
       "milb-home": "cdn:primary",
       "milb-away": "cdn:primary"
+    }
+  },
+  "1960": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:wordmark"
     }
   }
 }

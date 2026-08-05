@@ -626,7 +626,7 @@
       "4": "knockout",
       "5": "knockout",
       "6": "knockout",
-      "7": "ink",
+      "7": "knockout",
       "8": "knockout"
     }
   },
@@ -763,16 +763,20 @@
     "name": "Sugar Land Space Cowboys",
     "art": "70:768e7fe8",
     "parts": {
-      "3": "ink",
-      "11": "knockout",
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "11": "ink",
       "12": "knockout",
       "14": "knockout",
-      "15": "ink",
-      "18": "ink",
-      "21": "ink",
-      "30": "ink",
-      "40": "ink",
-      "67": "ink"
+      "15": "knockout",
+      "16": "knockout",
+      "18": "knockout",
+      "19": "knockout",
+      "21": "knockout",
+      "24": "knockout",
+      "30": "knockout",
+      "40": "knockout"
     }
   }
 }
