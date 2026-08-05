@@ -10,8 +10,8 @@
 // the stored value, never lower it, so a stale or malformed client can't
 // regress another device's already-synced progress.
 
-import { verifyToken } from '@clerk/backend'
-import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { authenticateUser } from './_lib/auth.js'
+import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
@@ -44,17 +44,6 @@ if cur == nil or inc > cur then
   return inc
 end
 return cur`
-
-async function authenticate(req) {
-  const secretKey = process.env.CLERK_SECRET_KEY
-  if (!secretKey) return null
-  const auth = getHeader(req, 'authorization')
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  if (!token) return null
-  const { data, errors } = await verifyToken(token, { secretKey })
-  if (errors || !data?.sub) return null
-  return data.sub
-}
 
 // The cloud scorebook index — the user's own recently-scored games, one hash
 // per user (`scorebook:{userId}`, field = gamePk). Each entry is the SAME
@@ -99,8 +88,9 @@ export default async function handler(req, res) {
   const redis = getRedis()
   if (!redis) return reply(res, { error: 'sync not configured' }, 501)
 
-  const userId = await authenticate(req)
-  if (!userId) return reply(res, { error: 'unauthorized' }, 401)
+  const auth = await authenticateUser(req)
+  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  const userId = auth.userId
 
   // GET ?recent=1 — the scorebook index, newest first.
   if (wantRecent) {

@@ -13,6 +13,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import {
+  AUTH_NOT_CONFIGURED,
+  INVALID_TOKEN,
+  NO_TOKEN,
+  authPreflight,
+  authenticateUser,
+  bearerToken,
+} from '../api/_lib/auth.js'
 import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
@@ -352,4 +360,64 @@ test('a blank or whitespace value is not set', () => {
 test('no store configured stays null, which is the 501 every caller renders', () => {
   assert.equal(redisConfigFromEnv({}), null)
   assert.equal(redisConfigFromEnv(null), null)
+})
+
+// --------------------------------------------------------------------------
+// Telling the four auth failures apart (api/_lib/auth.js)
+// --------------------------------------------------------------------------
+// Every endpoint used to answer a bare `401 unauthorized` whether the deploy had
+// no CLERK_SECRET_KEY, the caller sent no token, or a real token failed to
+// verify. A production deploy therefore rejected every genuine signed-in
+// request while looking exactly like a working one being polled by strangers —
+// found only by reading Vercel's logs. These pin the distinction.
+const withToken = (t) => nodeReq('/api/stamps', { headers: { authorization: `Bearer ${t}` } })
+
+test('no secret key is 501 — the deploy cannot verify anything', () => {
+  const out = authPreflight(withToken('abc'), {})
+  assert.equal(out.ok, false)
+  assert.equal(out.status, 501)
+  assert.equal(out.error, AUTH_NOT_CONFIGURED)
+})
+
+test('a blank secret key is not a secret key', () => {
+  assert.equal(authPreflight(withToken('abc'), { CLERK_SECRET_KEY: '   ' }).status, 501)
+})
+
+test('configured but anonymous is 401 no-token, not a misconfiguration', () => {
+  const out = authPreflight(nodeReq('/api/stamps'), { CLERK_SECRET_KEY: 'sk_test_x' })
+  assert.equal(out.ok, false)
+  assert.equal(out.status, 401)
+  assert.equal(out.error, NO_TOKEN)
+})
+
+test('the not-configured check comes FIRST', () => {
+  // An anonymous request against a deploy with no secret key must report the
+  // deploy's problem, not the caller's — that ordering is the whole diagnostic.
+  assert.equal(authPreflight(nodeReq('/api/stamps'), {}).error, AUTH_NOT_CONFIGURED)
+})
+
+test('a token and a secret key pass preflight', () => {
+  const out = authPreflight(withToken('a-real-token'), { CLERK_SECRET_KEY: 'sk_test_x' })
+  assert.equal(out.ok, true)
+  assert.equal(out.token, 'a-real-token')
+  assert.equal(out.secretKey, 'sk_test_x')
+})
+
+test('bearerToken reads only a Bearer header', () => {
+  assert.equal(bearerToken(withToken('  spaced  ')), 'spaced')
+  assert.equal(bearerToken(nodeReq('/api/stamps', { headers: { authorization: 'Basic xyz' } })), '')
+  assert.equal(bearerToken(nodeReq('/api/stamps')), '')
+})
+
+test('a token that cannot be verified is 401 invalid, never a 500', () => {
+  // @clerk/backend throws on some malformed tokens rather than returning
+  // `errors`, and the old per-file copies didn't catch — a junk Authorization
+  // header was a stack trace.
+  return authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' } }).then(
+    (out) => {
+      assert.equal(out.ok, false)
+      assert.equal(out.status, 401)
+      assert.equal(out.error, INVALID_TOKEN)
+    },
+  )
 })

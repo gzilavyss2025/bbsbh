@@ -29,9 +29,9 @@
 // endpoint 501s and the client simply stays local-only. Sync has always been
 // opt-in infrastructure, never a requirement.
 
-import { verifyToken } from '@clerk/backend'
 import { isDayState, isDayString, MAX_SPOILED_DAYS } from '../src/lib/spoiledDays.js'
-import { getHeader, jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
+import { authenticateUser } from './_lib/auth.js'
+import { jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
@@ -42,17 +42,6 @@ export const config = { runtime: 'nodejs' }
 // user's consent record and hand it to another request.
 function reply(res, body, status = 200) {
   return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
-
-async function authenticate(req) {
-  const secretKey = process.env.CLERK_SECRET_KEY
-  if (!secretKey) return null
-  const auth = getHeader(req, 'authorization')
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  if (!token) return null
-  const { data, errors } = await verifyToken(token, { secretKey })
-  if (errors || !data?.sub) return null
-  return data.sub
 }
 
 // Re-validate whatever Redis hands back before it reaches a client: a hand-edited
@@ -85,8 +74,9 @@ export default async function handler(req, res) {
   const redis = getRedis()
   if (!redis) return reply(res, { error: 'sync not configured' }, 501)
 
-  const userId = await authenticate(req)
-  if (!userId) return reply(res, { error: 'unauthorized' }, 401)
+  const auth = await authenticateUser(req)
+  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  const userId = auth.userId
 
   const key = `spoiled:${userId}`
 
