@@ -5,7 +5,7 @@
 //
 //   GET    /api/stamps?season=2026     -> { season, stamps: [ { gamePk, …, game } ] }
 //   GET    /api/stamps?seasons=1       -> { seasons: [ { season, count } ] }
-//   GET    /api/stamps?export=1        -> { stamps: [ … every season … ] }
+//   GET    /api/stamps?export=1        -> { stamps: [ … every season, tombstones included … ] }
 //   POST   /api/stamps { gamePk, mode?, note? }  -> { stamp }   201 new / 200 update
 //   DELETE /api/stamps?gamePk=824680   -> { ok: true }
 //
@@ -213,38 +213,80 @@ async function readSeasons(redis, userId) {
   }
 }
 
-// The user hash joined against the shared facts cache. Tombstones ('off') are
-// filtered out of the response but stay in the hash — see applyRemoteStamps in
-// src/lib/stamps.js for why deleting them would resurrect an un-stamped game.
-async function readSeason(redis, userId, season) {
-  let stored
-  try {
-    stored = sanitizeStored(await redis.hgetall(stampsKey(userId, season)))
-  } catch {
-    return []
-  }
-  const live = Object.entries(stored).filter(([, entry]) => entry.state === 'on')
-  if (live.length === 0) return []
-
-  let facts = []
-  try {
-    facts = await redis.mget(...live.map(([gamePk]) => `game:final:${gamePk}`))
-  } catch {
-    facts = []
-  }
-  return live
-    .map(([gamePk, entry], i) => ({
+// The user hash as response rows, joined against the shared facts cache.
+//
+// ---------------------------------------------------------------------------
+// WHY `includeRemoved` EXISTS — the un-stamp propagation fix
+// ---------------------------------------------------------------------------
+// A removal is stored as an explicit 'off' tombstone rather than a deleted
+// field (see `applyRemoteStamps` in src/lib/stamps.js for why deleting would
+// resurrect the stamp on the next merge). This function used to filter those
+// tombstones out of EVERY response — which meant the removal reached the server
+// and stopped there: a second device holding that stamp saw a payload with the
+// gamePk simply absent, absence correctly means "no opinion" in the merge, and
+// so it kept showing a stamp its owner had taken back. ADR-0035 named that gap;
+// this closes it.
+//
+// The split is by PURPOSE, not by caller convenience:
+//
+//   - `?export=1` is the SYNC payload. It carries tombstones, because the merge
+//     needs to see the removal to apply it (last write wins on `updatedAt`).
+//   - `?season=` and `?seasons=1` are DISPLAY payloads. A tombstone has nothing
+//     to render and nothing to count, so they stay live-only.
+//
+// Every row now carries an explicit `state`, including the live ones. A client
+// must read it rather than assuming 'on' — an assumption is exactly what made
+// the old payload unable to express a removal at all.
+//
+// Pure, and exported, so the tombstone rules above are pinned by the unit suite
+// (test/api-handlers.test.js) rather than resting on a Redis round trip nobody
+// can run in CI.
+export function seasonRows(stored, facts, { includeRemoved = false } = {}) {
+  const entries = Object.entries(stored ?? {}).filter(
+    ([, entry]) => entry?.state === 'on' || (includeRemoved && entry?.state === 'off'),
+  )
+  return entries
+    .map(([gamePk, entry]) => ({
       gamePk: Number(gamePk),
+      state: entry.state,
       mode: entry.mode,
       stampedAt: entry.stampedAt,
       updatedAt: entry.updatedAt,
       note: entry.note,
       date: entry.date,
       // A stamp whose facts are missing still belongs to the user — it renders
-      // from the abbreviation-and-date it carries rather than vanishing.
-      game: facts[i] && typeof facts[i] === 'object' ? facts[i] : null,
+      // from the abbreviation-and-date it carries rather than vanishing. A
+      // tombstone never joins facts at all: there is nothing left to draw.
+      game:
+        entry.state === 'on' && facts?.[gamePk] && typeof facts[gamePk] === 'object'
+          ? facts[gamePk]
+          : null,
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.stampedAt - a.stampedAt))
+}
+
+async function readSeason(redis, userId, season, { includeRemoved = false } = {}) {
+  let stored
+  try {
+    stored = sanitizeStored(await redis.hgetall(stampsKey(userId, season)))
+  } catch {
+    return []
+  }
+  // Only live stamps have facts to join, so only they are looked up — a season
+  // of tombstones costs no mget at all.
+  const live = Object.keys(stored).filter((gamePk) => stored[gamePk].state === 'on')
+  const facts = {}
+  if (live.length) {
+    try {
+      const blobs = await redis.mget(...live.map((gamePk) => `game:final:${gamePk}`))
+      live.forEach((gamePk, i) => {
+        facts[gamePk] = blobs?.[i] ?? null
+      })
+    } catch {
+      // Facts unavailable — the stamps themselves still travel.
+    }
+  }
+  return seasonRows(stored, facts, { includeRemoved })
 }
 
 // ---------------------------------------------------------------------------
@@ -399,10 +441,14 @@ export default async function handler(req, res) {
     }
 
     // A keepsake collection with no way to take it with you is a bad promise,
-    // so the export is a first-class route rather than a someday feature.
+    // so the export is a first-class route rather than a someday feature. It is
+    // also the SYNC payload (StampsCloudSync GETs it on sign-in), which is why
+    // it — and only it — carries tombstones: see `seasonRows`.
     if (searchParams.get('export') === '1') {
       const seasons = await readSeasons(redis, userId)
-      const all = await Promise.all(seasons.map((s) => readSeason(redis, userId, s)))
+      const all = await Promise.all(
+        seasons.map((s) => readSeason(redis, userId, s, { includeRemoved: true })),
+      )
       return reply(res, { stamps: all.flat() })
     }
 

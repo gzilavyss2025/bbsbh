@@ -35,6 +35,7 @@
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
+//   '/logbook/stats'                     -> { name: 'logbook-stats' }          (what the collection adds up to)
 //   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
@@ -165,6 +166,17 @@ export function parseRoute(url) {
     const gamePk = Number(parts[1])
     return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
   }
+  // The Logbook retrospective — what your collection adds up to (ADR-0035, the
+  // game-stamps PRD §6). It reads ONLY your own stamps, which is what lets it
+  // print final scores plainly, same argument as /logbook itself.
+  //
+  // THIS BRANCH MUST STAY ABOVE THE SEASON BRANCH BELOW. That one parses
+  // `Number(parts[1])`, so '/logbook/stats' would resolve to season NaN ->
+  // null -> the bare Logbook page, silently and with no error to notice. Every
+  // named second segment this route ever grows has the same problem and needs
+  // the same placement.
+  if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'stats')
+    return { name: 'logbook-stats' }
   // One season of the Logbook. A non-numeric or out-of-range segment falls back
   // to the bare page (same idea as the invalid-date fallback above) rather than
   // stranding it on a season that cannot exist.
@@ -326,6 +338,11 @@ export function gamePhotosPath(gamePk) {
 // pick the newest season the local collection actually has.
 export function logbookPath(season = null) {
   return season ? `/logbook/${season}` : '/logbook'
+}
+// The retrospective over the whole collection — deliberately not season-paged,
+// so 'stats' can never collide with a season segment.
+export function logbookStatsPath() {
+  return '/logbook/stats'
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

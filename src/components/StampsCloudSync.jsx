@@ -37,15 +37,19 @@ import { revealMarkFor } from '../hooks/useRevealProgress.js'
 // reading only keys the server itself wrote.
 //
 // ---------------------------------------------------------------------------
-// A known staleness, stated rather than hidden
+// Removals propagate BOTH ways — read `state`, never assume it
 // ---------------------------------------------------------------------------
-// An un-stamp travels to the server (DELETE writes a tombstone there), but
-// `GET /api/stamps` filters tombstones out of its response, so a SECOND device
-// that already holds that stamp never learns it was removed and keeps showing
-// it until it changes that stamp itself. Removals therefore propagate one way
-// today. Closing it means teaching the read side to return tombstones; that is
-// an endpoint change, not a client one, and it is tracked rather than papered
-// over here.
+// An un-stamp travels to the server as a tombstone (DELETE writes `state:
+// 'off'`), and `GET /api/stamps?export=1` — the sync payload — returns those
+// tombstones alongside the live stamps. That is what lets a SECOND device learn
+// a stamp was removed: `applyRemoteStamps` takes the incoming 'off' by
+// last-write-wins on `updatedAt` and the stamp drops out of the collection.
+//
+// So the merge below must read each row's own `state`. It used to hardcode
+// 'on', which was the client half of why removals propagated one way: even
+// once the endpoint started returning tombstones, this would have merged them
+// straight back in as live stamps. Absence still means "no opinion" — only an
+// explicit 'off' is a removal.
 export function StampsCloudSync() {
   const { isSignedIn, getToken } = useAuth()
   const { stamps, mergeRemoteStamps } = useStamps()
@@ -82,7 +86,9 @@ export function StampsCloudSync() {
         for (const entry of data.stamps) {
           if (entry?.gamePk == null) continue
           remote[entry.gamePk] = {
-            state: 'on',
+            // Whatever the row says. A pre-fix deploy sends no `state` at all
+            // and every row it sends is live, so the fallback is 'on'.
+            state: entry.state === 'off' ? 'off' : 'on',
             mode: entry.mode,
             stampedAt: entry.stampedAt,
             updatedAt: entry.updatedAt,

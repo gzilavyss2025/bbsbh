@@ -24,6 +24,8 @@ import {
   teamLeadersPath,
   umpirePath,
   gamePhotosPath,
+  logbookPath,
+  logbookStatsPath,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -323,4 +325,41 @@ test('gamePhotosPath deep-links to one game and parses back with its gamePk', ()
 
 test('a non-numeric photos gamePk segment falls back to the plain browse route', () => {
   assert.deepEqual(parseRoute('/photos/not-a-number'), { name: 'photos' })
+})
+
+// --------------------------------------------------------------------------
+// The Logbook (ADR-0035) — where branch ORDER is the whole test
+// --------------------------------------------------------------------------
+test('the bare Logbook leaves the season for the page to resolve', () => {
+  assert.deepEqual(parseRoute('/logbook'), { name: 'logbook', season: null })
+  assert.equal(logbookPath(), '/logbook')
+})
+
+test('a Logbook season segment parses, and an impossible one falls back to the bare page', () => {
+  assert.deepEqual(parseRoute('/logbook/2026'), { name: 'logbook', season: 2026 })
+  assert.equal(logbookPath(2026), '/logbook/2026')
+  assert.deepEqual(parseRoute(logbookPath(2026)), { name: 'logbook', season: 2026 })
+  // Out of the 1876-2200 window, and not an integer at all: both land on the
+  // bare page rather than stranding it on a season that cannot exist.
+  assert.deepEqual(parseRoute('/logbook/1200'), { name: 'logbook', season: null })
+  assert.deepEqual(parseRoute('/logbook/9999'), { name: 'logbook', season: null })
+  assert.deepEqual(parseRoute('/logbook/2026.5'), { name: 'logbook', season: null })
+})
+
+// The regression this block exists for. `/logbook/{season}` parses its second
+// segment with `Number(parts[1])`, so until the 'stats' branch was placed
+// ABOVE it, '/logbook/stats' resolved to season NaN -> null -> the bare
+// Logbook page: no error, no 404, just the wrong screen. Any future named
+// second segment needs the same placement, which is why this asserts the route
+// NAME rather than merely "not the bare page".
+test('/logbook/stats is the retrospective, not season NaN falling through to /logbook', () => {
+  assert.deepEqual(parseRoute('/logbook/stats'), { name: 'logbook-stats' })
+  assert.equal(logbookStatsPath(), '/logbook/stats')
+  assert.deepEqual(parseRoute(logbookStatsPath()), { name: 'logbook-stats' })
+})
+
+test('an unknown Logbook sub-segment still falls back to the bare page', () => {
+  // 'stats' is matched by name, not by "non-numeric", so every other mangled
+  // link keeps the old forgiving behavior instead of 404-ing.
+  assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null })
 })
