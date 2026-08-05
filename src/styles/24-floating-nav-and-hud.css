@@ -276,16 +276,31 @@
 }
 
 /* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
-   variant — --pinstripe-color picks the line color per team. Without this the
-   tile fell through to the plain --tint fill above, so a pinstriped club
-   (Cubs, Yankees, …) read as a flat gray square. */
+   variant — --pinstripe-color picks the line color per team.
+
+   Split into background-color + background-image, unlike the other surfaces
+   using this recipe, and that split is the whole point: --pinstripe-color is
+   a TRANSLUCENT ink (rgba(0, 0, 0, 0.16) by default). Painted as one
+   `background` shorthand, the line stop is 84% transparent, so it is not a
+   soft gray line on the white fill — it is a hole punched clean through the
+   tile, compositing that ink over whatever sits behind. Every other surface
+   using this recipe sits on light paper, so the hole reads as intended. This
+   one sits on the HUD's dark chrome (.gamehud__strip's rgba(0, 0, 0, 0.15)
+   over the dark scorebug), so the same declaration rendered near-black —
+   measured rgb(15, 25, 38) — which is what read as far too aggressive.
+   Lowering the alpha only made it worse: less ink means MORE of the dark
+   chrome showing through the hole. Laying the fill down as an opaque
+   background-color and the lines as a background-image over it gives the ink
+   a white backdrop to composite against, the same one the other surfaces get
+   for free, and the line lands at the intended soft rgb(214, 214, 214). */
 .gamehud__tile.gamehud__tile--pinstripe {
-  background: repeating-linear-gradient(
+  background-color: var(--pinstripe-bg, #fff);
+  background-image: repeating-linear-gradient(
     90deg,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
     var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    var(--pinstripe-bg, #fff) 1px,
-    var(--pinstripe-bg, #fff) 7px
+    transparent 1px,
+    transparent 7px
   );
 }
 
