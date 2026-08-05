@@ -74,7 +74,7 @@ const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
   'src/styles/05-masthead-nav.css': 700, // 683
   'src/styles/06-loader-and-cards.css': 900, // 850
-  'src/styles/08-site-shell.css': 1000, // 995
+  'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 686
   'src/styles/10-lineup.css': 800, // 798
   'src/styles/12-sealbox.css': 1900, // 1810

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { writeFile } from 'node:fs/promises'
+import { execSync } from 'node:child_process'
 import {
   DEV_DATA_MAX_BODY_BYTES,
   devDataStore,
@@ -58,6 +59,22 @@ import { describeLogoCaveat } from './src/lib/logoArt.js'
 // reveal sync, copy — see root CLAUDE.md), which are Vercel edge functions, not
 // Vite dev middleware; a shared `/api/` prefix would misleadingly suggest this
 // is another one.
+
+// Vercel sets VERCEL_GIT_COMMIT_SHA for every build; `vite dev`/a local
+// `vite build` has none, so fall back to the checked-out HEAD. Bridging it
+// onto a VITE_-prefixed process.env var is what makes Vite expose it to
+// client code as import.meta.env.VITE_BUILD_COMMIT — see src/lib/buildInfo.js,
+// which the footer's build indicator reads (root CLAUDE.md's testing note on
+// confirming you're looking at the version you just merged).
+function resolveBuildCommit() {
+  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA
+  try {
+    return execSync('git rev-parse HEAD').toString().trim()
+  } catch {
+    return ''
+  }
+}
+process.env.VITE_BUILD_COMMIT = resolveBuildCommit()
 
 // Buffer a request body, or answer 413 and give up. Resolves null when nothing
 // usable arrived (too large, or the socket went away) — in which case the
