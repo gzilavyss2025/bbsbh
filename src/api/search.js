@@ -17,6 +17,16 @@ import { fetchTeams } from './schedule.js'
 // the result instead of refetching. No TTL: a person's id/name/position/team
 // is effectively static within a session. Capped at MAX_SEARCH_CACHE entries,
 // evicting the oldest, so a long session's search box doesn't grow unbounded.
+//
+// A row's second line names his club, and `currentTeam` keeps naming the last
+// one a retired player had — "Albert Pujols · 1B · St. Louis Cardinals", eleven
+// seasons after he left them and four after he stopped playing. `active` is the
+// one signal this endpoint carries for free, so an inactive player's row says
+// "Retired" instead. Deliberately NOT the player page's full roster-status
+// check: `hydrate=rosterEntries` would answer for unsigned free agents too, but
+// it ships every stint of every match's career and measured 2.3x the payload on
+// a common surname ("smith": 53 KB -> 121 KB even with `fields=`) — too much for
+// something that refires as you type. The player page corrects the rest.
 const searchPeopleCache = new Map()
 const MAX_SEARCH_CACHE = 200
 
@@ -35,7 +45,7 @@ export async function searchPeople(query, limit = 8) {
         name: p.fullName ?? '',
         active: !!p.active,
         pos: p.primaryPosition?.abbreviation ?? '',
-        team: p.currentTeam?.name ?? '',
+        team: p.active ? p.currentTeam?.name ?? '' : 'Retired',
       }))
       .sort((a, b) => Number(b.active) - Number(a.active))
       .slice(0, limit)

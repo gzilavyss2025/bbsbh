@@ -80,7 +80,21 @@ spoiler-free only when restricted to the half the user has reached
   Degrades to `[]` on failure or off-MLB.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
-  never wired into a sealed game surface.
+  never wired into a sealed game surface. **`currentTeam` is not a roster
+  claim**: the API keeps aiming a released, unsigned, or long-retired player at
+  the last club he was contracted to (Pujols still reads "St. Louis Cardinals"),
+  which the hero used to render as his team. `fetchPerson` therefore hydrates
+  `rosterEntries` — one row per STINT, `startDate`/`endDate` — and `person.js`'s
+  `rosterStatusView(person, onDate)` answers "is he on ANY club that day",
+  splitting a gap into free agent vs. retired on `person.active` (a fact about
+  today, so it may only classify a gap that runs to the present). Null means
+  rostered, i.e. render the club exactly as before; non-null makes `PlayerPage`
+  swap the club crest for the league mark and the club name for the status word,
+  and drop the club's header theme and headshot tint. Its companion
+  `lastPlayedSeason` backs the "Last played in 2022" banner, shown only for the
+  unrostered — a signed player who has missed the whole year is the IL banner's
+  story, not this one. Both are pure and take the page's cutoff date, so a
+  player page opened from an old box score reports his status THAT day.
 - `team.js` — team identity, roster, affiliates, standings, ranked team stats.
 - `search.js` — the footer's player/team directory search.
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`

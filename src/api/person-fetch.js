@@ -33,13 +33,24 @@ const feedLiveUrl = (gamePk, fields) =>
 // `team` hydration field has to ride along too: paired with `currentTeam` it's
 // the one that makes the API merge `sport`/`league`/`division` into the
 // `currentTeam` object (the standalone `team` field itself comes back empty).
+//
+// `rosterEntries` rides along as a FOURTH field because `currentTeam` never goes
+// empty: it keeps naming the last club a released, unsigned, or long-retired
+// player was under contract to (Pujols still reads "St. Louis Cardinals" four
+// years after his last game), which the page then renders as a roster claim the
+// app has no business making. The entries are the honest signal — one row per
+// STINT, with a `startDate` and an `endDate` that's absent while the stint is
+// open — so "is he on a roster on date D" becomes answerable. See
+// `rosterStatusView` in person.js for the classification and how it was
+// verified. Cheap: measured 1.9 KB -> 3.2 KB (Ohtani) and 3.4 KB -> 8.5 KB
+// (Cole, a long career full of rehab stints), once per player page.
 // Degrades to null (MiLB / bad id), so the page can show a graceful "couldn't
 // load".
 export async function fetchPerson(personId) {
   if (!personId) return null
   try {
     const data = await getJson(
-      `/api/v1/people/${personId}?hydrate=currentTeam,team,draft`,
+      `/api/v1/people/${personId}?hydrate=currentTeam,team,draft,rosterEntries`,
     )
     return data.people?.[0] ?? null
   } catch {

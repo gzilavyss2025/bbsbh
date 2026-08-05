@@ -4524,6 +4524,15 @@ body {
   margin: 0;
 }
 
+/* A fact that has to be the only one on its row — an odd count in this
+   two-column grid would otherwise leave the last cell empty, and the grid's
+   own rule-colored background showing through reads as a gap in the card
+   rather than a deliberate space. (PlayerPage's "Last Team", shown only for a
+   free-agent/retired player, is the one such fact today.) */
+.fact--wide {
+  grid-column: 1 / -1;
+}
+
 .fact__label {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -16107,6 +16116,10 @@ body {
     width: 96px !important;
     height: 96px !important;
   }
+  .player__leaguemark {
+    width: 96px;
+    height: 96px;
+  }
   .player__herologo-affiliate {
     height: 32px !important;
     width: 112px !important;
@@ -16219,6 +16232,20 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
+}
+/* The league mark in the crest slot, for a player on no club. Sized to match
+   the club logo it replaces (56px, 96px on the wide breakpoint below) so the
+   hero's third column keeps its width and the name doesn't shift between a
+   rostered player's page and a free agent's. Dimmed a touch — it is standing
+   in for an identity, not asserting one. */
+.player__herologo--league {
+  cursor: default;
+}
+.player__leaguemark {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  opacity: 0.7;
 }
 .player__ident {
   /* Grid items default to min-width:auto, which lets long names push this
@@ -16370,6 +16397,17 @@ body {
 .player__team {
   color: var(--navy);
   font-weight: var(--w-semibold);
+}
+/* "Free Agent" / "Retired", standing in the meta line where a club name would
+   be for a player who is on nobody's roster. Same weight as .player__team so
+   the line's rhythm doesn't change, but graphite rather than navy ink: it is a
+   state, not a place, and nothing behind it opens. Unbreakable for the same
+   reason .player__hand is: a hitter's meta line already carries both bat and
+   throw hands, and the wrap landed between "Free" and "Agent". */
+.player__status {
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+  white-space: nowrap;
 }
 .player .factgrid {
   margin-top: var(--space-4);
@@ -17975,6 +18013,33 @@ body {
   color: #fff;
   font-size: var(--fs-ui);
   line-height: var(--lh-solid);
+}
+
+/* ---- "last played in 2022" banner — the quietest member of the player-page
+   banner family. Deliberately NOT tape: the amber rehab and clay injured-list
+   strips both flag something in progress, and a career that ended four years
+   ago is neither urgent nor an alert. So it borrows the slate's neutral
+   graphite-to-ink gradient (.offday-banner) — the app's existing "nothing is
+   happening here" surface — rather than inventing a fourth treatment. Shown
+   only for a player who is on no roster AND has no games in the season being
+   viewed; see PlayerPage.jsx / loadPlayer.js. ---- */
+.lastplayed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
+  box-shadow: var(--shadow-card);
+}
+.lastplayed-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: #fff;
 }
 
 /* ---- game-status banner — flat kraft-amber strip flagging a delayed,

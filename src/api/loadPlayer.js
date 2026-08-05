@@ -40,6 +40,8 @@ import {
   personBio,
   signedFallback,
   personSportId,
+  rosterStatusView,
+  lastPlayedSeason,
   advancedPitchingView,
   advancedHittingView,
   battedBallView,
@@ -185,9 +187,18 @@ export async function loadPlayer(id, asOf) {
   // signedFallback) — cheap, txns is already fetched above.
   bio.signedYear = bio.draft?.year ? null : signedFallback(txns)
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
+  // Free agent / retired / released — set only when he is on NO club as of the
+  // page's cutoff, in which case `bio.team` is a stale pointer the hero must not
+  // render as his club. See rosterStatusView.
+  const rosterStatus = rosterStatusView(person, endDate)
   // Where he's playing RIGHT NOW (a big leaguer's is MLB; a demoted or
-  // now-a-lifer minor leaguer's is his current MiLB level).
-  const liveSportId = personSportId(person)
+  // now-a-lifer minor leaguer's is his current MiLB level). For an unrostered
+  // big leaguer that same stale `currentTeam` would pin the whole page to a
+  // level he isn't at — Céspedes's winter-league club would send every
+  // current-activity fetch and every outgoing link to sportId 17 — so a player
+  // who has reached the majors falls back to MLB. A never-debuted minor leaguer
+  // keeps his last level: it's still the right one for his MiLB register.
+  const liveSportId = rosterStatus && bio.debut ? 1 : personSportId(person)
   // A big leaguer currently on a minor-league REHAB assignment is a major
   // leaguer passing through the minors, not a demotion — so his current-activity
   // sections (season tiles, splits, game log, the register's current-season row)
@@ -409,6 +420,18 @@ export async function loadPlayer(id, asOf) {
   })
   const trophyCase = trophyCaseView(awards, endDate)
   const blocks = results.map((r) => r.block)
+  // "Last played in 2022" — the banner under the masthead for someone who isn't
+  // on a club AND hasn't appeared in a game this season. Only for the unrostered:
+  // a signed player who has missed the whole year is an injury story the IL
+  // banner already tells, and stamping him "last played in 2025" would read as
+  // an obituary. Reuses the year-by-year splits each block already fetched
+  // (both levels — a career minor leaguer's last season counts too), and is
+  // measured against the season IN VIEW, so an old box score's player links
+  // don't accuse anyone of being retired years before he was.
+  const lastPlayed = rosterStatus
+    ? lastPlayedSeason(person, results.flatMap((r) => [...r.mlbYbySplits, ...r.milbYbySplits]), season)
+    : null
+  const lastPlayedYear = lastPlayed && lastPlayed < season ? lastPlayed : null
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
   // The player's rank on his own org's farm-system list — shown as a second
@@ -650,6 +673,7 @@ export async function loadPlayer(id, asOf) {
     bio, blocks, season, asOf, sportId: currentActivitySportId,
     onRehab, rehab,
     onIL, il,
+    rosterStatus, lastPlayedYear,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions, trophyCase,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),

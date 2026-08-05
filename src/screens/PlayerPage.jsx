@@ -80,12 +80,20 @@ export function PlayerPage({ id, asOf, sportId }) {
 
   const { bio, blocks } = data
   const pitchBlock = blocks.find((b) => b.group === 'pitching')
+  // A free agent / retired / released player (see api/person.js's
+  // rosterStatusView). `bio.team` is still populated for him — the API points a
+  // player with no club at the last one he had — so everything club-shaped on
+  // this hero reads through `club` instead, which goes null the moment he is on
+  // nobody's roster. He gets the league mark and the status word in place of a
+  // club he isn't on.
+  const status = data.rosterStatus
+  const club = status ? null : bio.team
   // Not tied to any one game, so the player page always wears the club's
   // Main/Home triad — the same identity-only theme TeamHubShell resolves for
-  // its own hub header. Null (no curated triad for this club) leaves the page
-  // on the app's default navy chrome, same fallback headerTheme.js guarantees
-  // everywhere else.
-  const theme = headerThemeFor(bio.team?.id, themeKeyFor(bio.team?.id, 'home', 'main'))
+  // its own hub header. Null (no curated triad for this club, or no club at
+  // all) leaves the page on the app's default navy chrome, same fallback
+  // headerTheme.js guarantees everywhere else.
+  const theme = headerThemeFor(club?.id, themeKeyFor(club?.id, 'home', 'main'))
   const heroPos = bio.twoWay ? 'DH/P' : (bio.isPitcher && pitchBlock?.role) || bio.posAbbr || ''
   const hand = bio.isPitcher && !bio.twoWay
     ? bio.throws ? `Throws ${bio.throws}` : ''
@@ -131,15 +139,24 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
+        {data.lastPlayedYear && (
+          <div className="lastplayed-banner" role="note">
+            <span className="lastplayed-banner__text">Last played in {data.lastPlayedYear}</span>
+          </div>
+        )}
         <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
+          {/* No club, no club-colored wash behind the face — and `isMlb` is
+              passed explicitly because it normally derives from the teamId
+              that just went null, and a debuted player must keep skipping the
+              stale `milb` prospect-photo rung (see Headshot). */}
           <Headshot
             personId={bio.id}
             name={bio.fullName}
-            teamId={bio.team?.parentOrgId ?? bio.team?.id}
-            isMlb={isMlbTeamId(bio.team?.id)}
+            teamId={club?.parentOrgId ?? club?.id}
+            isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
           />
           <div className="player__ident">
             <h1 className="player__name">
@@ -155,9 +172,14 @@ export function PlayerPage({ id, asOf, sportId }) {
             <p className="player__meta">
               {heroPos && <span className="player__pos">{heroPos}</span>}
               {hand && <> <span className="sep">·</span> <span className="player__hand">{hand}</span></>}
-              {bio.team && (
+              {club && (
                 <> <span className="sep">·</span>{' '}
-                  <TeamLink id={bio.team.id} className="player__team">{bio.team.name}</TeamLink>
+                  <TeamLink id={club.id} className="player__team">{club.name}</TeamLink>
+                </>
+              )}
+              {status && (
+                <> <span className="sep">·</span>{' '}
+                  <span className="player__status">{status.label}</span>
                 </>
               )}
               {data.prospectRank && (
@@ -172,8 +194,8 @@ export function PlayerPage({ id, asOf, sportId }) {
                 <> <span className="sep">·</span>{' '}
                   <span className="prospectpill">
                     <TeamLogo
-                      teamId={bio.team?.parentOrgId ?? bio.team?.id}
-                      name={bio.team?.parentOrgName ?? bio.team?.name}
+                      teamId={club?.parentOrgId ?? club?.id}
+                      name={club?.parentOrgName ?? club?.name}
                       size={12}
                     />
                     #{data.orgProspectRank} PROSPECT
@@ -182,19 +204,28 @@ export function PlayerPage({ id, asOf, sportId }) {
               )}
             </p>
           </div>
-          {bio.team && (
-            <TeamLink id={bio.team.id} className="player__herologo">
-              <TeamLogo teamId={bio.team.id} name={bio.team.name} size={56} />
-              {bio.team.parentOrgId && (
+          {club && (
+            <TeamLink id={club.id} className="player__herologo">
+              <TeamLogo teamId={club.id} name={club.name} size={56} />
+              {club.parentOrgId && (
                 <TeamLogo
-                  teamId={bio.team.parentOrgId}
-                  name={bio.team.parentOrgName}
+                  teamId={club.parentOrgId}
+                  name={club.parentOrgName}
                   variant="wordmark"
                   size={20}
                   className="player__herologo-affiliate"
                 />
               )}
             </TeamLink>
+          )}
+          {/* The league mark stands in for the club crest — the slot has to hold
+              something or the hero's third column collapses and the name jumps
+              right, and MLB's own mark is the honest answer for a player who
+              belongs to no club. Not a link: there's no club page to open. */}
+          {status && (
+            <span className="player__herologo player__herologo--league">
+              <img src={leagueLogoUrl()} alt="" className="player__leaguemark" />
+            </span>
           )}
         </header>
 
@@ -220,6 +251,21 @@ export function PlayerPage({ id, asOf, sportId }) {
           />
           <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
           <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} />
+          {/* Where he last was, for the unrostered only — the fact the hero
+              stopped implying, now said outright under a label that can't be
+              misread as "his team". Spans the grid because a seventh cell
+              would otherwise leave a rule-colored hole beside it. */}
+          {status?.lastTeam && (
+            <Fact
+              label="Last Team"
+              wide
+              value={
+                <TeamLink id={status.lastTeam.id} className="player__team">
+                  {status.lastTeam.name}
+                </TeamLink>
+              }
+            />
+          )}
         </div>
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
@@ -713,9 +759,9 @@ function SectionTitle({ title, note, primary = false, bar = false }) {
   )
 }
 
-function Fact({ label, value, mono = false }) {
+function Fact({ label, value, mono = false, wide = false }) {
   return (
-    <div className="fact">
+    <div className={`fact${wide ? ' fact--wide' : ''}`}>
       <div className="fact__label">{label}</div>
       <div className={`fact__value${value === DASH ? ' fact__na' : ''}`}>
         {mono ? <span className="mono">{value}</span> : value}
