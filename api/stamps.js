@@ -32,7 +32,6 @@
 // Unconfigured degrades like the other two: no Redis (or no Clerk) and the
 // endpoint 501s, leaving the client local-only. Sync has always been opt-in.
 
-import { verifyToken } from '@clerk/backend'
 import {
   DEFAULT_STAMP_MODE,
   MAX_STAMPS_PER_SEASON,
@@ -45,7 +44,8 @@ import {
   seasonFromDate,
   toGamePk,
 } from '../src/lib/stamps.js'
-import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { authenticateUser } from './_lib/auth.js'
+import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js/spoiled-days.js:
@@ -56,17 +56,6 @@ export const config = { runtime: 'nodejs' }
 // where a shared cache would leak an actual score. Never relax this header.
 function reply(res, body, status = 200) {
   return jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
-}
-
-async function authenticate(req) {
-  const secretKey = process.env.CLERK_SECRET_KEY
-  if (!secretKey) return null
-  const auth = getHeader(req, 'authorization')
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  if (!token) return null
-  const { data, errors } = await verifyToken(token, { secretKey })
-  if (errors || !data?.sub) return null
-  return data.sub
 }
 
 const stampsKey = (userId, season) => `stamps:${userId}:${season}`
@@ -430,8 +419,9 @@ export default async function handler(req, res) {
   const redis = getRedis()
   if (!redis) return reply(res, { error: 'sync not configured' }, 501)
 
-  const userId = await authenticate(req)
-  if (!userId) return reply(res, { error: 'unauthorized' }, 401)
+  const auth = await authenticateUser(req)
+  if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
+  const userId = auth.userId
 
   if (req.method === 'GET') {
     // The cheap nav payload.

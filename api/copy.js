@@ -21,9 +21,9 @@
 // returns an empty override map (the app renders shipped defaults) and POST
 // returns 501. The app has never required a backend and still does not.
 
-import { verifyToken } from '@clerk/backend'
 import { sanitizeOverrides } from '../src/copy/registry.js'
-import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { authenticateUser } from './_lib/auth.js'
+import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
@@ -82,19 +82,16 @@ function authorizedParties() {
   return parties.length ? parties : undefined
 }
 
+// Deliberately still null-or-userId, unlike the other three endpoints. They
+// distinguish "this deploy cannot verify" from "you sent no token" because that
+// distinction is what makes a broken sync deploy diagnosable. Here every failure
+// is one thing — you are not an admin — and saying which of the four reasons
+// applied would tell an anonymous caller about the deploy's admin setup for no
+// benefit to the one person who is allowed in.
 async function authenticateAdmin(req) {
-  const secretKey = process.env.CLERK_SECRET_KEY
-  if (!secretKey) return null
-  const auth = getHeader(req, 'authorization')
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  if (!token) return null
-  const { data, errors } = await verifyToken(token, {
-    secretKey,
-    authorizedParties: authorizedParties(),
-  })
-  if (errors || !data?.sub) return null
-  if (!adminIds().has(data.sub)) return null
-  return data.sub
+  const auth = await authenticateUser(req, { authorizedParties: authorizedParties() })
+  if (!auth.ok) return null
+  return adminIds().has(auth.userId) ? auth.userId : null
 }
 
 export default async function handler(req, res) {
