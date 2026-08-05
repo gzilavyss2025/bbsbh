@@ -24,6 +24,7 @@ import {
   fetchMilbStarterRelieverSeason,
   fetchMilbGameLog,
   fetchPitchingAdvanced,
+  fetchHittingAdvanced,
   fetchTransactions,
   fetchPlayerAwards,
   fetchTradeCohort,
@@ -32,16 +33,21 @@ import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
-import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor } from './savantPercentiles.js'
+import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
 import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookiesData, rookieRecordFor } from './rookies.js'
 import {
   personBio,
   signedFallback,
   personSportId,
+  rosterStatusView,
+  lastPlayedSeason,
   advancedPitchingView,
+  advancedHittingView,
+  battedBallView,
   situationalSplitsView,
   pitchingRanksView,
+  hittingRanksView,
   SITUATIONAL_SIT_CODES,
   aggregateSplits,
   pitcherRole,
@@ -181,9 +187,18 @@ export async function loadPlayer(id, asOf) {
   // signedFallback) — cheap, txns is already fetched above.
   bio.signedYear = bio.draft?.year ? null : signedFallback(txns)
   const debutYear = bio.debut ? Number(bio.debut.slice(0, 4)) : null
+  // Free agent / retired / released — set only when he is on NO club as of the
+  // page's cutoff, in which case `bio.team` is a stale pointer the hero must not
+  // render as his club. See rosterStatusView.
+  const rosterStatus = rosterStatusView(person, endDate)
   // Where he's playing RIGHT NOW (a big leaguer's is MLB; a demoted or
-  // now-a-lifer minor leaguer's is his current MiLB level).
-  const liveSportId = personSportId(person)
+  // now-a-lifer minor leaguer's is his current MiLB level). For an unrostered
+  // big leaguer that same stale `currentTeam` would pin the whole page to a
+  // level he isn't at — Céspedes's winter-league club would send every
+  // current-activity fetch and every outgoing link to sportId 17 — so a player
+  // who has reached the majors falls back to MLB. A never-debuted minor leaguer
+  // keeps his last level: it's still the right one for his MiLB register.
+  const liveSportId = rosterStatus && bio.debut ? 1 : personSportId(person)
   // A big leaguer currently on a minor-league REHAB assignment is a major
   // leaguer passing through the minors, not a demotion — so his current-activity
   // sections (season tiles, splits, game log, the register's current-season row)
@@ -259,18 +274,21 @@ export async function loadPlayer(id, asOf) {
               : Promise.resolve([]),
             // The Advanced card's season/seasonAdvanced/sabermetrics bundle —
             // MLB-only at the source, so skip the request entirely for a
-            // player whose current activity is a MiLB level.
-            group === 'pitching' && currentActivitySportId === 1
-              ? fetchPitchingAdvanced(id, season)
+            // player whose current activity is a MiLB level. One fetcher per
+            // group; both return the same three-stat bundle shape.
+            currentActivitySportId === 1
+              ? (group === 'pitching' ? fetchPitchingAdvanced(id, season) : fetchHittingAdvanced(id, season))
               : Promise.resolve(null),
             // Situational splits (base state / count leverage) — full-season
-            // figures like the vs-L/R card, MLB only.
-            group === 'pitching' && currentActivitySportId === 1
+            // figures like the vs-L/R card, MLB only. The sitCodes set and the
+            // shaping are group-generic (ahead/behind in count reads from
+            // whichever side `group` asks for).
+            currentActivitySportId === 1
               ? fetchPersonStats(id, { type: 'statSplits', group, sitCodes: SITUATIONAL_SIT_CODES, season, sportId: 1 })
               : Promise.resolve([]),
             // League ranks — live current ranks with no as-of history, so a
             // spoiler-cutoff view skips them (same rule as FoulCard).
-            group === 'pitching' && currentActivitySportId === 1 && !cutoff
+            currentActivitySportId === 1 && !cutoff
               ? fetchPersonStats(id, { type: 'rankings', group, season, sportId: 1 })
               : Promise.resolve([]),
           ])
@@ -299,18 +317,28 @@ export async function loadPlayer(id, asOf) {
         // The raw season rates behind those percentiles, for the radar's spoke
         // labels — same file, separate map (see savantRawFor).
         block.savantRaw = savantRawFor(savantData, id, group)
-        // "Pitches like" — same attach-after-buildBlock pattern. Ranked
-        // against the level he's actually pitching at (see similarPitchersFor);
-        // [] for a hitter, a MiLB arm below AAA, or anyone under the sample
-        // floor, and the card then doesn't render.
+        // "Pitches like" / "Hits like" — same attach-after-buildBlock pattern,
+        // one field for both groups since a block only ever renders its own
+        // card. A pitcher ranks in arsenal space against the level he's
+        // actually pitching at (see similarPitchersFor); a hitter ranks in
+        // Statcast skill space against the savant file's qualified-MLB pool
+        // (see similarHittersFor — a MiLB bat isn't in the file, so the card
+        // simply doesn't render). [] under any sample floor.
         block.similar =
-          group === 'pitching' ? similarPitchersFor(arsenalData, id, tileSportId === 1) : []
+          group === 'pitching'
+            ? similarPitchersFor(arsenalData, id, tileSportId === 1)
+            : similarHittersFor(savantData, id)
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the
         // situational-splits ledger and the league-rank strip.
-        block.advanced = group === 'pitching' ? advancedPitchingView(advancedBundle) : null
-        block.situational = group === 'pitching' ? situationalSplitsView(situationalSplits, group) : null
-        block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : null
+        block.advanced =
+          group === 'pitching' ? advancedPitchingView(advancedBundle) : advancedHittingView(advancedBundle)
+        // The batted-ball profile shares the Advanced card's seasonAdvanced
+        // response — one fetch feeds both cards.
+        block.battedBall =
+          group === 'hitting' ? battedBallView(advancedBundle?.seasonAdvanced) : null
+        block.situational = situationalSplitsView(situationalSplits, group)
+        block.ranks = group === 'pitching' ? pitchingRanksView(rankSplits) : hittingRanksView(rankSplits)
         return { group, mlbYbySplits, milbYbySplits, block }
       }),
     ),
@@ -335,19 +363,21 @@ export async function loadPlayer(id, asOf) {
   ])
   // Transaction timeline enrichment — everything the raw player-scoped feed
   // can't give on its own: each affiliate club's level (for CALLED UP / SENT
-  // DOWN + the level tags), the other players in each trade (named only as free
-  // text on the player's own row), and his draft record. Gathered here, then
-  // shaped by transactionTimelineView. The same awards fetch also feeds the
-  // Trophy Case card (trophyCaseView, below) — awards are MLB-only, so only
-  // fetch them for a debuted player (a pure prospect has none in either
-  // allowlist).
+  // DOWN + the level tags, and for naming an Injured List rehab stop by level
+  // rather than affiliate name — see person.js's ilArcClause), the other
+  // players in each trade (named only as free text on the player's own row),
+  // and his draft record. Gathered here, then shaped by
+  // transactionTimelineView. The same awards fetch also feeds the Trophy Case
+  // card (trophyCaseView, below) — awards are MLB-only, so only fetch them for
+  // a debuted player (a pure prospect has none in either allowlist).
   const asgTeamIds = new Set()
   const trades = []
   for (const t of txns) {
-    if (
-      t.typeCode === 'ASG' && t.fromTeam?.id && t.toTeam?.id &&
-      !/rehab/i.test(t.description || '')
-    ) {
+    // Every ASG row's clubs go in, rehab included — the "real affiliate move"
+    // vs. "rehab assignment" distinction only matters to transactionTimelineView's
+    // own CALLED UP / SENT DOWN labeling (which re-checks the rehab regex
+    // itself), not to gathering the ids a level lookup needs.
+    if (t.typeCode === 'ASG' && t.fromTeam?.id && t.toTeam?.id) {
       asgTeamIds.add(t.fromTeam.id)
       asgTeamIds.add(t.toTeam.id)
     }
@@ -390,6 +420,18 @@ export async function loadPlayer(id, asOf) {
   })
   const trophyCase = trophyCaseView(awards, endDate)
   const blocks = results.map((r) => r.block)
+  // "Last played in 2022" — the banner under the masthead for someone who isn't
+  // on a club AND hasn't appeared in a game this season. Only for the unrostered:
+  // a signed player who has missed the whole year is an injury story the IL
+  // banner already tells, and stamping him "last played in 2025" would read as
+  // an obituary. Reuses the year-by-year splits each block already fetched
+  // (both levels — a career minor leaguer's last season counts too), and is
+  // measured against the season IN VIEW, so an old box score's player links
+  // don't accuse anyone of being retired years before he was.
+  const lastPlayed = rosterStatus
+    ? lastPlayedSeason(person, results.flatMap((r) => [...r.mlbYbySplits, ...r.milbYbySplits]), season)
+    : null
+  const lastPlayedYear = lastPlayed && lastPlayed < season ? lastPlayed : null
   const conversionNote = convHittingMilb ? positionPlayerPastNote(convHittingMilb, debutYear) : null
   const prospectRank = prospectRankById(prospects.players, bio.id)
   // The player's rank on his own org's farm-system list — shown as a second
@@ -631,6 +673,7 @@ export async function loadPlayer(id, asOf) {
     bio, blocks, season, asOf, sportId: currentActivitySportId,
     onRehab, rehab,
     onIL, il,
+    rosterStatus, lastPlayedYear,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions, trophyCase,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),

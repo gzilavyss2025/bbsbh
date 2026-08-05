@@ -1,6 +1,6 @@
 import { fetchTeam, fetchTeamRoster, fetchTeamIL, fetchStandings } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
-import { fetchTeamSchedule, recentDecidedGames, allDecidedGames } from '../../../api/schedule.js'
+import { fetchTeamSchedule, recentDecidedGames } from '../../../api/schedule.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../../../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
@@ -124,10 +124,10 @@ export async function loadOverview(id, asOf) {
     leagueSeasonScores: isMilb ? [] : leagueScoresFor(teamScores, season, scoreCutoff, 'season'),
     leagueSurpriseScores: isMilb ? [] : leagueSurpriseScoresFor(seasonScores, season, scoreCutoff),
     leagueFormScores: isMilb ? [] : leagueScoresFor(teamScores, season, scoreCutoff, 'currentForm'),
-    // Last 10 preview — the header's W-L stays pinned to the true last ten
-    // (recentGames) while the strip itself shows the five most recent stubs.
+    // Last 10 preview — the true last ten, which is both what the strip shows
+    // and the W-L its header carries. Every game older than those is the Games
+    // tab's grid, so the Overview never needs the full decided-game list.
     recentGames: recentDecidedGames(schedule),
-    seasonGames: allDecidedGames(schedule),
     // Lineup preview.
     lineupDefense: lineupDefenseFrom(preferredLineupFrom(fullRoster, id), injuredIds),
     // Leaders preview.

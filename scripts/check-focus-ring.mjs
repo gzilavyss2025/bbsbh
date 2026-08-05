@@ -16,19 +16,36 @@
 //
 // A deliberate one-off must be marked with a `focus-ring-exempt` comment on the
 // same line (mirrors the caps-exempt convention). Run by `npm run lint`. Zero
-// deps, scans src/index.css (where every component rule lives).
+// deps, scans src/styles/*.css (where every component rule lives).
 
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { resolve, join } from 'node:path'
 
-const cssPath = resolve('src/index.css')
-const raw = readFileSync(cssPath, 'utf8')
+// Every component rule lives in src/styles/*.css — the partials src/index.css
+// @imports in order. Read the DIRECTORY rather than a fixed list so a new
+// partial is covered the moment it exists.
+const stylesDir = resolve('src/styles')
+const sheets = readdirSync(stylesDir)
+  .filter((f) => f.endsWith('.css'))
+  .sort()
+  .map((f) => ({ rel: `src/styles/${f}`, raw: readFileSync(join(stylesDir, f), 'utf8') }))
 
-// Blank out /* ... */ comments while preserving every newline (and each line's
-// length), so char offsets and line numbers stay exact.
-const css = raw.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
-const rawLines = raw.split('\n')
-const lineAt = (index) => css.slice(0, index).split('\n').length
+// Same hazard as check-typography.mjs: if the stylesheets move again, or a
+// refactor empties them, every assertion below becomes a no-op while still
+// printing ✓. Fail loudly instead of guarding nothing.
+const totalRules = sheets.reduce(
+  (n, s) => n + (s.raw.replace(/\/\*[\s\S]*?\*\//g, '').match(/\{/g) || []).length,
+  0,
+)
+if (!sheets.length || totalRules === 0) {
+  console.error(
+    '\n✗ Focus-ring guard has nothing to check — src/styles/ holds no CSS rules\n' +
+      '  (found ' + sheets.length + ' sheet(s), ' + totalRules + ' rule(s)). If the stylesheets\n' +
+      '  moved, repoint this script IN THE SAME COMMIT as the move. Do not delete\n' +
+      '  this assertion — a vacuous pass still prints ✓.\n'
+  )
+  process.exit(1)
+}
 
 const errors = []
 
@@ -39,12 +56,21 @@ const ruleRe = /([^{}]*)\{([^{}]*)\}/g
 // The declarations that can paint a ring.
 const declRe = /(outline(?:-color)?|box-shadow)\s*:\s*([^;]+);/g
 
-let rule
-while ((rule = ruleRe.exec(css))) {
+for (const { rel, raw } of sheets) {
+  // Blank out /* ... */ comments while preserving every newline (and each line's
+  // length), so char offsets and line numbers stay exact.
+  const css = raw.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+  const rawLines = raw.split('\n')
+  const lineAt = (index) => css.slice(0, index).split('\n').length
+  ruleRe.lastIndex = 0
+
+  let rule
+  while ((rule = ruleRe.exec(css))) {
   const [, selector, body] = rule
   if (!selector.includes(':focus-visible')) continue
 
   const bodyStart = rule.index + selector.length + 1 // '{' consumed
+  declRe.lastIndex = 0
   let decl
   while ((decl = declRe.exec(body))) {
     const prop = decl[1]
@@ -65,10 +91,11 @@ while ((rule = ruleRe.exec(css))) {
           ? 'use box-shadow: var(--ring)'
           : 'use outline: <width> solid var(--focus-ring)'
       errors.push(
-        `src/index.css:${line}: ${prop}: ${value}; — ${fix} ` +
+        `${rel}:${line}: ${prop}: ${value}; — ${fix} ` +
           '(or mark a deliberate one-off with a /* focus-ring-exempt */ comment)',
       )
     }
+  }
   }
 }
 

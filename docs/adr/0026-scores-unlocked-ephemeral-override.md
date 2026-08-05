@@ -194,6 +194,37 @@ the shell so each poll fetched genuinely fresh data:
   auto-navigation, and the manual paging. This is the bug this ADR's
   `commitReveals` rule exists to prevent, confirmed clean against a live feed.
 
+## Amendment (2026-08-05) — the same-tab echo must not read eagerly
+
+Turning the pass back off did not re-seal the slate until a reload. The switch
+flipped, the pass expiry was dropped, and `bbsbh:spoiledDays` was correctly
+rewritten without today — but the live scores stayed painted on the cards,
+because the hook's IN-MEMORY day map still held today and `spoilersOffFor` reads
+that, not storage.
+
+The mechanism: `enable`/`disable` persist the day map from inside their `setDays`
+updater, which React runs at render time, but they fire `notifyLocalChange`
+synchronously right after *queueing* it. `refresh` — the echo's landing point —
+then read the map eagerly, before the write it was reacting to, and queued the
+pre-change value behind the change. React applied the updater, then reverted it.
+Reading from inside the updater (`setDays(() => parseSpoiledDays(...))`) puts the
+read after the write. The expiry half never had the bug and still reads eagerly,
+because both callers write that key synchronously before notifying; the hook's
+header now says so, since an undocumented asymmetry is how this comes back.
+
+Two things worth carrying forward:
+
+- **This is a spoiler bug, and the existing specs could not see it.** They
+  assert `localStorage`, which was right the whole time. The regression test
+  added with the fix asserts the only thing that tells the two apart — score
+  lines still in the DOM after the user said stop — and is the one spec in
+  `e2e/invariants/` that STUBS the feed rather than guarding on it, because
+  here "no feed" means nothing to assert rather than less.
+- **`useStamps.js` had the identical defect** (ADR-0036's addendum), found
+  first and fixed the same way. Any hook in this codebase that persists inside
+  a state updater and echoes synchronously has it; the echo listener must read
+  from inside its own updater.
+
 ## Known gaps (deliberately recorded, not yet closed)
 
 - **The sync component itself is untested end-to-end.** Its merge logic is pinned

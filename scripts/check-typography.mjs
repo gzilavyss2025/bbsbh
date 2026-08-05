@@ -1,9 +1,33 @@
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { readFileSync, readdirSync } from 'node:fs'
+import { resolve, join } from 'node:path'
 
-const cssPath = resolve('src/index.css')
-const css = readFileSync(cssPath, 'utf8')
+// Every component rule lives in src/styles/*.css — the partials src/index.css
+// @imports in order. Read the DIRECTORY rather than a fixed list so a new
+// partial is covered the moment it exists.
+const stylesDir = resolve('src/styles')
+const sheets = readdirSync(stylesDir)
+  .filter((f) => f.endsWith('.css'))
+  .sort()
+  .map((f) => ({ rel: `src/styles/${f}`, css: readFileSync(join(stylesDir, f), 'utf8') }))
 const errors = []
+
+// This guard is only as good as its target. If the partials move again — or a
+// refactor empties them — this script would keep exiting 0 while checking
+// nothing, and a guard that stops guarding is worse than none, because the ✓
+// still prints and reads as coverage. So assert there is real CSS to scan.
+const totalRules = sheets.reduce(
+  (n, s) => n + (s.css.replace(/\/\*[\s\S]*?\*\//g, '').match(/\{/g) || []).length,
+  0,
+)
+if (!sheets.length || totalRules === 0) {
+  console.error(
+    '\n✗ Typography guard has nothing to check — src/styles/ holds no CSS rules\n' +
+      '  (found ' + sheets.length + ' sheet(s), ' + totalRules + ' rule(s)). If the stylesheets moved,\n' +
+      '  repoint this script IN THE SAME COMMIT as the move. Do not delete this\n' +
+      '  assertion — it exists precisely because a vacuous pass still prints ✓.\n'
+  )
+  process.exit(1)
+}
 
 const rules = [
   {
@@ -31,16 +55,16 @@ const rules = [
   },
 ]
 
-for (const rule of rules) {
-  const declarations = new RegExp(`${rule.property}\\s*:\\s*([^;]+);`, 'g')
-  for (const match of css.matchAll(declarations)) {
-    const value = match[1].trim()
-    if (rule.allowed(value)) continue
+for (const { rel, css } of sheets) {
+  for (const rule of rules) {
+    const declarations = new RegExp(`${rule.property}\\s*:\\s*([^;]+);`, 'g')
+    for (const match of css.matchAll(declarations)) {
+      const value = match[1].trim()
+      if (rule.allowed(value)) continue
 
-    const line = css.slice(0, match.index).split('\n').length
-    errors.push(
-      `src/index.css:${line}: ${rule.property}: ${value}; — ${rule.guidance}`,
-    )
+      const line = css.slice(0, match.index).split('\n').length
+      errors.push(`${rel}:${line}: ${rule.property}: ${value}; — ${rule.guidance}`)
+    }
   }
 }
 

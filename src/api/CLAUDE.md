@@ -80,7 +80,21 @@ spoiler-free only when restricted to the half the user has reached
   Degrades to `[]` on failure or off-MLB.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
-  never wired into a sealed game surface.
+  never wired into a sealed game surface. **`currentTeam` is not a roster
+  claim**: the API keeps aiming a released, unsigned, or long-retired player at
+  the last club he was contracted to (Pujols still reads "St. Louis Cardinals"),
+  which the hero used to render as his team. `fetchPerson` therefore hydrates
+  `rosterEntries` — one row per STINT, `startDate`/`endDate` — and `person.js`'s
+  `rosterStatusView(person, onDate)` answers "is he on ANY club that day",
+  splitting a gap into free agent vs. retired on `person.active` (a fact about
+  today, so it may only classify a gap that runs to the present). Null means
+  rostered, i.e. render the club exactly as before; non-null makes `PlayerPage`
+  swap the club crest for the league mark and the club name for the status word,
+  and drop the club's header theme and headshot tint. Its companion
+  `lastPlayedSeason` backs the "Last played in 2022" banner, shown only for the
+  unrostered — a signed player who has missed the whole year is the IL banner's
+  story, not this one. Both are pure and take the page's cutoff date, so a
+  player page opened from an old box score reports his status THAT day.
 - `team.js` — team identity, roster, affiliates, standings, ranked team stats.
 - `search.js` — the footer's player/team directory search.
 - `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
@@ -117,6 +131,16 @@ spoiler-free only when restricted to the half the user has reached
   `hasPitchTracking(feed)` gates to MLB + AAA. See
   `.scratch/umpire-accuracy/consistency-favor-scope.md` §3.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
+  `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
+  (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
+  as `game:final:{gamePk}`. Its one caller is `StampGameButton` inside the box
+  score's `SealBox` reveal render — ADR-0035. Two fields there are load-bearing
+  for the SERVER's reveal gate, not decoration: `innings` and `homeBattedLast`
+  feed `finalHalfIndex` (`src/lib/stamps.js`), and they are derived by scanning
+  for the last half anyone actually batted in rather than off `innings.length`,
+  because the live feed pads its linescore out to `scheduledInnings` and the
+  schedule feed the server reads does not. A rain-shortened game is where those
+  two disagree; `test/stamp-art.test.js` pins it.
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
   at most MiLB parks, so every field is null-guarded and the UI hides the row.
@@ -132,6 +156,28 @@ spoiler-free only when restricted to the half the user has reached
   `.scratch/placed-runner-card/PRD.md`. `legAdvanceCode`'s per-runner advance
   codes (`ADVANCE_CODES`) have a couple of rare, deliberately-unresolved
   fallback gaps — see `docs/unresolved-scoring-conventions.md`.
+
+- `logbook.js` — the Logbook's game facts for a set of STAMPED gamePks
+  (`fetchStampGames`, `stampGameFacts`), ADR-0035. The one fetcher here that
+  deliberately asks statsapi FOR the score: every other schedule fetcher prunes
+  it out with `fields=` (see the `GAMES_BY_PK_FIELDS` block in `schedule.js`),
+  which is exactly why this one lives in its own file rather than beside them —
+  so nobody reaches for the wrong function. Safe only because its input is the
+  user's own stamps, and a stamp cannot exist for a game they have not finished
+  revealing. `stampGameFacts` produces the same blob `revealStampFacts` does, so
+  a stamp renders identically whichever source resolved it. Do not call it with
+  an arbitrary game list.
+
+- `logbookStats.js` — the Logbook's retrospective, Tier 1 (`computeLogbookStats`),
+  ADR-0035. **Pure**: `(stamps, gameFacts) -> numbers`, no fetching, so the
+  record/streak/aggregation math lands in the CI-gated suite
+  (`test/logbook-stats.test.js`) instead of being verifiable only by eye —
+  deliberately unlike `FirstScorebookPage.jsx`, which derives the same family of
+  numbers inline in `useMemo`s where nothing can reach it. **Reveal-only by
+  classification** (it handles scores, so ADR-0001 applies); with no seal to sit
+  inside, the discipline is the INPUT — only ever the user's own stamps, never an
+  arbitrary game list. Rendered by `screens/LogbookStatsPage.jsx` at
+  `/logbook/stats`.
 
 Related research docs (read before wiring a new source):
 - `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
@@ -415,6 +461,24 @@ for each generator; the reader modules:
   them. That pre-flip is exactly what makes a radar possible — it's what lets
   five metrics in five different units share one "farther out is better" axis —
   so read `radarGeometry.js`'s header before changing how any of it is scaled.
+  `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
+  "Hits like" card, the batter counterpart of `pitchArsenal.js`'s
+  `similarPitchersFor`: it flattens the `bat` percentile map into a pool and
+  ranks it with `src/lib/hitterSimilarity.js` (pure, unit-tested, calibration
+  constants documented against the real file's measured distance
+  distributions). Skill space only (ev/hardHit/brl/chase/sprintSpeed —
+  deliberately NOT xwoba, which would double-count contact quality), no
+  handedness filter (contact/discipline/speed don't invert with batting
+  side), and the file carries no names — `SimilarHitters.jsx` resolves its
+  three rows' names/clubs itself with one batched
+  `people?personIds=…&hydrate=currentTeam` call.
+- `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
+  slot the pitcher page fills with `workload.js`'s Recent workload): live
+  `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
+  out in one `Promise.all`; `hitterFormView` is the pure facts-list shaping.
+  Current-day only (the card skips under a spoiler `asOf`), and NOT
+  `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
+  projection — the name differs on purpose so the two never collide.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
   (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
   owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`
@@ -530,9 +594,9 @@ for each generator; the reader modules:
   alone, e.g. an ABS-challenge result card (`graphic`, from a taxonomy/shape
   match) or a broadcast frame grab slipping in.
   `photosForPlayer` is still unused groundwork; `photosForTeam` now backs the
-  Team Page's Photos rail (`TeamPhotosRail`, `src/screens/TeamPage.jsx`),
+  Team Page's Photos rail (`TeamPhotosRail`, on the hub's Games tab),
   which walks that team's own `seasonGames` (already `asOf`-cutoff-filtered,
-  same list `LastTenGamesStrip` renders off) backward from the newest game,
+  the same list the tab's `AllGames` grid renders off) backward from the newest game,
   fetching `fetchGamePhotos` per game on demand rather than reading a
   precomputed index — that page already has the one team's full decided-game
   list in memory, so a bounded live walk-back was enough. The cross-game

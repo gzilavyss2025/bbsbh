@@ -278,3 +278,28 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
     hurt: injuredIds.has(p.id),
   }))
 }
+
+// ---------------------------------------------------------------------------
+// Empty-tab detection (issue 08)
+// ---------------------------------------------------------------------------
+
+// Which of the five tab buttons opens onto nothing for this club, decided
+// cheaply off the identity data every tab already has (loadTeamIdentity's
+// `team`) — never by fetching a tab's own payload just to find out (PRD
+// non-negotiable 2). An MLB club never hides anything: every one of them has a
+// farm system and a league. Only two MiLB cases are cheap enough to trust:
+//  - `minors`: the Minors tab's own affiliates/prospects lookup is keyed off
+//    `team.parentOrgId` — with none, every module in that tab comes back empty.
+//  - `numbers`: with no league at all there are no standings and no rank
+//    context — the tab would open onto nothing but a 0-0 jersey strip.
+// A hidden tab is still a real route — this only decides the BUTTON (see
+// TeamTabBar's `hidden` prop). Roster and Games are never hidden: every club
+// reachable in this app has an active roster and plays a schedule.
+export function hiddenTeamTabs(team) {
+  const hidden = new Set()
+  const isMilb = (team.sport?.id ?? 1) !== 1
+  if (!isMilb) return hidden
+  if (!team.parentOrgId) hidden.add('minors')
+  if (!team.league?.id) hidden.add('numbers')
+  return hidden
+}

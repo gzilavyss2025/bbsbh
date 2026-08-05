@@ -21,7 +21,7 @@
 // Run by hand: node scripts/gen-trade-deadline.mjs [year] [--force]
 import { writeFile, mkdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
 import {
@@ -69,10 +69,16 @@ async function fetchAffiliateParentMap(orgIds, season) {
 // MLB trade deadline deal always involves two actual MLB organizations (even
 // when the players moved are the two orgs' own low-minors prospects), so a
 // row only counts when BOTH sides resolve to an MLB org, directly or via
-// its affiliate chain.
-function bothSidesMlb(row, orgIds, affilToOrg) {
+// its affiliate chain — AND those two orgs are DIFFERENT. Without that second
+// check, a player reassigned between two affiliates of the SAME parent (e.g.
+// "DSL Mets Blue traded RHP Jhoangel Marquez to DSL Mets Orange" — both
+// affiliates resolve to org 121, the Mets) reads as a real trade when it's
+// just an intra-org complex reassignment.
+export function bothSidesMlb(row, orgIds, affilToOrg) {
   const orgOf = (id) => (id != null && (orgIds.has(id) ? id : affilToOrg.get(id))) ?? null
-  return orgOf(row.fromTeam?.id) != null && orgOf(row.toTeam?.id) != null
+  const fromOrg = orgOf(row.fromTeam?.id)
+  const toOrg = orgOf(row.toTeam?.id)
+  return fromOrg != null && toOrg != null && fromOrg !== toOrg
 }
 
 // One batched /people pass covering two needs: the position fallback for
@@ -316,16 +322,19 @@ async function rebuildIndex() {
   console.log(`wrote ${indexFile} (${years.length} seasons)`)
 }
 
-const arg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
-const force = process.argv.includes('--force')
+// Only sweep when run as a script — keeps the pure helpers importable for tests.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const arg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null
+  const force = process.argv.includes('--force')
 
-const targets = arg ? SEASONS.filter((s) => s.year === Number(arg)) : SEASONS
-if (arg && targets.length === 0) {
-  console.error(`No configured trade-deadline season for ${arg} — see SEASONS in src/api/tradeDeadline.js`)
-  process.exit(1)
-}
+  const targets = arg ? SEASONS.filter((s) => s.year === Number(arg)) : SEASONS
+  if (arg && targets.length === 0) {
+    console.error(`No configured trade-deadline season for ${arg} — see SEASONS in src/api/tradeDeadline.js`)
+    process.exit(1)
+  }
 
-for (const season of targets) {
-  await buildSeason(season, force)
+  for (const season of targets) {
+    await buildSeason(season, force)
+  }
+  await rebuildIndex()
 }
-await rebuildIndex()

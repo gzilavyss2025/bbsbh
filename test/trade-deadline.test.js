@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { dedupeTransactions } from '../src/api/teamTransactions.js'
+import { bothSidesMlb } from '../scripts/gen-trade-deadline.mjs'
 import {
   groupTradeStories,
   seasonMeta,
@@ -473,4 +474,36 @@ test('formatPitchingLine includes a record for SP, drops it for RP, and shows sa
   assert.equal(formatPitchingLine('SP', base), '3.15 ERA, 9-6, 142.0 IP, 24% SO%, 7% BB%')
   assert.equal(formatPitchingLine('RP', base), '3.15 ERA, 142.0 IP, 24% SO%, 7% BB%')
   assert.equal(formatPitchingLine('CL', base), '3.15 ERA, 2 SV, 142.0 IP, 24% SO%, 7% BB%')
+})
+
+// --------------------------------------------------------------------------
+// bothSidesMlb — a real deadline deal always involves two DIFFERENT MLB
+// organizations, even when logged at the affiliate level. Verified live:
+// "DSL Mets Blue traded RHP Jhoangel Marquez to DSL Mets Orange" resolved
+// both sides to org 121 (the Mets) and was wrongly kept as a "trade" — it's
+// an intra-org complex reassignment, not a deal between two clubs.
+// --------------------------------------------------------------------------
+const ORG_IDS = new Set([121, 158])
+const AFFIL_TO_ORG = new Map([
+  [3701, 121], // DSL Mets Blue
+  [3702, 121], // DSL Mets Orange
+  [452, 158], // Brewers AAA affiliate
+])
+
+test('bothSidesMlb rejects a same-org intra-affiliate reassignment', () => {
+  const row = { fromTeam: { id: 3701 }, toTeam: { id: 3702 } }
+  assert.equal(bothSidesMlb(row, ORG_IDS, AFFIL_TO_ORG), false)
+})
+
+test('bothSidesMlb accepts a real deal between two different orgs, incl. via affiliate ids', () => {
+  const directRow = { fromTeam: { id: 121 }, toTeam: { id: 158 } }
+  assert.equal(bothSidesMlb(directRow, ORG_IDS, AFFIL_TO_ORG), true)
+
+  const affiliateRow = { fromTeam: { id: 3701 }, toTeam: { id: 452 } }
+  assert.equal(bothSidesMlb(affiliateRow, ORG_IDS, AFFIL_TO_ORG), true)
+})
+
+test('bothSidesMlb rejects when either side has no MLB org at all', () => {
+  assert.equal(bothSidesMlb({ fromTeam: { id: 999 }, toTeam: { id: 158 } }, ORG_IDS, AFFIL_TO_ORG), false)
+  assert.equal(bothSidesMlb({ fromTeam: { id: 121 }, toTeam: { id: 999 } }, ORG_IDS, AFFIL_TO_ORG), false)
 })

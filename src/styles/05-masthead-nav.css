@@ -1,0 +1,683 @@
+/* --------------------------------------------------------------- masthead
+   The game's identity in-view: two full-color marks — away @ home — sized
+   like the logos on the lineup pages, left-aligned in the page header, with
+   the game's date opposite them on the right. Each mark is a button that
+   opens the sketch modal. */
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 2px 0 16px;
+}
+
+.masthead__teams {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  /* `overflow: hidden` cancels this flex item's automatic min-width, so
+     without flex-shrink: 0 a wide `.masthead__side` (a long date plus the
+     keep-awake toggle and the MLB.TV pill) can squeeze this row narrower
+     than its own two logo tiles — clipping the second (home) team's mark
+     with a hard rectangular cut instead of its own rounded corners. Team
+     marks are art, never a filter (see src/CLAUDE.md): this row must never
+     compress. `.masthead__side` is the side designed to give way — its own
+     children already wrap to a second line under the same pressure. */
+  flex-shrink: 0;
+}
+
+/* The date + keep-awake toggle + MLB.TV pill. Allowed to wrap (right-aligned)
+   so on a narrow phone the pill drops to a second line within this cluster
+   instead of pushing the whole masthead wider than the viewport and forcing a
+   horizontal scroll. `min-width: 0` lets the cluster shrink to its widest
+   single child (the date) so that wrap can actually happen. */
+.masthead__side {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 10px;
+  min-width: 0;
+}
+
+.masthead__date {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* Watch button (masthead) — hands off to the MLB app/site's Gameday page for
+   this game (see GameView.jsx's WatchButton). A filled pill rather than
+   Game Notes' outline treatment: it's the one masthead control that's a call
+   to action, not just information. Shows the MLB.TV wordmark (its own "ondark"
+   variant, so it reads cleanly on this pill's navy fill) rather than a text
+   label. */
+.watchbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--accent-primary);
+  background: var(--accent-primary);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.watchbtn:active {
+  transform: scale(0.96);
+}
+
+.watchbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.watchbtn__logo {
+  display: block;
+  height: 16px;
+  width: auto;
+}
+
+.watchbtn__ext {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
+  color: var(--text-on-ink);
+}
+
+/* Screen-wake-lock toggle (GameView.jsx's KeepAwakeToggle) — a compact icon
+   pill riding next to Watch, only shown while the game is Live. */
+.awaketoggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+.awaketoggle.is-on {
+  background: var(--accent-positive);
+  border-color: var(--accent-positive);
+}
+.awaketoggle:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.awaketoggle__icon {
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
+/* At the narrowest supported phone width, the date is already present in the
+   navigator and the detail card below. Removing this duplicate keeps the two
+   club marks and MLB.TV action legible without shrinking any text below the
+   caption floor. */
+@media (max-width: 350px) {
+  .masthead {
+    gap: 10px;
+  }
+  .masthead__teams {
+    gap: 2px;
+  }
+  .masthead__date {
+    display: none;
+  }
+}
+
+.masthead__logo {
+  position: relative;
+  z-index: 1;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: var(--lh-zero);
+  border-radius: var(--radius-xs);
+}
+
+.masthead__logo:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The masthead's team marks are the same curated uniform tile the slate card
+   shows (.gamecard__logobox — one shared TeamTreatmentMark, one shared
+   treatmentTile resolver in lib/teams.js), so the club you tapped into a game
+   with still reads as the club wearing tonight's jersey. Sized off the mark
+   inside it (GameView.jsx's MASTHEAD_MARK): the mark lands ~20% larger than
+   the bare logo this replaced, with the tile a little larger still so the
+   overscaled art crops against a border rather than floating in one. */
+.masthead__logobox {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+
+/* A hand-styled pattern instead of a flat --tint swatch, same recipe as
+   .gamecard__logobox--pinstripe. */
+.masthead__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+/* Same edge-bleed overscale as .gamecard__logobox .teamlogo — the tile's own
+   overflow:hidden does the cropping; --scale lets a club's curated
+   per-treatment scale pull a dense mark back down. */
+.masthead__logobox .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+}
+
+/* ---------------------------------------------------------------- step nav
+   The four stops of a game — away lineup, home lineup, innings, box score —
+   as a segmented row under the masthead, so every section is one tap from
+   any other (the bottom "next" button still walks them in scoring order). */
+.stepnav {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.stepnav__btn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.stepnav__btn:active {
+  transform: scale(0.96);
+}
+
+.stepnav__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+
+/* The '@' behind the two club marks — the exact same screen-print watermark
+   treatment as the slate card (.gamecard__atmark: Big Shoulders Display,
+   printed twice a couple px out of register in kraft-amber + navy, the
+   misregistration real ballpark-program print runs have), just re-centered on
+   this row's own (smaller) box instead of the slate card's. Sized off the
+   64px logobox the same way the slate card's 158px watermark is sized off its
+   own ~130px tile, so the two read at the same visual weight; the tiles'
+   `.masthead__logo` sits at z-index: 1 (above this mark's z-index: 0) and
+   `.masthead__teams` clips it (`overflow: hidden`), same two roles
+   .gamecard__logobox and .gamecard__teams play for the slate card's mark. */
+.masthead__at {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  font-family: "Big Shoulders Display", var(--font-display);
+  font-weight: var(--w-black);
+  font-size: var(--fs-watermark-sm);
+  line-height: var(--lh-solid);
+  pointer-events: none;
+  /* Same descent/ascent centering nudge as .gamecard__atmark-*, scaled down
+     from -12px for a 158px glyph to -6px for this 78px one. */
+  transform: translate(-50%, calc(-50% - 6px)) skewX(-8deg) rotate(-2deg);
+}
+.masthead__at-ink,
+.masthead__at-ghost {
+  display: block;
+}
+.masthead__at-ghost {
+  position: absolute;
+  inset: 0;
+  color: var(--seal);
+  opacity: 0.1;
+  transform: translate(2px, 1.5px);
+}
+.masthead__at-ink {
+  position: relative;
+  color: var(--navy);
+  opacity: 0.07;
+}
+
+/* ---------------------------------------------------------- level toggle
+   Thin segmented control across the top of the slate: MLB / AAA / AA / A+ / A.
+   MLB is selected by default; the active pill inks navy like a scorebook tab. */
+.levelnav {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.levelnav__btn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.levelnav__btn:active {
+  transform: scale(0.96);
+}
+
+.levelnav__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------ team history
+   The career map above the "Path to the Majors" card: a left-aligned grid of
+   stops, each the club's logo floated on a pale wash of its own colors (set
+   inline per team from the logo art — see fetchTeamLogoTint), with the
+   season(s) below. The wash is chosen to carry the mark on its own, so there is
+   deliberately NO border or drop shadow on the badge. A CSS grid, not
+   flex-wrap — the column count (--careertl-cols, set inline by
+   CareerTimeline.jsx's balancedColumns) is chosen per career length so a
+   trailing row never strands just one or two stops under a full row above
+   it; each column still sizes to its own widest stop (a multi-year
+   "2021–2023" caption) rather than clipping at a fixed width. `max-content`,
+   not `auto` — an `auto`-sized track absorbs the grid container's leftover
+   space, which spread the badges out edge-to-edge instead of packing them
+   tight against each other the way flex-wrap's items naturally did. */
+.careertl__track {
+  display: grid;
+  grid-template-columns: repeat(var(--careertl-cols, 5), minmax(58px, max-content));
+  gap: var(--space-2);
+  list-style: none;
+  /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
+     sits flush against the left edge — no browser list indent. */
+  margin: 0;
+  padding: 0;
+}
+
+.careertl__stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.careertl__badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+.careertl__years {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* The level (MLB / AAA / … / ROK) sits directly under the year in the SAME mono
+   figure, nudged up against the flex gap so year + level read as one tight
+   two-line caption rather than three evenly spaced items. */
+.careertl__level {
+  margin-top: -2px;
+}
+
+/* ------------------------------------------------------- transaction timeline
+   The career roster-move ledger at the foot of the player page (see
+   TransactionTimeline.jsx). A vertical graphite rail runs down a fixed gutter;
+   each move hangs a tone-colored node off it — field green when a club gained
+   him, clay when one lost him, neutral for a lateral move — with the date
+   penciled in the left column and a chip + club mark + description to the right.
+   A year label sits centered on the rail wherever the year turns over, its
+   paper background breaking the line into eras. */
+.txntl {
+  margin-top: var(--space-6);
+}
+.txntl__track {
+  position: relative;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+/* The rail — a faded pencil line down the gutter between the date column and
+   the content. Inset top/bottom so it starts and ends at the first/last node. */
+.txntl__track::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 64px;
+  width: var(--bw-rule);
+  background: var(--border-rule);
+}
+.txntl__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  column-gap: 18px;
+  padding: 7px 0;
+}
+/* The node, centered on the rail (left 64px). A canvas-colored ring masks the
+   rail behind it so the dot reads as sitting on the line. */
+.txntl__item::before {
+  content: '';
+  position: absolute;
+  left: 60px;
+  top: 12px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-canvas);
+  background: var(--graphite);
+}
+.txntl__item--add::before { background: var(--accent-positive); }
+.txntl__item--out::before { background: var(--accent-negative); }
+.txntl__item--move::before { background: var(--graphite); }
+
+.txntl__date {
+  grid-column: 1;
+  align-self: start;
+  padding-top: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: right;
+  white-space: nowrap;
+}
+.txntl__main {
+  grid-column: 2;
+  min-width: 0;
+}
+.txntl__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.txntl__chip {
+  display: inline-block;
+  padding: 1px 6px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--graphite);
+}
+.txntl__chip--add {
+  color: var(--field-deep);
+  border-color: var(--field);
+  background: var(--field-soft);
+}
+.txntl__chip--out {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
+}
+.txntl__chip--move {
+  color: var(--text-muted);
+  background: var(--bg-page);
+}
+.txntl__club {
+  display: inline-flex;
+  align-items: center;
+}
+.txntl__desc {
+  margin: 3px 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+}
+/* Year marker — a mono label centered on the rail, its paper background
+   breaking the line so the year reads as an era divider. */
+.txntl__yr {
+  position: relative;
+  height: 22px;
+  margin-top: 6px;
+}
+.txntl__yr span {
+  position: absolute;
+  left: 64px;
+  transform: translateX(-50%);
+  top: 2px;
+  padding: 1px 6px;
+  background: var(--bg-canvas);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+}
+
+/* ---- collapsed-career expand/collapse — same "real show-all action, never
+   a dead-end +N more" convention as .ledger-expand/.ledger-collapse, but in
+   neutral ink rather than those two's medal-amber (this ledger is roster
+   moves, not honors, so the award tint would misread as a Trophy Case tie-in). ---- */
+.txntl-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.txntl-expand:hover {
+  background: var(--border-rule);
+  color: var(--paper-2);
+}
+.txntl-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.txntl-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.txntl-collapse:hover {
+  color: var(--text-body);
+}
+.txntl-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------- level progression card
+   "Path to the Majors" chevron strip on a pre-debut player's page: one rung
+   per MiLB level plus a fixed, dashed MLB target, structurally mirroring the
+   .levelnav toggle above. Each rung is clipped into an arrow — flat on the
+   left, pointed on the right — and pulled over its neighbor with a negative
+   margin so the point of one rung nests into the notch of the next, reading
+   as a single arrow chain "stepping" toward MLB. Later rungs sit later in
+   the DOM, so they naturally paint over the tip poking in from the left;
+   no z-index needed. The final (MLB) rung drops the point since it's the
+   destination, not another step to climb. */
+.levelprog__arrow {
+  display: flex;
+  overflow-x: auto;
+  padding-right: 12px;
+}
+
+.levelprog__step {
+  flex: 1 1 0;
+  min-width: 60px;
+  padding: 6px 16px 6px 22px;
+  margin-left: -12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  text-align: center;
+  box-shadow: var(--inset-cell);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+}
+
+.levelprog__step:first-child {
+  margin-left: 0;
+  padding-left: 10px;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+}
+
+.levelprog__step:last-child {
+  padding-right: 10px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+}
+
+/* Dims via TEXT color, not element opacity — `--surface-card`/`--border-rule`
+   are already a subtle near-paper fill and a "faded pencil" rule (see their
+   definitions), so fading the whole box on top of that washed the chevron
+   out to nothing against the page background instead of reading as dimmed. */
+.levelprog__step.is-unreached {
+  box-shadow: none;
+}
+.levelprog__step.is-unreached .levelprog__label {
+  color: var(--text-muted);
+}
+
+.levelprog__step.is-current {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+
+.levelprog__step.is-current .levelprog__detail {
+  color: var(--text-on-ink);
+}
+
+/* Dashed only while still unreached — the ahead-of-you destination marker. A
+   debuted player's MLB rung is reached, so it drops the dash and reads as
+   just another solid link in the same arrow chain as the MiLB rungs. */
+.levelprog__step.is-target.is-unreached {
+  border-style: dashed;
+}
+
+.levelprog__label {
+  display: block;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+}
+
+.levelprog__detail {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ---------------------------------------------------------------- hints */
+.hint {
+  color: var(--text-muted);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  padding: 12px 2px;
+}
+
+.hint--error {
+  color: var(--clay);
+}
+
+/* Status/caveat copy is interface text. Reserve the reading serif for
+   natural-case narrative rather than all-caps app chrome. */
+.hint--prose {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-text);
+}
+
+/* The Team Identity Lab's per-dimension descriptions (LabShell's shared hint
+   plus the Jersey Audit tab's own summary paragraph) are several sentences of
+   explanatory copy, not app chrome — shouted caps make them harder to scan. */
+.screen--identitylab .hint {
+  text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
+}
+
+/* An inline text-link riding inside a .hint paragraph — underlined, no
+   button chrome, so it reads as part of the sentence. */
+.hint__link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--accent-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* On the slate every bit of copy reads in scorebook all-caps — the shared hint
+   and button text (loading / no games / error / Retry) are uppercased here only,
+   leaving the same classes as-is on every other screen. */
+.screen--slate .hint,
+.screen--slate .btn {
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+

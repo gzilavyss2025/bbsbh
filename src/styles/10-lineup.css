@@ -1,0 +1,798 @@
+/* ---------------------------------------------------------------- lineup */
+.lineup__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.lineup__row,
+.roster__row {
+  display: grid;
+  grid-template-columns: 24px 44px 1fr auto;
+  /* start, not center: when a namewrap child (RadarPill's note) wraps the
+     row onto extra lines, order/jersey/pos must stay pinned level with the
+     name — centering them re-centers into the row's new full height and
+     overlaps the expanded note (see the radar-glyph prototype). Identical
+     to center for a normal single-line row, so nothing else shifts. */
+  align-items: start;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-ui);
+}
+
+/* Batting order: slot / name / jersey / position — jersey and position sit in
+   fixed-width columns (rather than auto, which sizes to each row's own
+   content) so their right-aligned text forms a straight column down the
+   card regardless of whether a given row holds "9"/"DH" or "60"/"CF". */
+.lineup__row {
+  grid-template-columns: 24px 1fr 34px 40px;
+}
+
+.lineup__list li:first-child {
+  border-top: none;
+}
+
+.lineup__order,
+.roster__order {
+  font-family: var(--font-mono);
+  color: var(--text-caption);
+  font-weight: var(--w-bold);
+  text-align: center;
+  /* .lineup__row/.roster__row keep align-items: start (see above) so these
+     stay pinned to the name's first line when a namewrap pill note wraps the
+     row taller; a normal single-line row is shorter than that edge case
+     accounts for, and start alignment there reads as sitting a hair high
+     against the namewrap content's own centered line — align-self here
+     re-centers this column within its actual row-track height. */
+  align-self: center;
+}
+/* The batting order slot (1-9) reads as part of the name, sized/weighted to
+   match .lineup__name — but stays the quieter gray of the shared
+   .lineup__order/.roster__order rule above rather than full name-ink. */
+.lineup__order {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+}
+
+/* Jersey number sits between name and pos/hand, in seam red — matched to
+   pos/hand's --fs-compact so the two line up as one size, not the row's
+   larger --fs-ui leaking in unset. */
+.lineup__jersey,
+.roster__jersey {
+  color: var(--clay);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  text-align: right;
+}
+.lineup__jersey,
+.roster__jersey {
+  align-self: center;
+}
+/* Batting order's jersey/position columns are fixed-width (see .lineup__row
+   above) rather than shrink-to-fit, so bump these back up to the row's own
+   --fs-ui — matching the name — instead of staying at --fs-compact just to
+   agree with each other's size. */
+.lineup__jersey {
+  font-size: var(--fs-ui);
+}
+
+.lineup__name,
+.roster__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A name with an id renders as a .plink button, and .plink (declared later,
+   same specificity) resets weight/color to `inherit` via its `font`/`color`
+   shorthand — same fix as .bs__player .bs__pname / .pitchers__cell
+   .plink.pitchers__pname below. Win it back with higher specificity so the
+   name still reads semibold body-ink instead of falling back to regular
+   inherited text. */
+.plink.lineup__name,
+.plink.roster__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* Wraps a name + its optional ProspectPill as one grid cell: the name still
+   truncates on one line, but a pill that doesn't fit drops to its own line
+   instead of fighting the row's fixed jersey/position columns for width. */
+.lineup__namewrap,
+.roster__namewrap,
+.thub-namewrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.lineup__pos,
+.roster__pos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  align-self: center;
+}
+.lineup__pos {
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  /* Right-align within the fixed-width column (see .lineup__row above) so
+     this lines up under the jersey column instead of hugging the gap on a
+     short one- or two-letter position. */
+  text-align: right;
+}
+
+/* The one thing that actually wraps a lineup/roster row taller is an open
+   RadarPill note (Breakout/Cooling — see radarpill__note's flex: 1 0 100%
+   trick). In that expanded state, revert order/jersey/pos from the center
+   override above back to start, pinned level with the name's first line
+   rather than drifting toward the middle of the now-taller row. */
+.lineup__row:has(.radarpill__note) .lineup__order,
+.lineup__row:has(.radarpill__note) .lineup__jersey,
+.lineup__row:has(.radarpill__note) .lineup__pos,
+.roster__row:has(.radarpill__note) .roster__order,
+.roster__row:has(.radarpill__note) .roster__jersey,
+.roster__row:has(.radarpill__note) .roster__pos {
+  align-self: start;
+}
+
+/* Birthday cake beside a name on the staging sheet (see TeamInfo's
+   BirthdayCake), sitting in the namewrap after the prospect pill. A small
+   emoji flourish — its own color, no ink token needed. */
+.name-cake {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
+}
+
+/* ---------------------------------------------- opposing starter/defense */
+/* The opposing starter's headshot card — leads the page ahead of the
+   batting order, since it's the one useful fact on hand before the lineup
+   posts. Same card chrome as .opp__defense below; the headshot anchors a
+   name/handedness/jersey column, with the season line as its own row. */
+.startercard__body {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 12px;
+  /* border/radius/shadow now live on the .startercard container so the masthead
+     caps one card cleanly (see .startercard). */
+}
+/* No-pitcher fallback sits directly in the card (not the padded body), so inset
+   it to match. */
+.startercard > .hint {
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.shot.startercard__shot {
+  flex: none;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.startercard__shot.shot--fallback {
+  font-size: var(--fs-hero-md);
+}
+
+.startercard__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.startercard__namewrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.startercard__name {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-title-sm);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Rendered as a PlayerLink → .plink button, and .plink (declared later, same
+   specificity) resets weight/color to `inherit` via its `font`/`color`
+   shorthand — same fix as .plink.lineup__name/.plink.roster__name above. */
+.plink.startercard__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.startercard__badges {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.startercard__jersey {
+  color: var(--clay);
+}
+.startercard__hand {
+  color: var(--field);
+}
+
+/* The starter's season line, then — same treatment, its own dashed divider —
+   his most recent appearance, so the card reads as a stack of dated facts
+   (badges, season-to-date, last time out) rather than one lump. */
+.startercard__stats,
+.startercard__last {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  padding-top: 4px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+
+/* The pitch-mix bar (PitchArsenalMix.jsx) — hidden below the wide breakpoint
+   (see the WIDE LAYOUT section), where the card has no spare width for it
+   next to the headshot + info column. */
+.startercard__arsenal {
+  display: none;
+}
+
+.arsenal__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin: 0 0 6px;
+}
+
+.arsenal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rows read as ledger lines — same dashed divider the card uses between its
+   season-stats/last-outing rows above (.startercard__stats/__last) — rather
+   than a gap, so the mix reads as one continuous stack of dated facts. */
+/* Two flexible spacer tracks (2 and 4, left empty — .arsenal__pct/__velo are
+   placed explicitly into 3 and 5) soak up the row's leftover width instead of
+   leaving it stranded past the last column: % lands further from the name,
+   MPH lands flush against the card's right edge, and both grow apart as the
+   card gets wider rather than staying bunched at a fixed offset. */
+.arsenal__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr 5ch 1fr 74px;
+  align-items: center;
+  column-gap: var(--space-2);
+  padding: 5px 0;
+  font-size: var(--fs-compact);
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.arsenal__row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.arsenal__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arsenal__pct {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  font-weight: var(--w-bold);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.arsenal__velo {
+  grid-column: 5;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.opp__defense {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.opp__defrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 9px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-ui);
+}
+
+.opp__defense li:first-child {
+  border-top: none;
+}
+
+.opp__defname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.opp__defpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------- former teammates
+   Pairs of players — one from each club — who once shared a (team, season):
+   cross-team history only. A big reunion card (see groupTeammateCards) can
+   run much taller than a plain pair card, so this is a CSS multi-column
+   "waterfall" — 1–3 columns depending on width — rather than a grid: a grid
+   row stretches every card in it to match its tallest member, which is
+   exactly the messy-empty-space problem a reunion card causes. Multi-column
+   instead lets each card flow into whichever column has room next, like a
+   Pinterest/Twitter card wall, so one tall card never drags its row-mates'
+   height with it. */
+.teammates__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  columns: 240px 3;
+  column-gap: var(--space-3);
+}
+
+.teammatecard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 8px;
+  padding: 10px 8px;
+  margin-bottom: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  break-inside: avoid;
+}
+
+/* 3+ players who all crossed paths on the SAME club at once (see
+   groupTeammateCards) — every headshot pools on one side, the one shared
+   club/years on the other, rather than repeating a card per opponent. */
+.teammatecard--group {
+  grid-template-columns: 1fr auto;
+}
+
+/* A fixed-track grid rather than flex-wrap: flex-wrap + centering left a
+   ragged number of headshots per row (a centered short last row reads as
+   uneven next to the full rows above it) — a big reunion (see
+   GROUP_MATES_SHOWN) is exactly the case with enough headshots for that to
+   show. auto-fill locks every row, including the wrapped ones, to the same
+   column count for the card's actual width, left-aligned like the rows above. */
+.teammatecard__group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 64px);
+  justify-content: start;
+  gap: 10px;
+}
+
+.teammatecard__group .teammatecard__half {
+  width: 64px;
+}
+
+/* Clicking this reveals the rest of the group's headshots in place — see
+   GroupCard's `expanded` state — so it reads as an action, not a count. */
+.teammatecard__groupmore {
+  display: block;
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 2px;
+  padding: 6px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.teammatecard__groupmore:hover {
+  color: var(--text-body);
+}
+
+/* A pair/group both starting tonight — the connection is about to play out
+   for real on the user's own scoresheet, the highest-value fact this card can
+   surface (see TONIGHT_BOOST). */
+.teammatecard__badge {
+  grid-column: 1 / -1;
+  order: -1;
+  margin: -2px -2px 2px;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-positive);
+  color: var(--surface-card);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+  text-align: center;
+}
+
+/* The one-line story under a card ("MLB teammates, Marlins '19-'21") — a
+   footer row spanning the full card regardless of the 2- or 3-column grid
+   above it. */
+.teammatecard__caption {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: center;
+}
+
+.teammatecard__half {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+
+.teammatecard__shotwrap {
+  position: relative;
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+.shot.teammatecard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+}
+
+.shot.teammatecard__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+
+/* The player's roster position, floated on the headshot's bottom-left corner
+   like a jersey patch — a pitcher always reads as the plain "P" (see
+   TeammateHalf's posLabel). */
+.teammatecard__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-ui);
+  text-align: center;
+}
+
+.teammatecard__name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.teammatecard__name-first {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teammatecard__name-last {
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  line-height: var(--lh-compact);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teammatecard__mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding-top: 20px;
+}
+
+.teammatecard__logos {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.teammatecard__years {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+.teammates__more {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.teammates__more:hover {
+  color: var(--text-body);
+}
+
+/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small lists (one per
+   batting direction — "Braves batters vs Padres pitchers" and back),
+   deliberately not FormerTeammates' headshot cards (this is a line off a stat
+   sheet, not a story). Grouped one heading per opposing pitcher, with the
+   batters he's faced listed beneath, each as a batter→line row. This replaced
+   an earlier three-column batter/pitcher/line table that repeated the pitcher
+   on every row and overflowed a phone's width (horizontal swipe to read the
+   line) — collapsing the pitcher to a group heading leaves a two-part row that
+   fits any width and reads cleaner on desktop too. */
+.matchuptable {
+  margin-top: var(--space-4);
+}
+.matchuptable:first-child {
+  margin-top: 0;
+}
+.matchuptable__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.matchuplist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+/* One opposing pitcher and the batters who've faced him. */
+.matchupgroup__pitcher {
+  margin: 0 0 var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* "vs" prefix ahead of the pitcher's name — a quiet function word, kept small
+   and uppercase so the eye lands on the name, not the label. */
+.matchupgroup__vs {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.matchupgroup__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+/* Batter name on the left, career line on the right; the line is allowed to
+   wrap under a long name (margin-left:auto keeps it right-aligned when it
+   does) so nothing ever forces the row wider than the card. */
+.matchupgroup__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.matchupgroup__batter {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.matchupgroup__line {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+  text-align: right;
+}
+/* A batter in tonight's actual starting lineup facing the opposing club's
+   actual probable starter — the one row on this list that's about to play out
+   for real on the user's own scoresheet. Same highlighter-yellow "pay
+   attention" wash as .standings tr.foulboard__row--outlier. */
+.matchupgroup__row--tonight {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+
+/* ----------------------------------------------------------- defense diamond
+   The sheet's bottom-left graphic: infield square on its point, surnames on
+   writing lines at their positions, the position number penciled beneath,
+   HOME/VISITOR DEFENSE ringed in the middle. Label spots share the SVG's
+   0–100 coordinate space (percent of the box). */
+.defdiamond {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10px 8px;
+}
+
+.defdiamond__field {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.defdiamond__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.defdiamond__spot {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  max-width: 112px;
+}
+
+/* The surname sits on its writing line, like penciling above the rule. */
+.defdiamond__name {
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  border-bottom: var(--bw-hair) solid var(--rule);
+  padding: 0 4px 1px;
+  min-width: 58px;
+  max-width: 112px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.defdiamond__name--tbd {
+  color: var(--graphite-soft);
+}
+
+/* A fielder who's been replaced: struck through in pencil, the reliever penciled
+   on his own writing line above (the stack renders newest-on-top). */
+.defdiamond__name--out {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+/* A substitute currently on the field: his surname inked seam-red to match the
+   inning tag, marking him as the new man at the spot. */
+.defdiamond__name--in {
+  color: var(--accent-negative);
+}
+
+/* The inning a substitute took the field, in parens beside his name. */
+.defdiamond__enter {
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
+
+.defdiamond__name .ilmark {
+  font-size: var(--fs-caption);
+  margin-left: 1px;
+}
+.defdiamond__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* The DH bats but never takes the field — one line under the diamond.
+   width:100% + text-align:center back up justify-content:center explicitly
+   (rather than relying solely on flex's default stretch) so this stays
+   centered under the diamond regardless of container context. */
+.defdiamond__dh {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  font-size: var(--fs-compact);
+}
+
+.defdiamond__dhpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+
+.defdiamond__dhname {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* The DH's substitution stack shares the diamond's writing-line names. */
+.defdiamond__dhstack {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+

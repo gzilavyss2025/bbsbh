@@ -11,7 +11,7 @@
 // otherLevelSeasonBlocks) — are labeled as such by the UI, not frozen; each is
 // a stat at a level OTHER than the game being scored, never that game's own line.
 
-import { SPORT_LABEL, MILB_LEVELS } from '../lib/teams.js'
+import { SPORT_LABEL, MILB_LEVELS, isMlbTeamId } from '../lib/teams.js'
 import { monthDay } from '../lib/dates.js'
 import {
   ipToOuts,
@@ -160,6 +160,92 @@ export function personBio(person) {
         }
       : null,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Roster status — is he actually ON a club, or does `currentTeam` just have
+// nowhere else to point?
+// ---------------------------------------------------------------------------
+// `personBio.team` above comes from `currentTeam`, and that field NEVER empties:
+// the API keeps aiming a released, unsigned, or decades-retired player at the
+// last club he was under contract to. Pujols still reads "St. Louis Cardinals"
+// four years after his last game; a reliever DFA'd last week still reads as his
+// old club's. The page rendered that as his team, logo and all, which is the
+// confusion this replaces.
+//
+// The honest signal is `rosterEntries` (hydrated in fetchPerson): one row per
+// STINT — a `startDate`, an `endDate` that's absent while the stint is open, and
+// a `status` naming how it ENDED (`RL` released, `FA` declared free agency,
+// `RET` voluntarily retired). So "on a roster on date D" is just "some stint
+// covers D". Verified live: zero false positives across 272 forty-man players
+// and 120 minor leaguers, where the only names the test flagged were four who
+// really had been released.
+//
+// Which KIND of gap it is takes one more field: `active === false` (or a last
+// stint that ended on the voluntarily-retired list) means retired, and every
+// other gap is an unsigned free agent.
+//
+// Both of those read the present, which is why only a gap running to the present
+// is reportable at all — see the far-side guard below, and note that it is what
+// makes this safe to point at an old box score's player links.
+//
+// Returns null when he IS rostered, when the gap has a stint on the far side of
+// it, and when the feed carries no entries at all — each means "nothing to say,
+// render the club exactly as before".
+export function rosterStatusView(person, onDate) {
+  const entries = (person?.rosterEntries ?? []).filter((e) => e.startDate)
+  if (!entries.length || !onDate) return null
+  const covers = (e) => e.startDate <= onDate && (!e.endDate || e.endDate >= onDate)
+  if (entries.some(covers)) return null
+  // A gap with a stint on the FAR side of it is not reportable, and this guard
+  // is the whole reason the feature is safe to point at an old box score. The
+  // history is holey the further back you go: Pujols's rows jump from a 2000
+  // Arizona Fall League stint straight to his 2011 Angels contract, so his
+  // entire Cardinals decade is a gap the naive check calls unemployment. Only a
+  // gap that runs to the present is trustworthy — nothing has been recorded
+  // since, because there is nothing to record. An interior gap could be either,
+  // and "either" means say nothing and render the club as before.
+  if (entries.some((e) => e.startDate > onDate)) return null
+
+  const ended = entries.filter((e) => e.endDate && e.endDate <= onDate)
+  const newest = (rows) => rows.reduce((a, b) => (a && a.endDate >= b.endDate ? a : b), null)
+  const last = newest(ended)
+  const retired = person.active === false || last?.status?.code === 'RET'
+  // Which club to name as his last stop. Prefer his most recent CURRENT-MLB
+  // stint, because a former big leaguer's final row is often a winter-league or
+  // independent club he passed through afterward — Céspedes ends at Águilas
+  // Cibaeñas, Abreu at the Senadores de San Juan, Kinsler at the Long Island
+  // Ducks — and naming one of those as "last team" is the same wrong answer in
+  // a different costume. Falls back to the most recent stint of any kind, which
+  // is also what a career minor leaguer (and a pre-expansion club, absent from
+  // the current-30 table) correctly gets.
+  const stop = newest(ended.filter((e) => isMlbTeamId(e.team?.id))) ?? last
+  return {
+    state: retired ? 'retired' : 'free-agent',
+    label: retired ? 'Retired' : 'Free Agent',
+    lastTeam: stop?.team?.id
+      ? { id: stop.team.id, name: stop.team.name ?? '' }
+      : null,
+    through: stop?.endDate ?? null,
+  }
+}
+
+// The last season he actually appeared in a game, at or before `throughYear` —
+// the number behind the "Last played in 2022" banner. `person.lastPlayedDate` is
+// the API's own answer and is MLB-scoped (Céspedes reads 2020, his last big
+// -league game, not the winter ball he played in 2021), but it's only populated
+// once MLB has flipped a player inactive, so an unsigned free agent has none.
+// Those fall back to the year-by-year splits the career register already
+// fetched: the newest season with a game in it. Takes the later of the two
+// rather than picking a winner, so neither source can understate the answer.
+// Null when nothing on hand says he ever played.
+export function lastPlayedSeason(person, seasonSplits, throughYear) {
+  const capped = (y) => (Number.isFinite(y) && (!throughYear || y <= throughYear) ? y : 0)
+  const played = (seasonSplits ?? [])
+    .filter((s) => num(s.stat?.gamesPlayed) > 0)
+    .map((s) => capped(Number(s.season)))
+  const stated = capped(Number((person?.lastPlayedDate ?? '').slice(0, 4)))
+  return Math.max(stated, ...played, 0) || null
 }
 
 // ---------------------------------------------------------------------------
@@ -405,6 +491,37 @@ export function pitchingRanksView(splits) {
     leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
   const items = []
   for (const [key, label] of RANK_STATS) {
+    const rank = Number(s.stat[key])
+    if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
+      items.push({ label, rank, text: ordinal(rank) })
+    }
+  }
+  if (!items.length) return null
+  items.sort((a, b) => a.rank - b.rank)
+  return { league, items: items.slice(0, RANK_MAX_CHIPS) }
+}
+
+// Hitting counterpart to pitchingRanksView — same top-10-only gate and chip
+// cap, curated to the headline hitting stats instead. Shares RANK_FLOOR /
+// RANK_MAX_CHIPS with the pitching version rather than a hitting-specific
+// pair, since the "worth a chip" bar doesn't change by group.
+const HITTING_RANK_STATS = [
+  ['homeRuns', 'HR'],
+  ['rbi', 'RBI'],
+  ['avg', 'AVG'],
+  ['ops', 'OPS'],
+  ['stolenBases', 'SB'],
+  ['hits', 'H'],
+]
+
+export function hittingRanksView(rankSplits) {
+  const s = (rankSplits ?? [])[0]
+  if (!s?.stat) return null
+  const leagueName = s.league?.name ?? ''
+  const league =
+    leagueName === 'National League' ? 'NL' : leagueName === 'American League' ? 'AL' : leagueName
+  const items = []
+  for (const [key, label] of HITTING_RANK_STATS) {
     const rank = Number(s.stat[key])
     if (Number.isFinite(rank) && rank >= 1 && rank <= RANK_FLOOR) {
       items.push({ label, rank, text: ordinal(rank) })
@@ -857,7 +974,7 @@ export function advancedPitchingView(bundle) {
   if (!adv && !saber) return null
   const facts = []
   // Each fact carries its own one-line explainer, shown when the card's
-  // per-fact "i" glyph is tapped open (AdvancedPitchingCard.jsx) — colocated
+  // per-fact "i" glyph is tapped open (AdvancedStatsCard.jsx) — colocated
   // with the value it explains rather than string-matched by label in the
   // component, so a relabel here can't silently orphan its note.
   const push = (label, value, note) => {
@@ -918,6 +1035,106 @@ export function advancedPitchingView(bundle) {
   // A sparse bundle (a cup-of-coffee arm the sabermetrics feed hasn't rated)
   // would render a lonely two-cell card — skip below four facts.
   return facts.length >= 4 ? { facts } : null
+}
+
+// ---------------------------------------------------------------------------
+// Advanced hitting card — the plate-discipline/power rates behind the hitter
+// tiles, from person-fetch's fetchHittingAdvanced bundle (standard season +
+// seasonAdvanced + sabermetrics, one request). Same shape and spoiler footing
+// as advancedPitchingView (AdvancedStatsCard.jsx renders both, generically,
+// off `facts`): full-season aggregates, labeled "full season" by the UI.
+// MLB-only at the source — degrades to null and the card doesn't render.
+// ---------------------------------------------------------------------------
+
+// ".59" style rate: two decimals, no leading zero — BB/K reads like a
+// fractional average, not a whole-number ratio.
+function rate2(v) {
+  const n = Number(v)
+  return Number.isFinite(n) ? n.toFixed(2).replace(/^0(?=\.)/, '') : null
+}
+
+export function advancedHittingView(bundle) {
+  const seasonAdvanced = bundle?.seasonAdvanced
+  const sabermetrics = bundle?.sabermetrics
+  if (!seasonAdvanced && !sabermetrics) return null
+  const facts = []
+  // Same per-fact note idiom as advancedPitchingView — colocated here rather
+  // than string-matched by label in the component.
+  const push = (label, value, note) => {
+    if (value != null) facts.push({ label, value, note })
+  }
+  push(
+    'wOBA',
+    sabermetrics?.woba != null ? rate3(Number(sabermetrics.woba)) : null,
+    "One number for the whole plate appearance — every walk, hit and out weighted by what it's actually worth in runs.",
+  )
+  push(
+    'wRC+',
+    roundInt(sabermetrics?.wRcPlus),
+    'His run creation measured against the league, park-adjusted: 100 is average, higher is better — the wRC+ to a hitter is what ERA− is to a pitcher.',
+  )
+  push(
+    'K%',
+    propPct(seasonAdvanced?.strikeoutsPerPlateAppearance),
+    'Share of plate appearances that ended in a strikeout.',
+  )
+  push(
+    'BB%',
+    propPct(seasonAdvanced?.walksPerPlateAppearance),
+    'Share of plate appearances that ended in a walk.',
+  )
+  push(
+    'BB/K',
+    rate2(seasonAdvanced?.walksPerStrikeout),
+    'Walks drawn for every strikeout — a quick read on his command of the strike zone as a hitter.',
+  )
+  push(
+    'ISO',
+    seasonAdvanced?.iso ?? null,
+    'Extra bases per at-bat — power with the singles stripped out.',
+  )
+  push('BABIP', seasonAdvanced?.babip ?? null, 'His batting average on balls put in play.')
+  push(
+    'P/PA',
+    fixed2(seasonAdvanced?.pitchesPerPlateAppearance),
+    'Pitches seen per trip to the plate — how hard he makes the pitcher work.',
+  )
+  // Same sparse-bundle floor as advancedPitchingView.
+  return facts.length >= 4 ? { facts } : null
+}
+
+// ---------------------------------------------------------------------------
+// Batted-ball profile — the ground/line/fly/pop mix from seasonAdvanced's
+// per-bucket outs+hits counts (fetchHittingAdvanced), each bucket's share of
+// balls in play and the AVG on that bucket. The four buckets sum exactly to
+// ballsInPlay (verified live: 145+83+83+30 = 341), so `share` always adds to 1.
+// ---------------------------------------------------------------------------
+
+// A sample floor so a September call-up's dozen balls in play doesn't render
+// a confident-looking batted-ball profile — same idea as the pitch arsenal's
+// MIN_ARSENAL_PITCHES qualifier floor (pitchArsenal.js).
+const MIN_BATTED_BALL_SAMPLE = 50
+
+const BATTED_BALL_BUCKETS = [
+  ['ground', 'Ground balls', 'groundOuts', 'groundHits'],
+  ['line', 'Line drives', 'lineOuts', 'lineHits'],
+  ['fly', 'Fly balls', 'flyOuts', 'flyHits'],
+  ['pop', 'Pop-ups', 'popOuts', 'popHits'],
+]
+
+export function battedBallView(seasonAdvanced) {
+  const bip = num(seasonAdvanced?.ballsInPlay)
+  if (!seasonAdvanced || bip < MIN_BATTED_BALL_SAMPLE) return null
+  const rows = BATTED_BALL_BUCKETS.map(([key, name, outsKey, hitsKey]) => {
+    const total = num(seasonAdvanced[outsKey]) + num(seasonAdvanced[hitsKey])
+    return {
+      key,
+      name,
+      share: total / bip,
+      avg: total > 0 ? num(seasonAdvanced[hitsKey]) / total : null,
+    }
+  })
+  return { rows, ballsInPlay: bip }
 }
 
 // ---------------------------------------------------------------------------
@@ -1718,7 +1935,8 @@ export function signedFallback(transactions) {
 // Curate + shape the career roster-move ledger. `transactions` is the raw
 // player-scoped feed; the rest is async-resolved enrichment the caller gathers
 // (see loadPlayer): `levelByTeamId` maps a club id to its sportId (for the
-// CALLED UP / SENT DOWN direction and the level tags), `tradeOthers` maps a
+// CALLED UP / SENT DOWN direction and the level tags, plus each Injured List
+// row's rehab-stop levels — see ilArcClause), `tradeOthers` maps a
 // tradeKey to the other players in that swap (for the in-description links),
 // `draft` is the shaped draft record, and `rookieUntil` is the date (from
 // public/data/rookies.json) he exceeded the rookie limit, if ever. Rows dated
@@ -1801,7 +2019,7 @@ export function transactionTimelineView(
 
   // Injured list — one row per STINT, folded from the placement / transfer /
   // rehab / activation rows the loop above deliberately skipped.
-  for (const stint of injuredListStints(transactions)) push(ilStintRow(stint))
+  for (const stint of injuredListStints(transactions)) push(ilStintRow(stint, levelByTeamId))
 
   // Draft — a synthetic row on that year's first-round date, alongside (not
   // instead of) the signing the raw feed already carries.
@@ -2082,7 +2300,12 @@ export function injuredListStints(transactions) {
     if (!open) continue
     if (isRehabTxn(t)) {
       const name = t.toTeam?.name
-      if (name && !open.rehabClubs.includes(name)) open.rehabClubs.push(name)
+      // id travels alongside the name so the row renderer can resolve each
+      // stop's LEVEL (AAA/AA/A+/A/ROK) rather than naming the affiliate — see
+      // ilArcClause. Deduped by name, same as before.
+      if (name && !open.rehabClubs.some((c) => c.name === name)) {
+        open.rehabClubs.push({ id: t.toTeam?.id ?? null, name })
+      }
       continue
     }
     if (date > open.start && isIlEndingTxn(t)) close(date)
@@ -2098,14 +2321,17 @@ function ilMonthDay(iso) {
 }
 
 // One timeline row per stint, in the feed's own voice: the placement's raw
-// description IS the sentence (it already names the club, position, player, day
-// count and the injury — "New York Yankees placed RHP Gerrit Cole on the 60-day
-// injured list. Tommy John surgery recovery."), same as every other row type on
-// this timeline, with the stint's own arc appended. A 15-day → 60-day transfer
-// earns a clause because that upgrade is the season-threatening signal; the
-// rehab stops earn one because a rehab is where the stint was actually spent.
-// The span is omitted when no closer was recorded rather than guessed — see
-// injuredListStints.
+// description IS the opening sentence (it already names the club, position,
+// player, day count and the injury — "New York Yankees placed RHP Gerrit Cole
+// on the 60-day injured list. Tommy John surgery recovery."), same as every
+// other row type on this timeline, with the stint's own arc told as a second,
+// connected sentence (`ilArcClause`) rather than a string of bolted-on
+// fragments — a duration figure reads as part of "activated May 23 after 60
+// days," not an em-dash afterthought. A 15-day → 60-day transfer earns its own
+// clause because that upgrade is the season-threatening signal; the rehab
+// stops fold into the activation clause because a rehab is where the stint was
+// actually spent. The span is omitted when no closer was recorded rather than
+// guessed — see injuredListStints.
 // The feed's own prose needs two small repairs before anything is appended to
 // it: some descriptions end without terminal punctuation ("…on the 7-day
 // disabled list. Concussion symptoms"), which would run straight into the next
@@ -2125,34 +2351,77 @@ function tidyFeedProse(text) {
 // and it opened all four of Cole's stints identically. Dropping it leaves the
 // part that differs — "60-day injured list. Tommy John surgery recovery." —
 // which is also what the INJURED LIST chip reads into. Worth roughly a line and
-// a half per row on a phone, on the longest rows the card has. Falls back to
-// the whole sentence if the prefix doesn't parse.
+// a half per row on a phone, on the longest rows the card has.
+//
+// The feed writes the day count and the injury as two separate sentences
+// ("60-day injured list. Right elbow inflammation."), which reads like two
+// unrelated facts bumping into each other. The injury is a modifier of the
+// list, not its own clause, so it moves inline as a parenthetical —
+// "60-day injured list (right elbow inflammation)." — ahead of any
+// "retroactive to" date the feed also carries. Falls back to the whole
+// (subject-stripped) sentence if this shape doesn't parse — a placement type
+// the regex hasn't seen should degrade to the old wording, not vanish.
 function ilPlacementProse(t) {
   const full = tidyFeedProse(t.description)
-  return full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
+  const stripped = full.match(/\bon the ((?:\d+[- ]day )?(?:injured|disabled) list\b.*)$/is)?.[1] ?? full
+  const m = stripped.match(/^((?:\d+[- ]day )?(?:injured|disabled) list)(\s+retroactive to [^.]+)?\.\s*(.*)$/is)
+  if (!m) return stripped
+  const [, listPhrase, retro = '', injury = ''] = m
+  const injuryText = injury.trim().replace(/\.$/, '')
+  const paren = injuryText ? ` (${injuryText.charAt(0).toLowerCase()}${injuryText.slice(1)})` : ''
+  return `${listPhrase}${paren}${retro}.`
 }
 
-// A long rehab tour is a detail, not the headline — three affiliate names is
-// already a full line on a phone, so the rest becomes a count.
-const REHAB_CLUBS_SHOWN = 3
-function rehabClause(clubs) {
-  if (!clubs.length) return ''
-  const shown = clubs.slice(0, REHAB_CLUBS_SHOWN).join(', ')
-  const rest = clubs.length - REHAB_CLUBS_SHOWN
-  return rest > 0 ? `Rehab: ${shown} +${rest} more.` : `Rehab: ${shown}.`
+// "A", "A and B", "A, B and C" — never an Oxford-comma-less runon.
+function humanJoin(items) {
+  if (items.length === 0) return ''
+  if (items.length === 1) return items[0]
+  if (items.length === 2) return `${items[0]} and ${items[1]}`
+  return `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`
 }
 
-function ilStintRow(s) {
+// The affiliate's NAME is a detail the reader has to decode ("is Somerset
+// higher or lower than Hudson Valley?"); its LEVEL is the fact that actually
+// answers "how far back was he." levelByTeamId (built in loadPlayer from a
+// live-or-static team lookup per rehab stop's toTeam id — see its own header)
+// resolves each stop to a SPORT_LABEL; a still-unresolved id (a lookup that
+// failed) is dropped rather than guessed. Deduped to unique LEVELS, in visit
+// order — a five-affiliate tour still tops out around AAA/AA/A+/A/ROK, so
+// unlike the old per-club list this never needs a "+N more" overflow.
+function rehabLevels(clubs, levelByTeamId) {
+  const levels = []
+  for (const c of clubs) {
+    const label = SPORT_LABEL[levelByTeamId.get(c.id)]
+    if (label && !levels.includes(label)) levels.push(label)
+  }
+  return levels
+}
+
+// Rehab and activation are one clause, not two independent bolt-ons — they're
+// really one fact ("how the stint ended") — so the total-days figure is folded
+// in as "after N days" rather than dash-appended like a data field. Degrades
+// by omission at every joint: no rehab stops → no "Rehabbed with" lead-in, no
+// recorded closer → no "activated" clause at all (never a guessed date), no
+// computed span → no "after N days" (see injuredListStints on why a missed
+// closer's days stays null rather than invented). A rehab with no recorded
+// activation yet reads as its own present-tense clause instead of vanishing.
+function ilArcClause(s, levelByTeamId) {
+  const levels = rehabLevels(s.rehabClubs, levelByTeamId)
+  const rehab = levels.length ? `${humanJoin(levels)} team${levels.length === 1 ? '' : 's'}` : ''
+  if (!s.end) return rehab ? `Rehabbing with ${rehab}.` : ''
+  const span = s.days != null ? ` after ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
+  return rehab
+    ? `Rehabbed with ${rehab}, then activated ${ilMonthDay(s.end)}${span}.`
+    : `Activated ${ilMonthDay(s.end)}${span}.`
+}
+
+function ilStintRow(s, levelByTeamId) {
   const parts = [ilPlacementProse(s.placement)]
   if (s.days60 && s.days60 !== injuredListDays(s.placement)) {
-    parts.push(`Transferred to the ${s.days60}-day list.`)
+    parts.push(`Later transferred to the ${s.days60}-day list.`)
   }
-  const rehab = rehabClause(s.rehabClubs)
-  if (rehab) parts.push(rehab)
-  if (s.end) {
-    const span = s.days != null ? ` — ${s.days} ${s.days === 1 ? 'day' : 'days'}` : ''
-    parts.push(`Activated ${ilMonthDay(s.end)}${span}.`)
-  }
+  const arc = ilArcClause(s, levelByTeamId)
+  if (arc) parts.push(arc)
   return {
     sig: `IL|${s.start}`,
     date: s.start,

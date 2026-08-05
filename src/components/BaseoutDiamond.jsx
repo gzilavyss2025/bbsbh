@@ -1,9 +1,10 @@
 // A "which bases are occupied" diamond for compact game-state widgets (the
 // Foul Tracker's PA-highs scorebug). Deliberately its OWN component rather
-// than reusing DiamondGlyph (the app's brand mark, which also doubles as a
-// base-occupancy indicator) — dropped into a dense data widget, DiamondGlyph's
-// bright --field green and rotated-square dots read as a logo/sticker, not a
-// scorekeeping notation. This instead borrows PlayDiamond's actual scorebook
+// than a second use of a brand-style glyph: bright --field green and
+// rotated-square base dots read as a logo/sticker when dropped into a dense
+// data widget, not as scorekeeping notation. (The app did carry such a mark,
+// DiamondGlyph — deleted as dead code once TallyBrand took over the identity
+// role its header still claimed.) This instead borrows PlayDiamond's scorebook
 // language (a quiet graphite ghost diamond, occupied marks penciled solid
 // ink) so it reads as a notation mark, not a game-UI badge. Home plate isn't
 // marked — it's the diamond's 4th vertex, never a "runner" position that

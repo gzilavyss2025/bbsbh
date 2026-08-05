@@ -34,6 +34,10 @@
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
+//   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
+//   '/logbook?place={gamePk}'            -> { name: 'logbook', placing: gamePk } (book in placement mode)
+//   '/logbook/stats'                     -> { name: 'logbook-stats' }          (what the collection adds up to)
+//   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
@@ -146,6 +150,18 @@ export function parseRoute(url) {
   // Personal scorebook archive, reached from the site menu or a direct link.
   if (parts.length === 1 && parts[0] === 'first-scorebook')
     return { name: 'first-scorebook' }
+  // The Logbook — this user's own collection of game stamps (ADR-0035). It
+  // renders scores plainly, which is safe for exactly one reason: a stamp only
+  // exists for a game its owner already finished revealing. `season: null` means
+  // "the newest season you have stamps in" and is resolved by the page, not
+  // here, since only the local collection knows.
+  // `?place={gamePk}` puts the book into placement mode for one stamp — the
+  // hand-off from the box score's mint card. Deliberately a QUERY and not a
+  // route name: it is a transient mode of this same page (you leave it by
+  // placing the stamp or by cancelling), not an address worth sharing, and a
+  // stale link to it degrades to the plain book.
+  if (parts.length === 1 && parts[0] === 'logbook')
+    return { name: 'logbook', season: null, placing: toGamePkParam(q.get('place')) }
   // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
@@ -156,6 +172,28 @@ export function parseRoute(url) {
   if (parts.length === 2 && parts[0] === 'photos') {
     const gamePk = Number(parts[1])
     return Number.isFinite(gamePk) ? { name: 'photos', gamePk } : { name: 'photos' }
+  }
+  // The Logbook retrospective — what your collection adds up to (ADR-0035, the
+  // game-stamps PRD §6). It reads ONLY your own stamps, which is what lets it
+  // print final scores plainly, same argument as /logbook itself.
+  //
+  // THIS BRANCH MUST STAY ABOVE THE SEASON BRANCH BELOW. That one parses
+  // `Number(parts[1])`, so '/logbook/stats' would resolve to season NaN ->
+  // null -> the bare Logbook page, silently and with no error to notice. Every
+  // named second segment this route ever grows has the same problem and needs
+  // the same placement.
+  if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'stats')
+    return { name: 'logbook-stats' }
+  // One season of the Logbook. A non-numeric or out-of-range segment falls back
+  // to the bare page (same idea as the invalid-date fallback above) rather than
+  // stranding it on a season that cannot exist.
+  if (parts.length === 2 && parts[0] === 'logbook') {
+    const season = Number(parts[1])
+    return {
+      name: 'logbook',
+      season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
+      placing: toGamePkParam(q.get('place')),
+    }
   }
   if (parts.length === 2 && parts[0] === 'player')
     return { name: 'player', id: parts[1], asOf, sportId }
@@ -222,6 +260,14 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 1) return 'lineup2'
   if (step === 3) return 'boxscore'
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
+}
+
+// A `?place=` gamePk, or null. Deliberately strict — a mangled value drops the
+// mode rather than putting the book into placement for a game that isn't real.
+function toGamePkParam(value) {
+  if (!value || !/^\d+$/.test(value)) return null
+  const pk = Number(value)
+  return Number.isInteger(pk) && pk > 0 ? pk : null
 }
 
 // URL date (MMDDYYYY) <-> API date (YYYY-MM-DD).
@@ -295,14 +341,26 @@ export function umpirePath(id) {
 export function managerPath(id) {
   return `/manager/${id}`
 }
-export function umpireRankingsPath() {
-  return '/umpires'
-}
 export function foulsPath() {
   return '/fouls'
 }
 export function gamePhotosPath(gamePk) {
   return `/photos/${gamePk}`
+}
+// The Logbook, optionally paged to one season. A bare `/logbook` lets the page
+// pick the newest season the local collection actually has.
+export function logbookPath(season = null) {
+  return season ? `/logbook/${season}` : '/logbook'
+}
+// The retrospective over the whole collection — deliberately not season-paged,
+// so 'stats' can never collide with a season segment.
+export function logbookStatsPath() {
+  return '/logbook/stats'
+}
+// The book, opened in placement mode for one freshly minted stamp. See the
+// `?place=` note in parseRoute for why this is a query rather than a route.
+export function logbookPlacePath(gamePk) {
+  return `/logbook?place=${Number(gamePk)}`
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

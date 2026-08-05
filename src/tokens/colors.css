@@ -94,4 +94,16 @@
   --arsenal-breaking: #1B2A3A; /* navy */
   --arsenal-offspeed: #B4453A; /* clay */
   --arsenal-other:    #938C7C; /* graphite-soft — knuckleball/eephus/etc */
+
+  /* ---- Batted-ball mix bar ---- the hitter page's counterpart to the
+     arsenal bar (BattedBallMix.jsx), same chart-only rule: no text ever sits
+     on these fills. Same four validated inks, re-aliased rather than reused
+     by their arsenal names so a batted-ball chip never claims to mean
+     "fastball" — and mapped by where each ball actually lives: ground balls
+     in the infield clay, line drives on the outfield grass, fly balls
+     against the navy sky, pop-ups the soft-graphite nothing outcome. */
+  --batted-ground: #B4453A; /* clay */
+  --batted-line:   #2F6E4F; /* outfield green */
+  --batted-fly:    #1B2A3A; /* navy */
+  --batted-pop:    #938C7C; /* graphite-soft */
 }

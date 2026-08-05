@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { wpaLogoFor, wpaLogoWithFallback } from '../lib/wpaLogo.js'
+import { wpaLogoFor, wpaLogoWithFallback } from '../lib/wpa/wpaLogo.js'
 
 // The mark a WPA band should tile for this (team, treatment), with the club's
 // Main mark standing in when the treatment's own art isn't on file.
 //
 // Why a hook rather than a pure lookup: procured treatment art (Alternate,
-// City Connect, …) is added club by club, and lib/wpaLogo.js deliberately has
+// City Connect, …) is added club by club, and lib/wpa/wpaLogo.js deliberately has
 // no manifest of which files exist — coverage grows by dropping a PNG into
 // public/team-logos/, same convention TeamLogo.jsx follows. So "does this art
 // exist" can only be answered by asking for it. An <img> probe does that: its

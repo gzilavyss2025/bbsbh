@@ -228,6 +228,56 @@ function isMonoInkStore(parsed) {
   return null
 }
 
+// stamp-logo-tuning.json: where a club's knockout mark sits inside a Logbook
+// stamp's mark slot, per side (src/lib/stampLogoTuning.js). Deliberately the
+// strictest validator here, and the reason is this store's blast radius: unlike
+// every other tuning file, it is read at RENDER time by art that is redrawn
+// from scratch on every view, so a bad value doesn't sit in a lab preview — it
+// reshapes that club's stamps in every user's Logbook. A closed side set, a
+// closed field set, and a real range per field.
+const STAMP_MARK_SIDES = new Set(['away', 'home'])
+const STAMP_PLACEMENT_RANGES = {
+  scale: [0.4, 2],
+  offsetX: [-60, 60],
+  offsetY: [-60, 60],
+  rotation: [-90, 90],
+}
+
+function isStampLogoTuningStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, entry] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
+    for (const field of ['name', 'note']) {
+      const v = entry[field]
+      if (v !== undefined && typeof v !== 'string') return `team ${teamId}'s ${field} is not a string`
+    }
+    if (entry.treatments === undefined) continue
+    if (!isPlainObject(entry.treatments) || hasPoisonKey(entry.treatments)) {
+      return `team ${teamId}'s treatments is not an object`
+    }
+    for (const [side, fields] of Object.entries(entry.treatments)) {
+      if (!STAMP_MARK_SIDES.has(side)) return `team ${teamId} has a bad stamp side "${side}"`
+      if (!isPlainObject(fields) || hasPoisonKey(fields)) return `team ${teamId}'s ${side} is not an object`
+      for (const [field, value] of Object.entries(fields)) {
+        if (field === 'note') {
+          if (typeof value !== 'string') return `team ${teamId}'s ${side}.note is not a string`
+          continue
+        }
+        const range = STAMP_PLACEMENT_RANGES[field]
+        if (!range) return `team ${teamId}'s ${side} carries an unknown field "${field}"`
+        if (typeof value !== 'number' || !Number.isFinite(value)) {
+          return `team ${teamId}'s ${side}.${field} is not a number`
+        }
+        if (value < range[0] || value > range[1]) {
+          return `team ${teamId}'s ${side}.${field} is outside ${range[0]}…${range[1]}`
+        }
+      }
+    }
+  }
+  return null
+}
+
 // A flat uniformAssetCode -> display-name string map (src/api/uniforms.js's
 // fetchUniformNameOverrides). Rejects an array, nested objects, or non-string
 // values rather than writing a shape the app's readers don't expect.
@@ -299,6 +349,10 @@ export const DEV_DATA_STORES = {
   'mono-ink': {
     file: 'src/lib/data/mono-ink.json',
     validate: isMonoInkStore,
+  },
+  'stamp-logo-tuning': {
+    file: 'src/lib/data/stamp-logo-tuning.json',
+    validate: isStampLogoTuningStore,
   },
   'alt-colors': {
     file: 'src/lib/data/alt-colors.json',

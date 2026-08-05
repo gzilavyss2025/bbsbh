@@ -1,0 +1,1088 @@
+/* ---- Wild Card board ------------------------------------------------------ */
+
+/* "Division leaders" / "Wild card" section labels, inline as a full-width row
+   rather than a second <table> — keeps one sticky team column and one
+   horizontal-scroll container for the whole league instead of two. */
+.wc-grouphead td {
+  padding-top: 12px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  background: var(--bg-page);
+  border-top: none;
+}
+.standings--wc tbody tr:first-child td {
+  padding-top: 6px;
+}
+/* The short division tag riding next to a team name in the pooled wild-card
+   list (teams aren't grouped by division here, so the badge is the only cue
+   left of which division a row belongs to). */
+.wc-div {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+/* The cutoff line after the last team AT or tied-into the 3rd wild-card
+   spot — mlb.com's own convention for "in" vs. "out" of the field. A bold
+   rule rather than a background change so it reads clearly under a
+   .is-me tint too. */
+.wc-cutoff td {
+  border-bottom: 2px solid var(--text-heading);
+}
+
+@media (min-width: 740px) {
+  /* Wide layout has room for the whole table — cap the page a touch narrower
+     than the 960px slate width so a 15-column standings grid stays legible
+     rather than stretching into sparse cells, and let the extra columns show.
+     840px (not the original 760px, sized for a 12-column table that also
+     allowed data cells to wrap) is the smallest cap, with a little headroom,
+     the current 15-column Division board fits without .ledger-wrap's
+     horizontal-scroll fallback kicking in now that cells are nowrap —
+     verified against the table's actual rendered min-content width, not
+     guessed. */
+  .screen.standings-screen {
+    max-width: 840px;
+  }
+  .standings--full .st-ext {
+    display: table-cell;
+  }
+  .standings--full th,
+  .standings--full td {
+    padding: 8px 9px;
+    font-size: var(--fs-small);
+  }
+}
+
+/* ranked team stats — a dense two-column ledger of stat / value / rank lines.
+   Each stat is one baseline-aligned row (condensed uppercase label, mono
+   tabular figure, tinted rank ordinal) rather than a padded card, so 9–13
+   rows read as a compact box-score block, not a wall of boxes. Two columns
+   on phone width, collapsing to one on the narrowest viewports. The whole
+   block sits on one soft-cream card with a kraft-tape border, rather than
+   each row floating over the page's own graph-paper background — the grid
+   lines behind an unbounded ledger made the rows hard to read at a glance. */
+.tstats-card {
+  margin-top: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+/* The masthead bolted onto the card's own top border — same title/note
+   layout as .thub-card__head, just kraft-bordered like the rest of this
+   card instead of the plain hairline the shared shell uses. */
+.tstats-card__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--seal);
+}
+.tstats-card__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.tstats-card__body {
+  padding: 4px 12px;
+}
+.tstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 18px;
+}
+.tstatrow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* The top row of each column sits flush against the card's own top border
+   (see .tstats-card) — dropping its rule keeps the two from doubling up. */
+.tstatrow:nth-child(-n + 2) {
+  border-top: none;
+}
+.tstatrow__k {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-caption);
+  min-width: 0;
+}
+.tstatrow__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.tstatrow__r {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  min-width: 2.6ch;
+  text-align: right;
+}
+.tstatrow__r--good {
+  color: var(--field-deep);
+}
+.tstatrow__r--bad {
+  color: var(--clay-deep);
+}
+/* League-best (1st) / league-worst (last) gets the whole row tinted, a
+   stronger claim than the rank ordinal's plain good/bad color. */
+.tstatrow--best,
+.tstatrow--worst {
+  border-radius: var(--radius-sm);
+}
+.tstatrow--best {
+  background: var(--field-soft);
+}
+.tstatrow--worst {
+  background: var(--clay-soft);
+}
+/* Today's row on the Record by Day of Week card — the same highlighter-yellow
+   wash as .foulboard__row--outlier's outlier flag, repurposed here to mean
+   "this is today" rather than "this is notable." Applied after best/worst so
+   it can layer on a row that's also this season's best/worst weekday. */
+.tstatrow--today {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+@media (max-width: 359px) {
+  .tstats {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+  /* Single column now — only the very first row is flush against the card
+     top; row 2 goes back to needing its own rule. */
+  .tstatrow:nth-child(2) {
+    border-top: var(--bw-hair) solid var(--border-hairline);
+  }
+}
+/* Comeback wins card (ComebackCard) — one row per depth (≤10/20/30% win
+   probability), each read as a RATE: "won N of M times they sank this low," with
+   a fill bar for the club's own comeback rate and a tick at the pooled MLB
+   baseline, so "better/worse than a typical club" is legible without a rank
+   table. Fixed 0–100% bar scale (comebacks ARE rare, so the short fill is the
+   honest picture). Reuses the .tstats-card chrome. */
+.cbk__gloss {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+  padding: 8px 8px 2px;
+  margin: 0;
+}
+.cbk__rows {
+  display: flex;
+  flex-direction: column;
+}
+.cbk__row {
+  padding: 9px 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.cbk__row:first-child {
+  border-top: none;
+}
+.cbk__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.cbk__label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-muted);
+}
+.cbk__frac {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cbk__rate {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.cbk__rate--over {
+  color: var(--field-deep);
+}
+.cbk__of {
+  font-weight: var(--w-regular);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.cbk__badge {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 7px;
+  margin-left: 7px;
+}
+/* One depth's distribution rail — reuses the .team-score__track/dot/tooltip
+   visuals (all 30 clubs plotted 0 → the MLB leader). */
+.cbk__rail {
+  margin: 2px 1px 0;
+}
+/* The pooled MLB-average rate — a bold dashed reference line with a flag cap so
+   it reads clearly through the dot cloud (rendered before the dots in the DOM so
+   a club dot still paints on top where they overlap). Dark ink, not a data
+   color, so it says "benchmark," not "a team." */
+.cbk__avg {
+  position: absolute;
+  top: 2px;
+  height: 22px;
+  width: 2px;
+  margin-left: -1px;
+  background: repeating-linear-gradient(
+    var(--ink-1) 0,
+    var(--ink-1) 3px,
+    transparent 3px,
+    transparent 5px
+  );
+}
+/* Downward flag at the top so the eye lands on the line even in a dense rail. */
+.cbk__avg::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--ink-1);
+}
+/* 0% (left) → the MLB leader's rate (right), with the average called out so the
+   rail's scale is legible without reading the gloss. */
+.cbk__scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+/* Tie the label to the dark reference line — same ink, slightly bolder. */
+.cbk__scale-avg {
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+}
+.rankchip {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+  white-space: nowrap;
+}
+.rankchip--good {
+  background: var(--field-soft);
+  color: var(--field-deep);
+  border-color: transparent;
+}
+.rankchip--bad {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  border-color: transparent;
+}
+
+/* Top-100-prospect badge — a neutral pill (not a performance judgment, so it
+   doesn't borrow rankchip's good/bad tone pair), MLB logo + rank number. */
+.prospectpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.prospectpill__logo {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+/* Milestone-watch pill — a lineup row's "N shy of X for his career" fact,
+   sibling to .prospectpill (same shape/weight), inked in the accent color
+   rather than neutral so a milestone chase reads as a distinct kind of note. */
+.milestonepill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--accent-primary);
+  border: var(--bw-hair) solid var(--accent-primary);
+}
+
+/* Rookie pill — still under MLB's rookie limit, another sibling to
+   .prospectpill (same shape/weight), inked in field green so a debut-season
+   player reads as its own distinct tone from the milestone/prospect pills. */
+.rookiepill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--field);
+  border: var(--bw-hair) solid var(--field);
+}
+.rookiepill__short {
+  display: none;
+}
+/* Phone widths swap the full "ROOKIE" word for just "R" — with WAR, name,
+   and a chevron already sharing the row (see .thub-row), the full word was
+   a big part of what made roster rows feel scrunched. */
+@media (max-width: 420px) {
+  .rookiepill__full {
+    display: none;
+  }
+  .rookiepill__short {
+    display: inline;
+  }
+}
+
+/* "Due up" pill — marks the one lineup-card slot leading off a team's own
+   next half (see LineupSection, EnteringReference.jsx). Same amber seal chip
+   as .standings-reveal rather than the neutral rookie/prospect palette, so it
+   reads as a live, time-sensitive marker rather than a standing badge. */
+.duepill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  border: var(--bw-hair) solid var(--seal-deep);
+}
+
+/* MLB-debut pill — icon-only sibling to .prospectpill/.rookiepill/
+   .milestonepill (same shape/weight): no text, since the shield mark alone
+   carries the meaning next to a name. */
+.debutpill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 5px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.debutpill__logo {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+/* PROTOTYPE (claude/radar-glyph-prototype) — Fever Baseball radar as a tap
+   glyph, not upfront jargon: a small magnifying glass sits quietly in the
+   row; tapping it presses like a scout's stamp (reuses .postponed's
+   stamp-press) and unfolds a plain-language note. The glyph and card shell
+   stay ink/graphite (never the kraft-seal amber — that's reserved for score
+   covers, see CLAUDE.md's spoiler rule); green/clay-red is spent in exactly
+   one place, the note's own up/down tag, not as decorative chrome bolted
+   onto the card. The glyph and the note are direct siblings in the row's
+   namewrap flex-wrap (RadarPill.jsx returns a Fragment, not a wrapping
+   span) — namewrap's own flex-wrap puts the note on its own line via
+   flex-basis: 100%, so the glyph never shares a line, and therefore never a
+   cross-axis center, with the note's height. */
+.radarpill__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* border-box: pressed's thicker white ring must not grow the button past
+     this fixed 21px — same size/position tapped or not. */
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+  color: var(--graphite);
+  cursor: pointer;
+  transform: rotate(-4deg);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.radarpill__glyph:hover {
+  border-color: var(--graphite-soft);
+  color: var(--ink-2);
+}
+.radarpill__glyph--pressed {
+  /* --radar-team-color is set inline per-player (RadarPill.jsx, from
+     teamPrimaryColor) when the club has a known brand color; falls back to
+     plain ink for MiLB teams with none. Full-strength fill + a white ring,
+     deliberately loud — this is the one state meant to grab the eye. */
+  background: var(--radar-team-color, var(--ink-1));
+  border-width: 2px;
+  border-color: #fff;
+  color: #fff;
+  animation: stamp-press 300ms var(--ease-out) both;
+}
+.radarpill__glyph--pressed:hover {
+  /* Hovering an already-open glyph previews what tapping it will do — a
+     visibly team-colored wash (not the max-saturation fill it shows at
+     rest, not a bare ring either) as a "this is about to close" cue. */
+  background: color-mix(in srgb, var(--radar-team-color, var(--ink-1)) 55%, var(--bg-page));
+  border-width: 2px;
+  border-color: var(--radar-team-color, var(--graphite));
+  color: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__note {
+  /* Basis 100% inside namewrap's own flex-wrap forces this onto its own
+     line, below name/pills/glyph — see the block comment above. */
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.radarpill__note-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.radarpill__note-tag--up {
+  color: var(--accent-positive);
+}
+.radarpill__note-tag--down {
+  color: var(--accent-negative);
+}
+.radarpill__note-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* Meter: exit velocity vs. the real qualified league (Savant percentile),
+   not Fever's own raw mph — a track + team-colored fill IS the comparison,
+   the label is a direct read of the same number, no legend/hover needed for
+   one value against a benchmark (dataviz skill's "meter" form). */
+.radarpill__meter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.radarpill__meter-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--border-hairline);
+  overflow: hidden;
+}
+.radarpill__meter-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--radar-team-color, var(--ink-1));
+}
+.radarpill__meter-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.radarpill__note-source {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+/* team-hub roster (own classes — the .roster panel is a different component) */
+.thub-roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.thub-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-ui);
+}
+.thub-roster li:first-child {
+  border-top: none;
+}
+.thub-roster li:first-child.thub-row {
+  border-top: none;
+}
+.thub-jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--clay);
+  font-weight: var(--w-bold);
+  text-align: right;
+}
+.thub-name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.thub-namewrap .ilmark {
+  font-size: var(--fs-compact);
+}
+/* Kraft-tape amber, deliberately NOT the clay red the IL cross (.ilmark) uses:
+   an All-Star who's also hurt would otherwise show a red star and a red cross
+   side by side in the same hue, reading as one smeared mark. Amber keeps the
+   honor distinct from the injury flag (and matches the gold-star convention). */
+.thub-allstar {
+  color: var(--seal);
+  margin-left: 4px;
+  font-size: var(--fs-compact);
+}
+.thub-pos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.thub-chev {
+  color: var(--graphite-soft);
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+}
+.rolechip {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--field-soft);
+  color: var(--field-deep);
+}
+.rolechip--rp {
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.rolechip--cl {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+}
+/* The Bullpen list's compound "SV · G · IP" badge — longer than every other
+   rolechip use, but still kept to one line (wrapping read badly); the name
+   column shrinks/ellipsizes first instead (see .thub-name). */
+.rolechip--stats {
+  white-space: nowrap;
+}
+
+/* Roster super-section (Preferred Lineup / Starting Pitchers / Bullpen) — one
+   bordered soft-cream card (same convention as .tstats-card) so the three
+   projection subsections read as one group, distinct from the actual
+   40-man Current Roster section below. */
+.roster-super {
+  margin-top: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+/* The masthead bolted onto the card's own top border, same title/note/action
+   layout as .thub-card__head — the Season/Last 10 Games toggle rides here as
+   the action slot. */
+.roster-super__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--seal);
+}
+.roster-super__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.roster-super__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 12px;
+}
+/* Two columns pair up at the desktop/iPad breakpoint (see e.g.
+   .standings__wide): the defensive nine + bench on the left, both pitching
+   staffs on the right. Below the breakpoint each column collapses and the four
+   subsections stack in reading order (Lineup, Substitutes, Starters, Bullpen). */
+.roster-super__row {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.roster-super__col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (min-width: 740px) {
+  .roster-super__row {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .roster-super__row > .roster-super__col {
+    flex: 1;
+    min-width: 0;
+  }
+}
+/* Roster super-section's Season / Last 10 Games toggle, in the SectionTitle
+   `action` slot — a two-button segmented control, same caps/tracking as
+   .chevron-link so it reads as part of the same header row. */
+.roster-super__toggle {
+  display: flex;
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.roster-super__toggle-btn {
+  border: none;
+  background: none;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.roster-super__toggle-btn + .roster-super__toggle-btn {
+  border-left: var(--bw-hair) solid var(--seal);
+}
+.roster-super__toggle-btn.is-active {
+  background: var(--seal);
+  color: var(--seal-ink);
+}
+
+.roster-sub__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+/* Position players / Pitchers, side by side at the desktop/iPad breakpoint
+   instead of stacked full-width. */
+.roster-cols {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (min-width: 740px) {
+  .roster-cols {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .roster-cols > div {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* Injured-List day-count badge on the Team page's IL section — clay/seam-red
+   tinted so an IL tag reads as a negative status, distinct from the neutral
+   green position chips and inferred-role chips. */
+.ilchip {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+}
+
+/* MLB team page's farm-system section — one card per full-season affiliate
+   (AAA/AA/A+/A), each a plain link to that club's own team page. Fixed at
+   two columns (not auto-fill) so four cards always fill two full rows
+   rather than an orphaned single card stranded on a third row. */
+.thub-affiliates {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.thub-affiliate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+.thub-affiliate__level {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+}
+.thub-affiliate__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  line-height: var(--lh-snug);
+}
+.thub-affiliate__loc {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* Prospect showcase — headshot spotlight strip above the ranked table,
+   spotlighting only the very top of the org list (see PROSPECT_SHOWCASE_COUNT
+   in TeamPage.jsx). Fixed column counts (not auto-fill) so the strip always
+   reads as one full row rather than wrapping an odd card onto its own line;
+   the row grows from 3 to 5 cards as the viewport (and .screen's own
+   max-width) widens, so a phone shows fewer, wider faces and the desktop
+   .screen width (960px, see the 740px breakpoint above) shows the whole
+   top-5 at once. Extra cards beyond the current column count are rendered
+   but hidden rather than unmounted, so no layout shift on resize. */
+.prospectshowcase {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.prospectshowcase__card:nth-child(n + 4) {
+  display: none;
+}
+@media (min-width: 420px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 4) {
+    display: flex;
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: none;
+  }
+}
+@media (min-width: 740px) {
+  .prospectshowcase {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .prospectshowcase__card:nth-child(n + 5) {
+    display: flex;
+  }
+}
+.prospectshowcase__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+/* The frame's height comes from the ::before spacer's padding-top (a
+   percentage of shotwrap's own width) rather than `aspect-ratio` on .shot
+   directly — a source photo's real pixel dimensions can otherwise leak
+   through as a min-content contribution in this flex/grid ancestry and
+   inflate the card past its intended size (seen live: a MiLB prospect whose
+   milb-context photo is a much taller portrait than the usual silo cutout
+   blew its card out to nearly double height). Taking .shot out of flow with
+   `position: absolute` severs that path entirely — its size comes from
+   `inset: 0` against the already-sized shotwrap, never from its own content,
+   so any future photo (right, wrong, or oddly shaped) is powerless to resize
+   the card. */
+.prospectshowcase__shotwrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.prospectshowcase__shotwrap::before {
+  content: '';
+  display: block;
+  padding-top: calc(var(--shot-md-h) / var(--shot-md-w) * 100%);
+}
+.shot.prospectshowcase__shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.shot.prospectshowcase__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.prospectshowcase__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-align: center;
+  line-height: var(--lh-ui);
+}
+.prospectshowcase__name {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  line-height: var(--lh-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Team-page prospect table — an org's farm-system leaderboard, shown only on
+   the parent MLB club's own page (affiliate pages badge their rosters instead). */
+.prospecttable .lft.ledger__sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.prospecttable__name {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.prospecttable__top {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border-radius: var(--radius-pill);
+  padding: 1px 5px;
+}
+.prospecttable__level {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  white-space: nowrap;
+}
+.prospecttable__line {
+  font-size: var(--fs-compact);
+  white-space: nowrap;
+}
+
+/* Standalone Top 100 page's "Rankings as of…" note, read after the table
+   in scorebook all-caps, matching the app's other captions. */
+.prospects__caption {
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* Rehab-assignments page — a grid of player cards (the list is small once
+   ended stints are filtered out, so cards read better than a dense table).
+   auto-fill packs two across on a phone and more as the viewport widens, no
+   breakpoint needed. Each card is a little header page: headshot on top, then
+   name + position, then the move (MLB club -> the affiliate) and that
+   affiliate's name with a level badge. */
+.rehabgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.rehabcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  text-align: center;
+}
+
+/* The headshot header. .shot's base rule is a big 104x139 portrait; scale it
+   down to a card-sized 3:4 crop, and strip the plink chrome off its wrapper so
+   the tap target carries no underline. */
+.rehabcard__portrait {
+  display: block;
+  line-height: var(--lh-zero);
+}
+.shot.rehabcard__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+}
+.shot.rehabcard__shot.shot--fallback {
+  font-size: var(--fs-hero-md);
+}
+
+/* Name (display caps, wraps within the card) + position caption. Compounded to
+   beat .plink's `font: inherit`. */
+.rehabcard__name.rehabcard__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  line-height: var(--lh-compact);
+}
+.rehabcard__pos {
+  margin: -2px 0 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The move: MLB club logo -> arrow -> rehab affiliate logo. */
+.rehabcard__move {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.rehabcard__team {
+  display: inline-flex;
+  line-height: var(--lh-zero);
+}
+.rehabcard__arrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+/* Affiliate name + level badge below the logos. */
+.rehabcard__club {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+}
+.rehabcard__clubname.rehabcard__clubname {
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+}
+.rehabcard__since {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+

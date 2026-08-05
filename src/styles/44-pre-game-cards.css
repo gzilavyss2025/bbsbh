@@ -1,0 +1,652 @@
+/* ------------------------------------------------------- pre-game metric card
+   Shared shell, originally for the two derived/analytic cards under the
+   batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed
+   grade, a workload signal) — where the navy/gold masthead marked them as
+   the page's INTERPRETIVE modules, contrasted with the plain-titled factual
+   sections around them (roster, opposing defense, umpires — posted facts).
+   Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome
+   alone, purely for visual consistency with its pregame neighbors — it's
+   still a posted-facts listing, not an interpretive one.
+   SectionMasthead.jsx + InfoPopover.jsx. */
+.metriccard {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  /* Not overflow:hidden — the masthead's info popover overflows the card. Top
+     corners are rounded on the bar itself instead. */
+}
+.metriccard__body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+/* Navy/gold masthead — title left, an info affordance right. The kraft-gold
+   (--seal) bottom border is the "tape" edge of the scorebook metaphor. */
+.metricbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px var(--space-4);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.metricbar__title {
+  margin: 0; /* also rendered as an <h3> on the plain page sections — kill UA margin */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: var(--text-on-ink);
+}
+/* The batting-order / opposing-starter / opposing-defense mastheads' club
+   mark (SectionMasthead's `logo` prop) — a decorative flourish, never the
+   sole identifier (the title text sits right next to it), so the image
+   itself carries no alt text.
+
+   The one-color white lockup these wear is the ART, not a treatment applied
+   here: callers ask TeamLogo for the `mono` variant, a knockout mark
+   precomputed per club by scripts/gen-mono-logos.mjs. This used to be a
+   `filter: brightness(0) invert(1)` on the full-color CDN mark, which crushed
+   every logo whose interior detail is drawn in a light fill into an
+   unreadable solid blob — see ADR-0031 and src/lib/logoMono.js. */
+.metricbar__logo {
+  flex: 0 0 auto;
+}
+/* Batting order, opposing defense, and opposing starter each wear the navy
+   masthead as the header of a real card. The CONTAINER owns the border / radius /
+   shadow; the inner body sheds its own so the masthead caps one clean card. Skip
+   this and the masthead's square bottom corners + gold border overhang the body's
+   rounded top corners as little "ears". */
+.lineup,
+.opp,
+.startercard {
+  margin-top: var(--space-4);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+/* The batting-order rows and the defense diamond carry their own backgrounds, so
+   the card clips them (and the masthead) to its rounded corners. Safe here — these
+   two mastheads hold no info popover to escape, and the lineup list already ran
+   overflow:hidden. The starter card stays UNclipped (its pills' tooltips must
+   escape); its masthead rounds its own top corners to match, the .metriccard way. */
+.lineup,
+.opp {
+  overflow: hidden;
+}
+/* Bodies drop their own card chrome — the container owns it now. Scoped so
+   DefenseDiamond's six other (uncapped) usages keep their own border. */
+.lineup .lineup__list {
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+  box-shadow: none;
+}
+.opp .defdiamond {
+  border: 0;
+  border-radius: 0;
+}
+/* Not-posted fallback inside the batting-order card: the roster block sheds its
+   own frame and its notice insets to the card. */
+.lineup .roster {
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+}
+.lineup .roster__notice {
+  margin: 8px 12px;
+}
+.metricbar__aside {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ------------------------------------------------------- season series strip
+   The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
+   A .metriccard like Lineup Strength / Bullpen Health above, so it wears the
+   same navy/gold masthead; the body swaps the usual stacked layout for a
+   horizontally-scrolling row of game cards with always-on square nav buttons
+   (this app doesn't use circular chrome elsewhere, so the buttons stay square
+   like every other control). */
+.seasonseries__body {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-4);
+}
+.seasonseries__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.seasonseries__nav:hover {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.seasonseries__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.seasonseries__strip {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it and fall
+     back to a full-size native scrollbar, which reads as a stray gray bar
+     under the square nav buttons (see .txcard__scroll for the same fix). The
+     ::-webkit-scrollbar rule below is what hides it in Chromium/WebKit. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.seasonseries__strip::-webkit-scrollbar {
+  display: none;
+}
+/* Once every card already fits (no nav arrows rendered — see
+   SeasonSeriesStrip.jsx's canScroll check), center the row instead of
+   left-packing it and leaving a lopsided gap on the wide desktop spread. */
+.seasonseries__strip--fit {
+  justify-content: center;
+}
+.seasonseries__cell {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: var(--font-display);
+  cursor: pointer;
+}
+.seasonseries__cell:hover {
+  background: color-mix(in srgb, var(--seal) 12%, transparent);
+}
+.seasonseries__cell:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.seasonseries__cell--current {
+  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+  border-color: var(--navy);
+}
+.seasonseries__cell--current:hover {
+  background: color-mix(in srgb, var(--navy) 13%, var(--surface-card));
+}
+/* A cell whose game was hosted at the OTHER team's park than the current
+   game — a light kraft/cream tint, distinct enough to separate a series'
+   legs at a glance without competing with the current-game navy highlight. */
+.seasonseries__cell--otherpark {
+  background: color-mix(in srgb, var(--seal) 7%, var(--surface-card));
+}
+.seasonseries__cell--otherpark:hover {
+  background: color-mix(in srgb, var(--seal) 16%, var(--surface-card));
+}
+.seasonseries__logo {
+  flex-shrink: 0;
+}
+.seasonseries__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+.seasonseries__sep {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.seasonseries__innings {
+  margin-left: 2px;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+.seasonseries__time {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  line-height: var(--lh-solid);
+}
+.seasonseries__date {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: center;
+  line-height: var(--lh-tight);
+}
+.seasonseries__opp {
+  display: block;
+  font-family: var(--font-display);
+  color: var(--text-muted);
+  font-weight: var(--w-semibold);
+}
+
+/* --------------------------------------------------------- box score photos
+   GamePhotosStrip.jsx — a .metriccard like Lineup Strength / Season Series
+   above, wearing the same navy/gold masthead, with a "VIEW ALL" shortcut as a
+   white filled pill (reversed off the bar's own navy, so it reads as the
+   one call-to-action in it — same footing as .watchbtn's filled-pill
+   treatment, just light-on-dark where that one's dark-on-light) sitting in
+   the bar's right-aligned aside slot; ink navy, golds on hover, same
+   external-link arrow glyph as .watchbtn__ext. The body packs photos into a
+   CSS grid that
+   fills DOWN before wrapping to a new column (grid-auto-flow: column) — one
+   row of larger thumbnails on phone, three rows from the wide breakpoint up
+   (BoxScore.jsx renders this stacked under Three Stars in the box score's
+   right-hand column, where the extra rows fill the space that column's
+   shorter content leaves beside the left column's totals/win-prob arc) —
+   then scrolls horizontally through however many photos the game has, same
+   square-nav-button idiom as .seasonseries__strip. */
+.photostrip__viewall {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid #FFFFFF;
+  background: #FFFFFF;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  cursor: pointer;
+}
+.photostrip__viewall:hover {
+  color: var(--seal);
+}
+.photostrip__viewall:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* The external-link arrow, same glyph/role as .watchbtn__ext. */
+.photostrip__viewallarrow {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-solid);
+}
+.photostrip__wrap {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.photostrip__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.photostrip__nav:hover {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.photostrip__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* A touchscreen already swipes the strip natively — permanently-visible
+   arrows there would just be clutter, so they're reserved for a
+   mouse/trackpad (matches the `canScroll` JS gate: shown only when the
+   strip actually overflows AND the device can hover). */
+@media (hover: none), (pointer: coarse) {
+  .photostrip__nav {
+    display: none;
+  }
+}
+.photostrip__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(1, 163px);
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.photostrip__body::-webkit-scrollbar {
+  display: none;
+}
+.photostrip__thumb {
+  scroll-snap-align: start;
+  width: 163px;
+  height: 163px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+}
+.photostrip__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.photostrip__thumb:hover {
+  border-color: var(--seal);
+}
+.photostrip__thumb:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* (i) info popover — a lightweight hover/tap tip (InfoPopover.jsx), not a
+   modal: opens on hover/focus (CSS below) and on click (aria-expanded), closes
+   on Escape / outside-click (JS). Lives in the navy bar, so the button inks in
+   the on-ink paper tone; the tip drops onto paper below it. */
+.infopop {
+  position: relative;
+  display: inline-flex;
+}
+.infopop__btn {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: var(--bw-hair) solid var(--graphite-soft);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-on-ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  font-style: italic;
+  line-height: var(--lh-solid);
+  text-align: center;
+  cursor: pointer;
+}
+.infopop__btn:hover,
+.infopop__btn:focus-visible {
+  border-color: var(--text-on-ink);
+  color: var(--surface-inset);
+}
+.infopop__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.infopop__tip {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 30;
+  width: 240px;
+  max-width: 72vw;
+  padding: 10px 12px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-2px);
+  transition: opacity 0.12s ease, transform 0.12s ease, visibility 0s linear 0.12s;
+}
+/* Pointer tab up toward the (i). */
+.infopop__tip::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--surface-inset);
+  border-left: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  transform: rotate(45deg);
+}
+.infopop:hover .infopop__tip,
+.infopop__btn:focus-visible + .infopop__tip,
+.infopop__btn[aria-expanded='true'] + .infopop__tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .infopop__tip {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------- lineup strength
+   LineupStrengthCard.jsx — the 0-10 grade of tonight's posted order vs. the
+   roster's best nine. The hero score + score-tracking tier pill lead; the
+   deductions read as an Expected → Starting → cost table. Spoiler-free
+   (season aggregates only). */
+.lstrength__hero {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.lstrength__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-tight-display);
+  color: var(--text-heading);
+}
+.lstrength__of {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+  color: var(--text-caption);
+}
+
+/* Score-tracking tier pill (lib/lineupStrengthTier.js) — a lineup-specific
+   word ladder, colour collapsed to the same field/award/clay families as
+   .tierpill so it reads consistently without reusing the shared statTiers
+   words. */
+.lstrengthtier {
+  flex: none;
+  padding: 3px 9px;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lstrengthtier--strong {
+  color: var(--field-deep);
+  border-color: var(--field);
+  background: var(--field-soft);
+}
+.lstrengthtier--mid {
+  color: var(--award-ink);
+  border-color: var(--award-line);
+  background: var(--award-soft);
+}
+.lstrengthtier--weak {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
+}
+
+/* A posted starter absent from the season data (recent trade/call-up): his slot
+   is left out of the grade, noted plainly so a partial grade stays honest. */
+.lstrength__partial {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------- bullpen board
+   BullpenBoard.jsx — a Fresh/Limited/Down summary pill row over the board,
+   which is sorted likely-down → limited → fresh, each with the rule that
+   tripped ("32 pitches yesterday"). Spoiler-free: completed appearances only
+   (api/workload.js). */
+.penboard__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+/* Summary pills double as a hover filter: pointing at one lights its arms on
+   the board below and dims the rest (penboard__row--dim). */
+.penboard__pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: default;
+  transition: box-shadow 0.14s ease;
+}
+.penboard__pill:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.penboard__pillnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+}
+.penboard__pill--fresh {
+  color: var(--field-deep);
+  background: var(--field-soft);
+}
+.penboard__pill--limited {
+  color: var(--award-ink);
+  background: var(--award-soft);
+}
+.penboard__pill--down {
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+}
+.penboard__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.penboard__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  transition: opacity 0.14s ease;
+}
+.penboard__row--dim {
+  opacity: 0.3;
+}
+/* Per-arm status tag — the same pill language as the summary above (label
+   only, no count), so the board reads as those pills stacked. */
+.penboard__tag {
+  flex: none;
+  min-width: 92px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  text-align: center;
+}
+.penboard__tag--fresh {
+  color: var(--field-deep);
+  background: var(--field-soft);
+}
+.penboard__tag--limited {
+  color: var(--award-ink);
+  background: var(--award-soft);
+}
+.penboard__tag--down {
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+}
+.penboard__name {
+  min-width: 0;
+  flex: 1;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Jersey number + LHP/RHP, pinned to the row's far right — same treatment as
+   .roster__jersey/.roster__pos, so it reads as the same fact in both places. */
+.penboard__badges {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.penboard__jersey {
+  color: var(--clay);
+}
+.penboard__hand {
+  color: var(--field);
+}
+@media (prefers-reduced-motion: reduce) {
+  .penboard__pill,
+  .penboard__row {
+    transition: none;
+  }
+}
+

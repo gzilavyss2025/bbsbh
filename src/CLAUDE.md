@@ -37,11 +37,15 @@ a shared mega-fetch; that is the whole point, not an implementation detail
 why the loaders were briefly duplicated).
 
 Where things live: roster projection / 40-man / injured list → Roster; schedule,
-last ten, photos, transactions → Games; standings, batting + pitching ranks,
-leaders, jerseys, day-of-week, comebacks → Numbers; affiliates, prospects,
+every decided game, photos, transactions → Games; standings, batting + pitching
+ranks, leaders, jerseys, day-of-week, comebacks → Numbers; affiliates, prospects,
 affiliation history → Minors. The Overview holds **previews only**, each ending in
 a `.thub-door` link to the tab that owns it, and each is a `preview`/`limit` prop
-on the same module the tab renders in full — never a parallel component.
+on the same module the tab renders in full — never a parallel component. The one
+pair that isn't literally the same component still lives in one module:
+`modules/TeamGames.jsx` exports the Overview's `LastTenGames` rail and the Games
+tab's `AllGames` grid over one shared ticket-stub card, since a sideways rail is
+the wrong shape for a whole season and a grid is the wrong shape for a preview.
 
 A tab's secondary modules render as full cards, same as its headline module —
 no collapsed/shelved state. Every tab path goes through `teamTabPath` →
@@ -153,6 +157,15 @@ read the linked ADRs before refactoring:
   A step therefore ends mid-play, which is why the pinch-runner pencil-in keys
   on its notice's index rather than the play's `visible` gate — read ADR-0016
   before touching `nextStepBoundary`.
+  Either choice's **tap target is the dead space around it**, not just the
+  button: `.pagenav` is click-through, so a missed thumb used to land on a
+  player card under the fade instead. `.pagenav--innings .btn::after`
+  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button —
+  split down the middle between the pair, Refresh excepted — and its offsets are
+  measured from the
+  button on purpose; anchoring them to the bar re-collapses the area mid-tap
+  under `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins both that
+  and what must stay click-through.
 - **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
   `InningViewer` without touching its guarantees. `GameView` resolves
   `spoilersOffFor(officialDate)` — the pass is running, or this day was consented
@@ -164,6 +177,38 @@ read the linked ADRs before refactoring:
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
   `selectLiveEdge` drives navigation only — under the pass everything already
   renders open, so there is nothing for a ratchet to advance.
+- **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
+  final score *plainly*, and it is safe for a structural reason rather than a
+  careful one: a stamp only exists for a game the server can prove this user
+  already finished revealing. Two mechanisms carry that into the UI.
+  `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
+  render function (`screens/BoxScore.jsx`), which IS the client-side gate —
+  ADR-0002 again, used a third time. That host `SealBox` still has **no
+  `onReveal` and persists nothing**, and must stay that way: give it one and a
+  box score opened under the Scores Unlocked pass would silently ratchet the
+  whole game's `revealedThrough`. `GameStamp.jsx` (the art) and
+  `StampGameButton.jsx` may be imported only from their allowlists —
+  `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
+  `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection
+  (`screens/LogbookPage.jsx`, `/logbook` + `/logbook/{season}`) and its store
+  (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
+  signed-out user has a real Logbook on that device, holding no scores at all —
+  the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
+  mirrors the collection across a signed-in user's devices, and is the one
+  place that pushes the local reveal mark to `/api/reveal` before minting; its
+  header says why that is the only sanctioned way to close ADR-0035's known gap.
+  The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
+  with **one tunable part**: where a club's knockout mark sits in its slot
+  (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in
+  `/identity-lab`'s Stamp placement editor — the third name on the containment
+  guard's allowlist, and the only one whose game is a fabricated literal). Read
+  ADR-0035's amendment first: that store is consulted on every render, so
+  retuning a club restyles its stamps in every Logbook that already holds one.
+  The stamp's **ink** is the winning club's darkest brand colour
+  (`lib/stampInk.js` → the `--stamp-ink` custom property `.gamestamp` falls back
+  from) — the one module in `src/lib/` that colours anything from game state,
+  contained by the same allowlist and safe for the same reason. ADR-0036's
+  second addendum has the argument; do not import it anywhere else.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
@@ -172,6 +217,56 @@ read the linked ADRs before refactoring:
   callbacks (`onReveal`/`onStepInfo`) so the preview can't
   itself advance `revealedThrough` or double-report a step. Not a second
   reveal boundary — see ADR-0024.
+
+## The Logbook's passport book (`src/components/passport/`, ADR-0036)
+
+`/logbook` is a passport book: a club-coloured cover, cream pages, and stamps
+you place by tapping the page. Three rules, each with a reason:
+
+- **Geometry lives in `src/lib/passportLayout.js`**, not in these components.
+  Capacity, page aspect, margins, the deterministic per-game tilt, the
+  collision nudge and the auto-layout are all pure and unit-tested
+  (`test/passport-layout.test.js`). A component that types a coordinate has put
+  it somewhere nothing can check. Two conversions in that module are easy to
+  invert and one already was: a y-fraction converts to width-units by
+  **dividing** by `PAGE_ASPECT`, while a stamp's width-fraction converts to a
+  height-fraction by **multiplying**.
+- **A placement is `{ page, x, y, tilt }` with x/y as FRACTIONS**, stored on the
+  stamp record and synced (`src/lib/stamps.js`). Pixels would be a fact about
+  one screen; the same book has to render on a phone page and a desktop spread,
+  and on both of one user's devices.
+- **Minting and placing are separate.** The mint stays in the box score's
+  `SealBox` (ADR-0035); placing happens here via `?place={gamePk}`. An unplaced
+  stamp waits in the book's tray, so abandoning the flow never loses a keepsake.
+- **A placement is editable, and a move IS the placing flow.** Tapping a placed
+  stamp opens its options bar (open the game, move it, back to the tray) instead
+  of navigating; "Move it" re-enters placing mode on a stamp that already has a
+  placement. `placeStamp` was always a move as much as a first placement, so the
+  only things a move adds are `otherPlacementsOn`/`pageIsFullFor` in
+  `passportLayout.js` — the stamp must not collide with, or be counted against,
+  its OWN current spot. Do not build a second placement path.
+- **One thing in this book moves on its own**: the stamp you just confirmed
+  plays `passport-stamp-land` once — held above the paper, accelerating down
+  (`--ease-press`, the system's only ease-IN, because a stamp is *pushed*),
+  compressing 4% on impact, releasing to rest. Cleared by `animationend` so the
+  duration lives in the CSS alone, skipped rather than slowed under reduced
+  motion, and deliberately NOT fired by "place them all for me".
+- **The page is RULED into eight boxes** (`pageSlots()`, 2 across × 4 down),
+  drawn faintly so a blank page says where a stamp goes; it comes up while
+  placing and settles back after. `PAGE_CAPACITY` is `PAGE_COLUMNS * PAGE_ROWS`
+  and auto-layout fills those same boxes, so the guide, the tidy-up and "this
+  page holds 8" cannot disagree. It is a **guide, not a snap** — the tap still
+  decides (ADR-0036 rejected snapping and still does). The grid also absorbed
+  the dashed margin guide that used to be drawn on the tap target.
+- **A stamp is pressed in the winner's ink** — `lib/stampInk.js`, published as
+  `--stamp-ink` so any rule that sets `color` outright still wins (the mint
+  card's un-minted preview stays graphite). No winner, or a club with no colour
+  on file, means no property and the book's own navy.
+
+`PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
+allowlist since that guard was written — justified because a page's entire input
+is the user's own collection. `/logbook/stats` renders no stamp art and stays
+off it. Read ADR-0036 before adding a third name.
 
 ## Notification cards, casing, color, and button copy (ADR-0017)
 
@@ -191,10 +286,45 @@ also covers the casing rule (no per-component `.toUpperCase()`, guarded by
 color pairing, and the button/label conventions (chevron vs. destination-named
 link, "Reveal" always visible, accessible name contains the visible word).
 
-## Design system (`src/index.css` + `src/tokens/*`)
+## Site search is the one dialog that isn't a sheet (ADR-0037)
 
-All CSS lives in `src/index.css`, which imports `src/tokens/*.css` (colors,
-typography, spacing, layout, effects, fonts). The tiers are layered Carbon-style
+`SiteSearchModal` (`components/SiteSearch.jsx`) is a full-screen, top-anchored
+surface (`.searchoverlay`), **not** the shared `.scrim`/`.sheet` bottom sheet
+every other dialog here uses. Not a style choice: a docked sheet is positioned
+against the layout viewport, which an on-screen keyboard does not shrink, so the
+field and every result sat behind the keyboard the moment the field auto-focused.
+Read ADR-0037 before consolidating it back. Three things there are load-bearing —
+`useVisualViewport` sizing the overlay to the visible rectangle (no CSS unit
+reports where a keyboard starts; `100dvh` tracks browser chrome, not the
+keyboard), the document scroll lock, and a result row cancelling its own
+`pointerdown` so the keyboard can't retract mid-tap and reflow a different row
+under the finger. It is deliberately **not** portalled: the ALL-CAPS invariant is
+a `#root *` rule, and a portal to `<body>` lands outside it. `--fs-field` (16px)
+is the iOS auto-zoom floor, not a taste call. The recents shelf is pure and
+shape-gated in `lib/recentSearches.js` (identity fields only, never a score) with
+`hooks/useRecentSearches.js` over it; `e2e/site-search.spec.js` is the guard.
+
+## Design system (`src/styles/*` + `src/tokens/*`)
+
+`src/index.css` holds **no rules** — it is a banner comment and 55 `@import`s:
+the six `src/tokens/*.css` files (colors, typography, spacing, layout, effects,
+fonts), then the 49 `src/styles/NN-name.css` partials in cascade order. It was a
+single 30,326-line file until it was cut at verified brace-depth-0 boundaries;
+`cat src/styles/*.css` still reproduces that file's body byte-for-byte, and the
+built stylesheet is unchanged, because Vite inlines `@import` at build time.
+
+**Order is the contract.** The numeric prefix IS the cascade — later partials
+override earlier ones at equal specificity, exactly as later lines did in the
+old file. Never reorder the `@import` list to tidy it, and add a new partial at
+the position its rules belong in, not at the end. To find a rule, grep
+`src/styles/`; the file names say which surface each covers.
+
+`check-typography.mjs` and `check-focus-ring.mjs` read the whole directory (not
+a fixed list), so a new partial is covered the moment it exists — and both fail
+loudly if they are ever pointed at something with no rules in it, which is what
+caught this split rather than letting it silently disable them.
+
+The tiers are layered Carbon-style
 (ADR-0023): a **primitive** tier of raw values — `spacing.css` is the generic 4px
 scale + radii + border widths, `colors.css`'s `--paper-*`/`--ink-*`/`--seal` — and
 a **semantic alias** tier components consume (`--bg-canvas`, `--text-body`,
@@ -220,9 +350,9 @@ before changing how any of these render; the conversion itself lives in
 
 Type size, weight, leading, and tracking must use the semantic roles in
 `tokens/typography.css`; `scripts/check-typography.mjs` rejects new ad hoc values in
-`index.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
+`src/styles/*.css`. Focus rings must use `var(--focus-ring)`/`var(--ring)`
 (`check-focus-ring.mjs`), and the documented text-on-background token pairings must
 hold WCAG AA (`check-contrast.mjs`) — see ADR-0023. The global ALL-CAPS invariant
-(see the block comment in `src/index.css`) is guarded by `scripts/check-caps.mjs`
+(see the block comment in `src/styles/01-base.css`) is guarded by `scripts/check-caps.mjs`
 (the CSS half) and `scripts/check-name-casing.mjs` (the JS half — no per-component
 `.toUpperCase()`/`.toLowerCase()` on rendered text; see ADR-0017) via `npm run lint`.

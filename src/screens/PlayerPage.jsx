@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
 import { loadPlayer, loadPositionScope } from '../api/loadPlayer.js'
 import { splitDisplayName } from '../api/person.js'
+import { fetchPersonStats } from '../api/person-fetch.js'
 import { leagueLogoUrl, SPORT_LABEL, isMlbTeamId } from '../lib/teams.js'
+import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../lib/headerTheme.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { LinkScope } from '../lib/nav.jsx'
@@ -20,11 +22,15 @@ import { spanCell } from '../lib/ledger.js'
 import { PositionInnings } from '../components/PositionInnings.jsx'
 import { SplitsVsTeam } from '../components/SplitsVsTeam.jsx'
 import { StatcastPercentiles } from '../components/StatcastPercentiles.jsx'
-import { AdvancedPitchingCard } from '../components/AdvancedPitchingCard.jsx'
+import { AdvancedStatsCard } from '../components/AdvancedStatsCard.jsx'
 import { PitchMix } from '../components/PitchMix.jsx'
+import { BattedBallMix } from '../components/BattedBallMix.jsx'
 import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
+import { SimilarHitters } from '../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../components/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/PitcherWorkloadCard.jsx'
+import { RecentFormCard } from '../components/RecentFormCard.jsx'
+import { PlayerPhotosRail } from '../components/PlayerPhotosRail.jsx'
 import { SiteHeader } from '../components/SiteHeader.jsx'
 import { AsOfBanner } from '../components/AsOfBanner.jsx'
 import { BackBtn } from '../components/BackBtn.jsx'
@@ -32,6 +38,10 @@ import { AsyncGate } from '../components/AsyncGate.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
+
+function isoToday() {
+  return new Date().toISOString().slice(0, 10)
+}
 
 function monthDay(iso) {
   const [, m, d] = (iso || '').split('-')
@@ -70,6 +80,20 @@ export function PlayerPage({ id, asOf, sportId }) {
 
   const { bio, blocks } = data
   const pitchBlock = blocks.find((b) => b.group === 'pitching')
+  // A free agent / retired / released player (see api/person.js's
+  // rosterStatusView). `bio.team` is still populated for him — the API points a
+  // player with no club at the last one he had — so everything club-shaped on
+  // this hero reads through `club` instead, which goes null the moment he is on
+  // nobody's roster. He gets the league mark and the status word in place of a
+  // club he isn't on.
+  const status = data.rosterStatus
+  const club = status ? null : bio.team
+  // Not tied to any one game, so the player page always wears the club's
+  // Main/Home triad — the same identity-only theme TeamHubShell resolves for
+  // its own hub header. Null (no curated triad for this club, or no club at
+  // all) leaves the page on the app's default navy chrome, same fallback
+  // headerTheme.js guarantees everywhere else.
+  const theme = headerThemeFor(club?.id, themeKeyFor(club?.id, 'home', 'main'))
   const heroPos = bio.twoWay ? 'DH/P' : (bio.isPitcher && pitchBlock?.role) || bio.posAbbr || ''
   const hand = bio.isPitcher && !bio.twoWay
     ? bio.throws ? `Throws ${bio.throws}` : ''
@@ -82,10 +106,15 @@ export function PlayerPage({ id, asOf, sportId }) {
   // .player__name-last--long. Eleven units is where the base size starts
   // ellipsizing at phone width.
   const nameUnits = lastName.length + (bio.number ? String(bio.number).length + 1 : 0)
+  const firstsOrder = bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER
+  const hasFirsts = data.firsts && firstsOrder.some((key) => data.firsts[key])
+  const hasPlayerHistory = Boolean(
+    data.positionInnings || hasFirsts || (data.progression && bio.debut) || (data.timeline && bio.debut) || data.transactions,
+  )
 
   return (
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
-      <div className="screen player">
+      <div className={`screen player ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
         <SiteHeader />
         {data.isAllStar && (
           <div className="allstar-banner" role="note">
@@ -110,15 +139,24 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
+        {data.lastPlayedYear && (
+          <div className="lastplayed-banner" role="note">
+            <span className="lastplayed-banner__text">Last played in {data.lastPlayedYear}</span>
+          </div>
+        )}
         <AsOfBanner asOf={asOf} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
+          {/* No club, no club-colored wash behind the face — and `isMlb` is
+              passed explicitly because it normally derives from the teamId
+              that just went null, and a debuted player must keep skipping the
+              stale `milb` prospect-photo rung (see Headshot). */}
           <Headshot
             personId={bio.id}
             name={bio.fullName}
-            teamId={bio.team?.parentOrgId ?? bio.team?.id}
-            isMlb={isMlbTeamId(bio.team?.id)}
+            teamId={club?.parentOrgId ?? club?.id}
+            isMlb={isMlbTeamId(club?.id) || Boolean(status && bio.debut)}
           />
           <div className="player__ident">
             <h1 className="player__name">
@@ -134,9 +172,14 @@ export function PlayerPage({ id, asOf, sportId }) {
             <p className="player__meta">
               {heroPos && <span className="player__pos">{heroPos}</span>}
               {hand && <> <span className="sep">·</span> <span className="player__hand">{hand}</span></>}
-              {bio.team && (
+              {club && (
                 <> <span className="sep">·</span>{' '}
-                  <TeamLink id={bio.team.id} className="player__team">{bio.team.name}</TeamLink>
+                  <TeamLink id={club.id} className="player__team">{club.name}</TeamLink>
+                </>
+              )}
+              {status && (
+                <> <span className="sep">·</span>{' '}
+                  <span className="player__status">{status.label}</span>
                 </>
               )}
               {data.prospectRank && (
@@ -151,8 +194,8 @@ export function PlayerPage({ id, asOf, sportId }) {
                 <> <span className="sep">·</span>{' '}
                   <span className="prospectpill">
                     <TeamLogo
-                      teamId={bio.team?.parentOrgId ?? bio.team?.id}
-                      name={bio.team?.parentOrgName ?? bio.team?.name}
+                      teamId={club?.parentOrgId ?? club?.id}
+                      name={club?.parentOrgName ?? club?.name}
                       size={12}
                     />
                     #{data.orgProspectRank} PROSPECT
@@ -161,19 +204,28 @@ export function PlayerPage({ id, asOf, sportId }) {
               )}
             </p>
           </div>
-          {bio.team && (
-            <TeamLink id={bio.team.id} className="player__herologo">
-              <TeamLogo teamId={bio.team.id} name={bio.team.name} size={56} />
-              {bio.team.parentOrgId && (
+          {club && (
+            <TeamLink id={club.id} className="player__herologo">
+              <TeamLogo teamId={club.id} name={club.name} size={56} />
+              {club.parentOrgId && (
                 <TeamLogo
-                  teamId={bio.team.parentOrgId}
-                  name={bio.team.parentOrgName}
+                  teamId={club.parentOrgId}
+                  name={club.parentOrgName}
                   variant="wordmark"
                   size={20}
                   className="player__herologo-affiliate"
                 />
               )}
             </TeamLink>
+          )}
+          {/* The league mark stands in for the club crest — the slot has to hold
+              something or the hero's third column collapses and the name jumps
+              right, and MLB's own mark is the honest answer for a player who
+              belongs to no club. Not a link: there's no club page to open. */}
+          {status && (
+            <span className="player__herologo player__herologo--league">
+              <img src={leagueLogoUrl()} alt="" className="player__leaguemark" />
+            </span>
           )}
         </header>
 
@@ -199,6 +251,21 @@ export function PlayerPage({ id, asOf, sportId }) {
           />
           <Fact label="Bats / Throws" value={`${bio.bats || DASH} / ${bio.throws || DASH}`} />
           <Fact label="Draft" value={draftLabel(bio.draft, bio.signedYear)} />
+          {/* Where he last was, for the unrostered only — the fact the hero
+              stopped implying, now said outright under a label that can't be
+              misread as "his team". Spans the grid because a seventh cell
+              would otherwise leave a rule-colored hole beside it. */}
+          {status?.lastTeam && (
+            <Fact
+              label="Last Team"
+              wide
+              value={
+                <TeamLink id={status.lastTeam.id} className="player__team">
+                  {status.lastTeam.name}
+                </TeamLink>
+              }
+            />
+          )}
         </div>
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
@@ -230,8 +297,9 @@ export function PlayerPage({ id, asOf, sportId }) {
             {blocks.length > 1 && <h2 className="player__blocktitle">{block.title}</h2>}
 
             <SectionTitle
-              title="Current season"
+              title={`${data.currentYear} Stats`}
               primary
+              bar
               note={
                 [
                   liveLevel,
@@ -258,45 +326,6 @@ export function PlayerPage({ id, asOf, sportId }) {
               </p>
             )}
 
-            {/* No header — sitting right beneath Current season's tiles,
-                a vs-LHP/RHP (or vs-LHB/RHB) breakdown of the same season
-                is self-explanatory without its own "Season splits" label.
-                .player__seasonsplits just gives it breathing room off the
-                stat grid above — neither carries its own margin, so with
-                no SectionTitle between them the two cards would touch. */}
-            {block.splits && (
-              <div className="player__seasonsplits">
-                <Ledger
-                  leftCols={1}
-                  head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                  rows={[
-                    { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-                    { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
-                  ].map(({ key, label, side }) => ({
-                    key,
-                    cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
-                  }))}
-                />
-              </div>
-            )}
-
-            {/* Situational splits — base state, then count leverage; the same
-                columns as the vs-L/R ledger above so the two read as one
-                family. Full-season figures (the page caveat covers both). */}
-            {block.situational && (
-              <>
-                <SectionTitle title="Situational" note="full season" />
-                <Ledger
-                  leftCols={1}
-                  head={['Split', 'BF', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                  rows={block.situational.map((r) => ({
-                    key: r.code,
-                    cells: [r.label, r.side.count, r.side.slash, r.side.hr, r.side.rbi, r.side.xbh, r.side.soPct, r.side.bbPct],
-                  }))}
-                />
-              </>
-            )}
-
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
                 leaguer's AAA line) — promoted beside the main tiles instead of
                 buried in the register footnote. Full-season figures, so labeled
@@ -314,31 +343,22 @@ export function PlayerPage({ id, asOf, sportId }) {
               </div>
             ))}
 
-            {/* Career splits vs the club this player's team is next facing (a
-                finger-scrollable strip to pick a different opponent), ahead of
-                Statcast's season-long percentiles — "how's he done against
-                tonight's opponent" is the more second-screen-shaped question
-                than a percentile chip that won't move start to start.
-                Rendered in the primary stat block only, per the card's spec. */}
-            {data.vsTeam && block.group === data.vsTeam.group && (
-              <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
-            )}
+            {/* Analytics — Statcast, Advanced, Foul Balls, Pitches, Pitches
+                Like, under one umbrella label; each still carries its own
+                section title underneath it. */}
+            <SectionTitle title="Analytics" bar />
 
             <StatcastPercentiles savant={block.savant} raw={block.savantRaw} group={block.group} />
 
-            {/* The run-prevention rates behind the headline tiles (FIP, ERA−,
-                K%/BB%, ground balls, opponents' line) — beside Statcast's
+            {/* The rates behind the headline tiles (a pitcher's FIP/ERA−/
+                K%/BB%; a hitter's wOBA/wRC+/discipline) — beside Statcast's
                 percentiles as its absolute-numbers sibling. */}
-            <AdvancedPitchingCard adv={block.advanced} />
+            <AdvancedStatsCard adv={block.advanced} />
 
-            {/* Season foul-ball line (gen-fouls.mjs) + recent pitcher
-                workload (gen-workload.mjs) — both current-day-only cards
-                that hide under a spoiler asOf cutoff, like the Milestone
-                Watch projection. */}
+            {/* Season foul-ball line (gen-fouls.mjs) — a current-day-only
+                card that hides under a spoiler asOf cutoff, like the
+                Milestone Watch projection. */}
             <FoulCard playerId={bio.id} group={block.group} asOf={asOf} />
-            {block.group === 'pitching' && (
-              <PitcherWorkloadCard playerId={bio.id} asOf={asOf} />
-            )}
 
             {block.arsenal && (
               <>
@@ -347,21 +367,41 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
 
-            {/* Directly under the mix it's derived from — the three arms whose
-                own mix looks most like the rows just above, which only reads
-                as an answer if the question is still on screen. Renders
-                nothing for a hitter, below AAA, or when nobody clears the
-                match floor (see lib/pitcherSimilarity.js). */}
-            {block.similar?.length > 0 && (
+            {/* The hitter's counterpart to the pitch mix — what happens when
+                he connects, in the same bar-over-rows dress (BattedBallMix
+                reuses the pitchmix classes on purpose). Shares the Advanced
+                card's fetch; null below the balls-in-play floor. */}
+            {block.battedBall && (
               <>
-                <SectionTitle title="Pitches like" note="closest arsenals" />
-                <SimilarPitchers similar={block.similar} />
+                <SectionTitle title="Batted balls" note="share of contact · average when hit" />
+                <BattedBallMix battedBall={block.battedBall} />
               </>
+            )}
+
+            {/* Directly under the mix it's derived from — the three players
+                whose own profile looks most like the rows just above, which
+                only reads as an answer if the question is still on screen.
+                A pitcher's neighbours are arsenal-space (what he throws, see
+                lib/pitcherSimilarity.js); a hitter's are Statcast-skill-space
+                (how he hits, see lib/hitterSimilarity.js). Renders nothing
+                below the sample floors or when nobody clears the match floor. */}
+            {block.similar?.length > 0 && (
+              block.group === 'pitching' ? (
+                <>
+                  <SectionTitle title="Pitches like" note="closest arsenals" />
+                  <SimilarPitchers similar={block.similar} />
+                </>
+              ) : (
+                <>
+                  <SectionTitle title="Hits like" note="closest Statcast profiles" />
+                  <SimilarHitters similar={block.similar} />
+                </>
+              )
             )}
 
             {block.gameLog && (
               <>
-                <SectionTitle title="Game log" note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : 'entering today'}`} />
+                <SectionTitle title="Game log" bar note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : 'entering today'}`} />
                 <ul className="gamelog">
                   {block.gameLog.rows.map((r) => (
                     <li className="gamelog__row" key={r.gamePk ?? r.date}>
@@ -381,7 +421,74 @@ export function PlayerPage({ id, asOf, sportId }) {
               </>
             )}
 
-            {/* A bridge between current pace (Game log, just above) and career
+            {/* Recent pitcher workload (gen-workload.mjs) — right after the
+                Game log it summarizes; same current-day-only rule as
+                FoulCard/Milestone Watch. */}
+            {block.group === 'pitching' && (
+              <PitcherWorkloadCard playerId={bio.id} asOf={asOf} />
+            )}
+
+            {/* The hitter's occupant of the same slot — Recent form, his
+                last-7/15/30 lines instead of a pitch-count ledger. Same
+                current-day-only rule; MLB tiles only (a MiLB bat's lastXGames
+                pull would answer with stale major-league rows or nothing). */}
+            {block.group === 'hitting' && block.tileSportId === 1 && (
+              <RecentFormCard playerId={bio.id} asOf={asOf} season={data.season} />
+            )}
+
+            {/* Splits — the vs-L/R breakdown, situational splits, and career
+                splits vs the next opponent, combined under one heading now
+                that they've moved off the Current-season tiles they used to
+                sit wordlessly beneath. */}
+            {(block.splits || block.situational || (data.vsTeam && block.group === data.vsTeam.group)) && (
+              <>
+                <SectionTitle title="Splits" bar />
+                {block.splits && (
+                  <div className="player__seasonsplits">
+                    <Ledger
+                      leftCols={1}
+                      head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                      rows={[
+                        { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
+                        { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+                      ].map(({ key, label, side }) => ({
+                        key,
+                        cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
+                      }))}
+                    />
+                  </div>
+                )}
+
+                {/* Situational splits — base state, then count leverage; the
+                    same columns as the vs-L/R ledger above so the two read
+                    as one family. Full-season figures (the page caveat
+                    covers both). */}
+                {block.situational && (
+                  <>
+                    <SectionTitle title="Situational" note="full season" />
+                    <Ledger
+                      leftCols={1}
+                      head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
+                      rows={block.situational.map((r) => ({
+                        key: r.code,
+                        cells: [r.label, r.side.count, r.side.slash, r.side.hr, r.side.rbi, r.side.xbh, r.side.soPct, r.side.bbPct],
+                      }))}
+                    />
+                  </>
+                )}
+
+                {/* Career splits vs the club this player's team is next
+                    facing (a finger-scrollable strip to pick a different
+                    opponent) — a new card underneath the season/situational
+                    tables. Rendered in the primary stat block only, per the
+                    card's spec. */}
+                {data.vsTeam && block.group === data.vsTeam.group && (
+                  <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
+                )}
+              </>
+            )}
+
+            {/* A bridge between current pace (Game log, above) and career
                 totals (the Career register, just below) — "X shy of Y" reads
                 as a caption for the totals row it now sits above. */}
             <MilestoneWatchCard
@@ -396,19 +503,40 @@ export function PlayerPage({ id, asOf, sportId }) {
           )
         })}
 
+        {/* Photos — only for a player who has appeared in an MLB game this
+            season (the primary block's tileStat resolving to MLB is
+            loadPlayer's own signal for that, see its comment at the
+            liveLevel derivation above) and only on the bare current-day view
+            (same current-day-only rule as FoulCard/PitcherWorkloadCard/
+            Milestone Watch — this card has no precompute to cut to a
+            spoiler asOf). Renders nothing itself if no photos turn up. */}
+        {!asOf && bio.debut && (() => {
+          const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
+          const primaryBlock = blocks.find((b) => b.group === primaryGroup) ?? blocks[0]
+          return primaryBlock?.tileSportId === 1 ? (
+            <PlayerPhotosSection playerId={bio.id} group={primaryGroup} season={data.season} />
+          ) : null
+        })()}
+
+        {/* Player History — the biographical archive: Innings by position,
+            then dated origin-story events (Firsts), then Path to the
+            Majors' compact summary before Team History's expanded logo
+            detail — summary before detail — then Transactions, the longest
+            and most archival section, last. Only the umbrella heading here
+            wears the club bar (section__title--bar) — the five sub-card
+            headings underneath stay plain, same as Analytics's and
+            Splits's own sub-cards. */}
+        {hasPlayerHistory && <SectionTitle title="Player history" bar />}
+
         {data.positionInnings && (
           <PositionInningsCard pi={data.positionInnings} playerId={bio.id} />
         )}
 
-        {/* The biographical archive: dated origin-story events (Firsts) open
-            it, then Path to the Majors' compact summary before Team History's
-            expanded logo detail — summary before detail — then Transactions,
-            the longest and most archival section, last. */}
-        {data.firsts && (bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).some((key) => data.firsts[key]) && (
+        {hasFirsts && (
           <section>
             <SectionTitle title="Firsts" />
             <div className="player__splits">
-              {(bio.isPitcher ? PITCHER_FIRSTS_ORDER : FIRSTS_ORDER).map((key) => {
+              {firstsOrder.map((key) => {
                 const f = data.firsts[key]
                 if (!f) return null
                 return (
@@ -524,7 +652,7 @@ function CareerRegister({ register }) {
 
   return (
     <>
-      <SectionTitle title="Career" />
+      <SectionTitle title="Career stats" bar />
       <Ledger
         leftCols={2}
         head={['Year', 'Team', ...columns]}
@@ -539,6 +667,30 @@ function CareerRegister({ register }) {
       {footnote && <p className="hint reg-footnote">{footnote}</p>}
     </>
   )
+}
+
+// Fetches this player's own this-season MLB game list (gamePk + date) and
+// hands it to PlayerPhotosRail for the live walk-back. A dedicated fetch
+// rather than reusing block.gameLog's rows: that log is truncated to a
+// display-sized "last N" and tracks the player's CURRENT-ACTIVITY level,
+// which can be MiLB for an optioned big leaguer even in a season he's
+// appeared in the majors — this always wants his full MLB (sportId 1) log.
+// Excludes today's game (a mid-game row can appear in the log before the
+// game is final) — the same "no still-live game" guarantee TeamPhotosRail
+// gets for free from its already-decided-games-only `seasonGames` list.
+function PlayerPhotosSection({ playerId, group, season }) {
+  const { data: games } = useAsync(
+    () => fetchPersonStats(playerId, { type: 'gameLog', group, season, sportId: 1 }),
+    [playerId, group, season],
+  )
+  if (!games) return null
+  const today = isoToday()
+  const rows = games
+    .filter((s) => s.game?.gamePk && s.date && s.date !== today)
+    .map((s) => ({ gamePk: s.game.gamePk, apiDate: s.date }))
+    .sort((a, b) => (a.apiDate < b.apiDate ? -1 : a.apiDate > b.apiDate ? 1 : 0))
+  if (!rows.length) return null
+  return <PlayerPhotosRail personId={playerId} games={rows} />
 }
 
 // Owns the position-innings scope toggle: the season scope arrives eager in
@@ -590,18 +742,26 @@ function StatGrid({ tiles }) {
   )
 }
 
-function SectionTitle({ title, note, primary = false }) {
+// `bar` marks one of the page's eight top-level sections (2026 Stats,
+// Analytics, Game log, Splits, Career stats, Player history — Recent
+// workload / Recent form and Photos opt in the same way from their own
+// components; the workload/form pair share one slot, split by group) so it
+// wears the club bar (.section__title--bar in index.css); their sub-card
+// headings underneath render through this same component without it.
+function SectionTitle({ title, note, primary = false, bar = false }) {
   return (
-    <h3 className={`section__title${primary ? ' section__title--primary' : ''}`}>
+    <h3
+      className={`section__title${primary ? ' section__title--primary' : ''}${bar ? ' section__title--bar' : ''}`}
+    >
       <span>{title}</span>
       {note && <em>{note}</em>}
     </h3>
   )
 }
 
-function Fact({ label, value, mono = false }) {
+function Fact({ label, value, mono = false, wide = false }) {
   return (
-    <div className="fact">
+    <div className={`fact${wide ? ' fact--wide' : ''}`}>
       <div className="fact__label">{label}</div>
       <div className={`fact__value${value === DASH ? ' fact__na' : ''}`}>
         {mono ? <span className="mono">{value}</span> : value}

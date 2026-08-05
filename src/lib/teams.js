@@ -53,7 +53,6 @@ function byTreatment(pick, { includeMain = false } = {}) {
 // The user scores Brewers games most often, so we pin them to the top of the
 // slate. teamId 158 is the Milwaukee Brewers in the MLB Stats API.
 export const PINNED_TEAM_ID = 158
-export const PINNED_TEAM_NAME = 'Milwaukee Brewers'
 
 // MLB Stats API sportId codes. sportId 1 is MLB; the minors use the codes
 // below. MiLB data quality varies, so screens that use these must degrade
@@ -208,6 +207,17 @@ export const LOGO_VARIANTS = [
 // for: that club just wears its full-color mark on the bar until the art
 // exists.
 const MONO_LOGO_BASE = '/data/logos/mono'
+
+// Whether this club actually HAS a precomputed knockout mark. Most consumers
+// don't need to ask — TeamLogo's own variant -> base fallback (an <img> that
+// 404s retries the CDN mark) covers them. The Logbook stamp does, because its
+// mark is an <image> inside an SVG <mask>: a 404 there paints nothing at all
+// rather than falling back, so the stamp has to know in advance to draw the
+// club's abbreviation in that slot instead (the documented fallback, see
+// .scratch/game-stamps/designs/stamp-concepts.md's "Team marks" rules).
+export function hasMonoLogo(teamId) {
+  return Boolean(MONO_LOGO_MANIFEST[String(teamId)])
+}
 
 // mono-logo-manifest.json (also written by gen-mono-logos.mjs) maps teamId to
 // a content hash of that club's precomputed knockout SVG, appended below as
@@ -574,16 +584,15 @@ export function treatmentScale(teamId, treatment) {
 
 // Horizontal nudge (percent of the tile's own width, negative = left) for a
 // mark whose visual weight sits off-center once scaled up — CSS translateX,
-// applied before scale. Lab-only so far: no shipped surface renders these
-// tiles large enough for the off-center weight to matter, so the game card and
-// masthead never ask for it. Kept here rather than in the lab (where it lived
-// as a page-local literal) so the whole per-treatment record has one home.
+// applied before scale. Read by treatmentTile, so every surface that resolves
+// a tile through it (the slate card, the in-game masthead, Team Identity Lab's
+// own grid) applies the same nudge. Kept here rather than in the lab (where it
+// lived as a page-local literal) so the whole per-treatment record has one home.
 export function treatmentOffsetX(teamId, treatment) {
   return treatmentTuning(teamId, treatment)?.offsetX ?? 0
 }
 
-// The vertical counterpart to treatmentOffsetX, same units and same lab-only
-// footing.
+// The vertical counterpart to treatmentOffsetX, same units.
 export function treatmentOffsetY(teamId, treatment) {
   return treatmentTuning(teamId, treatment)?.offsetY ?? 0
 }
@@ -759,6 +768,8 @@ export function treatmentTile(teamId, treatment) {
       pinstripeColor: pinstriped ? mainTreatmentPinstripeColor(teamId) : null,
       pinstripeBg: null,
       scale: mainTreatmentScale(teamId),
+      offsetX: treatmentOffsetX(teamId, 'main'),
+      offsetY: treatmentOffsetY(teamId, 'main'),
     }
   }
   const pinstripeColor = treatmentPinstripeColor(teamId, treatment)
@@ -768,6 +779,8 @@ export function treatmentTile(teamId, treatment) {
     pinstripeColor,
     pinstripeBg: pinstripeColor ? treatmentPinstripeBg(teamId, treatment) : null,
     scale: treatmentScale(teamId, treatment),
+    offsetX: treatmentOffsetX(teamId, treatment),
+    offsetY: treatmentOffsetY(teamId, treatment),
   }
 }
 

@@ -7,6 +7,7 @@ import MILB_TREATMENT_TUNING from '../src/lib/data/milb-treatment-tuning.json' w
 import WPA_TUNING from '../src/lib/data/wpa-tuning.json' with { type: 'json' }
 import MILB_COLORS from '../src/lib/data/milb-colors.json' with { type: 'json' }
 import MLB_TEAM_COLORS from '../src/lib/data/mlb-team-colors.json' with { type: 'json' }
+import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { byTeam, byTreatment, treatmentRecord } from '../src/lib/tuningStore.js'
 import {
   ALL_MLB_TEAM_IDS,
@@ -40,6 +41,10 @@ const STORES = {
   'mlb-treatment-tuning.json': MLB_TREATMENT_TUNING,
   'milb-treatment-tuning.json': MILB_TREATMENT_TUNING,
   'wpa-tuning.json': WPA_TUNING,
+  // Keyed by SIDE rather than by jersey treatment (`away`/`home`, the MiLB
+  // vocabulary) — the nesting is the same, so every outer-shape guard below
+  // applies unchanged. src/lib/stampLogoTuning.js.
+  'stamp-logo-tuning.json': STAMP_LOGO_TUNING,
 }
 
 // The stores with no `treatments` nesting — a fact about the CLUB, not about one

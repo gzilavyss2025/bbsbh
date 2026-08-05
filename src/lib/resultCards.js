@@ -115,3 +115,31 @@ export function reorderGameOfTheNight(games, cardMetaByGamePk, isPinned = () => 
   next.splice(target, 0, crowned)
   return next
 }
+
+// Promotes every nationally-broadcast game (GameSelect's nationalBroadcasts,
+// keyed by gamePk → network name) to sit right behind the favorite team's own
+// game — same anchor slot reorderGameOfTheNight uses, and for the same reason:
+// a pinned favorite outranks any other draw. Unlike the crown (always exactly
+// one game, promoted from anywhere in the slate), a day can have several
+// national games, so this stably groups all of them together in their
+// existing relative (start-time) order rather than picking just one.
+//
+// Confined to the STILL-PLAYING games sortGames already floated above the
+// Finals — a national Final shouldn't leapfrog a game still worth watching
+// live just because it happened to air on FOX. `games` is assumed already in
+// sortGames' order (non-final block first, so a contiguous run of
+// `abstractState !== 'Final'` from the front marks that block).
+export function reorderNationalBroadcasts(games, nationalByGamePk, isPinned = () => false) {
+  if (!nationalByGamePk || games.length === 0) return games
+  const finalIdx = games.findIndex((g) => g.abstractState === 'Final')
+  const activeEnd = finalIdx === -1 ? games.length : finalIdx
+  const target = isPinned(games[0]) ? 1 : 0
+  if (target >= activeEnd) return games
+  const head = games.slice(0, target)
+  const active = games.slice(target, activeEnd)
+  const rest = games.slice(activeEnd)
+  const national = active.filter((g) => !!nationalByGamePk[g.gamePk])
+  if (national.length === 0) return games
+  const others = active.filter((g) => !nationalByGamePk[g.gamePk])
+  return [...head, ...national, ...others, ...rest]
+}

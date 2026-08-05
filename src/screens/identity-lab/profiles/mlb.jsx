@@ -11,8 +11,8 @@ import {
   wpaBandColor,
   wpaBandPinstripeColor,
   wpaBandPinstripeBg,
-} from '../../../lib/wpaBandColors.js'
-import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpaLogo.js'
+} from '../../../lib/wpa/wpaBandColors.js'
+import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpa/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
@@ -972,7 +972,7 @@ function MlbJersey({ teamId, name, treatment, label, jerseyMatch, extras, lastOp
   // cache-bust, same idea as artVersion above) rather than only after Save.
   // `null` when neither is on, so WinProbChart falls through to its own
   // normal resolution. Wordmark wins outright, same top priority
-  // lib/wpaLogo.js's own resolveMark gives it over ownArt.
+  // lib/wpa/wpaLogo.js's own resolveMark gives it over ownArt.
   const wpaMarkOverride = wpaWordmarkOn
     ? { src: teamLogoUrl(teamId, 'wordmark'), recolor: null }
     : wpaOwnArt && wpaArtKey

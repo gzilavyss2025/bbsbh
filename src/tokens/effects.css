@@ -32,6 +32,15 @@
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
   --dur-snappy: 160ms;
 
+  /* The one ease-IN in the system, for the Logbook stamp coming down onto its
+     passport page (.passportpage__stamp--landed). Everything else in this app
+     decelerates, because everything else is a UI surface arriving; a stamp is
+     PUSHED, so it has to gather speed on the way to the paper and stop on it.
+     Penner's easeInCubic, which is the curve that era of interface used for
+     exactly this. Do not reach for it to bring something on screen — an ease-in
+     entrance reads as sluggish, which is why there is only one caller. */
+  --ease-press: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+
   /* The card flip (src/components/FlipCard.jsx, .flipcard__inner) — a
      bidirectional turn, so it earns its own symmetric ease-in-out rather than
      the one-shot --ease-out used everywhere else, and its own duration at the

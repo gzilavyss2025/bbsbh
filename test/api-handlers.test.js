@@ -1,4 +1,4 @@
-// Request-level coverage for the three `runtime: 'nodejs'` serverless functions.
+// Request-level coverage for the four `runtime: 'nodejs'` serverless functions.
 //
 // This is the test that was missing. The previous smoke check imported each
 // module and called it with a Web `Request` — a shape Vercel's Node runtime
@@ -16,6 +16,8 @@ import test from 'node:test'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
+import stampsHandler, { seasonRows } from '../api/stamps.js'
+import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
 
 // A stand-in for Node's (IncomingMessage, ServerResponse) pair.
 function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
@@ -97,6 +99,7 @@ test('every handler rejects an unsupported method without throwing', async () =>
     ['reveal', revealHandler, '/api/reveal?gamePk=1'],
     ['copy', copyHandler, '/api/copy'],
     ['spoiled-days', spoiledDaysHandler, '/api/spoiled-days'],
+    ['stamps', stampsHandler, '/api/stamps?season=2026'],
   ]) {
     const out = await call(handler, nodeReq(url, { method: 'PUT' }))
     assert.equal(out.status, 405, `${name} rejects PUT`)
@@ -135,4 +138,134 @@ test('authorization is read from Node plain-object headers', async () => {
     }),
   )
   assert.equal(out.status, 501) // store unconfigured; no TypeError en route
+})
+
+// --------------------------------------------------------------------------
+// Logbook stamps (ADR-0035)
+// --------------------------------------------------------------------------
+// The score-bearing endpoint, so the unconfigured path matters more here than
+// anywhere else: with no store it must refuse cleanly, and — the part worth
+// pinning — it must refuse BEFORE any statsapi fetch or reveal-gate work, so an
+// unconfigured deploy cannot be used to probe game data at all.
+test('stamps handler survives the bare path on every verb it accepts', async () => {
+  for (const [method, url, body] of [
+    ['GET', '/api/stamps?season=2026', undefined],
+    ['GET', '/api/stamps?seasons=1', undefined],
+    ['GET', '/api/stamps?export=1', undefined],
+    ['POST', '/api/stamps', { gamePk: 778241, mode: 'watched' }],
+    ['DELETE', '/api/stamps?gamePk=778241', undefined],
+  ]) {
+    const out = await call(
+      stampsHandler,
+      nodeReq(url, { method, body, headers: { 'content-type': 'application/json' } }),
+    )
+    assert.equal(out.status, 501, `${method} ${url}`)
+    assert.deepEqual(out.json, { error: 'sync not configured' })
+  }
+})
+
+test('stamps responses are never shared-cacheable', async () => {
+  // A stamp carries a final score. This is the one response in the codebase
+  // where a shared cache would leak one directly.
+  const out = await call(stampsHandler, nodeReq('/api/stamps?season=2026'))
+  assert.equal(out.headers['cache-control'], 'private, no-store')
+})
+
+// --------------------------------------------------------------------------
+// The read side of un-stamp propagation (ADR-0035's second known gap)
+// --------------------------------------------------------------------------
+// The bug this closes: a removal is stored as an explicit 'off' tombstone, but
+// every GET filtered tombstones out of its response — so the removal reached
+// the server and stopped there. A second device saw the gamePk simply ABSENT,
+// absence correctly means "no opinion" to the merge, and it went on showing a
+// stamp its owner had taken back.
+//
+// The rows are built by a pure function precisely so these rules are testable
+// without a Redis round trip (the handler's own Redis path can't run in CI at
+// all — @upstash/redis needs a live REST endpoint and Clerk needs a real
+// token). What is exercised here is the wire contract itself, end to end: the
+// rows the endpoint emits, fed to the very merge the client runs on them.
+const STORED = {
+  778241: { state: 'on', mode: 'watched', stampedAt: 1000, updatedAt: 1000, note: '', date: '2026-04-20' },
+  778242: { state: 'off', mode: 'watched', stampedAt: 900, updatedAt: 2000, note: '', date: '2026-04-21' },
+}
+const FACTS = { 778241: { gamePk: 778241, status: 'Final' }, 778242: { gamePk: 778242, status: 'Final' } }
+
+test('the display payload stays live-only — a tombstone has nothing to render', () => {
+  const rows = seasonRows(STORED, FACTS)
+  assert.deepEqual(rows.map((r) => r.gamePk), [778241])
+})
+
+test('the sync payload carries tombstones, so a removal can travel', () => {
+  const rows = seasonRows(STORED, FACTS, { includeRemoved: true })
+  assert.deepEqual(rows.map((r) => r.gamePk).sort(), [778241, 778242])
+  const dead = rows.find((r) => r.gamePk === 778242)
+  assert.equal(dead.state, 'off')
+  // A tombstone never joins the facts cache: there is no stamp left to draw,
+  // and shipping a final score for a game the user un-stamped would be the
+  // wrong direction entirely.
+  assert.equal(dead.game, null)
+  // It still carries the clock the merge decides on.
+  assert.equal(dead.updatedAt, 2000)
+})
+
+test('every row states its own state, including the live ones', () => {
+  // The client used to hardcode 'on' when reading these rows. A payload that
+  // cannot express a removal is how the gap survived a fix on either side
+  // alone, so the live rows say 'on' out loud rather than by omission.
+  for (const row of seasonRows(STORED, FACTS, { includeRemoved: true })) {
+    assert.ok(row.state === 'on' || row.state === 'off', String(row.gamePk))
+  }
+  assert.equal(seasonRows(STORED, FACTS)[0].state, 'on')
+})
+
+test('a live row still joins its facts, and survives a missing blob', () => {
+  const rows = seasonRows(STORED, {}, { includeRemoved: true })
+  assert.equal(rows.find((r) => r.gamePk === 778241).game, null)
+  assert.equal(seasonRows(STORED, FACTS)[0].game.gamePk, 778241)
+})
+
+test('rows sort newest game first regardless of tombstones', () => {
+  const rows = seasonRows(STORED, FACTS, { includeRemoved: true })
+  assert.deepEqual(rows.map((r) => r.date), ['2026-04-21', '2026-04-20'])
+})
+
+// The end of the round trip: the endpoint's tombstone, merged by the client's
+// own rules, must actually remove the stamp on the second device.
+test('a tombstone from the endpoint removes the stamp on another device', () => {
+  // Device B's local collection: both games stamped, and it has never heard
+  // about the removal.
+  const local = {
+    778241: { state: 'on', mode: 'watched', stampedAt: 1000, updatedAt: 1000, note: '', date: '2026-04-20' },
+    778242: { state: 'on', mode: 'watched', stampedAt: 900, updatedAt: 900, note: '', date: '2026-04-21' },
+  }
+
+  // Exactly what StampsCloudSync builds from the export rows: `game` dropped,
+  // `state` READ rather than assumed.
+  const remote = {}
+  for (const row of seasonRows(STORED, FACTS, { includeRemoved: true })) {
+    remote[row.gamePk] = {
+      state: row.state === 'off' ? 'off' : 'on',
+      mode: row.mode,
+      stampedAt: row.stampedAt,
+      updatedAt: row.updatedAt,
+      note: row.note,
+      date: row.date,
+    }
+  }
+
+  const merged = applyRemoteStamps(local, remote)
+  assert.equal(isStamped(merged, 778241), true)
+  assert.equal(isStamped(merged, 778242), false, 'the un-stamped game must not survive the merge')
+  // And the tombstone is KEPT, not deleted — deleting it is what would let the
+  // next sync union the stale 'on' back in.
+  assert.equal(merged[778242].state, 'off')
+
+  // The old payload, for contrast: filter the tombstone out and the stamp
+  // stays. This is the bug, pinned so it cannot come back.
+  const oldStyle = {}
+  for (const row of seasonRows(STORED, FACTS)) {
+    oldStyle[row.gamePk] = { ...row, state: 'on', game: undefined }
+  }
+  assert.equal(isStamped(applyRemoteStamps(local, oldStyle), 778242), true)
 })

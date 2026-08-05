@@ -13,7 +13,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | File | Tests | Modules under test | Feature |
 |---|---|---|---|
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
-| api-handlers.test.js | 8 | api/copy.js, api/reveal.js, api/spoiled-days.js | Node-runtime request-shape handling for edge functions |
+| api-handlers.test.js | 16 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes + the Logbook's tombstone read side (ADR-0035) |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 12 | src/api/careerMatchups.js | Career Matchups table (TeamInfo) |
 | career-register.test.js | 2 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels |
@@ -46,6 +46,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | lib-helpers.test.js | 14 | format.js, dates.js, statTiers.js, runExpectancy.js | General lib grab-bag |
 | lineup-strength.test.js | 32 | lineupSolver.js, lineupStrength.js, lineupStrengthTier.js | Lineup Strength grade (docs/lineup-strength.md) |
 | live-edge.test.js | 17 | liveEdge.js, select.js, revealProgressCore.js, scoresUnlocked.js | Follow-live-edge + reveal/unlock mechanism |
+| logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
 | logo-recolor.test.js | 9 | logoMono.js, logoRecolor.js | Logo recolor editor (shares shape numbering w/ logo-mono by design) |
 | logo-tint.test.js | 8 | src/lib/logoTint.js | Logo tint wash |
@@ -57,6 +58,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
 | node-handler.test.js | 14 | api/_lib/nodeHandler.js | Vercel Node runtime request adapter |
 | page-turn-state.test.js | 13 | src/components/page-turn/pageTurnState.js | Forward page-turn transition (ADR-0024) |
+| passport-layout.test.js | 39 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, the ruled 2x4 guide + capacity (ADR-0035/0036) |
 | pinch-hitter-notice.test.js | 2 | src/api/playbyplay.js | Mid-half PH notice (ADR-0017 tiers) |
 | pitch-arsenal.test.js | 8 | scripts/gen-pitch-arsenal.mjs, src/api/pitchArsenal.js | Pitch arsenal aggregation/reader |
 | pitch-challenge-marker.test.js | 2 | src/api/challenges.js | ABS challenge marker on one pitch (PR #344) |
@@ -73,7 +75,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 13 | src/api/rookies.js | Rookie pill |
-| route.test.js | 24 | src/lib/route.js | Full router surface |
+| route.test.js | 32 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
 | scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |
@@ -85,6 +87,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |
+| stamp-ink.test.js | 11 | src/lib/stampInk.js, contrast.js | Logbook stamp ink — the winner's darkest brand colour + its contrast floor (ADR-0036) |
+| stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
@@ -100,7 +104,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |
 | workload.test.js | 11 | src/api/workload.js | Rolling pitcher workload |
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
-| wpa-logo.test.js | 18 | src/lib/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
+| wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 
 Last full audit: 2026-07-31 — all 88 files' imports resolved, all features traced to
 a currently-documented behavior, no dead code found. Two soft consolidation

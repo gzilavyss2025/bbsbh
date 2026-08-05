@@ -1,0 +1,686 @@
+/* ---------------------------------------------------------------- team info */
+/* Room at the bottom so the last section clears the fixed .pagenav bar. */
+.teaminfo {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+.teaminfo__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 4px 0 16px;
+}
+
+/* ------------------------------------------------------------- club theming
+   ADR-0030. `.is-themed` carries three custom properties resolved from the
+   jersey that club is wearing tonight — lib/headerTheme.js. Every themed rule
+   below reads them WITH the default as its fallback, so an unthemed surface
+   (most of them — coverage is partial) renders byte-identically to how it did
+   before this feature existed.
+
+   Each themed surface adds `.is-themed` to its own root rather than one
+   page-wide ancestor: .teaminfo (the club-name bar + its section mastheads)
+   and, per card, the box score's .bs__team/.bs__abscard/.bs__defensecard
+   (BoxScore.jsx) — the same club, jersey, and triad as that club's lineup
+   page, just resolved a second time per card instead of once per page. The
+   innings viewer carries the seal metaphor — kraft amber on manila, navy
+   chrome around it — and stays untouched because nothing there ever adds the
+   class; recoloring it would put a club's brand in a fight with the spoiler
+   UI's own visual language.
+
+   The club-name bar is the one surface that CHANGES shape when themed: unthemed
+   it's a plain heading on the page canvas, themed it becomes a real bar so the
+   colour has something to sit in. */
+.teaminfo.is-themed > .teaminfo__head {
+  padding: 10px var(--space-4);
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.teaminfo.is-themed > .teaminfo__head .teaminfo__name,
+.teaminfo.is-themed > .teaminfo__head .teaminfo__namelink {
+  color: var(--bar-text, var(--text-heading));
+}
+/* Away/Home rides the bar directly (plain text, no background of its own), so
+   it takes the bar's ink too — at the muted weight it already reads at, via a
+   partial alpha over the bar rather than a second hand-picked hex the
+   contrast guard couldn't see. The Game Notes button is its own opaque card
+   (`--surface-card`) floating on the bar, not text sitting in it, so it stays
+   unthemed — recoloring just its text to the bar's ink went invisible
+   whenever that ink came out light (white-on-white against the card). */
+.teaminfo.is-themed > .teaminfo__head .teaminfo__side {
+  color: var(--bar-text, var(--text-caption));
+  opacity: 0.78;
+}
+
+/* The section mastheads on a themed page — same three properties, same
+   fallbacks, so this single rule covers Batting order / Starting pitcher /
+   Defense and every .metriccard header on the page at once. */
+.is-themed .metricbar {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+}
+.is-themed .metricbar__title {
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* A masthead's club mark is the MONO knockout art — a flat, single-ink white
+   silhouette (ADR-0031, lib/logoMono.js). On a light bar that disappears, so a
+   theme whose ink is dark re-inks the mark to match.
+
+   This is NOT the `filter: brightness(0) invert(1)` whitening ADR-0031 exists
+   to forbid. That failure mode is filtering FULL-COLOR art: a mark whose
+   interior detail is drawn in a light fill flattens into an unreadable blob.
+   The mono asset has already been through that reduction — it is one opaque
+   shape plus transparency — so darkening it is exact, losing nothing there was
+   left to lose. Applied only here, only to art that is already a silhouette. */
+.is-themed--dark .metricbar__logo {
+  filter: brightness(0);
+}
+
+/* The box score's ABS and Defense cards (.bs__abscard/.bs__defensecard,
+   BoxScore.jsx) carry no club mark of their own — just a text title — so
+   unlike .metricbar above there's no light/dark re-inking to do, only the
+   fill/edge/text triad. */
+.is-themed .abs__title,
+.is-themed .halfdefense__title {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+  color: var(--bar-text, var(--text-on-ink));
+}
+.is-themed .halfdefense__chevron {
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+/* The player page's section headers — same club bar idiom as
+   .teaminfo.is-themed above, but opt-in via `.section__title--bar` rather
+   than blanket-applied to every `.section__title` on the page: the eight
+   top-level sections (2026 Stats, Analytics, Game log, Recent workload,
+   Splits, Career stats, Photos, Player history) carry the modifier and get
+   the club bar; their sub-card headings underneath (Statcast, Advanced,
+   Foul Balls, Pitches, Pitches Like under Analytics; Situational, Splits vs
+   Team under Splits; Innings by position, Firsts, Path to the Majors, Team
+   history, Transactions under Player history) stay the plain unthemed
+   label, same as Trophy Case and Milestone Watch. Not tied to any one game,
+   so PlayerPage.jsx always resolves the club's Main/Home triad rather than
+   a jersey actually worn tonight. */
+.player.is-themed .section__title--bar {
+  padding: 10px var(--app-gutter);
+  margin-left: calc(-1 * var(--app-gutter));
+  margin-right: calc(-1 * var(--app-gutter));
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+}
+.player.is-themed .section__title--bar span {
+  color: var(--bar-text, var(--text-caption));
+}
+.player.is-themed .section__title--bar em {
+  color: var(--bar-text, var(--graphite-soft));
+  opacity: 0.78;
+}
+/* "2026 Stats" keeps its own larger size (see .section__title--primary
+   below) but still takes the bar's ink rather than the accent color that
+   role normally carries — the accent-primary/bar-fill pairing isn't a
+   reviewed combination. */
+.player.is-themed .section__title--bar.section__title--primary span {
+  color: var(--bar-text, var(--accent-primary));
+}
+
+/* The team page (TeamPage.jsx, /team/:id) — not tied to any one game, so it
+   always resolves the club's Main/Home triad rather than tonight's jersey (see
+   TeamPage.jsx's own theme useMemo). Scoped to .team-hub so it never leaks
+   onto the shared SectionTitle/section__title used by the player and
+   team-leaders pages — the player page now themes that shared class itself
+   via an opt-in modifier (see `.player.is-themed .section__title--bar`
+   above); team-leaders is the one surface still deliberately unthemed.
+
+   The hero (.team-hub__id) itself stays UNTHEMED — no bar, no club-colored
+   box — the club's identity already rides on the big Main-treatment mark
+   (see .team-hub__logobox below) instead. Every OTHER themed section is a
+   masthead BOLTED onto the table/list/grid it labels — the same
+   metricbar+metriccard idiom the lineup page uses, not
+   a label floating disconnected above its content. `.thub-card` is the
+   shared shell for sections that had no card of their own (Standings,
+   Schedule, Team Leaders, Current Roster, Injured List, Affiliates,
+   Prospects, Logos & jerseys); `.tstats-card`, `.roster-super`, `.txcard`,
+   and `.team-score` already had one, so those just grow a `*__head` bolted
+   onto their existing border instead of a second wrapper. `overflow:hidden`
+   on every card lets the head's own square corners get clipped to the
+   card's radius for free, same trick `.team-score` already used. */
+.thub-card {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.thub-card__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 10px var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.thub-card__head > span,
+.tstats-card__head > span,
+.roster-super__head > span {
+  font-size: 1.2em;
+}
+.thub-card__head em {
+  font-style: normal;
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+.thub-card__body {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.team-hub.is-themed .thub-card__head,
+.team-hub.is-themed .tstats-card__head,
+.team-hub.is-themed .roster-super__head,
+.team-hub.is-themed .team-score__head {
+  background: var(--bar-fill, transparent);
+  border-bottom: 3px solid var(--bar-accent, transparent);
+  color: var(--bar-text, var(--text-caption));
+}
+.team-hub.is-themed .thub-card__head em,
+.team-hub.is-themed .tstats-card__head em,
+.team-hub.is-themed .roster-super__head em {
+  color: var(--bar-text, var(--graphite-soft));
+}
+
+/* Transactions and Team Leaders each carry a swipeable deck that
+   deliberately bleeds past the card gutter (.txcard__scroll,
+   .tlead__grid--horizontal — see the .txcard comment above) — a bordered
+   card whose own content escapes its border reads as broken, not
+   deliberate, so these two stay unwrapped, plain-caption headers rather
+   than a bolted bar, same as before theming existed. */
+
+/* Header buttons/pills/toggles ride on a themed bar as neutral opaque
+   chips — the same "card floating on the bar" convention the lineup page's
+   Game Notes button already uses (this file, ~4440) — rather than
+   recoloring the app's own kraft/seal chrome per club, which would fight
+   some clubs' colors and vanish into others'. */
+.team-hub.is-themed .psodds-pill {
+  border-color: var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.team-hub.is-themed .roster-super__toggle {
+  border-color: var(--border-rule);
+}
+.team-hub.is-themed .roster-super__toggle-btn {
+  color: var(--bar-text, var(--text-caption));
+}
+.team-hub.is-themed .roster-super__toggle-btn + .roster-super__toggle-btn {
+  border-left-color: var(--border-rule);
+}
+.team-hub.is-themed .roster-super__toggle-btn.is-active {
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.team-hub.is-themed .team-score__howlink,
+.team-hub.is-themed .team-score__howsep {
+  color: var(--bar-text, var(--seal-hatch));
+  opacity: 0.85;
+}
+.team-hub.is-themed .team-score__howlink {
+  border-bottom-color: color-mix(in srgb, var(--bar-text, var(--seal-hatch)) 40%, transparent);
+}
+.teaminfo__headright {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: none;
+}
+
+.teaminfo__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.teaminfo__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  margin: 0;
+  min-width: 0;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+.teaminfo__side {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.factgrid {
+  margin: 0 0 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.fact {
+  background: var(--surface-card);
+  padding: 10px 12px;
+  margin: 0;
+}
+
+/* A fact that has to be the only one on its row — an odd count in this
+   two-column grid would otherwise leave the last cell empty, and the grid's
+   own rule-colored background showing through reads as a gap in the card
+   rather than a deliberate space. (PlayerPage's "Last Team", shown only for a
+   free-agent/retired player, is the one such fact today.) */
+.fact--wide {
+  grid-column: 1 / -1;
+}
+
+.fact__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.fact__value {
+  margin: 3px 0 0;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+}
+
+.fact__na {
+  color: var(--graphite-soft);
+}
+
+/* A person inside a fact box (the manager): surname-first name with the
+   uniform number inked in seam red, like every lineup row. */
+.fact__person {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fact__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--clay);
+  font-weight: var(--w-bold);
+}
+
+.fact__note {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+
+/* Attendance's "i" glyph + the unfold note it opens — same tap-glyph idiom
+   as the Umpires card's .umptier__glyph, but deliberately quiet at rest
+   (just background info, not a tier read worth a loud fill): the card's own
+   surface + rule color, with only the icon tinted kraft as a small tap hint.
+   Tapping it open switches to the kraft fill, same look the tier glyph uses
+   for its own open state. */
+.attendance__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.attendance__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--seal);
+  cursor: pointer;
+}
+.attendance__glyph:hover {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.attendance__glyph--open {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--seal-ink);
+}
+.attendance__glyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.attendance__note {
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.attendance__note-pct {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+.attendance__note-cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* The Advanced card's per-fact "i" glyph + unfold note (see
+   AdvancedStatsCard.jsx) — same tap-glyph idiom as .attendance__glyph
+   above, just anchored next to the fact's LABEL instead of its value, since
+   every cell here carries its own glyph rather than one card carrying just
+   one. */
+.fact__label--info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fact__infoglyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border-radius: 999px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--seal);
+  cursor: pointer;
+}
+.fact__infoglyph:hover {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.fact__infoglyph--open {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--seal-ink);
+}
+.fact__infoglyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.fact__infonote {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-body);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.section__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin: 18px 0 8px;
+}
+/* "2026 Stats" is the player page's primary mid-game glance — every other
+   SectionTitle reads as an equal, generic label, so this one alone gets
+   inked in the accent color to read as the page's headline stat block, not
+   just another section among many. */
+.section__title--primary {
+  font-size: var(--fs-h2);
+  color: var(--accent-primary);
+}
+/* The player page's eight top-level bar headings (2026 Stats, Analytics,
+   Game log, Recent workload, Splits, Career stats, Photos, Player history —
+   see .section__title--bar theming above) share one consistent size, split
+   the difference between the generic label's fs-label and "2026 Stats"'s
+   own fs-h2 — overrides --primary's font-size on that heading (same
+   specificity, declared after it) so the whole set of bar headings reads as
+   one visual tier despite "2026 Stats" alone also carrying the accent-color
+   treatment above. */
+.section__title--bar {
+  font-size: var(--fs-h3);
+}
+
+.umps__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+/* A crew size that doesn't fill the last row (1, 3, or 5 umpires — MiLB
+   often posts fewer than four, postseason crews sometimes post an odd
+   number) would leave the .umps__list background showing through as a gap;
+   stretch the lone last item across both columns instead. */
+.umps__list li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.umps__list li {
+  background: var(--surface-card);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.umps__role {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Scoped through the parent (not just `.umps__name`) so this outranks
+   `.plink`'s `font`/`color`/`text-transform: inherit` reset further down the
+   sheet — same specificity tie otherwise, and `.plink` would win by source
+   order, leaving the name in the button's inherited (unstyled) font. */
+.umps__namerow .umps__name {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+}
+
+.umps__namerow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+/* Wraps the HP tier pill as a tap target for the accuracy modal — reset to
+   bare, no underline-on-hover (would run oddly under the pill's own border/
+   fill), just the focus ring for keyboard access. */
+.umps__tierbtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: var(--lh-zero);
+}
+.umps__tierbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-pill);
+}
+
+/* Umpire accuracy tier pill — a statistical-tier badge (Elite / Good /
+   Average / Below Average; see api/umpires.js's tierForZ) shown next to a
+   plate umpire's name on the lineup Umpires card, his own page, and the
+   rankings table. Same four-ink language as the transaction-timeline chips
+   (field=positive, award=honors, clay=negative) so the tiers read as
+   distinct at a glance without a legend. */
+.tierpill {
+  display: inline-block;
+  padding: 2px 7px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+  color: var(--graphite);
+}
+.tierpill--elite {
+  color: var(--field-deep);
+  border-color: var(--field);
+  background: var(--field-soft);
+}
+.tierpill--good {
+  color: var(--award-ink);
+  border-color: var(--award-line);
+  background: var(--award-soft);
+}
+.tierpill--average {
+  color: var(--text-muted);
+  border-color: var(--border-rule);
+  background: var(--bg-page);
+}
+.tierpill--below {
+  color: var(--clay-deep);
+  border-color: var(--clay);
+  background: var(--clay-soft);
+}
+
+/* Umpire accuracy glyph — the HP tier's tap target on the lineup Umpires
+   card (UmpireTierGlyph.jsx). A solid home-plate silhouette on a
+   tier-colored dot, same four-ink language as .tierpill above; unlike
+   RadarPill's glyph (neutral until pressed) this one stays colored at rest
+   — the at-a-glance read is the point in this tight card. Tapping unfolds
+   .umptier__note in place, same idiom as .radarpill__note. */
+.umptier__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  color: #fff;
+}
+.umptier__glyph--elite {
+  background: var(--field-deep);
+}
+.umptier__glyph--good {
+  background: var(--award-ink);
+}
+.umptier__glyph--average {
+  background: var(--text-muted);
+}
+.umptier__glyph--below {
+  background: var(--clay-deep);
+}
+.umptier__glyph:hover,
+.umptier__glyph--open {
+  box-shadow: 0 0 0 1px var(--border-rule);
+}
+.umptier__glyph--open {
+  border-color: #fff;
+}
+.umptier__glyph:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.umptier__note {
+  /* Basis 100% inside .umps__namerow's own flex-wrap forces this onto its
+     own line below the name/glyph, same trick as .radarpill__note. */
+  flex: 1 0 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+  animation: postponed-in var(--dur-med) var(--ease-out) both;
+}
+.umptier__note-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.umptier__note-stats {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.umptier__note-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+  cursor: pointer;
+}
+.umptier__note-link:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.umptier__note-link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

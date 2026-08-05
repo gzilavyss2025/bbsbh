@@ -3,9 +3,12 @@
 // chain that resolves a MiLB affiliate to a colour pair.
 //
 // It sits below both on purpose. milbColors.js already reaches teams.js
-// transitively (via wpaLogo.js), so putting the chain in either of them and
-// importing the other would close an import cycle. Everything here is a leaf:
-// two static tables and pure functions over them. See src/lib/CLAUDE.md.
+// directly (teamLogoUrl), so putting the chain in either of them and importing
+// the other would close an import cycle. (This said "transitively, via
+// wpaLogo.js" until milbColors.js started taking its two WPA constants from
+// wpa/wpaDefaults.js instead; the cycle argument is unchanged.) Everything here
+// is a leaf: two static tables and pure functions over them. See
+// src/lib/CLAUDE.md.
 //
 // The chain, in one place, read by every MiLB surface:
 //

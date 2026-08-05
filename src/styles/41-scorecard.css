@@ -1,0 +1,439 @@
+/* ============================================================
+   SCORECARD — Numbers Game "22" sheet
+   A by-hand baseball scorecard rendered in the paper-scorebook system.
+   Milestone 1 is the empty template; reached in isolation at /scorecard-lab
+   (see ScorecardLab.jsx), not yet wired into a game. Fixed-width cells scroll
+   horizontally so the sheet keeps its landscape proportions on a phone.
+   ============================================================ */
+.scorecard {
+  /* Cell + column geometry, shared by the grid and its sticky frame. */
+  --sc-cell-w: 92px;
+  --sc-cell-h: 90px;
+  --sc-pos-w: 34px;
+  --sc-name-w: 116px;
+  --sc-sum-w: 34px;
+  --sc-strike-fill: color-mix(in srgb, var(--graphite) 15%, var(--surface-card));
+  margin-top: var(--space-4);
+}
+
+.sc-labctl {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+/* Dev-only "load a gamePk" row on the Scorecard Lab (not a product surface). */
+.sc-labload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.sc-labload__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-labload__input {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+}
+
+/* ---- Header band: write-in fields over pencil lines ---- */
+.sc-header {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.sc-header__half {
+  align-self: center;
+  padding-right: var(--space-3);
+  border-right: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+.sc-header__fields {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: var(--space-2) var(--space-4);
+}
+.sc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 84px;
+}
+.sc-field--wide {
+  flex: 1;
+  min-width: 150px;
+}
+.sc-field__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-field__line {
+  min-height: 16px;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Main grid: sticky Pos/Player column + inning header, horizontal scroll ---- */
+.sc-sheet__scroll {
+  margin-top: var(--space-3);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: var(--bw-hair) solid var(--border-rule);
+}
+.sc-sheet {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface-card);
+}
+.sc-sheet th,
+.sc-sheet td {
+  border-right: var(--bw-hair) solid var(--rule-grid);
+  border-bottom: var(--bw-hair) solid var(--rule-grid);
+}
+
+/* Inning + summary headers, pinned to the top edge as the sheet scrolls up. */
+.sc-sheet thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-1) 0;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-sheet__inning-h {
+  width: var(--sc-cell-w);
+}
+.sc-sheet__sum-h,
+.sc-sheet__sum {
+  width: var(--sc-sum-w);
+  min-width: var(--sc-sum-w);
+}
+
+/* The two left columns stay put as the innings scroll sideways. */
+.sc-sheet__pos {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: var(--sc-pos-w);
+  min-width: var(--sc-pos-w);
+  background: var(--surface-card);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+.sc-sheet__name {
+  position: sticky;
+  left: var(--sc-pos-w);
+  z-index: 1;
+  width: var(--sc-name-w);
+  min-width: var(--sc-name-w);
+  padding-left: var(--space-2);
+  background: var(--surface-card);
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+/* A substitute's sub-line beneath the slot's starter: the name inset and set
+   in the lighter caption ink so the starter still reads as the row's head. */
+.sc-sheet__name--sub {
+  padding-left: var(--space-4);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-caption);
+}
+
+/* The corner cells sit at both sticky intersections, so they outrank both. */
+.sc-sheet__corner {
+  z-index: 3;
+}
+
+.sc-sheet__cell {
+  width: var(--sc-cell-w);
+  height: var(--sc-cell-h);
+  padding: 0;
+  vertical-align: top;
+  background: var(--surface-inset);
+}
+.sc-sheet__sum {
+  background: var(--surface-inset);
+}
+
+/* An inning's first column carries a heavier left rule, so the eye can still
+   group innings once batting-around has widened one into several columns. */
+.sc-sheet__inning-h--start,
+.sc-sheet__cell--start {
+  border-left: var(--bw-rule) solid var(--rule-grid);
+}
+
+/* Totals row across the foot of the grid. */
+.sc-sheet__totals td {
+  height: 26px;
+  background: var(--bg-page);
+}
+.sc-sheet__totals .sc-sheet__name {
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-sheet__totals .sc-sheet__pos {
+  background: var(--bg-page);
+}
+
+/* ---- One at-bat box ---- */
+.sc-ab {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+/* A substitution took over this slot at this at-bat: a heavier pencil rule down
+   the box's leading edge, the way a scorer draws the line between two hitters. */
+.sc-ab--sub::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--graphite);
+}
+.sc-ab__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 8px 3px 3px;
+}
+.sc-ab__head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  height: 15px;
+}
+.sc-ab__type,
+.sc-ab__rbi {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--bw-hair) solid var(--rule-grid);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+/* A base hit: the outcome inks green and is ringed, the way a scorer circles a
+   hit in the outcome box. */
+.sc-ab__type--hit {
+  color: var(--accent-positive);
+  border: 1.5px solid var(--accent-positive);
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+}
+/* An error inks red. */
+.sc-ab__type--error {
+  color: var(--accent-negative);
+}
+.sc-ab__diamond {
+  position: relative;
+  margin-top: 3px;
+}
+.sc-ab__diamond .pbp__diamond {
+  display: block;
+}
+/* The scorer's fielding chain penciled in the MIDDLE of the diamond (4-3, F7,
+   L3, 6-3) — outs only. A small paper-colored chip sits behind it so it stays
+   legible over a solid (scored) diamond. */
+.sc-ab__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 1px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  font-family: var(--font-mono);
+  /* Sized to nearly span the diamond — the fielding chain is the dominant mark
+     in the box, penciled big the way a scorer fills the middle of the diamond. */
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+}
+.sc-ab__center--out {
+  color: var(--graphite);
+}
+/* An interrupted at-bat's carry-over mark ("CS →") mid-diamond — same pencil
+   graphite as an out chain; the blank outcome box and empty diamond are what
+   distinguish it from a result (see AtBatBox). */
+.sc-ab__center--interrupted {
+  color: var(--text-caption);
+}
+/* The out circle rides the divider between the diamond and the pitch strip,
+   ringed in pencil with the 1/2/3 sequence number inside. */
+.sc-ab__out {
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--graphite);
+  background: var(--surface-card);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-body);
+}
+/* Nothing to ring when there was no out on the box — hide the empty circle. */
+.sc-ab__out:empty {
+  display: none;
+}
+.sc-ab__strip {
+  display: grid;
+  grid-template-columns: 11px 8px 8px;
+}
+.sc-ab__balls,
+.sc-ab__strike {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding-top: 2px;
+  overflow: hidden;
+  border-left: var(--bw-hair) solid var(--rule-grid);
+}
+.sc-ab__balls {
+  background: var(--surface-inset);
+}
+.sc-ab__strike {
+  background: var(--sc-strike-fill);
+}
+/* One pitch mark — its 1-based place in the at-bat, or an X for a ball in play. */
+.sc-ab__pip {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-body);
+}
+
+/* ---- Footer: defense diamond, pitcher table, scoreboard ---- */
+.sc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+.sc-footer__block {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.sc-footer__defense {
+  flex: 0 0 auto;
+}
+.sc-footer__defense .defdiamond {
+  width: 160px;
+}
+.sc-footer__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+/* The pitcher table reuses .pitchers__grid; the sheet only sets its blank-row
+   height so an empty template keeps writing room. */
+.sc-pitchers tbody td {
+  height: 22px;
+}
+
+/* Scoreboard: two team lines across the innings, then the R/H/E/LOB final. */
+.sc-scoreboard {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sc-scoreboard th,
+.sc-scoreboard td {
+  height: 22px;
+  text-align: center;
+  border: var(--bw-hair) solid var(--rule-grid);
+}
+.sc-scoreboard thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+.sc-scoreboard__team {
+  width: 22%;
+  text-align: left;
+  padding-left: var(--space-1);
+}
+/* R/H/E totals ride the right edge, emphasized over the per-inning run cells. */
+.sc-scoreboard__rhe {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  background: var(--surface-inset);
+}
+.sc-decisions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+

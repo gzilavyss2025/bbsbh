@@ -1,0 +1,691 @@
+/* ---------------------------------------------------------- team color lab
+   Dev-only harness (screens/identity-lab/) reviewing each club's Main/
+   Alternate/City Connect logo treatment against its three official colors.
+   The .colorlab__* rules that survive here are the ones the editors inside a
+   jersey bench still wear (the logo tile, the swatch cells, the position/WPA
+   field grids); the page structure around them is .idlab__*, further down. */
+
+/* A pinned right-hand list of quick-reuse neutral hex values (cream/
+   off-white/grey variants, white, black, road grey, a common navy) for
+   the MiLB dimension's Position/WPA/Header hex fields — several MiLB
+   affiliates' Away variation, or an unresolved team's placeholder, wants a
+   plain neutral rather than either researched brand color, and typing one
+   from memory invites a typo a click-to-copy value doesn't. Mirrors
+   .colorlab__nav's fixed-card treatment, opposite side; the lab's MLB
+   dimension has no such list (its per-treatment swatches already cover every
+   color a tile needs). Hidden below the width where it'd overlap centered content,
+   same breakpoint as .colorlab__nav. */
+.milbneutrals {
+  display: none;
+}
+
+/* Docked the same way the Club Rail is (fixed, full-height, edge-to-edge,
+   its own scrollbar) rather than a floating card — the two are meant to read
+   as a matched pair of scroll strips, one full of clubs on the left, one full
+   of colors on the right. Each row still needs its label + hex, unlike a
+   rail item's bare logo, so the swatch itself is the thing bolted to the
+   item's own right edge (`.milbneutrals__chip` below) instead of the row
+   being nothing but a swatch. */
+@media (min-width: 900px) {
+  .milbneutrals {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 184px;
+    padding: var(--space-2) 0;
+    overflow-y: auto;
+    background: var(--surface-card);
+    border-left: var(--bw-hair) solid var(--border-rule);
+    z-index: 5;
+  }
+
+  .milbneutrals__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-compact);
+    font-weight: var(--w-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-caps);
+    color: var(--text-caption);
+    padding: 0 var(--space-2) var(--space-1);
+  }
+
+  .milbneutrals__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 4px var(--space-2);
+  }
+
+  .milbneutrals__row:hover {
+    background: var(--paper-1);
+  }
+
+  .milbneutrals__text {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .milbneutrals__label {
+    font-family: var(--font-display);
+    font-size: var(--fs-compact);
+    font-weight: var(--w-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-caps);
+    color: var(--text-caption);
+  }
+
+  .milbneutrals__hex {
+    font-family: var(--font-mono);
+    font-size: var(--fs-compact);
+    color: var(--text-muted);
+  }
+
+  /* The rail's own logo square, same 44px rail items wear on the left edge —
+     flush against this panel's right edge so the two strips visually rhyme. */
+  .milbneutrals__chip {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    border: var(--bw-hair) solid var(--border-rule);
+  }
+}
+
+.colorlab__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.colorlab__teamname {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.colorlab__nameinput {
+  width: 100%;
+}
+
+/* The exact frame the real slate card uses (.gamecard__logobox in GameCard.jsx)
+   — same size, border, radius, and inset shadow, so a treatment previewed
+   here looks like it would in the actual game card, not a flat comparison
+   swatch. Fill defaults to the card's plain paper, same as Alternate/City
+   Connect; a Main-treatment background mockup (MAIN_OVERRIDES in
+   the Team Identity Lab) sets --tint inline to try a brand color instead. */
+.colorlab__logobox {
+  flex: 0 0 auto;
+  position: relative;
+  width: 108px;
+  height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+
+/* A Main tile with MAIN_OVERRIDES' `pinstripe` flag (the Team Identity Lab) —
+   white with a subtle vertical pinstripe echoing that club's own home
+   jersey, instead of a flat brand-color --tint like every other override.
+   --pinstripe-color (mainTreatmentPinstripeColor) picks the line color per
+   team — Rockies' black, Yankees' navy. Compound selector for guaranteed
+   higher specificity over the plain `background: var(--tint, ...)` rule
+   above regardless of source order. */
+.colorlab__logobox.colorlab__logobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+/* A diagonal white-to-black sheen over the whole tile face (background AND
+   mark alike, via the ::after stacking above both) — reads as a glossy,
+   slightly domed badge instead of a flat paint chip. Applied to every
+   treatment's tile (Main, Alternate, City Connect). */
+.colorlab__logobox--gloss::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+/* Same edge-bleed overscale as .gamecard__logobox .teamlogo, so a procured
+   Alternate/City Connect mark previews at the same crop the real card would
+   apply, not a smaller contain-fit thumbnail. Also covers Main, which
+   renders a plain .teamlogo (components/TeamLogo.jsx) inside this same box.
+   --scale lets a Main mockup shrink a dense mark off the default 1.32 (see
+   MAIN_OVERRIDES) so it doesn't read as "the whole tile is this color"
+   against its own new background fill. */
+.colorlab__logobox .teamlogo,
+.colorlab__logoimg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+  transform-origin: center var(--origin-y, center);
+}
+
+.colorlab__logoplaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    var(--border-rule) 6px,
+    var(--border-rule) 7px
+  );
+}
+
+/* The logo tile as a drop target (LogoDropZone.jsx, dev-only). The tile itself
+   is unchanged — this wraps it in a column that adds the Replace-art button and
+   the result line under it, so a rejected file explains itself right where it
+   was dropped instead of in a page-level status area. The max-width keeps a
+   long "why it bounced" message from stretching the treatment box's flex row. */
+.colorlab__logodrop {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 190px;
+}
+
+.colorlab__logodropzone {
+  position: relative;
+  border-radius: var(--radius-md);
+}
+
+/* Dragging over the tile. An outline rather than a border so the tile's own
+   108px frame doesn't shift under the pointer mid-drop. */
+.colorlab__logodropzone--over {
+  outline: 2px dashed var(--accent-primary);
+  outline-offset: 3px;
+}
+
+.colorlab__logodropbadge {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 2px;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
+  pointer-events: none;
+}
+
+/* The file picker behind the Replace-art button. Not `display: none` — a hidden
+   input still has to be reachable for a click() to open the picker. */
+.colorlab__logodropinput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.colorlab__logodropmsg {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
+.colorlab__logodropmsg--error {
+  color: var(--accent-negative);
+}
+
+.colorlab__logodropmsg--ok {
+  color: var(--accent-positive);
+}
+
+/* The "copy another treatment's art here" pair, under Replace art — same
+   22px-tall row as .colorlab__wparesetbtn so the two actions read as one
+   group instead of the copy control looking bolted on. */
+.colorlab__logocopyrow {
+  display: flex;
+  gap: var(--space-1);
+  max-width: 100%;
+}
+
+.colorlab__logocopyselect {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  padding: 0 var(--space-1);
+}
+
+.colorlab__logocopyselect:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.colorlab__swatchrow {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.colorlab__posinlinefields {
+  display: flex;
+  gap: 6px;
+}
+
+.colorlab__posinlinefields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__posinlinefields input {
+  width: 60px;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+}
+
+.colorlab__posinlinefields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The Background/Stripe hex field needs room for a full "#rrggbb" (or an
+   rgba(...) pinstripe line color) — wider than the Scale/X/Y number boxes
+   next to it. */
+.colorlab__posinlinefields .colorlab__posbgfield input {
+  width: 84px;
+}
+
+/* The Pinstripe toggle — checkbox + label read left-to-right instead of
+   stacked like the fields above it, same footing as the WPA preview's own
+   Pinstripe checkbox (.colorlab__wpapreviewcheck). */
+.colorlab__posinlinefields label.colorlab__poscheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorlab__posinlinefields .colorlab__poscheck input {
+  width: auto;
+  border: none;
+  padding: 0;
+}
+
+.colorlab__swatchcell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  /* Widened from 76px so the hex input (still its original 62px — a full
+     "#XXXXXX" needs every bit of that in --font-mono) has room for the
+     eyedropper button (HexField.jsx) beside it without truncating. */
+  width: 92px;
+}
+
+.colorlab__swatchcell--placeholder {
+  opacity: 0.5;
+}
+
+.colorlab__swatchchip {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+}
+
+/* Marks which swatch a Main-treatment background mockup (MAIN_OVERRIDES,
+   the Team Identity Lab) actually used as the tile's --tint, so it's clear at a
+   glance which of the three colors above is driving the box beside it. */
+.colorlab__swatchcell--active .colorlab__swatchchip {
+  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-positive);
+}
+
+/* Marks which swatch is currently driving the WPA preview's band color
+   (TreatmentWpaPreview) — a distinct ring color from --active above so the
+   two "this swatch is driving X" claims (tile background vs. WPA band)
+   never read as the same indicator. */
+.colorlab__swatchcell--wpaselected .colorlab__swatchchip {
+  box-shadow: 0 0 0 2px var(--paper-1), 0 0 0 4px var(--accent-primary);
+}
+
+.colorlab__swatchchip--placeholder {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    var(--border-rule) 4px,
+    var(--border-rule) 5px
+  );
+}
+
+/* A swatch chip that doubles as a "use this as the WPA band color" button
+   (ColorSwatch's onPickWpaBand) — same size/shape as the plain chip, just
+   with pointer affordance and a hover nudge. */
+.colorlab__swatchchip--btn {
+  display: block;
+  padding: 0;
+  cursor: pointer;
+}
+
+.colorlab__swatchchip--btn:hover {
+  transform: scale(1.06);
+}
+
+.colorlab__swatchchip--btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.colorlab__swatchlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__swatchhex {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+
+/* The Main tile's editable Primary/Secondary/Third (ColorSwatch's `editable`)
+   swaps the read-only hex label above for this — same font/size as the label
+   it replaces, sized to fit a full "#XXXXXX" alongside the eyedropper button
+   in the 92px swatch cell it sits in. */
+.colorlab__swatchhexinput {
+  width: 62px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+  text-align: center;
+}
+
+/* Wraps every hex `<input>` in the lab (HexField.jsx) with its eyedropper
+   button — an inline-flex span so the pair drops into whatever layout the
+   bare input used to sit in (a swatch cell's narrow column, a label's own
+   flex row) with no changes needed there. */
+.colorlab__hexfield {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.colorlab__eyedropperbtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--accent-primary);
+  padding: 0;
+  cursor: pointer;
+}
+
+.colorlab__eyedropperbtn:hover {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.colorlab__eyedropperbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* One section of a jersey bench's tuning stack — the WPA knobs here, plus
+   Name/Colors/Position/Worn under .idlab__section, which shares this rule.
+   A recessed --paper-1 card inside the bench, so the sections read as content
+   sitting in the bench rather than as cards of their own. */
+.colorlab__wpapreview,
+.idlab__section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+}
+
+.colorlab__wpapreviewhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.colorlab__wpapreviewlabel {
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* Same filled-primary look as the site's own action buttons (.btn--next) —
+   accent-primary navy background, text-on-ink white, the same pairing
+   already validated in scripts/check-contrast.mjs ("inverse text on ink
+   chip") — instead of the plain outlined surface-card button this used to
+   be, so this internal lab's buttons read as intentional, not unstyled. */
+.colorlab__wparesetbtn {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-xs);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  padding: 0 var(--space-1);
+  cursor: pointer;
+}
+
+.colorlab__wparesetbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.colorlab__wparesetbtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* No more single-tile SVG mockup beside these — just the fields, now given
+   the whole card's width to lay out across (auto-fill instead of a fixed
+   2-column grid built for a 112px sidebar). */
+.colorlab__wpapreviewfields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.colorlab__wpapreviewcolor {
+  grid-column: 1 / -1;
+}
+
+.colorlab__wpapreviewfields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__wpapreviewfields input {
+  width: 100%;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 1px var(--space-1);
+}
+
+/* The Pinstripe toggle — a checkbox + its own label read left-to-right
+   instead of stacked like the number/text fields above it, and its input
+   shouldn't stretch to the row's full width like a text field does. Extra
+   specificity (repeating the parent) beats the generic label/input rules
+   above without resorting to !important. */
+.colorlab__wpapreviewfields label.colorlab__wpapreviewcheck {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.colorlab__wpapreviewfields .colorlab__wpapreviewcheck input {
+  width: auto;
+  border: none;
+  padding: 0;
+}
+
+.colorlab__wpapreviewfields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* TreatmentWpaScenarios (the Team Identity Lab) — three REAL WinProbChart
+   instances (its own .winprob card, unstyled here) side by side, one per
+   score state. Equal-thirds on a wide viewport, stacking on a narrow one —
+   same wrap behavior as every other multi-column row on this page. */
+.colorlab__wpascenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.colorlab__wpascenario {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.colorlab__wpascenariolabel {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+.colorlab__headerfields {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-3);
+}
+
+.colorlab__headerfields label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.colorlab__headerfields input {
+  width: 90px;
+  font-family: inherit;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  padding: 2px var(--space-1);
+}
+
+.colorlab__headerfields input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.colorlab__weardates-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.colorlab__weardates-hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* Whether this tile's triad is LANDED (the lineup page really wears it) or
+   still just a proposal the app answers with default navy chrome. Coverage of
+   the header tables is partial by design, and an unlanded preview looks
+   identical to a landed one, so the lab states which it is. */
+.colorlab__headercoverage {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.colorlab__headercoverage--on {
+  color: var(--accent-positive);
+}
+

@@ -18,11 +18,15 @@ import {
   gamePath,
   playerPath,
   teamPath,
+  teamTabPath,
   leadersPath,
   orgLeadersPath,
   teamLeadersPath,
   umpirePath,
   gamePhotosPath,
+  logbookPath,
+  logbookStatsPath,
+  logbookPlacePath,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -162,6 +166,65 @@ test('the 3-segment leaders/team branches win over the generic game branch', () 
 })
 
 // --------------------------------------------------------------------------
+// teamTabPath / parseRoute — the team hub's five tabs
+// --------------------------------------------------------------------------
+test('teamTabPath builds each tab path and carries the spoiler cutoff through', () => {
+  assert.equal(teamTabPath(158, 'overview'), '/team/158')
+  assert.equal(teamTabPath(158, 'roster'), '/team/158/roster')
+  assert.equal(teamTabPath(158, 'games'), '/team/158/games')
+  assert.equal(teamTabPath(158, 'numbers'), '/team/158/numbers')
+  assert.equal(teamTabPath(158, 'minors'), '/team/158/minors')
+  assert.equal(teamTabPath(158, 'leaders'), '/team/158/leaders')
+  // The spoiler-relevant case: a tab switch must reproduce the same ?d=/?s=
+  // a dated team link arrived with — dropping either would show a visitor
+  // mid-scoring stats past the half-inning they've reached (PRD non-negotiable 1).
+  assert.equal(
+    teamTabPath(158, 'roster', { d: '2026-07-05', s: 11 }),
+    '/team/158/roster?d=2026-07-05&s=11',
+  )
+  assert.equal(
+    teamTabPath(158, 'overview', { d: '2026-07-05', s: 11 }),
+    '/team/158?d=2026-07-05&s=11',
+  )
+})
+
+test('parseRoute resolves all five team-hub tab URLs, carrying the cutoff query', () => {
+  for (const tab of ['roster', 'games', 'numbers', 'minors']) {
+    assert.deepEqual(
+      parseRoute(`/team/158/${tab}`),
+      { name: `team-${tab}`, id: '158', asOf: null, sportId: null },
+      tab,
+    )
+  }
+  assert.deepEqual(parseRoute('/team/158/leaders'), {
+    name: 'team-leaders',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/team/158'), { name: 'team', id: '158', asOf: null, sportId: null })
+  assert.deepEqual(parseRoute('/team/158/roster?d=2026-07-05&s=11'), {
+    name: 'team-roster',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+})
+
+test('a team tab segment is not mistaken for a date-first game route', () => {
+  // The ordering trap route.js's own header warns about: '/team/{id}/roster' is
+  // 3 segments, the same shape as '/{date}/{matchup}/{section}'. The
+  // TEAM_TAB_ROUTES branch must be checked before the generic game branch, or
+  // this parses as a bogus game with date='team', matchup='158', section='roster'.
+  assert.deepEqual(parseRoute('/team/158/roster'), {
+    name: 'team-roster',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+})
+
+// --------------------------------------------------------------------------
 // parseRoute — game sections
 // --------------------------------------------------------------------------
 test('a 3-segment path is a game section, matchup and section lowercased', () => {
@@ -263,4 +326,65 @@ test('gamePhotosPath deep-links to one game and parses back with its gamePk', ()
 
 test('a non-numeric photos gamePk segment falls back to the plain browse route', () => {
   assert.deepEqual(parseRoute('/photos/not-a-number'), { name: 'photos' })
+})
+
+// --------------------------------------------------------------------------
+// The Logbook (ADR-0035) — where branch ORDER is the whole test
+// --------------------------------------------------------------------------
+test('the bare Logbook leaves the season for the page to resolve', () => {
+  assert.deepEqual(parseRoute('/logbook'), { name: 'logbook', season: null, placing: null })
+  assert.equal(logbookPath(), '/logbook')
+})
+
+test('a Logbook season segment parses, and an impossible one falls back to the bare page', () => {
+  assert.deepEqual(parseRoute('/logbook/2026'), { name: 'logbook', season: 2026, placing: null })
+  assert.equal(logbookPath(2026), '/logbook/2026')
+  assert.deepEqual(parseRoute(logbookPath(2026)), { name: 'logbook', season: 2026, placing: null })
+  // Out of the 1876-2200 window, and not an integer at all: both land on the
+  // bare page rather than stranding it on a season that cannot exist.
+  for (const bad of ['/logbook/1200', '/logbook/9999', '/logbook/2026.5']) {
+    assert.deepEqual(parseRoute(bad), { name: 'logbook', season: null, placing: null }, bad)
+  }
+})
+
+// `?place=` is a transient MODE of the book, not an address — the hand-off
+// from the box score's mint card into the placement flow.
+test('?place= puts the book into placement mode for one game', () => {
+  assert.equal(logbookPlacePath(823035), '/logbook?place=823035')
+  assert.deepEqual(parseRoute(logbookPlacePath(823035)), {
+    name: 'logbook',
+    season: null,
+    placing: 823035,
+  })
+  // It rides along on a season page too, so placing from a mint card doesn't
+  // throw away which season you were looking at.
+  assert.deepEqual(parseRoute('/logbook/2026?place=823035'), {
+    name: 'logbook',
+    season: 2026,
+    placing: 823035,
+  })
+})
+
+test('a mangled ?place= drops the mode rather than placing a game that is not real', () => {
+  for (const bad of ['/logbook?place=', '/logbook?place=abc', '/logbook?place=-4', '/logbook?place=0', '/logbook?place=1.5']) {
+    assert.deepEqual(parseRoute(bad), { name: 'logbook', season: null, placing: null }, bad)
+  }
+})
+
+// The regression this block exists for. `/logbook/{season}` parses its second
+// segment with `Number(parts[1])`, so until the 'stats' branch was placed
+// ABOVE it, '/logbook/stats' resolved to season NaN -> null -> the bare
+// Logbook page: no error, no 404, just the wrong screen. Any future named
+// second segment needs the same placement, which is why this asserts the route
+// NAME rather than merely "not the bare page".
+test('/logbook/stats is the retrospective, not season NaN falling through to /logbook', () => {
+  assert.deepEqual(parseRoute('/logbook/stats'), { name: 'logbook-stats' })
+  assert.equal(logbookStatsPath(), '/logbook/stats')
+  assert.deepEqual(parseRoute(logbookStatsPath()), { name: 'logbook-stats' })
+})
+
+test('an unknown Logbook sub-segment still falls back to the bare page', () => {
+  // 'stats' is matched by name, not by "non-numeric", so every other mangled
+  // link keeps the old forgiving behavior instead of 404-ing.
+  assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null, placing: null })
 })

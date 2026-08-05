@@ -1,0 +1,1027 @@
+/* -------------------------------------------------------------- strike zone
+   Per-at-bat pitch-location diagram. Additive to the play-by-play card: on a
+   phone an icon button (.pbp__zonebtn) opens it in a modal; from the wide
+   breakpoint up the card and its zone pane sit side by side (.pbp__atbat grid
+   below). Pitch-dot colors mirror the five pitch-ladder categories so the two
+   read as one system. Score-adjacent (part of the at-bat account), so it only
+   ever renders inside revealed play-by-play. */
+.strikezone,
+.pitchlist,
+.strikezone__legend {
+  --pd-called: var(--accent-negative);
+  --pd-whiff: var(--ink-1);
+  --pd-foul: var(--graphite);
+  --pd-inplay: var(--accent-positive);
+  --pd-ball-line: var(--graphite-soft);
+  --pd-ball-fill: var(--surface-inset);
+}
+
+.strikezone {
+  display: block;
+  width: 118px;
+  height: auto;
+}
+.strikezone--modal {
+  width: 224px;
+}
+/* When the batter's-box silhouette is shown, the viewBox grows by BATTER_W —
+   scale the rendered width by the same ratio so the plate/dots stay the same
+   size instead of shrinking to fit the wider canvas. Keep these in sync with
+   BATTER_W in StrikeZone.jsx (190 + BATTER_W, scaled by 118/190 and 224/190
+   respectively). */
+.strikezone--withbatter {
+  width: 155px;
+}
+.strikezone--modal.strikezone--withbatter {
+  width: 295px;
+}
+
+.strikezone__frame {
+  fill: none;
+  stroke: var(--seal-hatch);
+  stroke-width: 1.4;
+}
+.strikezone__third {
+  stroke: var(--seal-hatch);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 3;
+  opacity: 0.55;
+}
+.strikezone__plate {
+  fill: none;
+  stroke: var(--graphite-soft);
+  stroke-width: 1;
+}
+.strikezone__dot--called { fill: var(--pd-called); }
+.strikezone__dot--whiff { fill: var(--pd-whiff); }
+.strikezone__dot--foul { fill: var(--pd-foul); }
+.strikezone__dot--ball {
+  fill: var(--pd-ball-fill);
+  stroke: var(--pd-ball-line);
+  stroke-width: 1.3;
+}
+.strikezone__dot--inplay {
+  fill: none;
+  stroke: var(--pd-inplay);
+  stroke-width: 2.4;
+}
+.strikezone__num {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  fill: var(--paper-3);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+.strikezone__num--ball { fill: var(--ink-1); }
+.strikezone__num--inplay { fill: var(--pd-inplay); }
+
+/* The batter's-box silhouette (see BatterSilhouette in StrikeZone.jsx) — a
+   filled figure, inked no heavier than the home-plate outline it stands
+   beside. The diagram grows a bit wider to fit it (.strikezone--withbatter
+   below) rather than shrinking the pitch plot to make room. */
+.strikezone__battersil {
+  fill: var(--graphite-soft);
+}
+
+/* Numbered pitch-by-pitch list beside the diagram. */
+/* The grid lives on the LIST, not each row — every .pitchlist__row is
+   display:contents (its cells become direct grid items of .pitchlist), so
+   all rows share one set of column tracks. That's what gives the trailing
+   ABS-challenge pill (.pitchlist__challenge, its own 4th column) one fixed
+   horizontal position down the whole list — before this, each row was its
+   OWN independent 3-column grid, so a marker appended after the variable-
+   length call text (BALL vs SWINGING STRIKE vs …) landed at a different x
+   position on every row it appeared on. */
+.pitchlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 16px 1fr auto auto;
+  column-gap: 7px;
+  row-gap: 2px;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.pitchlist__row {
+  display: contents;
+}
+.pitchlist__num {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--paper-3);
+}
+.pitchlist__num--called { background: var(--accent-negative); }
+.pitchlist__num--whiff { background: var(--ink-1); }
+.pitchlist__num--foul { background: var(--graphite); }
+.pitchlist__num--ball {
+  background: var(--surface-inset);
+  border: 1.4px solid var(--graphite-soft);
+  color: var(--ink-1);
+}
+.pitchlist__num--inplay {
+  background: transparent;
+  border: 2.4px solid var(--accent-positive);
+  color: var(--accent-positive);
+}
+.pitchlist__type { color: var(--text-body); }
+
+/* ABS challenge marker (ChallengeMark, StrikeZone.jsx) — its own trailing
+   grid column (.pitchlist's 4th track), so it sits at one fixed horizontal
+   position down the whole list rather than wherever the variable-length call
+   text (BALL vs SWINGING STRIKE vs …) happens to end. A neutral kraft-free
+   gray pill — soft fill, darker gray outline — deliberately NOT the app's
+   usual navy/kraft palette, so it reads as a distinct, separate marker system
+   rather than another card chrome element. "ABS" labels it before the club
+   mark; the dot after is a plain solid fill for whether THAT CLUB's
+   challenge succeeded (green) or failed (red) — same win/loss colors as
+   .abs__pip, so the app keeps one dot vocabulary instead of two. */
+.pitchlist__challenge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--graphite-soft) 16%, var(--paper-2));
+  border: var(--bw-hair) solid var(--graphite-soft);
+}
+.pitchlist__challengelabel {
+  font-family: var(--font-display);
+  font-size: 0.8em; /* relative to the pill's inherited var(--fs-caption) */
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--graphite);
+}
+.pitchlist__challengelogo {
+  flex: 0 0 auto;
+}
+.pitchlist__challengedot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.pitchlist__challengedot--win {
+  background: var(--accent-positive);
+}
+.pitchlist__challengedot--loss {
+  background: var(--accent-negative);
+}
+
+/* Category legend, shared by the modal and the desktop pane. */
+.strikezone__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+.strikezone__li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.strikezone__sw {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.strikezone__sw--called { background: var(--accent-negative); }
+.strikezone__sw--whiff { background: var(--ink-1); }
+.strikezone__sw--foul { background: var(--graphite); }
+.strikezone__sw--ball {
+  background: var(--surface-inset);
+  border: 1.5px solid var(--graphite-soft);
+}
+.strikezone__sw--inplay {
+  background: transparent;
+  border: 2.5px solid var(--accent-positive);
+}
+
+/* The "Pitch colors" button (see PitchColorsKey) — a compact pill whose icon
+   is the five pitch swatches in a row, opening the key in a modal. Keep it
+   small/quiet wherever it rides. */
+.pitchkeybtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: 999px;
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.pitchkeybtn__dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.pitchkeybtn__dots .strikezone__sw {
+  width: 8px;
+  height: 8px;
+}
+.pitchkeybtn__dots .strikezone__sw--ball {
+  border-width: 1px;
+}
+.pitchkeybtn__dots .strikezone__sw--inplay {
+  border-width: 1.5px;
+}
+
+/* The pitch-color key modal (opened by the header button). Reuses the szmodal
+   scrim/close chrome; the legend is laid out as a readable one-per-row list. */
+.pcmodal {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 300px;
+  width: 100%;
+  padding: 14px 16px 16px;
+}
+.pcmodal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.pcmodal__ttl {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.pcmodal__hint {
+  margin: 0 0 12px;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+.pcmodal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.pcmodal__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-body);
+}
+.pcmodal__row .strikezone__sw {
+  width: 14px;
+  height: 14px;
+}
+
+/* The phone icon button, tucked into the card's bottom-left whitespace. Hidden
+   from the wide breakpoint up, where the zone rides inline (see the media
+   query). display: flex (block-level), not inline-flex: .pbp__main is plain
+   block flow, so an inline-flex button here would try to sit on the SAME
+   line as .pbp__hlbtn when there's room and only wrap to its own line when
+   there isn't — meaning its left edge would drift depending on available
+   width instead of always lining up with the zone button above it. Forcing
+   its own line (with width: fit-content so it doesn't stretch full width)
+   keeps it flush left every time. */
+.pbp__zonebtn {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  cursor: pointer;
+}
+.pbp__zoneicon {
+  width: 19px;
+  height: 19px;
+}
+
+/* The desktop right-column pane (card | zone). Hidden on a phone. */
+.pbp__zonecell {
+  display: none;
+}
+
+/* "Watch highlight" — sits directly below the zone icon button (own line,
+   same reasoning as .pbp__zonebtn above), generic text label only (never the
+   clip's own title, which would spoil the play — see PlayByPlay.jsx).
+   Present only on the small fraction of plays with a matched clip. Always
+   flush left, whether or not a zone button precedes it, so it lines up with
+   the zone button on cards that have both. */
+.pbp__hlbtn {
+  margin-top: 7px;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pbp__hlicon {
+  font-size: var(--fs-caption);
+}
+
+/* Strike-zone modal — reuses the .scrim backdrop (see below), a centered card
+   like the logo modal. */
+.szmodal {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 340px;
+  width: 100%;
+  padding: 14px 16px 16px;
+}
+.szmodal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.szmodal__ttl {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.szmodal__eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.szmodal__name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.szmodal__vs {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.szmodal__close {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+/* Phone modal: zone on top, the pitch list full-width beneath it — side by
+   side is too tight at phone width and clips the list's velo/result column. */
+.szmodal__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.szmodal__body .pitchlist {
+  width: 100%;
+}
+.szmodal__body .pitchlist__row {
+  font-size: var(--fs-caption);
+}
+.szmodal__body .pitchlist__type {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+}
+
+/* ── Umpire zone map ─────────────────────────────────────────────────────────
+   The 3×3 diagram shared by the umpire page's Plate-accuracy card and the
+   accuracy modal (UmpireZoneMap). Two encodings on one grid: each cell is
+   FILLED in ink at an opacity equal to the umpire's called-strike rate there
+   (his perceived zone — dark where he rings pitches up), and any cell where his
+   misses run above the league average is OUTLINED in the negative-accent clay.
+   Batter-oriented (columns outside → inside, rows high → low). */
+.zonemap {
+  display: block;
+  width: 132px;
+  height: auto;
+  color: var(--accent-primary);
+}
+.zonemap__cell {
+  fill: currentColor;
+}
+.zonemap__frame {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 1.5;
+}
+.zonemap__grid {
+  stroke: var(--border-hairline);
+  stroke-width: 1;
+}
+.zonemap__over {
+  fill: none;
+  stroke: var(--accent-negative);
+}
+
+/* ── Umpire accuracy modal ───────────────────────────────────────────────────
+   Opened from the lineup Umpires card's accuracy rank. Centered card (reuses
+   .scrim--center + .szmodal__close), showing the rank, the zone map, and the
+   umpire's last five plate games linking to their box scores. */
+.umpmodal {
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal, 0 30px 70px -30px rgba(0, 0, 0, 0.6));
+  max-width: 340px;
+  width: 100%;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+}
+.umpmodal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+.umpmodal__ttl {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.umpmodal__eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umpmodal__name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.umpmodal__rankrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.umpmodal__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+.umpmodal__hint {
+  margin: 4px 0 0;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+.umpmodal__zone {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.umpmodal__zonecap {
+  margin: 0;
+  flex: 1;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  line-height: var(--lh-ui);
+  text-align: left;
+  /* Natural-case explainer prose reads better than shouted caps for a full
+     sentence — same convention as .tscoremodal__body p. */
+  text-transform: none; /* caps-exempt */
+}
+.umpmodal__gtitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umpmodal__glist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.umpmodal__grow {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.umpmodal__grow:first-child {
+  border-top: none;
+}
+.umpmodal__gdate {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.umpmodal__gmatchrow {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.umpmodal__gmatch {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+/* The level tag on a mixed MLB/AAA game log (see hasMixedLevels in
+   UmpireAccuracyModal.jsx) — neutral ink, not a positive/negative accuracy
+   signal, so it deliberately doesn't borrow .tierpill's four-ink language. */
+.umpmodal__glevel {
+  display: inline-block;
+  padding: 1px 5px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.umpmodal__gacc {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+/* .btn--next handles sizing/color; this just tightens the modal-local gap. */
+.umpmodal__full {
+  margin-top: 14px;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(22, 34, 47, 0.44);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fade var(--dur-med) var(--ease-out);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sheet {
+  width: 100%;
+  max-width: var(--app-width);
+  background: var(--surface-card);
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+  border: var(--bw-hair) solid var(--border-rule);
+  box-shadow: var(--shadow-raised);
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  animation: slideup var(--dur-slow) var(--ease-out);
+}
+
+@keyframes slideup {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.sheet__title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.sheet__body {
+  margin: 0 0 18px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+/* The ✕ in a sheet's head row. Lived on .sitesearchsheet__close until the site
+   search stopped being a sheet (see .searchoverlay above); it was always a
+   .sheet part rather than a search part, so it moved here rather than keeping a
+   dead block's name alive. */
+.sheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+.sheet__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.sheet__actions .btn {
+  flex: 1;
+}
+
+/* ---------------------------------------------------------------- motion */
+/* Reveal is the one expressive transition; honor reduced-motion by
+   cross-fading instead of sliding (per the design system). */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .statgrid {
+    animation: fade var(--dur-med) var(--ease-out);
+  }
+}
+
+/* ---------------------------------------------------------------- logo sheet
+   A browsable reference sheet of every club's logo at a level, styled like
+   the rest of the app rather than a standalone print sheet. */
+.logogrid {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.logotile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px 12px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.logotile__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: none;
+  border: none;
+  min-height: 0;
+}
+
+.logotile__img {
+  border-radius: 0;
+}
+
+.logotile__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  line-height: var(--lh-snug);
+}
+
+/* --------------------------------------------------------------- game photos
+   Unsealed personal tool (screens/GamePhotosPage.jsx) — pick a club (reusing
+   TeamFilterStrip's vsteam__* logo strip), then a game, then browse MLB's
+   high-res CDN originals for it. Own section/row/grid treatment below;
+   .gamefinder__season isn't reused here since the season select rides inline
+   in a sectionhead instead of its own labeled row. */
+
+/* A dashed kraft-adjacent strip (same shape as .asof-banner) rather than a
+   full-bleed prose block — the page needs to flag "nothing here is sealed"
+   without reading as heavier than the actual controls below it. --clay is
+   the app's existing alert color (outs, errors), reused here as a caution
+   rather than an error. */
+.gamephotos__notice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  margin: 4px 0 var(--space-4);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) dashed var(--clay);
+  background: var(--clay-soft);
+}
+.gamephotos__noticetag {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--clay-deep);
+}
+.gamephotos__notice p {
+  margin: 0;
+  flex: 1 1 220px;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  letter-spacing: var(--ls-text);
+  color: var(--text-body);
+}
+
+.gamephotos__section {
+  margin-bottom: var(--space-5);
+}
+
+.gamephotos__sectionhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.gamephotos__sectiontitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.gamephotos__seasonselect {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+}
+
+.gamephotos__resultsmeta {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+/* Groups the found-count with the "Browse other games" escape hatch shown
+   only when the page arrived deep-linked to one game (GamePhotosPage.jsx's
+   `browsing` state) — the picker sections above are hidden, so this is the
+   only way back to them. */
+.gamephotos__galleryactions {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.gamephotos__browsebtn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--accent-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.gamephotos__browsebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.gamephotos__games {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Room for the focus ring on the first/last row without letting the
+     scrolling container itself clip it. */
+  padding: 2px;
+}
+
+.gamephotos__gamerow {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard);
+}
+.gamephotos__gamerow:hover {
+  border-color: var(--text-caption);
+}
+.gamephotos__gamerow:active {
+  transform: scale(0.99);
+}
+.gamephotos__gamerow.is-active {
+  background: var(--field-soft);
+  border-color: var(--accent-primary);
+}
+.gamephotos__gamematchup {
+  flex: 1 1 auto;
+  font-weight: var(--w-semibold);
+}
+.gamephotos__gamematchup em {
+  font-style: normal;
+  color: var(--text-caption);
+}
+.gamephotos__gamedate {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+}
+
+.gamephotos__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* The tile geometry lives on the anchor rather than the li so the subject
+   caption below it (.gamephotos__subject) sits outside the cropped frame. */
+.gamephotos__grid li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gamephotos__tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+/* Scoped to the tile, not the whole grid item — the subject caption below it
+   carries a team logo that must keep its own intrinsic size. */
+.gamephotos__tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Who the photo is of — the feed's own player/team tag, set quiet so the grid
+   still reads as photography with a caption rather than a data table. */
+.gamephotos__subject {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.gamephotos__subject img {
+  flex: 0 0 auto;
+}
+
+.gamephotos__subjectname {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* A quiet "this opens elsewhere" affordance — invisible until hover/focus, so
+   the grid reads as clean photography rather than a wall of buttons. */
+.gamephotos__expand {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  background: rgba(30, 20, 5, 0.55);
+  color: var(--text-on-ink);
+  font-size: var(--fs-caption);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-standard);
+}
+.gamephotos__tile:hover .gamephotos__expand,
+.gamephotos__tile:focus-visible .gamephotos__expand {
+  opacity: 1;
+}
+.gamephotos__tile:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+

@@ -126,3 +126,29 @@ MiLB degrades as it does everywhere else in the app: minor-league feeds
 routinely lack uniforms, prospects, transactions, coaches and precomputed
 scores, so those previews and shelves resolve to null/empty and simply do not
 render.
+
+## Amendment (2026-08-05): the Games tab shows the whole season, in a grid
+
+The Games tab shipped with the Overview's Last 10 strip repeated in full — the
+same sideways rail, growing older ten games at a time as you scrolled back
+toward Opening Day. It was the wrong shape for the tab that OWNS games: a
+season is ~160 decided games, and reaching June meant a hundred-odd swipes
+inside a page that scrolls the other way.
+
+The tab now renders `AllGames` instead: every decided game as the same
+ticket-stub card, in a `repeat(auto-fill, minmax(100px, 1fr))` grid — three
+columns on a phone, more as the frame widens — newest first, capped at 24 with a
+"Show more" underneath. The cap is client-side only; the whole season was
+already in memory from the tab's single schedule fetch, so paging costs no
+request. The rail keeps its job on the Overview, where ten cards is exactly what
+a preview should hold, and the growth machinery it needed for the old Games-tab
+role is gone.
+
+That makes one pair of surfaces that are **not** literally the same component
+with a `preview` prop — the exception this ADR's "props on the existing modules"
+rule didn't anticipate. The rule's intent survives: `LastTenGames` and
+`AllGames` are two exports of one module (`modules/TeamGames.jsx`) over one
+shared `GameStubCard`, so there is still a single source of truth for what a
+game card is. Reach for a second export only when the two surfaces genuinely
+need different LAYOUTS, as here; a preview that differs only in how much it
+shows is still a prop.

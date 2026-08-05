@@ -1,10 +1,32 @@
-// Loader + view selector for the Scorecard Lab's "load a real game" mode. It
-// pulls ONLY spoiler-free, pre-pitch reference data — the lineup, the defensive
-// alignment, the umpire crew, the starters, and the header write-in fields — the
-// same staging information the lineup pages already show before first pitch. The
-// score-revealing cells (the at-bat grid, the pitcher's line, the scoreboard)
-// are never fetched into here; you still ink those by hand. So, unlike the live
-// game view, this needs no SealBox: there is no sealed number in what it reads.
+// Loader + view selectors for the Scorecard Lab's "load a real game" mode.
+//
+// SPOILER CLASSIFICATION — this module is MIXED, and the boundary runs through
+// the middle of it. Read this before importing anything here on a new surface.
+//
+//   SPOILER-FREE (safe at render top-level):
+//     loadScorecardGame   — fetches the feed plus the two out-of-feed sources
+//     scorecardView       — pre-pitch staging only: lineup, defensive alignment,
+//                           umpire crew, starters, header write-in fields — the
+//                           same information the lineup pages already show
+//                           before first pitch
+//     scorecardCenterCode — a pure notation-code formatter, no feed access
+//
+//   REVEAL-ONLY (ADR-0001 rules apply — a SealBox reveal render function, or an
+//   equivalent explicit gate):
+//     scorecardPlays      — the inked at-bat grid, play by play
+//     scorecardScoreboard — per-inning runs for BOTH sides plus full R/H/E, via
+//                           revealInning/revealTotals (linescore.js)
+//     scorecardFull       — calls scorecardScoreboard, so it carries the score
+//
+// This header previously claimed the module "pulls ONLY spoiler-free, pre-pitch
+// reference data" and "needs no SealBox: there is no sealed number in what it
+// reads". That was false: the import below pulls revealInning/revealTotals, and
+// scorecardScoreboard returns a finished scoreboard. Nothing ever leaked,
+// because the only consumer is screens/ScorecardLab.jsx, which App.jsx gates
+// behind import.meta.env.DEV and drops from the production module graph
+// entirely — the containment is real, it just lives there rather than here. The
+// hazard was a future reader trusting this header and reusing scorecardFull on
+// a surface that ships.
 //
 // Managers and uniforms aren't in the live feed (see api/game.js + api/uniforms.js),
 // so they ride their own fetches alongside it; both degrade to null/'' and the

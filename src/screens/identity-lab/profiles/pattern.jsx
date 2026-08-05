@@ -6,9 +6,9 @@
 import { useEffect, useId, useState } from 'react'
 import { CopyBox } from '../../../components/CopyBox.jsx'
 import { RecolorFilter } from '../../../components/WinProbChart.jsx'
-import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../../../lib/wpaBandColors.js'
+import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../../../lib/wpa/wpaBandColors.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../../../lib/teams.js'
-import { wpaLogoFor, wpaTilePlacements } from '../../../lib/wpaLogo.js'
+import { wpaLogoFor, wpaTilePlacements } from '../../../lib/wpa/wpaLogo.js'
 
 // The WPA-pattern dimension: every club's win-probability band pattern (color +
 // tiled logo, see components/WinProbChart.jsx) at full size, one league level at
@@ -152,7 +152,7 @@ function TeamPatternCard({ teamId, name, leagueLabel, note, onNoteChange }) {
   const copyText =
     `Team: ${name} (id ${teamId}, ${leagueLabel})\n` +
     `Where: src/lib/data/wpa-tuning.json — ${teamId}.bandColor (this club's Main band fill) / ` +
-    `src/lib/wpaLogo.js — LOGO_COLOR_OVERRIDES[${teamId}] (whether its mark may be recolored)`
+    `src/lib/wpa/wpaLogo.js — LOGO_COLOR_OVERRIDES[${teamId}] (whether its mark may be recolored)`
 
   return (
     <div className="patternlab__card">

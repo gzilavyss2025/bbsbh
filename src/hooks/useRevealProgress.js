@@ -21,6 +21,17 @@ function readRevealMark(storageKey) {
   }
 }
 
+// This device's persisted mark for one game, by gamePk — the same value the hook
+// below initializes from, exposed for the one caller that needs it without
+// mounting the hook: StampsCloudSync, which pushes the local mark to
+// /api/reveal before minting a stamp. That is the sanctioned way to close
+// ADR-0035's known gap (a game revealed before signing in has no server mark),
+// and it is safe precisely because /api/reveal is a one-directional ratchet.
+// -1 for a game this device has never opened.
+export function revealMarkFor(gamePk) {
+  return readRevealMark(gamePk ? `${REVEAL_KEY}${gamePk}` : null)
+}
+
 // localStorage key prefix + reader for the at-bat-mode stepping cursor (see
 // ADR-0016): how many play-by-play entries of whichever half is currently
 // being stepped through have been revealed so far. Stored as "{halfIdx}:

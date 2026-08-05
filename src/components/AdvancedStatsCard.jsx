@@ -1,17 +1,20 @@
 import { useState } from 'react'
 
-// The player page's "Advanced" card for pitchers: the run-prevention rates
-// behind the headline tiles — FIP, league-adjusted ERA−, the K/BB rates, the
-// ground-ball share, what hitters bat against him, and a role-aware last cell
-// (quality starts / inherited runners). Shaped by person.js's
-// advancedPitchingView from one live statsapi request (see
-// person-fetch.js's fetchPitchingAdvanced). Full-season aggregates — same
-// spoiler footing as the vs-L/R season splits, and labeled so. MLB-only at
-// the source; MiLB pitchers get no card. Each stat's own explainer sits
-// behind a tap-to-open "i" glyph next to its label rather than one fixed
-// caveat paragraph under the grid, so a reader only sees the prose for the
-// term they're actually unsure of.
-export function AdvancedPitchingCard({ adv }) {
+// The player page's "Advanced" card, either group: the rates behind the
+// headline tiles. For a pitcher that's FIP, league-adjusted ERA−, the K/BB
+// rates, the ground-ball share, what hitters bat against him, and a
+// role-aware last cell (quality starts / inherited runners); for a hitter,
+// wOBA, wRC+, the plate-discipline rates, ISO/BABIP and pitches per trip.
+// Purely presentational over a facts list — the group split lives in
+// person.js's advancedPitchingView / advancedHittingView, each shaped from
+// one live statsapi request (person-fetch.js's fetchPitchingAdvanced /
+// fetchHittingAdvanced). Full-season aggregates — same spoiler footing as
+// the vs-L/R season splits, and labeled so. MLB-only at the source; MiLB
+// players get no card. Each stat's own explainer sits behind a tap-to-open
+// "i" glyph next to its label rather than one fixed caveat paragraph under
+// the grid, so a reader only sees the prose for the term they're actually
+// unsure of.
+export function AdvancedStatsCard({ adv }) {
   if (!adv?.facts?.length) return null
   return (
     <div className="advcard">

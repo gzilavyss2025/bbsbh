@@ -22,9 +22,9 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // (`onlyPhotographer`, gamePhotos.js; drops both TV broadcast frame grabs and
 // rendered graphic cards like Statcast darkroom cards or ABS challenge result
 // cards) whose subject is this club (`photosForTeam`). Walks `games` (==
-// seasonGames, the same oldest -> newest, cutoff-filtered list
-// LastTenGamesStrip renders off) backward from the newest game. Unlike that
-// strip, the data isn't preloaded — each game's photos are a real fetch
+// seasonGames, the same oldest -> newest, cutoff-filtered list the tab's
+// AllGames grid renders off) backward from the newest game. Unlike that
+// grid, the data isn't preloaded — each game's photos are a real fetch
 // (fetchGamePhotos), so "scroll back" here grows the window by fetching more
 // games on demand rather than slicing an array already in memory.
 //
@@ -33,7 +33,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // risk as a highlight clip's title — see that module's header) and today's
 // other two consumers get away with that because /photos is a standalone
 // unsealed tool and GamePhotosStrip only ever renders inside the box score's
-// SealBox. This rail leans on the same precedent LastTenGamesStrip already
+// SealBox. This rail leans on the same precedent the AllGames grid already
 // uses instead of either of those: `games` is `seasonGames`
 // (allDecidedGames(schedule)), which fetchTeamSchedule has already cut off at
 // the page's `asOf` (`won` is only ever non-null for a game at/before that
@@ -163,7 +163,8 @@ export function TeamPhotosRail({ teamId, games }) {
   }, [photos.length, canScroll])
 
   // Restores the pre-growth scroll position after older photos are prepended
-  // (see pendingGrowRef below), same compensation LastTenGamesStrip does.
+  // (see pendingGrowRef below) — without it, prepending content shoves the
+  // user's current view further right instead of leaving it visually still.
   useLayoutEffect(() => {
     const el = trackRef.current
     const pending = pendingGrowRef.current

@@ -1,0 +1,388 @@
+/* ------------------------------------------------------------- floating nav
+   Site-wide: the primary "advance" button rides a fixed bar pinned to the
+   bottom of the viewport so it's always in reach without scrolling. The bar
+   itself is click-through (a soft fade over the paper); only the button takes
+   taps. Screens that use it pad their bottom so nothing hides underneath. */
+.pagenav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  padding: 14px var(--app-gutter) calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    var(--bg-canvas) 55%,
+    color-mix(in srgb, var(--bg-canvas) 0%, transparent)
+  );
+  pointer-events: none;
+}
+
+.pagenav .btn {
+  pointer-events: auto;
+  width: 100%;
+  max-width: calc(var(--app-width) - 2 * var(--app-gutter));
+  margin: 0;
+  box-shadow: var(--shadow-raised);
+}
+
+/* Innings view: on a phone the floating bar also carries a duplicate Refresh
+   button stacked above Next, so refreshing live data during a game doesn't
+   require scrolling back up to the toolbar. */
+.pagenav--innings {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.refreshbtn--float {
+  pointer-events: auto;
+  background: var(--bg-canvas);
+}
+
+/* The dead space around this bar's primary action belongs to the action, not
+   to the page under it. .pagenav is click-through by design (a soft fade over
+   the paper), so a thumb that missed the button mid-game punched straight
+   through the fade and opened whichever player card happened to sit
+   underneath — you asked to reveal an at-bat and got a page you didn't want.
+   Each button now carries an invisible ::after covering the bar around it: up
+   past the "as of 7:42 PM" stamp to the Refresh row, out to the gutters, and
+   down through the bottom padding and the safe-area inset. Nothing moves
+   visually; only the boundary the pointer sees changes.
+
+   The offsets are measured from the BUTTON, not from the bar, and that is
+   load-bearing rather than incidental: .btn:active nudges the button 1px with
+   a transform, and a transform makes the element a containing block for its
+   own absolutely positioned pseudo. Anchor this to the bar instead (top/bottom
+   0 against the fixed .pagenav — tidier, no magic numbers) and the press
+   silently re-anchors it to the button, collapsing the hit area mid-tap: the
+   pointer goes down on the button and up on the page beneath, which dispatches
+   the click on their common ancestor and the reveal never fires. Anchored
+   here, the press just carries the hit area along with it.
+
+   -76px is this bar's full height above the button when the stamp is absent
+   (14px top padding + 34px Refresh + 8px column gap + the row's 20px
+   margin-top), which is the tallest it may ever reach: with the stamp present
+   the bar is taller still and the area ends partway up the Refresh row.
+   Either way it stops inside the bar and never claims real content above it —
+   the :has() guard keeps that true on a game with no Refresh to sit under,
+   where the same offset WOULD overshoot. */
+.pagenav--innings .btn {
+  position: relative;
+}
+
+.pagenav--innings .btn::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: calc(-1 * var(--app-gutter));
+  bottom: calc(-14px - env(safe-area-inset-bottom));
+  left: calc(-1 * var(--app-gutter));
+}
+
+.pagenav--innings:has(.refreshbtn--float) .btn::after {
+  top: -76px;
+}
+
+/* Refresh keeps its own taps by riding ABOVE that hit area rather than the
+   area stopping short of it: the stamp between the two rows comes and goes
+   with each poll (see RefreshButton), so the gap under Refresh has no fixed
+   height to stop at. */
+.pagenav--innings .refreshbtn--float {
+  position: relative;
+  z-index: 3;
+}
+
+/* A sealed half offers two choices (ADR-0016), so the dead space splits down
+   the middle rather than all going to one of them: each button claims its own
+   outer gutter and the 8px between the pair, putting a stray tap on the choice
+   it was nearest. The two areas OVERLAP across that gap on purpose — abutting
+   them at a shared edge leaves a hairline crack a tap really can fall through
+   (measured: neither area answers at the seam, and the page underneath does) —
+   and the raised z-index hands the overlap, and so the ambiguous middle, to
+   the smaller reveal. (Above the pair, below Refresh — hence its 3.) */
+.pagenav--innings .revealsplit__btn:first-child {
+  z-index: 1;
+}
+
+.pagenav--innings .revealsplit__btn:first-child::after {
+  right: -8px;
+}
+
+.pagenav--innings .revealsplit__btn:last-child::after {
+  left: -4px;
+}
+
+/* ------------------------------------------------------- scorebug HUD
+   Persistent innings-view HUD (src/components/Scorebug.jsx). Mobile-first
+   default: fixed top-right, invisible (`.gamehud-dock--show` toggles it on)
+   until InningViewer's IntersectionObserver reports the real linescore
+   (RollingLine) has scrolled out of view. The wide-layout override below
+   (kept in sync with WIDE_QUERY, src/hooks/useMediaQuery.js) repositions it
+   bottom-right and forces it always-visible regardless of scroll — desktop
+   never loses sight of RollingLine in the first place. z-index sits above
+   `.pagenav` (20) so the floating advance bar never covers it. */
+.gamehud-dock {
+  position: fixed;
+  z-index: 21;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.gamehud-dock--show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tap/click-to-reposition corners (InningViewer's `cornerIdx`/`CORNERS`) —
+   each rule sets only the two edges that place that corner, leaving the
+   other two `auto` so switching corners never leaves a stale offset pinning
+   the dock away from its new edge. */
+.gamehud-dock--top-right {
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  right: calc(var(--space-3) + env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+}
+
+.gamehud-dock--bottom-right {
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  right: calc(var(--space-3) + env(safe-area-inset-right));
+  top: auto;
+  left: auto;
+}
+
+.gamehud-dock--bottom-left {
+  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  left: calc(var(--space-3) + env(safe-area-inset-left));
+  top: auto;
+  right: auto;
+}
+
+.gamehud-dock--top-left {
+  top: calc(var(--space-3) + env(safe-area-inset-top));
+  left: calc(var(--space-3) + env(safe-area-inset-left));
+  bottom: auto;
+  right: auto;
+}
+
+.gamehud {
+  width: 246px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 9px 10px 0;
+  background: var(--ink-1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  overflow: hidden;
+  font-family: var(--font-body);
+  color: var(--paper-2);
+}
+
+/* Between innings (Scorebug.jsx's `blank` — no batter/pitcher row left):
+   drop the card's own top padding so the strip flows straight to the top
+   edge and picks up the card's own rounding via the `overflow: hidden`
+   clip above, instead of leaving a bare padded bar over an empty strip. */
+.gamehud--blank {
+  padding-top: 0;
+}
+
+.gamehud--blank .gamehud__strip {
+  margin-top: 0;
+}
+
+.gamehud__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gamehud__who {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-text);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gamehud__row--batter .gamehud__who {
+  color: var(--paper-3);
+}
+
+.gamehud__row--pitcher .gamehud__who {
+  color: var(--paper-3);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-regular);
+}
+
+.gamehud__val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-num);
+  flex: none;
+}
+
+.gamehud__row--batter .gamehud__val {
+  color: var(--paper-3);
+  font-weight: var(--w-semibold);
+}
+
+.gamehud__row--pitcher .gamehud__val {
+  color: var(--paper-3);
+}
+
+.gamehud__lbl {
+  color: var(--paper-3);
+  margin-right: 2px;
+}
+
+/* The strip bleeds edge-to-edge past the card's own side padding (negative
+   margins cancel it) — a single horizontal band, not a separate column. */
+.gamehud__strip {
+  display: flex;
+  align-items: stretch;
+  margin: 3px -10px 0;
+  min-height: 67px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.gamehud__marks {
+  display: grid;
+  grid-template-columns: 80% 20%;
+  grid-template-rows: 1fr 1fr;
+  flex: 1;
+  min-width: 0;
+}
+
+/* TeamTreatmentMark's own block-class contract (see the component doc):
+   width/height 100% so the mark fills its grid cell edge-to-edge, no padding. */
+.gamehud__tile {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--tint, var(--ink-2));
+}
+
+/* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
+   variant — --pinstripe-color picks the line color per team. Without this the
+   tile fell through to the plain --tint fill above, so a pinstriped club
+   (Cubs, Yankees, …) read as a flat gray square. */
+.gamehud__tile.gamehud__tile--pinstripe {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
+.gamehud__tile .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1));
+}
+
+.gamehud__runs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-3);
+  color: var(--ink-0);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+
+.gamehud__div {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.12);
+  flex: none;
+}
+
+.gamehud__inninghalf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 3px 8px;
+  flex: none;
+}
+
+.gamehud__tri {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+}
+
+.gamehud__tri--up {
+  border-bottom: 6px solid var(--paper-3);
+}
+
+.gamehud__tri--down {
+  border-top: 6px solid var(--paper-3);
+}
+
+.gamehud__tri--dim {
+  border-bottom-color: rgba(255, 255, 255, 0.22);
+  border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+.gamehud__innnum {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  color: var(--paper-3);
+  line-height: var(--lh-solid);
+}
+
+.gamehud__diamondwrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 3px 6px;
+  flex: none;
+}
+
+.gamehud__outs {
+  display: flex;
+  gap: 3px;
+}
+
+.gamehud__outdot {
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: var(--bw-hair) solid rgba(255, 255, 255, 0.28);
+}
+
+.gamehud__outdot--filled {
+  background: var(--clay);
+  border-color: var(--clay);
+}
+
+@media (min-width: 740px) {
+  .gamehud-dock {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+

@@ -9,8 +9,9 @@ import { ChevronLink } from '../components/ChevronLink.jsx'
 import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'
+import { hiddenTeamTabs } from './team/data/shared.js'
 import { StandingsCard } from './team/modules/StandingsCard.jsx'
-import { LastTenGames } from './team/modules/LastTenGames.jsx'
+import { LastTenGames } from './team/modules/TeamGames.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
 
 // How many rows each preview shows. A preview is a DOOR, not a smaller
@@ -69,7 +70,6 @@ export function TeamPage({ id, asOf, sportId }) {
     leagueSurpriseScores,
     leagueFormScores,
     recentGames,
-    seasonGames,
     lineupDefense,
     leaderPool,
     injuredIds,
@@ -84,6 +84,7 @@ export function TeamPage({ id, asOf, sportId }) {
       asOf={asOf}
       sportId={sportId}
       active="overview"
+      hiddenTabs={hiddenTeamTabs(team)}
     >
       {/* Standing — the club's row plus the team above and below it. The
           Postseason Odds pill still opens the whole division's snapshot: that
@@ -120,18 +121,11 @@ export function TeamPage({ id, asOf, sportId }) {
         </>
       )}
 
-      {/* Last 10 — the true last ten, newest last, matching the Games tab's own
-          reading direction. Scrolling back past them to Opening Day is that
-          tab's job, and is the only thing this preview holds back. */}
+      {/* Last 10 — the true last ten, newest last. Every game before them is
+          the Games tab's grid, and is the only thing this preview holds back. */}
       {recentGames.length > 0 && (
         <>
-          <LastTenGames
-            teamId={team.id}
-            asOf={asOf}
-            recentGames={recentGames}
-            seasonGames={seasonGames}
-            preview
-          />
+          <LastTenGames teamId={team.id} asOf={asOf} recentGames={recentGames} />
           <PreviewDoor label="Season schedule" onClick={() => go('games')} />
         </>
       )}

@@ -1,0 +1,844 @@
+/* ---------------------------------------------------- team transactions
+   The team page's roster-move feed, one story per swipeable card in a
+   horizontal deck (see .scratch/team-transactions/ for the original locked
+   design; reworked into a horizontal scroller per feedback — see
+   .txcard__scroll below). The deck full-bleeds to the SCREEN's own edges
+   (the negative --app-gutter margin, same breakout .slatehead already uses
+   for its rule), so no outer bordered "card" shell wraps it — a bordered box
+   whose own content escapes past its border reads as broken, not deliberate.
+   The section label (.txcard__head) stays inset like any other section
+   caption; only the card deck below it bleeds. */
+.txcard {
+  display: grid;
+  margin: 14px 0 14px;
+}
+.txcard__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+/* A horizontally swipeable deck of story cards, full-bleed to the screen's
+   edges regardless of viewport width — an "infinite scroll" of cards reads
+   oddly boxed into a reading column. Native scroll-snap + an edge mask, the
+   same idiom .vsteam__team already uses for the splits-vs-team club picker,
+   so this reads as a familiar "flip through" gesture, not a new one-off
+   interaction. TeamTransactionsCard.jsx lazy-reveals more cards
+   (already-fetched days first, then a fresh loadMoreTeamTransactions page)
+   as a trailing sentinel nears the visible edge. */
+.txcard__scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 2px var(--app-gutter) 6px;
+  /* scrollbar-width is Firefox-only — Chrome/Safari/Edge ignore it entirely
+     and fall back to a full-size native horizontal scrollbar, which reads as
+     a stray gray bar under a touch-first swipe deck. The ::-webkit-scrollbar
+     rule below is what actually hides it in Chromium/WebKit. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 var(--app-gutter), #000 calc(100% - var(--app-gutter)), transparent 100%
+  );
+}
+.txcard__scroll::-webkit-scrollbar {
+  display: none;
+}
+.txcard__sentinel {
+  flex: 0 0 auto;
+  width: 1px;
+}
+.txcard__more {
+  flex: 0 0 160px;
+  align-self: stretch;
+  scroll-snap-align: start;
+  padding: 12px;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font: inherit;
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+.txcard__more:hover:not(:disabled),
+.txcard__more:focus-visible {
+  color: var(--text-body);
+  border-style: solid;
+}
+.txcard__more:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+/* Each story is its own bordered card — wider than the deck's first cut
+   (a 3-photo rail, a real 2-for-1 trade, needs the room so the cutline
+   doesn't crowd into a narrow wrap). */
+.txstory {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 320px;
+  padding: 10px 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  /* A new block-formatting context, so the floated rail is contained here
+     rather than bleeding past this card's own border. */
+  display: flow-root;
+}
+/* A 3-headshot rail (a shuffle, a multi-player trade) still gets a bit more
+   room than the base width — now that a player's name wraps properly
+   (.txstory__cutline .plink's display:contents above), the card no longer
+   needs to be this wide just to dodge an awkward name break, but the
+   floated rail itself is still wider with a 3rd photo. See the wide flag in
+   TeamTransactionsCard.jsx. */
+.txstory--wide {
+  width: 360px;
+}
+.txstory__date {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* The rail floats top-right; the type pill + cutline run as normal text flow
+   after it, so the pill sits flush with the rail's top edge and the cutline
+   sentence wraps around it — a magazine caption wrapping a floated photo. */
+.photorail {
+  float: right;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 6px 10px;
+}
+.photorail__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: var(--shot-sm-w);
+}
+
+/* Plain headshot treatment — the same `.shot` base every other card in the
+   app uses (Headshot.jsx already applies the club-tint wash itself), not a
+   one-off halftone/dot-screen texture. */
+.shot.txstory__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.txstory__shot.shot--fallback {
+  font-size: var(--fs-h1);
+}
+
+/* The pre-decided kicker banner (In/Out/Up/Down/Up-Down/IL-N) — solid fill +
+   light text is the app's existing convention for a colored badge on a photo
+   (see .sstrip__cell--win), reused here rather than the softer outline-chip
+   look .txntl__chip uses on the player page's own transaction timeline (this
+   card is deliberately a different visual language from that component —
+   see scope.md). */
+.banner {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 1px 5px;
+  color: var(--surface-card);
+  background: var(--graphite);
+}
+.banner--in { background: var(--accent-positive); }
+.banner--out { background: var(--accent-negative); }
+.banner--move { background: var(--graphite); }
+
+.photo__cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--graphite-soft);
+  text-align: center;
+  line-height: var(--lh-compact);
+  letter-spacing: var(--ls-title);
+}
+
+.txstory__type {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+/* Same three-tone system as .txntl__chip--add/--out/--move, mapped per story
+   type (see TYPE_TONE in TeamTransactionsCard.jsx) rather than per row. */
+.txstory__type--add { color: var(--field-deep); }
+.txstory__type--out { color: var(--clay-deep); }
+.txstory__type--move { color: var(--text-muted); }
+
+/* The serif cutline register — same --font-read (Newsreader) the app already
+   uses for box-score-notes / in-game notification copy, distinct from the
+   plainer Plex Sans .txntl__desc uses on the player page's timeline. Reads
+   as an ordinary sentence rather than shouted app chrome (sanctioned
+   exception to the ALL-CAPS INVARIANT, see that block comment up top) — no
+   bold/italic emphasis; a player's name is a plain PlayerLink instead. */
+.txstory__cutline {
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+/* #root prefix matches the ALL-CAPS INVARIANT rule's own specificity — a
+   plain .txstory__cutline selector can't outrank #root * and would be
+   silently ignored (see .brewblurb__body above for the same technique). */
+#root .txstory__cutline {
+  text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
+}
+/* Both a player's name (PlayerLink) and a club's name (TeamLink) inside the
+   cutline share the .plink base class — a bare <button> keeps its own box
+   even with display:inline set, some part of its native rendering can still
+   hold the text together as one unbreakable run ("Lance McCullers Jr." or
+   "Kansas City Royals" jumping to the next line as a whole rather than
+   wrapping mid-name like the plain prose around it), confirmed still
+   happening in real Chrome even after a display:inline override.
+   display:contents removes the button's own box from layout entirely, so its
+   text becomes a plain part of the paragraph's flow — no button-box quirk
+   left to fight. The click handler and focusability live on the <button>
+   element itself, unaffected by its own box disappearing. */
+.txstory__cutline .plink {
+  display: contents;
+}
+/* A player's name additionally stays bold + all-caps (the app's default
+   #root * uppercase already applies to this <button> — no override needed)
+   even though the sentence around it reads natural-case, so the name reads
+   as the "headline" word in an otherwise ordinary sentence — a club name
+   stays a plain link, so it doesn't compete with the player for emphasis.
+   The link wraps just the bare name — the position abbreviation stays in
+   the surrounding plain prose (see teamTransactions.js: the emphasized/
+   linked span is built from the player's name alone, never "{POS} {Name}"). */
+.txstory__cutline .txstory__namelink {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* A club name (TeamLink, no .txstory__namelink) is just the plain link
+   described above — unlike .txstory__namelink, it has no override to keep
+   #root *'s uppercase, so it would otherwise shout "HOUSTON ASTROS" against
+   the natural-case sentence around it. Reads in the cutline's own case even
+   though it's still a hyperlink, same as the surrounding prose. #root prefix
+   ties the ID component of #root *'s specificity, same technique as
+   #root .txstory__cutline above — a plain .txstory__cutline .plink selector
+   would lose to #root * and be silently ignored. */
+#root .txstory__cutline .plink:not(.txstory__namelink) {
+  text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
+}
+
+.team-hub__manager {
+  margin: 4px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.team-hub__manager .plink {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+.team-hub__manager-interim {
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+
+/* Last 10 Games — ticket-stub cards, one per recently decided game, in a
+   horizontally-scrolling strip on the Overview (LastTenGamesStrip in
+   modules/TeamGames.jsx). Nav chrome and scroll wiring mirror
+   .seasonseries__nav/__strip exactly. Ordered oldest -> newest, same direction
+   as .sstrip, so the two strips never scan in mirror directions; opens
+   pre-scrolled to the newest card.
+
+   TWO surfaces share the CARD half of this block (.last10__card and its
+   children): this strip, and the Games tab's .gamesgrid below — same ticket
+   stub, laid out in a wrapping grid instead of a rail. The `last10__` prefix
+   predates that split and is kept rather than renamed through ~40 rules; only
+   the rail chrome (.last10, __nav, __track) is actually last-ten-specific. */
+.last10 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.last10__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.last10__nav:hover:not(:disabled) {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.last10__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.last10__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.last10__track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  /* scrollbar-width is Firefox-only, same fix as .seasonseries__strip. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.last10__track::-webkit-scrollbar {
+  display: none;
+}
+/* Ticket-stub card: a torn calendar leaf (date) over a dashed tear-line over
+   a full-width win/loss ink stamp, the score printed last. Left-aligned, not
+   centered, even when the strip is short — the ragged right edge is itself
+   the "season just started" signal on a club with fewer than 10 decided
+   games. */
+.last10__card {
+  flex: 0 0 100px;
+  width: 100px;
+  /* min-, not a fixed height: a game carrying a meta line ("Gm 2", "11 inn")
+     is ~14px taller than one without, and a hard 150px clipped that line off
+     under `overflow: hidden`. Both layouts stretch their items, so the row (or
+     the strip) still ends up with cards of one height — the tallest one's. */
+  min-height: 150px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+.last10__card:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.last10__stub {
+  flex: 0 0 auto;
+  padding: 7px var(--space-2) 6px;
+  border-bottom: 1px dashed var(--border-rule);
+  text-align: right;
+}
+@media (hover: hover) {
+  .last10__card:hover .last10__stub {
+    background: var(--surface-inset);
+  }
+}
+/* Home/away, mimicking the schedule strip's own convention right below this
+   card (.sstrip__cell--home): a solid kraft fill for home, plain paper for
+   away. The schedule strip spends that fill on the whole cell because an
+   undecided cell has no result color competing for it; every Last 10 Games
+   card IS decided, so the two zones not already carrying the win/loss ink
+   stamp — the stub above the band and the score below it — carry the kraft
+   instead, reading as one continuous kraft ticket the band is stamped onto. */
+.last10__card--home .last10__stub,
+.last10__card--home .last10__foot {
+  background: color-mix(in srgb, var(--seal) 80%, transparent);
+}
+.last10__card--home .last10__stub {
+  border-bottom-color: var(--seal-hatch);
+}
+.last10__card--home .last10__cap,
+.last10__card--home .last10__daynum,
+.last10__card--home .last10__score,
+.last10__card--home .last10__score--final,
+.last10__card--home .last10__sep,
+.last10__card--home .last10__meta {
+  color: var(--seal-ink);
+}
+@media (hover: hover) {
+  .last10__card--home:hover .last10__stub,
+  .last10__card--home:hover .last10__foot {
+    background: color-mix(in srgb, var(--seal) 92%, transparent);
+  }
+}
+.last10__cap {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.last10__daynum {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+  margin-top: 2px;
+}
+/* The win/loss ink stamp — the same diagonal hatch as the kraft seal cover
+   and IL tape (see --win-texture/--il-texture, tokens/effects.css), so a
+   result reads as a stamp pressed on the stub rather than a flat color
+   swatch. Knocked-out mono team mark (TeamLogo variant="mono", ADR-0031)
+   plus a small text abbreviation, since the mono asset alone isn't enough
+   for a colorblind-safe read at this size — see the W/L letter below too. */
+.last10__band {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--win-texture);
+}
+.last10__card--loss .last10__band {
+  background: var(--il-texture);
+}
+.last10__wl {
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink);
+}
+.last10__logo {
+  filter: drop-shadow(0 1px 1px rgba(22, 34, 47, 0.25));
+}
+.last10__oppcap {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
+  color: var(--text-on-ink);
+  white-space: nowrap;
+}
+.last10__foot {
+  flex: 0 0 auto;
+  padding: 7px var(--space-2) 8px;
+}
+.last10__score {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+}
+.last10__score--final {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+}
+.last10__sep {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+.last10__meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  margin-top: 2px;
+}
+
+/* Every decided game, on the Games tab (AllGames in modules/TeamGames.jsx) —
+   the same ticket stubs as the strip above, laid out IN the page instead of on
+   a rail: the tab that owns games shows the whole season, and a sideways rail
+   is the wrong shape for a hundred-odd of them. Deliberately heading-less (the
+   Schedule strip above it already names the season), and capped at a screenful
+   with a "Show more" underneath.
+
+   auto-fill at the stub's own 100px width settles on three columns on a phone
+   and more as the frame widens, so the card keeps its shape at every size and
+   the page scrolls DOWN through the season rather than sideways. */
+.gamesgrid {
+  margin-top: var(--space-4);
+}
+.gamesgrid__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-2);
+}
+/* The stub is a fixed-width rail item by default (see .last10__card); in the
+   grid the track sizes it, and there's no scroll container left to snap to. */
+.gamesgrid .last10__card {
+  flex: initial;
+  width: auto;
+  scroll-snap-align: none;
+}
+/* Same full-width block affordance as .teammates__more / .marginnotes__more. */
+.gamesgrid__more {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.gamesgrid__more:hover {
+  color: var(--text-body);
+}
+.gamesgrid__more:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Team Page Photos rail — professional camera stills of this club, lazily
+   fetched a few games at a time (TeamPhotosRail in TeamPage.jsx). Same
+   nav/track/sentinel structure as .last10 just above (single-row flex track,
+   IntersectionObserver-driven growth), thumbnail sizing/treatment borrowed
+   from .photostrip__thumb (GamePhotosStrip) since this rail shows photos,
+   not ticket-stub game cards. */
+.teamphotos {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.teamphotos__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.teamphotos__nav:hover:not(:disabled) {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.teamphotos__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.teamphotos__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.teamphotos__track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.teamphotos__track::-webkit-scrollbar {
+  display: none;
+}
+/* Invisible IntersectionObserver target at the leading (oldest) edge of the
+   track — scrolling it into view is what fetches the next batch of older
+   games' photos (see TeamPhotosRail). */
+.teamphotos__sentinel {
+  flex: 0 0 1px;
+  width: 1px;
+  height: 163px;
+  scroll-snap-align: start;
+}
+.teamphotos__thumb {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  width: 163px;
+  height: 163px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+}
+.teamphotos__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.teamphotos__thumb:hover {
+  border-color: var(--seal);
+}
+.teamphotos__thumb:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.teamphotos__loading {
+  flex: 0 0 163px;
+  width: 163px;
+  height: 163px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) dashed var(--border-rule);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+
+/* team-hub schedule strip — one block per series (run of consecutive games
+   vs. the same opponent), wrapping left-to-right/top-to-bottom instead of
+   paging by month; see SeriesStrip in TeamPage.jsx. */
+.sstrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 4px 0 2px;
+}
+.sstrip__series {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 4px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+/* The series the page was opened from (asOf, or today on a bare visit) gets
+   a kraft-tape ring so it reads as "you are here" among a season's worth of
+   otherwise-identical blocks. */
+.sstrip__series--current {
+  border-color: var(--seal);
+  border-width: 2px;
+}
+.sstrip__opp {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.sstrip__opplabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.sstrip__cells {
+  display: flex;
+  gap: 2px;
+}
+.sstrip__cell {
+  height: 16px;
+  width: 16px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--paper-2);
+  cursor: pointer;
+}
+/* Home games get the scorebook's kraft-tape tone (see --seal) rather than
+   the opponent's own color — same "paper" vocabulary as the seal covers,
+   just solid instead of hatched. */
+.sstrip__cell--home {
+  background: color-mix(in srgb, var(--seal) 80%, transparent);
+  border-color: transparent;
+}
+/* Once a game's result is safe to show (see fetchTeamSchedule's resultsCutoff),
+   the cell itself carries the W/L as a solid fill off the field-green/clay-red
+   accent tokens — at strip scale (16px, no label) a pale tint reads as empty,
+   so this deliberately breaks from the muted-tint convention elsewhere (e.g.
+   the standings table's run-diff column) in favor of a color a whole season
+   can be read from arm's length. A home game keeps its identity via the
+   kraft-tape ring instead of the amber fill, since the fill is now spoken for
+   by the result. */
+.sstrip__cell--win {
+  background: var(--accent-positive);
+  border-color: var(--field-deep);
+}
+.sstrip__cell--loss {
+  background: var(--accent-negative);
+  border-color: var(--clay-deep);
+}
+.sstrip__cell--home.sstrip__cell--win,
+.sstrip__cell--home.sstrip__cell--loss {
+  border: 2px solid var(--seal);
+}
+/* The All-Star Game card — a real, clickable game (see fetchAllStarGame) so
+   it's a <button> rather than the .sstrip__series div wrapper the opponent
+   blocks use; kraft-tape tinted to read as a break in the season rather than
+   just another series. */
+.sstrip__series--allstar {
+  font: inherit;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--seal) 14%, var(--bg-page));
+  border-color: var(--seal);
+}
+.sstrip__series--allstar .sstrip__opp {
+  gap: 1px;
+}
+.sstrip__series--allstar .sstrip__opplabel {
+  color: var(--award-ink);
+  white-space: nowrap;
+}
+
+/* standings */
+.standings th,
+.standings td {
+  padding: 7px 8px;
+  font-size: var(--fs-small);
+  text-align: right;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.standings thead th {
+  border-top: none;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.standings td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  /* Same reasoning as .ledger td: data cells are single tokens (a W-L split
+     like "35-15", a streak code like "W2") — never let one wrap at its
+     hyphen onto a second row. Auto table layout then sizes each column to
+     fit its widest one-line value instead of squeezing it into wrapping;
+     .ledger-wrap's horizontal scroll (or, on phone, the "More columns"
+     toggle) is what absorbs a table that ends up wider than the viewport. */
+  white-space: nowrap;
+}
+.standings .team {
+  text-align: left;
+}
+/* Body cells only — a header `th.team` reads as a plain column caption like
+   every other header in the row (muted color, condensed font, via
+   `.standings thead th`), not the bold body-text emphasis a data row's
+   player/team name gets. */
+.standings td.team {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+/* Body cells only — a header `th.team` is plain left-aligned text (no
+   rank/logo/name-abbr row to lay out), and `display: flex` on a `<th>`
+   overrides its native `table-cell` display, which is what makes it
+   auto-stretch to match a taller row (e.g. this board's own header row,
+   where "% With 2 Strikes" wraps to two lines). Flexing it anyway sized the
+   cell to its own single-line content instead, leaving a strip of the
+   card's white background exposed at the bottom of just that header cell. */
+.standings td.team,
+.standings td.team > * {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+/* A name that wraps to two lines (a long surname on a narrow phone, e.g.
+   "Pete Crow-Armstrong") grows the .team row's height; align-items: center
+   above then floats the rank number and team-abbreviation siblings at the
+   row's vertical MIDDLE instead of by the name's first line, reading as a
+   stray gap between the name and its team. Pin those two side items to the
+   top of the row instead — a single-line name is unaffected (every sibling
+   is the same height already), so this only changes the wrapped case. */
+.standings .team > .umprank__rank,
+.standings .team > .foulboard__team {
+  align-self: flex-start;
+}
+/* The highlighted favorite-team row tints to that club's own accent
+   (--fav-accent, a per-team hex set inline by StandingsPage from
+   favoriteAccentColor() — see lib/teams.js), same convention as
+   .gamecard--pinned / .tlead__row--fav, rather than a fixed green — an
+   Orioles fan's row reads orange, a Reds fan's reads red. Falls back to the
+   original --field green for a pinned team with no known accent (MiLB). */
+.standings tr.is-me td {
+  background: color-mix(in srgb, var(--fav-accent, var(--field)) 10%, transparent);
+}
+.standings tr.is-me .team {
+  color: var(--fav-accent, var(--field-deep));
+}
+.standings td.is-positive {
+  color: var(--accent-positive);
+}
+/* Home/Away split columns — phone width is too narrow for them alongside
+   Team/W/L/GB/Streak/L10/RD, so they only join in at the desktop/iPad
+   breakpoint the rest of the app already uses (see e.g. .standings-daynav). */
+.standings__wide {
+  display: none;
+}
+@media (min-width: 740px) {
+  .standings__wide {
+    display: table-cell;
+  }
+}
+.standings td.is-negative {
+  color: var(--accent-negative);
+}
+/* Division magic-number column once a club has clinched (at least a tie for)
+   its division — same "good news" tone as is-positive, bolded to read as a
+   verdict rather than just another number. */
+.standings td.is-clinched {
+  color: var(--accent-positive);
+  font-weight: var(--w-semibold);
+}
+/* Inline rank-movement glyph riding inside the GB/WCGB cell (not its own
+   column — see the standings enhancement plan's column-density note). */
+.standings-trend {
+  font-size: var(--fs-caption);
+  margin-left: 2px;
+}
+.standings-trend--up {
+  color: var(--accent-positive);
+}
+.standings-trend--down {
+  color: var(--accent-negative);
+}
+

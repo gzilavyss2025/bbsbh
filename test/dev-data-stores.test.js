@@ -329,3 +329,56 @@ test('a color-swatch store rejects a prototype-poisoning key at either level', (
     /malformed swatch/,
   )
 })
+
+// --------------------------------------------------------------------------
+// stamp-logo-tuning — where a club's knockout mark sits inside a Logbook
+// stamp's mark slot (src/lib/stampLogoTuning.js). The strictest validator in
+// this file, because it is the only store read at RENDER time by art that is
+// redrawn from scratch every view: a bad value here doesn't sit in a lab
+// preview, it reshapes that club's stamps in every user's Logbook.
+// --------------------------------------------------------------------------
+const stampPlacement = DEV_DATA_STORES['stamp-logo-tuning'].validate
+
+test('a stamp-placement entry pins two known sides to numbers inside the clamps', () => {
+  assert.equal(stampPlacement({}), null)
+  assert.equal(
+    stampPlacement({
+      158: {
+        name: 'Milwaukee Brewers',
+        treatments: {
+          away: { scale: 1.14, offsetX: -4, offsetY: 2, rotation: -3, note: 'wordmark runs wide' },
+          home: { scale: 1.14, offsetX: 4, offsetY: 2, rotation: 0 },
+        },
+      },
+    }),
+    null,
+  )
+  // A club cleared back to its defaults is an entry with no sides at all.
+  assert.equal(stampPlacement({ 158: { name: 'Milwaukee Brewers', treatments: {} } }), null)
+})
+
+test('a stamp-placement entry rejects an unknown side, an unknown field, and a value outside its clamp', () => {
+  // The side vocabulary is closed: a stamp has exactly two mark slots, and a
+  // jersey treatment key here would silently never be read.
+  assert.match(stampPlacement({ 158: { treatments: { 'city-connect': { scale: 1 } } } }), /bad stamp side/)
+  assert.match(stampPlacement({ 158: { treatments: { away: { skew: 3 } } } }), /unknown field "skew"/)
+  assert.match(stampPlacement({ 158: { treatments: { away: { scale: 9 } } } }), /scale is outside/)
+  assert.match(stampPlacement({ 158: { treatments: { home: { offsetX: -400 } } } }), /offsetX is outside/)
+  assert.match(stampPlacement({ 158: { treatments: { home: { rotation: 180 } } } }), /rotation is outside/)
+  assert.match(stampPlacement({ 158: { treatments: { away: { scale: '1.2' } } } }), /scale is not a number/)
+  assert.match(stampPlacement({ 158: { treatments: { away: { note: 4 } } } }), /note is not a string/)
+  assert.match(stampPlacement({ 158: { treatments: 'nope' } }), /treatments is not an object/)
+  assert.match(stampPlacement({ brewers: {} }), /not a team id/)
+})
+
+test('a stamp-placement store rejects prototype-poisoning keys at every level', () => {
+  assert.match(stampPlacement(JSON.parse('{"__proto__": {}}')), /expected an object keyed by team id/)
+  assert.match(
+    stampPlacement(JSON.parse('{"158": {"treatments": {"__proto__": {"scale": 1}}}}')),
+    /treatments is not an object/,
+  )
+  assert.match(
+    stampPlacement(JSON.parse('{"158": {"treatments": {"away": {"__proto__": "x"}}}}')),
+    /away is not an object/,
+  )
+})

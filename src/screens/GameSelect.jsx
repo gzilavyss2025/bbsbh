@@ -27,7 +27,7 @@ import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/OffDaySection.jsx'
 import { AsyncStatus } from '../components/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
-import { FILTER_CHIPS, reorderGameOfTheNight } from '../lib/resultCards.js'
+import { FILTER_CHIPS, reorderGameOfTheNight, reorderNationalBroadcasts } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { ConsentModal } from '../components/ConsentModal.jsx'
 import { useCopy } from '../copy/copyContext.js'
@@ -350,18 +350,19 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
 
   // The slate's actual render order: `sorted` (soonest → latest, favorite
-  // pinned first) with the crowned "Game of the Night" game promoted to the
-  // front — behind the favorite team's own game when there is one on the
-  // slate, otherwise outright first (see reorderGameOfTheNight). A no-op
-  // until cardMetaByGamePk is populated, so this can't leak which game is
-  // crowned ahead of the reveal-all gate above.
-  const gamesForDisplay = useMemo(
-    () =>
-      reorderGameOfTheNight(sorted, cardMetaByGamePk, (g) =>
-        isPinned(g, favoriteTeamId, favoriteAffiliateIds),
-      ),
-    [sorted, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds],
-  )
+  // pinned first), then every national-broadcast game grouped in right behind
+  // the favorite's own game (reorderNationalBroadcasts), then the crowned
+  // "Game of the Night" game promoted to that same front slot (see
+  // reorderGameOfTheNight) — a no-op until cardMetaByGamePk is populated, so
+  // this can't leak which game is crowned ahead of the reveal-all gate above.
+  const gamesForDisplay = useMemo(() => {
+    const nationallyOrdered = reorderNationalBroadcasts(sorted, nationalBroadcasts.data, (g) =>
+      isPinned(g, favoriteTeamId, favoriteAffiliateIds),
+    )
+    return reorderGameOfTheNight(nationallyOrdered, cardMetaByGamePk, (g) =>
+      isPinned(g, favoriteTeamId, favoriteAffiliateIds),
+    )
+  }, [sorted, nationalBroadcasts.data, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
 
   // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
   // above) the user has toggled on. Reset on a new day/level, same as

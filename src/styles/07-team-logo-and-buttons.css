@@ -1,0 +1,486 @@
+/* ---------------------------------------------------------------- team logo */
+.teamlogo {
+  flex: 0 0 auto;
+  object-fit: contain;
+  /* A small radius keeps club marks tidy against the cream card. */
+  border-radius: var(--radius-xs);
+}
+
+/* Grayscale treatment for the enlarged sketch-modal view — pencil-sketch
+   friendly. (The slate cards and masthead render their marks in full color.) */
+.teamlogo--bw {
+  filter: grayscale(1) contrast(1.03);
+}
+
+/* Small "vibe" crop treatment — see TeamLogo.jsx's `crop` prop. A clipped
+   square with the mark zoomed past its own SVG padding, edge to edge. */
+.teamlogo-crop {
+  display: inline-flex;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+}
+.teamlogo--crop {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.6);
+}
+
+.teamlogo--fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  border-radius: var(--radius-xs);
+  /* Scale the monogram down from the box so it never touches the edges. */
+  font-size: 0.62em;
+  line-height: var(--lh-solid);
+}
+
+.gamecard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.gamecard__level {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* "Game 1 / Game 2" doubleheader chip — same pill as the level tag but tinted
+   so a twin bill's two rows are told apart without a second glance. */
+.gamecard__dh {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--paper-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* "N Prospects on this roster" — a bonus fact, not a functional tag like
+   level/dh, so unlike those it carries no pill chrome (no border/background/
+   bold) — same "plain text, no box" treatment as .gamecard__pin, just with
+   the small league mark since it's not tied to either club's own logo. */
+.gamecard__prospects {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gamecard__prospects-logo {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+/* Groups the ready pill + start time at the far right of the meta row (the
+   level/dh/prospect tags + pin star stay left), regardless of whether the
+   pill is even rendered (postponed/Final games skip it) — the margin lives
+   on this wrapper, not on .gamecard__status itself, so the time still lands
+   at the right edge on its own. */
+.gamecard__metaright {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* The one thing on this row someone actually needs at a glance — given the
+   most typographic weight of anything in .gamecard__meta (no pill needed,
+   just ink), rather than the plain caption-weight text it used to share with
+   the bonus badges around it. */
+.gamecard__status {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Park-local start time trailing the viewer's local time, dialed down so the
+   viewer's clock stays the headline. */
+.gamecard__status-park {
+  font-size: 0.82em;
+  color: var(--text-muted);
+}
+
+/* "Scores Unlocked" score + inning row (ADR-0026). Rendered below the matchup
+   only while the day pass is on. No pill, no fill — the earlier kraft-amber
+   bar read as one more badge, and kraft is the SEAL's material, exactly wrong
+   for a value the user just unsealed. Instead: a hairline totals rule (the
+   scorebook's bottom-of-the-column line) with each run total penciled as a
+   mono ledger numeral directly under its own team column (same 1fr/1fr + gap
+   grid as .gamecard__teams, so the numbers land under the marks), and the
+   game-state token absolutely centered between them — centered against the
+   CARD, not squeezed between grid tracks, so its width never nudges the
+   numerals off the tile centers. The token is always present (TOP 7 / LIVE /
+   FINAL / F/10): the center is what binds two bare digits into one score.
+   All content is uppercase-safe (digits, TOP/BOT/…, FINAL, F/n). */
+.gamecard__scoreline {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  /* Soft hairline, not --border-rule — the card's own edge uses that token,
+     and an internal divider shouldn't out-ink its container. */
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* One team's run total, composing .t-num (mono, tabular). Semibold navy for
+   both sides while live — no mid-game winner inking, the hierarchy shouldn't
+   repaint on every lead change. Only a FINAL settles it: --winner goes bold,
+   --loser fades to graphite (still 8:1 on the card surface). */
+.gamecard__runs {
+  justify-self: center;
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-score);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+/* An in-progress game's row wears a quiet field-green wash — green is
+   already this card's "happening now" family (the READY pill's own
+   --field-soft), so a tinted band reads as "on the field right now" while a
+   final's row stays plain paper. A wash, not a badge: full-bleed across the
+   card (no inline padding, so the numerals stay dead on the column centers),
+   and the totals rule just re-inks toward field green. */
+.gamecard__scoreline--live {
+  /* Match the base rule's top padding — a fill makes lopsided padding
+     visible in a way the bare paper row never showed. */
+  padding-bottom: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--field-soft);
+  border-top-color: color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  /* Root a stacking context so the hover sheen below can sit at z -1 —
+     above this band's own fill, below its ink. */
+  z-index: 0;
+}
+
+/* Hover detail for the live band: outfield mow stripes. The band's green
+   already says "this game is on the field right now" — resting the pointer
+   on the card brings up the freshly-cut look: wide alternating rows of
+   barely-deeper green, leaned to the same slight angle as the '@' watermark
+   (skewX(-8deg) ≈ 98deg here). Kin to the pinstripe tile's hand-styled
+   stripes, but far wider and softer — mow rows, not pinstripes. Painted
+   UNDER the numerals/token (z -1 within the band's stacking context) so
+   hovering never dims the ink; the stripe-over-wash composite is asserted
+   against both inks in check-contrast.mjs (precomputed hex — the checker
+   doesn't parse color-mix). Opacity-only fade (GPU-cheap, fine under
+   reduced motion), hover-capable fine pointers only — on touch, a tap is
+   navigation, and stuck post-tap stripes are noise. */
+.gamecard__scoreline--live::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    98deg,
+    color-mix(in srgb, var(--field) 10%, transparent) 0 14px,
+    transparent 14px 28px
+  );
+  opacity: 0;
+  transition: opacity 200ms ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gamecard__open:hover .gamecard__scoreline--live::after {
+    opacity: 1;
+  }
+}
+
+/* Symmetric padding puts the box center back on the numerals' own center,
+   so the base rule's half-padding nudge would now sit the token low. */
+.gamecard__scoreline--live .gamecard__scorestate {
+  top: 50%;
+}
+
+.gamecard__runs--winner {
+  font-weight: var(--w-bold);
+}
+
+.gamecard__runs--loser {
+  color: var(--text-muted);
+}
+
+/* The game-state token between the totals, composing .t-label (condensed
+   caps). Bold + graphite (not caption gray) so the inning — one of the three
+   things this row exists to say — reads as ink, not a footnote. */
+.gamecard__scorestate {
+  position: absolute;
+  left: 50%;
+  /* 50% centers on the padding box, whose top 8px is the totals rule's
+     breathing room — nudge down half of it to sit on the numerals' own
+     optical center. */
+  top: calc(50% + var(--space-2) / 2);
+  transform: translate(-50%, -50%);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Scorebook-readiness pill: four small checkbox pips for whether the basics
+   you'd pencil in pre-game (each team's lineup, the umpires, both starters)
+   are posted yet, in a fixed left-to-right order — unlabeled, since pip
+   position is learned once you've seen it. Bare (no chrome) while any are
+   still outstanding: each pip already draws its own checkbox border, so the
+   row reads as a deliberate checklist with no wrapper needed, and a not-yet-
+   posted pip is a hollow paper box, never red — nothing here reads as an
+   alarm for the hours before any of this could actually be wrong. Only once
+   all four post does `--complete` add the "Ready" word and the pill chrome
+   (same shape as .gamecard__level/.gamecard__dh, tinted field-green) — a
+   tinted "good status" background around a still-incomplete checklist would
+   claim a state that isn't true yet. Deliberately NOT bold even complete —
+   it sits on the same line as .gamecard__status (the start time) and matches
+   that line's regular weight rather than the loud bold badges, since it's a
+   quiet status, not a headline. */
+.gamecard__readypill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gamecard__readypill--complete {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--field) 35%, var(--border-rule));
+  background: var(--field-soft);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--field-deep);
+}
+
+.gamecard__readypill-pips {
+  display: flex;
+  gap: 4px;
+}
+
+.pip {
+  display: inline-flex;
+}
+
+.pip rect {
+  fill: var(--paper-1);
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+.pip__tick {
+  fill: none;
+  stroke: var(--paper-3);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.pip--on rect {
+  fill: var(--field);
+  stroke: var(--field-deep);
+}
+.pip--on .pip__tick {
+  opacity: 1;
+}
+
+/* National-broadcast flag: a small TV-screen glyph on .gamecard__metaright,
+   between the ready pips and the start time/FINAL — the blackout-relevant
+   fact that this game airs on a national network (FOX/ESPN/TBS/Apple TV+/…)
+   rather than only the local regional feed. Muted like the pips' unchecked
+   state rather than an alert color — this is informational, not a warning. */
+.gamecard__nationaltv {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.gamecard__nationaltv rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+.gamecard__nationaltv path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* A network's real wordmark, once one exists in broadcastLogos.js, replaces
+   the glyph+text pairing above entirely — the mark alone is the label. Height
+   is the pinned dimension (matched to the glyph it replaces); width floats
+   per wordmark, so FOX/TBS/Peacock/etc. each render at their own natural
+   proportions rather than being squashed to a shared box. */
+.gamecard__nationaltv-logo {
+  display: block;
+  height: 16px;
+  width: auto;
+  max-width: 56px;
+  object-fit: contain;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  min-height: var(--tap-min);
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.btn--next {
+  width: 100%;
+  margin-top: 20px;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
+}
+
+/* "Caught up to live" status — replaces the forward action in the innings bar
+   while following at the live frontier (InningViewer atLiveEdge). Same footprint
+   as .btn--next / .revealsplit so the bar never jumps as halves tick over; a
+   soft medal-amber chip (a quieter cousin of the solid kraft .modestrip) with
+   a slow-pulsing dot, reading "the seal is off, and we're current." */
+.liveedge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: 20px;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid var(--seal);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.liveedge__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--seal);
+  box-shadow: 0 0 0 0 rgba(181, 130, 74, 0.55);
+  animation: liveedge-pulse 1.8s var(--ease-standard) infinite;
+}
+@keyframes liveedge-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(181, 130, 74, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(181, 130, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(181, 130, 74, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .liveedge__dot { animation: none; }
+}
+
+/* The innings bar's primary action while the shown half is still sealed. It IS
+   the seal now (the inline cover is gone): the same kraft diagonal-hatch texture
+   the cover box carried, so revealing still reads as "peel the tape." Flips to
+   .btn--next once revealed. */
+.btn--reveal {
+  width: 100%;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--seal-texture);
+  border-color: var(--seal-hatch);
+  color: var(--seal-ink);
+  font-weight: var(--w-bold);
+}
+.btn--reveal .btn__ball {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* Two side-by-side reveal choices for a sealed half (ADR-0016): step to the
+   next at-bat, or reveal the whole half at once. Same kraft-seal button as
+   .btn--reveal, just split into equal-width halves instead of one full-width
+   button. */
+.revealsplit {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  max-width: calc(var(--app-width) - 2 * var(--app-gutter));
+  margin-top: 20px;
+}
+.revealsplit__btn {
+  width: auto;
+  flex: 1 1 0;
+  margin-top: 0;
+  min-width: 0;
+  /* A true phone column only gives each of these two buttons ~half of
+     .revealsplit's already-narrow max-width — "Reveal next at-bat" /
+     "Reveal whole {half}" don't fit on one line at that width, so this wraps
+     the label onto a second line (min-height is a floor, not a fixed height,
+     so the button grows to fit) rather than truncating it with an ellipsis.
+     The 780px-wide override below gives them enough room to stay one line. */
+  padding: 8px 10px;
+  white-space: normal;
+  text-align: center;
+  line-height: var(--lh-snug);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+.btn--danger {
+  background: var(--clay);
+  border-color: var(--clay-deep);
+  color: #fff4f1;
+  font-weight: var(--w-bold);
+}
+

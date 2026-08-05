@@ -10,9 +10,10 @@
 // Order is "current-season and busiest first, archival/meta last": live
 // standings/leaders/fouls (what's happening now) → player-
 // trajectory pages (prospects/rehab/milestones) → the deeper-cut umpire
-// stats → season-culminating history → the two personal/unsealed pages (My
-// First Scorebook, a retrospective; Game Photos, an unsealed CDN photo finder
-// — see route.js and root CLAUDE.md's spoiler section), always last.
+// stats → season-culminating history → the three personal/unsealed pages
+// (Logbook, this device's own stamped games — ADR-0035; My First Scorebook, a
+// retrospective; Game Photos, an unsealed CDN photo finder — see route.js and
+// root CLAUDE.md's spoiler section), always last.
 //
 // Two pages are deliberately NOT in this shared list, each for its own
 // screen: Logo Sheet ('/logos') is one of the footer's three bordered
@@ -34,6 +35,7 @@ export const REPORT_PAGES = [
   { label: 'Trade Deadline', path: '/trade-deadline' },
   { label: 'All Star Game', path: '/all-star-rosters' },
   { label: 'All-Star Legacy', path: '/all-star-legacy' },
+  { label: 'Logbook', path: '/logbook' },
   { label: 'My First Scorebook', path: '/first-scorebook' },
   { label: 'Game Photos', path: '/photos' },
 ]

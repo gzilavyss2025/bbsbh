@@ -37,6 +37,12 @@
   --fs-label:   12px;   /* condensed uppercase section labels */
   --fs-body:    15px;
   --fs-ui:      14px;
+  /* Text INPUTS only, and not a taste call: mobile Safari zooms the page in
+     whenever a focused field's text is under 16px, which throws the layout off
+     centre and leaves the reader pinch-zooming back out. 16px is that floor, so
+     a field consumes this role rather than the (smaller) --fs-body the copy
+     around it uses. */
+  --fs-field:   16px;
   --fs-small:   13px;
   --fs-compact: 12px;
   --fs-caption: 11px;
