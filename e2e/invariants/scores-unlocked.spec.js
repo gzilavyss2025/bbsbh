@@ -85,6 +85,114 @@ test('the day pass is offered today, gated by consent, and the switch is its own
   expect(JSON.parse(daysOff ?? '[]')).toHaveLength(0)
 })
 
+// Switching the pass OFF has to re-seal the slate in THIS tab, immediately —
+// "an accidental tap on the confirm button costs nothing" (useScoresUnlocked's
+// own words) is worth nothing if the scores stay on screen until a reload.
+//
+// The test above already toggles off and checks localStorage, and it passed
+// throughout the window this was broken: the day map was persisted correctly
+// and only the IN-MEMORY copy went stale, so nothing that reads storage could
+// see it. `spoilersOffFor` reads the in-memory copy. So this asserts the one
+// thing that actually tells them apart — live scores still painted on the
+// cards, after the user has explicitly said stop.
+//
+// WHY THIS ONE STUBS THE FEED where its siblings guard on it: the observable
+// IS a score on a card, so "no feed" would mean nothing to assert rather than
+// less to assert, and a guarded version would silently pass everywhere it
+// mattered. Two synthetic Live games is the smallest slate that renders a score
+// line at all. Everything under test — the toggle, the consent sheet, the hook,
+// `spoilersOffFor` — is the real thing; only the feed behind it is fixed. A
+// stub that stops matching fails loudly (no cards, no score lines at step one)
+// rather than quietly asserting nothing.
+const localToday = () => {
+  const d = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// The shape fetchSchedule asks for, trimmed to what a card draws with (checked
+// against a real statsapi response for a real slate, 2026-08-05).
+const liveGame = (gamePk, away, home) => ({
+  gamePk,
+  gameDate: `${localToday()}T18:10:00Z`,
+  officialDate: localToday(),
+  // Live, not Final: `todayAllFinal` would otherwise hide the very toggle this
+  // test drives, and a Final slate takes the past-day reveal-all path instead.
+  status: { abstractGameState: 'Live', detailedState: 'In Progress', statusCode: 'I' },
+  teams: {
+    away: { team: { ...away, sport: { id: 1, name: 'Major League Baseball' } } },
+    home: { team: { ...home, sport: { id: 1, name: 'Major League Baseball' } } },
+  },
+  venue: { id: 1, name: 'Test Park', timeZone: { tz: 'CDT', id: 'America/Chicago' } },
+  gameNumber: 1,
+  doubleHeader: 'N',
+})
+
+test('switching the pass off re-seals the slate immediately, without a reload', async ({ page }) => {
+  const day = localToday()
+  const games = [
+    liveGame(776001, { id: 158, name: 'Milwaukee Brewers', teamName: 'Brewers', abbreviation: 'MIL' }, { id: 112, name: 'Chicago Cubs', teamName: 'Cubs', abbreviation: 'CHC' }),
+    liveGame(776002, { id: 147, name: 'New York Yankees', teamName: 'Yankees', abbreviation: 'NYY' }, { id: 111, name: 'Boston Red Sox', teamName: 'Red Sox', abbreviation: 'BOS' }),
+  ]
+  const slateScores = {
+    dates: [
+      {
+        games: games.map((g, i) => ({
+          gamePk: g.gamePk,
+          teams: { away: { score: 3 + i }, home: { score: 1 + i } },
+          linescore: { currentInning: 5, inningState: 'Top' },
+        })),
+      },
+    ],
+  }
+
+  await page.route(
+    (url) => url.hostname === 'statsapi.mlb.com',
+    (route) => {
+      const u = route.request().url()
+      // The two requests this test cares about, told apart by their hydrate:
+      // the slate itself never asks for a linescore (that is the whole point of
+      // fetchSchedule staying score-free), and the score line's own request is
+      // the only one that does.
+      const onToday = u.includes(`&date=${day}`)
+      const body =
+        onToday && u.includes('hydrate=linescore') ? slateScores
+        : onToday && u.includes('venue(timezone)') ? { dates: [{ games }] }
+        : { dates: [] }
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(body),
+      })
+    },
+  )
+
+  await page.goto('/')
+  await clearPass(page)
+  await page.reload()
+
+  const scoreLines = page.locator('.gamecard__scoreline')
+  // If this is 0 the stub has stopped matching and nothing below means anything.
+  await expect(page.locator('.gamecard')).toHaveCount(2)
+  await expect(scoreLines).toHaveCount(0)
+
+  // Pass ON: the slate paints live scores.
+  const toggle = page.getByTestId('scores-unlock-switch')
+  await toggle.click()
+  await page.locator('.consent__btn--confirm').click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'true')
+  await expect(scoreLines).toHaveCount(2)
+
+  // Pass OFF again — no reload, no navigation. THE assertion: the scores are
+  // gone from the DOM, not merely gone from localStorage.
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'false')
+  await expect(scoreLines).toHaveCount(0)
+  expect(
+    JSON.parse((await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)) ?? '[]'),
+  ).toHaveLength(0)
+})
+
 test('the day pass is NOT offered on a past day', async ({ page }) => {
   await page.goto(GAME) // navigate into a game so a feed request has been made
   await page.goto('/07072026') // a past-day slate
