@@ -13,10 +13,15 @@ import { SimilarPlayerGrid } from './SimilarPlayerGrid.jsx'
 
 // What the grid's "Measured on" band names, in the same order the model
 // weights them: pitcherSimilarity.js scores SHAPE (per-type share of pitches)
-// against VELOCITY, then filters the pool to one throwing hand. The hand is
-// listed because it's the reason a whole side of the staff is missing from a
-// list, which a reader can otherwise only read as a bug.
-const MEASURE = ['Pitch mix', 'Average velo', 'Same throwing hand']
+// against VELOCITY.
+//
+// The band lists what is MEASURED, so the same-hand restriction is left off it
+// even though it still applies — it's a filter on who enters the pool, not a
+// term in the distance, and naming it here read as a third thing being scored.
+// The pool restriction itself is unchanged and load-bearing (a lefty's ball
+// moves the other way, so a mixed-hand list reads as a bug); see
+// pitcherSimilarity.js and src/api/CLAUDE.md before touching THAT.
+const MEASURE = ['Pitch mix', 'Average velo']
 
 // The position line under each face. pitch-arsenal.json carries `throws` but
 // no position, and every arm in this pool is a pitcher, so "P" alone would

@@ -25,12 +25,14 @@ import { teamClubNameShort } from '../../lib/teams.js'
 // bottom-aligned across all three (`margin-top: auto`) so the numbers still
 // read as one comparable row even when one name wraps and another doesn't.
 //
-// The cell is FIVE stacked elements at most — face, name, position + club on
+// The cell is FOUR stacked elements at most — face, name, position + club on
 // one caption line, and the match footer — because a phone-sized column that
 // stacks six centered things reads as a pile rather than a card. The
-// stylesheet scales all of it up past 740px: three thirds of a desktop-width
-// page are wide enough that phone-sized type inside them floats in dead
-// space, which is the failure this card had on its first pass.
+// stylesheet scales all of it up past 740px and turns the stack on its side
+// there (face left, name/position/club right, figure below): three thirds of a
+// desktop-width page are wide enough that a centered phone-sized column inside
+// them floats in dead space, which is the failure this card had on its first
+// pass.
 //
 // THE MATCH NUMBER IS SHOWN ON PURPOSE. A bare "hits like X, Y, Z" is a
 // confident-sounding claim the data doesn't always support: a pitcher with a
@@ -53,10 +55,18 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
 
   return (
     <div className="simlike">
-      <p className="simlike__measure">
-        <span className="simlike__measurelabel">Measured on</span>
-        <span className="simlike__measureterms">{measure.join(' · ')}</span>
-      </p>
+      {/* One legend block, not three loose fragments. What the comparison runs
+          on and what it stops short of claiming are the same thought, and they
+          used to sit at opposite ends of the card with the three faces between
+          them — the caveat in particular read as a stray line of copy that had
+          drifted under the grid. Stated together, before the evidence. */}
+      <div className="simlike__legend">
+        <p className="simlike__measure">
+          <span className="simlike__measurelabel">Measured on</span>
+          <span className="simlike__measureterms">{measure.join(' · ')}</span>
+        </p>
+        <p className="simlike__note">{note}</p>
+      </div>
       <ul className="simlike__list">
         {rows.map((p) => {
           const { first, last } = splitDisplayName(p.name)
@@ -70,21 +80,28 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
                   teamId={p.teamId}
                   className="simlike__shot"
                 />
-                <span className="simlike__ident">
-                  {first && <span className="simlike__first">{first}</span>}
-                  <span className="simlike__last">{last}</span>
-                </span>
-                {/* Position and club share one line as the cell's caption.
-                    The position is absent for a player we couldn't resolve one
-                    for — the same degrade-to-nothing every other optional
-                    field on a MiLB-capable surface gets, never a guessed "P" —
-                    and the line disappears entirely when neither resolves. */}
-                {(p.pos || club) && (
-                  <span className="simlike__meta">
-                    {p.pos && <span className="simlike__pos">{p.pos}</span>}
-                    {club && <span className="simlike__club">{club}</span>}
+                {/* Everything that isn't the face or the figure, wrapped so it
+                    can move as one block: it sits under the headshot on a
+                    phone and beside it on a desktop column wide enough to put
+                    them side by side. */}
+                <span className="simlike__body">
+                  <span className="simlike__ident">
+                    {first && <span className="simlike__first">{first}</span>}
+                    <span className="simlike__last">{last}</span>
                   </span>
-                )}
+                  {/* Position and club share one line as the cell's caption.
+                      The position is absent for a player we couldn't resolve
+                      one for — the same degrade-to-nothing every other
+                      optional field on a MiLB-capable surface gets, never a
+                      guessed "P" — and the line disappears entirely when
+                      neither resolves. */}
+                  {(p.pos || club) && (
+                    <span className="simlike__meta">
+                      {p.pos && <span className="simlike__pos">{p.pos}</span>}
+                      {club && <span className="simlike__club">{club}</span>}
+                    </span>
+                  )}
+                </span>
                 <span className="simlike__match">
                   <span className="simlike__matchval">
                     {p.match}
@@ -97,10 +114,6 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
           )
         })}
       </ul>
-      {/* One line, because the page's copy renders in scorebook caps and four
-          lines of it shouts. The band above says what is compared; this says
-          what the comparison does NOT claim. */}
-      <p className="hint hint--prose simlike__note">{note}</p>
     </div>
   )
 }

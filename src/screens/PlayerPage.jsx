@@ -385,20 +385,21 @@ export function PlayerPage({ id, asOf, sportId }) {
                 lib/pitcherSimilarity.js); a hitter's are Statcast-skill-space
                 (how he hits, see lib/hitterSimilarity.js). Renders nothing
                 below the sample floors or when nobody clears the match floor.
-                The note says only how MANY — what "closest" is measured on is
-                the card's own "Measured on" band, which names the actual
-                inputs (SimilarPlayerGrid.jsx); it used to be this note, where
-                "closest Statcast profiles" was a phrase a reader had no way
-                to check. */}
+                NO section note, unlike its neighbours: what "closest" is
+                measured on now lives in the card's own legend, which names the
+                actual inputs (SimilarPlayerGrid.jsx). The note that used to be
+                here said "closest Statcast profiles", a phrase a reader had no
+                way to check, and then briefly "3 closest", which only counted
+                cards already on screen. */}
             {block.similar?.length > 0 && (
               block.group === 'pitching' ? (
                 <>
-                  <SectionTitle title="Pitches like" note={`${block.similar.length} closest`} />
+                  <SectionTitle title="Pitches like" />
                   <SimilarPitchers similar={block.similar} />
                 </>
               ) : (
                 <>
-                  <SectionTitle title="Hits like" note={`${block.similar.length} closest`} />
+                  <SectionTitle title="Hits like" />
                   <SimilarHitters similar={block.similar} />
                 </>
               )
