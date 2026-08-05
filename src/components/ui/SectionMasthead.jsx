@@ -1,5 +1,5 @@
-// The navy/gold section masthead for the pre-game cards (Lineup Strength,
-// Bullpen Health, and the batting order / opposing defense / opposing starter
+// The navy/gold section masthead for the pre-game cards (Bullpen Health,
+// and the batting order / opposing defense / opposing starter
 // sections): a navy bar with a kraft-gold bottom border, a condensed-uppercase
 // title, and a right-aligned slot for an info affordance. `children` is the
 // right-aligned slot (typically an <InfoPopover>). `as` sets the title element:

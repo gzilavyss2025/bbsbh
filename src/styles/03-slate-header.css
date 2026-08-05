@@ -116,14 +116,17 @@
   min-width: 0;
 }
 
-/* The icon buttons (search, menu, and — when reveal sync is configured — the
-   account button) as ONE nowrap unit inside the wrapping actions row. Without
-   this sub-group, flex-wrap moves items individually, so whichever single
-   button no longer fits drops to its own row as an orphan — a lone account
-   avatar floating under the menu icon on a 402px-wide iPhone was the real
-   rendered bug. Grouped, either all the icons share the level-pill row or the
-   whole trio wraps below it together (the fallback the .levelnav comment
-   below describes). Guarded by e2e/slate-header.spec.js. */
+/* The icon buttons (search, the labelled Game Log pill, menu, and — when reveal
+   sync is configured — the account button) as ONE nowrap unit inside the
+   wrapping actions row. The Game Log's word (see LogbookButton.jsx) makes this
+   group ~60px wider than an all-glyph row, so it now drops below the level
+   pills at a wider viewport than it used to — which is the intended trade, and
+   why the group has to wrap as a unit rather than shedding one button. Without this sub-group, flex-wrap moves items individually, so
+   whichever single button no longer fits drops to its own row as an orphan —
+   a lone account avatar floating under the menu icon on a 402px-wide iPhone
+   was the real rendered bug. Grouped, either all the icons share the
+   level-pill row or the whole group wraps below it together (the fallback
+   the .levelnav comment below describes). Guarded by e2e/slate-header.spec.js. */
 .topbar__iconcluster {
   display: flex;
   flex-wrap: nowrap;
@@ -148,23 +151,25 @@
   min-height: 30px;
 }
 
-/* Condensed to fit beside the title: content-width (not full-bleed), tighter
-   gaps, and smaller pill buttons than the standalone level toggle. Natural
-   (unshrunk) size — on a narrow phone there isn't room to compress five level
-   pills AND the icon buttons onto one line without either overlapping or
-   clipping button labels, so the icon buttons wrap onto their own row instead
-   (as a unit — see .topbar__iconcluster above) rather than the level pills
-   losing their min-content floor. */
+/* Condensed to fit beside the title: content-width (not full-bleed) and
+   smaller cells than the standalone level toggle. No gap to override here —
+   the strip's cells are flush (see .levelnav in 05-masthead-nav.css); a
+   leftover `gap: 4px` from the old five-separate-chips design lived on this
+   override until it turned into a cream sliver next to the active navy cell.
+   Natural (unshrunk) size — on a narrow phone there isn't room to compress
+   five level cells AND the icon buttons onto one line without either
+   overlapping or clipping button labels, so the icon buttons wrap onto their
+   own row instead (as a unit — see .topbar__iconcluster above) rather than
+   the level strip losing its min-content floor. */
 .topbar--slate .levelnav {
   flex: 0 0 auto;
-  gap: 4px;
   margin: 0;
 }
 
 .topbar--slate .levelnav__btn {
   min-height: 30px;
   padding: 0 6px;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
 }
 
 /* Two-class selector so this actually beats .sitesearch-btn/.sitemenu-btn's

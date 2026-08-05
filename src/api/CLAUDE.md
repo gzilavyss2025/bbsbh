@@ -504,35 +504,6 @@ for each generator; the reader modules:
   latest revealed inning, within one pitch type; null at untracked MiLB
   parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
   see below and `docs/callouts.md`), not rendered directly.
-- `lineupStrength.js` — the Lineup Strength grade, from
-  `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
-  `src/lib/lineupSolver.js` (exact Hungarian assignment over the eligible
-  positions). Each hitter carries a bat (`rpg`, from wRC+) and a glove
-  (`fldRpg`, from season fielding runs) as SEPARATE numbers; `slotValue` adds
-  both at a fielding slot and uses the bat alone at DH. **`docs/lineup-strength.md`
-  is required reading before changing any of this** — it records the three things
-  removed from the model (positional adjustment, familiarity discount,
-  career-based eligibility), each of which looks like an obvious addition and
-  each of which produced provably wrong answers. `receiptFor` groups the
-  optimal-vs-posted difference into paths and cycles so one move is one row and
-  the rows sum to the gap; `rpgFromWar`/`fldRpgFromRuns` are the runtime echoes
-  of the generator's model and must stay in step with it.
-  `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
-  statTiers tier, the itemized receipt (`sub`/`chain`/`shuffle` rows — a
-  personnel swap, a multi-slot shift, or a same-nine rearrangement) and
-  `ungraded` (posted starters with no value in any file). The card
-  (`LineupStrengthCard.jsx`) currently renders only the score + tier; the
-  receipt is computed and tested but deliberately not surfaced yet — see
-  docs/lineup-strength.md "Explaining the grade".
-  Spoiler-free by construction (the posted starting nine + season
-  aggregates); surface is `LineupStrengthCard` under the batting order on
-  the lineup pages. MLB only. A starter posted after the last nightly build
-  (trade/call-up) is resolved best-data-first: another club's file entry,
-  then `war.json` (via `rpgFromWar`, which is why `fetchLineupValues`
-  attaches a `warFallback`), else his slot is excluded from the gap and shown
-  as "not yet in the season data" — a data hole never reads as a weakness.
-  `names` (the posted lineup's id→name map) backfills a war-only starter's
-  name in the receipt.
 - `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
   `public/data/season-score.json`. The nightly generator stores snapshots by
   season, team, and completed date rather than one mutable current row;

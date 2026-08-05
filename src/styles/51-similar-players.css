@@ -13,9 +13,13 @@
    deliberately not, for two reasons. Its ONE ordering dependency is `.plink`
    (26-player-page.css), which it overrides, and being later satisfies that
    more safely than being adjacent. And inserting at 27 would renumber
-   twenty-two partials across a repo with several live branches, a collision
+   twenty-odd partials across a repo with several live branches, a collision
    for every one of them in exchange for nothing the cascade needs. Nothing
-   between 28 and 49 touches these selectors.
+   between 28 and 50 touches these selectors.
+
+   It was 50- before `50-logbook-landing.css` landed on main and took the
+   number. Two branches appending on the same day is exactly the collision the
+   append-at-the-end habit invites; whoever adds 52- should expect the same.
    ============================================================ */
 
 /* ---- "Pitches like" / "Hits like" (player page): the three closest

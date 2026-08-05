@@ -51,28 +51,28 @@ const MAX_FILES = 12
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
-  // The 50 stylesheet partials src/index.css @imports in order. This one is a
+  // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is
   // what makes the @import list and the cascade readable. Nesting them would
   // break that ordering for no gain. See ADR-0038.
   //
-  // 49 -> 50 for `50-similar-players.css`: the player page's "Pitches like" /
+  // 50 -> 51 for `51-similar-players.css`: the player page's "Pitches like" /
   // "Hits like" card, moved out of 27-player-position-innings.css when that
   // file hit its own size budget. Its alternatives were both worse — leaving
   // it in a file the file-size guard had already flagged, or nesting it and
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
-  'src/styles': 50,
-  'src/api': 84,
+  'src/styles': 51,
+  'src/api': 83,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
-  scripts: 68,
+  scripts: 67,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
-  'src/lib': 53,
+  'src/lib': 51,
   'src/screens': 38,
   'src/hooks': 21,
   'src/screens/identity-lab': 15,

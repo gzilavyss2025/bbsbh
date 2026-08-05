@@ -26,14 +26,56 @@
      doesn't crowd the slate. The date stepper right below it is deliberately
      left OUT: it's a per-day control, not a nav landmark worth nagging
      "you're on {date}" through every scroll, and paging days already
-     reloads the slate under it anyway. Opaque backdrop so cards scroll
-     cleanly underneath instead of showing through (the phone-width
-     .slatehead comment above explains why no fill is needed there). */
+     reloads the slate under it anyway. Needs to stay opaque once a scrolled
+     card is actually passing underneath it, but a flat color patch read as
+     a hard-edged banner — so this is the same faint graph-paper grid body
+     itself is drawn on (01-base.css), not a solid fill, so the pinned row
+     reads as a continuation of the page rather than a plate laid over it. */
   .topbar--slate {
     position: sticky;
     top: 0;
     z-index: 5;
-    background: var(--bg-canvas);
+    background-color: var(--bg-canvas);
+    background-image: linear-gradient(var(--rule-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--rule-grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Near-zero-height sticky sentinel GameSelect.jsx renders just above the
+     real header, purely so its own IntersectionObserver can tell when the
+     header has actually started sticking (see the JSX comment there). 1px,
+     not 0 — a genuinely zero-area target makes some browsers' intersection
+     ratio unreliable. top: -1px, not 0 — pinned flush at 0 it would stay
+     FULLY visible (ratio 1) for the entire time it's stuck, since nothing
+     ever pushes it out of the viewport; parked 1px above the viewport
+     instead, it reads as not-fully-intersecting for as long as it's stuck,
+     not just the single transitional frame `top: 0` would have caught. */
+  .topbar__stickysentinel {
+    position: sticky;
+    top: -1px;
+    height: 1px;
+    margin-bottom: -1px;
+  }
+
+  /* Only once a card is passing underneath the pinned header — not at rest
+     on a fresh page, where a permanent shadow would just read as a banner.
+     A gradient fade on a ::after, not box-shadow directly on the header:
+     box-shadow's blur bleeds equally left/right as well as down, and a
+     background never bleeds past its own box the way a blurred shadow does
+     — no clip-path needed to trim the sides, which matters here since the
+     search/menu buttons render their full-screen overlays as descendants of
+     this same header, and a clip-path on the header itself would cut into
+     those too. Same ink color the app's shadow tokens already use
+     (rgba(22,34,47,…), see --shadow-raised in tokens/effects.css). */
+  .topbar--slate.topbar--stuck::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 16px;
+    background: linear-gradient(rgba(22, 34, 47, 0.16), transparent);
+    pointer-events: none;
   }
 
   /* ---- slate: the date stepper and the day-state row (Live Scores toggle

@@ -21,8 +21,9 @@ const teamAvatarAppearance = {
 // Only rendered when Clerk is configured (see clerkConfig.js) — otherwise
 // ClerkProvider isn't mounted at all and these components would have no
 // context to read. Signing in is what lets revealedThrough sync across a
-// user's devices (see useRevealCloudSync.js); it's entirely optional —
-// everything works locally, per-device, without ever touching this.
+// user's devices (see useRevealCloudSync.js). Scoring and reveals still work
+// locally without it; on a configured deploy the Game Log explains why an
+// account is needed before it opens the user's synced book.
 export function AccountButton({ className = '' }) {
   const { favoriteTeamId } = useFavoriteTeam()
   if (!isClerkEnabled) return null

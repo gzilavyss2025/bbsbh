@@ -5,10 +5,11 @@ import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react'
 // reveal high-water mark, never a score (ADR-0022) — across a user's own
 // devices, so a game started on the couch phone picks up on the kitchen iPad,
 // and the slate's "Pick up your pencil" strip (ContinueScoring.jsx) can resume
-// it without a feed fetch. Entirely optional: everything works per-device
-// without an account. Only ever rendered when isClerkEnabled — FavoriteTeamModal
-// lazy-loads it — because it touches Clerk hooks/components at its top level,
-// which throw with no ClerkProvider ancestor.
+// it without a feed fetch. Scoring and reveals continue per-device without an
+// account; the Game Log is the account destination on configured deployments.
+// Only ever rendered when isClerkEnabled — FavoriteTeamModal lazy-loads it —
+// because it touches Clerk hooks/components at its top level, which throw with
+// no ClerkProvider ancestor.
 export function AccountPitch() {
   return (
     <section className="favteamsheet__section favteamsheet__section--divider">

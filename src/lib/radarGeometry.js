@@ -2,7 +2,7 @@
 // src/components/playercard/StatRadar.jsx. Pure: numbers in, numbers out, no
 // DOM and no React, so the shape can be pinned by unit tests rather than
 // eyeballed in a browser. The component does nothing but turn these into SVG
-// attributes. Same split as lib/beeswarm.js and lib/lineupSolver.js.
+// attributes. Same split as lib/beeswarm.js and lib/passportLayout.js.
 //
 // WHY PERCENTILES ARE THE RADIUS. Savant's percentile ranks are already
 // pre-flipped so that higher is always better, even for metrics where a low raw

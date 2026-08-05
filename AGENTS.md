@@ -45,4 +45,11 @@ See `docs/development.md` for the expanded workflow and reserved ports.
 ## Architecture docs
 
 - This repo's architecture decisions live in `CLAUDE.md` (root + nested `src/CLAUDE.md`, `src/api/CLAUDE.md`, `scripts/CLAUDE.md`) and `docs/adr/`. Read the relevant one before touching the data layer, generators, or spoiler-reveal logic — don't infer architecture from a single file's diff.
+- **The Game Log** (the personal stamp collection at `/logbook`) has its own scope
+  document: `docs/game-log.md`. Read it before changing anything that surface
+  renders, and **always before writing or editing its copy** — it carries the
+  user-facing-name-vs-code-name contract ("Game Log" in the UI, `logbook` in code
+  and in the route, permanently), the full inventory of shipped strings, and the
+  voice rules those strings follow. The mechanics are guarded by tests; the voice
+  is not.
 - As of `docs/adr/0021-sqlite-data-layer.md`: `gen-team-score.mjs` and `gen-season-score.mjs` now author their `public/data/*.json` output through a shared SQLite layer (`scripts/lib/schema.sql`, `scripts/lib/db.js`) instead of hand-rolled JSON merges, so cross-file joins (e.g. Season Grade) don't need another one-off merge function. The committed source of truth is TEXT dumps (`scripts/data/*.sql`), never a binary `.db` — see the ADR before adding a new table or generator to this layer.

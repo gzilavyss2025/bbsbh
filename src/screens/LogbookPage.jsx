@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
+import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { gamePath, logbookPath, logbookStatsPath } from '../lib/route.js'
 import {
   PAGE_CAPACITY,
@@ -19,6 +20,16 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { GameStamp } from '../components/logbook/GameStamp.jsx'
 import { PassportBook } from '../components/passport/PassportBook.jsx'
 import { PassportCover } from '../components/passport/PassportCover.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
+import { LogbookLanding } from '../components/account/LogbookLanding.jsx'
+
+const LogbookAccountGate = isClerkEnabled
+  ? lazy(() =>
+      import('../components/account/LogbookAccountGate.jsx').then((module) => ({
+        default: module.LogbookAccountGate,
+      })),
+    )
+  : null
 
 // The Logbook — your passport book of game stamps (ADR-0035, ADR-0036).
 //
@@ -36,9 +47,10 @@ import { PassportCover } from '../components/passport/PassportCover.jsx'
 //
 // LOCAL-FIRST. The collection comes from localStorage (useStamps), which holds
 // no scores at all; the facts each stamp draws with are resolved at render time
-// from the schedule (api/logbook.js). A signed-out user therefore gets a real,
-// working Logbook on this device, and a signed-in one gets the same page with
-// the collection merged across devices by StampsCloudSync. One code path.
+// from the schedule (api/logbook.js). On a Clerk-configured deploy this book is
+// the signed-in branch behind LogbookAccountGate; the signed-out branch explains
+// the feature and offers account entry. A deploy with no Clerk keeps the local
+// collection directly accessible, preserving the optional-dependency fallback.
 //
 // ===========================================================================
 // The book, and the two-step placement flow (ADR-0036)
@@ -71,8 +83,38 @@ function monthDay(date) {
   return year ? MONTH_DAY.format(new Date(year, month - 1, day)) : ''
 }
 
-export function LogbookPage({ season: requestedSeason = null, placing = null }) {
-  useDocumentTitle('Logbook')
+export function LogbookPage(props) {
+  useDocumentTitle('Game Log')
+
+  // Local visual handoff for a surface that otherwise needs a configured,
+  // signed-out Clerk session. DEV-only, so production auth remains the only
+  // way into the pitch; route parsing already ignores query strings.
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('signedout')) {
+    return <LogbookLanding />
+  }
+
+  if (LogbookAccountGate) {
+    return (
+      <Suspense fallback={<LogbookGateLoader />}>
+        <LogbookAccountGate Book={LogbookCollection} pageProps={props} />
+      </Suspense>
+    )
+  }
+
+  return <LogbookCollection {...props} />
+}
+
+function LogbookGateLoader() {
+  return (
+    <div className="screen logbook">
+      <SiteHeader />
+      <Loader />
+      <ReportFooter />
+    </div>
+  )
+}
+
+function LogbookCollection({ season: requestedSeason = null, placing = null }) {
   const navigate = useNav()
   const { counts, seasons, forSeason, all, unplaced, place, unplace, placeAll } = useStamps()
 
@@ -211,7 +253,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
     <div className="screen logbook">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Logbook</h1>
+        <h1 className="topbar__title">Game Log</h1>
         {total > 0 && (
           <button
             type="button"
@@ -378,7 +420,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
 
           {/* Everything the Logbook already showed, shifted below the book. */}
           {seasons.length > 1 && (
-            <nav className="logbook__seasons" aria-label="Logbook seasons">
+            <nav className="logbook__seasons" aria-label="Game Log seasons">
               {seasons.map((year) => (
                 <button
                   type="button"

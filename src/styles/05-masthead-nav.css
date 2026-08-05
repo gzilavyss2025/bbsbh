@@ -273,41 +273,58 @@
 }
 
 /* ---------------------------------------------------------- level toggle
-   Thin segmented control across the top of the slate: MLB / AAA / AA / A+ / A.
-   MLB is selected by default; the active pill inks navy like a scorebook tab. */
+   Flush against the page, hairline dividers between cells like a box score.
+   Active/hover get a rounded pill via ::before, inset 4px so it stops short
+   of the divider (z-index: 0 on the cell contains that fill's z-index: -1
+   to just this button). Grid, not flex: every cell is equal-width no
+   matter the label length. */
 .levelnav {
-  display: flex;
-  gap: 6px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   margin-bottom: 12px;
 }
 
 .levelnav__btn {
-  flex: 1 1 0;
+  position: relative;
+  z-index: 0;
+  min-width: 0;
   min-height: 34px;
   padding: 0 4px;
-  border-radius: var(--radius-sm);
-  border: var(--bw-hair) solid var(--border-rule);
-  background: var(--surface-card);
+  border: none;
+  border-right: var(--bw-hair) solid var(--border-rule);
+  background: transparent;
   color: var(--text-muted);
   font-family: var(--font-display);
-  font-size: var(--fs-compact);
+  font-size: var(--fs-ui);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   cursor: pointer;
-  box-shadow: var(--inset-cell);
   transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.levelnav__btn:last-child {
+  border-right: none;
 }
 
 .levelnav__btn:active {
   transform: scale(0.96);
 }
 
-.levelnav__btn.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
+.levelnav__btn.is-active,
+.levelnav__btn:hover {
   color: var(--text-on-ink);
-  box-shadow: none;
+}
+
+.levelnav__btn.is-active::before,
+.levelnav__btn:hover::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 4px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-primary);
 }
 
 /* ------------------------------------------------------------ team history

@@ -263,7 +263,7 @@ const GENERIC = {
   'trade-deadline': { eyebrow: 'TRADE DEADLINE', title: 'Trade Deadline', sub: "This year's deadline moves, tracked as they happen." },
   'all-star-rosters': { eyebrow: 'ALL-STAR GAME', title: 'All-Star Rosters', sub: 'Every All-Star roster, year over year back to 1933.' },
   'all-star-legacy': { eyebrow: 'ALL-STAR LEGACY', title: 'All-Star Legacy', sub: 'Career All-Star selections and honors, franchise by franchise.' },
-  logbook: { eyebrow: 'LOGBOOK', title: 'Logbook', sub: "A passport of the games you've scored — every stamp your own." },
+  logbook: { eyebrow: 'GAME LOG', title: 'Game Log', sub: "A passport of the games you've scored — every stamp your own." },
   'first-scorebook': { eyebrow: 'MY FIRST SCOREBOOK', title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
   photos: { eyebrow: 'GAME PHOTOS', title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
 }
