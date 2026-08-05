@@ -384,16 +384,21 @@ export function PlayerPage({ id, asOf, sportId }) {
                 A pitcher's neighbours are arsenal-space (what he throws, see
                 lib/pitcherSimilarity.js); a hitter's are Statcast-skill-space
                 (how he hits, see lib/hitterSimilarity.js). Renders nothing
-                below the sample floors or when nobody clears the match floor. */}
+                below the sample floors or when nobody clears the match floor.
+                The note says only how MANY — what "closest" is measured on is
+                the card's own "Measured on" band, which names the actual
+                inputs (SimilarPlayerGrid.jsx); it used to be this note, where
+                "closest Statcast profiles" was a phrase a reader had no way
+                to check. */}
             {block.similar?.length > 0 && (
               block.group === 'pitching' ? (
                 <>
-                  <SectionTitle title="Pitches like" note="closest arsenals" />
+                  <SectionTitle title="Pitches like" note={`${block.similar.length} closest`} />
                   <SimilarPitchers similar={block.similar} />
                 </>
               ) : (
                 <>
-                  <SectionTitle title="Hits like" note="closest Statcast profiles" />
+                  <SectionTitle title="Hits like" note={`${block.similar.length} closest`} />
                   <SimilarHitters similar={block.similar} />
                 </>
               )

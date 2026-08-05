@@ -1,61 +1,51 @@
-import { Headshot } from '../player/Headshot.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
-import { teamClubNameShort } from '../../lib/teams.js'
+import { SimilarPlayerGrid } from './SimilarPlayerGrid.jsx'
 
 // PITCHES LIKE — the three arms whose season pitch mix and velocities most
 // resemble this pitcher's. The ranking is src/lib/pitcherSimilarity.js (pure,
 // unit-tested); the level-aware pool comes from api/pitchArsenal.js's
-// similarPitchersFor. This file is presentation only.
+// similarPitchersFor. This file only shapes that ranking into rows;
+// SimilarPlayerGrid.jsx draws them (and carries the reasoning for the
+// three-across layout and the match figure).
 //
 // Each name is a PlayerLink, so the card doubles as a way to wander the staff
 // — which is most of its value on a second screen. Spoiler-free like the rest
 // of the arsenal data (a completed-game season aggregate), so no SealBox.
-//
-// THE MATCH NUMBER IS SHOWN ON PURPOSE. A bare "pitches like X, Y, Z" is a
-// confident-sounding claim the data doesn't always support: a pitcher with a
-// genuinely unusual arsenal (Kenley Jansen throws 94% cutters) has no close
-// comparison in the league, and his best match scoring 67 rather than 90 is
-// the honest answer. Printing it lets a reader calibrate instead of taking
-// three names on faith. It is a match score, never a probability — the copy
-// beneath says so.
+
+// What the grid's "Measured on" band names, in the same order the model
+// weights them: pitcherSimilarity.js scores SHAPE (per-type share of pitches)
+// against VELOCITY, then filters the pool to one throwing hand. The hand is
+// listed because it's the reason a whole side of the staff is missing from a
+// list, which a reader can otherwise only read as a bug.
+const MEASURE = ['Pitch mix', 'Average velo', 'Same throwing hand']
+
+// The position line under each face. pitch-arsenal.json carries `throws` but
+// no position, and every arm in this pool is a pitcher, so "P" alone would
+// print the same letter three times and say nothing. The hand is the live
+// distinction, in the form a scorecard already uses. An unknown hand can't
+// reach here — similarPitchers skips a candidate the file has no hand for
+// rather than guessing — but the fallback stays for the day that changes.
+function pitcherPos(throws) {
+  if (throws === 'R') return 'RHP'
+  if (throws === 'L') return 'LHP'
+  return 'P'
+}
+
 export function SimilarPitchers({ similar }) {
   if (!similar?.length) return null
 
+  const rows = similar.map((p) => ({
+    personId: p.personId,
+    match: p.match,
+    name: p.name,
+    teamId: p.teamId,
+    pos: pitcherPos(p.throws),
+  }))
+
   return (
-    <div className="pitcheslike">
-      <ul className="pitcheslike__list">
-        {similar.map((p) => {
-          const club = teamClubNameShort(p.teamId)
-          return (
-            <li className="pitcheslike__item" key={p.personId}>
-              <PlayerLink id={p.personId} className="pitcheslike__link">
-                <Headshot
-                  personId={p.personId}
-                  name={p.name}
-                  teamId={p.teamId}
-                  className="pitcheslike__shot"
-                />
-                <span className="pitcheslike__ident">
-                  <span className="pitcheslike__name">{p.name}</span>
-                  {club && <span className="pitcheslike__club">{club}</span>}
-                </span>
-                <span className="pitcheslike__match">
-                  {p.match}
-                  <span className="pitcheslike__matchunit">match</span>
-                </span>
-              </PlayerLink>
-            </li>
-          )
-        })}
-      </ul>
-      {/* One line, because the page's copy renders in scorebook caps and four
-          lines of it shouts. It still has to carry all three things a reader
-          needs: what "similar" is measured on, why a whole handedness is
-          missing from the list, and that this compares what he THROWS, not how
-          he fares with it. */}
-      <p className="hint hint--prose pitcheslike__note">
-        Closest season pitch mix and speeds, same throwing hand — what he throws, not how he fares.
-      </p>
-    </div>
+    <SimilarPlayerGrid
+      rows={rows}
+      measure={MEASURE}
+      note="What he throws, not how he fares with it."
+    />
   )
 }

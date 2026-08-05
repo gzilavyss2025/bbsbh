@@ -260,72 +260,148 @@
   text-align: right;
 }
 
-/* ---- "Pitches like" (player page): the three closest arsenals to this
-   pitcher's, each a tappable row into that player's own page. Rows rather
-   than the pill row the reference design uses — a phone gives three pills
-   about 100px each, which ellipsizes most major-league surnames, and the
-   match figure needs a column of its own to stay scannable. That figure is
-   plain mono ink, never a seal amber: this is analysis, not a score cover
-   (see CLAUDE.md's spoiler rule). ---- */
-.pitcheslike {
+/* ---- "Pitches like" / "Hits like" (player page): the three closest
+   neighbours to this player, each cell a tappable door into that player's own
+   page. One shared block for both cards — they are the same object, and a
+   second copy of this would be two things to keep in sync for no visual gain
+   (SimilarPlayerGrid.jsx draws both).
+
+   THREE ACROSS, replacing three full-width rows with a 33px thumbnail. The old
+   rows spent the whole width on a name that needed a third of it; at a third
+   each there is room for a real 63px headshot, which is what makes a
+   comparison land at a glance. The name splits over two lines the way the
+   player hero's does, so a long surname wraps rather than ellipsizing — and
+   because that makes cells different heights, the match block is pushed to the
+   bottom (`margin-top: auto`) so the three figures still line up as one row.
+
+   The match figure is plain mono ink, never a seal amber: this is analysis,
+   not a score cover (see CLAUDE.md's spoiler rule). ---- */
+.simlike {
   margin: 0 0 18px;
 }
-.pitcheslike__list {
+
+/* The "Measured on" band. Accented rather than quiet on purpose: it is the
+   card's whole warrant, and as a muted section note it read as decoration.
+   The navy edge is the same ink the page's bar headings use, so it reads as
+   part of the section rather than as a warning. */
+.simlike__measure {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  border-left: var(--bw-heavy) solid var(--accent-primary);
+  background: var(--bg-page);
+}
+.simlike__measurelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+.simlike__measureterms {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-snug);
+  color: var(--text-caption);
+}
+
+.simlike__list {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.pitcheslike__item + .pitcheslike__item {
-  border-top: var(--bw-hair) solid var(--border-rule);
-}
-.pitcheslike__link {
   display: grid;
-  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.simlike__item {
+  display: flex;
+  min-width: 0;
+}
+.simlike__link {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  column-gap: 10px;
+  gap: var(--space-1);
   width: 100%;
-  padding: 8px 2px;
-  text-align: left;
+  min-width: 0;
+  padding: 10px 4px 8px;
+  text-align: center;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
 }
-.pitcheslike__shot {
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
+.simlike__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
 }
-.pitcheslike__ident {
+/* The position tag, tucked up over the headshot's lower edge so it reads as
+   belonging to the face rather than as the first line of the name block. */
+.simlike__pos {
+  margin-top: -10px;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+.simlike__ident {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
 }
-.pitcheslike__name {
+.simlike__first {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
+}
+.simlike__last {
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.pitcheslike__club {
+.simlike__club {
   font-size: var(--fs-caption);
   color: var(--text-muted);
 }
-.pitcheslike__match {
+/* Bottom-aligned across the three cells regardless of how far a name wraps. */
+.simlike__match {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 6px;
+}
+.simlike__matchval {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-tight-display);
   color: var(--text-heading);
 }
-.pitcheslike__matchunit {
-  text-transform: uppercase;
+.simlike__matchpct {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+}
+.simlike__matchunit {
   letter-spacing: var(--ls-label);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-muted);
 }
-.pitcheslike__note {
+.simlike__note {
   padding-top: 8px;
   padding-bottom: 0;
 }
