@@ -3,9 +3,9 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { Headshot } from '../components/Headshot.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Headshot } from '../components/player/Headshot.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 
 const DATE = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })

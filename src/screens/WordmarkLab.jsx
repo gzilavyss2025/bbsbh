@@ -1,5 +1,5 @@
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TallyBaseballMark, TallyWordmark } from '../components/chrome/TallyBrand.jsx'
 
 function LegacyWordmark({ height = 42 }) {
   const aspect = 1851 / 458

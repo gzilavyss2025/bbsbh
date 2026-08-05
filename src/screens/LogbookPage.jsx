@@ -14,9 +14,9 @@ import {
   pageIsFullFor,
   placementFor,
 } from '../lib/passportLayout.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
-import { GameStamp } from '../components/GameStamp.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { GameStamp } from '../components/logbook/GameStamp.jsx'
 import { PassportBook } from '../components/passport/PassportBook.jsx'
 import { PassportCover } from '../components/passport/PassportCover.jsx'
 

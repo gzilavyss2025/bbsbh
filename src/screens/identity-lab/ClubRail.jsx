@@ -1,4 +1,4 @@
-import { TeamLogo } from '../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { teamAnchorId } from './teamAnchorId.js'
 
 // The thirty clubs, always to hand, down the left edge. For the colour

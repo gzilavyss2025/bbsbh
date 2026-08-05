@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { TeamLogo } from '../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { CopyIconButton } from '../../components/ui/CopyBox.jsx'
 import { discardStyle, toggleCarry, useStyleCard } from './styleClipboard.js'
 

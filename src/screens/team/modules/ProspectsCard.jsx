@@ -1,6 +1,6 @@
-import { Headshot } from '../../../components/Headshot.jsx'
-import { PlayerLink } from '../../../components/PlayerLink.jsx'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { Headshot } from '../../../components/player/Headshot.jsx'
+import { PlayerLink } from '../../../components/player/PlayerLink.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 
 const DASH = '—'
 // Org prospect list starts collapsed to the top 10, expandable to the full ~30.

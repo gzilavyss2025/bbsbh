@@ -10,7 +10,7 @@
 // 2nd on a walk, then thrown out at home on Walker Janek's single).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { outLegBases } from '../src/components/playDiamondGeometry.js'
+import { outLegBases } from '../src/components/scoring/playDiamondGeometry.js'
 
 test('no out — traveled is just how far he was credited safe, no leg anchors', () => {
   assert.deepEqual(outLegBases(2, null), { traveled: 2, legA: null, legB: null })

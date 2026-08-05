@@ -1,5 +1,5 @@
-import { Headshot } from '../Headshot.jsx'
-import { PlayerLink } from '../PlayerLink.jsx'
+import { Headshot } from '../player/Headshot.jsx'
+import { PlayerLink } from '../player/PlayerLink.jsx'
 import { teamClubNameShort } from '../../lib/teams.js'
 import { getJson } from '../../api/statsapi.js'
 import { useAsync } from '../../hooks/useAsync.js'

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Guards the box-score skeleton's rolling-ball sprite strip
-// (src/components/BoxScoreSkeleton.jsx + the .skel__ballFrames rule in
+// (src/components/game/BoxScoreSkeleton.jsx + the .skel__ballFrames rule in
 // src/styles/*.css) against the two files silently drifting apart. The CSS
 // hardcodes BALL_FRAME_COUNT * BALL_SPIN_LOOPS in three places (the frame
 // strip's width, the steps() count, and the skel-ball-spin keyframe's
@@ -17,7 +17,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
-const jsPath = join(ROOT, 'src/components/BoxScoreSkeleton.jsx')
+const jsPath = join(ROOT, 'src/components/game/BoxScoreSkeleton.jsx')
 // The rules live in one of the src/styles/*.css partials (today
 // 22-box-score-tables.css). Read them ALL and concatenate rather than naming
 // the partial: which one holds a given rule is an implementation detail of how

@@ -51,7 +51,6 @@ const MAX_FILES = 12
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
-  'src/components': 100,
   // The 49 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is

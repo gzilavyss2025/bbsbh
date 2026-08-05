@@ -4,12 +4,12 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
 import { tradeDeadlinePath, tradeDeadlineSeasonPath } from '../lib/route.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { BackBtn } from '../components/BackBtn.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
-import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
-import { TradeCard } from '../components/TradeCard.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { BackBtn } from '../components/ui/BackBtn.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
+import { TradeCard } from '../components/transactions/TradeCard.jsx'
 
 // Newest year first, matching the season index page's own tile order.
 const SEASON_YEARS = [...SEASONS].map((s) => s.year).sort((a, b) => b - a)

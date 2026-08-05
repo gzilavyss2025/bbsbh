@@ -13,12 +13,12 @@ import {
 import { sumHitting, sumPitching } from '../api/statsLevels.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { BackBtn } from '../components/BackBtn.jsx'
-import { AsyncGate } from '../components/AsyncGate.jsx'
-import { TeamLink } from '../components/TeamLink.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { Headshot } from '../components/Headshot.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { BackBtn } from '../components/ui/BackBtn.jsx'
+import { AsyncGate } from '../components/ui/AsyncGate.jsx'
+import { TeamLink } from '../components/team/TeamLink.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Headshot } from '../components/player/Headshot.jsx'
 
 // One person's career coaching page: a header (photo, current role or "last
 // managed"), an awards strip, a compact per-team managerial win-loss record,

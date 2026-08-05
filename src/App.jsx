@@ -24,7 +24,7 @@ function lazyNamed(loader, name) {
 // site-wide, not per game.
 const SpoiledDaysCloudSync = isClerkEnabled
   ? lazy(() =>
-      import('./components/SpoiledDaysCloudSync.jsx').then((m) => ({
+      import('./components/sync/SpoiledDaysCloudSync.jsx').then((m) => ({
         default: m.SpoiledDaysCloudSync,
       })),
     )
@@ -37,7 +37,7 @@ const SpoiledDaysCloudSync = isClerkEnabled
 // publish even after the user navigates away from that game.
 const StampsCloudSync = isClerkEnabled
   ? lazy(() =>
-      import('./components/StampsCloudSync.jsx').then((m) => ({
+      import('./components/sync/StampsCloudSync.jsx').then((m) => ({
         default: m.StampsCloudSync,
       })),
     )

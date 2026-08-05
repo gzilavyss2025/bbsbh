@@ -1,5 +1,5 @@
-import { Headshot } from '../Headshot.jsx'
-import { PlayerLink } from '../PlayerLink.jsx'
+import { Headshot } from '../player/Headshot.jsx'
+import { PlayerLink } from '../player/PlayerLink.jsx'
 import { teamClubNameShort } from '../../lib/teams.js'
 
 // PITCHES LIKE — the three arms whose season pitch mix and velocities most

@@ -3,15 +3,15 @@ import { loadMilestoneWatch, formatMilestoneProjection } from '../api/milestones
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
-import { PlayerLink } from '../components/PlayerLink.jsx'
-import { TeamLink } from '../components/TeamLink.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { Headshot } from '../components/Headshot.jsx'
+import { PlayerLink } from '../components/player/PlayerLink.jsx'
+import { TeamLink } from '../components/team/TeamLink.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { Headshot } from '../components/player/Headshot.jsx'
 import { MasonryColumns } from '../components/ui/MasonryColumns.jsx'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 function monthDay(iso) {

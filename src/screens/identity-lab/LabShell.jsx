@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SiteHeader } from '../../components/SiteHeader.jsx'
+import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { LabHintModal } from './LabHintModal.jsx'
 
 // The chrome every dimension of the lab shares: site bar, title, hint, and the

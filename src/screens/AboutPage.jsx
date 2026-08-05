@@ -1,6 +1,6 @@
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TallyBaseballMark, TallyWordmark } from '../components/TallyBrand.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TallyBaseballMark, TallyWordmark } from '../components/chrome/TallyBrand.jsx'
 
 const PRINCIPLES = [
   {

@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
-import { UmpireZoneMap } from '../components/UmpireAccuracyModal.jsx'
+import { UmpireZoneMap } from '../components/umpire/UmpireAccuracyModal.jsx'
 import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { gamePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { BackBtn } from '../components/BackBtn.jsx'
-import { AsyncGate } from '../components/AsyncGate.jsx'
-import { TeamLink } from '../components/TeamLink.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { BackBtn } from '../components/ui/BackBtn.jsx'
+import { AsyncGate } from '../components/ui/AsyncGate.jsx'
+import { TeamLink } from '../components/team/TeamLink.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_VENUES_LIMIT = 5

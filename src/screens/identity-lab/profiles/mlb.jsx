@@ -4,7 +4,7 @@
    this dev-only lab, which is a fine trade for keeping each dimension's data,
    copy text, and tiles in one readable file. */
 import { useEffect, useState } from 'react'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
 import {
   DEFAULT_PINSTRIPE_COLOR,
