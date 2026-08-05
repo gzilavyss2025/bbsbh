@@ -1,7 +1,7 @@
 // Both come from the dependency-free leaf rather than from wpa/wpaLogo.js /
 // wpa/wpaBandColors.js on purpose: this module is on the eager first-paint path
 // (headerTheme.js -> SiteHeader), and importing them from their home modules
-// pulled data/wpa-tuning.json into the entry chunk. See lib/wpaDefaults.js.
+// pulled data/wpa-tuning.json into the entry chunk. See lib/wpa/wpaDefaults.js.
 import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from './wpa/wpaDefaults.js'
 import { byTreatment } from './tuningStore.js'
 import { teamLogoUrl } from './teams.js'

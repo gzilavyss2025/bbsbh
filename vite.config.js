@@ -473,8 +473,13 @@ export default defineConfig({
                 url.pathname,
               ) ||
               /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
-              // Trade Deadline is season-chunked the same way, plus an index.json
-              // the page reads first to learn which seasons exist.
+              // Trade Deadline is season-chunked the same way. The season list
+              // itself is the hardcoded SEASONS array in api/tradeDeadline.js,
+              // NOT the generated index.json — nothing in the app reads that
+              // file today (gen-trade-deadline.mjs still writes it, and its one
+              // reader, loadTradeDeadlineIndex, was dead and has been deleted).
+              // The `index` arm is kept so a future reader is covered rather
+              // than silently uncached; it simply never fires right now.
               /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',

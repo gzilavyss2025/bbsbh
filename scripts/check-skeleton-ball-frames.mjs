@@ -47,8 +47,16 @@ function extract(source, pattern, label) {
   return Number(m[1])
 }
 
-const frameCount = js && extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
-const spinLoops = js && extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
+// An explicit null, never `js && extract(...)`. Both falsy cases matter and a
+// bare && gets each one wrong: a MISSING file (js === null) would short-circuit
+// to null — fine — but an EMPTY one reads as '', which short-circuits to '' and
+// then satisfies the `!= null` gate below, so the guard would run its CSS
+// arithmetic on a missing constant and blame the stylesheet for a JS problem.
+// Written this way, a missing file skips extraction (readTarget already filed
+// the error) and an empty one still goes through extract(), which reports the
+// constant it could not find.
+const frameCount = js == null ? null : extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
+const spinLoops = js == null ? null : extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
 
 if (css && frameCount != null && spinLoops != null) {
   const totalSteps = frameCount * spinLoops

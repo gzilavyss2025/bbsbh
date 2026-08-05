@@ -50,7 +50,7 @@ export const BAND_COLOR_OVERRIDES = byTeam(WPA_TUNING, (e) => e.bandColor)
 export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.band)
 
 // Re-exported so this stays the module you import band colors from — the
-// literal lives in the dependency-free lib/wpaDefaults.js leaf, so a caller who
+// literal lives in the dependency-free lib/wpa/wpaDefaults.js leaf, so a caller who
 // wants only that one string (lib/milbColors.js, on the eager first-paint path)
 // doesn't drag this module — and, through its WPA_TUNING import, the whole of
 // data/wpa-tuning.json — into the entry chunk. Read wpaDefaults.js first.

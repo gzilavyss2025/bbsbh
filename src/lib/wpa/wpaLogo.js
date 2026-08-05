@@ -221,7 +221,7 @@ const LOGO_PADDING_Y = WPA_LOGO_DEFAULTS.paddingY
 const LOGO_ROW_SHIFT = WPA_LOGO_DEFAULTS.rowShift
 
 // Re-exported so this stays the module you import WPA layout defaults from —
-// the values themselves live in the dependency-free lib/wpaDefaults.js leaf, so
+// the values themselves live in the dependency-free lib/wpa/wpaDefaults.js leaf, so
 // that a caller who wants ONLY these numbers (lib/milbColors.js, which is on the
 // eager first-paint path) doesn't drag this module and data/wpa-tuning.json into
 // the entry chunk with them. Read wpaDefaults.js before moving them back.

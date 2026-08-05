@@ -101,6 +101,17 @@ for (const [dir, budget] of Object.entries(BUDGETS)) {
   const n = counts.get(dir)
   if (n == null) {
     problems.push(`${dir} has a budget of ${budget} in this guard but no longer exists — drop the entry.`)
+  } else if (n <= MAX_FILES) {
+    // Back under the cap, so it no longer needs an exception at all. This case
+    // MUST come before the tighten-it branch below: without it, the guard would
+    // hand you a sub-cap number to pin (say 11), and the directory would then be
+    // held to a stricter limit than the CLAUDE.md rule this script enforces —
+    // a legal 12th file failing with "already over 12", which is false. Same
+    // surrender-the-entry rule as check-file-size.mjs.
+    problems.push(
+      `${dir} is down to ${n} source files, back under the ${MAX_FILES}-file cap. ` +
+        `Drop its BUDGETS entry in this commit so the exception table keeps shrinking.`,
+    )
   } else if (n < budget) {
     problems.push(
       `${dir} is down to ${n} source files but its budget still says ${budget}. ` +
@@ -123,8 +134,11 @@ if (problems.length) {
   process.exit(1)
 }
 
-const over = Object.keys(BUDGETS).length
+// Name the worst offender rather than hardcoding a directory that this guard's
+// own third assertion is designed to eventually remove from the table.
+const entries = Object.entries(BUDGETS)
+const worst = entries.sort((a, b) => b[1] - a[1])[0]
 console.log(
   `✓ Directory sizes hold — ${counts.size} directories under ${MAX_FILES} files, ` +
-    `${over} on a shrinking budget (largest: src/components ${BUDGETS['src/components']}).`,
+    `${entries.length} on a shrinking budget${worst ? ` (largest: ${worst[0]} ${worst[1]})` : ''}.`,
 )
