@@ -97,7 +97,6 @@ const BUDGETS = {
   'src/styles/49-passport-book.css': 1000, // 953
   'src/api/person.js': 2800, // 2706
   'src/api/callout-notes.js': 2100, // 2080
-  'src/api/playbyplay.js': 1800, // 1784
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
@@ -111,6 +110,11 @@ const BUDGETS = {
   'src/api/boxscore.js': 900, // 859
   'src/screens/GameSelect.jsx': 900, // 854
   'src/api/select.js': 800, // 796
+  // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
+  // per-batter trip tracking, the visible-step gate) is tightly coupled and
+  // deliberately not decomposed further when playbyplay.js was split
+  // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
+  'src/api/playbyplay/halfInningFeed.js': 800, // 724
   'src/screens/PlayerPage.jsx': 800, // 772
   'src/components/playbyplay/PlayByPlay.jsx': 700, // 687
   'src/api/loadPlayer.js': 700, // 682
