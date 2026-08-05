@@ -1,0 +1,21 @@
+{
+  "158": {
+    "name": "Milwaukee Brewers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 0,
+        "offsetY": 0,
+        "rotation": 0,
+        "note": "The reference entry: every field at its default, i.e. exactly how an untuned club draws. Kept so the store is never empty and so the shape a Save writes stays pinned by test/identity-lab-stores.test.js."
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": 0,
+        "offsetY": 0,
+        "rotation": 0,
+        "note": "Same as the away side above — the baseline, not a tuning."
+      }
+    }
+  }
+}

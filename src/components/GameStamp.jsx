@@ -1,4 +1,5 @@
 import { hasMonoLogo, teamLogoUrl } from '../lib/teams.js'
+import { stampMarkPlacement } from '../lib/stampLogoTuning.js'
 import {
   INNER_RING_R,
   MARK_BOX,
@@ -12,6 +13,7 @@ import {
   STAMP_CENTER,
   STAMP_SIZE,
   labelType,
+  markBoxX,
   ringLayout,
   runFontSize,
   stampDateText,
@@ -64,6 +66,15 @@ import {
 //      nothing rather than falling back. Hence `hasMonoLogo` and the bold
 //      abbreviation dropped into the same box — the documented fallback.
 //
+// WHERE a mark sits inside its slot is the one tunable part of the locked art:
+// a club may carry a hand-picked scale/offset/rotation per SIDE, resolved by
+// src/lib/stampLogoTuning.js and applied as a transform on the mask's <image>
+// (the geometry, and why it clamps, is stampArt.js's "Per-club mark placement"
+// block). Untuned clubs get a null transform and draw exactly as before. The
+// visible rect is the whole stamp rather than the slot, so a tuned mark can be
+// scaled or turned without the rect — or the mask's own region, pinned here in
+// userSpaceOnUse for the same reason — cropping it back to the untuned box.
+//
 // Every <defs> id is suffixed per stamp instance, because SVG ids are global to
 // the document and a Logbook grid puts dozens of these on one page.
 //
@@ -71,7 +82,12 @@ import {
 // either by revealStampFacts (src/api/linescore.js, from a live feed) or by
 // fetchStampGames (src/api/logbook.js, from the schedule). One shape, so the
 // two sources cannot drift.
-export function GameStamp({ game, seriesText = null, instanceId, className = '', title }) {
+//
+// `placements` is the lab's live-preview seam and nothing else: `{ away, home }`
+// records standing IN for what the store holds, so /identity-lab's Stamp
+// placement editor can show an unsaved edit on the real stamp instead of on a
+// mock-up of it. Every real caller omits it and reads the landed store.
+export function GameStamp({ game, seriesText = null, instanceId, className = '', title, placements }) {
   if (!game) return null
 
   const ids = stampIds(instanceId ?? game.gamePk)
@@ -122,8 +138,8 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
           <circle cx={STAMP_CENTER} cy={STAMP_CENTER} r={CLIP_R} />
         </clipPath>
 
-        <MarkMask id={ids.awayMask} teamId={game.away?.id} x={MARK_BOX.awayX} />
-        <MarkMask id={ids.homeMask} teamId={game.home?.id} x={MARK_BOX.homeX} />
+        <MarkMask id={ids.awayMask} teamId={game.away?.id} side="away" placement={placements?.away} />
+        <MarkMask id={ids.homeMask} teamId={game.home?.id} side="home" placement={placements?.home} />
       </defs>
 
       <g filter={`url(#${ids.ink})`} fill="currentColor">
@@ -180,13 +196,13 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
             maskId={ids.awayMask}
             teamId={game.away?.id}
             abbreviation={game.away?.abbreviation}
-            x={MARK_BOX.awayX}
+            side="away"
           />
           <ClubMark
             maskId={ids.homeMask}
             teamId={game.home?.id}
             abbreviation={game.home?.abbreviation}
-            x={MARK_BOX.homeX}
+            side="home"
           />
         </g>
 
@@ -260,19 +276,27 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
 // The <mask> half of one club mark. Emitted only when that club actually has a
 // precomputed knockout file — otherwise there is nothing to mask and ClubMark
 // draws the abbreviation instead.
-function MarkMask({ id, teamId, x }) {
+//
+// The mask REGION is stated in user space over the whole stamp rather than left
+// to its default (the masked element's bounding box, grown 10%): the masked
+// element is now the full-stamp rect below, and a region tied to a box would
+// crop a club that scaled or turned its mark.
+function MarkMask({ id, teamId, side, placement }) {
   if (!teamId || !hasMonoLogo(teamId)) return null
+  const place = stampMarkPlacement(teamId, side, placement)
   return (
-    <mask id={id}>
+    <mask id={id} maskUnits="userSpaceOnUse" x="0" y="0" width={STAMP_SIZE} height={STAMP_SIZE}>
       <image
         href={teamLogoUrl(teamId, 'mono')}
-        x={x}
-        y={MARK_BOX.y}
-        width={MARK_BOX.size}
-        height={MARK_BOX.size}
+        x={place.x}
+        y={place.y}
+        width={place.size}
+        height={place.size}
         // Marks are not square (Brewers 157x172 portrait, Cubs 234x234), so the
         // slot is square and the mark letterboxes into it. Never assume aspect.
         preserveAspectRatio="xMidYMid meet"
+        // Absent for a club with no tuning on file, so its markup is unchanged.
+        {...(place.transform ? { transform: place.transform } : null)}
       />
     </mask>
   )
@@ -280,14 +304,22 @@ function MarkMask({ id, teamId, x }) {
 
 // The visible half: a currentColor rect punched by the mask above, or the club's
 // bold abbreviation centered in the same slot when there is no mark to punch it.
-function ClubMark({ maskId, teamId, abbreviation, x }) {
+//
+// The rect is the whole stamp, not the mark's slot — the mask is what shapes it,
+// and a rect the size of the untuned slot would clip a mark its club had scaled
+// up or rotated. Nothing paints outside the mark either way, and the enclosing
+// <g> is clipped to the inner circle regardless.
+//
+// The abbreviation fallback is deliberately NOT tuned: placement tunes the
+// knockout mark, and a club drawing this has none.
+function ClubMark({ maskId, teamId, abbreviation, side }) {
   if (teamId && hasMonoLogo(teamId)) {
     return (
       <rect
-        x={x}
-        y={MARK_BOX.y}
-        width={MARK_BOX.size}
-        height={MARK_BOX.size}
+        x="0"
+        y="0"
+        width={STAMP_SIZE}
+        height={STAMP_SIZE}
         fill="currentColor"
         mask={`url(#${maskId})`}
       />
@@ -296,7 +328,7 @@ function ClubMark({ maskId, teamId, abbreviation, x }) {
   if (!abbreviation) return null
   return (
     <text
-      x={x + MARK_BOX.size / 2}
+      x={markBoxX(side) + MARK_BOX.size / 2}
       y={MARK_BOX.y + MARK_BOX.size / 2 + 18}
       textAnchor="middle"
       fontFamily='"IBM Plex Mono", ui-monospace, monospace'

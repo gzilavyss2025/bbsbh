@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { teamAbbr } from '../../../lib/teams.js'
 import { CrestStrip } from './CrestStrip.jsx'
 import { LogoRecolorEditor } from '../editors/LogoRecolorEditor.jsx'
 import { MonoInkEditor } from '../editors/MonoInkEditor.jsx'
+import { StampPlacementEditor } from '../editors/StampPlacementEditor.jsx'
 import { TwoBarsPanel } from './TwoBarsPanel.jsx'
 import { LogoShelf } from './LogoShelf.jsx'
 import { JerseyRack } from './JerseyRack.jsx'
@@ -90,6 +92,17 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
         <MonoInkEditor key={`mono-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
         <LogoRecolorEditor key={`art-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
       </div>
+
+      {/* Club-level for the same reason the knockout editor above it is: a
+          stamp wears the one mono mark, whatever jersey the club had on that
+          night. It sits under that pair because it asks the next question about
+          the same mark — not "which shapes are ink" but "where does it sit". */}
+      <StampPlacementEditor
+        key={`stamp-${team.id}`}
+        teamId={team.id}
+        name={team.name}
+        abbreviation={teamAbbr(team)}
+      />
 
       <LogoShelf marks={profile.shelfMarks?.(team.id) ?? []} onSelect={selectFromShelf} />
 

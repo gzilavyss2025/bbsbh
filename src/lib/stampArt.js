@@ -39,6 +39,94 @@ export const DIAMOND_R = 129
 // small fixed box. y 44-194 is ~64% of the inner circle's vertical space.
 export const MARK_BOX = { size: 150, y: 44, awayX: -18, homeX: 162 }
 
+// ---------------------------------------------------------------------------
+// Per-club mark placement — the one part of the locked art that is tunable
+// ---------------------------------------------------------------------------
+// The slot above is one size for every club, and the marks that letterbox into
+// it are not one shape: a tall portrait cap logo lands small in a square slot,
+// a wide wordmark lands short and bleeds hard off the clipped edge. So a club
+// may carry a hand-tuned nudge — a scale, an x/y offset, a rotation — picked by
+// eye in /identity-lab's Stamp placement editor and stored in
+// src/lib/data/stamp-logo-tuning.json (src/lib/stampLogoTuning.js reads it).
+//
+// This does NOT unlock the art. The slot, the clip circle, the ring and the
+// numerals stay locked; what a club tunes is where inside that fixed slot its
+// own mark sits, per side, and nothing else. An untuned club resolves to the
+// identity placement and draws byte-identical markup to the day the design was
+// locked — `markTransform` answers null rather than an `identity` string
+// precisely so that stays checkable.
+//
+// One consequence, and it is the point rather than a side effect: a stamp
+// stores game FACTS, never art, so it is redrawn from these numbers every time
+// it renders. Retuning a club therefore restyles every stamp of that club
+// already sitting in every user's Logbook, the moment the change ships. Hence
+// the clamps below — a mistyped value can shift a mark, never fling it off the
+// stamp — and hence the tuning being per club rather than per stamp.
+export const MARK_SIDES = ['away', 'home']
+
+export const MARK_PLACEMENT_DEFAULT = { scale: 1, offsetX: 0, offsetY: 0, rotation: 0 }
+
+// Deliberately narrow. Past these a mark stops being "placed in its slot" and
+// becomes a different design: 2x overruns the inner circle, 60 user units is a
+// fifth of the stamp, and a tilt beyond a quarter turn reads as a mistake
+// rather than as a tilt.
+export const MARK_PLACEMENT_LIMITS = {
+  scale: { min: 0.4, max: 2, step: 0.01 },
+  offsetX: { min: -60, max: 60, step: 1 },
+  offsetY: { min: -60, max: 60, step: 1 },
+  rotation: { min: -90, max: 90, step: 1 },
+}
+
+const clampPlacement = (value, { min, max }) => Math.min(max, Math.max(min, value))
+
+// Which x the 150x150 slot sits at. `side` is 'away' | 'home'; anything else
+// reads as away, since those two slots are the whole vocabulary.
+export function markBoxX(side) {
+  return side === 'home' ? MARK_BOX.homeX : MARK_BOX.awayX
+}
+
+// A partial — possibly junk — record from the store, resolved to the four
+// numbers the art draws with. A missing, non-finite, or out-of-range field
+// falls back to the default rather than to whatever was written, so a
+// hand-edited store can't put a mark somewhere the editor would never have
+// allowed.
+export function resolveMarkPlacement(tuning) {
+  const out = { ...MARK_PLACEMENT_DEFAULT }
+  for (const key of Object.keys(MARK_PLACEMENT_DEFAULT)) {
+    const value = Number(tuning?.[key])
+    if (Number.isFinite(value)) out[key] = clampPlacement(value, MARK_PLACEMENT_LIMITS[key])
+  }
+  return out
+}
+
+// The SVG transform that puts a tuned mark where its club asked for it, or null
+// when the club is untuned. Scale and rotation are both about the SLOT's centre
+// — turning a knob then moves the mark around its own middle instead of
+// swinging it in from the stamp's origin, and the offsets read as "and now
+// nudge it this far", in stamp units.
+export function markTransform(side, tuning) {
+  const { scale, offsetX, offsetY, rotation } = resolveMarkPlacement(tuning)
+  if (scale === 1 && offsetX === 0 && offsetY === 0 && rotation === 0) return null
+  const cx = round(markBoxX(side) + MARK_BOX.size / 2)
+  const cy = round(MARK_BOX.y + MARK_BOX.size / 2)
+  return (
+    `translate(${round(offsetX)} ${round(offsetY)}) ` +
+    `rotate(${round(rotation)} ${cx} ${cy}) ` +
+    `translate(${cx} ${cy}) scale(${round(scale)}) translate(${-cx} ${-cy})`
+  )
+}
+
+// Everything one mark needs in order to draw: where its slot sits, and how (if
+// at all) its club has asked for the art inside that slot to be moved.
+export function markPlacement(side, tuning) {
+  return {
+    x: markBoxX(side),
+    y: MARK_BOX.y,
+    size: MARK_BOX.size,
+    transform: markTransform(side, tuning),
+  }
+}
+
 // The run totals, and the footer label under them.
 export const RUN_BASELINE = 243
 export const RUN_X = { away: 108, home: 192 }
