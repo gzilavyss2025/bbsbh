@@ -15445,6 +15445,20 @@ body {
   background: var(--tint, var(--ink-2));
 }
 
+/* Pinstripe background, same recipe as .gamecard__logobox's own pinstripe
+   variant — --pinstripe-color picks the line color per team. Without this the
+   tile fell through to the plain --tint fill above, so a pinstriped club
+   (Cubs, Yankees, …) read as a flat gray square. */
+.gamehud__tile.gamehud__tile--pinstripe {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+
 .gamehud__tile .teamlogo {
   transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1));
 }
