@@ -35,7 +35,7 @@ export const REPORT_PAGES = [
   { label: 'Trade Deadline', path: '/trade-deadline' },
   { label: 'All Star Game', path: '/all-star-rosters' },
   { label: 'All-Star Legacy', path: '/all-star-legacy' },
-  { label: 'Logbook', path: '/logbook' },
+  { label: 'Game Log', path: '/logbook' },
   { label: 'My First Scorebook', path: '/first-scorebook' },
   { label: 'Game Photos', path: '/photos' },
 ]

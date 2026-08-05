@@ -116,9 +116,12 @@
   min-width: 0;
 }
 
-/* The icon buttons (search, Logbook, menu, and — when reveal sync is
-   configured — the account button) as ONE nowrap unit inside the wrapping
-   actions row. Without this sub-group, flex-wrap moves items individually, so
+/* The icon buttons (search, the labelled Game Log pill, menu, and — when reveal
+   sync is configured — the account button) as ONE nowrap unit inside the
+   wrapping actions row. The Game Log's word (see LogbookButton.jsx) makes this
+   group ~60px wider than an all-glyph row, so it now drops below the level
+   pills at a wider viewport than it used to — which is the intended trade, and
+   why the group has to wrap as a unit rather than shedding one button. Without this sub-group, flex-wrap moves items individually, so
    whichever single button no longer fits drops to its own row as an orphan —
    a lone account avatar floating under the menu icon on a 402px-wide iPhone
    was the real rendered bug. Grouped, either all the icons share the

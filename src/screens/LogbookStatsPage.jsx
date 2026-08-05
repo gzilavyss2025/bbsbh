@@ -83,7 +83,7 @@ function Tally({ items }) {
 }
 
 export function LogbookStatsPage() {
-  useDocumentTitle('Logbook Stats')
+  useDocumentTitle('Game Log Stats')
   const navigate = useNav()
   const { seasons, forSeason } = useStamps()
 
@@ -115,7 +115,7 @@ export function LogbookStatsPage() {
             state of this screen, not a different screen. */}
         <header className="topbar">
           <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
-            ‹ Logbook
+            ‹ Game Log
           </button>
           <h1 className="topbar__title">Stats</h1>
         </header>
@@ -135,7 +135,7 @@ export function LogbookStatsPage() {
       <SiteHeader />
       <header className="topbar">
         <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
-          ‹ Logbook
+          ‹ Game Log
         </button>
         <h1 className="topbar__title">Stats</h1>
       </header>

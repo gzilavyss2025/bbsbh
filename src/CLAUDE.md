@@ -177,6 +177,12 @@ read the linked ADRs before refactoring:
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
   `selectLiveEdge` drives navigation only — under the pass everything already
   renders open, so there is nothing for a ratchet to advance.
+- **"Logbook" is the CODE name only — the UI says "Game Log."** Route
+  (`/logbook`), modules, CSS classes, and storage keys all keep `logbook`; every
+  user-visible string says Game Log. Renaming the route would break every shared
+  stamped-game deep link and its cached OG card, so don't. **`docs/game-log.md`**
+  is the full scope: the naming contract, every display-copy location, and the
+  voice rules — read it before writing any copy this feature shows.
 - **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
   final score *plainly*, and it is safe for a structural reason rather than a
   careful one: a stamp only exists for a game the server can prove this user

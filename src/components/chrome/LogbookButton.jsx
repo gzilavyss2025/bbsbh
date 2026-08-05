@@ -1,28 +1,45 @@
 import { useNav } from '../../lib/nav.js'
 
-// A persistent icon button, sibling to SiteSearchButton and SiteMenuButton,
-// linking straight to the Logbook (ADR-0035/0036) — otherwise reachable only
+// A persistent entry point, sibling to SiteSearchButton and SiteMenuButton,
+// linking straight to the Game Log (ADR-0035/0036) — otherwise reachable only
 // by opening the "More" sheet or scrolling to the slate footer's page list.
-// The Logbook just absorbed a dozen-plus PRs of investment as a recurring,
+// The Game Log just absorbed a dozen-plus PRs of investment as a recurring,
 // personal collection feature, so it earns a direct entry point rather than
 // staying buried a level deeper than search and menu. Lives in the slate's
 // own topbar only for now (see GameSelect.jsx) — SiteHeader can pick it up
 // too if the same gap turns out to matter on other screens.
+//
+// Alone among the topbar's controls it carries a WORD as well as a mark. Search
+// and menu are glyphs the whole web already taught everyone to read; a bound
+// book is not — nothing outside this app says that rectangle means "the games
+// you've kept". Labelling it is also what makes it findable: the destination is
+// the one page here that is yours rather than the league's, and an unlabelled
+// icon is only ever found by the people who already know it's there.
+//
+// The label is title-case in the DOM and uppercased in CSS, so screen readers
+// and find-in-page get "Game Log" while the row reads in the same small caps as
+// the level pills beside it. Visible text also means no aria-label: with one,
+// the accessible name would silently shadow the word actually on screen.
+//
+// NOTE: the code layer still says "logbook" throughout — route (`/logbook`),
+// class names, modules, storage keys. "Game Log" is the user-facing name only;
+// renaming the route would break every stamped game's shared deep link and its
+// cached Open Graph card.
 export function LogbookButton({ className = '' }) {
   const navigate = useNav()
   return (
     <button
       type="button"
-      className={`logbook-btn ${className}`}
+      className={`logbook-btn logbook-btn--labeled ${className}`}
       onClick={() => navigate('/logbook')}
-      aria-label="Logbook"
     >
       <LogbookGlyph />
+      <span className="logbook-btn__label">Game Log</span>
     </button>
   )
 }
 
-// The Logbook's own object, in miniature: the closed passport book — board,
+// The Game Log's own object, in miniature: the closed passport book — board,
 // spine, and one emblem foil-stamped on the cover (PassportCover.jsx, ADR-0035
 // /0036's passport-book redesign). Deliberately the BOOK and not a stamp: this
 // is a generic nav glyph, so it must not reproduce the gated cancellation art,
@@ -32,7 +49,7 @@ export function LogbookButton({ className = '' }) {
 //
 //   1. SILHOUETTE, not detail. This glyph's immediate neighbour is
 //      SiteSearchButton's magnifier — a bare circle of almost exactly this
-//      size. Any ring-shaped Logbook mark lands as a second circle two pixels
+//      size. Any ring-shaped Game Log mark lands as a second circle two pixels
 //      away and the pair has to be read rather than recognised. A portrait
 //      rectangle separates at a glance from both the magnifier and the
 //      hamburger, which is the only comparison that matters in an icon row.
