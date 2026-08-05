@@ -11,8 +11,8 @@
 // regress another device's already-synced progress.
 
 import { verifyToken } from '@clerk/backend'
-import { Redis } from '@upstash/redis'
 import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { getRedis } from './_lib/redis.js'
 
 // Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
 // verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
@@ -54,13 +54,6 @@ async function authenticate(req) {
   const { data, errors } = await verifyToken(token, { secretKey })
   if (errors || !data?.sub) return null
   return data.sub
-}
-
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return null
-  return new Redis({ url, token })
 }
 
 // The cloud scorebook index — the user's own recently-scored games, one hash

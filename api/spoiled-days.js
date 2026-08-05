@@ -30,9 +30,9 @@
 // opt-in infrastructure, never a requirement.
 
 import { verifyToken } from '@clerk/backend'
-import { Redis } from '@upstash/redis'
 import { isDayState, isDayString, MAX_SPOILED_DAYS } from '../src/lib/spoiledDays.js'
 import { getHeader, jsonResponse, readJsonBody } from './_lib/nodeHandler.js'
+import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -53,13 +53,6 @@ async function authenticate(req) {
   const { data, errors } = await verifyToken(token, { secretKey })
   if (errors || !data?.sub) return null
   return data.sub
-}
-
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return null
-  return new Redis({ url, token })
 }
 
 // Re-validate whatever Redis hands back before it reaches a client: a hand-edited

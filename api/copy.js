@@ -22,9 +22,9 @@
 // returns 501. The app has never required a backend and still does not.
 
 import { verifyToken } from '@clerk/backend'
-import { Redis } from '@upstash/redis'
 import { sanitizeOverrides } from '../src/copy/registry.js'
 import { getHeader, jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
+import { getRedis } from './_lib/redis.js'
 
 // Node runtime, not edge — same reason as reveal.js: @clerk/backend's
 // verifyToken pulls in internals Vercel's edge sandbox rejects.
@@ -44,10 +44,7 @@ function reply(res, body, status = 200, extraHeaders = {}) {
   return jsonResponse(res, body, status, extraHeaders)
 }
 
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return null
+function copyRedis() {
   // `automaticDeserialization: false` is DELIBERATE and specific to the copy
   // store (api/reveal.js keeps the default because it stores an integer). Our
   // values are arbitrary admin-authored strings: with the default on,
@@ -56,8 +53,9 @@ function getRedis() {
   // "not a string" — a silent data-loss bug where a perfectly good humor line
   // vanishes after saving. Off, every value round-trips as the exact string we
   // stored. The history list (JSON we stringify ourselves) is parsed by hand
-  // below for the same reason.
-  return new Redis({ url, token, automaticDeserialization: false })
+  // below for the same reason. It is why this one endpoint passes an option to
+  // the shared factory instead of calling it bare.
+  return getRedis({ automaticDeserialization: false })
 }
 
 // Parse COPY_ADMIN_USER_IDS ("user_abc,user_def") into a Set. An unset/empty
@@ -104,7 +102,7 @@ export default async function handler(req, res) {
     return reply(res, { error: 'method not allowed' }, 405)
   }
 
-  const redis = getRedis()
+  const redis = copyRedis()
   const { searchParams } = requestUrl(req)
   const wantHistory = searchParams.get('history') === '1'
 
