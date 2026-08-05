@@ -34,6 +34,7 @@ import {
   serializeStamps,
   stampFor,
   stampsForSeason,
+  stampsToPublish,
   toGamePk,
   unplaceStamp,
 } from '../src/lib/stamps.js'
@@ -476,4 +477,90 @@ test('a garbled remote payload degrades to no change', () => {
   assert.deepEqual(applyRemoteStamps(local, null), local)
   assert.deepEqual(applyRemoteStamps(local, 'nope'), local)
   assert.deepEqual(applyRemoteStamps(local, { abc: { stampedAt: 1 }, 2: { junk: true } }), local)
+})
+
+// ---------------------------------------------------------------------------
+// The backfill: what this device has that the server doesn't
+// ---------------------------------------------------------------------------
+// The gap these pin: the sync used to publish "what changed since I started
+// watching", so a collection that already existed when the user signed in was
+// never uploaded at all — the phone kept its stamps, the laptop showed an empty
+// Logbook, and no amount of waiting fixed it because nothing was changing.
+
+const REC = (updatedAt, extra = {}) => ({
+  state: 'on',
+  mode: 'watched',
+  stampedAt: 1_000,
+  updatedAt,
+  note: '',
+  date: '2026-05-18',
+  placement: null,
+  ...extra,
+})
+
+test('a collection that predates sign-in publishes in full', () => {
+  const local = { 101: REC(5), 102: REC(6) }
+  assert.deepEqual(stampsToPublish(local, {}), [101, 102])
+})
+
+test('a record the server already has identically is not republished', () => {
+  const local = { 101: REC(5) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(5) }), [])
+})
+
+test('this device publishes when it holds the newer version', () => {
+  const local = { 101: REC(9, { note: 'edited here' }) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(5) }), [101])
+})
+
+test('a NEWER remote record is left alone — the merge already took it', () => {
+  // Republishing it would echo the server back to itself, and on a slow
+  // connection could land after a genuinely newer change from a third device.
+  const local = { 101: REC(5) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(9) }), [])
+})
+
+test('two changes inside one millisecond still publish', () => {
+  // Same updatedAt, different content: cheaper to publish than to reason about.
+  const local = { 101: REC(5, { note: 'moved' }) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(5) }), [101])
+})
+
+test('a placement the server has not seen publishes', () => {
+  const local = { 101: REC(7, { placement: { page: 2, x: 0.5, y: 0.5, tilt: 0 } }) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(5) }), [101])
+})
+
+test('an un-stamp travels as a tombstone the server lacks', () => {
+  const local = { 101: REC(9, { state: 'off' }) }
+  assert.deepEqual(stampsToPublish(local, { 101: REC(5) }), [101])
+  // …and one the server already knows about does not repeat.
+  assert.deepEqual(stampsToPublish(local, { 101: REC(9, { state: 'off' }) }), [])
+})
+
+test('a record only the server has is never treated as a local removal', () => {
+  // Absence must keep meaning "no opinion" — the whole reason removals are
+  // explicit tombstones. A fresh device holding nothing must not erase anything.
+  assert.deepEqual(stampsToPublish({}, { 101: REC(5) }), [])
+})
+
+test('the full round trip: two devices, neither empty, converge', () => {
+  // The real situation this was written for — stamps made on a phone before the
+  // store existed, and a different game stamped on a laptop afterwards.
+  const phone = { 101: REC(5), 102: REC(6) }
+  const laptop = { 303: REC(7) }
+
+  // Phone signs in first against an empty server and backfills.
+  assert.deepEqual(stampsToPublish(phone, {}), [101, 102])
+  const server = { ...phone }
+
+  // Laptop pulls, merges, and publishes only what the server is missing.
+  const laptopMerged = applyRemoteStamps(laptop, server)
+  assert.deepEqual(stampsToPublish(laptopMerged, server), [303])
+  const server2 = { ...server, 303: REC(7) }
+
+  // Phone pulls again and now holds all three, with nothing left to say.
+  const phoneMerged = applyRemoteStamps(phone, server2)
+  assert.deepEqual(Object.keys(phoneMerged).map(Number).sort((a, b) => a - b), [101, 102, 303])
+  assert.deepEqual(stampsToPublish(phoneMerged, server2), [])
 })

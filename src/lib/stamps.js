@@ -463,3 +463,64 @@ export function applyRemoteStamps(local, remote) {
 export function statesFromStamps(map) {
   return normalizeAll(map)
 }
+
+// Are these the same record? Every field a device can change, compared. Used by
+// the sync diff below so a record that merely round-tripped through JSON isn't
+// republished.
+export function sameStampRecord(a, b) {
+  if (!a || !b) return !a && !b
+  return (
+    a.state === b.state &&
+    a.mode === b.mode &&
+    a.note === b.note &&
+    a.stampedAt === b.stampedAt &&
+    a.updatedAt === b.updatedAt &&
+    samePlacement(a.placement, b.placement)
+  )
+}
+
+// Which of this device's stamps the OTHER side doesn't have, or has an older
+// version of — the list StampsCloudSync publishes.
+//
+// ---------------------------------------------------------------------------
+// WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
+// ---------------------------------------------------------------------------
+// The sync used to publish "whatever changed since the last thing I observed",
+// with the first observation establishing a silent baseline. That is correct for
+// every change made from then on, and wrong for the collection that already
+// existed: a phone holding forty stamps signs in, sets its baseline, sees no
+// change, and publishes nothing — forever. Its owner's laptop then signs into
+// the same account and finds an empty Logbook, because nothing was ever
+// uploaded. Stamping something new on the laptop doesn't help either: that
+// publishes fine, but the phone's forty are still only on the phone.
+//
+// (The reveal mark never had this problem — RevealCloudSync posts whenever the
+// local mark is at all advanced, so a pre-existing mark backfills on its own.
+// A collection is not one integer, so it needs the comparison below.)
+//
+// So the question a device asks is not "what did I just change?" but "what do I
+// have that the server doesn't?" — which is answerable from the two collections
+// alone, needs no history, and is self-healing: a publish lost to a dead network
+// is simply found again by the next comparison.
+//
+// The three ways a local record earns a publish:
+//   - the remote has never heard of it (an un-backfilled collection, or a stamp
+//     minted while offline),
+//   - the remote's copy is older (this device edited it last),
+//   - the two claim the same `updatedAt` but disagree on content (two changes
+//     inside one millisecond — vanishingly rare, and cheaper to publish than to
+//     reason about).
+// A remote record that is NEWER is deliberately absent: `applyRemoteStamps` has
+// already taken it, and re-publishing it would just echo the server to itself.
+export function stampsToPublish(local, remote) {
+  const mine = normalizeAll(local)
+  const theirs = normalizeAll(remote)
+  const out = []
+  for (const [key, entry] of Object.entries(mine)) {
+    const before = theirs[key]
+    if (before && before.updatedAt > entry.updatedAt) continue
+    if (sameStampRecord(before, entry)) continue
+    out.push(Number(key))
+  }
+  return out.sort((a, b) => a - b)
+}
