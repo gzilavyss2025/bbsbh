@@ -1,4 +1,4 @@
-import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { HeaderBarMock, HeaderFields, UmpireCall } from '../editors/HeaderPreview.jsx'
 import { MarkImage } from './MarkImage.jsx'
 

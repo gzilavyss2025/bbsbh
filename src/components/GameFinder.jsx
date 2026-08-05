@@ -4,7 +4,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { TeamSearchBox } from './TeamSearchBox.jsx'
-import { Loader } from './Loader.jsx'
+import { Loader } from './ui/Loader.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const SEASONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i)

@@ -2,7 +2,7 @@ import { halfIndex } from '../../api/select.js'
 import { StatBox, AbsCard } from '../../components/StatBox.jsx'
 import { DueUpNextCard } from '../../components/DueUpNextCard.jsx'
 import { HalfInning } from '../../components/HalfInning.jsx'
-import { WinProbChart } from '../../components/WinProbChart.jsx'
+import { WinProbChart } from '../../components/charts/WinProbChart.jsx'
 
 // A no-op stand-in for HalfInning's onReveal, which HalfInning calls directly
 // (not via `?.()`) both from SealBox's onReveal and from PlayByPlay's

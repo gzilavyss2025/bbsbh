@@ -1,4 +1,4 @@
-import { Loader } from './Loader.jsx'
+import { Loader } from './ui/Loader.jsx'
 
 // Career/season workload by fielding position, drawn on a small diamond that
 // echoes DefenseDiamond's SPOTS layout (see components/DefenseDiamond.jsx) —

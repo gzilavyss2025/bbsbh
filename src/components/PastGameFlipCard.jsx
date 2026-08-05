@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { usePastGameSignals } from '../hooks/usePastGameSignals.js'
 import { gamePath } from '../lib/route.js'
 import { GameCard } from './GameCard.jsx'
-import { FlipCard } from './FlipCard.jsx'
+import { FlipCard } from './ui/FlipCard.jsx'
 import { GameResultFace } from './GameResultFace.jsx'
 import { BoxScoreSkeleton } from './BoxScoreSkeleton.jsx'
 

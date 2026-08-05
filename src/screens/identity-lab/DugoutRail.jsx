@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../components/TeamLogo.jsx'
-import { CopyIconButton } from '../../components/CopyBox.jsx'
+import { CopyIconButton } from '../../components/ui/CopyBox.jsx'
 import { discardStyle, toggleCarry, useStyleCard } from './styleClipboard.js'
 
 // The bar along the bottom of the two colour dimensions: what's pending, what's

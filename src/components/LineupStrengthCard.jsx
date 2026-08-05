@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { lineupStrengthFor } from '../api/lineupStrength.js'
-import { InfoPopover } from './InfoPopover.jsx'
-import { SectionMasthead } from './SectionMasthead.jsx'
+import { InfoPopover } from './ui/InfoPopover.jsx'
+import { SectionMasthead } from './ui/SectionMasthead.jsx'
 
 // The Lineup Strength card — tonight's posted batting order graded 0–10
 // against the best lineup this roster could field (api/lineupStrength.js:

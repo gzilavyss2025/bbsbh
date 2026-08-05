@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { TeamLogo } from './TeamLogo.jsx'
-import { ModalPortal } from './ModalPortal.jsx'
+import { ModalPortal } from './ui/ModalPortal.jsx'
 
 // Per-plate-appearance strike-zone diagram: every pitch of the at-bat plotted
 // where it crossed the plate (pX/pZ, feet, catcher's-eye view) against THIS

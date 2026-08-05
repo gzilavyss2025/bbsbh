@@ -4,8 +4,8 @@
    this dev-only lab, which is a fine trade for keeping each dimension's data,
    copy text, and tiles in one readable file. */
 import { useEffect, useId, useState } from 'react'
-import { CopyBox } from '../../../components/CopyBox.jsx'
-import { RecolorFilter } from '../../../components/WinProbChart.jsx'
+import { CopyBox } from '../../../components/ui/CopyBox.jsx'
+import { RecolorFilter } from '../../../components/charts/WinProbChart.jsx'
 import { BAND_COLOR_OVERRIDES, chipColorsFor } from '../../../lib/wpa/wpaBandColors.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../../../lib/teams.js'
 import { wpaLogoFor, wpaTilePlacements } from '../../../lib/wpa/wpaLogo.js'

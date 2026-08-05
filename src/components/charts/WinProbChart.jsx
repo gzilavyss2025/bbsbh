@@ -1,12 +1,12 @@
 import { useId, useState } from 'react'
-import { winProbSplit } from '../api/winprob.js'
-import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../lib/wpa/wpaBandColors.js'
-import { wpaLogoLayout, wpaTilePlacements } from '../lib/wpa/wpaLogo.js'
-import { isMlbTeamId } from '../lib/teams.js'
-import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../lib/milbColors.js'
-import { useWpaLogo } from '../hooks/useWpaLogo.js'
-import { useMilbWpaLogo } from '../hooks/useMilbWpaLogo.js'
-import { ordinal } from '../lib/format.js'
+import { winProbSplit } from '../../api/winprob.js'
+import { wpaBandColor, wpaBandPinstripeColor, wpaBandPinstripeBg, chipColorsFor } from '../../lib/wpa/wpaBandColors.js'
+import { wpaLogoLayout, wpaTilePlacements } from '../../lib/wpa/wpaLogo.js'
+import { isMlbTeamId } from '../../lib/teams.js'
+import { milbWpaLogoLayout, milbWpaBandColor, milbWpaBandPinstripeColor } from '../../lib/milbColors.js'
+import { useWpaLogo } from '../../hooks/useWpaLogo.js'
+import { useMilbWpaLogo } from '../../hooks/useMilbWpaLogo.js'
+import { ordinal } from '../../lib/format.js'
 
 // The win-probability "story of the game", drawn the scorebook way: one ink line
 // tracing the home team's win % across every plotted play, the plot split into

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { TierPill } from './TierPill.jsx'
-import { TIER_LABELS } from '../lib/statTiers.js'
+import { TIER_LABELS } from '../../lib/statTiers.js'
 
 // The lineup Umpires card's HP accuracy indicator, as a tap glyph rather
 // than an upfront "Below Average" pill wrapping the name row — same

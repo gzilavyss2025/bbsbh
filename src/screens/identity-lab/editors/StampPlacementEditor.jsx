@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { GameStamp } from '../../../components/GameStamp.jsx'
-import { CopyIconButton } from '../../../components/CopyBox.jsx'
+import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { hasMonoLogo } from '../../../lib/teams.js'
 import {
   MARK_PLACEMENT_DEFAULT,

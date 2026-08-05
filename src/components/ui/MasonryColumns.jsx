@@ -1,4 +1,4 @@
-import { useColumnCount } from '../hooks/useColumnCount.js'
+import { useColumnCount } from '../../hooks/useColumnCount.js'
 
 // Round-robin ("Pinterest") masonry. Distributes `items` across N columns
 // left-to-right — item i lands in column (i % N) — so the sequence reads

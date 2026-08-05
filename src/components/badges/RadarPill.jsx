@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { teamPrimaryColor } from '../lib/teams.js'
+import { teamPrimaryColor } from '../../lib/teams.js'
 
 // A small "scout's glyph" for the breakout/fade prospect radar (see
 // src/api/feverRadar.js + gen-fever-radar.mjs) — a magnifying glass rather

@@ -1,5 +1,5 @@
 import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
-import { BreakableLocation } from './BreakableLocation.jsx'
+import { BreakableLocation } from './ui/BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'

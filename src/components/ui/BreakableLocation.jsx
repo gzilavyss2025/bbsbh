@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { slashBreakSegments } from '../lib/teamSplits.js'
+import { slashBreakSegments } from '../../lib/teamSplits.js'
 
 // A team's split-off location line, with a FORCED line break right after any
 // "/" (e.g. "Scranton/Wilkes-Barre") rather than leaving it to the browser's

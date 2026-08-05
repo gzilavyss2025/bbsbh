@@ -1,4 +1,4 @@
-import { TIER_LABELS } from '../lib/statTiers.js'
+import { TIER_LABELS } from '../../lib/statTiers.js'
 
 // A small statistical-tier badge (SD buckets over a ranked pool's mean — see
 // lib/statTiers.js) — shared by plate-umpire accuracy (UmpireTierPill, a thin

@@ -26,7 +26,7 @@ import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { BatterNotice } from './BatterNotice.jsx'
 import { PlacedRunnerCard } from './PlacedRunnerCard.jsx'
 import { TeamLogo } from './TeamLogo.jsx'
-import { UsagePips } from './UsagePips.jsx'
+import { UsagePips } from './charts/UsagePips.jsx'
 import { StrikeZone, PitchList, StrikeZoneGlyph, StrikeZoneModal } from './StrikeZone.jsx'
 import { HighlightSheet } from './HighlightSheet.jsx'
 

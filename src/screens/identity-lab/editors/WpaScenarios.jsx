@@ -1,4 +1,4 @@
-import { WinProbChart } from '../../../components/WinProbChart.jsx'
+import { WinProbChart } from '../../../components/charts/WinProbChart.jsx'
 import { teamAbbr } from '../../../lib/teams.js'
 
 // Three fixed win-probability states — a losing team gets a small band, a tied

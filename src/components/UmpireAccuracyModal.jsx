@@ -3,7 +3,7 @@ import { loadUmpire } from '../api/umpires.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath, umpirePath } from '../lib/route.js'
-import { TierPill } from './TierPill.jsx'
+import { TierPill } from './badges/TierPill.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const HP_GAMES_LIMIT = 5

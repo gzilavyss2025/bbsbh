@@ -1,4 +1,4 @@
-import { CopyIconButton } from '../../components/CopyBox.jsx'
+import { CopyIconButton } from '../../components/ui/CopyBox.jsx'
 
 // Quick-reuse neutrals for the hex fields — an affiliate's Away variation, an
 // MLB treatment with no researched color, or an unresolved team's placeholder
