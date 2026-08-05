@@ -93,7 +93,6 @@ const BUDGETS = {
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
-  'src/styles/44-pre-game-cards.css': 700, // 652
   'src/styles/49-passport-book.css': 1000, // 953
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483

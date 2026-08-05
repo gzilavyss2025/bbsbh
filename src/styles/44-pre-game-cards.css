@@ -1,8 +1,8 @@
 /* ------------------------------------------------------- pre-game metric card
-   Shared shell, originally for the two derived/analytic cards under the
-   batting order — LineupStrengthCard.jsx + BullpenBoard.jsx (a computed
-   grade, a workload signal) — where the navy/gold masthead marked them as
-   the page's INTERPRETIVE modules, contrasted with the plain-titled factual
+   Shared shell, originally for the derived/analytic cards under the batting
+   order — BullpenBoard.jsx (a workload signal), alongside the since-removed
+   Lineup Strength grade — where the navy/gold masthead marked them as the
+   page's INTERPRETIVE modules, contrasted with the plain-titled factual
    sections around them (roster, opposing defense, umpires — posted facts).
    Former Teammates (TeamInfo.jsx) reuses the same shell for its card chrome
    alone, purely for visual consistency with its pregame neighbors — it's
@@ -113,7 +113,7 @@
 
 /* ------------------------------------------------------- season series strip
    The lineup page's "other meetings this season" widget — SeasonSeriesStrip.jsx.
-   A .metriccard like Lineup Strength / Bullpen Health above, so it wears the
+   A .metriccard like Bullpen Health below, so it wears the
    same navy/gold masthead; the body swaps the usual stacked layout for a
    horizontally-scrolling row of game cards with always-on square nav buttons
    (this app doesn't use circular chrome elsewhere, so the buttons stay square
@@ -255,7 +255,7 @@
 }
 
 /* --------------------------------------------------------- box score photos
-   GamePhotosStrip.jsx — a .metriccard like Lineup Strength / Season Series
+   GamePhotosStrip.jsx — a .metriccard like Season Series / Bullpen Health
    above, wearing the same navy/gold masthead, with a "VIEW ALL" shortcut as a
    white filled pill (reversed off the bar's own navy, so it reads as the
    one call-to-action in it — same footing as .watchbtn's filled-pill
@@ -452,75 +452,6 @@
   .infopop__tip {
     transition: none;
   }
-}
-
-/* ---------------------------------------------------------- lineup strength
-   LineupStrengthCard.jsx — the 0-10 grade of tonight's posted order vs. the
-   roster's best nine. The hero score + score-tracking tier pill lead; the
-   deductions read as an Expected → Starting → cost table. Spoiler-free
-   (season aggregates only). */
-.lstrength__hero {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-.lstrength__score {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-xl);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-display);
-  letter-spacing: var(--ls-tight-display);
-  color: var(--text-heading);
-}
-.lstrength__of {
-  font-family: var(--font-body);
-  font-size: var(--fs-body);
-  font-weight: var(--w-regular);
-  letter-spacing: var(--ls-none);
-  color: var(--text-caption);
-}
-
-/* Score-tracking tier pill (lib/lineupStrengthTier.js) — a lineup-specific
-   word ladder, colour collapsed to the same field/award/clay families as
-   .tierpill so it reads consistently without reusing the shared statTiers
-   words. */
-.lstrengthtier {
-  flex: none;
-  padding: 3px 9px;
-  border: var(--bw-hair) solid currentColor;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-wide);
-  line-height: var(--lh-solid);
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.lstrengthtier--strong {
-  color: var(--field-deep);
-  border-color: var(--field);
-  background: var(--field-soft);
-}
-.lstrengthtier--mid {
-  color: var(--award-ink);
-  border-color: var(--award-line);
-  background: var(--award-soft);
-}
-.lstrengthtier--weak {
-  color: var(--clay-deep);
-  border-color: var(--clay);
-  background: var(--clay-soft);
-}
-
-/* A posted starter absent from the season data (recent trade/call-up): his slot
-   is left out of the grade, noted plainly so a partial grade stays honest. */
-.lstrength__partial {
-  margin: var(--space-3) 0 0;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-snug);
-  color: var(--text-muted);
 }
 
 /* ---------------------------------------------------------- bullpen board

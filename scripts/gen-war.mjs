@@ -30,12 +30,14 @@ const season = new Date().getFullYear()
 // `type=6` is FanGraphs' VALUE view. It carries the same `WAR`/`PA` the old
 // `type=8` (Dashboard) view did, and additionally breaks WAR into its components
 // — `Batting`, `BaseRunning`, `Fielding`, `Positional`, `Replacement` — alongside
-// `wRC+`. The Lineup Strength grade needs the components rather than the WAR
-// total: WAR bundles a player's bat with his glove AND with a positional
-// adjustment that is prorated by his actual playing time, so any attempt to
-// reconstruct one component from the total is wrong by however much of the
-// season he has played. Same single request either way — see the header note in
-// gen-lineup-values.mjs for what that reconstruction cost us.
+// `wRC+`. The since-removed Lineup Strength grade needed the components rather
+// than the WAR total: WAR bundles a player's bat with his glove AND with a
+// positional adjustment that is prorated by his actual playing time, so any
+// attempt to reconstruct one component from the total is wrong by however much
+// of the season he has played. Same single request either way, so the extra
+// fields stayed when the grade went — `.scratch/lineup-strength/README.md`
+// records what that reconstruction cost us, and §1 of its `model.md` is
+// required reading before pruning them.
 async function fetchLeaderboard(stats) {
   const url =
     `https://www.fangraphs.com/api/leaders/major-league/data` +
@@ -58,16 +60,16 @@ async function fetchLeaderboard(stats) {
     const w = num(row.WAR)
     if (w != null) war[id] = Math.round(w * 10) / 10
     // Plate appearances travel alongside WAR so a downstream consumer can apply
-    // the same PA regression the nightly lineup-values build uses (the Lineup
-    // Strength grade's runtime fallback for a just-traded starter absent from
-    // that file — src/api/lineupStrength.js rpgFromWar). Batters only; a
-    // pitcher's rate denominator is IP, which this metric never needs.
+    // a PA regression to a rate stat (the removed Lineup Strength grade's
+    // runtime fallback did exactly that). Batters only; a pitcher's rate
+    // denominator is IP, which this metric never needs.
     const p = num(row.PA)
     if (p != null) pa[id] = p
     // wRC+ (park- and league-adjusted OFFENSE only, 100 = league average) and
     // Fielding (season fielding runs above average, framing already folded in
     // for catchers — the components sum to WAR, so CFraming is NOT additive on
-    // top). Together they replace WAR as the Lineup Strength value input.
+    // top). These were the Lineup Strength value input and are unread today;
+    // see the header note above before dropping them.
     const r = num(row['wRC+'])
     if (r != null) wrc[id] = Math.round(r * 10) / 10
     const f = num(row.Fielding)

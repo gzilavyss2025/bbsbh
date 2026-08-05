@@ -15,7 +15,7 @@ request that kicked this off:
 
 | Doc | Idea |
 |---|---|
-| `lineup-strength.md` | Pre-game grade of the actual starting lineup vs. the best lineup the roster could plausibly field |
+| `lineup-strength.md` | Pre-game grade of the actual starting lineup vs. the best lineup the roster could plausibly field — **built, then removed; see `.scratch/lineup-strength/`** |
 | `pitching-health.md` | In-game stress-adjusted pitch load ("not all pitches are created equal") |
 | `foul-tracker.md` | Foul-ball counting, leaders, and outcome correlations |
 | `pitch-workload.md` | Stress-weighted rolling pitch-count workload over last 1/3/10 games vs. baselines |

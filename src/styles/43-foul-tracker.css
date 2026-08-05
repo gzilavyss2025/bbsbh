@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------- foul tracker
    FoulTrackerPage.jsx — season foul-ball boards. Every board is a .metriccard
    wearing the same navy/gold SectionMasthead the rest of the app's card
-   sections use (Lineup Strength, Bullpen Health, batting order, …) —
+   sections use (Bullpen Health, batting order, opposing defense, …) —
    .foulboard-block only adds page-specific tweaks on top of the shared
    .metriccard/.metricbar rules. Reuses .standings/.ledger-wrap ledger styling
    (same right-aligned mono figures, left-aligned .team cell) for the tables;

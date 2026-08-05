@@ -49,7 +49,6 @@ import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
 import { pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
-import { LineupStrengthCard } from '../components/teamstats/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
@@ -98,7 +97,6 @@ export function TeamInfo({
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
-  lineupValuesData,
   callouts,
   onNext,
   nextLabel,
@@ -181,7 +179,6 @@ export function TeamInfo({
         formerTeammatesData={formerTeammatesData}
         careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
-        lineupValuesData={lineupValuesData}
         callouts={callouts}
       />
 
@@ -362,7 +359,6 @@ function TeamSections({
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
-  lineupValuesData,
   callouts,
 }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
@@ -408,17 +404,6 @@ function TeamSections({
     const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workloadData])
-  // Same freshness rule for the lineup grade: the nightly values file
-  // describes the CURRENT roster, so grading an archival game's posted nine
-  // against today's values would be stale nonsense — hide it there.
-  const freshLineupValues = useMemo(() => {
-    const d = feed?.gameData?.datetime?.officialDate ?? null
-    const asOf = (lineupValuesData?.asOf ?? '').slice(0, 10) || null
-    if (!d || !asOf) return null
-    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
-    return diff <= 3 * 86400000 ? lineupValuesData : null
-  }, [feed, lineupValuesData])
-
   // Ties between this matchup's two clubs — see formerTeammatePairs. Empty
   // for MiLB games / matchups outside the nightly build, which hides the card.
   const teammatePairs = useMemo(
@@ -629,8 +614,6 @@ function TeamSections({
           </section>
         )}
       </div>
-
-      <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
 
       <BullpenBoard
         workload={workloadData}
