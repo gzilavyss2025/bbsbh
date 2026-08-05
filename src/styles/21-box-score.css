@@ -183,8 +183,8 @@
 }
 
 /* These five box score cards each wear the pre-game cards' own navy/gold
-   SectionMasthead (same .metricbar/.metricbar__title as Lineup Strength/
-   Bullpen Health) as their own header, in place of the plain caption titles
+   SectionMasthead (same .metricbar/.metricbar__title as Bullpen Health)
+   as their own header, in place of the plain caption titles
    they used to carry. Unlike those cards, these keep one uniform padding on
    their content rather than a separate header/body split, so the masthead
    bleeds out to the card's own edges via a negative margin matching that

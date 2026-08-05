@@ -361,8 +361,9 @@ on a pitcher, ahead of every season aggregate above:
 ## Extending
 
 One metric-adjacent family was deliberately NOT built as a callout: the
-lineup-strength grade (its receipt card already owns the lineup page — a
-callout would restate it). The in-game laboring/velo-decay signals ARE
+lineup-strength grade, which owned the lineup page itself until the grade was
+removed altogether (`.scratch/lineup-strength/`). The in-game
+laboring/velo-decay signals ARE
 callouts now (Margin Notes, above) — before the Pitchers table's notes
 joined the worthiness system, they were the one exception, kept as plain
 Pitchers-table rows since the row they annotate already sat right there.

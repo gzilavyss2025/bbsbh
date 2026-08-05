@@ -71,7 +71,9 @@ calibrated against the league-wide nightly distribution).
 > **Correction (July 2026, after shipping). The value input above is wrong — L2
 > as built no longer uses WAR at all. The shipped design, and the evidence behind
 > every deviation from what this section proposes, now lives in
-> [`docs/lineup-strength.md`](../../docs/lineup-strength.md) — read that first;
+> [`.scratch/lineup-strength/model.md`](../lineup-strength/model.md) — read that
+> first (the feature has since been REMOVED from the app; that directory's
+> `README.md` says why and how to restore it);
 > the rest of this file is the original engine survey, kept for the alternatives
 > it weighs and the research pass behind the constants.**
 >

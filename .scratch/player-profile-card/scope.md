@@ -92,7 +92,7 @@ host, same nightly job, same `personId` key, and the merged file stays well unde
 - `scripts/gen-savant-percentiles.mjs` — second fetch, merge raw values in beside the
   percentiles (`{pct, raw}` per metric, or a parallel `rawPit`/`rawBat` map).
 - `src/lib/radarGeometry.js` — pure: `(spokes[]) → {points, gridRings, labelAnchors}`.
-  Pure and unit-testable, same shape as `lineupSolver.js`/`beeswarm.js`. This is
+  Pure and unit-testable, same shape as `radarGeometry.js`/`beeswarm.js`. This is
   where the whole thing gets pinned by `npm test`.
 - `src/components/StatRadar.jsx` — inline SVG. No chart library; the app has none and
   a radar is ~40 lines of polygon points.

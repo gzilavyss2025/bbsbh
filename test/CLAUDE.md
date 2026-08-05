@@ -7,7 +7,7 @@ most files keep their fixtures inline (see "Fixtures" below for why).
 ## Index
 
 One line per file so a future audit or "does X still have coverage?" question can be
-answered by reading this table instead of opening all ~88 files. Keep it in sync when
+answered by reading this table instead of opening all ~87 files. Keep it in sync when
 a test file is added, renamed, or removed — a stale index is worse than none.
 
 | File | Tests | Modules under test | Feature |
@@ -44,7 +44,6 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | json-patch.test.js | 8 | src/lib/jsonPatch.js | JSON patch utility |
 | leg-advance-codes.test.js | 2 | src/api/playbyplay.js | ADVANCE_CODES (catcher-interference labeling) |
 | lib-helpers.test.js | 14 | format.js, dates.js, statTiers.js, runExpectancy.js | General lib grab-bag |
-| lineup-strength.test.js | 32 | lineupSolver.js, lineupStrength.js, lineupStrengthTier.js | Lineup Strength grade (docs/lineup-strength.md) |
 | live-edge.test.js | 17 | liveEdge.js, select.js, revealProgressCore.js, scoresUnlocked.js | Follow-live-edge + reveal/unlock mechanism |
 | logbook-stats.test.js | 27 | src/api/logbookStats.js | Logbook retrospective Tier 1 — records, streaks, aggregates (ADR-0035) |
 | logo-mono.test.js | 25 | logoMono.js | Mono logo editor (ADR-0031) |
@@ -106,7 +105,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | worktrees.test.js | 15 | scripts/worktrees.mjs | Git-worktree staleness classification |
 | wpa-logo.test.js | 18 | src/lib/wpa/wpaLogo.js, teams.js, logoArt.js | WPA band logo resolver/recolor guard |
 
-Last full audit: 2026-07-31 — all 88 files' imports resolved, all features traced to
+Last full audit: 2026-07-31 — all 88 files' imports resolved (87 since
+lineup-strength.test.js went with its feature), all features traced to
 a currently-documented behavior, no dead code found. Two soft consolidation
 candidates noted, not acted on: `milb-color-chain.test.js` +
 `milb-team-wiring.test.js` (adjacent MiLB color concerns), and

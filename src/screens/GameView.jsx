@@ -59,7 +59,6 @@ export function GameView({ game, section, onSection }) {
     highlightsData,
     runExpectancyData,
     workloadData,
-    lineupValuesData,
     jerseyTreatments,
     started,
   } = useGameData(game, passActive, step)
@@ -239,7 +238,6 @@ export function GameView({ game, section, onSection }) {
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
-          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
@@ -268,7 +266,6 @@ export function GameView({ game, section, onSection }) {
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
-          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"

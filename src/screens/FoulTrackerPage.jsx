@@ -318,7 +318,7 @@ function buildBoards(data, teamId = null) {
 }
 
 // Every board on this page wears the same navy/gold masthead the rest of the
-// app's card sections use (Lineup Strength, Bullpen Tonight, batting order,
+// app's card sections use (Bullpen Tonight, batting order, opposing defense,
 // …) — the container owns the border/radius/shadow, the masthead caps it,
 // same convention as those. No descriptive copy under the title — the board's
 // own name plus its data carries the meaning, and every board's table/list

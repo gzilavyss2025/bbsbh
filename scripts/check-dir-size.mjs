@@ -57,14 +57,14 @@ const BUDGETS = {
   // what makes the @import list and the cascade readable. Nesting them would
   // break that ordering for no gain. See ADR-0038.
   'src/styles': 49,
-  'src/api': 84,
+  'src/api': 83,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
-  scripts: 68,
+  scripts: 67,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
-  'src/lib': 53,
+  'src/lib': 51,
   'src/screens': 38,
   'src/hooks': 21,
   'src/screens/identity-lab': 15,
