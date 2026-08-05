@@ -52,6 +52,12 @@ const MAX_FILES = 12
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
   'src/components': 125,
+  // The 49 stylesheet partials src/index.css @imports in order. This one is a
+  // deliberate exception rather than a directory awaiting subdivision: the files
+  // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is
+  // what makes the @import list and the cascade readable. Nesting them would
+  // break that ordering for no gain. See ADR-0038.
+  'src/styles': 49,
   'src/api': 84,
   scripts: 67,
   'src/lib': 52,

@@ -1,0 +1,918 @@
+/* ------------------------------------------------------------- box score
+   The full, MLB.com-style final line, revealed as one sealed block. Dense mono
+   tables (batting + pitching per team) with the notes/decisions/game-info foot
+   underneath. The tables can outgrow a phone, so each rides its own horizontal
+   scroll rather than shrinking the numbers into illegibility. */
+.boxscore {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
+/* The revealed box score fills the page directly — drop SealBox's inset panel
+   (its pale fill + padding) so the individual cards sit on the paper on their
+   own, each lifted by its own drop shadow rather than boxed inside a backdrop. */
+.boxscore .statgrid {
+  padding: 0;
+  background: none;
+}
+
+.boxscore__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: 4px 0 14px;
+}
+
+.boxscore__headright {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+/* Refresh (when the game isn't Final — see BoxScore.jsx) rides here inline
+   once there's room; on a phone it hides in favor of the floating pill
+   (.pagenav--boxscore below), same split as .daystate__chip--reveal/.pagenav--revealall. */
+.boxscore__headright .refreshbtn {
+  display: none;
+}
+
+.boxscore__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.gamestory {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.gamestory__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.gamestory__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.gamestory__note {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.gamestory__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-3) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.gamestory__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast) var(--ease-standard),
+    background-color var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+/* On a device with a real pointer, the row fills with that team's own real
+   brand color at full brightness (--team-color, set inline per row — see
+   GameStoryCard.jsx) with the headline flipping to white for contrast, and
+   the logo recoloring to match (brightness(0) invert(1) turns any opaque
+   pixel white regardless of the mark's own colors — a plain CSS trick, no
+   second white-on-dark logo asset needed). Skipped on touch (hover:none) so
+   a tap doesn't leave the row stuck in its "hovered" color until the next
+   tap elsewhere. Falls through to the plain card look for a team
+   teamPrimaryColor doesn't know (--team-color unset). */
+@media (hover: hover) and (pointer: fine) {
+  .gamestory__link:hover {
+    background: var(--team-color, var(--surface-inset));
+    border-color: var(--team-color, var(--border-rule));
+    color: #fff;
+  }
+  .gamestory__link:hover .gamestory__logo {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.gamestory__logo {
+  flex-shrink: 0;
+  transition: filter var(--dur-fast) var(--ease-standard);
+}
+
+.gamestory__headline {
+  flex: 1;
+}
+
+#root .gamestory__headline {
+  text-transform: none; /* caps-exempt: a real MLB.com headline reads as a natural sentence, same idiom as .buzz__text */
+}
+
+.gamestory__link:active {
+  transform: scale(0.98);
+}
+
+.gamestory__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.bs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.bs__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.bs__sectionTitle {
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.bs__team {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 10px;
+}
+
+/* These five box score cards each wear the pre-game cards' own navy/gold
+   SectionMasthead (same .metricbar/.metricbar__title as Lineup Strength/
+   Bullpen Health) as their own header, in place of the plain caption titles
+   they used to carry. Unlike those cards, these keep one uniform padding on
+   their content rather than a separate header/body split, so the masthead
+   bleeds out to the card's own edges via a negative margin matching that
+   padding (12px/14px on every one of the five) instead of the container
+   dropping its own top padding. */
+.bs__team > .metricbar,
+.bs__potg > .metricbar,
+.bs__stars > .metricbar,
+.bs__statcastCard > .metricbar,
+.bs__insights > .metricbar {
+  margin: -12px -14px 10px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+/* Every navy/gold header on this page reads at the same, larger size —
+   .metricbar__title's own var(--fs-body) — rather than the smaller sizes
+   .abs__title/.halfdefense__title/.winprob__title carry by default
+   elsewhere (those are shared with the innings view, so the bump is scoped
+   to .bs rather than changing the shared classes themselves). */
+.bs .abs__title,
+.bs .halfdefense__title,
+.bs .winprob__title {
+  font-size: var(--fs-body);
+}
+
+.bs__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.bs__scroll + .bs__scroll {
+  margin-top: 14px;
+}
+
+/* No min-width: the tables size to fit the phone's content column rather than
+   forcing a horizontal scroll. Tight cell padding + small tabular figures keep
+   even the pitching table (nine numeric columns) inside the column; the name
+   auto-balances and wraps if a surname is long. .bs__scroll stays only as a
+   fallback for pathologically wide values. */
+.bs__grid {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.bs__grid th,
+.bs__grid td {
+  padding: 5px 2px;
+  text-align: center;
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.bs__grid thead th {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+
+/* Player name column: left-aligned; the numeric columns take what they need and
+   this column absorbs the rest. A modest width hint keeps the numbers roomy;
+   auto table layout lets a wide value borrow back from the name if needed. */
+.bs__nameCol {
+  width: 34%;
+  text-align: left !important;
+  padding-left: 0 !important;
+  /* !important: needed to beat ".bs__grid th, .bs__grid td"'s nowrap, which
+     outranks a bare .bs__nameCol on specificity alone (element+class beats
+     class). Without it a long surname next to a wide position tag (e.g. a
+     pinch-runner's "18 | PR-RF") can't wrap and instead overflows onto the
+     tag beside it — reported as clipped/overlapping text on mobile. */
+  white-space: normal !important;
+}
+
+.bs__player {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 5px;
+}
+
+.bs__pname {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  overflow-wrap: anywhere;
+}
+
+/* The batter/pitcher name is a .plink button, and .plink (declared later, same
+   specificity) resets text-transform and font to `inherit` — which drops the
+   surname back to the cell's title-case, normal-weight context. Win it back
+   with a higher-specificity rule so every box-score surname reads bold all-caps
+   in both the batting and pitching tables. */
+.bs__player .bs__pname {
+  text-transform: uppercase;
+  font-weight: var(--w-bold);
+}
+
+/* Position(s) after the batter's name, and the pitcher's decision tag. */
+.bs__pos {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.bs__dec {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+}
+/* Decision tag by result: a win or save reads field-green, a loss seam-red. */
+.bs__dec--win {
+  color: var(--accent-positive);
+}
+.bs__dec--loss {
+  color: var(--accent-negative);
+}
+
+/* Uniform number — inked seam-red wherever it rides beside a name (the manager
+   fill-in, and the number|position tag on every batter and pitcher). Mono
+   tabular figures like the lineup pages' jersey number, at the surrounding font
+   size so number and position sit level. */
+.bs__unum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
+
+/* Substitute rows sit indented under their starter, like a printed box score. */
+.bs__sub .bs__nameCol {
+  padding-left: 14px !important;
+}
+
+/* Batting table only: the surname reads bold, and the number|position tag is
+   pushed hard to the right edge of the name cell so it sits in its own gutter
+   ("CONTRERAS        24 | C"). Fixed layout gives every stat column an equal,
+   uniform width the way a printed box score aligns AB/R/H/RBI. */
+.bs__grid--bat {
+  table-layout: fixed;
+}
+.bs__grid--bat .bs__nameCol {
+  width: 50%;
+}
+.bs__grid--bat thead th:not(.bs__nameCol),
+.bs__grid--bat tbody td:not(.bs__nameCol),
+.bs__grid--bat tfoot td:not(.bs__nameCol) {
+  width: 12.5%;
+}
+.bs__grid--bat .bs__player {
+  display: flex;
+  width: 100%;
+  flex-wrap: nowrap;
+  align-items: baseline;
+}
+.bs__grid--bat .bs__pname {
+  min-width: 0;
+}
+.bs__grid--bat .bs__pos {
+  margin-left: auto;
+  padding-left: 6px;
+  white-space: nowrap;
+}
+
+/* Footnote marker ("a", "b"…) next to a sub and in the footnote list. */
+.bs__mark {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+.bs__avg {
+  color: var(--text-muted);
+}
+.bs__ps {
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+}
+
+.bs__totals td {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  border-bottom: none;
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+/* Footnotes + BATTING/BASERUNNING/FIELDING note groups under each team. */
+.bs__footnotes {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.bs__footnotes li {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+.bs__footnotes .bs__mark {
+  margin-right: 5px;
+}
+
+.bs__notes {
+  margin-top: 10px;
+}
+.bs__notesTitle {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__note {
+  margin: 2px 0;
+  font-size: var(--fs-compact);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.bs__noteLabel {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* Pitchers of record — stacked one per line, like a printed box score's
+   decisions, each name trailing its (W-L) / (SV) season line. */
+.bs__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+.bs__decision {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.bs__decisionK {
+  min-width: 34px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__decisionV {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Play of the game — the single most memorable play (see
+   computePlayOfTheGame), sitting above the three stars. Same card treatment;
+   the description reads like a scorebook note, the inning tag trails it. */
+.bs__potg {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 10px;
+}
+.bs__potgBody {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+/* Compound with .shot/.shot--fallback (both classes Headshot always sets) so
+   this reliably outranks the base .shot sizing — same pattern as
+   .playercard__shot below. Sized up from the three-stars/insight-note headshots
+   (52px/26px) so the card's lead player reads as the card's focal point,
+   matching the slate's Top Performers card treatment. */
+.shot.bs__potgShot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.bs__potgShot.shot--fallback {
+  font-size: var(--fs-hero-sm);
+}
+.bs__potgMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.bs__potgWho {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* Compound to beat .plink's `font: inherit`. */
+.bs__potgWho .bs__potgName {
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.bs__potgMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.bs__potgDesc {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-heading);
+  /* Approved exception to the ALL-CAPS INVARIANT, scoped to this one
+     narrative: title case reads better for a play-of-the-game sentence than
+     shouting it. The nested .bs__potgWhen inning tag and .bs__potgScore below
+     aren't affected — #root * still matches them directly and wins over this
+     rule's inherited value. */
+  text-transform: capitalize; /* caps-exempt: approved title case for the box score's play-of-the-game narrative only */
+}
+/* The inning it happened in, inline ahead of the description — same font as
+   the description, tinted the scorebook's kraft-tape amber so it reads as a
+   quiet tag rather than more description text. */
+.bs__potgWhen {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  color: var(--award-ink);
+}
+/* The score right after the play, appended to the narrative — bold, and
+   explicitly re-uppercased so the team abbreviations don't inherit the
+   narrative's title case (redundant today since #root * already wins here,
+   but explicit in case that specificity relationship ever changes). */
+.bs__potgScore {
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+}
+
+/* Insights — the box score's catch-all "what stood out tonight" card: whole-
+   game Statcast superlatives (see computeGameSuperlatives, reusing the same
+   .statcast card grid as the innings view's per-half row) plus every season
+   leader/streak/situational-record call-out that fired somewhere in the game
+   (see computeGameCalloutNotes — the same .pbp__callout notes shown one at a
+   time in the innings view, rolled up here). Sits last inside the sealed box
+   score, directly above the Game Buzz card, which shares this same seal. */
+.bs__insights {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--space-3);
+}
+.bs__insightsTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* The by-inning tally: a second line score (own card frame, matches
+   .bs__insights) always open — see InningTally's doc for why this one
+   doesn't default collapsed the way its old row-per-half layout did. */
+.bs__tally {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--space-3);
+  overflow: hidden;
+}
+.bs__tallyHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 12px 14px;
+}
+/* The legend spells out what the four slash-joined figures in each inning
+   cell mean, once, instead of repeating "P / Wh / F / LOB" column headers
+   above every inning the way Scoreboard repeats "R" once per team. */
+.bs__tallyLegend {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.bs__tallyBody {
+  padding: 0 14px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+/* The box score's own Statcast Leaders card — its own full-width row
+   between the linescore column and the two team cards (see
+   BoxScoreBody), each superlative rendered as a .playercard__bucket +
+   .playercard__list, the same "baseball card" tile (headshot, team, stat
+   line) Top Performers uses (see PerformerCard.jsx) — so this card reads as
+   the same idiom as that slate box rather than its own small tiles. Matches the
+   frame of .bs__insights/.bs__stars beside it. */
+.bs__statcastCard {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+/* Phone: the three superlatives stack, same as any other playercard list.
+   Desktop/ipad: one row, three columns wide (see the wide-layout block). */
+.bs__statcastRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.bs__statcastCol {
+  min-width: 0;
+}
+
+/* The call-out notes grid — one card per player/club (see InsightNoteCard,
+   groupCalloutNotes), each wide enough for a full sentence beside its
+   avatar. Cards vary in height (a player with 3 notes vs. one with 1), so
+   this is a CSS-columns waterfall rather than a row-locked grid — each card
+   flows into the shortest column instead of every row stretching to its
+   tallest member, keeping the same gap between cards without the excess
+   whitespace a fixed-row grid leaves behind. `column-width` lets the browser
+   pick the column count itself, same auto-fit intent as the old grid. */
+.bs__noteGrid {
+  column-width: 240px;
+  column-gap: 8px;
+}
+
+/* One call-out note card: a headshot (or team logo(s), for a note about a
+   club rather than a person) beside the player's name and the note itself
+   (a .pbp__callout, same star-marked strip as the innings view). Same card
+   chrome as .statcast__card so it reads as a sibling of the Statcast tiles
+   above it, but laid out as a row — there's a full sentence to fit, not just
+   a number. */
+.bs__noteCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+  break-inside: avoid;
+}
+.bs__noteAvatar {
+  flex: none;
+}
+/* On the shared 3:4 headshot scale like every other card — the former 40×40
+   circular "avatar" treatment was the app's only round headshot, folded in
+   here for consistency. */
+.shot.bs__noteShot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.bs__noteShot.shot--fallback {
+  font-size: var(--fs-num-md);
+}
+.bs__noteLogos {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.bs__noteBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.bs__noteWho {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* The note text rides inside this card rather than the innings feed, so it
+   doesn't need the star-strip's own background/border treatment. Sized up
+   from the innings view's inline 10px — standing alone in its own card, it's
+   the whole point of the card rather than a quiet aside under a play. */
+.bs__noteBody .pbp__callout {
+  padding: 0;
+  border-left: none;
+  background: none;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* Show-more for the ranked note grid — the notes arrive most-impactful-first
+   (see computeGameCalloutNotes), the tail folds behind this. Same quiet
+   full-width affordance as .teammates__more. */
+.bs__noteMore {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.bs__noteMore:hover {
+  color: var(--text-body);
+}
+
+/* Three stars of the game — WPA leaders under the decisions. Card matches
+   the decisions block above it. The top mover gets its own hero treatment
+   (an inset gradient panel — see .stars3__hero below, modeled on the Team
+   Score card's .team-score__grade); #2/#3 fall into compact rows underneath,
+   same idiom as .team-score__row--compact. */
+.bs__stars {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+
+.stars3__hero {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+/* Compound with .shot/.shot--fallback so this outranks the base .shot sizing
+   — the "player-of-game" scale, same size as .stars3__rowShot below so all
+   three stars' headshots line up at one size; only the surrounding
+   panel/copy marks this row as the top mover. */
+.shot.stars3__heroShot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.stars3__heroShot.shot--fallback {
+  font-size: var(--fs-num-lg);
+}
+.stars3__heroCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.stars3__heroKicker {
+  color: var(--seal);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
+}
+.stars3__heroName {
+  font-family: var(--font-body);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.stars3__heroMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+/* Capped and wrapping (not nowrap) so a big stat line — multi-extra-base-hit
+   games routinely run past 25 characters — wraps onto its own lines instead
+   of forcing .stars3__heroCopy's flex:1/min-width:0 name column to collapse,
+   which let the stat text render on top of the player name. */
+.stars3__heroStat {
+  flex: none;
+  max-width: 38%;
+  color: var(--text-heading);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: right;
+}
+
+.stars3__list {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.stars3__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 2px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+}
+/* Sits above the name inside .stars3__rowWho's column stack — same position
+   as .stars3__heroKicker above the hero's name — instead of a separate
+   fixed-width column to the left of the headshot. */
+.stars3__rowMarks {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
+  color: var(--seal);
+}
+.shot.stars3__rowShot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.stars3__rowShot.shot--fallback {
+  font-size: var(--fs-num-lg);
+}
+.stars3__rowWho {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.stars3__rowName {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.stars3__rowMeta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.stars3__rowStat {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+/* On a phone, both the hero star's and the #2/#3 rows' stat line drops to
+   its own full-width row below the name/meta lines instead of squeezing
+   beside them in the same row as the headshot — a big extra-base-hit line
+   otherwise fights the name column for width (see the .stars3__heroStat
+   comment above; the same squeeze hits the compact rows below it). A grid
+   (not flex-wrap) so the photo gets its own fixed column and the copy/stat
+   blocks share the SAME second column — see the identical reasoning on
+   .pitchernotice's own phone-only override just above the "Row 2" comment
+   for why a flex-wrap + flex-basis:100% attempt here would instead push the
+   name/meta block below the photo rather than beside it. */
+@media (max-width: 739.98px) {
+  .stars3__hero {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .shot.stars3__heroShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__heroCopy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__heroStat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+
+  .stars3__row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
+    row-gap: 2px;
+    align-items: start;
+  }
+  .shot.stars3__rowShot {
+    grid-row: 1 / 3;
+  }
+  .stars3__rowWho {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__rowStat {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: left;
+  }
+}
+

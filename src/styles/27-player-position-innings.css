@@ -1,0 +1,706 @@
+/* ---------------------------------------------------------------- posinn
+   "Innings by position" — career/season workload by fielding spot, drawn on
+   a small diamond that echoes .defdiamond's SPOTS layout, plus a starter/
+   reliever IP pair for pitchers. Purely presentational: PositionInnings.jsx
+   owns no state. */
+
+.posinn__scope {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+
+.posinn__scopebtn {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.posinn__scopebtn:active {
+  transform: scale(0.96);
+}
+.posinn__scopebtn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+.posinn__scopebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.posinn__loading {
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.posinn__diamond {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 10px 8px;
+}
+
+.posinn__field {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.posinn__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.posinn__spot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.posinn__spot--mound {
+  z-index: 1;
+}
+
+.posinn__box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 40px;
+  padding: 3px 5px;
+  border-radius: var(--radius-xs);
+  border: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+}
+
+.posinn__box--played {
+  background: var(--clay-soft);
+  border-color: var(--accent-negative);
+}
+
+.posinn__box--empty {
+  background: var(--bg-page);
+  border-color: var(--border-hairline);
+  opacity: 0.7;
+}
+
+.posinn__pos {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.posinn__box--played .posinn__pos {
+  color: var(--clay-deep);
+}
+
+.posinn__innings {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.posinn__box--played .posinn__innings {
+  color: var(--clay-deep);
+}
+
+.posinn__box--empty .posinn__innings {
+  color: var(--graphite-soft);
+}
+
+/* The DH bats but never takes the field — one line under the diamond,
+   mirroring .defdiamond__dh. */
+.posinn__dh {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  font-size: var(--fs-compact);
+}
+
+.posinn__dhpos {
+  font-family: var(--font-display);
+  color: var(--field);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.posinn__dhvalue {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+}
+
+/* Starter/reliever IP — two .stat tiles side by side. */
+.posinn__pitchgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.posinn__pitchbox .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- pitch arsenal: unique pitch types + average velocity ---- */
+.pitch__unit {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+  margin-left: 3px;
+}
+
+/* ---- pitch mix (player page "Pitches"): a family-colored usage bar over
+   per-pitch rows. The bar is decorative (aria-hidden in PitchMix.jsx) — every
+   number it encodes repeats in the labeled rows beneath, each led by a family
+   chip, so the low-chroma --arsenal-* inks never carry identity alone. The
+   2px gaps between segments are the chart convention for stacked fills. ---- */
+.pitchmix {
+  margin: 0 0 18px;
+}
+.pitchmix__bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.pitchmix__seg {
+  flex-basis: 0;
+  min-width: 3px;
+}
+.pitchmix__seg--fastball, .pitchmix__chip--fastball { background: var(--arsenal-fastball); }
+.pitchmix__seg--breaking, .pitchmix__chip--breaking { background: var(--arsenal-breaking); }
+.pitchmix__seg--offspeed, .pitchmix__chip--offspeed { background: var(--arsenal-offspeed); }
+.pitchmix__seg--other,    .pitchmix__chip--other    { background: var(--arsenal-other); }
+/* The hitter page's Batted balls card wears the same bar in batted-ball
+   dress (BattedBallMix.jsx) — same segments/chips, its own --batted-*
+   aliases (tokens/colors.css) so the two vocabularies can drift apart
+   later without a find-and-replace. */
+.pitchmix__seg--ground, .pitchmix__chip--ground { background: var(--batted-ground); }
+.pitchmix__seg--line,   .pitchmix__chip--line   { background: var(--batted-line); }
+.pitchmix__seg--fly,    .pitchmix__chip--fly    { background: var(--batted-fly); }
+.pitchmix__seg--pop,    .pitchmix__chip--pop    { background: var(--batted-pop); }
+.pitchmix__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pitchmix__row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) max-content max-content;
+  align-items: center;
+  column-gap: 8px;
+  padding: 6px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pitchmix__row:first-child {
+  border-top: 0;
+}
+.pitchmix__chip {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-xs);
+}
+.pitchmix__name {
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pitchmix__usage {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+  min-width: 40px;
+  text-align: right;
+}
+.pitchmix__velo {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  min-width: 86px;
+  text-align: right;
+}
+
+/* ---- "Pitches like" (player page): the three closest arsenals to this
+   pitcher's, each a tappable row into that player's own page. Rows rather
+   than the pill row the reference design uses — a phone gives three pills
+   about 100px each, which ellipsizes most major-league surnames, and the
+   match figure needs a column of its own to stay scannable. That figure is
+   plain mono ink, never a seal amber: this is analysis, not a score cover
+   (see CLAUDE.md's spoiler rule). ---- */
+.pitcheslike {
+  margin: 0 0 18px;
+}
+.pitcheslike__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pitcheslike__item + .pitcheslike__item {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.pitcheslike__link {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+  align-items: center;
+  column-gap: 10px;
+  width: 100%;
+  padding: 8px 2px;
+  text-align: left;
+}
+.pitcheslike__shot {
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+}
+.pitcheslike__ident {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.pitcheslike__name {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pitcheslike__club {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+.pitcheslike__match {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+.pitcheslike__matchunit {
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-muted);
+}
+.pitcheslike__note {
+  padding-top: 8px;
+  padding-bottom: 0;
+}
+
+/* ---- league-rank chips under the season tiles ("1st NL · ERA") ---- */
+.leaguerank {
+  margin: 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.leaguerank__chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 9px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.leaguerank__ord {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+
+/* Quality-start pill in the game log — the .gamelog__level pill's geometry
+   with the positive accent ink, so a run of strong starts reads at a glance. */
+.gamelog__qs {
+  margin-left: 5px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--accent-positive);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-positive);
+  vertical-align: middle;
+}
+
+/* ---- 2026 All-Star banner — blue tape across the top of the card ---- */
+.allstar-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+  box-shadow: var(--shadow-card);
+}
+.allstar-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  color: #fff;
+}
+.allstar-banner__star {
+  color: #fff;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
+/* ---- Slate empty-day banners — the same tape-banner recipe as the player
+   page's All-Star/rehab banners above, for GameSelect's empty-slate spot.
+   break-banner reuses the celebratory All-Star blue (every level goes dark
+   the same week — it's not an MLB-only concept here); offday-banner is the
+   neutral graphite/ink counterpart for a level's own ordinary day off (a
+   Monday MiLB off day, a rare all-30-idle MLB day outside the break). One
+   line, label + "resumes {date}" side by side; wraps to two lines only if a
+   narrow viewport can't fit both. ---- */
+.break-banner,
+.offday-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+.break-banner {
+  background: linear-gradient(180deg, var(--allstar-blue) 0%, var(--allstar-blue-deep) 100%);
+}
+.offday-banner {
+  background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
+}
+.break-banner__text,
+.offday-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  color: #fff;
+}
+.break-banner__detail,
+.offday-banner__detail {
+  font-size: var(--fs-label);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* ---- rehab-assignment banner — an actual strip of kraft-amber tape: the same
+   diagonal-hatch weave (--seal-texture) as the spoiler seals and the reveal
+   button, so a player's status reads as tape stuck onto the scorebook page. The
+   "on hold / passing through the minors" counterpart to the clay injured-list
+   tape and the celebratory blue All-Star tape. --seal-ink is tuned to hold AA
+   against both kraft hatch stripes. ---- */
+.rehab-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--seal-texture);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  box-shadow: var(--shadow-card);
+}
+.rehab-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.rehab-banner__mark {
+  color: var(--seal-ink);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
+/* ---- injured-list banner — the clay/seam-red sibling of the amber rehab tape,
+   same hatch weave in the app's "alert / negative" color (--il-texture). A
+   player can carry both at once (on the IL and out on a rehab stint), so they
+   stack. White text holds AA against both clay stripes. ---- */
+.il-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: var(--il-texture);
+  border: var(--bw-hair) solid var(--clay-deep);
+  box-shadow: var(--shadow-card);
+}
+.il-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: #fff;
+}
+.il-banner__mark {
+  color: #fff;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-solid);
+}
+
+/* ---- "last played in 2022" banner — the quietest member of the player-page
+   banner family. Deliberately NOT tape: the amber rehab and clay injured-list
+   strips both flag something in progress, and a career that ended four years
+   ago is neither urgent nor an alert. So it borrows the slate's neutral
+   graphite-to-ink gradient (.offday-banner) — the app's existing "nothing is
+   happening here" surface — rather than inventing a fourth treatment. Shown
+   only for a player who is on no roster AND has no games in the season being
+   viewed; see PlayerPage.jsx / loadPlayer.js. ---- */
+.lastplayed-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 var(--space-3);
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink-0) 100%);
+  box-shadow: var(--shadow-card);
+}
+.lastplayed-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: #fff;
+}
+
+/* ---- game-status banner — flat kraft-amber strip flagging a delayed,
+   suspended, or postponed game, shown under the masthead on every section so
+   it stays visible while the user navigates around a paused game. Structural
+   metadata, not a score, so it renders unconditionally like the masthead
+   date. Same amber as .gamecard__delay's slate badge; flat fill, not the
+   hatch weave the spoiler covers use. ---- */
+.game-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 4px 0 var(--space-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+}
+.game-status-banner__text {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--seal-ink);
+}
+.game-status-banner__reason {
+  font-weight: var(--w-semibold);
+}
+
+/* ---- Delay notice — a between-half-innings card flagging that play stopped
+   for a delay (rain, etc.) during the half being viewed (see
+   components/DelayCard, api/select.js selectDelays). Spoiler-free structural
+   info: the stoppage, its cause, and how long it lasted — never a score. A cool
+   navy family (a weather interlude), set apart from the amber "on hold" status
+   tape and the clay out/alert red. "Pops up" on mount. ---- */
+.delaycard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--navy) 7%, var(--surface-card));
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-left: 3px solid var(--navy);
+  box-shadow: var(--shadow-card);
+  animation: delay-pop var(--dur-med) var(--ease-out) both;
+}
+.delaycard__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--navy) 12%, var(--surface-inset));
+}
+.delaycard__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.delaycard__title {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-label);
+  color: var(--text-heading);
+}
+.delaycard__detail {
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.delaycard__detail b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+.delayrain__cloud {
+  fill: var(--navy);
+}
+.delaypause rect {
+  fill: var(--navy);
+}
+.delayrain__drop {
+  stroke: var(--allstar-blue);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  animation: rain-fall 1.7s linear infinite;
+}
+.delayrain__drop--2 {
+  animation-delay: 0.35s;
+}
+.delayrain__drop--3 {
+  animation-delay: 0.7s;
+}
+
+@keyframes delay-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes rain-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .delaycard {
+    animation: none;
+  }
+  .delayrain__drop {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+/* ---- as-of banner — neutral graphite strip (not a status tape like the
+   banners above) flagging that this page's link carried a spoiler-safe date
+   cutoff (see lib/route.js `?d=&s=`). "Go live" drops the cutoff without
+   hand-editing the URL. ---- */
+.asof-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 4px 0 var(--space-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  border: var(--bw-hair) dashed var(--rule);
+}
+.asof-banner__text {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.asof-banner__btn {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--accent-primary);
+  background: none;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  cursor: pointer;
+}
+.asof-banner__btn:hover {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+

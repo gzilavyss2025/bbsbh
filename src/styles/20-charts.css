@@ -1,0 +1,684 @@
+/* --------------------------------------------------------------- running line
+   Top-of-innings box score that fills in as the user reveals each half. Narrow
+   mono digits in a scrolling grid so 9+ innings never force the page to scroll
+   horizontally. */
+.rolling {
+  margin-bottom: var(--space-4);
+}
+
+.rolling__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.rolling__grid {
+  /* `separate` (not `collapse`) so the sticky first (team) column's row rule
+     stays pixel-aligned with the scrolling inning columns — see the long note
+     on `.standings`. Under `collapse` the shared border lands adrift beneath the
+     pinned cell, stepping every row rule at the seam. Zero spacing keeps the
+     cells flush, and every internal hairline here is a per-cell `border-bottom`
+     / `border-left`, so nothing doubles. */
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.rolling__grid th,
+.rolling__grid td {
+  padding: 6px 0;
+  min-width: 24px;
+  text-align: center;
+  font-size: var(--fs-small);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* Rule every inning off into its own bordered box — a fixed-width cell no
+   matter how big the frame, so a 10-run inning reads the same width as a 0. */
+.rolling__grid th + th,
+.rolling__grid td + td {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
+.rolling__grid thead th {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+.rolling__grid tbody tr:last-child th,
+.rolling__grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.rolling__team {
+  padding-left: 12px !important;
+  padding-right: 8px !important;
+  text-align: left !important;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  position: sticky;
+  left: 0;
+  background: var(--surface-card);
+}
+
+.rolling__corner {
+  position: sticky;
+  left: 0;
+  background: var(--surface-card);
+}
+
+.rolling__tot {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  background: var(--surface-inset);
+}
+.rolling__grid thead th.rolling__tot {
+  color: var(--accent-primary);
+}
+
+/* Each run cell is a tap target that jumps to that half-inning (the line score
+   is the navigator). The button fills the cell; the current half is inked like a
+   selected chip. */
+.rolling__grid td.rolling__cell {
+  padding: 0;
+}
+
+.rolling__pick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 34px;
+  box-sizing: border-box;
+  border: none;
+  background: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.rolling__pick.rolling__pending {
+  color: var(--graphite-soft);
+}
+
+/* A half that never happened at all (the home team already ahead entering
+   it, so the game ended in the top half) — permanently inert, not merely
+   "not revealed yet," so it reads distinctly from .rolling__pending's dot
+   and overrides the generic mid-turn [aria-disabled] dimming (opacity 0.6,
+   which reads as "temporarily unavailable") with a plain, undimmed graphite
+   ✕ instead. */
+.rolling__pick.rolling__skipped {
+  opacity: 1;
+  color: var(--graphite-soft);
+  cursor: default;
+}
+
+/* A frame that scored: inked bold and field-green (the same positive accent
+   as the R stat and the RBI tag), the way a scorer's eye jumps to the runs.
+   Placed before is-active so the selected half still wins (the crossing
+   white-on-navy ink). */
+.rolling__pick.rolling__runs {
+  color: var(--accent-positive);
+  font-weight: var(--w-bold);
+}
+
+.rolling__pick.is-active {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
+}
+
+/* ----------------------------------------------------------- win probability
+   The game's win-probability arc — one ink line for the home team's win %, the
+   plot split into a soft-navy home band (below the line) and a soft-clay away
+   band (above). Reveal-gated everywhere it appears (see api/winprob.js): the
+   innings view feeds only the plays through the revealed half, the box score
+   the whole game inside its seal. Real per-team brand color (teams.js's
+   teamChipColors) is reserved for identity chrome — the header swatches/
+   splitbar, the ledger chips, the linked big-swing markers — the bands/line
+   stay the neutral navy/clay pair above since their job is structural
+   ("which side of 50%"), not "which team". */
+.winprob {
+  margin-bottom: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 10px;
+  overflow: hidden;
+}
+
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title) rather than floating as a smaller rounded shape inside
+   the card's padding — overflow:hidden on .winprob clips the square corners
+   here to the card's own rounded ones. */
+.winprob__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+
+.winprob__title {
+  margin: 0;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+
+/* Current/final split — the two team shares, each swatch/figure in that
+   team's own real brand color (--team-color, set inline from
+   teamChipColors) rather than the generic navy/clay the chart bands use. */
+.winprob__split {
+  display: flex;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+}
+
+.winprob__team {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+}
+
+.winprob__team::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  border: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 45%, transparent);
+  background: var(--team-color, var(--graphite-soft));
+}
+
+.winprob__pct { color: var(--text-on-ink); }
+
+/* Scales uniformly (default preserveAspectRatio) so the dots stay round and the
+   labels crisp. On a phone the viewBox ratio sets the height (~180px); on the
+   wide box-score layout max-height caps it and it letterboxes rather than
+   growing huge. Taller than before now that the decorative splitbar recap
+   (removed — it duplicated the split pills above and the chart's own bands
+   below) no longer claims its own slice of the card's height; the chart
+   grows into that freed space instead. */
+.winprob__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 260px;
+}
+
+/* The bands themselves are filled via inline `style={{ fill: url(#...) }}`
+   (WinProbChart.jsx) — a per-instance <pattern> id, so plain class selectors
+   can't target the fill here. What the rules below DO style is each
+   pattern's own tile content: that club's own color at FULL strength (set
+   per-instance via the --band-color custom property, one rule shared by
+   both bands rather than a --away/--home pair) plus a full-opacity copy of
+   the logo laid over it — a solid, saturated banner rather than a faint
+   watermark. */
+.winprob__patternbg {
+  fill: var(--band-color, var(--graphite-soft));
+}
+.winprob__patternlogo {
+  opacity: 1;
+}
+
+.winprob__line {
+  fill: none;
+  stroke: var(--winprob-line);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Scoring-play flecks — deliberately flattened into the line (small, dim, no
+   stroke halo, no pointer affordance): a DIFFERENT set of plays than the
+   tappable big-swing markers below, and must never be mistakable for them. */
+.winprob__scoremark {
+  fill: var(--clay);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.winprob__now {
+  fill: var(--winprob-line);
+  stroke: var(--surface-inset);
+  stroke-width: 1.5;
+}
+
+.winprob__inninglabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  fill: var(--text-caption);
+}
+
+/* Card-wide rule: these ▲/▼ are the ONLY top/bottom glyphs anywhere on this
+   card — the ledger below never reuses them (see .winprob__ledger-chip). */
+.winprob__inningarrow {
+  font-size: var(--fs-caption);
+}
+
+/* ---- linked highlighting: chart markers ----
+   One hand-drawn baseball per selectWinProbBigPlays() entry — a circle plus
+   two seam arcs, all inline SVG (no fetched icon, same "nothing external"
+   rule as the rest of this no-backend app). `.winprob__bigdot-hit` is an
+   invisible larger circle for a comfortable tap target around the small
+   visible glyph. `.winprob__bigdot-ball` scales as one unit via a CSS
+   transform (transform-box:fill-box pins the scale origin to the glyph's own
+   center, not the chart's corner). */
+.winprob__bigdot { cursor: pointer; }
+.winprob__bigdot-hit { fill: transparent; }
+.winprob__bigdot-ball {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(1.7);
+  transition: transform 0.15s ease;
+}
+
+.winprob__ball-body {
+  fill: var(--surface-inset);
+  stroke: var(--ink-1);
+  stroke-width: 0.9px;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.winprob__ball-seam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 0.6px;
+  stroke-linecap: round;
+  opacity: 0.4;
+  transition: opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+.winprob__bigdot-ring {
+  r: 0px;
+  opacity: 0;
+  fill: var(--team-color);
+  transition: r 0.18s ease, opacity 0.18s ease;
+}
+
+.winprob__bigdot-label {
+  opacity: 0;
+  transition: opacity var(--dur-fast) ease;
+  pointer-events: none;
+}
+.winprob__bigdot-label-bg { fill: var(--team-color); }
+.winprob__bigdot-label-text {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  fill: var(--team-text);
+}
+
+/* Active state: the tapped/hovered baseball grows and tints toward the
+   favored team's own color (seams stay --clay "seam red" — it never stops
+   reading as a ball), plus a soft halo and its own value label. Every OTHER
+   big-swing marker fades once something is active (.winprob.is-active) — an
+   idle chart shows every marker at equal, unhighlighted weight. */
+.winprob__bigdot.is-active .winprob__bigdot-ball { transform: scale(3.23); } /* 1.9 * the 1.7x base size */
+.winprob__bigdot.is-active .winprob__ball-body {
+  fill: color-mix(in srgb, var(--team-color) 55%, var(--surface-inset));
+  stroke: var(--team-color);
+  stroke-width: 1.1px;
+}
+.winprob__bigdot.is-active .winprob__ball-seam { opacity: 1; stroke-width: 0.8px; }
+.winprob__bigdot.is-active .winprob__bigdot-ring { r: 11px; opacity: 0.16; }
+.winprob__bigdot.is-active .winprob__bigdot-label { opacity: 1; }
+.winprob.is-active .winprob__bigdot:not(.is-active) .winprob__bigdot-ball { opacity: 0.32; }
+
+.winprob__subhead {
+  margin: 10px 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* "How we got here" — a ruled ledger of the biggest revealed swings, newest
+   on top: a team-colored chip (abbreviation + signed % magnitude) with its
+   half-inning caption underneath, then the play in full (no truncation) —
+   and the ledger half of the chart↔ledger linked highlight above. */
+.winprob__ledger-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.winprob__ledger-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 6px;
+  margin: 0 -6px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-compact);
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.winprob__ledger-row:first-child {
+  border-top: 0;
+}
+
+.winprob__ledger-row.is-active {
+  background: color-mix(in srgb, var(--team-color) 12%, var(--surface-inset));
+  box-shadow: inset 3px 0 0 var(--team-color);
+}
+.winprob.is-active .winprob__ledger-row:not(.is-active) { opacity: 0.5; }
+
+.winprob__ledger-meta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.winprob__ledger-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.winprob__ledger-half {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.winprob__ledger-desc {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-body);
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment) —
+   the #root-scoped selector (1 id + 1 class) outweighs the global `#root *`
+   uppercase, same pattern as #root .pbp__desc above. A plain `.winprob__
+   ledger-desc { text-transform: none }` rule here would lose to `#root *` on
+   specificity and silently stay shouted — this is that exact trap. */
+#root .winprob__ledger-desc {
+  text-transform: none; /* caps-exempt: feed-sourced play description reads as a natural sentence, same idiom as .pbp__desc */
+}
+
+/* ------------------------------------------------------------- margin notes
+   The ranked in-progress pitcher digest (MarginNotes.jsx, api/pitcher-
+   callouts.js's buildMarginNotes) — same card anatomy as .prehalf (a headshot
+   beside a star-marked sentence), sat above the Pitchers stat grid it used to
+   be folded into. Same flush navy/gold masthead recipe as .pitchers__title
+   (bleeds past the card's own padding to cap it flush; overflow:hidden on
+   .marginnotes clips the square corners to the card's own rounded ones), plus
+   its own margin-bottom so it doesn't sit flush against the Pitchers card
+   right below it. */
+.marginnotes {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 8px;
+  overflow: hidden;
+}
+.marginnotes__title {
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+.marginnotes__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+.marginnotes__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.marginnotes__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+.shot.marginnotes__shot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.marginnotes__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.marginnotes__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.marginnotes__who {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.marginnotes__text {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.marginnotes__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: var(--fs-caption);
+}
+/* The fun-fact sentence reads as a natural-case sentence — same sanctioned
+   exception as .prehalf__text (see the ALL-CAPS INVARIANT block) — but the
+   name line above it is a structural label like any other card heading, so
+   it stays in the app's shouted convention (same split as .prehalf__who,
+   which lost this same exemption). */
+#root .marginnotes__text {
+  text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence */
+}
+/* Same "Show N more" block button as .teammates__more (TeamInfo.jsx) and
+   .bs__noteMore (BoxScore.jsx) — one-way reveal, no collapse back. */
+.marginnotes__more {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  cursor: pointer;
+}
+.marginnotes__more:hover {
+  color: var(--text-body);
+}
+
+/* -------------------------------------------------------------- pitcher lines
+   Running lines for every pitcher who has appeared in a revealed half-inning —
+   one block per team, each led by the team name and its own header row (gated
+   in api/pitchers.js — not sealed). Sized to fit a phone with NO horizontal
+   scroll: the Pitcher column absorbs the slack and wraps; the numeric columns
+   stay tight. */
+.pitchers {
+  margin-top: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px 8px;
+  overflow: hidden;
+}
+
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title) — overflow:hidden on .pitchers clips the square corners
+   here to the card's own rounded ones. */
+.pitchers__title {
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+
+/* Team name sits above that team's header row. */
+.pitchers__teamname {
+  margin: 14px 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.pitchers__team:first-of-type .pitchers__teamname {
+  margin-top: 2px;
+}
+
+.pitchers__grid {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.pitchers__grid th,
+.pitchers__grid td {
+  padding: 6px 1px;
+  text-align: center;
+  font-size: var(--fs-compact);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.pitchers__grid thead th {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+
+.pitchers__grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Name column takes a fixed share (the nine numeric columns split the remainder
+   evenly under table-layout: fixed). The cell stays a table-cell; an inner flex
+   row wraps the name on the left and pins the jersey number to the right. */
+.pitchers__pitcher {
+  width: 36%;
+  text-align: left !important;
+  padding-left: 0 !important;
+  padding-right: 6px !important;
+}
+
+.pitchers__cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* Caps-locked and auto-shrunk to fit on one line (see PitcherName): `flex: 1`
+   keeps the box filling its share of the column so the measured width is stable,
+   and overflow is hidden so a mid-shrink frame never spills into a scroll. JS
+   drives font-size down from 12px; the value here is just the pre-script max. */
+.pitchers__pname {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  line-height: var(--lh-compact);
+}
+
+.pitchers__num {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
+  text-align: right;
+}
+
+/* A pitcher with an id renders as a .plink button, and .plink (declared later,
+   same specificity) resets text-transform to `inherit`, dropping the name back
+   to title case. Win it back with higher specificity, same fix as the box
+   score's .bs__player .bs__pname. */
+.pitchers__cell .plink.pitchers__pname {
+  text-transform: uppercase;
+}
+

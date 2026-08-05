@@ -1,0 +1,995 @@
+/* ------------------------------------------------------------- site footer
+   Bottom-of-slate block: search boxes, the past-matchup finder, the logo
+   sheet link, and the standard small print. Set off from the game list with
+   a full-bleed rule, same trick the slatehead banner uses up top. */
+.sitefooter {
+  margin: var(--space-8) calc(-1 * var(--app-gutter)) 0;
+  padding: var(--space-6) var(--app-gutter) 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+
+/* --------------------------------------------------------------- searchbox */
+.searchbox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.searchbox__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.searchbox__input {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  width: 100%;
+}
+
+.searchbox__input::placeholder {
+  color: var(--graphite-soft);
+}
+
+.searchbox__input:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.searchbox__results {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+}
+
+.searchbox__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.searchbox__item:active {
+  background: var(--field-soft);
+}
+
+.searchbox__name {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.searchbox__sub {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.searchbox__hint {
+  padding: 8px 10px;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.searchbox__chosen {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2) 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--field-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--field-deep);
+}
+
+.searchbox__clear {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--field-deep);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------- gamefinder */
+.gamefinder__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.gamefinder__vs {
+  flex: 0 0 auto;
+  padding-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamefinder__season {
+  margin-top: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.gamefinder__season label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.gamefinder__season select {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+}
+
+.gamefinder__results {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gamefinder__result {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.gamefinder__result:active {
+  background: var(--field-soft);
+}
+
+.gamefinder__arrow {
+  color: var(--text-caption);
+}
+
+/* --------------------------------------------------------------- actions
+   "Find a past matchup" (opens GameFinderModal) and "Logo sheet" — two real
+   buttons, harmonized so neither reads as more important than the other. */
+/* A responsive grid, not a single flex row: the actions have grown to five
+   stops with long labels ("Find a past matchup", "Top MLB Prospects"), which
+   overflowed their boxes when crammed into one row on a phone. auto-fit +
+   minmax lets them flow onto as many rows as fit — two columns on a phone,
+   more as the viewport widens — and each cell is wide enough that its label
+   wraps inside the box instead of spilling past the border. */
+.sitefooter__actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.sitefooter__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: var(--bw-rule) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.sitefooter__action:active {
+  transform: translateY(1px);
+  background: var(--field-soft);
+}
+
+.sitefooter__action:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.sitefooter__more-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.sitefooter__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--space-4);
+}
+
+/* Plain links, not buttons — these are browse/reference pages, not actions on
+   this screen, so they skip the bordered-box chrome above entirely (see the
+   comment atop this file). Padding still gives each one a real tap target
+   without adding visible bulk; unlike .sitefooter__action these deliberately
+   don't reach --tap-min, since a wrapped inline list of ten forced to 44px
+   each would bring back the very bulk this split exists to remove.
+   Idle reads as a pencil sketch (dotted underline, graphite ink) — hovering
+   resolves it solid and darkens to full ink, like tracing over the sketch;
+   pressing adds the same small tap-down every other button in the app uses,
+   plus a brief dip into field-green (the app's "confirmed/on" accent — see
+   the ready pill) rather than just letting the click pass silently. */
+.sitefooter__link {
+  padding: 6px 2px;
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
+}
+
+.sitefooter__link:hover {
+  color: var(--text-heading);
+  text-decoration-style: solid;
+}
+
+.sitefooter__link:active {
+  transform: translateY(1px);
+  color: var(--field-deep);
+}
+
+.sitefooter__link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-xs);
+}
+
+/* -------------------------------------------------- past-matchup sheet
+   GameFinderModal's dialog chrome; the finder itself is unstyled beyond
+   .gamefinder's own row/results rules above. */
+.gamefindersheet {
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.gamefindersheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.gamefindersheet__head .sheet__title {
+  margin: 0;
+}
+
+.gamefindersheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+/* ------------------------------------------------------ site search overlay
+   SiteSearchModal's chrome — the merged player/club lookup reached from the
+   header's search button on every screen (see SiteSearch.jsx).
+
+   Deliberately NOT the shared .scrim/.sheet bottom sheet the app's other
+   dialogs use, and the reason is load-bearing rather than aesthetic: an
+   on-screen keyboard does not shrink the layout viewport a docked sheet is
+   positioned against, so the sheet — field, hint and every result — sat
+   entirely behind the keyboard the instant the field it exists to focus took
+   focus. The field belongs at the TOP of the screen with the results growing
+   down, so the keyboard can only ever cover the tail of a scrollable list.
+   SiteSearch.jsx's header and ADR-0037 carry the full reasoning; don't fold
+   this back into .sheet. */
+.searchoverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  /* The fallback for a browser with no visualViewport (desktop, mostly, where
+     there's no keyboard to work around). Where there IS one, useVisualViewport
+     overrides height + transform inline with the real visible rectangle — the
+     only way to know where the keyboard starts, since no CSS unit reports it
+     (100dvh tracks retractable browser chrome, not the keyboard). */
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-page);
+}
+
+.searchoverlay__panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--app-width);
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--space-2) + env(safe-area-inset-top)) var(--app-gutter) 0;
+  animation: searchoverlay-in var(--dur-med) var(--ease-out);
+}
+
+@keyframes searchoverlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.searchoverlay__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+/* The field itself: a pill holding the magnifier, the input, and our own clear
+   button — one tap target's worth of it, unlike the ~14px native affordance
+   `type="search"` draws (hidden below). */
+.searchfield {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+}
+
+.searchfield:focus-within {
+  border-color: var(--field-deep);
+  box-shadow: var(--ring);
+}
+
+.searchfield__glyph {
+  flex: 0 0 auto;
+  display: flex;
+  color: var(--text-caption);
+}
+
+.searchfield__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-body);
+  font-family: var(--font-body);
+  /* --fs-field, not --fs-body: mobile Safari zooms the page in on a focused
+     field under 16px. See the token's own note. */
+  font-size: var(--fs-field);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchfield__input:focus {
+  outline: none;
+}
+
+.searchfield__input::placeholder {
+  color: var(--graphite-soft);
+}
+
+.searchfield__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+.searchfield__clear {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  border-radius: var(--radius-pill);
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.searchoverlay__cancel {
+  flex: 0 0 auto;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-1);
+  border: none;
+  background: none;
+  color: var(--field-deep);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+/* A hairline that scans under the field while a request is in flight. It
+   replaces the old "Searching…" line, which pushed the whole result list down
+   and then let it snap back up the moment the rows landed. */
+.searchoverlay__progress {
+  flex: 0 0 auto;
+  height: 2px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--rule-grid);
+}
+
+.searchoverlay__progressbar {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--field);
+  animation: searchoverlay-scan 1.1s var(--ease-standard) infinite;
+}
+
+@keyframes searchoverlay-scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(350%);
+  }
+}
+
+/* The global reduced-motion rule collapses the scan to a stalled 40% stub;
+   a still full-width rule says "working" without moving. */
+@media (prefers-reduced-motion: reduce) {
+  .searchoverlay__progressbar {
+    width: 100%;
+    transform: none;
+  }
+}
+
+.searchoverlay__results {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* Stops a flick past the end of the list from chaining into the page behind
+     the overlay — the other half of the modal's document scroll lock. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--space-2) 0 calc(var(--space-6) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.searchoverlay__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Sticky so the group a row belongs to stays named while the list scrolls
+   under the keyboard — with Players and Teams stacked, the heading is the only
+   thing distinguishing two rows that otherwise look identical. */
+.searchoverlay__grouphead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) 2px;
+  background: var(--bg-page);
+}
+
+.searchoverlay__grouptitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.searchoverlay__clearrecent {
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--field-deep);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+
+.searchoverlay__hint {
+  margin: 0;
+  padding: var(--space-2) 2px;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.searchoverlay__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* The row IS the control (role="option"), so it carries the tap target rather
+   than wrapping a button — see SiteSearch.jsx's ResultRow. */
+.searchoverlay__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.searchoverlay__opt--active,
+.searchoverlay__opt:active {
+  background: var(--field-soft);
+}
+
+/* One fixed-width slot for both kinds of mark — a 3:4 headshot and a square
+   club logo — so a Players row and a Teams row start their text at the same
+   x. TeamLogo sizes itself inline, so the slot has to own the width. */
+.searchoverlay__mark {
+  flex: none;
+  width: var(--shot-2xs-w);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shot.searchoverlay__shot {
+  flex: none;
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+  border-radius: var(--radius-sm);
+}
+
+.shot.searchoverlay__shot.shot--fallback {
+  font-size: var(--fs-num-md);
+}
+
+.searchoverlay__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.searchoverlay__name {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchoverlay__sub {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Wide screens have no keyboard eating the viewport, so the full-bleed sheet
+   would read as a page takeover. Float the same panel near the top instead,
+   over a dimmed page — a command-palette shape, with the backdrop tap the
+   phone layout has no room for. */
+@media (min-width: 560px) {
+  .searchoverlay {
+    background: rgba(22, 34, 47, 0.44);
+    padding-top: 8vh;
+  }
+
+  .searchoverlay__panel {
+    flex: 0 1 auto;
+    max-width: 560px;
+    max-height: 100%;
+    padding: var(--space-4) var(--space-4) 0;
+    background: var(--surface-card);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .searchoverlay__grouphead {
+    background: var(--surface-card);
+  }
+
+  .searchoverlay__results {
+    padding-bottom: var(--space-4);
+  }
+}
+
+/* ---------------------------------------------------------- site menu sheet
+   SiteMenuModal's dialog chrome — the "more pages" list reached from the
+   header's menu button (see SiteMenu.jsx): standings, league leaders,
+   prospects, rehab assignments, the logo sheet, and about. Otherwise these
+   are only reachable by scrolling to the bottom of the slate's footer. Same
+   bottom-sheet shape as .gamefindersheet, minus the input. */
+.sitemenusheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.sitemenusheet__head .sheet__title {
+  margin: 0;
+}
+
+.sitemenusheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sitemenusheet__item {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+}
+
+/* -------------------------------------------------- settings modal
+   FavoriteTeamModal's dialog chrome — a centered card (like .logomodal, via
+   .scrim--center) rather than a docked bottom sheet, so it reads as a
+   deliberate "stop and choose" moment rather than a quick in-flow picker. The
+   team picker itself reuses the Splits vs Team card's vsteam__tray/strip
+   rules above. */
+.favteamsheet {
+  width: calc(100% - 32px);
+  max-width: var(--app-width);
+  max-height: 82vh;
+  overflow-y: auto;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  animation: slideup var(--dur-slow) var(--ease-out);
+}
+
+.favteamsheet__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.favteamsheet__head .sheet__title {
+  margin: 0;
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
+   .pbp__desc for the same pattern): the welcome modal's explainer copy —
+   headline and pitch — is what a visitor reads first, so it's set in the
+   reading serif at natural sentence case instead of shouted display
+   uppercase, like a magazine intro rather than app chrome. The `#root`-scoped
+   selectors (1 id + 1 class) are what actually outweigh the global `#root *`
+   uppercase — a plain class alone can't (see the ALL-CAPS INVARIANT block
+   comment). */
+#root .favteamsheet__title--intro,
+#root .favteamsheet__pitch {
+  font-family: var(--font-read);
+  text-transform: none; /* caps-exempt: welcome-modal headline + pitch read as natural sentences */
+}
+
+.favteamsheet__close {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+}
+
+.favteamsheet__pitch {
+  margin: 0 0 var(--space-4);
+}
+
+.favteamsheet__subtitle {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* Settings modal's account-pitch section (AccountPitch.jsx) — --divider adds
+   the rule + top gap that separates it from the favorite-team section above. */
+.favteamsheet__section--divider {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.favteamsheet__sectionTitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.favteamsheet__actions {
+  margin-top: var(--space-4);
+}
+
+/* Account "why sign in" panel in the welcome/settings modal (AccountPitch.jsx),
+   shown only when Clerk is configured. The pitch prose sits above a full-width
+   ink-navy button matching .btn--next; the signed-in confirmation reuses the
+   same prose block, no button. */
+.favteamsheet__accountpitch {
+  margin: 0 0 var(--space-3);
+}
+/* #root-scoped so it outweighs the global `#root *` uppercase (1,0,1) — same
+   mechanism as .favteamsheet__pitch — so the multi-sentence account copy (and
+   the signed-in email) read as natural sentences instead of shouted chrome. */
+#root .favteamsheet__accountpitch {
+  text-transform: none; /* caps-exempt: account-pitch explainer prose reads as natural sentences, like the welcome pitch beside it */
+}
+.btn--account {
+  width: 100%;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
+}
+
+/* Extra edge padding on the picker strip so even the alphabetical extremes
+   (first/last club) can scroll all the way to center — without it, the
+   native scrollLeft clamps at the content edge and an edge pick (e.g. the
+   Diamondbacks or the Nationals) stops short of the middle instead of
+   landing there like every interior club does. 50% of the tray's own
+   rendered width, minus half a logo button (46px: the 36px TeamLogo plus
+   .vsteam__team's 5px padding on each side) — same centering math as the
+   scrollTo effect in FavoriteTeamModal.jsx, just resolved by CSS instead of
+   a one-off JS measurement so it stays correct across viewport widths. */
+.favteamsheet .vsteam__strip {
+  padding-left: calc(50% - 23px);
+  padding-right: calc(50% - 23px);
+}
+
+/* --------------------------------------------------------------- legal */
+.sitefooter__legal {
+  padding-bottom: var(--space-4);
+  font-size: var(--fs-compact);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+.sitefooter__legal p {
+  margin: 0 0 6px;
+}
+
+.sitefooter__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.sitefooter__brand > span {
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+}
+
+/* ---------------------------------------------------------------- about page */
+.aboutpage {
+  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
+}
+
+#root .aboutpage .caps-exempt {
+  text-transform: none; /* caps-exempt: About page explanatory copy reads as natural sentences */
+}
+
+.aboutpage__intro {
+  padding: var(--space-4) 0 var(--space-5);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.aboutpage__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-3);
+  color: var(--text-heading);
+}
+
+.aboutpage__title {
+  margin: 0;
+  max-width: 32ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  line-height: var(--lh-score);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+}
+
+.aboutpage__lede {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.aboutpage__section {
+  padding: var(--space-5) 0 0;
+}
+
+.aboutpage__principles {
+  display: grid;
+  gap: 8px;
+}
+
+.aboutpage__principle,
+.aboutpage__note {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.aboutpage__principle {
+  padding: 13px 14px 12px;
+}
+
+.aboutpage__principle h3 {
+  margin: 0 0 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.aboutpage__principle p,
+.aboutpage__note p {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.aboutpage__list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.aboutpage__list li {
+  padding: 11px 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-tight);
+  color: var(--text-body);
+}
+
+.aboutpage__list li::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border: var(--bw-hair) solid var(--field);
+  border-radius: 50%;
+  background: var(--surface-card);
+  vertical-align: 1px;
+}
+
+.aboutpage__note {
+  margin-top: var(--space-5);
+  padding: 13px 14px;
+  color: var(--text-caption);
+  background: var(--surface-inset);
+}
+
+.aboutpage__note p {
+  color: var(--text-caption);
+}
+

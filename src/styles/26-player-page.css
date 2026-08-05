@@ -1,0 +1,1383 @@
+/* ============================================================
+   PLAYER & TEAM PAGES
+   Baseball-card treatment on the app's paper-and-ink system.
+   Reuses the .stat tiles, .factgrid bio grid, .section__title
+   and .hint; everything below is page-specific.
+   ============================================================ */
+
+/* The plain, no-underline name/team link — the whole navigation affordance.
+   Rest state is indistinguishable from surrounding text (the spoiler-safe look);
+   a dotted underline appears only on hover / keyboard focus. */
+.plink {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  /* A <button> doesn't inherit text-transform on its own, so a name link would
+     drop out of an uppercase context (batter header, event note). Force it. */
+  text-transform: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+.plink:hover {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.plink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.backbtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 6px 2px 12px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+.backbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.player .mono,
+.team-hub .mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Every hint/caveat on the player page (loading, error, not-found, the
+   season-cutoff footnote) reads scorebook all-caps like the rest of the page. */
+.player .hint {
+  text-transform: uppercase;
+}
+
+/* Section titles on these pages carry an optional right-aligned note. */
+.player .section__title,
+.team-hub .section__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.player .section__title em,
+.team-hub .section__title em {
+  font-style: normal;
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+}
+/* All copy on these pages is forced uppercase (the "scorebook all-caps"
+   convention — see the ALL-CAPS INVARIANT in this file's header). */
+.player .section__title em {
+  text-transform: uppercase;
+}
+.team-hub .section__title em {
+  text-transform: uppercase;
+}
+
+/* ---- player hero ---- */
+.player__hero {
+  display: grid;
+  grid-template-columns: 104px 1fr auto;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: 4px;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.player__herologo {
+  align-self: center;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+/* The league mark in the crest slot, for a player on no club. Sized to match
+   the club logo it replaces (56px, 96px on the wide breakpoint below) so the
+   hero's third column keeps its width and the name doesn't shift between a
+   rostered player's page and a free agent's. Dimmed a touch — it is standing
+   in for an identity, not asserting one. */
+.player__herologo--league {
+  cursor: default;
+}
+.player__leaguemark {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  opacity: 0.7;
+}
+.player__ident {
+  /* Grid items default to min-width:auto, which lets long names push this
+     column (and the logo after it) past the viewport edge on mobile. */
+  min-width: 0;
+  /* Size container so .player__name-last--long can scale to the column's
+     ACTUAL width (cqw) — the headshot and hero logo are fixed-px, so this
+     column shrinks faster than the viewport and a vw-based size can't track
+     it. Safe here: the column is the grid's 1fr track, so its width never
+     depends on its own contents. */
+  container-type: inline-size;
+}
+/* The affiliate mark — the parent MLB org's wordmark, drawn small below a
+   MiLB player's own team logo, like a jersey's affiliation patch. Only
+   rendered when `bio.team.parentOrgId` is present (see PlayerPage.jsx). */
+.player__herologo-affiliate {
+  opacity: 0.75;
+}
+.shot {
+  display: block;
+  width: var(--shot-xl-w);
+  height: var(--shot-xl-h);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  /* Transparent fill so the silo cutout floats on whatever card/page sits
+     behind it, and a faint hairline (not the full rule) so the frame barely
+     whispers around the floating cutout. */
+  background: transparent;
+  border: var(--bw-hair) solid var(--border-hairline);
+  flex: 0 0 auto;
+}
+.shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  /* Slight desaturation so the transparent silo cutout sits in the paper
+     scorebook rather than popping like a web photo. */
+  filter: grayscale(0.16) contrast(1.02);
+}
+.shot--fallback {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-display-lg);
+  color: var(--graphite-soft);
+  /* No cutout art here — restore the filled inset chip the transparent base
+     rule drops, so the empty-state monogram still reads as a mounted card. */
+  background: var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+/* A player with no real photo on file falls back to his team's logo (see
+   Headshot.jsx) rather than the plain monogram. Same mounted-chip background
+   as .shot--fallback, but the mark is oversized so it bleeds past the 3:4
+   frame and its edges clip off at the border — the same "printed badge"
+   treatment the slate matchup tiles use (.gamecard__logobox), scaled up
+   enough to overcome most marks' internal viewBox padding. Centered on BOTH
+   axes: object-position: center overrides the top-center cover crop the base
+   .shot img rule sets for real photos, and scale() grows from the box center,
+   so the mark sits dead-center in the (unchanged 3:4) headshot space. */
+.shot--logo {
+  display: grid;
+  place-items: center;
+  background: var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+.shot--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
+  filter: none;
+}
+.player__name {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  letter-spacing: var(--ls-num);
+  min-width: 0;
+}
+.player__name-first {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.player__name-last {
+  font-weight: var(--w-bold);
+  font-size: clamp(20px, 7vw, 32px);
+  line-height: var(--lh-score);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* A long surname-plus-number ("Misiorowski #32", "Contreras #24") steps the
+   display size down — the jersey number with it — rather than ellipsizing the
+   player's own name on his own page (PlayerPage adds the modifier when the
+   combined length reaches 11 units). Container-relative (cqw, see
+   .player__ident) so the size tracks the hero's middle column, which shrinks
+   faster than the viewport; 11.4cqw fits an 11-char surname plus number down
+   to ~360px phones (verified 320–430px; at 320 the ellipsis safety net still
+   applies). */
+.player__name-last--long {
+  font-size: clamp(14px, 11.4cqw, 25px);
+}
+.player__name-last--long .player__num {
+  font-size: var(--fs-ui);
+}
+.player__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--clay);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-md);
+  margin-left: 5px;
+}
+.player__meta {
+  margin: 6px 0 0;
+  font-size: var(--fs-ui);
+  color: var(--text-muted);
+  line-height: var(--lh-prose);
+  text-transform: uppercase;
+}
+.player__pos {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.player__meta .sep {
+  color: var(--graphite-soft);
+}
+/* "Bats L / Throws R" as one unbreakable chunk — plain text let a two-way
+   player's longer meta line (position · hand · team) wrap mid-phrase,
+   splitting "Throws" from "R" and stranding the separator before the team. */
+.player__hand {
+  white-space: nowrap;
+}
+.player__team {
+  color: var(--navy);
+  font-weight: var(--w-semibold);
+}
+/* "Free Agent" / "Retired", standing in the meta line where a club name would
+   be for a player who is on nobody's roster. Same weight as .player__team so
+   the line's rhythm doesn't change, but graphite rather than navy ink: it is a
+   state, not a place, and nothing behind it opens. Unbreakable for the same
+   reason .player__hand is: a hitter's meta line already carries both bat and
+   throw hands, and the wrap landed between "Free" and "Agent". */
+.player__status {
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+  white-space: nowrap;
+}
+.player .factgrid {
+  margin-top: var(--space-4);
+}
+
+/* ---- 5-tile season row (reuses .stat) ----
+   Same edge-to-edge hairline-ruled container as .factgrid/.player__splits —
+   also covers SplitsVsTeam's career line, which reuses this class
+   (.player__statgrid vsteam__grid) rather than styling its own grid. */
+.player__statgrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.player__statgrid .stat {
+  background: var(--surface-card);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 11px 3px;
+}
+.player__statgrid .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title-sm);
+}
+
+/* The header-less vs-LHP/RHP split ledger sitting directly under the stat
+   grid above (see PlayerPage.jsx) — neither card carries its own margin,
+   so without a SectionTitle between them they'd otherwise touch. */
+.player__seasonsplits {
+  margin-top: 10px;
+}
+
+.player__blocktitle {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  margin: 22px 0 0;
+  padding-top: var(--space-4);
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+.player__career {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-ui);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  padding: 11px 12px;
+  margin: 0;
+  line-height: var(--lh-body);
+}
+.player__caveat {
+  margin-top: var(--space-5);
+}
+
+/* ---- splits ----
+   Same edge-to-edge grid treatment as .factgrid (the bio card above it):
+   a single hairline-ruled container rather than a gap of separately
+   bordered/shadowed cards. */
+.player__splits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.split {
+  background: var(--surface-card);
+  padding: 10px 12px;
+  margin: 0;
+}
+/* An odd item count (e.g. a pitcher's 5-item Firsts) leaves the last card
+   alone in column 1 with nothing in column 2 — stretch it across both so the
+   container's own hairline background never shows through as a bare block. */
+.player__splits > .split:nth-child(2n + 1):last-child {
+  grid-column: 1 / -1;
+}
+.split__k {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+/* Phone (base): stack the date over its description so the date gets the card's
+   full width on line one and the opponent/pitcher/hitter reads on line two —
+   the extra room lets the team firsts spell out the full club name. The wider
+   layout restores the single-line date-and-sub row (see the min-width rule). */
+.split__row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 3px;
+}
+.split__v {
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+}
+.split__sub {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+@media (min-width: 740px) {
+  .split__row {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+}
+
+/* ---- Statcast percentile cards ----
+   Each metric is a small StatcastCard tile (the same one the innings view
+   and box score use for per-half superlatives), not a bar mimicking
+   Baseball Savant's own chart. `.statcast` here is the same flex-wrap rule
+   used there (see the "Statcast superlatives" block above); this override
+   just drops the play-by-play-feed divider (nothing sits above it on the
+   player page) and gives each tile a real minimum width so 6-7 cards wrap
+   across rows — an 84px floor with flex-grow (not a fixed column count)
+   means an incomplete last row (e.g. a pitcher's 7th, "Hard-hit %") stretches
+   to fill the row instead of sitting alone at its floor width. */
+.statcast-section .statcast {
+  margin-top: 8px;
+  padding-top: 0;
+  border-top: none;
+}
+
+/* ---- the percentile polygon, above the cards it summarises. Navy ink on
+   manila with a graphite dashed ring for the average player: no seal amber
+   anywhere, that ink means "score cover" (see CLAUDE.md's spoiler rule) and
+   this is spoiler-free season data. Geometry is all computed in
+   lib/radarGeometry.js — nothing here positions anything, it only inks. ---- */
+.statradar {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0 4px;
+}
+.statradar__svg {
+  width: 100%;
+  max-width: 400px; /* = radarGeometry's viewBox WIDTH (size 320 + 2×40 gutter) */
+  height: auto;
+}
+/* The rim is "best in the league" — a quiet boundary, not a feature. */
+.statradar__rim {
+  fill: none;
+  stroke: var(--border-rule);
+  stroke-width: 1;
+}
+.statradar__axis {
+  stroke: var(--border-rule);
+  stroke-width: 0.5;
+}
+/* The league-average ring, dashed the way a pencilled reference line would be. */
+.statradar__avg {
+  fill: none;
+  stroke: var(--text-caption);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+/* The player himself, in ink. The translucent fill is what makes the silhouette
+   readable where it crosses the average ring. */
+.statradar__shape {
+  fill: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+  stroke: var(--accent-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+/* The type tokens work here because the viewBox is 400 user units wide and the
+   svg is capped at 400px, so one user unit is one CSS pixel — see
+   radarGeometry's `size`/`gutter` note before changing either number. */
+.statradar__label {
+  font-family: var(--font-condensed);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  fill: var(--text-muted);
+}
+.statradar__down {
+  fill: var(--text-caption);
+}
+.statradar__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  fill: var(--text-heading);
+}
+.statcast-section .statcast > * {
+  flex: 1 1 84px;
+  min-width: 84px;
+}
+
+/* The button wrapping each FlipCard — reset to a plain pressable card (see
+   .agents/skills/review-animations STANDARDS.md "button press feedback":
+   scale(0.97) on :active, sub-200ms ease-out). The flip itself reuses
+   FlipCard's own transform transition untouched (src/index.css "FLIP
+   CARDS" block) — same 450ms turn as the slate's past-game reveal. */
+.statcast__flipbtn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: transform var(--dur-snappy) var(--ease-out);
+}
+.statcast__flipbtn:active {
+  transform: scale(0.97);
+}
+.statcast__flipbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* The back face: same tile chrome as the front (.statcast__card), holding
+   the metric name + its plain-language gloss instead of the value. */
+.statcast__card--back {
+  justify-content: center;
+}
+.statcast__def {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+
+/* ---- splits vs team: opponent picker + career line + last meeting ----
+   A finger-scrollable strip of every MLB club's logo (unselected clubs dulled to
+   grayscale, the selected one in full color), the career stat tiles below it,
+   and the last-meeting stat line under those. */
+.vsteam {
+  margin-top: var(--space-2);
+}
+/* The opponent picker's "tray" — an inset panel (recessed paper + hairline
+   border + inner shadow) that lifts the logo strip off the page so it reads as a
+   control you scrub through, not just a loose row of images. */
+.vsteam__tray {
+  margin-top: 8px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.vsteam__strip {
+  /* Makes the strip its own children's offsetParent, so a centering effect's
+     `btn.offsetLeft` (SplitsVsTeam.jsx, FavoriteTeamModal.jsx) is measured
+     relative to the strip itself rather than skipping past it — a static
+     element isn't an offsetParent — to whatever positioned ancestor happens
+     to sit further up (e.g. a modal's `position: fixed` scrim), which throws
+     the centering math off by that ancestor's own offset. No visual change:
+     `relative` with no top/left/etc. doesn't move anything. */
+  position: relative;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 8px 14px;
+  scrollbar-width: thin;
+  /* Fade the leading/trailing edges so it's clear more clubs sit just out of
+     view — the simplest cross-browser scroll affordance (a mask gradient), no
+     scroll listeners. See css-tricks "Modern Scroll Shadows" / shadcn
+     scroll-fade. */
+  -webkit-mask-image: linear-gradient(
+    to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right, transparent 0, #000 18px, #000 calc(100% - 18px), transparent 100%
+  );
+}
+.vsteam__team {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 5px;
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, background var(--dur-fast) ease, box-shadow var(--dur-fast) ease;
+}
+/* Unselected clubs read as grayed-out pencil references; the picked one snaps to
+   full color inside a raised card that pops against the recessed tray. An
+   unfaced club dims a touch more. */
+.vsteam__team .teamlogo {
+  filter: grayscale(1);
+  opacity: 0.4;
+  transition: filter var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+.vsteam__team.is-empty .teamlogo {
+  opacity: 0.24;
+}
+.vsteam__team.is-active {
+  border-color: var(--accent-primary);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.vsteam__team.is-active .teamlogo {
+  filter: none;
+  opacity: 1;
+}
+@media (hover: hover) {
+  .vsteam__team:not(.is-active):hover .teamlogo {
+    opacity: 0.7;
+  }
+}
+/* TeamFilterStrip — the same vsteam__tray strip, spanning the full content
+   width as a team highlight picker (League Leaders, All-Star Rosters)
+   rather than the player-page opponent picker's narrower card. The "MLB"
+   reset button is pinned outside the scrolling club list (see
+   teamfilterstrip__row/__pin/__divider below) rather than being one of the
+   scrolled items, so it's always one tap away regardless of scroll position. */
+.teamfilterstrip {
+  margin: var(--space-2) 0;
+}
+.teamfilterstrip__row {
+  display: flex;
+  align-items: center;
+}
+.teamfilterstrip__pin {
+  flex: 0 0 auto;
+  width: auto;
+  padding-left: 14px;
+  padding-right: 14px;
+  margin: 8px 8px 8px 8px;
+}
+/* The active/picked state draws its own bordered card (.vsteam__team.is-active)
+   around the logo — the wider 14px resting padding above reads as loose once
+   that border shows up, so pull it back to the scrolling logos' own tighter
+   5px just for that state, without touching the resting padding. */
+.teamfilterstrip__pin.is-active {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.teamfilterstrip__divider {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: var(--bw-hair);
+  margin: 8px 0;
+  background: var(--border-rule);
+}
+.teamfilterstrip__mlblogo {
+  display: block;
+  object-fit: contain;
+}
+/* The slate's team-logo nav banner (GameSelect) reuses this strip to jump
+   straight to a club's team page rather than to highlight one — nothing is
+   ever "picked" (selectedTeamId is always null), so the ordinary
+   grayscale-until-active treatment above would leave every logo permanently
+   dim. This modifier keeps them full color. */
+.teamfilterstrip--nav .vsteam__team .teamlogo {
+  filter: none;
+  opacity: 1;
+}
+/* The nav strip's own native scrollbar would otherwise sit right under the
+   logos, fighting the tray's bottom edge — hide it, since the mask-faded
+   edges above already signal "more to scroll" and the arrow buttons below
+   give non-touch users an explicit way to move the strip. */
+.teamfilterstrip--nav .vsteam__strip {
+  scrollbar-width: none;
+}
+.teamfilterstrip--nav .vsteam__strip::-webkit-scrollbar {
+  display: none;
+}
+.teamfilterstrip__arrow {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 8px 2px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.teamfilterstrip__arrow:active {
+  transform: scale(0.94);
+}
+/* A touchscreen already swipes the strip directly. Match the photo/rank-strip
+   convention by reserving these compact step buttons for a mouse or trackpad. */
+@media (hover: none), (pointer: coarse) {
+  .teamfilterstrip__arrow {
+    display: none;
+  }
+}
+.vsteam__grid {
+  margin-top: 2px;
+}
+.vsteam__grid .stat {
+  padding: 11px 2px;
+}
+.vsteam__none {
+  margin: 8px 0 0;
+}
+/* The conditional last-meeting card — a caption naming what it is ("Last game
+   vs STL"), then the date + opponent, a divider, and the broadcast-style stat
+   line, the same mono treatment as the game log. */
+.vsteam__last {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+.vsteam__last-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  margin-bottom: 5px;
+}
+.vsteam__last-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+}
+.vsteam__last-meta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+.vsteam__last-sep {
+  color: var(--border-rule);
+}
+.vsteam__last-line {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+
+/* ---- game log: one broadcast-style stat line per game ----
+   The date + opponent ride a fixed left column; the stat line ("2-4, 2B, HR,
+   2 RBI, K") fills the rest in mono, reading like a TV lower-third. */
+.gamelog {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.gamelog__row {
+  display: grid;
+  /* max-content, not a fixed px: sized to the widest date+opponent across
+     every row in THIS log, so a long nickname ("Diamondbacks") never wraps
+     just because some fixed guess undershot it — the stat-line column has
+     room to give since most lines are far short of the card's full width. */
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 12px;
+  padding: 8px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.gamelog__row:first-child {
+  border-top: none;
+}
+.gamelog__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.gamelog__date {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.gamelog__opp {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  /* .gamelog__row's max-content meta column already sizes to fit the
+     widest date+opponent in the log, so no nickname needs to wrap in
+     practice — this is just the flex-item safety net: a plain flex child
+     defaults to min-width:auto, which would refuse to shrink at all on a
+     viewport too narrow even for that (rather than wrapping gracefully). */
+  min-width: 0;
+}
+/* Level pill on a combined MLB + rehab game log (see gameLogView's tagLevel) —
+   tells apart a rehabbing big leaguer's MLB rows from his MiLB rehab rows. */
+.gamelog__level {
+  margin-left: 5px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  vertical-align: middle;
+}
+.gamelog__line {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+  text-align: right;
+}
+
+/* ---- data ledgers: game log & year-by-year (the card back) ---- */
+.ledger-wrap {
+  overflow-x: auto;
+}
+/* The table's own drop shadow is clipped by the wrap's overflow (needed for the
+   horizontal scroll), so the card shadow lives on the wrap itself — where it
+   renders outside the box and matches the page's other cards. */
+.player .ledger-wrap {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+/* Same card-look-on-the-wrap idea as .player .ledger-wrap above, but ALSO
+   resets the table's own overflow to visible (not just moves the shadow).
+   .standings's shared overflow:hidden (below) sits on the <table> itself, to
+   clip the header row's square corners to the table's own border-radius —
+   harmless for every other ledger table, but it breaks position:sticky's
+   containing-block chain for the sticky team column here: sticky computes
+   relative to the NEAREST ancestor whose overflow isn't visible, which with
+   overflow:hidden ON THE TABLE is the table itself (which never scrolls)
+   instead of .ledger-wrap (which does) — so the "stuck" column just slides
+   off with everything else. Only matters for the Standings boards, the one
+   ledger table with both a sticky column and real horizontal scroll wide
+   enough to use it (the "More columns" toggle, phone-only). */
+.standings-wrap {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  /* Native horizontal scrollbars vary wildly across platforms — some
+     Android/Chromium builds render a thick classic bar complete with arrow
+     buttons, which clashes hard against the scorebook look. A thin
+     paper-toned track with a graphite thumb instead (Firefox's styling
+     hook — the ::-webkit-scrollbar rules below are Chromium/WebKit's). */
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-caption) var(--bg-page);
+}
+.standings-wrap .standings--full {
+  overflow: visible;
+  /* The wrap above now owns the card chrome entirely — without resetting
+     these too, the table's OWN border-radius/border/box-shadow (still set
+     by the shared base .standings rule) render as a second, slightly
+     differently-curved rounded rect nested just inside the wrap's, since
+     `overflow: visible` no longer clips it away. Looks like a stray
+     duplicate element sitting in the corner rather than one clean edge. */
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+.standings-wrap::-webkit-scrollbar {
+  height: 7px;
+}
+.standings-wrap::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+.standings-wrap::-webkit-scrollbar-thumb {
+  background: var(--text-caption);
+  border-radius: var(--radius-pill);
+}
+.standings-wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--text-body);
+}
+.standings-wrap::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+/* Row copy ("vs"/"@" before the opponent) is written lowercase in JS; force it
+   uppercase here rather than littering the markup with literal caps. */
+.player .ledger td {
+  text-transform: uppercase;
+}
+.ledger,
+.standings {
+  width: 100%;
+  /* `separate` (not `collapse`) so the sticky first column's row-divider
+     hairlines stay pixel-aligned with the scrolling columns'. Under `collapse`
+     the divider is a SHARED border owned by the table grid, and the sticky team
+     cell — promoted to its own paint layer — renders that border a pixel or two
+     adrift (and iOS/Chromium disagree on whether it paints at all), leaving a
+     visible step in every row rule at the column seam. With `separate` +
+     zero spacing every cell owns its own top border at the same box position,
+     so the rule is continuous across the seam. See the sticky team column
+     rules below. */
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.ledger th,
+.ledger td {
+  padding: 7px 8px;
+  font-size: var(--fs-small);
+  text-align: right;
+  /* Data cells are single tokens; keep them on one line so a value like the
+     pitcher W–L ("10–7") never wraps at its en-dash onto a second row. The
+     wrap lives on .ledger-wrap (horizontal scroll) instead. */
+  white-space: nowrap;
+}
+/* Row dividers as ONE full-width line per row (a background gradient owned by
+   the row) rather than a per-cell `border-top`. These are auto-layout tables,
+   and a row that carries a logo cell (the prospect tables' team/level columns)
+   gets a fractional intrinsic height; the browser then rounds that odd cell's
+   border box a device pixel off its text-only neighbors, so a per-cell top
+   border steps the hairline at that one seam (visible under BOTH `collapse`
+   and `separate` — it's a fractional-row-height artifact, not a collapse one).
+   A single line owned by the whole row snaps to device pixels exactly once, so
+   it stays flat across every column seam. thead has no rule; tfoot keeps its
+   own heavier one below. */
+.ledger tbody td {
+  border-top: none;
+}
+.ledger tbody tr {
+  background-image: linear-gradient(var(--border-hairline), var(--border-hairline));
+  background-repeat: no-repeat;
+  background-position: left top;
+  background-size: 100% var(--bw-hair);
+}
+.ledger thead th {
+  border-top: none;
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+}
+.ledger td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+}
+.ledger .lft {
+  text-align: left;
+}
+.ledger .yr {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+/* Namespaced (not bare `.opp`) — a plain `.opp` class collides with the
+   opposing-lineup/defense/starter CARD container selector below (`.lineup,
+   .opp, .startercard`), which was leaking its border/background/shadow/
+   overflow:hidden onto every ledger's team/player column. */
+.ledger .ledger__sub {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+.ledger tr.is-allstar td {
+  background: rgba(233, 195, 63, 0.16);
+}
+.ledger tr.is-allstar .yr {
+  color: var(--clay-deep);
+}
+.ledger__allstar {
+  color: var(--clay);
+  margin-left: 3px;
+  font-size: var(--fs-caption);
+}
+/* Career total — the ledger footer, set off with a heavier rule + a tinted row
+   so it reads as the sum of everything above it. */
+.ledger tfoot td {
+  border-top: var(--bw-rule) solid var(--border-rule);
+  background: var(--bg-page);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.ledger tfoot .yr {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* ---- career register: unified MLB (inked) + MiLB (penciled) rows ----
+   MLB rows keep the ledger's default ink; MiLB rows are penciled in graphite,
+   so the two competitions read as distinct at a glance — the scorebook's
+   official-vs-provisional metaphor, not decoration. */
+.ledger tr.reg-milb td {
+  color: var(--graphite);
+}
+.ledger tr.reg-milb .yr {
+  color: var(--graphite);
+  font-weight: var(--w-semibold);
+}
+/* The level tag riding each MiLB row's team. MLB rows carry none — ink IS the
+   majors by default, so tagging every one would just be dead repetition. */
+.reg-pill {
+  margin-left: 5px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--graphite);
+  vertical-align: middle;
+}
+/* Split totals — the MLB footer inked, the MiLB footer penciled, so neither
+   reads as a blended cross-level career line. */
+.ledger tfoot tr.reg-milb td {
+  color: var(--graphite);
+}
+/* A missed season (see missingSeasonRows in api/person.js) — the note
+   replacing the team + stat cells reads as an aside, not a stat line: italic
+   graphite, no bold weight. */
+.reg-gap td {
+  color: var(--graphite);
+}
+.reg-gap .yr {
+  color: var(--graphite);
+}
+.reg-gap__note {
+  font-style: italic;
+}
+/* The note spans the rest of the row (see Ledger's spanCell) instead of
+   sitting `nowrap` beside a run of dashes — let it wrap within the table's
+   width rather than forcing the whole ledger into horizontal scroll. */
+.ledger td.ledger__span {
+  white-space: normal;
+}
+/* The career register's secondary columns (a pitcher's GS, K, BB) fold away on
+   a phone so the essentials stay legible; they return at the 740px "wide"
+   breakpoint. The Ledger tags those cells with col-narrow-hide (see hideNarrow). */
+@media (max-width: 739.98px) {
+  .ledger .col-narrow-hide {
+    display: none;
+  }
+  /* Tighten the cell gutters on a phone so a dense 8-column pitcher register
+     fits the viewport without the last stat spilling into a horizontal scroll. */
+  .ledger th,
+  .ledger td {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+}
+/* Neutral caption for the small post-debut stints kept out of the ledger, plus
+   the "converted to pitcher" note that sits above the stat blocks. */
+.reg-footnote {
+  margin: 8px 2px 0;
+  font-size: var(--fs-compact);
+  font-style: italic;
+  color: var(--graphite);
+}
+.reg-convert {
+  margin: 0 2px 14px;
+  font-size: var(--fs-compact);
+  font-style: italic;
+  color: var(--graphite);
+}
+/* MILESTONE WATCH card below the career register — a small bordered block
+   (echoes .rehabcard's card treatment) rather than a bare line, since it now
+   carries a projected timeframe alongside the progress fact. Title uppercase
+   like every other SectionTitle; each row's progress text stays neutral, the
+   projected timeframe inked in the accent color (like .milestonepill) so the
+   forward-looking half of the fact reads as distinct from the plain count. */
+.milestonewatch {
+  margin: 8px 2px 0;
+  padding: 8px 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+.milestonewatch__title {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+.milestonewatch__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 3px 0;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+}
+.milestonewatch__eta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+/* FoulCard's "League foul tracker ›" — a destination-named chevron link out
+   of the card, same register as .chevron-link's "See all ›". Compound to
+   beat .plink's `font: inherit`/`color: inherit` reset (same fix as
+   .plink.lineup__name/.plink.startercard__name above). */
+.plink.foulcard__more {
+  display: inline-block;
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--accent-link);
+}
+
+/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): a
+   marquee (.plaque) for the single most prestigious honor, then everything
+   else as ledger groups below it. Sits in the achievements zone alongside
+   Milestone Watch and Firsts, right after the fact grid — same bordered-card
+   treatment as .milestonewatch so the two read as siblings.
+
+   No per-award icon: a lettered badge in a ring reads as a generic avatar
+   no matter which two letters go inside it, so the marquee is pure
+   typographic hierarchy — an eyebrow, the headline, a short tier-coloured
+   rule (a divider, not an icon standing in for one), then the honor's own
+   dates. A ledger row's tier reads from a background tint (see
+   .ledger-row.is-allstar), the same mechanism the career register already
+   uses for its own All-Star rows, not a rail or a badge. */
+.trophycase {
+  margin: 0 2px;
+  padding: 10px 12px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+/* ---- marquee: the single hero honor, no enclosing shape ---- */
+.plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.plaque-eyebrow {
+  margin: 0 0 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.plaque-eyebrow.tier-hw {
+  color: var(--award-ink);
+}
+.plaque-eyebrow.tier-as {
+  color: var(--allstar-blue);
+}
+.plaque-eyebrow.tier-is {
+  color: var(--graphite);
+}
+.plaque-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+/* A hardware honor outside the top of HERO_RANK (person.js) — Gold Glove
+   down through All-MLB Second Team — is real, but not career-defining the
+   way an MVP or Cy Young is; the marquee says so by rendering smaller and
+   lighter, not just via the (identical) tier-hw color every hardware honor
+   already shares. */
+.plaque-name--lesser {
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-body);
+}
+.plaque-rule {
+  display: block;
+  width: 30px;
+  height: 3px;
+  margin: 9px 0 8px;
+  border-radius: var(--radius-xs);
+}
+.plaque-rule.tier-hw {
+  background: var(--award-line);
+}
+.plaque-rule.tier-as {
+  background: var(--allstar-blue);
+}
+.plaque-rule.tier-is {
+  background: var(--graphite-soft);
+}
+.plaque-years {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+
+/* ---- ledger: flex rows, not a rigid table — a date list needs to wrap,
+   not truncate to fit a table cell. Every row shows ALL of its honor's
+   dates, uncapped — a row with more than one grows onto its own line and
+   wraps rather than hiding a "+N more". ---- */
+.ledger-group {
+  margin-top: 14px;
+}
+.plaque + .ledger-group {
+  padding-top: 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ledger-taglabel {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+.ledger-rows {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ledger-row {
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ledger-row:first-child {
+  border-top: none;
+}
+.ledger-row .lbl {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.ledger-row .val {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+}
+/* One date: label + date share the line, date pinned right. */
+.ledger-row.single {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ledger-row.single .val {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Several dates: label gets its own line, the full list wraps beneath it
+   across as many lines as it needs — the card grows, nothing truncates. */
+.ledger-row.multi .lbl {
+  display: block;
+  margin-bottom: 3px;
+}
+.ledger-row.multi .val {
+  line-height: var(--lh-loose);
+}
+.ledger-row.is-allstar {
+  background: color-mix(in srgb, var(--allstar-blue) 8%, var(--surface-inset));
+}
+.ledger-row.is-allstar .val {
+  color: var(--allstar-blue-deep);
+  font-weight: var(--w-semibold);
+}
+
+/* ---- collapsed tally + expand — dense careers (see COLLAPSE_THRESHOLD in
+   TrophyCase.jsx) open the ledger collapsed to one line per group instead
+   of the full list, with a real "show everything" action, never a
+   dead-end "+N more". ---- */
+.ledger-tally {
+  margin-top: 14px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.ledger-tally__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 9px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--graphite);
+}
+.ledger-tally__row:first-child {
+  border-top: none;
+}
+.ledger-tally__row b {
+  font-family: var(--font-mono);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+.ledger-expand {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  appearance: none;
+  cursor: pointer;
+  border: var(--bw-hair) dashed var(--award-line);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+  color: var(--award-ink);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.ledger-expand:hover {
+  background: var(--award-line);
+  color: var(--paper-2);
+}
+.ledger-expand:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.ledger-collapse {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--graphite);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ledger-collapse:hover {
+  color: var(--text-body);
+}
+.ledger-collapse:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+

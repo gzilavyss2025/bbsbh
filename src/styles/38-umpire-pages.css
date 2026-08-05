@@ -1,0 +1,381 @@
+/* ---------------------------------------------------------------- umpire page */
+.umpage__head {
+  margin: 6px 0 14px;
+}
+.umpage__namerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.umpage__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+.umpage__sub {
+  margin: 4px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.umpage__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.umpage__card {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.umpage__cardtitle {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Logo-per-team grid: wraps to the next row once a line of logos fills the
+   card width, rather than a fixed column count — reads well from a phone's
+   narrow width up through the wide desktop layout. */
+.umpage__teamgrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.umpage__teamitem {
+  flex: 0 0 auto;
+}
+.umpage__teamlink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px;
+}
+.umpage__teamcount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+/* A club this umpire hasn't worked this season: kept in the grid (so the
+   whole league always shows) but dimmed, with TeamLogo's own bw treatment. */
+.umpage__teamitem--unworked {
+  opacity: 0.35;
+}
+
+.umpage__venuelist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.umpage__venuerow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.umpage__reclogo {
+  align-self: center;
+}
+.umpage__venuerank {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-align: right;
+}
+.umpage__venuename {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.umpage__venuecount {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+/* Level tag on AAA rows (game log + ballparks). MLB is the implicit default, so
+   only AAA is chipped — a small kraft-amber pill, the level toggle's own hue. */
+.umpage__levelchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+  background: var(--seal);
+  vertical-align: middle;
+}
+/* Game-context tag (postseason round / All-Star Game) on game-log rows — same
+   pill as the level chip, in navy ink to read as a different axis than level. */
+.umpage__ctxchip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--accent-primary);
+  vertical-align: middle;
+}
+/* Sub-line under an accuracy card title (e.g. the postseason "not ranked" note). */
+.umpage__cardsub {
+  margin: -2px 0 10px;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+/* "Show all" toggle under a truncated ballparks/team-records list. */
+.umpage__showall {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+/* Single-Game Highs' "View more" toggle, revealing the rest of the list past
+   GAME_HIGHS_LIMIT — same convention as .umpage__showall above. */
+.foulboard__viewmore {
+  display: block;
+  margin: 10px auto 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+
+.umpage__filter {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.umpage__filterbtn {
+  flex: 1;
+  padding: 9px 10px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+}
+.umpage__filterbtn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--paper-0);
+}
+.umpage__filterbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.umpage__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.umpage__row {
+  display: grid;
+  grid-template-columns: 40px 64px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.umpage__list li:first-child.umpage__row {
+  border-top: none;
+}
+/* Zebra-stripe the games this ump had behind the plate, in the mixed "All
+   games" view, so they read at a glance against his base/field assignments. */
+.umpage__row--hp {
+  background: var(--surface-inset);
+}
+.umpage__role {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umpage__date {
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.umpage__matchup {
+  justify-self: start;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+}
+/* Per-game called-pitch accuracy, on the games the ump had behind the plate. */
+.umpage__rowacc {
+  justify-self: end;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+/* The "Accurate strike zone" label riding the per-game % — spelled out only
+   once there's room for it (tablet/desktop); a phone-width row keeps just the
+   figure so it doesn't crowd the matchup column. */
+.umpage__rowacclabel {
+  display: none;
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+}
+
+/* Plate-accuracy summary card: the headline figure/rank tiles + zone map.
+   Up to 4 tiles now (accuracy, rank, consistency, favor) — flex-wrap + a
+   min-width basis lets 2–3 sit in one full-width row like before, while 4
+   wraps to a 2×2 grid on a phone-width card rather than squeezing every
+   tile down to an unreadable sliver. */
+.umpage__accrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.umpage__acctile {
+  flex: 1 1 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  text-align: center;
+}
+.umpage__accpct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+}
+.umpage__acctilelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umpage__acclabel {
+  margin: 0;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  text-align: center;
+}
+/* The zone map + its caption inside the Plate-accuracy card. */
+.umpage__acczone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.umpage__acczonecap {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  line-height: var(--lh-ui);
+  text-align: center;
+}
+
+@media (min-width: 740px) {
+  /* Tablet/desktop has the width to spell out what the per-game % means. */
+  .umpage__rowacclabel {
+    display: inline;
+  }
+}
+
+/* ---------------------------------------------------------- umpire rankings
+   The full league table (UmpireRankingsPage) reuses .standings/.ledger-wrap's
+   ledger styling (see the Standings page above) rather than a parallel table
+   skin — same right-aligned mono figures, left-aligned .team cell. Only the
+   rank number riding the name cell is specific to this table. */
+/* Row for a plate umpire slated behind the dish TODAY — same amber "this is
+   today" wash as .tstatrow--today, applied per-<td> like .standings tr.is-me
+   above (border-collapse: separate keeps each cell's own border-top). */
+.umprank__row--today td {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+}
+/* Home-plate glyph beside a today-working umpire's name — a small round
+   kraft-tape badge, same 21px dot as .umptier__glyph (the Umpires card's own
+   tap-glyph), reusing that same HomePlateIcon shape (UmpireTierGlyph.jsx) so
+   "home plate" reads as one consistent mark across the app rather than a
+   TEXT chip, which truncated illegibly on a narrow phone (the .standings td
+   `white-space: nowrap` a text label had to fight). Static, not a button —
+   this row has nothing to expand into. */
+.umprank__todaychip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 21px;
+  height: 21px;
+  margin-left: 6px;
+  border-radius: 999px;
+  color: var(--seal-ink);
+  background: var(--seal);
+  vertical-align: middle;
+}
+.umprank__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  min-width: 1.4em;
+  text-align: center;
+}
+

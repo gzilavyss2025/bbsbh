@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// Caps how long a single source file may get, so the next src/index.css (29,828
-// lines) or src/api/person.js (2,620) is caught while it is still small enough
-// to split cheaply. Companion to check-dir-size.mjs; both are ADR-0038.
+// Caps how long a single source file may get, so the next src/index.css — which
+// reached 30,326 lines before it was split into src/styles/ — or the next
+// src/api/person.js (2,706) is caught while it is still small enough to split
+// cheaply. Companion to check-dir-size.mjs; both are ADR-0038.
 //
 // A file this long is a maintenance problem in three specific ways: an agent
 // cannot hold it in context, two agents editing different parts of it still
@@ -62,12 +63,38 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // not to widen the table. The trailing comment on each line is the measured
 // length when it was last set, so a reader can see the headroom.
 //
-// src/index.css is the extreme case and the reason this guard exists. When it is
-// split into partials, this entry must be REPLACED by one entry per partial that
-// is still over MAX_LINES — that is the point, and it is what stops 30,000 lines
-// evaporating into unrecorded 9,000-line pieces.
+// src/index.css WAS the extreme case and the reason this guard exists, at 30,326
+// lines. It is now 63 — a banner comment and 55 @import lines — and its entry
+// here has been replaced by one per oversized partial, exactly as this comment
+// used to instruct. That replacement is the point: it is what stopped 30,000
+// lines evaporating into unrecorded 9,000-line pieces and being called an
+// improvement. The 24 entries below are the stylesheet's remaining real debt,
+// now itemised instead of hidden inside one number.
 const BUDGETS = {
-  'src/index.css': 30400, // 30326
+  'src/styles/02-wordmark-lab.css': 700, // 644
+  'src/styles/05-masthead-nav.css': 700, // 683
+  'src/styles/06-loader-and-cards.css': 900, // 850
+  'src/styles/08-site-shell.css': 1000, // 995
+  'src/styles/09-team-info.css': 700, // 686
+  'src/styles/10-lineup.css': 800, // 798
+  'src/styles/12-sealbox.css': 1900, // 1810
+  'src/styles/14-strike-zone.css': 1100, // 1027
+  'src/styles/15-team-color-lab.css': 700, // 691
+  'src/styles/17-identity-lab-workbench.css': 1200, // 1140
+  'src/styles/20-charts.css': 700, // 684
+  'src/styles/21-box-score.css': 1000, // 918
+  'src/styles/22-box-score-tables.css': 800, // 789
+  'src/styles/23-box-score-detail.css': 700, // 637
+  'src/styles/26-player-page.css': 1400, // 1383
+  'src/styles/27-player-position-innings.css': 800, // 706
+  'src/styles/28-team-hub.css': 1000, // 984
+  'src/styles/29-team-transactions.css': 900, // 844
+  'src/styles/31-wild-card.css': 1100, // 1088
+  'src/styles/35-postseason-series.css': 700, // 693
+  'src/styles/42-first-scorebook.css': 900, // 854
+  'src/styles/43-foul-tracker.css': 900, // 877
+  'src/styles/44-pre-game-cards.css': 700, // 652
+  'src/styles/49-passport-book.css': 1000, // 953
   'src/api/person.js': 2800, // 2706
   'src/api/callout-notes.js': 2100, // 2080
   'src/api/playbyplay.js': 1800, // 1784
@@ -173,8 +200,11 @@ if (problems.length) {
   process.exit(1)
 }
 
-const budgeted = Object.keys(BUDGETS).length
+// Name the worst offender rather than hardcoding a file this guard's own third
+// assertion is designed to eventually remove from the table.
+const budgeted = Object.entries(BUDGETS).sort((a, b) => b[1] - a[1])
+const worst = budgeted[0]
 console.log(
   `✓ File sizes hold — ${measured.size} source files under ${MAX_LINES} lines, ` +
-    `${budgeted} on a ceiling (largest: src/index.css ${BUDGETS['src/index.css']}).`,
+    `${budgeted.length} on a ceiling${worst ? ` (largest: ${worst[0]} ${worst[1]})` : ''}.`,
 )

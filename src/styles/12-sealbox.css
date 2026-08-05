@@ -1,0 +1,1810 @@
+/* ---------------------------------------------------------------- sealbox */
+/* The signature spoiler cover: kraft tape hatch over the inning totals. */
+.sealbox.cover {
+  width: 100%;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  color: var(--seal-ink);
+  background: var(--seal-texture);
+}
+
+.cover__lock {
+  font-size: var(--fs-title-lg);
+  line-height: var(--lh-solid);
+}
+
+.cover__main {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--seal-ink);
+  letter-spacing: var(--ls-xwide);
+  text-transform: uppercase;
+}
+
+.cover__sub {
+  font-family: var(--font-body);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  color: var(--seal-ink);
+  opacity: 0.82;
+}
+
+.statgrid {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface-inset);
+  animation: reveal var(--dur-slow) var(--ease-out);
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* R/H/E/LOB and the four pitch stats as one 4-column, 2-row seamless grid —
+   same recipe as .factgrid/.umps__list, just with .stat's own --inset-cell
+   shadow (not --shadow-card) since this already sits inside .statbox's own
+   bordered card rather than floating on the page directly. The 1px gap
+   reveals the hairline rule beneath; individual .stat cells (below)
+   contribute only their background, not a border/radius/shadow of their own.
+   All eight cells share one font size (see .stat, no more --big/--small
+   variants here) so the two rows read as one consistent stat line rather
+   than a "hero" row over a secondary one. */
+.statline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border-rule);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--inset-cell);
+}
+
+.statline .stat {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ABS (Automated Ball-Strike) challenges — the card's third row (see
+   StatBox's AbsRow). One club per row inside a single inset panel that matches
+   the R/H/E and pitch-stat cells above, so ABS reads as another row of the
+   card rather than orphaned text. The club logo anchors each row on the left;
+   the pips then narrate that club's challenge history left-to-right — one pip
+   per challenge MADE, colored by outcome (overturned = won, stood = lost) —
+   followed by any still-unused challenges in kraft brown. A right-aligned
+   record + remaining readout carries the same information as digits for anyone
+   who'd rather not decode the dots. (Unlike the mound-visit UsagePips, this is
+   an outcome history, not a plain remaining count, so it uses its own pips.) */
+.abs {
+  margin-top: 10px;
+}
+/* The title's bottom corners square off and sit flush against the rows
+   below, so the navy header and the row panel read as ONE attached card
+   rather than a header floating loose above a separately-bordered box (which
+   this used to be inside .statbox, its inset-padded default context — see
+   .abs__rows below). .bs__abscard (box score) already wants this same
+   joined look; .abscard (desktop) is the one context that still wants the
+   header floating separately, and overrides both back apart below. */
+.abs__title {
+  display: block;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  margin-bottom: 0;
+}
+.abs__rows {
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.bs__abscard {
+  /* Now an independent card in its own right (BoxScoreBody's .bs__col),
+     not the batting/pitching card's tail — the column's own flex gap
+     (var(--space-4)) spaces it from its neighbors, so the base .abs rule's
+     own margin-top would double that gap. */
+  margin-top: 0;
+}
+.abs__row + .abs__row {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+/* The row is a toggle button (see AbsRow, StatBox.jsx) — reset off the .btn
+   look entirely so it still reads as a plain card row, not an app button.
+   Inert (no pointer cursor, no hover) when there are no challenges yet to
+   expand — :disabled covers that without a separate modifier class. */
+.abs__rowbtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.abs__rowbtn:disabled {
+  cursor: default;
+}
+.abs__rowbtn:not(:disabled):hover {
+  background: var(--paper-1);
+}
+.abs__rowbtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+/* The club mark — sized like the app's other inline club logos. Falls back to
+   the abbreviation (.abs__team) when the art is missing (MiLB / load error). */
+.abs__logo {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+.abs__team {
+  flex: 0 0 auto;
+  min-width: 24px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.abs__pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.abs__pip {
+  box-sizing: border-box;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+.abs__pip--won {
+  background: var(--accent-positive);
+}
+.abs__pip--lost {
+  background: var(--accent-negative);
+}
+.abs__pip--open {
+  background: var(--seal);
+}
+/* Record (won–lost) + what's still in the bank, right-aligned as tabular
+   figures — the same numbers the pips encode, for a scorer who wants the count. */
+.abs__rec {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* The expanded detail list under a tapped .abs__rowbtn — one line per
+   challenge, spelling out in words the same three facts the pips encode as
+   color (who, when, outcome), for anyone who taps in rather than decoding
+   dots. Inset panel matches the row's own kraft-tinted surface (same idiom as
+   .rolling__cell) rather than the card's plain paper. */
+.abs__detail {
+  list-style: none;
+  margin: 0;
+  padding: 4px 13px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--paper-1);
+}
+.abs__detailrow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: var(--fs-caption);
+}
+.abs__detailhalf {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
+  min-width: 5.5ch;
+}
+.abs__detailwho {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.abs__detailresult {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+.abs__detailresult--won {
+  color: var(--accent-positive);
+}
+.abs__detailresult--lost {
+  color: var(--accent-negative);
+}
+
+/* Plate umpire: the worst missed call so far, then the net favor it's part of
+   — a compact sibling to .abs (same title treatment). */
+.umpfavor {
+  padding-top: 10px;
+}
+/* .umpfavor__row: same idea as .bs__duo/.bs__col (BoxScore.jsx) — a column
+   on a phone (each card its own natural height), a real two-up grid at the
+   app's shared min-width:740px breakpoint (iPad/desktop) where the two cards
+   sit side by side AND match height — grid's default align-items: stretch
+   (unset here, so it applies) stretches the shorter card to the row's full
+   height instead of leaving the two top-aligned at their own heights. */
+.umpfavor__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+@media (min-width: 740px) {
+  .umpfavor__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  /* The innings view's stat card shares its row with the win-probability
+     column (see .innings__row2 above) rather than running the app's full
+     measure, so the worst-call diagram and favor meter don't have room for
+     a real two-up grid there even past this shared breakpoint — stay
+     stacked instead of squeezing both into half a narrow card. The box
+     score's own (unscoped) use of .umpfavor__row is unaffected — it runs
+     the full-width card the two-up grid was designed for. */
+  .innings__statbox .umpfavor__row {
+    display: flex;
+    flex-direction: column;
+  }
+  /* Stacked full-card-width, .wcall__body's 124px-diagram + 1fr-text grid
+     otherwise stretches the text column across the whole card, stranding
+     the diagram at the left edge with empty space beside it — cap its width
+     and center the pair instead. */
+  .innings__statbox .wcall__body {
+    max-width: 380px;
+    margin: 0 auto;
+  }
+}
+.umpfavor__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* The worst-call card: label, a fixed-scale zone diagram beside the call
+   pills, a batter/inning locator, and the before→after count blink. Same
+   card chrome as .statcast__card/.favormeter (paper-2 fill, hairline border,
+   inset shadow) so it reads as their sibling. */
+.wcall {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 10px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+.wcall__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.wcall__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.wcall__body {
+  display: grid;
+  grid-template-columns: 124px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.wcall__diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.wcall__svg {
+  width: 100%;
+  max-width: 124px;
+  display: block;
+}
+/* The zone rectangle: a fixed illustrative shape (schematic, not to-scale per
+   batter — same footing as UmpireZoneMap's 3×3 grid), NOT the crossed edge —
+   see wcallGeometry in StatBox.jsx for why the frame never rescales per
+   pitch. */
+.wcall__zone {
+  fill: var(--surface-inset);
+  stroke: var(--border-hairline);
+  stroke-width: 1.5;
+}
+.wcall__edgeline {
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.wcall__bracket {
+  stroke-width: 1.5;
+  stroke-dasharray: 2 2;
+}
+.wcall__ball {
+  fill: var(--surface-inset);
+  stroke-width: 1.6;
+}
+.wcall__ink--clay { stroke: var(--clay); fill: var(--clay); }
+.wcall__ink--field { stroke: var(--field); fill: var(--field); }
+.wcall__edgeword {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.wcall__side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wcall__calls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-family: var(--font-display);
+}
+.wcall__pill {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.wcall__pill--wrong {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.wcall__pill--right {
+  background: var(--field-soft);
+  color: var(--field);
+}
+.wcall__arrow {
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+.wcall__locator {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.wcall__locator b {
+  color: var(--text-heading);
+  font-weight: var(--w-semibold);
+}
+
+/* The before→after count blink — see CountBlink in StatBox.jsx. Fires once
+   per mount, never loops; --marker is the app's existing highlighter-yellow
+   "watch this" flag (used elsewhere for the same "pay attention" job), not a
+   new color. */
+.wcall__count {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+.wcall__count-label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  margin-right: 1px;
+}
+.wcall__count-old {
+  color: var(--graphite-soft);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  animation: wcall-count-old var(--dur-slow) var(--ease-out) 1;
+}
+.wcall__count-arrow {
+  color: var(--graphite-soft);
+  font-size: var(--fs-caption);
+}
+.wcall__count-new {
+  padding: 0 4px;
+  border-radius: var(--radius-xs);
+  color: var(--text-heading);
+  animation: wcall-count-new var(--dur-highlight) var(--ease-out) 1;
+}
+@keyframes wcall-count-old {
+  0% { opacity: 1; }
+  100% { opacity: 0.55; }
+}
+@keyframes wcall-count-new {
+  0% { background: var(--marker); }
+  100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wcall__count-old, .wcall__count-new { animation: none; }
+  .wcall__count-old { opacity: 0.55; }
+}
+
+/* The favor lean-bar: two club logos flanking a track whose fill grows from
+   center toward whichever side missed calls have added value to, a
+   plain-English caption underneath, and a routine/standout/outlier tier
+   badge in the top-right corner (favorTier — see .favormeter__tierpill
+   below). Same card treatment as .statcast__card (it's a grid sibling of
+   one) — background/border/radius/shadow — so the two read as one
+   consistent row rather than a tile next to a bare block. Away/home fill
+   colors default to WinProbChart's own soft-clay/soft-navy pair — the same
+   "which side" visual language already on this page — but the fill's own
+   inline style usually overrides that with the favored club's real
+   primary/secondary stripe (see lib/teams.js's teamStripeGradient). */
+.favormeter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* No-op at its own natural height; centers the track/caption when the
+     iPad/desktop .umpfavor__row grid stretches this card to match a taller
+     worst-call card beside it. */
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+/* The whole card picks up a soft wash of its own tier color, not just the
+   pill — routine stays the plain card treatment above (nothing to escalate),
+   standout tints toward the medal-amber "honors" family, outlier toward the
+   highlighter "watch flag" marker, both via the same color-mix() pattern
+   already used elsewhere in this file (e.g. .pin-card). */
+.favormeter--standout {
+  background: color-mix(in srgb, var(--award-line) 10%, var(--paper-2));
+  border-color: var(--award-line);
+}
+.favormeter--outlier {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  border-color: color-mix(in srgb, var(--marker) 60%, var(--border-hairline));
+}
+/* The tier badge (favorTier) — routine/standout/outlier, escalating in
+   visual weight rather than a single flat color: routine blends into the
+   card, standout borrows the medal-amber "honors" treatment already used on
+   the transaction timeline, outlier borrows the highlighter "watch flag"
+   marker color so a truly lopsided night visually demands a second look.
+   A normal flex child (own row, right-aligned via align-self), NOT
+   position:absolute — an overlay here collided with the track-row right
+   below it at this card's narrow 50%-column width, hiding the home club's
+   logo under the pill. */
+.favormeter__tierpill {
+  align-self: flex-end;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.favormeter__tierpill--routine {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-caption);
+}
+.favormeter__tierpill--standout {
+  background: var(--award-soft);
+  color: var(--award-ink);
+}
+.favormeter__tierpill--outlier {
+  background: var(--marker);
+  color: var(--ink-0);
+}
+.favormeter__track-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.favormeter__track {
+  position: relative;
+  flex: 1;
+  /* Taller than a typical hairline meter specifically so the diagonal
+     team-color stripe (teamStripeGradient) reads as a clean woven texture
+     rather than a muddy sliver at this card's narrow 50%-column width. */
+  height: 18px;
+  border-radius: 999px;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  overflow: hidden;
+}
+.favormeter__mid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--bw-hair);
+  background: var(--border-rule);
+}
+.favormeter__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.favormeter__fill--away {
+  right: 50%;
+  background: var(--winprob-away);
+}
+.favormeter__fill--home {
+  left: 50%;
+  background: var(--winprob-home);
+}
+.favormeter__caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.favormeter__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.favormeter__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  /* Same size StatcastCard uses for its own value (.statcast__value) — this
+     card is its grid sibling, so the headline figures should match. */
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+.favormeter__unit {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  opacity: 0.7;
+}
+/* The tier phrase (favorTier) — smaller and softer than the main caption
+   lines above it, since it's supporting context ("how notable is this"),
+   not the headline fact. */
+.favormeter__tier {
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-style: italic;
+  font-weight: var(--w-regular);
+  color: var(--text-muted);
+}
+
+/* Statcast tile base (see StatcastCard.jsx) — the player page's season-
+   percentile grid (.statcast-section below) is the only remaining user; each
+   card reads top-to-bottom: the measure, the value with its unit trailing
+   small, then who did it. */
+.statcast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.statcast > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.statcast__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 10px 6px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+
+.statcast__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.statcast__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+
+.statcast__unit {
+  font-style: normal;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  opacity: 0.7;
+}
+
+.statcast__who {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-compact);
+}
+
+/* Pre-pitch subs/pitching changes for the half about to be revealed, shown
+   above the seal (see api/select.js's selectPrePitchChanges). Kept visually
+   distinct from the sealed content below it: a plain rule and caption, no
+   seal texture, since it isn't gated by the tap. */
+/* The pre-half callout strip (see PreHalfCallouts.jsx) — the "entering this
+   half" season-context cards above the seal: starter team record, the
+   leading-after checkpoint, an inning's run-differential story. Same card
+   anatomy as the box score's .bs__noteCard (avatar beside a star-marked
+   sentence), sat with the pre-pitch staging content. Horizontal margin (not
+   just margin-bottom): flush against .half's own border (which carries no
+   padding of its own) reads wider than the "now pitching"/"due up" cards
+   above it — same 14px inset those follow (see .pitchernotice--pbp/.upnext). */
+.prehalf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+  margin: 0 14px 12px;
+}
+.prehalf__card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  min-width: 0;
+}
+.prehalf__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+/* Rectangular headshot, the same portrait frame every other card-mounted
+   photo uses (see .pitchernotice__shot — the pitching-change card these
+   callout cards sit beside), not the old circle avatar: consistent shape and
+   large enough to actually read a face. */
+.shot.prehalf__shot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.prehalf__shot.shot--fallback {
+  font-size: var(--fs-title-lg);
+}
+.prehalf__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.prehalf__who {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.prehalf__text {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+.prehalf__mark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: var(--fs-caption);
+}
+
+/* The pre-half callout cards' fun-fact line reads as a natural-case sentence —
+   the same sanctioned exception as the play-by-play copy (see the ALL-CAPS
+   INVARIANT block) — but the name line above it is a structural label like any
+   other card heading, so it stays in the app's shouted convention. Opt out of
+   the global uppercase; the #root-scoped selector outranks `#root *`. */
+#root .prehalf__text {
+  text-transform: none; /* caps-exempt: pre-half callout cards' fun-fact line reads as a natural sentence */
+}
+
+/* UpNextBatters: who's due up to face the entering pitcher, before any of the
+   half is revealed — three headshot columns. Horizontal margin (not just
+   .prehalf's margin-bottom): a headshot flush against .half's own border
+   (which carries no padding of its own) reads worse than the text-only cards
+   around it do, the same reasoning the kraft "now pitching" card's own
+   horizontal margin follows (see .pitchernotice--pbp). */
+.upnext {
+  margin: 10px 14px 4px;
+}
+.upnext__title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 8px;
+}
+.upnext__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.upnext__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
+}
+.shot.upnext__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.upnext__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.prepitch {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: var(--bw-hair) dashed var(--border-rule);
+}
+
+.prepitch__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.prepitch__item {
+  padding: 4px 8px;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+
+/* "Now pitching for the Giants: BIVENS, SPENCER 76 | RHP" — a scorebook
+   announcement line, condensed uppercase to match the lineup-team headers. */
+.prepitch__pitching {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+
+.prepitch__now {
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+
+.prepitch__pitcher {
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+/* Both teams' lineup cards for the half, rendered outside the seal as the
+   scorebook reference you copy onto the sheet before scoring (see
+   api/battingorder.js's lineupEntering — the lineup as it stands ENTERING the
+   half). Each row reads name(s) on the left, with the standing occupant's
+   jersey number │ fielding position right-aligned on a shared column; a
+   substituted starter is struck through, the seam-red incomer tagged with the
+   inning he entered (shared with the defense diamond's writing-line styling). */
+/* The lineups & defense reference, sealed half (staged inside the SAME card as
+   the play-by-play, ahead of tapping to reveal): this wrapper is a
+   transparent box so its cards stage around the seal exactly as before. Wide
+   layout hides this and shows the right-column card instead (see below). */
+.half__entering {
+  display: contents;
+}
+
+/* Same reference, once the half is revealed: below the play-by-play's card
+   (see HalfInning.jsx), so the just-scored at-bats read as their own distinct
+   unit. Lineups and Defense now read as two separate standalone cards here —
+   the same recipe the wide layout's .innings__ref-lineups/.innings__ref-defense
+   already use below (own border/radius/shadow, a flush masthead relying on
+   that card's own overflow:hidden to round its corners, no ambient parent
+   padding to fight) — rather than sharing one outer card, which used to leave
+   both titles floating as independently-rounded pills inset on all sides
+   instead of spanning their card's full width. This wrapper keeps the "half"
+   class only so other .half-scoped rules still reach in (.half .defdiamond
+   below); it supplies none of its own frame — .lineupcard/.halfdefense do
+   that directly. margin-top spaces it from the play-by-play card above;
+   margin-bottom does the same from the Insights card below — on a phone the
+   two sit back to back with no gap otherwise (they're not flex siblings of
+   the same .innings__grid instance here, so its own gap doesn't reach this
+   seam; a plain margin does regardless of that). */
+.halfentering {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  overflow: visible;
+}
+/* Both cards already carry their own border/radius/shadow (base .lineupcard/
+   .halfdefense rules above) — this wrapper's own flex gap spaces them apart,
+   so just drop the base rule's 14px horizontal inset (there's no ambient
+   .half card here to inset from; each card already spans .halfentering's
+   full width). */
+.halfentering .lineupcard,
+.halfentering .halfdefense {
+  margin: 0;
+}
+
+.innings__reference {
+  display: none;
+}
+
+/* Wide-layout-only pieces, hidden on a phone (the lineups/defense render
+   inline instead, via .half__entering). */
+.innings__ref-defense,
+.innings__ref-lineups {
+  display: none;
+}
+
+/* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
+   rounded, bordered, and shadowed like every other card in the view. */
+.statbox {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Same flush masthead recipe as .half__title/.pitchers__title — no padding
+   of its own on .statbox, so this caps the card directly; overflow:hidden
+   above clips its square corners to the card's own rounded ones. */
+.statbox__title {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+
+/* The SealBox's own .statgrid wrapper paints --surface-inset once revealed,
+   which otherwise shows through as a whiter patch inside this card's kraft
+   background. Strip it back to transparent so .statbox's own background is
+   the only one that shows. */
+.statbox .statgrid {
+  background: none;
+}
+
+/* The half's Statcast superlatives — now the same headshot "baseball card"
+   tile the box score's Insights card uses (PerformerCard, src/components/
+   PerformerCard.jsx), read via the same resolveCardPlayer lookup, rather
+   than the plain label/value/who tile StatcastCard.jsx still renders for the
+   player-page percentile grid. A
+   seamless list, same recipe as .abs__rows just below (paper-2 background,
+   one hairline divider between rows instead of a border per card) rather
+   than each PerformerCard floating in its own bordered tile like it does in
+   those other two spots — .playercard's own border/radius/background are
+   stripped inside this scope only. */
+.halfcast {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+  overflow: hidden;
+}
+.halfcast__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+}
+.halfcast__row + .halfcast__row {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.halfcast__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.halfcast .playercard__list {
+  margin: 0;
+}
+.halfcast .playercard {
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+}
+
+/* Wide layout (.screen widens to 960px from here up — see the 740px media
+   query further down): the 1-3 superlatives go three across in one row
+   instead of stacking, same auto-fit-evenly idea as the base .statcast grid;
+   the divider between them switches from a horizontal rule to a vertical
+   one. */
+@media (min-width: 740px) {
+  .halfcast {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  }
+  .halfcast__row + .halfcast__row {
+    border-top: none;
+    border-left: var(--bw-hair) solid var(--border-rule);
+  }
+}
+
+/* A pitcher entering the game, filling row 2's stat-box slot before the
+   current half is revealed (StatBox renders nothing there otherwise, to keep
+   the row from costing space on a half the scorer hasn't reached yet) — a
+   kraft/seal-amber notification card (the app's attention color for
+   "something just happened," same family as the seal cover), since a
+   pitching change is worth noticing before the scorer even reveals the half. */
+/* Shared inner layout for the "now pitching" card (see PitcherNotice), used in
+   both the row-2 stat slot and the play-by-play feed; the card chrome is added
+   by the context class beside it. */
+.pitchernotice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* The self-contained seal-amber notification card — the pre-pitch staging
+   cards at the top of a half (a pitching change, a fresh fielder, a
+   pinch-hitter; see HalfInning.jsx's PrePitchChanges) and the same card
+   interleaved with the at-bat cards when a change happens mid-inning
+   (PlayByPlay.jsx), so a new arm/fielder/hitter reads as prominently as the
+   plays around it (rather than the old plain "Pitching Change: X replaces Y"
+   note line). */
+.pitchernotice--pbp {
+  /* Horizontal margin, not just padding: .half has no padding of its own
+     (see .half__title's matching 14px inset comment), so without this the
+     card's own border sits flush against the card it's nested inside. */
+  margin: 4px 14px;
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
+}
+
+/* Notification-card family, tier 2/3 — mound visits, ejections, and the
+   baserunning/misc events with no plate appearance of their own (steal,
+   caught stealing, pickoff, wild pitch, passed ball, balk) all ride the SAME
+   .pitchernotice/.pitchernotice--pbp kraft-amber card tier 1 (pitching/
+   defensive/pinch-running notices) already uses — no separate colored-rail
+   strip. What used to be a bare icon is now the real scorer's shorthand for
+   the event ("MV", "EJ", "SB", "WP", …), same family as the at-bat card's own
+   .pbp__code. --event just tightens the gap for this denser, iconless row. */
+.pitchernotice--event {
+  gap: 8px;
+}
+.pitchernotice__code {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
+  color: var(--ink-1);
+  flex: none;
+}
+/* An ejection's code, in the same negative accent .pbp__code--error uses for
+   a reached-on-error play — this is the one alert-weight event in the family. */
+.pitchernotice__code--alert {
+  color: var(--clay-deep);
+}
+.pitchernotice__teammark {
+  flex: none;
+}
+.pitchernotice__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.pitchernotice__spacer {
+  flex: 1;
+}
+/* UsagePips (shared by the mound-visit notice above and StatBox.jsx's ABS
+   challenge row) — "how many of a capped resource are left" as used/open
+   circles. Drawn as CSS shapes rather than ●/○/✕ glyphs: those characters
+   aren't rendered at the same optical size in any font (a filled dot reads
+   smaller than a hollow ring at an identical font-size), so a glyph-based
+   pip row can never actually match itself pip-to-pip; a shared fixed box
+   with only the fill/border swapped can. */
+.usagepips {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+}
+.usagepips__pip {
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.usagepips__pip--used {
+  background: var(--seal-hatch);
+}
+.usagepips__pip--open {
+  border: 1.3px solid var(--graphite-soft);
+}
+/* Mound-visit card: the pips are the card's one figure, so they read at 2x
+   size. */
+.pitchernotice--mv .usagepips {
+  gap: 8px;
+}
+.pitchernotice--mv .usagepips__pip {
+  width: 14px;
+  height: 14px;
+}
+.pitchernotice--mv .usagepips__pip--open {
+  border-width: 2.6px;
+}
+/* "N left" tail beside the pips — same idiom as the ABS row's own .abs__rec
+   readout: the fill/outline pips alone don't say which state means used vs.
+   still available, so this spells it out in words. */
+.pitchernotice__mvcount {
+  flex: none;
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+/* An ejection/event card's sentence — same natural-case prose treatment as
+   .pbp__note (exempted from the ALL-CAPS INVARIANT below), since it's a full
+   sentence straight from the feed, not a caps token. */
+.pitchernotice__eventtext {
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-text);
+  color: var(--text-heading);
+  min-width: 0;
+}
+
+/* The entering pitcher's headshot (see PitcherPhoto in StatBox.jsx) — sized
+   like the app's other card-mounted headshots (.shot), not the cramped inline
+   emoji this replaced, so the photo actually reads at a glance. Object-fit:
+   cover on a fixed-ratio frame keeps it from ever looking squished. */
+.pitchernotice__shot {
+  flex: 0 0 auto;
+  display: block;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: transparent;
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.pitchernotice__shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  filter: grayscale(0.16) contrast(1.02);
+}
+.pitchernotice__shot--fallback {
+  display: grid;
+  place-items: center;
+  font-size: var(--fs-h1);
+  line-height: var(--lh-solid);
+  background: var(--surface-inset);
+}
+/* No real photo on file, but a team's known — his club's logo, centered and
+   scaled up past the frame's edges, same "printed badge" treatment as the
+   base .shot--logo rule (Headshot.jsx). */
+.pitchernotice__shot--logo {
+  display: grid;
+  place-items: center;
+  background: var(--surface-inset);
+}
+.pitchernotice__shot--logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.6);
+  filter: none;
+}
+
+.pitchernotice__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pitchernotice__now {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+}
+
+.pitchernotice__pitcher {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.pitchernotice__pitcher > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Uniform number + throwing hand, pinned to the row's right edge — same
+   right-aligned treatment as the lineup card's .lineup__jersey/.lineup__pos. */
+.pitchernotice__badges {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: none;
+  font-size: var(--fs-compact);
+}
+.pitchernotice__jersey {
+  color: var(--clay);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  text-align: right;
+}
+.pitchernotice__hand {
+  color: var(--field);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* The "PR" badge beside the entering pinch runner's jersey number — same red
+   the diamond's own PR mark uses (.pbp__pr). */
+.pitchernotice__prtag {
+  color: var(--clay-deep);
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+}
+
+/* Who the entering runner replaced and where — a second line below the name
+   row, same caption weight as the pitching-change card's other trailing
+   detail (.pitchernotice__mvcount). Condensed display face like the rest of
+   this card's text, not --font-read (that's reserved for full sentences
+   straight from the feed, e.g. .pitchernotice__eventtext). */
+.pitchernotice__forline {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+/* How many pitches he'd already thrown entering this half (PitcherNotice's
+   `entering` prop, HalfInning.jsx only) — pinned to the card's right edge,
+   a compact two-line figure beside the photo+body block rather than folded
+   into either. */
+.pitchernotice__entering {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+.pitchernotice__enteringcount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.pitchernotice__enteringwhen {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* On a phone, the persistent Now Pitching card's "entering" figure gets its
+   own full-width row below the name/hand line instead of squeezing beside
+   it on the same row as the headshot — otherwise the "pitching for"/name
+   text has to share that row with a right-pinned column and wraps/truncates
+   sooner than it needs to. A grid (rather than flex-wrap) so the photo gets
+   its own fixed-width column and the body/entering blocks share the SAME
+   second column — a flex-wrap attempt here forced the body onto its own
+   full-width row too (a wrapped flex item's hypothetical size for the line-
+   break decision is its flex-basis, not its post-shrink size, so `flex: 1 1
+   100%` on the body pushed it below the photo instead of keeping it beside
+   it — only the explicitly margin-shifted entering block landed in the
+   right column). Scoped to :has(.pitchernotice__entering) since only this
+   persistent card (HalfInning.jsx) ever passes the `entering` prop — the
+   mid-half change notices (PlayByPlay/StatBox) don't, and are untouched
+   here. */
+@media (max-width: 739.98px) {
+  .pitchernotice:has(.pitchernotice__entering) {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__shot {
+    grid-row: 1 / 3;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__body {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .pitchernotice:has(.pitchernotice__entering) .pitchernotice__entering {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* Row 2: the stat card beside the win-probability chart — stacked on a phone,
+   side by side from the wide breakpoint up (see media query below).
+   margin-top at every width: .innings__grid's own flex gap (see its
+   media-query rule) only reaches DIRECT children, and InningPageTurn.jsx
+   wraps .inning + this row together inside .turnscene, so they're siblings
+   INSIDE one grid child rather than two grid children themselves — the
+   margin here is what actually separates them from the card directly above
+   (.inning — either just the play-by-play, or that plus the standalone
+   .halfentering reference once a half starts revealing) at every width, not
+   just on a phone. */
+.innings__row2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.innings__row2-right > .winprob {
+  margin-bottom: 0;
+}
+/* Below the wide breakpoint neither column wrapper exists as a layout box —
+   `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
+   `.statbox__abs`) — so their children just fall back into the same single
+   flex column as everything else in `.innings__row2`. */
+.innings__row2-left,
+.innings__row2-right {
+  display: contents;
+}
+/* Mobile-first hidden: AbsCard's whole-card copy of ABS Challenges only
+   exists for the wide layout's right column (unhidden in the min-width:740px
+   block below) — on a phone the ABS block stays inline inside StatBox
+   (`.statbox__abs`, always visible there below this breakpoint). */
+.abscard {
+  display: none;
+}
+
+/* DueUpNextCard: the OTHER team's next half, previewed — same card recipe as
+   .statbox, stacked below it on both breakpoints (unlike .abscard, this has
+   no other-breakpoint home to hide from). */
+.dueup {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding: 12px 14px;
+  overflow: hidden;
+}
+/* Bleeds past the card's own padding to cap it flush (same masthead recipe
+   as .half__title/.pitchers__title) — overflow:hidden on .dueup clips the
+   square corners here to the card's own rounded ones. */
+.dueup__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -12px -14px 8px;
+  padding: 8px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
+}
+/* Same headshot-column recipe as .upnext (UpNextBatters.jsx) — this card
+   previews the OTHER side's next half instead of the batting side's own, so
+   it keeps its own team-identifying title, but the body reads as the same
+   "who's due up" widget either way. */
+.dueup__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.dueup__col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+  min-width: 0;
+}
+.shot.dueup__shot {
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.dueup__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Phone-only: once a half starts revealing, promote row 2 (the R/H/E/LOB +
+   pitching + Statcast stat card, paired with the win-probability chart)
+   above the lineups/defense reference card (.halfentering) instead of
+   trailing it — the stat line reads as part of "what just happened," right
+   under the play-by-play, with the entering-lineups reference (staging for
+   the NEXT half) following it. .inning goes display:contents so its two
+   children (.half, and .halfentering once it exists) become direct items of
+   this flex column alongside .innings__row2/.innings__ref/.innings__rosters,
+   orderable independently of their source order. That makes .innings__grid
+   itself a flex container here too, which drops the block-flow margin
+   collapsing the phone layout was leaning on — so the items' own top/bottom
+   margins that used to supply inter-card spacing are reset to 0 and
+   .innings__grid's own gap takes over instead, same fix the wide-breakpoint
+   media query above already applies to .innings__row2/.pitchers for the
+   identical reason. */
+@media (max-width: 739.98px) {
+  .innings__grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .inning {
+    display: contents;
+  }
+  .rolling {
+    margin-bottom: 0;
+  }
+  .half {
+    order: 1;
+  }
+  .innings__row2 {
+    order: 2;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .halfentering {
+    order: 3;
+  }
+  .innings__ref {
+    order: 4;
+  }
+  .innings__ref-left .pitchers {
+    margin-top: 0;
+  }
+  .innings__rosters {
+    order: 5;
+  }
+  .innings__rosters > .roster:first-child {
+    margin-top: 0;
+  }
+}
+
+/* A self-contained, clickable card — same 14px horizontal inset off .half's
+   own borderless edge as the "now pitching"/"due up"/pre-half callout cards
+   above it (see .pitchernotice--pbp), rather than a bare navy header sitting
+   directly on the page with unbordered rows below (what this used to be:
+   a dashed divider, no card of its own). Tapping the title (see
+   LineupSection, EnteringReference.jsx) collapses .lineupcard__teams. */
+.lineupcard {
+  margin: 12px 14px 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+/* Names the moment ("Lineups entering the Top 7th") — same navy masthead
+   treatment as .halfdefense__title (deliberately identical rules, not just a
+   similar look: the two cards read as one matched pair, phone and wide
+   layout alike, rather than Defense having a title and Lineups improvising
+   its own). Replaces the old .innings__reference-title, which only existed
+   on the wide layout and left the phone's inline copy with no title at all.
+   A <button> (LineupSection) toggling .lineupcard__teams below — reset off
+   the browser's own button chrome so it still reads as a plain masthead. */
+.lineupcard__title {
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border: none;
+  border-bottom: 3px solid var(--seal);
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lineupcard__chevron {
+  margin-left: auto;
+  color: var(--text-on-ink);
+  opacity: 0.8;
+}
+
+/* Away over home, each a self-contained nine-slot list. Stacked so a long name
+   with its number/position never has to wrap in a cramped column on a phone. */
+.lineupcard__teams {
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lineupteam__name {
+  margin: 0 0 8px;
+  padding: 4px 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.lineupcard__list {
+  margin: 0;
+  padding: 0 8px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lineupcard__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.lineupcard__slot {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  min-width: 12px;
+  text-align: right;
+}
+
+/* The name stack grows to fill the row so the number/position column is pushed
+   to the right edge; a substitution stack wraps within it. center, not
+   baseline: a bordered/padded pill (RookiePill/ProspectPill) needs more room
+   above its own baseline than plain text does, so baseline alignment was
+   inflating the whole row's height just to fit one pill — same fix already
+   used by .lineup__namewrap elsewhere. */
+.lineupcard__names {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lineupcard__name {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* A batter who's been replaced: struck through in pencil, same as the defense
+   diamond's --out name. Set on the .plink too — a <button> won't take an
+   ancestor's line-through (see the play-by-play's .pbp__replaced .plink). */
+.lineupcard__name--out,
+.lineupcard__name--out .plink {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+/* The standing occupant of a slot that's seen a sub: inked seam-red, same as
+   the defense diamond's --in name. */
+.lineupcard__name--in,
+.lineupcard__name--in .plink {
+  color: var(--accent-negative);
+}
+
+.lineupcard__enter {
+  margin-left: 5px;
+  color: var(--accent-negative);
+  font-weight: var(--w-bold);
+}
+
+/* Right-aligned number + position for the slot's standing occupant: jersey in
+   clay (like the roster cards), then the fielding position in field green.
+   Held on one line, flush to the row's right edge. */
+.lineupcard__meta {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.lineupcard__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--clay);
+}
+
+.lineupcard__pos {
+  min-width: 20px;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--field);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+/* The fielding team's live alignment for the half, below the feed — the lineup
+   page's defense diamond, now building up substitutions as innings are revealed
+   (reveal-only, see api/defense.js). Same self-contained clickable card as
+   .lineupcard above (same 14px inset, same reasoning) — collapses the diamond
+   below via the title button (DefenseSection, EnteringReference.jsx). */
+.halfdefense {
+  margin: 12px 14px 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.halfdefense__title {
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border: none;
+  border-bottom: 3px solid var(--seal);
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.halfdefense__chevron {
+  margin-left: auto;
+  color: var(--text-on-ink);
+  opacity: 0.8;
+}
+
+/* The box score's own Defense card (BoxDefense, BoxScore.jsx) reads as one
+   complete card — the navy title's bottom corners square off and sit flush
+   against the diamond below (whose own border/shadow drops its top edge in
+   turn), rather than floating above it as its own separately rounded pill
+   over a separately bordered diamond (the innings view's copy of this same
+   .halfdefense/.defdiamond markup, EnteringReference.jsx, keeps that
+   floating "ears" look). */
+.bs__defensecard.halfdefense {
+  /* Now an independent card in its own right (BoxScoreBody's .bs__col), below
+     BoxAbs but no longer its nested continuation — the column's own flex gap
+     (var(--space-4)) spaces the two apart, so the base .halfdefense rule's
+     own margin/border/shadow would draw a second, redundant card around this
+     one's own title+diamond "joined ears" look (see .bs__defensecard
+     .defdiamond below) rather than sitting flush in the column. */
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.bs__defensecard .halfdefense__title {
+  /* A plain <h4> here, not the innings view's collapsible <button> copy —
+     restore the non-interactive cursor the base rule's button reset assumes. */
+  margin-bottom: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  cursor: default;
+}
+.bs__defensecard .defdiamond {
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+/* On a phone, .halfdefense is itself now a card (see above) nested inside
+   .half's own bordered/shadowed card (the pre-reveal reference band staged
+   above the seal — see HalfInning.jsx) — the diamond's own card border would
+   double against .halfdefense's own, right at the bottom edge. The wide
+   layout's copy (.innings__ref-defense) drops the diamond's border for the
+   same reason against ITS OWN wrapper card instead (see below); only this
+   selector's own .half-nested copy needs the reset here. Horizontal inset
+   matches its siblings' own 8px (.lineupteam__name, .halfdefense__title); the
+   bottom keeps real padding since — unlike the removed border — this is the
+   LAST thing in the card, and the DH line needs room to breathe before
+   .halfdefense's own bottom edge. */
+.half .defdiamond {
+  border: none;
+  box-shadow: none;
+  background: none;
+  padding: 12px var(--space-2) var(--space-4);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding: 8px 4px;
+  background: var(--paper-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+
+.stat__v {
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+
+.stat--run .stat__v {
+  color: var(--field-deep);
+}
+
+.stat__k {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+
+.stat__unit {
+  font-style: normal;
+  opacity: 0.7;
+}
+

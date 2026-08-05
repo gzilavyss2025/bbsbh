@@ -1,0 +1,558 @@
+/* ---------------------------------------------------------------- manager page
+   ManagerPage.jsx — mirrors the umpire page's card layout (.umpage__card
+   above), with a photo header like the player page. No SealBox: a coaching
+   career/awards carry no live score. */
+.mgrpage__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 6px 0 14px;
+}
+.mgrpage__shot {
+  flex: none;
+  /* No size override — same page-header treatment as the player page's
+     `.shot` (base rule, --shot-xl), the biggest rung in the app. */
+}
+.mgrpage__ident {
+  min-width: 0;
+}
+.mgrpage__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+.mgrpage__sub {
+  margin: 4px 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.mgrpage__card {
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.mgrpage__cardtitle {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.mgrpage__awards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgrpage__award {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.mgrpage__awardseason {
+  flex: none;
+  width: 3.4em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.mgrpage__awardname {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* Playing-career tile grid — reuses the shared .stat tile (see PlayerPage's
+   .player__statgrid) but at 4 columns, since a hitting/pitching line runs 8–9
+   headline stats rather than the player page's 5. */
+.mgrpage__statgrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+.mgrpage__statgrid .stat {
+  padding: 10px 3px;
+}
+.mgrpage__statgrid .stat__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-h3);
+}
+
+.mgrpage__recordlist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mgrpage__recordrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding-top: 10px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.mgrpage__recordlist li:first-child.mgrpage__recordrow {
+  padding-top: 0;
+  border-top: none;
+}
+.mgrpage__recordteam {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mgrpage__recordteamname {
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-transform: uppercase;
+}
+.mgrpage__recordyears {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.mgrpage__recordwl {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.mgrpage__recordpct {
+  flex: none;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+.mgrpage__recordcaveat {
+  margin-left: auto;
+  font-size: var(--fs-compact);
+  font-style: italic;
+  color: var(--text-muted);
+}
+.mgrpage__recordinterim {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.mgrpage__timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mgrpage__timelinerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.mgrpage__timeline li:first-child.mgrpage__timelinerow {
+  padding-top: 0;
+  border-top: none;
+}
+.mgrpage__timelineseason {
+  flex: none;
+  width: 3em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.mgrpage__timelineteam {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mgrpage__timelinejob {
+  flex: none;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+/* That season's own W-L, next to the job label — only Manager/Interim
+   Manager rows carry one (see ManagerPage's isManager guard). A shared,
+   not-yet-researched season reads "Shared season" instead of a number,
+   same caveat convention as the record table above. */
+.mgrpage__timelinerecord {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Manager/Interim Manager rows carry the page's "story" — inked bold, unlike
+   the lighter assistant-coach rows around them. */
+.mgrpage__timelinerow--mgr .mgrpage__timelineteam,
+.mgrpage__timelinerow--mgr .mgrpage__timelinejob {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+/* ── Ballpark modal ─────────────────────────────────────────────────────────
+   The venue name on the lineup page opens a to-scale ink sketch of the field
+   (BallparkDiagram) plus the park's outfield distances / wall heights ranked
+   against the league. Paper-scorebook idiom: manila fills, navy fence, graphite
+   lines, mono tabular figures — see BallparkModal.jsx / BallparkDiagram.jsx. */
+
+/* Venue name rendered as a tap target when the park is on file. */
+.fact__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.fact__link:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+.bpsheet {
+  max-height: min(90vh, 780px);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.bpsheet__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bpsheet__head .sheet__title {
+  margin: 0;
+}
+
+.bpsheet__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.bpsheet__close:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-radius: var(--radius-sm);
+}
+
+/* The field drawing. viewBox is 620×560; it scales to the sheet width. */
+.bpdiagram {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  margin: 8px auto 4px;
+}
+
+.bpdiagram__foul {
+  fill: var(--rule-soft);
+}
+
+.bpdiagram__grass {
+  fill: var(--field-soft);
+}
+
+.bpdiagram__track {
+  fill: var(--rule);
+  stroke: none;
+}
+
+.bpdiagram__dirt {
+  fill: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+}
+
+.bpdiagram__baseline {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent-negative) 22%, var(--paper-2));
+  stroke-linecap: round;
+}
+
+.bpdiagram__line {
+  fill: none;
+  stroke: var(--paper-3);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.bpdiagram__wall {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bpdiagram__base {
+  fill: var(--surface-inset);
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.bpdiagram__dist {
+  fill: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-semibold);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.bpdiagram__wallh {
+  fill: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+/* Facts strip: opened / roof / capacity. */
+.bpsheet__facts {
+  display: flex;
+  margin: 6px 0 4px;
+  padding: 12px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.bpfact {
+  flex: 1;
+  text-align: center;
+}
+
+.bpfact__label {
+  margin: 0;
+  font-family: var(--font-condensed, var(--font-mono));
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.bpfact__value {
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* Ranked dimension lists. */
+.bpsheet__ranks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+  margin-top: 14px;
+}
+
+.rankgrp {
+  flex: 1;
+  min-width: 150px;
+}
+
+.rankgrp__title {
+  margin: 0 0 6px;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.rankgrp__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rankrow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.rankrow:first-child {
+  border-top: none;
+}
+
+.rankrow__label {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+.rankrow__value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.rankrow__rank {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  min-width: 62px;
+  text-align: right;
+}
+
+.rankrow__rank.is-most {
+  color: var(--accent-primary);
+  font-weight: var(--w-semibold);
+}
+
+.rankrow__rank.is-least {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
+}
+
+.rankrow__of {
+  color: var(--graphite-soft);
+}
+
+.bpsheet__foot {
+  margin: 16px 0 0;
+  font-size: var(--fs-caption);
+  color: var(--graphite-soft);
+  text-align: center;
+}
+
+.gsmodal__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gsmodal__head .sheet__title {
+  margin: 0;
+}
+
+.gsmodal__close {
+  flex: none;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin: -4px -4px 0 0;
+  color: var(--text-caption);
+  font-size: var(--fs-num-md);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+/* ---------------------------------------------------- postseason odds pill
+   The Standings section's "Postseason Odds" trigger (SectionTitle's action
+   slot) — same interactive-pill contract as .attendance__glyph--open (kraft
+   seal fill, seal-ink text, pill radius) rather than a plain text link, since
+   the ask was specifically a pill. Opens PostseasonOddsModal. */
+.psodds-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-pill);
+  background: var(--seal);
+  color: var(--seal-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.psodds-pill:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Same bottom-sheet head/close chrome as .gsmodal__head/.gsmodal__close
+   (.sheet, both reused as-is) — only the subtitle and table below the head
+   are specific to this modal. */
+.psoddsmodal {
+  max-height: 86vh;
+  overflow-y: auto;
+}
+.psoddsmodal__sub {
+  margin: 0 0 14px;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* The table itself reuses .standings/.ledger-wrap wholesale (base cell
+   styling + the is-me favorite-team tint) — .psoddstable only needs the
+   team-name cell's logo+name pairing, everything else rides the shared
+   ledger skin. */
+.psoddstable td.team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.psoddsmodal__meta {
+  margin: 10px 0 0;
+  color: var(--graphite-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
+

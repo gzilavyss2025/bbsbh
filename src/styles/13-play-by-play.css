@@ -1,0 +1,582 @@
+/* --------------------------------------------------------------- play-by-play
+   Per-plate-appearance feed shown below the pitch-summary row once a half is
+   revealed (api/playbyplay.js — reveal-only, same rule as linescore.js). One
+   card per batter, first-at-bat first, with mound-visit / pitching-change
+   notes interleaved between cards. No border-top divider before the first
+   record — nothing above it in the card needs dividing from anymore. */
+.pbp {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* The "Pitch colors" button at the foot of the play-by-play card (moved down
+   from the header — see HalfInning.jsx) — left-aligned like the zone/
+   highlight buttons above it, with the card's own 14px horizontal inset
+   (.half has no padding of its own; see .half__title's matching padding).
+   Overrides .pitchkeybtn's own var(--surface-inset) fill (a near-white chip,
+   right for sitting on a plain page background) with the card's own
+   var(--surface-card) tone instead — sitting directly on .half's own
+   background here, the brighter inset shade read as a mismatched white
+   patch rather than a chip. */
+.half__pitchkeyfoot {
+  margin: var(--space-3) 14px 12px;
+  background: var(--surface-card);
+}
+
+/* This is a phone-first app, so "mobile" is the default breakpoint below
+   740px — hide the "Pitch colors" legend button/modal there; it still shows
+   at the wider breakpoint. Selector combines both classes (rather than just
+   .half__pitchkeyfoot) so its specificity beats the unconditional
+   `.pitchkeybtn { display: inline-flex }` base rule declared later in this
+   file — with equal (0,1,0) specificity on .half__pitchkeyfoot alone, the
+   later, unconditional rule was winning the cascade and the button was
+   leaking onto mobile despite this "hide" rule. */
+@media (max-width: 739.98px) {
+  .pitchkeybtn.half__pitchkeyfoot {
+    display: none;
+  }
+}
+
+.pbp__note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+  border-bottom: var(--bw-hair) dashed var(--border-hairline);
+  /* Sentence-like event notes (mound visits, pitching changes) — same prose
+     treatment as .pbp__desc: the high-legibility serif in natural case (the
+     caps exception is the #root rule below). */
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-text);
+  color: var(--text-caption);
+}
+
+.pbp__noteicon {
+  font-style: normal;
+  font-size: var(--fs-small);
+}
+
+/* The note's text as one wrapping flex item (so its player deep-links flow
+   inline beside the icon instead of each becoming its own flex child). */
+.pbp__notetext {
+  min-width: 0;
+}
+
+/* Player names lifted out of a prose description. The description now reads as a
+   natural-case sentence (see the #root .pbp__desc override), so the names flow
+   inline with it rather than taking the scorebook's uppercase name style — the
+   span stays as a hook for that override. */
+
+.pbp__card {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+  padding: 5px 6px;
+}
+
+.pbp__main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The right-hand tally — pitch lanes + result code + diamond. Sits directly on
+   the card (no inner frame) so it doesn't read as a card-within-a-card. */
+.pbp__side {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* Scorebook denotation over the diamond. A reach code (1B / F8 / BB) sits
+   above the diamond same as ever; an OUT's fielding chain (6-3, F7, K…)
+   instead goes dead center on the diamond itself, penciled big — the same
+   "middle of the diamond" placement the scorecard sheet uses (see
+   .sc-ab__center) and how a scorer actually notes an out on paper. The out
+   marker is a red circle overlaid on the diamond's bottom-left corner. */
+.pbp__play {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  flex: 0 0 auto;
+}
+
+.pbp__code {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
+  color: var(--ink-1);
+}
+
+/* Base hits inked green, reached-on-error red — the rest stay ink. */
+.pbp__code--hit {
+  color: var(--field-deep);
+}
+
+.pbp__code--error {
+  color: var(--clay-deep);
+}
+
+/* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
+   bases mid-count; the at-bat restarts next inning), penciled in the MIDDLE
+   of the diamond (combined with .pbp__code--center) the way the scorer
+   writes it. Pencil graphite, not ink: it's a scorer's note, not a batting
+   result. Same treatment on the scorecard sheet (.sc-ab__center--interrupted). */
+.pbp__code--interrupted {
+  color: var(--text-caption);
+}
+
+/* An out's fielding chain, penciled dead center on the diamond instead of
+   above it — bigger than the reach codes since it's the dominant mark on
+   the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
+   its paper chip backing — this diamond's outline is sparse enough at the
+   center that the bare code reads fine directly over it. */
+.pbp__code--center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  text-align: center;
+  white-space: pre-line;
+}
+
+/* The backwards-K still needs its mirror flip, combined with the centering
+   transform above (equal specificity would otherwise let whichever rule
+   comes later silently win and drop the other transform). */
+.pbp__code--center.pbp__klooking {
+  transform: translate(-50%, -50%) scaleX(-1);
+}
+
+.pbp__outcircle {
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-ui);
+  color: var(--clay-deep);
+  background: var(--clay-soft);
+  border: 2px solid var(--clay);
+}
+
+/* Advance notations penciled outside the bases (BB, GO, 2B…), with the
+   lineup slot of the hitter who drove him over as a small superscript. */
+.pbp__advance {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  fill: var(--graphite);
+}
+
+/* An error-driven leg notation (E8, E5…) inks red like every other error mark
+   in the app (.pbp__code--error, .sc-ab__type--error) — a bobbled ball is
+   worth calling out the same way wherever it shows up on the card. */
+.pbp__advance--error {
+  fill: var(--clay-deep);
+}
+
+.pbp__advslot {
+  font-size: var(--fs-caption);
+  fill: var(--ink-2);
+}
+
+/* How a runner was cut down on the bases, inked red by the capped path. A
+   touch smaller than the advance code since it now carries a tag + chain
+   ("CS 2-4", "PK 3-1") rather than a bare "CS". */
+.pbp__advance--out {
+  fill: var(--clay-deep);
+  font-size: var(--fs-caption);
+}
+
+/* Red "PR" penciled beside the base a pinch runner took over at, his jersey
+   number stacked on the line below (see PlayDiamond's PR_LABELS). */
+.pbp__pr {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
+  fill: var(--clay-deep);
+}
+
+.pbp__prnum {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+
+.pbp__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.pbp__batter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+/* One name line inside the batter cell — the batter, plus any pinch runner
+   penciled beneath him — keeping the name and its position tag on one line. */
+.pbp__batline {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+/* A batter (or earlier runner) lifted for a pinch runner: crossed out in
+   pencil, the same spent-row treatment the roster uses for a player who's
+   entered. Set on the .plink too — a <button> won't take an ancestor's
+   line-through. */
+.pbp__replaced,
+.pbp__replaced .plink {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+.pbp__pos {
+  font-size: var(--fs-caption);
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  color: var(--graphite-soft);
+  margin-left: 4px;
+}
+
+.pbp__rbi {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--field-deep);
+  background: var(--field-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* The extra-innings automatic runner's mark ("AR"), in the top-right slot the
+   RBI chip would take on an at-bat card — where a scorer writes it, in the
+   place a batting result would otherwise go. Penciled graphite in the pill
+   shape the roster/lineup pills already use (.rookiepill), deliberately NOT
+   the RBI chip's green: nothing here was earned. The dashed border is the
+   same given-not-run motif the diamond's dotted ghost path carries. See
+   PlacedRunnerCard.jsx. */
+/* The placement card itself: the at-bat card's frame — its diamond has to sit
+   in the same place and read the same way — with a dashed leading edge, the
+   one structural cue that this row isn't a plate appearance. */
+.pbp__card--placed {
+  border-left: var(--bw-heavy) dashed var(--graphite-soft);
+}
+
+.pbp__placed {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  background: var(--bg-page);
+  border: var(--bw-hair) dashed var(--graphite-soft);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent
+   thin columns — a light "ball" lane and a shaded "strike" lane — stretched
+   to a common height, each listing its pitch numbers stacked from the top
+   (see PitchLadder in PlayByPlay.jsx). */
+.pbp__ladder {
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  flex: 0 0 auto;
+  border: var(--bw-hair) solid var(--seal-hatch);
+  overflow: hidden;
+}
+
+.pbp__laddercol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 17px;
+}
+
+.pbp__laddercol--ball {
+  background: var(--paper-3);
+}
+
+/* Kraft-tape brown strike lane, echoing the seal covers. */
+.pbp__laddercol--strike {
+  background: var(--seal);
+  border-left: var(--bw-hair) solid var(--seal-hatch);
+}
+
+.pbp__ladderhead {
+  align-self: stretch;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--seal-hatch);
+  padding: 1px 0;
+}
+
+.pbp__laddercol--strike .pbp__ladderhead {
+  color: var(--seal-ink);
+}
+
+.pbp__cell {
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+}
+
+.pbp__laddercol--ball .pbp__cell {
+  color: var(--ink-1);
+}
+
+.pbp__laddercol--strike .pbp__cell {
+  color: var(--seal-ink);
+}
+
+.pbp__diamond {
+  flex: 0 0 auto;
+}
+
+.pbp__desc {
+  /* Sentence-like play copy — the high-legibility serif at a smaller size, with
+     a touch of tracking and looser leading. Rendered in natural case (the caps
+     exception below) so it reads as a real sentence. See --font-read in
+     tokens/typography.css. */
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+/* Sanctioned exception to the ALL-CAPS INVARIANT (see that block comment and
+   .buzz__text for the same pattern): play-by-play copy reads as natural-case
+   sentences — the play descriptions (MLB's templated prose, and the verbose
+   replay-review blurbs like "Challenged (pitch result), call on the field was
+   confirmed: …" especially, read badly forced to caps) and the interleaved
+   event notes (mound visits, pitching changes). The `#root`-scoped selectors
+   (1 id + 1 class) outweigh the global `#root *` uppercase; the inline player
+   names — `.pbp__name` spans in descriptions, `.plink` deep-links in notes — go
+   natural too so each sentence reads whole. */
+#root .pbp__desc,
+#root .pbp__desc .pbp__name,
+#root .pbp__subnote,
+#root .pbp__subnote .pbp__name,
+#root .pbp__note,
+#root .pbp__note .plink,
+#root .pbp__notetext,
+#root .pbp__callout,
+#root .pitchernotice__eventtext,
+#root .pitchernotice__eventtext .plink {
+  text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
+}
+
+/* Secondary prose beneath a batter's own description: a baserunning event
+   (steal, caught stealing, wild pitch…) that happened during his plate
+   appearance. Quieter than .pbp__desc, marked off with a short left rule. */
+.pbp__subnote {
+  margin-top: 4px;
+  padding-left: 7px;
+  border-left: 2px solid var(--border-rule);
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+
+.pbp__klooking {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+/* Season-context call-out beneath a play: a leader / streak / situational-record
+   fun fact (see api/callout-notes.js). Reads as a sentence (caps-exempt below),
+   set off a touch louder than a baserunning subnote with the kraft-amber seal
+   accent and a small star, so a "leads the club in walks" note catches the eye
+   without shouting. Same var(--surface-card) as its parent .pbp__card, not the
+   brighter var(--surface-inset) chip fill — that read as a mismatched white
+   patch sitting directly on the card's own cream surface (same bug already
+   fixed for .half__pitchkeyfoot). */
+.pbp__callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-left: 2px solid var(--seal-deep);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-card);
+  font-family: var(--font-read);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-num);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+.pbp__calloutmark {
+  flex: none;
+  color: var(--seal-deep);
+  font-size: var(--fs-caption);
+}
+
+/* In the play-by-play feed, match the pitching-change notice card's total
+   horizontal inset from the .half edge: the notice sits directly in
+   .statgrid's 14px padding plus its own 14px margin (28px total); the
+   callout sits one level deeper, inside .pbp__card's own 6px padding, so 8px
+   more here reaches that same 28px and the two cards read the same width. */
+.pbp__card .pbp__callout {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* ---------------------------------------------------------------- roster */
+/* The lineup-not-posted caveat sitting between the section title and the
+   roster card. Sized/colored as a caption, same family as .roster__group's
+   Batters/Bullpen/Starters labels below it, rather than the larger loose
+   .hint paragraph treatment — this is a one-line aside, not prose. */
+.roster__notice {
+  margin: 2px 2px 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.roster {
+  margin-top: 10px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.roster__toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--surface-card);
+  border: none;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  cursor: pointer;
+}
+
+.roster__chevron {
+  color: var(--text-caption);
+}
+
+.roster__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* Roster rows carry no batting-order slot — name / jersey / handedness|pos. */
+.roster__row {
+  grid-template-columns: 1fr auto auto;
+}
+
+.roster__body {
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 6px;
+}
+
+.roster__group {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin: 10px 12px 4px;
+}
+
+/* A bullpen/bench player who has entered the game (within revealed innings) is
+   no longer eligible — struck through like a pencil line in the scorebook. */
+.roster__row.is-entered .roster__name,
+.roster__row.is-entered .roster__jersey,
+.roster__row.is-entered .roster__pos {
+  color: var(--text-caption);
+  text-decoration: line-through;
+  text-decoration-color: var(--graphite-soft);
+  text-decoration-thickness: 1.5px;
+}
+
+/* ---------------------------------------------------------------- reveal all */
+.revealscore {
+  border: var(--bw-rule) solid var(--clay);
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  min-height: 36px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.revealscore--done {
+  color: var(--text-caption);
+  border-color: var(--border-rule);
+  background: var(--surface-card);
+}
+

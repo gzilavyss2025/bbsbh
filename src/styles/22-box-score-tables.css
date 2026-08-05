@@ -1,0 +1,789 @@
+/* ---------------------------------------------------------------------------
+   FLIP CARDS — past-day preview (src/components/FlipCard.jsx). Blackjack-style
+   3D flip: front and back faces occupy the same grid cell (so the container
+   sizes to whichever face is taller, without absolute-position overflow
+   math), rotated in place. Purely a `transition` on `transform` (never
+   `@keyframes`), so the blanket `prefers-reduced-motion` rule further down
+   this file (`* { transition-duration: 0.01ms !important }`) collapses it to
+   an instant swap for free — no separate reduced-motion override needed here.
+   --------------------------------------------------------------------------- */
+/* "Reveal all games" — the single unlock for every flip card at once (see
+   RevealAllBar in GameSelect.jsx). Phone-first: only the floating bottom bar
+   (same .pagenav/.btn--reveal convention InningViewer uses for "Reveal
+   {half}") renders here, keeping the action in thumb reach on a long single-
+   column list. The desktop equivalent now lives inline in the header's
+   .daystate row instead of a separate full-width banner — see
+   .daystate__chip--reveal in the 740px block below, which hides this
+   floating bar there since there's no long scroll to reach for. */
+/* Match the kraft "Tap to reveal" cover's font (.cover__main) — .btn's own
+   base font-family (--font-body) read as a visibly different typeface next
+   to the SealBox cover sitting right beside it. Shared with
+   .daystate__chip--reveal so the desktop chip matches. */
+.pagenav--revealall .btn,
+.daystate__chip--reveal {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-xwide);
+}
+
+/* The revealed slate's category filter (ResultFilterBar, GameSelect.jsx) —
+   one toggle chip per storyline that occurs somewhere today. Unselected: a
+   light tint of the chip's OWN accent color (--chip-accent) behind a colored
+   border, but ALWAYS dark heading-ink text — the raw accent itself isn't a
+   safe text color at every one of these hues (--marker, in particular, fails
+   WCAG AA as text on the page) so text never carries the accent directly,
+   only the background tint + border do. Selected: filled solid, the exact
+   same accent/text pairing the matching card's own pill uses (see
+   .flipback__pill--scenario/--crown, already contrast-checked) — a chip and
+   the cards it's currently filtering to read as one color. */
+.slate-filterbar {
+  margin: 12px 0;
+}
+.slate-filterbar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* "Showing 3 of 15 games" — a live region (role="status") that only carries
+   text while a chip is on, so a screen reader hears the slate shrink instead
+   of silently losing most of it. Empty (not unmounted) when no filter is
+   active: a live region has to already be in the DOM for its later content
+   to be announced at all. */
+.slate-filterbar__count {
+  margin: 6px 0 0;
+  min-height: 1em;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.slate-filterbar__chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--chip-accent) 16%, var(--bg-page));
+  color: var(--text-heading);
+  border: var(--bw-rule) solid var(--chip-accent);
+}
+.slate-filterbar__chip--active {
+  background: var(--chip-accent);
+  color: var(--chip-text);
+}
+.slate-filterbar__chip:active {
+  transform: translateY(1px);
+}
+.slate-filterbar__chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.flipcard {
+  perspective: 1400px;
+}
+.flipcard__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  /* Strong ease-in-out (not ease-out): unlike a one-shot reveal, a flip is
+     bidirectional and should feel symmetric turning either way. 450ms sits at
+     the top of the "modal/drawer"-scale range — this swaps a whole card's
+     worth of content, not a small UI nudge. --dur-flip/--ease-flip name this
+     because it's reused verbatim by every flip in the app (see the
+     .statcast__flipbtn comment below). */
+  transition: transform var(--dur-flip) var(--ease-flip);
+}
+.flipcard--flipped .flipcard__inner {
+  transform: rotateY(180deg);
+}
+.flipcard__face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  min-width: 0;
+}
+.flipcard__face--back {
+  transform: rotateY(180deg);
+}
+/* Once the flip lands, take the front face out entirely. backface-visibility
+   alone is not enough on iOS Safari: a descendant that gets promoted to its
+   own compositing layer — the team logo's `transform: scale(1.32)`
+   (.gamecard__logobox .teamlogo), the absolutely-positioned corner pills —
+   can keep painting through the rotated face, mirrored, and the per-child
+   backface-visibility patches sprinkled on .gamecard__* haven't reliably
+   held for the transformed logo. `visibility: hidden` is engine-independent:
+   nothing under the front face can paint (or take taps/focus — the front
+   card's buttons stop intercepting input meant for the result face). Delayed
+   to 225ms = the flip's 90° midpoint, when the front is edge-on and so
+   legitimately invisible anyway; the first half of the turn still shows it
+   rotating away. Reveal is one-directional (see FlipCard.jsx), so the
+   un-delayed reverse never runs in practice. */
+.flipcard--flipped .flipcard__face--front {
+  visibility: hidden;
+  transition: visibility 0s 225ms;
+}
+/* Reduced motion collapses the flip itself to an instant swap (the blanket
+   `transition-duration: 0.01ms !important` rule above) but leaves delays
+   alone — zero this one too so the front doesn't linger mirrored for 225ms
+   after an instant flip. */
+@media (prefers-reduced-motion: reduce) {
+  .flipcard--flipped .flipcard__face--front {
+    transition-delay: 0s;
+  }
+}
+
+/* The back face's content — final line, decisions, play of the game (see
+   src/components/GameResultFace.jsx). Same card chrome as .gamecard so the
+   flip reads as one object turning over, not two different cards. */
+.flipback {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 8px 16px 14px;
+  border-radius: var(--radius-md);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  box-shadow: var(--shadow-card);
+}
+/* The card-level accent tint (GameResultFace.jsx's cardAccent/isPinnedGame):
+   two independent channels, since a card can carry both at once (your team's
+   own Blowout win, say) —
+   • .flipback--accent tints the BORDER to whichever single signal is the
+     biggest deal (crown > scenario > pinned-team, see cardAccent) via
+     --card-accent, same color-mix recipe .gamecard--pinned uses pregame.
+   • .flipback--pinned tints the BACKGROUND to the pinned team's own accent
+     (--pin-accent) regardless of which signal won the border — the same
+     gradient the slate's pregame card wears for a pinned team, so "this is
+     your team's game" reads the same before and after the reveal. */
+.flipback--accent {
+  /* Heavier (2px, --bw-heavy) AND a stronger mix (70%, vs. the pregame
+     pinned card's subtler 45%) than the hairline default — this is the one
+     border on the slate meant to read as "a different color," not just a
+     faintly warmer hairline, so both channels move together. */
+  border-width: var(--bw-heavy);
+  border-color: color-mix(in srgb, var(--card-accent) 70%, var(--border-rule));
+}
+.flipback--pinned {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),
+    var(--surface-card) 70%
+  );
+}
+/* Box score button + pill row share one line — the button leads, the pill(s)
+   (ResultPills, GameResultFace.jsx) trail after it and wrap onto their own
+   line first if the card gets too narrow for both. */
+.flipback__topRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* The pill-badge row (ResultPills, GameResultFace.jsx) — at most one crowned
+   "Game of the Night" pill (amber fill, same medal-amber the app already uses
+   for award chips) alongside its own scenario pill (filled in that
+   scenario's own accent — see .flipback__pill--scenario below), plus the
+   doubleheader modifier (the one pill still left as a quiet outline chip,
+   same idiom as .prospectpill/.gamecard__dh — a doubleheader label isn't
+   tied to any accent color). The favorite team's game is called out by the
+   whole card's tint instead — see .flipback--pinned. */
+.flipback__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.flipback__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+.flipback__pill--tag {
+  background: var(--bg-page);
+  color: var(--text-muted);
+  border: var(--bw-hair) solid var(--border-hairline);
+}
+.flipback__pill--crown {
+  background: var(--award-ink);
+  color: var(--text-on-ink);
+}
+/* The ★ glyph's own em-box doesn't sit centered against the label's caps at
+   this caption size — nudged onto the same visual center as the label
+   instead of floating off it. */
+.flipback__pill-star {
+  display: inline-block;
+  transform: translateY(0.5px);
+}
+/* The scenario pill (Dominant Performance/Blowout/Close Game/Extra Innings) —
+   filled solid in --pill-accent, the SAME token GameResultFace's cardAccent
+   hands the card's own border when this scenario wins that race, so the pill
+   and the border read as one color family even when something else (the
+   crown, the favorite team) outranks this scenario for the border. --pill-
+   text is per-scenario (see SCENARIO_STYLE, GameResultFace.jsx) rather than
+   always the same one: --field/--clay/--allstar-blue are dark/saturated
+   enough for light on-ink text, but --marker (Close Game) is a bright
+   highlighter yellow — reversed, dark ink text is what actually holds
+   WCAG AA against IT specifically. */
+.flipback__pill--scenario {
+  background: var(--pill-accent);
+  color: var(--pill-text);
+  border: var(--bw-hair) solid var(--pill-accent);
+}
+/* The Game of the Night's conditional second beat, and the Dominant
+   Performance / Blowout / Extra-Innings performer-card variant — a
+   PerformerCard sitting where (or beneath where) the plain-text Play of the
+   Game block would otherwise go, same list wrapper the slate rail/box score
+   Insights card use around it. Borderless here specifically: the OUTER
+   .flipback card already carries the card-level accent border above, so the
+   nested .playercard tile drops its own border/background/padding rather
+   than doubling up into a card-within-a-card. */
+.flipback__perfcard {
+  margin: 0;
+}
+.flipback__perfcard .playercard {
+  border: none;
+  background: none;
+  padding: 0;
+}
+/* Line score: a header row (R/H/E labels, once) above two team rows — team
+   name flexes to fill the leading column, the three stat columns are fixed-
+   width so header and value rows line up. Values are sized up from the
+   original draft (--fs-num-lg) since this is the card's headline number. */
+.flipback__linescore {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.flipback__lsHeader,
+.flipback__team {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 28px);
+  align-items: center;
+  column-gap: 8px;
+}
+/* Doubles as the "N innings" note on an extra-innings card (GameResultFace.jsx
+   only fills it in then) — same font/weight/color as the R/H/E labels beside
+   it (.flipback__lsCol) so the two read as one header row, just left- rather
+   than center-aligned to sit over the team names below it. */
+.flipback__lsTeamCol {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.flipback__lsCol {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.flipback__team {
+  padding: 2px 0;
+}
+.flipback__abbr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  /* 1.5x the original 13px, on every viewport (not gated to wide layout). */
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+.flipback__lsVal {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+/* Phone-first: W/L/S each get their own line (more legible at narrow widths
+   than a wrapped inline row). Wide layout below regroups them into one row. */
+.flipback__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-muted);
+}
+.flipback__decision b {
+  color: var(--text-heading);
+  margin-right: 3px;
+}
+/* Headshot-led, same idiom as the full box score's .bs__potgBody (BoxScore.jsx)
+   — sized to --shot-md, matching the slate rail's Top Performers card
+   (.playercard__shot) so the lead player reads at the same scale wherever a
+   past game surfaces one: the photo anchors the left edge, the label +
+   description shift over into their own column. */
+.flipback__potgWrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 4px;
+}
+/* Headshot + its position badge, same wrapper idiom as
+   .playercard__shotwrap/__posbadge (PerformerCard.jsx) — every headshot on
+   the slate carries the same nested position tag. */
+.flipback__potgShotwrap {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.flipback__potgShot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.flipback__potgMain {
+  min-width: 0;
+}
+.flipback__potg {
+  margin: 0;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.flipback__potgLabel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin-bottom: 2px;
+}
+.flipback__potgDot {
+  color: var(--graphite-soft);
+}
+/* Play of the game (and its batter-name link) reads as a natural sentence in
+   the app's serif "read" face, not the usual all-caps display type — same
+   sanctioned exception as .pbp__desc (see the ALL-CAPS INVARIANT block
+   comment near the top of this file). A nested .plink needs its OWN entry
+   here too: `#root *`'s uppercase would otherwise win over it directly. */
+.flipback__potg,
+.flipback__potg .plink {
+  font-family: var(--font-read);
+}
+#root .flipback__potg,
+#root .flipback__potg .plink {
+  text-transform: none; /* caps-exempt: play of the game reads as a natural sentence */
+}
+/* Sits in .flipback__topRow next to the pill row (see above), left-aligned
+   above the logos/team names rather than the old full-width band pinned to
+   the card's bottom. Padding trimmed to a caption-sized pill (font/size match
+   .flipback__lsCol's R/H/E header) so it reads as scaled to that row, not a
+   full-size button that happens to be short. */
+.flipback__boxbtn {
+  width: auto;
+  min-height: 0;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* ---------------------------------------------------------------------------
+   BOX SCORE SKELETON (src/components/BoxScoreSkeleton.jsx) — a
+   PastGameFlipCard's back face while a revealed game's feed/win-probability
+   are still in flight. Reuses .flipback's own chrome (border, padding,
+   shadow — see `.skel` sharing that class in the component) so the
+   placeholder matches the eventual card's footprint in the common case.
+   .skel__perfcard below adds the one block whose presence varies per game
+   (a PerformerCard, when showsPerformerCard(cardMeta) says GameResultFace
+   will show one) — best-effort, not a guarantee: cardMetaByGamePk
+   (useDayCardMeta.js) needs THIS game's own signals plus every other game's,
+   so it can populate no earlier than this card's own fetch resolves, and
+   often lands just after — in which case GameResultFace itself mounts
+   without the block first and grows into it on cardMeta's next render, same
+   as it already could before this component existed. This placeholder only
+   narrows that window; closing it fully would mean reworking
+   useDayCardMeta's per-game vs. day-wide timing, out of scope here. Grayscale
+   blocks shaped like that layout pulse together as ONE unit (a single
+   animation on
+   .skel__body, not per-bar — matches the plain "everything fades together"
+   skeleton idiom rather than a busier staggered shimmer), plus a small
+   baseball rolling back and forth across the middle of the card on its own
+   z-index, layered above the pulsing bars rather than confined to a strip
+   of its own — a wink at "still rounding the bases" rather than a literal
+   progress bar.
+   --------------------------------------------------------------------------- */
+.skel__body {
+  position: relative; /* the containing block .skel__ball positions itself against */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: skel-pulse 1.5s ease-in-out infinite;
+}
+.skel__bar,
+.skel__circle {
+  display: inline-block;
+  background: var(--rule-soft);
+  border-radius: var(--radius-xs);
+}
+.skel__circle {
+  border-radius: var(--radius-pill);
+}
+.skel__topRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.skel__bar--btn {
+  width: 74px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+}
+.skel__bar--pill {
+  width: 96px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+}
+.skel__linescore {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+.skel__team {
+  display: grid;
+  grid-template-columns: 24px 1fr repeat(3, 20px);
+  align-items: center;
+  column-gap: 8px;
+}
+.skel__circle--logo {
+  width: 24px;
+  height: 24px;
+}
+.skel__bar--team {
+  height: 14px;
+  width: 70%;
+}
+.skel__bar--num {
+  height: 14px;
+  width: 100%;
+}
+.skel__decisions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.skel__bar--decision {
+  height: 12px;
+  width: 60%;
+}
+/* Only rendered when showsPerformerCard(cardMeta) says the real
+   GameResultFace will stack a PerformerCard block here (see
+   BoxScoreSkeleton.jsx) — mirrors .playercard's own row shape (headshot +
+   name/team/stat lines) so reserving this placeholder doesn't itself
+   introduce the layout jump it exists to prevent. */
+.skel__perfcard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+.skel__bar--perfShot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.skel__perfLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.skel__bar--perfName {
+  height: 14px;
+  width: 55%;
+}
+.skel__bar--perfTeam {
+  height: 12px;
+  width: 35%;
+}
+.skel__bar--perfStat {
+  height: 12px;
+  width: 70%;
+}
+.skel__potg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-top: 4px;
+}
+.skel__circle--shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  flex: none;
+}
+.skel__potgLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
+.skel__bar--short {
+  height: 12px;
+  width: 40%;
+}
+.skel__bar--long {
+  height: 12px;
+  width: 90%;
+}
+@keyframes skel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+/* .skel__ball only carries POSITION (the roll across the card, `left` +
+   vertical centering) — the SPIN is a separate animation one layer down on
+   .skel__ballFrames (see BoxScoreSkeleton.jsx's header comment for why a
+   flat `rotate()` on this outer element would be the wrong motion: it'd spin
+   the ball around the axis pointing AT the viewer, like a coin, not the
+   axis a ball rolling along this path actually turns on). Splitting position
+   from spin onto two elements is what lets both run as independent
+   `infinite alternate` CSS animations that nonetheless stay in lockstep —
+   same duration/direction, same clock. Positioned against .skel__body (see
+   that rule's `position: relative`) rather than confined to its own bottom
+   strip, so it rolls across the middle of the card, over the top of the
+   pulsing bars — `z-index` lifts it above them, and the drop-shadow is what
+   sells "floating over," not "sitting flush with." */
+.skel__ball {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--skel-ball-size);
+  height: var(--skel-ball-size);
+  transform: translateY(-50%);
+  z-index: 2;
+  filter: drop-shadow(var(--shadow-drop-raised));
+  animation: skel-roll 2.4s ease-in-out infinite alternate;
+}
+.skel__ballBody {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.skel__ballBody circle {
+  /* fill comes from the SkelBall-defined radialGradient (its highlight/
+     shadow stops are the two rules below) — not set here. */
+  stroke: var(--rule);
+  stroke-width: 3;
+}
+.skel__ballShadeLight {
+  stop-color: var(--paper-3);
+}
+.skel__ballShadeDark {
+  stop-color: var(--rule-soft);
+}
+/* The circular "window": clips the wide frame-strip SVG down to one frame's
+   worth, same idea as a classic sprite-sheet animation's viewport. Circular
+   (not square) so a frame's seam artwork — which is only guaranteed correct
+   inside the ball's own silhouette — can never paint past the ball's edge. */
+.skel__ballWindow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+/* BALL_TOTAL_STEPS slots (BoxScoreSkeleton.jsx — BALL_FRAME_COUNT unique
+   rotation snapshots repeated BALL_SPIN_LOOPS times via <use>, not
+   regenerated) laid out side by side and stepped through via `steps()`, the
+   standard technique for a sprite-sheet rotation — see that file's header
+   comment for why the rotation itself needs to be precomputed 3D frames
+   rather than a flat `rotate()`. 3600% wide = 36 frame-widths (12 frames ×
+   3 loops); the endpoint travels 35 of those 36 steps (the 36th IS the
+   starting frame again, so stopping short of it avoids a same-frame
+   double-step at the loop boundary). Every number here is hardcoded rather
+   than threaded in from JS since `steps()` needs a literal integer — update
+   all three together (JS's BALL_FRAME_COUNT/BALL_SPIN_LOOPS) if any changes. */
+.skel__ballFrames {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3600%;
+  height: 100%;
+  animation: skel-ball-spin 2.4s steps(35) infinite alternate;
+}
+.skel__ballSeam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.skel__ballStitch {
+  stroke: var(--clay);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+@keyframes skel-roll {
+  from { left: 0; }
+  to   { left: calc(100% - var(--skel-ball-size)); }
+}
+@keyframes skel-ball-spin {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-35 / 36 * 100%)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel__body {
+    animation: none;
+    opacity: 0.8;
+  }
+  .skel__ball {
+    animation: none;
+    left: calc(50% - var(--skel-ball-size) / 2);
+  }
+  .skel__ballFrames {
+    animation: none;
+    transform: translateX(0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   PLAYER CARD — the shared "baseball card" tile (src/components/
+   PerformerCard.jsx): headshot, name + position, team logo + abbreviation,
+   stat line. Used by Statcast leaders, the box score's Insights card, each
+   result card's Dominant Performance/Blowout/Extra-Innings pill
+   (GameResultFace.jsx), and Award History.
+   --------------------------------------------------------------------------- */
+/* Winners/Losers "baseball card" tiles — headshot, name + position, team
+   logo + abbreviation, stat line, in a compact horizontal tile (the sidebar
+   is too narrow for a 3-up grid of anything wider than this). */
+.playercard__bucket {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.playercard__bucket + .playercard__list {
+  margin-bottom: 12px;
+}
+.playercard__list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Same layout on every viewport now (no phone-vs-wide split) — the bigger
+   headshot + two-line name that used to only kick in at the wide breakpoint
+   is now the only version. */
+.playercard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+/* Headshot + its position badge, same wrapper idiom as
+   .teammatecard__shotwrap/__posbadge (former teammates cards). */
+.playercard__shotwrap {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: var(--radius-sm);
+}
+.shot.playercard__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.playercard__posbadge {
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  min-width: 16px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-ui);
+  text-align: center;
+}
+.playercard__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+/* Phone-first: first + last name on one row, a bit bigger than the old
+   universal size (there's only one flex item here — the PlayerLink — so this
+   is really just a font/wrap setting; the actual first/last line break is
+   the .playercard__namebreak <br> below). The wide-layout override (740px
+   block) switches to the two-line stack next to the bigger headshot there. */
+.playercard__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+.playercard__namebreak {
+  display: none;
+}
+/* flex-wrap: wrap so the Top Performers rail's optional ProspectPill (see
+   PerformerCard.jsx) can drop to its own line rather than overflowing the
+   card — every other .playercard caller never fills this row enough to wrap. */
+.playercard__team {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+.playercard__stat {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
