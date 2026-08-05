@@ -268,11 +268,18 @@
 
    THREE ACROSS, replacing three full-width rows with a 33px thumbnail. The old
    rows spent the whole width on a name that needed a third of it; at a third
-   each there is room for a real 63px headshot, which is what makes a
-   comparison land at a glance. The name splits over two lines the way the
-   player hero's does, so a long surname wraps rather than ellipsizing — and
-   because that makes cells different heights, the match block is pushed to the
-   bottom (`margin-top: auto`) so the three figures still line up as one row.
+   each there is room for a real headshot, which is what makes a comparison
+   land at a glance. The name splits over two lines the way the player hero's
+   does, so a long surname wraps rather than ellipsizing — and because that
+   makes cells different heights, the match block is pushed to the bottom
+   (`margin-top: auto`) so the three figures still line up as one row.
+
+   IT SCALES WITH THE COLUMN, which is the whole reason for the 740px block at
+   the end. Sized for a phone alone, the cell was right at 115px wide and badly
+   wrong at 300: a 63px face, 14px name and 22px figure marooned in the middle
+   of a tall empty box. Every rung — face, name, caption, figure, padding —
+   steps up together past the breakpoint, because scaling only some of them is
+   what makes a card look assembled rather than designed.
 
    The match figure is plain mono ink, never a seal amber: this is analysis,
    not a score cover (see CLAUDE.md's spoiler rule). ---- */
@@ -283,14 +290,18 @@
 /* The "Measured on" band. Accented rather than quiet on purpose: it is the
    card's whole warrant, and as a muted section note it read as decoration.
    The navy edge is the same ink the page's bar headings use, so it reads as
-   part of the section rather than as a warning. */
+   part of the section rather than as a warning. Label over terms on a phone,
+   one line side by side once there's room for it. */
 .simlike__measure {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 0 0 10px;
-  padding: 7px 10px;
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  /* Square on the inked edge only: a radius there rounds the rule away at both
+     ends and leaves a stub floating beside the band rather than a rule down
+     the side of it. */
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   border-left: var(--bw-heavy) solid var(--accent-primary);
   background: var(--bg-page);
 }
@@ -303,7 +314,8 @@
 }
 .simlike__measureterms {
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   line-height: var(--lh-snug);
   color: var(--text-caption);
@@ -325,10 +337,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-1);
+  gap: 5px;
   width: 100%;
   min-width: 0;
-  padding: 10px 4px 8px;
+  padding: 12px 6px 10px;
   text-align: center;
   background: var(--surface-card);
   border: var(--bw-hair) solid var(--border-rule);
@@ -337,19 +349,7 @@
 .simlike__shot {
   width: var(--shot-md-w);
   height: var(--shot-md-h);
-}
-/* The position tag, tucked up over the headshot's lower edge so it reads as
-   belonging to the face rather than as the first line of the name block. */
-.simlike__pos {
-  margin-top: -10px;
-  padding: 1px 6px;
-  border-radius: var(--radius-pill);
-  background: var(--accent-primary);
-  color: var(--text-on-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
+  margin-bottom: 1px;
 }
 .simlike__ident {
   display: flex;
@@ -368,17 +368,42 @@
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
-.simlike__club {
+/* Position + club on one caption line. The position used to be a filled chip
+   pulled up over the headshot's lower edge, which put dark knockout type on
+   the middle of a player's chin and clipped it against the photo — the face is
+   the one thing in this cell that can't take an overlay. Here it reads as what
+   it is: the first half of a caption, inked to stand off the club beside it. */
+.simlike__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
   font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+}
+.simlike__pos {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+.simlike__club {
   color: var(--text-muted);
 }
-/* Bottom-aligned across the three cells regardless of how far a name wraps. */
+/* Bottom-aligned across the three cells regardless of how far a name wraps,
+   and ruled off so it reads as the cell's footer rather than a fourth thing
+   floating in the stack. */
 .simlike__match {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1px;
+  width: 100%;
   margin-top: auto;
-  padding-top: 6px;
+  padding-top: 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 .simlike__matchval {
   font-family: var(--font-mono);
@@ -386,10 +411,13 @@
   font-weight: var(--w-bold);
   font-size: var(--fs-num-lg);
   line-height: var(--lh-solid);
-  letter-spacing: var(--ls-tight-display);
+  letter-spacing: var(--ls-num);
   color: var(--text-heading);
 }
+/* Set on the number's own baseline at a smaller size — the sign qualifies the
+   figure, it isn't part of it. */
 .simlike__matchpct {
+  margin-left: 1px;
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   color: var(--text-muted);
@@ -404,6 +432,52 @@
 .simlike__note {
   padding-top: 8px;
   padding-bottom: 0;
+}
+
+/* Past the player page's own breakpoint (see 26-player-page.css) a third of
+   the column is ~300px, not ~115px. Everything steps up a rung together. */
+@media (min-width: 740px) {
+  .simlike__measure {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: 10px 14px;
+  }
+  .simlike__measurelabel {
+    flex: none;
+  }
+  .simlike__list {
+    gap: var(--space-3);
+  }
+  .simlike__link {
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-3) var(--space-3);
+  }
+  .simlike__shot {
+    width: var(--shot-lg-w);
+    height: var(--shot-lg-h);
+  }
+  .simlike__first {
+    font-size: var(--fs-small);
+  }
+  .simlike__last {
+    font-size: var(--fs-title-sm);
+  }
+  .simlike__meta {
+    font-size: var(--fs-small);
+  }
+  .simlike__match {
+    padding-top: 10px;
+  }
+  .simlike__matchval {
+    font-size: var(--fs-hero-sm);
+  }
+  .simlike__matchpct {
+    font-size: var(--fs-body);
+  }
+  .simlike__matchunit {
+    font-size: var(--fs-label);
+  }
 }
 
 /* ---- league-rank chips under the season tiles ("1st NL · ERA") ---- */

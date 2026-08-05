@@ -18,12 +18,19 @@ import { teamClubNameShort } from '../../lib/teams.js'
 //
 // THREE ACROSS, NOT A LIST OF ROWS. The card used to be three full-width rows
 // with a 33px thumbnail, which spent the whole width on a name that needed a
-// third of it. At a third each, a real 63px headshot fits — the face is what
-// makes a comparison land on a second screen — and the name splits over two
-// lines the way the player hero's does, so a long surname wraps instead of
+// third of it. At a third each, a real headshot fits — the face is what makes
+// a comparison land on a second screen — and the name splits over two lines
+// the way the player hero's does, so a long surname wraps instead of
 // ellipsizing. The match figure moves under the face as the cell's footer,
 // bottom-aligned across all three (`margin-top: auto`) so the numbers still
 // read as one comparable row even when one name wraps and another doesn't.
+//
+// The cell is FIVE stacked elements at most — face, name, position + club on
+// one caption line, and the match footer — because a phone-sized column that
+// stacks six centered things reads as a pile rather than a card. The
+// stylesheet scales all of it up past 740px: three thirds of a desktop-width
+// page are wide enough that phone-sized type inside them floats in dead
+// space, which is the failure this card had on its first pass.
 //
 // THE MATCH NUMBER IS SHOWN ON PURPOSE. A bare "hits like X, Y, Z" is a
 // confident-sounding claim the data doesn't always support: a pitcher with a
@@ -63,15 +70,21 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
                   teamId={p.teamId}
                   className="simlike__shot"
                 />
-                {/* Absent for a player whose position we couldn't resolve —
-                    the same degrade-to-nothing every other optional field on
-                    a MiLB-capable surface gets, never a guessed "P". */}
-                {p.pos && <span className="simlike__pos">{p.pos}</span>}
                 <span className="simlike__ident">
                   {first && <span className="simlike__first">{first}</span>}
                   <span className="simlike__last">{last}</span>
                 </span>
-                {club && <span className="simlike__club">{club}</span>}
+                {/* Position and club share one line as the cell's caption.
+                    The position is absent for a player we couldn't resolve one
+                    for — the same degrade-to-nothing every other optional
+                    field on a MiLB-capable surface gets, never a guessed "P" —
+                    and the line disappears entirely when neither resolves. */}
+                {(p.pos || club) && (
+                  <span className="simlike__meta">
+                    {p.pos && <span className="simlike__pos">{p.pos}</span>}
+                    {club && <span className="simlike__club">{club}</span>}
+                  </span>
+                )}
                 <span className="simlike__match">
                   <span className="simlike__matchval">
                     {p.match}
