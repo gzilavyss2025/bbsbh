@@ -7,7 +7,11 @@ function hexToRgb(hex) {
   return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16))
 }
 
-function relLuminance(hex) {
+// WCAG relative luminance: 0 (black) to 1 (white). Exported because "which of
+// these hexes is the DARKEST" is the same question in other clothes, and
+// answering it off the hex digits gets yellow badly wrong — the green channel
+// carries three quarters of the weight (src/lib/stampInk.js).
+export function relativeLuminance(hex) {
   const [r, g, b] = hexToRgb(hex).map((c) => {
     c /= 255
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
@@ -17,7 +21,7 @@ function relLuminance(hex) {
 
 // WCAG contrast ratio between two hex colors: 1 (identical) to 21 (black/white).
 export function contrastRatio(hexA, hexB) {
-  const [l1, l2] = [relLuminance(hexA), relLuminance(hexB)]
+  const [l1, l2] = [relativeLuminance(hexA), relativeLuminance(hexB)]
   const [light, dark] = l1 > l2 ? [l1, l2] : [l2, l1]
   return (light + 0.05) / (dark + 0.05)
 }

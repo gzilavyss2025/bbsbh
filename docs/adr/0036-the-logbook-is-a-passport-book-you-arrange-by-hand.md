@@ -148,7 +148,7 @@ obvious implementation goes wrong:
   compressing 4% on impact, releasing to rest, over `--dur-slow`. transform and
   opacity only, so `GameStamp`'s turbulence filter never re-rasterises
   mid-flight. Skipped rather than slowed under reduced motion, and deliberately
-  not fired by "place them all for me": nine at once is a flurry, not a
+  not fired by "place them all for me": a pageful at once is a flurry, not a
   stamping.
 
 **A bug this uncovered, in the seam rather than in the book.** Placing a stamp
@@ -162,11 +162,84 @@ test could have caught it, because the store and the geometry were each already
 right; `e2e/logbook-passport.spec.js` now pins that a placement repaints the
 book it was made in.
 
+## Addendum (2026-08-05) — the page is ruled, and the ink is the winner's
+
+Two changes to what a page looks like. Neither touches the reveal gate, the
+store, or the sync payload: a placement is still `{ page, x, y, tilt }` and a
+stamp still only exists for a game its owner already revealed.
+
+### The page shows its eight boxes
+
+A blank cream page gives no answer to "where does this go, and how many fit?",
+so the paper is now **ruled into eight faint boxes, two across and four down**,
+and a stamp goes in one. Three things about that:
+
+- **It is a guide, not a snap.** The tap is still the instruction, still nudged
+  only off a genuine collision. The alternative below — snapping to slots — is
+  still rejected for the reason it always was; drawing the boxes gets the
+  legibility a grid would have bought without giving up the arrangement.
+- **Capacity is derived from the grid, not typed beside it.** `PAGE_CAPACITY`
+  is `PAGE_COLUMNS * PAGE_ROWS`, and `pageSlots()` in `passportLayout.js` is the
+  one statement of where the boxes are — the guide the user sees, the boxes
+  "place them all for me" fills, and the number a full page reports are one
+  piece of geometry. §2's rule, applied to a number that is now on screen.
+- **Two by four, because the stamp has to FIT ITS BOX** — a guide that promises
+  a box the art overflows is worse than no guide. At `STAMP_WIDTH` 0.3 on a
+  0.704-aspect page, a 2x4 cell is 0.44 x 0.22 against a 0.3 x 0.211 stamp;
+  3x3 is narrower than the stamp, and 2x5 is both shorter than it and inside
+  `MIN_SEPARATION` down the page. The arithmetic is in the constant's header
+  and pinned by `test/passport-layout.test.js`.
+
+Capacity therefore drops from nine to eight. **Nothing is un-placed by that** —
+a page of an older book that already holds nine keeps all nine; `pageIsFull`
+simply answers true for it until one is moved off. Auto-layout now fills the
+boxes rather than a rhythm of its own, wobbling each stamp inside its own box
+(`clampToSlot`) so a filled page still reads as stamped rather than printed.
+The separate dashed margin guide drawn while placing was absorbed: the grid's
+outer edge IS that margin, and two dashed rules on one line was one too many.
+
+### A stamp is pressed in the winner's ink
+
+Every stamp was navy. They are now drawn in **the winning club's darkest brand
+colour** — `src/lib/stampInk.js`, the one module in `src/lib/` that colours
+something from game state.
+
+That is a deliberate, contained exception to the rule at the end of
+`src/lib/CLAUDE.md` ("theming's only inputs are `teamId` and `treatment`"), and
+it is safe for the same structural reason the rest of the stamp is: its only
+caller is the art, and the art may only render where `check-stamp-surfaces.mjs`
+allows — surfaces where every game shown is one this user already finished
+revealing. The ink says who won a game whose score is printed in numerals two
+lines below it. **Do not import that module anywhere else.**
+
+- **Darkest, not primary.** The mark is one colour at hairline weights on cream
+  paper, so the colour has to work as ink — which a club's gold, sky blue or
+  powder blue does not. Every club owns something dark, and the darkest thing it
+  owns is both unmistakably its own and legible. "Darkest" is a luminance
+  question; reading it off the hex digits gets yellow badly wrong, so it goes
+  through `relativeLuminance` (now exported from `lib/contrast.js`).
+- **With a floor under it.** Ink that misses 4.5:1 against the page's paper is
+  walked toward black by scaling all three channels — which keeps the hue —
+  until it reads. Exactly one club in either league needs it today (Rocket
+  City's `#3378c2`, at 4.22); it exists for the affiliate whose researched pair
+  is a pastel, not for the 30.
+- **No winner means no ink.** A tie, a suspended game, facts that never
+  resolved, a club with no colour on file: `null`, and the stamp keeps the
+  book's default navy. It is published as `--stamp-ink` rather than a `color`,
+  so a surface with its own opinion still wins — which is how the mint card's
+  un-minted preview stays graphite.
+
 ## Alternatives considered
 
 - **Snap placement to a fixed grid of ten slots.** Rejected: only a slot index
   would need storing, and it could never overlap — but it is a grid with extra
-  steps, and the arrangement stops being the artifact.
+  steps, and the arrangement stops being the artifact. (Still rejected after the
+  2026-08-05 addendum: the page now DRAWS its boxes, but a tap still lands where
+  it was aimed.)
+- **Ink the stamp in the winner's primary brand colour.** Rejected: it is the
+  more obvious reading of "the winner's colours" and it produces gold, orange
+  and powder-blue stamps that don't read as ink at hairline weights on cream.
+  Darkest-with-a-floor keeps the club and keeps the metaphor.
 - **Keep placement local-only.** Rejected: it is cheap (a number and two
   fractions on a record that already syncs), and a book that looks different on
   your laptop is not your book.

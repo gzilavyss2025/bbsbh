@@ -23,20 +23,43 @@
 // stampArt.js) rendered at whatever CSS box it is given, so this module only
 // ever reasons about its size as a fraction of the page too.
 
-// How many stamps a page holds. NINE, laid out three across and three down,
-// and the number is arithmetic rather than taste: at STAMP_WIDTH a page has
-// about 0.67 of its height free for stamp CENTRES once the margins are taken,
-// so five rows would sit 0.24 page-widths apart — inside MIN_SEPARATION, i.e.
-// overlapping by this module's own definition. Ten in two columns therefore
-// produced auto-layouts that `nudgeFromCollisions` would have refused, which
-// is the kind of disagreement between two functions in one file that only a
-// test catches. Three by three clears it with room: 0.29 across, 0.47 down.
-// Still inside the brief's "about 8 to 10".
-export const PAGE_CAPACITY = 9
+// The grid a page is ruled into: TWO columns by FOUR rows, so a page holds
+// EIGHT stamps and every one of them has a box of its own. The book draws that
+// grid as a faint guide (PassportPage.jsx) — a page that says where a stamp
+// goes is far easier to fill by hand than a blank sheet — and `pageSlots()`
+// below is the single place its geometry is stated.
+//
+// Two by four rather than any other pair of factors, and the reasoning is
+// arithmetic rather than taste. A cell is (1 - 2 * PAGE_MARGIN) split over the
+// columns across and over the rows down, and the STAMP HAS TO FIT INSIDE ITS
+// CELL — otherwise the guide is a lie the moment anything lands on it:
+//
+//   2 x 4 -> cell 0.44 x 0.22 of the page, stamp 0.3 x 0.211
+//            (stampHeightFraction). Fits, with room across and a hair to spare
+//            down. Adjacent centres sit 0.44 apart across and 0.31 apart down
+//            IN WIDTH-UNITS, both clear of MIN_SEPARATION — so `autoLayout`
+//            and `nudgeFromCollisions` still agree about what overlaps.
+//   3 x 3 -> cell 0.293 wide: narrower than the stamp itself.
+//   2 x 5 -> cell 0.176 tall: shorter than the stamp, and the rows only 0.25
+//            apart, inside MIN_SEPARATION — overlapping by this module's own
+//            definition, which is exactly the disagreement the last test in
+//            test/passport-layout.test.js exists to catch.
+//
+// Capacity is therefore DERIVED, never typed: it is the number of boxes the
+// page is ruled into, and so it cannot drift from the guide the user is
+// looking at. One fewer than the ungridded 3x3 this replaces — a page of an
+// older book that already holds nine keeps all nine (a capacity change never
+// un-places anything; `pageIsFull` simply answers true for that page until one
+// is moved off it).
+export const PAGE_COLUMNS = 2
+export const PAGE_ROWS = 4
+export const PAGE_CAPACITY = PAGE_COLUMNS * PAGE_ROWS
 
 // Bounds the page count so a hostile or hand-edited client can't mint a book
-// with 40,000 pages in it. 60 pages x 10 is 600, comfortably past the 500
-// stamps a season is capped at (MAX_STAMPS_PER_SEASON).
+// with 40,000 pages in it. 60 pages of 8 boxes is 480 — and PAGE_CAPACITY is a
+// guide rather than a refusal (a full page says so and still takes the stamp),
+// so this comfortably covers the 500 stamps a season is capped at
+// (MAX_STAMPS_PER_SEASON).
 export const MAX_PAGES = 60
 
 // The stamp's width as a fraction of the page's width. The page is roughly
@@ -103,6 +126,78 @@ export function clampToPage(x, y) {
     x: clamp(Number.isFinite(x) ? x : 0.5, halfW, 1 - halfW),
     y: clamp(Number.isFinite(y) ? y : 0.5, halfH, 1 - halfH),
   }
+}
+
+// The eight boxes a page is ruled into, in reading order (across, then down).
+// One entry per slot:
+//
+//   { index, column, row, left, top, width, height, x, y }
+//
+// `left`/`top`/`width`/`height` are the CELL as fractions of the page box —
+// what PassportPage.jsx draws the faint guide from, so the rules on screen and
+// the arithmetic behind PAGE_CAPACITY are one thing rather than two. `x`/`y`
+// are that cell's centre, in the same fractions a placement uses, so
+// `autoLayout` can drop a stamp in the middle of a box without converting
+// anything.
+//
+// The grid is inset by PAGE_MARGIN, which is not decoration: a cell centre
+// outside `clampToPage`'s bounds would be a box no stamp could ever sit in the
+// middle of, and the guide would be pointing at a spot the module refuses.
+// Recomputed on each call rather than frozen at module scope — it is a handful
+// of multiplications, and a shared mutable array handed to a React render is a
+// bug waiting for its first mutation.
+export function pageSlots() {
+  const span = 1 - PAGE_MARGIN * 2
+  const width = span / PAGE_COLUMNS
+  const height = span / PAGE_ROWS
+  const slots = []
+  for (let row = 0; row < PAGE_ROWS; row += 1) {
+    for (let column = 0; column < PAGE_COLUMNS; column += 1) {
+      const left = PAGE_MARGIN + column * width
+      const top = PAGE_MARGIN + row * height
+      slots.push({
+        index: row * PAGE_COLUMNS + column,
+        column,
+        row,
+        left,
+        top,
+        width,
+        height,
+        x: left + width / 2,
+        y: top + height / 2,
+      })
+    }
+  }
+  return slots
+}
+
+// Keep a stamp's centre inside ONE box of that grid — the same job clampToPage
+// does for the page, one scale down, and the reason a wobbled auto-layout can
+// never push a stamp across the rule the user is looking at. A cell is barely
+// taller than the stamp is (0.22 against 0.211), so this leaves real room
+// across and almost none down; that asymmetry is the grid working as intended,
+// not a bug to tune away.
+//
+// Falls back to the plain page clamp for a slot it can't read, so a caller that
+// loses one still lands a stamp on the paper.
+export function clampToSlot(x, y, slot) {
+  if (!slot) return clampToPage(x, y)
+  const halfW = STAMP_WIDTH / 2
+  const halfH = stampHeightFraction() / 2
+  // A cell that somehow can't hold the mark centres it rather than inverting
+  // the bounds (`clamp` with lo > hi would answer `hi` and read as a sudden
+  // jump to the wrong edge).
+  const lowX = slot.left + halfW
+  const highX = slot.left + slot.width - halfW
+  const lowY = slot.top + halfH
+  const highY = slot.top + slot.height - halfH
+  const spot = {
+    x: lowX > highX ? slot.x : clamp(Number.isFinite(x) ? x : slot.x, lowX, highX),
+    y: lowY > highY ? slot.y : clamp(Number.isFinite(y) ? y : slot.y, lowY, highY),
+  }
+  // The grid is inset by PAGE_MARGIN, so this is already on the page — belt
+  // and braces against a future change to either inset.
+  return clampToPage(spot.x, spot.y)
 }
 
 // Distance between two centres, measured in PAGE-WIDTH fractions so one number
@@ -208,8 +303,8 @@ export function otherPlacementsOn(stamps, page, exceptGamePk = null) {
 
 // Whether a page has no room left, from the point of view of the stamp about
 // to land on it. `exceptGamePk` again names the stamp being moved: a full page
-// is NOT full for a keepsake already sitting on it, so nudging one of nine
-// stamps an inch to the left must never be refused with "this page holds 9".
+// is NOT full for a keepsake already sitting on it, so nudging one of eight
+// stamps an inch to the left must never be refused with "this page holds 8".
 export function pageIsFullFor(stamps, page, exceptGamePk = null) {
   return otherPlacementsOn(stamps, page, exceptGamePk).length >= PAGE_CAPACITY
 }
@@ -239,37 +334,30 @@ export function pageCountFor(stamps, added = 1) {
   return clamp(Math.max(highest, Math.trunc(added) || 1), 1, MAX_PAGES)
 }
 
-// A tidy scatter for stamps the user hasn't placed by hand — the "place them
-// all for me" path, and what an upgrading collection needs so nobody is made
-// to re-place forty keepsakes one at a time.
+// A tidy fill for stamps the user hasn't placed by hand — the "place them all
+// for me" path, and what an upgrading collection needs so nobody is made to
+// re-place forty keepsakes one at a time.
 //
-// Deliberately NOT a grid: it lays out on a two-column rhythm and then lets
-// each stamp's own deterministic tilt and a seeded offset break the alignment,
-// so an auto-filled page still reads as stamped rather than as printed. Order
-// is the caller's order, so "oldest game first" fills page 1 first.
+// One stamp per box, in the boxes `pageSlots()` rules the page into, so the
+// button lays out exactly what the guide promises. It is still not a PRINTED
+// grid: each stamp keeps its own deterministic tilt and takes a seeded offset
+// off its box's centre — clamped inside that box by `clampToSlot`, which is
+// what stops the wobble from crossing a rule. There is room to wander across a
+// cell and almost none down it, so an auto-filled page reads as eight stamps
+// pressed by a careful hand rather than as a table. Order is the caller's, so
+// "oldest game first" fills page 1 first.
 export function autoLayout(stamps, { startPage = 1 } = {}) {
   const out = []
-  const perPage = PAGE_CAPACITY
-  // Three across, matching the geometry PAGE_CAPACITY is derived from — a
-  // two-column rhythm at this capacity overlaps (see that constant's note).
-  const columns = 3
-  const rows = Math.ceil(perPage / columns)
+  const slots = pageSlots()
 
   ;(stamps ?? []).forEach((stamp, i) => {
-    const page = clamp(startPage + Math.floor(i / perPage), 1, MAX_PAGES)
-    const slot = i % perPage
-    const column = slot % columns
-    const row = Math.floor(slot / columns)
+    const page = clamp(startPage + Math.floor(i / PAGE_CAPACITY), 1, MAX_PAGES)
+    const slot = slots[i % PAGE_CAPACITY]
 
-    // The nominal centre of this slot, then a seeded wobble of up to a third
-    // of the gap so two auto-filled pages don't look identical.
-    const seed = tiltFor(stamp?.gamePk) / MAX_TILT // -1 .. 1, already stable
-    const nominalX = (column + 0.5) / columns
-    const nominalY = (row + 0.5) / rows
-    const spot = clampToPage(
-      nominalX + seed * 0.045,
-      nominalY - seed * 0.03,
-    )
+    // -1..1, already stable per game (see tiltFor) — no clock, no random draw,
+    // so two devices lay out the same collection identically.
+    const seed = tiltFor(stamp?.gamePk) / MAX_TILT
+    const spot = clampToSlot(slot.x + seed * 0.045, slot.y - seed * 0.03, slot)
     out.push({
       gamePk: stamp?.gamePk,
       placement: { page, x: spot.x, y: spot.y, tilt: tiltFor(stamp?.gamePk) },

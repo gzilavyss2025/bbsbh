@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { PAGE_ASPECT, PAGE_MARGIN, STAMP_WIDTH } from '../../lib/passportLayout.js'
+import { PAGE_ASPECT, STAMP_WIDTH, pageSlots } from '../../lib/passportLayout.js'
 import { GameStamp } from '../GameStamp.jsx'
 import { PassportWatermark } from './PassportWatermark.jsx'
 
@@ -21,7 +21,8 @@ import { PassportWatermark } from './PassportWatermark.jsx'
 // Every number here is imported, none is tuned by eye
 // ===========================================================================
 // The page's shape (PAGE_ASPECT), how wide a stamp sits (STAMP_WIDTH), and the
-// margin the art must stay inside (PAGE_MARGIN) all come from
+// eight boxes the paper is ruled into (`pageSlots()` — which is where the
+// margin no stamp may cross now shows up too) all come from
 // src/lib/passportLayout.js, which is the single source of truth for the
 // book's geometry and is pinned by test/passport-layout.test.js. A placement's
 // x/y are FRACTIONS of the page box marking the stamp's CENTRE — that is what
@@ -166,6 +167,31 @@ export function PassportPage({
           meant for placing a stamp. */}
       <PassportWatermark page={page} />
 
+      {/* The ruled guide: one faint box per stamp the page holds, from
+          passportLayout's `pageSlots()` — the SAME geometry PAGE_CAPACITY is
+          derived from and "place them all for me" fills, so the rules drawn
+          here can never promise a layout the module would refuse. It is a
+          guide, not a grid the placement snaps to: the tap is still the
+          instruction (ADR-0036 rejected snapping, and that stands), this only
+          answers "where does a stamp go, and how many fit" before the user has
+          to guess. Decorative and inert — aria-hidden, and pointer-events off
+          in the CSS for the same load-bearing reason the watermark's are, or
+          it would swallow the taps that place a stamp. */}
+      <div className="passportpage__grid" aria-hidden="true">
+        {pageSlots().map((slot) => (
+          <span
+            key={slot.index}
+            className="passportpage__cell"
+            style={{
+              left: `${slot.left * 100}%`,
+              top: `${slot.top * 100}%`,
+              width: `${slot.width * 100}%`,
+              height: `${slot.height * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+
       {stamps.map((stamp) => {
         const facts = factsByPk?.[stamp?.gamePk]
         const placement = stamp?.placement
@@ -285,16 +311,14 @@ export function PassportPage({
           // Same import as the placed stamps use — one number, one source.
           style={{ '--stamp-w': `${STAMP_WIDTH * 100}%` }}
         >
-          {/* The margin no stamp may cross (passportLayout clamps every
-              placement to it) drawn as a dashed guide, plus a crosshair that
-              tracks the pointer. Both are decoration on the tap target — the
-              target is the whole page, the guide only says where the art will
-              actually settle. */}
-          <span
-            className="passportpage__margin"
-            style={{ inset: `${PAGE_MARGIN * 100}%` }}
-            aria-hidden="true"
-          />
+          {/* A crosshair that tracks the pointer, drawn at the size the stamp
+              will actually be. Decoration on the tap target — the target is
+              the whole page, this only says where the art will land.
+
+              The margin this used to draw alongside it (a dashed rectangle at
+              PAGE_MARGIN, the bound no stamp may cross) is now the outer edge
+              of the ruled guide above, which draws it and subdivides it. Two
+              dashed rules on one line was one too many. */}
           <span className="passportpage__crosshair" aria-hidden="true" />
         </button>
       )}

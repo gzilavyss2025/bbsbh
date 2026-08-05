@@ -72,6 +72,7 @@ own `note`.
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
 | `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
 | `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
+| `stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour, floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The rule that must not drift" below |
 | `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
 | `customMarks.js` | The library of those recolored marks, and which treatment wears one (`data/custom-marks.json`) |
 
@@ -363,3 +364,14 @@ and it *would* be a spoiler (root `CLAUDE.md`). Nothing in this directory may
 read a score, an inning, or a win probability to decide a colour. ADR-0030
 records the reasoning; `test/header-theme.test.js` asserts it structurally, so
 wiring a feed into `headerTheme.js` fails a test rather than a review.
+
+**`stampInk.js` is the single, contained exception**, and knowing exactly why
+is what keeps it from becoming a precedent. It reads one thing about a game —
+who won — to ink a Logbook stamp. The rule above is about surfaces the user has
+NOT revealed; a stamp exists only for a game its owner already finished
+revealing (ADR-0035), and it prints that game's final score in numerals, so the
+ink is not telling anyone anything. It is safe because of WHERE it can render,
+not because of what it computes: its only caller is `GameStamp.jsx`, and that
+component's import sites are an allowlist enforced by
+`scripts/check-stamp-surfaces.mjs`. **Importing it anywhere else is a spoiler
+bug**, not a style choice.

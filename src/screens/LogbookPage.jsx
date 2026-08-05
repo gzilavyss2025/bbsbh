@@ -92,7 +92,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
   const [selectedPk, setSelectedPk] = useState(null)
   // The stamp that has JUST been put down, which plays the press once and then
   // clears itself when the animation reports back. Only ever set by a confirm —
-  // "place them all for me" deliberately does not set it, because nine stamps
+  // "place them all for me" deliberately does not set it, because a pageful
   // pressing at once is a flurry, not a stamping.
   const [landedPk, setLandedPk] = useState(null)
   // Which spread of the book is open, and how many blank pages this device has
@@ -346,8 +346,8 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
                 </button>
               </div>
               {/* The stamp being moved does not count against the page it is
-                  moving off — nine keepsakes on a page, one of them this one,
-                  still leaves room for it to land somewhere else on that page. */}
+                  moving off — a full page, one of those keepsakes being this
+                  one, still has room for it to land somewhere else on it. */}
               {pageIsFullFor(all, openPage, placingPk) && !pending && (
                 <p className="hint hint--prose">
                   This page holds {PAGE_CAPACITY}. Turn to a new one, or add one from the
