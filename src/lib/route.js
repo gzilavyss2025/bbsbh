@@ -35,6 +35,7 @@
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
+//   '/logbook?place={gamePk}'            -> { name: 'logbook', placing: gamePk } (book in placement mode)
 //   '/logbook/stats'                     -> { name: 'logbook-stats' }          (what the collection adds up to)
 //   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
@@ -154,7 +155,13 @@ export function parseRoute(url) {
   // exists for a game its owner already finished revealing. `season: null` means
   // "the newest season you have stamps in" and is resolved by the page, not
   // here, since only the local collection knows.
-  if (parts.length === 1 && parts[0] === 'logbook') return { name: 'logbook', season: null }
+  // `?place={gamePk}` puts the book into placement mode for one stamp — the
+  // hand-off from the box score's mint card. Deliberately a QUERY and not a
+  // route name: it is a transient mode of this same page (you leave it by
+  // placing the stamp or by cancelling), not an address worth sharing, and a
+  // stale link to it degrades to the plain book.
+  if (parts.length === 1 && parts[0] === 'logbook')
+    return { name: 'logbook', season: null, placing: toGamePkParam(q.get('place')) }
   // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
@@ -185,6 +192,7 @@ export function parseRoute(url) {
     return {
       name: 'logbook',
       season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
+      placing: toGamePkParam(q.get('place')),
     }
   }
   if (parts.length === 2 && parts[0] === 'player')
@@ -252,6 +260,14 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 1) return 'lineup2'
   if (step === 3) return 'boxscore'
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
+}
+
+// A `?place=` gamePk, or null. Deliberately strict — a mangled value drops the
+// mode rather than putting the book into placement for a game that isn't real.
+function toGamePkParam(value) {
+  if (!value || !/^\d+$/.test(value)) return null
+  const pk = Number(value)
+  return Number.isInteger(pk) && pk > 0 ? pk : null
 }
 
 // URL date (MMDDYYYY) <-> API date (YYYY-MM-DD).
@@ -343,6 +359,11 @@ export function logbookPath(season = null) {
 // so 'stats' can never collide with a season segment.
 export function logbookStatsPath() {
   return '/logbook/stats'
+}
+// The book, opened in placement mode for one freshly minted stamp. See the
+// `?place=` note in parseRoute for why this is a query rather than a route.
+export function logbookPlacePath(gamePk) {
+  return `/logbook?place=${Number(gamePk)}`
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

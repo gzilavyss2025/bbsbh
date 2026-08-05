@@ -40,6 +40,7 @@ import {
   isSeasonNumber,
   isStampMode,
   meetsRevealGate,
+  normalizePlacement,
   normalizeStamp,
   sanitizeNote,
   seasonFromDate,
@@ -254,6 +255,12 @@ export function seasonRows(stored, facts, { includeRemoved = false } = {}) {
       updatedAt: entry.updatedAt,
       note: entry.note,
       date: entry.date,
+      // Where the stamp sits in the user's passport book. A page number and
+      // two fractions — nothing score-bearing — and it travels for the same
+      // reason the note does: a book arranged on the phone must be the same
+      // book on the laptop. Rows are built field by field here, so a new
+      // field that isn't listed is silently dropped on the way out.
+      placement: entry.placement ?? null,
       // A stamp whose facts are missing still belongs to the user — it renders
       // from the abbreviation-and-date it carries rather than vanishing. A
       // tombstone never joins facts at all: there is nothing left to draw.
@@ -356,6 +363,7 @@ async function mint(req, res, redis, userId) {
     }
   }
 
+  const asked = normalizePlacement(body.placement)
   const entry = {
     state: 'on',
     mode: isStampMode(body.mode) ? body.mode : DEFAULT_STAMP_MODE,
@@ -364,6 +372,11 @@ async function mint(req, res, redis, userId) {
     updatedAt: now,
     note: sanitizeNote(body.note),
     date: game.date,
+    // Same rule as the client's addStamp: a publish that carries no placement
+    // must not knock the stamp off the page it already sits on, and a revived
+    // tombstone starts unplaced. Validated server-side like every other field
+    // — the client's number is never trusted, it is re-checked.
+    placement: asked ?? (reviving ? null : (existing.placement ?? null)),
   }
 
   await redis.hset(key, { [gamePk]: entry })

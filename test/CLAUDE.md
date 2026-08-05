@@ -58,6 +58,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
 | node-handler.test.js | 14 | api/_lib/nodeHandler.js | Vercel Node runtime request adapter |
 | page-turn-state.test.js | 13 | src/components/page-turn/pageTurnState.js | Forward page-turn transition (ADR-0024) |
+| passport-layout.test.js | 25 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, capacity (ADR-0035) |
 | pinch-hitter-notice.test.js | 2 | src/api/playbyplay.js | Mid-half PH notice (ADR-0017 tiers) |
 | pitch-arsenal.test.js | 8 | scripts/gen-pitch-arsenal.mjs, src/api/pitchArsenal.js | Pitch arsenal aggregation/reader |
 | pitch-challenge-marker.test.js | 2 | src/api/challenges.js | ABS challenge marker on one pitch (PR #344) |
@@ -86,6 +87,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |
+| stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |

@@ -32,7 +32,19 @@ const SRC = join(ROOT, 'src')
 // is a spoiler-rule decision — read ADR-0035 first, and say in the PR why the
 // new surface cannot show an unrevealed game.
 const STAMP_ALLOWLIST = {
-  'components/GameStamp.jsx': ['components/StampGameButton.jsx', 'screens/LogbookPage.jsx'],
+  // `components/passport/PassportPage.jsx` is on this list deliberately, and it
+  // is the one surface added since the guard was written. A passport page draws
+  // ONLY the stamps the user has placed on it — its entire input is this user's
+  // own collection (src/hooks/useStamps.js), never a schedule, never a slate,
+  // never a game list of any other provenance. So every game it can possibly
+  // render is one whose score its owner already unsealed, which is the same
+  // argument that makes LogbookPage.jsx safe. Read ADR-0035 before adding a
+  // third name here.
+  'components/GameStamp.jsx': [
+    'components/StampGameButton.jsx',
+    'screens/LogbookPage.jsx',
+    'components/passport/PassportPage.jsx',
+  ],
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.
   'components/StampGameButton.jsx': ['screens/BoxScore.jsx'],

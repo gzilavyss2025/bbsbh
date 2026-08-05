@@ -28855,3 +28855,821 @@ button.gamehigh-matchup:active {
     grid-template-columns: 1fr 1fr;
   }
 }
+/* ================================================================ passport
+   THE PASSPORT BOOK — src/components/passport/
+   (PassportBook.jsx, PassportPage.jsx, usePageTurn.js)
+
+   The Logbook as a book you turn, rather than a grid you scroll. Three
+   things are worth knowing before editing any of this:
+
+   1. EVERY GEOMETRY NUMBER COMES FROM JS. The page's aspect ratio, a stamp's
+      width, the margin the art stays inside, and the stamp's tilt are all
+      written as inline custom properties / inline `aspect-ratio` by the
+      components, sourced from src/lib/passportLayout.js — the single source
+      of truth for the book's geometry, pinned by test/passport-layout.test.js.
+      Nothing here restates one. If a rule below needs a placement number,
+      it reads a custom property; it never hardcodes a percentage.
+
+   2. THE TWO-PAGE BREAKPOINT IS MIRRORED IN JS. `min-width: 900px` here and
+      BOOK_WIDE_QUERY in PassportBook.jsx are the same decision written twice
+      (the component has to KNOW whether it is rendering one page or two —
+      the spine, the leaf's width, and which slot a page lands in all change).
+      They must move together. It is deliberately not the app's shared 740px
+      WIDE_QUERY: two passport-shaped pages at 740 are each narrower than one
+      page on a phone.
+
+   3. THE TURN IS A REAL SHEET OF PAPER. One hinged panel with a front and a
+      back face rotating 180° about the spine — not a cross-fade and not the
+      inning viewer's clip-path wipe (.turnscene, which is forward-only for
+      spoiler reasons that don't apply to a page of already-revealed stamps;
+      see usePageTurn.js's header for the full argument). A backward turn is
+      the identical animation with `animation-direction: reverse`, because
+      physically that is exactly what it is.
+   ------------------------------------------------------------------------ */
+
+.passportbook {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* The book is one tab stop, so the arrow keys work the moment a keyboard
+   user reaches it (PassportBook's onKeyDown) rather than only once they've
+   tabbed into the Back/Next buttons. */
+.passportbook:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: var(--space-2);
+  border-radius: var(--radius-md);
+}
+
+/* The 3D scene. `perspective` here (not on the leaf) is what gives the turn
+   depth — a leaf rotating in a flat scene reads as a squash, not a page.
+
+   The clip is load-bearing on a phone: there the leaf is the full width of
+   the book and hinged at its left edge, so mid-turn it sweeps into the space
+   BESIDE the book. Clipping is what makes that read as the page leaving.
+   `overflow: clip` + a clip margin is preferred over plain `hidden` so a
+   stamp's focus ring right at the page edge isn't shaved off; `hidden` is
+   the fallback for browsers without it and costs only that ring. */
+.passportbook__stage {
+  position: relative;
+  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: var(--space-2);
+  perspective: 1800px;
+}
+
+/* One opening. A single column on a phone (the component renders only the
+   right slot), two equal columns from the breakpoint up. `grid-auto-columns`
+   rather than an explicit template so the same rule covers both. */
+.passportbook__spread {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+}
+
+/* The empty half beside a closed book — the desk, not a page. Holds the
+   column open so the cover sits on the right where a closed book's cover is. */
+.passportbook__empty {
+  min-height: var(--space-1);
+}
+
+/* The blank reverse of a sheet: the back of the last leaf, or (on a phone,
+   where an opening is one page) the back of every leaf. Real paper, no
+   content — never a second copy of a page that is also mounted elsewhere. */
+.passportbook__blank {
+  width: 100%;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.passportbook__cover {
+  width: 100%;
+}
+
+/* The gutter where two pages meet. A band of the slightly deeper page stock
+   laid over the seam, hairlined on both sides and pressed in with the same
+   inset the scorebook's cells use — so the two pages read as bound rather
+   than as two cards side by side. Decorative and never in the way of a tap. */
+.passportbook__spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 2;
+  width: var(--space-4);
+  transform: translateX(-50%);
+  border-left: var(--bw-hair) solid var(--border-hairline);
+  border-right: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+  box-shadow: var(--inset-cell);
+  pointer-events: none;
+}
+
+/* ---- the leaf in flight ---------------------------------------------- */
+
+/* Present only while a turn is actually running (usePageTurn mounts it, and
+   never at all under reduced motion), which is why `will-change` can sit
+   here unconditionally — same reasoning as .turnscene's scoped will-change.
+   Hinged at its left edge: on a two-page opening that edge IS the spine. */
+.passportbook__leaf {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation-name: passport-leaf;
+  animation-duration: var(--dur-flip);
+  animation-timing-function: var(--ease-flip);
+  animation-fill-mode: both;
+}
+
+.passportbook__stage--wide .passportbook__leaf {
+  width: 50%;
+}
+
+/* Backward is the same sheet played the other way — one keyframe set, not a
+   mirrored copy that could drift from it. */
+.passportbook__leaf[data-direction='back'],
+.passportbook__leaf[data-direction='back'] .passportbook__face::after {
+  animation-direction: reverse;
+}
+
+.passportbook__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.passportbook__face--back {
+  transform: rotateY(180deg);
+}
+
+/* Shading, so the sheet has a lit side and a shaded one as it swings. The
+   front face darkens on the way over and the back face lightens on the way
+   down; each is only visible for its own half of the turn (backface-
+   visibility), so together they read as one piece of paper catching the
+   light. Painted into the face — a pseudo-element on the leaf itself would
+   sit coplanar with both faces in its 3D space and z-fight them. */
+.passportbook__face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  animation-duration: var(--dur-flip);
+  animation-timing-function: var(--ease-flip);
+  animation-fill-mode: both;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--accent-primary) 34%, transparent),
+    transparent 62%
+  );
+}
+
+.passportbook__face--front::after {
+  animation-name: passport-shade-front;
+}
+
+.passportbook__face--back::after {
+  animation-name: passport-shade-back;
+}
+
+@keyframes passport-leaf {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+
+@keyframes passport-shade-front {
+  0% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes passport-shade-back {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- the book's own navigator ---------------------------------------- */
+
+/* Same button language as .inningnav (the half-inning navigator) — condensed
+   uppercase display type at a matching height. Turning a page is turning a
+   page; it should not look like a different app. */
+.passportbook__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.passportbook__nav button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.passportbook__nav button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.passportbook__nav button:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.passportbook__nav button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.passportbook__where {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* ================================================================ the page
+   PassportPage.jsx — the paper a stamp lands on.
+
+   The ground is --surface-card (the raised-card paper stock), one step
+   brighter than the --bg-page manila the book sits on, so a page reads as
+   lifted off the desk. No new token: the semantic role "a raised sheet on
+   the canvas" already exists and this is that.
+   ------------------------------------------------------------------------ */
+
+/* `aspect-ratio` is set inline from passportLayout's PAGE_ASPECT — the page
+   IS its shape, and the width it's handed (a phone column, or half a
+   desktop opening) settles everything else. `overflow: hidden` is the
+   backstop behind that module's clampToPage: no stamp may bleed off paper. */
+.passportpage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  color: var(--text-body);
+}
+
+/* Left empty on purpose — the near-transparent Tally watermark fills this,
+   and it is the page's FIRST child so it always paints beneath the stamps. */
+.passportpage__watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* A placed stamp. `left`/`top`/`width` are written inline as percentages of
+   the page box from the placement's own fractions; the translate is what
+   makes those fractions mean the stamp's CENTRE, and it shares one transform
+   with the tilt so neither can silently drop the other. GameStamp inherits
+   `color`, so the ink is set here and nowhere inside the art. */
+.passportpage__stamp {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-body);
+  aspect-ratio: 1;
+  cursor: pointer;
+  transform: translate(-50%, -50%) rotate(var(--stamp-tilt, 0deg));
+}
+
+.passportpage__stamp:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-pill);
+}
+
+/* A stamp whose game facts haven't resolved (offline, a failed batch). The
+   keepsake is still the user's, so it holds its exact spot on the page
+   rather than leaving a gap — the same call .logbook__pending makes. */
+.passportpage__pending {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: var(--bw-rule) dashed var(--border-rule);
+  border-radius: var(--radius-pill);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  text-align: center;
+}
+
+/* Page number and the add-a-page control, in the bottom corner where a
+   passport's page number lives. Above the watermark, below a stamp — a
+   stamp that lands near the corner covers it, exactly as a real one would. */
+.passportpage__foot {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-2);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-caption);
+}
+
+.passportpage__number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+}
+
+.passportpage__addpage {
+  min-height: var(--space-6);
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.passportpage__addpage:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---- placing a stamp -------------------------------------------------- */
+
+/* While placing, the whole page is the target — one button over everything,
+   which also means a tap can't accidentally open a stamp that happens to be
+   under the finger. No confirm UI here by design: this reports the point and
+   stops. */
+.passportpage__target {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: crosshair;
+}
+
+.passportpage__target:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -4px;
+}
+
+/* The margin passportLayout clamps every placement into, drawn as a guide.
+   `inset` is written inline from PAGE_MARGIN — this rule only says what it
+   looks like, never how far in it sits. */
+.passportpage__margin {
+  position: absolute;
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+
+/* The crosshair, drawn at the size the stamp will actually be (--stamp-w is
+   written inline from STAMP_WIDTH), so the affordance answers "how big" as
+   well as "where". Position comes from --tap-x/--tap-y, which the component
+   writes straight onto the DOM node on pointermove rather than through state:
+   re-rendering here would re-render every GameStamp — each an SVG with a
+   turbulence filter — on every mouse move. --tap-shown fades it out when the
+   pointer leaves, and keeps it hidden until the pointer has been somewhere,
+   so a touch user never sees a stale crosshair sitting in the middle. */
+.passportpage__crosshair {
+  position: absolute;
+  left: var(--tap-x, 50%);
+  top: var(--tap-y, 50%);
+  width: var(--stamp-w, var(--tap-min));
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: var(--bw-hair) dashed var(--text-caption);
+  border-radius: var(--radius-pill);
+  opacity: var(--tap-shown, 0);
+  transition: opacity var(--dur-fast) var(--ease-standard);
+  pointer-events: none;
+  background:
+    linear-gradient(var(--text-caption), var(--text-caption)) center / var(--bw-hair) 100%
+      no-repeat,
+    linear-gradient(var(--text-caption), var(--text-caption)) center / 100% var(--bw-hair)
+      no-repeat;
+}
+/* ====================================================== passport book: cover
+   The Logbook passport book's front cover and its page watermark
+   (src/components/passport/PassportCover.jsx, PassportWatermark.jsx).
+
+   TWO COLOURS ARRIVE AT RUNTIME, AS INLINE CUSTOM PROPERTIES.
+   The board is painted in the user's favourite club's primary brand colour and
+   everything on it is foil-stamped in whichever of the app's two text tokens
+   actually contrasts with it — both resolved per user by teamChipColors()
+   (src/lib/teams.js) and set on the element by PassportCover.jsx:
+
+     --cover-ink   the board          (club primary)
+     --cover-foil  the stamping ink   (--text-on-ink or --text-heading, picked
+                                       by WCAG ratio against --cover-ink)
+
+   So neither hex can live in this file. Every use below carries a token
+   fallback — the app's own navy board with paper foil — which is what a club
+   the colour chain knows nothing about actually renders, and it is a
+   deliberate look rather than a failure state.
+
+   CONTRAST: readableTextColor's two candidates cross over at ~3.8:1, so the
+   foil is never worse than that against ANY club colour. Everything stamped on
+   the board is therefore art or type at >=20px/--w-bold (past the large-text
+   threshold), holding the 3:1 non-text/large-text AA bar. Do not add small
+   copy to the board — it would be the one thing here that could fall under AA.
+
+   --passport-aspect is likewise set inline, from PAGE_ASPECT
+   (src/lib/passportLayout.js), so the cover is the same shape as the pages it
+   opens onto and the number is written down in exactly one place.
+   ====================================================== */
+
+.passcover {
+  /* The board. A passport cover is one flat colour, so this is a fill, not a
+     gradient — the depth all comes from the emboss lines below. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  aspect-ratio: var(--passport-aspect, 0.704);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-xs) var(--radius-md) var(--radius-md) var(--radius-xs);
+  background: var(--cover-ink, var(--navy));
+  color: var(--cover-foil, var(--text-on-ink));
+  box-shadow: var(--shadow-raised);
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--dur-snappy) var(--ease-out),
+    box-shadow var(--dur-snappy) var(--ease-out);
+}
+
+/* Pebble grain: a fine cross-hatch mixed from the cover's OWN two colours
+   (color-mix, as ~80 other rules in this file already do) so it tints with
+   whatever club the user picked instead of being a fixed grey overlay. Both
+   legs are a few percent — a texture you feel rather than see. */
+.passcover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--cover-foil, var(--text-on-ink)) 7%, transparent) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--cover-ink, var(--navy)) 45%, transparent) 0 1px,
+      transparent 1px 4px
+    );
+}
+
+/* The blind-embossed border a passport cover carries a few millimetres in from
+   its edge. Same foil, held down to a hairline hint. */
+.passcover::after {
+  content: '';
+  position: absolute;
+  inset: var(--space-3);
+  pointer-events: none;
+  border: var(--bw-hair) solid
+    color-mix(in srgb, var(--cover-foil, var(--text-on-ink)) 35%, transparent);
+  border-radius: var(--radius-xs);
+}
+
+.passcover:active {
+  transform: translateY(1px) scale(0.995);
+  box-shadow: var(--shadow-card);
+}
+
+.passcover:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---- the crest: the club's one-colour knockout mark ---- */
+
+.passcover__crest {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38%;
+  aspect-ratio: 1;
+  position: relative;
+}
+
+/* The <rect fill="currentColor"> inside the mask picks the foil up from here,
+   which is the entire recolour — no filter (ADR-0031). */
+.passcover__mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+}
+
+/* Documented fallback for a club with no precomputed knockout file: its
+   abbreviation, foil-stamped in the same slot (same answer GameStamp.jsx
+   gives). Large and bold, so it holds the same 3:1 bar the mark does. */
+.passcover__abbr {
+  font-family: var(--font-mono);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-caps);
+  color: inherit;
+}
+
+/* ---- the foil-stamped Tally mark and the cover lines ---- */
+
+.passcover__wordmark {
+  display: block;
+  width: 52%;
+  height: auto;
+  color: inherit;
+  opacity: 0.92;
+}
+
+.passcover__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-black);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  color: inherit;
+  text-align: center;
+}
+
+.passcover__club {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-wide);
+  color: inherit;
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0.88;
+}
+
+.passcover__rule {
+  width: 34%;
+  height: var(--bw-rule);
+  background: currentColor;
+  opacity: 0.5;
+}
+
+/* The visible word the button's accessible name repeats (ADR-0017). Kept at
+   the large-text weight/size with everything else on the board — see the
+   contrast note at the top of this block. */
+.passcover__open {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-display);
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* ====================================================== passport book: page watermark
+   The ghost print under a page's stamps (PassportWatermark.jsx). Positioned
+   against whatever page element wraps it, so that element needs `position:
+   relative` — the page owns that, not this file.
+   ====================================================== */
+
+.passwatermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Load-bearing, not tidiness: the page beneath is a tap-to-place surface
+     (src/lib/passportLayout.js's placementFor takes the tap point), and this
+     element covers all of it. Swallowing a tap here would make the middle of
+     every page unstampable. */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  /* Under the stamps, always. */
+  z-index: 0;
+  color: var(--graphite);
+}
+
+.passwatermark__mark {
+  display: block;
+  width: 72%;
+  height: auto;
+  color: inherit;
+}
+
+/* Deterministic per-page variation — a pure function of the page number, so
+   the same page prints identically on every render and every device. Odd
+   pages sit high and left of centre with a slight counter-rotation; even pages
+   sit low and right, a touch larger. Subtle by design: it should read as two
+   sheets off the same press, not as two different marks. */
+.passwatermark--odd .passwatermark__mark {
+  opacity: 0.055;
+  transform: translate(-6%, -8%) rotate(-4deg);
+}
+
+.passwatermark--even .passwatermark__mark {
+  opacity: 0.05;
+  transform: translate(6%, 8%) rotate(3deg) scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .passcover {
+    transition: none;
+  }
+}
+/* ADDENDUM ONLY — the main passport-book block is ALREADY assembled into
+   src/index.css (around .passportbook / .passportpage). Do not re-concatenate
+   that; this file now holds just the one rule written after assembly.
+
+   .passportpage__ghost is rendered by PassportPage.jsx for the pending
+   ("where would this land?") stamp, which arrived in the component after the
+   CSS was folded in and so has no rule in index.css yet. Append this next to
+   .passportpage__stamp. */
+
+/* The pending stamp — where it WOULD land, at the size and angle it will
+   actually have, waiting on a confirm the caller owns. Positioned exactly
+   like a placed stamp (inline percentages of the page box, centre-anchored,
+   its own transform carrying both the centring pull and the tilt), and drawn
+   in pencil rather than ink: it is not on the page yet, and it is not
+   clickable. Above the placed stamps so a proposal landing near one is still
+   legible, below .passportpage__target so a re-tap still moves it. */
+.passportpage__ghost {
+  position: absolute;
+  z-index: 2;
+  aspect-ratio: 1;
+  color: var(--text-caption);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ---- the Logbook's tray and placement bar (ADR-0036) ---- */
+/* Stamps that have been minted but not yet put on a page wait here, above the
+   book. Small on purpose — a tray stamp is a thing you are about to move, not
+   a keepsake on display, and at page size it would out-shout the book. */
+.logbook__tray {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.logbook__traylede {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbook__traylist {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 var(--space-1);
+  overflow-x: auto;
+  list-style: none;
+}
+
+.logbook__traystamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 96px;
+  flex: 0 0 auto;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  color: var(--text-body);
+}
+
+.logbook__traystamp:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.logbook__traystamp small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* The placement bar. Sticky so the confirm control stays reachable while you
+   are scrolled down inside a tall book looking for a spot. */
+.logbook__placing {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--seal-cover);
+  border-radius: var(--radius-sm);
+  background: var(--award-soft);
+}
+
+.logbook__placinglede {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+  color: var(--seal-cover-ink);
+}
+
+.logbook__placingactions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Which page a stamp sits on, in the grid below the book — and the control
+   that takes it back off (the "re-stamp the page" path). */
+.logbook__unplace,
+.logbook__unplaced {
+  border: 0;
+  padding: 0 var(--space-1);
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}
+
+.logbook__unplace {
+  text-decoration: underline;
+}
+
+.logbook__unplace:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.stampcard__place {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}

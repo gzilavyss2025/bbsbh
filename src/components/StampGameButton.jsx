@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../lib/stamps.js'
-import { logbookPath } from '../lib/route.js'
+import { logbookPath, logbookPlacePath } from '../lib/route.js'
 import { SectionMasthead } from './SectionMasthead.jsx'
 import { GameStamp } from './GameStamp.jsx'
 
@@ -92,7 +92,11 @@ export function StampGameButton({ game }) {
 
           {isFinal && existing && (
             <>
-              <p className="stampcard__lede">Stamped. It’s in your Logbook.</p>
+              <p className="stampcard__lede">
+                {existing.placement
+                  ? `Stamped, and on page ${existing.placement.page} of your book.`
+                  : 'Stamped. It’s waiting to be placed in your book.'}
+              </p>
 
               <div className="stampcard__modes" role="group" aria-label="How you took this game in">
                 {STAMP_MODES.map((mode) => (
@@ -130,6 +134,19 @@ export function StampGameButton({ game }) {
               </label>
 
               <div className="stampcard__actions">
+                {/* The hand-off into the placement flow. Minting and PLACING
+                    are deliberately two steps: the mint happens here, inside
+                    the seal, where the safety argument lives, and the book —
+                    a whole page of other games' stamps — never has to render
+                    inside a game screen. An unplaced stamp is not a lost one;
+                    it waits in the book's tray until you put it somewhere. */}
+                <button
+                  type="button"
+                  className="btn stampcard__place"
+                  onClick={() => navigate(logbookPlacePath(game.gamePk))}
+                >
+                  {existing.placement ? 'Move it in your book' : 'Place it in your book'}
+                </button>
                 <button
                   type="button"
                   className="btn btn--ghost"

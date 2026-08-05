@@ -16,10 +16,12 @@
 // convention a future surface can forget.
 //
 // What this module deliberately does NOT hold: the score. A local stamp record
-// is `{ state, mode, stampedAt, updatedAt, note, date }` — no runs, no result,
-// no winner. The Logbook resolves those from the game facts at render time
-// (from Redis when signed in, from statsapi when not), so localStorage stays
-// exactly as non-score-bearing as `bbsbh:reveal:{gamePk}` already is.
+// is `{ state, mode, stampedAt, updatedAt, note, date, placement }` — no runs,
+// no result, no winner. (`placement` is where the stamp sits in the passport
+// book: a page number and two fractions. A picture, not an outcome.) The
+// Logbook resolves the score from the game facts at render time — from Redis
+// when signed in, from statsapi when not — so localStorage stays exactly as
+// non-score-bearing as `bbsbh:reveal:{gamePk}` already is.
 
 export const STAMPS_KEY = 'bbsbh:stamps'
 
@@ -152,6 +154,51 @@ export function meetsRevealGate({ game, revealedThrough, daySpoiled } = {}) {
 }
 
 // ---------------------------------------------------------------------------
+// Placement — where a stamp sits in the passport book
+// ---------------------------------------------------------------------------
+// `{ page, x, y, tilt }`, with x/y as FRACTIONS of the page box (the stamp's
+// centre) and tilt in degrees. Fractions rather than pixels is the whole
+// reason a book arranged on a phone reads correctly on a laptop — and the
+// reason a placement is worth syncing at all.
+//
+// Note what this adds to the per-user record: a page number and two fractions.
+// Nothing score-bearing, so the record stays on exactly the same footing as
+// `revealedThrough` (ADR-0035's central claim), and a hostile client that
+// forges one has moved a picture, not minted a score.
+//
+// The geometry itself — capacity, margins, tilt range — lives in
+// src/lib/passportLayout.js. Only the BOUNDS are restated here, because this
+// module is bundled into the serverless function and has no business pulling
+// the layout module in behind it (same reasoning as `halfIndexOf` above).
+export const MAX_PLACEMENT_PAGE = 60
+export const MAX_PLACEMENT_TILT = 7
+
+export function normalizePlacement(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const page = Number(raw.page)
+  if (!Number.isInteger(page) || page < 1 || page > MAX_PLACEMENT_PAGE) return null
+  const x = Number(raw.x)
+  const y = Number(raw.y)
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null
+  const rawTilt = Number(raw.tilt)
+  const tilt = Number.isFinite(rawTilt)
+    ? Math.max(-MAX_PLACEMENT_TILT, Math.min(MAX_PLACEMENT_TILT, rawTilt))
+    : 0
+  const clamp01 = (n) => Math.max(0, Math.min(1, n))
+  // Rounded so a placement round-tripping through JSON and two devices can't
+  // drift by a float epsilon and read as a change worth republishing.
+  const round = (n) => Math.round(n * 10000) / 10000
+  return { page, x: round(clamp01(x)), y: round(clamp01(y)), tilt: Math.round(tilt * 100) / 100 }
+}
+
+// Whether two placements are the same spot — used by the sync diff, which must
+// not republish a stamp whose placement merely round-tripped.
+export function samePlacement(a, b) {
+  if (!a || !b) return !a && !b
+  return a.page === b.page && a.x === b.x && a.y === b.y && a.tilt === b.tilt
+}
+
+// ---------------------------------------------------------------------------
 // The local store
 // ---------------------------------------------------------------------------
 
@@ -179,6 +226,11 @@ export function normalizeStamp(raw) {
     updatedAt,
     note: sanitizeNote(raw.note),
     date,
+    // Where this stamp sits in the passport book, or null for "not placed
+    // yet" — an unplaced stamp waits in the book's tray. An unreadable
+    // placement degrades to null (back to the tray) rather than invalidating
+    // the record: the keepsake outranks its position on a page.
+    placement: normalizePlacement(raw.placement),
   }
 }
 
@@ -250,6 +302,20 @@ export function stampsForSeason(map, season) {
     .map(([gamePk, entry]) => ({ gamePk, ...entry }))
 }
 
+// Every live stamp, across every season, OLDEST game first — the order a
+// passport book fills in, which is why it is the opposite of
+// `stampsForSeason`'s newest-first grid order. Doubleheaders and same-day
+// stamps settle on `stampedAt` so the order is total and stable.
+export function allStamps(map) {
+  return Object.entries(map || {})
+    .map(([pk, entry]) => [toGamePk(pk), entry])
+    .filter(([pk, entry]) => pk != null && entry?.state === 'on')
+    .sort((a, b) =>
+      a[1].date < b[1].date ? -1 : a[1].date > b[1].date ? 1 : a[1].stampedAt - b[1].stampedAt,
+    )
+    .map(([gamePk, entry]) => ({ gamePk, ...entry }))
+}
+
 // { season: count } over live stamps only — the Logbook's season nav.
 export function seasonCounts(map) {
   const out = {}
@@ -279,7 +345,7 @@ export function seasonIsFull(map, season) {
 // affordance, the server for the guarantee). This function does not re-check
 // it, because it does not have the game facts; that separation is deliberate —
 // there is exactly one gate, in one place, and it is the server's.
-export function addStamp(map, gamePk, { mode, note, date, now } = {}) {
+export function addStamp(map, gamePk, { mode, note, date, now, placement } = {}) {
   const current = normalizeAll(map)
   const pk = toGamePk(gamePk)
   const at = Number.isInteger(now) && now > 0 ? now : 0
@@ -288,6 +354,7 @@ export function addStamp(map, gamePk, { mode, note, date, now } = {}) {
   const existing = current[pk]
   const reviving = !existing || existing.state === 'off'
   if (reviving && season != null && seasonIsFull(current, season)) return current
+  const asked = normalizePlacement(placement)
   return {
     ...current,
     [pk]: {
@@ -297,8 +364,54 @@ export function addStamp(map, gamePk, { mode, note, date, now } = {}) {
       updatedAt: at,
       note: sanitizeNote(note),
       date,
+      // Editing a note must not knock the stamp off the page it was placed
+      // on, so an existing placement is kept unless the caller names a new
+      // one. Reviving a tombstone starts unplaced — you un-stamped it, so
+      // where it used to sit is not where this keepsake belongs.
+      placement: asked ?? (reviving ? null : existing.placement),
     },
   }
+}
+
+// Place a stamp in the book (or move one already placed). A no-op for a game
+// that isn't live-stamped — you cannot place a keepsake you don't hold.
+//
+// Bumps `updatedAt`, so a placement propagates to the user's other devices by
+// exactly the same last-write-wins path every other change takes. Deliberately
+// NOT a separate sync channel: the book is part of the collection.
+export function placeStamp(map, gamePk, placement, { now } = {}) {
+  const current = normalizeAll(map)
+  const pk = toGamePk(gamePk)
+  const at = Number.isInteger(now) && now > 0 ? now : 0
+  const existing = pk == null ? null : current[pk]
+  if (!existing || existing.state !== 'on' || !at) return current
+  const next = normalizePlacement(placement)
+  if (!next) return current
+  if (samePlacement(existing.placement, next)) return current
+  return { ...current, [pk]: { ...existing, placement: next, updatedAt: at } }
+}
+
+// Take a placed stamp back off the page — the "re-stamp the page" half of the
+// placement flow. The stamp itself survives; it returns to the tray.
+export function unplaceStamp(map, gamePk, { now } = {}) {
+  const current = normalizeAll(map)
+  const pk = toGamePk(gamePk)
+  const at = Number.isInteger(now) && now > 0 ? now : 0
+  const existing = pk == null ? null : current[pk]
+  if (!existing || existing.state !== 'on' || !at || !existing.placement) return current
+  return { ...current, [pk]: { ...existing, placement: null, updatedAt: at } }
+}
+
+// Apply a whole batch of placements at once — the book's "place them all for
+// me" control, and what an upgrading collection needs so nobody is made to
+// place forty keepsakes by hand. Takes the `[{ gamePk, placement }]` shape
+// `autoLayout` (src/lib/passportLayout.js) returns.
+export function placeStamps(map, placements, { now } = {}) {
+  let out = normalizeAll(map)
+  for (const { gamePk, placement } of placements ?? []) {
+    out = placeStamp(out, gamePk, placement, { now })
+  }
+  return out
 }
 
 // Un-stamp. Writes an explicit 'off' tombstone rather than deleting the key —
