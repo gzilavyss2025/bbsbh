@@ -84,7 +84,7 @@ function SiteMenuModal({ onClose }) {
           <button
             ref={closeRef}
             type="button"
-            className="sitesearchsheet__close"
+            className="sheet__close"
             onClick={onClose}
             aria-label="Close"
           >
