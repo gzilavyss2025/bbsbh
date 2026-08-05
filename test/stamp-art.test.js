@@ -20,9 +20,16 @@ import test from 'node:test'
 
 import {
   MARK_BOX,
+  MARK_PLACEMENT_DEFAULT,
+  MARK_PLACEMENT_LIMITS,
+  MARK_SIDES,
   diamondPath,
   labelType,
+  markBoxX,
+  markPlacement,
+  markTransform,
   polar,
+  resolveMarkPlacement,
   ringLayout,
   runFontSize,
   stampDateText,
@@ -30,6 +37,8 @@ import {
   stampLabel,
   stampSeed,
 } from '../src/lib/stampArt.js'
+import { stampLogoTuning, stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
+import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
 import { stampGameFacts } from '../src/api/logbook.js'
 import { finalHalfIndex, meetsRevealGate } from '../src/lib/stamps.js'
@@ -97,6 +106,87 @@ test('the club mark slots are the locked design’s, asymmetry included', () => 
   // Each slot is wider than the gap to the inner circle, which is the point:
   // the marks bleed off its left/right edge rather than fitting inside it.
   assert.ok(MARK_BOX.size > 2 * 117 - MARK_BOX.size)
+})
+
+// --------------------------------------------------------------------------
+// Per-club mark placement
+// --------------------------------------------------------------------------
+// The one tunable part of the locked art (src/lib/data/stamp-logo-tuning.json).
+// Every stamp is redrawn from these numbers on every render, including ones
+// already minted and placed in someone's Logbook, so the two properties that
+// matter get pinned here: an untuned club produces NO transform at all (its
+// markup is what it was the day the design was locked), and a tuned one can
+// only ever move its mark within the clamps.
+
+test('an untuned club gets no transform, so its markup is unchanged', () => {
+  assert.equal(markTransform('away', null), null)
+  assert.equal(markTransform('home', undefined), null)
+  assert.equal(markTransform('away', {}), null)
+  // Values that ARE the defaults are the same thing written out.
+  assert.equal(markTransform('home', { scale: 1, offsetX: 0, offsetY: 0, rotation: 0 }), null)
+  // And so is junk, which resolves back to the defaults rather than to NaN.
+  assert.equal(markTransform('away', { scale: 'wide', offsetY: null }), null)
+})
+
+test('a placement resolves to the defaults for anything missing or non-finite, and clamps the rest', () => {
+  assert.deepEqual(resolveMarkPlacement(undefined), MARK_PLACEMENT_DEFAULT)
+  assert.deepEqual(resolveMarkPlacement({ scale: Number.NaN, rotation: Infinity }), MARK_PLACEMENT_DEFAULT)
+  // Out of range clamps rather than falling back — a 5x scale was still an
+  // instruction to make it bigger.
+  assert.equal(resolveMarkPlacement({ scale: 5 }).scale, MARK_PLACEMENT_LIMITS.scale.max)
+  assert.equal(resolveMarkPlacement({ offsetX: -900 }).offsetX, MARK_PLACEMENT_LIMITS.offsetX.min)
+  assert.equal(resolveMarkPlacement({ rotation: 270 }).rotation, MARK_PLACEMENT_LIMITS.rotation.max)
+  // A partial record keeps the fields it does carry.
+  assert.deepEqual(resolveMarkPlacement({ offsetY: -8 }), { ...MARK_PLACEMENT_DEFAULT, offsetY: -8 })
+})
+
+test('scale and rotation turn about the slot’s own centre, not the stamp’s origin', () => {
+  // away slot -18..132 → centre 57; home slot 162..312 → centre 237. Both share
+  // the same y centre, 44 + 75 = 119.
+  assert.match(markTransform('away', { scale: 1.2 }), /translate\(57 119\) scale\(1\.2\) translate\(-57 -119\)/)
+  assert.match(markTransform('home', { scale: 1.2 }), /translate\(237 119\) scale\(1\.2\) translate\(-237 -119\)/)
+  assert.match(markTransform('home', { rotation: -6 }), /rotate\(-6 237 119\)/)
+  // The offsets lead, so they read as "and now nudge it this far" in stamp
+  // units whatever the scale and rotation are doing.
+  assert.match(markTransform('away', { offsetX: 4, offsetY: -3, scale: 0.9 }), /^translate\(4 -3\) /)
+})
+
+test('a placement carries the slot along with the transform', () => {
+  const away = markPlacement('away', { scale: 1.1 })
+  assert.equal(away.x, MARK_BOX.awayX)
+  assert.equal(away.y, MARK_BOX.y)
+  assert.equal(away.size, MARK_BOX.size)
+  assert.ok(away.transform)
+  assert.equal(markPlacement('home', null).transform, null)
+  // An unknown side is the away slot — those two are the whole vocabulary.
+  assert.equal(markBoxX('nonsense'), MARK_BOX.awayX)
+  assert.equal(markBoxX('home'), MARK_BOX.homeX)
+})
+
+test('every entry in the placement store is a side the art knows, inside the clamps', () => {
+  for (const [teamId, entry] of Object.entries(STAMP_LOGO_TUNING)) {
+    for (const [side, fields] of Object.entries(entry.treatments ?? {})) {
+      assert.ok(MARK_SIDES.includes(side), `${teamId} has a stamp side "${side}"`)
+      for (const [field, value] of Object.entries(fields)) {
+        if (field === 'note') continue
+        const limits = MARK_PLACEMENT_LIMITS[field]
+        assert.ok(limits, `${teamId}.${side} carries an unknown field "${field}"`)
+        assert.ok(Number.isFinite(value), `${teamId}.${side}.${field} is ${value}`)
+        assert.ok(
+          value >= limits.min && value <= limits.max,
+          `${teamId}.${side}.${field} (${value}) is outside its clamp`,
+        )
+      }
+    }
+  }
+})
+
+test('the store’s landed values are what the art actually draws with', () => {
+  // The reader and the geometry are separate modules; this is the seam between
+  // them, and it is the seam a stamp in someone's Logbook depends on.
+  assert.deepEqual(stampLogoTuning(158, 'away'), resolveMarkPlacement(stampLogoTuningRecord(158, 'away')))
+  // A club with no entry at all still gets an answer rather than a null.
+  assert.deepEqual(stampLogoTuning(999999, 'home'), MARK_PLACEMENT_DEFAULT)
 })
 
 // --------------------------------------------------------------------------

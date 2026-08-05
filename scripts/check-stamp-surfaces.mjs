@@ -40,10 +40,22 @@ const STAMP_ALLOWLIST = {
   // render is one whose score its owner already unsealed, which is the same
   // argument that makes LogbookPage.jsx safe. Read ADR-0035 before adding a
   // third name here.
+  //
+  // `screens/identity-lab/editors/StampPlacementEditor.jsx` is that third name,
+  // and the only entry that renders a stamp for no real game at all. It tunes
+  // where a club's knockout mark sits inside the stamp's mark slot, and judges
+  // that against the true art rather than a mock-up — but the game those
+  // previews draw is a literal in that file: a made-up ballpark, a fixed date,
+  // two invented run totals. It reads no schedule, no feed, no collection and
+  // no gamePk, so there is no unrevealed game there to leak. It is also the one
+  // entry that cannot reach production at all — /identity-lab is DEV-gated
+  // behind `import.meta.env.DEV` in App.jsx, so the import is dropped from a
+  // production build. Read ADR-0035 before adding a fourth.
   'components/GameStamp.jsx': [
     'components/StampGameButton.jsx',
     'screens/LogbookPage.jsx',
     'components/passport/PassportPage.jsx',
+    'screens/identity-lab/editors/StampPlacementEditor.jsx',
   ],
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.

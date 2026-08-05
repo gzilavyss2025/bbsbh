@@ -184,3 +184,45 @@ a keepsake that vanishes on its own is a broken promise.
 - **`attended` as a third mode in v1.** Deferred. It wants its own overprint on
   the stamp art; adding an enum value later is cheap, un-shipping a half-drawn
   mark is not.
+
+## Amendment (2026-08) — the mark slot is tunable per club, and retroactively so
+
+The stamp art stayed locked in every respect but one: WHERE a club's knockout
+mark sits inside its 150×150 slot. One square slot has to hold a portrait cap
+logo, a square roundel and a wide wordmark, and "centre it, letterbox it" —
+correct for most clubs — leaves some marks tiny and others hard against the clip
+circle. MiLB is where it shows worst, which is also where nobody was going to
+hand-fix 120 files.
+
+So a club may carry `{ scale, offsetX, offsetY, rotation }` **per side** —
+`src/lib/data/stamp-logo-tuning.json`, picked by eye in `/identity-lab`'s Stamp
+placement editor, resolved by `src/lib/stampLogoTuning.js`, applied by
+`src/lib/stampArt.js`'s `markTransform`. Per side because the two slots are not
+mirror images: each bleeds off the opposite edge of the clip circle, so the nudge
+that rescues the away mark can ruin the home one.
+
+Three things follow, and all three were the decision rather than a side effect:
+
+- **It is retroactive, on purpose.** A stamp stores game facts and no art
+  (that is the whole `game:final:{gamePk}` split above), so it is redrawn from
+  these numbers on every render. Retuning a club restyles every stamp of that
+  club everywhere the moment it ships, including keepsakes already minted and
+  placed in someone's passport book. The alternative — freezing a placement into
+  each stamp at mint time — would make a club's Logbook a museum of every
+  version of its own logo placement, and would put art in a record that
+  deliberately holds none.
+- **Untuned is untouched.** `markTransform` answers `null` rather than an
+  identity transform, so a club with no entry emits exactly the markup it did
+  the day the design was locked. `test/stamp-art.test.js` pins that.
+- **The values clamp, in three places.** The editor's inputs, the resolver
+  (`resolveMarkPlacement`), and the dev-save validator
+  (`scripts/lib/dev-data-stores.mjs`) all bound the same four fields. This store
+  is the only tuning file read at render time by art in other people's
+  collections; a typo may shift a mark, never fling it off the stamp.
+
+The editor is the third name on `check-stamp-surfaces.mjs`'s `GameStamp`
+allowlist, and the only one that renders a stamp for no real game: its preview
+game is a literal in that file — a made-up ballpark, a fixed date, two invented
+run totals — reaching no schedule, feed, collection or gamePk. It is also
+DEV-only (`import.meta.env.DEV` in `App.jsx`), so it never reaches a production
+build at all. Read this ADR before adding a fourth name.

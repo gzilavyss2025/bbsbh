@@ -10864,11 +10864,48 @@ body {
    pair reads as one row of "take this club's art apart".
    screens/identity-lab/editors/LogoRecolorEditor.jsx. */
 .idlab__monoink,
-.idlab__recolor {
+.idlab__recolor,
+.idlab__stampplace {
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
+}
+
+/* Stamp placement — the two mark slots of a Logbook stamp, each a real stamp
+   with its own knobs under it. screens/identity-lab/editors/StampPlacementEditor.jsx.
+   Full width rather than half of the marks pair above: two stamps side by side
+   need the room, and they're only comparable at one size. */
+.idlab__stampplace {
+  margin-top: var(--space-4);
+}
+
+.idlab__stampplacewarn {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin: var(--space-2) 0 0;
+}
+
+.idlab__stampplacerow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  align-items: start;
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 720px) {
+  .idlab__stampplacerow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The stamp itself is `width: 100%` of whatever holds it (the .gamestamp rule),
+   so the cap lives here — big enough to judge a nudge of a few user units,
+   small enough that both sides fit one row. */
+.idlab__stampplaceart {
+  max-width: 240px;
+  margin: var(--space-2) auto;
 }
 
 .idlab__monoinkrow {

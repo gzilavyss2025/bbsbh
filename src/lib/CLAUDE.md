@@ -71,6 +71,7 @@ own `note`.
 | `wpaBandColors.js` | That band's fill/pinstripe resolution |
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
 | `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
+| `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
 | `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
 | `customMarks.js` | The library of those recolored marks, and which treatment wears one (`data/custom-marks.json`) |
 
@@ -93,6 +94,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | `milb-colors.json` | `brandColors.js` |
 | `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
 | `mono-ink.json` | `monoInk.js` — and `scripts/gen-mono-logos.mjs`, which is what it actually changes |
+| `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/GameStamp.jsx` — the one store read at RENDER time |
 | `wpa-tuning.json` | `wpaLogo.js`, `wpaBandColors.js` |
 
 Every store has the same outer shape:
@@ -177,6 +179,35 @@ four layers that keep it out of production.
 A few values have no home in a store yet and still land by hand from an editor's
 copy icon: the flat background hex for a non-Main MLB treatment lives in
 `ALT_COLORS` and friends, which are still JS literals.
+
+## Stamp placement (`stampLogoTuning.js` + `data/stamp-logo-tuning.json`)
+
+The Logbook stamp letterboxes each club's knockout mark into one 150×150 slot
+(`lib/stampArt.js`'s `MARK_BOX`). One slot has to hold a portrait cap logo, a
+square roundel and a wide wordmark, so a club may carry
+`{ scale, offsetX, offsetY, rotation }` — picked by eye in `/identity-lab`'s
+**Stamp placement** editor, which previews the real stamp for both slots.
+
+Keyed per club and then per SIDE (`away`/`home`, the MiLB vocabulary), because
+the two slots are not mirror images: each bleeds off the opposite edge of the
+clip circle, so the nudge that rescues one can ruin the other. MLB and every
+MiLB level read the same store — it is keyed by team id and knows nothing about
+levels.
+
+Three things to know before touching it, all recorded in ADR-0035's amendment:
+
+- **It is read at RENDER time, and it is retroactive.** Every other store here
+  feeds a resolver or a generator; this one is consulted each time a stamp
+  draws. A stamp keeps game facts and no art, so retuning a club restyles that
+  club's stamps everywhere on the next deploy — including keepsakes already
+  minted and placed in someone's passport book. That is the design, not a leak:
+  one club, one placement.
+- **Untuned means untouched.** `markTransform` answers `null` rather than an
+  identity transform, so a club with no entry emits the markup the locked design
+  shipped with. `test/stamp-art.test.js` pins it.
+- **The four fields clamp in three places** — the editor's inputs,
+  `resolveMarkPlacement`, and the dev-save validator. Given the blast radius, a
+  typo may shift a mark and never fling it off the stamp.
 
 ## The curated art (`public/team-logos/`)
 

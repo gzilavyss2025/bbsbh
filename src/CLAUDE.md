@@ -184,7 +184,13 @@ read the linked ADRs before refactoring:
   mirrors the collection across a signed-in user's devices, and is the one
   place that pushes the local reveal mark to `/api/reveal` before minting; its
   header says why that is the only sanctioned way to close ADR-0035's known gap.
-  The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`.
+  The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
+  with **one tunable part**: where a club's knockout mark sits in its slot
+  (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in
+  `/identity-lab`'s Stamp placement editor — the third name on the containment
+  guard's allowlist, and the only one whose game is a fabricated literal). Read
+  ADR-0035's amendment first: that store is consulted on every render, so
+  retuning a club restyles its stamps in every Logbook that already holds one.
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
