@@ -57,10 +57,10 @@ export const LOGO_ART_URL_ROOT = '/team-logos'
 // MLB keys, which rename into their real directory.
 // The `-wpa` family below are a SECOND, independent destination per real MLB
 // treatment — a club's WPA band can tile a wholly separate uploaded mark from
-// whatever its tile box shows (see src/lib/wpaLogo.js's `WPA_OWN_ART`/
+// whatever its tile box shows (see src/lib/wpa/wpaLogo.js's `WPA_OWN_ART`/
 // `wpaArtUrl`), keyed by a synthetic `'<treatment>-wpa'` string that is never
 // a real treatment on its own (it never appears in mlb-treatment-tuning.json,
-// jerseys.json, or any teams.js resolver — only here and in wpaLogo.js).
+// jerseys.json, or any teams.js resolver — only here and in wpa/wpaLogo.js).
 export const LOGO_TREATMENT_DIRS = {
   main: 'main-overrides',
   alternate: 'alternate',

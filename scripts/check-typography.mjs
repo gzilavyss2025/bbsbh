@@ -5,6 +5,22 @@ const cssPath = resolve('src/index.css')
 const css = readFileSync(cssPath, 'utf8')
 const errors = []
 
+// This guard is only as good as its target. Split src/index.css into partials
+// (or otherwise empty it of rules) and this script would keep exiting 0 while
+// checking nothing — and a guard that stops guarding is worse than none,
+// because the ✓ still prints and reads as coverage. So assert the target
+// actually holds rules, and say what to do when it doesn't.
+if (!/\{/.test(css.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+  console.error(
+    '\n✗ Typography guard has nothing to check — src/index.css contains zero\n' +
+      '  rules. If the stylesheet was split into partials, repoint this script at\n' +
+      '  all of them (e.g. every src/styles/*.css) IN THE SAME COMMIT as the\n' +
+      '  split. Do not delete this assertion — it exists precisely because a\n' +
+      '  vacuous pass still prints ✓.\n'
+  )
+  process.exit(1)
+}
+
 const rules = [
   {
     property: 'font-size',

@@ -19,10 +19,24 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 const jsPath = join(ROOT, 'src/components/BoxScoreSkeleton.jsx')
 const cssPath = join(ROOT, 'src/index.css')
-const js = readFileSync(jsPath, 'utf8')
-const css = readFileSync(cssPath, 'utf8')
 
 const errors = []
+
+// Both targets are addressed by hard-coded path, so either one moving would
+// otherwise kill this script with an ENOENT stack trace. Report it as a guard
+// failure instead — the check still fails (which is right; it has stopped
+// checking), but it says which file to repoint and why.
+function readTarget(path) {
+  try {
+    return readFileSync(path, 'utf8')
+  } catch {
+    errors.push(`${path.slice(path.indexOf('src')).replace(/\\/g, '/')} — named in this guard but no longer exists`)
+    return null
+  }
+}
+
+const js = readTarget(jsPath)
+const css = readTarget(cssPath)
 
 function extract(source, pattern, label) {
   const m = source.match(pattern)
@@ -33,10 +47,18 @@ function extract(source, pattern, label) {
   return Number(m[1])
 }
 
-const frameCount = extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
-const spinLoops = extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
+// An explicit null, never `js && extract(...)`. Both falsy cases matter and a
+// bare && gets each one wrong: a MISSING file (js === null) would short-circuit
+// to null — fine — but an EMPTY one reads as '', which short-circuits to '' and
+// then satisfies the `!= null` gate below, so the guard would run its CSS
+// arithmetic on a missing constant and blame the stylesheet for a JS problem.
+// Written this way, a missing file skips extraction (readTarget already filed
+// the error) and an empty one still goes through extract(), which reports the
+// constant it could not find.
+const frameCount = js == null ? null : extract(js, /const BALL_FRAME_COUNT = (\d+)/, 'BALL_FRAME_COUNT in BoxScoreSkeleton.jsx')
+const spinLoops = js == null ? null : extract(js, /const BALL_SPIN_LOOPS = (\d+)/, 'BALL_SPIN_LOOPS in BoxScoreSkeleton.jsx')
 
-if (frameCount != null && spinLoops != null) {
+if (css && frameCount != null && spinLoops != null) {
   const totalSteps = frameCount * spinLoops
 
   const framesBlock = css.match(/\.skel__ballFrames\s*\{[^}]*\}/)?.[0]

@@ -48,8 +48,11 @@ and had no step 2 at all. Collapsing them is why every MiLB headshot,
 `PitcherNotice`, and off-day card now reads as the affiliate's own identity.
 
 `brandColors.js` sits *below* both `teams.js` and `milbColors.js` because
-`milbColors.js` already reaches `teams.js` transitively through `wpaLogo.js` —
-putting the chain in either one and importing the other closes an import cycle.
+`milbColors.js` already reaches `teams.js` directly (`teamLogoUrl`) — putting the
+chain in either one and importing the other closes an import cycle. (That reach
+used to be described as transitive, through `wpaLogo.js`; it is a direct import
+now that `milbColors.js` takes its two WPA constants from `wpa/wpaDefaults.js`
+instead. The cycle argument is unchanged.)
 
 An affiliate research never resolved a hex for carries `"found": false` and **no
 `pair`**, so it falls to step 2 rather than wearing an invented colour; three do
@@ -67,8 +70,9 @@ own `note`.
 | `teams.js` | Club names/abbreviations/ids, logo URL builders, the MLB-only colour tables (`TEAM_COLORS` — the distinctiveness accent — plus `teamColorExtras`, `ALT_COLORS`, `CITY_CONNECT_COLORS`, `ALT2/3/4_COLORS`), and every MLB tile resolver — `treatmentTile` is the one every surface goes through |
 | `logoArt.js` | The curated-art standard: the PNG header reader, the rejection reasons, and the treatment→directory allowlist an upload resolves through |
 | `milbColors.js` | The MiLB counterpart: the Home/Away resolvers and `milbTreatmentTile` (it re-exports the chain rather than owning it) |
-| `wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
-| `wpaBandColors.js` | That band's fill/pinstripe resolution |
+| `wpa/wpaLogo.js` | Which mark tiles a win-probability band, its layout geometry, and whether it may be recoloured |
+| `wpa/wpaBandColors.js` | That band's fill/pinstripe resolution |
+| `wpa/wpaDefaults.js` | The two WPA constants a **non-WPA** caller needs, in a dependency-free leaf. `milbColors.js` is on the eager first-paint path, so importing them from their home modules dragged `data/wpa-tuning.json` into the entry chunk (−3.7 KB gz once split out). Keep it import-free |
 | `logoMono.js` | The one-colour knockout marks for navy mastheads (ADR-0031) |
 | `monoInk.js` | The hand-picked per-SHAPE corrections to that conversion (`data/mono-ink.json`) |
 | `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
@@ -96,7 +100,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
 | `mono-ink.json` | `monoInk.js` — and `scripts/gen-mono-logos.mjs`, which is what it actually changes |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/GameStamp.jsx` — the one store read at RENDER time |
-| `wpa-tuning.json` | `wpaLogo.js`, `wpaBandColors.js` |
+| `wpa-tuning.json` | `wpa/wpaLogo.js`, `wpa/wpaBandColors.js` — deliberately NOT reachable from the eager entry graph; see `wpa/wpaDefaults.js` |
 
 Every store has the same outer shape:
 

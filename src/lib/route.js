@@ -341,9 +341,6 @@ export function umpirePath(id) {
 export function managerPath(id) {
   return `/manager/${id}`
 }
-export function umpireRankingsPath() {
-  return '/umpires'
-}
 export function foulsPath() {
   return '/fouls'
 }

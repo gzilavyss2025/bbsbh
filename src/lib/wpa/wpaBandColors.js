@@ -10,9 +10,10 @@ import {
   mainTreatmentPinstripeColor,
   treatmentPinstripeColor,
   treatmentPinstripeBg,
-} from './teams.js'
-import { byTeam, byTreatment } from './tuningStore.js'
+} from '../teams.js'
+import { byTeam, byTreatment } from '../tuningStore.js'
 import { WPA_TUNING } from './wpaLogo.js'
+import { DEFAULT_PINSTRIPE_COLOR } from './wpaDefaults.js'
 
 // The real chart's own band area, in the SAME px units as its desktop
 // render (the <svg> has no responsive scaling of its own beyond the
@@ -48,11 +49,12 @@ export const BAND_COLOR_OVERRIDES = byTeam(WPA_TUNING, (e) => e.bandColor)
 // teams.js's MAIN_OVERRIDES).
 export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.band)
 
-// The pinstripe line color at its default weight — same literal
-// mainTreatmentPinstripeColor/treatmentPinstripeColor (teams.js) fall back
-// to, so a pinstriped WPA band always matches a pinstriped logo-box tile
-// exactly unless a team/treatment explicitly picks its own line color.
-export const DEFAULT_PINSTRIPE_COLOR = 'rgba(0, 0, 0, 0.16)'
+// Re-exported so this stays the module you import band colors from — the
+// literal lives in the dependency-free lib/wpa/wpaDefaults.js leaf, so a caller who
+// wants only that one string (lib/milbColors.js, on the eager first-paint path)
+// doesn't drag this module — and, through its WPA_TUNING import, the whole of
+// data/wpa-tuning.json — into the entry chunk. Read wpaDefaults.js first.
+export { DEFAULT_PINSTRIPE_COLOR }
 
 // A team's brand pair for chip/marker chrome, falling back to a neutral
 // graphite pair for a team teamChipColors doesn't know (no teamId handed in,

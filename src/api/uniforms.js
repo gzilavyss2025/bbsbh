@@ -104,18 +104,6 @@ export function liveTreatmentFor(gameJerseys, gamePk, teamId, clubName) {
   return classifyUniformAsset(jersey.text, clubName, jersey.code)
 }
 
-// One printable uniform line — "Alt 2 Navy Blue jersey · Road Grey pants ·
-// Alt Yellow Front hat". Asset labels arrive as "<Club> <desc> <Piece>"
-// ("Brewers Alt 2 Navy Blue Jersey"); the club name is redundant next to a
-// team header, so it's stripped, and the trailing piece word is lowercased so
-// the descriptor reads as the name and the piece as a plain noun.
-export function uniformLine(assets, clubName) {
-  if (!assets?.length) return ''
-  return assets
-    .map((a) => stripClubName(a.text, clubName).replace(/\s(Jersey|Pants|Hat)$/, (m) => m.toLowerCase()))
-    .join(' · ')
-}
-
 // A tight, at-a-glance uniform summary — "Away Alternate Navy Blue",
 // "Home White", "Road Grey" — synthesized from the full asset list the way
 // weather.js boils a forecast down to a scorebook line. The JERSEY is the

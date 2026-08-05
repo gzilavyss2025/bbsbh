@@ -1,4 +1,4 @@
-// Unit coverage for the WPA band's logo resolver (lib/wpaLogo.js) — which
+// Unit coverage for the WPA band's logo resolver (lib/wpa/wpaLogo.js) — which
 // mark tiles a (team, treatment) band, and whether a LOGO_COLOR_OVERRIDES
 // entry is allowed to recolor it.
 //
@@ -19,7 +19,7 @@ import {
   wpaLogoLayout,
   wpaLogoWithFallback,
   wpaTilePlacements,
-} from '../src/lib/wpaLogo.js'
+} from '../src/lib/wpa/wpaLogo.js'
 import { teamLogoUrl } from '../src/lib/teams.js'
 import { wpaArtUrl } from '../src/lib/logoArt.js'
 import WPA_TUNING from '../src/lib/data/wpa-tuning.json' with { type: 'json' }
