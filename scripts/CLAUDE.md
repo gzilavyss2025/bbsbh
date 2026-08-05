@@ -593,6 +593,16 @@ process automatically.
   partials are listed individually so
   that splitting it FORCES one entry per oversized partial rather than laundering
   the debt. See ADR-0038.
+- `check-dead-exports.mjs` — fails if a named/default export in `src/**/*.{js,jsx}`
+  has no reference anywhere (cross-file import OR same-file call) — an orphan left
+  behind after its last caller was removed. Regex-based, like its siblings above:
+  it cannot tell a forgotten export from a deliberately staged one, so a handful of
+  documented-but-not-yet-wired exports sit in an `ALLOWLIST` with the reason, the
+  same ratchet-table convention as `check-dir-size.mjs`'s `BUDGETS`. Understands
+  this app's two dynamic-import shapes (`lazyNamed(loader, 'Name')` from
+  `src/App.jsx`, and `import(...).then((m) => ({ default: m.X }))`/`m.X(...)`) so a
+  lazily-routed screen or Clerk-gated component doesn't read as dead just because
+  no static `import` statement names it.
 - `check-dist-dev-routes.mjs` — post-build (not part of `npm run lint`, since it
   inspects `dist/`): fails if a dev-only save endpoint string reaches the
   production bundle, and equally if `dist/team-logos/` comes out empty. Both

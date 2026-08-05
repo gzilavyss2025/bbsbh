@@ -58,7 +58,9 @@ const BUDGETS = {
   // break that ordering for no gain. See ADR-0038.
   'src/styles': 49,
   'src/api': 84,
-  scripts: 67,
+  // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
+  // its siblings already here.
+  scripts: 68,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
