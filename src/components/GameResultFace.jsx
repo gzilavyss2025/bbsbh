@@ -1,10 +1,10 @@
 import { selectBoxscore, computePlayOfTheGame } from '../api/boxscore.js'
 import { useNav } from '../lib/nav.js'
 import { favoriteAccentColor } from '../lib/teams.js'
-import { Headshot } from './Headshot.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
-import { TeamLink } from './TeamLink.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { Headshot } from './identity/Headshot.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
+import { TeamLink } from './identity/TeamLink.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 import { PerformerCard } from './PerformerCard.jsx'
 import {
   SCENARIO_LABEL,

@@ -1,7 +1,7 @@
-import { PlayerLink } from './PlayerLink.jsx'
-import { TeamLink } from './TeamLink.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
-import { Headshot } from './Headshot.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
+import { TeamLink } from './identity/TeamLink.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
+import { Headshot } from './identity/Headshot.jsx'
 import { ProspectPill } from './badges/ProspectPill.jsx'
 import { teamFullName } from '../lib/teams.js'
 

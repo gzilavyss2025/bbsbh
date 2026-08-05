@@ -1,4 +1,4 @@
-import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
+import { TeamTreatmentMark } from './identity/TeamTreatmentMark.jsx'
 import { BreakableLocation } from './ui/BreakableLocation.jsx'
 import { splitName } from '../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../lib/teams.js'

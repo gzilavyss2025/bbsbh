@@ -15,9 +15,9 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 
 const FILES = [
-  join(ROOT, 'src/components/SiteMenu.jsx'),
-  join(ROOT, 'src/components/SiteFooter.jsx'),
-  join(ROOT, 'src/components/ReportFooter.jsx'),
+  join(ROOT, 'src/components/chrome/SiteMenu.jsx'),
+  join(ROOT, 'src/components/chrome/SiteFooter.jsx'),
+  join(ROOT, 'src/components/chrome/ReportFooter.jsx'),
 ]
 
 const IMPORT_RE = /import\s*\{\s*REPORT_PAGES\s*\}\s*from\s*['"].*lib\/reportPages\.js['"]/

@@ -1,4 +1,4 @@
-import { LEVELS } from '../lib/teams.js'
+import { LEVELS } from '../../lib/teams.js'
 
 // The MLB/AAA/AA/A+/A level toggle, shared by the slate and the logo sheet.
 // Plain toggle buttons with aria-pressed — not a tablist, which would promise

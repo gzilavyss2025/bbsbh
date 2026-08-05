@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Headshot } from './Headshot.jsx'
+import { Headshot } from './identity/Headshot.jsx'
 
 // Show only the first handful up front and let a button reveal the rest —
 // same FormerTeammates/InsightsCard pattern (TeamInfo.jsx, BoxScore.jsx) as

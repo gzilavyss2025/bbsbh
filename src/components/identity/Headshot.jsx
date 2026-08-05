@@ -1,5 +1,5 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
-import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../lib/teams.js'
+import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../../lib/teams.js'
 
 // A person's headshot, keyed by the person id we already carry. Walks a
 // fallback chain, each rung using the CDN WITHOUT its `d_people:generic`

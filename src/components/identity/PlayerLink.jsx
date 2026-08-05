@@ -1,5 +1,5 @@
-import { useNav, useLinkScope } from '../lib/nav.js'
-import { playerPath } from '../lib/route.js'
+import { useNav, useLinkScope } from '../../lib/nav.js'
+import { playerPath } from '../../lib/route.js'
 
 // Wraps a player's name (already rendered as children) in a plain, no-underline
 // button that navigates to their page. SPOILER-SAFE: it carries only the id

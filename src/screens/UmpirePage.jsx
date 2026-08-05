@@ -7,11 +7,11 @@ import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useNav } from '../lib/nav.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { BackBtn } from '../components/BackBtn.jsx'
-import { AsyncGate } from '../components/AsyncGate.jsx'
-import { TeamLink } from '../components/TeamLink.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { BackBtn } from '../components/chrome/BackBtn.jsx'
+import { AsyncGate } from '../components/chrome/AsyncGate.jsx'
+import { TeamLink } from '../components/identity/TeamLink.jsx'
+import { TeamLogo } from '../components/identity/TeamLogo.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const TOP_VENUES_LIMIT = 5

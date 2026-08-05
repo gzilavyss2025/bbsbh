@@ -3,12 +3,12 @@ import { fetchTodayPlateUmpireIds } from '../api/schedule.js'
 import { toApiDate } from '../lib/dates.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { UmpireLink } from '../components/UmpireLink.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { AsyncStatus } from '../components/chrome/AsyncGate.jsx'
+import { UmpireLink } from '../components/identity/UmpireLink.jsx'
 import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { HomePlateIcon } from '../components/badges/UmpireTierGlyph.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const pct1 = (x) => `${(x * 100).toFixed(1)}%`
 

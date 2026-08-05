@@ -1,5 +1,5 @@
 import { PitcherPhoto } from './PitcherNotice.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 import { ordinal } from '../lib/format.js'
 
 // The "pinch running" notification card, at the moment a pinch runner enters

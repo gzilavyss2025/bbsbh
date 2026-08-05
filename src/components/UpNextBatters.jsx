@@ -1,6 +1,6 @@
 import { selectDueUpNow } from '../api/dueup.js'
-import { Headshot } from './Headshot.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { Headshot } from './identity/Headshot.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // Who's due up to face the entering pitcher, BEFORE any of this half is
 // revealed — three headshot columns, same "entering the half" spoiler-safety

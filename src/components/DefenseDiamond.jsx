@@ -1,6 +1,6 @@
 import { ordinal } from '../lib/format.js'
 import { InjuredMark } from './badges/InjuredMark.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // The scorebook's defense diamond, drawn the way the #22 sheet prints it:
 // the infield square rotated onto its point, each fielder's surname on a

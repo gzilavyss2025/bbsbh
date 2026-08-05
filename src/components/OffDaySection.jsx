@@ -1,4 +1,4 @@
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 import { BreakableLocation } from './ui/BreakableLocation.jsx'
 import { useNav } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'

@@ -1,5 +1,5 @@
 import { PitcherPhoto } from './PitcherNotice.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // The "now playing" notification card for a defensive change — same headshot +
 // label + name layout as PitcherNotice (shares its .pitchernotice CSS and

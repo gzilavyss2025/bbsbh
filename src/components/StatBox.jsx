@@ -8,9 +8,9 @@ import { resolveCardPlayer } from '../api/boxscore.js'
 import { teamLogoUrl, teamStripeGradient } from '../lib/teams.js'
 import { ordinal } from '../lib/format.js'
 import { SealBox } from './SealBox.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 import { PerformerCard } from './PerformerCard.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // The half's three Statcast superlatives, resolved to the "baseball card"
 // shape PerformerCard renders — same resolveCardPlayer lookup the box score's

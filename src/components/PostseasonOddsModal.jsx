@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 import { favoriteAccentColor } from '../lib/teams.js'
 
 // Rounding straight to 1 decimal would show "100.0%" for anything from

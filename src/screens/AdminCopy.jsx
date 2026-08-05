@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { SiteHeader } from '../components/SiteHeader.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../copy/registry.js'

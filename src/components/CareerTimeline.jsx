@@ -1,4 +1,4 @@
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // A career map, shown above the "Path to the Majors" card: one stop per club
 // the player logged real time with (see careerTimelineView's threshold),

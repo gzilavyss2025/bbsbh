@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { LOGO_VARIANTS } from '../lib/teams.js'
-import { TeamLogo } from './TeamLogo.jsx'
-import { TeamLink } from './TeamLink.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
+import { TeamLink } from './identity/TeamLink.jsx'
 
 // A large grayscale team mark blown up for pencil-sketching, shown when the
 // user taps a logo on a team page. Same tonal treatment as the printable Logo

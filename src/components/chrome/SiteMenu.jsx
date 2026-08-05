@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useState } from 'react'
-import { useNav } from '../lib/nav.js'
-import { REPORT_PAGES } from '../lib/reportPages.js'
+import { useNav } from '../../lib/nav.js'
+import { REPORT_PAGES } from '../../lib/reportPages.js'
 
 // The standalone, non-game pages — everything you'd otherwise only reach by
 // scrolling to the bottom of the slate's footer (SiteFooter). Built from the

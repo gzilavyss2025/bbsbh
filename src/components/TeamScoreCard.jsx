@@ -7,7 +7,7 @@ import { teamClubName } from '../lib/teams.js'
 import { beeswarmRows } from '../lib/beeswarm.js'
 import { useNav, useLinkScope } from '../lib/nav.js'
 import { teamPath } from '../lib/route.js'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 const DASH = '—'
 const RANKSTRIP_VISIBLE = 5

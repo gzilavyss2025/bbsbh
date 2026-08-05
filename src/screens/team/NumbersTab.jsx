@@ -1,5 +1,5 @@
 import { useAsync } from '../../hooks/useAsync.js'
-import { AsyncGate, AsyncStatus } from '../../components/AsyncGate.jsx'
+import { AsyncGate, AsyncStatus } from '../../components/chrome/AsyncGate.jsx'
 import { useNav } from '../../lib/nav.js'
 import { teamLeadersPath, orgLeadersPath } from '../../lib/route.js'
 import { teamClubName } from '../../lib/teams.js'

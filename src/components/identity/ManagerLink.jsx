@@ -1,5 +1,5 @@
-import { useNav } from '../lib/nav.js'
-import { managerPath } from '../lib/route.js'
+import { useNav } from '../../lib/nav.js'
+import { managerPath } from '../../lib/route.js'
 
 // Wraps a manager's fact-grid content (already rendered as children) in a
 // plain, no-underline button that navigates to his page — the manager

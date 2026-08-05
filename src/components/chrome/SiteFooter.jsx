@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { GameFinderModal } from './GameFinderModal.jsx'
-import { FavoriteTeamModal } from './FavoriteTeamModal.jsx'
+import { GameFinderModal } from '../GameFinderModal.jsx'
+import { FavoriteTeamModal } from '../FavoriteTeamModal.jsx'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
-import { useNav } from '../lib/nav.js'
-import { REPORT_PAGES } from '../lib/reportPages.js'
+import { useNav } from '../../lib/nav.js'
+import { REPORT_PAGES } from '../../lib/reportPages.js'
 
 // Same REPORT_PAGES list the hamburger menu (SiteMenu.jsx) uses, plus About
 // as the trailing item — see reportPages.js for why Logo Sheet isn't here

@@ -6,7 +6,7 @@ import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
 import { monthDayYear } from '../lib/dates.js'
 import { SectionMasthead } from './ui/SectionMasthead.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // This season's other meetings between the two clubs, as a scrollable strip
 // of cards — every OTHER game's result is fair to show up front (they already

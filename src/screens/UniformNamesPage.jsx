@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TeamLogo } from '../components/identity/TeamLogo.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { teamAnchorId } from './identity-lab/teamAnchorId.js'
 import { ALL_MLB_TEAM_IDS, teamFullName, teamClubName } from '../lib/teams.js'

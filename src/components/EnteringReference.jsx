@@ -5,11 +5,11 @@ import { selectDueUpNext } from '../api/dueup.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill } from '../api/rookies.js'
 import { ordinal } from '../lib/format.js'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 import { DefenseDiamond } from './DefenseDiamond.jsx'
 import { ProspectPill } from './badges/ProspectPill.jsx'
 import { RookiePill } from './badges/RookiePill.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // The pre-scoring reference for a half: both teams' lineup cards + the fielding
 // side's alignment as they stand ENTERING it (subs through first pitch only).

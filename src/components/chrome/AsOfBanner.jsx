@@ -1,5 +1,5 @@
-import { humanDate } from '../lib/dates.js'
-import { useNav } from '../lib/nav.js'
+import { humanDate } from '../../lib/dates.js'
+import { useNav } from '../../lib/nav.js'
 
 // Shown atop a player/team/leaders page whenever the URL carries the `?d=&s=`
 // spoiler-safe cutoff (see lib/route.js) — a link opened from a sealed game.

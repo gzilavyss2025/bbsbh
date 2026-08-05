@@ -1,5 +1,5 @@
 import { PitcherPhoto } from './PitcherNotice.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // The "now batting" notification card for a pinch hitter — same headshot +
 // label + name layout as PitcherNotice/FielderNotice (shares its

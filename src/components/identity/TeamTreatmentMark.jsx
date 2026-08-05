@@ -1,6 +1,6 @@
 import { TeamLogo } from './TeamLogo.jsx'
-import { treatmentTile, isMlbTeamId } from '../lib/teams.js'
-import { milbTreatmentTile } from '../lib/milbColors.js'
+import { treatmentTile, isMlbTeamId } from '../../lib/teams.js'
+import { milbTreatmentTile } from '../../lib/milbColors.js'
 
 // A club's mark on the tinted tile of whatever uniform treatment it's wearing
 // — the "square" the slate card and the in-game masthead both show. The look

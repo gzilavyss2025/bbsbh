@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { TeamLogo } from './TeamLogo.jsx'
-import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../lib/teams.js'
+import { ALL_MLB_TEAM_IDS, leagueLogoUrl, teamFullName } from '../../lib/teams.js'
 
 // A finger-scrollable strip of every current MLB club's logo, reusing the
 // Splits vs Team / Favorite Team picker's tray styling (vsteam__* — see

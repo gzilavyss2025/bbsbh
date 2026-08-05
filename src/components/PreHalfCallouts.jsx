@@ -1,6 +1,6 @@
 import { buildPreHalfCallouts } from '../api/prehalf-callouts.js'
-import { Headshot } from './Headshot.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { Headshot } from './identity/Headshot.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // The pre-half callout strip: the "entering this half" season-context cards
 // (starter team record / leading-after checkpoint / inning run differential —

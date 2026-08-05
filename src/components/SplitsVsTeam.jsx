@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 import { teamLocationName, teamClubName } from '../lib/teams.js'
 
 // SPLITS VS TEAM — a player's career line against a chosen opponent, with a

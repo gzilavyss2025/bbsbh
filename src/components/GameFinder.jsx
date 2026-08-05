@@ -3,7 +3,7 @@ import { fetchHeadToHead } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { gamePath } from '../lib/route.js'
-import { TeamSearchBox } from './TeamSearchBox.jsx'
+import { TeamSearchBox } from './identity/TeamSearchBox.jsx'
 import { Loader } from './ui/Loader.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()

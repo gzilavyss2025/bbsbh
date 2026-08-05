@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { fetchTeamDirectory, searchTeams } from '../api/search.js'
-import { useAsync } from '../hooks/useAsync.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { fetchTeamDirectory, searchTeams } from '../../api/search.js'
+import { useAsync } from '../../hooks/useAsync.js'
+import { SPORT_LABEL } from '../../lib/teams.js'
 
 // Team-name search box — GameFinder's club picker. Picking a result hands the
 // chosen team back via `onPick` — how GameFinder lets someone choose two

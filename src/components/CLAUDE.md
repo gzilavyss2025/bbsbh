@@ -19,13 +19,11 @@ about what it is. Do not tidy it into a folder.
 | `ui/` | `Loader`, `SectionMasthead`, `SectionTitle`, `ChevronLink`, `CopyBox`, `ModalPortal`, `InfoPopover`, `MasonryColumns`, `FlipCard`, `BreakableLocation` | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
 | `badges/` | `ProspectPill`, `RookiePill`, `DebutPill`, `MilestonePill`, `InjuredMark`, `RadarPill`, `TierPill`, `UmpireTierPill`, `UmpireTierGlyph` | An inline mark that adorns a name in a dense row, and **renders nothing when inactive** — so a caller can splice it in unconditionally |
 | `charts/` | `WinProbChart`, `UsagePips`, `PitchMix`, `BattedBallMix`, `PitchArsenalMix`, `StatcastPercentiles` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
+| `identity/` | `TeamLogo`, `PlayerLink`, `Headshot`, `TeamLink`, `TeamFilterStrip`, `TeamTreatmentMark`, `ManagerLink`, `UmpireLink`, `TeamSearchBox` | Renders **who** something is, from an id. Holds the four most-imported components in the app. The link components carry only ids plus the `?d=`/`?s=` cutoff hint — **never a stat**, which is what keeps a link out of the spoiler surface |
+| `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `TallyBrand`, `BackBtn`, `AsOfBanner`, `LevelNav`, `ReportFooter`, `AsyncGate` | The frame around a page rather than any page's content. Survives a route change |
 
-Everything else is still at the top level awaiting a bucket. The remaining
-groups, roughly: the site frame (`SiteHeader`/`SiteFooter`/`SiteMenu`/…), the
-identity primitives (`TeamLogo`, `PlayerLink`, `Headshot`, `TeamLink` — the four
-most-imported components in the app), the dialogs, the Clerk-gated account
-components, and the game-section tree. The last two need care and are called out
-below.
+Still at the top level awaiting a bucket: the dialogs, the Clerk-gated account
+components, and the game-section tree. The last two need care — see below.
 
 ## Two constraints that outrank tidiness
 
@@ -39,9 +37,9 @@ just that the build passed.
 **Some components are named by literal path in a guard.** `check-stamp-surfaces.mjs`
 holds an allowlist plus eight `FORBIDDEN_SURFACES` (`GameCard`, `ContinueScoring`,
 `PastGameFlipCard`, `GameResultFace`, `Scorebug`, `GameFinder`, `DeckNudge`, and
-`GameSelect`), and `check-report-pages.mjs` names `SiteMenu`, `SiteFooter`,
-`ReportFooter`. Moving any of those means editing the guard **in the same
-commit**. They fail loudly rather than silently if you forget, which is the
+`GameSelect`), and `check-report-pages.mjs` names `SiteMenu`, `SiteFooter`, `ReportFooter`
+(already repointed at `chrome/`). Moving any of those means editing the guard
+**in the same commit**. They fail loudly rather than silently if you forget, which is the
 point — read ADR-0035 before touching the stamp list.
 
 ## No barrel files

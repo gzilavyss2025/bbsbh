@@ -3,11 +3,11 @@ import { fetchTeams } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { TeamLogo } from '../components/identity/TeamLogo.jsx'
 import { LogoModal } from '../components/LogoModal.jsx'
-import { LevelNav } from '../components/LevelNav.jsx'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { LevelNav } from '../components/chrome/LevelNav.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { AsyncStatus } from '../components/chrome/AsyncGate.jsx'
 
 // A browsable reference sheet of every club's logo at a level, independent of
 // any day's schedule. Tapping a tile opens the same sketch modal used

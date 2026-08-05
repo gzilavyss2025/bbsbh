@@ -1,5 +1,5 @@
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/DelayCard.jsx'

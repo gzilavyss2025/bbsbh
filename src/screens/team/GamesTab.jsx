@@ -1,5 +1,5 @@
 import { useAsync } from '../../hooks/useAsync.js'
-import { AsyncGate } from '../../components/AsyncGate.jsx'
+import { AsyncGate } from '../../components/chrome/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/TeamTransactionsCard.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'

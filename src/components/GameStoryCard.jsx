@@ -1,7 +1,7 @@
 import { fetchGameStory } from '../api/gameStory.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { teamPrimaryColor } from '../lib/teams.js'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // Each team's own MLB.com coverage of this game — a recap, and any same-game
 // news (an in-game injury, e.g.) — one row per story, that team's logo at the

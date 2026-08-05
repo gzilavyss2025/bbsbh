@@ -1,4 +1,4 @@
-import { TeamTreatmentMark } from './TeamTreatmentMark.jsx'
+import { TeamTreatmentMark } from './identity/TeamTreatmentMark.jsx'
 import { BaseState } from './BaseState.jsx'
 
 // The persistent scorebug HUD (see docs/scorebug-spec.html for the visual

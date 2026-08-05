@@ -1,7 +1,7 @@
 import { selectDueUpNext } from '../api/dueup.js'
-import { Headshot } from './Headshot.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
-import { TeamLogo } from './TeamLogo.jsx'
+import { Headshot } from './identity/Headshot.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // A preview of the OTHER team's next half: the first few spots due up, same
 // headshot-column presentation as UpNextBatters.jsx's own "Due up" card (no

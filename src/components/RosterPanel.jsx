@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill } from '../api/rookies.js'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 import { ProspectPill } from './badges/ProspectPill.jsx'
 import { RookiePill } from './badges/RookiePill.jsx'
 

@@ -6,9 +6,9 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { logbookPath } from '../lib/route.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { TeamLogo } from '../components/identity/TeamLogo.jsx'
 
 // The Logbook retrospective — what your collection adds up to (ADR-0035, the
 // game-stamps PRD §6, Tier 1).

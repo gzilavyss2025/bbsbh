@@ -1,5 +1,5 @@
 import { PlayDiamond } from './PlayDiamond.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // The extra-innings automatic runner's card — the placed runner gets his own
 // row at the head of the half, above the leadoff batter, which is both where

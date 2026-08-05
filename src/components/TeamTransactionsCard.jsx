@@ -1,8 +1,8 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { loadMoreTeamTransactions } from '../api/teamTransactions.js'
-import { Headshot } from './Headshot.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
-import { TeamLink } from './TeamLink.jsx'
+import { Headshot } from './identity/Headshot.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
+import { TeamLink } from './identity/TeamLink.jsx'
 import { DeckNudge } from './DeckNudge.jsx'
 
 // The deck's per-card scroll step (card width + gap, both from .txcard__scroll

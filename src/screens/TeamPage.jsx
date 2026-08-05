@@ -1,7 +1,7 @@
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
-import { AsyncGate } from '../components/AsyncGate.jsx'
+import { AsyncGate } from '../components/chrome/AsyncGate.jsx'
 import { TeamLeaders } from '../components/TeamLeaders.jsx'
 import { TeamScoreCard } from '../components/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/TeamTransactionsCard.jsx'

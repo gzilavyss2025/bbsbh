@@ -1,4 +1,4 @@
-import { TallyWordmark } from '../TallyBrand.jsx'
+import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 
 // The ghost printing under a passport page's cancellations (ADR-0035, the
 // passport-book redesign). A real passport page carries a pale security print

@@ -1,5 +1,5 @@
-import { useNav } from '../lib/nav.js'
-import { REPORT_PAGES } from '../lib/reportPages.js'
+import { useNav } from '../../lib/nav.js'
+import { REPORT_PAGES } from '../../lib/reportPages.js'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 
 // Same list + trailing About link SiteFooter.jsx uses — kept as its own

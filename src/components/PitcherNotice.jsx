@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { headshotSources, isMlbTeamId, teamLogoUrl, teamTintColor } from '../lib/teams.js'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 // The "now pitching" notification card — the entering pitcher's headshot beside
 // his name / number / throwing hand, on the seal-amber attention surface. Shared

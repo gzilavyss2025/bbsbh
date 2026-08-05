@@ -3,7 +3,7 @@ import { fetchTeams } from '../api/schedule.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../lib/teams.js'
-import { TeamLogo } from './TeamLogo.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
 
 // Same lazy gate as GameSelect/SiteHeader: AccountPitch imports
 // @clerk/clerk-react at its top, so it's never fetched — let alone rendered —

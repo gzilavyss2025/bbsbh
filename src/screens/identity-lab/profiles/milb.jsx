@@ -4,7 +4,7 @@
    this dev-only lab, which is a fine trade for keeping each dimension's data,
    copy text, and tiles in one readable file. */
 import { useEffect, useState } from 'react'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../../components/identity/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'

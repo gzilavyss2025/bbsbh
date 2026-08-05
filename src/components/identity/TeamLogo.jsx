@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { teamLogoUrl } from '../lib/teams.js'
+import { teamLogoUrl } from '../../lib/teams.js'
 
 // Decorative team logo, keyed by the team id we already carry throughout the
 // app. The label next to it always names the team in text, so the image is

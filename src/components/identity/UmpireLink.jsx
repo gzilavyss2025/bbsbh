@@ -1,5 +1,5 @@
-import { useNav } from '../lib/nav.js'
-import { umpirePath } from '../lib/route.js'
+import { useNav } from '../../lib/nav.js'
+import { umpirePath } from '../../lib/route.js'
 
 // Wraps an umpire's name (already rendered as children) in a plain,
 // no-underline button that navigates to their page. Unlike PlayerLink there's

@@ -1,5 +1,5 @@
-import { useNav, useLinkScope } from '../lib/nav.js'
-import { teamTabPath } from '../lib/route.js'
+import { useNav, useLinkScope } from '../../lib/nav.js'
+import { teamTabPath } from '../../lib/route.js'
 
 // Team-name counterpart to PlayerLink — navigates to the team hub, carrying the
 // same spoiler-safe cutoff hints. Renders plain children when `id` is absent.

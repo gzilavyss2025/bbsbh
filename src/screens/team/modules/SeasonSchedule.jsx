@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { gamePath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../../components/identity/TeamLogo.jsx'
 
 // Season progress strip for the team page — one block per series (a run of
 // consecutive games against the same opponent), one small cell per game

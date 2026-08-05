@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { availabilityFor, bullpenStatusCounts, workloadFor } from '../api/workload.js'
 import { InfoPopover } from './ui/InfoPopover.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 import { SectionMasthead } from './ui/SectionMasthead.jsx'
 
 // The bullpen availability board — who's rested, who's limited, who's likely

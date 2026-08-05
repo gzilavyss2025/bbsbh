@@ -1,4 +1,4 @@
-import { PlayerLink } from '../../../components/PlayerLink.jsx'
+import { PlayerLink } from '../../../components/identity/PlayerLink.jsx'
 import { InjuredMark } from '../../../components/badges/InjuredMark.jsx'
 import { ProspectPill } from '../../../components/badges/ProspectPill.jsx'
 import { RookiePill } from '../../../components/badges/RookiePill.jsx'

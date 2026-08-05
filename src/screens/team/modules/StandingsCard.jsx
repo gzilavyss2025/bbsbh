@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { favoriteAccentColor } from '../../../lib/teams.js'
-import { TeamLink } from '../../../components/TeamLink.jsx'
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLink } from '../../../components/identity/TeamLink.jsx'
+import { TeamLogo } from '../../../components/identity/TeamLogo.jsx'
 import { PostseasonOddsModal } from '../../../components/PostseasonOddsModal.jsx'
 
 // The three rows a preview shows: the club's own, plus the team above and the

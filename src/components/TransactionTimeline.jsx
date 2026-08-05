@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react'
-import { TeamLogo } from './TeamLogo.jsx'
-import { PlayerLink } from './PlayerLink.jsx'
+import { TeamLogo } from './identity/TeamLogo.jsx'
+import { PlayerLink } from './identity/PlayerLink.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
