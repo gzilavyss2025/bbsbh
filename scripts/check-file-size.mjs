@@ -72,7 +72,7 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
-  'src/styles/05-masthead-nav.css': 700, // 683
+  'src/styles/05-masthead-nav.css': 700, // 692
   'src/styles/06-loader-and-cards.css': 900, // 850
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 686

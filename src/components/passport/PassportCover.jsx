@@ -114,7 +114,7 @@ export function PassportCover({ onOpen }) {
       onClick={onOpen}
       // The accessible name says what the control DOES, and contains the word
       // the foot of the cover shows (ADR-0017's button-copy convention).
-      aria-label="Open your logbook"
+      aria-label="Open your Game Log"
     >
       {/* No knockout mark AND no abbreviation (an unrecognised id) — the crest
           slot is dropped entirely rather than left as an empty square, and the
@@ -166,7 +166,7 @@ export function PassportCover({ onOpen }) {
         tight
       />
 
-      <span className="passcover__title">Logbook</span>
+      <span className="passcover__title">Game Log</span>
 
       {/* MiLB ids have no name in the static table and answer null — the line
           is dropped rather than filled with a placeholder. */}

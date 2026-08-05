@@ -72,7 +72,7 @@ function monthDay(date) {
 }
 
 export function LogbookPage({ season: requestedSeason = null, placing = null }) {
-  useDocumentTitle('Logbook')
+  useDocumentTitle('Game Log')
   const navigate = useNav()
   const { counts, seasons, forSeason, all, unplaced, place, unplace, placeAll } = useStamps()
 
@@ -211,7 +211,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
     <div className="screen logbook">
       <SiteHeader />
       <header className="topbar">
-        <h1 className="topbar__title">Logbook</h1>
+        <h1 className="topbar__title">Game Log</h1>
         {total > 0 && (
           <button
             type="button"
@@ -378,7 +378,7 @@ export function LogbookPage({ season: requestedSeason = null, placing = null }) 
 
           {/* Everything the Logbook already showed, shifted below the book. */}
           {seasons.length > 1 && (
-            <nav className="logbook__seasons" aria-label="Logbook seasons">
+            <nav className="logbook__seasons" aria-label="Game Log seasons">
               {seasons.map((year) => (
                 <button
                   type="button"

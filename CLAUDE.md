@@ -149,11 +149,11 @@ user consented to spoil (consent, never a mark — a per-day on/off state map, s
 that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
 consent-pop-up wording (never a score, closed registry, public-cached read,
 allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
-ADR-0025. **The fourth stores a score, by design**: Logbook game stamps
+ADR-0025. **The fourth stores a score, by design**: the **Game Log**'s game stamps
 (`api/stamps.js` + `src/lib/stamps.js`, surfaced at `/logbook` and inside the box
 score's seal) — mintable only for a game the SERVER can prove this user already
-revealed, which is what keeps the Logbook from spoiling anything. Read ADR-0035
-before touching that gate or the `check-stamp-surfaces` guard that contains it.
+revealed, which is what keeps it from spoiling anything. `docs/game-log.md` is its
+scope, naming contract, and copy voice; read ADR-0035 before touching that gate.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

@@ -20,6 +20,7 @@ import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
 import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
 import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
+import { LogbookButton } from '../components/chrome/LogbookButton.jsx'
 import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
@@ -344,6 +345,26 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
     return () => obs.disconnect()
   }, [showRevealChip])
 
+  // Same trick again, this time to drop a shadow under the sticky desktop
+  // topbar (.topbar--slate in 25-wide-layout.css) once a card is actually
+  // scrolling underneath it — a permanent shadow would look like a fixed
+  // banner even at the very top of a fresh page. `topbarSentinel` is its own
+  // 1px `position: sticky; top: 0` element placed just above the real
+  // header (see the JSX below); a sticky element's intersectionRatio drops
+  // below 1 the instant it starts sticking, which happens at the same
+  // scroll position the real header does — no header-height math needed.
+  const topbarSentinelRef = useRef(null)
+  const [topbarStuck, setTopbarStuck] = useState(false)
+  useEffect(() => {
+    const el = topbarSentinelRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const obs = new IntersectionObserver(([entry]) => setTopbarStuck(entry.intersectionRatio < 1), {
+      threshold: [1],
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+
   // Per-game pill classification (Game of the Night / Dominant Performance /
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
@@ -445,7 +466,8 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           level deeper, position: sticky could only hold it in view for the
           height of its own short parent (see .topbar--slate's desktop rule
           in index.css). */}
-      <header className="topbar topbar--slate">
+      <div ref={topbarSentinelRef} className="topbar__stickysentinel" aria-hidden="true" />
+      <header className={`topbar topbar--slate${topbarStuck ? ' topbar--stuck' : ''}`}>
         <button
           type="button"
           className="topbar__title topbar__home"
@@ -462,6 +484,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               whichever single button no longer fit onto its own row. */}
           <div className="topbar__iconcluster">
             <SiteSearchButton className="topbar__search" />
+            <LogbookButton className="topbar__search" />
             <SiteMenuButton className="topbar__search" />
             {AccountButton && (
               <Suspense fallback={null}>

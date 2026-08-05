@@ -136,7 +136,7 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
     <section className="idlab__stampplace" aria-label="Stamp placement">
       <div className="colorlab__wpapreviewhead">
         <span className="colorlab__wpapreviewlabel">Stamp placement</span>
-        <span className="idlab__monoinkhint">Where this club&rsquo;s knockout mark sits on a Logbook stamp</span>
+        <span className="idlab__monoinkhint">Where this club&rsquo;s knockout mark sits on a Game Log stamp</span>
         <CopyIconButton
           text={copyText(name, teamId, placement)}
           label={`Copy ${name} stamp-placement context`}
@@ -148,7 +148,7 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
 
       <p className="idlab__stampplacewarn">
         Saved placement applies to every stamp of this club, including ones already minted and placed in a
-        Logbook — a stamp stores the game, never the art, so it redraws from these numbers each time.
+        Game Log — a stamp stores the game, never the art, so it redraws from these numbers each time.
       </p>
 
       <div className="idlab__stampplacerow">
