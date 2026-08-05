@@ -12,24 +12,24 @@ import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
-import { GameCard } from '../components/GameCard.jsx'
-import { DerbyCard } from '../components/DerbyCard.jsx'
-import { PastGameFlipCard } from '../components/PastGameFlipCard.jsx'
-import { LevelNav } from '../components/LevelNav.jsx'
-import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
-import { TallyLockup } from '../components/TallyBrand.jsx'
-import { SiteSearchButton } from '../components/SiteSearch.jsx'
-import { SiteMenuButton } from '../components/SiteMenu.jsx'
+import { GameCard } from '../components/game/GameCard.jsx'
+import { DerbyCard } from '../components/allstar/DerbyCard.jsx'
+import { PastGameFlipCard } from '../components/game/PastGameFlipCard.jsx'
+import { LevelNav } from '../components/team/LevelNav.jsx'
+import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
+import { TallyLockup } from '../components/chrome/TallyBrand.jsx'
+import { SiteSearchButton } from '../components/chrome/SiteSearch.jsx'
+import { SiteMenuButton } from '../components/chrome/SiteMenu.jsx'
 import { goHome } from '../lib/home.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
-import { SiteFooter } from '../components/SiteFooter.jsx'
-import { FavoriteTeamModal } from '../components/FavoriteTeamModal.jsx'
-import { OffDaySection } from '../components/OffDaySection.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
+import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
+import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
+import { OffDaySection } from '../components/team/OffDaySection.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import { FILTER_CHIPS, reorderGameOfTheNight, reorderNationalBroadcasts } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
-import { ConsentModal } from '../components/ConsentModal.jsx'
+import { ConsentModal } from '../components/seal/ConsentModal.jsx'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 import { slateScoreLine } from '../lib/slateScoreLine.js'
@@ -39,10 +39,10 @@ import { trackToggleConsent, TOGGLES, ACTIONS, SURFACES } from '../lib/analytics
 // use of Clerk hooks) imports @clerk/clerk-react at its top, so neither is
 // ever fetched — let alone rendered — on a deploy without Clerk configured.
 const AccountButton = isClerkEnabled
-  ? lazy(() => import('../components/AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
+  ? lazy(() => import('../components/account/AccountButton.jsx').then((m) => ({ default: m.AccountButton })))
   : null
 const ContinueScoring = isClerkEnabled
-  ? lazy(() => import('../components/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
+  ? lazy(() => import('../components/game/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
   : null
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate

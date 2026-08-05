@@ -51,28 +51,28 @@ const STAMP_ALLOWLIST = {
   // entry that cannot reach production at all — /identity-lab is DEV-gated
   // behind `import.meta.env.DEV` in App.jsx, so the import is dropped from a
   // production build. Read ADR-0035 before adding a fourth.
-  'components/GameStamp.jsx': [
-    'components/StampGameButton.jsx',
+  'components/logbook/GameStamp.jsx': [
+    'components/logbook/StampGameButton.jsx',
     'screens/LogbookPage.jsx',
     'components/passport/PassportPage.jsx',
     'screens/identity-lab/editors/StampPlacementEditor.jsx',
   ],
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.
-  'components/StampGameButton.jsx': ['screens/BoxScore.jsx'],
+  'components/logbook/StampGameButton.jsx': ['screens/BoxScore.jsx'],
 }
 
 // Surfaces that list games the user has NOT revealed. None of them may so much
 // as name a stamp component.
 const FORBIDDEN_SURFACES = [
   'screens/GameSelect.jsx',
-  'components/GameCard.jsx',
-  'components/ContinueScoring.jsx',
-  'components/PastGameFlipCard.jsx',
-  'components/GameResultFace.jsx',
-  'components/Scorebug.jsx',
-  'components/GameFinder.jsx',
-  'components/DeckNudge.jsx',
+  'components/game/GameCard.jsx',
+  'components/game/ContinueScoring.jsx',
+  'components/game/PastGameFlipCard.jsx',
+  'components/game/GameResultFace.jsx',
+  'components/gamehud/Scorebug.jsx',
+  'components/game/GameFinder.jsx',
+  'components/teamstats/DeckNudge.jsx',
 ]
 const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 

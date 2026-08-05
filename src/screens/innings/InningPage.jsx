@@ -1,7 +1,7 @@
 import { halfIndex } from '../../api/select.js'
-import { StatBox, AbsCard } from '../../components/StatBox.jsx'
-import { DueUpNextCard } from '../../components/DueUpNextCard.jsx'
-import { HalfInning } from '../../components/HalfInning.jsx'
+import { StatBox, AbsCard } from '../../components/gamehud/StatBox.jsx'
+import { DueUpNextCard } from '../../components/playbyplay/DueUpNextCard.jsx'
+import { HalfInning } from '../../components/inning/HalfInning.jsx'
 import { WinProbChart } from '../../components/charts/WinProbChart.jsx'
 
 // A no-op stand-in for HalfInning's onReveal, which HalfInning calls directly

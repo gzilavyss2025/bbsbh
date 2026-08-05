@@ -1,6 +1,6 @@
 import { useAsync } from '../../hooks/useAsync.js'
-import { AsyncGate } from '../../components/AsyncGate.jsx'
-import { TeamTransactionsCard } from '../../components/TeamTransactionsCard.jsx'
+import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
+import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadGames } from './data/loadGames.js'

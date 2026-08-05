@@ -1,10 +1,10 @@
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { BoxScoreSkeleton } from '../components/BoxScoreSkeleton.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
-import { DelayCard } from '../components/DelayCard.jsx'
-import { PostponedBanner } from '../components/GameCard.jsx'
-import { CountBlink } from '../components/StatBox.jsx'
+import { DelayCard } from '../components/inning/DelayCard.jsx'
+import { PostponedBanner } from '../components/game/GameCard.jsx'
+import { CountBlink } from '../components/gamehud/StatBox.jsx'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:

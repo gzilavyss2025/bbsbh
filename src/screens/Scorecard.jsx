@@ -1,5 +1,5 @@
-import { ScorecardSheet } from '../components/ScorecardSheet.jsx'
-import { DefenseDiamond } from '../components/DefenseDiamond.jsx'
+import { ScorecardSheet } from '../components/scoring/ScorecardSheet.jsx'
+import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 
 // The Numbers Game "22" scorecard sheet, drawn in the paper-scorebook system: a
 // header band of write-in fields, the nine-by-eleven at-bat grid, and a footer of

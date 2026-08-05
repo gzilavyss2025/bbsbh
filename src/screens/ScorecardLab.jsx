@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { SiteHeader } from '../components/SiteHeader.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { Loader } from '../components/ui/Loader.jsx'

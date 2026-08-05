@@ -288,7 +288,7 @@ link, "Reveal" always visible, accessible name contains the visible word).
 
 ## Site search is the one dialog that isn't a sheet (ADR-0037)
 
-`SiteSearchModal` (`components/SiteSearch.jsx`) is a full-screen, top-anchored
+`SiteSearchModal` (`components/chrome/SiteSearch.jsx`) is a full-screen, top-anchored
 surface (`.searchoverlay`), **not** the shared `.scrim`/`.sheet` bottom sheet
 every other dialog here uses. Not a style choice: a docked sheet is positioned
 against the layout viewport, which an on-screen keyboard does not shrink, so the

@@ -2,7 +2,7 @@ import { useId } from 'react'
 import { PAGE_ASPECT } from '../../lib/passportLayout.js'
 import { useFavoriteTeam } from '../../hooks/useFavoriteTeam.js'
 import { hasMonoLogo, teamAbbr, teamChipColors, teamFullName, teamLogoUrl } from '../../lib/teams.js'
-import { TallyWordmark } from '../TallyBrand.jsx'
+import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 
 // The Logbook passport book's FRONT COVER (ADR-0035, the passport-book
 // redesign). A real passport cover is one board of one colour with everything

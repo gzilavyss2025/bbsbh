@@ -1,4 +1,4 @@
-import { TeamLogo } from '../../../components/TeamLogo.jsx'
+import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 
 // Which club is on the bench, and — because the real job is "work through all
 // thirty" rather than "find one" — who's on deck. The arrows step the rail's

@@ -9,7 +9,7 @@ in-app modal of the narrative blurbs from the PDF — the hand-titled callouts
 
 This documents how that parse works, why it's shaped the way it is, and how to
 verify or extend it. It's the companion to the code: `src/api/whatsBrewing.js`
-(parser + the per-club `CONFIG`), `src/components/WhatsBrewingModal.jsx` (the
+(parser + the per-club `CONFIG`), `src/components/game/WhatsBrewingModal.jsx` (the
 modal), and `GameNotesButton` in `src/screens/TeamInfo.jsx`.
 
 ## The short version

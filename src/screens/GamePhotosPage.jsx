@@ -5,11 +5,11 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { PINNED_TEAM_ID, SPORT_IDS, teamFullName } from '../lib/teams.js'
 import { toApiDate } from '../lib/dates.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TeamFilterStrip } from '../components/TeamFilterStrip.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { ReportFooter } from '../components/ReportFooter.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const SEASONS = Array.from({ length: 6 }, (_, i) => CURRENT_YEAR - i)

@@ -19,16 +19,16 @@ import { safeToShowEntering } from '../api/enteringHalf.js'
 import { revealRunsThrough } from '../api/linescore.js'
 import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
-import { RollingLine } from '../components/RollingLine.jsx'
-import { ExtrasBanner } from '../components/ExtrasBanner.jsx'
-import { DelayCard } from '../components/DelayCard.jsx'
-import { Scorebug } from '../components/Scorebug.jsx'
+import { RollingLine } from '../components/gamehud/RollingLine.jsx'
+import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
+import { DelayCard } from '../components/inning/DelayCard.jsx'
+import { Scorebug } from '../components/gamehud/Scorebug.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
-import { PitchersSection } from '../components/PitchersSection.jsx'
-import { MarginNotes } from '../components/MarginNotes.jsx'
-import { DefenseSection, LineupSection } from '../components/EnteringReference.jsx'
-import { RosterPanel } from '../components/RosterPanel.jsx'
+import { PitchersSection } from '../components/inning/PitchersSection.jsx'
+import { MarginNotes } from '../components/inning/MarginNotes.jsx'
+import { DefenseSection, LineupSection } from '../components/inning/EnteringReference.jsx'
+import { RosterPanel } from '../components/inning/RosterPanel.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
@@ -39,7 +39,7 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 // device) when a deploy actually configures Clerk — see main.jsx's matching
 // dynamic import and clerkConfig.js.
 const RevealCloudSync = isClerkEnabled
-  ? lazy(() => import('../components/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
+  ? lazy(() => import('../components/sync/RevealCloudSync.jsx').then((m) => ({ default: m.RevealCloudSync })))
   : null
 
 // The scorebug dock's tap-to-reposition corners, clockwise from top-right —

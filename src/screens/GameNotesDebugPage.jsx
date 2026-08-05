@@ -5,10 +5,10 @@ import { whatsBrewingLayout } from '../api/whatsBrewing.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { ALL_MLB_TEAM_IDS, teamFullName } from '../lib/teams.js'
-import { SiteHeader } from '../components/SiteHeader.jsx'
-import { TeamLogo } from '../components/TeamLogo.jsx'
-import { AsyncStatus } from '../components/AsyncGate.jsx'
-import { WhatsBrewingModal } from '../components/WhatsBrewingModal.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
 
 // Unlisted QA page — linked from nowhere (see route.js), reachable only by
 // direct URL (/game-notes-debug). One row per MLB club: whether its Game

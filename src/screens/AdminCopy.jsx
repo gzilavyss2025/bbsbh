@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
-import { SiteHeader } from '../components/SiteHeader.jsx'
+import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { FIELDS, GROUPS, defaultCopy, fillTokens, sanitizeOverrides } from '../copy/registry.js'
-import { ConsentModal } from '../components/ConsentModal.jsx'
+import { ConsentModal } from '../components/seal/ConsentModal.jsx'
 import { makePreviewResolver } from '../copy/previewResolver.js'
 import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 
