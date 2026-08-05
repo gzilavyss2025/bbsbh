@@ -123,7 +123,13 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}
-        {data.onRehab && (
+        {/* startingToday: he's announced as TODAY's probable starter for the
+            club that has him on rehab/the IL — MLB posts that days before it
+            files the activation transaction the banners are otherwise keyed
+            on, so showing "Rehab Assignment"/"Injured List" the day he's
+            about to take the mound would be stale on its face. See
+            loadPlayer.js. */}
+        {data.onRehab && !data.startingToday && (
           <div className="rehab-banner" role="note">
             <span className="rehab-banner__mark" aria-hidden="true">✚</span>
             <span className="rehab-banner__text">
@@ -131,7 +137,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
-        {data.onIL && (
+        {data.onIL && !data.startingToday && (
           <div className="il-banner" role="note">
             <span className="il-banner__mark" aria-hidden="true">✚</span>
             <span className="il-banner__text">

@@ -152,7 +152,7 @@ const asOf = (rows, date) => rows.filter((r) => (r.effectiveDate || r.date) <= d
 test('detectInjuredList sees a pre-2019 "disabled list" placement', () => {
   assert.deepEqual(
     detectInjuredList(asOf(BETTS_2015_DL, '2015-08-05'), '2015-08-05'),
-    { days: '7', label: '7-Day' },
+    { days: '7', label: '7-Day', team: RED_SOX },
   )
 })
 
@@ -163,7 +163,7 @@ test('a pre-2019 "disabled list" activation closes the stint', () => {
 test('a stint placed on a "disabled list" and activated off an "injured list" opens and closes', () => {
   assert.deepEqual(
     detectInjuredList(asOf(BETTS_2018_MIXED, '2018-06-05'), '2018-06-05'),
-    { days: '10', label: '10-Day' },
+    { days: '10', label: '10-Day', team: RED_SOX },
   )
   assert.equal(detectInjuredList(asOf(BETTS_2018_MIXED, '2018-06-20'), '2018-06-20'), null)
 })
@@ -171,7 +171,7 @@ test('a stint placed on a "disabled list" and activated off an "injured list" op
 test('the day count parses from the unhyphenated "10 day disabled list" form', () => {
   assert.deepEqual(
     detectInjuredList(asOf(VALDEZ_2021_UNHYPHENATED, '2021-04-15'), '2021-04-15'),
-    { days: '10', label: '10-Day' },
+    { days: '10', label: '10-Day', team: ASTROS },
   )
 })
 
@@ -181,12 +181,12 @@ test('an activation from the All-Star reserve list closes an open IL stint', () 
   // Still hurt before the All-Star break.
   assert.deepEqual(
     detectInjuredList(asOf(BETTS_2024_RESERVE_LIST, '2024-07-01'), '2024-07-01'),
-    { days: '10', label: '10-Day' },
+    { days: '10', label: '10-Day', team: DODGERS },
   )
   // Being parked on the All-Star club's reserve list is not a return.
   assert.deepEqual(
     detectInjuredList(asOf(BETTS_2024_RESERVE_LIST, '2024-07-20'), '2024-07-20'),
-    { days: '10', label: '10-Day' },
+    { days: '10', label: '10-Day', team: DODGERS },
   )
   // His own club activating him from that list IS the return.
   assert.equal(detectInjuredList(asOf(BETTS_2024_RESERVE_LIST, '2024-08-20'), '2024-08-20'), null)
@@ -197,7 +197,7 @@ test('an All-Star club "activating" a still-injured player is still a phantom', 
   // The guard this file must not regress: only the Yankees' own 7-28 row ends it.
   assert.deepEqual(
     detectInjuredList(asOf(JUDGE_2023_PHANTOM, '2023-07-15'), '2023-07-15'),
-    { days: '10', label: '10-Day' },
+    { days: '10', label: '10-Day', team: YANKEES },
   )
   assert.equal(detectInjuredList(asOf(JUDGE_2023_PHANTOM, '2023-08-01'), '2023-08-01'), null)
 })
@@ -205,7 +205,7 @@ test('an All-Star club "activating" a still-injured player is still a phantom', 
 test('modern injured-list wording is unaffected', () => {
   assert.deepEqual(
     detectInjuredList(asOf(COLE_2025_CONTROL, '2025-06-01'), '2025-06-01'),
-    { days: '60', label: '60-Day' },
+    { days: '60', label: '60-Day', team: YANKEES },
   )
   assert.equal(detectInjuredList(asOf(COLE_2025_CONTROL, '2025-11-20'), '2025-11-20'), null)
 })

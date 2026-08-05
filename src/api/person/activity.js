@@ -128,7 +128,15 @@ export function detectInjuredList(transactions, asOf) {
   const ends = (transactions ?? []).some((t) => txnDate(t) > start && isIlEndingTxn(t))
   if (ends) return null
   const days = injuredListDays(latest)
-  return { days, label: days ? `${days}-Day` : 'Injured List' }
+  return {
+    days,
+    label: days ? `${days}-Day` : 'Injured List',
+    // The placing club — an MLB parent org, since only a big-league IL
+    // placement reads this way. Lets a caller check "is HE announced to
+    // start for THAT club today" (loadPlayer.js's `startingToday` override)
+    // without a second lookup for which org actually has him on the list.
+    team: latest.toTeam?.id ? { id: latest.toTeam.id, name: latest.toTeam.name || '' } : null,
+  }
 }
 
 // ---------------------------------------------------------------------------

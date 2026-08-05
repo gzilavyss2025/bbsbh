@@ -588,6 +588,31 @@ export async function fetchTransactions(personId, endDate) {
   }
 }
 
+// Whether a player is TODAY's announced probable starter for a team — MLB
+// posts this days before it files the activation transaction that would
+// clear an IL/rehab flag, so it's the one live signal that can outrun
+// `detectInjuredList`/`detectRehabAssignment` (person.js); see loadPlayer.js's
+// `startingToday`. Spoiler-free; degrades to false on any failure/off day.
+export async function isProbableStarterToday(teamId, personId, date) {
+  if (!teamId || !personId || !date) return false
+  try {
+    const data = await getJson(
+      `/api/v1/schedule?sportId=1&teamId=${teamId}&date=${date}&hydrate=probablePitcher`,
+    )
+    const game = (data.dates ?? []).flatMap((d) => d.games ?? [])[0]
+    if (!game) return false
+    const side =
+      game.teams?.home?.team?.id === teamId
+        ? game.teams.home
+        : game.teams?.away?.team?.id === teamId
+          ? game.teams.away
+          : null
+    return side?.probablePitcher?.id === Number(personId)
+  } catch {
+    return false
+  }
+}
+
 // Player ids selected to this season's All-Star Game. Roster membership isn't
 // score-revealing, so this is spoiler-safe to show year-round (unlike the game
 // itself, which stays sealed like any other).
