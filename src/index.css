@@ -15322,6 +15322,79 @@ body {
   background: var(--bg-canvas);
 }
 
+/* The dead space around this bar's primary action belongs to the action, not
+   to the page under it. .pagenav is click-through by design (a soft fade over
+   the paper), so a thumb that missed the button mid-game punched straight
+   through the fade and opened whichever player card happened to sit
+   underneath — you asked to reveal an at-bat and got a page you didn't want.
+   Each button now carries an invisible ::after covering the bar around it: up
+   past the "as of 7:42 PM" stamp to the Refresh row, out to the gutters, and
+   down through the bottom padding and the safe-area inset. Nothing moves
+   visually; only the boundary the pointer sees changes.
+
+   The offsets are measured from the BUTTON, not from the bar, and that is
+   load-bearing rather than incidental: .btn:active nudges the button 1px with
+   a transform, and a transform makes the element a containing block for its
+   own absolutely positioned pseudo. Anchor this to the bar instead (top/bottom
+   0 against the fixed .pagenav — tidier, no magic numbers) and the press
+   silently re-anchors it to the button, collapsing the hit area mid-tap: the
+   pointer goes down on the button and up on the page beneath, which dispatches
+   the click on their common ancestor and the reveal never fires. Anchored
+   here, the press just carries the hit area along with it.
+
+   -76px is this bar's full height above the button when the stamp is absent
+   (14px top padding + 34px Refresh + 8px column gap + the row's 20px
+   margin-top), which is the tallest it may ever reach: with the stamp present
+   the bar is taller still and the area ends partway up the Refresh row.
+   Either way it stops inside the bar and never claims real content above it —
+   the :has() guard keeps that true on a game with no Refresh to sit under,
+   where the same offset WOULD overshoot. */
+.pagenav--innings .btn {
+  position: relative;
+}
+
+.pagenav--innings .btn::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: calc(-1 * var(--app-gutter));
+  bottom: calc(-14px - env(safe-area-inset-bottom));
+  left: calc(-1 * var(--app-gutter));
+}
+
+.pagenav--innings:has(.refreshbtn--float) .btn::after {
+  top: -76px;
+}
+
+/* Refresh keeps its own taps by riding ABOVE that hit area rather than the
+   area stopping short of it: the stamp between the two rows comes and goes
+   with each poll (see RefreshButton), so the gap under Refresh has no fixed
+   height to stop at. */
+.pagenav--innings .refreshbtn--float {
+  position: relative;
+  z-index: 3;
+}
+
+/* A sealed half offers two choices (ADR-0016), so the dead space splits down
+   the middle rather than all going to one of them: each button claims its own
+   outer gutter and the 8px between the pair, putting a stray tap on the choice
+   it was nearest. The two areas OVERLAP across that gap on purpose — abutting
+   them at a shared edge leaves a hairline crack a tap really can fall through
+   (measured: neither area answers at the seam, and the page underneath does) —
+   and the raised z-index hands the overlap, and so the ambiguous middle, to
+   the smaller reveal. (Above the pair, below Refresh — hence its 3.) */
+.pagenav--innings .revealsplit__btn:first-child {
+  z-index: 1;
+}
+
+.pagenav--innings .revealsplit__btn:first-child::after {
+  right: -8px;
+}
+
+.pagenav--innings .revealsplit__btn:last-child::after {
+  left: -4px;
+}
+
 /* ------------------------------------------------------- scorebug HUD
    Persistent innings-view HUD (src/components/Scorebug.jsx). Mobile-first
    default: fixed top-right, invisible (`.gamehud-dock--show` toggles it on)
