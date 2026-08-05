@@ -28,18 +28,6 @@ export function monoInkFor(teamId) {
   return { art: entry.art ?? null, parts: entry.parts ?? {} }
 }
 
-// The pins to actually apply to `sourceSvg`, or null. A saved set whose
-// fingerprint doesn't match the art in hand is DROPPED, not applied: the club
-// rebranded (or the CDN reordered its shapes) and part 3 is no longer the shape
-// somebody looked at. Falling back to the automatic pass shows a mark that's
-// merely unreviewed; applying stale pins shows one that's confidently wrong.
-export function monoInkPins(teamId, fingerprint) {
-  const entry = monoInkFor(teamId)
-  if (!entry || !Object.keys(entry.parts).length) return null
-  if (entry.art && fingerprint && entry.art !== fingerprint) return null
-  return entry.parts
-}
-
 // The whole store, for the lab's save path (which posts it back in full, like
 // every other dev store).
 export function monoInkStore() {
