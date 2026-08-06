@@ -49,7 +49,10 @@ the wrong shape for a whole season and a grid is the wrong shape for a preview.
 
 A tab's secondary modules render as full cards, same as its headline module —
 no collapsed/shelved state. Every tab path goes through `teamTabPath` →
-`linkQuery`: a switch that dropped a dated link's `?d=` would be a spoiler bug.
+`linkQuery`, so a dated link keeps its `?d=` across a tab switch. The hub itself
+opens on **current** stats — links out of a game stopped stamping that cutoff on
+(ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
+one, and `AsOfBanner` is the way back to live.
 
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 

@@ -57,12 +57,16 @@
 // half-inning). Legacy 'inning{n}' links still parse (as the top half).
 // Example: /07052026/milari/bottom3
 //
-// Player/team pages are game-independent (resolvable by id on a cold link), but
-// carry an optional query so a link opened FROM a sealed game stays spoiler-
-// safe: `?d={officialDate}` cuts stats off at the day before that game, and
-// `?s={sportId}` hints the level. Both are omitted on a bare shared link (which
-// has no game to spoil, so it defaults to current stats). Accepts a URL that
-// may include a `?query`.
+// Player/team pages are game-independent (resolvable by id on a cold link) and
+// show CURRENT stats by default, however you reached them. Two optional hints:
+// `?d={officialDate}` shows the page as it stood entering that day, and
+// `?s={sportId}` hints the level so the fetch layer can skip a lookup.
+//
+// `?d=` used to be stamped automatically onto every link out of a started game,
+// as a spoiler cutoff. It isn't any more (ADR-0034, "The cutoff is opt-in now")
+// — it still parses and still applies, so an already-shared dated link resolves
+// the way its sender meant it to, but nothing puts it there for you. Accepts a
+// URL that may include a `?query`.
 
 // The team hub's tabs, as `third URL segment -> route name`. Every one of these
 // is a real address (the URL changes, back/forward work, each tab is
@@ -309,10 +313,11 @@ export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
   return `/${apiDateToUrl(apiDate)}/${matchupSlug(awayAbbr, homeAbbr, gameNumber)}/${section}`
 }
 
-// Build a player / team page path, carrying the spoiler-safe cutoff hints when
-// linked from a game: `d` = the game's officialDate (YYYY-MM-DD), `s` = sportId.
-// Both optional — a bare link (no game context) omits them and shows current
-// stats.
+// Build a player / team page path. `d` = the as-of date (YYYY-MM-DD), `s` =
+// sportId. Both optional, and both absent on an ordinary link — including one
+// out of a game, which is the change ADR-0034's amendment records. A path
+// carrying `d` is one the reader asked for, and every link built from that page
+// keeps it so a single visit gives a single answer.
 function linkQuery({ d, s } = {}) {
   const q = new URLSearchParams()
   if (d) q.set('d', d)
@@ -368,10 +373,9 @@ export function teamLeadersPath(id, opts = {}) {
 // Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
 // 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs
 // hang off.
-// Goes through linkQuery like every other team link, because a team page opened
-// from a game carries `?d=` (the spoiler cutoff) and `?s=` — a tab switch that
-// dropped them would show stats past the half-inning the visitor has reached,
-// which is a spoiler bug, not a cosmetic one.
+// Goes through linkQuery like every other team link: a team page opened at a
+// dated URL must keep `?d=`/`?s=` across a tab switch, or the same visit would
+// answer "entering April 1" on one tab and "today" on the next.
 export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview' ? teamPath(id, opts) : `/team/${id}/${tab}${linkQuery(opts)}`
 }

@@ -144,11 +144,24 @@ export function GameView({ game, section, onSection }) {
   ) : null
 
   return (
-    // Before first pitch there's nothing yet to spoil, so a link out of a
-    // Preview game's lineups should show live/current stats rather than
-    // freezing to "entering today" (that framing only makes sense once the
-    // game — and the spoiler risk — has actually started).
-    <LinkScope asOf={started ? officialDate : null} sportId={game.sportId}>
+    // A link out of a game carries the LEVEL hint and nothing else. It used to
+    // carry `asOf={started ? officialDate : null}` too, stamping `?d=` on every
+    // player/team/leaders link so those pages opened frozen to "entering today".
+    //
+    // That was the spoiler rule reaching a long way past the surfaces it exists
+    // to protect. A season stat line is not a score: it moves by fractions, it
+    // is the same number the back of a baseball card has carried for a century,
+    // and reading one tells you nothing about how the game you are scoring is
+    // going. Freezing it by default made a whole section of the app quietly
+    // wrong — a player page reached from a game showed different numbers than
+    // the same page reached from search — in exchange for very little.
+    //
+    // So stats pages now open LIVE, always. `?d=` still parses and still
+    // freezes (see route.js), so an already-shared link resolves the way its
+    // sender meant it to; it is simply no longer stamped on by default. Nothing
+    // about the game itself is affected — the slate, the lineup pages, the
+    // innings viewer and the box score are unchanged and stay sealed.
+    <LinkScope sportId={game.sportId}>
     <div className="screen">
       <SiteHeader />
 
