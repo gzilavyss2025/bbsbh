@@ -5,12 +5,13 @@
 // Two things here are worth more than the rest:
 //
 //   1. `revealStampFacts` must derive the SAME `innings`/`homeBattedLast` the
-//      server derives, because those two fields are what the reveal gate turns
-//      on (finalHalfIndex, src/lib/stamps.js). If the client says nine innings
-//      and the server says six, the affordance and the gate disagree about
-//      whether a legitimate stamp is mintable. The live feed pads its linescore
-//      out to `scheduledInnings` with empty rows and the schedule feed does not,
-//      which is the exact trap those cases pin.
+//      server derives, because a stamp is drawn from whichever producer resolved
+//      it and must look identical either way — "Final / 11" on the phone that
+//      minted it and "Final / 9" in the Logbook is the same keepsake disagreeing
+//      with itself. The live feed pads its linescore out to `scheduledInnings`
+//      with empty rows and the schedule feed does not, which is the exact trap
+//      those cases pin. (These two fields also used to feed the reveal gate,
+//      retired in ADR-0035's second amendment; the agreement still matters.)
 //   2. The art's constants are LOCKED (PR #502). Pinning the handful that carry
 //      design intent — the double-digit size drop, the diamond clamp — means a
 //      "cleanup" that changes one fails here instead of silently reshaping a
@@ -41,8 +42,6 @@ import { stampLogoTuning, stampLogoTuningRecord } from '../src/lib/stampLogoTuni
 import STAMP_LOGO_TUNING from '../src/lib/data/stamp-logo-tuning.json' with { type: 'json' }
 import { revealStampFacts } from '../src/api/linescore.js'
 import { stampGameFacts } from '../src/api/logbook.js'
-import { finalHalfIndex, meetsRevealGate } from '../src/lib/stamps.js'
-import { halfIndex } from '../src/api/select.js'
 
 // --------------------------------------------------------------------------
 // Geometry
@@ -309,7 +308,6 @@ test('a home club that never batted in the last inning is not claimed to have', 
   const facts = revealStampFacts(feedFixture({ innings, awayRuns: 2, homeRuns: 4 }))
   assert.equal(facts.innings, 9)
   assert.equal(facts.homeBattedLast, false)
-  assert.equal(finalHalfIndex(facts), halfIndex(9, 'top'))
 })
 
 test('a rain-shortened game is not padded out to its scheduled length', () => {
@@ -317,8 +315,7 @@ test('a rain-shortened game is not padded out to its scheduled length', () => {
   // `runs` at all. Verified against gamePk 824807 (2026-08-02 PHI@BAL,
   // "Completed Early: Rain"): a 9-long array whose last four rows are empty and
   // whose sixth has only a top half. Reading the array's LENGTH would claim
-  // nine innings and demand a bottom half nobody played, and the stamp would
-  // never be mintable for a game the user watched to its actual end.
+  // nine innings on the face of the stamp for a game that ran six.
   const innings = [
     ...Array.from({ length: 5 }, (_, i) => ({ num: i + 1, away: { runs: 0 }, home: { runs: 0 } })),
     { num: 6, away: { runs: 3 }, home: { hits: 0, errors: 0, leftOnBase: 0 } },
@@ -329,12 +326,6 @@ test('a rain-shortened game is not padded out to its scheduled length', () => {
   const facts = revealStampFacts(feedFixture({ innings, awayRuns: 8, homeRuns: 0 }))
   assert.equal(facts.innings, 6)
   assert.equal(facts.homeBattedLast, false)
-  assert.equal(finalHalfIndex(facts), halfIndex(6, 'top'))
-
-  // And the gate agrees: reaching the top of the sixth is enough, and stopping
-  // one half short is not.
-  assert.equal(meetsRevealGate({ game: facts, revealedThrough: halfIndex(6, 'top') }), true)
-  assert.equal(meetsRevealGate({ game: facts, revealedThrough: halfIndex(5, 'bottom') }), false)
 })
 
 test('extra innings are counted from the innings actually played', () => {
@@ -347,10 +338,6 @@ test('extra innings are counted from the innings actually played', () => {
   assert.equal(facts.innings, 11)
   assert.equal(facts.homeBattedLast, true)
   assert.equal(stampLabel(facts), 'Final / 11')
-  // A user who revealed only through regulation has NOT seen the innings that
-  // decided it, and cannot stamp.
-  assert.equal(meetsRevealGate({ game: facts, revealedThrough: halfIndex(9, 'bottom') }), false)
-  assert.equal(meetsRevealGate({ game: facts, revealedThrough: halfIndex(11, 'bottom') }), true)
 })
 
 test('a tie carries no winner rather than inventing one', () => {
@@ -365,8 +352,6 @@ test('revealStampFacts degrades rather than throwing on an empty feed', () => {
   assert.equal(bare.innings, 0)
   assert.equal(bare.status, '')
   assert.equal(bare.away.runs, null)
-  // Nothing about an empty blob may pass the gate.
-  assert.equal(meetsRevealGate({ game: bare, revealedThrough: 999 }), false)
 })
 
 test('both producers of the facts blob agree on the same game', () => {

@@ -1,14 +1,16 @@
 // The Logbook's pure rules (src/lib/stamps.js, ADR-0035).
 //
-// The gate cases below are the spoiler-critical ones: a stamp carries a final
-// score, so "you cannot own a stamp for a game you have not finished revealing"
-// has to hold for a walk-off, for extra innings, and for a home team that never
-// batted in the last inning — the three shapes where a naive
-// `regulation × 2 − 1` gets it wrong in one direction or the other.
+// This file used to open with the reveal-gate cases — `meetsRevealGate` across a
+// walk-off, extra innings, and a home team that never batted. That gate was
+// retired in ADR-0035's second amendment and the predicate deleted, so those
+// cases went with the code they pinned rather than being loosened to pass.
+// The mint's surviving refusals are pinned server-side instead
+// (`mintRefusal`/`stampEntry` in test/api-handlers.test.js), and the Logbook's
+// spoiler containment is pinned by `scripts/check-stamp-surfaces.mjs` and
+// `e2e/invariants/logbook-stamp.spec.js`, both untouched.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { halfIndex } from '../src/api/select.js'
 import {
   DEFAULT_STAMP_MODE,
   MAX_NOTE_LENGTH,
@@ -17,9 +19,7 @@ import {
   MAX_STAMPS_PER_SEASON,
   addStamp,
   applyRemoteStamps,
-  finalHalfIndex,
   isStamped,
-  meetsRevealGate,
   normalizePlacement,
   normalizeStamp,
   parseStamps,
@@ -38,77 +38,6 @@ import {
   toGamePk,
   unplaceStamp,
 } from '../src/lib/stamps.js'
-
-const NINE = { gamePk: 1, status: 'Final', date: '2026-05-18', innings: 9, homeBattedLast: true }
-
-// ---------------------------------------------------------------------------
-// The half-index restatement must not drift from the real one
-// ---------------------------------------------------------------------------
-
-test('finalHalfIndex agrees with select.js halfIndex', () => {
-  for (let inning = 1; inning <= 15; inning++) {
-    assert.equal(finalHalfIndex({ innings: inning, homeBattedLast: true }), halfIndex(inning, 'bottom'))
-    assert.equal(finalHalfIndex({ innings: inning, homeBattedLast: false }), halfIndex(inning, 'top'))
-  }
-})
-
-test('finalHalfIndex refuses a game with no innings', () => {
-  assert.equal(finalHalfIndex({ innings: 0, homeBattedLast: true }), null)
-  assert.equal(finalHalfIndex({}), null)
-  assert.equal(finalHalfIndex(null), null)
-})
-
-// ---------------------------------------------------------------------------
-// The reveal gate
-// ---------------------------------------------------------------------------
-
-test('a nine-inning game needs the bottom of the ninth revealed', () => {
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: halfIndex(9, 'top') }), false)
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: halfIndex(9, 'bottom') }), true)
-})
-
-test('a home team that never batted in the ninth is gated at the top of the ninth', () => {
-  // Home led after the top half, so there is no bottom to reveal. Demanding one
-  // would make the stamp unreachable for every such game.
-  const game = { ...NINE, homeBattedLast: false }
-  assert.equal(meetsRevealGate({ game, revealedThrough: halfIndex(8, 'bottom') }), false)
-  assert.equal(meetsRevealGate({ game, revealedThrough: halfIndex(9, 'top') }), true)
-})
-
-test('an extra-inning game is NOT unlocked by revealing regulation', () => {
-  // The PRD's `regulation × 2 − 1` would pass here, and it would be a spoiler
-  // in reverse: the game was tied after nine, so the user has seen none of the
-  // innings that decided it.
-  const game = { ...NINE, innings: 11 }
-  assert.equal(meetsRevealGate({ game, revealedThrough: halfIndex(9, 'bottom') }), false)
-  assert.equal(meetsRevealGate({ game, revealedThrough: halfIndex(11, 'bottom') }), true)
-})
-
-test('a consented spoiled day satisfies the gate on its own', () => {
-  // ADR-0026: the Scores Unlocked pass never writes the reveal mark, so this is
-  // the one legitimate way to know a final score with revealedThrough at -1.
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: -1, daySpoiled: true }), true)
-})
-
-test('the gate fails closed on everything else', () => {
-  assert.equal(meetsRevealGate(), false)
-  assert.equal(meetsRevealGate({}), false)
-  assert.equal(meetsRevealGate({ game: NINE }), false)
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: '17' }), false)
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: 1.5 }), false)
-  // Live games never mint — a stamp is permanent, a live score is not.
-  assert.equal(
-    meetsRevealGate({ game: { ...NINE, status: 'Live' }, revealedThrough: 99 }),
-    false,
-  )
-  // A truthy-but-not-true consent flag is not consent.
-  assert.equal(meetsRevealGate({ game: NINE, revealedThrough: -1, daySpoiled: 'yes' }), false)
-  // Consent for a game with no parseable date proves nothing.
-  assert.equal(
-    meetsRevealGate({ game: { ...NINE, date: 'May 18' }, revealedThrough: -1, daySpoiled: true }),
-    false,
-  )
-})
 
 // ---------------------------------------------------------------------------
 // Validation and parsing

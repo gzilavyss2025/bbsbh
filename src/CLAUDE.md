@@ -185,11 +185,14 @@ read the linked ADRs before refactoring:
   voice rules — read it before writing any copy this feature shows.
 - **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
   final score *plainly*, and it is safe for a structural reason rather than a
-  careful one: a stamp only exists for a game the server can prove this user
-  already finished revealing. Two mechanisms carry that into the UI.
+  careful one — but the structure is **where it may render**, not a permission
+  check at mint time. The server-side reveal gate was retired in ADR-0035's
+  second amendment (it refused the ordinary flow, for the `onReveal` reason
+  below); read that before adding any mint-time evidence back.
   `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
-  render function (`screens/BoxScore.jsx`), which IS the client-side gate —
-  ADR-0002 again, used a third time. That host `SealBox` still has **no
+  render function (`screens/BoxScore.jsx`), which is what puts a stamp out of
+  reach until you open the box score — ADR-0002 again, used a third time. That
+  host `SealBox` still has **no
   `onReveal` and persists nothing**, and must stay that way: give it one and a
   box score opened under the Scores Unlocked pass would silently ratchet the
   whole game's `revealedThrough`. `GameStamp.jsx` (the art) and
@@ -200,9 +203,9 @@ read the linked ADRs before refactoring:
   (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
   signed-out user has a real Logbook on that device, holding no scores at all —
   the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
-  mirrors the collection across a signed-in user's devices, and is the one
-  place that pushes the local reveal mark to `/api/reveal` before minting; its
-  header says why that is the only sanctioned way to close ADR-0035's known gap.
+  mirrors the collection across a signed-in user's devices; it used to push the
+  local reveal mark to `/api/reveal` before each mint to satisfy the gate, and
+  its header records why that could never work and what replaced it.
   The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
   with **one tunable part**: where a club's knockout mark sits in its slot
   (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in

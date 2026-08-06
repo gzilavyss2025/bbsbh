@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useStamps } from '../../hooks/useStamps.js'
 import { stampsToPublish } from '../../lib/stamps.js'
-import { revealMarkFor } from '../../hooks/useRevealProgress.js'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
@@ -18,24 +17,20 @@ import { revealMarkFor } from '../../hooks/useRevealProgress.js'
 // does local-only.
 //
 // ---------------------------------------------------------------------------
-// THE REVEAL PUSH — read this before touching `publish`
+// THERE IS NO REVEAL PUSH HERE ANY MORE — and that is the fix, not a regression
 // ---------------------------------------------------------------------------
-// `POST /api/stamps` refuses to mint unless the SERVER can prove this user
-// already revealed the game, by reading their own `reveal:{userId}:{gamePk}`
-// ratchet or their spoiled-day consent map. That is the invariant the whole
-// Logbook rests on (ADR-0035), and it is not negotiable.
+// This publish path used to POST the game's local `revealedThrough` to
+// /api/reveal before each mint, because `POST /api/stamps` refused to mint
+// without a server-side reveal mark (ADR-0035). It did not work, for a reason
+// that was structural rather than a bug: the mint affordance lives inside the
+// box score's `SealBox`, and that `SealBox` deliberately persists nothing — so
+// `revealMarkFor(gamePk)` returned -1 for the ordinary flow, the push was
+// skipped, and the mint 403'd. Nineteen real stamps sat unsyncable behind it.
 //
-// It leaves one gap, which the ADR names explicitly: reveal sync is opt-in and
-// only populated for signed-in users, so a game revealed BEFORE signing in has
-// no server mark, and its perfectly legitimate stamp would be refused. The one
-// sanctioned fix is the one below — push this device's local `revealedThrough`
-// to /api/reveal first, then mint. That endpoint is a one-directional ratchet
-// (it can only ever move the mark forward, and it stores a half-index, never a
-// score), so feeding it is safe in a way that weakening the gate would not be.
-//
-// Do NOT "simplify" this into sending the mark along with the mint, or into
-// having the server trust a claim in the request body. The gate must keep
-// reading only keys the server itself wrote.
+// The gate was retired in ADR-0035's second amendment; read it before adding
+// any evidence-passing back. The short version: what keeps the Logbook from
+// spoiling anything is `scripts/check-stamp-surfaces.mjs` — where stamp art may
+// render — not what the server can prove about who revealed what.
 //
 // ---------------------------------------------------------------------------
 // Removals propagate BOTH ways — read `state`, never assume it
@@ -196,19 +191,6 @@ export function StampsCloudSync() {
             if (entry.state === 'off') {
               await fetch(`/api/stamps?gamePk=${gamePk}`, { method: 'DELETE', headers: auth })
               return
-            }
-            // See THE REVEAL PUSH above. Best-effort and deliberately not
-            // awaited-for-success: a user whose mark is already on the server,
-            // or who qualifies through the spoiled-day map instead, mints fine
-            // without it, and a failure here should cost a mint attempt, not
-            // skip it.
-            const mark = revealMarkFor(gamePk)
-            if (mark >= 0) {
-              await fetch(`/api/reveal?gamePk=${gamePk}`, {
-                method: 'POST',
-                headers: { ...auth, 'content-type': 'application/json' },
-                body: JSON.stringify({ revealedThrough: mark }),
-              }).catch(() => {})
             }
             await fetch('/api/stamps', {
               method: 'POST',
