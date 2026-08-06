@@ -18,6 +18,19 @@ import { test, expect } from './fixtures.js'
 // Its top of the 1st carries two MLB.com highlight clips.
 const GAME = '/07072026/milstl-2'
 
+// The "Rest of half" button sits in the floating bar's bottom-right corner,
+// which the scorebug dock parks over — and keeps, always-visible — on any
+// viewport >= 740px (z-index 21, above `.pagenav`'s 20, by design; see the
+// dock comment in `e2e/reveal-hit-area.spec.js`). A plain Playwright
+// `.click()` targets the element's centre, which the dock covers there, so
+// it retries into a 30s timeout instead of ever landing. Aim at the button's
+// inner-left edge instead — same technique that spec's `lastX` uses.
+async function clickRestOfHalf(page) {
+  const btn = page.getByRole('button', { name: /Reveal the rest of half/ })
+  const box = await btn.boundingBox()
+  await page.mouse.click(box.x + box.width * 0.2, box.y + box.height / 2)
+}
+
 // Every element the browser would actually deliver a tap to, at a point.
 async function hitPathAt(page, x, y) {
   return page.evaluate(
@@ -37,7 +50,7 @@ async function hitPathAt(page, x, y) {
 test('the highlight sheet sits above the floating bar, not under it', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
 
-  await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
+  await clickRestOfHalf(page)
   const watch = page.locator('.pbp__hlbtn').first()
   await expect(watch).toBeVisible()
   await watch.click()
@@ -86,7 +99,7 @@ test.describe('pitch-zone modal', () => {
   test('sits above the floating bar too', async ({ page }) => {
     await page.goto(`${GAME}/top1`)
 
-    await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
+    await clickRestOfHalf(page)
     const zone = page.locator('.pbp__zonebtn').first()
     await expect(zone).toBeVisible()
     await zone.click()
@@ -113,7 +126,7 @@ test.describe('pitch-color key', () => {
   test('sits above the floating bar too', async ({ page }) => {
     await page.goto(`${GAME}/top1`)
 
-    await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
+    await clickRestOfHalf(page)
     await page.getByRole('button', { name: 'Show the pitch-color key' }).first().click()
 
     await expect(page.locator('.pcmodal')).toBeVisible()
@@ -125,7 +138,7 @@ test.describe('pitch-color key', () => {
 test('closing a portalled dialog still hands focus back to its trigger', async ({ page }) => {
   await page.goto(`${GAME}/top1`)
 
-  await page.getByRole('button', { name: /Reveal the rest of half/ }).click()
+  await clickRestOfHalf(page)
   const watch = page.locator('.pbp__hlbtn').first()
   await watch.click()
 
