@@ -318,7 +318,11 @@ export function gamePath(apiDate, awayAbbr, homeAbbr, section, gameNumber = 1) {
 // out of a game, which is the change ADR-0034's amendment records. A path
 // carrying `d` is one the reader asked for, and every link built from that page
 // keeps it so a single visit gives a single answer.
-function linkQuery({ d, s } = {}) {
+// Exported so the as-of date control (`components/seal/AsOfBanner.jsx`) can
+// apply a picked date to whatever page it's rendering on by re-appending this
+// query to `location.pathname` — the same query string every path builder
+// below already produces, so a hand-built one can't drift from theirs.
+export function linkQuery({ d, s } = {}) {
   const q = new URLSearchParams()
   if (d) q.set('d', d)
   if (s) q.set('s', String(s))

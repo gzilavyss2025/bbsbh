@@ -633,4 +633,47 @@
   background: var(--accent-primary);
   color: var(--text-on-ink);
 }
+/* The live-state "way in" and the dated-state "way to change" are both a
+   plain-text button (no border) so they read as lighter-weight than "Show
+   current" — that one leaves the dated view, this one only offers to enter
+   or edit it. */
+.asof-banner__cancel {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  color: var(--text-caption);
+  background: none;
+  border: none;
+  padding: 3px 2px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.asof-banner__cancel:hover {
+  color: var(--accent-primary);
+}
+/* The live-state banner carries only the entry link — no border/background,
+   so it doesn't read as an alert on the common (live) path the way the dated
+   banner's dashed strip does. */
+.asof-banner--live {
+  border: none;
+  background: none;
+  padding: 4px 16px;
+}
+.asof-banner__label {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.asof-banner__input {
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  color: var(--text-body);
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
 

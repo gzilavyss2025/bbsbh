@@ -104,7 +104,7 @@ export function LeadersPage({ scope = 'mlb', orgId, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={sportId ?? null}>
       <div className="screen">
         <SiteHeader />
-        <AsOfBanner asOf={asOf} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="topbar leaders__head">
