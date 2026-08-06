@@ -85,6 +85,25 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   the innings view specifically, its only consumer), but `highlightsByPlayId`
   is only ever called inside `HalfInning`'s `SealBox` reveal function.
   Degrades to `[]` on failure or off-MLB.
+  Also holds the highlights **cascade**'s pure classification —
+  `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
+  `highlightPoster` — which is NOT reveal-only: it's plain data transform over
+  the same raw items, run by `scripts/gen-highlights.mjs` in Node with no DOM.
+  It lives here rather than in a parallel module because it reads the same
+  `content` payload, and the FILTER POLICY must have exactly one home (a second
+  copy is how a rail and its generator drift apart). Field names and the
+  taxonomy vocabulary were verified live over 1,150 clips / 41 games; see
+  `.scratch/highlights-cascade/`.
+- `gamehighlights.js` — the reader half of the cascade: the static per-team
+  archive `scripts/gen-highlights.mjs` precomputes
+  (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
+  and the player page's rail. Build-time-fetch pattern (below), same
+  thin-static-reader-beside-a-live-fetcher split as `war.js`. Deliberately
+  DUMB — every filter already ran in the generator, so there is no policy here
+  to drift; a caller's only job on top is identity scoping (the player rail
+  keeps `clip.playerId === personId` from his CURRENT team's file). Decided
+  games only, so not a spoiler surface. Degrades to `{ games: [] }`, cached per
+  team for the session.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface. **`currentTeam` is not a roster

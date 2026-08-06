@@ -139,25 +139,30 @@ don't run these by hand.
   (sportId 16), reuses `person.js`'s REHAB_CAP idea to drop a rehab cameo. App reads
   it via `src/api/formerTeammates.js`.
 - `gen-career-matchups.mjs` → `public/data/career-matchups.json` — for each
-  upcoming matchup (MLB or MiLB), every batter/pitcher pair (one from each
-  club, either direction) with real career plate-appearance history against
-  each other, summed across EVERY level the two have both played at — not just
-  tonight's, so a AA lineup card still surfaces a pair who last faced off in
-  A+. Costly for the same reason `gen-former-teammates.mjs` is: statsapi's
-  `vsPlayerTotal` takes exactly one `sportId` per call (a comma-list 400s), so
-  checking "have these two faced off, at any level" is one call per level per
-  pair. Pruned by first reducing each player's career to the set of levels
-  he's played at as a batter or pitcher (one cheap sweep, mirrors
-  `buildPairSet` but a single stat group) and only querying the INTERSECTION —
-  most pairs share zero levels and cost nothing beyond that sweep. Rows per
-  matchup are capped (`ROWS_PER_MATCHUP_CAP`, sorted by plate appearances) —
-  same-league MiLB rivals who play each other constantly can otherwise turn up
-  hundreds of real pairs for one matchup. Also spoiler-sensitive in a way its
-  sibling generators aren't: `vsPlayerTotal` for the CURRENT season already
-  reflects tonight's plate appearances the moment they happen, so this data
-  can ONLY be safely computed before that night's games are played — the
-  nightly cron timing itself is the spoiler guard, not extra code. App reads
-  it via `src/api/careerMatchups.js`.
+  upcoming GAME (MLB or MiLB), how every batter on a club has fared in his
+  career against the OPPOSING club's probable starting pitcher. Keyed by
+  gamePk, not by team pair: a three-game series is the same two clubs behind
+  three different starters and a doubleheader is two in one day, neither of
+  which a team-pair key can represent. Costly for the same reason
+  `gen-former-teammates.mjs` is: statsapi's `vsPlayerTotal` takes exactly one
+  `sportId` per call (a comma-list 400s, and it rejects a comma-list of
+  `opposingPlayerId` too), so a pair is one call per level checked. `levelsFor`
+  bounds that — an MLB game checks MLB only (measured across a real slate's
+  starter pairs: every pair with any history had it at MLB, none had MiLB-only
+  history, so the four extra calls bought nothing), a MiLB game also checks one
+  level down, which is where "they last faced off in A+" actually lives.
+  **Do not "simplify" this to one call per batter with `opposingTeamId`** —
+  `stats=vsPlayer&opposingTeamId={id}` returns a batter's whole career book vs
+  a franchise in ONE request and looks perfect, but filters by the uniform the
+  pitcher was WEARING AT THE TIME rather than by who is on that staff today;
+  measured against a real PIT@MIL card it found 41 of 141 pairs and 140 of 495
+  plate appearances, and undercounts the pairs it does return. The generator
+  header records the full numbers. Also spoiler-sensitive in a way its sibling
+  generators aren't: `vsPlayerTotal` for the CURRENT season already reflects
+  tonight's plate appearances the moment they happen, so this data can ONLY be
+  safely computed before that night's games are played — the nightly cron
+  timing itself is the spoiler guard, not extra code. App reads it via
+  `src/api/careerMatchups.js`.
 - `gen-vs-team-splits.mjs` → `public/data/vs-team-splits.json` — for every MLB
   active-roster player, his career line vs each opposing club + the last meeting's
   line. The API's vs-team splits carry no game granularity, so it sweeps each
@@ -328,6 +333,29 @@ don't run these by hand.
   The nightly job rebuilds only the current season; once the season file is
   marked `final`, later runs leave it immutable unless explicitly forced.
 
+- `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
+  per MLB club holding its per-play video highlights, game by game, newest first.
+  Feeds the Team hub's Games-tab rail and the player page's rail; the box score's
+  own per-play clips stay a LIVE single-game fetch (`src/api/highlights.js`) and
+  are unaffected. **Scans by GAME, not by team** — each game belongs to two clubs,
+  so per-team schedule scans would fetch the same `content` twice — and files each
+  clip under the team its own `team_id` names, which handles a mid-season trade for
+  free (pre-trade clips stay under the old club). APPEND-ONLY/incremental like
+  `gen-umpire-accuracy.mjs` (`--days` trailing window, `--since`/`--until`
+  backfill), deduped by gamePk; MLB only. **All filtering happens in the
+  generator, never the reader**, so the rails stay dumb: the `abs`/`challenge`
+  exclusion (the `team_id` sign is unrecoverable for those — it tags the
+  participant, not who benefited), the non-play content gate
+  (`NON_PLAY_TAXONOMY` in `src/api/highlights.js` — the same `content` array
+  carries recaps, condensed games, interviews, pressers, Data Viz cards, injury
+  exits and ejections, ~half of all items), and the hand-maintained
+  `scripts/highlight-blocklist.json` (`{clipId, reason}`, starts empty — **edit
+  the seed, never the output**). Clip identity is `guid ?? id`, NOT `guid` alone:
+  54% of content items carry no guid, real highlights among them. Kept OUT of the
+  PWA precache. Shares every bit of its per-game logic with the hand-run backfill
+  below via `scripts/lib/highlights.mjs`. App reads it via
+  `src/api/gamehighlights.js`. Full write-up: `.scratch/highlights-cascade/`.
+
 ## Own-cadence generators (not the nightly batch)
 
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
@@ -429,6 +457,16 @@ Re-run only to fold in a new season.
   itself. AVG/ERA carry a minimum-AB/IP qualifier (same idea as the live
   leader boards' floor) so a single pinch-hit or mop-up inning can't top a
   rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
+- `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` — the
+  one-time historical sweep that establishes the season the nightly
+  `gen-highlights.mjs` (above) can't reach back to. Same relationship, and same
+  reasoning, as `gen-rookies-backfill.mjs` below: one `/content` call per Final
+  MLB game makes a from-scratch season a genuinely large crawl (~2,430 games),
+  so `--since`/`--until` chunk it across invocations. A game already present in
+  any team file is skipped without a fetch, so widening the range later never
+  re-sweeps or overwrites what's done. Shares all its per-game logic with the
+  nightly job (`scripts/lib/highlights.mjs`) — the two differ only in how they
+  source their target games.
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB
