@@ -573,6 +573,23 @@
       }
     }
   },
+  "403": {
+    "name": "Everett AquaSox",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 25,
+        "offsetY": 6,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.91,
+        "offsetX": -14,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
   "416": {
     "name": "Louisville Bats",
     "treatments": {
@@ -658,6 +675,57 @@
       }
     }
   },
+  "453": {
+    "name": "Brooklyn Cyclones",
+    "treatments": {
+      "away": {
+        "scale": 0.89,
+        "offsetX": 29,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -19,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "459": {
+    "name": "Dayton Dragons",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 28,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -24,
+        "offsetY": 17,
+        "rotation": 0
+      }
+    }
+  },
+  "461": {
+    "name": "Eugene Emeralds",
+    "treatments": {
+      "away": {
+        "scale": 0.94,
+        "offsetX": 28,
+        "offsetY": 6,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.95,
+        "offsetX": -13,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "484": {
     "name": "Indianapolis Indians",
     "treatments": {
@@ -671,6 +739,23 @@
         "scale": 1,
         "offsetX": -14,
         "offsetY": 16,
+        "rotation": 0
+      }
+    }
+  },
+  "492": {
+    "name": "Cedar Rapids Kernels",
+    "treatments": {
+      "away": {
+        "scale": 0.94,
+        "offsetX": 31,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -3,
+        "offsetY": 5,
         "rotation": 0
       }
     }
@@ -841,6 +926,23 @@
         "scale": 0.9,
         "offsetX": -25,
         "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "2498": {
+    "name": "Bowling Green Hot Rods",
+    "treatments": {
+      "away": {
+        "scale": 0.87,
+        "offsetX": 19,
+        "offsetY": 14,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.93,
+        "offsetX": -4,
+        "offsetY": 13,
         "rotation": 0
       }
     }
