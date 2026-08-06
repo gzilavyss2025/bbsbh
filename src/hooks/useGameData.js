@@ -393,10 +393,10 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const formerTeammatesData = teammates.data ?? null
 
-  // Career batter/pitcher matchup history between the two clubs' rosters, at
-  // ANY level either has played (see api/careerMatchups.js) — same
-  // build-time-fetch tier as former teammates: one cached same-origin read,
-  // MLB + MiLB alike, degrading to no card outside the build's window.
+  // Each club's batters vs the opposing probable starter (see
+  // api/careerMatchups.js) — same build-time-fetch tier as former teammates:
+  // one cached same-origin read, MLB + MiLB alike, degrading to no card
+  // outside the build's window.
   const careerMatchupsQuery = useAsync(
     () => (enrichmentReady ? loadCareerMatchups() : Promise.resolve(null)),
     [enrichmentReady],

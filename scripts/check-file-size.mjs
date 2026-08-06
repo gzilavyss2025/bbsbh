@@ -97,7 +97,7 @@ const BUDGETS = {
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
-  'src/screens/TeamInfo.jsx': 1400, // 1342
+  'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1300, // 1216
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   'src/lib/teams.js': 1100, // 1098
