@@ -98,42 +98,61 @@ function keyShape(secretKey) {
   return prefix
 }
 
-// Clerk returns `errors` as TokenVerificationError-ish objects; a thrown one
-// arrives as an Error. Reduce either to something a log line can carry.
-function failureReason(errors, caught) {
-  if (caught) return `threw: ${caught?.message ?? String(caught)}`
-  if (!Array.isArray(errors) || errors.length === 0) return 'no sub claim on a token that verified'
-  return errors
-    .map((e) => [e?.reason, e?.message].filter(Boolean).join(': ') || String(e))
-    .join(' | ')
+// ---------------------------------------------------------------------------
+// THE RETURN SHAPE — read before touching the call below
+// ---------------------------------------------------------------------------
+// `verifyToken` RESOLVES TO THE JWT PAYLOAD ITSELF, and THROWS when a token
+// does not verify. Its signature in @clerk/backend 3.x is:
+//
+//   verifyToken(token, options) => Promise<JwtPayload>
+//
+// It does NOT resolve to `{ data, errors }`. This file used to destructure
+// exactly that, and the consequence was total and silent: a payload has no
+// `data` property, so `data` came back `undefined` for a PERFECTLY VALID
+// token, `!data?.sub` was therefore always true, and every authenticated
+// request in production was answered `401 invalid token` — reveal sync, the
+// spoiled-day map, and the Logbook alike, since the day Clerk was added.
+//
+// It hid so well because it fails in the direction that looks like a
+// misconfiguration. A bad token throws and is caught, and a GOOD token was
+// rejected too, so the endpoint's outward behaviour was indistinguishable from
+// a wrong secret key — which is what it was mistaken for, through several
+// rounds of re-issuing keys that were correct all along. What finally named it
+// was logging the reason: "no sub claim on a token that verified" only makes
+// sense if verification SUCCEEDED and we discarded the result.
+//
+// So: read the payload directly, and let the catch handle failure. If a future
+// bump changes this again, the symptom will be a 100% auth failure rate with
+// valid credentials — check this contract first.
+function failureReason(caught) {
+  if (!caught) return 'verified, but the payload carried no `sub` claim'
+  return `${caught?.name ?? 'Error'}: ${caught?.message ?? String(caught)}`
 }
 
 // The full check. `verifyOptions` is passed through to Clerk — api/copy.js adds
-// `authorizedParties`, the others don't. `log` is injectable so the unit suite
-// can assert on what gets reported without writing to the test runner's output.
-//
-// The try/catch is not decoration: @clerk/backend THROWS on some malformed
-// tokens rather than returning `errors`, and the previous per-file copies didn't
-// catch, so a junk Authorization header was a 500 with a stack trace instead of
-// a 401.
+// `authorizedParties`, the others don't. `log` and `verify` are injectable so
+// the unit suite can pin both the logging and the return-shape contract above
+// without a live Clerk instance, which CI has no way to reach.
 export async function authenticateUser(
   req,
-  { env = process.env, log = console.error, ...verifyOptions } = {},
+  { env = process.env, log = console.error, verify = verifyToken, ...verifyOptions } = {},
 ) {
   const pre = authPreflight(req, env)
   if (!pre.ok) return pre
-  const reject = (errors, caught) => {
-    log(`[auth] verifyToken rejected a token — secretKey=${keyShape(pre.secretKey)} reason=${failureReason(errors, caught)}`)
+  const reject = (caught) => {
+    log(
+      `[auth] verifyToken rejected a token — secretKey=${keyShape(pre.secretKey)} reason=${failureReason(caught)}`,
+    )
     return { ok: false, status: 401, error: INVALID_TOKEN }
   }
   try {
-    const { data, errors } = await verifyToken(pre.token, {
-      secretKey: pre.secretKey,
-      ...verifyOptions,
-    })
-    if (errors || !data?.sub) return reject(errors, null)
-    return { ok: true, userId: data.sub }
+    const payload = await verify(pre.token, { secretKey: pre.secretKey, ...verifyOptions })
+    // `sub` is the Clerk user id. Absent means this is not a session token we
+    // can attribute to a user, which is a rejection — but a different one from
+    // "did not verify", and the log says which.
+    if (!payload?.sub) return reject(null)
+    return { ok: true, userId: payload.sub }
   } catch (caught) {
-    return reject(null, caught)
+    return reject(caught)
   }
 }

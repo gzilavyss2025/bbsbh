@@ -437,6 +437,76 @@ const capture = () => {
   return { lines, log: (line) => lines.push(line) }
 }
 
+// --------------------------------------------------------------------------
+// The @clerk/backend return-shape contract (api/_lib/auth.js)
+// --------------------------------------------------------------------------
+// verifyToken RESOLVES TO THE PAYLOAD and THROWS on failure. It does not
+// resolve to `{ data, errors }`. Destructuring that shape read `undefined` off
+// a perfectly valid payload, so `!data?.sub` was always true and EVERY
+// authenticated request in production got `401 invalid token` — for as long as
+// Clerk had been wired up. `verify` is injected here because the contract is
+// the thing under test; a live Clerk instance is not reachable from CI.
+test('a token that verifies authenticates the user it names', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('good.session.token'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => ({ sub: 'user_2abcXYZ', iss: 'https://clerk.example.com' }),
+  })
+  assert.equal(out.ok, true)
+  assert.equal(out.userId, 'user_2abcXYZ')
+  assert.equal(lines.length, 0, 'a success writes no log line')
+})
+
+test('the secret key and options reach verifyToken unchanged', async () => {
+  let seen = null
+  await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log: () => {},
+    authorizedParties: ['https://tallybb.com'],
+    verify: async (token, options) => {
+      seen = { token, options }
+      return { sub: 'user_1' }
+    },
+  })
+  assert.equal(seen.token, 'tok')
+  assert.equal(seen.options.secretKey, 'sk_live_x')
+  // api/copy.js passes authorizedParties through; it must survive the spread.
+  assert.deepEqual(seen.options.authorizedParties, ['https://tallybb.com'])
+  // The injection seam must not leak into what Clerk is handed.
+  assert.equal('verify' in seen.options, false)
+  assert.equal('log' in seen.options, false)
+  assert.equal('env' in seen.options, false)
+})
+
+test('a payload with no sub is rejected, and says so distinctly', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => ({ iss: 'https://clerk.example.com' }),
+  })
+  assert.equal(out.ok, false)
+  assert.equal(out.status, 401)
+  assert.equal(out.error, INVALID_TOKEN)
+  // Distinguishable from a verification failure — that distinction is what
+  // identified the bug this test exists to prevent.
+  assert.match(lines[0], /no `sub` claim/)
+})
+
+test('a throw from verifyToken is a 401 carrying the thrown reason', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => {
+      throw Object.assign(new Error('token-invalid-signature'), { name: 'TokenVerificationError' })
+    },
+  })
+  assert.equal(out.status, 401)
+  assert.match(lines[0], /TokenVerificationError: token-invalid-signature/)
+})
+
 test('a rejection reports Clerk’s reason to the server log', async () => {
   const { lines, log } = capture()
   await authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
