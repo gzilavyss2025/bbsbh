@@ -20,9 +20,9 @@
 // bulk of any current player's MLB career, and pre-START seasons on a veteran's
 // register simply show a dash in the WAR column (graceful, same as MiLB).
 // Run by hand: node scripts/gen-war-history.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war-history.json')
@@ -63,6 +63,5 @@ for (let season = START_SEASON; season <= LAST_SEASON; season++) {
   console.log(`${season}: ${Object.keys(b).length} batters, ${Object.keys(p).length} pitchers`)
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ seasons, generatedAt: new Date().toISOString(), bat, pit }))
+await writeJsonAtomic(out, { seasons, generatedAt: new Date().toISOString(), bat, pit })
 console.log(`wrote ${out} (${seasons.length} seasons ${START_SEASON}–${LAST_SEASON})`)

@@ -14,9 +14,9 @@
 // docs/data-enrichment.md §3/§5 and .scratch/savant-percentiles/plan.md for
 // the full research trail and reasoning.
 // Run by hand: node scripts/gen-savant-percentiles.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'savant-percentiles.json')
@@ -230,11 +230,7 @@ for (const [group, raw, wanted] of [['bat', rawBat, RAW_METRICS.bat], ['pit', ra
   }
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ season, generatedAt: new Date().toISOString(), bat, pit, rawBat, rawPit }),
-)
+await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, rawBat, rawPit })
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers; ` +
   `raw rates for ${Object.keys(rawBat).length}/${Object.keys(rawPit).length})`,

@@ -26,10 +26,10 @@
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Run by hand: node scripts/gen-fever-radar.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'fever-radar.json')
@@ -120,8 +120,7 @@ async function main() {
   }
   await dumpGroup(db, 'player-snapshots')
 
-  await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify(exportJson(db, dataThrough)))
+  await writeJsonAtomic(out, exportJson(db, dataThrough))
   const counts = Object.keys(BOARD_SPECS)
     .map((board) => `${board}=${(data[board] ?? []).length}`)
     .join(', ')

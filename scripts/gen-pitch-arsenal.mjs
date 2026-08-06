@@ -32,24 +32,18 @@
 // long backfill resumes cleanly. --export-only rebuilds the JSON view from the
 // rows already on file, for when a derived (not per-game) field like handedness
 // changes and re-fetching every ingested feed would change nothing in the DB.
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
+import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'pitch-arsenal.json')
-const BASE = 'https://statsapi.mlb.com'
-
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 // --- pure per-game aggregation (exported for tests) --------------------------
 //
@@ -217,27 +211,6 @@ export function exportPitchArsenal(db, hands = {}) {
 }
 
 // --- CLI ---------------------------------------------------------------------
-function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)=(.*)$/.exec(a)
-    if (m) args[m[1]] = m[2]
-    else if (a.startsWith('--')) args[a.slice(2)] = true
-  }
-  return args
-}
-
-const isoDay = (d) => d.toISOString().slice(0, 10)
-
-function dateRange(args) {
-  const today = new Date()
-  if (args.since) return { startDate: args.since, endDate: args.until || isoDay(today) }
-  const days = Number(args.days) || DEFAULT_DAYS
-  const start = new Date(today)
-  start.setUTCDate(start.getUTCDate() - (days - 1))
-  return { startDate: isoDay(start), endDate: isoDay(today) }
-}
-
 // The levels swept, most-senior first — see header for why AAA rides along
 // and AA/below don't.
 const ALL_LEVELS = [
@@ -247,7 +220,7 @@ const ALL_LEVELS = [
 
 async function main() {
   const args = parseArgs(process.argv.slice(2))
-  const { startDate, endDate } = dateRange(args)
+  const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
   const sportsFilter = args.sports
     ? new Set(String(args.sports).split(',').map((s) => Number(s.trim())))
     : null
@@ -268,8 +241,7 @@ async function main() {
   // adding one, this refreshes the committed file in seconds instead of
   // re-fetching every ingested game's feed to change nothing in the database.
   if (args['export-only']) {
-    await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, JSON.stringify(exportPitchArsenal(db, hands)))
+    await writeJsonAtomic(out, exportPitchArsenal(db, hands))
     console.log(`wrote ${out} (export only — no games swept)`)
     db.close()
     return
@@ -300,8 +272,7 @@ async function main() {
 
   const writeOut = async () => {
     await dumpGroup(db, 'pitch-arsenal')
-    await mkdir(dirname(out), { recursive: true })
-    await writeFile(out, JSON.stringify(exportPitchArsenal(db, hands)))
+    await writeJsonAtomic(out, exportPitchArsenal(db, hands))
   }
 
   let done = 0

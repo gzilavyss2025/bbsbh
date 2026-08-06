@@ -20,9 +20,10 @@
 // baselines also serve pitching-health.md's P3 own-baseline engine.
 //
 // Run by hand: node scripts/gen-workload.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'workload.json')
@@ -62,23 +63,6 @@ async function getJson(path) {
 
 // Run an async mapper across items with a small concurrency cap, results in
 // order (be polite to statsapi). Mirrors gen-vs-team-splits.mjs's helper.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 // --- mean / standard deviation (population) ----------------------------------
 function meanSd(values) {
   const n = values.length
@@ -243,11 +227,7 @@ const cohorts = {
   losing: computeBaselines(losers, asOf),
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ season: SEASON, asOf, pitchers, baselines, cohorts }),
-)
+await writeJsonAtomic(out, { season: SEASON, asOf, pitchers, baselines, cohorts })
 
 const sizeKb = (JSON.stringify({ season: SEASON, asOf, pitchers, baselines, cohorts }).length / 1024).toFixed(1)
 console.log(

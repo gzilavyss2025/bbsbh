@@ -42,21 +42,15 @@
 // back at READ time (src/lib/runExpectancy.js's lookupRE) to a base/out-only
 // RE24 total — this script writes BOTH `states` (288) and `re24` (24) sums so
 // that fallback never needs a second pass over history.
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { stateKey, re24Key } from '../src/lib/runExpectancy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'run-expectancy.json')
-const BASE = 'https://statsapi.mlb.com'
 const BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 function parseArgs(argv) {
   const args = {}
@@ -224,17 +218,13 @@ for (const season of seasons) {
   console.log(`${season}: swept (${states.size} states populated so far)`)
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    seasons,
-    gamesSwept,
-    states: Object.fromEntries(states),
-    re24: Object.fromEntries(re24),
-  }),
-)
+await writeJsonAtomic(out, {
+  generatedAt: new Date().toISOString(),
+  seasons,
+  gamesSwept,
+  states: Object.fromEntries(states),
+  re24: Object.fromEntries(re24),
+})
 console.log(
   `wrote ${out} — ${seasons.join(', ')}, ${gamesSwept} games, ${states.size}/288 states populated`,
 )

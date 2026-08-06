@@ -19,9 +19,9 @@
 // serving, rather than every visitor's team page breaking. See
 // docs/data-enrichment.md for the full research trail and reasoning.
 // Run by hand: node scripts/gen-war.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'war.json')
@@ -85,11 +85,7 @@ const pa = batLb.pa // hitter PA only (see fetchLeaderboard note)
 const wrc = batLb.wrc
 const fld = batLb.fld
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ season, generatedAt: new Date().toISOString(), bat, pit, pa, wrc, fld }),
-)
+await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), bat, pit, pa, wrc, fld })
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ` +
     `${Object.keys(pa).length} PA, ${Object.keys(wrc).length} wRC+, ${Object.keys(fld).length} Fld)`,

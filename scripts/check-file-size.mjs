@@ -117,7 +117,6 @@ const BUDGETS = {
   'src/api/loadPlayer.js': 700, // 682
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629
-  'scripts/gen-former-teammates.mjs': 700, // 614
   'src/components/charts/WinProbChart.jsx': 700, // 612
 }
 

@@ -75,12 +75,12 @@ import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'umpire-accuracy.json')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // Loaded once at startup; null (favor degrades to 0/null everywhere) until
 // scripts/gen-run-expectancy.mjs has been hand-run at least once.
 let reTable = null
@@ -101,36 +101,7 @@ const BALL_R = 1.45 / 12 // 0.121 ft
 
 const DEFAULT_DAYS = 3
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // --- date range from CLI ------------------------------------------------------
-function parseArgs(argv) {
-  const args = {}
-  for (const a of argv) {
-    const m = /^--([^=]+)=(.*)$/.exec(a)
-    if (m) args[m[1]] = m[2]
-    else if (a.startsWith('--')) args[a.slice(2)] = true
-  }
-  return args
-}
-
-const isoDay = (d) => d.toISOString().slice(0, 10)
-
-function dateRange(args) {
-  const today = new Date()
-  if (args.since) {
-    return { startDate: args.since, endDate: args.until || isoDay(today) }
-  }
-  const days = Number(args.days) || DEFAULT_DAYS
-  const start = new Date(today)
-  start.setUTCDate(start.getUTCDate() - (days - 1))
-  return { startDate: isoDay(start), endDate: isoDay(today) }
-}
-
 // --- per-game accuracy --------------------------------------------------------
 // Attribute one missed call to a single zone edge: the boundary it's most on
 // the wrong side of (expanded misses) or nearest to (squeezed misses) — i.e.
@@ -367,7 +338,7 @@ async function mapWithConcurrency(items, limit, fn) {
 
 // --- main ---------------------------------------------------------------------
 const args = parseArgs(process.argv.slice(2))
-const { startDate, endDate } = dateRange(args)
+const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
 const season = Number(endDate.slice(0, 4))
 
 // ENOENT → genuine first run; a corrupt committed file must abort rather than

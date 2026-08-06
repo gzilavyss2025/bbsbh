@@ -117,10 +117,11 @@
 // Runs for TOMORROW's slate by default (the games it precomputes); pass a
 // YYYY-MM-DD as argv[2] to (re)generate a specific date by hand:
 //   node scripts/gen-callouts.mjs 2026-07-10
-import { writeFile, readFile, mkdir, readdir, rm } from 'node:fs/promises'
+import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
+import { writeJsonAtomic } from './lib/io.js'
 import {
   computeLeaders,
   HITTING_CATEGORIES,
@@ -1458,11 +1459,7 @@ for (const g of games) {
   }
 }
 
-await mkdir(outDir, { recursive: true })
-await writeFile(
-  outFile,
-  JSON.stringify({ date: targetApi, season, generatedAt: new Date().toISOString(), games: outGames }),
-)
+await writeJsonAtomic(outFile, { date: targetApi, season, generatedAt: new Date().toISOString(), games: outGames })
 console.log(
   `wrote ${outFile} (${Object.keys(outGames).length} games across MLB+MiLB, ${hitterList.length} hitters and ${pitcherList.length} pitchers swept, ${ttoById.size} TTO splits)`,
 )
