@@ -12,7 +12,7 @@ import { test, expect } from '../fixtures.js'
 test('/profile issues no request to statsapi and prints nothing score-shaped', async ({ page }) => {
   const feedRequests = []
   page.on('request', (req) => {
-    if (req.url().includes('statsapi.mlb.com')) feedRequests.push(req.url())
+    if (new URL(req.url()).hostname === 'statsapi.mlb.com') feedRequests.push(req.url())
   })
 
   await page.goto('/profile')
