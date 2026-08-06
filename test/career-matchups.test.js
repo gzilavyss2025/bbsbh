@@ -9,7 +9,7 @@
 // already-ordered list per side and there is nothing left to regroup.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { starterMatchupsFor, matchupLine } from '../src/api/careerMatchups.js'
+import { starterMatchupsFor, splitMatchupRows, matchupLine } from '../src/api/careerMatchups.js'
 
 function batter(id, pa) {
   return { id, name: `Batter ${id}`, ab: pa, h: 0, hr: 0, bb: 0, hbp: 0, k: 0, pa, levels: [] }
@@ -71,6 +71,46 @@ test('starterMatchupsFor is null when the game or club is unset', () => {
   // A cold load renders before the feed lands, so both arrive undefined.
   assert.equal(starterMatchupsFor(data, undefined, 158), null)
   assert.equal(starterMatchupsFor(data, 777, undefined), null)
+})
+
+// --- splitMatchupRows --------------------------------------------------------
+
+test('splitMatchupRows indexes every row by batter id for the inline lookup', () => {
+  const side = starterMatchupsFor(data, 777, 158)
+  const { byId } = splitMatchupRows(side, new Set([1, 2]))
+  assert.equal(byId.get(1).pa, 9)
+  assert.equal(byId.get(2).pa, 4)
+})
+
+test('splitMatchupRows sends a batter who is NOT in the posted nine to the bench list', () => {
+  // The case that makes the bench row necessary: measured across a real slate,
+  // every side had at least one of these, so annotating only the posted nine
+  // would drop a live pinch-hit read every game.
+  const side = starterMatchupsFor(data, 777, 158)
+  const { byId, bench } = splitMatchupRows(side, new Set([1]))
+  assert.deepEqual(bench.map((r) => r.id), [2])
+  // Still indexed — the bench row renders from the same records.
+  assert.equal(byId.size, 2)
+})
+
+test('splitMatchupRows leaves the bench empty when every batter is in the order', () => {
+  const side = starterMatchupsFor(data, 777, 158)
+  assert.deepEqual(splitMatchupRows(side, new Set([1, 2])).bench, [])
+})
+
+test('splitMatchupRows benches nobody before a lineup posts', () => {
+  // No posted order means the card is listing the whole roster, so every
+  // batter's line goes inline and there is nothing left over to collect.
+  const side = starterMatchupsFor(data, 777, 158)
+  assert.deepEqual(splitMatchupRows(side, new Set()).bench, [])
+  assert.deepEqual(splitMatchupRows(side, undefined).bench, [])
+  assert.equal(splitMatchupRows(side, new Set()).byId.size, 2)
+})
+
+test('splitMatchupRows survives a null side', () => {
+  const { byId, bench } = splitMatchupRows(null, new Set([1]))
+  assert.equal(byId.size, 0)
+  assert.deepEqual(bench, [])
 })
 
 // --- matchupLine -------------------------------------------------------------

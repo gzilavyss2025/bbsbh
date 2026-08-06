@@ -20,7 +20,13 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
-import { starterMatchupsFor, matchupLine } from '../api/careerMatchups.js'
+import { starterMatchupsFor, splitMatchupRows } from '../api/careerMatchups.js'
+import {
+  useMatchupNotes,
+  MatchupNotesToggle,
+  MatchupNote,
+  BenchMatchups,
+} from '../components/teamstats/StarterMatchups.jsx'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
@@ -419,6 +425,19 @@ function TeamSections({
     () => starterMatchupsFor(careerMatchupsData, feed?.gamePk, meta.id),
     [careerMatchupsData, feed?.gamePk, meta.id],
   )
+  const { showNotes, setShowNotes } = useMatchupNotes()
+  // Split once per render into "goes beside a name in the order" and "goes in
+  // the bench row". Before the lineup posts the card lists the whole roster, so
+  // the lineup set is empty and every batter's line lands inline instead.
+  const matchupNotes = useMemo(
+    () => splitMatchupRows(starterMatchups, new Set(lineup.map((p) => p.id))),
+    [starterMatchups, lineup],
+  )
+  const starterLast = useMemo(
+    () => (starterMatchups ? splitDisplayName(starterMatchups.pitcher.name).last : ''),
+    [starterMatchups],
+  )
+  const matchupLevel = SPORT_LABEL[meta.sportId] ?? 'MLB'
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const dayNight = info.dayNight
 
@@ -453,14 +472,6 @@ function TeamSections({
         arsenal={oppArsenal}
       />
 
-      <StarterMatchups
-        side={starterMatchups}
-        startingIds={startingIds}
-        teamId={meta.id}
-        teamName={meta.teamName}
-        levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
-      />
-
       {/* Wide screens run the batting order and defense diamond side by side
           rather than 50/50 — the order's the meat of the page, the diamond is
           a small square (see .teaminfo__lineupdefense's 3fr/2fr split). */}
@@ -478,7 +489,15 @@ function TeamSections({
                 className="metricbar__logo"
               />
             }
-          />
+          >
+            {/* Names the pitcher the notes below are measured against, and
+                switches them off for a clean order to copy onto paper. */}
+            <MatchupNotesToggle
+              pitcherLast={starterLast}
+              showNotes={showNotes}
+              onToggle={setShowNotes}
+            />
+          </SectionMasthead>
           {lineup.length > 0 ? (
             <ol className="lineup__list">
               {lineup.map((p) => (
@@ -499,11 +518,24 @@ function TeamSections({
                       evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
                     />
                     <BirthdayCake show={birthdayIds.has(p.id)} />
+                    {/* Inside the namewrap, not beside it: the note is a flex
+                        child that takes a full-width basis, which is what puts
+                        it on its own line under the name (see .lineup__vs). */}
+                    {showNotes && (
+                      <MatchupNote row={matchupNotes.byId.get(p.id)} levelLabel={matchupLevel} />
+                    )}
                   </span>
                   <span className="lineup__jersey">{p.jersey || ''}</span>
                   <span className="lineup__pos">{p.position}</span>
                 </li>
               ))}
+              {showNotes && (
+                <BenchMatchups
+                  rows={matchupNotes.bench}
+                  levelLabel={matchupLevel}
+                  pitcherLast={starterLast}
+                />
+              )}
             </ol>
           ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
             <>
@@ -531,6 +563,19 @@ function TeamSections({
                               evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
                             />
                             <BirthdayCake show={birthdayIds.has(p.id)} />
+                            {/* Most visits to this page happen BEFORE the
+                                lineup posts, when this roster list is the whole
+                                card — so the notes attach here too and the data
+                                is visible all day, not only once the nine drop.
+                                No bench row is needed here: with no posted
+                                order, nobody is left over. */}
+                            {showNotes && (
+                              <MatchupNote
+                                row={matchupNotes.byId.get(p.id)}
+                                levelLabel={matchupLevel}
+                                className="roster__vs"
+                              />
+                            )}
                           </span>
                           <span className="roster__jersey">{p.jersey}</span>
                           <span className="roster__pos">{p.pos}</span>
@@ -961,81 +1006,6 @@ function OrgTies({ ties }) {
           </li>
         ))}
       </ul>
-    </section>
-  )
-}
-
-const MATCHUPS_SHOWN = 6
-
-// How this club's batters have fared in their careers against the arm they're
-// about to face — the "Contreras is 0-for-3 vs. tonight's starter" scorebook
-// fact, sitting directly under the Starting pitcher card that names him. A
-// plain stat list rather than FormerTeammates' headshot cards: this is a line
-// off the stat sheet, not a story about two careers crossing. Hidden when the
-// lineup has no history against him (a debut start, most often).
-//
-// Deliberately scoped to the STARTER alone. This card used to cross every
-// batter with every pitcher on the other club, then cap the result at the 30
-// deepest pairs — which, measured against the committed data file, was binding
-// on all 91 matchups, so the card filled with whichever veterans happened to
-// have the most career plate appearances and could push tonight's actual
-// matchup off the page entirely. One starter, every batter who has faced him,
-// nothing dropped. History against the rest of the staff still exists in the
-// nightly store for other surfaces to use; it just isn't this card's job.
-//
-// `startingIds` (see startingIdsFor) is the same set FormerTeammates uses for
-// its "starting tonight" badge — here it inks the rows for batters who are in
-// tonight's posted lineup, so the nine that matter stand out from the bench
-// bats once the card is filled in.
-function StarterMatchups({ side, startingIds, teamId, teamName, levelLabel }) {
-  const [showAll, setShowAll] = useState(false)
-  if (!side) return null
-  const rows = side.batters
-  const shown = showAll ? rows : rows.slice(0, MATCHUPS_SHOWN)
-  const hidden = rows.length - shown.length
-  return (
-    <section className="metriccard matchups">
-      <SectionMasthead
-        as="h3"
-        title="Career vs today’s starter"
-        logo={
-          <TeamLogo
-            teamId={teamId}
-            name={teamName}
-            size={22}
-            variant="mono"
-            className="metricbar__logo"
-          />
-        }
-      />
-      <div className="metriccard__body">
-        <p className="matchupgroup__pitcher">
-          <span className="matchupgroup__vs">vs</span>{' '}
-          <PlayerLink id={side.pitcher.id}>{side.pitcher.name}</PlayerLink>
-        </p>
-        <ul className="matchupgroup__rows">
-          {shown.map((r) => (
-            <li
-              key={r.id}
-              className={
-                startingIds?.has(r.id)
-                  ? 'matchupgroup__row matchupgroup__row--tonight'
-                  : 'matchupgroup__row'
-              }
-            >
-              <PlayerLink id={r.id} className="matchupgroup__batter">
-                {r.name}
-              </PlayerLink>
-              <span className="matchupgroup__line">{matchupLine(r, levelLabel)}</span>
-            </li>
-          ))}
-        </ul>
-        {hidden > 0 && (
-          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
-            Show {hidden} more batter{hidden === 1 ? '' : 's'}
-          </button>
-        )}
-      </div>
     </section>
   )
 }

@@ -55,6 +55,24 @@ export function starterMatchupsFor(data, gamePk, battingTeamId) {
   return side
 }
 
+// Splits one side's rows into the two places the batting order card puts them:
+// `byId`, looked up as each name is rendered so the line sits directly under
+// it, and `bench` — batters with real history against tonight's starter who
+// AREN'T in the posted nine. That second list is not an edge case: measured
+// across a real slate, every side had at least one (1.9 on average), so a card
+// that only annotated the posted nine would silently drop a live pinch-hit
+// read every game.
+//
+// `lineupIds` empty (or absent) means no lineup has posted yet — the card is
+// showing the whole roster, every batter gets his line inline, and nothing is
+// left over to collect. Callers pass a Set.
+export function splitMatchupRows(side, lineupIds) {
+  const rows = side?.batters ?? []
+  const byId = new Map(rows.map((r) => [r.id, r]))
+  const bench = lineupIds?.size ? rows.filter((r) => !lineupIds.has(r.id)) : []
+  return { byId, bench }
+}
+
 // "2-for-7, 1 HR, 3 K — AA, A+" — scorebook shorthand first (the thing a paper
 // scorer already writes), extras only when they're nonzero so a plain 0-for-2
 // doesn't carry three redundant zero badges, levels last so a pair who's only

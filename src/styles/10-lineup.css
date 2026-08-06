@@ -547,30 +547,82 @@
   color: var(--text-body);
 }
 
-/* Career vs today's starter (TeamInfo.jsx's StarterMatchups) — one small list
-   of this club's batters and how they've done against the arm they're about to
-   face, deliberately not FormerTeammates' headshot cards (this is a line off a
-   stat sheet, not a story). The pitcher is a single heading over batter→line
-   rows. Two earlier shapes are folded into that: a three-column
-   batter/pitcher/line table that repeated the pitcher on every row and
-   overflowed a phone's width (horizontal swipe to read the line), and then a
-   pair of per-direction tables listing every pitcher on both staffs. Scoping
-   the card to the one probable starter leaves a single group, so the
-   .matchuptable/.matchuplist wrappers those needed are gone; .matchupgroup__*
-   below is the whole card. */
-/* The starter, over the batters who've faced him. */
-.matchupgroup__pitcher {
-  margin: 0 0 var(--space-1);
-  padding-bottom: var(--space-1);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
+/* Career vs today's starter — a margin note under the batter's name in the
+   batting order (TeamInfo.jsx + components/teamstats/StarterMatchups.jsx),
+   the thing a paper scorer pencils beside the name while staging the sheet.
+   Three earlier shapes collapsed into this one: a three-column
+   batter/pitcher/line table that overflowed a phone's width, a pair of
+   per-direction tables listing every pitcher on both staffs, and a standalone
+   "Career vs today's starter" card. Folding the lines into the order they
+   annotate removed the last of those; the toggle in the masthead is what puts
+   back the heading that card used to supply. */
+
+/* .lineup__namewrap / .roster__namewrap are WRAPPING FLEX containers, so
+   flex-basis:100% is what makes this a line of its own rather than one more
+   flex item. Without it the note rides up beside short names and drops below
+   long ones, and the card's left edge goes ragged row by row. */
+.lineup__vs,
+.roster__vs {
+  flex-basis: 100%;
+  margin-top: -2px;
   font-family: var(--font-body);
   font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-caption);
 }
-/* "vs" prefix ahead of the pitcher's name — a quiet function word, kept small
-   and uppercase so the eye lands on the name, not the label. */
-.matchupgroup__vs {
+
+/* The control that both labels and switches the notes, in the batting order
+   masthead's aside slot (where BullpenBoard puts its InfoPopover).
+
+   Colour here is load-bearing, not decorative: kraft gold as TEXT on the navy
+   bar measures 4.35:1, under the 4.5:1 check-contrast.mjs demands. So the OFF
+   state is --text-on-ink (13.5:1) inside a gold BORDER (a UI element, which
+   only needs 3:1), and the ON state is the already-validated --text-on-seal on
+   --seal. Don't repaint this gold-on-navy without re-running that guard. */
+.matchupswitch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px 9px;
+  border: var(--bw-hair) solid var(--seal);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.matchupswitch__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.35;
+}
+.matchupswitch[aria-pressed='true'] {
+  background: var(--seal);
+  color: var(--text-on-seal);
+}
+.matchupswitch[aria-pressed='true'] .matchupswitch__dot {
+  opacity: 1;
+}
+
+/* Batters with history against tonight's starter who AREN'T in the posted nine
+   — never empty in practice (see splitMatchupRows), and the reason folding the
+   notes into the order doesn't quietly lose a pinch-hit read. */
+.lineup__bench {
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+.lineup__benchlabel {
+  display: block;
+  margin-bottom: 2px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -578,42 +630,11 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.matchupgroup__rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-/* Batter name on the left, career line on the right; the line is allowed to
-   wrap under a long name (margin-left:auto keeps it right-aligned when it
-   does) so nothing ever forces the row wider than the card. */
-.matchupgroup__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0 var(--space-3);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-}
-.matchupgroup__batter {
-  font-family: var(--font-body);
+.lineup__bench b {
   font-weight: var(--w-semibold);
   color: var(--text-body);
 }
-.matchupgroup__line {
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
-  color: var(--text-caption);
-  text-align: right;
-}
-/* A batter in tonight's actual starting lineup facing the opposing club's
-   actual probable starter — the one row on this list that's about to play out
-   for real on the user's own scoresheet. Same highlighter-yellow "pay
-   attention" wash as .standings tr.foulboard__row--outlier. */
-.matchupgroup__row--tonight {
-  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
-}
+
 
 /* ----------------------------------------------------------- defense diamond
    The sheet's bottom-left graphic: infield square on its point, surnames on
