@@ -486,6 +486,7 @@ function TeamSections({
                 name={meta.teamName}
                 size={22}
                 variant="mono"
+                crop="bar"
                 className="metricbar__logo"
               />
             }
@@ -651,6 +652,7 @@ function TeamSections({
                   name={oppMeta.teamName}
                   size={22}
                   variant="mono"
+                  crop="bar"
                   className="metricbar__logo"
                 />
               }
@@ -716,6 +718,7 @@ function OpposingStarterCard({
             name={teamName}
             size={22}
             variant="mono"
+            crop="bar"
             className="metricbar__logo"
           />
         }

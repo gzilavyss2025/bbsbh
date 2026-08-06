@@ -27,6 +27,26 @@
   transform: scale(1.6);
 }
 
+/* Full-bar-height crop treatment — see TeamLogo.jsx's `crop="bar"` prop.
+   Unlike .teamlogo-crop's fixed square, this wrapper takes no size of its
+   own here: its height is set by wherever it's placed (the .metricbar
+   partial gives it an explicit height and bleeds it to the masthead's full
+   height — see that partial for why it's an explicit height and not
+   align-self: stretch). This rule just owns the overflow clip and, on the
+   <img>, the aspect-correct sizing plus the 5%-top/5%-bottom crop
+   (111.12% = 100% / 0.9 — the extra height overflows the wrapper equally on
+   both edges and gets clipped). */
+.teamlogo-crop-bar {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+}
+.teamlogo--crop-bar {
+  height: 111.12%;
+  width: auto;
+  object-fit: contain;
+}
+
 .teamlogo--fallback {
   display: inline-flex;
   align-items: center;
