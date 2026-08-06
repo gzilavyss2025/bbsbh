@@ -413,11 +413,80 @@ test('a token that cannot be verified is 401 invalid, never a 500', () => {
   // @clerk/backend throws on some malformed tokens rather than returning
   // `errors`, and the old per-file copies didn't catch — a junk Authorization
   // header was a stack trace.
-  return authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' } }).then(
-    (out) => {
-      assert.equal(out.ok, false)
-      assert.equal(out.status, 401)
-      assert.equal(out.error, INVALID_TOKEN)
-    },
-  )
+  return authenticateUser(withToken('not.a.jwt'), {
+    env: { CLERK_SECRET_KEY: 'sk_test_x' },
+    log: () => {},
+  }).then((out) => {
+    assert.equal(out.ok, false)
+    assert.equal(out.status, 401)
+    assert.equal(out.error, INVALID_TOKEN)
+  })
+})
+
+// --------------------------------------------------------------------------
+// What the SERVER learns from a rejection (api/_lib/auth.js)
+// --------------------------------------------------------------------------
+// The response stays a bare `invalid token` — a caller is told nothing. But the
+// reason was being discarded server-side too, which left a production deploy
+// rejecting every genuine token with no way to find out why: signature, expiry,
+// and "couldn't reach Clerk's JWKS" are three different faults wearing one
+// string. These pin the log line that closes that gap, and the two redactions
+// that keep it safe to write.
+const capture = () => {
+  const lines = []
+  return { lines, log: (line) => lines.push(line) }
+}
+
+test('a rejection reports Clerk’s reason to the server log', async () => {
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  assert.equal(lines.length, 1)
+  assert.match(lines[0], /\[auth\] verifyToken rejected/)
+  // Something specific about the failure, not just that there was one.
+  assert.match(lines[0], /reason=\S/)
+})
+
+test('the log carries the key SHAPE and never the token or the key', async () => {
+  const { lines, log } = capture()
+  await authenticateUser(withToken('a-live-credential'), {
+    env: { CLERK_SECRET_KEY: 'sk_test_supersecrettail' },
+    log,
+  })
+  // The prefix is diagnostic; the tail is a credential and must not appear.
+  assert.match(lines[0], /secretKey=sk_test_/)
+  assert.equal(lines[0].includes('supersecrettail'), false)
+  // The bearer token is a live credential too — a log line is not the place.
+  assert.equal(lines[0].includes('a-live-credential'), false)
+})
+
+test('a publishable key in the secret slot is called out by name', async () => {
+  // The mix-up that motivated this: the two keys sit side by side in Clerk's
+  // dashboard, and once Vercel marks the variable Sensitive nothing echoes it
+  // back. Every genuine token then fails as `invalid token` with no clue why.
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), {
+    env: { CLERK_SECRET_KEY: 'pk_live_Y2xlcmsuZXhhbXBsZS5jb20k' },
+    log,
+  })
+  assert.match(lines[0], /PUBLISHABLE KEY/)
+  assert.match(lines[0], /VITE_CLERK_PUBLISHABLE_KEY/)
+})
+
+test('a rejection logs exactly once, not once per internal retry', async () => {
+  // A per-request log line is only tolerable if it stays one line. (The success
+  // path writes nothing, but asserting that needs a real Clerk instance to
+  // verify against, so it is left to the deploy rather than faked here.)
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  assert.equal(lines.length, 1)
+})
+
+test('preflight failures never reach the log — they are not token failures', async () => {
+  // An anonymous poll of a public URL is not an incident, and a deploy with no
+  // secret key has a problem the response already names. Neither should write a
+  // line every time a stranger hits the endpoint.
+  const { lines, log } = capture()
+  await authenticateUser(nodeReq('/api/stamps'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  await authenticateUser(withToken('abc'), { env: {}, log })
+  assert.equal(lines.length, 0)
 })
