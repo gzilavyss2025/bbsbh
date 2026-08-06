@@ -25,12 +25,20 @@ export function TeamLogo({
   bw = false,
   variant = 'base',
   className = '',
+  // `crop={true}` is the square "vibe" treatment below. `crop="bar"` is the
+  // SectionMasthead treatment: the mark stretches to the full height of its
+  // `.metricbar`, cancelling that bar's own vertical padding to bleed edge to
+  // edge, with 7% clipped off its own top and bottom (see the CSS partial) —
+  // `size` is unused in this mode since the bar's height, not a pixel prop,
+  // drives it.
   crop = false,
   // Above-the-fold marks (the slate's first cards) opt out of lazy loading —
   // for them `loading="lazy"` defers the largest visible images past the
   // initial layout pass, delaying the page's LCP for no bandwidth saved.
   eager = false,
 }) {
+  const cropSquare = crop === true
+  const cropBar = crop === 'bar'
   // 'stage' tracks how far down the fallback chain we are for the current
   // (teamId, variant). Reset whenever either changes so a re-picked mark starts
   // fresh instead of inheriting a prior failure.
@@ -74,6 +82,16 @@ export function TeamLogo({
   }
 
   if (!url) {
+    if (cropBar) {
+      return (
+        <span
+          className={`teamlogo-crop-bar teamlogo--fallback ${bwClass} ${className}`}
+          aria-hidden="true"
+        >
+          {monogram}
+        </span>
+      )
+    }
     return (
       <span
         className={`teamlogo teamlogo--fallback ${bwClass} ${className}`}
@@ -88,7 +106,7 @@ export function TeamLogo({
   const img = (
     <img
       key={url}
-      className={`teamlogo ${crop ? 'teamlogo--crop' : ''} ${bwClass} ${crop ? '' : className}`}
+      className={`teamlogo ${cropSquare ? 'teamlogo--crop' : ''} ${cropBar ? 'teamlogo--crop-bar' : ''} ${bwClass} ${crop ? '' : className}`}
       style={crop ? undefined : style}
       src={url}
       alt=""
@@ -102,13 +120,13 @@ export function TeamLogo({
     />
   )
 
-  // `crop` is a small "vibe" treatment (the affiliate-level chip on a
+  // `crop={true}` is a small "vibe" treatment (the affiliate-level chip on a
   // prospect table row, not meant for precise club identification): most
   // team-logo SVGs carry internal padding within their viewBox, so a plain
   // object-fit: contain leaves visible whitespace at this size. Wrapping in
   // a clipped square box and zooming the image past its own padding fills
   // the box edge-to-edge instead.
-  if (crop) {
+  if (cropSquare) {
     return (
       <span
         className={`teamlogo-crop ${className}`}
@@ -117,6 +135,13 @@ export function TeamLogo({
         {img}
       </span>
     )
+  }
+
+  // `crop="bar"` — the wrapper's own height comes from the CSS bleed (it
+  // stretches to fill and overshoot `.metricbar`'s padding, see the partial),
+  // never from `size`, so no inline style here.
+  if (cropBar) {
+    return <span className={`teamlogo-crop-bar ${className}`}>{img}</span>
   }
 
   return img

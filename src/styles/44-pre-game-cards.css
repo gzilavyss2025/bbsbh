@@ -56,9 +56,26 @@
    precomputed per club by scripts/gen-mono-logos.mjs. This used to be a
    `filter: brightness(0) invert(1)` on the full-color CDN mark, which crushed
    every logo whose interior detail is drawn in a light fill into an
-   unreadable solid blob — see ADR-0031 and src/lib/logoMono.js. */
+   unreadable solid blob — see ADR-0031 and src/lib/logoMono.js.
+   The mark also wears TeamLogo's `crop="bar"` treatment (SectionMasthead
+   renders `logo` as a direct child of .metricbar, a sibling of the title):
+   an explicit height matching the bar's title-line formula (font-size + the
+   same 20px of padding), then a negative margin cancelling that padding so
+   the mark bleeds to the bar's true top/bottom edges. Deliberately NOT
+   `align-self: stretch` off the line's auto-computed cross size — the
+   <img>'s percentage-height crop (teamlogo-and-buttons.css) resolves to
+   'auto' inside a box whose own height is still auto-computing (CSS2
+   §10.5), starving the mark's width to 0; an explicit height sidesteps that.
+   `.metricbar__logo` still names the img/wrapper for the dark-theme re-ink
+   rule below (`.is-themed--dark .metricbar__logo`, 09-team-info.css) —
+   shared with DueUpNextCard/EnteringReference's unstretched inline mark,
+   why the bleed rule lives on `.teamlogo-crop-bar`, not folded in here. */
 .metricbar__logo {
   flex: 0 0 auto;
+}
+.metricbar > .teamlogo-crop-bar {
+  height: calc(var(--fs-body) * var(--lh-solid) + 20px);
+  margin-block: -10px;
 }
 /* Batting order, opposing defense, and opposing starter each wear the navy
    masthead as the header of a real card. The CONTAINER owns the border / radius /
