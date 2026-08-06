@@ -13,7 +13,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | File | Tests | Modules under test | Feature |
 |---|---|---|---|
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
-| api-handlers.test.js | 16 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes + the Logbook's tombstone read side (ADR-0035) |
+| api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 2 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels |
@@ -82,7 +82,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scores-unlocked.test.js | 16 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer |
 | season-score.test.js | 7 | scripts/gen-season-score.mjs, src/api/seasonScore.js | Season score / Marcel baseline |
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
-| skipped-bottom-half.test.js | 4 | src/api/select.js | selectSkippedBottomHalf |
+| skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |

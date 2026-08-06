@@ -8,6 +8,7 @@ import {
   selectDelays,
   selectSkippedBottomHalf,
   selectIsFinal,
+  selectFinalHalfIndex,
   halfIndex,
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
@@ -153,6 +154,10 @@ export function InningViewer({
   // high-water mark (see api/reveal.js + ContinueScoring.jsx): enough to draw
   // a "pick up your pencil" card on the slate — never a score. Field paths
   // match what selectTeamMeta/selectGameBanner already read off gameData.
+  // `finalHalfIndex` is null until the game ends, then the half-index of the
+  // last half actually played (selectFinalHalfIndex) — what lets the server
+  // know a card has nothing left to pick up once revealedThrough reaches it,
+  // and drop it from the index instead of adding it back.
   const gameSnapshot = useMemo(() => {
     const gd = feed?.gameData
     if (!gd) return null
@@ -164,6 +169,7 @@ export function InningViewer({
       homeName: gd.teams?.home?.clubName ?? gd.teams?.home?.teamName ?? '',
       gameNumber: gd.game?.gameNumber ?? 1,
       regulation,
+      finalHalfIndex: selectFinalHalfIndex(feed),
     }
   }, [feed, regulation])
 

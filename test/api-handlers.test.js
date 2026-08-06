@@ -23,7 +23,7 @@ import {
 } from '../api/_lib/auth.js'
 import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
-import revealHandler from '../api/reveal.js'
+import revealHandler, { isFullyWrappedUp, recentGamesView, sanitizeSnapshot } from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
@@ -78,6 +78,77 @@ test('reveal handler still validates its query off the parsed path', async () =>
   const out = await call(revealHandler, nodeReq('/api/reveal'))
   assert.equal(out.status, 400)
   assert.deepEqual(out.json, { error: 'gamePk required' })
+})
+
+test('reveal handler accepts DELETE (the manual "remove from my pencil") on the bare path', async () => {
+  // Same unconfigured-store posture as the other verbs: 501, not the 405 a
+  // method PUT never added to the allow-list would get further down.
+  const out = await call(revealHandler, nodeReq('/api/reveal?gamePk=1', { method: 'DELETE' }))
+  assert.equal(out.status, 501)
+  assert.deepEqual(out.json, { error: 'sync not configured' })
+})
+
+// --------------------------------------------------------------------------
+// The cloud scorebook index's auto-drop ("go away once you've unlocked every
+// half inning and the game is over") — pure logic, no Redis needed. Same
+// split as stamps.js's mint/mintRefusal: the Redis-touching handler just
+// wires these answers to hset/hdel, so the actual RULE is tested here
+// directly instead of through a fake store.
+// --------------------------------------------------------------------------
+test('sanitizeSnapshot carries a valid finalHalfIndex through', () => {
+  const snap = sanitizeSnapshot({
+    date: '2026-08-06',
+    away: 'PIT',
+    home: 'MIL',
+    finalHalfIndex: 17, // bottom of the 9th
+  })
+  assert.equal(snap.finalHalfIndex, 17)
+})
+
+test('sanitizeSnapshot drops a malformed or missing finalHalfIndex to null', () => {
+  const live = sanitizeSnapshot({ date: '2026-08-06', away: 'PIT', home: 'MIL' })
+  assert.equal(live.finalHalfIndex, null)
+  const hostile = sanitizeSnapshot({
+    date: '2026-08-06',
+    away: 'PIT',
+    home: 'MIL',
+    finalHalfIndex: -3,
+  })
+  assert.equal(hostile.finalHalfIndex, null)
+})
+
+test('isFullyWrappedUp is false for a live game (finalHalfIndex still null)', () => {
+  assert.equal(isFullyWrappedUp({ finalHalfIndex: null, revealedThrough: 11 }), false)
+})
+
+test('isFullyWrappedUp is false for a finished game not yet fully revealed', () => {
+  assert.equal(isFullyWrappedUp({ finalHalfIndex: 17, revealedThrough: 10 }), false)
+})
+
+test('isFullyWrappedUp is true once revealedThrough reaches the game’s real last half', () => {
+  assert.equal(isFullyWrappedUp({ finalHalfIndex: 17, revealedThrough: 17 }), true)
+  // Extras: revealedThrough can run past finalHalfIndex too (the mark only
+  // ever ratchets forward), not just land on it exactly.
+  assert.equal(isFullyWrappedUp({ finalHalfIndex: 17, revealedThrough: 19 }), true)
+})
+
+test('recentGamesView splits finished entries into "done" and keeps the rest, newest first', () => {
+  const all = {
+    // Live game, still in progress — belongs in the list.
+    778241: { date: '2026-08-06', away: 'PIT', home: 'MIL', finalHalfIndex: null, revealedThrough: 5, updatedAt: 3000 },
+    // Finished AND fully revealed — has nothing left to pick up.
+    778240: { date: '2026-08-05', away: 'PIT', home: 'MIL', finalHalfIndex: 17, revealedThrough: 17, updatedAt: 2000 },
+    // Finished but not yet fully revealed — still belongs in the list.
+    778239: { date: '2026-08-04', away: 'TOR', home: 'CHC', finalHalfIndex: 21, revealedThrough: 10, updatedAt: 1000 },
+  }
+  const { games, done } = recentGamesView(all)
+  assert.deepEqual(games.map((g) => g.gamePk), [778241, 778239])
+  assert.deepEqual(done, ['778240'])
+})
+
+test('recentGamesView degrades to no games/no prune for an empty or missing hash', () => {
+  assert.deepEqual(recentGamesView({}), { games: [], done: [] })
+  assert.deepEqual(recentGamesView(null), { games: [], done: [] })
 })
 
 test('copy handler serves the public read from a bare path', async () => {

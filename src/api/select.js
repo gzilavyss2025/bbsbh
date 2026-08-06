@@ -701,6 +701,28 @@ export function selectSkippedBottomHalf(feed, inning) {
   return row != null && row.home?.runs === undefined
 }
 
+// The half-index of the LAST half actually played in a finished game — not
+// halfIndex(selectInningCount(feed), 'bottom'), which is padded out to
+// scheduledInnings (see revealStampFacts's header for why that padding
+// exists and why it must be scanned around). Same structural footing as
+// selectSkippedBottomHalf just above: a `runs` key's mere PRESENCE says a
+// half was played, never its value, and this is only trustworthy once
+// selectIsFinal is true — a live game's last-posted row just means "not yet
+// posted," never "never coming." Feeds the cloud scorebook index's
+// auto-drop-once-fully-revealed check (api/reveal.js) — a card in "Pick up
+// your pencil" needs to know when there's nothing left to pick up.
+export function selectFinalHalfIndex(feed) {
+  if (!selectIsFinal(feed)) return null
+  const rows = feed?.liveData?.linescore?.innings ?? []
+  let last = null
+  for (const row of rows) {
+    if (typeof row?.away?.runs === 'number' || typeof row?.home?.runs === 'number') last = row
+  }
+  if (!Number.isInteger(last?.num)) return null
+  const homeBattedLast = typeof last.home?.runs === 'number'
+  return halfIndex(last.num, homeBattedLast ? 'bottom' : 'top')
+}
+
 // Coarse game-state flags for the delayed/suspended/postponed/warmup banner.
 // Structural metadata, not a score — safe to render unconditionally, same as
 // selectHasStarted above. `detailedState` carries MLB's specific phrasing

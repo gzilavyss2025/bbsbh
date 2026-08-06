@@ -112,7 +112,11 @@ const BUDGETS = {
   // hooks — splitting three small pieces of state out would scatter the
   // slate's own logic rather than shrink it.
   'src/screens/GameSelect.jsx': 1000, // 924
-  'src/api/select.js': 800, // 796
+  // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
+  // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
+  // gated reasoning selectSkippedBottomHalf right above it already has, so it
+  // belongs beside that function rather than in a new file duplicating it.
+  'src/api/select.js': 900, // 819
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split

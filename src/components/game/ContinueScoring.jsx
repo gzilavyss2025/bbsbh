@@ -21,6 +21,13 @@ const THIRD_GAME_THRESHOLD = 3
 // to the next half without fetching a feed. Same lazy-import gate as
 // AccountButton (this module touches Clerk hooks at its top level).
 //
+// A card leaves this strip two ways. Automatically, once a game is over and
+// fully revealed — the server itself stops handing that entry back (see
+// api/reveal.js's isFullyWrappedUp), so there is nothing to filter here.
+// Manually, via the ✕ on each card (removeGame below) — DELETE only clears
+// the scorebook-index entry, never the underlying reveal mark, so returning
+// to the game directly still resumes exactly where the user left off.
+//
 // Signed OUT, the same slot instead pitches an account once this device
 // holds three or more games in progress — "what the strip WOULD be" if the
 // visitor signed in (PRD §6.2 row 3). One-shot via usePromptDismiss;
@@ -40,16 +47,44 @@ export function ContinueScoring() {
   // worth for a strip that already re-mounts on navigation.
   const [gameCount] = useState(() => countGamesInProgress(browserStorage()))
 
+  // Optimistic local removal for the manual ✕: a gamePk lands here the moment
+  // it's tapped, so the card is gone immediately rather than waiting on the
+  // round trip — and stays gone even if a background reload() races back in
+  // before the DELETE resolves.
+  const [removedIds, setRemovedIds] = useState(() => new Set())
+  const removeGame = (gamePk) => {
+    setRemovedIds((prev) => new Set(prev).add(gamePk))
+    deleteGame(getToken, gamePk).then((ok) => {
+      if (!ok) {
+        // The server never dropped it — put the card back rather than leave
+        // the user believing a removal that didn't happen.
+        setRemovedIds((prev) => {
+          const next = new Set(prev)
+          next.delete(gamePk)
+          return next
+        })
+      }
+    })
+  }
+
   if (isSignedIn) {
-    const games = recent.data ?? []
+    const games = (recent.data ?? []).filter((g) => !removedIds.has(g.gamePk))
     if (games.length === 0) return null
     return (
       <section className="continuebar" aria-label="Pick up your pencil">
         <h2 className="continuebar__label">Pick up your pencil</h2>
         <ul className="continuebar__list">
           {games.slice(0, 3).map((g) => (
-            <li key={g.gamePk}>
+            <li key={g.gamePk} className="continuebar__row">
               <ContinueCard game={g} />
+              <button
+                type="button"
+                className="continuebar__delete"
+                onClick={() => removeGame(g.gamePk)}
+                aria-label={`Remove ${g.away} at ${g.home}, ${humanDate(g.date)}, from your pencil`}
+              >
+                ✕
+              </button>
             </li>
           ))}
         </ul>
@@ -91,6 +126,22 @@ async function fetchRecent(getToken) {
   if (!res.ok) return []
   const data = await res.json()
   return Array.isArray(data.games) ? data.games : []
+}
+
+// The manual half of "delete games from my pencil" — removes just this game's
+// scorebook-index entry (see api/reveal.js's DELETE handler). Resolves false
+// on any failure so the caller can restore the optimistically-removed card.
+async function deleteGame(getToken, gamePk) {
+  try {
+    const token = await getToken()
+    const res = await fetch(`/api/reveal?gamePk=${gamePk}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return res.ok
+  } catch {
+    return false
+  }
 }
 
 // halfIndex -> "top 7" / "bottom 3", the same 0-based tops-even/bottoms-odd
