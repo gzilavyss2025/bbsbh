@@ -757,6 +757,53 @@
       }
     }
   },
+  "427": {
+    "name": "Team 427",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#BA0C2F",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -32,
+          "rowShift": 0
+        },
+        "band": "#F8F8F5",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#ffcd00",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 80,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#FBF6ED",
+        "wpaWordmark": true
+      }
+    }
+  },
   "428": {
     "name": "Team 428",
     "treatments": {
@@ -895,6 +942,51 @@
         },
         "band": "#DA291C",
         "wpaWordmark": true
+      }
+    }
+  },
+  "437": {
+    "name": "Team 437",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": -11,
+          "offsetY": 0,
+          "bg": "#051C2C",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#051C2C"
+      },
+      "away": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": -11,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#F2A900"
       }
     }
   },
@@ -1885,6 +1977,53 @@
           "accent": "#EE3124",
           "onBar": "#F8F8F5"
         }
+      }
+    }
+  },
+  "537": {
+    "name": "Team 537",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.01,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#0C2340",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#0C2340",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.01,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#97999B",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#97999B",
+        "wpaWordmark": true
       }
     }
   },
@@ -3014,6 +3153,51 @@
         },
         "band": "#38C2CD",
         "wpaWordmark": true
+      }
+    }
+  },
+  "6324": {
+    "name": "Team 6324",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#ee3124",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 71,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -3,
+          "rowShift": 0
+        },
+        "band": "#0C2340"
+      },
+      "away": {
+        "position": {
+          "scale": 1.25,
+          "offsetX": 0,
+          "offsetY": 9,
+          "bg": "#78BE21",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 11,
+          "paddingY": -8,
+          "rowShift": 0
+        },
+        "band": "#78BE21"
       }
     }
   },

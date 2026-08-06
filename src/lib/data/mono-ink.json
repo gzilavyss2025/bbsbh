@@ -374,6 +374,27 @@
       "3": "knockout"
     }
   },
+  "427": {
+    "name": "Jersey Shore BlueClaws",
+    "art": "30:8ff3963f",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "9": "knockout",
+      "10": "knockout",
+      "12": "knockout",
+      "13": "knockout",
+      "14": "knockout",
+      "19": "knockout",
+      "20": "knockout",
+      "21": "knockout",
+      "25": "knockout",
+      "28": "knockout"
+    }
+  },
   "428": {
     "name": "Greenville Drive",
     "art": "9:9d0fe3ab",
@@ -417,6 +438,23 @@
     "parts": {
       "0": "knockout",
       "1": "ink"
+    }
+  },
+  "437": {
+    "name": "Lake County Captains",
+    "art": "31:fe509433",
+    "parts": {
+      "2": "ink",
+      "3": "ink",
+      "5": "ink",
+      "7": "ink",
+      "9": "ink",
+      "11": "ink",
+      "13": "ink",
+      "15": "ink",
+      "17": "ink",
+      "21": "knockout",
+      "26": "knockout"
     }
   },
   "445": {
@@ -604,6 +642,17 @@
       "8": "knockout"
     }
   },
+  "499": {
+    "name": "Lansing Lugnuts",
+    "art": "19:47fcfbed",
+    "parts": {
+      "3": "knockout",
+      "10": "knockout",
+      "11": "knockout",
+      "12": "ink",
+      "18": "knockout"
+    }
+  },
   "507": {
     "name": "St. Lucie Mets",
     "art": "5:2d020cba",
@@ -696,6 +745,15 @@
       "1": "knockout",
       "2": "knockout",
       "3": "knockout"
+    }
+  },
+  "537": {
+    "name": "Hudson Valley Renegades",
+    "art": "5:9c532e44",
+    "parts": {
+      "1": "knockout",
+      "2": "ink",
+      "4": "ink"
     }
   },
   "541": {
@@ -916,6 +974,22 @@
       "24": "knockout",
       "30": "knockout",
       "40": "knockout"
+    }
+  },
+  "6324": {
+    "name": "Hub City Spartanburgers",
+    "art": "25:eacdea54",
+    "parts": {
+      "2": "knockout",
+      "3": "ink",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "9": "knockout",
+      "10": "knockout",
+      "12": "knockout",
+      "14": "knockout",
+      "16": "knockout"
     }
   }
 }

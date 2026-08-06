@@ -149,5 +149,12 @@
       "milb-home": "baseorangeonwhite",
       "milb-away": "baseorangeonwhite"
     }
+  },
+  "6324": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:cap",
+      "milb-away": "cdn:cap"
+    }
   }
 }
