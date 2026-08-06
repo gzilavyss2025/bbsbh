@@ -72,7 +72,13 @@ const BUDGETS = {
   // split by subject (52 is the page a signed-out visitor sees in full, 53 is
   // the part that only means anything once an account exists), which is what
   // "put new code elsewhere" MEANS in a directory that cannot nest.
-  'src/styles': 53,
+  //
+  // 53 -> 54 for `54-my-tally-intro.css`: the two-step first-visit intro's own
+  // rules (phase 4). Its own partial rather than growing 08-site-shell.css
+  // (already near ITS OWN budget) or either My Tally partial (a different
+  // subject — onboarding chrome, not the settings page), same "one new file,
+  // one new number" rule as the entry above.
+  'src/styles': 54,
   'src/api': 83,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.

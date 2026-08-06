@@ -9,7 +9,9 @@ import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
+import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
 import { usePreferences } from '../hooks/preferences/usePreferences.js'
+import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
@@ -45,6 +47,13 @@ const AccountButton = isClerkEnabled
   : null
 const ContinueScoring = isClerkEnabled
   ? lazy(() => import('../components/game/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
+  : null
+const MergeReceiptStrip = isClerkEnabled
+  ? lazy(() =>
+      import('../components/account/MergeReceiptStrip.jsx').then((m) => ({
+        default: m.MergeReceiptStrip,
+      })),
+    )
   : null
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
@@ -82,8 +91,12 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // through the hook rather than holding a second copy in local state is what
   // keeps a change made on another device from being ignored until a reload.
   const { level: sportId, set: setPreference } = usePreferences()
-  const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
-  const [showWelcome, setShowWelcome] = useState(isFirstVisit && !welcomeSuppressed())
+  const { favoriteTeamId, hasClubOpinion, setFavoriteTeam } = useFavoriteTeam()
+  // Replaces the old "has a club opinion" proxy for first-visit detection —
+  // see src/lib/account/intro.js for why the two questions had to be
+  // decoupled once the welcome modal grew a second step.
+  const [introSeen, markIntroSeen] = useIntroFlag(hasClubOpinion)
+  const [showWelcome, setShowWelcome] = useState(!introSeen && !welcomeSuppressed())
   const pickLevel = (id) => setPreference('level', id)
 
   // The displayed date comes from the URL (see App.jsx): bare '/' means today.
@@ -109,6 +122,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // pretending otherwise the next morning would be a fiction.
   const scoresUnlocked = spoilersOffFor(dateStr)
   const [askUnlock, setAskUnlock] = useState(false)
+  // The `scores-unlocked-local` contextual prompt (PRD-adjacent, §6.2's honest-
+  // wording mandate): right after the user consents, quietly confirm the
+  // choice does NOT follow their other devices — bbsbh:scoresUnlocked is
+  // device-local by hard invariant (P2) and always will be, so this has to be
+  // said plainly rather than left to be assumed from the rest of My Tally's
+  // sync claims. Tied to the actual enable action (not to passActive being
+  // true on a reload), and one-shot forever via usePromptDismiss.
+  const [justEnabledPass, setJustEnabledPass] = useState(false)
+  const [passScopeNoteDismissed, dismissPassScopeNote] = usePromptDismiss('scores-unlocked-local')
   const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   const goToDate = (apiDate) =>
     navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
@@ -590,11 +612,45 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             )}
           </div>
         )}
+
+        {/* The scores-unlocked-local prompt: fires only right after THIS tap
+            enables the pass (see the ConsentModal onConfirm below), never on
+            a reload where the pass happens to still be active — and only
+            where an account exists to be confused about (isClerkEnabled). */}
+        {isClerkEnabled && justEnabledPass && !passScopeNoteDismissed && (
+          <p className="daystate__scopenote caps-exempt">
+            Live scores stays on this device — it won&rsquo;t turn on for your
+            other signed-in devices.
+            <button
+              type="button"
+              className="daystate__scopenotedismiss"
+              onClick={() => {
+                dismissPassScopeNote()
+                setJustEnabledPass(false)
+              }}
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </p>
+        )}
       </div>
+
+      {/* Signed in only: the merge-receipt strip fires only once every
+          configured channel has finished its first pull and the full receipt
+          on /profile hasn't been dismissed yet (PRD §5.3's deferred slate
+          pointer). See MergeReceiptStrip.jsx. */}
+      {MergeReceiptStrip && (
+        <Suspense fallback={null}>
+          <MergeReceiptStrip />
+        </Suspense>
+      )}
 
       {/* Signed-in only, and only when the cloud scorebook has entries —
           renders null otherwise, so the slate is untouched for everyone
-          else. See ContinueScoring.jsx. */}
+          else. Signed OUT, the same slot instead pitches an account once
+          three-plus games are in progress on this device. See
+          ContinueScoring.jsx. */}
       {ContinueScoring && (
         <Suspense fallback={null}>
           <ContinueScoring />
@@ -719,10 +775,12 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 
       {showWelcome && (
         <FavoriteTeamModal
-          intro
           favoriteTeamId={favoriteTeamId}
           onSave={setFavoriteTeam}
-          onClose={() => setShowWelcome(false)}
+          onClose={(step) => {
+            markIntroSeen(step)
+            setShowWelcome(false)
+          }}
         />
       )}
 
@@ -732,6 +790,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           time={formatResetTime(nextResetAt())}
           onConfirm={() => {
             enableUnlock()
+            if (isClerkEnabled) setJustEnabledPass(true)
             trackToggleConsent({
               toggle: TOGGLES.SCORES_UNLOCKED,
               action: ACTIONS.CONFIRM,

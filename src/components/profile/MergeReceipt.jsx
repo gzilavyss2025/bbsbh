@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { hasSeenMergeReceipt, markMergeReceiptSeen } from '../../lib/account/mergeReceiptFlag.js'
 
 // The post-sign-in merge receipt — shown once per (device, account), the first
 // time this device's things become an account's things.
@@ -18,33 +19,18 @@ import { useState } from 'react'
 // zero: a zero is a claim about your collection, an omission is not.
 //
 // Never a modal, never blocking, never a notification.
-
-const KEY_PREFIX = 'bbsbh:mergeReceipt:'
-
-function seen(userId) {
-  try {
-    return Boolean(window.localStorage.getItem(KEY_PREFIX + userId))
-  } catch {
-    // Storage unreadable — show it, at worst once per visit. The failure a
-    // one-shot flag protects against is nagging, not a spoiler.
-    return false
-  }
-}
-
-function markSeen(userId) {
-  try {
-    window.localStorage.setItem(KEY_PREFIX + userId, String(Date.now()))
-  } catch {
-    // Private mode. Dismissal still applies for this session via state below.
-  }
-}
+//
+// The one-shot flag (`bbsbh:mergeReceipt:{userId}`) is shared with the
+// slate's one-line pointer, MergeReceiptStrip.jsx (PRD §5.3's deferred "if the
+// sign-in happened elsewhere" strip, phase 4) — see mergeReceiptFlag.js's
+// header for why that has to be one flag, not two.
 
 // `lines` is `[{ id, text }]`, already filtered by the caller — it is the only
 // party that knows which channels answered.
 export function MergeReceipt({ userId, lines = [] }) {
   // Read once, at mount. Re-reading on every render would fight the dismissal
   // below, and this flag never changes underneath us.
-  const [dismissed, setDismissed] = useState(() => seen(userId))
+  const [dismissed, setDismissed] = useState(() => hasSeenMergeReceipt(userId))
   if (dismissed || !userId || lines.length === 0) return null
 
   return (
@@ -62,7 +48,7 @@ export function MergeReceipt({ userId, lines = [] }) {
         type="button"
         className="mergereceipt__dismiss"
         onClick={() => {
-          markSeen(userId)
+          markMergeReceiptSeen(userId)
           setDismissed(true)
         }}
       >

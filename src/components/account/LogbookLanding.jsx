@@ -1,5 +1,7 @@
 import { SiteHeader } from '../chrome/SiteHeader.jsx'
 import { ReportFooter } from '../chrome/ReportFooter.jsx'
+import { usePromptDismiss } from '../../hooks/preferences/usePromptDismiss.js'
+import { useStamps } from '../../hooks/useStamps.js'
 
 const STEPS = [
   {
@@ -97,6 +99,37 @@ function PassportPreview() {
   )
 }
 
+// This is the ONE surface a signed-out visitor reaches at /logbook on a
+// Clerk-configured deploy (LogbookAccountGate.jsx renders it whenever
+// !isSignedIn, regardless of what this device's local collection holds) — so
+// it is also the one place the `first-stamp` contextual prompt (PRD §6.2 row
+// 2) can actually be seen by the audience it targets. The PRD sketched that
+// prompt as living "in the /logbook tray, under the waiting-for-a-page line";
+// that tray is part of LogbookCollection, which a signed-out+Clerk-enabled
+// visitor never reaches (the account gate stands in front of it), so the
+// literal location was unreachable by construction. This is the deliberate
+// resolution, recorded in HANDOFF.md: same trigger (this device holds at
+// least one stamp already), same one-shot id and copy, moved to the door this
+// visitor actually walks through.
+function DeviceScopeNote() {
+  const { all } = useStamps()
+  const [dismissed, dismiss] = usePromptDismiss('first-stamp')
+  if (all.length === 0 || dismissed) return null
+  return (
+    <p className="logbooklanding__devicenote caps-exempt">
+      This book lives on this device. An account carries it to the others.
+      <button
+        type="button"
+        className="logbooklanding__devicenotedismiss"
+        onClick={dismiss}
+        aria-label="Dismiss"
+      >
+        ✕
+      </button>
+    </p>
+  )
+}
+
 // Pure presentation on purpose. The Clerk-aware wrapper is dynamically
 // imported by LogbookPage, so an unconfigured deploy never downloads the
 // account SDK just to carry this page's markup and illustration.
@@ -116,6 +149,7 @@ export function LogbookLanding({
               Reveal the final box score, press a keepsake stamp, and arrange your
               baseball year one game at a time. Your Game Log comes with you.
             </p>
+            <DeviceScopeNote />
             <LandingActions SignUpAction={SignUpAction} SignInAction={SignInAction} />
             <p className="logbooklanding__fineprint caps-exempt">
               Free account. No public profile, leaderboard, or social feed — this

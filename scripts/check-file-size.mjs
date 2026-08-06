@@ -105,7 +105,13 @@ const BUDGETS = {
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 912
   'src/api/boxscore.js': 900, // 859
-  'src/screens/GameSelect.jsx': 900, // 854
+  // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
+  // wiring, the merge-receipt slate strip, and the scores-unlocked-local
+  // contextual prompt (all PRD §6.1/§6.2). GameSelect is already the one
+  // screen that legitimately owns first-visit and slate-level onboarding
+  // hooks — splitting three small pieces of state out would scatter the
+  // slate's own logic rather than shrink it.
+  'src/screens/GameSelect.jsx': 1000, // 924
   'src/api/select.js': 800, // 796
   // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
