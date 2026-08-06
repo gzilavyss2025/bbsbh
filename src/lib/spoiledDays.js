@@ -145,3 +145,54 @@ export function statesFromDays(days) {
   for (const day of normalize(days)) out[day] = 'on'
   return out
 }
+
+// ---------------------------------------------------------------------------
+// WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
+// ---------------------------------------------------------------------------
+// SpoiledDaysCloudSync used to publish "whatever changed since the last list I
+// observed", with the first observation establishing a silent baseline. That is
+// correct for every change made from then on, and wrong for the consent that
+// already existed: a phone holding a month of spoiled days signs in, sets its
+// baseline, sees no change, and publishes nothing — forever. Its owner's laptop
+// then signs into the same account and finds an empty map. Consenting to a NEW
+// day doesn't help either: that one day publishes fine, and the month behind it
+// is still only on the phone.
+//
+// (The reveal mark never had this problem — RevealCloudSync posts whenever the
+// local mark is at all advanced, so a pre-existing mark backfills on its own. A
+// day list is not one integer, so it needs the comparison below. `stampsToPublish`
+// in src/lib/stamps.js is the same fix for the same defect; read its header.)
+//
+// So the question a device asks is not "what did I just change?" but "what do I
+// have that the server doesn't?" — answerable from the two maps alone, needing no
+// history, and self-healing: a publish lost to a dead network is simply found
+// again by the next comparison.
+//
+// `previous` — this device's list as of the last time it looked — is the ONE
+// thing the comparison can't supply, and it buys exactly one row type: the
+// explicit 'off'. A withdrawal cannot be inferred from absence, because absence
+// on the wire has to keep meaning "no opinion" (see `statesFromDays`); a day this
+// device is merely ignorant of and a day it deliberately took back look
+// identical from the local list alone. So an 'off' is published only where BOTH
+// are true — this device held the day and no longer does, AND the server still
+// says 'on' — which is precisely the stale row a withdrawal exists to reverse.
+// A day dropped by the merge (the server itself said 'off') is therefore not
+// echoed back, and a caller with no `previous` publishes no removals at all.
+//
+// Returns the `{ day, state }` rows api/spoiled-days.js takes, one per POST,
+// ordered oldest first so a publish reads chronologically in a network log.
+export function dayStatesToPublish(days, remote, previous = null) {
+  const mine = normalize(days)
+  const theirs = remote && typeof remote === 'object' && !Array.isArray(remote) ? remote : {}
+  const out = []
+  for (const day of mine) {
+    if (theirs[day] !== 'on') out.push({ day, state: 'on' })
+  }
+  if (previous != null) {
+    const held = new Set(mine)
+    for (const day of normalize(previous)) {
+      if (!held.has(day) && theirs[day] === 'on') out.push({ day, state: 'off' })
+    }
+  }
+  return out.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0))
+}

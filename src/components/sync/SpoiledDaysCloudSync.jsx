@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
+import { dayStatesToPublish } from '../../lib/spoiledDays.js'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
@@ -13,35 +14,67 @@ import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 // `revealedThrough`; that has its own key, its own shape, and its own sync
 // (RevealCloudSync / ADR-0022).
 //
-// Sync model mirrors RevealCloudSync: localStorage stays the instant,
-// offline-first source of truth and this only adds a background merge. On
-// mount/sign-in, GET the remote state map and apply it via mergeRemoteDays.
-// Afterwards, publish each local change as it happens. A signed-out user never
-// calls the endpoint at all, and a deploy without the store 501s — either way
-// the app behaves exactly as it does local-only.
+// Sync model mirrors RevealCloudSync and StampsCloudSync: localStorage stays the
+// instant, offline-first source of truth and this only adds a background merge.
+// On mount/sign-in, GET the remote state map and apply it via mergeRemoteDays.
+// Afterwards, publish what this device holds that the server doesn't. A signed-out
+// user never calls the endpoint at all, and a deploy without the store 501s —
+// either way the app behaves exactly as it does local-only.
 //
-// Why local changes are published one day at a time, as an explicit state:
-// absence has to keep meaning "no opinion". If this posted the whole list, a
-// fresh device with an empty list would tell the server to erase every day the
-// user ever consented to. Posting `{ day, state }` says only what this device
-// actually decided — and lets a withdrawal travel as a real 'off' rather than
-// being inferred from a gap, which is what stops a stale remote 'on' from
-// silently reversing a same-day undo. See spoiledDays.js's sync header.
+// Why local state is published one day at a time, as an explicit state: absence
+// has to keep meaning "no opinion". If this posted the whole list, a fresh device
+// with an empty list would tell the server to erase every day the user ever
+// consented to. Posting `{ day, state }` says only what this device actually
+// decided — and lets a withdrawal travel as a real 'off' rather than being
+// inferred from a gap, which is what stops a stale remote 'on' from silently
+// reversing a same-day undo. See spoiledDays.js's sync header.
+//
+// ---------------------------------------------------------------------------
+// WHAT A PULL LEAVES BEHIND — the baseline, and why it is the REMOTE
+// ---------------------------------------------------------------------------
+// `known` is what we believe the SERVER holds, and every pull overwrites it with
+// what the server just said. The publish step then asks `dayStatesToPublish` —
+// "what do I have that it doesn't?" — so consent that predates sign-in backfills
+// on the first pull instead of sitting on one device forever.
+//
+// This used to be a CHANGE LOG instead: it diffed each new list against the last
+// one it saw, with the first observation establishing a silent baseline. A device
+// holding days from before sign-in therefore saw no change, published nothing, and
+// never would; the owner's second device signed in to an empty map. That module's
+// header has the full argument, and `stampsToPublish` (src/lib/stamps.js, PR #545)
+// is the same fix for the identical defect in the Logbook.
+//
+// The one thing a comparison can't see is a WITHDRAWAL, since the local list keeps
+// no tombstones — so `seen` (this device's list as of the last look) is still kept,
+// and is the sole input to the explicit 'off' rows. It is deliberately not enough
+// on its own: an 'off' also requires the server to still say 'on', which is what
+// keeps a day the merge itself removed from being echoed back at the server that
+// sent it. That replaces the old `merging` flag, which had to suppress the whole
+// publish pass — including the backfill the merge is the trigger for.
 export function SpoiledDaysCloudSync() {
   const { isSignedIn, getToken } = useAuth()
   const { spoiledDays, mergeRemoteDays } = useScoresUnlocked()
 
-  // The list as of the last time we either published or merged, so a change can
-  // be diffed into the specific days that moved. Starts null so the very first
-  // observation establishes a baseline instead of publishing everything.
+  // What the server held as of the last successful pull. Starts null for "we have
+  // not heard from the server yet", which suppresses publishing entirely —
+  // publishing against an unknown remote would either echo the whole list back or,
+  // worse, act on a guess.
   const known = useRef(null)
-  // Set while a remote merge is being applied, so the resulting change to
-  // `spoiledDays` isn't immediately echoed back to the server it came from.
-  const merging = useRef(false)
+  // This device's list as of the last look, so a day that DISAPPEARED locally can
+  // be told from a day this device simply never had. Only the first of those is a
+  // withdrawal.
+  const seen = useRef(null)
 
   // Pull remote state once per sign-in.
   useEffect(() => {
-    if (!isSignedIn) return undefined
+    if (!isSignedIn) {
+      // Signing out forgets what we knew about the server. The next sign-in —
+      // possibly as a DIFFERENT user — must not publish this device's consent
+      // against the previous account's baseline.
+      known.current = null
+      seen.current = null
+      return undefined
+    }
     let cancelled = false
     ;(async () => {
       try {
@@ -51,12 +84,18 @@ export function SpoiledDaysCloudSync() {
         })
         if (!res.ok || cancelled) return
         const data = await res.json()
-        if (cancelled || !data?.days) return
-        merging.current = true
+        if (cancelled || !data?.days || typeof data.days !== 'object') return
+        // Baseline BEFORE the merge: the publish effect below fires on the state
+        // change the merge causes, and it must already be comparing against what
+        // the server actually has. The `cancelled` checks are what keep a reply
+        // that lands after a sign-out from re-seeding that baseline with the
+        // previous account's map.
+        known.current = data.days
         mergeRemoteDays(data.days)
       } catch {
         // Offline / unauthorized / store not configured on this deploy — local
-        // state stands, which is the whole offline-first contract.
+        // state stands, which is the whole offline-first contract. `known` keeps
+        // its previous value, so nothing publishes against a guess.
       }
     })()
     return () => {
@@ -64,25 +103,25 @@ export function SpoiledDaysCloudSync() {
     }
   }, [isSignedIn, getToken, mergeRemoteDays])
 
-  // Publish local changes.
+  // Publish what the server is missing.
   useEffect(() => {
     if (!isSignedIn) return
-    const prev = known.current
-    known.current = spoiledDays
-    // First observation: nothing to publish, just establish the baseline.
-    if (prev === null) return
-    // The change we just applied came FROM the server — don't send it back.
-    if (merging.current) {
-      merging.current = false
-      return
-    }
-    const added = spoiledDays.filter((d) => !prev.includes(d))
-    const removed = prev.filter((d) => !spoiledDays.includes(d))
-    const changes = [
-      ...added.map((day) => ({ day, state: 'on' })),
-      ...removed.map((day) => ({ day, state: 'off' })),
-    ]
+    const previous = seen.current
+    seen.current = spoiledDays
+    // Nothing has been heard from the server yet, so there is no baseline to
+    // compare against. The pull above supplies one and this effect re-runs.
+    if (known.current === null) return
+
+    const changes = dayStatesToPublish(spoiledDays, known.current, previous)
     if (changes.length === 0) return
+
+    // Assume these land. A publish that fails leaves the server without them, and
+    // the next pull's comparison finds them again — self-healing, where a
+    // pessimistic baseline would republish the whole list on every render.
+    const published = { ...known.current }
+    for (const { day, state } of changes) published[day] = state
+    known.current = published
+
     ;(async () => {
       try {
         const token = await getToken()
@@ -100,8 +139,7 @@ export function SpoiledDaysCloudSync() {
         )
       } catch {
         // A failed publish costs this device nothing — its own local state is
-        // already correct, and the next change (or the next sign-in fetch on
-        // another device) reconciles.
+        // already correct, and the next pull's comparison finds these again.
       }
     })()
   }, [isSignedIn, getToken, spoiledDays])

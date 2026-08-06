@@ -225,6 +225,39 @@ Two things worth carrying forward:
   a state updater and echoes synchronously has it; the echo listener must read
   from inside its own updater.
 
+## Amendment (2026-08-06) — the publish step is a comparison, not a change log
+
+The day map never backfilled. `SpoiledDaysCloudSync` published "whatever changed
+since the last list I saw", with the first observation establishing a silent
+baseline — so a device holding consent from BEFORE sign-in saw no change,
+published nothing, and never would. The owner's second device signed into the
+same account and found an empty map. Consenting to a new day didn't rescue it
+either: that one day published fine and everything behind it stayed on the one
+device.
+
+The fix is the shape ADR-0035's Logbook sync already took (`stampsToPublish`,
+PR #545): the baseline is now what the SERVER said on the last pull, and the
+question is "what do I have that it doesn't?" — `dayStatesToPublish`
+(`src/lib/spoiledDays.js`). Answerable from the two maps alone, needing no
+history, and self-healing, since a publish lost to a dead network is found again
+by the next comparison.
+
+Two details the state map forced, and both are load-bearing:
+
+- **A withdrawal still cannot be inferred from absence.** The local list keeps no
+  tombstones, so a day this device took back and a day it is merely ignorant of
+  look identical from that list alone — and absence on the wire has to keep
+  meaning "no opinion", or a fresh device would erase the user's history. So the
+  last-observed local list is still kept, and an explicit `'off'` is published
+  only where this device HELD the day, no longer does, **and** the server still
+  says `'on'` — precisely the stale row a withdrawal exists to reverse.
+- **That second condition replaced the old `merging` flag**, which suppressed the
+  whole publish pass while a remote merge was being applied. It had to go: the
+  merge is exactly the moment the new baseline arrives, so suppressing that pass
+  would suppress the backfill it enables. Requiring the server to still say
+  `'on'` is what keeps a day the merge itself removed from being echoed back at
+  the server that sent it.
+
 ## Known gaps (deliberately recorded, not yet closed)
 
 - **The sync component itself is untested end-to-end.** Its merge logic is pinned

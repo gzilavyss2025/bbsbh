@@ -7,6 +7,7 @@ import test from 'node:test'
 import {
   MAX_SPOILED_DAYS,
   addSpoiledDay,
+  dayStatesToPublish,
   isDaySpoiled,
   isDayString,
   applyRemoteStates,
@@ -190,4 +191,85 @@ test('isDayState accepts only the two wire states', () => {
   assert.equal(isDayState('on'), true)
   assert.equal(isDayState('off'), true)
   for (const bad of ['ON', '1', true, null, undefined, '']) assert.equal(isDayState(bad), false)
+})
+
+// --------------------------------------------------------------------------
+// The backfill: what this device holds that the server doesn't
+// --------------------------------------------------------------------------
+// The gap these pin: the sync used to publish "what changed since I started
+// watching", so consent that already existed when the user signed in was never
+// uploaded at all — the phone kept its spoiled days, the laptop signed into the
+// same account and found an empty map, and no amount of waiting fixed it,
+// because nothing was changing. Same defect PR #545 fixed for stamps
+// (`stampsToPublish`), same shape of fix.
+
+test('consent that predates sign-in publishes in full', () => {
+  assert.deepEqual(dayStatesToPublish(['2026-07-24', '2026-07-22'], {}), [
+    { day: '2026-07-22', state: 'on' },
+    { day: '2026-07-24', state: 'on' },
+  ])
+})
+
+test('a day the server already has on is not republished', () => {
+  assert.deepEqual(dayStatesToPublish(['2026-07-24'], { '2026-07-24': 'on' }), [])
+})
+
+test('a day the server has tombstoned but this device re-consented to publishes', () => {
+  assert.deepEqual(dayStatesToPublish(['2026-07-24'], { '2026-07-24': 'off' }), [
+    { day: '2026-07-24', state: 'on' },
+  ])
+})
+
+test('a day only the server knows about is left alone — absence is never an erase', () => {
+  // The rule the whole state-map design rests on. This device has no opinion
+  // about 2026-07-22; the merge is what brings it in, not a published 'off'.
+  assert.deepEqual(dayStatesToPublish([], { '2026-07-22': 'on' }), [])
+})
+
+test('a withdrawal travels as an explicit off — but only for a day this device held', () => {
+  // Consent, publish, then the same-day undo: the server's stale 'on' has to be
+  // reversed by a real 'off', which is what stops the next merge from silently
+  // putting the day back.
+  const before = ['2026-07-24']
+  assert.deepEqual(dayStatesToPublish([], { '2026-07-24': 'on' }, before), [
+    { day: '2026-07-24', state: 'off' },
+  ])
+})
+
+test('a withdrawal the server never heard the consent for stays quiet', () => {
+  // Nothing to reverse — absence already means "no opinion" on the wire.
+  assert.deepEqual(dayStatesToPublish([], {}, ['2026-07-24']), [])
+})
+
+test('a day removed BY the merge is not echoed back as a withdrawal', () => {
+  // Another device published 'off'; this one applied it. Re-publishing that
+  // 'off' would just tell the server what it already said.
+  assert.deepEqual(dayStatesToPublish([], { '2026-07-24': 'off' }, ['2026-07-24']), [])
+})
+
+test('a backfill and a withdrawal ride the same list', () => {
+  assert.deepEqual(
+    dayStatesToPublish(['2026-07-25'], { '2026-07-24': 'on' }, ['2026-07-24']),
+    [
+      { day: '2026-07-24', state: 'off' },
+      { day: '2026-07-25', state: 'on' },
+    ],
+  )
+})
+
+test('dayStatesToPublish degrades to a plain backfill on a garbled remote', () => {
+  for (const bad of [null, undefined, 'nope', 42, []]) {
+    assert.deepEqual(
+      dayStatesToPublish(['2026-07-24'], bad),
+      [{ day: '2026-07-24', state: 'on' }],
+      `${JSON.stringify(bad)} must not suppress the backfill`,
+    )
+  }
+})
+
+test('dayStatesToPublish drops junk from either side rather than publishing it', () => {
+  assert.deepEqual(dayStatesToPublish(['2026-07-24', 'today', 7], { 'not-a-day': 'on' }), [
+    { day: '2026-07-24', state: 'on' },
+  ])
+  assert.deepEqual(dayStatesToPublish(null, null, null), [])
 })
