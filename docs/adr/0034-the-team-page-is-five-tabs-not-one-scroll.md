@@ -95,6 +95,11 @@ check whether they answer the same question before parameterising them into one.
 
 ## `?d=` and `?s=` on every tab path is a spoiler requirement
 
+> **Amended 2026-08-06.** A team page opened from a game no longer carries `?d=`
+> at all — the team hub opens LIVE, like every other stats surface. See "The
+> cutoff is opt-in now" below; the propagation rule this section states is still
+> correct for a link that *does* carry one, and that is why it stays.
+
 A team page opened from a game carries `?d=` (the game's `officialDate`) and
 `?s=` (the sportId). `fetchTeamSchedule` uses that cutoff, so a visitor
 mid-scoring never sees a result they have not reached, and `fetchStandings` is
@@ -152,3 +157,29 @@ shared `GameStubCard`, so there is still a single source of truth for what a
 game card is. Reach for a second export only when the two surfaces genuinely
 need different LAYOUTS, as here; a preview that differs only in how much it
 shows is still a prop.
+
+### The cutoff is opt-in now (2026-08-06)
+
+`GameView` no longer stamps `?d=` onto the links out of a game, so the team hub —
+and the player page, and the leader boards — open on **current** stats whichever
+way you arrive. The propagation rule above is unchanged and still enforced: a
+path that carries `?d=` must keep carrying it through every tab switch and
+preview door, because dropping it halfway would show two different answers on one
+visit. What changed is only whether anything puts it there to begin with.
+
+Why: the cutoff was the spoiler rule reaching past the surfaces it exists to
+protect. A season stat line is not a score. It moves by fractions, it is the same
+number the back of a baseball card has carried for a century, and reading one
+tells you nothing about the game you are currently scoring. Freezing it by
+default meant the same team page showed different numbers depending on whether
+you reached it from a game or from search — a real cost, for a spoiler risk close
+to zero. The scoring surfaces (slate, lineups, innings, box score) are untouched
+and stay sealed; that is where the rule earns its keep.
+
+**This leaves the historical view with no way in from the UI.** `?d=` still works
+by hand (`/team/158?d=2026-04-01` shows the club as it stood entering that day)
+and the banner offers the way back out, but nothing offers the way IN any more.
+That is a known, deliberate gap: "show me this team as of April 1" deserves a
+real date control rather than a side effect of how you happened to navigate, and
+it is worth designing on its own. Recorded here so the next context does not
+mistake it for an oversight.
