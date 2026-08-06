@@ -1,22 +1,31 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useKeepAwakePreference } from '../hooks/useKeepAwakePreference.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
-import { TeamInfo } from './TeamInfo.jsx'
-import { InningViewer } from './InningViewer.jsx'
-import { BoxScore } from './BoxScore.jsx'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { humanDateWithYear } from '../lib/dates.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
+
+// GameView is itself a lazily-loaded route (App.jsx), but its three sections
+// — lineups, innings, box score — are mutually exclusive per render (`step`)
+// and each is a large module on its own. Splitting them further means opening
+// a game to read a lineup never downloads the innings viewer or box score
+// code until the user actually taps into that section.
+const TeamInfo = lazy(() => import('./TeamInfo.jsx').then((m) => ({ default: m.TeamInfo })))
+const InningViewer = lazy(() =>
+  import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
+)
+const BoxScore = lazy(() => import('./BoxScore.jsx').then((m) => ({ default: m.BoxScore })))
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -231,6 +240,7 @@ export function GameView({ game, section, onSection }) {
       />
 
       {feed && step === 0 && (
+        <Suspense fallback={<Loader />}>
         <TeamInfo
           feed={feed}
           side="away"
@@ -258,8 +268,10 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
         />
+        </Suspense>
       )}
       {feed && step === 1 && (
+        <Suspense fallback={<Loader />}>
         <TeamInfo
           feed={feed}
           side="home"
@@ -286,8 +298,10 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
         />
+        </Suspense>
       )}
       {feed && step === 2 && (
+        <Suspense fallback={<Loader />}>
         <InningViewer
           feed={feed}
           started={started}
@@ -312,8 +326,10 @@ export function GameView({ game, section, onSection }) {
           spoilersOff={spoilersOff}
           passActive={passActive}
         />
+        </Suspense>
       )}
       {feed && step === 3 && (
+        <Suspense fallback={<Loader />}>
         <BoxScore
           feed={feed}
           managers={managers.data}
@@ -329,6 +345,7 @@ export function GameView({ game, section, onSection }) {
           onSection={onSection}
           spoilersOff={spoilersOff}
         />
+        </Suspense>
       )}
 
     </div>
