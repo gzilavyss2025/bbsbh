@@ -1,7 +1,7 @@
 # My Tally — the private account & profile experience
 
 **Status:** phase 2 of 5 complete (spec + preference/sync foundation) · **Slug:** `my-tally` · **Route:** `/profile`
-**Branch:** `claude/my-tally-account-experience` · **Based on:** `origin/main` @ `70de897`
+**Branch:** `claude/my-tally-account-experience` · **Based on:** `origin/main` @ `bda26c6` (rebased)
 
 The user-facing destination is **My Tally**. Subtitle: **"Profile & settings."**
 The URL is `/profile` and it never changes (same reasoning as `/logbook` —

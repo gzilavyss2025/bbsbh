@@ -82,7 +82,7 @@ exact interface phase 3 should consume. This file only carries state.
 
 ## Overlap check against concurrent work
 
-Re-run at `origin/main` @ `70de897`. **No open PRs** (`gh pr list --state open`
+Re-run at `origin/main` @ `bda26c6`. **No open PRs** (`gh pr list --state open`
 → `[]`). Most branches ahead of `main` are squash-merge leftovers whose content
 is verified present in `main`.
 
@@ -123,7 +123,7 @@ No hard conflicts.
 Branch: claude/my-tally-account-experience
 Worktree: C:\Users\gzilavy\bbsbh-my-tally-account
 PR: not opened
-Based on: origin/main at 70de897
+Based on: origin/main at bda26c6 (rebased 2026-08-06; #578, #579, #580 landed mid-phase and were absorbed cleanly)
 State: committed on the branch, NOT pushed. Phase 2 touched 34 files — 13 new
        (api/preferences.js, api/account.js, src/lib/account/{preferences,
        preferencesStorage,syncStatus,syncClaims}.js, src/hooks/preferences/*,
