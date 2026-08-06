@@ -200,43 +200,49 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 
 ## 4. How it works
 
-### 4.1 The mint gate — the spoiler argument
+### 4.1 Containment — the spoiler argument
 
 The Game Log is the **first and only** thing in this app that persists a final
-score (ADR-0035). It is safe for a structural reason, not a careful one: **a stamp
-can only exist for a game the server can prove this user already finished
-revealing.** The score was already theirs before the stamp carried it.
+score (ADR-0035). It is safe for a structural reason, not a careful one — and the
+structure is **where a stamp may render**, not a permission check when it is
+minted:
 
-`meetsRevealGate` (`src/lib/stamps.js`) is the whole argument, and it **fails
-closed** — a missing game, an unparseable innings count, or an absent reveal mark
-all answer `false`. Two ways to qualify, and they are exactly the two ways a user
-legitimately comes to know a final score in this app:
+> A stamp can only be **reached** from inside a revealed box score, and can only
+> be **rendered** on a surface the containment guard allows. Nothing about the
+> Game Log can put a score in front of you on a game you haven't opened.
 
-1. **`revealedThrough` reached the game's last half** — they uncovered it by hand
-   through the existing ratchet (`useRevealProgress.js`).
-2. **The game's day is 'on' in their spoiled-day map** — they consented to spoil
-   that date under the Scores Unlocked pass (ADR-0026), the one case where a user
-   has seen a score without the reveal mark ever moving.
-
-**Do not add a third way in.** That the two existing stores compose here without
-either being bent is the strongest evidence the model is right.
-
-The gate keys on `finalHalfIndex`, the game's **actual** last half-index, derived
-from `homeBattedLast` — never `regulation × 2 − 1`. That formula both mints for an
-extra-inning game the user stopped revealing at regulation (a game still tied when
-they left it) and demands a bottom half that never existed when the home club won
-without batting in the ninth.
-
-The gate runs **server-side on every mint** (`api/stamps.js`). The client-side
-half is that `StampGameButton.jsx` renders **inside** the box score's `SealBox`
-reveal render function. That host `SealBox` has **no `onReveal` and persists
-nothing**, and must stay that way — give it one and a box score opened under the
-Scores Unlocked pass would silently ratchet the whole game's `revealedThrough`.
-
-**A lint guard contains this.** `scripts/check-stamp-surfaces.mjs` fails
+**The lint guard is that argument.** `scripts/check-stamp-surfaces.mjs` fails
 `npm run lint` if `GameStamp.jsx` or `StampGameButton.jsx` is imported from
-anywhere outside its allowlist. `e2e/invariants/logbook-stamp.spec.js` is the
-runtime half. Read ADR-0035 before touching either.
+anywhere outside its allowlist, and forbids a named set of unrevealed-game
+surfaces — the slate, game cards, "Pick up your pencil" — from so much as
+mentioning either. `e2e/invariants/logbook-stamp.spec.js` is the runtime half: it
+asserts a stamp is *absent from the DOM*, not merely hidden, before the box score
+is tapped. Read ADR-0035 before touching either.
+
+The reach half is that `StampGameButton.jsx` renders **inside** the box score's
+`SealBox` reveal render function. That host `SealBox` has **no `onReveal` and
+persists nothing**, and must stay that way — give it one and a box score opened
+under the Scores Unlocked pass would silently ratchet the whole game's
+`revealedThrough`.
+
+#### The retired mint gate
+
+`POST /api/stamps` used to refuse unless the server could prove, from
+`reveal:{userId}:{gamePk}` or `spoiled:{userId}`, that the user had finished
+revealing the game (`meetsRevealGate`). **That gate is gone** — ADR-0035's second
+amendment has the full reasoning, and the short version is that the `SealBox`
+above deliberately persists nothing, so the ordinary way to stamp left no mark
+for the gate to find and every such mint 403'd. It refused the flow while
+defending only against a hostile client, which here is the owner spoiling their
+own collection.
+
+What the server still refuses:
+
+1. **A game that isn't Final.** A live score still moves; a stamp is permanent.
+2. **A client-supplied score.** The number lives in `game:final:{gamePk}`, a
+   shared blob the server fetches for itself; the per-user record has no room for
+   one. `mintRefusal`/`stampEntry` (`api/stamps.js`) are both pure and pinned in
+   `test/api-handlers.test.js`.
 
 ### 4.2 Storage, shape, and limits
 
@@ -289,9 +295,10 @@ degrades to the plain book.
 `src/components/sync/StampsCloudSync.jsx` — Clerk-gated, lazy, mounted in
 `App.jsx`, inert when Clerk or Upstash is unconfigured (the endpoints `501`).
 GET-merges the whole collection via `?export=1` on sign-in, then publishes each
-local change. It **POSTs the local `revealedThrough` to `/api/reveal` before every
-mint**, so the server's gate is judging a current reveal mark rather than a stale
-one. Notes commit on blur, not per keystroke — every save bumps `updatedAt`, which
+local change. It used to POST the local `revealedThrough` to `/api/reveal` before
+every mint to satisfy the retired gate (§4.1); that push is gone, and its removal
+is what let a backlog of unsyncable stamps finally upload. Notes commit on blur,
+not per keystroke — every save bumps `updatedAt`, which
 is what the sync diffs on, so per-keystroke writes would publish a request per
 character.
 
@@ -328,7 +335,8 @@ unknown to us.
 
 ## 6. Invariants — do not break these
 
-1. **No third way through the mint gate.** `meetsRevealGate` fails closed. §4.1.
+1. **Containment is the whole spoiler argument** — a stamp is reachable only from
+   inside a revealed box score, and renderable only where the guard allows. §4.1.
 2. **The box score's stamp `SealBox` gets no `onReveal` and persists nothing.**
 3. **`GameStamp.jsx` and `StampGameButton.jsx` stay inside their import
    allowlists** — `scripts/check-stamp-surfaces.mjs` is not advisory.

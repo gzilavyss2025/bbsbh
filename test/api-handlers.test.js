@@ -25,7 +25,7 @@ import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
-import stampsHandler, { seasonRows } from '../api/stamps.js'
+import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
 
 // A stand-in for Node's (IncomingMessage, ServerResponse) pair.
@@ -277,6 +277,157 @@ test('a tombstone from the endpoint removes the stamp on another device', () => 
     oldStyle[row.gamePk] = { ...row, state: 'on', game: undefined }
   }
   assert.equal(isStamped(applyRemoteStamps(local, oldStyle), 778242), true)
+})
+
+// --------------------------------------------------------------------------
+// Minting (ADR-0035's second amendment — the reveal gate is gone)
+// --------------------------------------------------------------------------
+// The bug this closes: `POST /api/stamps` refused to mint unless the server
+// could read a `reveal:{userId}:{gamePk}` mark or a spoiled-day consent for the
+// game. The ordinary way to stamp — tapping the affordance inside the box
+// score's `SealBox` — writes NEITHER, because that SealBox deliberately
+// persists nothing (an `onReveal` there would let a box score opened under the
+// Scores Unlocked pass ratchet the whole game's `revealedThrough`). So the
+// normal flow 403'd, and nineteen real stamps could not be uploaded.
+//
+// `mint` takes its Redis client as a parameter, so the real path runs here
+// against a fake — the one Redis-backed branch in this file, and worth it
+// because this branch IS the feature.
+function fakeRedis(seed = {}) {
+  const store = { ...seed }
+  const hashes = {}
+  return {
+    calls: [],
+    store,
+    hashes,
+    async get(key) {
+      this.calls.push(`get ${key}`)
+      return store[key] ?? null
+    },
+    async hget(key, field) {
+      this.calls.push(`hget ${key} ${field}`)
+      return hashes[key]?.[field] ?? null
+    },
+    async hset(key, obj) {
+      hashes[key] = { ...(hashes[key] ?? {}), ...obj }
+    },
+    async hlen(key) {
+      return Object.keys(hashes[key] ?? {}).length
+    },
+    async sadd() {},
+    async set(key, value) {
+      store[key] = value
+    },
+  }
+}
+
+// A Final game already in the shared facts cache, so no statsapi fetch happens.
+const FINAL_GAME = {
+  gamePk: 778241,
+  date: '2026-04-20',
+  gameNumber: 1,
+  sportId: 1,
+  gameType: 'R',
+  venue: 'Rogers Centre',
+  innings: 9,
+  homeBattedLast: true,
+  status: 'Final',
+  away: { id: 136, abbreviation: 'SEA', name: 'Seattle Mariners', runs: 3, hits: 7, errors: 0 },
+  home: { id: 141, abbreviation: 'TOR', name: 'Toronto Blue Jays', runs: 5, hits: 9, errors: 1 },
+  winnerId: 141,
+  decisions: { winner: '', loser: '', save: '' },
+}
+
+const mintReq = (body) =>
+  nodeReq('/api/stamps', { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+
+test('a Final game mints with no reveal mark and no day consent', async () => {
+  // This is the case that used to 403. Nothing in the fake store answers to
+  // `reveal:u1:778241` or `spoiled:u1`, which is exactly the state a real
+  // box-score stamp leaves behind.
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+
+  assert.equal(res.statusCode, 201)
+  assert.equal(res.json.stamp.gamePk, 778241)
+  assert.equal(res.json.stamp.state, 'on')
+  // And it must not have gone looking for permission on the way.
+  assert.equal(
+    redis.calls.some((c) => c.startsWith('get reveal:') || c.startsWith('hget spoiled:')),
+    false,
+    'the mint must not read a reveal mark or a consent map',
+  )
+})
+
+test('an unfinished game is still refused — a stamp is permanent, a live score is not', () => {
+  assert.deepEqual(mintRefusal({ ...FINAL_GAME, status: 'Live' }), {
+    error: 'game not final',
+    status: 409,
+  })
+  assert.deepEqual(mintRefusal(null), { error: 'game not found', status: 404 })
+  // Resolvable but with a date no season can be read from: nothing to shard on.
+  assert.deepEqual(mintRefusal({ ...FINAL_GAME, date: 'April 20' }), {
+    error: 'game not found',
+    status: 404,
+  })
+  assert.equal(mintRefusal(FINAL_GAME), null)
+})
+
+test('the mint takes nothing score-bearing from the request body', () => {
+  // The remaining integrity claim now that the gate is gone: the client names a
+  // mode, a note and a placement. The score lives in the shared `game:final`
+  // blob the server fetched itself, and the per-user record has no room for one
+  // — so a hostile body cannot forge a 20-0 keepsake.
+  const entry = stampEntry(
+    {
+      mode: 'followed',
+      note: 'Dad’s first game',
+      away: { runs: 20 },
+      home: { runs: 0 },
+      winnerId: 999,
+      date: '1999-01-01',
+      state: 'off',
+      stampedAt: 1,
+    },
+    FINAL_GAME,
+    null,
+    5000,
+  )
+  assert.deepEqual(Object.keys(entry).sort(), [
+    'date',
+    'mode',
+    'note',
+    'placement',
+    'stampedAt',
+    'state',
+    'updatedAt',
+  ])
+  assert.equal(entry.date, FINAL_GAME.date, 'the date comes from the game, never the body')
+  assert.equal(entry.state, 'on')
+  assert.equal(entry.stampedAt, 5000)
+  assert.equal(entry.mode, 'followed')
+})
+
+test('re-stamping keeps the keepsake’s original date and its page', () => {
+  const existing = {
+    state: 'on',
+    mode: 'watched',
+    stampedAt: 1000,
+    updatedAt: 1000,
+    note: '',
+    date: '2026-04-20',
+    placement: { page: 2, x: 0.25, y: 0.25, tilt: 3 },
+  }
+  const edited = stampEntry({ note: 'better note' }, FINAL_GAME, existing, 9000)
+  assert.equal(edited.stampedAt, 1000, 'stampedAt is the keepsake’s date, not the sync clock')
+  assert.equal(edited.updatedAt, 9000)
+  assert.deepEqual(edited.placement, existing.placement, 'editing a note must not clear the page')
+
+  // Reviving a tombstone is a NEW keepsake, and starts unplaced.
+  const revived = stampEntry({}, FINAL_GAME, { ...existing, state: 'off' }, 9000)
+  assert.equal(revived.stampedAt, 9000)
+  assert.equal(revived.placement, null)
 })
 
 // --------------------------------------------------------------------------

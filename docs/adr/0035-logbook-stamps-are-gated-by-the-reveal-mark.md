@@ -1,6 +1,9 @@
-# ADR-0035 — Logbook stamps are score-bearing, and gated by the reveal mark
+# ADR-0035 — Logbook stamps are score-bearing, and contained by where they render
 
-Status: accepted (2026-08-04)
+Status: accepted (2026-08-04); **the reveal gate superseded 2026-08-06 — see the
+second amendment at the bottom, which is the current decision.** Everything above
+it is kept as written because the reasoning it records is still the reasoning
+that has to be answered.
 
 ## Context
 
@@ -226,3 +229,107 @@ game is a literal in that file — a made-up ballpark, a fixed date, two invente
 run totals — reaching no schedule, feed, collection or gamePk. It is also
 DEV-only (`import.meta.env.DEV` in `App.jsx`), so it never reaches a production
 build at all. Read this ADR before adding a fourth name.
+
+## Second amendment (2026-08-06) — the reveal gate is retired
+
+**The server-side reveal gate is gone.** `POST /api/stamps` no longer reads
+`reveal:{userId}:{gamePk}` or `spoiled:{userId}`, `meetsRevealGate` and
+`finalHalfIndex` are deleted from `src/lib/stamps.js`, and `StampsCloudSync`'s
+reveal push (the "known gap" closer named above) went with them. What survives
+server-side is the refusal that protects the *artifact* rather than the user —
+only a **Final** game mints, because a stamp is permanent and a live score is
+not — plus the `game:final:{gamePk}` split, which is what still keeps a client
+from minting a fabricated 20–0 keepsake. Both are `mintRefusal`/`stampEntry` in
+`api/stamps.js`, pure and pinned in `test/api-handlers.test.js`.
+
+### What forced it
+
+Nineteen real stamps across sixteen dates could not be uploaded. Every
+`POST /api/stamps` returned 403 "game not revealed", and the cause was not a bug
+in the gate — the gate was working exactly as this ADR specifies:
+
+- The mint affordance renders inside the box score's `SealBox` reveal render
+  function, and **that `SealBox` deliberately has no `onReveal`**
+  (`BoxScore.jsx`; the reason is in `src/CLAUDE.md` and it is a good one — an
+  `onReveal` there would let a box score opened under the Scores Unlocked pass
+  silently ratchet the game's whole `revealedThrough`).
+- So stamping from a box score writes no `bbsbh:reveal:{gamePk}`, the client had
+  no mark to push, and the server had nothing to find.
+- The gate then correctly failed closed.
+
+The client-side gate and the server-side gate disagreed about what counts as
+proof, and the sanctioned bridge between them could only carry evidence the
+normal flow never produces. **This was not an edge case. It was the flow.**
+
+### Why the answer is to remove it rather than widen it
+
+The obvious repair was a third door — let the client offer its local stamp, or
+its "I opened this box score" claim, as evidence, and post a reveal mark before
+minting. Rejected, because working out what that door should be forced the
+question of what the gate was buying, and the answer was: less than this ADR
+claims.
+
+- **Containment, not the gate, is the argument.** What actually stops the
+  Logbook spoiling anything is *where stamp art may render* —
+  `scripts/check-stamp-surfaces.mjs`, which allowlists the import sites of
+  `GameStamp.jsx`/`StampGameButton.jsx` by path and forbids a named set of
+  unrevealed-game surfaces from mentioning either, with
+  `e2e/invariants/logbook-stamp.spec.js` asserting a stamp is *absent from the
+  DOM* before the box score is tapped. **All of that is untouched.** A stamp
+  still cannot appear on the slate, on a game card, in "Pick up your pencil", or
+  in any list of unrevealed games. The original text says containment "still
+  matters, the gate does not replace it"; it turns out to be the other way round.
+- **The threat model was a hostile client, and there isn't one.** The gate stops
+  someone minting a stamp for a game they haven't opened. On a single-user app
+  that someone is the owner, deliberately spoiling a game they went out of their
+  way to stamp, in a collection only they can see. Reveal state is per *user*,
+  not per device, so the multi-device case it appears to protect — stamp on the
+  phone, see the score on the iPad — is a game this user already revealed.
+- **A third door made the guarantee a fiction anyway.** Every candidate piece of
+  evidence (a local reveal mark, a local stamp, a claim in the body) is
+  user-editable `localStorage`. A gate fed by those is a gate in name only, and
+  the honest options were "remove it" or "keep 403'ing the normal flow".
+
+The sentence this ADR was built to make true — *you cannot own a stamp for a
+game you have not finished revealing* — is retired with it. The replacement is
+narrower and actually enforced:
+
+> A stamp can only be **reached** from inside a revealed box score, and can only
+> be **rendered** on a surface the containment guard allows. Nothing about the
+> Logbook can put a score in front of you on a game you haven't opened.
+
+### The wider decision this sits inside
+
+This is the first change under a deliberate rescoping of the spoiler rule: it
+governs the **scoring surfaces** — the slate, the lineup pages, the innings
+viewer, the box score — and stops trying to govern everything score-adjacent
+elsewhere in the app. The rule was written as "a score-revealing value must never
+exist in the DOM until revealed" and had accreted into a general-purpose
+guardrail that also froze season stats, team pages and player pages by default.
+Treating a final score as though it were a credential cost real functionality and
+bought very little. The narrowed scope lands across this change and two
+companions: the `?d=&s=` cutoff on stats/team/player pages becoming opt-in time
+travel rather than an on-by-default freeze, and then the root `CLAUDE.md` /
+`CONTEXT.md` prose being rewritten to state the new scope outright.
+
+**Tier 1 is unchanged and stays strict.** `SealBox`, `revealedThrough`, the
+render-function gate (ADR-0002), reveal-only module isolation (ADR-0001), the
+`NetworkOnly` service worker (ADR-0004), extras never spoiling (ADR-0008) — none
+of that moves. Nothing here loosens what happens while you are scoring a game.
+
+### Consequences
+
+- `test/stamps.test.js`'s gate block was **deleted along with the predicate it
+  pinned**, not loosened to pass. `test/api-handlers.test.js` gains the mint
+  path driven against a fake Redis — a Final game with no reveal mark and no day
+  consent mints 201 and never reads a `reveal:`/`spoiled:` key — which fails
+  with 403 against the pre-change endpoint.
+- `revealMarkFor` (`src/hooks/useRevealProgress.js`) is deleted; it existed only
+  for the reveal push. `check-dead-exports.mjs` is what caught it.
+- **The 500-stamps-per-season cap is now the only thing bounding writes** to a
+  user's own shard. It refuses rather than prunes, as before.
+- `/logbook/stats` inherits the *containment* argument rather than the gate one.
+  Its input must still only ever be the user's own stamps — no "recent games you
+  might stamp", no club's other results, no league context.
+- ADR-0026's spoiled-day map keeps its own job (which days you agreed to see) and
+  simply stops having a second one. It is no longer consulted at mint time.
