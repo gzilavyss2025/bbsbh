@@ -122,7 +122,7 @@ function DeviceScopeNote() {
         type="button"
         className="logbooklanding__devicenotedismiss"
         onClick={dismiss}
-        aria-label="Dismiss"
+        aria-label="Dismiss this note"
       >
         ✕
       </button>

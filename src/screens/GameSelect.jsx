@@ -591,7 +591,20 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     : 'Live scores — off'
                 }
                 className={`daystate__chip daystate__chip--live${passActive ? ' daystate__chip--live-on' : ''}`}
-                onClick={() => (passActive ? disableUnlock() : setAskUnlock(true))}
+                onClick={() => {
+                  if (passActive) {
+                    disableUnlock()
+                    // The note says "Live scores stays on this device". Once
+                    // the pass is off there is no "live scores" to say it
+                    // about, and leaving it up asserted a scope for a setting
+                    // that no longer applied. Clearing it here is NOT the
+                    // one-shot dismissal — that is the ✕, and only the ✕
+                    // writes bbsbh:prompts.
+                    setJustEnabledPass(false)
+                  } else {
+                    setAskUnlock(true)
+                  }
+                }}
               >
                 <span className="daystate__dot" aria-hidden="true" />
                 {copy('scoresUnlocked.toggleLabel')}
@@ -628,7 +641,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                 dismissPassScopeNote()
                 setJustEnabledPass(false)
               }}
-              aria-label="Dismiss"
+              aria-label="Dismiss this note"
             >
               ✕
             </button>

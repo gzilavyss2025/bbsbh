@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { SignInButton, SignOutButton, UserProfile, useAuth, useUser } from '@clerk/clerk-react'
-import { SYNCED_ITEMS } from '../../lib/account/syncClaims.js'
+import { mergeReceiptLines } from '../../lib/account/mergeReceiptFlag.js'
+import { NEVER_SYNCED, SYNCED_ITEMS } from '../../lib/account/syncClaims.js'
 import { DeviceHandoff } from './DeviceHandoff.jsx'
 import { EraseDataDialog } from './EraseDataDialog.jsx'
 import { MergeReceipt } from './MergeReceipt.jsx'
@@ -25,24 +26,6 @@ import { MergeReceipt } from './MergeReceipt.jsx'
 // does not do. Read docs/game-log.md §3 before rewording any of it — in
 // particular, sync is a convenience and never a BACKUP, so nothing here may say
 // "backed up", "safe", or "never lose".
-
-// A count is a fact about you. A game is not — so these lines carry numbers of
-// your own things and never name one of them (PRD invariant P10).
-function mergeLines({ status, counts, clubName }) {
-  const lines = []
-  const reached = (channel) => status?.[channel]?.phase === 'synced'
-  if (reached('stamps') && counts.stamps > 0) {
-    lines.push({ id: 'stamps', text: `${counts.stamps} ${counts.stamps === 1 ? 'stamp' : 'stamps'}` })
-  }
-  if (counts.games > 0) {
-    lines.push({ id: 'games', text: `${counts.games} ${counts.games === 1 ? 'game' : 'games'} in progress` })
-  }
-  if (reached('spoiledDays') && counts.days > 0) {
-    lines.push({ id: 'days', text: `${counts.days} ${counts.days === 1 ? 'day' : 'days'} you had unsealed` })
-  }
-  if (reached('prefs') && clubName) lines.push({ id: 'club', text: clubName })
-  return lines
-}
 
 export function ProfileAccount({ status, counts, clubName }) {
   const { isLoaded, isSignedIn, user } = useUser()
@@ -87,9 +70,9 @@ export function ProfileAccount({ status, counts, clubName }) {
         <div className="mytally__pitch">
           <DeviceHandoff className="mytally__handoff" />
           <p className="mytally__pitchlede caps-exempt">
-            Everything on this page already works. An account carries it to your other
-            screens — start a game on the phone at the park, pick it up on the iPad at
-            home, right where you left off.
+            Everything on this page already works, on this device. An account carries the
+            four things below to your other screens — start a game on the phone at the
+            park, pick it up on the iPad at home, right where you left off.
           </p>
           <ul className="mytally__claims">
             {SYNCED_ITEMS.map((item) => (
@@ -105,8 +88,10 @@ export function ProfileAccount({ status, counts, clubName }) {
             </button>
           </SignInButton>
           <p className="mytally__fineprint caps-exempt">
-            No public profile, no leaderboard, no social feed. A score is never synced —
-            only how far you have opened each game.
+            These never leave this device, by design:{' '}
+            {NEVER_SYNCED.map((item) => item.label).join(', ')}. No public profile, no
+            leaderboard, no social feed. A score is never synced — only how far you have
+            opened each game.
           </p>
         </div>
       </section>
@@ -116,7 +101,7 @@ export function ProfileAccount({ status, counts, clubName }) {
   return (
     <section className="mytally__section mytally__account">
       <h2 className="mytally__sectiontitle">Account</h2>
-      <MergeReceipt userId={user?.id} lines={mergeLines({ status, counts, clubName })} />
+      <MergeReceipt userId={user?.id} lines={mergeReceiptLines({ status, counts, clubName })} />
       <p className="mytally__accountid caps-exempt">
         Signed in as <strong>{who || 'your account'}</strong>.
       </p>

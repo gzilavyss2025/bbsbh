@@ -201,14 +201,24 @@ export function StampsCloudSync() {
       }
       const auth = { Authorization: `Bearer ${token}` }
 
-      await Promise.all(
+      // Every reply is collected and JUDGED. Reporting `synced` unconditionally
+      // at the end — which this did — meant a publish that landed nothing still
+      // told the receipt "Carried across your devices. Last checked just now."
+      // That is precisely the failure ADR-0022 records and that syncStatus.js
+      // exists to close: a graceful degrade masking a hard failure. Note also
+      // that an un-checked `res.ok` never reaches a catch at all, so a 500 or a
+      // 501 was invisible twice over. Both siblings already get this right.
+      const outcomes = await Promise.all(
         changed.map(async ([gamePk, entry]) => {
           try {
             if (entry.state === 'off') {
-              await fetch(`/api/stamps?gamePk=${gamePk}`, { method: 'DELETE', headers: auth })
-              return
+              const res = await fetch(`/api/stamps?gamePk=${gamePk}`, {
+                method: 'DELETE',
+                headers: auth,
+              })
+              return res.ok ? null : res.status
             }
-            await fetch('/api/stamps', {
+            const res = await fetch('/api/stamps', {
               method: 'POST',
               headers: { ...auth, 'content-type': 'application/json' },
               body: JSON.stringify({
@@ -218,15 +228,29 @@ export function StampsCloudSync() {
                 placement: entry.placement ?? null,
               }),
             })
+            return res.ok ? null : res.status
           } catch {
             // A failed publish costs this device nothing — its own local state
             // is already correct, and the next change (or another device's next
-            // sign-in fetch) reconciles.
-            report('stamps', 'error', { reason: 'network' })
+            // sign-in fetch) reconciles. It must still be REPORTED.
+            return undefined
           }
         }),
       )
-      report('stamps', 'synced')
+      // `null` is a success, a number is an HTTP failure, `undefined` is a
+      // throw. `find` cannot be used here: it returns `undefined` both for "no
+      // failure" and for "a network failure", which are opposite answers.
+      const failures = outcomes.filter((outcome) => outcome !== null)
+      if (failures.length === 0) {
+        report('stamps', 'synced')
+      } else {
+        const status = failures.find((outcome) => outcome !== undefined)
+        report(
+          'stamps',
+          status === undefined ? 'error' : phaseForResponse(status),
+          { reason: status === undefined ? 'network' : reasonForResponse(status) },
+        )
+      }
     })()
   }, [isSignedIn, getToken, stamps, report])
 

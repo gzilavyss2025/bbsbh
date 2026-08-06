@@ -8,9 +8,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { LEVELS } from '../src/lib/teams.js'
 import {
   FIELD_NAMES,
   LEGACY_KEYS,
+  LEVEL_SPORT_IDS,
   MAX_CLOCK_SKEW_MS,
   PREFS_KEY,
   adoptRemotePreferences,
@@ -348,14 +350,83 @@ test('a clock in the past is taken as-is', () => {
   assert.equal(clampUpdatedAt(0, 5000), 0)
 })
 
-test('a wildly future clock is clamped to now, not refused', () => {
+test('a future clock is clamped to now, not refused', () => {
   const now = 1_700_000_000_000
   assert.equal(clampUpdatedAt(now + MAX_CLOCK_SKEW_MS + 1, now), now)
   assert.equal(clampUpdatedAt(now + MAX_CLOCK_SKEW_MS, now), now + MAX_CLOCK_SKEW_MS)
+})
+
+test('the skew bound is minutes, because it is how long one bad clock can freeze a field', () => {
+  // Not a style preference. For as long as a stored `updatedAt` sits in the
+  // future, every other device's tap loses the comparison, persists locally,
+  // publishes nothing, and is reverted by the next pull. The bound IS that
+  // outage's duration, so it belongs in minutes and never in days.
+  assert.ok(
+    MAX_CLOCK_SKEW_MS <= 15 * 60 * 1000,
+    'a device with a fast clock must not be able to pin a preference for hours',
+  )
+})
+
+test('a clock far in the future cannot outrank an honest device', () => {
+  const now = 1_700_000_000_000
+  const fast = clampUpdatedAt(now + 47 * 60 * 60 * 1000, now)
+  const honest = now + 1000
+  assert.ok(honest > fast, "the honest device's later tap must win")
 })
 
 test('a missing or nonsense clock becomes now — a write with no clock is still a write', () => {
   assert.equal(clampUpdatedAt(undefined, 5000), 5000)
   assert.equal(clampUpdatedAt('later', 5000), 5000)
   assert.equal(clampUpdatedAt(-5, 5000), 5000)
+})
+
+// --------------------------------------------------------------------------
+// Gaps phase 5's audit found: real behaviour with no test behind it
+// --------------------------------------------------------------------------
+
+test('a field the SERVER has and this device does not is taken — the second-device case', () => {
+  // The whole point of the feature, and it had no test: every existing merge
+  // case had the field present on BOTH sides. Inverting the `!existing` branch
+  // in applyRemotePreferences left the entire suite green.
+  const out = applyRemotePreferences({}, { club: { value: 147, updatedAt: 5 } })
+  assert.deepEqual(out, { club: { value: 147, updatedAt: 5 } })
+})
+
+test('a fresh device takes every remote field, and adds nothing of its own', () => {
+  const remote = {
+    club: { value: 147, updatedAt: 5 },
+    level: { value: 11, updatedAt: 6 },
+    keepAwake: { value: true, updatedAt: 7 },
+  }
+  const out = applyRemotePreferences({}, remote)
+  assert.deepEqual(Object.keys(out).sort(), ['club', 'keepAwake', 'level'])
+  assert.deepEqual(preferencesToPublish(out, remote), [], 'and publishes nothing back')
+})
+
+test('a remote clock in the future does not permanently outrank a later local tap', () => {
+  // The merge path had no skew test at all — only the server-side clamp did,
+  // which is not where the damage happens.
+  const now = 1_700_000_000_000
+  const remote = { club: { value: 147, updatedAt: clampUpdatedAt(now + 47 * 3600_000, now) } }
+  const merged = applyRemotePreferences({}, remote)
+  const tapped = setPreference(merged, 'club', 158, { now: now + 1000 })
+  assert.equal(preferenceValue(tapped, 'club'), 158)
+  assert.equal(
+    preferencesToPublish(tapped, remote).length,
+    1,
+    'and the tap must actually reach the server, not sit unpublishable',
+  )
+})
+
+test('LEVEL_SPORT_IDS has not drifted from teams.js LEVELS', () => {
+  // preferences.js restates this list rather than importing teams.js (a
+  // 1,100-line identity module has no business in a serverless bundle) and its
+  // header names itself "the second place to change". Nothing enforced that.
+  // Add a rung to LEVELS without adding it here and the slate's level toggle
+  // silently no-ops: setPreference rejects the value and returns the same
+  // reference, so the button does nothing, with no error.
+  assert.deepEqual(
+    [...LEVEL_SPORT_IDS].sort((a, b) => a - b),
+    LEVELS.map((l) => l.sportId).sort((a, b) => a - b),
+  )
 })

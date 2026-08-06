@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import { markIntroSeenIn } from '../../lib/account/intro.js'
 import { clearTallyDataIn } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
 
@@ -71,7 +72,7 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
     }
     if (e.key !== 'Tab' || !sheetRef.current) return
     const focusable = sheetRef.current.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     )
     if (focusable.length === 0) return
     const first = focusable[0]
@@ -90,6 +91,17 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
   // navigation to the slate rather than a re-render with a dozen stale stores.
   const wipeDeviceAndRestart = () => {
     clearTallyDataIn(browserStorage())
+    // Erasing sweeps `bbsbh:intro` along with everything else, which made the
+    // reload look like a brand-new visitor and reopened the welcome modal.
+    // That is a bad moment on its own — you asked to be forgotten and got
+    // onboarded — but it was also a live data bug: ANY exit from that modal
+    // commits its pick, defaulting to the pinned club, and with `bbsbh:prefsOwner`
+    // swept too the strategy falls back to `backfill`, so a still-signed-in
+    // user's real club was overwritten with the default on every device.
+    //
+    // Re-seeding the flag is the whole fix: someone who just used the erase
+    // sheet has plainly seen the intro.
+    markIntroSeenIn(browserStorage())
     window.location.assign('/')
   }
 
@@ -139,8 +151,15 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
             ref={cancelRef}
             type="button"
             className="erasesheet__btn"
-            onClick={onClose}
-            disabled={state === 'working'}
+            // aria-disabled, not `disabled`. A button that disables itself under
+            // the user's focus drops focus to <body> — and this dialog's Escape
+            // handler and Tab trap are both bound to the dialog element, so from
+            // <body> neither one can fire: Escape stops working and Tab walks
+            // straight out into the page behind the scrim, breaking the
+            // aria-modal promise. ConsentModal, which this is modelled on, never
+            // disables its buttons for exactly this reason.
+            aria-disabled={state === 'working'}
+            onClick={() => state !== 'working' && onClose()}
           >
             Keep my data
           </button>
@@ -156,8 +175,8 @@ export function EraseDataDialog({ scope = 'device', eraseAccount = null, onClose
             <button
               type="button"
               className="erasesheet__btn erasesheet__btn--danger"
-              onClick={run}
-              disabled={state === 'working'}
+              aria-disabled={state === 'working'}
+              onClick={() => state !== 'working' && run()}
             >
               {state === 'working' ? copy.working : copy.confirm}
             </button>

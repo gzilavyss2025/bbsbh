@@ -116,6 +116,34 @@ export function rollupSync(state) {
   return 'off'
 }
 
+// Give a channel that has NEVER reported the account's own phase, so silence
+// cannot be mistaken for failure.
+//
+// `RevealCloudSync` mounts inside InningViewer, not app-wide. On every other
+// surface — /profile, and the slate — the `reveal` channel has therefore never
+// spoken and is still sitting on `initialSyncState`'s opening phase. Left
+// alone, `rollupSync` (worst channel wins) reads that silence as `local` and
+// the whole page lies to a signed-in user whose sync is perfectly healthy.
+//
+// A channel that has never reported is exactly `{ at: null }` — `report()`
+// always stamps a clock — so a silent channel inherits the phase of the `prefs`
+// channel, which IS app-wide and Clerk-gated and is therefore the faithful
+// signed-in/out signal. It inherits the PHASE only, never a `syncedAt`, so
+// nothing can claim a "last checked" time it never had.
+//
+// Both readers of the store must use this. Phase 5 found the slate's merge
+// strip gated on the raw rollup and therefore permanently dead, which is why
+// this lives here as one tested function instead of privately on the page.
+export function normalizeSilentChannels(state) {
+  const account = state?.prefs?.phase ?? 'off'
+  const out = {}
+  for (const channel of SYNC_CHANNELS) {
+    const record = state?.[channel] ?? blankChannel(account)
+    out[channel] = record.at == null ? { ...record, phase: account } : record
+  }
+  return out
+}
+
 // The most recent moment ANY channel last succeeded — "last synced" for the
 // page as a whole. Null when nothing ever has.
 export function lastSyncedAt(state) {

@@ -74,7 +74,7 @@ export function ContinueScoring() {
           type="button"
           className="continuebar__dismiss"
           onClick={dismissPitch}
-          aria-label="Dismiss"
+          aria-label="Dismiss this suggestion"
         >
           ✕
         </button>

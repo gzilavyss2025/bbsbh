@@ -60,30 +60,60 @@ function reply(res, body, status = 200) {
 // the key set — including the negative: `game:final:*` is never in it.
 export async function keysForUser(redis, userId) {
   const keys = [`prefs:${userId}`, `spoiled:${userId}`, `scorebook:${userId}`]
+  // An index we could not READ must not be deleted. Deleting it anyway would
+  // destroy the only way to find the shards it names, turning a transient Redis
+  // failure into permanent, unreachable residue — and the reply would still say
+  // `ok`, so the client would wipe the device and the user would be told they
+  // had been forgotten. `partial` is how the caller knows to refuse.
+  let partial = false
 
   let seasons = []
   try {
     const raw = await redis.smembers(`stamps:${userId}:seasons`)
     seasons = (Array.isArray(raw) ? raw : []).map(Number).filter(isSeasonNumber)
+    keys.push(`stamps:${userId}:seasons`)
   } catch {
-    seasons = []
+    partial = true
   }
   for (const season of seasons) keys.push(`stamps:${userId}:${season}`)
-  keys.push(`stamps:${userId}:seasons`)
 
-  let gamePks = []
+  // The reveal family is resolved from BOTH indexes, and deliberately so.
+  //
+  // `reveal:index:{u}` only started being written by the deploy that introduced
+  // it, so every mark a user made before that is invisible to it. Left at that,
+  // "erase everywhere" would silently spare an existing user's entire reveal
+  // history — and RevealCloudSync would then pull those marks straight back
+  // onto the freshly-wiped device, which is a reveal resurrecting itself after
+  // the user asked for it to be gone.
+  //
+  // `scorebook:{u}` is the older index of the same games: a hash keyed by
+  // gamePk, written alongside the ratchet whenever the client sends a snapshot.
+  // Unioning the two makes the erase as complete as anything short of a SCAN,
+  // which a shared store rules out.
+  const gamePks = new Set()
+  const addPks = (raw) => {
+    for (const v of Array.isArray(raw) ? raw : []) {
+      const n = Number(v)
+      if (Number.isInteger(n) && n > 0) gamePks.add(n)
+    }
+  }
+
   try {
-    const raw = await redis.smembers(`reveal:index:${userId}`)
-    gamePks = (Array.isArray(raw) ? raw : [])
-      .map((v) => Number(v))
-      .filter((n) => Number.isInteger(n) && n > 0)
+    addPks(await redis.smembers(`reveal:index:${userId}`))
+    keys.push(`reveal:index:${userId}`)
   } catch {
-    gamePks = []
+    partial = true
+  }
+  try {
+    addPks(await redis.hkeys?.(`scorebook:${userId}`))
+  } catch {
+    // The scorebook hash is a bonus source, not the index of record — its own
+    // key is already on the delete list either way, so a failure here costs
+    // completeness for pre-index games only. Not worth refusing the erase over.
   }
   for (const gamePk of gamePks) keys.push(`reveal:${userId}:${gamePk}`)
-  keys.push(`reveal:index:${userId}`)
 
-  return { keys, seasons: seasons.length, reveals: gamePks.length }
+  return { keys, seasons: seasons.length, reveals: gamePks.size, partial }
 }
 
 // Exported so the unit suite can drive the real deletion against a fake Redis
@@ -91,7 +121,15 @@ export async function keysForUser(redis, userId) {
 // This is the one branch whose behaviour is the feature, and the one where
 // deleting too much would be worse than deleting too little.
 export async function erase(res, redis, userId) {
-  const { keys, seasons, reveals } = await keysForUser(redis, userId)
+  const { keys, seasons, reveals, partial } = await keysForUser(redis, userId)
+
+  // An index we could not read means we cannot know what to delete. Refuse
+  // before deleting anything, so the indexes survive and a retry can still
+  // find the keys — the alternative is an unrecoverable residue reported as a
+  // success. The client only wipes the device on `ok`.
+  if (partial) {
+    return reply(res, { error: 'erase failed' }, 503)
+  }
 
   // Deleted in one call where the client supports it, and never partially
   // reported: an erase that half-succeeded must say so rather than answer

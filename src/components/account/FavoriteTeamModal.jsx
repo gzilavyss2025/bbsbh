@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react'
 import { fetchTeams } from '../../api/schedule.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
@@ -43,11 +43,16 @@ const AccountPitch = isClerkEnabled
 // section renders — so there is exactly one club picker in the app.
 export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
   const [selId, setSelId] = useState(favoriteTeamId ?? PINNED_TEAM_ID)
+  const titleId = useId()
   const [step, setStep] = useState(1)
   const mlbTeams = useAsync(() => fetchTeams(SPORT_IDS.MLB), [])
   const teams = mlbTeams.data ?? []
   const selectedTeam = teams.find((team) => team.id === selId) ?? null
-  const clubLabel = selectedTeam?.teamName || selectedTeam?.name || 'your club'
+  // `teams` is async, so `selectedTeam` is null on first paint. The primary
+  // action must NOT read "Continue with the your club" while it resolves —
+  // which is the literal first thing a new visitor saw on a cold cache. Until
+  // a real club name exists, the neutral label stands.
+  const clubLabel = selectedTeam?.teamName || selectedTeam?.name || ''
 
   const pick = (id) => {
     setSelId(id)
@@ -67,18 +72,12 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
     else onClose(1)
   }
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && finish()
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selId, step])
-
   // Dialog focus contract, same as GameFinderModal/LogoModal: focus moves to
   // the close button on open and back to the trigger on close. Re-run on a
   // step change too, so a screen-reader user lands somewhere sane on the new
   // panel instead of wherever the previous one left focus.
   const closeRef = useRef(null)
+  const sheetRef = useRef(null)
   useEffect(() => {
     const trigger = document.activeElement
     closeRef.current?.focus()
@@ -90,23 +89,61 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
     closeRef.current?.focus()
   }, [step])
 
+  // Escape + Tab are handled ON the dialog, not on `window`, and `aria-modal`
+  // is enforced rather than merely declared — the rule ConsentModal.jsx states.
+  //
+  // A window listener was actively harmful here: step 2 renders Clerk's
+  // <SignUpButton mode="modal">, which opens a Clerk portal ON TOP of this
+  // dialog. Escape inside Clerk's own sign-up sheet bubbled to window, closed
+  // the whole intro out from under it, and unmounted the sign-up mid-flow.
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation()
+      finish()
+      return
+    }
+    if (e.key !== 'Tab' || !sheetRef.current) return
+    const focusable = [
+      ...sheetRef.current.querySelectorAll(
+        'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      ),
+    ]
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault()
+      last.focus()
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault()
+      first.focus()
+    }
+  }
+
   return (
     <div
       className="scrim scrim--center"
       onClick={(e) => e.target.classList.contains('scrim') && finish()}
     >
       <div
+        ref={sheetRef}
         className="favteamsheet introsheet"
         role="dialog"
         aria-modal="true"
-        aria-label="Welcome to Tally Baseball"
+        aria-labelledby={titleId}
+        onKeyDown={onKeyDown}
       >
         <div className="favteamsheet__head">
           <div>
-            <p className="introsheet__eyebrow caps-exempt">
-              {step === 1 ? 'Step 1 · Your club' : 'Step 2 · Your scorebook'}
-            </p>
-            <h2 className="sheet__title favteamsheet__title--intro">
+            {/* No step indicator when there is no step 2 to go to. PRD §6.1:
+                on an unconfigured deploy there is "no step 2, no indicator,
+                and no dead '1 of 2'". */}
+            {AccountPitch && (
+              <p className="introsheet__eyebrow caps-exempt">
+                {step === 1 ? 'Step 1 · Your club' : 'Step 2 · Your scorebook'}
+              </p>
+            )}
+            <h2 id={titleId} className="sheet__title favteamsheet__title--intro">
               {step === 1 ? 'Make Tally yours.' : 'Take your Tally with you.'}
             </h2>
           </div>
@@ -149,7 +186,7 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
 
             <div className="sheet__actions favteamsheet__actions introsheet__actions">
               <button type="button" className="btn btn--next" onClick={goToStep2}>
-                {AccountPitch ? `Continue with the ${clubLabel}` : 'Get started'}
+                {AccountPitch && clubLabel ? `Continue with the ${clubLabel}` : 'Get started'}
               </button>
               {AccountPitch && (
                 <button type="button" className="btn btn--ghost" onClick={finish}>
@@ -168,7 +205,10 @@ export function FavoriteTeamModal({ favoriteTeamId, onSave, onClose }) {
               <Suspense fallback={null}>
                 <AccountPitch
                   clubTeamId={selId}
-                  clubName={selectedTeam?.name}
+                  // `clubLabel`, not `.name`: step 1 calls the club "Brewers"
+                  // and step 2 was calling it "Milwaukee Brewers" two taps
+                  // later, in the same dialog.
+                  clubName={clubLabel}
                   onContinue={finish}
                 />
               </Suspense>

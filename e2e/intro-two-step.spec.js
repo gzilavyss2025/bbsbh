@@ -16,7 +16,8 @@ import { withNoIntro } from './fixtures.js'
 // my-tally.spec.js records for the account section. On this deploy shape
 // step 1's primary action is "Get started" and there is no step 2 at all
 // (PRD §6.1: "there is no step 2, no indicator, and no dead '1 of 2'"), so
-// these specs pin exactly that shape. See HANDOFF.md for what to watch on the
+// these specs pin exactly that shape — including the ABSENCE of the step
+// indicator, which is part of the rule and not a detail. See HANDOFF.md for what to watch on the
 // first Clerk-configured run: step 1's primary action becomes
 // "Continue with the {club}", a step 2 panel appears, and its own two
 // actions ("Create my Tally" / "Use this device only") both close the modal.
@@ -26,9 +27,13 @@ test('a cleared visitor sees step 1, with the exact copy, and no step 2 chrome',
   await page.evaluate(() => window.localStorage.clear())
   await page.reload()
 
-  const dialog = page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })
+  const dialog = page.getByRole('dialog', { name: 'Make Tally yours.' })
   await expect(dialog).toBeVisible()
-  await expect(dialog.locator('.introsheet__eyebrow')).toHaveText('Step 1 · Your club')
+  // PRD §6.1 is explicit that an unconfigured deploy shows "no step 2, no
+  // indicator, and no dead '1 of 2'". The first version of this spec quoted
+  // that sentence in its own header and then asserted the indicator was
+  // PRESENT — pinning the violation instead of the rule.
+  await expect(dialog.locator('.introsheet__eyebrow')).toHaveCount(0)
   await expect(dialog.getByRole('heading', { name: 'Make Tally yours.' })).toBeVisible()
   await expect(dialog).toContainText(
     'Choose your club. We’ll pin its games—and its affiliates—to the top of every slate.',
@@ -45,8 +50,8 @@ test('picking a club shows the inked-seal reaction and the exact benefit line', 
   await page.evaluate(() => window.localStorage.clear())
   await page.reload()
 
-  const dialog = page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })
-  await dialog.locator('.vsteam__team[title="New York Yankees"]').click()
+  const dialog = page.getByRole('dialog', { name: 'Make Tally yours.' })
+  await dialog.locator('.vsteam__team[aria-label="New York Yankees"]').click()
 
   await expect(dialog.locator('.introsheet__reaction .clubseal')).toBeVisible()
   await expect(dialog.locator('.introsheet__reactiontext')).toHaveText(
@@ -59,15 +64,15 @@ test('finishing the intro persists the club and never reopens the modal', async 
   await page.evaluate(() => window.localStorage.clear())
   await page.reload()
 
-  const dialog = page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })
-  await dialog.locator('.vsteam__team[title="Boston Red Sox"]').click()
+  const dialog = page.getByRole('dialog', { name: 'Make Tally yours.' })
+  await dialog.locator('.vsteam__team[aria-label="Boston Red Sox"]').click()
   await dialog.getByRole('button', { name: 'Get started' }).click()
   await expect(dialog).toBeHidden()
 
   // The pick is committed — bbsbh:intro is set, so a reload does not reopen
   // the welcome modal, and the club stuck as the app's own preference.
   await page.reload()
-  await expect(page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Make Tally yours.' })).toHaveCount(0)
   const prefs = await page.evaluate(() => window.localStorage.getItem('bbsbh:prefs'))
   expect(JSON.parse(prefs).club.value).toBe(111) // Boston Red Sox teamId
   const intro = await page.evaluate(() => window.localStorage.getItem('bbsbh:intro'))
@@ -79,8 +84,8 @@ test('dismissing by the ✕ also commits the current pick — a dismissal is an 
   await page.evaluate(() => window.localStorage.clear())
   await page.reload()
 
-  const dialog = page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })
-  await dialog.locator('.vsteam__team[title="San Francisco Giants"]').click()
+  const dialog = page.getByRole('dialog', { name: 'Make Tally yours.' })
+  await dialog.locator('.vsteam__team[aria-label="San Francisco Giants"]').click()
   await dialog.getByRole('button', { name: 'Close' }).click()
   await expect(dialog).toBeHidden()
 
@@ -93,7 +98,7 @@ test('an untouched dismissal still persists the pinned default', async ({ page }
   await page.evaluate(() => window.localStorage.clear())
   await page.reload()
 
-  const dialog = page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })
+  const dialog = page.getByRole('dialog', { name: 'Make Tally yours.' })
   await dialog.getByRole('button', { name: 'Get started' }).click()
   await expect(dialog).toBeHidden()
 
@@ -109,7 +114,7 @@ test('?nointro suppresses the welcome modal entirely', async ({ page }) => {
   // above) — `?nointro` is what every other spec in this suite relies on to
   // keep it out of the way.
   await page.goto(withNoIntro('/'))
-  await expect(page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Make Tally yours.' })).toHaveCount(0)
 })
 
 test('a visitor who already has a club opinion is seeded as already-onboarded', async ({ page }) => {
@@ -124,5 +129,5 @@ test('a visitor who already has a club opinion is seeded as already-onboarded', 
     )
   })
   await page.reload()
-  await expect(page.getByRole('dialog', { name: 'Welcome to Tally Baseball' })).toHaveCount(0)
+  await expect(page.getByRole('dialog', { name: 'Make Tally yours.' })).toHaveCount(0)
 })

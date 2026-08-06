@@ -30,9 +30,17 @@ test('My Tally opens on this device, with every setting usable and no account ga
   // Three counts, and every one of them is a count of the reader's own things.
   await expect(page.locator('.mytally__ledgerrow')).toHaveCount(3)
 
-  // The receipt renders one row per claim in src/lib/account/syncClaims.js, and
-  // signed out every one of them says where the thing actually is.
-  await expect(page.locator('.syncreceipt__row')).toHaveCount(5)
+  // One row per CHANNEL (PRD §5.2's table is four rows), not one per claim.
+  // `reveal` backs two claims — "Reveal progress" and "Pick up your pencil" —
+  // and rendering the ledger directly produced two rows showing byte-identical
+  // state under two labels. Signed out, every row says where the thing is.
+  await expect(page.locator('.syncreceipt__row')).toHaveCount(4)
+  await expect(page.locator('.syncreceipt__label')).toHaveText([
+    'Reveal progress',
+    'Days you unsealed',
+    'Game Log',
+    'Club and settings',
+  ])
   await expect(page.locator('.syncreceipt__row').first().locator('.syncreceipt__state')).toHaveText(
     'On this device.',
   )
@@ -41,7 +49,7 @@ test('My Tally opens on this device, with every setting usable and no account ga
 test('the club is picked on the page and survives a reload', async ({ page }) => {
   await page.goto('/profile')
 
-  const yankees = page.locator('.vsteam__team[title="New York Yankees"]')
+  const yankees = page.locator('.vsteam__team[aria-label="New York Yankees"]')
   await expect(yankees).toBeVisible()
   await yankees.click()
   await expect(page.locator('.mytally__club')).toHaveText('New York Yankees')
@@ -51,8 +59,10 @@ test('the club is picked on the page and survives a reload', async ({ page }) =>
   // survives the round trip.
   await page.reload()
   await expect(page.locator('.mytally__club')).toHaveText('New York Yankees')
-  await expect(page.locator('.vsteam__team[title="New York Yankees"]')).toHaveAttribute(
-    'aria-selected',
+  // The strip is a radiogroup, not a tablist — it is single-select preference
+  // input and controls no panel. So the state attribute is aria-checked.
+  await expect(page.locator('.vsteam__team[aria-label="New York Yankees"]')).toHaveAttribute(
+    'aria-checked',
     'true',
   )
 })
@@ -126,11 +136,22 @@ test('erasing this device clears every bbsbh: key and starts over', async ({ pag
 
   await sheet.getByRole('button', { name: 'Erase this device' }).click()
   await page.waitForURL('**/')
+
+  // Everything is swept EXCEPT `bbsbh:intro`, which is deliberately re-seeded
+  // on the way out. Without it the reload looks like a brand-new visitor and
+  // reopens the welcome modal — and since every exit route from that modal
+  // commits a club pick (defaulting to the pinned club) while `bbsbh:prefsOwner`
+  // has just been swept too, a still-signed-in user's real club was published
+  // over with the default on every device. Asserting the exact remaining key,
+  // rather than a count, is what keeps that from silently growing.
   expect(
     await page.evaluate(() =>
-      Object.keys(window.localStorage).filter((k) => k.startsWith('bbsbh:')).length,
+      Object.keys(window.localStorage).filter((k) => k.startsWith('bbsbh:')).sort(),
     ),
-  ).toBe(0)
+  ).toEqual(['bbsbh:intro'])
+
+  // And the point of keeping it: no welcome modal on the way back in.
+  await expect(page.getByRole('dialog', { name: 'Make Tally yours.' })).toHaveCount(0)
 })
 
 test('the slate footer’s Settings button is the way in', async ({ page }) => {

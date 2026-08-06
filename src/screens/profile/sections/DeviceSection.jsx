@@ -6,10 +6,15 @@ import { MOTION_MODES } from '../../../lib/account/preferences.js'
 // both follow a signed-in user between devices. Scores Unlocked does NOT, and
 // that is the section's one load-bearing distinction (see below).
 
+// Each note says what the setting ACTUALLY does. `full` in particular does not
+// override an operating system that asks for reduced motion — the app follows
+// that request either way — and the copy no longer implies it does. See
+// hooks/preferences/useMotionPreference.js for why that is the right default
+// rather than a gap.
 const MOTION_COPY = {
   system: { label: 'Follow my system', note: 'Whatever this device’s accessibility settings say.' },
-  reduced: { label: 'Reduced', note: 'Skip the page turns and the stamp landing.' },
-  full: { label: 'Full', note: 'Every transition, whatever the system says.' },
+  reduced: { label: 'Reduced', note: 'Skip the page turns, the stamp landing, and every other animation — everywhere in Tally.' },
+  full: { label: 'Full', note: 'Keep the animations, unless this device’s own accessibility settings ask for less.' },
 }
 
 export function DeviceSection({

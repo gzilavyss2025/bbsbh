@@ -18,7 +18,7 @@ departures from the spec, each with its reason). This file only carries state.
 | 2 | Sync foundation — `src/lib/account/*`, `usePreferences`, `PreferencesCloudSync`, `SyncStatusProvider`, `api/preferences.js`, `api/account.js`, reveal index, unit + request-level tests | **done** |
 | 3 | The My Tally page — `/profile` route, `src/screens/profile/**`, `src/components/profile/**`, `52-my-tally.css` + `53-my-tally-account.css`, entry points, `UserButton`/`UserProfile` wiring, `EraseDataDialog`, the merge receipt, e2e | **done** |
 | 4 | Onboarding — the two-step intro, the contextual prompts, `bbsbh:intro`, `bbsbh:prompts` | **done** |
-| 5 | Integration — ADR-0039, remaining CLAUDE.md updates, full lint/test/build/e2e, one PR | not started |
+| 5 | Integration — ADR-0039, CLAUDE.md updates, four adversarial audits + their fixes, full lint/test/build/e2e, one PR | **done** |
 
 ## Decisions locked (do not reopen without a reason in writing)
 
@@ -316,41 +316,84 @@ No hard conflicts.
 
 ---
 
+## Phase 5's audits — what was found, fixed, and deliberately NOT fixed
+
+Four read-only audits ran in parallel (spoiler/auth/privacy · UX/copy/a11y ·
+tests/errors/races · perf/bundling). **Audit 4's headline came back clean:** an
+unconfigured-Clerk build never loads Clerk's SDK — verified empirically against
+`dist/`, not just inferred.
+
+**Fixed** (each with a test that fails without the fix, where the layer allows
+one): the slate merge strip was gated on the RAW rollup and therefore dead by
+construction (`normalizeSilentChannels` now lives in `syncStatus.js` and both
+readers share it); the merge receipt's `games` line was ungated, so a store-less
+deploy got "Your book is on this account now" and burned the one-shot flag;
+`components/account/` was on NEITHER stamp-guard list; `reveal:index` was
+forward-only, so an existing user's reveal marks survived "erase everywhere" and
+were then re-synced back onto the wiped device; a partial erase answered `ok`
+*and* deleted the index that was the only way to retry; `StampsCloudSync` never
+checked `res.ok` and reported `synced` unconditionally; a failed preference push
+left the baseline claiming success, dropping that change for the session; the
+48-hour clock-skew window let one fast device freeze a field for two days; the
+Motion control stored a string and did nothing; erasing the device re-opened the
+welcome modal, which committed the DEFAULT club over the user's real one on every
+device; `ClubPicker` was a fake tablist with 30 tab stops and title-only names.
+
+**Found and deliberately NOT fixed** — recorded rather than silently overridden:
+
+1. **The owner-tag guard covers `prefs` only.** `StampsCloudSync`,
+   `SpoiledDaysCloudSync` and `RevealCloudSync` publish whatever is in local
+   storage after a sign-in, so on a SHARED device user A's spoiled days and
+   reveal marks can reach user B's account — the same leak `bbsbh:prefsOwner`
+   was built to close, one channel over. **This is pre-existing** (all three
+   predate this program) and the spoiled-days half is genuinely spoiler-relevant,
+   so it deserves its own PR. Not fixed here because it means touching three
+   components whose signed-in path **cannot be exercised on this machine**, and
+   a wrong fix silently drops a user's own data. Highest-priority follow-up.
+2. **"Erase everywhere" is not durable while another device is signed in** —
+   that device's next publish re-uploads what it still holds locally. The copy
+   already states the erase-then-delete ordering; it does not mention this.
+3. **`usePreferences`'s unconditional echo repaints every consumer on every
+   window focus.** Real, and it is ALSO load-bearing: the guest-to-account
+   backfill currently depends on that redundant re-render. The two must move
+   together (the baseline wants to become state; a bare counter trips
+   `react-hooks/refs` and the setState-in-effect rule). Rather than split them
+   blind, the coupling is now written down at length in `usePreferences.js`.
+4. `GameSelect` mounts two independent `usePreferences` stores; `ClubSeal` is
+   hoisted into the main chunk; `bbsbh:intro`'s `step` is still written and never
+   read. All nits, all recorded here rather than churned.
+
+**One incidental change worth knowing about:** `api/reveal.js` was the only file
+in `api/` committed with CRLF endings. Editing it produced `git diff --check`
+trailing-whitespace failures, so the file is normalized to LF in this PR — the
+repo convention (`core.autocrlf false`, LF). That is why its diff looks like a
+whole-file rewrite; it is 15 real added lines plus line endings.
+
 ## Handoff block
 
 ```text
 Branch: claude/my-tally-account-experience
 Worktree: C:\Users\gzilavy\bbsbh-my-tally-account
-PR: not opened
-Based on: origin/main at bda26c6 (rebased 2026-08-06); origin/main has since
-       advanced to 81eb7d0 (unrelated skills-folder reorg) — rebase before
-       opening the PR (phase 5), re-measuring the check-dir-size /
-       check-file-size budgets per the overlap-check section above.
-State: committed on the branch, NOT pushed. Four commits: phase 2, its rebase
-       note, phase 3, and phase 4 (730baeb). Phase 4 touched 26 files — 11 new
-       (3 lib/account modules, 2 hooks, 2 components, 1 CSS partial, 2 unit
-       test files, 1 e2e spec), the rest edits. Full list in PRD §13.3.
-Validation: npm run lint (exit 0), npm test (1574 pass / 0 fail), npm run
-       build (exit 0), node --test test/prompts.test.js test/intro.test.js
-       (16 pass / 0 fail), and the FULL Playwright suite against the
-       production preview build on :4169 — 146 passed, 1 skipped, 31 failed,
-       across mobile/ipad/desktop. All 31 failures are pre-existing and
-       unrelated to this phase (DEV-only routes unreachable in a production
-       build, plus 4 pre-existing animation-timing cases in files this phase
-       never touched) — see PRD §13.6 for how that was confirmed three ways.
-       e2e/intro-two-step.spec.js itself (this phase's new spec, 7 cases × 3
-       viewports) passed cleanly as part of that run.
-Local example: http://localhost:4169/?nointro — `npm run preview:5`, serving
-       this phase's build. Not a dev server: all five reserved dev ports
-       (5169-5173) are held by other agents' worktrees, same as phase 3's
-       note (preview:4/:4170 back then; preview:5/:4169 now, since :4170 was
-       also taken this time). Clerk is NOT configured on this machine, so
-       clearing localStorage and reloading shows step 1 of the welcome modal
-       only ("Get started", no step 2) — the state the whole intro's
-       unconfigured branch rests on. Also worth opening (cleared storage):
-       http://localhost:4169/profile?nointro — My Tally, unchanged by this
-       phase. Screenshots of the two-step modal at 390px and 1280px were
-       taken during this phase's own verification and are not preserved
-       anywhere durable; re-take them if a visual regression is suspected.
-Cleanup: do not remove — program in progress
+PR: opened by phase 5 (see the PR body for the full change list)
+Based on: origin/main at 81eb7d0, rebased cleanly 2026-08-06 with no conflicts
+       — src/index.css's @import list absorbed main's 51-similar-players.css
+       without a fight, and check-dir-size (src/styles 54) / check-file-size
+       still hold as measured.
+State: committed and pushed. Five commits: phase 2, its rebase note, phase 3,
+       phase 4, and phase 5 (docs + the audit fixes).
+Validation: npm run lint (exit 0), npm test (exit 0), npm run build (exit 0),
+       git diff --check (exit 0), and the FULL Playwright suite against a real
+       DEV SERVER on :5172 — not a preview build, so phase 4's DEV-only false
+       positives are gone. 168 passed / 1 skipped / 0 failed at the start of
+       this phase; after the fixes, the only repeatable failures are the five
+       pre-existing inning-modal-stacking cases, CONFIRMED pre-existing by
+       stashing this phase's work and re-running them against the clean tree
+       (identical five). innings-page-turn / asof-opt-in / extra-innings-gating
+       flake under parallel load and pass on a targeted re-run.
+Clerk: still NOT configured on this machine, so every signed-in path remains
+       code-reviewed only — unchanged from phases 2-4. Production curl confirms
+       the store is live there (`/api/stamps` answers 401, not 501), and the two
+       new endpoints correctly 404 in production because this branch is not
+       deployed. Do not deploy it to check.
+Cleanup: do NOT remove — the PR is open. Safe to remove once it merges.
 ```

@@ -91,7 +91,17 @@ const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 // as the reveal mark itself — and a local stamp record has never held a score
 // anyway (ADR-0035: the Logbook resolves those at render time). What is
 // forbidden is the ART, which is the thing that carries a result.
-const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile']
+//
+// `components/account` joins them for the same reason and by the same
+// treatment. It holds the onboarding surfaces — the two-step intro, the account
+// pitch, the decorative passport mark, the slate's merge-receipt strip — every
+// one of which is marketing shown to a visitor who has revealed nothing. PRD
+// P5: no marketing visual may state or imply a score. It CANNOT go on
+// FORBIDDEN_SURFACES above, because LogbookLanding.jsx legitimately calls
+// `useStamps()` to know whether this device has a stamp yet (the `first-stamp`
+// prompt's trigger) — which is exactly the count-versus-art distinction this
+// narrower list exists to draw.
+const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile', 'components/account']
 const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton']
 
 function sourceFiles(dir) {

@@ -404,7 +404,11 @@
   }
 }
 
-@media (min-width: 720px) {
+/* 740px, not 720: styles/25-wide-layout.css widens `.screen` from 440px to
+   960px at exactly 740px, and hooks/useMediaQuery.js's WIDE_QUERY is kept in
+   sync with it. In the 720–739px band this grid was splitting a shell that was
+   still 440px wide, leaving ~112px for the whole right-hand column. */
+@media (min-width: 740px) {
   .mytally__masthead {
     gap: var(--space-6);
   }
@@ -416,7 +420,11 @@
     gap: var(--space-6);
   }
 
-  .devicehandoff {
+  /* `.mytally__pitch .devicehandoff`, not the bare class. 53-my-tally-account.css
+     is @imported after this file and sets max-width/margin on `.devicehandoff`
+     at identical (0,1,0) specificity, so the bare selector here lost at every
+     width and this rule did nothing at all. */
+  .mytally__pitch .devicehandoff {
     margin: 0;
     max-width: none;
   }

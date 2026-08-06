@@ -13,7 +13,7 @@ import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 import { useStamps } from '../../hooks/useStamps.js'
 import { countGamesInProgress } from '../../lib/account/localData.js'
 import { browserStorage } from '../../lib/account/preferencesStorage.js'
-import { SYNC_CHANNELS } from '../../lib/account/syncStatus.js'
+import { normalizeSilentChannels } from '../../lib/account/syncStatus.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { formatResetTime } from '../../lib/scoresUnlocked.js'
 import { allStamps } from '../../lib/stamps.js'
@@ -64,33 +64,12 @@ const ProfileAccount = isClerkEnabled
     )
   : null
 
-// ---------------------------------------------------------------------------
-// WHY THE STATUS IS NORMALIZED BEFORE IT IS READ
-// ---------------------------------------------------------------------------
-// Three of the four sync components mount app-wide in App.jsx, so by the time
-// you reach this page they have each reported. `RevealCloudSync` does not — it
-// mounts inside InningViewer, because it needs the game it is syncing. So on
-// /profile the `reveal` channel has never spoken, and it is still sitting on
-// `initialSyncState`'s opening phase.
-//
-// Left alone, that would make the page lie twice: `rollupSync` takes the WORST
-// channel, so a signed-in user would read "This device.", and the receipt would
-// tell them their reveal progress was local when it is not.
-//
-// A channel that has never reported is exactly `{ at: null }` — `report()`
-// always stamps a clock — so a silent channel inherits the account's own phase
-// (the `prefs` channel, which is app-wide and Clerk-gated and is therefore the
-// faithful signed-in/out signal). It inherits the PHASE only, never a
-// `syncedAt`, so nothing claims a "last checked" time it never had.
-function normalizeStatus(status) {
-  const account = status?.prefs?.phase ?? 'off'
-  const out = {}
-  for (const channel of SYNC_CHANNELS) {
-    const record = status?.[channel] ?? { phase: account, at: null, syncedAt: null, reason: null }
-    out[channel] = record.at == null ? { ...record, phase: account } : record
-  }
-  return out
-}
+// The status is normalized before it is read. `RevealCloudSync` mounts inside
+// InningViewer, not app-wide, so on this page the `reveal` channel has never
+// spoken — and `rollupSync` (worst channel wins) would read that silence as
+// "This device." for a signed-in user whose sync is fine. `normalizeSilentChannels`
+// is the shared fix; read its header in src/lib/account/syncStatus.js before
+// touching the receipt, and use it anywhere else that reads the store.
 
 export function ProfilePage() {
   useDocumentTitle('My Tally')
@@ -113,7 +92,7 @@ export function ProfilePage() {
     [teams, club],
   )
 
-  const status = useMemo(() => normalizeStatus(rawStatus), [rawStatus])
+  const status = useMemo(() => normalizeSilentChannels(rawStatus), [rawStatus])
   const accountPhase = status.prefs.phase
 
   // Read once, at mount. This counts reveal KEY NAMES and never their values —
@@ -174,7 +153,7 @@ export function ProfilePage() {
           stampCount={stampCount}
           recentCount={recent.length}
           onClearRecent={clearRecent}
-          accountEraseAvailable={accountPhase !== 'off' && accountPhase !== 'local'}
+          accountEraseAvailable={accountPhase === 'synced' || accountPhase === 'pulling'}
         />
 
         {ProfileAccount && (

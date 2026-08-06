@@ -309,6 +309,15 @@
   cursor: pointer;
 }
 
+/* There is no global :focus-visible rule, so a control without this falls back
+   to the UA default ring. Its three sibling dismiss buttons added alongside it
+   (.daystate__scopenotedismiss, .logbooklanding__devicenotedismiss,
+   .mergestrip__dismiss) all carry one; this was the only one that did not. */
+.continuebar__dismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
    sub-page (lineups, innings) so the sealed full box score is always one tap
    away without walking back through the sections. */

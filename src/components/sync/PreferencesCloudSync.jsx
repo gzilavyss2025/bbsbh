@@ -65,6 +65,10 @@ export function PreferencesCloudSync() {
   // publishing against an unknown remote would either echo the whole document
   // back or, worse, act on a guess.
   const known = useRef(null)
+  // The account this component is currently for, readable from inside an async
+  // closure that captured an older one. Written in the effect below, never
+  // during render (react-hooks/refs).
+  const userIdRef = useRef(userId)
   // One pull at a time. Two overlapping pulls would race to set `known`, and
   // the loser could leave a stale baseline behind.
   const pulling = useRef(false)
@@ -78,6 +82,11 @@ export function PreferencesCloudSync() {
       const res = await fetch('/api/preferences', {
         headers: { Authorization: `Bearer ${token}` },
       })
+      // The account can change while this is in flight. Landing a previous
+      // user's document — and stamping the owner tag with their id — onto the
+      // device the NEXT user is now looking at is the exact leak the owner tag
+      // exists to close, reached from the other direction.
+      if (userId !== userIdRef.current) return
       if (!res.ok) {
         report('prefs', phaseForResponse(res.status), { reason: reasonForResponse(res.status) })
         return
@@ -114,17 +123,24 @@ export function PreferencesCloudSync() {
   }, [getToken, userId, mergeRemote, adoptRemote, report])
 
   useEffect(() => {
+    userIdRef.current = userId
     if (!isLoaded) return
     if (!isSignedIn) {
       // Signing out forgets what we knew about the server. The next sign-in —
       // possibly as a DIFFERENT user — must not publish this device's
       // preferences against the previous account's baseline.
       known.current = null
+      // And it must not be REFUSED a pull either. `pull` drops (rather than
+      // defers) a call while one is in flight, so a sign-out mid-pull used to
+      // leave this latched true: the next user's sign-in returned immediately,
+      // and their device sat showing the previous account's settings until some
+      // later focus event happened to re-pull.
+      pulling.current = false
       report('prefs', 'local')
       return
     }
     pull()
-  }, [isLoaded, isSignedIn, pull, report])
+  }, [isLoaded, isSignedIn, userId, pull, report])
 
   // A phone and a laptop are both open; the phone changes the club. Without
   // this, the laptop shows the old one until someone reloads it — which is the
@@ -157,9 +173,13 @@ export function PreferencesCloudSync() {
     const changes = preferencesToPublish(prefs, known.current)
     if (changes.length === 0) return
 
-    // Assume these land. A publish that fails leaves the server without them,
-    // and the next pull's comparison finds them again — self-healing, where a
-    // pessimistic baseline would republish the whole document on every render.
+    // Assume these land, so a re-render mid-flight does not fire a second
+    // identical publish. A failure ROLLS THIS BACK (below): leaving the
+    // optimistic baseline in place told `preferencesToPublish` the server held
+    // a value it had never received, and since a pull only happens on focus or
+    // reload, a desktop tab that never loses focus dropped that change for the
+    // rest of the session — silently, behind an error the user cannot act on.
+    const previousKnown = known.current
     const published = { ...known.current }
     for (const change of changes) {
       published[change.field] = { value: change.value, updatedAt: change.updatedAt }
@@ -171,6 +191,7 @@ export function PreferencesCloudSync() {
       try {
         token = await getToken()
       } catch {
+        if (known.current === published) known.current = previousKnown
         report('prefs', 'error', { reason: 'auth' })
         return
       }
@@ -192,6 +213,7 @@ export function PreferencesCloudSync() {
         )
         const failed = replies.find((r) => !r.ok)
         if (failed) {
+          if (known.current === published) known.current = previousKnown
           report('prefs', phaseForResponse(failed.status), {
             reason: reasonForResponse(failed.status),
           })
@@ -211,7 +233,9 @@ export function PreferencesCloudSync() {
         report('prefs', 'synced')
       } catch {
         // A failed publish costs this device nothing — its own local state is
-        // already correct, and the next pull's comparison finds these again.
+        // already correct — but the baseline must go back, or the retry never
+        // happens.
+        if (known.current === published) known.current = previousKnown
         report('prefs', 'error', { reason: 'network' })
       }
     })()

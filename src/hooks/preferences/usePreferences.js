@@ -61,6 +61,28 @@ export function usePreferences() {
 
   // One writer for every mutation: apply a pure transform, persist, then echo.
   // No caller touches localStorage or the document shape directly.
+  //
+  // ---------------------------------------------------------------------
+  // THE ECHO IS UNCONDITIONAL, AND THAT IS CURRENTLY LOAD-BEARING.
+  // ---------------------------------------------------------------------
+  // `notifyLocalChange()` fires even when the transform changed nothing. That
+  // looks like an obvious cleanup — move it inside the `next !== prev` branch
+  // and stop repainting every consumer on every window focus (the pure layer's
+  // `preserve` contract in lib/account/preferences.js promises exactly that).
+  //
+  // Do not do it on its own. `PreferencesCloudSync`'s publish effect has no
+  // honest dependency on "a pull landed": `known` is a ref, so its only
+  // pull-shaped dep is `prefs`. A guest's FIRST sign-in pulls `{}`, which
+  // `applyRemotePreferences` merges to the SAME object — no state change, no
+  // re-run, and the guest's club never reaches their new account. Today that
+  // effect re-runs only because this echo re-reads storage into a fresh object.
+  //
+  // So the two must move together: give the publish effect a real signal that a
+  // pull completed (the baseline as state rather than a ref is the clean shape;
+  // a bare counter trips react-hooks/refs and the setState-in-effect rule),
+  // THEN make this conditional. Phase 5 found the coupling and deliberately did
+  // not split it, because a guest-to-account backfill cannot be verified on a
+  // machine with no Clerk key — see HANDOFF.md.
   const commit = useCallback((transform) => {
     setPrefs((prev) => {
       const next = transform(prev)

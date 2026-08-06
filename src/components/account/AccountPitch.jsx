@@ -116,10 +116,15 @@ function SignedInConfirmation({ clubName, onContinue }) {
   const who = user?.primaryEmailAddress?.emailAddress || user?.username || ''
   return (
     <div className="introsheet__confirm">
+      {/* The club list is async, so `clubName` is empty on first paint — which
+          is every time this branch renders. The two halves are written as whole
+          sentences rather than one sentence with a hole in it, because the
+          hole-less version read "You're already signed in, your reveal
+          progress, and your Game Log already travel with you". */}
       <p className="introsheet__confirmlede caps-exempt">
-        You&rsquo;re already signed in{clubName ? ` — your ${clubName} pick` : ''}, your
-        reveal progress, and your Game Log already travel with you to every
-        device you sign in on.
+        {clubName
+          ? `You’re already signed in — your ${clubName} pick, your reveal progress, and your Game Log already travel with you to every device you sign in on.`
+          : 'You’re already signed in — your club pick, your reveal progress, and your Game Log already travel with you to every device you sign in on.'}
       </p>
       <BenefitRows />
       <button

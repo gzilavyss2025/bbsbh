@@ -80,6 +80,9 @@ function fakeRedis({ hashes = {}, sets = {}, store = {} } = {}) {
     async smembers(key) {
       return sets[key] ?? []
     },
+    async hkeys(key) {
+      return Object.keys(hashes[key] ?? {})
+    },
     async del(...keys) {
       this.deleted.push(...keys)
       for (const k of keys) {
@@ -406,14 +409,58 @@ test('a failed delete says so rather than answering ok', async () => {
   assert.deepEqual(out.json, { error: 'erase failed' })
 })
 
-test('a broken index degrades to erasing what it can, not to throwing', async () => {
+test('an index that cannot be READ is not deleted, and the erase does not claim success', async () => {
+  // The inverted version of this test used to assert a 200. It was wrong, and
+  // dangerously so: if `smembers` fails, the shards it names are never added to
+  // the delete list — but the INDEX ITSELF was still deleted, destroying the
+  // only way to find them. A retry then enumerated nothing and answered `ok`
+  // again, so the residue was unrecoverable by construction. The client wipes
+  // the device on `ok`, so the user is told they were forgotten while the
+  // server still holds everything.
   const redis = fakeRedis()
   redis.smembers = async () => {
     throw new Error('nope')
   }
   const out = await callErase(redis, 'u1')
+  assert.equal(out.status, 503, 'a partial erase must not report ok')
+  assert.equal(
+    redis.deleted.includes('reveal:index:u1'),
+    false,
+    'the index that could not be read must survive, so a retry can still find the keys',
+  )
+  assert.equal(redis.deleted.includes('stamps:u1:seasons'), false)
+})
+
+test('reveal marks are found through the scorebook index too, so an erase is not future-only', async () => {
+  // `reveal:index:{u}` is only populated from the deploy that introduced it
+  // forward. Every mark written before that is invisible to it — and would
+  // survive "erase everywhere" permanently, then be pulled straight back onto
+  // the freshly-wiped device by RevealCloudSync. `scorebook:{u}` is a hash
+  // keyed by gamePk that predates the index and covers the same games.
+  const redis = fakeRedis({
+    sets: { 'reveal:index:u1': ['777001'] },
+    hashes: { 'scorebook:u1': { 777002: { updatedAt: 1 }, 777003: { updatedAt: 2 } } },
+  })
+  const out = await callErase(redis, 'u1')
   assert.equal(out.status, 200)
-  assert.ok(redis.deleted.includes('prefs:u1'))
+  for (const pk of ['777001', '777002', '777003']) {
+    assert.ok(
+      redis.deleted.includes(`reveal:u1:${pk}`),
+      `reveal:u1:${pk} must be erased however it was discovered`,
+    )
+  }
+  assert.equal(out.json.erased.reveal, 3, 'and counted once each, not twice')
+})
+
+test('erase still never reaches another user, however a gamePk was discovered', async () => {
+  const redis = fakeRedis({
+    hashes: { 'scorebook:u1': { 999: {} }, 'scorebook:u2': { 111: {} } },
+  })
+  await callErase(redis, 'u1')
+  for (const key of redis.deleted) {
+    assert.ok(key.includes('u1'), `${key} is not this user's to erase`)
+    assert.equal(key.includes('u2'), false)
+  }
 })
 
 test('the erase response names no game, club, date, or score', async () => {

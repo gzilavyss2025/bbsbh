@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { SYNCED_ITEMS } from '../../lib/account/syncClaims.js'
-import { lastSyncedAt } from '../../lib/account/syncStatus.js'
+import { claimsForChannel } from '../../lib/account/syncClaims.js'
+import { SYNC_CHANNELS, lastSyncedAt } from '../../lib/account/syncStatus.js'
 
 // The sync receipt — a carbon-copy slip: one ruled row per thing an account
 // carries, each naming THE THING rather than the mechanism, and each saying
@@ -87,13 +87,20 @@ export function SyncReceipt({ status }) {
   return (
     <>
       <ul className="syncreceipt">
-        {SYNCED_ITEMS.map((item) => {
-          const state = stateFor(status?.[item.channel], now)
+        {SYNC_CHANNELS.map((channel) => {
+          const claims = claimsForChannel(channel)
+          if (claims.length === 0) return null
+          const state = stateFor(status?.[channel], now)
+          // One row per CHANNEL, not per claim. `reveal` backs two claims
+          // ("Reveal progress" and "Pick up your pencil"), and mapping the
+          // ledger directly rendered them as two rows showing byte-identical
+          // state — a receipt is one line per thing that syncs, and those two
+          // are one thing. PRD §5.2 specifies four rows.
           return (
-            <li key={item.id} className="syncreceipt__row" data-tone={state.tone}>
+            <li key={channel} className="syncreceipt__row" data-tone={state.tone}>
               <span className="syncreceipt__mark" aria-hidden="true" />
               <span className="syncreceipt__body">
-                <span className="syncreceipt__label">{item.label}</span>
+                <span className="syncreceipt__label">{claims[0].label}</span>
                 <span className="syncreceipt__state caps-exempt">{state.text}</span>
               </span>
             </li>

@@ -15,6 +15,7 @@ import {
   initialSyncState,
   isRecoverable,
   lastSyncedAt,
+  normalizeSilentChannels,
   phaseForResponse,
   reasonForResponse,
   reduceSync,
@@ -109,4 +110,50 @@ test('lastSyncedAt is the newest success across every channel, or null', () => {
 test('rollupSync says off about nothing at all', () => {
   assert.equal(rollupSync({}), 'off')
   assert.equal(rollupSync(null), 'off')
+})
+
+// --------------------------------------------------------------------------
+// A channel that never reported (normalizeSilentChannels)
+//
+// `RevealCloudSync` mounts inside InningViewer, not app-wide, so on any surface
+// that is not a game — /profile, and the slate — the `reveal` channel has never
+// spoken. It is still sitting on initialSyncState's opening phase, which
+// `rollupSync` (worst channel wins) turns into "local" no matter how healthy
+// every other channel is. Both readers of the store hit this; phase 5 found the
+// slate's merge strip gated on the RAW rollup and therefore permanently dead.
+// --------------------------------------------------------------------------
+
+test('a channel that never reported inherits the account phase, so the rollup is not held down by silence', () => {
+  let state = initialSyncState(true)
+  for (const channel of ['prefs', 'spoiledDays', 'stamps']) {
+    state = reduceSync(state, { channel, phase: 'synced', at: 5000 })
+  }
+  // The raw store cannot say "synced": `reveal` never spoke and still reads local.
+  assert.equal(rollupSync(state), 'local')
+  assert.equal(rollupSync(normalizeSilentChannels(state)), 'synced')
+})
+
+test('a silent channel inherits the phase only — never a syncedAt it never earned', () => {
+  let state = initialSyncState(true)
+  state = reduceSync(state, { channel: 'prefs', phase: 'synced', at: 5000 })
+  const out = normalizeSilentChannels(state)
+  assert.equal(out.reveal.phase, 'synced')
+  assert.equal(out.reveal.syncedAt, null)
+  assert.equal(out.reveal.at, null)
+})
+
+test('a channel that HAS reported is left exactly as it stands', () => {
+  let state = initialSyncState(true)
+  state = reduceSync(state, { channel: 'prefs', phase: 'synced', at: 5000 })
+  state = reduceSync(state, { channel: 'reveal', phase: 'error', at: 9000, reason: 'network' })
+  const out = normalizeSilentChannels(state)
+  assert.equal(out.reveal.phase, 'error')
+  assert.equal(out.reveal.at, 9000)
+  assert.equal(rollupSync(out), 'error')
+})
+
+test('with no account at all every channel reads off, not a borrowed success', () => {
+  const out = normalizeSilentChannels(initialSyncState(false))
+  for (const channel of SYNC_CHANNELS) assert.equal(out[channel].phase, 'off')
+  assert.equal(rollupSync(out), 'off')
 })

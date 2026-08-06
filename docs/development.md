@@ -222,6 +222,14 @@ Everything works with none of these set — each feature they gate degrades to
   store is live and the problem is elsewhere. Env changes only reach the
   functions on a fresh deploy — redeploy after connecting a database.
 
+**My Tally adds no new environment variables.** `/profile`, the preference
+document (`api/preferences.js`) and the erase path (`api/account.js`) ride the
+two pairs above and nothing else — ADR-0039. Both new endpoints check the store
+before they authenticate, so the same curl probe diagnoses them:
+`curl https://bbsbh.vercel.app/api/preferences` and
+`curl -X DELETE https://bbsbh.vercel.app/api/account` each answer `501 sync not
+configured` on a deploy with no store and `401` on one where the store is live.
+
 ## CI
 
 `.github/workflows/ci.yml` runs `npm run lint` + `npm run build` on every PR and

@@ -195,7 +195,9 @@ nothing from MLB, but it belongs in this file's mental model: it is the other
 half of the four `api/` functions that authenticate a real end user.
 
 - **`preferences.js`** — the My Tally preference document (`bbsbh:prefs`), the
-  **fifth** backend exception. A **closed** four-field registry: `club`
+  **fifth** backend exception (**ADR-0039**, which also carries invariants
+  P1–P10, the Option A/B argument and the deferred `user.deleted` webhook). A
+  **closed** four-field registry: `club`
   (teamId), `level` (a statsapi sportId, the same vocabulary `teams.js`
   speaks — not a second string name for it), `keepAwake`, `motion`. Pure,
   React-free, and imported **verbatim** by `api/preferences.js`, the same
@@ -239,6 +241,20 @@ half of the four `api/` functions that authenticate a real end user.
   exist, so a promise cannot outrun the implementation. `scoresUnlocked` is on
   the `NEVER_SYNCED` list with its reason: mirroring the pass expiry would
   unseal a device the user never consented on (ADR-0026).
+- **`localData.js`** — `tallyKeysIn` / `countGamesInProgress` /
+  `clearTallyDataIn` / `buildGameLogExport`. The **local** half of erase and
+  export: `api/account.js` only ever clears the server, so the confirm sheet
+  has to clear this device itself. It takes a storage object as an argument
+  rather than reaching for `window`, which is the only reason it is testable.
+- **`intro.js`, `prompts.js`, `mergeReceiptFlag.js`** — the onboarding
+  one-shots (`bbsbh:intro`, `bbsbh:prompts`, `bbsbh:mergeReceipt:{userId}`).
+  **None of them sync, deliberately**: a dismissal is a fact about this browser,
+  not about the account, and syncing one would let a second device suppress a
+  note the user there has never seen. Each returns the **same object reference**
+  when it changes nothing — a contract the tests assert with `assert.equal`, not
+  `assert.deepEqual`, because a freshly-allocated identical map still re-renders
+  React. `markPromptSeen`'s first draft scrubbed before it compared and broke
+  exactly that; check the raw map first.
 
 `api/account.js` is the erase counterpart — it deletes every per-user key from
 the verified `sub`, resolving the reveal family through `reveal:index:{userId}`

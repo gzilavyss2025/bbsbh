@@ -209,3 +209,10 @@
     flex: 1 1 0;
   }
 }
+
+/* The signed-in confirmation prints the account's email as fineprint, and an
+   address is one unbreakable token — same 320px overflow vector as
+   .mytally__accountid. */
+.introsheet__fineprint {
+  overflow-wrap: anywhere;
+}

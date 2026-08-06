@@ -23,8 +23,11 @@ const SCOPE = {
   // documented degrade (docs/development.md), so it is stated plainly and is
   // never styled as an error.
   unavailable: {
-    label: 'This device.',
-    note: 'Sync is not available on this deployment — everything is still saved here.',
+    // PRD §1.3, verbatim. "Signed in." leads on purpose — the user IS signed
+    // in, and dropping it made this read like a signed-out state. "On this
+    // device" is the phrase §1.1 fixes as exact; "here" is not it.
+    label: 'Signed in.',
+    note: 'Sync is not available on this deployment — everything is still saved on this device.',
   },
   error: {
     label: 'This device, for now.',

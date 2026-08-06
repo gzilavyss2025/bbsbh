@@ -6,6 +6,7 @@ import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
+import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import {
   parseRoute,
   gamePath,
@@ -187,6 +188,8 @@ function currentUrl() {
 // Every section of every game is a real, shareable URL; the back button walks
 // the steps.
 export default function App() {
+  // Applies the saved motion preference to <html>. One mount, app-wide.
+  useMotionPreference()
   const [route, setRoute] = useState(() => parseRoute(currentUrl()))
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.

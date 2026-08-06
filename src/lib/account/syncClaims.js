@@ -71,10 +71,16 @@ export const SYNCED_ITEMS = Object.freeze([
 export const NEVER_SYNCED = Object.freeze([
   {
     id: 'scoresUnlocked',
+    // The user-facing name, so the copy that says what stays put is rendered
+    // from this list rather than hand-written next to it. The whole point of
+    // this module is that a claim — including a claim about what does NOT
+    // travel — cannot drift from the code.
+    label: 'Scores Unlocked',
     why: 'The pass is an ephemeral, device-local render override. Mirroring it would unseal a device the user never consented on.',
   },
   {
     id: 'recentSearches',
+    label: 'your recent searches',
     why: 'A browsing trail. Device-local by nature, and a needless privacy surface to move off-device.',
   },
 ])

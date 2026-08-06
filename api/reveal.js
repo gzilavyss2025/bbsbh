@@ -109,6 +109,21 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const current = await redis.get(key)
     const revealedThrough = Number.isInteger(current) ? current : -1
+    // Backfill the erase index for a mark this user made before the index
+    // existed. Without this, `reveal:index:{u}` is populated FORWARD ONLY, so
+    // every pre-index mark survives "erase my Tally data everywhere" — and is
+    // then pulled straight back onto the freshly-wiped device the next time
+    // that game is opened, which is a reveal resurrecting itself after the user
+    // asked for it to be gone. Opening a game is the one moment we can name a
+    // gamePk that is certainly this user's, so the repair belongs here.
+    if (revealedThrough >= 0) {
+      try {
+        await redis.sadd(`reveal:index:${userId}`, gamePk)
+      } catch {
+        // Same posture as the ratchet's own index write below: losing this
+        // costs completeness on a future erase, never a mark.
+      }
+    }
     return reply(res, { revealedThrough })
   }
 

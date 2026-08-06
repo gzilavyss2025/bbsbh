@@ -103,6 +103,9 @@
   font-size: var(--fs-body);
   line-height: var(--lh-body);
   color: var(--text-body);
+  /* An email address is a single unbreakable token. At 320px a long one
+     overflows the column and takes the whole page sideways with it. */
+  overflow-wrap: anywhere;
 }
 
 .mytally__pitch {

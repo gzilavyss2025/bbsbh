@@ -34,3 +34,38 @@ export function markMergeReceiptSeen(userId) {
     // dismissal from reversing itself for the rest of this visit.
   }
 }
+
+// The card's lines, as a pure rule — the other half of the receipt both
+// renderings share, and the half that is easy to get wrong.
+//
+// PRD §5.3: "If a channel is `unavailable`, its line is omitted rather than
+// shown as zero. A zero is a claim; an omission is not." That has a sharper
+// consequence than it looks. Every count here is read from LOCAL storage, so a
+// line drawn without checking its channel is not merely imprecise — it asserts
+// that a merge happened on a deployment where nothing was ever uploaded.
+//
+// Phase 5 found exactly that: the `games` line was ungated, so a signed-in user
+// on a store-less deploy (the supported 501 degrade, PRD §1.3) got the headline
+// "Your book is on this account now." while the scope badge two blocks above
+// correctly said sync was unavailable — and dismissing it burned the one-shot
+// flag, so the REAL receipt could never appear once the store came up.
+//
+// So: every line is gated on its own channel having actually reached `synced`.
+// `status` must be the NORMALIZED store (see normalizeSilentChannels).
+export function mergeReceiptLines({ status, counts, clubName }) {
+  const lines = []
+  const reached = (channel) => status?.[channel]?.phase === 'synced'
+  const n = (count, one, many) => `${count} ${count === 1 ? one : many}`
+
+  if (reached('stamps') && counts?.stamps > 0) {
+    lines.push({ id: 'stamps', text: n(counts.stamps, 'stamp', 'stamps') })
+  }
+  if (reached('reveal') && counts?.games > 0) {
+    lines.push({ id: 'games', text: `${n(counts.games, 'game', 'games')} in progress` })
+  }
+  if (reached('spoiledDays') && counts?.days > 0) {
+    lines.push({ id: 'days', text: `${n(counts.days, 'day', 'days')} you'd already unsealed` })
+  }
+  if (reached('prefs') && clubName) lines.push({ id: 'club', text: clubName })
+  return lines
+}

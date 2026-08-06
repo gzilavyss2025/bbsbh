@@ -60,7 +60,19 @@ export const LEGACY_KEYS = Object.freeze({
 // clock should cost the user a merge-order surprise, never their setting. Same
 // posture as api/reveal.js's MAX_REVEALED_THROUGH — bound the hostile input,
 // don't fail the honest one.
-export const MAX_CLOCK_SKEW_MS = 48 * 60 * 60 * 1000
+//
+// This was 48 HOURS, and 48 hours was wrong. The bound is not a tolerance for
+// hostile input, it is the exact size of the window during which a device with
+// a fast clock makes a field UNCHANGEABLE everywhere else: the stored value
+// wins every last-write-wins comparison, so another device's tap persists
+// locally, publishes nothing (it is not strictly newer than the baseline), and
+// is then reverted by the next focus pull. Silently, repeatedly, with no way
+// for the user to fix it. "A merge-order surprise" undersold it by two days.
+//
+// A few minutes covers real clock jitter between two honest devices; anything
+// beyond it clamps to the server's own now, which still keeps the user's
+// setting — it just stops the setting from outranking everyone else's.
+export const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000
 
 // The slate's level toggle stores a statsapi **sportId**, which is what
 // src/lib/teams.js's SPORT_IDS/LEVELS and every fetch in the app already speak.

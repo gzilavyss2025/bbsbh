@@ -55,3 +55,25 @@ export function serializeIntro(step, now = Date.now()) {
 export function hasSeenIntro(state) {
   return Boolean(state && state.seen === true)
 }
+
+// Write the flag against a storage object handed in, so a caller outside a hook
+// can set it — and so it is testable, which `useIntroFlag`'s own window-bound
+// writer is not (preferencesStorage.js's header argues the general case).
+//
+// The caller that needs this is the erase sheet: wiping every `bbsbh:` key
+// takes this flag with it, and without re-seeding it the reload looks like a
+// first visit, reopens the welcome modal, and — because any exit from that
+// modal commits its pick — publishes the DEFAULT club over the user's real one
+// on every device.
+export function markIntroSeenIn(storage, step = 1, now = Date.now()) {
+  // `storage?.setItem?.(…)` would optional-chain straight past a missing
+  // storage and then report success, which is the one answer this must never
+  // give: the caller uses it to decide whether the device still looks new.
+  if (typeof storage?.setItem !== 'function') return false
+  try {
+    storage.setItem(INTRO_KEY, serializeIntro(step, now))
+    return true
+  } catch {
+    return false
+  }
+}

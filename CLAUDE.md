@@ -147,9 +147,9 @@ consented to spoil (consent, never a mark — a per-day on/off state map, since 
 can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
 consent-pop-up wording (never a score, closed registry, public-cached read, allowlisted
 write) so the owner tunes it without a deploy — ADR-0025. **My Tally**'s preferences
-(`api/preferences.js` + `src/lib/account/`) mirror a CLOSED four-field set — club, slate
-level, keep-awake, motion — last-write-wins per FIELD, never anything score-derived;
-`api/account.js` erases every per-user key. **The fifth stores a score, by design**: the
+(`api/preferences.js` + `src/lib/account/`) mirror a CLOSED four-field set — club, level,
+keep-awake, motion — last-write-wins per FIELD, never score-derived; `api/account.js`
+erases every per-user key — ADR-0039. **The fifth stores a score, by design**: the
 **Game Log**'s game stamps (`api/stamps.js` + `src/lib/stamps.js`, at `/logbook` and
 inside the box score's seal) — safe because of WHERE stamp art may render
 (`check-stamp-surfaces`, never an unrevealed-game surface), not a mint-time check; the
