@@ -150,7 +150,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="lastplayed-banner__text">Last played in {data.lastPlayedYear}</span>
           </div>
         )}
-        <AsOfBanner asOf={asOf} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
@@ -413,7 +413,11 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             {block.gameLog && (
               <>
-                <SectionTitle title="Game log" bar note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : 'entering today'}`} />
+                <SectionTitle
+                  title="Game log"
+                  bar
+                  note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDay(asOf)}` : 'entering today'}`}
+                />
                 <ul className="gamelog">
                   {block.gameLog.rows.map((r) => (
                     <li className="gamelog__row" key={r.gamePk ?? r.date}>
@@ -588,7 +592,8 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {asOf && (
           <p className="hint hint--prose player__caveat">
-            Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row, the splits and the Advanced rates are full-season figures.
+            Season tiles, game log and past-year rows are frozen to “entering {monthDay(asOf)}.”
+            The current-year row, the splits and the Advanced rates are full-season figures.
           </p>
         )}
       </div>

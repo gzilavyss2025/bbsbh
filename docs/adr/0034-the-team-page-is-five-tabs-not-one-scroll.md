@@ -183,3 +183,48 @@ That is a known, deliberate gap: "show me this team as of April 1" deserves a
 real date control rather than a side effect of how you happened to navigate, and
 it is worth designing on its own. Recorded here so the next context does not
 mistake it for an oversight.
+
+### The gap gets a way in (2026-08-06)
+
+`AsOfBanner` (`components/seal/AsOfBanner.jsx`) now carries the cutoff's whole
+lifecycle, not just the way out. On a live page it renders a plain-text "View
+as of a date" button that opens an inline `<input type="date">`; picking one
+navigates to the SAME pathname with `?d=` (and `?s=`) appended — reusing the
+exact loaders and propagation rule this ADR already established, not a parallel
+mechanism. On a dated page, "Change date" reopens the same picker pre-filled
+with the URL's own date, and "Show current" still drops the cutoff entirely.
+
+Where it lives: this one shared component, not five separate controls. All
+four stats surfaces (team hub, player page, both leader-board pages) already
+rendered `<AsOfBanner asOf={asOf} />` unconditionally as the exit mechanism, so
+extending it to also be the entry mechanism reaches all four for free — the
+player page and leader boards were never a "follow-up," because withholding the
+control from them would have meant special-casing three call sites for no
+reason, not saving work.
+
+Bounds: the picker's `min`/`max` (and a defensive `clampAsOfDate` re-check on
+apply, `lib/dates.js`) span January 1st of the current year through today. That
+floor is a stand-in for "the season opener," not the real thing — MLB and each
+MiLB level open on their own date most years, and resolving the exact one would
+cost a fetch just to police an HTML attribute. A pick that lands before a real
+opener still resolves fine through the existing loaders (season-to-date zeros),
+so the imprecision costs nothing. An out-of-range pick CLAMPS to the nearer
+bound rather than being refused outright or silently discarded — the picker's
+own attributes stop most of these before they happen, so this is a defensive
+backstop, and landing on the boundary is closer to what was asked for than
+doing nothing.
+
+**The default still opens live.** Nothing pre-fills the picker on a live page —
+picking a date is the only way a page becomes dated, same as before this
+change. Pre-filling "Change date" with the URL's own existing value isn't an
+exception to that: it reflects what the address already explicitly says, not a
+remembered or invented default.
+
+One thing this surfaced rather than caused: two labels — the team hub's record
+line and `StandingsCard`'s division header — read the literal string "entering
+today" regardless of the actual `asOf` date, a leftover from when `asOf` was
+always effectively "today" (GameView stamped the *current* game's own date).
+Once a real date control made other dates reachable, both would have read
+"entering today" while showing a April number. Fixed alongside this control
+(`humanDate(asOf)` in both places, and `PlayerPage`'s game-log note and
+frozen-data caveat, same bug).

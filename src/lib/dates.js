@@ -122,6 +122,51 @@ export function longDate(apiDate) {
   })
 }
 
+// Whether an apiDate ("YYYY-MM-DD") names a real calendar date — a Date
+// round-trip catches an out-of-range month/day (e.g. "2026-13-45" or
+// "2026-02-30") that a digit-count regex alone would let through. Backs the
+// as-of date control (`components/seal/AsOfBanner.jsx`): a garbled value
+// should be refused, not silently resolved to some nearby date.
+export function isRealDate(apiDate) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(apiDate ?? '')
+  if (!m) return false
+  const y = Number(m[1])
+  const mo = Number(m[2])
+  const d = Number(m[3])
+  const dt = new Date(y, mo - 1, d)
+  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d
+}
+
+// The as-of date control's valid range: never later than today, never
+// earlier than January 1st of today's year. That floor is a stand-in for
+// "the season opener" rather than the real thing — every level (MLB, four
+// MiLB levels) opens on its own date most years, and resolving the exact one
+// would cost a fetch just to police a `<input type="date">`'s `min`. A date
+// that lands before a real opener still resolves fine through the normal
+// loaders (season-to-date zeros, same as any other early-season case this
+// app already renders), so the imprecision costs nothing but a slightly wide
+// picker range.
+export function asOfBounds(today = new Date()) {
+  return { min: `${today.getFullYear()}-01-01`, max: toApiDate(today) }
+}
+
+// Clamp a candidate as-of date into asOfBounds — a future pick clamps to
+// today, an implausibly early one clamps to the season floor. Returns null
+// for anything that isn't a real calendar date at all, so the control can
+// refuse outright rather than guessing at a nearby date. Clamping (rather
+// than refusing or falling back to live) is the choice for an in-range but
+// out-of-bounds pick: the picker's own `min`/`max` should stop most of these
+// before they happen, so this is a defensive backstop, and landing on the
+// nearest boundary is closer to what the user asked for than silently
+// discarding the pick.
+export function clampAsOfDate(candidate, today = new Date()) {
+  if (!isRealDate(candidate)) return null
+  const { min, max } = asOfBounds(today)
+  if (candidate > max) return max
+  if (candidate < min) return min
+  return candidate
+}
+
 // "7:42 PM" — the live-game refresh staleness indicator ("as of 7:42 PM"),
 // from a `Date.now()`-style epoch ms timestamp (useAsync's `lastUpdated`).
 // Returns '' for a missing timestamp so callers can skip the caption before

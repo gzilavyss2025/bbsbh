@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { humanDate } from '../../../lib/dates.js'
 import { favoriteAccentColor } from '../../../lib/teams.js'
 import { TeamLink } from '../../../components/team/TeamLink.jsx'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
@@ -34,7 +35,7 @@ export function StandingsCard({ team, standings, asOf, divisionPostseasonOdds, p
       <div className="thub-card">
         <div className="thub-card__head">
           <span>{team.division?.name || 'Standings'}</span>
-          {asOf && <em>entering today</em>}
+          {asOf && <em>entering {humanDate(asOf)}</em>}
           {divisionPostseasonOdds.length > 0 && (
             <button
               type="button"

@@ -52,7 +52,9 @@ no collapsed/shelved state. Every tab path goes through `teamTabPath` →
 `linkQuery`, so a dated link keeps its `?d=` across a tab switch. The hub itself
 opens on **current** stats — links out of a game stopped stamping that cutoff on
 (ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
-one, and `AsOfBanner` is the way back to live.
+one, and `components/seal/AsOfBanner.jsx` is the way IN (a date picker on a live
+page), the way to CHANGE it, and the way back to live — see ADR-0034's "The gap
+gets a way in." Same component on the player page and both leader-board pages.
 
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 

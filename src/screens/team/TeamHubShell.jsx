@@ -9,6 +9,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { LinkScope } from '../../lib/nav.jsx'
 import { useNav } from '../../lib/nav.js'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
+import { humanDate } from '../../lib/dates.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
@@ -105,7 +106,7 @@ export function TeamHubShell({
         style={headerThemeStyle(theme)}
       >
         <SiteHeader />
-        <AsOfBanner asOf={asOf} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
@@ -140,7 +141,7 @@ export function TeamHubShell({
                 {record.rank && record.div && (
                   <span className="team-hub__div">{ordinal(record.rank)} · {record.div}</span>
                 )}
-                {asOf && <em>· entering today</em>}
+                {asOf && <em>· entering {humanDate(asOf)}</em>}
               </p>
             )}
             {manager && (

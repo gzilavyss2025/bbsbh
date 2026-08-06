@@ -52,7 +52,7 @@ export function TeamLeadersPage({ id, asOf, sportId }) {
     <LinkScope asOf={asOf} sportId={data.sportId ?? sportId ?? null}>
       <div className="screen team-hub">
         <SiteHeader />
-        <AsOfBanner asOf={asOf} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
