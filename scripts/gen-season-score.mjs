@@ -9,24 +9,19 @@
 // exact spoiler-safe cutoff rather than today's season result. Normal nightly
 // use appends yesterday's MLB snapshot; --date=YYYY-MM-DD rebuilds one date,
 // and --from/--to backfills an inclusive date range.
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'season-score.json')
 const seedPath = join(here, 'season-expectations-seed.json')
-const BASE = 'https://statsapi.mlb.com'
 const MLB_LEAGUES = [103, 104]
 const HOME_WIN_PROBABILITY = 0.54
 const EARLY_SEASON_VARIANCE = 9 // keeps a 10-game hot streak below the ceiling
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 const round1 = (n) => Math.round(n * 10) / 10
@@ -285,8 +280,7 @@ async function main() {
     console.log(`${date}: ${Object.keys(snapshots).length} MLB season-score snapshots`)
   }
   await dumpGroup(db, 'team-snapshots')
-  await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify(exportJson(db)))
+  await writeJsonAtomic(out, exportJson(db))
   console.log(`wrote ${out}`)
   db.close()
 }

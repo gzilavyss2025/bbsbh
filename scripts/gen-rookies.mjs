@@ -36,40 +36,17 @@ import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { levelSeasonStat } from '../src/api/person.js'
 import { ipToOuts } from '../src/api/rehab-policy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
-const BASE = 'https://statsapi.mlb.com'
-
 const ROOKIE_AB_LIMIT = 130
 const ROOKIE_IP_OUTS_LIMIT = 150 // 50 IP == 150 outs
 const LIMIT = { hitting: ROOKIE_AB_LIMIT, pitching: ROOKIE_IP_OUTS_LIMIT }
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // Run an async mapper across items with a small concurrency cap (be polite to
 // statsapi). Mirrors gen-milestones.mjs's helper.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 // fullRoster (not active) so IL and optioned/minor-league players are
 // included — a rookie call-up who gets optioned back down mid-season is
 // still a rookie candidate. Hydrate person for mlbDebutDate.

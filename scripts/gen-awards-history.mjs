@@ -35,11 +35,13 @@
 // same graceful degradation as everywhere else in this app.
 //
 // Run by hand: node scripts/gen-awards-history.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { MAJOR_AWARDS } from '../src/api/person.js'
 import { teamFullName } from '../src/lib/teams.js'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 // Hardware only, no All-Star selections — MAJOR_AWARDS carries ALAS/NLAS too
 // (the Trophy Case's own All-Star tier), but this page is scoped to trophies/
@@ -50,37 +52,12 @@ const HARDWARE_AWARDS = Object.fromEntries(
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'awards-history.json')
-const BASE = 'https://statsapi.mlb.com'
-
 const SEASON_COUNT = 5
 const CURRENT_SEASON = new Date().getUTCFullYear()
 const seasons = Array.from({ length: SEASON_COUNT }, (_, i) => CURRENT_SEASON - i)
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // Run an async mapper across items with a small concurrency cap, results in
 // order (be polite to statsapi). Mirrors gen-milestones.mjs's helper.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 // AL*/NL*-prefixed ids split by league; the MLB-wide ones (MLBRC,
 // MLBAFIRST/MLBSECOND) carry no league split.
 function leagueOf(awardId) {
@@ -206,9 +183,5 @@ const familiesOut = familyOrder
   .map((label) => families.get(label))
   .filter((f) => Object.keys(f.years).length > 0)
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ generatedAt: new Date().toISOString(), seasons, families: familiesOut }),
-)
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), seasons, families: familiesOut })
 console.log(`wrote ${out} (${familiesOut.length} awards, seasons ${seasons[seasons.length - 1]}–${seasons[0]})`)

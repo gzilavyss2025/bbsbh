@@ -55,25 +55,18 @@
 // which bye box reads "1" vs. "2".
 //
 // Run by hand: node scripts/gen-postseason-history.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'postseason-history.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // The app's own UI shows 2020-present eagerly and gates 2000-2019 behind a
 // "Load more" button (PostseasonHistoryPage.jsx) — EARLIEST_YEAR is the
 // generator's own floor, independent of that UI cutoff.
 const EARLIEST_YEAR = 2000
 const CURRENT_YEAR = new Date().getUTCFullYear()
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 // gameType -> round bucket. Order here is bracket order (earliest round
 // first), and doubles as the fixed render order on the page.
@@ -320,8 +313,7 @@ for (let year = CURRENT_YEAR; year >= EARLIEST_YEAR; year--) {
   if (season) seasons.push(season)
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), seasons }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), seasons })
 console.log(
   `wrote ${out} (${seasons.length} seasons, ${seasons[seasons.length - 1]?.year}–${seasons[0]?.year})`,
 )

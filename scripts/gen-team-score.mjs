@@ -20,12 +20,12 @@ import {
 } from '../src/api/teamScoreFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
 import { openDb, dumpGroup } from './lib/db.js'
+import { getJson } from './lib/statsapi.mjs'
 
 export { pythagoreanPct, qualityScoreFromGames, currentFormScoreFromGames }
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'team-score.json')
-const BASE = 'https://statsapi.mlb.com'
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
   const d = new Date(`${date}T00:00:00Z`)
@@ -33,12 +33,6 @@ const addDays = (date, n) => {
   return isoDay(d)
 }
 const previousUtcDay = () => addDays(isoDay(new Date()), -1)
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 function parseArgs(argv) {
   const args = {}

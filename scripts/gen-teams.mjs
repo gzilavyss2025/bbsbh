@@ -14,9 +14,9 @@
 // browser-facing src/, and a plain Node script pulling from it isn't worth
 // the added coupling for one array literal).
 // Run by hand: node scripts/gen-teams.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'teams.json')
@@ -49,8 +49,7 @@ for (const sportId of SEARCHABLE_SPORT_IDS) {
   bySportId[sportId] = await fetchLevel(sportId)
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), bySportId }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), bySportId })
 console.log(
   `wrote ${out} (${SEARCHABLE_SPORT_IDS.map((id) => `${id}:${bySportId[id].length}`).join(', ')})`,
 )

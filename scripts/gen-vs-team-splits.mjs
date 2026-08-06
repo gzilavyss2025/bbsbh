@@ -23,14 +23,14 @@
 // card shows "no career meetings" for those).
 //
 // Run by hand: node scripts/gen-vs-team-splits.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'vs-team-splits.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // How far ahead to look for each club's next game (to pre-select the opponent).
 const NEXT_GAME_WINDOW_DAYS = 14
 
@@ -40,31 +40,8 @@ const isoDay = (offset = 0) => {
   return d.toISOString().slice(0, 10)
 }
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // Run an async mapper across items with a small concurrency cap, results in
 // order (be polite to statsapi). Mirrors gen-former-teammates.mjs's helper.
-async function mapConcurrent(items, limit, mapper) {
-  const out = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        out[i] = await mapper(items[i], i)
-      } catch {
-        out[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return out
-}
-
 const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 
 // Innings pitched ("104.1" = 104 ⅓) <-> outs, so multi-game IP sums correctly.
@@ -316,17 +293,13 @@ ids.forEach((id, i) => {
   connections += Object.keys(vs).length
 })
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    season: new Date().getUTCFullYear(),
-    teams,
-    nextOpponent,
-    players,
-  }),
-)
+await writeJsonAtomic(out, {
+  generatedAt: new Date().toISOString(),
+  season: new Date().getUTCFullYear(),
+  teams,
+  nextOpponent,
+  players,
+})
 console.log(
   `wrote ${out} (${teams.length} teams, ${Object.keys(players).length} players, ${connections} player-opponent splits)`,
 )

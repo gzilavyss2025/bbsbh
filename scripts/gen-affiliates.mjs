@@ -16,9 +16,9 @@
 // back to the live per-org call when the file is missing, stale for the
 // requested season, or doesn't cover the org.
 // Run by hand: node scripts/gen-affiliates.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'affiliates.json')
@@ -70,6 +70,5 @@ for (const list of Object.values(byOrgId)) {
   list.sort((a, b) => AFFILIATE_SPORT_IDS.indexOf(a.sportId) - AFFILIATE_SPORT_IDS.indexOf(b.sportId))
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), season, byOrgId }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, byOrgId })
 console.log(`wrote ${out} (${Object.keys(byOrgId).length} orgs)`)

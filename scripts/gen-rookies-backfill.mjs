@@ -24,45 +24,23 @@
 // Run by hand:
 //   node scripts/gen-rookies-backfill.mjs                       # full 1901–present
 //   node scripts/gen-rookies-backfill.mjs --since=2015 --until=2020
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { levelSeasonStat } from '../src/api/person.js'
 import { ipToOuts } from '../src/api/rehab-policy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
-const BASE = 'https://statsapi.mlb.com'
-
 const ROOKIE_AB_LIMIT = 130
 const ROOKIE_IP_OUTS_LIMIT = 150 // 50 IP == 150 outs
 const LIMIT = { hitting: ROOKIE_AB_LIMIT, pitching: ROOKIE_IP_OUTS_LIMIT }
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // Run an async mapper across items with a small concurrency cap (be polite to
 // statsapi). Mirrors gen-milestones.mjs's helper.
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 function parseArgs(argv) {
   const args = {}
   for (const a of argv) {
@@ -199,9 +177,8 @@ for (const r of results) {
   existing.players[id] = rec
 }
 
-await mkdir(dirname(out), { recursive: true })
 existing.generatedAt = new Date().toISOString()
-await writeFile(out, JSON.stringify(existing))
+await writeJsonAtomic(out, existing)
 console.log(
   `wrote ${out} (${Object.keys(existing.players).length} players total, ${toCompute.length} newly computed this run, seasons ${startYear}-${endYear})`,
 )

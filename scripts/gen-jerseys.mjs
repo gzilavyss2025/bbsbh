@@ -46,25 +46,19 @@
 // Run by hand:
 //   node scripts/gen-jerseys.mjs            # trailing 3 days
 //   node scripts/gen-jerseys.mjs --days=200 # season-to-date backfill
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { classifyUniformAsset } from '../src/api/uniforms.js'
 import { teamClubName } from '../src/lib/teams.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const jerseysJsonPath = join(here, '..', 'public', 'data', 'jerseys.json')
 
-const BASE = 'https://statsapi.mlb.com'
 const DEFAULT_DAYS = 3
 const BATCH_SIZE = 100 // gamePks per uniforms/game call
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 function parseArgs(argv) {
   const args = {}
@@ -208,8 +202,7 @@ async function main() {
     // rewrite for nothing.
     const rows = db.prepare('SELECT game_pk, team_id, payload_json FROM jerseys').all()
     const exported = buildJerseysExport(rows)
-    await mkdir(dirname(jerseysJsonPath), { recursive: true })
-    await writeFile(jerseysJsonPath, JSON.stringify(exported))
+    await writeJsonAtomic(jerseysJsonPath, exported)
     console.log(
       `wrote public/data/jerseys.json (${Object.keys(exported).length} treatment(s))`,
     )

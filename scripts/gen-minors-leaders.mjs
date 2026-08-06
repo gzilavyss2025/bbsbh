@@ -24,11 +24,12 @@
 // also what keeps the leader-relative qualifier's playing-time floor correct —
 // the app can't reproduce that floor from a trimmed pool, so it must be baked in.
 // Run by hand: node scripts/gen-minors-leaders.mjs
-import { writeFile, readFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
 import { computeLeaders, ALL_CATEGORIES } from '../src/api/teamLeaders.js'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'minors-leaders.json')
@@ -82,10 +83,6 @@ for (const category of ALL_CATEGORIES) {
   if (entries.length) leaders[category.key] = entries
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ season, generatedAt: new Date().toISOString(), poolSize: pool.length, leaders }),
-)
+await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), poolSize: pool.length, leaders })
 const cats = Object.keys(leaders).length
 console.log(`wrote ${out} (${pool.length} players ranked across ${cats} categories, top ${DEPTH} each)`)
