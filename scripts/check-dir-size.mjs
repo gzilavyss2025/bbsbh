@@ -64,7 +64,9 @@ const BUDGETS = {
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
-  'src/styles': 51,
+  // 51 -> 52 for the pregame Innings board. This remains in the numbered
+  // cascade because the exception above explicitly preserves that ordering.
+  'src/styles': 52,
   'src/api': 83,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
