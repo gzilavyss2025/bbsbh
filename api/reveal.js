@@ -49,11 +49,13 @@ return cur`
 // per user (`scorebook:{userId}`, field = gamePk). Each entry is the SAME
 // high-water mark plus just enough spoiler-free identity to draw a "pick up
 // your pencil" card without fetching the game feed: date, team abbreviations
-// and club names, doubleheader game number, regulation length. Never a score,
-// same footing as revealedThrough itself (see ADR-0022).
+// and club names, doubleheader game number, regulation length, and — once the
+// game has ended — the half-index of its true last half (`finalHalfIndex`,
+// null until then; see selectFinalHalfIndex in src/api/select.js). Never a
+// score, same footing as revealedThrough itself (see ADR-0022).
 const SCOREBOOK_MAX = 24
 
-function sanitizeSnapshot(game) {
+export function sanitizeSnapshot(game) {
   if (!game || typeof game !== 'object') return null
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '')
   const date = str(game.date, 10)
@@ -62,6 +64,12 @@ function sanitizeSnapshot(game) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !away || !home) return null
   const num = (v, dflt, max) =>
     Number.isInteger(v) && v >= 1 && v <= max ? v : dflt
+  const finalHalfIndex =
+    Number.isInteger(game.finalHalfIndex) &&
+    game.finalHalfIndex >= 0 &&
+    game.finalHalfIndex <= MAX_REVEALED_THROUGH
+      ? game.finalHalfIndex
+      : null
   return {
     date,
     away,
@@ -70,11 +78,43 @@ function sanitizeSnapshot(game) {
     homeName: str(game.homeName, 40),
     gameNumber: num(game.gameNumber, 1, 3),
     regulation: num(game.regulation, 9, 15),
+    finalHalfIndex,
   }
 }
 
+// Whether a scorebook entry has finished the arc "Pick up your pencil"
+// tracks: the game ended (finalHalfIndex resolved) and the user has revealed
+// every half there is. An entry in this state has nothing left to pick up, so
+// it drops out of the index rather than sitting there forever — the automatic
+// half of "delete games from my pencil" (the DELETE method below is the
+// manual half). Pure so the POST ratchet and the GET ?recent=1 prune share one
+// answer instead of two chances to disagree.
+export function isFullyWrappedUp(entry) {
+  return (
+    Number.isInteger(entry?.finalHalfIndex) &&
+    Number.isInteger(entry?.revealedThrough) &&
+    entry.revealedThrough >= entry.finalHalfIndex
+  )
+}
+
+// Shapes the raw scorebook hash into what GET ?recent=1 returns, splitting
+// out any entry that has finished its own arc (isFullyWrappedUp) so the
+// handler can prune those from Redis in the same request. Pure — the Redis
+// round trip lives in the handler, this only decides what belongs where.
+export function recentGamesView(all) {
+  const entries = Object.entries(all ?? {})
+    .map(([pk, v]) => (v && typeof v === 'object' ? { gamePk: Number(pk), ...v } : null))
+    .filter(Boolean)
+  const done = entries.filter(isFullyWrappedUp).map((g) => String(g.gamePk))
+  const games = entries
+    .filter((g) => !isFullyWrappedUp(g))
+    .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
+    .slice(0, 12)
+  return { games, done }
+}
+
 export default async function handler(req, res) {
-  if (req.method !== 'GET' && req.method !== 'POST') {
+  if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
     return reply(res, { error: 'method not allowed' }, 405)
   }
 
@@ -92,16 +132,36 @@ export default async function handler(req, res) {
   if (!auth.ok) return reply(res, { error: auth.error }, auth.status)
   const userId = auth.userId
 
-  // GET ?recent=1 — the scorebook index, newest first.
+  // GET ?recent=1 — the scorebook index, newest first. Any entry that's
+  // finished its own arc (fully revealed, game over) is dropped from the
+  // response AND pruned from Redis here as a safety net — the ordinary path
+  // is the POST ratchet below never writing one back in the first place, but
+  // this catches an entry an older client wrote before this check existed.
   if (wantRecent) {
     if (req.method !== 'GET') return reply(res, { error: 'method not allowed' }, 405)
-    const all = (await redis.hgetall(`scorebook:${userId}`)) || {}
-    const games = Object.entries(all)
-      .map(([pk, v]) => (v && typeof v === 'object' ? { gamePk: Number(pk), ...v } : null))
-      .filter(Boolean)
-      .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0))
-      .slice(0, 12)
+    const bookKey = `scorebook:${userId}`
+    const all = (await redis.hgetall(bookKey)) || {}
+    const { games, done } = recentGamesView(all)
+    if (done.length) {
+      try {
+        await redis.hdel(bookKey, ...done)
+      } catch {
+        // Best-effort tidy; already excluded from THIS response either way.
+      }
+    }
     return reply(res, { games })
+  }
+
+  // DELETE ?gamePk= — the manual half of "delete games from my pencil."
+  // Removes only this game's scorebook-index entry, never the
+  // `reveal:{userId}:{gamePk}` mark itself: this clears the card from the
+  // slate strip, not the user's own reveal progress, so returning to the game
+  // directly still resumes where they left off. If they keep scoring it, the
+  // next reveal's POST below folds it back into the index — the same as any
+  // other progress update.
+  if (req.method === 'DELETE') {
+    await redis.hdel(`scorebook:${userId}`, gamePk)
+    return reply(res, { ok: true })
   }
 
   const key = `reveal:${userId}:${gamePk}`
@@ -160,18 +220,31 @@ export default async function handler(req, res) {
   // snapshot (older clients simply don't, and the entry is skipped — the
   // ratchet above is unaffected either way). Pruned to the newest
   // SCOREBOOK_MAX so one user's hash can't grow without bound.
+  //
+  // Unless this reveal just finished the game's own arc — the whole point of
+  // "go away once you've unlocked every half inning and the game is over":
+  // rather than writing an entry back in only to have the next GET prune it,
+  // drop it here on the very reveal that completes it.
   const snapshot = sanitizeSnapshot(body?.game)
   if (snapshot) {
     const bookKey = `scorebook:${userId}`
-    await redis.hset(bookKey, {
-      [gamePk]: { ...snapshot, revealedThrough: next, updatedAt: Date.now() },
-    })
-    const all = (await redis.hgetall(bookKey)) || {}
-    const stale = Object.entries(all)
-      .sort(([, a], [, b]) => (b?.updatedAt ?? 0) - (a?.updatedAt ?? 0))
-      .slice(SCOREBOOK_MAX)
-      .map(([pk]) => pk)
-    if (stale.length) await redis.hdel(bookKey, ...stale)
+    const entry = { ...snapshot, revealedThrough: next, updatedAt: Date.now() }
+    if (isFullyWrappedUp(entry)) {
+      try {
+        await redis.hdel(bookKey, gamePk)
+      } catch {
+        // Best-effort; a leftover finished entry is caught by the next
+        // GET ?recent=1's own prune either way.
+      }
+    } else {
+      await redis.hset(bookKey, { [gamePk]: entry })
+      const all = (await redis.hgetall(bookKey)) || {}
+      const stale = Object.entries(all)
+        .sort(([, a], [, b]) => (b?.updatedAt ?? 0) - (a?.updatedAt ?? 0))
+        .slice(SCOREBOOK_MAX)
+        .map(([pk]) => pk)
+      if (stale.length) await redis.hdel(bookKey, ...stale)
+    }
   }
 
   return reply(res, { revealedThrough: next })
