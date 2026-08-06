@@ -31,6 +31,7 @@ import { FoulCard } from '../components/playerstats/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
 import { RecentFormCard } from '../components/playerstats/RecentFormCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
+import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../components/chrome/BackBtn.jsx'
@@ -519,19 +520,28 @@ export function PlayerPage({ id, asOf, sportId }) {
           )
         })}
 
-        {/* Photos — only for a player who has appeared in an MLB game this
-            season (the primary block's tileStat resolving to MLB is
-            loadPlayer's own signal for that, see its comment at the
-            liveLevel derivation above) and only on the bare current-day view
-            (same current-day-only rule as FoulCard/PitcherWorkloadCard/
-            Milestone Watch — this card has no precompute to cut to a
-            spoiler asOf). Renders nothing itself if no photos turn up. */}
+        {/* Photos + Highlights — both only for a player who has appeared in
+            an MLB game this season (the primary block's tileStat resolving
+            to MLB is loadPlayer's own signal for that, see its comment at the
+            liveLevel derivation above) and only on the bare current-day view.
+            Photos has no precompute to cut to a spoiler asOf; Highlights
+            COULD technically filter its static file to `clip.date <= asOf`
+            but deliberately doesn't (see PlayerHighlightsRail's issue) — same
+            `!asOf` gate, for v1 simplicity and consistency with the box
+            score/team rail's "decided games only" footing rather than a
+            dated cutoff. `primaryBlock`/the gate is computed once and shared
+            by both sections rather than duplicated. Each renders nothing
+            itself if it turns up empty. */}
         {!asOf && bio.debut && (() => {
           const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
           const primaryBlock = blocks.find((b) => b.group === primaryGroup) ?? blocks[0]
-          return primaryBlock?.tileSportId === 1 ? (
-            <PlayerPhotosSection playerId={bio.id} group={primaryGroup} season={data.season} />
-          ) : null
+          if (primaryBlock?.tileSportId !== 1) return null
+          return (
+            <>
+              <PlayerPhotosSection playerId={bio.id} group={primaryGroup} season={data.season} />
+              <PlayerHighlightsRail playerId={bio.id} teamId={club?.id} />
+            </>
+          )
         })()}
 
         {/* Player History — the biographical archive: Innings by position,

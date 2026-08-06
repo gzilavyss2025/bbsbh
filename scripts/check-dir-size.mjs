@@ -64,12 +64,10 @@ const BUDGETS = {
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
-  //
-  // 51 -> 52 for `52-highlight-clip-card.css`: the reusable video-highlight
-  // clip card (components/highlights/HighlightClipCard.jsx). Same story as
-  // 51 — its first draft grew 29-team-transactions.css past that file's own
-  // size budget, and a card built to be shared by two rails was never a
-  // team-transactions odd job to begin with.
+  // 51 -> 52 for `52-highlight-clip-card.css`: HighlightClipCard.jsx's rules,
+  // shared by TeamHighlightsRail and PlayerHighlightsRail (both cascade
+  // issues 03/04) — same "new reusable component earns a partial, append at
+  // the end" reasoning as the entry above.
   'src/styles': 52,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.

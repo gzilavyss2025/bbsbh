@@ -30,7 +30,7 @@ about what it is. Do not tidy it into a folder.
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `PreHalfCallouts`, `EnteringReference`, `ExtrasBanner`, `DelayCard`, `MarginNotes` | The innings-viewer shell around the at-bat feed |
 | `logbook/` | `GameStamp`, `StampGameButton` | The Logbook stamp (ADR-0035) — `check-stamp-surfaces.mjs` allowlists these by path |
 | `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos` | Club-mark rendering and its sketch/print modal |
-| `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail` | Player-identity primitives and career-level cards |
+| `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail`, `PlayerHighlightsRail` | Player-identity primitives and career-level cards |
 | `playerstats/` | `StatcastCard`, `RecentFormCard`, `SplitsVsTeam`, `FoulCard`, `MilestoneWatchCard`, `PitcherWorkloadCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities) |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `PinchRunNotice`, `CalloutNote`, `DueUpNextCard`, `UpNextBatters`, `HighlightSheet` | The at-bat feed's notification-card family (ADR-0017) |
 | `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |

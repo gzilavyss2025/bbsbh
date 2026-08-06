@@ -119,11 +119,21 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   to drift; a caller's only job on top is identity scoping (the player rail
   keeps `clip.playerId === personId` from his CURRENT team's file). Decided
   games only, so not a spoiler surface. Degrades to `{ games: [] }`, cached per
-  team for the session. `flattenPositiveClips(data)` is the one shared flatten
-  step both rails call — a `games[]` result to one oldest-first clip list,
-  each annotated with its `gamePk`/`date` — so the two rails can only ever
+  team for the session. `flattenPositiveClips(data)` is the shared shaping step
+  both rails call on top of a fetch result — flattens `games[].clips[]` into
+  one OLDEST-first list, each clip annotated with its `gamePk`/`date`, so both
+  rails' newest-at-right scroll anchor (PRD's "Rail ordering") lands at the end
+  of the array with no separate reverse step, and the two rails can only ever
   differ in which clips they keep after this call, never in how they unpack
-  the file.
+  the file. Both rails also render the same `HighlightClipCard`
+  (`src/components/highlights/`) for each clip — purely presentational, no
+  fetching of its own — so a clip object only ever needs shaping once, here,
+  regardless of which rail is reading it. `highlightPlaybacks`
+  (`highlights.js` above) also had to grow a second branch for this cascade —
+  a shipped clip's `playbacks` field is already the resolved `{hls, mp4}`
+  object the generator wrote, not the raw MLB array of named sources
+  `HighlightSheet.jsx`'s box-score caller passes, so the function now accepts
+  either shape rather than a rail needing to re-derive playback URLs itself.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface. **`currentTeam` is not a roster

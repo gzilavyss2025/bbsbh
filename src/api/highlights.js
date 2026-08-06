@@ -219,10 +219,10 @@ export function isEligibleForPositiveFilter(classified) {
 // `{name, url}`, resolved here) or an already-resolved `{hls, mp4}` object —
 // which is exactly what a highlights-cascade team file stores per clip
 // (`scripts/lib/highlights.mjs` calls this function once at generation time
-// and writes the result). `HighlightSheet.jsx` calls this on whatever `item`
-// its caller hands it, so both the box score's raw per-play item and a
-// team/player rail's precomputed clip need to resolve correctly here without
-// the rails re-deriving playback URLs themselves.
+// and writes the result). HighlightSheet.jsx calls this on whatever `item` its
+// caller hands it, so both the box score's raw per-play item and a
+// TeamHighlightsRail/PlayerHighlightsRail clip need to resolve correctly here
+// without the rails re-deriving playback URLs themselves.
 export function highlightPlaybacks(item) {
   const playbacks = item?.playbacks
   if (playbacks && !Array.isArray(playbacks)) return { hls: playbacks.hls ?? null, mp4: playbacks.mp4 ?? null }
