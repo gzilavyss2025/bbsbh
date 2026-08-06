@@ -69,10 +69,32 @@
 //     gen-run-expectancy.mjs) to reconstruct it. Null/0 when
 //     public/data/run-expectancy.json hasn't been built yet (hand-run, not
 //     nightly) — favor is a bonus figure on top of accuracy, never blocking.
+//
+// ABS CHALLENGES + HANDEDNESS (see .scratch/umpire-tendencies/PRD.md §2, and
+// issues/03 for the migration). Two more per-game figures off the same walk,
+// both feeding the Umpire Tendencies card:
+//   - `challenges`/`challengesOverturned` — how many Automated Ball-Strike
+//     challenges this game drew and how many overturned the plate umpire's
+//     call. Attributing them to him is the point: a challenge overturns HIS
+//     call. Resolved by challengeForPlay (src/api/challenges.js) rather than
+//     re-implemented, the same don't-let-them-drift import this file already
+//     makes for euz.js/runExpectancy.js — that module knows a review can sit
+//     at EITHER the play or the pitch-event level (sometimes mirrored at
+//     both, which it dedupes) and that MLB's older manager's-replay reviews
+//     also set `challengeTeamId` and must be excluded on `reviewType`.
+//     A count-only re-implementation here got that wrong twice in review.
+//   - `missL`/`missR` — the same four-region miss tallies as `high/low/
+//     inside/outside`, split by the BATTER's side. missRegion already
+//     orients horizontally to the batter, so this is the same attribution
+//     read two ways, never a second definition of a region.
+// Both are absent (not zero) on rows swept before this schema — a pre-schema
+// row and a game with genuinely no challenges must stay distinguishable, so
+// aggregate() counts contributing games rather than summing blindly.
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
+import { challengeForPlay } from '../src/api/challenges.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
@@ -154,6 +176,15 @@ function computeGameAccuracy(feed) {
   let expanded = 0 // called strike, out of zone → generous
   let squeezed = 0 // called ball, in zone → tight
   const region = { high: 0, low: 0, inside: 0, outside: 0 }
+  // The same misses, split by the batter's side. missRegion already orients
+  // horizontally to the batter, so these are one attribution read two ways —
+  // regionL.inside + regionR.inside === region.inside, always.
+  const regionL = { high: 0, low: 0, inside: 0, outside: 0 }
+  const regionR = { high: 0, low: 0, inside: 0, outside: 0 }
+  // ABS challenges drawn by this game's plate umpire, and how many overturned
+  // him. Counted per PLAY (challengeForPlay resolves at most one per play).
+  let challenges = 0
+  let challengesOverturned = 0
   // 3×3 zone-map tallies (see cellIndex): all called judgments, how many were
   // called strikes (perceived zone), and how many were wrong (miss overlay).
   const cellCalled = Array(9).fill(0)
@@ -215,7 +246,9 @@ function computeGameAccuracy(feed) {
       }
       if (strikeCall) expanded++
       else squeezed++
-      region[missRegion(c.pX, c.pZ, top, bot, batSide)]++
+      const missedIn = missRegion(c.pX, c.pZ, top, bot, batSide)
+      region[missedIn]++
+      ;(batSide === 'L' ? regionL : regionR)[missedIn]++
       cellMiss[cell]++
 
       // A pre-pitch count outside 0–3 balls / 0–2 strikes is corrupted feed
@@ -228,6 +261,17 @@ function computeGameAccuracy(feed) {
         else favorHome += favor
         favorMagnitude += Math.abs(favor)
       }
+    }
+
+    // At most one ABS challenge per play, resolved by the app's own
+    // challengeForPlay so this count and the box score's can't disagree (see
+    // the header). It returns null for a play with no ABS review, for the
+    // older manager's-replay reviews, and for a review whose challengeTeamId
+    // matches neither club.
+    const abs = challengeForPlay(feed, p)
+    if (abs) {
+      challenges++
+      if (abs.outcome === 'success') challengesOverturned++
     }
 
     // Apply this play's runner movements for the NEXT play's base/out state —
@@ -251,6 +295,10 @@ function computeGameAccuracy(feed) {
     expanded,
     squeezed,
     ...region,
+    missL: regionL,
+    missR: regionR,
+    challenges,
+    challengesOverturned,
     cellCalled,
     cellStrikeCall,
     cellMiss,
@@ -276,6 +324,16 @@ function aggregate(games) {
   let consistentCalledSum = 0
   let favorMagnitudeSum = 0
   let favorGames = 0
+  // Same degrade for the two Umpire Tendencies schemas. `challengeGames` is
+  // what keeps "swept before challenges were counted" distinct from "played a
+  // game nobody challenged" — a zero would collapse the two and quietly drag
+  // every challenges-per-game figure toward zero mid-migration.
+  const regionL = { high: 0, low: 0, inside: 0, outside: 0 }
+  const regionR = { high: 0, low: 0, inside: 0, outside: 0 }
+  let handedGames = 0
+  let challengeSum = 0
+  let challengeOverturnedSum = 0
+  let challengeGames = 0
   for (const g of games) {
     sum.called += g.called
     sum.correct += g.correct
@@ -300,6 +358,18 @@ function aggregate(games) {
       favorMagnitudeSum += g.favorMagnitude
       favorGames++
     }
+    if (g.missL && g.missR) {
+      for (const k of ['high', 'low', 'inside', 'outside']) {
+        regionL[k] += g.missL[k] ?? 0
+        regionR[k] += g.missR[k] ?? 0
+      }
+      handedGames++
+    }
+    if (g.challenges != null) {
+      challengeSum += g.challenges
+      challengeOverturnedSum += g.challengesOverturned ?? 0
+      challengeGames++
+    }
   }
   sum.accuracy = sum.called ? sum.correct / sum.called : null
   sum.cellCalled = cellCalled
@@ -308,6 +378,16 @@ function aggregate(games) {
   sum.consistency = consistentCalledSum ? consistentSum / consistentCalledSum : null
   sum.favorMagnitude = favorGames ? favorMagnitudeSum : null
   sum.favorPerGame = favorGames ? favorMagnitudeSum / favorGames : null
+  sum.missL = handedGames ? regionL : null
+  sum.missR = handedGames ? regionR : null
+  // `challengeGames` is carried, not just used: it is the denominator behind
+  // challengesPerGame, and it is NOT sum.games until every row has been
+  // re-swept. A reader that divides by sum.games instead understates the rate.
+  sum.challenges = challengeGames ? challengeSum : null
+  sum.challengesOverturned = challengeGames ? challengeOverturnedSum : null
+  sum.challengeGames = challengeGames || null
+  sum.challengesPerGame = challengeGames ? challengeSum / challengeGames : null
+  sum.overturnRate = challengeSum ? challengeOverturnedSum / challengeSum : null
   return sum
 }
 
