@@ -20,12 +20,13 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
+import { starterMatchupsFor, splitMatchupRows } from '../api/careerMatchups.js'
 import {
-  careerMatchupsFor,
-  sortByPitcher,
-  groupByPitcher,
-  matchupLine,
-} from '../api/careerMatchups.js'
+  useMatchupNotes,
+  MatchupNotesToggle,
+  MatchupNote,
+  BenchMatchups,
+} from '../components/teamstats/StarterMatchups.jsx'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
@@ -417,11 +418,26 @@ function TeamSections({
     [formerTeammatesData, meta.id, oppMeta.id],
   )
   const startingIds = useMemo(() => startingIdsFor(feed), [feed])
-  // Same once-per-matchup skip as teammatePairs above — see careerMatchupsFor.
-  const matchupPairs = useMemo(
-    () => careerMatchupsFor(careerMatchupsData, meta.id, oppMeta.id),
-    [careerMatchupsData, meta.id, oppMeta.id],
+  // This club's batters vs the arm they're about to face. Keyed by gamePk, so
+  // a doubleheader's two games and a series' three nights each resolve to
+  // their own starter rather than sharing one team-pair entry.
+  const starterMatchups = useMemo(
+    () => starterMatchupsFor(careerMatchupsData, feed?.gamePk, meta.id),
+    [careerMatchupsData, feed?.gamePk, meta.id],
   )
+  const { showNotes, setShowNotes } = useMatchupNotes()
+  // Split once per render into "goes beside a name in the order" and "goes in
+  // the bench row". Before the lineup posts the card lists the whole roster, so
+  // the lineup set is empty and every batter's line lands inline instead.
+  const matchupNotes = useMemo(
+    () => splitMatchupRows(starterMatchups, new Set(lineup.map((p) => p.id))),
+    [starterMatchups, lineup],
+  )
+  const starterLast = useMemo(
+    () => (starterMatchups ? splitDisplayName(starterMatchups.pitcher.name).last : ''),
+    [starterMatchups],
+  )
+  const matchupLevel = SPORT_LABEL[meta.sportId] ?? 'MLB'
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const dayNight = info.dayNight
 
@@ -473,7 +489,15 @@ function TeamSections({
                 className="metricbar__logo"
               />
             }
-          />
+          >
+            {/* Names the pitcher the notes below are measured against, and
+                switches them off for a clean order to copy onto paper. */}
+            <MatchupNotesToggle
+              pitcherLast={starterLast}
+              showNotes={showNotes}
+              onToggle={setShowNotes}
+            />
+          </SectionMasthead>
           {lineup.length > 0 ? (
             <ol className="lineup__list">
               {lineup.map((p) => (
@@ -494,11 +518,24 @@ function TeamSections({
                       evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
                     />
                     <BirthdayCake show={birthdayIds.has(p.id)} />
+                    {/* Inside the namewrap, not beside it: the note is a flex
+                        child that takes a full-width basis, which is what puts
+                        it on its own line under the name (see .lineup__vs). */}
+                    {showNotes && (
+                      <MatchupNote row={matchupNotes.byId.get(p.id)} levelLabel={matchupLevel} />
+                    )}
                   </span>
                   <span className="lineup__jersey">{p.jersey || ''}</span>
                   <span className="lineup__pos">{p.position}</span>
                 </li>
               ))}
+              {showNotes && (
+                <BenchMatchups
+                  rows={matchupNotes.bench}
+                  levelLabel={matchupLevel}
+                  pitcherLast={starterLast}
+                />
+              )}
             </ol>
           ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
             <>
@@ -526,6 +563,19 @@ function TeamSections({
                               evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
                             />
                             <BirthdayCake show={birthdayIds.has(p.id)} />
+                            {/* Most visits to this page happen BEFORE the
+                                lineup posts, when this roster list is the whole
+                                card — so the notes attach here too and the data
+                                is visible all day, not only once the nine drop.
+                                No bench row is needed here: with no posted
+                                order, nobody is left over. */}
+                            {showNotes && (
+                              <MatchupNote
+                                row={matchupNotes.byId.get(p.id)}
+                                levelLabel={matchupLevel}
+                                className="roster__vs"
+                              />
+                            )}
                           </span>
                           <span className="roster__jersey">{p.jersey}</span>
                           <span className="roster__pos">{p.pos}</span>
@@ -629,13 +679,6 @@ function TeamSections({
         homeTeamId={side === 'away' ? oppMeta.id : meta.id}
       />
       <OrgTies ties={orgTies} />
-      <CareerMatchups
-        pairs={matchupPairs}
-        startingIds={startingIds}
-        teamA={{ id: meta.id, name: meta.teamName }}
-        teamB={{ id: oppMeta.id, name: oppMeta.teamName }}
-        levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
-      />
     </>
   )
 }
@@ -964,117 +1007,6 @@ function OrgTies({ ties }) {
         ))}
       </ul>
     </section>
-  )
-}
-
-const MATCHUPS_SHOWN = 6
-
-// Every batter/pitcher pair on the two clubs with real career plate-
-// appearance history against each other, at ANY level either has played (see
-// careerMatchupsFor) — the "Contreras is 0-for-3 vs. tonight's starter"
-// scorebook fact, but not limited to just the probable starter, and not
-// limited to history made at tonight's own level: a AA lineup card still
-// shows a pair who last faced off in A+. A plain stat table rather than
-// FormerTeammates' headshot cards — this is a line off the stat sheet, not a
-// story about two people's careers crossing. Hidden when there's no history.
-//
-// `pairs` mixes both directions (teamA batting vs teamB pitching, and vice
-// versa — see careerMatchupsFor's header); this splits it into the two real
-// baseball facts a reader actually wants ("how has THIS lineup done against
-// THAT pitching staff") rather than one interleaved list. `startingIds` (see
-// startingIdsFor) is the same set FormerTeammates uses for its "starting
-// tonight" badge — here it drives a soft row highlight for a pair that's
-// tonight's actual batter vs. the opposing actual starter, the highest-value
-// row on the table.
-function CareerMatchups({ pairs, startingIds, teamA, teamB, levelLabel }) {
-  const tableA = useMemo(
-    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamA?.id)),
-    [pairs, teamA?.id],
-  )
-  const tableB = useMemo(
-    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamB?.id)),
-    [pairs, teamB?.id],
-  )
-  if (tableA.length === 0 && tableB.length === 0) return null
-  return (
-    <section className="metriccard matchups">
-      <SectionMasthead as="h3" title="Career matchups" />
-      <div className="metriccard__body">
-        <MatchupTable
-          title={`${teamA?.name || 'Team'} batters vs ${teamB?.name || 'team'} pitchers`}
-          rows={tableA}
-          startingIds={startingIds}
-          levelLabel={levelLabel}
-        />
-        <MatchupTable
-          title={`${teamB?.name || 'Team'} batters vs ${teamA?.name || 'team'} pitchers`}
-          rows={tableB}
-          startingIds={startingIds}
-          levelLabel={levelLabel}
-        />
-      </div>
-    </section>
-  )
-}
-
-// One direction's list (e.g. "Braves batters vs Padres pitchers") — rows
-// already grouped by pitcher (sortByPitcher), then collapsed one heading per
-// pitcher (groupByPitcher) so his name isn't repeated down every row. That
-// repetition is what forced a three-column "batter / pitcher / line" table
-// too wide for a phone (the reported horizontal-swipe bug); a pitcher heading
-// over two-part batter→line rows fits any width with no scroll, and reads
-// cleaner on desktop too. Each list shows/hides independently since one
-// direction commonly has far more real history than the other (a club's
-// long-tenured regulars vs. a just-called-up opener). Slice by MATCHUP (row)
-// count first so "Show N more" still counts matchups, then group the slice.
-function MatchupTable({ title, rows, startingIds, levelLabel }) {
-  const [showAll, setShowAll] = useState(false)
-  if (rows.length === 0) return null
-  const shown = showAll ? rows : rows.slice(0, MATCHUPS_SHOWN)
-  const hidden = rows.length - shown.length
-  const groups = groupByPitcher(shown)
-  return (
-    <div className="matchuptable">
-      <h4 className="matchuptable__title">{title}</h4>
-      <div className="matchuplist">
-        {groups.map((g) => {
-          const pitcherStarting = startingIds?.has(g.pitcher.id)
-          return (
-            <div className="matchupgroup" key={g.pitcher.id}>
-              <p className="matchupgroup__pitcher">
-                <span className="matchupgroup__vs">vs</span>{' '}
-                <PlayerLink id={g.pitcher.id}>{g.pitcher.name}</PlayerLink>
-              </p>
-              <ul className="matchupgroup__rows">
-                {g.rows.map((r) => {
-                  const tonight = pitcherStarting && startingIds?.has(r.batter.id)
-                  return (
-                    <li
-                      key={r.batter.id}
-                      className={
-                        tonight
-                          ? 'matchupgroup__row matchupgroup__row--tonight'
-                          : 'matchupgroup__row'
-                      }
-                    >
-                      <PlayerLink id={r.batter.id} className="matchupgroup__batter">
-                        {r.batter.name}
-                      </PlayerLink>
-                      <span className="matchupgroup__line">{matchupLine(r, levelLabel)}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          )
-        })}
-      </div>
-      {hidden > 0 && (
-        <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
-          Show {hidden} more matchup{hidden === 1 ? '' : 's'}
-        </button>
-      )}
-    </div>
   )
 }
 
