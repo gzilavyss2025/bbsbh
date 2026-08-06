@@ -8,7 +8,10 @@ import { fetchNationalBroadcasts } from '../api/broadcast.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
+import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
+import { usePreferences } from '../hooks/preferences/usePreferences.js'
+import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
@@ -45,21 +48,22 @@ const AccountButton = isClerkEnabled
 const ContinueScoring = isClerkEnabled
   ? lazy(() => import('../components/game/ContinueScoring.jsx').then((m) => ({ default: m.ContinueScoring })))
   : null
+const MergeReceiptStrip = isClerkEnabled
+  ? lazy(() =>
+      import('../components/account/MergeReceiptStrip.jsx').then((m) => ({
+        default: m.MergeReceiptStrip,
+      })),
+    )
+  : null
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
-// all season shouldn't reset to MLB every time they come back). The date
+// all season shouldn't reset to MLB every time they come back). It lives in the
+// My Tally preference document (`usePreferences`) rather than its own
+// `bbsbh:level` key — that old key is still read once as a migration seed, and
+// the value now travels between a signed-in user's devices. The date
 // deliberately does NOT persist anywhere — it lives in the URL ('/{MMDDYYYY}',
 // bare '/' = today), so a paged-to day is shareable and "today" is always the
 // right place a fresh visit starts.
-const LEVEL_KEY = 'bbsbh:level'
-function readLevel() {
-  try {
-    const n = Number(window.localStorage.getItem(LEVEL_KEY))
-    return LEVELS.some((l) => l.sportId === n) ? n : SPORT_IDS.MLB
-  } catch {
-    return SPORT_IDS.MLB
-  }
-}
 
 // Testing escape hatch: `?nointro` on any slate URL suppresses the first-visit
 // welcome modal for that load, so an automated test (or a manual spot-check)
@@ -82,17 +86,18 @@ function welcomeSuppressed() {
 export function GameSelect({ date = null, onPick, onShowLogos }) {
   useDocumentTitle(null)
   const navigate = useNav()
-  const [sportId, setSportId] = useState(readLevel)
-  const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
-  const [showWelcome, setShowWelcome] = useState(isFirstVisit && !welcomeSuppressed())
-  const pickLevel = (id) => {
-    setSportId(id)
-    try {
-      window.localStorage.setItem(LEVEL_KEY, String(id))
-    } catch {
-      // Private mode — level just won't stick between visits.
-    }
-  }
+  // The level is a field of the My Tally preference document now, so it
+  // travels between a signed-in user's devices along with the club. Reading it
+  // through the hook rather than holding a second copy in local state is what
+  // keeps a change made on another device from being ignored until a reload.
+  const { level: sportId, set: setPreference } = usePreferences()
+  const { favoriteTeamId, hasClubOpinion, setFavoriteTeam } = useFavoriteTeam()
+  // Replaces the old "has a club opinion" proxy for first-visit detection —
+  // see src/lib/account/intro.js for why the two questions had to be
+  // decoupled once the welcome modal grew a second step.
+  const [introSeen, markIntroSeen] = useIntroFlag(hasClubOpinion)
+  const [showWelcome, setShowWelcome] = useState(!introSeen && !welcomeSuppressed())
+  const pickLevel = (id) => setPreference('level', id)
 
   // The displayed date comes from the URL (see App.jsx): bare '/' means today.
   // Paging navigates to the neighboring day's URL rather than bumping local
@@ -117,6 +122,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // pretending otherwise the next morning would be a fiction.
   const scoresUnlocked = spoilersOffFor(dateStr)
   const [askUnlock, setAskUnlock] = useState(false)
+  // The `scores-unlocked-local` contextual prompt (PRD-adjacent, §6.2's honest-
+  // wording mandate): right after the user consents, quietly confirm the
+  // choice does NOT follow their other devices — bbsbh:scoresUnlocked is
+  // device-local by hard invariant (P2) and always will be, so this has to be
+  // said plainly rather than left to be assumed from the rest of My Tally's
+  // sync claims. Tied to the actual enable action (not to passActive being
+  // true on a reload), and one-shot forever via usePromptDismiss.
+  const [justEnabledPass, setJustEnabledPass] = useState(false)
+  const [passScopeNoteDismissed, dismissPassScopeNote] = usePromptDismiss('scores-unlocked-local')
   const resetLabel = formatResetTime(resetAt ?? nextResetAt())
   const goToDate = (apiDate) =>
     navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
@@ -577,7 +591,20 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     : 'Live scores — off'
                 }
                 className={`daystate__chip daystate__chip--live${passActive ? ' daystate__chip--live-on' : ''}`}
-                onClick={() => (passActive ? disableUnlock() : setAskUnlock(true))}
+                onClick={() => {
+                  if (passActive) {
+                    disableUnlock()
+                    // The note says "Live scores stays on this device". Once
+                    // the pass is off there is no "live scores" to say it
+                    // about, and leaving it up asserted a scope for a setting
+                    // that no longer applied. Clearing it here is NOT the
+                    // one-shot dismissal — that is the ✕, and only the ✕
+                    // writes bbsbh:prompts.
+                    setJustEnabledPass(false)
+                  } else {
+                    setAskUnlock(true)
+                  }
+                }}
               >
                 <span className="daystate__dot" aria-hidden="true" />
                 {copy('scoresUnlocked.toggleLabel')}
@@ -598,11 +625,45 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
             )}
           </div>
         )}
+
+        {/* The scores-unlocked-local prompt: fires only right after THIS tap
+            enables the pass (see the ConsentModal onConfirm below), never on
+            a reload where the pass happens to still be active — and only
+            where an account exists to be confused about (isClerkEnabled). */}
+        {isClerkEnabled && justEnabledPass && !passScopeNoteDismissed && (
+          <p className="daystate__scopenote caps-exempt">
+            Live scores stays on this device — it won&rsquo;t turn on for your
+            other signed-in devices.
+            <button
+              type="button"
+              className="daystate__scopenotedismiss"
+              onClick={() => {
+                dismissPassScopeNote()
+                setJustEnabledPass(false)
+              }}
+              aria-label="Dismiss this note"
+            >
+              ✕
+            </button>
+          </p>
+        )}
       </div>
+
+      {/* Signed in only: the merge-receipt strip fires only once every
+          configured channel has finished its first pull and the full receipt
+          on /profile hasn't been dismissed yet (PRD §5.3's deferred slate
+          pointer). See MergeReceiptStrip.jsx. */}
+      {MergeReceiptStrip && (
+        <Suspense fallback={null}>
+          <MergeReceiptStrip />
+        </Suspense>
+      )}
 
       {/* Signed-in only, and only when the cloud scorebook has entries —
           renders null otherwise, so the slate is untouched for everyone
-          else. See ContinueScoring.jsx. */}
+          else. Signed OUT, the same slot instead pitches an account once
+          three-plus games are in progress on this device. See
+          ContinueScoring.jsx. */}
       {ContinueScoring && (
         <Suspense fallback={null}>
           <ContinueScoring />
@@ -723,18 +784,16 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         )}
       </div>
 
-      <SiteFooter
-        onShowLogos={onShowLogos}
-        favoriteTeamId={favoriteTeamId}
-        onSetFavoriteTeam={setFavoriteTeam}
-      />
+      <SiteFooter onShowLogos={onShowLogos} />
 
       {showWelcome && (
         <FavoriteTeamModal
-          intro
           favoriteTeamId={favoriteTeamId}
           onSave={setFavoriteTeam}
-          onClose={() => setShowWelcome(false)}
+          onClose={(step) => {
+            markIntroSeen(step)
+            setShowWelcome(false)
+          }}
         />
       )}
 
@@ -744,6 +803,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           time={formatResetTime(nextResetAt())}
           onConfirm={() => {
             enableUnlock()
+            if (isClerkEnabled) setJustEnabledPass(true)
             trackToggleConsent({
               toggle: TOGGLES.SCORES_UNLOCKED,
               action: ACTIONS.CONFIRM,

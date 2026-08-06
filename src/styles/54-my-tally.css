@@ -1,0 +1,449 @@
+/* ====================================================== MY TALLY — /profile
+   The private profile & settings destination (screens/profile/ProfilePage.jsx).
+
+   The metaphor is the inside front cover of a scorebook: a pressed club seal,
+   your name on the page, a ruled ledger of what is in the book, and a
+   carbon-copy slip saying what has been carried where. Everything here draws
+   from the paper/ink/graphite/kraft tokens — no new palette, no raw hex.
+
+   Imported AFTER the logbook and passport partials because it borrows their
+   motifs (the stamp roundel, the kraft seal) and must be able to sit on top of
+   them at equal specificity.
+
+   Nothing on this page is score-bearing, so nothing here needs a seal
+   treatment — the one place kraft amber appears is the DEVICE HANDOFF
+   illustration, where it stands in for the numbers that are deliberately
+   absent.
+   ====================================================== */
+
+.mytally {
+  padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+}
+
+/* This page is prose-heavy in a way the scoring surfaces are not — it explains
+   what happens to a person's data. Shouted app chrome is wrong for that, so the
+   explanatory lines opt out of the global ALL-CAPS invariant while every label,
+   title and button stays uppercase (same shouted-heading / natural-case-body
+   split as the consent modal and the Game Log landing page). */
+#root .mytally .caps-exempt,
+#root .mergereceipt .caps-exempt,
+#root .erasesheet .caps-exempt,
+#root .syncreceipt .caps-exempt {
+  text-transform: none; /* caps-exempt: settings + privacy explanations read as sentences */
+}
+
+.mytally main {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.mytally__masthead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) 0 var(--space-5);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+
+.mytally__identity {
+  min-width: 0;
+}
+
+.mytally__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-black);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.mytally__subtitle {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* Held at a fixed height whether or not the club list has landed, so the page
+   never jumps as it resolves. */
+.mytally__club {
+  min-height: 1.2em;
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-body);
+}
+
+.mytally__scope {
+  display: block;
+  margin: var(--space-2) 0 0;
+}
+
+.mytally__scopelabel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-cover-ink);
+}
+
+.mytally__scopenote {
+  display: block;
+  margin-top: var(--space-1);
+  max-width: 40ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+/* ------------------------------------------------------------- the club seal
+   A pressed rubber stamp: navy ink under a kraft rim, with the club's one-color
+   knockout mark (ADR-0031) sitting in the middle. The mark is white art, which
+   is why the disc has to be dark — do not lighten it without swapping the
+   variant. */
+
+.clubseal {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--accent-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.clubseal__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.clubseal__circle {
+  fill: none;
+  stroke: var(--seal-cover);
+  stroke-width: 1.6;
+}
+
+.clubseal__circle--inner {
+  stroke-width: 0.8;
+  opacity: 0.7;
+}
+
+.clubseal__tick {
+  stroke: var(--seal-cover);
+  stroke-width: 1.4;
+  opacity: 0.8;
+}
+
+.clubseal__diamond {
+  fill: none;
+  stroke: var(--seal-cover);
+  stroke-width: 1;
+  opacity: 0.65;
+}
+
+.clubseal__mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/* ---------------------------------------------------------------- sections */
+
+.mytally__section {
+  padding: var(--space-6) 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.mytally__sectiontitle {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.mytally__field + .mytally__field {
+  margin-top: var(--space-6);
+}
+
+.mytally__fieldlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.mytally__fieldvalue {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-body);
+}
+
+.mytally__fieldnote {
+  margin: var(--space-2) 0 0;
+  max-width: 48ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+/* ------------------------------------------------------- choices + switches */
+
+.mytally__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.mytally__choice {
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-4);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  cursor: pointer;
+}
+
+.mytally__choice.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.mytally__choice:focus-visible,
+.mytally__switch:focus-visible,
+.mytally__rowbtn:focus-visible,
+.mytally__inlinebtn:focus-visible,
+.mytally__cta:focus-visible,
+.erasesheet__btn:focus-visible,
+.mergereceipt__dismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.mytally__switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.mytally__switchlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-body);
+}
+
+.mytally__switchtrack {
+  flex: 0 0 auto;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  background: var(--border-rule);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.mytally__switch.is-on .mytally__switchtrack {
+  background: var(--accent-positive);
+}
+
+.mytally__switchknob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.mytally__switch.is-on .mytally__switchknob {
+  transform: translateX(20px);
+}
+
+/* ------------------------------------------------------------- the ledger
+   Mono tabular figures in a ruled column — the one place this page prints
+   numbers, and every one of them is a count of the reader's own things. */
+
+.mytally__ledger {
+  margin: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.mytally__ledgerrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.mytally__ledgerrow dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-muted);
+}
+
+.mytally__ledgerrow dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+}
+
+.mytally__inlinebtn {
+  min-height: var(--tap-min);
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border: var(--bw-rule) solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------- action rows */
+
+.mytally__rowbtn {
+  display: block;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mytally__rowbtn[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.mytally__rowbtn--danger {
+  border-color: var(--accent-negative);
+  color: var(--accent-negative);
+}
+
+.mytally__rowbtnhint {
+  display: block;
+  margin-top: var(--space-1);
+  max-width: 52ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+/* ------------------------------------------------------------ wide layout */
+
+/* On the narrowest phones the seal and the four stacked identity lines fight
+   for the same 320px, and the club name wraps mid-word beside it. Stack them
+   instead: the seal reads as a header mark above the name rather than a
+   squeezed one beside it. */
+@media (max-width: 359px) {
+  .mytally__masthead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}
+
+/* 740px, not 720: styles/25-wide-layout.css widens `.screen` from 440px to
+   960px at exactly 740px, and hooks/useMediaQuery.js's WIDE_QUERY is kept in
+   sync with it. In the 720–739px band this grid was splitting a shell that was
+   still 440px wide, leaving ~112px for the whole right-hand column. */
+@media (min-width: 740px) {
+  .mytally__masthead {
+    gap: var(--space-6);
+  }
+
+  .mytally__pitch {
+    display: grid;
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  /* `.mytally__pitch .devicehandoff`, not the bare class. 53-my-tally-account.css
+     is @imported after this file and sets max-width/margin on `.devicehandoff`
+     at identical (0,1,0) specificity, so the bare selector here lost at every
+     width and this rule did nothing at all. */
+  .mytally__pitch .devicehandoff {
+    margin: 0;
+    max-width: none;
+  }
+
+  .mytally__pitchlede {
+    grid-column: 2;
+    margin-top: 0;
+  }
+
+  .mytally__claims,
+  .mytally__cta,
+  .mytally__fineprint {
+    grid-column: 2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mytally__switchtrack,
+  .mytally__switchknob {
+    transition: none;
+  }
+}

@@ -38,24 +38,51 @@ export const clerkAppearance = {
     footerActionLink: 'tally-cl-link',
     userButtonPopoverCard: 'tally-cl-card',
     userButtonPopoverActionButton: 'tally-cl-menuitem',
+    // <UserProfile routing="virtual" />, mounted inside My Tally's account
+    // section (/profile). Extended HERE rather than passed as a second
+    // appearance object at that call site, so the sign-in modal, the
+    // UserButton popover and the profile card stay ONE visual system — a
+    // second object is how two Clerk surfaces drift apart.
+    rootBox: 'tally-cl-root',
+    cardBox: 'tally-cl-cardbox',
+    navbar: 'tally-cl-navbar',
+    navbarButton: 'tally-cl-navbtn',
+    pageScrollBox: 'tally-cl-page',
+    profileSectionTitleText: 'tally-cl-sectiontitle',
+    profileSectionPrimaryButton: 'tally-cl-link',
+    formButtonReset: 'tally-cl-link',
   },
 }
 
 // Copy on the Clerk screens, rephrased in Tally's voice — an account exists to
-// keep the paper scorebook's reveal progress in sync, so say that instead of
-// Clerk's generic "to continue to {app}". Partial override; everything not
-// named here keeps Clerk's default strings.
+// keep the paper scorebook in sync, so say the COMPLETE benefit (club and
+// settings, reveal progress, spoiler choices, and the Game Log — the same
+// four claims src/lib/account/syncClaims.js guards) instead of Clerk's
+// generic "to continue to {app}" or an earlier draft that named reveal
+// progress alone. Partial override; everything not named here keeps Clerk's
+// default strings. "Never a score" stays in both: docs/game-log.md §3.3 rule
+// 4 — sync is a convenience, never a promise of backup, and neither subtitle
+// may imply otherwise.
 export const clerkLocalization = {
   signIn: {
     start: {
       title: 'Sign in to Tally',
-      subtitle: 'Pick up your scorebook on any of your devices',
+      subtitle:
+        'Your club, reveal progress, spoiler choices, and Game Log — on any device you sign in on',
     },
   },
   signUp: {
     start: {
       title: 'Create your Tally account',
-      subtitle: 'Your reveal progress follows you to every device — never a score',
+      subtitle:
+        'Keep your club, reveal progress, spoiler choices, and Game Log together on every device — never a score',
     },
+  },
+  // The account menu's own item, renamed so it says the same thing My Tally's
+  // disclosure says. Clerk's default is "Manage account"; what the screen behind
+  // it actually holds is email, connected accounts, passkeys, active devices
+  // and account deletion — security, not settings, which live on /profile.
+  userButton: {
+    action__manageAccount: 'Account & security',
   },
 }

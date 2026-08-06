@@ -272,6 +272,52 @@
   color: var(--text-caption);
 }
 
+/* The SAME slot, signed out: the third-game contextual prompt
+   (ContinueScoring.jsx, PRD §6.2 row 3) — "what the strip would be" once
+   three-plus games are in this visitor's pencil. Reads as a natural sentence
+   rather than shouted chrome, like the rest of this app's account voice. */
+#root .continuebar--pitch .caps-exempt {
+  text-transform: none; /* caps-exempt: the third-game prompt reads as a natural sentence */
+}
+
+.continuebar__pitchline {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+.continuebar__pitchactions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.continuebar__pitchcta {
+  flex: 1 1 auto;
+  min-height: var(--tap-min);
+}
+
+.continuebar__dismiss {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}
+
+/* There is no global :focus-visible rule, so a control without this falls back
+   to the UA default ring. Its three sibling dismiss buttons added alongside it
+   (.daystate__scopenotedismiss, .logbooklanding__devicenotedismiss,
+   .mergestrip__dismiss) all carry one; this was the only one that did not. */
+.continuebar__dismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
    sub-page (lineups, innings) so the sealed full box score is always one tap
    away without walking back through the sections. */

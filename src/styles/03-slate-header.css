@@ -444,3 +444,42 @@
   display: none;
 }
 
+/* The scores-unlocked-local contextual prompt (GameSelect.jsx) — a quiet,
+   one-shot line right under the day-state chips, only right after the tap
+   that turned Live Scores on. Honest wording, not a warning: the pass is
+   device-local by hard invariant (P2), and this says so plainly rather than
+   leaving it to be assumed. */
+/* The note sits as a sibling of .daystate inside .slatehead (see
+   GameSelect.jsx), not inside it — descendant selector targets the whole
+   header so a future sibling note doesn't need a third scoping rule. */
+#root .slatehead .caps-exempt {
+  text-transform: none; /* caps-exempt: the pass-scope note reads as a natural sentence */
+}
+
+.daystate__scopenote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 40ch;
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+.daystate__scopenotedismiss {
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  border: none;
+  background: none;
+  color: var(--text-caption);
+  cursor: pointer;
+}
+
+.daystate__scopenotedismiss:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+

@@ -107,3 +107,30 @@ body {
   background-size: 100% 100%, 24px 24px, 24px 24px;
   background-attachment: fixed, scroll, scroll;
 }
+
+/* --------------------------------------------------------------------------
+   The user's own motion preference (My Tally → Scorebook experience → Motion).
+
+   `data-motion="reduced"` is set on <html> by useMotionPreference.js. It is a
+   blanket kill, on purpose: the app has 27 separate
+   `@media (prefers-reduced-motion: reduce)` blocks written long before this
+   preference existed, and a per-component opt-in would reach none of them. A
+   user who asks for less motion means all of it, not the subset somebody
+   remembered to wire.
+
+   `.01ms` rather than `0` so animation/transition END events still fire —
+   several components sequence off `transitionend`, and zeroing the duration
+   outright would strand them mid-flow. Same trick the WCAG reduced-motion
+   snippet uses, and the same reason.
+
+   Nothing is emitted for `system` or `full`: with no attribute the app follows
+   the OS query alone, exactly as it always has.
+   -------------------------------------------------------------------------- */
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

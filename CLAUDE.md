@@ -136,23 +136,24 @@ under `bbsbh:reveal:{gamePk}` — only that half-index, never a score, so the sp
 rule still holds on return; a same-device tab picks up another tab's reveal via a
 `storage` listener in `useRevealProgress.js`.
 
-**Four narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
-unconfigured. **Three never render or fetch a score.** Link previews (`api/og.js` + `api/preview.js` +
-`api/_lib/cards.js`) render dynamic Open Graph cards for shared deep links, failing
-safe to the static default card — ADR-0012. Multi-device reveal sync (Clerk, off
-unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's
-own devices via `api/reveal.js` + Upstash Redis, ratcheted both sides, inert if
-unconfigured — ADR-0022; its companion `api/spoiled-days.js` mirrors which DAYS the
-user consented to spoil (consent, never a mark — a per-day on/off state map, since
-that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
-consent-pop-up wording (never a score, closed registry, public-cached read,
-allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
-ADR-0025. **The fourth stores a score, by design**: the **Game Log**'s game stamps
-(`api/stamps.js` + `src/lib/stamps.js`, surfaced at `/logbook` and inside the box
-score's seal) — safe because of WHERE stamp art may render (`check-stamp-surfaces`,
-never an unrevealed-game surface), not a mint-time permission check; the server-side
-reveal gate was retired in ADR-0035's second amendment, which says why. Scope,
-naming contract, and copy voice: `docs/game-log.md`.
+**Five narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
+unconfigured. **Four never render or fetch a score.** Link previews (`api/og.js` +
+`api/preview.js` + `api/_lib/cards.js`) render dynamic Open Graph cards for shared deep
+links, failing safe to the static default card — ADR-0012. Multi-device reveal sync
+(Clerk, off unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across
+a user's own devices via `api/reveal.js` + Upstash Redis, ratcheted both sides, inert if
+unconfigured — ADR-0022; its companion `api/spoiled-days.js` mirrors which DAYS the user
+consented to spoil (consent, never a mark — a per-day on/off state map, since that one
+can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
+consent-pop-up wording (never a score, closed registry, public-cached read, allowlisted
+write) so the owner tunes it without a deploy — ADR-0025. **My Tally**'s preferences
+(`api/preferences.js` + `src/lib/account/`) mirror a CLOSED four-field set — club, level,
+keep-awake, motion — last-write-wins per FIELD, never score-derived; `api/account.js`
+erases every per-user key — ADR-0039. **The fifth stores a score, by design**: the
+**Game Log**'s game stamps (`api/stamps.js` + `src/lib/stamps.js`, at `/logbook` and
+inside the box score's seal) — safe because of WHERE stamp art may render
+(`check-stamp-surfaces`, never an unrevealed-game surface), not a mint-time check; the
+gate was retired in ADR-0035's second amendment. Naming/voice: `docs/game-log.md`.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

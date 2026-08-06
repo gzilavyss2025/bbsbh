@@ -5,6 +5,8 @@ import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
+import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
+import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
 import {
   parseRoute,
   gamePath,
@@ -39,6 +41,19 @@ const StampsCloudSync = isClerkEnabled
   ? lazy(() =>
       import('./components/sync/StampsCloudSync.jsx').then((m) => ({
         default: m.StampsCloudSync,
+      })),
+    )
+  : null
+
+// Headless cross-device sync for the My Tally preference document — the club,
+// the slate's level, keep-awake, motion. Same shape as the two above: imports
+// @clerk/clerk-react at its top, so it is only ever dynamically imported and
+// only on a deploy that configures Clerk. App-wide because the level is changed
+// on the slate and the club from the header, which are different screens.
+const PreferencesCloudSync = isClerkEnabled
+  ? lazy(() =>
+      import('./components/sync/PreferencesCloudSync.jsx').then((m) => ({
+        default: m.PreferencesCloudSync,
       })),
     )
   : null
@@ -133,6 +148,11 @@ const GamePhotosPage = lazyNamed(
   () => import('./screens/GamePhotosPage.jsx'),
   'GamePhotosPage',
 )
+// My Tally — the private settings/account destination. Clerk-free at its top
+// level on purpose: the page has to render, whole, on a deploy that configures
+// no account at all, so everything that touches @clerk/clerk-react sits behind
+// its own dynamic import one level down (see screens/profile/ProfilePage.jsx).
+const ProfilePage = lazyNamed(() => import('./screens/profile/ProfilePage.jsx'), 'ProfilePage')
 // Scorecard Lab deliberately contains full-reveal code. It is available only
 // in development and is omitted from the production module graph.
 const ScorecardLab = import.meta.env.DEV
@@ -168,6 +188,8 @@ function currentUrl() {
 // Every section of every game is a real, shareable URL; the back button walks
 // the steps.
 export default function App() {
+  // Applies the saved motion preference to <html>. One mount, app-wide.
+  useMotionPreference()
   const [route, setRoute] = useState(() => parseRoute(currentUrl()))
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.
@@ -236,6 +258,11 @@ export default function App() {
     content = <FoulTrackerPage />
   } else if (route.name === 'admin') {
     content = <AdminCopyPage onBack={() => go('/')} />
+  } else if (route.name === 'profile') {
+    // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
+    // are settings, and every one of them works on this device with no account
+    // at all. The account section is the only part that appears or disappears.
+    content = <ProfilePage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {
@@ -333,27 +360,39 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
-      {SpoiledDaysCloudSync && (
-        <Suspense fallback={null}>
-          <SpoiledDaysCloudSync />
-        </Suspense>
-      )}
-      {StampsCloudSync && (
-        <Suspense fallback={null}>
-          <StampsCloudSync />
-        </Suspense>
-      )}
-      <Suspense
-        fallback={
-          <div className="app">
-            <div className="screen">
-              <Loader />
+      {/* Mounted unconditionally — it touches no Clerk API of its own, and the
+          sync receipt has to be able to say "this deploy has no account
+          feature" rather than rendering nothing. It is an external store, so
+          a sync report re-renders only what reads the status, never this
+          subtree. */}
+      <SyncStatusProvider enabled={isClerkEnabled}>
+        {SpoiledDaysCloudSync && (
+          <Suspense fallback={null}>
+            <SpoiledDaysCloudSync />
+          </Suspense>
+        )}
+        {StampsCloudSync && (
+          <Suspense fallback={null}>
+            <StampsCloudSync />
+          </Suspense>
+        )}
+        {PreferencesCloudSync && (
+          <Suspense fallback={null}>
+            <PreferencesCloudSync />
+          </Suspense>
+        )}
+        <Suspense
+          fallback={
+            <div className="app">
+              <div className="screen">
+                <Loader />
+              </div>
             </div>
-          </div>
-        }
-      >
-        <div className="app">{content}</div>
-      </Suspense>
+          }
+        >
+          <div className="app">{content}</div>
+        </Suspense>
+      </SyncStatusProvider>
     </NavProvider>
   )
 }

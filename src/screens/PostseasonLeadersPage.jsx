@@ -5,7 +5,7 @@ import {
 } from '../api/postseasonLeaders.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
