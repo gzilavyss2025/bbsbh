@@ -67,10 +67,19 @@ const BUDGETS = {
   // 51 -> 52 for the pregame Innings board. This remains in the numbered
   // cascade because the exception above explicitly preserves that ordering.
   'src/styles': 52,
-  'src/api': 83,
+  // +1 for gamehighlights.js — the thin static-file reader for the per-team
+  // highlight archives, sibling to the live-fetch highlights.js already here.
+  // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
+  'src/api': 84,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
-  scripts: 67,
+  // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
+  // generator and its hand-run backfill, the same pair-of-files shape as
+  // gen-rookies.mjs/gen-rookies-backfill.mjs already here. Every gen-*.mjs in
+  // this repo sits flat in scripts/ (only shared helpers live in scripts/lib,
+  // where this pair's shared body does go), so nesting these two alone would
+  // split the generator catalog rather than subdivide it.
+  scripts: 69,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
