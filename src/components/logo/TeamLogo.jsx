@@ -28,7 +28,7 @@ export function TeamLogo({
   // `crop={true}` is the square "vibe" treatment below. `crop="bar"` is the
   // SectionMasthead treatment: the mark stretches to the full height of its
   // `.metricbar`, cancelling that bar's own vertical padding to bleed edge to
-  // edge, with 5% clipped off its own top and bottom (see the CSS partial) —
+  // edge, with 7% clipped off its own top and bottom (see the CSS partial) —
   // `size` is unused in this mode since the bar's height, not a pixel prop,
   // drives it.
   crop = false,

@@ -33,8 +33,8 @@
    partial gives it an explicit height and bleeds it to the masthead's full
    height — see that partial for why it's an explicit height and not
    align-self: stretch). This rule just owns the overflow clip and, on the
-   <img>, the aspect-correct sizing plus the 5%-top/5%-bottom crop
-   (111.12% = 100% / 0.9 — the extra height overflows the wrapper equally on
+   <img>, the aspect-correct sizing plus the 7%-top/7%-bottom crop
+   (116.28% = 100% / 0.86 — the extra height overflows the wrapper equally on
    both edges and gets clipped). */
 .teamlogo-crop-bar {
   display: inline-flex;
@@ -42,7 +42,7 @@
   overflow: hidden;
 }
 .teamlogo--crop-bar {
-  height: 111.12%;
+  height: 116.28%;
   width: auto;
   object-fit: contain;
 }
