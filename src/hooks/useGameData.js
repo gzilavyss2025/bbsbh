@@ -56,7 +56,7 @@ const FOLLOW_POLL_MS = 15 * 1000
 
 // Sticky "has `active` ever been true for the current `resetKey`" flag — lets
 // a fetch start lazily on first visit to its consuming surface (winProb: the
-// innings view or the box score; highlights: the innings view — see below),
+// innings view or the box score; highlights: either one too — see below),
 // then behave exactly like every other feed-derived fetch in this hook: fired
 // once, cached, and immune to a later visit toggling the surface off and back
 // on (navigating from the box score back to a lineup page must not drop

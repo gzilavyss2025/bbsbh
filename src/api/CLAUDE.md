@@ -84,7 +84,17 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
   the innings view specifically, its only consumer), but `highlightsByPlayId`
   is only ever called inside `HalfInning`'s `SealBox` reveal function.
-  Degrades to `[]` on failure or off-MLB.
+  Degrades to `[]` on failure or off-MLB. `eligibleHighlightForPlay(items,
+  playId)` is the SECOND consumer of that join and reveal-only in the same
+  sense — one play's clip for the box score's Play of the Game card, gated by
+  `isEligibleForPositiveFilter` so an `abs`/`challenge` review can't anchor a
+  card claiming "the best play" (the per-play button deliberately shows ANY
+  clip). It requires no significance tag: the play is picked by this app's own
+  WPA ranking, and requiring MLB's tag on top measured out at 57% of games
+  losing a button that had a real matched clip. The card's `playId` comes from
+  `boxscore.js`'s `computePlayOfTheGame` — see its `playIdForWinProbEntry` for
+  why the join reads the FEED by `about.atBatIndex` rather than the win-prob
+  entry's own (pruned-away) `playEvents`.
   Also holds the highlights **cascade**'s pure classification —
   `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
   `highlightPoster` — which is NOT reveal-only: it's plain data transform over
