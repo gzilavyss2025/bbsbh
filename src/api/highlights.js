@@ -35,6 +35,33 @@ export function highlightsByPlayId(items) {
   return map
 }
 
+// The clip for ONE named play, gated for the box score's Play of the Game card
+// (BoxScore.jsx). Same `guid === playId` join as highlightsByPlayId above, but
+// a direct lookup rather than a whole map — this card asks about exactly one
+// play — plus the cascade's eligibility gate below.
+//
+// The gate is the difference from PlayByPlay's per-play button, which
+// deliberately shows ANY clip for a revealed play regardless of sign. This
+// card is specifically claiming "the best play", so a clip the positive filter
+// excludes — an abs/challenge review whose sign can't be recovered, an
+// interview, an injury exit — must not anchor it. It does NOT additionally
+// require a significance tag: the play is already picked by WPA, by this app's
+// own ranking rather than by MLB's tagging, and requiring their tag on top was
+// measured to suppress the button on 57% of games (25 of 44 sampled) that have
+// a real, correctly-matched clip of the picked play. See
+// .scratch/highlights-cascade/issues/02-box-score-potg-watch.md.
+//
+// Reveal-only, exactly like highlightsByPlayId: a clip's title, description
+// and poster all narrate the play's outcome, so call this only from inside a
+// SealBox's reveal render function, never at render top-level or in an eager
+// useMemo (ADR-0001).
+export function eligibleHighlightForPlay(items, playId) {
+  if (!playId) return null
+  const item = (items ?? []).find((i) => i?.guid === playId)
+  if (!item) return null
+  return isEligibleForPositiveFilter(classifyHighlight(item)) ? item : null
+}
+
 // ---------------------------------------------------------------------------
 // Classification (the highlights CASCADE — team/player rails, not the per-play
 // join above). See .scratch/highlights-cascade/PRD.md + issues/01-data-layer.md.

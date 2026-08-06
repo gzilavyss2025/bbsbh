@@ -282,12 +282,16 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   // wiring: nothing here is rendered until highlightsByPlayId is called
   // inside that reveal, so a poll landing mid-game is still spoiler-safe.
   // The fetch is safe to start eagerly (a raw fetch result produces no DOM on
-  // its own), but its only consumer is the innings view's SealBox reveal, so
-  // it waits for that view to actually be opened (`useEverActive`), same
-  // reasoning as `winProb` above; the 5-minute poll below is a no-op while
-  // inactive. Resolves [] on failure or off-MLB (most MiLB games carry no
-  // clips).
-  const highlightsActive = useEverActive(activeStep === 2, game.gamePk)
+  // its own), but its consumers are both behind a seal, so it waits for one of
+  // their views to actually be opened (`useEverActive`), same reasoning as
+  // `winProb` above; the 5-minute poll below is a no-op while inactive.
+  // Resolves [] on failure or off-MLB (most MiLB games carry no clips).
+  //
+  // TWO consumers now, so the gate matches winProb's exactly: the innings
+  // view's per-play Watch buttons (step 2) and the box score's Play of the
+  // Game card (step 3), which looks up the one clip for its WPA-picked play
+  // inside its own SealBox reveal render.
+  const highlightsActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
   const highlights = useAsync(
     () => (feed && highlightsActive ? fetchHighlights(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), highlightsActive],
