@@ -715,11 +715,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         )}
       </div>
 
-      <SiteFooter
-        onShowLogos={onShowLogos}
-        favoriteTeamId={favoriteTeamId}
-        onSetFavoriteTeam={setFavoriteTeam}
-      />
+      <SiteFooter onShowLogos={onShowLogos} />
 
       {showWelcome && (
         <FavoriteTeamModal

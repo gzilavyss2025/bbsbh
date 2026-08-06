@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useStamps } from '../../hooks/useStamps.js'
 import { stampsToPublish } from '../../lib/stamps.js'
+import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
@@ -57,9 +59,15 @@ import { stampsToPublish } from '../../lib/stamps.js'
 // sitting on one device forever. That module's header has the full argument;
 // the short version is that a change log can't describe a collection that never
 // changed, and a comparison can.
+// The `report(...)` calls below are new and change no behaviour: every catch
+// block stays exactly where it was, still swallows, and still leaves
+// localStorage authoritative. They only stop it being SILENT — which is how
+// ADR-0022's total production failure hid for weeks, and what My Tally's sync
+// receipt exists to make visible.
 export function StampsCloudSync() {
   const { isSignedIn, getToken } = useAuth()
   const { stamps, mergeRemoteStamps } = useStamps()
+  const report = useSyncReport()
 
   // What the server held as of the last successful pull. Starts null for "we
   // have not heard from the server yet", which suppresses publishing entirely —
@@ -73,6 +81,7 @@ export function StampsCloudSync() {
   const pull = useCallback(async () => {
     if (pulling.current) return
     pulling.current = true
+    report('stamps', 'pulling')
     try {
       const token = await getToken()
       // The whole collection in one call rather than a season at a time: the
@@ -81,7 +90,10 @@ export function StampsCloudSync() {
       const res = await fetch('/api/stamps?export=1', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        report('stamps', phaseForResponse(res.status), { reason: reasonForResponse(res.status) })
+        return
+      }
       const data = await res.json()
       if (!Array.isArray(data?.stamps)) return
       // The endpoint returns a list joined against the shared facts cache;
@@ -112,14 +124,16 @@ export function StampsCloudSync() {
       // the server actually has.
       known.current = remote
       mergeRemoteStamps(remote)
+      report('stamps', 'synced')
     } catch {
       // Offline / unauthorized / store not configured on this deploy — local
       // state stands, which is the whole offline-first contract. `known` keeps
       // its previous value, so nothing publishes against a guess.
+      report('stamps', 'error', { reason: 'network' })
     } finally {
       pulling.current = false
     }
-  }, [getToken, mergeRemoteStamps])
+  }, [getToken, mergeRemoteStamps, report])
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -127,10 +141,11 @@ export function StampsCloudSync() {
       // possibly as a DIFFERENT user — must not publish this device's stamps
       // against the previous account's baseline.
       known.current = null
+      report('stamps', 'local')
       return
     }
     pull()
-  }, [isSignedIn, pull])
+  }, [isSignedIn, pull, report])
 
   // A phone and a laptop are both open; the phone stamps a game. Without this,
   // the laptop shows the old collection until someone reloads it — which is the
@@ -181,6 +196,7 @@ export function StampsCloudSync() {
       try {
         token = await getToken()
       } catch {
+        report('stamps', 'error', { reason: 'auth' })
         return
       }
       const auth = { Authorization: `Bearer ${token}` }
@@ -206,11 +222,13 @@ export function StampsCloudSync() {
             // A failed publish costs this device nothing — its own local state
             // is already correct, and the next change (or another device's next
             // sign-in fetch) reconciles.
+            report('stamps', 'error', { reason: 'network' })
           }
         }),
       )
+      report('stamps', 'synced')
     })()
-  }, [isSignedIn, getToken, stamps])
+  }, [isSignedIn, getToken, stamps, report])
 
   return null
 }

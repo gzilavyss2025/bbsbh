@@ -1,6 +1,6 @@
 # My Tally — the private account & profile experience
 
-**Status:** phase 2 of 5 complete (spec + preference/sync foundation) · **Slug:** `my-tally` · **Route:** `/profile`
+**Status:** phase 3 of 5 complete (spec + preference/sync foundation + the My Tally page) · **Slug:** `my-tally` · **Route:** `/profile`
 **Branch:** `claude/my-tally-account-experience` · **Based on:** `origin/main` @ `bda26c6` (rebased)
 
 The user-facing destination is **My Tally**. Subtitle: **"Profile & settings."**
@@ -1077,3 +1077,182 @@ real Vercel deploy and are pre-existing.
 - `scripts/check-dir-size.mjs` — `src/hooks` tightened 21 → 19. Phase 3 must not
   loosen it; `src/screens/profile/` and `src/components/profile/` are why the
   page's parts go in subdirectories.
+
+---
+
+## 12. Phase 3, as built
+
+Phase 3 (the My Tally page itself) is complete: `npm run lint`, `npm test`,
+`npm run build` and the full `npm run e2e` suite all pass, and the page is
+verified in a real browser at 320px, 390px and 1280px (§12.6).
+
+### 12.1 Deliberate departures from §§4–6
+
+Recorded rather than silently absorbed, the way §11.1 does for phase 2.
+
+1. **The reusable club picker is `src/components/account/ClubPicker.jsx`, not a
+   part of `ClubSection.jsx`.** §4.3 said "the favourite-team strip itself moves
+   into `ClubSection.jsx` and is shared with the intro's step 1" — but that puts
+   a component `src/components/account/FavoriteTeamModal.jsx` needs inside
+   `src/screens/`, inverting the dependency direction every other shared piece
+   in this app follows. It lives in `components/account/` instead, and **both**
+   hosts render it today (the modal was refactored onto it in this phase), so
+   there is exactly one club strip. Phase 4 imports it as-is — see HANDOFF.md
+   for the props.
+2. **`ClubPicker` takes `teams` as a PROP and fetches nothing.** Its two hosts
+   want different sources and that is not an accident: `/profile` reads the
+   same-origin static club file (`fetchStaticTeams`, `src/api/teams-static.js`),
+   because a page whose whole promise is "no game data" should issue no request
+   to statsapi at all — which is also the thing
+   `e2e/invariants/profile-no-scores.spec.js` can actually assert. The intro
+   modal keeps its existing live-with-static-fallback loader
+   (`fetchTeams(SPORT_IDS.MLB)`), so nothing about first-visit behaviour changed.
+3. **The stylesheet is TWO partials, `52-my-tally.css` and
+   `53-my-tally-account.css`.** §6.4 planned one. One file came to 751 lines and
+   `check-file-size.mjs` refused it at 600 — correctly. Split by subject, not by
+   size: 52 is the page a signed-out visitor sees in full, 53 is the part that
+   only means anything once an account exists. `src/styles` budget 51 → 53.
+4. **`check-stamp-surfaces.mjs` gained a forbidden-DIRECTORY list with a
+   NARROWER identifier set**, rather than two more entries in
+   `FORBIDDEN_SURFACES`. Two reasons. A directory covers every file added later
+   without anyone remembering to name it. And the existing list forbids
+   `useStamps` as well as the art — which My Tally legitimately needs, because it
+   COUNTS your collection ("14 stamps in your Game Log") and offers to export it.
+   A count is not a score, and a local stamp record has never held one
+   (ADR-0035: the Logbook resolves facts at render time). So the profile
+   directories forbid `GameStamp` and `StampGameButton` only, and §7's P4 —
+   which names exactly those two — is satisfied literally.
+5. **The three remaining sync reporters were wired in phase 3, not phase 2.**
+   §8's phase-2 table lists `{Reveal,SpoiledDays,Stamps}CloudSync.jsx` as
+   "report into the status context from the existing `catch` blocks"; only
+   `PreferencesCloudSync` actually shipped one. Without the other three the
+   receipt would have rendered four rows of "on this device" to a signed-in
+   user — a lie, from the exact seam built to stop the app lying about sync. No
+   behaviour change: every catch block stays where it was and still swallows.
+6. **`MergeReceipt` renders on `/profile` only.** §5.3 also wanted a one-line
+   strip on the slate when the sign-in happened elsewhere. The card is built and
+   triggered; the slate strip is deferred (it is a `GameSelect` edit, and phase 4
+   is already opening that file for prompt 3). See HANDOFF.md.
+7. **The page-level scope word comes from the `prefs` channel, not from
+   `rollupSync` over all four.** §11.4's mapping table assumed every channel
+   reports. `RevealCloudSync` mounts inside `InningViewer`, so on `/profile` the
+   `reveal` channel has never spoken and is still sitting on
+   `initialSyncState`'s opening phase — which `rollupSync` (worst channel wins)
+   would turn into "This device." for a signed-in user. `ProfilePage`'s
+   `normalizeStatus` gives a channel that has never reported (`at == null`, since
+   `report()` always stamps a clock) the account's own phase, and its PHASE only,
+   never a `syncedAt` — so nothing claims a "last checked" it never had. Read
+   that function's header before touching the receipt.
+8. **The Scores Unlocked row offers the same-day withdrawal** ("Re-seal today"),
+   which §7's P3 explicitly permits. It offers nothing else: no standing
+   opt-out, no default-on, nothing that pre-consents a future day. The e2e spec
+   asserts that absence as well as the presence.
+
+### 12.2 Files, as landed
+
+**New — the page:**
+
+| File | What it owns |
+|---|---|
+| `src/screens/profile/ProfilePage.jsx` | the shell, the masthead, `normalizeStatus`, and every hook read the sections need |
+| `src/screens/profile/sections/ClubSection.jsx` | Baseball — club + level |
+| `src/screens/profile/sections/DeviceSection.jsx` | Scorebook experience — Keep Awake, motion, the Scores Unlocked report |
+| `src/screens/profile/sections/LedgerSection.jsx` | the progress ledger + the Game Log door |
+| `src/screens/profile/sections/DataSection.jsx` | Sync & data — the receipt, export, clear recent searches, erase this device |
+
+**New — the components:**
+
+| File | What it owns |
+|---|---|
+| `src/components/profile/ProfileAccount.jsx` | the ONLY file here that touches Clerk; loading / signed-out / signed-in, `UserProfile routing="virtual"`, the `DELETE /api/account` caller |
+| `src/components/profile/ClubSeal.jsx` | the club-seal roundel (identity art, mono knockout — ADR-0031) |
+| `src/components/profile/DeviceHandoff.jsx` | the score-free handoff illustration |
+| `src/components/profile/SyncReceipt.jsx` | the carbon-copy slip, rendered from `SYNCED_ITEMS` |
+| `src/components/profile/ScopeBadge.jsx` | "This device." / "Every device you sign in on." |
+| `src/components/profile/MergeReceipt.jsx` | the one-shot post-sign-in card (`bbsbh:mergeReceipt:{userId}`) |
+| `src/components/profile/EraseDataDialog.jsx` | the confirm sheet for both deletion scopes |
+| `src/components/account/ClubPicker.jsx` | the one club strip, shared with the intro modal |
+
+**New — the rules, the styles, the tests:**
+
+| File | What it owns |
+|---|---|
+| `src/lib/account/localData.js` | `tallyKeysIn`, `countGamesInProgress`, `clearTallyDataIn`, `buildGameLogExport`, `gameLogFilename` |
+| `src/styles/52-my-tally.css` | the page |
+| `src/styles/53-my-tally-account.css` | the account half |
+| `test/local-data.test.js` | 11 cases |
+| `e2e/my-tally.spec.js` | 8 cases × 3 viewports |
+| `e2e/invariants/profile-no-scores.spec.js` | P4/P6 at runtime |
+
+**Edited:** `src/lib/route.js` (+`profilePath`) · `test/route.test.js` (4 cases) ·
+`src/App.jsx` (the lazy route) · `src/lib/reportPages.js` (My Tally leads the
+personal group) · `src/components/chrome/SiteFooter.jsx` (Settings navigates;
+the modal and its two props are gone) · `src/screens/GameSelect.jsx` (drops the
+two now-unused footer props) · `src/components/account/AccountButton.jsx` (the
+`UserButton.MenuItems` composition) · `src/components/account/FavoriteTeamModal.jsx`
+(renders `ClubPicker`) · `src/lib/clerkAppearance.js` (`UserProfile` element
+slots + the `manageAccount` relabel) ·
+`src/components/sync/{Reveal,SpoiledDays,Stamps}CloudSync.jsx` (the reporters) ·
+`src/index.css` (two `@import`s) · `scripts/check-stamp-surfaces.mjs` (the
+forbidden directories) · `scripts/check-dir-size.mjs` (`src/styles` 51 → 53) ·
+`scripts/check-dead-exports.mjs` (the `useSyncStatusState` entry is gone, as
+§11.6 instructed).
+
+### 12.3 The information architecture, as shipped
+
+One page, six blocks, in this order:
+
+1. **Masthead** — club seal, `My Tally`, *Profile & settings.*, the club name,
+   the scope badge. The crest is the account identity, matching the header's
+   `UserButton` overlay, which is untouched.
+2. **Baseball** — the club picker, the level the slate opens on.
+3. **Scorebook experience** — Keep Awake, motion, and the Scores Unlocked
+   report (status + the same-day withdrawal only).
+4. **Your ledger** — games in your pencil, stamps in your Game Log, days you
+   unsealed, and the door to `/logbook`.
+5. **Sync & data** — the receipt, the last-carried line, Export your Game Log,
+   Clear recent searches, Erase this device.
+6. **Account** — absent when Clerk is unconfigured; the benefit panel + handoff
+   illustration when signed out; identity, merge receipt, Account & security
+   (Clerk's `UserProfile`), Sign out and Erase everywhere when signed in.
+
+### 12.4 The `UserButton` menu
+
+`My Tally` → `/profile`, `Game Log` → `/logbook`, then Clerk's own
+`manageAccount` and `signOut` actions, declared explicitly so the custom links
+are not simply appended after the defaults. `manageAccount` is relabelled to
+**Account & security** through `clerkLocalization`, so the menu and My Tally's
+own disclosure name the same screen the same way. Navigation is a browser
+navigation, not our History-API router — no Clerk router integration is
+configured — which is fine, because `vercel.json` rewrites every path to
+`index.html`.
+
+### 12.5 What is deliberately NOT here
+
+- **No `/profile` OG card.** Invariant P7: nothing is added to
+  `api/_lib/cards.js`, so a shared link falls through to the static default card
+  exactly as ADR-0012 specifies.
+- **No new preference field, endpoint, or merge rule.** Phase 3 consumed §11.4's
+  interface verbatim and added no data plumbing.
+- **No "always show scores" control**, in any form. P3.
+
+### 12.6 Validation run
+
+| Check | Result |
+|---|---|
+| `node --test test/local-data.test.js` | **11 pass, 0 fail** |
+| `npm test` (full CI-gated suite) | **exit 0** |
+| `npm run lint` (eslint + all 12 guards) | **exit 0** — verified by exit code, not by grep |
+| `npm run build` | **exit 0** |
+| `E2E_PORT=4170 npx playwright test` (whole suite) | **122 passed, 1 skipped, 0 failed** |
+| Browser, production build on `:4170`, 320 / 390 / 1280px | no layout shift, no overflow, no console error |
+
+The browser pass confirmed the four things unit tests cannot: the club seal's
+mono knockout reads on the navy disc at every width; the masthead stacks below
+360px rather than crushing the club name against the seal; the erase sheet
+focuses "Keep my data" first; and `/profile` issues **zero** requests to
+`statsapi.mlb.com` for its whole lifetime.
+
+**Signed-in paths remain unverifiable locally** — no `VITE_CLERK_PUBLISHABLE_KEY`
+on this machine, the same gap ADR-0026 records. See HANDOFF.md's open threads for
+the curl probes and exactly what to watch on the first real sign-in.

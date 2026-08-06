@@ -147,6 +147,11 @@ const GamePhotosPage = lazyNamed(
   () => import('./screens/GamePhotosPage.jsx'),
   'GamePhotosPage',
 )
+// My Tally — the private settings/account destination. Clerk-free at its top
+// level on purpose: the page has to render, whole, on a deploy that configures
+// no account at all, so everything that touches @clerk/clerk-react sits behind
+// its own dynamic import one level down (see screens/profile/ProfilePage.jsx).
+const ProfilePage = lazyNamed(() => import('./screens/profile/ProfilePage.jsx'), 'ProfilePage')
 // Scorecard Lab deliberately contains full-reveal code. It is available only
 // in development and is omitted from the production module graph.
 const ScorecardLab = import.meta.env.DEV
@@ -250,6 +255,11 @@ export default function App() {
     content = <FoulTrackerPage />
   } else if (route.name === 'admin') {
     content = <AdminCopyPage onBack={() => go('/')} />
+  } else if (route.name === 'profile') {
+    // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
+    // are settings, and every one of them works on this device with no account
+    // at all. The account section is the only part that appears or disappears.
+    content = <ProfilePage />
   } else if (route.name === 'player') {
     content = <PlayerPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team') {

@@ -76,6 +76,24 @@ const FORBIDDEN_SURFACES = [
 ]
 const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 
+// Whole DIRECTORIES where no stamp ART may render — every file beneath them,
+// present and future, so a surface added later is covered without anyone
+// remembering to name it.
+//
+// My Tally (/profile) is here because it makes exactly the promise this guard
+// protects: it renders no game data at all. It never loads a feed, never
+// resolves a game fact, and must never draw a stamp — a stamp IS a final score.
+//
+// The identifier set is narrower than FORBIDDEN_IDENTIFIERS above ON PURPOSE:
+// `useStamps` is permitted here and nowhere else on this list, because My Tally
+// COUNTS your collection ("14 stamps in your Game Log") and offers to export
+// it. A count of your own things is not a score — it is the same class of fact
+// as the reveal mark itself — and a local stamp record has never held a score
+// anyway (ADR-0035: the Logbook resolves those at render time). What is
+// forbidden is the ART, which is the thing that carries a result.
+const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile']
+const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton']
+
 function sourceFiles(dir) {
   const out = []
   for (const entry of readdirSync(dir)) {
@@ -141,6 +159,28 @@ for (const surface of FORBIDDEN_SURFACES) {
   }
 }
 
+// --- 4: the forbidden directories -----------------------------------------
+for (const dir of FORBIDDEN_ART_DIRS) {
+  const inDir = files.filter((file) => rel(file).startsWith(`${dir}/`))
+  if (inDir.length === 0) {
+    // Renamed or removed. Say so rather than silently passing — same reason the
+    // named-but-missing branch above exists.
+    problems.push(`${dir}/ is named in this guard's forbidden-directory list but holds no source files.`)
+    continue
+  }
+  for (const file of inDir) {
+    const src = stripComments(readFileSync(file, 'utf8'))
+    for (const identifier of FORBIDDEN_ART_IDENTIFIERS) {
+      if (new RegExp(`\\b${identifier}\\b`).test(src)) {
+        problems.push(
+          `${rel(file)} references ${identifier}. ${dir}/ renders no game data at ` +
+            `all — a stamp there is a final score on a page that promises none.`,
+        )
+      }
+    }
+  }
+}
+
 if (problems.length) {
   console.error(
     '\n✗ Logbook stamp containment guard failed. A game stamp carries a final\n' +
@@ -157,5 +197,6 @@ if (problems.length) {
 }
 
 console.log(
-  '✓ Logbook stamp containment holds — GameStamp.jsx and StampGameButton.jsx are imported only from their allowlists.',
+  '✓ Logbook stamp containment holds — GameStamp.jsx and StampGameButton.jsx are imported only from their allowlists, ' +
+    `and ${FORBIDDEN_ART_DIRS.length} no-game-data directories name neither.`,
 )

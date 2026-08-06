@@ -30,6 +30,7 @@ import {
   logbookPath,
   logbookStatsPath,
   logbookPlacePath,
+  profilePath,
 } from '../src/lib/route.js'
 
 // --------------------------------------------------------------------------
@@ -390,4 +391,45 @@ test('an unknown Logbook sub-segment still falls back to the bare page', () => {
   // 'stats' is matched by name, not by "non-numeric", so every other mangled
   // link keeps the old forgiving behavior instead of 404-ing.
   assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null, placing: null })
+})
+
+// --------------------------------------------------------------------------
+// parseRoute — /profile (My Tally)
+// --------------------------------------------------------------------------
+
+test('/profile is My Tally, and its path builder round-trips', () => {
+  assert.deepEqual(parseRoute('/profile'), { name: 'profile' })
+  assert.equal(profilePath(), '/profile')
+  assert.deepEqual(parseRoute(profilePath()), { name: 'profile' })
+})
+
+// The neighbours it sits among in the ordered single-segment list. None of them
+// is a prefix of 'profile' and 'profile' is a prefix of none of them, but the
+// list is order-sensitive by design (its own header says so), so pin it rather
+// than trusting a reading of the file.
+test('/profile collides with none of its single-segment neighbours', () => {
+  assert.deepEqual(parseRoute('/photos'), { name: 'photos' })
+  assert.deepEqual(parseRoute('/postseason-history'), { name: 'postseason-history' })
+  assert.deepEqual(parseRoute('/postseason-leaders'), { name: 'postseason-leaders' })
+  assert.deepEqual(parseRoute('/prospects'), { name: 'prospects' })
+})
+
+// There is deliberately no '/profile/{sub}' — sections live on the one page, and
+// Clerk's <UserProfile> is mounted routing="virtual" so it never asks this
+// parser for a wildcard. A stale or hand-typed sub-path must degrade to the
+// slate rather than throwing or resolving as a game (date='profile').
+test('an unknown /profile sub-segment degrades to the slate rather than a game', () => {
+  assert.deepEqual(parseRoute('/profile/security'), { name: 'home' })
+  assert.deepEqual(parseRoute('/profile/x/y'), {
+    name: 'game',
+    date: 'profile',
+    matchup: 'x',
+    section: 'y',
+  })
+})
+
+// A query string is not part of this route's identity — `?nointro` rides along
+// on every e2e URL (e2e/fixtures.js) and must not change what parses.
+test('/profile ignores a query string', () => {
+  assert.deepEqual(parseRoute('/profile?nointro'), { name: 'profile' })
 })

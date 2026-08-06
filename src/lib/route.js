@@ -22,6 +22,7 @@
 //   '/standings'                        -> { name: 'standings' }
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
+//   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
 //   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
@@ -122,6 +123,15 @@ export function parseRoute(url) {
   // production visit renders the (locked) panel rather than falling through to
   // the generic game route.
   if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
+  // My Tally — the page that reports on YOU rather than on baseball: the club
+  // you follow, how this device behaves, what an account carries between them.
+  // Deliberately ONE address with sections on it, not '/profile/{sub}': a
+  // sub-route would make this parser grow a wildcard it has never needed, and
+  // would force Clerk's <UserProfile> into path routing (it owns its own
+  // sub-navigation), which is why that component is mounted routing="virtual".
+  // A stray '/profile/x' therefore falls through to the slate, same forgiving
+  // shape as every other unknown second segment here.
+  if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
@@ -370,6 +380,12 @@ export function logbookStatsPath() {
 // `?place=` note in parseRoute for why this is a query rather than a route.
 export function logbookPlacePath(gamePk) {
   return `/logbook?place=${Number(gamePk)}`
+}
+// My Tally. A fixed address with no parameters — same reasoning as /logbook
+// (docs/game-log.md §2): the URL outlives any redirect we would maintain, so it
+// never changes even if the destination is renamed again.
+export function profilePath() {
+  return '/profile'
 }
 export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`

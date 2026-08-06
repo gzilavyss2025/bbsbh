@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { GameFinderModal } from '../game/GameFinderModal.jsx'
-import { FavoriteTeamModal } from '../account/FavoriteTeamModal.jsx'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { useNav } from '../../lib/nav.js'
 import { REPORT_PAGES } from '../../lib/reportPages.js'
+import { profilePath } from '../../lib/route.js'
 import { BuildStamp } from '../ui/BuildStamp.jsx'
 
 // Same REPORT_PAGES list the hamburger menu (SiteMenu.jsx) uses, plus About
@@ -14,14 +14,18 @@ const FOOTER_LINKS = [...REPORT_PAGES, { label: 'About', path: '/about' }]
 const YEAR = new Date().getFullYear()
 
 // The slate's footer: the past-matchup finder (tucked behind a modal so its
-// two team pickers + results don't have to live inline), the Settings modal
-// (favorite team, see FavoriteTeamModal.jsx), the printable logo sheet, and
-// the standard small print. Site-wide player/team
+// two team pickers + results don't have to live inline), Settings, the
+// printable logo sheet, and the standard small print. Site-wide player/team
 // search used to live here as two boxes; it's now the single header search
 // button (see SiteSearch.jsx), reachable from every screen rather than just
-// the slate. Nothing here is score-revealing — the favorite-team pick
-// surfaces identity and schedule only, same as every other spoiler-free
-// selector.
+// the slate. Nothing here is score-revealing.
+//
+// **Settings is a destination now, not a modal.** It used to open
+// FavoriteTeamModal in a second, non-intro mode holding one control. It
+// navigates to `/profile` (My Tally) instead, where the club sits with the
+// level, keep-awake, motion, the progress ledger, the sync receipt and the
+// account — none of which fit a one-purpose sheet. The modal survives for the
+// first-visit intro only (GameSelect).
 //
 // Bordered-button chrome is reserved for the three things you actually DO on
 // this screen (open Settings, look up a past matchup, print the logo sheet);
@@ -30,13 +34,8 @@ const YEAR = new Date().getFullYear()
 // for primary actions, plain text for the rest of a sitemap-style list) —
 // rather than all thirteen sharing one identical bold uppercase box regardless
 // of how often anyone actually taps it.
-export function SiteFooter({
-  onShowLogos,
-  favoriteTeamId,
-  onSetFavoriteTeam,
-}) {
+export function SiteFooter({ onShowLogos }) {
   const [showFinder, setShowFinder] = useState(false)
-  const [showFavoriteTeam, setShowFavoriteTeam] = useState(false)
   const navigate = useNav()
 
   return (
@@ -45,7 +44,7 @@ export function SiteFooter({
         <button
           type="button"
           className="sitefooter__action"
-          onClick={() => setShowFavoriteTeam(true)}
+          onClick={() => navigate(profilePath())}
         >
           Settings
         </button>
@@ -78,14 +77,6 @@ export function SiteFooter({
       </div>
 
       {showFinder && <GameFinderModal onClose={() => setShowFinder(false)} />}
-
-      {showFavoriteTeam && (
-        <FavoriteTeamModal
-          favoriteTeamId={favoriteTeamId}
-          onSave={onSetFavoriteTeam}
-          onClose={() => setShowFavoriteTeam(false)}
-        />
-      )}
 
       <div className="sitefooter__legal">
         <p className="sitefooter__brand">

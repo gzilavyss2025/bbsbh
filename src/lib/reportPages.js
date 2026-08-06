@@ -10,10 +10,15 @@
 // Order is "current-season and busiest first, archival/meta last": live
 // standings/leaders/fouls (what's happening now) → player-
 // trajectory pages (prospects/rehab/milestones) → the deeper-cut umpire
-// stats → season-culminating history → the three personal/unsealed pages
-// (Logbook, this device's own stamped games — ADR-0035; My First Scorebook, a
-// retrospective; Game Photos, an unsealed CDN photo finder — see route.js and
-// root CLAUDE.md's spoiler section), always last.
+// stats → season-culminating history → the four personal/unsealed pages
+// (My Tally, your club + this device + your account — /profile, which renders
+// no game data at all; Logbook, this device's own stamped games — ADR-0035;
+// My First Scorebook, a retrospective; Game Photos, an unsealed CDN photo
+// finder — see route.js and root CLAUDE.md's spoiler section), always last.
+//
+// My Tally leads that personal group on purpose: it is the destination the
+// slate footer's "Settings" button now opens, so it is the one a reader is
+// most likely to be looking for by name.
 //
 // Two pages are deliberately NOT in this shared list, each for its own
 // screen: Logo Sheet ('/logos') is one of the footer's three bordered
@@ -35,6 +40,7 @@ export const REPORT_PAGES = [
   { label: 'Trade Deadline', path: '/trade-deadline' },
   { label: 'All Star Game', path: '/all-star-rosters' },
   { label: 'All-Star Legacy', path: '/all-star-legacy' },
+  { label: 'My Tally', path: '/profile' },
   { label: 'Game Log', path: '/logbook' },
   { label: 'My First Scorebook', path: '/first-scorebook' },
   { label: 'Game Photos', path: '/photos' },

@@ -70,7 +70,6 @@ const ALLOWLIST = {
   'src/lib/milbColors.js#MILB_COLORS': 'Re-exported on purpose ("so every existing MiLB caller ... still has one import for \'MiLB colors\'") even though every current caller happens to import it from brandColors.js instead. Kept open as the intended single entry point.',
   'src/lib/milbColors.js#MILB_RESEARCHED_PAIRS': 'Same re-export as MILB_COLORS above, same file, same rationale.',
   'src/lib/wpa/wpaBandColors.js#WPA_PLOT_SIZE': 'Declared "exported so Team Identity Lab\'s WPA preview can render its tile pattern at TRUE size" — the lab does not currently read it (comment may be ahead of the wiring), flagged for a maintainer to confirm rather than deleted blind.',
-  'src/components/sync/SyncStatusProvider.jsx#useSyncStatusState': 'The READING half of the sync-status seam, landed with its four reporters (phase 2 of the My Tally program) ahead of the surface that renders it — /profile\'s sync receipt, phase 3. Deliberately staged rather than merged into phase 3: the reporters are useless without a defined reader, and defining it here is what makes the shape reviewable next to the code that feeds it. DELETE THIS ENTRY when SyncReceipt.jsx lands.',
 }
 
 function walk(dir, out = []) {

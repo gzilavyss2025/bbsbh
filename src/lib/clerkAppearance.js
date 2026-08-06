@@ -38,6 +38,19 @@ export const clerkAppearance = {
     footerActionLink: 'tally-cl-link',
     userButtonPopoverCard: 'tally-cl-card',
     userButtonPopoverActionButton: 'tally-cl-menuitem',
+    // <UserProfile routing="virtual" />, mounted inside My Tally's account
+    // section (/profile). Extended HERE rather than passed as a second
+    // appearance object at that call site, so the sign-in modal, the
+    // UserButton popover and the profile card stay ONE visual system — a
+    // second object is how two Clerk surfaces drift apart.
+    rootBox: 'tally-cl-root',
+    cardBox: 'tally-cl-cardbox',
+    navbar: 'tally-cl-navbar',
+    navbarButton: 'tally-cl-navbtn',
+    pageScrollBox: 'tally-cl-page',
+    profileSectionTitleText: 'tally-cl-sectiontitle',
+    profileSectionPrimaryButton: 'tally-cl-link',
+    formButtonReset: 'tally-cl-link',
   },
 }
 
@@ -57,5 +70,12 @@ export const clerkLocalization = {
       title: 'Create your Tally account',
       subtitle: 'Your reveal progress follows you to every device — never a score',
     },
+  },
+  // The account menu's own item, renamed so it says the same thing My Tally's
+  // disclosure says. Clerk's default is "Manage account"; what the screen behind
+  // it actually holds is email, connected accounts, passkeys, active devices
+  // and account deletion — security, not settings, which live on /profile.
+  userButton: {
+    action__manageAccount: 'Account & security',
   },
 }

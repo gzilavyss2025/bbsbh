@@ -3,7 +3,7 @@ import { fetchTeams } from '../../api/schedule.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { PINNED_TEAM_ID, SPORT_IDS } from '../../lib/teams.js'
-import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { ClubPicker } from './ClubPicker.jsx'
 
 // Same lazy gate as GameSelect/SiteHeader: AccountPitch imports
 // @clerk/clerk-react at its top, so it's never fetched — let alone rendered —
@@ -13,11 +13,17 @@ const AccountPitch = isClerkEnabled
   ? lazy(() => import('./AccountPitch.jsx').then((m) => ({ default: m.AccountPitch })))
   : null
 
-// Settings modal, shared by the first-visit welcome flow (GameSelect, `intro`)
-// and the footer's "Settings" button: the favorite-team picker. It reuses the
-// Splits vs Team card's tray/strip styling (vsteam__* — see index.css) rather
-// than a new one: the same finger-scrollable row of every MLB club's logo,
-// grayscaled except the pick.
+// The first-visit welcome modal (GameSelect, `intro`): the favorite-team
+// picker plus the spoiler promise. Its strip is `ClubPicker`, shared verbatim
+// with My Tally's Baseball section, which reuses the Splits vs Team card's
+// tray/strip styling (vsteam__* — see src/styles/) rather than a new one.
+//
+// The footer's "Settings" button USED to open this in a second, non-intro mode.
+// It now navigates to `/profile` (My Tally), where the club sits alongside the
+// level, keep-awake, motion, the progress ledger and the account — a modal was
+// never the right shape for a settings page. The `intro={false}` branch is
+// still here because phase 4 of that program rebuilds this dialog into the
+// two-step intro; it has no caller in the meantime.
 //
 // Tapping a club applies it immediately (no separate Save step), and closing
 // by any route — backdrop tap, the X, Escape, or (in `intro` mode) the "Get
@@ -51,23 +57,6 @@ export function FavoriteTeamModal({
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selId])
-
-  // Keep the selected club centered in the strip, same behavior as the
-  // player page's Splits vs Team picker (SplitsVsTeam.jsx): scroll the
-  // strip's own scrollLeft (not scrollIntoView, which would also scroll the
-  // page/modal) so the pick is centered both on open — the Brewers default
-  // sits mid-alphabet — and after every subsequent tap.
-  const stripRef = useRef(null)
-  const activeRef = useRef(null)
-  useEffect(() => {
-    const strip = stripRef.current
-    const btn = activeRef.current
-    if (!strip || !btn) return
-    strip.scrollTo({
-      left: btn.offsetLeft - strip.clientWidth / 2 + btn.clientWidth / 2,
-      behavior: 'smooth',
-    })
-  }, [selId, teams.length])
 
   // Dialog focus contract, same as GameFinderModal/LogoModal: focus moves to
   // the close button on open and back to the trigger on close.
@@ -124,32 +113,10 @@ export function FavoriteTeamModal({
               : 'Choose a different favorite team.'}
           </p>
 
-          <div className="vsteam__tray">
-            <div
-              className="vsteam__strip"
-              role="tablist"
-              aria-label="Favorite team"
-              ref={stripRef}
-            >
-              {teams.map((t) => {
-                const active = t.id === selId
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    title={t.name}
-                    ref={active ? activeRef : null}
-                    className={`vsteam__team${active ? ' is-active' : ''}`}
-                    onClick={() => pick(t.id)}
-                  >
-                    <TeamLogo teamId={t.id} name={t.name} size={36} />
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          {/* The one club strip in the app — shared verbatim with My Tally's
+              Baseball section (components/account/ClubPicker.jsx), so the
+              two pickers cannot drift. */}
+          <ClubPicker teams={teams} value={selId} onPick={pick} ariaLabel="Favorite team" />
         </section>
 
         {AccountPitch && (

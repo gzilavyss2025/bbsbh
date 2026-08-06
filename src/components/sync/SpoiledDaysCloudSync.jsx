@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 import { dayStatesToPublish } from '../../lib/spoiledDays.js'
+import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
+import { useSyncReport } from './SyncStatusProvider.jsx'
 
 // Headless — renders nothing, only runs the effects. Only ever mounted when
 // isClerkEnabled (see clerkConfig.js), so useAuth() always has a ClerkProvider
@@ -51,9 +53,15 @@ import { dayStatesToPublish } from '../../lib/spoiledDays.js'
 // keeps a day the merge itself removed from being echoed back at the server that
 // sent it. That replaces the old `merging` flag, which had to suppress the whole
 // publish pass — including the backfill the merge is the trigger for.
+// The `report(...)` calls below are new and change no behaviour: every catch
+// block stays exactly where it was, still swallows, and still leaves
+// localStorage authoritative. They only stop it being SILENT — which is how
+// ADR-0022's total production failure hid for weeks, and what My Tally's sync
+// receipt exists to make visible.
 export function SpoiledDaysCloudSync() {
   const { isSignedIn, getToken } = useAuth()
   const { spoiledDays, mergeRemoteDays } = useScoresUnlocked()
+  const report = useSyncReport()
 
   // What the server held as of the last successful pull. Starts null for "we have
   // not heard from the server yet", which suppresses publishing entirely —
@@ -73,16 +81,24 @@ export function SpoiledDaysCloudSync() {
       // against the previous account's baseline.
       known.current = null
       seen.current = null
+      report('spoiledDays', 'local')
       return undefined
     }
     let cancelled = false
     ;(async () => {
+      report('spoiledDays', 'pulling')
       try {
         const token = await getToken()
         const res = await fetch('/api/spoiled-days', {
           headers: { Authorization: `Bearer ${token}` },
         })
-        if (!res.ok || cancelled) return
+        if (!res.ok) {
+          report('spoiledDays', phaseForResponse(res.status), {
+            reason: reasonForResponse(res.status),
+          })
+          return
+        }
+        if (cancelled) return
         const data = await res.json()
         if (cancelled || !data?.days || typeof data.days !== 'object') return
         // Baseline BEFORE the merge: the publish effect below fires on the state
@@ -92,16 +108,18 @@ export function SpoiledDaysCloudSync() {
         // previous account's map.
         known.current = data.days
         mergeRemoteDays(data.days)
+        report('spoiledDays', 'synced')
       } catch {
         // Offline / unauthorized / store not configured on this deploy — local
         // state stands, which is the whole offline-first contract. `known` keeps
         // its previous value, so nothing publishes against a guess.
+        report('spoiledDays', 'error', { reason: 'network' })
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [isSignedIn, getToken, mergeRemoteDays])
+  }, [isSignedIn, getToken, mergeRemoteDays, report])
 
   // Publish what the server is missing.
   useEffect(() => {
@@ -125,7 +143,7 @@ export function SpoiledDaysCloudSync() {
     ;(async () => {
       try {
         const token = await getToken()
-        await Promise.all(
+        const replies = await Promise.all(
           changes.map((change) =>
             fetch('/api/spoiled-days', {
               method: 'POST',
@@ -137,12 +155,19 @@ export function SpoiledDaysCloudSync() {
             }),
           ),
         )
+        const failed = replies.find((r) => !r.ok)
+        report(
+          'spoiledDays',
+          failed ? phaseForResponse(failed.status) : 'synced',
+          failed ? { reason: reasonForResponse(failed.status) } : {},
+        )
       } catch {
         // A failed publish costs this device nothing — its own local state is
         // already correct, and the next pull's comparison finds these again.
+        report('spoiledDays', 'error', { reason: 'network' })
       }
     })()
-  }, [isSignedIn, getToken, spoiledDays])
+  }, [isSignedIn, getToken, spoiledDays, report])
 
   return null
 }

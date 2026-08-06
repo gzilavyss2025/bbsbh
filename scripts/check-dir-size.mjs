@@ -64,7 +64,15 @@ const BUDGETS = {
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
-  'src/styles': 51,
+  //
+  // 51 -> 53 for `52-my-tally.css` + `53-my-tally-account.css`: /profile's own
+  // rules, imported after the logbook/passport partials because they borrow
+  // those motifs (the stamp roundel, the kraft seal). TWO partials rather than
+  // one because a single file crossed check-file-size.mjs's 600-line ceiling —
+  // split by subject (52 is the page a signed-out visitor sees in full, 53 is
+  // the part that only means anything once an account exists), which is what
+  // "put new code elsewhere" MEANS in a directory that cannot nest.
+  'src/styles': 53,
   'src/api': 83,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
