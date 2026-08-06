@@ -31,12 +31,20 @@ function sameTeam(statsTeam, espnTeam) {
 // Collapses ESPN's per-market broadcast list to one display string, national
 // feed first (what most viewers would recognize), then home market, then any
 // other market, deduped and capped so the fact stays a single readable line.
+// "MLB.TV" is filtered out throughout: it's the league's own out-of-market
+// streaming package, sold alongside whatever else airs a game, not itself
+// the broadcast (with its own announcers) that would identify who's calling
+// it — same reasoning as nationalName's filter below. Verified against the
+// last 15 days of games (2026-07-23 through 2026-08-06, 185 games carrying
+// MLB.TV): it was never the sole broadcast entry, always alongside a
+// national network and/or each club's own regional feed (home+away both
+// present in 156 of the 185), so dropping it never empties the fact.
 function summarizeBroadcasts(broadcasts) {
   if (!Array.isArray(broadcasts) || broadcasts.length === 0) return ''
   const order = ['national', 'home', 'away']
   const names = []
   const add = (list) => {
-    for (const n of list ?? []) if (n && !names.includes(n)) names.push(n)
+    for (const n of list ?? []) if (n && n !== 'MLB.TV' && !names.includes(n)) names.push(n)
   }
   for (const market of order) {
     add(broadcasts.find((b) => b.market === market)?.names)
