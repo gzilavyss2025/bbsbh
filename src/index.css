@@ -23,6 +23,7 @@
 @import './styles/09-team-info.css';
 @import './styles/10-lineup.css';
 @import './styles/11-innings.css';
+@import './styles/11-pregame-scoreboard.css';
 @import './styles/12-sealbox.css';
 @import './styles/13-play-by-play.css';
 @import './styles/14-strike-zone.css';
@@ -63,6 +64,7 @@
 @import './styles/49-passport-book.css';
 @import './styles/50-logbook-landing.css';
 @import './styles/51-similar-players.css';
-@import './styles/52-my-tally.css';
-@import './styles/53-my-tally-account.css';
-@import './styles/54-my-tally-intro.css';
+@import './styles/52-highlight-clip-card.css';
+@import './styles/54-my-tally.css';
+@import './styles/55-my-tally-account.css';
+@import './styles/56-my-tally-intro.css';

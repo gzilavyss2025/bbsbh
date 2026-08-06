@@ -1,0 +1,244 @@
+/* Pregame Innings state — a hand-set ballpark scoreboard rather than a generic
+   empty-state illustration. Wrigley's manual-board construction supplies the
+   grammar (green steel, painted type, replaceable number plates); every color
+   remains Tally's own scorebook palette. The digits deliberately have NO
+   transition or animation: changing once a second is already motion, and a
+   repeated mechanical flip would turn craft into distraction. */
+.pregameboard {
+  max-width: var(--app-width);
+  margin: var(--space-6) auto var(--space-5);
+  text-align: center;
+}
+
+.pregameboard__board {
+  position: relative;
+  margin-top: var(--space-8);
+  padding: var(--space-8) var(--space-4) var(--space-5);
+  border: var(--bw-heavy) solid var(--field);
+  border-radius: var(--radius-xs);
+  background-color: var(--field-deep);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--field) 24%, transparent) var(--bw-hair), transparent var(--bw-hair)),
+    linear-gradient(90deg, color-mix(in srgb, var(--field) 18%, transparent) var(--bw-hair), transparent var(--bw-hair));
+  background-size: 100% 22px, 28px 100%;
+  color: var(--surface-inset);
+  box-shadow: var(--shadow-raised), var(--inset-cell);
+}
+
+.pregameboard__board::before,
+.pregameboard__board::after {
+  content: '';
+  position: absolute;
+  top: var(--space-2);
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--seal-cover);
+}
+
+.pregameboard__board::before {
+  left: var(--space-3);
+}
+
+.pregameboard__board::after {
+  right: var(--space-3);
+}
+
+.pregameboard__clock {
+  position: absolute;
+  top: calc(var(--space-5) * -1);
+  left: 50%;
+  width: var(--space-10);
+  height: var(--space-10);
+  border: var(--bw-heavy) solid var(--surface-inset);
+  border-radius: var(--radius-pill);
+  background: var(--field-deep);
+  transform: translateX(-50%);
+  box-shadow: var(--shadow-card);
+}
+
+.pregameboard__clock::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  transform: translate(-50%, -50%);
+}
+
+.pregameboard__clockhour,
+.pregameboard__clockminute {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: var(--bw-heavy);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  transform-origin: 50% 100%;
+}
+
+.pregameboard__clockhour {
+  height: var(--space-3);
+  transform: translateX(-50%);
+}
+
+.pregameboard__clockminute {
+  height: var(--space-4);
+  transform: translateX(-50%) rotate(120deg);
+}
+
+.pregameboard__teams,
+.pregameboard__lead,
+.pregameboard__status,
+.pregameboard__meta {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+
+.pregameboard__teams {
+  margin: 0;
+  padding-bottom: var(--space-4);
+  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--surface-inset) 60%, transparent);
+  font-size: var(--fs-label);
+}
+
+.pregameboard__lead {
+  margin: var(--space-4) 0 var(--space-3);
+  font-size: var(--fs-label);
+}
+
+.pregameboard__countdown {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-1);
+}
+
+.pregameboard__unit {
+  min-width: 0;
+}
+
+.pregameboard__plate {
+  display: grid;
+  place-items: center;
+  min-height: 86px;
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--field-deep) 72%, var(--text-heading));
+  border-radius: var(--radius-xs);
+  background:
+    linear-gradient(transparent 49%, color-mix(in srgb, var(--field-deep) 78%, var(--text-heading)) 49% 52%, transparent 52%),
+    linear-gradient(var(--field), var(--field-deep));
+  color: var(--surface-inset);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-xl);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-solid);
+  box-shadow: var(--inset-cell);
+}
+
+.pregameboard__plate--wide {
+  font-size: var(--fs-hero-lg);
+}
+
+.pregameboard__unitlabel {
+  display: block;
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+
+.pregameboard__colon {
+  padding-top: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+
+.pregameboard__message {
+  display: grid;
+  place-items: center;
+  min-height: 86px;
+  margin: 0;
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--field-deep) 72%, var(--text-heading));
+  border-radius: var(--radius-xs);
+  background: linear-gradient(var(--field), var(--field-deep));
+  color: var(--surface-inset);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  box-shadow: var(--inset-cell);
+}
+
+.pregameboard__status {
+  display: inline-block;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-2) var(--space-4);
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--marker) 70%, var(--text-heading));
+  border-radius: var(--radius-xs);
+  background: var(--marker);
+  color: var(--text-heading);
+  font-size: var(--fs-caption);
+}
+
+.pregameboard__meta {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: var(--bw-hair) solid color-mix(in srgb, var(--surface-inset) 60%, transparent);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+}
+
+.pregameboard__meta p {
+  margin: 0;
+}
+
+.pregameboard__meta p + p {
+  margin-top: var(--space-1);
+  color: var(--field-soft);
+}
+
+.pregameboard__title {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.pregameboard__detail {
+  margin: var(--space-2) var(--space-4) 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+}
+
+@media (max-width: 370px) {
+  .pregameboard__board {
+    padding-right: var(--space-3);
+    padding-left: var(--space-3);
+  }
+
+  .pregameboard__plate {
+    min-height: 72px;
+    font-size: var(--fs-display-md);
+  }
+
+  .pregameboard__plate--wide {
+    font-size: var(--fs-hero-sm);
+  }
+
+  .pregameboard__colon {
+    padding-top: var(--space-4);
+    font-size: var(--fs-num-lg);
+  }
+}

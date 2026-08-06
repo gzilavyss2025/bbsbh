@@ -64,21 +64,31 @@ const BUDGETS = {
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
+  // 51 -> 52 for `11-pregame-scoreboard.css`: the pregame Innings board's
+  // first-pitch countdown, sharing the `11-` prefix with `11-innings.css`
+  // (the two are siblings, not a renumbering) rather than appending at the
+  // cascade's end — same "new reusable component earns a partial" reasoning
+  // as the entry above, just inserted next to the file it extends.
+  // 52 -> 53 for `52-highlight-clip-card.css`: HighlightClipCard.jsx's rules,
+  // shared by TeamHighlightsRail and PlayerHighlightsRail (both cascade
+  // issues 03/04) — same reasoning as the entry above, appended at the end.
   //
-  // 51 -> 53 for `52-my-tally.css` + `53-my-tally-account.css`: /profile's own
+  // 53 -> 55 for `54-my-tally.css` + `55-my-tally-account.css`: /profile's own
   // rules, imported after the logbook/passport partials because they borrow
   // those motifs (the stamp roundel, the kraft seal). TWO partials rather than
   // one because a single file crossed check-file-size.mjs's 600-line ceiling —
-  // split by subject (52 is the page a signed-out visitor sees in full, 53 is
+  // split by subject (54 is the page a signed-out visitor sees in full, 55 is
   // the part that only means anything once an account exists), which is what
-  // "put new code elsewhere" MEANS in a directory that cannot nest.
+  // "put new code elsewhere" MEANS in a directory that cannot nest. Numbered
+  // 54/55 rather than 52/53 because `52-highlight-clip-card.css` claimed that
+  // slot first (both landed the same day, written in parallel).
   //
-  // 53 -> 54 for `54-my-tally-intro.css`: the two-step first-visit intro's own
+  // 55 -> 56 for `56-my-tally-intro.css`: the two-step first-visit intro's own
   // rules (phase 4). Its own partial rather than growing 08-site-shell.css
   // (already near ITS OWN budget) or either My Tally partial (a different
   // subject — onboarding chrome, not the settings page), same "one new file,
   // one new number" rule as the entry above.
-  'src/styles': 54,
+  'src/styles': 56,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

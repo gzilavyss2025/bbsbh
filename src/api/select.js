@@ -664,7 +664,8 @@ export function selectInningCount(feed) {
   return Math.max(innings.length, scheduled)
 }
 
-// Whether the game has started at all (used for the "not started yet" state).
+// Coarse Live/Final state used by GameView's fetch and polling gates. The
+// Innings screen uses the exact boundary from playbyplay/firstPitch.js.
 export function selectHasStarted(feed) {
   const abstract = feed?.gameData?.status?.abstractGameState
   return abstract === 'Live' || abstract === 'Final'

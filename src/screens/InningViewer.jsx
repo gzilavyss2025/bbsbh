@@ -10,6 +10,7 @@ import {
   selectIsFinal,
   halfIndex,
 } from '../api/select.js'
+import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
 import { selectLiveEdge, shouldFollowLiveEdge } from '../api/liveEdge.js'
 import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
@@ -29,6 +30,7 @@ import { PitchersSection } from '../components/inning/PitchersSection.jsx'
 import { MarginNotes } from '../components/inning/MarginNotes.jsx'
 import { DefenseSection, LineupSection } from '../components/inning/EnteringReference.jsx'
 import { RosterPanel } from '../components/inning/RosterPanel.jsx'
+import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
@@ -190,6 +192,7 @@ export function InningViewer({
   // MiLB roster/lineup surface here, not a second ROOKIE claim (see
   // showRookiePill, api/rookies.js).
   const isMlb = (meta.away.sportId ?? 1) === 1
+  const firstPitchThrown = useMemo(() => selectHasFirstPitch(feed), [feed])
 
   // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
   // between-half-innings notice on the affected half's page. Almost always empty.
@@ -589,19 +592,17 @@ export function InningViewer({
     [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
 
-  if (!started) {
+  if (!firstPitchThrown) {
     return (
       <div className="innings">
         {cloudSync}
         {/* Keep the LINEUPS / INNINGS / BOX tabs on screen pre-game — a deep
             link straight to an innings URL (e.g. /…/top1) lands here, and
             without the nav there'd be no way to reach the lineup/box pages
-            the hint points at (only the browser Back button). */}
+            while the scoreboard is waiting for first pitch (only the browser
+            Back button). */}
         {sectionNav && <div className="inningchrome">{sectionNav}</div>}
-        <p className="hint hint--prose">
-          This game hasn’t started yet. Lineups and info are on the previous
-          pages; inning totals appear once first pitch is thrown.
-        </p>
+        <PregameScoreboard feed={feed} />
         <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>
     )

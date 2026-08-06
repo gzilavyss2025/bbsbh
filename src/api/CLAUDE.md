@@ -84,7 +84,17 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
   the innings view specifically, its only consumer), but `highlightsByPlayId`
   is only ever called inside `HalfInning`'s `SealBox` reveal function.
-  Degrades to `[]` on failure or off-MLB.
+  Degrades to `[]` on failure or off-MLB. `eligibleHighlightForPlay(items,
+  playId)` is the SECOND consumer of that join and reveal-only in the same
+  sense — one play's clip for the box score's Play of the Game card, gated by
+  `isEligibleForPositiveFilter` so an `abs`/`challenge` review can't anchor a
+  card claiming "the best play" (the per-play button deliberately shows ANY
+  clip). It requires no significance tag: the play is picked by this app's own
+  WPA ranking, and requiring MLB's tag on top measured out at 57% of games
+  losing a button that had a real matched clip. The card's `playId` comes from
+  `boxscore.js`'s `computePlayOfTheGame` — see its `playIdForWinProbEntry` for
+  why the join reads the FEED by `about.atBatIndex` rather than the win-prob
+  entry's own (pruned-away) `playEvents`.
   Also holds the highlights **cascade**'s pure classification —
   `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
   `highlightPoster` — which is NOT reveal-only: it's plain data transform over
@@ -93,7 +103,13 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   `content` payload, and the FILTER POLICY must have exactly one home (a second
   copy is how a rail and its generator drift apart). Field names and the
   taxonomy vocabulary were verified live over 1,150 clips / 41 games; see
-  `.scratch/highlights-cascade/`.
+  `.scratch/highlights-cascade/`. `highlightPlaybacks` accepts either the raw
+  `content` item's `playbacks` array OR an already-resolved `{hls, mp4}`
+  object — the shape a highlights-cascade team/player file stores per clip
+  (the generator calls this function once at write time and keeps the
+  result) — so `HighlightSheet.jsx` can stay the one consumer for both the
+  box score's raw per-play item and a rail's precomputed clip, with neither
+  rail re-deriving playback URLs by hand.
 - `gamehighlights.js` — the reader half of the cascade: the static per-team
   archive `scripts/gen-highlights.mjs` precomputes
   (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
@@ -103,7 +119,21 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   to drift; a caller's only job on top is identity scoping (the player rail
   keeps `clip.playerId === personId` from his CURRENT team's file). Decided
   games only, so not a spoiler surface. Degrades to `{ games: [] }`, cached per
-  team for the session.
+  team for the session. `flattenPositiveClips(data)` is the shared shaping step
+  both rails call on top of a fetch result — flattens `games[].clips[]` into
+  one OLDEST-first list, each clip annotated with its `gamePk`/`date`, so both
+  rails' newest-at-right scroll anchor (PRD's "Rail ordering") lands at the end
+  of the array with no separate reverse step, and the two rails can only ever
+  differ in which clips they keep after this call, never in how they unpack
+  the file. Both rails also render the same `HighlightClipCard`
+  (`src/components/highlights/`) for each clip — purely presentational, no
+  fetching of its own — so a clip object only ever needs shaping once, here,
+  regardless of which rail is reading it. `highlightPlaybacks`
+  (`highlights.js` above) also had to grow a second branch for this cascade —
+  a shipped clip's `playbacks` field is already the resolved `{hls, mp4}`
+  object the generator wrote, not the raw MLB array of named sources
+  `HighlightSheet.jsx`'s box-score caller passes, so the function now accepts
+  either shape rather than a rail needing to re-derive playback URLs itself.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface. **`currentTeam` is not a roster

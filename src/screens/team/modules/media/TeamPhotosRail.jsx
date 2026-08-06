@@ -1,5 +1,5 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
-import { fetchGamePhotos, photosForTeam, onlyPhotographer } from '../../../api/gamePhotos.js'
+import { fetchGamePhotos, photosForTeam, onlyPhotographer } from '../../../../api/gamePhotos.js'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,

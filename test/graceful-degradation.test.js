@@ -28,6 +28,7 @@ import {
   dayWord,
   entryIndexById,
 } from '../src/api/select.js'
+import { selectHasFirstPitch } from '../src/api/playbyplay/firstPitch.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, computeGameSuperlatives } from '../src/api/derive.js'
 import { computePitcherLines } from '../src/api/pitchers.js'
@@ -65,6 +66,7 @@ const SELECTORS = {
   selectRegulationInnings,
   selectInningCount,
   selectHasStarted,
+  selectHasFirstPitch,
   selectIsFinal,
   selectSkippedBottomHalf: (f) => selectSkippedBottomHalf(f, 9),
   selectGameStatus,
