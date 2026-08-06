@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umpire Tendencies — visual mock</title>
+<style>
+/* Token values copied from src/tokens/colors.css — this is a static mock, not
+   wired to the real stylesheet. The shipped component uses var(--…). */
+:root{
+  --paper-0:#F6EFDC; --paper-1:#F3ECD8; --paper-2:#FBF6E9; --paper-3:#FFFDF6;
+  --ink-0:#16222F; --ink-1:#1B2A3A; --ink-2:#3C4A5A;
+  --graphite:#6B6558; --graphite-soft:#938C7C;
+  --rule:#CBC1A7; --rule-soft:#DED6C0;
+  --clay:#B4453A; --clay-deep:#8E332B; --navy:#1B2A3A;
+  --seal:#B5824A; --seal-ink:#1E1405; --marker:#E9C33F;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 16px 48px;background:var(--paper-0);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color:var(--ink-1);text-transform:uppercase;
+  display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start}
+.wrap{width:340px}
+.note{width:100%;max-width:1080px;text-transform:none;color:var(--graphite);
+  font-size:13px;line-height:1.6;margin:0 auto 4px;text-align:center}
+.note b{color:var(--ink-1)}
+
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+  overflow:hidden;box-shadow:0 1px 0 rgba(22,34,47,.06),0 6px 18px rgba(22,34,47,.07)}
+
+/* 1 — masthead */
+.mast{background:var(--navy);color:var(--paper-2);padding:9px 14px;
+  font-size:12px;font-weight:700;letter-spacing:.14em;text-align:center;
+  border-bottom:3px solid var(--seal)}
+
+/* 2 — identity */
+.id{display:flex;gap:11px;align-items:center;padding:13px 14px;
+  border-bottom:1px solid var(--rule-soft)}
+.crest{width:38px;height:38px;flex:none;border-radius:3px;background:var(--navy);
+  display:grid;place-items:center;color:var(--paper-2);font-size:9px;
+  font-weight:700;letter-spacing:.06em;line-height:1.1;text-align:center}
+.id__name{font-size:19px;font-weight:800;letter-spacing:.02em;color:var(--ink-0);line-height:1.1}
+.id__sub{font-size:10.5px;letter-spacing:.09em;color:var(--graphite);margin-top:3px}
+.pill{display:inline-block;margin-left:7px;vertical-align:2px;font-size:9px;
+  font-weight:700;letter-spacing:.08em;padding:2px 6px;border-radius:9px;
+  border:1px solid var(--rule);background:var(--paper-3);color:var(--ink-2)}
+
+/* 3 — the scale */
+.scale{display:flex;gap:11px;padding:14px 14px 11px}
+.ramp{width:12px;flex:none;border-radius:6px;border:1px solid var(--rule);
+  background:linear-gradient(to bottom,var(--navy) 0%,var(--graphite-soft) 50%,var(--clay) 100%)}
+.bands{flex:1;display:flex;flex-direction:column;gap:3px}
+.band{position:relative;padding:6px 9px;font-size:10.5px;letter-spacing:.08em;
+  color:var(--graphite);border-radius:4px;border:1px solid transparent}
+.band--on{background:var(--paper-3);border-color:var(--rule);
+  color:var(--ink-0);font-weight:700}
+.band--on::before{content:"";position:absolute;left:-15px;top:50%;
+  width:9px;height:2px;background:var(--ink-0);transform:translateY(-50%)}
+.band--on.is-hit{box-shadow:inset 3px 0 0 var(--clay)}
+.band--on.is-pit{box-shadow:inset 3px 0 0 var(--navy)}
+.cap{padding:0 14px 13px;font-size:10px;line-height:1.55;color:var(--graphite);
+  text-transform:none;letter-spacing:.01em;border-bottom:1px solid var(--rule-soft)}
+
+/* 4 — area to watch */
+.watch{margin:13px 14px;border:1px solid var(--seal);border-radius:4px;
+  background:repeating-linear-gradient(135deg,#F4E6CE 0 7px,#EFDDBE 7px 14px)}
+.watch__lbl{font-size:8.5px;font-weight:700;letter-spacing:.14em;
+  color:var(--seal-ink);padding:6px 10px 0}
+.watch__txt{font-size:14px;font-weight:800;letter-spacing:.03em;
+  color:var(--seal-ink);padding:2px 10px 9px}
+
+/* 5 — tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule-soft);
+  border-top:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft)}
+.tile{background:var(--paper-2);padding:11px 8px;text-align:center}
+.tile__v{display:block;font-size:22px;font-weight:800;color:var(--ink-0);
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile__l{display:block;font-size:9px;letter-spacing:.1em;color:var(--graphite);margin-top:3px}
+.tiles--four{grid-template-columns:1fr 1fr 1fr 1fr}
+.tiles--four .tile__v{font-size:18px}
+.tiles--four .tile__l{font-size:8px;letter-spacing:.06em}
+
+/* 6 — provenance */
+.prov{padding:9px 14px;font-size:9px;letter-spacing:.07em;color:var(--graphite);text-align:center}
+.phase{font-size:10px;letter-spacing:.1em;color:var(--graphite);
+  text-align:center;margin:0 0 9px;font-weight:700}
+</style>
+</head>
+<body>
+
+<p class="note">
+  <b>Umpire Tendencies — visual mock.</b> Structure follows the broadcast graphic band for band;
+  palette is the paper-scorebook system (navy ink, manila paper, kraft-amber seal).
+  Both cards show <b>Erich Bacchus' real numbers</b> from <code>public/data/umpire-accuracy.json</code>.
+  Left is Phase 1 (ships today, no data work). Right is Phase 2, after one generator change and one backfill.
+</p>
+
+<!-- ===================== PHASE 1 ===================== -->
+<div class="wrap">
+  <p class="phase">Phase 1 — ships today</p>
+  <div class="card">
+    <div class="mast">Umpire Tendencies</div>
+
+    <div class="id">
+      <div class="crest">MLB</div>
+      <div>
+        <div class="id__name">Erich Bacchus <span class="pill">Average</span></div>
+        <div class="id__sub">84 games · 21 behind the plate</div>
+      </div>
+    </div>
+
+    <div class="scale">
+      <div class="ramp"></div>
+      <div class="bands">
+        <div class="band">Very pitcher friendly</div>
+        <div class="band">Pitcher friendly</div>
+        <div class="band">Neutral</div>
+        <div class="band">Hitter friendly</div>
+        <div class="band band--on is-hit">Very hitter friendly</div>
+      </div>
+    </div>
+    <p class="cap">
+      His missed calls have handed hitters <b>0.46 runs per game</b> — about 1.6 standard
+      deviations above the league average of 0.18. Measured against the other 89 qualifying
+      plate umpires, not against zero.
+    </p>
+
+    <div class="watch">
+      <div class="watch__lbl">Area to watch</div>
+      <div class="watch__txt">Low in the zone</div>
+    </div>
+
+    <div class="tiles tiles--four">
+      <div class="tile"><span class="tile__v">93.5%</span><span class="tile__l">Accuracy</span></div>
+      <div class="tile"><span class="tile__v">51</span><span class="tile__l">of 90</span></div>
+      <div class="tile"><span class="tile__v">92.0%</span><span class="tile__l">Consistent</span></div>
+      <div class="tile"><span class="tile__v">1.5</span><span class="tile__l">Runs/game</span></div>
+    </div>
+
+    <div class="prov">2026 season · 20 scored games · updated nightly</div>
+  </div>
+</div>
+
+<!-- ===================== PHASE 2 ===================== -->
+<div class="wrap">
+  <p class="phase">Phase 2 — after backfill</p>
+  <div class="card">
+    <div class="mast">Umpire Tendencies</div>
+
+    <div class="id">
+      <div class="crest">MLB</div>
+      <div>
+        <div class="id__name">Erich Bacchus <span class="pill">Average</span></div>
+        <div class="id__sub">84 games · 21 behind the plate</div>
+      </div>
+    </div>
+
+    <div class="scale">
+      <div class="ramp"></div>
+      <div class="bands">
+        <div class="band">Very pitcher friendly</div>
+        <div class="band">Pitcher friendly</div>
+        <div class="band">Neutral</div>
+        <div class="band">Hitter friendly</div>
+        <div class="band band--on is-hit">Very hitter friendly</div>
+      </div>
+    </div>
+    <p class="cap">
+      His missed calls have handed hitters <b>0.46 runs per game</b> — about 1.6 standard
+      deviations above the league average of 0.18. Measured against the other 89 qualifying
+      plate umpires, not against zero.
+    </p>
+
+    <div class="watch">
+      <div class="watch__lbl">Area to watch</div>
+      <div class="watch__txt">Low to left-handed hitters</div>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span class="tile__v">4.1</span><span class="tile__l">Challenges/game</span></div>
+      <div class="tile"><span class="tile__v">61.0%</span><span class="tile__l">Overturn%</span></div>
+    </div>
+
+    <div class="prov">League average: 57.8% of challenges overturned</div>
+
+    <div class="tiles tiles--four">
+      <div class="tile"><span class="tile__v">93.5%</span><span class="tile__l">Accuracy</span></div>
+      <div class="tile"><span class="tile__v">51</span><span class="tile__l">of 90</span></div>
+      <div class="tile"><span class="tile__v">92.0%</span><span class="tile__l">Consistent</span></div>
+      <div class="tile"><span class="tile__v">1.5</span><span class="tile__l">Runs/game</span></div>
+    </div>
+
+    <div class="prov">2026 season · 20 scored games · updated nightly</div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:14px">
+  Phase 2's challenge figures and the handedness clause are <b>placeholders</b> — that data is not
+  on disk yet. Everything else is real. Note Bacchus reads <b>very hitter friendly</b> here where the
+  broadcast graphic called him pitcher friendly: different metric, different sample, unknown
+  methodology. See PRD §2 Band 3.
+</p>
+
+</body>
+</html>
