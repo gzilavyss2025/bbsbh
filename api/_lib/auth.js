@@ -60,24 +60,80 @@ export function authPreflight(req, env = process.env) {
   return { ok: true, token, secretKey }
 }
 
+// ---------------------------------------------------------------------------
+// WHY THE SERVER LOGS WHAT THE RESPONSE WON'T SAY
+// ---------------------------------------------------------------------------
+// `401 invalid token` is the right answer to hand a CLIENT: a caller has no
+// business learning whether it failed on a signature, an expiry, or this
+// deploy's inability to reach Clerk at all. But it was also all the SERVER
+// knew, and that is a different problem — the same one this file was written
+// to solve, one level further down.
+//
+// Production hit exactly that wall: every genuine token rejected as `invalid
+// token`, while the publishable key, the token's issuer, and the secret key
+// had each been independently verified to belong to the same Clerk instance.
+// Nothing was left to check from outside, because Clerk's own reason —
+// `token-invalid-signature` vs `token-expired` vs `jwk-remote-failed-to-load`,
+// which are three unrelated faults with three unrelated fixes — was being
+// caught and thrown away right here.
+//
+// So the reason now goes to the log, where only the operator can read it, and
+// the response is untouched. Two rules keep that safe:
+//
+//   - The token NEVER gets logged. It is a live credential; a log line is not
+//     the place for one, and the reason is what's diagnostic anyway.
+//   - The secret key is logged as its PREFIX only (`sk_live_` / `sk_test_`),
+//     which is 8 characters, secret-free, and answers the two questions that
+//     actually recur: is this the live instance or the test one, and is it
+//     even a secret key rather than a publishable key pasted into the wrong
+//     variable. That specific mix-up is easy to make — the two sit side by
+//     side in Clerk's dashboard — and impossible to see once Vercel marks the
+//     variable Sensitive and stops echoing it back.
+function keyShape(secretKey) {
+  const prefix = String(secretKey).slice(0, 8)
+  // A publishable key here is a real, seen-in-the-wild misconfiguration, so it
+  // gets named rather than reported as just another opaque prefix.
+  if (prefix.startsWith('pk_')) return `${prefix} (PUBLISHABLE KEY — belongs in VITE_CLERK_PUBLISHABLE_KEY)`
+  if (!prefix.startsWith('sk_')) return `${prefix} (not a Clerk secret key)`
+  return prefix
+}
+
+// Clerk returns `errors` as TokenVerificationError-ish objects; a thrown one
+// arrives as an Error. Reduce either to something a log line can carry.
+function failureReason(errors, caught) {
+  if (caught) return `threw: ${caught?.message ?? String(caught)}`
+  if (!Array.isArray(errors) || errors.length === 0) return 'no sub claim on a token that verified'
+  return errors
+    .map((e) => [e?.reason, e?.message].filter(Boolean).join(': ') || String(e))
+    .join(' | ')
+}
+
 // The full check. `verifyOptions` is passed through to Clerk — api/copy.js adds
-// `authorizedParties`, the others don't.
+// `authorizedParties`, the others don't. `log` is injectable so the unit suite
+// can assert on what gets reported without writing to the test runner's output.
 //
 // The try/catch is not decoration: @clerk/backend THROWS on some malformed
 // tokens rather than returning `errors`, and the previous per-file copies didn't
 // catch, so a junk Authorization header was a 500 with a stack trace instead of
 // a 401.
-export async function authenticateUser(req, { env = process.env, ...verifyOptions } = {}) {
+export async function authenticateUser(
+  req,
+  { env = process.env, log = console.error, ...verifyOptions } = {},
+) {
   const pre = authPreflight(req, env)
   if (!pre.ok) return pre
+  const reject = (errors, caught) => {
+    log(`[auth] verifyToken rejected a token — secretKey=${keyShape(pre.secretKey)} reason=${failureReason(errors, caught)}`)
+    return { ok: false, status: 401, error: INVALID_TOKEN }
+  }
   try {
     const { data, errors } = await verifyToken(pre.token, {
       secretKey: pre.secretKey,
       ...verifyOptions,
     })
-    if (errors || !data?.sub) return { ok: false, status: 401, error: INVALID_TOKEN }
+    if (errors || !data?.sub) return reject(errors, null)
     return { ok: true, userId: data.sub }
-  } catch {
-    return { ok: false, status: 401, error: INVALID_TOKEN }
+  } catch (caught) {
+    return reject(null, caught)
   }
 }
