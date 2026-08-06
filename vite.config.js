@@ -453,6 +453,13 @@ export default defineConfig({
           // opposing-starter card's pitch-mix bar and by the player page's
           // "Pitches like" card, which ranks the whole league-wide pool.
           '**/data/pitch-arsenal.json',
+          // Per-team video-highlight archives (scripts/gen-highlights.mjs) —
+          // one file per club, each growing all season. A 3-day sample already
+          // runs 6-24 KB per team, so a full season lands well past the
+          // vs-team-splits.json threshold when summed across the league, and a
+          // user browsing one club's rail needs exactly one of the 30. Read on
+          // demand by the Team hub's Games tab and the player page.
+          '**/data/highlights/*.json',
           // The precomputed one-color club marks (~150 files, ~1.7 MB all
           // told — scripts/gen-mono-logos.mjs). One game shows exactly two of
           // them, so precaching the whole league's art on every install would
@@ -490,6 +497,8 @@ export default defineConfig({
                 url.pathname,
               ) ||
               /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
+              // One video-highlight file per club, same on-demand shape.
+              /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
               // Trade Deadline is season-chunked the same way. The season list
               // itself is the hardcoded SEASONS array in api/tradeDeadline.js,
               // NOT the generated index.json — nothing in the app reads that

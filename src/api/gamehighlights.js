@@ -1,0 +1,44 @@
+// Per-team video highlights, read from a static same-origin file
+// (public/data/highlights/{teamId}.json) rather than fetched live from MLB.
+// Those files are regenerated nightly by scripts/gen-highlights.mjs (see
+// .github/workflows/update-nightly-data.yml) — this module just reads them.
+// The build-time-fetch pattern, same split as war.js (thin static reader) vs.
+// the live fetching elsewhere; see src/api/CLAUDE.md.
+//
+// Deliberately DUMB. Every filter — the abs/challenge exclusion, the non-play
+// content gate, the hand-maintained blocklist — already ran in the generator,
+// so a shipped file only ever holds clips that passed all of them and there is
+// no policy here to drift out of sync with it. The one thing a caller does on
+// top is identity scoping: PlayerHighlightsRail reads its player's CURRENT
+// team's file and keeps clips where `playerId` matches. (Consequence, accepted
+// for v1: a traded player's pre-trade clips live under his old club and so
+// don't surface on his page.)
+//
+// Not a spoiler surface: files carry DECIDED games only — the generator sweeps
+// Final games exclusively, so nothing here describes a game in progress. Each
+// game row is self-contained (gamePk, date, clips); there is no team-level
+// aggregate that could leak the existence or state of a game not in the file.
+//
+// MLB only, like the generator — a MiLB teamId simply has no file, which lands
+// on the same empty result as a team MLB hasn't clipped. Degrades to an empty
+// game list on any failure: no rail, never a broken page.
+//
+// Cached in-memory per team for the session, since a file only changes once a
+// day (mirrors war.js's module-level cache).
+const cache = new Map()
+
+export async function fetchTeamHighlights(teamId) {
+  if (!teamId) return { games: [] }
+  if (cache.has(teamId)) return cache.get(teamId)
+  let data
+  try {
+    const res = await fetch(`/data/highlights/${teamId}.json`)
+    if (!res.ok) throw new Error(`highlights/${teamId}.json ${res.status}`)
+    data = await res.json()
+  } catch {
+    data = { games: [] }
+  }
+  if (!Array.isArray(data.games)) data = { ...data, games: [] }
+  cache.set(teamId, data)
+  return data
+}
