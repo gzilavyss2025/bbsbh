@@ -17,7 +17,7 @@ departures from the spec, each with its reason). This file only carries state.
 | 1 | Specification — PRD + handoff | **done** |
 | 2 | Sync foundation — `src/lib/account/*`, `usePreferences`, `PreferencesCloudSync`, `SyncStatusProvider`, `api/preferences.js`, `api/account.js`, reveal index, unit + request-level tests | **done** |
 | 3 | The My Tally page — `/profile` route, `src/screens/profile/**`, `src/components/profile/**`, `52-my-tally.css` + `53-my-tally-account.css`, entry points, `UserButton`/`UserProfile` wiring, `EraseDataDialog`, the merge receipt, e2e | **done** |
-| 4 | Onboarding — the two-step intro, the three contextual prompts, `bbsbh:intro`, `bbsbh:prompts` | not started |
+| 4 | Onboarding — the two-step intro, the contextual prompts, `bbsbh:intro`, `bbsbh:prompts` | **done** |
 | 5 | Integration — ADR-0039, remaining CLAUDE.md updates, full lint/test/build/e2e, one PR | not started |
 
 ## Decisions locked (do not reopen without a reason in writing)
@@ -49,7 +49,47 @@ departures from the spec, each with its reason). This file only carries state.
 
 ---
 
-## What phase 4 needs, precisely
+## What phase 4 built
+
+Phase 4 (the two-step intro and the contextual prompts) is **done** — full
+detail, exact copy, trigger conditions, and the eight deliberate departures
+are in **PRD.md §13**, not repeated here. Read that section first; this file
+only carries state and pointers.
+
+Headline: `FavoriteTeamModal.jsx` is now a two-step dialog (Clerk-configured
+deploys get both steps; unconfigured deploys still see step 1 only, exactly
+as before). Three one-shot contextual prompts (`first-stamp`, `third-game`,
+`scores-unlocked-local` — the third is new, not in the original PRD §6.2
+table, added per this phase's task brief) plus the deferred merge-receipt
+slate strip are all wired and tested. `bbsbh:intro` and `bbsbh:prompts` are
+new pure modules (`src/lib/account/intro.js`, `src/lib/account/prompts.js`),
+each with a real unit suite (`test/intro.test.js`, `test/prompts.test.js`).
+
+**Everything gated on `isClerkEnabled` remains unverifiable on this
+machine** — same gap as phases 2–3, see PRD §13.5. That includes step 2 of the
+intro, the `third-game` and `scores-unlocked-local` prompts, and the
+merge-receipt strip. Each was checked by code review, by
+`e2e/intro-two-step.spec.js`'s seven cases against the unconfigured face, and
+(for `first-stamp` specifically, since it does not need Clerk to render, only
+to be REACHED — see PRD §13.2 item 3) against a throwaway local `vite` dev
+server. **Watch these on the first Clerk-configured run**, in addition to the
+five items phases 2–3 already flagged below:
+1. Step 1's primary action becomes `Continue with the {club}` and a
+   `Choose later` secondary appears; closing step 1 by any route still
+   commits the current pick.
+2. Step 2 renders: signed out, the pitch (club seal, device handoff, the
+   illustrative progress marker, the three benefit rows, `Create my Tally` /
+   `Use this device only`); signed in already (a returning visitor on a
+   cleared browser), the confirmation instead — no account pitch, no email
+   leading the copy.
+3. `ContinueScoring`'s slot, signed out with 3+ games in progress, shows the
+   `third-game` pitch; dismissing it is one-shot forever.
+4. Enabling Scores Unlocked shows the `scores-unlocked-local` note once,
+   right under the day-state chips; a page reload with the pass still active
+   must NOT re-show it (only the actual enable action fires it).
+5. Signing in elsewhere and then landing on the slate shows the
+   `MergeReceiptStrip` one-liner, which links to `/profile` and dismisses the
+   full `MergeReceipt` card too (they share one flag).
 
 ### The reusable favourite-team picker — import this, do not rebuild it
 
@@ -77,36 +117,37 @@ import { ClubPicker } from '../../components/account/ClubPicker.jsx'
 - `FavoriteTeamModal` is already refactored onto it, so **step 1 of the two-step
   intro needs no picker work at all** — only the step chrome around it.
 
-### `FavoriteTeamModal`, as phase 4 finds it
+### `FavoriteTeamModal`, as phase 4 left it
 
-- Still takes `{ favoriteTeamId, intro = false, onSave, onClose }`.
-- Its **only caller is now `GameSelect`'s welcome flow**, always with `intro`.
-  The footer's Settings button navigates to `/profile` instead, so the
-  `intro={false}` branch is live code with no caller — phase 4 either grows it
-  into step 2 or deletes it, deliberately.
-- Its header comment already says this. Update it when the two steps land.
+- **The settings-mode (`intro=false`) branch is gone.** Phase 4 took the
+  "grow it into step 2 or delete it" fork by deleting it — its only caller had
+  already moved to `/profile` in phase 3, so the branch was dead code. The
+  component now takes `{ favoriteTeamId, onSave, onClose }` — no `intro` prop
+  — and `onClose` is called with the step number (`1` or `2`) the visitor
+  exited from, purely so `bbsbh:intro` can record it (gates nothing).
+- Its only caller is still `GameSelect`'s welcome flow.
 
 ### Where prompt 4 (`settings-pitch`) already lives
 
 PRD §6.2's row 4 — "the standing benefit panel on the `/profile` account
-section, signed out" — **is built**. It is the `!isSignedIn` branch of
-`src/components/profile/ProfileAccount.jsx`: the `DeviceHandoff` illustration,
-a lede, the `SYNCED_ITEMS` claim list, `Create account or sign in`, and the
-fineprint. Phase 4 should reuse its copy rather than writing a second version,
-and should NOT add a one-shot prompt id for it (it is deliberately the one
-panel allowed to persist).
+section, signed out" — **is built** (phase 3) and **untouched by phase 4**. It
+is the `!isSignedIn` branch of `src/components/profile/ProfileAccount.jsx`:
+the `DeviceHandoff` illustration, a lede, the `SYNCED_ITEMS` claim list,
+`Create account or sign in`, and the fineprint. Phase 4's step 2 (a different
+surface, the welcome modal rather than `/profile`) reuses the same
+`SYNCED_ITEMS` ledger for its own three benefit rows, relabelled for that
+warmer moment (PRD §13.2 item 8) — deliberately not the same JSX, since the
+two panels serve different contexts, but the same underlying claims.
 
-### Two things phase 3 deliberately left for later
+### What phase 3 deliberately left for later — now closed
 
-- **The slate's merge-receipt strip** (PRD §5.3's "if the sign-in happened
-  elsewhere, a one-line strip on the slate linking to `/profile`"). The card
-  itself is built and triggered on `/profile`
-  (`src/components/profile/MergeReceipt.jsx`, one-shot per `(device, account)`
-  via `bbsbh:mergeReceipt:{userId}`). The slate strip is a `GameSelect.jsx`
-  edit, and phase 4 is already opening that file for prompt 3 — do it there or
-  hand it to phase 5, but do not build a second receipt component.
+- **The slate's merge-receipt strip** (PRD §5.3) is built —
+  `src/components/account/MergeReceiptStrip.jsx`, sharing the full card's
+  `bbsbh:mergeReceipt:{userId}` flag via the new
+  `src/lib/account/mergeReceiptFlag.js` (both `MergeReceipt.jsx` and the strip
+  import from there now; neither holds its own copy of the read/write logic).
 - **`docs/adr/0039-my-tally-preferences-document.md` and the CLAUDE.md
-  updates** are phase 5's, by PRD §8, so nothing cites an ADR that does not
+  updates** are still phase 5's, by PRD §8, so nothing cites an ADR that does not
   exist yet. The checklist is under "Phase 5's docket" below.
 
 ---
@@ -145,24 +186,59 @@ panel allowed to persist).
   works because `reuseExistingServer: true` finds the already-listening preview
   and never starts vite. Without a free dev port that is the only honest way to
   run the suite against YOUR branch rather than another worktree's.
+- **A DEV-only escape hatch (`?signedout`, `?nointro`'s sibling on `/logbook`)
+  is NOT reachable against a production preview build.** `import.meta.env.DEV`
+  is baked in at build time and is always false for `vite build`/`vite
+  preview`. Running the full e2e suite against a preview server (the only
+  option when all five dev ports are taken) therefore fails
+  `logbook-landing.spec.js` and `uniform-names.spec.js` — both pre-existing,
+  neither a regression — every time. Verify anything gated on `DEV` against a
+  real `vite` dev server instead, even a disposable one on an unreserved port
+  (e.g. `npx vite --port 5199 --strictPort`, killed after).
+- **A one-shot store's "return the same reference" contract breaks the moment
+  you scrub-then-compare.** `markPromptSeen`'s first draft called `scrub(map)`
+  unconditionally before checking `hasSeenPrompt`, so an ALREADY-dismissed
+  prompt returned a freshly-allocated (if structurally identical) object
+  instead of the original — same defect class `preserve()` in `preferences.js`
+  exists to prevent, caught here by the same test pattern
+  (`assert.equal(next, map)`, not `assert.deepEqual`). Fixed by checking
+  `hasSeenPrompt` against the RAW map first, only calling `scrub` on the path
+  that actually changes something.
+- **`LogbookAccountGate.jsx` blocks a signed-out+Clerk-enabled visitor from
+  ever reaching `LogbookCollection`'s tray** — it renders `LogbookLanding`
+  (the feature pitch) instead, unconditionally, regardless of what the local
+  collection holds. A prompt whose PRD location was "inside the tray" for
+  exactly that audience is unreachable by construction; see PRD §13.2 item 3
+  for the `first-stamp` resolution. Worth checking before placing anything
+  else inside `LogbookCollection` for a signed-out audience.
 
 ---
 
 ## Overlap check against concurrent work
 
-Re-run at `origin/main` @ `bda26c6`. **No open PRs** at the last check.
+Re-run at `origin/main` @ `81eb7d0` (one commit ahead of phase 2–3's
+`bda26c6`, an unrelated skills-folder reorg). **No open PRs** at the last
+check.
 
-- **`codex/score-unlocked-card-lab` — genuinely unmerged.** Touches
-  `src/App.jsx`, `src/lib/route.js`, `test/route.test.js`, `src/index.css`.
-  Phase 3 has now edited **all four**. Still a **soft conflict only** — both
-  sides add an independent route branch, an `App.jsx` branch, a `test/route`
-  block and an `@import`. Whichever lands second resolves four small hunks.
-- **`src/index.css`'s `@import` list** is touched by several branches and phase 3
-  appended TWO lines to it (`52-my-tally.css`, `53-my-tally-account.css`).
-  Re-check immediately before opening the PR.
-- `scripts/check-dir-size.mjs`'s `src/styles` budget is now **53**. That guard
-  cannot absorb a merge race (its own header says so) — **rebase onto `main` and
-  re-measure before merging.**
+- **`codex/score-unlocked-card-lab` — still genuinely unmerged, and now
+  visibly staler.** It touches `src/components/FavoriteTeamModal.jsx` and
+  `src/components/ContinueScoring.jsx` at their PRE-#551 paths — i.e. it
+  predates the "bucket components by feature domain" reorg that moved them to
+  `src/components/account/` and `src/components/game/`, which is itself an
+  ancestor of this branch's base. Whoever picks this branch back up is looking
+  at a directory-structure conflict on top of the four-file soft conflict
+  phase 3 already noted (`src/App.jsx`, `src/lib/route.js`, `test/route.test.js`,
+  `src/index.css`) — still not a hard conflict with THIS branch (nothing here
+  depends on `codex/`'s content existing), but worth flagging as a bigger job
+  than a four-hunk resolve by the time either side actually merges.
+- **`src/index.css`'s `@import` list** is touched by several branches. Phase 4
+  appended a third new line since phase 3 (`54-my-tally-intro.css`, after
+  `52-my-tally.css`/`53-my-tally-account.css`). Re-check immediately before
+  opening the PR.
+- `scripts/check-dir-size.mjs`'s `src/styles` budget is now **54**;
+  `scripts/check-file-size.mjs`'s `src/screens/GameSelect.jsx` budget is now
+  **1000**. Neither guard can absorb a merge race (their own headers say so)
+  — **rebase onto `main` and re-measure both before merging.**
 
 No hard conflicts.
 
@@ -198,6 +274,18 @@ No hard conflicts.
 - **`react-refresh/only-export-components`** still warns twice on
   `SyncStatusProvider.jsx`. Pre-existing shape (matches `TeamStatsCard.jsx`), not
   worth a file split.
+- **`scores-unlocked-local` cannot be exercised locally at all** (§the new
+  handoff intro above) — it is gated on `isClerkEnabled`, which is false on
+  this machine. Code-reviewed and structurally verified (the `ConsentModal`
+  confirm handler sets the trigger state; the gate correctly renders nothing
+  on this deployment), but never actually SEEN. Watch it specifically on the
+  first Clerk-configured run — see the new "What phase 4 built" section above
+  for the full first-sign-in watch-list.
+- **`bbsbh:intro`'s `step` field is written but never read back by anything.**
+  Deliberate (PRD §13.2 item 7) — it exists for a future analytics or support
+  need, not a behavioural gate. If phase 5 or a later program finds no use for
+  it within a release or two, simplifying `bbsbh:intro` back to a bare boolean
+  is a reasonable, low-risk cleanup — not a correctness fix.
 
 ---
 
@@ -213,12 +301,18 @@ No hard conflicts.
   displace something.
 - `src/CLAUDE.md` — a short section for the profile screen and the sync-status
   context: `/profile` renders no game data, the two forbidden directories, the
-  `normalizeStatus` reason, and `ClubPicker` as the one club strip.
+  `normalizeStatus` reason, and `ClubPicker` as the one club strip. Consider
+  whether it also needs a line on `src/lib/account/prompts.js`/`intro.js` as
+  the onboarding half of the same subsystem — phase 4 kept both pure-module
+  headers self-contained rather than presuming a CLAUDE.md slot, so this is a
+  judgment call, not a known gap.
 - `docs/development.md` — state explicitly that this program adds **no new env
   vars**.
-- `e2e/intro-two-step.spec.js` — phase 4's, if phase 4 does not write it.
-- Re-check `src/index.css`'s `@import` ordering and the `check-dir-size` budgets
-  against `main` immediately before opening the PR.
+- ~~`e2e/intro-two-step.spec.js` — phase 4's, if phase 4 does not write it.~~
+  **Done** — 7 cases × 3 viewports, all passing against the unconfigured face
+  of the flow. See PRD §13.6 for the signed-in gap this still carries.
+- Re-check `src/index.css`'s `@import` ordering and the `check-dir-size` /
+  `check-file-size` budgets against `main` immediately before opening the PR.
 
 ---
 
@@ -228,21 +322,35 @@ No hard conflicts.
 Branch: claude/my-tally-account-experience
 Worktree: C:\Users\gzilavy\bbsbh-my-tally-account
 PR: not opened
-Based on: origin/main at bda26c6 (rebased 2026-08-06)
-State: committed on the branch, NOT pushed. Three commits: phase 2, its rebase
-       note, and phase 3. Phase 3 touched 41 files — 17 new (5 screens, 8
-       components, localData.js, 2 CSS partials, 3 test/e2e files), the rest
-       edits. Full list in PRD §12.2.
-Validation: npm run lint (exit 0), npm test (exit 0), npm run build (exit 0),
-       node --test test/local-data.test.js (11 pass / 0 fail), and the FULL
-       Playwright suite against the production build on :4170 —
-       122 passed, 1 skipped, 0 failed, across mobile/ipad/desktop.
-Local example: http://localhost:4170/profile?nointro — `npm run preview:4`,
-       serving the phase-3 build. Not a dev server: all five reserved dev ports
-       (5169-5173) are held by other agents' worktrees. Clerk is NOT configured
-       on this machine, so that URL shows the "This device." state with the
-       account section correctly absent — which is the state the whole design
-       rests on. Also worth opening: http://localhost:4170/?nointro (the slate
-       footer's Settings button is now the way in).
+Based on: origin/main at bda26c6 (rebased 2026-08-06); origin/main has since
+       advanced to 81eb7d0 (unrelated skills-folder reorg) — rebase before
+       opening the PR (phase 5), re-measuring the check-dir-size /
+       check-file-size budgets per the overlap-check section above.
+State: committed on the branch, NOT pushed. Four commits: phase 2, its rebase
+       note, phase 3, and phase 4 (730baeb). Phase 4 touched 26 files — 11 new
+       (3 lib/account modules, 2 hooks, 2 components, 1 CSS partial, 2 unit
+       test files, 1 e2e spec), the rest edits. Full list in PRD §13.3.
+Validation: npm run lint (exit 0), npm test (1574 pass / 0 fail), npm run
+       build (exit 0), node --test test/prompts.test.js test/intro.test.js
+       (16 pass / 0 fail), and the FULL Playwright suite against the
+       production preview build on :4169 — 146 passed, 1 skipped, 31 failed,
+       across mobile/ipad/desktop. All 31 failures are pre-existing and
+       unrelated to this phase (DEV-only routes unreachable in a production
+       build, plus 4 pre-existing animation-timing cases in files this phase
+       never touched) — see PRD §13.6 for how that was confirmed three ways.
+       e2e/intro-two-step.spec.js itself (this phase's new spec, 7 cases × 3
+       viewports) passed cleanly as part of that run.
+Local example: http://localhost:4169/?nointro — `npm run preview:5`, serving
+       this phase's build. Not a dev server: all five reserved dev ports
+       (5169-5173) are held by other agents' worktrees, same as phase 3's
+       note (preview:4/:4170 back then; preview:5/:4169 now, since :4170 was
+       also taken this time). Clerk is NOT configured on this machine, so
+       clearing localStorage and reloading shows step 1 of the welcome modal
+       only ("Get started", no step 2) — the state the whole intro's
+       unconfigured branch rests on. Also worth opening (cleared storage):
+       http://localhost:4169/profile?nointro — My Tally, unchanged by this
+       phase. Screenshots of the two-step modal at 390px and 1280px were
+       taken during this phase's own verification and are not preserved
+       anywhere durable; re-take them if a visual regression is suspected.
 Cleanup: do not remove — program in progress
 ```

@@ -1256,3 +1256,234 @@ focuses "Keep my data" first; and `/profile` issues **zero** requests to
 **Signed-in paths remain unverifiable locally** — no `VITE_CLERK_PUBLISHABLE_KEY`
 on this machine, the same gap ADR-0026 records. See HANDOFF.md's open threads for
 the curl probes and exactly what to watch on the first real sign-in.
+
+---
+
+## 13. Phase 4, as built
+
+Phase 4 (onboarding — the two-step intro and the contextual prompts) is
+complete: `npm run lint`, `npm test` (1574 pass / 0 fail), and `npm run build`
+all pass, and both the intro flow and the reachable prompts are verified in a
+real browser (§13.6).
+
+### 13.1 The final copy, verbatim
+
+**Step 1** — eyebrow *"Step 1 · Your club"*, title *"Make Tally yours."*, body
+*"Choose your club. We'll pin its games—and its affiliates—to the top of every
+slate."* Selecting a club shows an inked `ClubSeal` plus *"Pinned to the top
+of every {club} slate — and every {club} affiliate, from AAA to Single-A."*
+Primary (Clerk-configured only) *"Continue with the {club}"* → step 2;
+unconfigured, *"Get started"* → closes. Secondary (Clerk-configured only)
+*"Choose later"* → closes, same as the ✕/backdrop/Escape. A fineprint line
+carries a condensed spoiler promise: *"Every run, hit, and out stays sealed
+until you tap to reveal it — the whole reason Tally exists."*
+
+**Step 2** (Clerk-configured only) — eyebrow *"Step 2 · Your scorebook"*,
+title *"Take your Tally with you."*, body *"Create a free account to keep your
+place in every game, your spoiler choices, and your Game Log together on
+every device."* Signed out: the club seal + `DeviceHandoff`, an illustrative
+progress marker (*"A game you're mid-way through waits right where you left
+it — say, through top 7 — on every device."*, nine ticks, seven filled — an
+EXAMPLE, never a result), three benefit rows sourced from
+`SYNCED_ITEMS` (relabelled *Game progress* / *Spoiler choices* / *Game Log*
+for this warmer context), primary *"Create my Tally"* (`SignUpButton`),
+secondary *"Use this device only"* (closes), fineprint repeating the
+no-public-profile / never-a-score promise. Signed in: a confirmation —
+*"You're already signed in — your {club} pick, your reveal progress, and your
+Game Log already travel with you to every device you sign in on."* — the same
+three benefit rows, one *"Continue"* action, and the email address as
+fineprint, never the lede.
+
+**Contextual prompts**, one-shot via `src/lib/account/prompts.js`
+(`bbsbh:prompts`), dismissible, triggered only after the named action:
+
+| Id | Trigger | Where | Copy |
+|---|---|---|---|
+| `first-stamp` | this device's stamp count reaches 1 | `LogbookLanding.jsx`'s hero, before the CTAs — **relocated**, see §13.2 item 3 | *"This book lives on this device. An account carries it to the others."* |
+| `third-game` | distinct `bbsbh:reveal:*` keys reach 3 | `ContinueScoring.jsx`'s own slot, signed out | *"Three games in your pencil. Sign in and they'll be waiting on your other devices too."* |
+| `scores-unlocked-local` | right after the Scores Unlocked consent-modal confirm | `GameSelect.jsx`, under the day-state chips | *"Live scores stays on this device — it won't turn on for your other signed-in devices."* — **new in phase 4**, see §13.2 item 4 |
+
+The merge-receipt slate strip (PRD §5.3's deferred pointer) is not a
+`bbsbh:prompts` entry — it shares the full card's own flag,
+`bbsbh:mergeReceipt:{userId}` (§13.2 item 5).
+
+Clerk's sign-in/sign-up subtitles now name the complete benefit (club,
+reveal progress, spoiler choices, Game Log) rather than reveal progress alone
+— `src/lib/clerkAppearance.js`'s `clerkLocalization`.
+
+### 13.2 Deliberate departures from §§6.1–6.4
+
+Recorded rather than silently absorbed, the way §11.1/§12.1 do for phases 2–3.
+
+1. **`FavoriteTeamModal`'s settings-mode (`intro=false`) branch is DELETED, not
+   grown.** HANDOFF.md left this as an explicit either/or for phase 4. Its only
+   caller disappeared in phase 3 (the footer's Settings button now navigates to
+   `/profile`), so keeping a second, unreachable rendering mode would be dead
+   code with a maintenance cost and no user. The component now takes
+   `{ favoriteTeamId, onSave, onClose }` — no `intro` prop — and has exactly
+   one purpose.
+2. **Step 1's original "welcome paragraph" (lineups/umpires/rosters/spoiler
+   promise) is not the lead copy anymore.** §6.1 said it "stays here… belongs
+   on the first screen"; this phase's task brief supplied FINAL, verbatim copy
+   for step 1's body instead (§13.1). Resolution: the exact new body copy
+   leads, and the spoiler promise survives as a condensed fineprint line below
+   the club picker rather than being dropped. Nothing about the spoiler
+   promise's CONTENT changed, only its size and position.
+3. **The `first-stamp` prompt moved from "the /logbook tray" to
+   `LogbookLanding.jsx`'s hero.** The PRD's literal location is unreachable by
+   construction: `LogbookAccountGate.jsx` renders `LogbookLanding` (the
+   feature pitch) for EVERY signed-out visitor on a Clerk-configured deploy,
+   regardless of what their local collection holds — the tray only exists
+   inside `LogbookCollection`, which that same gate never lets a signed-out
+   visitor reach. So the PRD's own gating clause ("only rendered when
+   isClerkEnabled && !isSignedIn") and its literal render location can never
+   both be true at once. Resolution: same trigger (`useStamps().all.length >
+   0`), same one-shot id, same exact copy, moved to the actual door this
+   visitor walks through — `LogbookLanding`'s hero, right before its CTAs.
+   Verified this is a real, unavoidable gate (not a misreading) by hitting
+   `/logbook?signedout` against a **production preview build**: it renders the
+   real book (`GAME LOG`), not the landing page, because the DEV-only escape
+   hatch requires `import.meta.env.DEV`, which a production build never has —
+   then confirmed against an actual `vite` dev server that the note appears,
+   reads correctly, and dismisses one-shot once a local stamp exists.
+4. **A fourth contextual prompt, `scores-unlocked-local`, was added — not in
+   §6.2's original four-row table.** The phase 4 task brief named it
+   explicitly ("After Scores Unlocked: quietly confirm whether the choice
+   follows other devices… word this honestly"), tied to invariant P2
+   (`bbsbh:scoresUnlocked` never syncs). Modelled on the other three: one-shot
+   via the same `bbsbh:prompts` store, dismissible, triggered by the actual
+   consent action (`ConsentModal`'s `onConfirm`, not by `passActive` merely
+   being true on a reload — a reload must never re-fire it). Gated on
+   `isClerkEnabled` alone, not also `!isSignedIn`: the whole point is
+   correcting an assumption an account might create, so it stays live whether
+   or not THIS device happens to be signed in.
+5. **The merge-receipt slate strip is `components/account/MergeReceiptStrip.jsx`,
+   sharing the full card's `bbsbh:mergeReceipt:{userId}` flag** (extracted to
+   `src/lib/account/mergeReceiptFlag.js`, imported by both). HANDOFF.md was
+   explicit: "do not build a second receipt component" — this is the same
+   fact rendered twice, and dismissing either dismisses both. Trigger:
+   signed in, the flag unset, and `rollupSync(status) === 'synced'` (every
+   configured channel has completed a first pull) — deliberately NOT
+   re-deriving the full card's counts on the slate, since the strip never
+   shows a number (PRD P10) and has no need of them.
+6. **`third-game` lives INSIDE `ContinueScoring.jsx` itself**, as a second
+   branch of the same component, rather than a second lazy-loaded component
+   next to it. The PRD's own framing — "the slot ContinueScoring occupies
+   when signed in… what the strip WOULD be" — describes two mutually
+   exclusive renderings of one slot, which is what one component with an
+   `isSignedIn` branch already models; a second `lazy()` import for the
+   adjacent state would cost a second Clerk-gated chunk for no behavioural
+   gain.
+7. **`bbsbh:intro`'s `step` field gates nothing**, exactly as §6.1 implies but
+   does not say outright: every exit from the intro, at either step, ends it
+   for good. `step` exists purely so the two outcomes are distinguishable
+   later (analytics, or a future support question), the same spirit as
+   `updatedAt: 0` in the preferences document.
+8. **The three step-2 benefit rows are onboarding-specific RELABELS of
+   `SYNCED_ITEMS` entries**, not new claims — `INTRO_BENEFIT_LABELS` in
+   `AccountPitch.jsx` renames `reveal`/`spoiledDays`/`stamps` to *Game
+   progress*/*Spoiler choices*/*Game Log* for this warmer moment, but the
+   blurb text and the underlying id still come from the guarded ledger, so a
+   renamed or removed id drops its row rather than inventing one. §6.3's
+   "claims are mechanical, not remembered" rule holds.
+
+### 13.3 Files, as landed
+
+**New — the pure rules (`src/lib/account/`):**
+
+| File | What it owns |
+|---|---|
+| `prompts.js` | `PROMPT_IDS`, `parsePrompts`/`serializePrompts`, `hasSeenPrompt`/`markPromptSeen` — the one-shot store behind the three contextual prompts |
+| `intro.js` | `parseIntro`/`serializeIntro`/`hasSeenIntro` — the first-visit flag that replaces the old `bbsbh:favoriteTeam`-presence proxy |
+| `mergeReceiptFlag.js` | `hasSeenMergeReceipt`/`markMergeReceiptSeen` — extracted from `MergeReceipt.jsx` so the slate strip can share the identical flag |
+
+**New — the React seam:**
+
+| File | What it owns |
+|---|---|
+| `src/hooks/preferences/usePromptDismiss.js` | one prompt id's dismissal state, over `prompts.js` |
+| `src/hooks/preferences/useIntroFlag.js` | the welcome-modal's seen/not-seen state, over `intro.js` |
+| `src/components/account/IntroPassportMark.jsx` | the decorative passport-stamp roundel (score-free, not the real stamp) |
+| `src/components/account/MergeReceiptStrip.jsx` | the slate's one-line merge-receipt pointer |
+
+**Edited:**
+
+| File | Change |
+|---|---|
+| `src/components/account/FavoriteTeamModal.jsx` | rebuilt as the two-step dialog; the settings-mode branch is gone |
+| `src/components/account/AccountPitch.jsx` | rebuilt as step 2's content (signed-out pitch + signed-in confirmation) |
+| `src/components/account/LogbookLanding.jsx` | the `first-stamp` device-scope note |
+| `src/components/game/ContinueScoring.jsx` | the `third-game` signed-out pitch branch |
+| `src/components/profile/MergeReceipt.jsx` | reads/writes through `mergeReceiptFlag.js` instead of private local functions |
+| `src/hooks/preferences/useFavoriteTeam.js` | drops `isFirstVisit`, adds `hasClubOpinion` |
+| `src/lib/clerkAppearance.js` | `clerkLocalization`'s sign-in/sign-up subtitles |
+| `src/screens/GameSelect.jsx` | `useIntroFlag` wiring, the `MergeReceiptStrip` mount, the `scores-unlocked-local` note + its trigger in the `ConsentModal` confirm handler |
+| `src/index.css` | one new `@import` |
+| `scripts/check-dir-size.mjs` | `src/styles` 53 → 54 |
+| `scripts/check-file-size.mjs` | `src/screens/GameSelect.jsx` budget 900 → 1000 |
+
+**New — styles and tests:**
+
+| File | What it owns |
+|---|---|
+| `src/styles/54-my-tally-intro.css` | the two-step intro's own rules |
+| (small additions) `03-slate-header.css`, `04-site-bar.css`, `08-site-shell.css`, `50-logbook-landing.css` | the scores-unlocked-local note, the third-game pitch, the merge strip, the first-stamp note — each within its file's existing headroom, no new budgets |
+| `test/prompts.test.js` | 11 cases |
+| `test/intro.test.js` | 5 cases |
+| `e2e/intro-two-step.spec.js` | 7 cases × 3 viewports |
+
+### 13.4 What is deliberately NOT here
+
+- **No new preference field, endpoint, or backend change.** Every prompt and
+  the intro flag are local-only, one-shot, and never synced (matching
+  `bbsbh:scoresUnlocked`'s posture) — a dismissal is a fact about this
+  browser, not the account.
+- **No permanent account banner added.** `settings-pitch` (the `/profile`
+  account section signed out) is the one panel PRD §6.2 already allows to
+  persist; nothing new joins it.
+- **No score-bearing content anywhere in this phase's surfaces.** The
+  progress marker is explicitly illustrative ("say, through top 7"); the
+  passport mark is hand-drawn geometry with no game as input; the merge strip
+  never repeats the card's counts.
+
+### 13.5 Verification gap carried forward
+
+**Signed-in paths, and everything gated on `isClerkEnabled`, remain
+unverifiable on this machine** — no `VITE_CLERK_PUBLISHABLE_KEY`, the same gap
+phases 2–3 recorded. That includes step 2 of the intro, the `third-game` and
+`scores-unlocked-local` prompts (both mounted only when `isClerkEnabled`), and
+the merge-receipt strip. Each was checked by code review, by the seven
+`intro-two-step.spec.js` cases that exercise everything the unconfigured face
+of step 1 offers, and — for `scores-unlocked-local` specifically — by driving
+the `ConsentModal` confirm path and confirming the gate (`isClerkEnabled`)
+correctly suppresses the note on this deployment rather than throwing. See
+HANDOFF.md for what to watch on the first Clerk-configured run.
+
+### 13.6 Validation run
+
+| Check | Result |
+|---|---|
+| `node --test test/prompts.test.js test/intro.test.js` | **16 pass, 0 fail** |
+| `npm test` (full CI-gated suite) | **1574 pass, 0 fail** |
+| `npm run lint` (eslint + all guards) | **exit 0** — verified by exit code, not by grep |
+| `npm run build` | **exit 0** |
+| `E2E_PORT=4169 npx playwright test` (whole suite, production preview build — all five reserved dev ports occupied by other worktrees again) | **146 passed, 1 skipped, 31 failed — all 31 pre-existing and unrelated to this phase** (see below) |
+| Browser, intro modal at 390px and 1280px (screenshot) | inked-seal reaction, benefit copy and CTA layout all render cleanly at both widths |
+
+**The 31 failures are a known, pre-existing environment gap, not a
+regression.** All 31 are `uniform-names.spec.js` (a DEV-only curation page and
+its `/__dev/*` endpoint, unreachable in a production build),
+`logbook-landing.spec.js` (the `?signedout` DEV escape hatch, same cause), and
+four pre-existing `innings-page-turn.spec.js`/`inning-modal-stacking.spec.js`
+cases in files this phase never touched. Confirmed three ways: (1)
+`git diff --stat` against this phase's base shows none of those spec files or
+`InningViewer.jsx` in the diff; (2) the commit that added
+`logbook-landing.spec.js` (`daaee36`) is an ancestor of this branch's base, so
+it already existed when phase 3 recorded "0 failed" against a production
+preview — meaning either that run predates this spec or the count was
+approximate; (3) run against a throwaway `vite` dev server (where
+`import.meta.env.DEV` is true), `logbook-landing.spec.js` passes cleanly, and
+a seeded local stamp correctly triggers and one-shot-dismisses the new
+`first-stamp` note. `npm run e2e`'s own dev-server default does not hit this
+gap at all — it is specific to verifying against `npm run preview` when every
+reserved dev port is already held.
