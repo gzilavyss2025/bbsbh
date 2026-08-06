@@ -105,8 +105,12 @@ Refresh, never across games/dates.
 
 ## UI-side spoiler enforcement
 
-The spoiler rule (root `CLAUDE.md`) is enforced structurally in these components —
-read the linked ADRs before refactoring:
+The spoiler rule governs the **scoring surfaces** (root `CLAUDE.md`): the slate's
+score cells, the two lineup pages, the innings viewer, the box score. It is
+enforced structurally in the components below — read the linked ADRs before
+refactoring. Nothing on an open surface (player and team pages, leader boards,
+standings) is gated here, and **adding a gate there is a regression, not a
+hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
 
 - **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
   only once revealed; reveal is one-directional, and re-sealing on inning
@@ -186,10 +190,10 @@ read the linked ADRs before refactoring:
   stamped-game deep link and its cached OG card, so don't. **`docs/game-log.md`**
   is the full scope: the naming contract, every display-copy location, and the
   voice rules — read it before writing any copy this feature shows.
-- **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
-  final score *plainly*, and it is safe for a structural reason rather than a
-  careful one — but the structure is **where it may render**, not a permission
-  check at mint time. The server-side reveal gate was retired in ADR-0035's
+- **The Logbook stamp** (ADR-0035) is the one thing reachable from a *scoring
+  surface* that renders a final score plainly, and it is safe for a structural
+  reason rather than a careful one — but the structure is **where it may
+  render**, not a permission check at mint time. The server-side reveal gate was retired in ADR-0035's
   second amendment (it refused the ordinary flow, for the `onReveal` reason
   below); read that before adding any mint-time evidence back.
   `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal

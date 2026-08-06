@@ -17,8 +17,12 @@ Open as a DRAFT (agent/`claude/*` branches are required to; see CLAUDE.md).
 ## Spoiler-safety
 
 <!--
-The core invariant: a score-revealing value must never exist in the DOM until
-the user reveals it (see the "spoiler rule" section of CLAUDE.md + docs/adr/).
+The core invariant, with its scope: on the SCORING surfaces (the slate's score
+cells, the lineup pages, the innings viewer, the box score) a score-revealing
+value never exists in the DOM until the user reveals it. Open surfaces — season
+and career stats, player and team pages, leader boards, standings — are not
+gated, and gating one is a regression rather than a hardening. See the "spoiler
+rule" section of CLAUDE.md + docs/adr/.
 -->
 
 - [ ] This change doesn't touch any sealed/reveal-gated game surface, **or**

@@ -13,13 +13,16 @@ intentionally lightweight.
   bugs). Describe the problem or idea and wait for a thumbs-up before
   investing time in a PR — it avoids wasted work on something that doesn't
   fit the project's direction.
-- **Read the spoiler rule.** The core invariant of this app is that a
-  score-revealing value must never exist in the DOM until the user reveals
+- **Read the spoiler rule — and its scope.** On the surfaces you score a game
+  from (the slate's score cells, the lineup pages, the innings viewer, the box
+  score) a score-revealing value never exists in the DOM until the user reveals
   it. This is enforced structurally (see the "spoiler rule" section of
   `CLAUDE.md`). Any change that touches reveal logic, `SealBox`, or the
   reveal-only API modules (`src/api/linescore.js`, `src/api/derive.js`) needs
   to preserve this invariant — read the linked ADRs in `docs/adr/` before
-  changing how those work.
+  changing how those work. Everything else opens live: season and career stats,
+  player and team pages, leader boards, standings. Don't gate one of those "for
+  safety" — a stat line is not a score, and that is a regression here.
 
 ## Development setup
 

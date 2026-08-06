@@ -26,6 +26,13 @@ spoiler-free only when restricted to the half the user has reached
 (`halfIndex <= revealedThrough + 1`). See the root `CLAUDE.md` spoiler section and
 `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010) before touching any of these.
 
+**This classification is about the SCORING surfaces only** — the slate's score
+cells, the lineup pages, the innings viewer, the box score. Most modules below
+feed OPEN surfaces instead (season and career stats, team and player pages,
+leader boards, standings), correctly need no seal at all, and say so; a season
+aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
+"no `SealBox`" on one of those as an omission waiting to be fixed.
+
 ## Core feed / selectors
 
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
@@ -361,12 +368,13 @@ for each generator; the reader modules:
   (`schedule.js`). `rosters[season]` is
   `{ AL, NL }`, each precomputed into `{ starters, bullpen, substitutes }` by the
   generator (one extra boxscore fetch per season resolves who actually started)
-  so the page renders the sections directly with no client-side grouping. This
-  is the one game surface that DOES show the final score plainly (a small
-  full-width result card, not `GameCard`) — a deliberate, narrowly-scoped
-  exception to the spoiler rule's "never print a score" invariant, since an
-  All-Star Game's result is decades-settled and carries no individual game's
-  stakes; see ADR-0019. The same card also shows `mvps[season]` (absent before
+  so the page renders the sections directly with no client-side grouping. It
+  shows each season's final score plainly (a small full-width result card, not
+  `GameCard`) — not an exception to the spoiler rule but a page outside its
+  scope, since the subject is who was NAMED to a squad and an All-Star Game's
+  result is decades-settled exhibition trivia carrying no individual game's
+  stakes; see ADR-0019, and the root `CLAUDE.md` for the scope it sits outside
+  of. The same card also shows `mvps[season]` (absent before
   1962) and `venues[season]` (a name always, plus a best-effort host-team id
   the generator resolves against the CURRENT 30 teams' home parks — an older
   or relocated venue falls back to name-only). Kept OUT of the PWA precache
@@ -550,10 +558,9 @@ for each generator; the reader modules:
   photographer's original upload and dedupes by photo id.
   Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
   narrates the outcome just by looking at it, same risk as a highlight clip's
-  title, but this is a standalone personal tool outside the scored-game flow
-  (its page carries its own disclaimer instead). See root CLAUDE.md's spoiler
-  section for why that's a deliberate, narrow exception rather than a hole in
-  the rule.
+  title, but this is a standalone page outside the scoring flow, so it sits
+  outside the spoiler rule's scope rather than carving a hole in it (its page
+  carries its own disclaimer instead). See the root `CLAUDE.md` for that scope.
   Every image is a video THUMBNAIL (`editorial` has been empty on every game
   checked), so each carries a `kind` — `photographer` (a Getty/AP/MLB
   Photos-Greenfly still), `broadcast` (a frame off the TV feed), `graphic` (a
