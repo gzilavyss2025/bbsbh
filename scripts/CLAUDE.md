@@ -328,6 +328,29 @@ don't run these by hand.
   The nightly job rebuilds only the current season; once the season file is
   marked `final`, later runs leave it immutable unless explicitly forced.
 
+- `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
+  per MLB club holding its per-play video highlights, game by game, newest first.
+  Feeds the Team hub's Games-tab rail and the player page's rail; the box score's
+  own per-play clips stay a LIVE single-game fetch (`src/api/highlights.js`) and
+  are unaffected. **Scans by GAME, not by team** — each game belongs to two clubs,
+  so per-team schedule scans would fetch the same `content` twice — and files each
+  clip under the team its own `team_id` names, which handles a mid-season trade for
+  free (pre-trade clips stay under the old club). APPEND-ONLY/incremental like
+  `gen-umpire-accuracy.mjs` (`--days` trailing window, `--since`/`--until`
+  backfill), deduped by gamePk; MLB only. **All filtering happens in the
+  generator, never the reader**, so the rails stay dumb: the `abs`/`challenge`
+  exclusion (the `team_id` sign is unrecoverable for those — it tags the
+  participant, not who benefited), the non-play content gate
+  (`NON_PLAY_TAXONOMY` in `src/api/highlights.js` — the same `content` array
+  carries recaps, condensed games, interviews, pressers, Data Viz cards, injury
+  exits and ejections, ~half of all items), and the hand-maintained
+  `scripts/highlight-blocklist.json` (`{clipId, reason}`, starts empty — **edit
+  the seed, never the output**). Clip identity is `guid ?? id`, NOT `guid` alone:
+  54% of content items carry no guid, real highlights among them. Kept OUT of the
+  PWA precache. Shares every bit of its per-game logic with the hand-run backfill
+  below via `scripts/lib/highlights.mjs`. App reads it via
+  `src/api/gamehighlights.js`. Full write-up: `.scratch/highlights-cascade/`.
+
 ## Own-cadence generators (not the nightly batch)
 
 - `warm-previews.mjs` — NOT a data generator (writes no `public/data/*` file,
@@ -429,6 +452,16 @@ Re-run only to fold in a new season.
   itself. AVG/ERA carry a minimum-AB/IP qualifier (same idea as the live
   leader boards' floor) so a single pinch-hit or mop-up inning can't top a
   rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
+- `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` — the
+  one-time historical sweep that establishes the season the nightly
+  `gen-highlights.mjs` (above) can't reach back to. Same relationship, and same
+  reasoning, as `gen-rookies-backfill.mjs` below: one `/content` call per Final
+  MLB game makes a from-scratch season a genuinely large crawl (~2,430 games),
+  so `--since`/`--until` chunk it across invocations. A game already present in
+  any team file is skipped without a fetch, so widening the range later never
+  re-sweeps or overwrites what's done. Shares all its per-game logic with the
+  nightly job (`scripts/lib/highlights.mjs`) — the two differ only in how they
+  source their target games.
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB

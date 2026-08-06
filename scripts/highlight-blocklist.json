@@ -1,0 +1,4 @@
+{
+  "_hint": "Hand-maintained, NOT auto-generated — same 'edit the seed, never the output' convention as milb-history-seed.json. Clips listed in `blocked` are dropped by scripts/gen-highlights.mjs BEFORE anything is filed under a team, so public/data/highlights/{teamId}.json never contains them and the rails stay dumb readers with no filtering of their own. Each entry is { clipId, reason }, where clipId is the value gen-highlights.mjs writes as `clipId` (a clip's `guid` when it has one, otherwise its readable `id` slug — 54% of MLB content items carry no guid). Whole CATEGORIES of unwanted clips (interviews, injuries, ejections, ABS challenges, recaps) are already excluded by rule in NON_PLAY_TAXONOMY (src/api/highlights.js) — use this file only for a one-off a rule can't catch. Removing an entry does not restore the clip until that game is re-swept; re-run gen-highlights.mjs with --since covering its date.",
+  "blocked": []
+}
