@@ -612,6 +612,53 @@
       }
     }
   },
+  "419": {
+    "name": "Team 419",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.13,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#7bc143",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 12,
+          "paddingY": -21,
+          "rowShift": 0
+        },
+        "band": "#75b740",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.13,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#7BAFD4",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -18,
+          "rowShift": 0
+        },
+        "band": "#7BAFD4",
+        "wpaWordmark": true
+      }
+    }
+  },
   "421": {
     "name": "Montgomery Biscuits",
     "treatments": {
@@ -710,6 +757,52 @@
       }
     }
   },
+  "428": {
+    "name": "Team 428",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.2,
+          "offsetX": -11,
+          "offsetY": 0,
+          "bg": "#C8102E",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 90,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 16,
+          "paddingY": -53,
+          "rowShift": 0
+        },
+        "band": "#0c2340",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.2,
+          "offsetX": -14,
+          "offsetY": 0,
+          "bg": "#0C2340",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 94,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 14,
+          "paddingY": -53,
+          "rowShift": 0
+        },
+        "band": "#0C2340"
+      }
+    }
+  },
   "431": {
     "name": "Team 431",
     "treatments": {
@@ -755,6 +848,53 @@
           "bg": "#73AA4F",
           "pinstripe": false
         }
+      }
+    }
+  },
+  "432": {
+    "name": "Team 432",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.15,
+          "offsetX": 0,
+          "offsetY": 22,
+          "bg": "#010101",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 79,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -39,
+          "rowShift": 0
+        },
+        "band": "#da291c",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.15,
+          "offsetX": 0,
+          "offsetY": 22,
+          "bg": "#DA291C",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 69,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -38,
+          "rowShift": 0
+        },
+        "band": "#DA291C",
+        "wpaWordmark": true
       }
     }
   },
@@ -960,6 +1100,45 @@
       }
     }
   },
+  "456": {
+    "name": "Team 456",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#1c7f64",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 70,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#AF272F",
+        "wpaWordmark": true
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 71,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#010101",
+        "wpaWordmark": true
+      }
+    }
+  },
   "459": {
     "name": "Team 459",
     "treatments": {
@@ -1094,6 +1273,52 @@
           "rowShift": 0
         },
         "band": "#0f254b"
+      }
+    }
+  },
+  "477": {
+    "name": "Team 477",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": -7,
+          "offsetY": -4,
+          "bg": "#00843D",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#00843D"
+      },
+      "away": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": -7,
+          "offsetY": -4,
+          "bg": "#f79e44",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 84,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 14,
+          "paddingY": -48,
+          "rowShift": 0
+        },
+        "band": "#f9b774",
+        "wpaWordmark": true
       }
     }
   },
@@ -1237,6 +1462,44 @@
         },
         "band": "#041E42",
         "wpaWordmark": true
+      }
+    }
+  },
+  "493": {
+    "name": "Team 493",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.92,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#010101",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -20,
+          "rowShift": 0
+        },
+        "band": "#010101",
+        "wpaWordmark": true
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 59,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -13,
+          "rowShift": 0
+        },
+        "band": "#FC4C02"
       }
     }
   },
@@ -2247,6 +2510,18 @@
           "rowShift": 0
         },
         "band": "#000000"
+      }
+    }
+  },
+  "584": {
+    "name": "Team 584",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#b5121b",
+          "accent": "#807f83",
+          "onBar": "#ffffff"
+        }
       }
     }
   },

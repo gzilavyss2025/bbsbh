@@ -340,6 +340,16 @@
       "1": "knockout"
     }
   },
+  "419": {
+    "name": "Hillsboro Hops",
+    "art": "8:d4c73ae4",
+    "parts": {
+      "3": "knockout",
+      "4": "knockout",
+      "6": "knockout",
+      "7": "knockout"
+    }
+  },
   "422": {
     "name": "Buffalo Bisons",
     "art": "23:d2f8a02d",
@@ -364,6 +374,15 @@
       "3": "knockout"
     }
   },
+  "428": {
+    "name": "Greenville Drive",
+    "art": "9:9d0fe3ab",
+    "parts": {
+      "3": "knockout",
+      "5": "knockout",
+      "8": "knockout"
+    }
+  },
   "431": {
     "name": "Gwinnett Stripers",
     "art": "21:5cd63bb5",
@@ -379,6 +398,17 @@
       "13": "knockout",
       "15": "knockout",
       "20": "knockout"
+    }
+  },
+  "432": {
+    "name": "Rome Emperors",
+    "art": "16:2e1166f2",
+    "parts": {
+      "0": "ink",
+      "1": "knockout",
+      "3": "ink",
+      "12": "ink",
+      "15": "knockout"
     }
   },
   "436": {
@@ -434,6 +464,20 @@
       "5": "knockout"
     }
   },
+  "456": {
+    "name": "Great Lakes Loons",
+    "art": "12:c010eb34",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "2": "ink",
+      "3": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "9": "knockout",
+      "11": "knockout"
+    }
+  },
   "459": {
     "name": "Dayton Dragons",
     "art": "20:ea061ee1",
@@ -463,6 +507,16 @@
       "3": "knockout",
       "4": "knockout",
       "5": "knockout"
+    }
+  },
+  "477": {
+    "name": "Greensboro Grasshoppers",
+    "art": "11:42af3778",
+    "parts": {
+      "2": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout"
     }
   },
   "478": {
@@ -527,6 +581,15 @@
       "6": "knockout",
       "8": "knockout",
       "9": "knockout"
+    }
+  },
+  "493": {
+    "name": "Frederick Keys",
+    "art": "7:6a2cc00b",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "5": "knockout"
     }
   },
   "494": {
