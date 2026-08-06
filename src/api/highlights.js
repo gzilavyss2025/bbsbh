@@ -187,13 +187,24 @@ export function isEligibleForPositiveFilter(classified) {
 // in Safari on iPhone, this app's primary target — see CLAUDE.md), fall back
 // to the standard MP4 for any other engine. Returns { hls, mp4 } with either
 // possibly null if that playback name wasn't present.
+//
+// Accepts either shape: the raw MLB `content` item (`playbacks` is an array of
+// `{name, url}`, resolved here) or an already-resolved `{hls, mp4}` object —
+// which is exactly what a highlights-cascade team file stores per clip
+// (`scripts/lib/highlights.mjs` calls this function once at generation time
+// and writes the result). `HighlightSheet.jsx` calls this on whatever `item`
+// its caller hands it, so both the box score's raw per-play item and a
+// team/player rail's precomputed clip need to resolve correctly here without
+// the rails re-deriving playback URLs themselves.
 export function highlightPlaybacks(item) {
-  const playbacks = item?.playbacks ?? []
+  const playbacks = item?.playbacks
+  if (playbacks && !Array.isArray(playbacks)) return { hls: playbacks.hls ?? null, mp4: playbacks.mp4 ?? null }
+  const list = playbacks ?? []
   const hls =
-    playbacks.find((p) => p.name === 'hlsCloud')?.url ??
-    playbacks.find((p) => p.name === 'HTTP_CLOUD_WIRED')?.url ??
+    list.find((p) => p.name === 'hlsCloud')?.url ??
+    list.find((p) => p.name === 'HTTP_CLOUD_WIRED')?.url ??
     null
-  const mp4 = playbacks.find((p) => p.name === 'mp4Avc')?.url ?? null
+  const mp4 = list.find((p) => p.name === 'mp4Avc')?.url ?? null
   return { hls, mp4 }
 }
 

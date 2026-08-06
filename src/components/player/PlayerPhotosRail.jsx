@@ -19,7 +19,7 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // (`onlyPhotographer`, gamePhotos.js) whose subject is this player
 // (`photosForPlayer` — its first caller; previously unused groundwork from
 // PR #487, see .scratch/game-photos-by-subject/). Same live walk-back as
-// TeamPhotosRail (src/screens/team/modules/TeamPhotosRail.jsx) — the
+// TeamPhotosRail (src/screens/team/modules/media/TeamPhotosRail.jsx) — the
 // cross-game photo INDEX scoped for a "no games list already loaded"
 // surface in that doc's issue 01 isn't needed here, because `games` is
 // cheap for the caller to fetch directly (one player's own season gameLog,
