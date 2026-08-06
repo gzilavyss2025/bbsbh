@@ -544,6 +544,78 @@
   text-transform: uppercase;
 }
 
+/* "Watch" — the video clip for this exact play, when MLB cut an eligible one
+   (see eligibleHighlightForPlay). Two forms, one button: with a poster frame
+   it becomes a full-width 16:9 still with the play badge sitting on it; with
+   no usable poster it collapses to the same kraft pill the innings view's
+   per-play button uses (.pbp__hlbtn), so a missing or broken image costs the
+   affordance nothing.
+
+   Both live inside the box score's seal, like the rest of this card. */
+.bs__potgWatch {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+  cursor: pointer;
+}
+.bs__potgWatch:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+/* The poster form: the still fills the button, the badge rides the bottom-left
+   corner over it. Height comes from the image's own 16:9 ratio rather than a
+   fixed value, so it can't letterbox. */
+.bs__potgWatch--poster {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: auto;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--paper-2);
+}
+.bs__potgPoster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.bs__potgPlay {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+/* Over a photo the badge needs its own ground to stay legible — the same
+   kraft chip the pill form is, floated onto the frame. */
+.bs__potgWatch--poster .bs__potgPlay {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: var(--seal);
+  border: var(--bw-hair) solid var(--seal-hatch);
+  color: var(--seal-ink);
+}
+.bs__potgPlayIcon {
+  font-size: var(--fs-caption);
+}
+
 /* Insights — the box score's catch-all "what stood out tonight" card: whole-
    game Statcast superlatives (see computeGameSuperlatives, reusing the same
    .statcast card grid as the innings view's per-half row) plus every season

@@ -339,6 +339,7 @@ export function GameView({ game, section, onSection }) {
           winProbTreatment={jerseyTreatments}
           callouts={gameCallouts}
           vsTeam={vsTeamSplitsData}
+          highlights={highlightsData}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}

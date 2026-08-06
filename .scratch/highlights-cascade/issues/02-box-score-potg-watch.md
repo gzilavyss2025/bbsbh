@@ -1,4 +1,4 @@
-Status: needs-triage
+Status: ready-for-human
 Blocked by: 01-data-layer.md
 
 # Box score — give the existing Play of the Game card a Watch affordance
@@ -158,3 +158,128 @@ today — no empty state needed, this is purely additive.
    `test/*.test.js` coverage for `computePlayOfTheGame`'s new `playId` field.
 
 ## Comments
+
+### 2026-08-06 — implemented (branch `claude/box-score-potg-watch`)
+
+#### §1 research pass: neither (a) nor (b) as written — it's (b) done EXACTLY
+
+The `/winProbability` entries **do** carry their own full `playEvents[]`, each
+pitch with a `playId` — which reads like the nearly-free option (a). It isn't
+usable: `WIN_PROB_FIELDS` (`api/game.js`) deliberately prunes `playEvents` out
+of that fetch because it is ~85% of the payload. Measured cost of putting it
+back to recover one string per game:
+
+| gamePk | pruned today | + `playEvents,isPitch,playId` | unpruned |
+|---|---|---|---|
+| 823035 | 51 KB | 87 KB (+70%) | 939 KB |
+| 824891 | 44 KB | 76 KB (+73%) | 845 KB |
+
+So the join goes to the feed instead — but **not** by the `(inning, half,
+batterId)` match this issue proposed. A win-prob entry carries its own
+`about.atBatIndex`, which is already in `WIN_PROB_FIELDS` (`selectWinProbPath`
+reads it for the at-bat-stepping clamp), and that is an **exact** key into
+`allPlays`. None of the anticipated collision risk exists, so no `outsBefore`
+or event-index fallback was needed.
+
+Verified live against the pinned test games, mirroring the format the original
+video-highlights issue used:
+
+| gamePk | win-prob entries | resolved to a play | terminal `playId` matched | clips w/ guid |
+|---|---|---|---|---|
+| 823035 | 78 | 78 | 78 | 14 |
+| 777747 | 78 | 78 | 78 | 12 |
+| 778501 | 98 | 98 | 98 | 20 |
+| 778442 | 79 | 79 | 79 | 14 |
+| 777877 | 67 | 67 | 67 | 8 |
+| 824087 | 73 | 73 | 73 | 13 |
+| 781572 (AAA) | 76 | 76 | 76 | 0 — no clips at all |
+| **total** | **549** | **549** | **549** | |
+
+Zero mismatches, zero misses. `playId` is nullable and resolves null on the
+pruned past-game path (`PAST_GAME_FEED_FIELDS` lists neither `playEvents` nor
+`playId`) — correct, since the slate flip-card's `.flipback__potg` shows the
+description with no Watch affordance. That path was deliberately left
+unpruned-for; adding those fields would inflate every final game on a revealed
+slate for a button that doesn't exist there.
+
+#### §2 gate: the significance requirement was measured, then dropped
+
+The 2026-08-06 decision to also require a `SIGNIFICANCE_TAGS` hit was reversed
+the same day, **by the maintainer, on measurement**. Over 44 games (the 6
+pinned MLB test games + every Final 2026-08-02..04), applying the full decided
+gate:
+
+| outcome | games |
+|---|---|
+| Watch button shows | 14 (32%) |
+| clip exists but **no significance tag** | **25 (57%)** |
+| no clip on the picked play | 3 |
+| excluded by `isEligibleForPositiveFilter` | 2 |
+
+57% of games had a real, correctly-matched clip of the WPA-picked play and
+would have shown no button. The card's "best play" claim comes from this app's
+own WPA ranking (ADR-0013), not from MLB's tagging, so their tag was never a
+precondition for it. **Shipped gate: `playId` match → passes
+`isEligibleForPositiveFilter`.** The `abs`/`challenge` half of the issue's
+reasoning is fully kept — that exclusion lives inside that same filter.
+
+Re-measured with the shipped gate over 45 games: **39 show a button (87%)**, 4
+have no clip on the picked play, 2 are excluded by the filter, and **all 39
+have a usable 16:9 poster** (0 eligible-but-posterless).
+
+Notable: neither exclusion was `abs`/`challenge` — both were items missing the
+`highlight` tag entirely. No `abs`/`challenge` clip landed on a POTG play in
+the whole sample, so verification case 4 is a unit test, not a live game (as
+the issue anticipated it might have to be).
+
+#### Verification plan results
+
+1. ✅ Live join check — table above.
+2. ✅ Game WITH an eligible clip: gamePk 823035 (`/07072026/milstl-2/boxscore`),
+   Luis Lara's two-run single, tagged `career-first`, poster present. Poster +
+   Watch render, the sheet opens, the clip is the right play. Pinned as an e2e
+   fixture.
+3. ✅ Game with NO matching clip: gamePk 781572 (AAA, no clips at all) plus
+   822943 / 823270 / 824324. Card renders exactly as before — no broken image,
+   no dead button.
+4. ✅ `abs`/`challenge` clip rejected — unit test (not found live, see above).
+5. ✅ Clip with no significance tag — now **accepted**, per the reversal above;
+   pinned by a unit test that records why it reads like an omission.
+6. ✅ `npm run lint`, `npm test` (1476 tests), `npm run build` all clean.
+   New coverage: `test/potg-highlight.test.js` (9 tests) — the join, its four
+   null-degradation paths, a `WIN_PROB_FIELDS` allowlist guard on the join key
+   (same regression class as `winprob.test.js`), and the gate.
+
+#### Spoiler audit checklist
+
+- [x] Poster and button render only inside the box score's existing top-level
+      `SealBox` reveal path. The lookup itself (`eligibleHighlightForPlay`) is
+      called inside that reveal render function, beside `computePlayOfTheGame`
+      — no eager `useMemo`, nothing hoisted to render top-level (ADR-0001). No
+      new `SealBox` was added, and the host seal still has no `onReveal`
+      (ADR-0035's constraint is untouched).
+- [x] Playwright: `e2e/invariants/spoiler-dom.spec.js` asserts **0**
+      `.bs__potgWatch`, **0** `.bs__potgPoster` and 0 `Watch highlight` buttons
+      before the tap, then exactly **1** of each after, on a fixture game
+      verified to have an eligible clip — so the post-reveal half can't pass
+      vacuously. It also pins that the label stays generic and that the button
+      opens the shared `HighlightSheet`.
+- [x] The poster adds no information the card doesn't already print: it is a
+      still of the same play whose description, score and players sit two lines
+      above it, inside the same seal. Checked the actual frames on the sampled
+      games — they are the play's own action shot (MLB's clip poster is a frame
+      of that clip), not a crowd/celebration cutaway implying a later outcome.
+      Worth re-checking if MLB ever changes how poster frames are chosen; the
+      argument is specifically "same play, already spelled out" and does **not**
+      generalize to a surface where the play isn't already in text.
+
+#### Notes for whoever picks this up next
+
+- The button's label is deliberately generic ("Watch"), never the clip's own
+  title — MLB's titles narrate the outcome ("Luis Lara's first MLB hit is a
+  two-run single"). Same discipline as `PlayByPlay`'s per-play button.
+- A poster that fails to load falls back to the plain kraft pill rather than
+  leaving a broken frame (`posterFailed` state), so the affordance never
+  depends on the image resolving.
+- Not folded in, as instructed: the per-play `AtBatCard` poster (a separate
+  follow-up against the ORIGINAL video-highlights feature) is untouched.

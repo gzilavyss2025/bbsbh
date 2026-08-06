@@ -64,9 +64,15 @@ const BUDGETS = {
   // breaking the ordering this exception exists to protect. Growing this count
   // is what "put new code elsewhere" MEANS in a directory that can't nest, so
   // the number will keep climbing; that is the design, not a leak.
-  // 51 -> 52 for the pregame Innings board. This remains in the numbered
-  // cascade because the exception above explicitly preserves that ordering.
-  'src/styles': 52,
+  // 51 -> 52 for `11-pregame-scoreboard.css`: the pregame Innings board's
+  // first-pitch countdown, sharing the `11-` prefix with `11-innings.css`
+  // (the two are siblings, not a renumbering) rather than appending at the
+  // cascade's end — same "new reusable component earns a partial" reasoning
+  // as the entry above, just inserted next to the file it extends.
+  // 52 -> 53 for `52-highlight-clip-card.css`: HighlightClipCard.jsx's rules,
+  // shared by TeamHighlightsRail and PlayerHighlightsRail (both cascade
+  // issues 03/04) — same reasoning as the entry above, appended at the end.
+  'src/styles': 53,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
