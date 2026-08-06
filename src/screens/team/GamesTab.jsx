@@ -1,13 +1,15 @@
 import { useAsync } from '../../hooks/useAsync.js'
 import { AsyncGate } from '../../components/ui/AsyncGate.jsx'
 import { TeamTransactionsCard } from '../../components/transactions/TeamTransactionsCard.jsx'
+import { isMlbTeamId } from '../../lib/teams.js'
 import { TeamHubShell } from './TeamHubShell.jsx'
 import { loadTeamIdentity } from './loadTeamIdentity.js'
 import { loadGames } from './data/loadGames.js'
 import { hiddenTeamTabs } from './data/shared.js'
 import { AllGames } from './modules/TeamGames.jsx'
 import { SeasonSchedule } from './modules/SeasonSchedule.jsx'
-import { TeamPhotosRail } from './modules/TeamPhotosRail.jsx'
+import { TeamHighlightsRail } from './modules/media/TeamHighlightsRail.jsx'
+import { TeamPhotosRail } from './modules/media/TeamPhotosRail.jsx'
 
 function isoToday() {
   return new Date().toISOString().slice(0, 10)
@@ -60,6 +62,10 @@ export function GamesTab({ id, asOf, sportId }) {
         // Keyed so switching club (or dated view) starts the list back at its
         // first page instead of inheriting how far the last one was paged.
         <AllGames key={`games-${team.id}-${asOf ?? ''}`} games={seasonGames} />
+      )}
+
+      {seasonGames.length > 0 && isMlbTeamId(team.id) && (
+        <TeamHighlightsRail key={`highlights-${team.id}`} teamId={team.id} games={seasonGames} />
       )}
 
       {seasonGames.length > 0 && (

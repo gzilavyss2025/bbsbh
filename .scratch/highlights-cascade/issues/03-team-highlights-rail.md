@@ -1,5 +1,5 @@
-Status: needs-triage
-Blocked by: 01-data-layer.md
+Status: ready-for-human
+Blocked by: 01-data-layer.md (merged, PR #586)
 
 # Team hub → Games tab: TeamHighlightsRail
 
@@ -147,3 +147,88 @@ same footing as `TeamPhotosRail`'s own photos.
 4. `npm run lint` and `npm run build` pass clean.
 
 ## Comments
+
+**Shipped 2026-08-06, branch `claude/team-highlights-rail`.** Built as written,
+with implementation details the issue didn't anticipate:
+
+1. **`src/screens/team/modules` hit its 12-file directory-size budget**
+   (ADR-0038) the moment `TeamHighlightsRail.jsx` landed as its 13th file.
+   Moved it and `TeamPhotosRail.jsx` into a new `modules/media/` subfolder
+   (both are Games-tab media rails, a genuine feature-domain split, not an
+   arbitrary one) rather than editing the budget upward. `TeamPhotosRail.jsx`
+   itself is otherwise untouched — only its file path and the two files that
+   imported it (`GamesTab.jsx`, and a doc-comment path reference in
+   `PlayerPhotosRail.jsx`) changed. Any other in-flight branch importing
+   `screens/team/modules/TeamPhotosRail.jsx` directly will need to update
+   that import when it rebases past this PR.
+2. **Card redesign, extracted as a shared component.** The maintainer asked
+   for a 16:9 thumbnail with a play affordance and a caption naming the play
+   and the game — a real redesign, not what the issue originally specified
+   (a bare `.teamphotos__thumb`-style square tile). Landed as
+   `src/components/highlights/HighlightClipCard.jsx` (+
+   `src/styles/52-highlight-clip-card.css`) — purely presentational
+   (`{ clip, caption, onOpen }`, no fetching, no game-shape knowledge)
+   specifically so a future player-page rail (issue 04) renders the identical
+   card from its own clip list with no duplicated markup/CSS. `caption` is a
+   prebuilt string the caller computes (`gameCaption`, local to
+   `TeamHighlightsRail.jsx` — needs `seasonGames` for the opponent/date, which
+   only the caller has loaded).
+3. **Cross-branch reconciliation, done now rather than left for merge time.**
+   Issue 04 (`claude/player-highlights-rail`) was being built concurrently and
+   independently (not waiting on this issue's `Blocked by`, since only issue
+   01 — already merged — actually gates it) and hit the same two problems
+   this issue did, solving both better:
+   - The precomputed clip shape's `playbacks: {hls, mp4}` doesn't match what
+     `HighlightSheet`'s `highlightPlaybacks(item)` expects (`item.playbacks`
+     as an array of `{name, url}`, `.find()`d by name) — passing a stored clip
+     straight into `HighlightSheet` used to throw. This issue's first draft
+     fixed it with a local adapter in `TeamHighlightsRail.jsx`; issue 04
+     fixed it in the shared function instead — `highlightPlaybacks` now
+     accepts either shape. **Adopted issue 04's fix** (better: one place,
+     both callers) into `src/api/highlights.js`, deleted this issue's local
+     adapter, and `TeamHighlightsRail` now hands `HighlightSheet` the clip
+     object directly.
+   - Both issues needed the same `games[] -> flat, oldest-first clip list`
+     step. This issue kept it local; issue 04 added it to `gamehighlights.js`
+     as `flattenPositiveClips`, exactly the shared home the original issue
+     text floated as a possibility. **Adopted issue 04's placement** — moved
+     it to `gamehighlights.js`, `TeamHighlightsRail` now imports it.
+
+   Net effect: `claude/team-highlights-rail` now carries the shared plumbing
+   issue 04 already validated (live spot checks per its own Comments), so
+   when issue 04 rebases past this PR it should find `gamehighlights.js` and
+   `highlights.js` already matching what it built — no design decision left,
+   just dropping its own now-redundant copies — and switch its card markup
+   from `.teamphotos__thumb--video`/`.teamphotos__playicon` to
+   `HighlightClipCard`.
+
+**Verification plan results:**
+
+1. ✅ Brewers (158, several eligible clips): rail renders under "Highlights,"
+   right-anchored to the newest clip on load (`scrollLeft` confirmed at the
+   track's right edge), tapping a thumbnail opens `HighlightSheet` with a
+   real, playable `.m3u8` src and the clip's own title in the sheet header.
+   Confirmed via Playwright against the live dev server + a screenshot.
+2. ⚠️ Not reproduced live — every one of the 30 MLB teams currently on file
+   has at least one eligible clip (2–4 games, 10–33 clips each), so there's
+   no real team/period with zero clips to load against today. Verified by
+   code inspection instead: `clips.length === 0 && !loading` returns `null`,
+   the same guard shape `TeamPhotosRail`'s `exhausted && photos.length === 0
+   && !loading` already uses, and `flattenPositiveClips` on `{games: []}`
+   (an absent-file 404, per `fetchTeamHighlights`'s catch) correctly reduces
+   to `[]`.
+3. ✅ Nashville Sounds (556, MiLB): confirmed via Playwright network-request
+   logging that zero `/data/highlights/*` requests fire and no Highlights
+   section renders — the `isMlbTeamId` gate wraps the whole component call,
+   not just an inner empty state.
+4. ✅ `npm run lint` and `npm run build` both pass clean (lint's only output
+   is pre-existing warnings in unrelated files).
+
+## Spoiler audit checklist — re-confirmed
+
+- [x] `TeamHighlightsRail` only ever receives `teamId` — no gamePk, no feed,
+      nothing that could resolve to an in-progress game. The precomputed file
+      it reads is generator-guarded to `Final` games only (issue 01).
+- [x] Renders on the Games tab, outside any `SealBox`, same footing as
+      `TeamPhotosRail` right below it — no new spoiler surface, no new
+      precedent.

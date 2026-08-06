@@ -103,7 +103,13 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   `content` payload, and the FILTER POLICY must have exactly one home (a second
   copy is how a rail and its generator drift apart). Field names and the
   taxonomy vocabulary were verified live over 1,150 clips / 41 games; see
-  `.scratch/highlights-cascade/`.
+  `.scratch/highlights-cascade/`. `highlightPlaybacks` accepts either the raw
+  `content` item's `playbacks` array OR an already-resolved `{hls, mp4}`
+  object — the shape a highlights-cascade team/player file stores per clip
+  (the generator calls this function once at write time and keeps the
+  result) — so `HighlightSheet.jsx` can stay the one consumer for both the
+  box score's raw per-play item and a rail's precomputed clip, with neither
+  rail re-deriving playback URLs by hand.
 - `gamehighlights.js` — the reader half of the cascade: the static per-team
   archive `scripts/gen-highlights.mjs` precomputes
   (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
@@ -113,7 +119,11 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   to drift; a caller's only job on top is identity scoping (the player rail
   keeps `clip.playerId === personId` from his CURRENT team's file). Decided
   games only, so not a spoiler surface. Degrades to `{ games: [] }`, cached per
-  team for the session.
+  team for the session. `flattenPositiveClips(data)` is the one shared flatten
+  step both rails call — a `games[]` result to one oldest-first clip list,
+  each annotated with its `gamePk`/`date` — so the two rails can only ever
+  differ in which clips they keep after this call, never in how they unpack
+  the file.
 - `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface. **`currentTeam` is not a roster

@@ -42,3 +42,22 @@ export async function fetchTeamHighlights(teamId) {
   cache.set(teamId, data)
   return data
 }
+
+// Flattens a fetchTeamHighlights() result into one chronological (OLDEST
+// first) list of clips, each annotated with its game's gamePk/date — shared
+// by TeamHighlightsRail and the player page's rail, which differ only in
+// which clips they keep after this call (the team rail keeps them all; the
+// player rail filters to `clip.playerId === personId`). Oldest-first on
+// purpose: both rails anchor to the newest clip on the right edge (PRD's
+// "Rail ordering"), so rendering oldest-to-newest lets that anchor land at
+// the end of the list with no separate reverse step. `games` rows in the
+// source file are newest-first (the generator's own upsertGame sort), so
+// this re-sorts rather than assuming the file's order.
+export function flattenPositiveClips(data) {
+  const games = [...(data?.games ?? [])].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
+  const out = []
+  for (const game of games) {
+    for (const clip of game.clips ?? []) out.push({ ...clip, gamePk: game.gamePk, date: game.date })
+  }
+  return out
+}
