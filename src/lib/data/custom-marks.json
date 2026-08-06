@@ -83,6 +83,13 @@
       "milb-away": "cdn:primary"
     }
   },
+  "486": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "493": {
     "marks": [],
     "assignments": {
@@ -108,10 +115,29 @@
       "milb-home": "cdn:primary"
     }
   },
+  "540": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "550": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:primary"
+    }
+  },
   "552": {
     "marks": [],
     "assignments": {
       "milb-home": "cdn:wordmark"
+    }
+  },
+  "553": {
+    "marks": [],
+    "assignments": {
+      "milb-away": "cdn:primary"
     }
   },
   "556": {
@@ -148,6 +174,13 @@
     "assignments": {
       "milb-home": "baseorangeonwhite",
       "milb-away": "baseorangeonwhite"
+    }
+  },
+  "6324": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:cap",
+      "milb-away": "cdn:cap"
     }
   }
 }

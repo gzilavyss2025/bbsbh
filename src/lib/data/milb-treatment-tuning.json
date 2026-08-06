@@ -71,6 +71,47 @@
       }
     }
   },
+  "233": {
+    "name": "Team 233",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#00274c",
+          "accent": "#fdb913",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.08,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#eee1c6",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#eee1c6",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.08,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F2A900",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        }
+      }
+    }
+  },
   "234": {
     "name": "Durham Bulls",
     "treatments": {
@@ -158,11 +199,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 1.1,
           "offsetX": 13,
           "offsetY": 0,
-          "bg": "#0069aa",
-          "pinstripe": false
+          "bg": "#093262",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -173,15 +215,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#0069aa"
+        "band": "#123357",
+        "header": {
+          "bar": "#002b5c",
+          "accent": "#f3901d",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 1,
+          "scale": 1.1,
           "offsetX": 13,
           "offsetY": 0,
-          "bg": "#fbb034",
-          "pinstripe": false
+          "bg": "#f3901d",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -192,7 +240,7 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#fbb034"
+        "band": "#f3901d"
       }
     }
   },
@@ -268,7 +316,12 @@
           "paddingY": 2,
           "rowShift": 0
         },
-        "band": "#231f20"
+        "band": "#231f20",
+        "header": {
+          "bar": "#231f20",
+          "accent": "#d11242",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -332,11 +385,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1.06,
-          "offsetX": -10,
-          "offsetY": 22,
+          "scale": 0.89,
+          "offsetX": 0,
+          "offsetY": 3,
           "bg": "#005294",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 60,
@@ -347,15 +401,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#005294"
+        "band": "#005294",
+        "header": {
+          "bar": "#0067b1",
+          "accent": "#b9e0f7",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 1.06,
-          "offsetX": -10,
-          "offsetY": 22,
+          "scale": 0.89,
+          "offsetX": 0,
+          "offsetY": 0,
           "bg": "#221e1f",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 60,
@@ -464,11 +524,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 1.36,
           "offsetX": 0,
-          "offsetY": 0,
+          "offsetY": -4,
           "bg": "#0072CE",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 62,
@@ -481,18 +542,19 @@
         },
         "band": "#0072CE",
         "header": {
-          "bar": "#0072CE",
-          "accent": "#010101",
+          "bar": "#231f20",
+          "accent": "#f89728",
           "onBar": "#FBF6E9"
         }
       },
       "away": {
         "position": {
-          "scale": 1,
+          "scale": 1.36,
           "offsetX": 0,
-          "offsetY": 0,
+          "offsetY": -4,
           "bg": "#D0D0D0",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 62,
@@ -503,7 +565,7 @@
           "paddingY": -8,
           "rowShift": 0
         },
-        "band": "#010101"
+        "band": "#f89728"
       }
     }
   },
@@ -528,7 +590,12 @@
           "paddingY": 6,
           "rowShift": 0
         },
-        "band": "#041E42"
+        "band": "#041E42",
+        "header": {
+          "bar": "#002d62",
+          "accent": "#d6e03e",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -570,10 +637,11 @@
       "home": {
         "position": {
           "scale": 0.79,
-          "offsetX": -3,
+          "offsetX": 5,
           "offsetY": 5,
           "bg": "#010101",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 37,
@@ -594,10 +662,11 @@
       "away": {
         "position": {
           "scale": 0.79,
-          "offsetX": -3,
+          "offsetX": 5,
           "offsetY": 5,
           "bg": "#D0D0D0",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 38,
@@ -634,7 +703,12 @@
           "rowShift": 0
         },
         "band": "#75b740",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002d55",
+          "accent": "#7bc143",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -757,6 +831,110 @@
       }
     }
   },
+  "426": {
+    "name": "Team 426",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#002d62",
+          "accent": "#96c0e6",
+          "onBar": "#f8f8f5"
+        },
+        "position": {
+          "scale": 1.33,
+          "offsetX": 0,
+          "offsetY": -9,
+          "bg": "#8BB8E8",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 85,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": -52,
+          "rowShift": 0
+        },
+        "band": "#8BB8E8",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.33,
+          "offsetX": 0,
+          "offsetY": -9,
+          "bg": "#afb1b3",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 84,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 13,
+          "paddingY": -52,
+          "rowShift": 0
+        },
+        "band": "#bec0c2",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "427": {
+    "name": "Team 427",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#BA0C2F",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -32,
+          "rowShift": 0
+        },
+        "band": "#F8F8F5",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#0071ce",
+          "accent": "#c10230",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 4,
+          "offsetY": 0,
+          "bg": "#ffcd00",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 80,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#FBF6ED",
+        "wpaWordmark": true
+      }
+    }
+  },
   "428": {
     "name": "Team 428",
     "treatments": {
@@ -779,7 +957,12 @@
           "rowShift": 0
         },
         "band": "#0c2340",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#e31837",
+          "accent": "#002b5c",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -873,7 +1056,12 @@
           "rowShift": 0
         },
         "band": "#da291c",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#010101",
+          "accent": "#da291c",
+          "onBar": "#fbf6e9"
+        }
       },
       "away": {
         "position": {
@@ -898,6 +1086,90 @@
       }
     }
   },
+  "435": {
+    "name": "Team 435",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#b30838",
+          "accent": "#ed174f",
+          "onBar": "#f8f8f5"
+        },
+        "wpaLayout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D50032"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#9D2235"
+      }
+    }
+  },
+  "437": {
+    "name": "Team 437",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": -11,
+          "offsetY": 0,
+          "bg": "#051C2C",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#051C2C",
+        "header": {
+          "bar": "#002d56",
+          "accent": "#fdb913",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": -11,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#F2A900"
+      }
+    }
+  },
   "440": {
     "name": "Springfield Cardinals",
     "treatments": {
@@ -911,7 +1183,20 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#d30e45"
+        "band": "#d30e45",
+        "position": {
+          "scale": 1.11,
+          "offsetX": -13,
+          "offsetY": 0,
+          "bg": "#d30e45",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "header": {
+          "bar": "#d31245",
+          "accent": "#002b5c",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -923,7 +1208,65 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#002c5d"
+        "band": "#002c5d",
+        "position": {
+          "scale": 1.11,
+          "offsetX": -13,
+          "offsetY": 0,
+          "bg": "#002c5d",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        }
+      }
+    }
+  },
+  "443": {
+    "name": "Team 443",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#005daa",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 46,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0C2340",
+        "header": {
+          "bar": "#d31245",
+          "accent": "#ffd457",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#ffd457",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 40,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#BA0C2F"
       }
     }
   },
@@ -973,6 +1316,58 @@
           "rowShift": 0
         },
         "band": "#68ACDB",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "450": {
+    "name": "Team 450",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#005847",
+          "accent": "#7ac143",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.1,
+          "offsetX": -9,
+          "offsetY": -6,
+          "bg": "#e1c69f",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -40,
+          "rowShift": 0
+        },
+        "band": "#004E42",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": -9,
+          "offsetY": -6,
+          "bg": "#005444",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 79,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -45,
+          "rowShift": 0
+        },
+        "band": "#78BE21",
         "wpaWordmark": true
       }
     }
@@ -1038,7 +1433,12 @@
           "paddingY": 2,
           "rowShift": 0
         },
-        "band": "#b21921"
+        "band": "#b21921",
+        "header": {
+          "bar": "#b5121b",
+          "accent": "#231f20",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1075,7 +1475,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#13294B"
+        "band": "#13294B",
+        "header": {
+          "bar": "#00245d",
+          "accent": "#ffc425",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -1122,7 +1527,12 @@
           "rowShift": 0
         },
         "band": "#AF272F",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#006f51",
+          "accent": "#bf311a",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1161,7 +1571,12 @@
           "rowShift": 0
         },
         "band": "#F8F8F5",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#00853f",
+          "accent": "#231f20",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -1182,6 +1597,58 @@
           "rowShift": 0
         },
         "band": "#F8F8F5",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "460": {
+    "name": "Team 460",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.97,
+          "offsetX": 2,
+          "offsetY": 6,
+          "bg": "#041E42",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 81,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -37,
+          "rowShift": 0
+        },
+        "band": "#041E42",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002d62",
+          "accent": "#cfaa7a",
+          "onBar": "#FFFFFF"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.97,
+          "offsetX": 2,
+          "offsetY": 6,
+          "bg": "#B9975B",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 85,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -39,
+          "rowShift": 0
+        },
+        "band": "#B9975B",
         "wpaWordmark": true
       }
     }
@@ -1208,7 +1675,12 @@
           "rowShift": 0
         },
         "band": "#00775c",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#008265",
+          "accent": "#8ac640",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -1253,7 +1725,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#c6021e"
+        "band": "#c6021e",
+        "header": {
+          "bar": "#002b5c",
+          "accent": "#e31837",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -1297,7 +1774,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#00843D"
+        "band": "#00843D",
+        "header": {
+          "bar": "#008752",
+          "accent": "#f68b1f",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -1319,6 +1801,48 @@
         },
         "band": "#f9b774",
         "wpaWordmark": true
+      }
+    }
+  },
+  "478": {
+    "name": "Team 478",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#008265",
+          "accent": "#62bb46",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#64bc49",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0c614f"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#007A53"
       }
     }
   },
@@ -1418,6 +1942,58 @@
       }
     }
   },
+  "486": {
+    "name": "Team 486",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.87,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#BA0C2F",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 82,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -49,
+          "rowShift": 0
+        },
+        "band": "#e4ccb5",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002d62",
+          "accent": "#d31145",
+          "onBar": "#FFFFFF"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.87,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#ffe9d3",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 86,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 16,
+          "paddingY": -50,
+          "rowShift": 0
+        },
+        "band": "#041E42",
+        "wpaWordmark": true
+      }
+    }
+  },
   "492": {
     "name": "Team 492",
     "treatments": {
@@ -1440,7 +2016,12 @@
           "rowShift": 0
         },
         "band": "#009A44",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#00814d",
+          "accent": "#002d62",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -1487,7 +2068,12 @@
           "rowShift": 0
         },
         "band": "#010101",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#231f20",
+          "accent": "#f15d22",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1573,7 +2159,12 @@
           "paddingY": 3,
           "rowShift": 0
         },
-        "band": "#ec3b46"
+        "band": "#ec3b46",
+        "header": {
+          "bar": "#231f20",
+          "accent": "#ef3e42",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -1593,6 +2184,56 @@
           "rowShift": 0
         },
         "band": "#9EA2A2"
+      }
+    }
+  },
+  "499": {
+    "name": "Team 499",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#c8102e",
+          "accent": "#010101",
+          "onBar": "#f3f6e9"
+        },
+        "position": {
+          "scale": 0.93,
+          "offsetX": -8,
+          "offsetY": 2,
+          "bg": "#C8102E",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#C8102E"
+      },
+      "away": {
+        "position": {
+          "scale": 0.93,
+          "offsetX": -8,
+          "offsetY": 2,
+          "bg": "#c4ced4",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 38,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#c4ced4"
       }
     }
   },
@@ -1616,7 +2257,12 @@
           "paddingY": 2,
           "rowShift": 0
         },
-        "band": "#bc0b35"
+        "band": "#bc0b35",
+        "header": {
+          "bar": "#d31245",
+          "accent": "#002b5c",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -1644,11 +2290,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.99,
-          "offsetX": 3,
+          "scale": 1,
+          "offsetX": 0,
           "offsetY": 0,
-          "bg": "#081f3f",
-          "pinstripe": false
+          "bg": "#00244f",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -1658,7 +2305,13 @@
           "paddingX": 4,
           "paddingY": 4,
           "rowShift": 0
-        }
+        },
+        "header": {
+          "bar": "#002d62",
+          "accent": "#cfab7a",
+          "onBar": "#FFFFFF"
+        },
+        "band": "#00244f"
       },
       "away": {
         "wpaLayout": {
@@ -1688,7 +2341,12 @@
           "rowShift": 0
         },
         "band": "#FBF6ED",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002b5c",
+          "accent": "#fdb913",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1710,11 +2368,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.96,
-          "offsetX": -13,
-          "offsetY": 6,
+          "scale": 1.13,
+          "offsetX": -8,
+          "offsetY": 1,
           "bg": "#d10c47",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -1725,15 +2384,21 @@
           "paddingY": 2,
           "rowShift": 0
         },
-        "band": "#d10c47"
+        "band": "#d10c47",
+        "header": {
+          "bar": "#002d62",
+          "accent": "#d31245",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 0.96,
-          "offsetX": -13,
-          "offsetY": 6,
+          "scale": 1.13,
+          "offsetX": -8,
+          "offsetY": 1,
           "bg": "#042d60",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -1762,7 +2427,12 @@
           "rowShift": 0
         },
         "band": "#EB1750",
-        "wpaWordmark": true
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002448",
+          "accent": "#e31837",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -1852,7 +2522,12 @@
           "paddingY": 6,
           "rowShift": 0
         },
-        "band": "#00275C"
+        "band": "#00275C",
+        "header": {
+          "bar": "#073059",
+          "accent": "#e31837",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -1888,6 +2563,58 @@
       }
     }
   },
+  "537": {
+    "name": "Team 537",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.01,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#0C2340",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#0C2340",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#002b5c",
+          "accent": "#adafb2",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.01,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#97999B",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#97999B",
+        "wpaWordmark": true
+      }
+    }
+  },
   "538": {
     "name": "Hartford Yard Goats",
     "treatments": {
@@ -1908,7 +2635,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#002c76"
+        "band": "#002c76",
+        "header": {
+          "bar": "#004b8d",
+          "accent": "#00a160",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -1936,11 +2668,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
-          "offsetX": 0,
+          "scale": 2.36,
+          "offsetX": 115,
           "offsetY": 0,
-          "bg": "#326295",
-          "pinstripe": false
+          "bg": "#e0c398",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -1951,15 +2684,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#326295"
+        "band": "#e0c398",
+        "header": {
+          "bar": "#326295",
+          "accent": "#e0c398",
+          "onBar": "#FBF6E9"
+        }
       },
       "away": {
         "position": {
-          "scale": 1,
-          "offsetX": 0,
+          "scale": 2.36,
+          "offsetX": 115,
           "offsetY": 0,
-          "bg": "#F3ECD8",
-          "pinstripe": false
+          "bg": "#98012e",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -2049,7 +2788,7 @@
         "band": "#e03a3e",
         "header": {
           "bar": "#e03a3e",
-          "accent": "#000000",
+          "accent": "#fbb040",
           "onBar": "#000000"
         }
       },
@@ -2094,7 +2833,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#d10c47"
+        "band": "#d10c47",
+        "header": {
+          "bar": "#002d62",
+          "accent": "#cbb677",
+          "onBar": "#ffffff"
+        }
       },
       "away": {
         "position": {
@@ -2114,6 +2858,108 @@
           "rowShift": 0
         },
         "band": "#042e61"
+      }
+    }
+  },
+  "548": {
+    "name": "Team 548",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#231f20",
+          "accent": "#f26531",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.18,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#010101",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 84,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -52,
+          "rowShift": 0
+        },
+        "band": "#f26531",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#f26531",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 83,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -49,
+          "rowShift": 0
+        },
+        "band": "#f26531",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "550": {
+    "name": "Team 550",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#005596",
+          "accent": "#e31837",
+          "onBar": "#fbf6e9"
+        },
+        "position": {
+          "scale": 0.95,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#002F6C",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 36,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 6,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#002F6C"
+      },
+      "away": {
+        "position": {
+          "scale": 0.91,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#C8102E",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 39,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": 5,
+          "rowShift": 0
+        },
+        "band": "#C8102E"
       }
     }
   },
@@ -2141,6 +2987,11 @@
         "band": {
           "pinstripe": true,
           "color": "rgba(0, 0, 0, 0.16)"
+        },
+        "header": {
+          "bar": "#004b8d",
+          "accent": "#f47d30",
+          "onBar": "#FFFFFF"
         }
       },
       "away": {
@@ -2164,9 +3015,10 @@
         "position": {
           "scale": 0.86,
           "offsetX": -8,
-          "offsetY": 7,
+          "offsetY": 2,
           "bg": "#FFFFFF",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -2177,15 +3029,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#FFFFFF"
+        "band": "#FFFFFF",
+        "header": {
+          "bar": "#005596",
+          "accent": "#e31937",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 0.86,
-          "offsetX": -8,
-          "offsetY": 7,
-          "bg": "#D0D0D0",
-          "pinstripe": false
+          "scale": 1.15,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#e31937",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -2318,7 +3176,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#e93c49"
+        "band": "#e93c49",
+        "header": {
+          "bar": "#231f20",
+          "accent": "#ef3e42",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -2401,6 +3264,106 @@
       }
     }
   },
+  "565": {
+    "name": "Team 565",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#00549e",
+          "accent": "#ad8505",
+          "onBar": "#fbf6e9"
+        },
+        "position": {
+          "scale": 1.18,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#004d90",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 50,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 8,
+          "paddingY": -4,
+          "rowShift": 0
+        },
+        "band": "#004d90"
+      },
+      "away": {
+        "position": {
+          "scale": 1.17,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#a2a4a7",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 52,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": -2,
+          "rowShift": 0
+        },
+        "band": "#003594"
+      }
+    }
+  },
+  "566": {
+    "name": "Team 566",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.53,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#fcbc7e",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "header": {
+          "bar": "#00245d",
+          "accent": "#005695",
+          "onBar": "#FFFFFF"
+        },
+        "wpaLayout": {
+          "size": 54,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#f5b77b"
+      },
+      "away": {
+        "position": {
+          "scale": 1.53,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#236192",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": -15,
+          "rowShift": 0
+        },
+        "band": "#00508a"
+      }
+    }
+  },
   "568": {
     "name": "Team 568",
     "treatments": {
@@ -2446,6 +3409,58 @@
           "rowShift": 0
         },
         "band": "#010101",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "572": {
+    "name": "Team 572",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 0.83,
+          "offsetX": 0,
+          "offsetY": 1,
+          "bg": "#862633",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#862633",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#8a2432",
+          "accent": "#c49d6f",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 0.83,
+          "offsetX": 0,
+          "offsetY": 1,
+          "bg": "#010101",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#adafb0",
         "wpaWordmark": true
       }
     }
@@ -2497,7 +3512,12 @@
           "paddingY": 1,
           "rowShift": 0
         },
-        "band": "#ba0c2f"
+        "band": "#ba0c2f",
+        "header": {
+          "bar": "#98002e",
+          "accent": "#d31245",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -2510,6 +3530,110 @@
           "rowShift": 0
         },
         "band": "#000000"
+      }
+    }
+  },
+  "580": {
+    "name": "Team 580",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1,
+          "offsetX": -5,
+          "offsetY": 0,
+          "bg": "#F6EFDC",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#ffffff",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#492f92",
+          "accent": "#231f20",
+          "onBar": "#FFFFFF"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": -5,
+          "offsetY": 0,
+          "bg": "#492f92",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#ffffff",
+        "wpaWordmark": true
+      }
+    }
+  },
+  "582": {
+    "name": "Team 582",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.31,
+          "offsetX": -27,
+          "offsetY": 0,
+          "bg": "#004588",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 73,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -38,
+          "rowShift": 0
+        },
+        "band": "#29639b",
+        "wpaWordmark": true,
+        "header": {
+          "bar": "#004990",
+          "accent": "#79bde8",
+          "onBar": "#f8f8f5"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.31,
+          "offsetX": -27,
+          "offsetY": 0,
+          "bg": "#73b4dd",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -39,
+          "rowShift": 0
+        },
+        "band": "#6dabd2",
+        "wpaWordmark": true
       }
     }
   },
@@ -2530,11 +3654,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.86,
-          "offsetX": -9,
-          "offsetY": 6,
-          "bg": "#002d6a",
-          "pinstripe": false
+          "scale": 0.9,
+          "offsetX": -1,
+          "offsetY": 3,
+          "bg": "#e50e63",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -2545,15 +3670,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#002d6a"
+        "band": "#002d6a",
+        "header": {
+          "bar": "#005596",
+          "accent": "#ffda02",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 0.86,
-          "offsetX": -9,
-          "offsetY": 6,
-          "bg": "#a20534",
-          "pinstripe": false
+          "scale": 0.9,
+          "offsetX": -1,
+          "offsetY": 3,
+          "bg": "#ffe02a",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -2588,8 +3719,9 @@
           "scale": 1,
           "offsetX": 0,
           "offsetY": 0,
-          "bg": "#FFFFFF",
-          "pinstripe": false
+          "bg": "#0a2240",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -2600,7 +3732,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#FFFFFF"
+        "band": "#FFFFFF",
+        "header": {
+          "bar": "#0a2240",
+          "accent": "#b2b3aa",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
@@ -2644,7 +3781,12 @@
           "paddingY": 5,
           "rowShift": 0
         },
-        "band": "#1C1C1C"
+        "band": "#1C1C1C",
+        "header": {
+          "bar": "#00539f",
+          "accent": "#000000",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "wpaLayout": {
@@ -2724,35 +3866,29 @@
       }
     }
   },
+  "3390": {
+    "name": "Team 3390",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#231f20",
+          "accent": "#ef3e42",
+          "onBar": "#FFFFFF"
+        }
+      }
+    }
+  },
   "3410": {
     "name": "Richmond Flying Squirrels",
     "treatments": {
       "home": {
         "position": {
-          "scale": 1.6,
-          "offsetX": 0,
-          "offsetY": 3,
-          "bg": "#d41041",
-          "pinstripe": false
-        },
-        "wpaLayout": {
-          "size": 82,
-          "rotate": -14,
-          "offsetX": 8,
-          "offsetY": 6,
-          "paddingX": 9,
-          "paddingY": -37,
-          "rowShift": 0
-        },
-        "band": "#d41041"
-      },
-      "away": {
-        "position": {
-          "scale": 1.6,
+          "scale": 1.8,
           "offsetX": 0,
           "offsetY": 3,
           "bg": "#231f20",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 82,
@@ -2763,7 +3899,84 @@
           "paddingY": -37,
           "rowShift": 0
         },
-        "band": "#231f20"
+        "band": "#231f20",
+        "header": {
+          "bar": "#231f20",
+          "accent": "#d31245",
+          "onBar": "#FFFFFF"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.8,
+          "offsetX": 0,
+          "offsetY": 3,
+          "bg": "#babcbe",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 82,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -37,
+          "rowShift": 0
+        },
+        "band": "#babcbe"
+      }
+    }
+  },
+  "3705": {
+    "name": "Team 3705",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.17,
+          "offsetX": 0,
+          "offsetY": 16,
+          "bg": "#dee257",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "header": {
+          "bar": "#002d5b",
+          "accent": "#bfd22b",
+          "onBar": "#FFFFFF"
+        },
+        "wpaLayout": {
+          "size": 70,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#dee257",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.17,
+          "offsetX": 0,
+          "offsetY": 16,
+          "bg": "#093460",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#093460",
+        "wpaWordmark": true
       }
     }
   },
@@ -2773,10 +3986,11 @@
       "home": {
         "position": {
           "scale": 1,
-          "offsetX": -15,
+          "offsetX": 0,
           "offsetY": 0,
           "bg": "#032c5b",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 60,
@@ -2787,15 +4001,21 @@
           "paddingY": -2,
           "rowShift": 0
         },
-        "band": "#032c5b"
+        "band": "#032c5b",
+        "header": {
+          "bar": "#002b5c",
+          "accent": "#e31837",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
           "scale": 1,
-          "offsetX": -15,
+          "offsetX": 0,
           "offsetY": 0,
-          "bg": "#e1143b",
-          "pinstripe": false
+          "bg": "#e31837",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 60,
@@ -2815,11 +4035,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.97,
-          "offsetX": -8,
-          "offsetY": 5,
-          "bg": "#003087",
-          "pinstripe": false
+          "scale": 1.16,
+          "offsetX": -2,
+          "offsetY": 18,
+          "bg": "#002d62",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -2830,15 +4051,21 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#003087"
+        "band": "#002d62",
+        "header": {
+          "bar": "#002d62",
+          "accent": "#e20177",
+          "onBar": "#FFFFFF"
+        }
       },
       "away": {
         "position": {
-          "scale": 0.97,
-          "offsetX": -8,
-          "offsetY": 5,
+          "scale": 1.16,
+          "offsetX": -2,
+          "offsetY": 18,
           "bg": "#e20177",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -2918,10 +4145,20 @@
       },
       "home": {
         "header": {
-          "bar": "#0f69b1",
+          "bar": "#0067b1",
           "accent": "#e2b880",
           "onBar": "#FBF6E9"
-        }
+        },
+        "wpaLayout": {
+          "size": 44,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0f69b1"
       }
     }
   },
@@ -3014,6 +4251,56 @@
         },
         "band": "#38C2CD",
         "wpaWordmark": true
+      }
+    }
+  },
+  "6324": {
+    "name": "Team 6324",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.24,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#ee3124",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 71,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 9,
+          "paddingY": -3,
+          "rowShift": 0
+        },
+        "band": "#0C2340",
+        "header": {
+          "bar": "#002b5e",
+          "accent": "#7ac143",
+          "onBar": "#ffffff"
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.25,
+          "offsetX": 0,
+          "offsetY": 9,
+          "bg": "#78BE21",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 11,
+          "paddingY": -8,
+          "rowShift": 0
+        },
+        "band": "#78BE21"
       }
     }
   },

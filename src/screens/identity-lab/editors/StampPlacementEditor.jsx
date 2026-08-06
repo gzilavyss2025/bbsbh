@@ -195,11 +195,9 @@ function SidePanel({ side, teamId, name, abbreviation, values, landed, placement
     <div className="idlab__stampplaceside">
       <div className="colorlab__wpapreviewhead">
         <span className="colorlab__wpapreviewlabel">{SIDE_LABEL[side]} slot</span>
-        {moved && (
-          <button type="button" className="colorlab__wparesetbtn" onClick={onReset}>
-            Reset
-          </button>
-        )}
+        <button type="button" className="colorlab__wparesetbtn" onClick={onReset} disabled={!moved}>
+          Reset
+        </button>
       </div>
 
       <div className="idlab__stampplaceart">

@@ -505,6 +505,23 @@
       }
     }
   },
+  "233": {
+    "name": "Charleston RiverDogs",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -5,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "234": {
     "name": "Durham Bulls",
     "treatments": {
@@ -539,6 +556,23 @@
       }
     }
   },
+  "260": {
+    "name": "Tulsa Drillers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 23,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -13,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "342": {
     "name": "Albuquerque Isotopes",
     "treatments": {
@@ -569,6 +603,23 @@
         "scale": 1,
         "offsetX": -17,
         "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "402": {
+    "name": "Akron RubberDucks",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 14,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.08,
+        "offsetX": 0,
+        "offsetY": 0,
         "rotation": 0
       }
     }
@@ -641,6 +692,40 @@
       }
     }
   },
+  "426": {
+    "name": "Wilmington Blue Rocks",
+    "treatments": {
+      "away": {
+        "scale": 1.13,
+        "offsetX": 25,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.11,
+        "offsetX": -20,
+        "offsetY": 5,
+        "rotation": 0
+      }
+    }
+  },
+  "427": {
+    "name": "Jersey Shore BlueClaws",
+    "treatments": {
+      "away": {
+        "scale": 0.95,
+        "offsetX": 21,
+        "offsetY": 17,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.06,
+        "offsetX": 0,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
   "428": {
     "name": "Greenville Drive",
     "treatments": {
@@ -692,6 +777,74 @@
       }
     }
   },
+  "435": {
+    "name": "Vancouver Canadians",
+    "treatments": {
+      "away": {
+        "scale": 0.99,
+        "offsetX": 11,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.89,
+        "offsetX": -20,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "437": {
+    "name": "Lake County Captains",
+    "treatments": {
+      "away": {
+        "scale": 1.09,
+        "offsetX": 18,
+        "offsetY": 6,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -20,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "440": {
+    "name": "Springfield Cardinals",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 12,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.96,
+        "offsetX": -39,
+        "offsetY": 4,
+        "rotation": 0
+      }
+    }
+  },
+  "443": {
+    "name": "Peoria Chiefs",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 18,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -33,
+        "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
   "445": {
     "name": "Columbus Clippers",
     "treatments": {
@@ -709,6 +862,23 @@
       }
     }
   },
+  "450": {
+    "name": "Daytona Tortugas",
+    "treatments": {
+      "away": {
+        "scale": 1.1,
+        "offsetX": 1,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.01,
+        "offsetX": -33,
+        "offsetY": 19,
+        "rotation": 0
+      }
+    }
+  },
   "451": {
     "name": "Iowa Cubs",
     "treatments": {
@@ -722,6 +892,17 @@
         "scale": 0.8,
         "offsetX": -9,
         "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
+  "452": {
+    "name": "Altoona Curve",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 20,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -777,6 +958,23 @@
       }
     }
   },
+  "460": {
+    "name": "Tri-City Dust Devils",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 32,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.88,
+        "offsetX": -28,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "461": {
     "name": "Eugene Emeralds",
     "treatments": {
@@ -828,6 +1026,23 @@
       }
     }
   },
+  "486": {
+    "name": "Spokane Indians",
+    "treatments": {
+      "away": {
+        "scale": 1.02,
+        "offsetX": 40,
+        "offsetY": 16,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.98,
+        "offsetX": -10,
+        "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
   "492": {
     "name": "Cedar Rapids Kernels",
     "treatments": {
@@ -875,6 +1090,40 @@
         "scale": 0.77,
         "offsetX": -22,
         "offsetY": 18,
+        "rotation": 0
+      }
+    }
+  },
+  "499": {
+    "name": "Lansing Lugnuts",
+    "treatments": {
+      "away": {
+        "scale": 0.93,
+        "offsetX": 18,
+        "offsetY": 6,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.87,
+        "offsetX": -27,
+        "offsetY": 6,
+        "rotation": 0
+      }
+    }
+  },
+  "510": {
+    "name": "San Antonio Missions",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 18,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -12,
+        "offsetY": 4,
         "rotation": 0
       }
     }
@@ -947,6 +1196,40 @@
       }
     }
   },
+  "537": {
+    "name": "Hudson Valley Renegades",
+    "treatments": {
+      "away": {
+        "scale": 0.97,
+        "offsetX": 22,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -18,
+        "offsetY": 17,
+        "rotation": 0
+      }
+    }
+  },
+  "550": {
+    "name": "South Bend Cubs",
+    "treatments": {
+      "away": {
+        "scale": 0.94,
+        "offsetX": 15,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.95,
+        "offsetX": -6,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "552": {
     "name": "Syracuse Mets",
     "treatments": {
@@ -998,6 +1281,91 @@
       }
     }
   },
+  "565": {
+    "name": "Quad Cities River Bandits",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 19,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -15,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "566": {
+    "name": "Clearwater Threshers",
+    "treatments": {
+      "away": {
+        "scale": 1.18,
+        "offsetX": 15,
+        "offsetY": 20,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -11,
+        "offsetY": 18,
+        "rotation": 0
+      }
+    }
+  },
+  "580": {
+    "name": "Winston-Salem Dash",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 21,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -27,
+        "offsetY": 0,
+        "rotation": 0
+      }
+    }
+  },
+  "582": {
+    "name": "West Michigan Whitecaps",
+    "treatments": {
+      "away": {
+        "scale": 1.3,
+        "offsetX": 2,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.06,
+        "offsetX": -33,
+        "offsetY": 16,
+        "rotation": 0
+      }
+    }
+  },
+  "1350": {
+    "name": "Northwest Arkansas Naturals",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 11,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -6,
+        "offsetY": 6,
+        "rotation": 0
+      }
+    }
+  },
   "1410": {
     "name": "Lehigh Valley IronPigs",
     "treatments": {
@@ -1011,6 +1379,23 @@
         "scale": 0.93,
         "offsetX": -6,
         "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "1956": {
+    "name": "Somerset Patriots",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 11,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -5,
+        "offsetY": 6,
         "rotation": 0
       }
     }
@@ -1049,6 +1434,57 @@
       }
     }
   },
+  "3410": {
+    "name": "Richmond Flying Squirrels",
+    "treatments": {
+      "away": {
+        "scale": 1.34,
+        "offsetX": 14,
+        "offsetY": 16,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.32,
+        "offsetX": 0,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "3705": {
+    "name": "Columbia Fireflies",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 13,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -13,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "4124": {
+    "name": "Pensacola Blue Wahoos",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 36,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -21,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "4904": {
     "name": "El Paso Chihuahuas",
     "treatments": {
@@ -1066,6 +1502,23 @@
       }
     }
   },
+  "5015": {
+    "name": "Biloxi Shuckers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 16,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.96,
+        "offsetX": -21,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "5434": {
     "name": "Sugar Land Space Cowboys",
     "treatments": {
@@ -1079,6 +1532,23 @@
         "scale": 1,
         "offsetX": -15,
         "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "6324": {
+    "name": "Hub City Spartanburgers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.93,
+        "offsetX": -27,
+        "offsetY": 11,
         "rotation": 0
       }
     }
