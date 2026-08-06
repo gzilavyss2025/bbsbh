@@ -574,11 +574,21 @@
 /* The control that both labels and switches the notes, in the batting order
    masthead's aside slot (where BullpenBoard puts its InfoPopover).
 
-   Colour here is load-bearing, not decorative: kraft gold as TEXT on the navy
-   bar measures 4.35:1, under the 4.5:1 check-contrast.mjs demands. So the OFF
-   state is --text-on-ink (13.5:1) inside a gold BORDER (a UI element, which
-   only needs 3:1), and the ON state is the already-validated --text-on-seal on
-   --seal. Don't repaint this gold-on-navy without re-running that guard. */
+   Colour here is load-bearing, not decorative. Kraft gold as TEXT on the bar
+   measures 4.35:1, under the 4.5:1 check-contrast.mjs demands — so neither
+   state paints gold text. Both states are FILLED pills instead of
+   filled-vs-outline: the bar is club-themed (ADR-0030), so a transparent pill
+   inherits a different backdrop for all 30 clubs, while a paper fill is the
+   same chip everywhere and matches the card rows beneath it. Measured:
+   OFF text 13.5:1, ON text 5.4:1, and each pill clears 3:1 against the bar
+   (14.2:1 and 4.6:1 on the darkest club bar).
+
+   The catch of filling both: paper and kraft separate by only 3.11:1, which
+   only just clears the 3:1 a non-text state cue needs, and hue alone is a poor
+   state signal anyway. So the dot carries the state by SHAPE as well — a
+   hollow ring when off, filled when on — leaving three redundant cues
+   (aria-pressed, fill colour, dot shape). Don't collapse the dot back to an
+   opacity change. */
 .matchupswitch {
   display: inline-flex;
   align-items: center;
@@ -586,8 +596,8 @@
   padding: 3px 9px;
   border: var(--bw-hair) solid var(--seal);
   border-radius: var(--radius-pill);
-  background: none;
-  color: var(--text-on-ink);
+  background: var(--surface-card);
+  color: var(--text-body);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -596,18 +606,19 @@
   cursor: pointer;
 }
 .matchupswitch__dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
+  border: var(--bw-hair) solid currentColor;
   border-radius: 50%;
-  background: currentColor;
-  opacity: 0.35;
+  background: none;
 }
 .matchupswitch[aria-pressed='true'] {
   background: var(--seal);
+  border-color: var(--seal);
   color: var(--text-on-seal);
 }
 .matchupswitch[aria-pressed='true'] .matchupswitch__dot {
-  opacity: 1;
+  background: currentColor;
 }
 
 /* Batters with history against tonight's starter who AREN'T in the posted nine

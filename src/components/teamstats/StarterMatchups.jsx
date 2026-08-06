@@ -56,11 +56,13 @@ export function useMatchupNotes() {
 // name is genuinely ambiguous — it could read as a season line or a last-game
 // line — and the notes' own rows deliberately don't repeat "vs May" nine times.
 //
-// Colour is not free here: kraft gold on the navy bar measures 4.35:1, under
-// the 4.5:1 check-contrast.mjs requires of text. So the OFF state is
-// --text-on-ink (13.5:1) inside a gold border (a UI element, which only needs
-// 3:1), and the ON state is the already-validated --text-on-seal on --seal.
-// Don't restyle this to gold text without re-running that guard.
+// Colour is not free here: kraft gold as TEXT on the bar measures 4.35:1,
+// under the 4.5:1 check-contrast.mjs requires, so neither state paints gold
+// text. Both states are filled pills (paper when off, kraft when on) rather
+// than filled-vs-outline, because the bar is club-themed — a transparent pill
+// would sit on 30 different backdrops. The dot is a redundant, non-colour
+// state cue: hollow when off, filled when on. See .matchupswitch in
+// styles/10-lineup.css for the measured numbers before changing any of it.
 //
 // No .toUpperCase() anywhere — the caps are CSS, per the ALL-CAPS invariant
 // (ADR-0017 / check-name-casing.mjs).
