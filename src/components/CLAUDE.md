@@ -26,10 +26,11 @@ about what it is. Do not tidy it into a folder.
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `ReportFooter`, `TallyBrand`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. `BackBtn` sits here rather than in `ui/` because it's page furniture that knows about route history, not a context-free primitive |
 | `game/` | `GameCard`, `GameFinder`, `GameFinderModal`, `GameStoryCard`, `GameResultFace`, `GamePhotosStrip`, `PastGameFlipCard`, `ContinueScoring`, `BoxScoreSkeleton`, `WhatsBrewingModal` | The slate/game-selection layer — a game before you're inside its innings |
 | `gamehud/` | `RollingLine`, `Scorebug`, `StatBox` | Persistent live-game heads-up widgets shown while scoring |
+| `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `PreHalfCallouts`, `EnteringReference`, `ExtrasBanner`, `DelayCard`, `MarginNotes` | The innings-viewer shell around the at-bat feed |
 | `logbook/` | `GameStamp`, `StampGameButton` | The Logbook stamp (ADR-0035) — `check-stamp-surfaces.mjs` allowlists these by path |
 | `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos` | Club-mark rendering and its sketch/print modal |
-| `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail` | Player-identity primitives and career-level cards |
+| `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail`, `PlayerHighlightsRail` | Player-identity primitives and career-level cards |
 | `playerstats/` | `StatcastCard`, `RecentFormCard`, `SplitsVsTeam`, `FoulCard`, `MilestoneWatchCard`, `PitcherWorkloadCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities) |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `PinchRunNotice`, `CalloutNote`, `DueUpNextCard`, `UpNextBatters`, `HighlightSheet` | The at-bat feed's notification-card family (ADR-0017) |
 | `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |

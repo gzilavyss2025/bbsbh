@@ -1,0 +1,181 @@
+/* ============================================================
+   HIGHLIGHT CLIP CARD — the reusable video-highlight clip card
+   (src/components/highlights/HighlightClipCard.jsx).
+
+   One card per clip in a horizontal scroll-snap rail (today the team
+   Games tab's TeamHighlightsRail; a PlayerHighlightsRail is planned to
+   reuse it verbatim — .scratch/highlights-cascade/issues/04). Purely
+   presentational, caller-agnostic, so these rules must not know about
+   teams, games, or the rail shell (.teamphotos__* owns the track).
+
+   THE METAPHOR: a printed still pasted into the scorebook. The whole
+   card is a slip of bright photo stock (--surface-inset, the same
+   brightest-paper token the revealed insets use) with a thin mat of
+   that paper around the 16:9 frame, resting on the page under
+   --shadow-card; the caption is written on the slip's lower margin the
+   way an album print gets hand-labeled — what the play was (the
+   Newsreader read voice in natural case, because a clip title IS a
+   play description — same sanctioned caps exception as .pbp__desc),
+   then which game it came from (mono graphite, the scorebook's
+   figures voice). The play affordance is a small tab of kraft tape
+   stuck on the print's lower-left, a hair off-square the way tape
+   goes down by hand — solid --seal, like .sstrip__cell--home's tape
+   tone, deliberately NOT the --seal-texture hatch, which is the
+   spoiler-cover weave and would claim "sealed" on a card that is the
+   opposite. No gradient scrim, no hover zoom: prints don't dim and
+   don't move, and both are the generic video-thumbnail playbook this
+   card exists to avoid — the amber tape carries its own contrast
+   (--text-on-seal is a validated pair) against any poster frame.
+
+   Numbered last-in-sequence, not beside 28/29 where its one consumer
+   renders: same append-at-the-end reasoning as 51-similar-players.css
+   (inserting mid-sequence renumbers twenty-odd partials across live
+   branches), and this block overrides nothing, so the cascade doesn't
+   care. It started life inside 29-team-transactions.css and moved out
+   when that file blew its check-file-size budget — a reusable
+   component's CSS was never going to stay a team-transactions odd job
+   anyway. */
+
+/* The card is a <button> (tap opens the HighlightSheet player), so it
+   resets UA button chrome the same way .last10__card does. */
+.hlclip {
+  flex: 0 0 232px;
+  width: 232px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--dur-snappy) var(--ease-standard),
+    border-color var(--dur-snappy) var(--ease-standard),
+    transform var(--dur-snappy) var(--ease-standard);
+}
+/* The slip lifts a hair off the page and its edge warms to the kraft
+   tone — the same border-color: var(--seal) hover the photo tiles
+   beside it use, so the two rails read as one family. */
+.hlclip:hover {
+  border-color: var(--seal);
+  box-shadow: var(--shadow-raised);
+  transform: translateY(-1px);
+}
+.hlclip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.hlclip__frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: var(--bg-page);
+}
+.hlclip__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The kraft-tape Watch tab — rotated a hair off-square (tape goes down
+   by hand) and shadowed with the same soft paper elevation as the slip
+   itself, so it reads as stuck ON the print rather than floating over
+   a video. Triangle drawn from borders (::before) so there's no
+   unicode-glyph baseline to fight — currentColor, so it inherits the
+   tab's validated on-seal ink. */
+.hlclip__play {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  border-radius: var(--radius-xs);
+  background: var(--seal);
+  color: var(--text-on-seal);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-compact);
+  transform: rotate(-1.5deg);
+  box-shadow: var(--shadow-card);
+}
+.hlclip__play::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid currentColor;
+}
+/* Deepen to the hatch-line amber on hover — still ≥4.5:1 under
+   --seal-ink (the pair colors.css documents for the seal texture's
+   darker stripe). */
+.hlclip:hover .hlclip__play {
+  background: var(--seal-hatch);
+}
+
+/* The slip's lower margin: play title in body ink, game line in the
+   scorebook's mono-figures voice. Title clamps to two lines and
+   reserves that height even when it fits on one, so a rail of mixed
+   title lengths keeps every game line on the same baseline. */
+.hlclip__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-1) var(--space-1);
+}
+.hlclip__title {
+  font-family: var(--font-read);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-text);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em;
+}
+/* Natural case: a clip title is a play sentence ("Brice Turang's RBI
+   single"), the same species as .pbp__desc and .tscoremodal__title,
+   and it borrows their sanctioned exception to the ALL-CAPS invariant
+   (`#root *` would otherwise win over the class rule directly). */
+#root .hlclip__title {
+  text-transform: none; /* caps-exempt: highlight titles read as real play sentences, same exception as .pbp__desc */
+}
+.hlclip__meta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+}
+
+/* Rail-side loading tile, same footprint as a card so the track
+   doesn't reflow when real clips land (used by TeamHighlightsRail
+   while the static highlights file is in flight). */
+.hlclip__loading {
+  flex: 0 0 232px;
+  width: 232px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) dashed var(--border-rule);
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+}
