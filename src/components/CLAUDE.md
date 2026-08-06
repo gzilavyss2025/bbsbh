@@ -37,7 +37,7 @@ about what it is. Do not tidy it into a folder.
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
 | `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035) |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |
-| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal` | Team-level statistical cards |
+| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal`, `StarterMatchups` | Team-level statistical cards |
 | `transactions/` | `TeamTransactionsCard`, `TradeCard`, `TransactionTimeline` | Roster-move surfaces |
 | `umpire/` | `UmpireAccuracyModal`, `UmpireLink` | Umpire-specific surfaces (the tier pill/glyph live in `badges/` — shared with Game Score rankings) |
 

@@ -616,6 +616,39 @@ export function selectBoxscore(feed) {
   }
 }
 
+// The terminal pitch's `playId` for a /winProbability entry — the join key to
+// that play's video highlight clip, whose `guid` is the same string (see
+// api/highlights.js). Resolved by cross-referencing the entry's OWN
+// `about.atBatIndex` into the live feed's `allPlays`, then taking the last
+// pitch event, the identical rule playbyplay/halfInningFeed.js already uses
+// for the per-play "Watch" button.
+//
+// Why not read it straight off the win-prob entry, which does carry its own
+// `playEvents[]` with the very same playIds? Because WIN_PROB_FIELDS
+// deliberately prunes `playEvents` out of that fetch — it is ~85% of the
+// payload (game.js's header) — and putting it back to recover one string per
+// game measured at +70% on the pruned response (51 KB -> 87 KB, gamePk
+// 823035). The feed is already fully in memory wherever this runs, so the
+// cross-reference is free.
+//
+// `atBatIndex` is an exact key, not a heuristic: it is a play's own index in
+// `allPlays`, so this needs none of the (inning, half, batterId) tie-breaking
+// a fuzzier match would. Verified live 2026-08-06 over 549 plays / 7 gamePks
+// (823035, 777747, 778501, 778442, 777877, 824087, 781572): every win-prob
+// entry resolved to a play, and its terminal playId matched the win-prob
+// entry's own playEvents on all 549, with no misses.
+//
+// Returns null whenever the feed was fetched through PAST_GAME_FEED_FIELDS
+// (which lists neither `playEvents` nor `playId`) — the slate flip-card path,
+// which renders no Watch affordance. Callers must treat null as ordinary.
+function playIdForWinProbEntry(entry, feed) {
+  const idx = entry?.about?.atBatIndex
+  if (typeof idx !== 'number') return null
+  const play = (feed?.liveData?.plays?.allPlays ?? []).find((p) => p?.about?.atBatIndex === idx)
+  const pitches = (play?.playEvents ?? []).filter((e) => e.isPitch)
+  return pitches.at(-1)?.playId ?? null
+}
+
 // PLAY OF THE GAME — the single most memorable play, distinct from the three
 // stars below (which rank PLAYERS by their cumulative score over the whole
 // game; this ranks one PLAY). Reveal-only, same rule as computeThreeStars:
@@ -656,12 +689,17 @@ export function computePlayOfTheGame(winProb, feed) {
   }
   if (!best) return null
   const batterId = best.matchup?.batter?.id ?? null
+  const playId = playIdForWinProbEntry(best, feed)
   const found = batterId ? findBoxscorePlayer(feed?.liveData?.boxscore, batterId) : null
   const batterGd = found ? feed?.gameData?.players?.[`ID${batterId}`] ?? found.player.person : null
   return {
     desc: best.result?.description ?? '',
     inning: best.about?.inning ?? null,
     half: best.about?.isTopInning ? 'top' : 'bottom',
+    // The join key to this play's video clip (see playIdForWinProbEntry).
+    // Nullable, and null on the pruned past-game path by design — the slate
+    // flip-card's .flipback__potg shows the description only, no Watch button.
+    playId,
     batterId,
     batterName: batterGd ? firstLast(batterGd) : '',
     // Team + position, same lookup shape as starLine below — lets the card

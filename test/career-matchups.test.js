@@ -1,97 +1,119 @@
-// Unit coverage for the pure sort/format helpers behind the lineup page's
-// Career Matchups tables (src/api/careerMatchups.js, wired into
-// TeamInfo.jsx's CareerMatchups/MatchupTable). careerMatchupsFor itself is
-// a thin symmetric-key lookup and isn't covered here.
+// Unit coverage for the pure lookup/format helpers behind the lineup page's
+// "Career vs today's starter" card (src/api/careerMatchups.js, wired into
+// TeamInfo.jsx's StarterMatchups).
+//
+// The sortByPitcher/groupByPitcher helpers this file used to cover are gone
+// with the card that needed them: it crossed every batter with every pitcher
+// on the other club and had to re-group the interleaved result. The card is
+// now scoped to the one probable starter, so the generator emits a single
+// already-ordered list per side and there is nothing left to regroup.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { sortByPitcher, groupByPitcher, matchupLine } from '../src/api/careerMatchups.js'
+import { starterMatchupsFor, splitMatchupRows, matchupLine } from '../src/api/careerMatchups.js'
 
-function row({ batterId, pitcherId, pa }) {
-  return {
-    batter: { id: batterId, name: `Batter ${batterId}`, teamId: 1 },
-    pitcher: { id: pitcherId, name: `Pitcher ${pitcherId}`, teamId: 2 },
-    ab: pa,
-    h: 0,
-    hr: 0,
-    bb: 0,
-    k: 0,
-    pa,
-    levels: [],
-  }
+function batter(id, pa) {
+  return { id, name: `Batter ${id}`, ab: pa, h: 0, hr: 0, bb: 0, hbp: 0, k: 0, pa, levels: [] }
 }
 
-test('sortByPitcher groups every row by pitcher, keeping batters adjacent', () => {
-  const rows = [
-    row({ batterId: 1, pitcherId: 10, pa: 3 }),
-    row({ batterId: 2, pitcherId: 20, pa: 5 }),
-    row({ batterId: 3, pitcherId: 10, pa: 7 }),
-  ]
-  const sorted = sortByPitcher(rows)
-  const pitcherIds = sorted.map((r) => r.pitcher.id)
-  // Pitcher 10's two rows stay together, never split by pitcher 20's row.
-  assert.deepEqual(pitcherIds, [10, 10, 20])
+const data = {
+  matchups: {
+    777: {
+      sides: {
+        158: { pitcher: { id: 10, name: 'Away Starter' }, batters: [batter(1, 9), batter(2, 4)] },
+        134: { pitcher: { id: 20, name: 'Home Starter' }, batters: [batter(3, 6)] },
+      },
+    },
+    // Game 2 of the same day's doubleheader: same two clubs, different arms.
+    778: {
+      sides: {
+        158: { pitcher: { id: 30, name: 'Game Two Starter' }, batters: [batter(1, 2)] },
+      },
+    },
+    // A side the generator reached but found no history for.
+    779: { sides: { 158: { pitcher: { id: 40, name: 'Debutant' }, batters: [] } } },
+  },
+}
+
+// --- starterMatchupsFor ------------------------------------------------------
+
+test('starterMatchupsFor returns the batting club\'s own side, not the opponent\'s', () => {
+  const side = starterMatchupsFor(data, 777, 158)
+  assert.equal(side.pitcher.name, 'Away Starter')
+  assert.deepEqual(side.batters.map((b) => b.id), [1, 2])
 })
 
-test('sortByPitcher ranks pitcher groups by the group\'s total PA', () => {
-  const rows = [
-    // Pitcher 10: total PA 4 (lower total, but one higher single-row PA)
-    row({ batterId: 1, pitcherId: 10, pa: 4 }),
-    // Pitcher 20: total PA 9 across two rows
-    row({ batterId: 2, pitcherId: 20, pa: 5 }),
-    row({ batterId: 3, pitcherId: 20, pa: 4 }),
-  ]
-  const sorted = sortByPitcher(rows)
-  assert.deepEqual(
-    sorted.map((r) => r.pitcher.id),
-    [20, 20, 10],
-  )
+test('starterMatchupsFor resolves a numeric gamePk against the file\'s string keys', () => {
+  // The live feed carries gamePk as a number; JSON object keys are strings.
+  assert.equal(starterMatchupsFor(data, 777, 158).pitcher.id, 10)
+  assert.equal(starterMatchupsFor(data, '777', '158').pitcher.id, 10)
 })
 
-test('sortByPitcher ranks batters within a pitcher group by PA, most first', () => {
-  const rows = [
-    row({ batterId: 1, pitcherId: 10, pa: 2 }),
-    row({ batterId: 2, pitcherId: 10, pa: 8 }),
-    row({ batterId: 3, pitcherId: 10, pa: 5 }),
-  ]
-  const sorted = sortByPitcher(rows)
-  assert.deepEqual(
-    sorted.map((r) => r.batter.id),
-    [2, 3, 1],
-  )
+test('starterMatchupsFor keeps a doubleheader\'s two games on their own starters', () => {
+  // The regression this file's gamePk key exists for: keyed by team pair, both
+  // games of a doubleheader (and every night of a series) collapsed onto
+  // whichever starter happened to be processed last.
+  assert.equal(starterMatchupsFor(data, 777, 158).pitcher.name, 'Away Starter')
+  assert.equal(starterMatchupsFor(data, 778, 158).pitcher.name, 'Game Two Starter')
 })
 
-test('sortByPitcher on an empty list returns an empty list', () => {
-  assert.deepEqual(sortByPitcher([]), [])
+test('starterMatchupsFor is null for a side with no career history', () => {
+  assert.equal(starterMatchupsFor(data, 779, 158), null)
 })
 
-test('groupByPitcher collapses adjacent same-pitcher rows into one group each', () => {
-  const rows = sortByPitcher([
-    row({ batterId: 1, pitcherId: 10, pa: 3 }),
-    row({ batterId: 2, pitcherId: 20, pa: 9 }),
-    row({ batterId: 3, pitcherId: 10, pa: 7 }),
-  ])
-  const groups = groupByPitcher(rows)
-  // Pitcher 10 (total PA 10 > pitcher 20's 9) leads; his two batters share one
-  // group, ordered by PA (batter 3's 7 ahead of batter 1's 3).
-  assert.deepEqual(
-    groups.map((g) => ({ pitcher: g.pitcher.id, batters: g.rows.map((r) => r.batter.id) })),
-    [
-      { pitcher: 10, batters: [3, 1] },
-      { pitcher: 20, batters: [2] },
-    ],
-  )
+test('starterMatchupsFor is null for an unknown game, an unknown club, or missing data', () => {
+  assert.equal(starterMatchupsFor(data, 999, 158), null)
+  assert.equal(starterMatchupsFor(data, 777, 111), null)
+  assert.equal(starterMatchupsFor(null, 777, 158), null)
+  assert.equal(starterMatchupsFor({ matchups: {} }, 777, 158), null)
 })
 
-test('groupByPitcher carries the pitcher object and every row through unchanged', () => {
-  const rows = [row({ batterId: 1, pitcherId: 10, pa: 4 })]
-  const [group] = groupByPitcher(rows)
-  assert.equal(group.pitcher, rows[0].pitcher)
-  assert.deepEqual(group.rows, rows)
+test('starterMatchupsFor is null when the game or club is unset', () => {
+  // A cold load renders before the feed lands, so both arrive undefined.
+  assert.equal(starterMatchupsFor(data, undefined, 158), null)
+  assert.equal(starterMatchupsFor(data, 777, undefined), null)
 })
 
-test('groupByPitcher on an empty list returns an empty list', () => {
-  assert.deepEqual(groupByPitcher([]), [])
+// --- splitMatchupRows --------------------------------------------------------
+
+test('splitMatchupRows indexes every row by batter id for the inline lookup', () => {
+  const side = starterMatchupsFor(data, 777, 158)
+  const { byId } = splitMatchupRows(side, new Set([1, 2]))
+  assert.equal(byId.get(1).pa, 9)
+  assert.equal(byId.get(2).pa, 4)
 })
+
+test('splitMatchupRows sends a batter who is NOT in the posted nine to the bench list', () => {
+  // The case that makes the bench row necessary: measured across a real slate,
+  // every side had at least one of these, so annotating only the posted nine
+  // would drop a live pinch-hit read every game.
+  const side = starterMatchupsFor(data, 777, 158)
+  const { byId, bench } = splitMatchupRows(side, new Set([1]))
+  assert.deepEqual(bench.map((r) => r.id), [2])
+  // Still indexed — the bench row renders from the same records.
+  assert.equal(byId.size, 2)
+})
+
+test('splitMatchupRows leaves the bench empty when every batter is in the order', () => {
+  const side = starterMatchupsFor(data, 777, 158)
+  assert.deepEqual(splitMatchupRows(side, new Set([1, 2])).bench, [])
+})
+
+test('splitMatchupRows benches nobody before a lineup posts', () => {
+  // No posted order means the card is listing the whole roster, so every
+  // batter's line goes inline and there is nothing left over to collect.
+  const side = starterMatchupsFor(data, 777, 158)
+  assert.deepEqual(splitMatchupRows(side, new Set()).bench, [])
+  assert.deepEqual(splitMatchupRows(side, undefined).bench, [])
+  assert.equal(splitMatchupRows(side, new Set()).byId.size, 2)
+})
+
+test('splitMatchupRows survives a null side', () => {
+  const { byId, bench } = splitMatchupRows(null, new Set([1]))
+  assert.equal(byId.size, 0)
+  assert.deepEqual(bench, [])
+})
+
+// --- matchupLine -------------------------------------------------------------
 
 test('matchupLine renders the bare AB/H line with no extras or levels', () => {
   const r = { h: 2, ab: 7, hr: 0, bb: 0, k: 0, levels: [] }

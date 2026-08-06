@@ -84,7 +84,17 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
   the innings view specifically, its only consumer), but `highlightsByPlayId`
   is only ever called inside `HalfInning`'s `SealBox` reveal function.
-  Degrades to `[]` on failure or off-MLB.
+  Degrades to `[]` on failure or off-MLB. `eligibleHighlightForPlay(items,
+  playId)` is the SECOND consumer of that join and reveal-only in the same
+  sense — one play's clip for the box score's Play of the Game card, gated by
+  `isEligibleForPositiveFilter` so an `abs`/`challenge` review can't anchor a
+  card claiming "the best play" (the per-play button deliberately shows ANY
+  clip). It requires no significance tag: the play is picked by this app's own
+  WPA ranking, and requiring MLB's tag on top measured out at 57% of games
+  losing a button that had a real matched clip. The card's `playId` comes from
+  `boxscore.js`'s `computePlayOfTheGame` — see its `playIdForWinProbEntry` for
+  why the join reads the FEED by `about.atBatIndex` rather than the win-prob
+  entry's own (pruned-away) `playEvents`.
   Also holds the highlights **cascade**'s pure classification —
   `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
   `highlightPoster` — which is NOT reveal-only: it's plain data transform over
@@ -93,7 +103,13 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   `content` payload, and the FILTER POLICY must have exactly one home (a second
   copy is how a rail and its generator drift apart). Field names and the
   taxonomy vocabulary were verified live over 1,150 clips / 41 games; see
-  `.scratch/highlights-cascade/`.
+  `.scratch/highlights-cascade/`. `highlightPlaybacks` accepts either the raw
+  `content` item's `playbacks` array OR an already-resolved `{hls, mp4}`
+  object — the shape a highlights-cascade team/player file stores per clip
+  (the generator calls this function once at write time and keeps the
+  result) — so `HighlightSheet.jsx` can stay the one consumer for both the
+  box score's raw per-play item and a rail's precomputed clip, with neither
+  rail re-deriving playback URLs by hand.
 - `gamehighlights.js` — the reader half of the cascade: the static per-team
   archive `scripts/gen-highlights.mjs` precomputes
   (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail

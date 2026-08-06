@@ -56,7 +56,7 @@ const FOLLOW_POLL_MS = 15 * 1000
 
 // Sticky "has `active` ever been true for the current `resetKey`" flag — lets
 // a fetch start lazily on first visit to its consuming surface (winProb: the
-// innings view or the box score; highlights: the innings view — see below),
+// innings view or the box score; highlights: either one too — see below),
 // then behave exactly like every other feed-derived fetch in this hook: fired
 // once, cached, and immune to a later visit toggling the surface off and back
 // on (navigating from the box score back to a lineup page must not drop
@@ -282,12 +282,16 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   // wiring: nothing here is rendered until highlightsByPlayId is called
   // inside that reveal, so a poll landing mid-game is still spoiler-safe.
   // The fetch is safe to start eagerly (a raw fetch result produces no DOM on
-  // its own), but its only consumer is the innings view's SealBox reveal, so
-  // it waits for that view to actually be opened (`useEverActive`), same
-  // reasoning as `winProb` above; the 5-minute poll below is a no-op while
-  // inactive. Resolves [] on failure or off-MLB (most MiLB games carry no
-  // clips).
-  const highlightsActive = useEverActive(activeStep === 2, game.gamePk)
+  // its own), but its consumers are both behind a seal, so it waits for one of
+  // their views to actually be opened (`useEverActive`), same reasoning as
+  // `winProb` above; the 5-minute poll below is a no-op while inactive.
+  // Resolves [] on failure or off-MLB (most MiLB games carry no clips).
+  //
+  // TWO consumers now, so the gate matches winProb's exactly: the innings
+  // view's per-play Watch buttons (step 2) and the box score's Play of the
+  // Game card (step 3), which looks up the one clip for its WPA-picked play
+  // inside its own SealBox reveal render.
+  const highlightsActive = useEverActive(activeStep === 2 || activeStep === 3, game.gamePk)
   const highlights = useAsync(
     () => (feed && highlightsActive ? fetchHighlights(game.gamePk) : Promise.resolve(null)),
     [game.gamePk, Boolean(feed), highlightsActive],
@@ -393,10 +397,10 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const formerTeammatesData = teammates.data ?? null
 
-  // Career batter/pitcher matchup history between the two clubs' rosters, at
-  // ANY level either has played (see api/careerMatchups.js) — same
-  // build-time-fetch tier as former teammates: one cached same-origin read,
-  // MLB + MiLB alike, degrading to no card outside the build's window.
+  // Each club's batters vs the opposing probable starter (see
+  // api/careerMatchups.js) — same build-time-fetch tier as former teammates:
+  // one cached same-origin read, MLB + MiLB alike, degrading to no card
+  // outside the build's window.
   const careerMatchupsQuery = useAsync(
     () => (enrichmentReady ? loadCareerMatchups() : Promise.resolve(null)),
     [enrichmentReady],

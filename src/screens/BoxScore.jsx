@@ -4,6 +4,7 @@ import { revealStampFacts } from '../api/linescore.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
 import { computeGameCalloutNotes } from '../api/callout-notes.js'
+import { eligibleHighlightForPlay, highlightPoster } from '../api/highlights.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
@@ -16,6 +17,7 @@ import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { PerformerCard } from '../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../components/playbyplay/CalloutNote.jsx'
+import { HighlightSheet } from '../components/playbyplay/HighlightSheet.jsx'
 import { GameStoryCard } from '../components/game/GameStoryCard.jsx'
 import { StampGameButton } from '../components/logbook/StampGameButton.jsx'
 import { GamePhotosStrip } from '../components/game/GamePhotosStrip.jsx'
@@ -89,6 +91,7 @@ export function BoxScore({
   winProbTreatment,
   callouts,
   vsTeam,
+  highlights,
   onReload,
   loading,
   lastUpdated,
@@ -135,6 +138,13 @@ export function BoxScore({
           // score itself.
           const stars = computeThreeStars(winProbability, feed)
           const potg = computePlayOfTheGame(winProbability, feed)
+          // The video clip for that one play, if MLB cut an eligible one (see
+          // eligibleHighlightForPlay). Looked up HERE, inside the reveal
+          // render, for the same ADR-0001 reason as everything else on this
+          // line — a clip's title and poster narrate the outcome, so neither
+          // may exist in the DOM before the tap. Null is the common case and
+          // renders the card exactly as it did before this button existed.
+          const potgHighlight = eligibleHighlightForPlay(highlights, potg?.playId)
           const winProbPoints = selectWinProbPath(winProbability)
           const winProbBigPlays = selectWinProbBigPlays(winProbability)
           // One per-inning play-by-play pass, shared by the Statcast
@@ -164,6 +174,7 @@ export function BoxScore({
               box={box}
               stars={stars}
               potg={potg}
+              potgHighlight={potgHighlight}
               winProbPoints={winProbPoints}
               winProbBigPlays={winProbBigPlays}
               winProbTreatment={winProbTreatment}
@@ -208,7 +219,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
+function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -334,7 +345,12 @@ function BoxScoreBody({ feed, box, stars, potg, winProbPoints, winProbBigPlays, 
           </div>
           <div className="bs__col">
             <Decisions decisions={box.decisions} />
-            <PlayOfTheGame play={potg} awayAbbr={box.away.abbreviation} homeAbbr={box.home.abbreviation} />
+            <PlayOfTheGame
+              play={potg}
+              highlight={potgHighlight}
+              awayAbbr={box.away.abbreviation}
+              homeAbbr={box.home.abbreviation}
+            />
             <ThreeStars stars={stars} />
             {/* Stacked under Three Stars in this same right-hand column
                 (rather than a full-width row of its own) so on desktop/ipad
@@ -1098,10 +1114,36 @@ function ordinal(n) {
 // The night's single most memorable moment (see computePlayOfTheGame) — the
 // play itself, not a player, so it sits above the three stars. Hidden entirely
 // when WPA isn't available (most MiLB parks).
-function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
+//
+// `highlight` is the eligible video clip for this exact play, or null — which
+// is the majority case (a clip was matched on 32-41 of 44 sampled games, but
+// coverage is genuinely uneven). When it's null the card renders exactly as it
+// did before the affordance existed: no empty state, nothing additive is
+// missing, this is purely a bonus when MLB happens to have cut the play.
+//
+// Everything here is already inside the box score's single top-level SealBox
+// (see BoxScore above), which is what makes the poster safe: it's an image of
+// a play whose description, score and players this same card is printing in
+// text two lines up, so it adds no information the reader doesn't already
+// have. That is the whole argument — it does NOT generalize to a surface
+// where the play isn't already spelled out.
+function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
+  const [watchOpen, setWatchOpen] = useState(false)
+  // A poster URL that 404s would leave a broken frame on the card, so a failed
+  // load falls back to the plain text button rather than an empty box.
+  const [posterFailed, setPosterFailed] = useState(false)
   if (!play || !play.desc) return null
   const halfLabel = play.half === 'top' ? 'Top' : 'Bottom'
   const hasScore = play.awayScore != null && play.homeScore != null
+  const poster = highlight && !posterFailed ? highlightPoster(highlight) : null
+  // Generic label only — never the clip's own title, same discipline as
+  // PlayByPlay's per-play button: the title narrates the play in words the
+  // card's own prose hasn't necessarily been read yet. The batter's name is
+  // enough to say what you're about to watch, and the full context still
+  // reaches screen readers through aria-label.
+  const watchLabel = play.batterName
+    ? `Watch highlight for ${play.batterName}`
+    : 'Watch highlight for the play of the game'
   return (
     <div className="bs__potg">
       <SectionMasthead as="h3" title="Play of the game" />
@@ -1145,6 +1187,35 @@ function PlayOfTheGame({ play, awayAbbr, homeAbbr }) {
           </p>
         </div>
       </div>
+      {/* The poster IS the button when there's a frame to show — a 16:9 still
+          with a play badge over it, which is the affordance the team/player
+          rails will read as too. With no usable poster it degrades to the same
+          plain kraft pill the innings view's per-play button uses, so the
+          feature never depends on the image resolving. */}
+      {highlight && (
+        <button
+          type="button"
+          className={`bs__potgWatch${poster ? ' bs__potgWatch--poster' : ''}`}
+          onClick={() => setWatchOpen(true)}
+          aria-label={watchLabel}
+        >
+          {poster && (
+            <img
+              className="bs__potgPoster"
+              src={poster}
+              alt=""
+              loading="lazy"
+              onError={() => setPosterFailed(true)}
+            />
+          )}
+          <span className="bs__potgPlay">
+            <span className="bs__potgPlayIcon" aria-hidden="true">▶</span> Watch
+          </span>
+        </button>
+      )}
+      {watchOpen && highlight && (
+        <HighlightSheet item={highlight} onClose={() => setWatchOpen(false)} />
+      )}
     </div>
   )
 }
