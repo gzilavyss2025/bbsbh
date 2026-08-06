@@ -547,36 +547,18 @@
   color: var(--text-body);
 }
 
-/* Career Matchups (TeamInfo.jsx's CareerMatchups) — two small lists (one per
-   batting direction — "Braves batters vs Padres pitchers" and back),
-   deliberately not FormerTeammates' headshot cards (this is a line off a stat
-   sheet, not a story). Grouped one heading per opposing pitcher, with the
-   batters he's faced listed beneath, each as a batter→line row. This replaced
-   an earlier three-column batter/pitcher/line table that repeated the pitcher
-   on every row and overflowed a phone's width (horizontal swipe to read the
-   line) — collapsing the pitcher to a group heading leaves a two-part row that
-   fits any width and reads cleaner on desktop too. */
-.matchuptable {
-  margin-top: var(--space-4);
-}
-.matchuptable:first-child {
-  margin-top: 0;
-}
-.matchuptable__title {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-.matchuplist {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-/* One opposing pitcher and the batters who've faced him. */
+/* Career vs today's starter (TeamInfo.jsx's StarterMatchups) — one small list
+   of this club's batters and how they've done against the arm they're about to
+   face, deliberately not FormerTeammates' headshot cards (this is a line off a
+   stat sheet, not a story). The pitcher is a single heading over batter→line
+   rows. Two earlier shapes are folded into that: a three-column
+   batter/pitcher/line table that repeated the pitcher on every row and
+   overflowed a phone's width (horizontal swipe to read the line), and then a
+   pair of per-direction tables listing every pitcher on both staffs. Scoping
+   the card to the one probable starter leaves a single group, so the
+   .matchuptable/.matchuplist wrappers those needed are gone; .matchupgroup__*
+   below is the whole card. */
+/* The starter, over the batters who've faced him. */
 .matchupgroup__pitcher {
   margin: 0 0 var(--space-1);
   padding-bottom: var(--space-1);

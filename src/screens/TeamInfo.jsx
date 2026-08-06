@@ -20,12 +20,7 @@ import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
-import {
-  careerMatchupsFor,
-  sortByPitcher,
-  groupByPitcher,
-  matchupLine,
-} from '../api/careerMatchups.js'
+import { starterMatchupsFor, matchupLine } from '../api/careerMatchups.js'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
@@ -417,10 +412,12 @@ function TeamSections({
     [formerTeammatesData, meta.id, oppMeta.id],
   )
   const startingIds = useMemo(() => startingIdsFor(feed), [feed])
-  // Same once-per-matchup skip as teammatePairs above — see careerMatchupsFor.
-  const matchupPairs = useMemo(
-    () => careerMatchupsFor(careerMatchupsData, meta.id, oppMeta.id),
-    [careerMatchupsData, meta.id, oppMeta.id],
+  // This club's batters vs the arm they're about to face. Keyed by gamePk, so
+  // a doubleheader's two games and a series' three nights each resolve to
+  // their own starter rather than sharing one team-pair entry.
+  const starterMatchups = useMemo(
+    () => starterMatchupsFor(careerMatchupsData, feed?.gamePk, meta.id),
+    [careerMatchupsData, feed?.gamePk, meta.id],
   )
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const dayNight = info.dayNight
@@ -454,6 +451,14 @@ function TeamSections({
         callouts={callouts}
         isMlb={isMlb}
         arsenal={oppArsenal}
+      />
+
+      <StarterMatchups
+        side={starterMatchups}
+        startingIds={startingIds}
+        teamId={meta.id}
+        teamName={meta.teamName}
+        levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
       />
 
       {/* Wide screens run the batting order and defense diamond side by side
@@ -629,13 +634,6 @@ function TeamSections({
         homeTeamId={side === 'away' ? oppMeta.id : meta.id}
       />
       <OrgTies ties={orgTies} />
-      <CareerMatchups
-        pairs={matchupPairs}
-        startingIds={startingIds}
-        teamA={{ id: meta.id, name: meta.teamName }}
-        teamB={{ id: oppMeta.id, name: oppMeta.teamName }}
-        levelLabel={SPORT_LABEL[meta.sportId] ?? 'MLB'}
-      />
     </>
   )
 }
@@ -969,112 +967,76 @@ function OrgTies({ ties }) {
 
 const MATCHUPS_SHOWN = 6
 
-// Every batter/pitcher pair on the two clubs with real career plate-
-// appearance history against each other, at ANY level either has played (see
-// careerMatchupsFor) — the "Contreras is 0-for-3 vs. tonight's starter"
-// scorebook fact, but not limited to just the probable starter, and not
-// limited to history made at tonight's own level: a AA lineup card still
-// shows a pair who last faced off in A+. A plain stat table rather than
-// FormerTeammates' headshot cards — this is a line off the stat sheet, not a
-// story about two people's careers crossing. Hidden when there's no history.
+// How this club's batters have fared in their careers against the arm they're
+// about to face — the "Contreras is 0-for-3 vs. tonight's starter" scorebook
+// fact, sitting directly under the Starting pitcher card that names him. A
+// plain stat list rather than FormerTeammates' headshot cards: this is a line
+// off the stat sheet, not a story about two careers crossing. Hidden when the
+// lineup has no history against him (a debut start, most often).
 //
-// `pairs` mixes both directions (teamA batting vs teamB pitching, and vice
-// versa — see careerMatchupsFor's header); this splits it into the two real
-// baseball facts a reader actually wants ("how has THIS lineup done against
-// THAT pitching staff") rather than one interleaved list. `startingIds` (see
-// startingIdsFor) is the same set FormerTeammates uses for its "starting
-// tonight" badge — here it drives a soft row highlight for a pair that's
-// tonight's actual batter vs. the opposing actual starter, the highest-value
-// row on the table.
-function CareerMatchups({ pairs, startingIds, teamA, teamB, levelLabel }) {
-  const tableA = useMemo(
-    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamA?.id)),
-    [pairs, teamA?.id],
-  )
-  const tableB = useMemo(
-    () => sortByPitcher((pairs ?? []).filter((r) => r.batter.teamId === teamB?.id)),
-    [pairs, teamB?.id],
-  )
-  if (tableA.length === 0 && tableB.length === 0) return null
-  return (
-    <section className="metriccard matchups">
-      <SectionMasthead as="h3" title="Career matchups" />
-      <div className="metriccard__body">
-        <MatchupTable
-          title={`${teamA?.name || 'Team'} batters vs ${teamB?.name || 'team'} pitchers`}
-          rows={tableA}
-          startingIds={startingIds}
-          levelLabel={levelLabel}
-        />
-        <MatchupTable
-          title={`${teamB?.name || 'Team'} batters vs ${teamA?.name || 'team'} pitchers`}
-          rows={tableB}
-          startingIds={startingIds}
-          levelLabel={levelLabel}
-        />
-      </div>
-    </section>
-  )
-}
-
-// One direction's list (e.g. "Braves batters vs Padres pitchers") — rows
-// already grouped by pitcher (sortByPitcher), then collapsed one heading per
-// pitcher (groupByPitcher) so his name isn't repeated down every row. That
-// repetition is what forced a three-column "batter / pitcher / line" table
-// too wide for a phone (the reported horizontal-swipe bug); a pitcher heading
-// over two-part batter→line rows fits any width with no scroll, and reads
-// cleaner on desktop too. Each list shows/hides independently since one
-// direction commonly has far more real history than the other (a club's
-// long-tenured regulars vs. a just-called-up opener). Slice by MATCHUP (row)
-// count first so "Show N more" still counts matchups, then group the slice.
-function MatchupTable({ title, rows, startingIds, levelLabel }) {
+// Deliberately scoped to the STARTER alone. This card used to cross every
+// batter with every pitcher on the other club, then cap the result at the 30
+// deepest pairs — which, measured against the committed data file, was binding
+// on all 91 matchups, so the card filled with whichever veterans happened to
+// have the most career plate appearances and could push tonight's actual
+// matchup off the page entirely. One starter, every batter who has faced him,
+// nothing dropped. History against the rest of the staff still exists in the
+// nightly store for other surfaces to use; it just isn't this card's job.
+//
+// `startingIds` (see startingIdsFor) is the same set FormerTeammates uses for
+// its "starting tonight" badge — here it inks the rows for batters who are in
+// tonight's posted lineup, so the nine that matter stand out from the bench
+// bats once the card is filled in.
+function StarterMatchups({ side, startingIds, teamId, teamName, levelLabel }) {
   const [showAll, setShowAll] = useState(false)
-  if (rows.length === 0) return null
+  if (!side) return null
+  const rows = side.batters
   const shown = showAll ? rows : rows.slice(0, MATCHUPS_SHOWN)
   const hidden = rows.length - shown.length
-  const groups = groupByPitcher(shown)
   return (
-    <div className="matchuptable">
-      <h4 className="matchuptable__title">{title}</h4>
-      <div className="matchuplist">
-        {groups.map((g) => {
-          const pitcherStarting = startingIds?.has(g.pitcher.id)
-          return (
-            <div className="matchupgroup" key={g.pitcher.id}>
-              <p className="matchupgroup__pitcher">
-                <span className="matchupgroup__vs">vs</span>{' '}
-                <PlayerLink id={g.pitcher.id}>{g.pitcher.name}</PlayerLink>
-              </p>
-              <ul className="matchupgroup__rows">
-                {g.rows.map((r) => {
-                  const tonight = pitcherStarting && startingIds?.has(r.batter.id)
-                  return (
-                    <li
-                      key={r.batter.id}
-                      className={
-                        tonight
-                          ? 'matchupgroup__row matchupgroup__row--tonight'
-                          : 'matchupgroup__row'
-                      }
-                    >
-                      <PlayerLink id={r.batter.id} className="matchupgroup__batter">
-                        {r.batter.name}
-                      </PlayerLink>
-                      <span className="matchupgroup__line">{matchupLine(r, levelLabel)}</span>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          )
-        })}
+    <section className="metriccard matchups">
+      <SectionMasthead
+        as="h3"
+        title="Career vs today’s starter"
+        logo={
+          <TeamLogo
+            teamId={teamId}
+            name={teamName}
+            size={22}
+            variant="mono"
+            className="metricbar__logo"
+          />
+        }
+      />
+      <div className="metriccard__body">
+        <p className="matchupgroup__pitcher">
+          <span className="matchupgroup__vs">vs</span>{' '}
+          <PlayerLink id={side.pitcher.id}>{side.pitcher.name}</PlayerLink>
+        </p>
+        <ul className="matchupgroup__rows">
+          {shown.map((r) => (
+            <li
+              key={r.id}
+              className={
+                startingIds?.has(r.id)
+                  ? 'matchupgroup__row matchupgroup__row--tonight'
+                  : 'matchupgroup__row'
+              }
+            >
+              <PlayerLink id={r.id} className="matchupgroup__batter">
+                {r.name}
+              </PlayerLink>
+              <span className="matchupgroup__line">{matchupLine(r, levelLabel)}</span>
+            </li>
+          ))}
+        </ul>
+        {hidden > 0 && (
+          <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
+            Show {hidden} more batter{hidden === 1 ? '' : 's'}
+          </button>
+        )}
       </div>
-      {hidden > 0 && (
-        <button type="button" className="teammates__more" onClick={() => setShowAll(true)}>
-          Show {hidden} more matchup{hidden === 1 ? '' : 's'}
-        </button>
-      )}
-    </div>
+    </section>
   )
 }
 
