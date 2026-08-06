@@ -109,5 +109,17 @@
     "assignments": {
       "milb-away": "cdn:wordmark"
     }
+  },
+  "2498": {
+    "marks": [
+      {
+        "slug": "baseorangeonwhite",
+        "name": "baseorangeonwhite"
+      }
+    ],
+    "assignments": {
+      "milb-home": "baseorangeonwhite",
+      "milb-away": "cdn:primary"
+    }
   }
 }

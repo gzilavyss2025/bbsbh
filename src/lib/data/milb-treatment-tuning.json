@@ -1725,7 +1725,12 @@
           "paddingY": -8,
           "rowShift": 0
         },
-        "band": "#010101"
+        "band": "#010101",
+        "header": {
+          "bar": "#010101",
+          "accent": "#00A3E0",
+          "onBar": "#F8F8F5"
+        }
       },
       "away": {
         "position": {
@@ -1975,7 +1980,12 @@
           "paddingY": 4,
           "rowShift": 0
         },
-        "band": "#0C2340"
+        "band": "#0C2340",
+        "header": {
+          "bar": "#0C2340",
+          "accent": "#236192",
+          "onBar": "#F8F8F5"
+        }
       }
     }
   },
@@ -2152,6 +2162,36 @@
           "bar": "#00285A",
           "accent": "#D21146",
           "onBar": "#F8F8F5"
+        }
+      }
+    }
+  },
+  "2498": {
+    "name": "Team 2498",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#0C2340",
+          "accent": "#FF6A14",
+          "onBar": "#FBF6E9"
+        },
+        "position": {
+          "scale": 1.04,
+          "offsetX": 5,
+          "offsetY": 0,
+          "bg": "#0C2340",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        }
+      },
+      "away": {
+        "position": {
+          "scale": 1.04,
+          "offsetX": 5,
+          "offsetY": 0,
+          "bg": "#FF6A14",
+          "pinstripe": false,
+          "pinstripeBg": ""
         }
       }
     }
