@@ -14,16 +14,15 @@
 // docs/data-enrichment.md §5); rehab status changes slowly enough that a daily
 // refresh is plenty.
 // Run by hand: node scripts/gen-rehab.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { SPORT_LABEL } from '../src/lib/teams.js'
 import { txnDate, isRehabTxn, isRehabEndingTxn } from '../src/api/rehab-policy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rehab.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // A rehab assignment can't run longer than ~30 days, so a 40-day transaction
 // window always contains the start of every currently-active stint.
 const REHAB_WINDOW_DAYS = 40
@@ -47,12 +46,6 @@ const daysAgo = (n) => {
 }
 const daysSince = (isoDate) => Math.round((Date.now() - new Date(`${isoDate}T00:00:00Z`)) / 86400000)
 const currentSeason = () => new Date().getUTCFullYear()
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 // --- transaction pass: who is on a rehab assignment right now -----------------
 // A rehab starts with an "Assigned" (ASG) row whose description says "rehab" and
@@ -218,6 +211,5 @@ const players = active.map((r) => ({
   level: SPORT_LABEL[levels[r.clubId]] ?? '',
 }))
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), players }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), players })
 console.log(`wrote ${out} (${players.length} of ${candidates.length} candidates still active)`)

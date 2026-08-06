@@ -6,14 +6,18 @@
 //
 // A stamp is a commemorative mark for a game you watched, carrying that game's
 // final score. That makes the Logbook the FIRST score-bearing thing this app
-// stores — read ADR-0035 before changing anything here. The invariant the whole
-// design exists to make true:
+// stores — read ADR-0035 before changing anything here.
 //
-//   You cannot own a stamp for a game you have not finished revealing.
-//
-// `meetsRevealGate` below is that sentence as code, and api/stamps.js runs it
-// server-side on every mint so it is a structural guarantee rather than a
-// convention a future surface can forget.
+// This module used to export `meetsRevealGate`/`finalHalfIndex`, the predicate
+// api/stamps.js ran server-side to refuse a stamp for a game the user could not
+// be PROVEN to have finished revealing. Both were removed in ADR-0035's second
+// amendment. What keeps the Logbook from spoiling anything is where stamp art
+// may render — `scripts/check-stamp-surfaces.mjs` and its runtime half
+// `e2e/invariants/logbook-stamp.spec.js` — which is untouched. The gate refused
+// the ordinary flow (the mint affordance sits inside a `SealBox` that
+// deliberately persists nothing, so it left no mark to prove) while defending
+// only against a hostile client, which on a single-user app is the user
+// spoiling a game they went out of their way to stamp.
 //
 // What this module deliberately does NOT hold: the score. A local stamp record
 // is `{ state, mode, stampedAt, updatedAt, note, date, placement }` — no runs,
@@ -96,61 +100,6 @@ export function sanitizeNote(value) {
   // eslint-disable-next-line no-control-regex
   const flat = value.replace(/[\u0000-\u001f\u007f]/g, ' ')
   return flat.replace(/\s+/g, ' ').trim().slice(0, MAX_NOTE_LENGTH)
-}
-
-// ---------------------------------------------------------------------------
-// The reveal gate — the load-bearing half of ADR-0035
-// ---------------------------------------------------------------------------
-
-// The half-index formula from src/api/select.js's `halfIndex`, restated rather
-// than imported: src/lib sits BELOW src/api (see src/lib/CLAUDE.md), and this
-// module is bundled into a serverless function that has no business pulling in
-// the whole selector layer. test/stamps.test.js pins the two against each other
-// so the restatement cannot drift.
-function halfIndexOf(inning, half) {
-  return (inning - 1) * 2 + (half === 'top' ? 0 : 1)
-}
-
-// The half-index of a finished game's LAST half — the value `revealedThrough`
-// has to reach for the user to have uncovered the final score by hand.
-//
-// Why this is computed from the game's ACTUAL innings and not the PRD's
-// `regulation × 2 − 1`: that formula under-gates and over-gates in opposite
-// directions on the two cases that matter. An extra-inning game is still tied
-// at the end of regulation, so `regulation × 2 − 1` would mint a stamp for a
-// user who has seen none of the innings that decided it. And a home team
-// leading after the top of the ninth never bats again, so the bottom half the
-// formula demands does not exist and the gate could never be satisfied.
-// `homeBattedLast` (from the linescore's last inning actually carrying a home
-// entry — the same test liveEdge.js's edgeFromLinescore makes) settles both.
-export function finalHalfIndex(game) {
-  const innings = game?.innings
-  if (!Number.isInteger(innings) || innings < 1) return null
-  return halfIndexOf(innings, game.homeBattedLast === false ? 'top' : 'bottom')
-}
-
-// May this user mint a stamp for this game? The whole spoiler argument for the
-// Logbook rests here, so it fails CLOSED on every uncertainty — an absent game,
-// an unparseable innings count, a missing reveal mark all answer false.
-//
-// Two ways to qualify, and they are the two ways a user legitimately comes to
-// know a final score in this app:
-//
-//   1. `revealedThrough` reached the game's last half — they uncovered it by
-//      hand through the existing ratchet (useRevealProgress.js).
-//   2. The game's day is 'on' in their spoiled-day map — they consented to
-//      spoil that date under the Scores Unlocked pass (ADR-0026), which is
-//      exactly the case where a user has seen the score without the mark ever
-//      moving (the pass deliberately never writes it).
-//
-// That the two existing stores compose here without either one being bent is
-// the strongest evidence the model is right; do not add a third way in.
-export function meetsRevealGate({ game, revealedThrough, daySpoiled } = {}) {
-  if (!game || game.status !== 'Final') return false
-  if (daySpoiled === true && isDayString(game.date)) return true
-  const needed = finalHalfIndex(game)
-  if (needed == null) return false
-  return Number.isInteger(revealedThrough) && revealedThrough >= needed
 }
 
 // ---------------------------------------------------------------------------
@@ -341,10 +290,10 @@ export function seasonIsFull(map, season) {
 // Re-stamping a tombstoned game revives it with a FRESH `stampedAt` — you
 // un-stamped it, so the old date is not the date of this keepsake.
 //
-// Callers are expected to have checked `meetsRevealGate` (the client for the
-// affordance, the server for the guarantee). This function does not re-check
-// it, because it does not have the game facts; that separation is deliberate —
-// there is exactly one gate, in one place, and it is the server's.
+// This function checks no permission of any kind, and never did. Reaching a
+// caller at all means the user tapped the mint affordance inside a revealed box
+// score; the only server-side refusal left is "that game isn't Final yet"
+// (`mintRefusal`, api/stamps.js).
 export function addStamp(map, gamePk, { mode, note, date, now, placement } = {}) {
   const current = normalizeAll(map)
   const pk = toGamePk(gamePk)
@@ -455,13 +404,6 @@ export function applyRemoteStamps(local, remote) {
     if (!existing || incoming.updatedAt >= existing.updatedAt) out[pk] = incoming
   }
   return normalizeAll(out)
-}
-
-// What this device would publish. Tombstones are INCLUDED — that is the whole
-// point of keeping them; an un-stamp that isn't published is an un-stamp the
-// next sync undoes.
-export function statesFromStamps(map) {
-  return normalizeAll(map)
 }
 
 // Are these the same record? Every field a device can change, compared. Used by

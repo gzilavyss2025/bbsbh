@@ -37,14 +37,14 @@
 // a game that hasn't happened yet.
 //
 // Run by hand: node scripts/gen-career-matchups.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'career-matchups.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // Same window as gen-former-teammates.mjs — today + the next two days, so
 // late-night and next-day browsing both find their game.
 const WINDOW_DAYS = 2
@@ -56,29 +56,6 @@ const isoDay = (offset = 0) => {
   const d = new Date()
   d.setUTCDate(d.getUTCDate() + offset)
   return d.toISOString().slice(0, 10)
-}
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
-async function mapConcurrent(items, limit, mapper) {
-  const results = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        results[i] = await mapper(items[i], i)
-      } catch {
-        results[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
 }
 
 // --- schedule: the matchups to precompute (same shape as
@@ -334,8 +311,7 @@ for (const { awayId, homeId } of pairs) {
   totalRows += matchups[key].length
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), matchups }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), matchups })
 console.log(
   `wrote ${out} (${Object.keys(matchups).length} matchups / ${totalRows} batter-pitcher pairs, ` +
     `${allBatterIds.size} batters, ${allPitcherIds.size} pitchers, ` +

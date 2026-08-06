@@ -152,6 +152,10 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // all 30 clubs' Main headers landed). MiLB's own Home/Away collapse
   // (milbHeaderColorOverride) folded every already-tuned club's header onto
   // the shared Home slot and dropped the redundant Away copy — this tuning
-  // session landed a further batch of MiLB clubs, 32 MiLB records today.
-  assert.equal(checked, 90, 'expected the 90 landed triads — update this count deliberately')
+  // session landed a further batch of MiLB clubs, 32 MiLB records today, then
+  // one more AAA tuning pass landed 2 more, 34 MiLB records today. This
+  // session's milb-treatment-tuning.json edits landed 3 more, 37 MiLB
+  // records today (95 total), then one more final tuning pass landed 1
+  // more, 38 MiLB records today (96 total).
+  assert.equal(checked, 96, 'expected the 96 landed triads — update this count deliberately')
 })

@@ -25,7 +25,7 @@ import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
 import revealHandler from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
-import stampsHandler, { seasonRows } from '../api/stamps.js'
+import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
 
 // A stand-in for Node's (IncomingMessage, ServerResponse) pair.
@@ -280,6 +280,157 @@ test('a tombstone from the endpoint removes the stamp on another device', () => 
 })
 
 // --------------------------------------------------------------------------
+// Minting (ADR-0035's second amendment — the reveal gate is gone)
+// --------------------------------------------------------------------------
+// The bug this closes: `POST /api/stamps` refused to mint unless the server
+// could read a `reveal:{userId}:{gamePk}` mark or a spoiled-day consent for the
+// game. The ordinary way to stamp — tapping the affordance inside the box
+// score's `SealBox` — writes NEITHER, because that SealBox deliberately
+// persists nothing (an `onReveal` there would let a box score opened under the
+// Scores Unlocked pass ratchet the whole game's `revealedThrough`). So the
+// normal flow 403'd, and nineteen real stamps could not be uploaded.
+//
+// `mint` takes its Redis client as a parameter, so the real path runs here
+// against a fake — the one Redis-backed branch in this file, and worth it
+// because this branch IS the feature.
+function fakeRedis(seed = {}) {
+  const store = { ...seed }
+  const hashes = {}
+  return {
+    calls: [],
+    store,
+    hashes,
+    async get(key) {
+      this.calls.push(`get ${key}`)
+      return store[key] ?? null
+    },
+    async hget(key, field) {
+      this.calls.push(`hget ${key} ${field}`)
+      return hashes[key]?.[field] ?? null
+    },
+    async hset(key, obj) {
+      hashes[key] = { ...(hashes[key] ?? {}), ...obj }
+    },
+    async hlen(key) {
+      return Object.keys(hashes[key] ?? {}).length
+    },
+    async sadd() {},
+    async set(key, value) {
+      store[key] = value
+    },
+  }
+}
+
+// A Final game already in the shared facts cache, so no statsapi fetch happens.
+const FINAL_GAME = {
+  gamePk: 778241,
+  date: '2026-04-20',
+  gameNumber: 1,
+  sportId: 1,
+  gameType: 'R',
+  venue: 'Rogers Centre',
+  innings: 9,
+  homeBattedLast: true,
+  status: 'Final',
+  away: { id: 136, abbreviation: 'SEA', name: 'Seattle Mariners', runs: 3, hits: 7, errors: 0 },
+  home: { id: 141, abbreviation: 'TOR', name: 'Toronto Blue Jays', runs: 5, hits: 9, errors: 1 },
+  winnerId: 141,
+  decisions: { winner: '', loser: '', save: '' },
+}
+
+const mintReq = (body) =>
+  nodeReq('/api/stamps', { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+
+test('a Final game mints with no reveal mark and no day consent', async () => {
+  // This is the case that used to 403. Nothing in the fake store answers to
+  // `reveal:u1:778241` or `spoiled:u1`, which is exactly the state a real
+  // box-score stamp leaves behind.
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+
+  assert.equal(res.statusCode, 201)
+  assert.equal(res.json.stamp.gamePk, 778241)
+  assert.equal(res.json.stamp.state, 'on')
+  // And it must not have gone looking for permission on the way.
+  assert.equal(
+    redis.calls.some((c) => c.startsWith('get reveal:') || c.startsWith('hget spoiled:')),
+    false,
+    'the mint must not read a reveal mark or a consent map',
+  )
+})
+
+test('an unfinished game is still refused — a stamp is permanent, a live score is not', () => {
+  assert.deepEqual(mintRefusal({ ...FINAL_GAME, status: 'Live' }), {
+    error: 'game not final',
+    status: 409,
+  })
+  assert.deepEqual(mintRefusal(null), { error: 'game not found', status: 404 })
+  // Resolvable but with a date no season can be read from: nothing to shard on.
+  assert.deepEqual(mintRefusal({ ...FINAL_GAME, date: 'April 20' }), {
+    error: 'game not found',
+    status: 404,
+  })
+  assert.equal(mintRefusal(FINAL_GAME), null)
+})
+
+test('the mint takes nothing score-bearing from the request body', () => {
+  // The remaining integrity claim now that the gate is gone: the client names a
+  // mode, a note and a placement. The score lives in the shared `game:final`
+  // blob the server fetched itself, and the per-user record has no room for one
+  // — so a hostile body cannot forge a 20-0 keepsake.
+  const entry = stampEntry(
+    {
+      mode: 'followed',
+      note: 'Dad’s first game',
+      away: { runs: 20 },
+      home: { runs: 0 },
+      winnerId: 999,
+      date: '1999-01-01',
+      state: 'off',
+      stampedAt: 1,
+    },
+    FINAL_GAME,
+    null,
+    5000,
+  )
+  assert.deepEqual(Object.keys(entry).sort(), [
+    'date',
+    'mode',
+    'note',
+    'placement',
+    'stampedAt',
+    'state',
+    'updatedAt',
+  ])
+  assert.equal(entry.date, FINAL_GAME.date, 'the date comes from the game, never the body')
+  assert.equal(entry.state, 'on')
+  assert.equal(entry.stampedAt, 5000)
+  assert.equal(entry.mode, 'followed')
+})
+
+test('re-stamping keeps the keepsake’s original date and its page', () => {
+  const existing = {
+    state: 'on',
+    mode: 'watched',
+    stampedAt: 1000,
+    updatedAt: 1000,
+    note: '',
+    date: '2026-04-20',
+    placement: { page: 2, x: 0.25, y: 0.25, tilt: 3 },
+  }
+  const edited = stampEntry({ note: 'better note' }, FINAL_GAME, existing, 9000)
+  assert.equal(edited.stampedAt, 1000, 'stampedAt is the keepsake’s date, not the sync clock')
+  assert.equal(edited.updatedAt, 9000)
+  assert.deepEqual(edited.placement, existing.placement, 'editing a note must not clear the page')
+
+  // Reviving a tombstone is a NEW keepsake, and starts unplaced.
+  const revived = stampEntry({}, FINAL_GAME, { ...existing, state: 'off' }, 9000)
+  assert.equal(revived.stampedAt, 9000)
+  assert.equal(revived.placement, null)
+})
+
+// --------------------------------------------------------------------------
 // Which env vars count as "a store is configured" (api/_lib/redis.js)
 // --------------------------------------------------------------------------
 // The bug this pins: connecting an Upstash database through Vercel's KV
@@ -413,11 +564,150 @@ test('a token that cannot be verified is 401 invalid, never a 500', () => {
   // @clerk/backend throws on some malformed tokens rather than returning
   // `errors`, and the old per-file copies didn't catch — a junk Authorization
   // header was a stack trace.
-  return authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' } }).then(
-    (out) => {
-      assert.equal(out.ok, false)
-      assert.equal(out.status, 401)
-      assert.equal(out.error, INVALID_TOKEN)
+  return authenticateUser(withToken('not.a.jwt'), {
+    env: { CLERK_SECRET_KEY: 'sk_test_x' },
+    log: () => {},
+  }).then((out) => {
+    assert.equal(out.ok, false)
+    assert.equal(out.status, 401)
+    assert.equal(out.error, INVALID_TOKEN)
+  })
+})
+
+// --------------------------------------------------------------------------
+// What the SERVER learns from a rejection (api/_lib/auth.js)
+// --------------------------------------------------------------------------
+// The response stays a bare `invalid token` — a caller is told nothing. But the
+// reason was being discarded server-side too, which left a production deploy
+// rejecting every genuine token with no way to find out why: signature, expiry,
+// and "couldn't reach Clerk's JWKS" are three different faults wearing one
+// string. These pin the log line that closes that gap, and the two redactions
+// that keep it safe to write.
+const capture = () => {
+  const lines = []
+  return { lines, log: (line) => lines.push(line) }
+}
+
+// --------------------------------------------------------------------------
+// The @clerk/backend return-shape contract (api/_lib/auth.js)
+// --------------------------------------------------------------------------
+// verifyToken RESOLVES TO THE PAYLOAD and THROWS on failure. It does not
+// resolve to `{ data, errors }`. Destructuring that shape read `undefined` off
+// a perfectly valid payload, so `!data?.sub` was always true and EVERY
+// authenticated request in production got `401 invalid token` — for as long as
+// Clerk had been wired up. `verify` is injected here because the contract is
+// the thing under test; a live Clerk instance is not reachable from CI.
+test('a token that verifies authenticates the user it names', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('good.session.token'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => ({ sub: 'user_2abcXYZ', iss: 'https://clerk.example.com' }),
+  })
+  assert.equal(out.ok, true)
+  assert.equal(out.userId, 'user_2abcXYZ')
+  assert.equal(lines.length, 0, 'a success writes no log line')
+})
+
+test('the secret key and options reach verifyToken unchanged', async () => {
+  let seen = null
+  await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log: () => {},
+    authorizedParties: ['https://tallybb.com'],
+    verify: async (token, options) => {
+      seen = { token, options }
+      return { sub: 'user_1' }
     },
-  )
+  })
+  assert.equal(seen.token, 'tok')
+  assert.equal(seen.options.secretKey, 'sk_live_x')
+  // api/copy.js passes authorizedParties through; it must survive the spread.
+  assert.deepEqual(seen.options.authorizedParties, ['https://tallybb.com'])
+  // The injection seam must not leak into what Clerk is handed.
+  assert.equal('verify' in seen.options, false)
+  assert.equal('log' in seen.options, false)
+  assert.equal('env' in seen.options, false)
+})
+
+test('a payload with no sub is rejected, and says so distinctly', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => ({ iss: 'https://clerk.example.com' }),
+  })
+  assert.equal(out.ok, false)
+  assert.equal(out.status, 401)
+  assert.equal(out.error, INVALID_TOKEN)
+  // Distinguishable from a verification failure — that distinction is what
+  // identified the bug this test exists to prevent.
+  assert.match(lines[0], /no `sub` claim/)
+})
+
+test('a throw from verifyToken is a 401 carrying the thrown reason', async () => {
+  const { lines, log } = capture()
+  const out = await authenticateUser(withToken('tok'), {
+    env: { CLERK_SECRET_KEY: 'sk_live_x' },
+    log,
+    verify: async () => {
+      throw Object.assign(new Error('token-invalid-signature'), { name: 'TokenVerificationError' })
+    },
+  })
+  assert.equal(out.status, 401)
+  assert.match(lines[0], /TokenVerificationError: token-invalid-signature/)
+})
+
+test('a rejection reports Clerk’s reason to the server log', async () => {
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  assert.equal(lines.length, 1)
+  assert.match(lines[0], /\[auth\] verifyToken rejected/)
+  // Something specific about the failure, not just that there was one.
+  assert.match(lines[0], /reason=\S/)
+})
+
+test('the log carries the key SHAPE and never the token or the key', async () => {
+  const { lines, log } = capture()
+  await authenticateUser(withToken('a-live-credential'), {
+    env: { CLERK_SECRET_KEY: 'sk_test_supersecrettail' },
+    log,
+  })
+  // The prefix is diagnostic; the tail is a credential and must not appear.
+  assert.match(lines[0], /secretKey=sk_test_/)
+  assert.equal(lines[0].includes('supersecrettail'), false)
+  // The bearer token is a live credential too — a log line is not the place.
+  assert.equal(lines[0].includes('a-live-credential'), false)
+})
+
+test('a publishable key in the secret slot is called out by name', async () => {
+  // The mix-up that motivated this: the two keys sit side by side in Clerk's
+  // dashboard, and once Vercel marks the variable Sensitive nothing echoes it
+  // back. Every genuine token then fails as `invalid token` with no clue why.
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), {
+    env: { CLERK_SECRET_KEY: 'pk_live_Y2xlcmsuZXhhbXBsZS5jb20k' },
+    log,
+  })
+  assert.match(lines[0], /PUBLISHABLE KEY/)
+  assert.match(lines[0], /VITE_CLERK_PUBLISHABLE_KEY/)
+})
+
+test('a rejection logs exactly once, not once per internal retry', async () => {
+  // A per-request log line is only tolerable if it stays one line. (The success
+  // path writes nothing, but asserting that needs a real Clerk instance to
+  // verify against, so it is left to the deploy rather than faked here.)
+  const { lines, log } = capture()
+  await authenticateUser(withToken('not.a.jwt'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  assert.equal(lines.length, 1)
+})
+
+test('preflight failures never reach the log — they are not token failures', async () => {
+  // An anonymous poll of a public URL is not an incident, and a deploy with no
+  // secret key has a problem the response already names. Neither should write a
+  // line every time a stranger hits the endpoint.
+  const { lines, log } = capture()
+  await authenticateUser(nodeReq('/api/stamps'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
+  await authenticateUser(withToken('abc'), { env: {}, log })
+  assert.equal(lines.length, 0)
 })

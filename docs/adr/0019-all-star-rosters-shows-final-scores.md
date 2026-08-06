@@ -1,8 +1,18 @@
 # All-Star Rosters shows final scores — a narrow, explicit spoiler-rule exception
 
-The spoiler rule (root `CLAUDE.md`) is otherwise absolute: a score-revealing
-value must never exist in the DOM until the user reveals it, with no age
-exemption — a 1955 game got no special treatment versus one from last week.
+> **Restated (2026-08-06).** The spoiler rule now states its SCOPE — it governs
+> the scoring surfaces (the slate's score cells, the lineup pages, the innings
+> viewer, the box score) and not the standalone pages outside that flow. Under
+> that framing this page is not an *exception* to the rule; it is outside its
+> scope, which is what the reasoning below was always really arguing. The
+> decision and every fact in it stand unchanged; only the word "exception" does
+> not. See the root `CLAUDE.md`, and ADR-0034's "The cutoff is opt-in now" for
+> the rescoping this was part of.
+
+The spoiler rule (root `CLAUDE.md`) was, when this was written, absolute: a
+score-revealing value must never exist in the DOM until the user reveals it,
+with no age exemption — a 1955 game got no special treatment versus one from
+last week.
 The All-Star Rosters page carves out one deliberate exception to that: it
 shows each year's final score plainly, in a small full-width result card, with
 no `SealBox` and no tap-to-reveal.

@@ -9,25 +9,44 @@
 //   POST   /api/stamps { gamePk, mode?, note? }  -> { stamp }   201 new / 200 update
 //   DELETE /api/stamps?gamePk=824680   -> { ok: true }
 //
-// WHAT MAKES THIS SAFE — read before touching `mint` below. A stamp carries a
-// final score by definition; that is the whole point of the artifact. The
-// spoiler rule survives because of one server-enforced invariant:
+// WHAT MAKES THIS SAFE — read before touching `mint` below.
 //
-//   You cannot own a stamp for a game you have not finished revealing.
+// This endpoint used to run a server-side reveal gate: it refused to mint
+// unless it could prove, from this user's own `reveal:{userId}:{gamePk}` ratchet
+// or `spoiled:{userId}` consent map, that they had already finished revealing
+// the game. ADR-0035 called that the whole spoiler argument for the Logbook. It
+// was retired in ADR-0035's second amendment, and the reasoning is worth having
+// here rather than one file away:
 //
-// `meetsRevealGate` (src/lib/stamps.js) is that sentence, and it runs HERE, on
-// the server, against this user's own `reveal:{userId}:{gamePk}` ratchet and
-// `spoiled:{userId}` consent map — never against a client-supplied claim. So
-// every number the Logbook renders, however plainly, is a number this user
-// already chose to see. Do not add a "trust the client" path; the known gap
-// (a user who revealed a game before signing in has no server mark) is closed
-// by the CLIENT posting its local mark to /api/reveal first — that endpoint is
-// a one-directional ratchet and safe to feed — not by weakening this.
+//   - **It was not the mechanism doing the work.** What actually keeps a stamp
+//     from spoiling anything is WHERE stamp art may render —
+//     `scripts/check-stamp-surfaces.mjs`, which allowlists the import sites of
+//     `GameStamp.jsx`/`StampGameButton.jsx` by path and forbids a named set of
+//     unrevealed-game surfaces from so much as mentioning them, with
+//     `e2e/invariants/logbook-stamp.spec.js` as its runtime half. That guard is
+//     untouched and is now the entire containment argument. A stamp still cannot
+//     appear on the slate, on a game card, or in any list of unrevealed games.
+//   - **It refused the ordinary case.** The mint affordance lives inside the box
+//     score's `SealBox` reveal render function — you cannot reach it without
+//     opening the box score — but that `SealBox` deliberately persists nothing
+//     (giving it an `onReveal` would let a box score opened under the Scores
+//     Unlocked pass ratchet the whole game's `revealedThrough`; see
+//     src/CLAUDE.md). So the normal path to a stamp left no mark for the gate to
+//     find, and every such mint 403'd. That is not an edge case, it is the flow.
+//   - **What it defended against was a hostile client**, and the only client is
+//     the user themself, spoiling a game they went out of their way to stamp.
 //
-// The score itself lives in `game:final:{gamePk}`, a SHARED, immutable cache of
-// public facts the server fetches for itself. The per-user record holds only
-// state/mode/timestamps/note, which keeps it on exactly the same footing as
-// revealedThrough, and means a client cannot mint a fabricated 20-0 stamp.
+// Two things the server still does, and they are the ones that matter:
+//
+//   1. **Only a Final game mints.** A live score still moves; a stamp is
+//      permanent. `mintRefusal` below.
+//   2. **The server supplies the score, never the client.** It lives in
+//      `game:final:{gamePk}`, a SHARED, immutable cache of public facts the
+//      server fetches for itself from statsapi. The per-user record holds only
+//      state/mode/timestamps/note/date/placement — so a client cannot mint a
+//      fabricated 20-0 stamp, and the user document stays on exactly the same
+//      footing as `revealedThrough`. `stampEntry` below is built field by field
+//      for that reason; pinned by test/api-handlers.test.js.
 //
 // Unconfigured degrades like the other two: no Redis (or no Clerk) and the
 // endpoint 501s, leaving the client local-only. Sync has always been opt-in.
@@ -37,7 +56,6 @@ import {
   MAX_STAMPS_PER_SEASON,
   isSeasonNumber,
   isStampMode,
-  meetsRevealGate,
   normalizePlacement,
   normalizeStamp,
   sanitizeNote,
@@ -282,27 +300,56 @@ async function readSeason(redis, userId, season, { includeRemoved = false } = {}
 // Minting
 // ---------------------------------------------------------------------------
 
-// The gate. Both reads are of THIS user's own keys, written by the two existing
-// ratchets — nothing here comes from the request body.
-async function gatePasses(redis, userId, game) {
-  let revealedThrough = -1
-  let daySpoiled = false
-  try {
-    const [mark, consent] = await Promise.all([
-      redis.get(`reveal:${userId}:${game.gamePk}`),
-      redis.hget(`spoiled:${userId}`, game.date),
-    ])
-    if (Number.isInteger(mark)) revealedThrough = mark
-    daySpoiled = consent === 'on'
-  } catch {
-    // Fail CLOSED: if we cannot prove the user revealed this game, we do not
-    // mint. A Redis blip costs a retry, never a stamp the gate didn't allow.
-    return false
-  }
-  return meetsRevealGate({ game, revealedThrough, daySpoiled })
+// Every reason a mint is refused, as `{ error, status }` or null for "go ahead"
+// — the whole refusal set in one pure place, so what this endpoint will and
+// will not mint is readable at a glance and pinned by the unit suite rather
+// than inferred from the order of early returns inside `mint`.
+//
+// There is deliberately no reveal check here any more (see the header). What
+// survives is the one refusal that protects the artifact rather than the user:
+// a stamp is permanent and a live score is not, so an unfinished game cannot be
+// stamped. Everything else — does this user deserve to see this score — is
+// answered by the render-surface containment guard, not by this function.
+export function mintRefusal(game) {
+  if (!game) return { error: 'game not found', status: 404 }
+  if (game.status !== 'Final') return { error: 'game not final', status: 409 }
+  // A game whose date won't resolve to a season has no shard to live in. Reads
+  // as "not found" rather than a 500 — there is nothing the client can do.
+  if (seasonFromDate(game.date) == null) return { error: 'game not found', status: 404 }
+  return null
 }
 
-async function mint(req, res, redis, userId) {
+// The record to store, built field by field from the request body and the
+// SERVER's own game facts. Pure, and exported, because this is where the
+// Logbook's remaining integrity claim lives: the client names a mode, a note
+// and a placement, and nothing else it sends reaches Redis. A body carrying
+// `away`, `home`, `runs`, `winnerId` — or a `date` that disagrees with the
+// game — contributes exactly nothing; `date` comes from `game`, and the score
+// is never in this record at all (it lives in the shared `game:final` blob).
+export function stampEntry(body, game, existing, now) {
+  const reviving = !existing || existing.state === 'off'
+  const asked = normalizePlacement(body?.placement)
+  return {
+    state: 'on',
+    mode: isStampMode(body?.mode) ? body.mode : DEFAULT_STAMP_MODE,
+    // Re-stamping keeps the keepsake's original date; only `updatedAt` moves.
+    stampedAt: reviving ? now : existing.stampedAt,
+    updatedAt: now,
+    note: sanitizeNote(body?.note),
+    date: game.date,
+    // Same rule as the client's addStamp: a publish that carries no placement
+    // must not knock the stamp off the page it already sits on, and a revived
+    // tombstone starts unplaced. Validated server-side like every other field
+    // — the client's number is never trusted, it is re-checked.
+    placement: asked ?? (reviving ? null : (existing.placement ?? null)),
+  }
+}
+
+// Exported so the unit suite can drive the real mint path against a fake Redis
+// (test/api-handlers.test.js). The handler's Redis-backed branches are
+// otherwise unreachable in CI — @upstash/redis needs a live REST endpoint — and
+// this is the one branch whose behaviour is the feature.
+export async function mint(req, res, redis, userId) {
   const body = await readJsonBody(req)
   if (body == null) return reply(res, { error: 'invalid body' }, 400)
 
@@ -310,16 +357,10 @@ async function mint(req, res, redis, userId) {
   if (gamePk == null) return reply(res, { error: 'gamePk required' }, 400)
 
   const game = await resolveGameFinal(redis, gamePk)
-  if (!game) return reply(res, { error: 'game not found' }, 404)
-  if (game.status !== 'Final') return reply(res, { error: 'game not final' }, 409)
+  const refusal = mintRefusal(game)
+  if (refusal) return reply(res, { error: refusal.error }, refusal.status)
 
   const season = seasonFromDate(game.date)
-  if (season == null) return reply(res, { error: 'game not found' }, 404)
-
-  if (!(await gatePasses(redis, userId, game))) {
-    return reply(res, { error: 'game not revealed' }, 403)
-  }
-
   const key = stampsKey(userId, season)
   let existing = null
   try {
@@ -345,21 +386,7 @@ async function mint(req, res, redis, userId) {
     }
   }
 
-  const asked = normalizePlacement(body.placement)
-  const entry = {
-    state: 'on',
-    mode: isStampMode(body.mode) ? body.mode : DEFAULT_STAMP_MODE,
-    // Re-stamping keeps the keepsake's original date; only `updatedAt` moves.
-    stampedAt: reviving ? now : existing.stampedAt,
-    updatedAt: now,
-    note: sanitizeNote(body.note),
-    date: game.date,
-    // Same rule as the client's addStamp: a publish that carries no placement
-    // must not knock the stamp off the page it already sits on, and a revived
-    // tombstone starts unplaced. Validated server-side like every other field
-    // — the client's number is never trusted, it is re-checked.
-    placement: asked ?? (reviving ? null : (existing.placement ?? null)),
-  }
+  const entry = stampEntry(body, game, existing, now)
 
   await redis.hset(key, { [gamePk]: entry })
   try {

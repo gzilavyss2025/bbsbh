@@ -148,13 +148,41 @@ const POOL = [
 ]
 
 test('the nearest arsenal ranks first', () => {
+  // 'Mirror Lefty' carries the subject's exact mix, so he is the nearest arm
+  // in the pool. That he is a lefty is not a tiebreak, a penalty, or a
+  // disqualification — see the handedness tests below.
   const [top] = similarPitchers(POOL, 1)
-  assert.equal(top.name, 'Near Righty')
+  assert.equal(top.name, 'Mirror Lefty')
 })
 
-test('a mirror-image lefty is filtered out however well his arsenal matches', () => {
+test('a mirror-image lefty is ranked on his arsenal, ahead of a near righty', () => {
+  // The inverse of what this file used to pin: handedness was a hard filter,
+  // and this arm was excluded however well his mix matched. It was dropped
+  // deliberately — the card's claim is about the repertoire, not the platoon
+  // matchup. See similarPitchers' header.
   const names = similarPitchers(POOL, 1, { limit: 5 }).map((p) => p.name)
-  assert.ok(!names.includes('Mirror Lefty'))
+  assert.ok(names.includes('Mirror Lefty'))
+  assert.ok(names.indexOf('Mirror Lefty') < names.indexOf('Near Righty'))
+})
+
+test('handedness changes nothing about the list', () => {
+  // The strong form: flip every hand in the pool and the same arms come back
+  // in the same order. A filter or a distance term would both fail this.
+  const flip = (h) => (h === 'R' ? 'L' : 'R')
+  const flipped = POOL.map((p) => ({ ...p, throws: p.throws ? flip(p.throws) : p.throws }))
+  assert.deepEqual(
+    similarPitchers(flipped, 1, { limit: 5 }).map((p) => p.personId),
+    similarPitchers(POOL, 1, { limit: 5 }).map((p) => p.personId),
+  )
+})
+
+test('each neighbour still carries his throwing hand for the card to print', () => {
+  // Dropping the filter is what makes this field load-bearing rather than
+  // decorative: SimilarPitchers.jsx's RHP/LHP line is now the only place a
+  // reader learns the list is mixed.
+  for (const p of similarPitchers(POOL, 1, { limit: 5 })) {
+    assert.ok(p.throws === 'R' || p.throws === 'L', `${p.name} lost his hand`)
+  }
 })
 
 test('a pitcher under the sample floor never appears', () => {
@@ -177,13 +205,13 @@ test('a subject under the sample floor yields no neighbours', () => {
 
 test('limit caps the list', () => {
   assert.equal(similarPitchers(POOL, 1, { limit: 1 }).length, 1)
-  assert.equal(similarPitchers(POOL, 1, { limit: 5 }).length, 1) // only 1 clears MIN_MATCH
+  assert.equal(similarPitchers(POOL, 1, { limit: 5 }).length, 2) // only 2 clear MIN_MATCH
 })
 
 test('a pitcher with no close comparison gets a SHORT list, never filler', () => {
-  // 'Far Righty' is a real, qualifying, same-handed arm — he's just nothing
-  // like the subject. Returning him to fill the card out would assert a
-  // resemblance that isn't there.
+  // 'Far Righty' is a real, qualifying arm — he's just nothing like the
+  // subject. Returning him to fill the card out would assert a resemblance
+  // that isn't there.
   const weak = similarPitchers(POOL, 1, { limit: 5 }).find((p) => p.name === 'Far Righty')
   assert.equal(weak, undefined)
 })
@@ -194,18 +222,21 @@ test('every neighbour returned clears the match floor', () => {
   }
 })
 
-test('a candidate with no known hand is skipped rather than guessed', () => {
+test('a candidate with no known hand is ranked like any other', () => {
+  // Previously skipped rather than guessed at, because an unknown hand
+  // couldn't be checked against the subject's. With nothing to check it
+  // against, he is simply an arsenal like the rest.
   const pool = [...POOL, { personId: 6, name: 'Unknown Hand', teamId: 120, types: POOL[1].types }]
   const names = similarPitchers(pool, 1, { limit: 5 }).map((p) => p.name)
-  assert.ok(!names.includes('Unknown Hand'))
+  assert.ok(names.includes('Unknown Hand'))
 })
 
-test('when the SUBJECT has no known hand the filter lifts rather than emptying the card', () => {
-  // A pitcher the source file has no hand for should still get neighbours —
-  // the alternative is a card that silently never renders for him.
+test('a SUBJECT with no known hand gets the same neighbours as anyone else', () => {
   const pool = POOL.map((p) => (p.personId === 1 ? { ...p, throws: undefined } : p))
-  const names = similarPitchers(pool, 1, { limit: 5 }).map((p) => p.name)
-  assert.ok(names.includes('Mirror Lefty'))
+  assert.deepEqual(
+    similarPitchers(pool, 1, { limit: 5 }).map((p) => p.personId),
+    similarPitchers(POOL, 1, { limit: 5 }).map((p) => p.personId),
+  )
 })
 
 test('ties break on personId so the list is stable across runs', () => {

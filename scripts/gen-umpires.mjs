@@ -24,15 +24,14 @@
 // parks carry no pitch-tracking so gen-umpire-accuracy.mjs can't score them.
 // Game dates/assignments carry no score, so the file is spoiler-free.
 // Run by hand: node scripts/gen-umpires.mjs
-import { writeFile, mkdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'umpires.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // Crew roles, mapped to short scorecard labels. Left/Right Field only appear in
 // six-man crews (All-Star Game + postseason); a two- or three-man MiLB crew just
 // omits the bases it doesn't staff. Any role not listed falls through to its raw
@@ -49,12 +48,6 @@ const UMP_LABELS = {
 }
 
 const currentSeason = () => new Date().getUTCFullYear()
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 // The levels this file covers, most-senior first. A game row is tagged with the
 // level's label so the umpire page can split MLB from AAA. See the header for
@@ -135,11 +128,7 @@ for (const [id, u] of umpires) {
   result[id] = u
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(
-  out,
-  JSON.stringify({ generatedAt: new Date().toISOString(), season, umpires: result }),
-)
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, umpires: result })
 console.log(
   `wrote ${out} (${umpires.size} umpires across ${gamesSeen} games, MLB + AAA)`,
 )

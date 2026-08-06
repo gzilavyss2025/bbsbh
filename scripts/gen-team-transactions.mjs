@@ -16,10 +16,11 @@
 // Full design: .scratch/team-transactions/data-layer-scope.md.
 //
 // Run by hand: node scripts/gen-team-transactions.mjs [season] [--force]
-import { writeFile, mkdir, readFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
+import { writeJsonAtomic } from './lib/io.js'
 import { dedupeTransactions, filterStoryworthy, groupIntoStories, bucketToOrg } from '../src/api/teamTransactions.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -119,6 +120,5 @@ const out = {
   byTeamId,
 }
 
-await mkdir(outDir, { recursive: true })
-await writeFile(outFile, JSON.stringify(out))
+await writeJsonAtomic(outFile, out)
 console.log(`wrote ${outFile} (${Object.keys(byTeamId).length} orgs, final=${final})`)

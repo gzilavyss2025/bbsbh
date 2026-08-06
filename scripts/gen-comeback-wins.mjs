@@ -33,20 +33,14 @@ import { dirname, join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { getJson } from './lib/statsapi.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'comeback-wins.json')
-const BASE = 'https://statsapi.mlb.com'
 const DEFAULT_DAYS = 3
 // The cumulative home win % (+ its `about` for nothing here, but kept minimal).
 // Only homeTeamWinProbability is read; pruning keeps each game's payload small.
 const WP_FIELDS = 'homeTeamWinProbability'
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 function parseArgs(argv) {
   const args = {}

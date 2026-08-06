@@ -42,6 +42,18 @@ function canonicalUrl(params, origin) {
     case 'team-leaders':
       path = `/team/${params.get('id')}/leaders`
       break
+    case 'team-roster':
+      path = `/team/${params.get('id')}/roster`
+      break
+    case 'team-games':
+      path = `/team/${params.get('id')}/games`
+      break
+    case 'team-numbers':
+      path = `/team/${params.get('id')}/numbers`
+      break
+    case 'team-minors':
+      path = `/team/${params.get('id')}/minors`
+      break
     case 'game':
       path = `/${params.get('date')}/${params.get('matchup')}/${params.get('section')}`
       break
@@ -56,6 +68,18 @@ function canonicalUrl(params, origin) {
     case 'rehab':
     case 'about':
     case 'logos':
+    case 'fouls':
+    case 'milestones':
+    case 'umpires':
+    case 'awards':
+    case 'postseason-history':
+    case 'postseason-leaders':
+    case 'trade-deadline':
+    case 'all-star-rosters':
+    case 'all-star-legacy':
+    case 'logbook':
+    case 'first-scorebook':
+    case 'photos':
       path = `/${route}`
       break
     default:

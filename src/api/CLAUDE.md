@@ -26,6 +26,13 @@ spoiler-free only when restricted to the half the user has reached
 (`halfIndex <= revealedThrough + 1`). See the root `CLAUDE.md` spoiler section and
 `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010) before touching any of these.
 
+**This classification is about the SCORING surfaces only** — the slate's score
+cells, the lineup pages, the innings viewer, the box score. Most modules below
+feed OPEN surfaces instead (season and career stats, team and player pages,
+leader boards, standings), correctly need no seal at all, and say so; a season
+aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
+"no `SealBox`" on one of those as an omission waiting to be fixed.
+
 ## Core feed / selectors
 
 - `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
@@ -134,13 +141,14 @@ spoiler-free only when restricted to the half the user has reached
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
   as `game:final:{gamePk}`. Its one caller is `StampGameButton` inside the box
-  score's `SealBox` reveal render — ADR-0035. Two fields there are load-bearing
-  for the SERVER's reveal gate, not decoration: `innings` and `homeBattedLast`
-  feed `finalHalfIndex` (`src/lib/stamps.js`), and they are derived by scanning
-  for the last half anyone actually batted in rather than off `innings.length`,
-  because the live feed pads its linescore out to `scheduledInnings` and the
-  schedule feed the server reads does not. A rain-shortened game is where those
-  two disagree; `test/stamp-art.test.js` pins it.
+  score's `SealBox` reveal render — ADR-0035. Two fields there are load-bearing,
+  not decoration: `innings` and `homeBattedLast` must match what the SERVER
+  derives from the schedule feed, because a stamp is drawn from whichever
+  producer resolved it and has to look identical either way. Both are derived by
+  scanning for the last half anyone actually batted in rather than off
+  `innings.length`, because the live feed pads its linescore out to
+  `scheduledInnings` and the schedule feed does not. A rain-shortened game is
+  where those two disagree; `test/stamp-art.test.js` pins it.
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
   at most MiLB parks, so every field is null-guarded and the UI hides the row.
@@ -360,12 +368,13 @@ for each generator; the reader modules:
   (`schedule.js`). `rosters[season]` is
   `{ AL, NL }`, each precomputed into `{ starters, bullpen, substitutes }` by the
   generator (one extra boxscore fetch per season resolves who actually started)
-  so the page renders the sections directly with no client-side grouping. This
-  is the one game surface that DOES show the final score plainly (a small
-  full-width result card, not `GameCard`) — a deliberate, narrowly-scoped
-  exception to the spoiler rule's "never print a score" invariant, since an
-  All-Star Game's result is decades-settled and carries no individual game's
-  stakes; see ADR-0019. The same card also shows `mvps[season]` (absent before
+  so the page renders the sections directly with no client-side grouping. It
+  shows each season's final score plainly (a small full-width result card, not
+  `GameCard`) — not an exception to the spoiler rule but a page outside its
+  scope, since the subject is who was NAMED to a squad and an All-Star Game's
+  result is decades-settled exhibition trivia carrying no individual game's
+  stakes; see ADR-0019, and the root `CLAUDE.md` for the scope it sits outside
+  of. The same card also shows `mvps[season]` (absent before
   1962) and `venues[season]` (a name always, plus a best-effort host-team id
   the generator resolves against the CURRENT 30 teams' home parks — an older
   or relocated venue falls back to name-only). Kept OUT of the PWA precache
@@ -437,10 +446,16 @@ for each generator; the reader modules:
   different peer pools); the ranking itself is `src/lib/pitcherSimilarity.js`,
   pure and unit-tested. Runs at RUNTIME with no precompute: ~500 arms × ~4 pitch
   types is one pass over a file the page has already loaded, so a neighbour-table
-  generator would buy nothing. Handedness is a hard FILTER (not a distance term,
-  which a big enough arsenal match would eventually outvote) from the file's
-  `throws`, resolved at export time — see `scripts/CLAUDE.md`; an unknown hand is
-  skipped, never guessed. Two floors guard against overclaiming —
+  generator would buy nothing. Handedness does NOT enter the ranking — not as a
+  filter, not as a distance term. It was a hard filter until August 2026 and was
+  dropped deliberately (the claim is about the REPERTOIRE, not the platoon
+  matchup), so a mirror-image lefty can top a righty's card and a pitcher with
+  no `throws` on file is ranked like anyone else. Measured effect, before
+  re-arguing it: closer neighbours for 327 of 538 MLB arms, by ~1 match point,
+  and no change to coverage at all — see `pitcherSimilarity.js`. The file's
+  `throws` is still exported and still carried on every returned row — it is
+  what `SimilarPitchers.jsx` prints as the RHP/LHP line, now the only place the
+  hand appears. Two floors guard against overclaiming —
   `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
   is dropped — so an unusual arsenal returns a SHORT list or none rather than
   filler. See `.scratch/player-profile-card/scope.md` §4.
@@ -468,8 +483,9 @@ for each generator; the reader modules:
   constants documented against the real file's measured distance
   distributions). Skill space only (ev/hardHit/brl/chase/sprintSpeed —
   deliberately NOT xwoba, which would double-count contact quality), no
-  handedness filter (contact/discipline/speed don't invert with batting
-  side), and the file carries no names — `SimilarHitters.jsx` resolves its
+  handedness filter (nothing here inverts with batting side — and since
+  August 2026 the pitching side has none either), and the file carries no
+  names — `SimilarHitters.jsx` resolves its
   three rows' names/clubs itself with one batched
   `people?personIds=…&hydrate=currentTeam` call.
 - `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
@@ -497,35 +513,6 @@ for each generator; the reader modules:
   latest revealed inning, within one pitch type; null at untracked MiLB
   parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
   see below and `docs/callouts.md`), not rendered directly.
-- `lineupStrength.js` — the Lineup Strength grade, from
-  `public/data/lineup-values.json` (`gen-lineup-values.mjs`) +
-  `src/lib/lineupSolver.js` (exact Hungarian assignment over the eligible
-  positions). Each hitter carries a bat (`rpg`, from wRC+) and a glove
-  (`fldRpg`, from season fielding runs) as SEPARATE numbers; `slotValue` adds
-  both at a fielding slot and uses the bat alone at DH. **`docs/lineup-strength.md`
-  is required reading before changing any of this** — it records the three things
-  removed from the model (positional adjustment, familiarity discount,
-  career-based eligibility), each of which looks like an obvious addition and
-  each of which produced provably wrong answers. `receiptFor` groups the
-  optimal-vs-posted difference into paths and cycles so one move is one row and
-  the rows sum to the gap; `rpgFromWar`/`fldRpgFromRuns` are the runtime echoes
-  of the generator's model and must stay in step with it.
-  `lineupStrengthFor(data, teamId, actualLineup, names?)` → 0–10 score,
-  statTiers tier, the itemized receipt (`sub`/`chain`/`shuffle` rows — a
-  personnel swap, a multi-slot shift, or a same-nine rearrangement) and
-  `ungraded` (posted starters with no value in any file). The card
-  (`LineupStrengthCard.jsx`) currently renders only the score + tier; the
-  receipt is computed and tested but deliberately not surfaced yet — see
-  docs/lineup-strength.md "Explaining the grade".
-  Spoiler-free by construction (the posted starting nine + season
-  aggregates); surface is `LineupStrengthCard` under the batting order on
-  the lineup pages. MLB only. A starter posted after the last nightly build
-  (trade/call-up) is resolved best-data-first: another club's file entry,
-  then `war.json` (via `rpgFromWar`, which is why `fetchLineupValues`
-  attaches a `warFallback`), else his slot is excluded from the gap and shown
-  as "not yet in the season data" — a data hole never reads as a weakness.
-  `names` (the posted lineup's id→name map) backfills a war-only starter's
-  name in the receipt.
 - `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
   `public/data/season-score.json`. The nightly generator stores snapshots by
   season, team, and completed date rather than one mutable current row;
@@ -571,10 +558,9 @@ for each generator; the reader modules:
   photographer's original upload and dedupes by photo id.
   Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
   narrates the outcome just by looking at it, same risk as a highlight clip's
-  title, but this is a standalone personal tool outside the scored-game flow
-  (its page carries its own disclaimer instead). See root CLAUDE.md's spoiler
-  section for why that's a deliberate, narrow exception rather than a hole in
-  the rule.
+  title, but this is a standalone page outside the scoring flow, so it sits
+  outside the spoiler rule's scope rather than carving a hole in it (its page
+  carries its own disclaimer instead). See the root `CLAUDE.md` for that scope.
   Every image is a video THUMBNAIL (`editorial` has been empty on every game
   checked), so each carries a `kind` — `photographer` (a Getty/AP/MLB
   Photos-Greenfly still), `broadcast` (a frame off the TV feed), `graphic` (a

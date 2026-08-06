@@ -86,20 +86,17 @@ export function TeamPage({ id, asOf, sportId }) {
       active="overview"
       hiddenTabs={hiddenTeamTabs(team)}
     >
-      {/* Standing — the club's row plus the team above and below it. The
-          Postseason Odds pill still opens the whole division's snapshot: that
-          modal is the Overview's, not the Numbers tab's. */}
+      {/* Standing — the whole division; divisions are small enough that a
+          preview window isn't worth the door. The Postseason Odds pill still
+          opens the whole division's snapshot: that modal is the Overview's,
+          not the Numbers tab's. */}
       {standings.length > 0 && (
-        <>
-          <StandingsCard
-            team={team}
-            standings={standings}
-            asOf={asOf}
-            divisionPostseasonOdds={divisionPostseasonOdds}
-            preview
-          />
-          <PreviewDoor label="Full standings" onClick={() => go('numbers')} />
-        </>
+        <StandingsCard
+          team={team}
+          standings={standings}
+          asOf={asOf}
+          divisionPostseasonOdds={divisionPostseasonOdds}
+        />
       )}
 
       {/* Form — the season grade and form rails, in full. This is the page's

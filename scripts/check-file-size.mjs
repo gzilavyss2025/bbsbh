@@ -72,7 +72,7 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
-  'src/styles/05-masthead-nav.css': 700, // 683
+  'src/styles/05-masthead-nav.css': 700, // 692
   'src/styles/06-loader-and-cards.css': 900, // 850
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 686
@@ -86,18 +86,14 @@ const BUDGETS = {
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
   'src/styles/26-player-page.css': 1400, // 1383
-  'src/styles/27-player-position-innings.css': 800, // 706
+  'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 1000, // 984
   'src/styles/29-team-transactions.css': 900, // 844
   'src/styles/31-wild-card.css': 1100, // 1088
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
-  'src/styles/44-pre-game-cards.css': 700, // 652
   'src/styles/49-passport-book.css': 1000, // 953
-  'src/api/person.js': 2800, // 2706
-  'src/api/callout-notes.js': 2100, // 2080
-  'src/api/playbyplay.js': 1800, // 1784
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
@@ -111,12 +107,16 @@ const BUDGETS = {
   'src/api/boxscore.js': 900, // 859
   'src/screens/GameSelect.jsx': 900, // 854
   'src/api/select.js': 800, // 796
+  // computeHalfInningFeed's own state machinery (pinch-runner aliasing,
+  // per-batter trip tracking, the visible-step gate) is tightly coupled and
+  // deliberately not decomposed further when playbyplay.js was split
+  // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
+  'src/api/playbyplay/halfInningFeed.js': 800, // 724
   'src/screens/PlayerPage.jsx': 800, // 772
   'src/components/playbyplay/PlayByPlay.jsx': 700, // 687
   'src/api/loadPlayer.js': 700, // 682
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629
-  'scripts/gen-former-teammates.mjs': 700, // 614
   'src/components/charts/WinProbChart.jsx': 700, // 612
 }
 

@@ -40,7 +40,7 @@ test('the slate never carries a stamp', async ({ page }) => {
   await expect(page.locator('.gamestamp')).toHaveCount(0)
 })
 
-test('minting files the game in the Logbook, and un-stamping takes it back', async ({ page }) => {
+test('minting files the game in the Game Log, and un-stamping takes it back', async ({ page }) => {
   await page.goto(`${GAME}/boxscore`)
   await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
 
@@ -75,7 +75,7 @@ test('minting files the game in the Logbook, and un-stamping takes it back', asy
 // stats page at all (before the 'stats' branch was ordered ahead of the numeric
 // season one, it silently fell through to the bare Logbook), and that its
 // totals can only ever come from the collection.
-test('the Logbook retrospective counts your stamps, and nothing else', async ({ page }) => {
+test('the Game Log retrospective counts your stamps, and nothing else', async ({ page }) => {
   await page.goto('/logbook/stats')
   // Empty collection: the page exists and says so, rather than resolving to
   // the bare Logbook and leaving the wrong screen up.

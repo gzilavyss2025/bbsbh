@@ -15,23 +15,18 @@
 // World Series / pennant odds are deliberately NOT computed here — they need a
 // bracket simulation (best-of-3/5/7) on top of this, a separate layer. This
 // generator only answers "does this team make the 6-team field."
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'postseason-odds.json')
 const teamScorePath = join(here, '..', 'public', 'data', 'team-score.json')
-const BASE = 'https://statsapi.mlb.com'
 const MLB_LEAGUES = [103, 104]
 const HOME_WIN_PROBABILITY = 0.54
 const DEFAULT_SIMS = 5000
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 const round1 = (n) => Math.round(n * 10) / 10
@@ -274,8 +269,7 @@ async function main() {
     seasons[season] = { byTeamId }
     console.log(`${date}: ${Object.keys(snapshots).length} MLB postseason-odds snapshots (${sims} sims)`)
   }
-  await mkdir(dirname(out), { recursive: true })
-  await writeFile(out, JSON.stringify({ version: 1, generatedAt: new Date().toISOString(), seasons }))
+  await writeJsonAtomic(out, { version: 1, generatedAt: new Date().toISOString(), seasons })
   console.log(`wrote ${out}`)
 }
 

@@ -3,8 +3,11 @@
 // by scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this module
 // just reads it. Keyed by MLB Stats API personId (FanGraphs' xMLBAMID is the
 // same id), so callers can index straight off a roster entry's person.id. Also
-// carries a parallel `pa` map (hitter plate appearances) the Lineup Strength
-// grade uses to re-value a just-traded starter (api/lineupStrength.js).
+// carries parallel `pa` (hitter plate appearances), `wrc` (wRC+) and `fld`
+// (season fielding runs) maps, which nothing reads today — they were the Lineup
+// Strength grade's inputs and were kept when it was removed because they ride
+// along on the one FanGraphs request WAR itself needs
+// (`.scratch/lineup-strength/README.md`).
 // Degrades to empty maps before the file exists or on any fetch failure — a
 // missing WAR badge, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.

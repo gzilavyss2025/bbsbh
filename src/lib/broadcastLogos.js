@@ -23,7 +23,10 @@ const NETWORK_LOGOS = {
   'prime video': '/broadcast-logos/primevideo.png',
   espn: '/broadcast-logos/espn.png',
   // "ESPN Unlmtd" (their streaming-only branding) shares the same mark —
-  // there's no separate ESPN Unlimited logo.
+  // there's no separate ESPN Unlimited logo. isEspnUnlimited below is what
+  // tells the plain-ESPN case apart so NationalTvIcon can flag it — wearing
+  // the bare ESPN mark alone would misrepresent it as free-with-cable ESPN,
+  // when Unlimited is a separate paid streaming tier.
   'espn unlmtd': '/broadcast-logos/espn.png',
   // Confirmed against 2026-03-25 NYY @ SF, the actual Opening Day opener.
   netflix: '/broadcast-logos/netflix.png',
@@ -32,4 +35,11 @@ const NETWORK_LOGOS = {
 export function broadcastLogoFor(network) {
   if (!network) return null
   return NETWORK_LOGOS[network.trim().toLowerCase()] ?? null
+}
+
+// True for ESPN's streaming-only "Unlmtd" tier specifically (not linear
+// ESPN) — see the NETWORK_LOGOS comment above for why NationalTvIcon needs
+// to tell the two apart even though they share one logo file.
+export function isEspnUnlimited(network) {
+  return (network ?? '').trim().toLowerCase() === 'espn unlmtd'
 }

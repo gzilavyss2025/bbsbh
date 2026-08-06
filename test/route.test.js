@@ -1,10 +1,13 @@
 // Unit coverage for the routing layer (src/lib/route.js) — 230 lines of pure,
 // order-sensitive parsing that was previously untested. parseRoute's branch
 // ordering is load-bearing (its own comments warn "must come BEFORE the generic
-// game branch"), and it decides whether a link carries the spoiler-safe cutoff
-// (`?d=` / `?s=`) onto a player/team page. A parse regression silently
-// misroutes or drops that cutoff, so the branches and the path round-trips are
-// worth pinning.
+// game branch"), and it decides whether a link carries the as-of cutoff
+// (`?d=` / `?s=`) onto a player/team page. Nothing in the UI stamps that cutoff
+// on any more (ADR-0034's amendment — stats pages open live), but a URL that
+// carries one must still parse it and still reproduce it across a tab switch,
+// or an already-shared dated link answers two different ways in one visit. So
+// the branches and the path round-trips are still worth pinning; what changed
+// is who supplies `d`, not what `d` means.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {

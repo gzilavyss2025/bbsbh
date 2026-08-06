@@ -1,16 +1,34 @@
 # bbsbh
 
 A spoiler-safe second-screen companion for scoring baseball by hand: it shows
-live game data pulled from the MLB Stats API, but keeps every score-revealing
-fact hidden until the user deliberately reveals it, one half-inning at a time.
+live game data pulled from the MLB Stats API, but on the surfaces you score from
+it keeps every score-revealing fact hidden until the user deliberately reveals
+it, one half-inning at a time.
 
 ## Language
 
 ### Spoiler mechanism
 
 **Spoiler rule**:
-The core invariant: a score-revealing value must never exist in the DOM until
-the user has revealed it — there is no fetched-then-hidden node to leak.
+The core invariant, stated with the scope that is half of it: on the **scoring
+surfaces**, a score-revealing value never exists in the DOM until the user has
+revealed it — there is no fetched-then-hidden node to leak. Off them, baseball
+opens live. The rule protects the game you are scoring by hand, not the sport's
+public record.
+_Avoid_: stating it without the scope ("no score anywhere, ever") — that was the
+older, absolute framing, and reading it back is how these guards re-tighten by
+accident.
+
+**Scoring surfaces**:
+The four places the spoiler rule governs: the slate's score cells, the two
+lineup pages, the innings viewer, and the box score — everything you touch while
+charting a game on paper. Everything else is an **open surface**: season and
+career stats, player and team pages, leader boards, standings, and the
+standalone pages outside the scoring flow (All-Star Rosters, Game Photos, the
+Game Log). A season stat line moves by fractions and says nothing about tonight's
+game; gating one was the rule reaching past what it protects (ADR-0034).
+_Avoid_: calling an open surface an "exception" — it is outside the scope, not a
+hole in it.
 
 **Seal**:
 The hidden state of a score-revealing value before the user has revealed it.

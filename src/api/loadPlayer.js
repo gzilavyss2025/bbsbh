@@ -26,6 +26,7 @@ import {
   fetchPitchingAdvanced,
   fetchHittingAdvanced,
   fetchTransactions,
+  isProbableStarterToday,
   fetchPlayerAwards,
   fetchTradeCohort,
 } from './person-fetch.js'
@@ -213,6 +214,19 @@ export async function loadPlayer(id, asOf) {
   const rehab = detectRehabAssignment(txns, debutYear, endDate)
   const onRehab = Boolean(rehab) && onIL
   const currentActivitySportId = onRehab ? 1 : liveSportId
+  // A player the transaction feed still shows on rehab/the IL may already be
+  // announced as tonight's probable starter — MLB posts that days before the
+  // club files the activation that would clear the banner (see
+  // isProbableStarterToday, schedule.js). Live view only (`!asOf`): a game-
+  // scoped historical page reflects that game's own cutoff, never "today".
+  const startingToday =
+    !asOf && onIL && il.team?.id ? await isProbableStarterToday(il.team.id, id, endDate) : false
+  // Stands the banner down and swaps `bio.team` from his rehab affiliate to
+  // the parent org he's actually pitching for tonight — no `parentOrgId` on
+  // the swapped-in club, since he isn't an affiliate of anyone, he simply IS
+  // on that club tonight, so the hero drops the affiliate mark and
+  // themes/links to the parent org directly.
+  if (startingToday) bio.team = { id: il.team.id, name: il.team.name, parentOrgId: null, parentOrgName: '' }
   // Where his career-shaped sections are pinned. A player who has reached the
   // majors gets the major-league treatment even while he's currently in the
   // minors (Ben Gamel — a longtime big leaguer now at AAA): his year-by-year
@@ -672,7 +686,7 @@ export async function loadPlayer(id, asOf) {
   return {
     bio, blocks, season, asOf, sportId: currentActivitySportId,
     onRehab, rehab,
-    onIL, il,
+    onIL, il, startingToday,
     rosterStatus, lastPlayedYear,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     conversionNote, positionInnings, transactions, trophyCase,

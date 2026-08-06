@@ -1,22 +1,31 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useKeepAwakePreference } from '../hooks/useKeepAwakePreference.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
-import { TeamInfo } from './TeamInfo.jsx'
-import { InningViewer } from './InningViewer.jsx'
-import { BoxScore } from './BoxScore.jsx'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
+import { Loader } from '../components/ui/Loader.jsx'
 import { LinkScope } from '../lib/nav.jsx'
 import { humanDateWithYear } from '../lib/dates.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { useCopy } from '../copy/copyContext.js'
 import { formatResetTime } from '../lib/scoresUnlocked.js'
+
+// GameView is itself a lazily-loaded route (App.jsx), but its three sections
+// — lineups, innings, box score — are mutually exclusive per render (`step`)
+// and each is a large module on its own. Splitting them further means opening
+// a game to read a lineup never downloads the innings viewer or box score
+// code until the user actually taps into that section.
+const TeamInfo = lazy(() => import('./TeamInfo.jsx').then((m) => ({ default: m.TeamInfo })))
+const InningViewer = lazy(() =>
+  import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
+)
+const BoxScore = lazy(() => import('./BoxScore.jsx').then((m) => ({ default: m.BoxScore })))
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -59,7 +68,6 @@ export function GameView({ game, section, onSection }) {
     highlightsData,
     runExpectancyData,
     workloadData,
-    lineupValuesData,
     jerseyTreatments,
     started,
   } = useGameData(game, passActive, step)
@@ -145,11 +153,24 @@ export function GameView({ game, section, onSection }) {
   ) : null
 
   return (
-    // Before first pitch there's nothing yet to spoil, so a link out of a
-    // Preview game's lineups should show live/current stats rather than
-    // freezing to "entering today" (that framing only makes sense once the
-    // game — and the spoiler risk — has actually started).
-    <LinkScope asOf={started ? officialDate : null} sportId={game.sportId}>
+    // A link out of a game carries the LEVEL hint and nothing else. It used to
+    // carry `asOf={started ? officialDate : null}` too, stamping `?d=` on every
+    // player/team/leaders link so those pages opened frozen to "entering today".
+    //
+    // That was the spoiler rule reaching a long way past the surfaces it exists
+    // to protect. A season stat line is not a score: it moves by fractions, it
+    // is the same number the back of a baseball card has carried for a century,
+    // and reading one tells you nothing about how the game you are scoring is
+    // going. Freezing it by default made a whole section of the app quietly
+    // wrong — a player page reached from a game showed different numbers than
+    // the same page reached from search — in exchange for very little.
+    //
+    // So stats pages now open LIVE, always. `?d=` still parses and still
+    // freezes (see route.js), so an already-shared link resolves the way its
+    // sender meant it to; it is simply no longer stamped on by default. Nothing
+    // about the game itself is affected — the slate, the lineup pages, the
+    // innings viewer and the box score are unchanged and stay sealed.
+    <LinkScope sportId={game.sportId}>
     <div className="screen">
       <SiteHeader />
 
@@ -219,6 +240,7 @@ export function GameView({ game, section, onSection }) {
       />
 
       {feed && step === 0 && (
+        <Suspense fallback={<Loader />}>
         <TeamInfo
           feed={feed}
           side="away"
@@ -239,7 +261,6 @@ export function GameView({ game, section, onSection }) {
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
-          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
@@ -247,8 +268,10 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
         />
+        </Suspense>
       )}
       {feed && step === 1 && (
+        <Suspense fallback={<Loader />}>
         <TeamInfo
           feed={feed}
           side="home"
@@ -268,7 +291,6 @@ export function GameView({ game, section, onSection }) {
           formerTeammatesData={formerTeammatesData}
           careerMatchupsData={careerMatchupsData}
           workloadData={workloadData}
-          lineupValuesData={lineupValuesData}
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
@@ -276,8 +298,10 @@ export function GameView({ game, section, onSection }) {
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
         />
+        </Suspense>
       )}
       {feed && step === 2 && (
+        <Suspense fallback={<Loader />}>
         <InningViewer
           feed={feed}
           started={started}
@@ -302,8 +326,10 @@ export function GameView({ game, section, onSection }) {
           spoilersOff={spoilersOff}
           passActive={passActive}
         />
+        </Suspense>
       )}
       {feed && step === 3 && (
+        <Suspense fallback={<Loader />}>
         <BoxScore
           feed={feed}
           managers={managers.data}
@@ -319,6 +345,7 @@ export function GameView({ game, section, onSection }) {
           onSection={onSection}
           spoilersOff={spoilersOff}
         />
+        </Suspense>
       )}
 
     </div>

@@ -60,24 +60,99 @@ export function authPreflight(req, env = process.env) {
   return { ok: true, token, secretKey }
 }
 
-// The full check. `verifyOptions` is passed through to Clerk — api/copy.js adds
-// `authorizedParties`, the others don't.
+// ---------------------------------------------------------------------------
+// WHY THE SERVER LOGS WHAT THE RESPONSE WON'T SAY
+// ---------------------------------------------------------------------------
+// `401 invalid token` is the right answer to hand a CLIENT: a caller has no
+// business learning whether it failed on a signature, an expiry, or this
+// deploy's inability to reach Clerk at all. But it was also all the SERVER
+// knew, and that is a different problem — the same one this file was written
+// to solve, one level further down.
 //
-// The try/catch is not decoration: @clerk/backend THROWS on some malformed
-// tokens rather than returning `errors`, and the previous per-file copies didn't
-// catch, so a junk Authorization header was a 500 with a stack trace instead of
-// a 401.
-export async function authenticateUser(req, { env = process.env, ...verifyOptions } = {}) {
+// Production hit exactly that wall: every genuine token rejected as `invalid
+// token`, while the publishable key, the token's issuer, and the secret key
+// had each been independently verified to belong to the same Clerk instance.
+// Nothing was left to check from outside, because Clerk's own reason —
+// `token-invalid-signature` vs `token-expired` vs `jwk-remote-failed-to-load`,
+// which are three unrelated faults with three unrelated fixes — was being
+// caught and thrown away right here.
+//
+// So the reason now goes to the log, where only the operator can read it, and
+// the response is untouched. Two rules keep that safe:
+//
+//   - The token NEVER gets logged. It is a live credential; a log line is not
+//     the place for one, and the reason is what's diagnostic anyway.
+//   - The secret key is logged as its PREFIX only (`sk_live_` / `sk_test_`),
+//     which is 8 characters, secret-free, and answers the two questions that
+//     actually recur: is this the live instance or the test one, and is it
+//     even a secret key rather than a publishable key pasted into the wrong
+//     variable. That specific mix-up is easy to make — the two sit side by
+//     side in Clerk's dashboard — and impossible to see once Vercel marks the
+//     variable Sensitive and stops echoing it back.
+function keyShape(secretKey) {
+  const prefix = String(secretKey).slice(0, 8)
+  // A publishable key here is a real, seen-in-the-wild misconfiguration, so it
+  // gets named rather than reported as just another opaque prefix.
+  if (prefix.startsWith('pk_')) return `${prefix} (PUBLISHABLE KEY — belongs in VITE_CLERK_PUBLISHABLE_KEY)`
+  if (!prefix.startsWith('sk_')) return `${prefix} (not a Clerk secret key)`
+  return prefix
+}
+
+// ---------------------------------------------------------------------------
+// THE RETURN SHAPE — read before touching the call below
+// ---------------------------------------------------------------------------
+// `verifyToken` RESOLVES TO THE JWT PAYLOAD ITSELF, and THROWS when a token
+// does not verify. Its signature in @clerk/backend 3.x is:
+//
+//   verifyToken(token, options) => Promise<JwtPayload>
+//
+// It does NOT resolve to `{ data, errors }`. This file used to destructure
+// exactly that, and the consequence was total and silent: a payload has no
+// `data` property, so `data` came back `undefined` for a PERFECTLY VALID
+// token, `!data?.sub` was therefore always true, and every authenticated
+// request in production was answered `401 invalid token` — reveal sync, the
+// spoiled-day map, and the Logbook alike, since the day Clerk was added.
+//
+// It hid so well because it fails in the direction that looks like a
+// misconfiguration. A bad token throws and is caught, and a GOOD token was
+// rejected too, so the endpoint's outward behaviour was indistinguishable from
+// a wrong secret key — which is what it was mistaken for, through several
+// rounds of re-issuing keys that were correct all along. What finally named it
+// was logging the reason: "no sub claim on a token that verified" only makes
+// sense if verification SUCCEEDED and we discarded the result.
+//
+// So: read the payload directly, and let the catch handle failure. If a future
+// bump changes this again, the symptom will be a 100% auth failure rate with
+// valid credentials — check this contract first.
+function failureReason(caught) {
+  if (!caught) return 'verified, but the payload carried no `sub` claim'
+  return `${caught?.name ?? 'Error'}: ${caught?.message ?? String(caught)}`
+}
+
+// The full check. `verifyOptions` is passed through to Clerk — api/copy.js adds
+// `authorizedParties`, the others don't. `log` and `verify` are injectable so
+// the unit suite can pin both the logging and the return-shape contract above
+// without a live Clerk instance, which CI has no way to reach.
+export async function authenticateUser(
+  req,
+  { env = process.env, log = console.error, verify = verifyToken, ...verifyOptions } = {},
+) {
   const pre = authPreflight(req, env)
   if (!pre.ok) return pre
-  try {
-    const { data, errors } = await verifyToken(pre.token, {
-      secretKey: pre.secretKey,
-      ...verifyOptions,
-    })
-    if (errors || !data?.sub) return { ok: false, status: 401, error: INVALID_TOKEN }
-    return { ok: true, userId: data.sub }
-  } catch {
+  const reject = (caught) => {
+    log(
+      `[auth] verifyToken rejected a token — secretKey=${keyShape(pre.secretKey)} reason=${failureReason(caught)}`,
+    )
     return { ok: false, status: 401, error: INVALID_TOKEN }
+  }
+  try {
+    const payload = await verify(pre.token, { secretKey: pre.secretKey, ...verifyOptions })
+    // `sub` is the Clerk user id. Absent means this is not a session token we
+    // can attribute to a user, which is a rejection — but a different one from
+    // "did not verify", and the log says which.
+    if (!payload?.sub) return reject(null)
+    return { ok: true, userId: payload.sub }
+  } catch (caught) {
+    return reject(caught)
   }
 }

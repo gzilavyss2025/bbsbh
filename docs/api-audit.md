@@ -295,8 +295,16 @@ by the constants — would convert the silent-drop class into a caught-in-CI cla
 
 ## 4. Spoiler-safety review
 
-The core invariant (root `CLAUDE.md`): *"a score-revealing value must never exist in the DOM
-until the user reveals it."* Note the scope: **DOM**, not JS memory. That scoping is the crux.
+The core invariant (root `CLAUDE.md`), **as it stood when this audit was written**:
+*"a score-revealing value must never exist in the DOM until the user reveals it."* Note the
+scope: **DOM**, not JS memory. That scoping is the crux of this section, and it still holds.
+
+> **Since restated (2026-08-06).** The rule now names the surfaces it governs — the scoring
+> surfaces (the slate's score cells, the lineup pages, the innings viewer, the box score) —
+> while season/career stats, player and team pages, leader boards and standings open live.
+> The mechanism analysis below is unaffected, but its inventory is not: `/standings`
+> (item 4) feeds an open surface and is no longer something to defend against. Do not read
+> the quote above as "seal everything"; see the root `CLAUDE.md`.
 
 ### Score-revealing network responses that reach the client
 

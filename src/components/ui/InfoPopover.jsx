@@ -7,8 +7,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 // closes on Escape and outside-click, and its motion is CSS-only so
 // prefers-reduced-motion is honoured in the stylesheet.
 //
-// Used in the navy section mastheads on the lineup pages (LineupStrengthCard,
-// BullpenBoard). `label` is the button's accessible name; `children` is the tip.
+// Used in the navy section mastheads on the lineup pages (BullpenBoard).
+// `label` is the button's accessible name; `children` is the tip.
 export function InfoPopover({ label, children, className = '' }) {
   const [open, setOpen] = useState(false)
   const wrapRef = useRef(null)

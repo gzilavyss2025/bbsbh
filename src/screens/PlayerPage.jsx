@@ -123,7 +123,13 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="allstar-banner__star" aria-hidden="true">★</span>
           </div>
         )}
-        {data.onRehab && (
+        {/* startingToday: he's announced as TODAY's probable starter for the
+            club that has him on rehab/the IL — MLB posts that days before it
+            files the activation transaction the banners are otherwise keyed
+            on, so showing "Rehab Assignment"/"Injured List" the day he's
+            about to take the mound would be stale on its face. See
+            loadPlayer.js. */}
+        {data.onRehab && !data.startingToday && (
           <div className="rehab-banner" role="note">
             <span className="rehab-banner__mark" aria-hidden="true">✚</span>
             <span className="rehab-banner__text">
@@ -131,7 +137,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             </span>
           </div>
         )}
-        {data.onIL && (
+        {data.onIL && !data.startingToday && (
           <div className="il-banner" role="note">
             <span className="il-banner__mark" aria-hidden="true">✚</span>
             <span className="il-banner__text">
@@ -144,7 +150,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="lastplayed-banner__text">Last played in {data.lastPlayedYear}</span>
           </div>
         )}
-        <AsOfBanner asOf={asOf} />
+        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
@@ -384,16 +390,22 @@ export function PlayerPage({ id, asOf, sportId }) {
                 A pitcher's neighbours are arsenal-space (what he throws, see
                 lib/pitcherSimilarity.js); a hitter's are Statcast-skill-space
                 (how he hits, see lib/hitterSimilarity.js). Renders nothing
-                below the sample floors or when nobody clears the match floor. */}
+                below the sample floors or when nobody clears the match floor.
+                NO section note, unlike its neighbours: what "closest" is
+                measured on now lives in the card's own legend, which names the
+                actual inputs (SimilarPlayerGrid.jsx). The note that used to be
+                here said "closest Statcast profiles", a phrase a reader had no
+                way to check, and then briefly "3 closest", which only counted
+                cards already on screen. */}
             {block.similar?.length > 0 && (
               block.group === 'pitching' ? (
                 <>
-                  <SectionTitle title="Pitches like" note="closest arsenals" />
+                  <SectionTitle title="Pitches like" />
                   <SimilarPitchers similar={block.similar} />
                 </>
               ) : (
                 <>
-                  <SectionTitle title="Hits like" note="closest Statcast profiles" />
+                  <SectionTitle title="Hits like" />
                   <SimilarHitters similar={block.similar} />
                 </>
               )
@@ -401,7 +413,11 @@ export function PlayerPage({ id, asOf, sportId }) {
 
             {block.gameLog && (
               <>
-                <SectionTitle title="Game log" bar note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : 'entering today'}`} />
+                <SectionTitle
+                  title="Game log"
+                  bar
+                  note={`last ${block.gameLog.rows.length} · ${data.onRehab ? 'MLB + rehab' : asOf ? `entering ${monthDay(asOf)}` : 'entering today'}`}
+                />
                 <ul className="gamelog">
                   {block.gameLog.rows.map((r) => (
                     <li className="gamelog__row" key={r.gamePk ?? r.date}>
@@ -576,7 +592,8 @@ export function PlayerPage({ id, asOf, sportId }) {
 
         {asOf && (
           <p className="hint hint--prose player__caveat">
-            Season tiles, game log and past-year rows are frozen to “entering today.” The current-year row, the splits and the Advanced rates are full-season figures.
+            Season tiles, game log and past-year rows are frozen to “entering {monthDay(asOf)}.”
+            The current-year row, the splits and the Advanced rates are full-season figures.
           </p>
         )}
       </div>

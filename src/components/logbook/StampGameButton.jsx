@@ -55,7 +55,7 @@ export function StampGameButton({ game }) {
 
   return (
     <section className="stampcard">
-      <SectionMasthead as="h3" title="Logbook" />
+      <SectionMasthead as="h3" title="Game Log" />
 
       <div className={`stampcard__body${existing ? '' : ' stampcard__body--unstamped'}`}>
         <div className="stampcard__art">
@@ -72,11 +72,11 @@ export function StampGameButton({ game }) {
           {isFinal && !existing && (
             <>
               <p className="stampcard__lede">
-                You opened this one. Keep it — a stamp files this game in your Logbook.
+                You opened this one. Keep it — a stamp files this game in your Game Log.
               </p>
               {full ? (
                 <p className="hint hint--error">
-                  Your {season} Logbook is full. Remove a stamp to make room.
+                  Your {season} Game Log is full. Remove a stamp to make room.
                 </p>
               ) : (
                 <button
@@ -152,7 +152,7 @@ export function StampGameButton({ game }) {
                   className="btn btn--ghost"
                   onClick={() => navigate(logbookPath(season))}
                 >
-                  Open Logbook
+                  Open Game Log
                 </button>
                 <button
                   type="button"

@@ -20,7 +20,7 @@ about what it is. Do not tidy it into a folder.
 | `ui/` | `Loader`, `SectionMasthead`, `SectionTitle`, `ChevronLink`, `CopyBox`, `ModalPortal`, `InfoPopover`, `MasonryColumns`, `FlipCard`, `BreakableLocation`, `AsyncGate`, `BuildStamp` | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
 | `badges/` | `ProspectPill`, `RookiePill`, `DebutPill`, `MilestonePill`, `InjuredMark`, `RadarPill`, `TierPill`, `UmpireTierPill`, `UmpireTierGlyph` | An inline mark that adorns a name in a dense row, and **renders nothing when inactive** — so a caller can splice it in unconditionally |
 | `charts/` | `WinProbChart`, `UsagePips`, `PitchMix`, `BattedBallMix`, `PitchArsenalMix`, `StatcastPercentiles` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
-| `account/` | `AccountButton`, `AccountPitch`, `FavoriteTeamModal` | Clerk sign-in/account-menu surfaces |
+| `account/` | `AccountButton`, `AccountPitch`, `FavoriteTeamModal`, `LogbookAccountGate`, `LogbookLanding` | Clerk sign-in/account-menu surfaces and the signed-out Game Log pitch |
 | `allstar/` | `AllStarGameResult`, `DerbyCard` | All-Star Game / Derby result cards (ADR-0019's plain-score exception) |
 | `ballpark/` | `BallparkDiagram`, `BallparkModal` | Park diagram + its modal |
 | `chrome/` | `SiteHeader`, `SiteFooter`, `SiteMenu`, `SiteSearch`, `ReportFooter`, `TallyBrand`, `BackBtn` | Global site frame — header/footer/menu/search, not any one screen. `BackBtn` sits here rather than in `ui/` because it's page furniture that knows about route history, not a context-free primitive |
@@ -36,7 +36,7 @@ about what it is. Do not tidy it into a folder.
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
 | `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035) |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |
-| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `LineupStrengthCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal` | Team-level statistical cards |
+| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal` | Team-level statistical cards |
 | `transactions/` | `TeamTransactionsCard`, `TradeCard`, `TransactionTimeline` | Roster-move surfaces |
 | `umpire/` | `UmpireAccuracyModal`, `UmpireLink` | Umpire-specific surfaces (the tier pill/glyph live in `badges/` — shared with Game Score rankings) |
 
@@ -48,7 +48,7 @@ UI, ADR-0036), `playercard/` (player-page radar/similar-players cards).
 ## Two constraints that outrank tidiness
 
 **The Clerk-gated components must stay dynamically imported.** `AccountButton`,
-`AccountPitch`, `ContinueScoring`, and the three `*CloudSync` components are
+`AccountPitch`, `LogbookAccountGate`, `ContinueScoring`, and the three `*CloudSync` components are
 reached through `import()` so `@clerk/clerk-react` (~110 KB gz) stays out of the
 entry chunk. Moving them is fine; converting one of those specifiers to a static
 import is not, and it would still build cleanly — so check the built output, not

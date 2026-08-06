@@ -224,27 +224,16 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
           />
         </g>
 
-        {/* The app's own screen-print '@' — doubled ghost + ink layers, the same
-            misregistration treatment as .masthead__at on the home masthead —
-            sitting in the gap between the two marks. */}
+        {/* The app's own screen-print '@', sitting in the gap between the two
+            marks — translucent, no ghost/misregistration layer. */}
         <g transform={`translate(${STAMP_CENTER},128) skewX(-8) rotate(-2)`}>
-          <text
-            x="2"
-            y="1.5"
-            textAnchor="middle"
-            opacity="0.28"
-            fontFamily='"Big Shoulders Display", "IBM Plex Sans Condensed", sans-serif'
-            fontSize="36"
-            fontWeight="900"
-          >
-            @
-          </text>
           <text
             x="0"
             y="0"
             textAnchor="middle"
+            opacity="0.3"
             fontFamily='"Big Shoulders Display", "IBM Plex Sans Condensed", sans-serif'
-            fontSize="36"
+            fontSize="50"
             fontWeight="900"
           >
             @

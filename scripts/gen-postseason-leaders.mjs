@@ -32,16 +32,16 @@
 // lookup needed for W/L/SV).
 //
 // Run by hand: node scripts/gen-postseason-leaders.mjs
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
+import { getJson } from './lib/statsapi.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const historyPath = join(here, '..', 'public', 'data', 'postseason-history.json')
 const out = join(here, '..', 'public', 'data', 'postseason-leaders.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // Career-postseason qualifier floors for rate stats — same idea as the live
 // leader boards' playing-time floor (teamLeaders.js): a single pinch-hit at-bat
 // or one mop-up relief inning shouldn't win a rate-stat leaderboard.
@@ -50,12 +50,6 @@ const MIN_OUTS_FOR_ERA = 45 // 15 innings
 const TOP_N = 10
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
-
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
 
 function allGames(history) {
   const games = []
@@ -317,18 +311,14 @@ async function main() {
 
   const writeOut = async () => {
     await dumpGroup(db, 'postseason-player-stats')
-    await mkdir(dirname(out), { recursive: true })
-    await writeFile(
-      out,
-      JSON.stringify({
-        generatedAt: new Date().toISOString(),
-        since: history.seasons[history.seasons.length - 1]?.year ?? null,
-        teams: computeTeamLeaders(history),
-        mvpAwards: computeMvpLeaders(history),
-        batting: battingLeaders(db),
-        pitching: pitchingLeaders(db),
-      }),
-    )
+    await writeJsonAtomic(out, {
+      generatedAt: new Date().toISOString(),
+      since: history.seasons[history.seasons.length - 1]?.year ?? null,
+      teams: computeTeamLeaders(history),
+      mvpAwards: computeMvpLeaders(history),
+      batting: battingLeaders(db),
+      pitching: pitchingLeaders(db),
+    })
   }
 
   let done = 0

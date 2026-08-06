@@ -40,7 +40,8 @@
   gap: 2px;
 }
 .sitesearch-btn,
-.sitemenu-btn {
+.sitemenu-btn,
+.logbook-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -53,8 +54,35 @@
   cursor: pointer;
 }
 .sitesearch-btn:active,
-.sitemenu-btn:active {
+.sitemenu-btn:active,
+.logbook-btn:active {
   background: var(--surface-inset);
+}
+
+/* The Game Log trigger is the one labelled control in the row (see
+   LogbookButton.jsx for why it earns the word). Labelled, it stops being a
+   square tap target and becomes a pill: horizontal padding replaces the icon
+   buttons' square min-width, and the glyph and word share a 5px gap — tight
+   enough that the pair reads as one mark-plus-name lockup rather than two
+   items that happen to sit near each other. */
+.logbook-btn--labeled {
+  min-width: 0;
+  gap: 5px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+/* Small caps in the display face, matching the level pills across the row —
+   the label has to read as chrome, not as a body-text link dropped in the
+   header. Uppercasing here (not in the JSX) keeps the accessible name and
+   find-in-page text as "Game Log". */
+.logbook-btn__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-solid);
 }
 
 /* AccountButton (sign-in / Clerk's UserButton) — only rendered when

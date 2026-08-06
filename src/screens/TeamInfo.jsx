@@ -10,7 +10,7 @@ import {
   selectBirthdayIds,
   lastFirst,
 } from '../api/select.js'
-import { fetchTeamRoster } from '../api/team.js'
+import { fetchTeam, fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
 import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
 import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
@@ -49,7 +49,6 @@ import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
 import { pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
-import { LineupStrengthCard } from '../components/teamstats/LineupStrengthCard.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
@@ -98,7 +97,6 @@ export function TeamInfo({
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
-  lineupValuesData,
   callouts,
   onNext,
   nextLabel,
@@ -181,7 +179,6 @@ export function TeamInfo({
         formerTeammatesData={formerTeammatesData}
         careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
-        lineupValuesData={lineupValuesData}
         callouts={callouts}
       />
 
@@ -362,7 +359,6 @@ function TeamSections({
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
-  lineupValuesData,
   callouts,
 }) {
   const lineup = useMemo(() => selectLineup(feed, side), [feed, side])
@@ -376,6 +372,16 @@ function TeamSections({
     () => selectTeamMeta(feed, side === 'away' ? 'home' : 'away'),
     [feed, side],
   )
+  // This matchup's two clubs' CURRENT parent org — this side's own id when
+  // it's already the MLB parent, else its live parentOrgId — so a prospect
+  // badge can be checked against the roster the player is actually on today
+  // rather than whatever org a week-old scrape baked in (prospectBadge,
+  // api/prospects.js). Never the affiliate's own id: orgProspects rows are
+  // always keyed by parent.
+  const { data: teamIdentity } = useAsync(() => fetchTeam(meta.id), [meta.id])
+  const { data: oppTeamIdentity } = useAsync(() => fetchTeam(oppMeta.id), [oppMeta.id])
+  const orgTeamId = teamIdentity?.parentOrgId ?? meta.id
+  const oppOrgTeamId = oppTeamIdentity?.parentOrgId ?? oppMeta.id
   const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
@@ -398,17 +404,6 @@ function TeamSections({
     const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
     return diff <= 3 * 86400000 ? d : null
   }, [feed, workloadData])
-  // Same freshness rule for the lineup grade: the nightly values file
-  // describes the CURRENT roster, so grading an archival game's posted nine
-  // against today's values would be stale nonsense — hide it there.
-  const freshLineupValues = useMemo(() => {
-    const d = feed?.gameData?.datetime?.officialDate ?? null
-    const asOf = (lineupValuesData?.asOf ?? '').slice(0, 10) || null
-    if (!d || !asOf) return null
-    const diff = Math.abs(new Date(`${d}T00:00:00Z`) - new Date(`${asOf}T00:00:00Z`))
-    return diff <= 3 * 86400000 ? lineupValuesData : null
-  }, [feed, lineupValuesData])
-
   // Ties between this matchup's two clubs — see formerTeammatePairs. Empty
   // for MiLB games / matchups outside the nightly build, which hides the card.
   const teammatePairs = useMemo(
@@ -452,6 +447,7 @@ function TeamSections({
         pitcherLine={oppPitcherLine}
         teamId={oppMeta.id}
         teamName={oppMeta.teamName}
+        orgTeamId={oppOrgTeamId}
         theme={oppTheme}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
@@ -487,7 +483,7 @@ function TeamSections({
                     <PlayerLink id={p.id} className="lineup__name">
                       {p.nameLastFirst}
                     </PlayerLink>
-                    <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                    <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
                     <MilestonePill text={milestoneTextFor(callouts, p.id)} />
                     <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                     <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
@@ -520,7 +516,7 @@ function TeamSections({
                             <PlayerLink id={p.id} className="roster__name">
                               {p.name}
                             </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
                             <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                             <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                             <RadarPill
@@ -548,7 +544,7 @@ function TeamSections({
                             <PlayerLink id={p.id} className="roster__name">
                               {p.name}
                             </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
                             <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                             <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                             <BirthdayCake show={birthdayIds.has(p.id)} />
@@ -570,7 +566,7 @@ function TeamSections({
                             <PlayerLink id={p.id} className="roster__name">
                               {p.name}
                             </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id)} />
+                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
                             <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
                             <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
                             <BirthdayCake show={birthdayIds.has(p.id)} />
@@ -619,8 +615,6 @@ function TeamSections({
         )}
       </div>
 
-      <LineupStrengthCard data={freshLineupValues} teamId={meta.id} lineup={lineup} />
-
       <BullpenBoard
         workload={workloadData}
         bullpen={bullpenArms}
@@ -657,6 +651,7 @@ function OpposingStarterCard({
   pitcherLine,
   teamId,
   teamName,
+  orgTeamId,
   theme,
   prospectsData,
   rookiesData,
@@ -695,7 +690,7 @@ function OpposingStarterCard({
               <PlayerLink id={pitcher.id} className="startercard__name">
                 {pitcher.nameLastFirst}
               </PlayerLink>
-              <ProspectPill {...prospectBadge(prospectsData, pitcher.id)} />
+              <ProspectPill {...prospectBadge(prospectsData, pitcher.id, orgTeamId)} />
               <MilestonePill text={milestoneTextFor(callouts, pitcher.id)} />
               <RookiePill active={showRookiePill(rookiesData, pitcher.id, isMlb)} />
               <DebutPill debuted={!isMlb && hasDebuted(rookiesData, pitcher.id)} />

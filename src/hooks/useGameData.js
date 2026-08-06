@@ -27,7 +27,6 @@ import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { loadCareerMatchups } from '../api/careerMatchups.js'
 import { fetchRunExpectancy } from '../api/umpireFavor.js'
 import { fetchWorkload } from '../api/workload.js'
-import { fetchLineupValues } from '../api/lineupStrength.js'
 import { useAsync } from './useAsync.js'
 import { useAsyncOnFeed } from './useAsyncOnFeed.js'
 import { nextEverActiveState } from './useGameDataCore.js'
@@ -491,18 +490,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const workloadData = workload.data ?? null
 
-  // Per-roster lineup values + position eligibility (gen-lineup-values.mjs) —
-  // spoiler-free season aggregates behind the Lineup Strength grade on the
-  // lineup pages (api/lineupStrength.js). MLB-only at source.
-  const lineupValues = useAsync(
-    () =>
-      enrichmentReady && game.sportId === SPORT_IDS.MLB
-        ? fetchLineupValues()
-        : Promise.resolve(null),
-    [enrichmentReady, game.sportId],
-  )
-  const lineupValuesData = lineupValues.data ?? null
-
   const started = useMemo(() => (feed ? selectHasStarted(feed) : false), [feed])
 
   // Which logo treatment each side actually wore tonight. Preferred order:
@@ -574,7 +561,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     highlightsData: highlights.data ?? null,
     runExpectancyData,
     workloadData,
-    lineupValuesData,
     jerseyTreatments,
     started,
   }

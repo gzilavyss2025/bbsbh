@@ -56,15 +56,16 @@
 // `rows`/`orgTies` the matchup's `kind` says is populated — never both, so the
 // UI never has to choose between two card types for the same matchup.
 // Run by hand: node scripts/gen-former-teammates.mjs
-import { writeFile, mkdir, readFile } from 'node:fs/promises'
+import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { meetsStintCap } from '../src/api/rehab-policy.js'
+import { getJson } from './lib/statsapi.mjs'
+import { mapConcurrent } from './lib/concurrency.mjs'
+import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'former-teammates.json')
-const BASE = 'https://statsapi.mlb.com'
-
 // How many days of the slate to precompute (today + the next two), so late-night
 // and next-day browsing both find their game. Rosters are as-of-build; a club's
 // former-teammate ties barely shift day to day.
@@ -84,12 +85,6 @@ const isoDay = (offset = 0) => {
   return d.toISOString().slice(0, 10)
 }
 
-async function getJson(path) {
-  const res = await fetch(BASE + path)
-  if (!res.ok) throw new Error(`statsapi ${res.status} ${path}`)
-  return res.json()
-}
-
 // meetsStintCap (the REHAB_CAP filter): see src/api/rehab-policy.js — shared
 // with the player page so a rehabbing veteran can't match a level's prospects
 // here while being classified as a real demotion there (or vice versa).
@@ -98,23 +93,6 @@ const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 // Run an async mapper across items with a small concurrency cap, keeping results
 // in order (be polite to statsapi rather than firing hundreds at once). Mirrors
 // gen-rehab.mjs's keepConcurrent, but returns each item's mapped value.
-async function mapConcurrent(items, limit, mapper) {
-  const out = new Array(items.length)
-  let cursor = 0
-  async function worker() {
-    while (cursor < items.length) {
-      const i = cursor++
-      try {
-        out[i] = await mapper(items[i], i)
-      } catch {
-        out[i] = null
-      }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return out
-}
-
 // --- schedule: the matchups to precompute --------------------------------------
 // Every scheduled game across the window, MLB and MiLB alike (see
 // MATCHUP_SPORT_IDS), as unique (away, home) team-id pairs plus the union of
@@ -604,8 +582,7 @@ for (const { awayId, homeId } of pairs) {
   matchups[key] = { teamA: awayId, teamB: homeId, kind: 'orgties', orgTies }
 }
 
-await mkdir(dirname(out), { recursive: true })
-await writeFile(out, JSON.stringify({ generatedAt: new Date().toISOString(), matchups }))
+await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), matchups })
 const teammateMatchups = Object.keys(matchups).length - orgTieMatchups
 const total = Object.values(matchups).reduce((n, m) => n + (m.rows?.length ?? 0), 0)
 console.log(

@@ -49,7 +49,12 @@ the wrong shape for a whole season and a grid is the wrong shape for a preview.
 
 A tab's secondary modules render as full cards, same as its headline module —
 no collapsed/shelved state. Every tab path goes through `teamTabPath` →
-`linkQuery`: a switch that dropped a dated link's `?d=` would be a spoiler bug.
+`linkQuery`, so a dated link keeps its `?d=` across a tab switch. The hub itself
+opens on **current** stats — links out of a game stopped stamping that cutoff on
+(ADR-0034's "The cutoff is opt-in now"); `?d=` still applies when a URL carries
+one, and `components/seal/AsOfBanner.jsx` is the way IN (a date picker on a live
+page), the way to CHANGE it, and the way back to live — see ADR-0034's "The gap
+gets a way in." Same component on the player page and both leader-board pages.
 
 ## Routing (`src/lib/route.js`, `src/App.jsx`)
 
@@ -102,8 +107,12 @@ Refresh, never across games/dates.
 
 ## UI-side spoiler enforcement
 
-The spoiler rule (root `CLAUDE.md`) is enforced structurally in these components —
-read the linked ADRs before refactoring:
+The spoiler rule governs the **scoring surfaces** (root `CLAUDE.md`): the slate's
+score cells, the two lineup pages, the innings viewer, the box score. It is
+enforced structurally in the components below — read the linked ADRs before
+refactoring. Nothing on an open surface (player and team pages, leader boards,
+standings) is gated here, and **adding a gate there is a regression, not a
+hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
 
 - **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
   only once revealed; reveal is one-directional, and re-sealing on inning
@@ -177,13 +186,22 @@ read the linked ADRs before refactoring:
   well as a tap, so without it every half merely LOOKED at ratchets the real mark.
   `selectLiveEdge` drives navigation only — under the pass everything already
   renders open, so there is nothing for a ratchet to advance.
-- **The Logbook stamp** (ADR-0035) is the one surface in the app that renders a
-  final score *plainly*, and it is safe for a structural reason rather than a
-  careful one: a stamp only exists for a game the server can prove this user
-  already finished revealing. Two mechanisms carry that into the UI.
+- **"Logbook" is the CODE name only — the UI says "Game Log."** Route
+  (`/logbook`), modules, CSS classes, and storage keys all keep `logbook`; every
+  user-visible string says Game Log. Renaming the route would break every shared
+  stamped-game deep link and its cached OG card, so don't. **`docs/game-log.md`**
+  is the full scope: the naming contract, every display-copy location, and the
+  voice rules — read it before writing any copy this feature shows.
+- **The Logbook stamp** (ADR-0035) is the one thing reachable from a *scoring
+  surface* that renders a final score plainly, and it is safe for a structural
+  reason rather than a careful one — but the structure is **where it may
+  render**, not a permission check at mint time. The server-side reveal gate was retired in ADR-0035's
+  second amendment (it refused the ordinary flow, for the `onReveal` reason
+  below); read that before adding any mint-time evidence back.
   `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
-  render function (`screens/BoxScore.jsx`), which IS the client-side gate —
-  ADR-0002 again, used a third time. That host `SealBox` still has **no
+  render function (`screens/BoxScore.jsx`), which is what puts a stamp out of
+  reach until you open the box score — ADR-0002 again, used a third time. That
+  host `SealBox` still has **no
   `onReveal` and persists nothing**, and must stay that way: give it one and a
   box score opened under the Scores Unlocked pass would silently ratchet the
   whole game's `revealedThrough`. `GameStamp.jsx` (the art) and
@@ -194,9 +212,9 @@ read the linked ADRs before refactoring:
   (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
   signed-out user has a real Logbook on that device, holding no scores at all —
   the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
-  mirrors the collection across a signed-in user's devices, and is the one
-  place that pushes the local reveal mark to `/api/reveal` before minting; its
-  header says why that is the only sanctioned way to close ADR-0035's known gap.
+  mirrors the collection across a signed-in user's devices; it used to push the
+  local reveal mark to `/api/reveal` before each mint to satisfy the gate, and
+  its header records why that could never work and what replaced it.
   The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
   with **one tunable part**: where a club's knockout mark sits in its slot
   (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in

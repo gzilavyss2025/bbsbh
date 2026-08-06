@@ -193,14 +193,32 @@ export function matchScore(distance) {
 // per-level shape into that, so this stays a pure ranking over whatever pool
 // it's handed and can be tested with three hand-written pitchers.
 //
-// HANDEDNESS IS A HARD FILTER when it's known for both sides. A lefty and a
-// righty with the same repertoire are not a useful answer to "who pitches like
-// this guy" — the ball moves the other way and the platoon math inverts, and a
-// reader who knows the game reads a mixed-hand list as a bug. It stays a filter
-// rather than a distance TERM deliberately: as a term, a big enough arsenal
-// match would eventually outvote it and a lefty would surface anyway.
-// `throws` is absent for a pitcher the source file has no hand for, and an
-// unknown hand is skipped rather than guessed.
+// HANDEDNESS DOES NOT ENTER THIS AT ALL — not as a filter, not as a distance
+// term. It used to be a hard filter, on the argument that a lefty and a righty
+// with the same repertoire aren't a useful answer to "who pitches like this
+// guy" because the ball moves the other way and the platoon math inverts.
+// Dropped deliberately (requested, August 2026): the card's claim is about the
+// REPERTOIRE — what he throws and how fast — and a hitter's platoon problem is
+// a different question from whose arsenal this most resembles.
+//
+// What it actually changed, measured against the real file rather than
+// guessed at: 327 of 538 qualifying MLB arms get a different list, and every
+// one of those is a closer set of neighbours than the filter allowed — but
+// only by 1.13 match points on the top row, on average. Coverage did not move
+// at ALL (538 MLB and 709 AAA cards before and after, every one of them a
+// full three). So this is a small quality gain, not a fix for empty cards:
+// both peer pools were already dense enough that a same-handed third
+// neighbour was never the scarce thing. Don't re-argue it on coverage.
+//
+// Two consequences to know before reading a list. A mirror-image lefty can now
+// top a righty's card, which is the intended behaviour and not a bug. And
+// `throws` is no longer read here at all — a pitcher the source file has no
+// hand for is ranked like anyone else instead of being skipped, so the pool is
+// strictly larger than it was. The field is still CARRIED through on each
+// returned row: SimilarPitchers.jsx prints it as the RHP/LHP line under each
+// face, which is now the only place the hand appears — and doing more work
+// than it used to, since a mixed-hand list is where that label starts telling
+// a reader something.
 // The worst match still worth calling a comparison. Past a half-unit of
 // distance the two arsenals disagree more than they agree, and printing that
 // pairing under the words "pitches like" asserts something the data doesn't
@@ -213,13 +231,10 @@ export function similarPitchers(pool, personId, { limit = 3 } = {}) {
   if (!subject) return []
   const subjectVec = arsenalVector(subject.types)
   if (!subjectVec) return []
-  const hand = subject.throws || null
 
   const scored = []
   for (const cand of pool) {
     if (String(cand.personId) === String(personId)) continue
-    if (hand && cand.throws && cand.throws !== hand) continue
-    if (hand && !cand.throws) continue
     const vec = arsenalVector(cand.types)
     if (!vec) continue
     const distance = arsenalDistance(subjectVec, vec)

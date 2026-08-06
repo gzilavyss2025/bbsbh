@@ -1,5 +1,11 @@
 # Lineup Strength — design notes
 
+> **This feature was removed from the app.** This file is the design doc as it
+> stood, kept verbatim so nothing here has to be rediscovered; every path it
+> names is gone from the tree. `README.md` next to it says why it was removed
+> and how to restore any of them. Present tense below describes the feature as
+> it was, not as it is.
+
 Grades tonight's posted batting order 0–10 against the best nine this roster
 could plausibly field. Spoiler-free by construction: the inputs are the posted
 starting nine plus season aggregates, nothing from the game itself, so the card

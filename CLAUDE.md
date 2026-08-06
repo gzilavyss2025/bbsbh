@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Tally Baseball** (repository name: `bbsbh`) is a spoiler-safe, read-only second-screen
 PWA for scoring baseball by hand. It displays lineups, umpires, rosters, and
-inning totals pulled live from the public MLB Stats API — but every
-score-revealing number stays sealed until the user taps to reveal it. It is
-**not** a data-entry tool; the user keeps scoring on paper.
+inning totals pulled live from the public MLB Stats API — but the numbers that
+would spoil the game you are scoring stay sealed until you tap to reveal them.
+It is **not** a data-entry tool; the user keeps scoring on paper.
 
 React 18 + Vite, phone-first (iPhone), installable PWA, **no backend**.
 
@@ -86,49 +86,47 @@ it first, watch it fail, then fix); product code and its tests land in the same 
 data crons bypass it via an admin PAT (`GH_BOT_TOKEN`) — see `docs/testing.md` before
 changing CI or that token.
 
-## The spoiler rule — the core invariant
+## The spoiler rule — and its scope, which is half the rule
 
-This is the whole point of the app. **Do not let it drift.** The rule: a
-score-revealing value must never exist in the DOM until the user reveals it — there
-is no fetched-then-hidden node to leak, with one narrow, explicit exception (All-Star
-Rosters shows final scores plainly — ADR-0019). One **opt-in, consented** departure
-also lifts the seal on demand: the site-wide **Scores Unlocked** switch — a *render*
-override that unseals a day you explicitly agree to spoil (and keeps a live game's
-view current), while never writing the persisted reveal mark — ADR-0026.
-`CONTEXT.md` defines the vocabulary
-(Seal, SealBox, reveal-only module, spoiler-free selector, revealedThrough,
-half-inning, regulation/extra innings, Pitchers table, primary position); `docs/adr/`
-records *why* each mechanism is shaped as it is — read the linked ADR before
-"simplifying" any of these.
+This is the whole point of the app. **Don't let either half drift.** On the
+surfaces where you score a game — the slate's score cells, the lineup pages, the
+innings viewer, the box score — a score-revealing value never exists in the DOM
+until you reveal it: not fetched-then-hidden, never computed. Everything else
+about baseball opens live — season and career stats, player and team pages,
+leader boards, standings, and the standalone pages outside the scoring flow. A
+stat line is not a score, and gating one was the rule reaching past what it
+protects (ADR-0034, "The cutoff is opt-in now"). One **opt-in, consented**
+departure lifts the seal inside the scope: the site-wide **Scores Unlocked**
+switch, a *render* override that unseals a day you agree to spoil (and keeps a
+live game's view current) while never writing the persisted reveal mark —
+ADR-0026. `CONTEXT.md` has the vocabulary; `docs/adr/` has the *why* — read the
+linked ADR before "simplifying" any of this.
 
-Enforced structurally by two conventions:
+Inside that scope it is enforced structurally, by two conventions:
 
 1. **Reveal-only modules** (`src/api/linescore.js`, `src/api/derive.js`), callable
-   only from inside a `SealBox`'s reveal render function — never at render top-level
-   or in an eager `useMemo` (ADR-0001). Contrast `src/api/select.js`,
-   spoiler-**free**. In between sit **caller-gated pre-pitch selectors** —
-   `selectPrePitchChanges` (`select.js`, ADR-0003), `defenseEntering` (`defense.js`),
-   and `lineupEntering` (`battingorder.js`) — spoiler-free only when restricted to the
-   half the user has reached (`halfIndex <= revealedThrough + 1`); the defense diamond
-   and both lineup cards render *outside* the seal, gated to
-   `revealed || isNextToReveal` (ADR-0010). See `src/api/CLAUDE.md` for the module
-   catalog and `src/CLAUDE.md` for the component wiring.
+   only from inside a `SealBox`'s reveal render function — never at render
+   top-level or in an eager `useMemo` (ADR-0001). Contrast `src/api/select.js`,
+   spoiler-**free**. Between them sit **caller-gated pre-pitch selectors**
+   (`selectPrePitchChanges`, `defenseEntering`, `lineupEntering`), spoiler-free
+   only for the half the user has reached (`halfIndex <= revealedThrough + 1`) —
+   ADR-0003/0010. Catalog in `src/api/CLAUDE.md`, wiring in `src/CLAUDE.md`.
 
 2. **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
-   only once revealed; reveal is one-directional, and re-sealing on inning navigation
-   works by the parent remounting with `key={inning}` (see `InningViewer.jsx`)
-   (ADR-0002).
+   only once revealed; reveal is one-directional, and re-sealing on inning
+   navigation works by the parent remounting with `key={inning}` (see
+   `InningViewer.jsx`) (ADR-0002).
 
 The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (`vite.config.js`)
 so a stale, spoiler-revealing score is never served from cache (ADR-0004).
 
 Three gotchas each caused a real spoiler bug and are now ADRs: roster-card
 membership/position labels (ADR-0005), per-inning `errors` being a *fielding* stat
-(ADR-0006), and manual (`useRef`) caches of reveal-only derivations needing to key on
-the `feed` object (ADR-0007). **The Pitchers table** is gated by `revealedThrough`
+(ADR-0006), and `useRef` caches of reveal-only derivations needing to key on the
+`feed` object (ADR-0007). **The Pitchers table** is gated by `revealedThrough`
 directly rather than wrapped in a `SealBox` (ADR-0009), and **extra innings never
-spoil** — only `regulation` innings show up front, extras unlock one at a time as
-`revealedThrough` advances (ADR-0008). Both are detailed in `src/CLAUDE.md`.
+spoil** — only `regulation` innings show up front, extras unlocking one at a time
+as `revealedThrough` advances (ADR-0008). Both detailed in `src/CLAUDE.md`.
 
 ## Architecture (map)
 
@@ -149,11 +147,12 @@ user consented to spoil (consent, never a mark — a per-day on/off state map, s
 that one can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
 consent-pop-up wording (never a score, closed registry, public-cached read,
 allowlisted write) so the owner tunes it without a deploy — inert if unconfigured,
-ADR-0025. **The fourth stores a score, by design**: Logbook game stamps
+ADR-0025. **The fourth stores a score, by design**: the **Game Log**'s game stamps
 (`api/stamps.js` + `src/lib/stamps.js`, surfaced at `/logbook` and inside the box
-score's seal) — mintable only for a game the SERVER can prove this user already
-revealed, which is what keeps the Logbook from spoiling anything. Read ADR-0035
-before touching that gate or the `check-stamp-surfaces` guard that contains it.
+score's seal) — safe because of WHERE stamp art may render (`check-stamp-surfaces`,
+never an unrevealed-game surface), not a mint-time permission check; the server-side
+reveal gate was retired in ADR-0035's second amendment, which says why. Scope,
+naming contract, and copy voice: `docs/game-log.md`.
 
 Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →

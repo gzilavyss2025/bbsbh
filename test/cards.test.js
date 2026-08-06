@@ -8,7 +8,7 @@
 // fetch/statsapi calls, since the race behavior itself is network-agnostic.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { firstNonNull } from '../api/_lib/cards.js'
+import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
 
 const delay = (ms, value) => new Promise((resolve) => setTimeout(() => resolve(value), ms))
 const rejectAfter = (ms, err) => new Promise((_, reject) => setTimeout(() => reject(err), ms))
@@ -50,4 +50,63 @@ test('a rejected promise counts as a miss, not an unhandled rejection', async ()
 
 test('an empty list resolves to null immediately', async () => {
   assert.equal(await firstNonNull([]), null)
+})
+
+// Coverage gap fixed here: vercel.json's rewrite list (and this switch) had
+// drifted behind REPORT_PAGES (src/lib/reportPages.js) and the team-hub's
+// five tabs (ADR-0034, src/CLAUDE.md) — 12 report pages and 4 team tabs fell
+// through to the static default card with no dynamic resolution attempted at
+// all, confirmed live against production. These routes build with no
+// statsapi call (genericCard is pure), so they're testable without mocking
+// fetch, unlike playerCard/teamCard/gameCard above.
+const STATIC_REPORT_ROUTES = [
+  'leaders',
+  'standings',
+  'prospects',
+  'rehab',
+  'about',
+  'logos',
+  'fouls',
+  'milestones',
+  'umpires',
+  'awards',
+  'postseason-history',
+  'postseason-leaders',
+  'trade-deadline',
+  'all-star-rosters',
+  'all-star-legacy',
+  'logbook',
+  'first-scorebook',
+  'photos',
+]
+
+for (const route of STATIC_REPORT_ROUTES) {
+  test(`buildCard resolves a dynamic card for route=${route}, not null`, async () => {
+    const card = await buildCard(new URLSearchParams({ route }), 'https://example.test')
+    assert.ok(card, `expected a card for route=${route}`)
+    assert.ok(card.title.includes('Tally Baseball'), `title should be branded: ${card.title}`)
+    assert.ok(card.image.startsWith('https://example.test/api/og?'), `image should be a same-origin /api/og URL: ${card.image}`)
+  })
+}
+
+test('buildCard still falls back to null for an unrecognized route', async () => {
+  const card = await buildCard(new URLSearchParams({ route: 'not-a-real-route' }), 'https://example.test')
+  assert.equal(card, null)
+})
+
+// Every team-hub tab (Overview is untagged; the other five pass `tab`) needs
+// its own eyebrow and a description that actually mentions the tab, so a
+// copy-pasted config entry can't silently describe the wrong tab.
+test('every team-hub tab has a distinct, non-empty eyebrow and description', () => {
+  const tabs = Object.keys(TEAM_TABS)
+  assert.deepEqual(tabs.sort(), ['games', 'leaders', 'minors', 'numbers', 'roster'].sort())
+  const eyebrows = new Set()
+  for (const tab of tabs) {
+    const cfg = TEAM_TABS[tab]
+    assert.ok(cfg.eyebrow, `${tab} needs a non-empty eyebrow`)
+    assert.ok(!eyebrows.has(cfg.eyebrow), `${tab}'s eyebrow "${cfg.eyebrow}" collides with another tab`)
+    eyebrows.add(cfg.eyebrow)
+    const desc = cfg.description('Milwaukee Brewers')
+    assert.ok(desc.includes('Milwaukee Brewers'), `${tab}'s description should mention the team name`)
+  }
 })

@@ -328,11 +328,6 @@ export function SiteSearchModal({ onClose }) {
           id={`${uid}-results`}
           aria-busy={searching || undefined}
         >
-          {!hasQuery && recent.length === 0 && (
-            <p className="searchoverlay__hint">
-              Search any player or club — every level, past and present.
-            </p>
-          )}
           {noResults && <p className="searchoverlay__hint">No matches for “{trimmed}”.</p>}
 
           {groups.map((group) => (
