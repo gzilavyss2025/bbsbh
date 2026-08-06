@@ -176,9 +176,25 @@ map both existing surfaces draw.
 so the generator change is genuinely small — but the season is on disk and needs
 a re-sweep (§5, Phase 2).
 
-Phase 1 copy therefore drops the handedness clause and says only where:
+**The two available signals currently disagree, and the flat tallies are the
+wrong one.** Putting the phrase beside the zone map in the mock exposed this.
+For Erich Bacchus:
 
-> `AREA TO WATCH — LOW AND INSIDE`
+- `accuracyTendency()` picks the top of the four flat edge tallies — **low 70
+  vs high 61**, a nine-call margin out of 213 missed calls. That is a coin flip
+  printed as a finding.
+- The league-relative 3×3 grid — the thing the map actually draws — flags
+  **high-outside (+3.5 pts of his miss share over the league baseline)**,
+  low-middle (+2.7), **high-inside (+2.2)**. Two of its top three are *high*.
+
+So a card built on `accuracyTendency()` would say "low" beside a picture whose
+heaviest flags are up in the zone. **Derive the phrase from the same grid the
+map draws** (issue 01), or gate it on a real margin over the runner-up. Do not
+ship the two side by side unreconciled.
+
+Phase 1 copy drops the handedness clause and says only where:
+
+> `AREA TO WATCH — HIGH AND OUTSIDE`
 
 ### Band 5 — CHALLENGES/GAME and OVERTURN% — ✗ NOT ON DISK, ✓ CHEAPLY DERIVABLE
 
@@ -224,11 +240,84 @@ reference graphic's shouted chrome *is* this app's default state.
 | --- | --- |
 | Blue chrome, white text | `--navy` masthead, `--text-on-ink` — the existing `SectionMasthead` treatment |
 | Card body | `--surface-card` on `--bg-page`, `--border-rule` hairlines |
-| Blue → yellow gradient | **Diverging navy ↔ clay ramp**: `--navy` (pitcher — cool, the arm) → `--graphite-soft`/paper at neutral → `--clay` (hitter — infield clay and seam red, the bat) |
-| White pointer chip | `--surface-inset` chip with `--border-rule`, the selected band inked in its pole colour |
-| `AREA TO WATCH` panel | Kraft-amber `--seal`/`--marker` flag panel — the system's existing "watch this" vocabulary |
-| Two stat tiles | The existing `umpage__acctile` tile, reused verbatim |
-| Sponsor bar | Provenance caption in `--text-caption` |
+| Blue → yellow gradient | **`--navy` → `--seal`/`--marker`** — see "The scale" below |
+| Vertical 5-band scale | **Kept vertical**, as the reference has it |
+| White pointer chip | An indicator on the occupied band, plus continuous position |
+| `AREA TO WATCH` panel | **`--marker` highlighter wash + left rule** — NOT the kraft-seal hatch |
+| Two stat tiles | The existing `umpage__acctile` tile, reused — **2×2, never 4-up** |
+| Sponsor bar | Terse provenance line in `--text-caption` |
+
+### The register: labels and numbers, not sentences
+
+**Maintainer direction, 2026-08-06, and it overrules the first design pass:**
+
+> "Almost no sentences or substantial superfluous text. I don't need descriptor
+> text. As close to the original source as possible."
+
+Look at the reference graphic: it is labels and numbers plus one asterisked
+footnote. That is the target. No caveat paragraph, no map caption, no
+explanatory prose on the card. Where a fact must survive — that the scale is
+measured against a league average rather than against zero — it takes the form
+of a terse label (a `LEAGUE AVG` tick) or an asterisked footnote in the source's
+own idiom. Never a sentence.
+
+Consequence worth stating: with the prose gone, essentially every string on the
+card is uppercase, which is the app's default anyway. The `caps-exempt`
+registration noted below shrinks to at most one footnote.
+
+### The scale
+
+**Vertical, as in the reference.** The first design pass converted it to a
+horizontal axis and was overruled; its argument (that a vertical gradient beside
+five labels reads as "a list with a highlighted row", and that the card should
+show *where* on a continuum the umpire falls rather than only which bucket) is
+recorded in `design-notes.md` and is worth reading before re-litigating the
+geometry. The instruction stands: keep it vertical, and solve the
+continuous-position problem within that arrangement.
+
+**No red and no green on this scale.** Neither pole is good or bad, and
+red/green is the app's documented good/bad signal (`--accent-positive`/
+`--accent-negative`, ADR-0017). This rules out `--clay` for the hitter pole,
+which the first pass used.
+
+**The ramp is `--navy` → neutral → `--seal`/`--marker`.** The reference's own
+gradient runs blue at the top to yellow at the bottom, and navy → kraft amber
+maps onto that almost exactly while staying inside the palette and carrying no
+valence: cool ink at one pole, warm kraft/highlighter at the other, graphite or
+bare paper between.
+
+**If the bucket geometry encodes z, specify the domain**, or two implementations
+will silently diverge. Equal fifths and z-proportional bands are different
+pictures; pick one and write it down.
+
+### Area to watch: `--marker`, not `--seal`
+
+The kraft diagonal hatch means exactly one thing in this product — *a
+score-revealing number is under here, sealed until you tap*. It is the visual
+half of the spoiler invariant. Spending it on a panel that is neither sealed nor
+tappable dilutes the one signal this app most needs to keep sharp, and a user
+trained by twenty innings of SealBoxes will read a hatched panel as tappable and
+be wrong. `colors.css` already documents `--marker` as *"highlighter yellow —
+'watch' flag"*, and `.umprank__row--today` already uses it for "the row that
+matters now". It is also the truer metaphor: a hand-scorer flags a tendency with
+a highlighter, not by taping over it. `--seal` still appears once, as the
+masthead's 3px underline, because that is `.metricbar`'s app-wide treatment.
+
+### The zone map earns its place on the card
+
+Reuse `UmpireZoneMap` verbatim inside the Area-to-watch band (~78×88px). It is
+the only picture of the actual zone on the card and the sharpest form of "area
+to watch". One addition: **a `--surface-inset` plate rect behind the grid**, or
+the highlighter wash tints every low-opacity navy cell olive.
+
+**If this card ships into `UmpireAccuracyModal`, drop that modal's existing
+zone-map section** — it would otherwise render the same map twice.
+
+### Caps exemptions
+
+With the prose stripped, at most one asterisked footnote is natural-case. If any
+survives, register its `caps-exempt` marker in `check-caps.mjs` in the same
+commit as the CSS rather than discovering it through a failing lint.
 
 **Do not use `--accent-positive`/`--accent-negative` (green/clay) for the
 scale.** That pairing is the app's documented good/bad signal (ADR-0017), and
@@ -283,7 +372,27 @@ files already committed. No generator run, no backfill, no cron change.
 
 That is most of the graphic, and it is worth shipping on its own.
 
-### Phase 2 — one generator change, one backfill (issue 03)
+### Phase 2 — DONE (issue 03, landed 2026-08-06)
+
+The generator change and the full-season backfill have both run. All **3,361**
+rows now carry `challenges`/`challengesOverturned` and `missL`/`missR`, across
+**both** levels (the sweep was widened from the `--sports=1` originally planned,
+since AAA runs the ABS system too and MLB-only would have banked a second
+1,600-fetch backfill).
+
+| Level | Rows | Challenges/game | Overturn% |
+| --- | --- | --- | --- |
+| MLB | 1,726 | 4.08 | **53.6%** |
+| AAA | 1,635 | 4.42 | 51.4% |
+
+MLB's 53.6% lands on the reference graphic's own *"MLB average: 54% of
+challenges overturned"* footnote — independent confirmation the `MJ`/`MA` filter
+is right. `missL + missR === the combined region tallies` on every row.
+
+**So the card can be built against real data for every band.** The original plan
+below is kept for the record.
+
+### Phase 2 as originally planned — one generator change, one backfill (issue 03)
 
 A single schema bump to `gen-umpire-accuracy.mjs`'s per-game row, adding both
 missing pieces at once so the season is re-swept exactly **once**:

@@ -43,12 +43,27 @@ words (`"Pitcher friendly — hands pitchers 0.2 runs per game more than a typic
 umpire"`), mirroring `UmpireZoneMap`. Pointer position must never be the only way
 to read the value.
 
-### The caption is load-bearing
+### Two "runs per game" on one card — resolve before building
 
-One line under the scale saying what the position actually means, in run units —
-not just the tier word. A reader who takes "pitcher friendly" as an accusation of
-bias has been misled by the card. Say it in runs, and say it is measured against
-the league, not against zero.
+`season.favorPerGame` is **unsigned**: `favorMagnitude / games`, the total
+absolute impact of every missed call in both directions. Bacchus reads **1.548**.
+
+The scale is driven by the **signed net** — `Σ(favorAway + favorHome) / games` —
+which for the same umpire is **0.432**.
+
+Both are legitimately "runs per game" and they are nowhere near each other.
+Printing the unsigned figure in a tile beside a signed-net-driven scale reads as
+an error. Either relabel the tile so the distinction is unmistakable in very few
+words (the card's register is labels, not sentences — see PRD §3), or drop it:
+of the four Phase 1 tiles it is the weakest.
+
+### Register
+
+**No descriptor prose on the card.** PRD §3 "The register" carries the
+maintainer's direction: labels and numbers plus at most one asterisked footnote,
+matching the reference graphic. Facts that must survive (the scale is measured
+against a league average, not zero) become a terse label or a footnote — never a
+sentence.
 
 ## Hosts
 

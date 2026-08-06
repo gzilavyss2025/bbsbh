@@ -73,16 +73,41 @@ disagreeing about the same umpire.
 
 ### `umpireWatchArea(season, leagueShare)` — the Area to Watch phrase
 
-Phase 1 shape: region only, no handedness. Prefer the 3×3 `cellMiss`-vs-baseline
-signal (`umpireZoneCells`'s `over`, which already exists and already backs the
-zone map) over the flat `high/low/inside/outside` tallies — it is measured
-against the league rather than against itself.
+**It must be derived from the 3×3 `cellMiss`-vs-league-baseline grid**
+(`umpireZoneCells`'s `over`, which already exists and already backs the zone
+map) — **not** from the flat `high/low/inside/outside` tallies.
+
+This is not a preference. The card renders the phrase beside the map, and on
+real data the two sources disagree in direction. Erich Bacchus, measured on the
+committed file:
+
+| Source | Says |
+| --- | --- |
+| `accuracyTendency()` — flat edge tallies | **low** (70 vs high 61 — a 9-call margin out of 213 misses) |
+| League-relative 3×3 grid — what the map draws | **high**-outside (+3.5 pts), low-middle (+2.7), **high**-inside (+2.2) |
+
+A nine-call lead out of 213 is a coin flip presented as a finding, and it points
+the opposite way from the picture printed next to it. Two of the grid's top
+three flags are high.
+
+If you keep a flat-tally path for any reason, **gate it on a real margin over
+the runner-up region** — but the grid is the better signal regardless, because it
+is measured against the league rather than against the umpire himself.
 
 Return `null` when there is no clear signal, the same floor
 `accuracyTendency()` already applies (fewer than 5 missed calls). **A card that
 says nothing is correct; a card that invents a tendency is not.**
 
-Keep `accuracyTendency()` as-is — it has its own callers and its own phrasing.
+Keep `accuracyTendency()` itself as-is — it has its own callers and its own
+phrasing, and this issue does not change them.
+
+### Phase 2 data has landed — build against the real fields
+
+`missL`/`missR` and `challenges`/`challengesOverturned` are on every row now
+(PRD §5). The handedness clause is buildable immediately; qualify it only when
+one side's miss share is far enough above the other's to be worth claiming.
+Read `challengeGames` as the denominator for a per-game rate, **not**
+`season.games` — see the aggregate's own comment for why.
 
 ## Reference: the statsapi umpire-bio dead end
 
