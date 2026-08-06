@@ -20,7 +20,7 @@ import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BaseoutDiamond } from '../components/scoring/BaseoutDiamond.jsx'
 import { TeamFilterStrip } from '../components/team/TeamFilterStrip.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
-import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { teamAbbr, teamFullName, teamClubName, favoriteAccentColor } from '../lib/teams.js'
 
 // The Foul Tracker — season-long foul-ball counting nobody else publishes:

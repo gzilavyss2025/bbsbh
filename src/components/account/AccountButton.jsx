@@ -1,6 +1,6 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/clerk-react'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
-import { useFavoriteTeam } from '../../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { teamLogoUrl } from '../../lib/teams.js'
 
 // Signed in, the trigger shows the user's favorite team's logo (the same

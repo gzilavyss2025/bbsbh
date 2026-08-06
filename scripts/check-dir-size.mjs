@@ -74,7 +74,10 @@ const BUDGETS = {
   // subdirectory.
   'src/lib': 51,
   'src/screens': 38,
-  'src/hooks': 21,
+  // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
+  // src/hooks/preferences/ alongside the usePreferences store they are now
+  // thin wrappers over. Tightened rather than left pinned, per the rule above.
+  'src/hooks': 19,
   'src/screens/identity-lab': 15,
 }
 

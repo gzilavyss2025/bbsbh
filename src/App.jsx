@@ -5,6 +5,7 @@ import { useAsync } from './hooks/useAsync.js'
 import { NavProvider } from './lib/nav.jsx'
 import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
+import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import {
   parseRoute,
   gamePath,
@@ -39,6 +40,19 @@ const StampsCloudSync = isClerkEnabled
   ? lazy(() =>
       import('./components/sync/StampsCloudSync.jsx').then((m) => ({
         default: m.StampsCloudSync,
+      })),
+    )
+  : null
+
+// Headless cross-device sync for the My Tally preference document — the club,
+// the slate's level, keep-awake, motion. Same shape as the two above: imports
+// @clerk/clerk-react at its top, so it is only ever dynamically imported and
+// only on a deploy that configures Clerk. App-wide because the level is changed
+// on the slate and the club from the header, which are different screens.
+const PreferencesCloudSync = isClerkEnabled
+  ? lazy(() =>
+      import('./components/sync/PreferencesCloudSync.jsx').then((m) => ({
+        default: m.PreferencesCloudSync,
       })),
     )
   : null
@@ -333,27 +347,39 @@ export default function App() {
   // name anywhere can navigate without threading a prop through the tree.
   return (
     <NavProvider navigate={go}>
-      {SpoiledDaysCloudSync && (
-        <Suspense fallback={null}>
-          <SpoiledDaysCloudSync />
-        </Suspense>
-      )}
-      {StampsCloudSync && (
-        <Suspense fallback={null}>
-          <StampsCloudSync />
-        </Suspense>
-      )}
-      <Suspense
-        fallback={
-          <div className="app">
-            <div className="screen">
-              <Loader />
+      {/* Mounted unconditionally — it touches no Clerk API of its own, and the
+          sync receipt has to be able to say "this deploy has no account
+          feature" rather than rendering nothing. It is an external store, so
+          a sync report re-renders only what reads the status, never this
+          subtree. */}
+      <SyncStatusProvider enabled={isClerkEnabled}>
+        {SpoiledDaysCloudSync && (
+          <Suspense fallback={null}>
+            <SpoiledDaysCloudSync />
+          </Suspense>
+        )}
+        {StampsCloudSync && (
+          <Suspense fallback={null}>
+            <StampsCloudSync />
+          </Suspense>
+        )}
+        {PreferencesCloudSync && (
+          <Suspense fallback={null}>
+            <PreferencesCloudSync />
+          </Suspense>
+        )}
+        <Suspense
+          fallback={
+            <div className="app">
+              <div className="screen">
+                <Loader />
+              </div>
             </div>
-          </div>
-        }
-      >
-        <div className="app">{content}</div>
-      </Suspense>
+          }
+        >
+          <div className="app">{content}</div>
+        </Suspense>
+      </SyncStatusProvider>
     </NavProvider>
   )
 }

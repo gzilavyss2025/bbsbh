@@ -123,6 +123,24 @@ export default async function handler(req, res) {
   }
   const next = Number(await redis.eval(RATCHET_SCRIPT, [key], [incoming]))
 
+  // Remember that this user has a mark for this game. `reveal:{u}:{gamePk}` is
+  // the only per-user key family with no natural index, so without this set
+  // "erase my Tally data" (api/account.js) could only ever be best-effort —
+  // there is no way to enumerate them, and a SCAN across a shared store is not
+  // one. The set holds gamePks: an identity, never a mark and never a score,
+  // exactly the footing of the scorebook index below it.
+  //
+  // Deliberately unbounded, unlike SCOREBOOK_MAX. A cap here would make the
+  // erase silently incomplete for whatever fell off it, which defeats the only
+  // reason the index exists; a set of integers bounded by how many games a
+  // human actually opens is small enough to leave alone. Failing to record one
+  // must never fail the ratchet, which is the write that matters.
+  try {
+    await redis.sadd(`reveal:index:${userId}`, gamePk)
+  } catch {
+    // Losing an index write costs completeness on a future erase, never a mark.
+  }
+
   // Fold this game into the scorebook index when the client sent a valid
   // snapshot (older clients simply don't, and the entry is skipped — the
   // ratchet above is unaffected either way). Pruned to the newest

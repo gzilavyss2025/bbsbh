@@ -1,6 +1,6 @@
 import { useId } from 'react'
 import { PAGE_ASPECT } from '../../lib/passportLayout.js'
-import { useFavoriteTeam } from '../../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { hasMonoLogo, teamAbbr, teamChipColors, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 

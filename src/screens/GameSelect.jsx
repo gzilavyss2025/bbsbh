@@ -8,7 +8,8 @@ import { fetchNationalBroadcasts } from '../api/broadcast.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
-import { useFavoriteTeam } from '../hooks/useFavoriteTeam.js'
+import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
+import { usePreferences } from '../hooks/preferences/usePreferences.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
 import { selectGameStatus } from '../api/select.js'
@@ -47,19 +48,13 @@ const ContinueScoring = isClerkEnabled
   : null
 
 // The chosen level survives leaving the slate (someone scoring an A+ affiliate
-// all season shouldn't reset to MLB every time they come back). The date
+// all season shouldn't reset to MLB every time they come back). It lives in the
+// My Tally preference document (`usePreferences`) rather than its own
+// `bbsbh:level` key — that old key is still read once as a migration seed, and
+// the value now travels between a signed-in user's devices. The date
 // deliberately does NOT persist anywhere — it lives in the URL ('/{MMDDYYYY}',
 // bare '/' = today), so a paged-to day is shareable and "today" is always the
 // right place a fresh visit starts.
-const LEVEL_KEY = 'bbsbh:level'
-function readLevel() {
-  try {
-    const n = Number(window.localStorage.getItem(LEVEL_KEY))
-    return LEVELS.some((l) => l.sportId === n) ? n : SPORT_IDS.MLB
-  } catch {
-    return SPORT_IDS.MLB
-  }
-}
 
 // Testing escape hatch: `?nointro` on any slate URL suppresses the first-visit
 // welcome modal for that load, so an automated test (or a manual spot-check)
@@ -82,17 +77,14 @@ function welcomeSuppressed() {
 export function GameSelect({ date = null, onPick, onShowLogos }) {
   useDocumentTitle(null)
   const navigate = useNav()
-  const [sportId, setSportId] = useState(readLevel)
+  // The level is a field of the My Tally preference document now, so it
+  // travels between a signed-in user's devices along with the club. Reading it
+  // through the hook rather than holding a second copy in local state is what
+  // keeps a change made on another device from being ignored until a reload.
+  const { level: sportId, set: setPreference } = usePreferences()
   const { favoriteTeamId, isFirstVisit, setFavoriteTeam } = useFavoriteTeam()
   const [showWelcome, setShowWelcome] = useState(isFirstVisit && !welcomeSuppressed())
-  const pickLevel = (id) => {
-    setSportId(id)
-    try {
-      window.localStorage.setItem(LEVEL_KEY, String(id))
-    } catch {
-      // Private mode — level just won't stick between visits.
-    }
-  }
+  const pickLevel = (id) => setPreference('level', id)
 
   // The displayed date comes from the URL (see App.jsx): bare '/' means today.
   // Paging navigates to the neighboring day's URL rather than bumping local
