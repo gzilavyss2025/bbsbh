@@ -614,6 +614,17 @@
       "16": "ink"
     }
   },
+  "452": {
+    "name": "Altoona Curve",
+    "art": "12:2b2a333",
+    "parts": {
+      "1": "knockout",
+      "2": "knockout",
+      "5": "ink",
+      "7": "ink",
+      "8": "ink"
+    }
+  },
   "453": {
     "name": "Brooklyn Cyclones",
     "art": "6:77228800",
@@ -702,6 +713,11 @@
     "name": "Augusta GreenJackets",
     "art": "34:8336d7f3",
     "parts": {
+      "1": "ink",
+      "2": "knockout",
+      "3": "ink",
+      "4": "ink",
+      "5": "knockout",
       "6": "knockout",
       "7": "knockout",
       "8": "knockout",

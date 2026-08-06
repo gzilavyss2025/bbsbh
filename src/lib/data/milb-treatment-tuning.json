@@ -71,6 +71,47 @@
       }
     }
   },
+  "233": {
+    "name": "Team 233",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#00274c",
+          "accent": "#fdb913",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.08,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#eee1c6",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#eee1c6",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.08,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#F2A900",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        }
+      }
+    }
+  },
   "234": {
     "name": "Durham Bulls",
     "treatments": {
@@ -1279,6 +1320,58 @@
       }
     }
   },
+  "450": {
+    "name": "Team 450",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#005847",
+          "accent": "#7ac143",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.1,
+          "offsetX": -9,
+          "offsetY": -6,
+          "bg": "#e1c69f",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 74,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -40,
+          "rowShift": 0
+        },
+        "band": "#004E42",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.1,
+          "offsetX": -9,
+          "offsetY": -6,
+          "bg": "#005444",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 79,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -45,
+          "rowShift": 0
+        },
+        "band": "#78BE21",
+        "wpaWordmark": true
+      }
+    }
+  },
   "451": {
     "name": "Team 451",
     "treatments": {
@@ -1708,6 +1801,48 @@
         },
         "band": "#f9b774",
         "wpaWordmark": true
+      }
+    }
+  },
+  "478": {
+    "name": "Team 478",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#008265",
+          "accent": "#62bb46",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#64bc49",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 43,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#0c614f"
+      },
+      "away": {
+        "wpaLayout": {
+          "size": 41,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#007A53"
       }
     }
   },
@@ -2726,6 +2861,58 @@
       }
     }
   },
+  "548": {
+    "name": "Team 548",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#231f20",
+          "accent": "#f26531",
+          "onBar": "#FFFFFF"
+        },
+        "position": {
+          "scale": 1.18,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#010101",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 84,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -52,
+          "rowShift": 0
+        },
+        "band": "#f26531",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.18,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#f26531",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 83,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -49,
+          "rowShift": 0
+        },
+        "band": "#f26531",
+        "wpaWordmark": true
+      }
+    }
+  },
   "550": {
     "name": "Team 550",
     "treatments": {
@@ -3124,6 +3311,56 @@
           "rowShift": 0
         },
         "band": "#003594"
+      }
+    }
+  },
+  "566": {
+    "name": "Team 566",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.53,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#fcbc7e",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "header": {
+          "bar": "#00245d",
+          "accent": "#005695",
+          "onBar": "#FFFFFF"
+        },
+        "wpaLayout": {
+          "size": 54,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#f5b77b"
+      },
+      "away": {
+        "position": {
+          "scale": 1.53,
+          "offsetX": 0,
+          "offsetY": 8,
+          "bg": "#236192",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 68,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 7,
+          "paddingY": -15,
+          "rowShift": 0
+        },
+        "band": "#00508a"
       }
     }
   },
@@ -3629,6 +3866,18 @@
       }
     }
   },
+  "3390": {
+    "name": "Team 3390",
+    "treatments": {
+      "home": {
+        "header": {
+          "bar": "#231f20",
+          "accent": "#ef3e42",
+          "onBar": "#FFFFFF"
+        }
+      }
+    }
+  },
   "3410": {
     "name": "Richmond Flying Squirrels",
     "treatments": {
@@ -3676,6 +3925,58 @@
           "rowShift": 0
         },
         "band": "#babcbe"
+      }
+    }
+  },
+  "3705": {
+    "name": "Team 3705",
+    "treatments": {
+      "home": {
+        "position": {
+          "scale": 1.17,
+          "offsetX": 0,
+          "offsetY": 16,
+          "bg": "#dee257",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "header": {
+          "bar": "#002d5b",
+          "accent": "#bfd22b",
+          "onBar": "#FFFFFF"
+        },
+        "wpaLayout": {
+          "size": 70,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#dee257",
+        "wpaWordmark": true
+      },
+      "away": {
+        "position": {
+          "scale": 1.17,
+          "offsetX": 0,
+          "offsetY": 16,
+          "bg": "#093460",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 65,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 10,
+          "paddingY": -35,
+          "rowShift": 0
+        },
+        "band": "#093460",
+        "wpaWordmark": true
       }
     }
   },

@@ -505,6 +505,23 @@
       }
     }
   },
+  "233": {
+    "name": "Charleston RiverDogs",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -5,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "234": {
     "name": "Durham Bulls",
     "treatments": {
@@ -845,6 +862,23 @@
       }
     }
   },
+  "450": {
+    "name": "Daytona Tortugas",
+    "treatments": {
+      "away": {
+        "scale": 1.1,
+        "offsetX": 1,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.01,
+        "offsetX": -33,
+        "offsetY": 19,
+        "rotation": 0
+      }
+    }
+  },
   "451": {
     "name": "Iowa Cubs",
     "treatments": {
@@ -858,6 +892,17 @@
         "scale": 0.8,
         "offsetX": -9,
         "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
+  "452": {
+    "name": "Altoona Curve",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 20,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -1253,6 +1298,23 @@
       }
     }
   },
+  "566": {
+    "name": "Clearwater Threshers",
+    "treatments": {
+      "away": {
+        "scale": 1.18,
+        "offsetX": 15,
+        "offsetY": 20,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -11,
+        "offsetY": 18,
+        "rotation": 0
+      }
+    }
+  },
   "580": {
     "name": "Winston-Salem Dash",
     "treatments": {
@@ -1384,6 +1446,23 @@
       "home": {
         "scale": 1.32,
         "offsetX": 0,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "3705": {
+    "name": "Columbia Fireflies",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 13,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -13,
         "offsetY": 14,
         "rotation": 0
       }
