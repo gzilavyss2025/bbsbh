@@ -1,8 +1,9 @@
 // The Team Score formula — 60% actual wins blended with 40% Pythagorean
-// "run-quality" wins, centered on .500 and damped for small samples. Pulled
-// out of scripts/gen-team-score.mjs (which imports node:fs and can't be
-// bundled for the browser) so the "How this is calculated" modal can compute
-// the Current Form window's real ceiling/floor instead of hardcoding them.
+// "run-quality" wins, plus a capped strength-of-schedule nudge (Season
+// Quality only), centered on .500 and damped for small samples. Pulled out
+// of scripts/gen-team-score.mjs (which imports node:fs and can't be bundled
+// for the browser) so the "How this is calculated" modal can compute the
+// Current Form window's real ceiling/floor instead of hardcoding them.
 export const MIN_GAMES = 10
 export const CURRENT_FORM_GAMES = 10
 export const PythagoreanExponent = 1.83
@@ -12,9 +13,35 @@ export const PythagoreanExponent = 1.83
 const SEASON_PRIOR_GAMES = 9
 const SEASON_TANH_SCALE = 2
 
+// Strength-of-schedule nudge (Season Quality only — see below for why
+// Current Form skips it). The Pythagorean half of Quality already scores a
+// team's OWN run differential; it has no idea whether that differential came
+// against the league's best or worst clubs. This converts the gap between a
+// team's average opponent's actual season winning percentage and .500 into a
+// small wins-equivalent credit or debit, scaled to games played so a half
+// season can't earn a full season's credit. `SOS_WINS_PER_POINT` is a
+// calibrated product coefficient, not an empirical truth (same caveat as
+// SEASON_GRADE_ACHIEVEMENT_WEIGHT in seasonGradeFormula.js): real MLB
+// schedules rarely deviate more than 2-3 points from a .500 average
+// opponent, so the cap mostly guards against small-sample extremes early in
+// a season rather than binding on a full one.
+export const SOS_WINS_PER_POINT = 0.8
+export const SOS_ADJUSTMENT_CAP = 2.5
+
+export function scheduleStrengthAdjustment(avgOpponentWinPct, games) {
+  if (avgOpponentWinPct == null || !games) return 0
+  const deviationPoints = (avgOpponentWinPct - 0.5) * 100
+  const raw = SOS_WINS_PER_POINT * deviationPoints * (games / 162)
+  return clamp(raw, -SOS_ADJUSTMENT_CAP, SOS_ADJUSTMENT_CAP)
+}
+
 // Current Form is a hot/cold-streak gauge over CURRENT_FORM_GAMES, not a
 // talent estimate — a real short stretch is *supposed* to read as volatile,
-// so it shrinks much less than the season formula.
+// so it shrinks much less than the season formula. It skips the
+// strength-of-schedule nudge above on purpose: ten games is already a small,
+// deliberately noisy sample, and layering a second schedule-context
+// adjustment on top of the late-swing nudge below would stack two "how much
+// does context matter" corrections in a window too short to support either.
 export const CURRENT_FORM_PRIOR_GAMES = 2
 export const CURRENT_FORM_TANH_SCALE = 1.4
 

@@ -8,8 +8,9 @@ The grade combines two existing, independently inspectable measures at the same
 spoiler-safe date cutoff:
 
 - **Quality** measures how strongly the club has played. It blends 60% actual
-  wins with 40% Pythagorean wins derived from run differential, then centers and
-  dampens the result around a 5.0 average club.
+  wins with 40% Pythagorean wins derived from run differential, applies a
+  capped strength-of-schedule nudge from opponents' own season winning
+  percentage, then centers and dampens the result around a 5.0 average club.
 - **Vs. expectation** measures actual wins against a schedule-adjusted preseason
   win-total baseline. A 5.0 means the club is exactly on its running assignment.
 

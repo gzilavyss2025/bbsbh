@@ -1,12 +1,14 @@
 // Regenerates public/data/team-score.json — MLB's date-keyed Quality and
 // Current Form. Both are team-quality measures: 60% actual wins and 40%
-// Pythagorean run quality, centered on .500 and damped for small samples.
-// Season Surprise remains in season-score.json as the Grade's separate,
-// visible Vs. expectation driver. The composite Season Grade is derived in
-// src/api/seasonGradeFormula.js from same-cutoff snapshots. The
-// formula itself lives in src/api/teamScoreFormula.js (pure, no node
-// imports) so the team page's "how this is calculated" explainer can run the
-// same math client-side — re-exported here so this script stays the
+// Pythagorean run quality, centered on .500 and damped for small samples;
+// Quality also folds in a capped strength-of-schedule nudge from opponents'
+// own season winning percentage (Current Form does not — see
+// teamScoreFormula.js). Season Surprise remains in season-score.json as the
+// Grade's separate, visible Vs. expectation driver. The composite Season
+// Grade is derived in src/api/seasonGradeFormula.js from same-cutoff
+// snapshots. The formula itself lives in src/api/teamScoreFormula.js (pure,
+// no node imports) so the team page's "how this is calculated" explainer can
+// run the same math client-side — re-exported here so this script stays the
 // existing import site for test/team-score.test.js.
 import { dirname, join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
@@ -16,6 +18,7 @@ import {
   qualityScoreFromGames,
   currentFormScoreFromGames,
   lateGameAdjustment,
+  scheduleStrengthAdjustment,
   CURRENT_FORM_GAMES,
 } from '../src/api/teamScoreFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
@@ -43,7 +46,10 @@ function parseArgs(argv) {
   return args
 }
 
-function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}) {
+const round2 = (n) => Math.round(n * 100) / 100
+const round3 = (n) => Math.round(n * 1000) / 1000
+
+function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}, extraFields = {}) {
   const wins = games.filter((game) => game.won).length
   const runsScored = games.reduce((sum, game) => sum + game.runsFor, 0)
   const runsAllowed = games.reduce((sum, game) => sum + game.runsAllowed, 0)
@@ -55,8 +61,30 @@ function summarize(games, scoreFn = qualityScoreFromGames, scoreExtras = {}) {
     runsAllowed,
     runDifferential: runsScored - runsAllowed,
     ...scoreFn({ wins, games: games.length, runsScored, runsAllowed, ...scoreExtras }),
+    ...extraFields,
   }
   return result
+}
+
+// Every opponent a team has actually played, so Quality's strength-of-
+// schedule nudge (see teamScoreFormula.js) can compare a team's average
+// opponent to a .500 club using real season records rather than a preseason
+// projection. `winPctByTeam` is built from the SAME completed-games list
+// summarize() draws from, so it can never look past the snapshot's own
+// cutoff — no separate fetch, no extra cost.
+function opponentWinPctLookup(byTeam) {
+  const winPctByTeam = new Map()
+  for (const [teamId, games] of byTeam) {
+    const wins = games.filter((g) => g.won).length
+    winPctByTeam.set(teamId, games.length ? wins / games.length : 0.5)
+  }
+  return winPctByTeam
+}
+
+function avgOpponentWinPct(games, winPctByTeam) {
+  if (!games.length) return null
+  const total = games.reduce((sum, g) => sum + (winPctByTeam.get(g.opponentId) ?? 0.5), 0)
+  return total / games.length
 }
 
 function gameOutcome(game) {
@@ -90,6 +118,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
       won: game.homeRuns > game.awayRuns,
       runsFor: game.homeRuns,
       runsAllowed: game.awayRuns,
+      opponentId: game.awayId,
       late: late.home,
     })
     ensure(game.awayId).push({
@@ -98,9 +127,12 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
       won: game.awayRuns > game.homeRuns,
       runsFor: game.awayRuns,
       runsAllowed: game.homeRuns,
+      opponentId: game.homeId,
       late: late.away,
     })
   }
+
+  const winPctByTeam = opponentWinPctLookup(byTeam)
 
   const snapshots = {}
   for (const [teamId, teamGames] of byTeam) {
@@ -111,9 +143,15 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
     })
     currentForm.blownLeads = formGames.filter((g) => g.late.blownLead).length
     currentForm.clutchWins = formGames.filter((g) => g.late.clutchWin).length
+
+    const oppWinPct = avgOpponentWinPct(ordered, winPctByTeam)
+    const sos = scheduleStrengthAdjustment(oppWinPct, ordered.length)
     snapshots[teamId] = {
       asOf,
-      season: summarize(ordered),
+      season: summarize(ordered, qualityScoreFromGames, { adjustment: sos }, {
+        avgOpponentWinPct: oppWinPct == null ? null : round3(oppWinPct),
+        sosAdjustment: round2(sos),
+      }),
       currentForm,
     }
   }
