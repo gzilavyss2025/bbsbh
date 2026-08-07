@@ -1,3 +1,4 @@
+import '../styles/34-postseason.css'
 import { useState } from 'react'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import { useAsync } from '../hooks/useAsync.js'

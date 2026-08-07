@@ -1,3 +1,6 @@
+// This page's own partial, kept out of the core sheet (src/index.css) so only
+// /fouls pays for it. It loads after the core, which is the order it had there.
+import '../styles/43-foul-tracker.css'
 import { useMemo, useState } from 'react'
 import { fetchFouls, topFoulGames, teamPitchTypeRates } from '../api/fouls.js'
 import { fetchGamesByPk } from '../api/schedule.js'

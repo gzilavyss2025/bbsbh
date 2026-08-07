@@ -4,6 +4,23 @@
    Metaphor: paper on a desk. Warm manila canvas, cream cards,
    navy ink, kraft-tape spoiler covers. All numbers are mono
    tabular figures; structural labels are condensed uppercase.
+
+   THE CORE SHEET, NOT THE WHOLE SHEET.
+   main.jsx imports this file, so everything below render-blocks EVERY route.
+   A partial that only one lazy screen (or one component only that screen
+   mounts) ever uses is therefore imported by that screen instead, and Vite
+   emits it as a per-route CSS chunk — see the "Per-route partials" list at the
+   bottom of this file. Order is still the contract (src/CLAUDE.md), and TWO
+   things had to hold before a partial could leave:
+     1. No OTHER partial shares an identical selector with it, at any position —
+        a route chunk's <link> lands after this sheet, so a rule that used to
+        lose to a later partial would start winning.
+     2. Every module that uses its class hooks is on a route that loads it, and
+        the emitted chunk order still runs low number → high number. A partial
+        two lazy chunks share becomes its OWN chunk, and Vite may link that
+        chunk before or after the page's — which is why 38-umpire-pages and
+        52-highlight-clip-card came back here rather than being shared out.
+   Anything two SCREENS share stays here.
    ============================================================ */
 @import './tokens/fonts.css';
 @import './tokens/colors.css';
@@ -27,9 +44,6 @@
 @import './styles/12-sealbox.css';
 @import './styles/13-play-by-play.css';
 @import './styles/14-strike-zone.css';
-@import './styles/15-team-color-lab.css';
-@import './styles/16-identity-lab-shell.css';
-@import './styles/17-identity-lab-workbench.css';
 @import './styles/18-uniforms-and-jerseys.css';
 @import './styles/19-pattern-and-sketch-labs.css';
 @import './styles/20-charts.css';
@@ -40,36 +54,55 @@
 @import './styles/24-floating-nav-and-hud.css';
 @import './styles/25-wide-layout.css';
 @import './styles/26-player-page.css';
-@import './styles/26a-percentile-strip.css';
 @import './styles/27-player-position-innings.css';
 @import './styles/28-team-hub.css';
 @import './styles/29-team-transactions.css';
-@import './styles/30-standings.css';
 @import './styles/31-wild-card.css';
-@import './styles/32-milestone-watch.css';
 @import './styles/33-awards-history.css';
-@import './styles/34-postseason.css';
-@import './styles/35-postseason-series.css';
-@import './styles/36-postseason-leaders.css';
-@import './styles/37-all-star-rosters.css';
 @import './styles/38-umpire-pages.css';
 @import './styles/39-manager-page.css';
 @import './styles/40-game-modals.css';
 @import './styles/41-scorecard.css';
-@import './styles/42-first-scorebook.css';
-@import './styles/43-foul-tracker.css';
 @import './styles/44-pre-game-cards.css';
-@import './styles/45-admin-copy-editor.css';
 @import './styles/46-consent-modal.css';
-@import './styles/47-trade-deadline.css';
-@import './styles/48-logbook.css';
 @import './styles/48-stamp-strip.css';
-@import './styles/49-passport-book.css';
-@import './styles/50-logbook-landing.css';
-@import './styles/51-similar-players.css';
 @import './styles/52-highlight-clip-card.css';
-@import './styles/53-umpire-tendencies.css';
 @import './styles/54-my-tally.css';
 @import './styles/55-my-tally-account.css';
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
+
+/* ------------------------------------------------------------
+   Per-route partials — still in src/styles/, still numbered, still
+   guarded by check-caps / check-typography / check-focus-ring /
+   check-contrast (they read the whole directory). They are imported by
+   the module that owns them instead of here, so only the routes that
+   need them pay for them. Do not add one back to the list above without
+   re-checking the selector rule in this file's header.
+
+     15-team-color-lab        screens/identity-lab/index.jsx (DEV-only),
+                              screens/UniformNamesPage.jsx (DEV-only)
+     16-identity-lab-shell    screens/identity-lab/index.jsx (DEV-only)
+     17-identity-lab-workbench  screens/identity-lab/index.jsx (DEV-only)
+     26a-percentile-strip     components/charts/PercentileStrip.jsx
+     30-standings             screens/StandingsPage.jsx
+     32-milestone-watch       screens/MilestoneWatchPage.jsx
+     34-postseason            screens/PostseasonHistoryPage.jsx
+     35-postseason-series     screens/PostseasonSeriesPage.jsx
+     36-postseason-leaders    screens/PostseasonLeadersPage.jsx
+     37-all-star-rosters      screens/AllStarRostersPage.jsx,
+                              components/allstar/AllStarGameResult.jsx
+     42-first-scorebook       screens/FirstScorebookPage.jsx,
+                              screens/AllStarLegacyPage.jsx
+     43-foul-tracker          screens/FoulTrackerPage.jsx
+     45-admin-copy-editor     screens/AdminCopy.jsx
+     47-trade-deadline        components/transactions/TradeCard.jsx,
+                              screens/TradeDeadlineSeasonPage.jsx
+     48-logbook               screens/LogbookPage.jsx,
+                              screens/LogbookStatsPage.jsx
+     49-passport-book         screens/LogbookPage.jsx,
+                              components/passport/PassportBook.jsx
+     50-logbook-landing       components/account/LogbookLanding.jsx
+     51-similar-players       components/playercard/SimilarPlayerGrid.jsx
+     53-umpire-tendencies     components/umpire/UmpireTendencies.jsx
+   ------------------------------------------------------------ */

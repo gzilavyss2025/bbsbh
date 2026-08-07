@@ -1,3 +1,5 @@
+import '../styles/48-logbook.css'
+import '../styles/49-passport-book.css'
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { useAsync } from '../hooks/useAsync.js'

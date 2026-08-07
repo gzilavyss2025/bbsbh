@@ -1,3 +1,7 @@
+// `.gamestamp`'s base rule (the --stamp-ink fallback, ADR-0036) lives in
+// 48-logbook.css, and this component also renders outside /logbook — in the box
+// score's seal — so it carries that partial itself rather than relying on a page.
+import '../../styles/48-logbook.css'
 import { hasMonoLogo, teamLogoUrl } from '../../lib/teams.js'
 import { stampInkFor, stampWinnerId } from '../../lib/stampInk.js'
 import { stampInkOverrideFor } from '../../lib/stampInkTuning.js'

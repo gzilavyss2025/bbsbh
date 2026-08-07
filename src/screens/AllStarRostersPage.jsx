@@ -1,3 +1,4 @@
+import '../styles/37-all-star-rosters.css'
 import { useState } from 'react'
 import { loadAllStarRosters } from '../api/allStarRosters.js'
 import { fetchGameCardsByPk } from '../api/schedule.js'

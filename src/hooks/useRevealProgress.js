@@ -146,13 +146,19 @@ export function useRevealProgress(feed, regulation, actualCount) {
   // feed) rebuilds it. Without this the map froze at whatever feed was present
   // on first reveal and pitch/whiff stats went stale for the live inning — the
   // play-by-play (read live from `feed`) would show a walk while PITCHES read 0.
+  //
+  // Wrapped in useCallback purely so its IDENTITY is stable per feed: it is a
+  // prop on the memoized InningPage, and a plain function rebuilt each render
+  // would miss that memo on every render. The cache key is unchanged and still
+  // the feed object itself — the useCallback dependency is that same object, so
+  // the two can never disagree.
   const derivedRef = useRef({ feed: null, map: null })
-  const getDerived = () => {
+  const getDerived = useCallback(() => {
     if (derivedRef.current.feed !== feed) {
       derivedRef.current = { feed, map: computeDerivedByInning(feed) }
     }
     return derivedRef.current.map
-  }
+  }, [feed])
 
   return {
     revealedThrough,

@@ -33,10 +33,10 @@ import {
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
-import { fetchVsTeamSplits, vsTeamSplitsFor } from './vsTeamSplits.js'
+import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
 import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
-import { fetchRookiesData, rookieRecordFor } from './rookies.js'
+import { fetchRookieRecord } from './rookies.js'
 import {
   personBio,
   signedFallback,
@@ -161,10 +161,12 @@ export async function loadPlayer(id, asOf) {
   // (nightly current season + hand-run history), session-cached, so this is
   // free after the first player page. Built into a per-group { season: war } map
   // below and threaded into each block's tiles + career-register column.
-  // Career-vs-club splits (the SPLITS VS TEAM card) ride along here too — one
-  // more same-origin static file (nightly), session-cached, so this is free
-  // after the first player page. MLB-only at the source; null for a player not
-  // on an MLB active roster, and the card then simply doesn't render.
+  // Career-vs-club splits (the SPLITS VS TEAM card) ride along here too —
+  // same-origin static files (nightly), session-cached, so this is free after
+  // the first player page. Both this and the rookie record read a SHARD for
+  // this one player rather than the whole league (see api/vsTeamSplits.js and
+  // api/rookies.js). MLB-only at the source; null for a player not on an MLB
+  // active roster, and the card then simply doesn't render.
   // Statcast percentile ranks (the STATCAST card) are a fourth same-origin
   // static file, same session-cached, degrade-to-empty pattern — see
   // api/savantPercentiles.js.
@@ -172,15 +174,15 @@ export async function loadPlayer(id, asOf) {
   // same-origin static file, session-cached after the first read anywhere in
   // the app (TeamInfo's opposing-starter card already asks for it), and the
   // source of the "Pitches like" card's comparison pool.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, arsenalData, rookiesData] = await Promise.all([
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, arsenalData, rookieInfo] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(),
-    fetchVsTeamSplits(),
+    fetchVsTeamSplitsForPlayer(id),
     fetchSavantPercentiles(),
     fetchPitchArsenal(),
-    fetchRookiesData(),
+    fetchRookieRecord(id),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -423,7 +425,6 @@ export async function loadPlayer(id, asOf) {
     for (const p of others) if (!list.some((x) => x.id === p.id)) list.push(p)
     tradeOthers.set(key, list)
   }
-  const rookieInfo = rookieRecordFor(rookiesData, bio.id)
   const transactions = transactionTimelineView(txns, {
     selfId: bio.id,
     levelByTeamId,

@@ -32,6 +32,7 @@ import { ipToOuts } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { writeRookieShards } from './lib/rookie-shards.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'rookies.json')
@@ -179,6 +180,11 @@ for (const r of results) {
 
 existing.generatedAt = new Date().toISOString()
 await writeJsonAtomic(out, existing)
+// Keep the app-read shards in step with the master (see gen-rookies.mjs and
+// scripts/lib/rookie-shards.mjs) — a backfill that only wrote the master would
+// leave the pills and the player page reading yesterday's league.
+const shards = await writeRookieShards(dirname(out), existing)
 console.log(
   `wrote ${out} (${Object.keys(existing.players).length} players total, ${toCompute.length} newly computed this run, seasons ${startYear}-${endYear})`,
 )
+console.log(`wrote public/data/rookies/ (status + ${shards.shards} record shards)`)

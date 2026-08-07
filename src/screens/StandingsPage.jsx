@@ -1,3 +1,4 @@
+import '../styles/30-standings.css'
 import { useMemo, useState } from 'react'
 import { fetchLeagueStandings } from '../api/team.js'
 import { fetchTeamScores, leagueSeasonGradesFor, gradeTiersByTeamId } from '../api/teamScore.js'

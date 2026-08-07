@@ -5,6 +5,12 @@
 // Transactions timeline ("Lost Rookie Status" once closed) — see
 // src/api/rookies.js.
 //
+// rookies.json is the MASTER record and is not fetched by the app. After every
+// write this script derives public/data/rookies/ from it — a compact
+// whole-league status map for the pills, plus id-sharded full records for the
+// player page. See scripts/lib/rookie-shards.mjs for why the split is by role
+// rather than by id.
+//
 // CRITICAL: this job is APPEND-ONLY/incremental (like gen-game-notes.mjs /
 // gen-umpire-accuracy.mjs), NOT a full rebuild (like gen-milestones.mjs). Once
 // a player's rookieUntil is set, that's a frozen historical fact — the
@@ -32,6 +38,7 @@
 //   node scripts/gen-rookies.mjs
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { writeRookieShards } from './lib/rookie-shards.mjs'
 import { fileURLToPath } from 'node:url'
 import { ALL_MLB_TEAM_IDS } from '../src/lib/teams.js'
 import { levelSeasonStat } from '../src/api/person.js'
@@ -178,6 +185,10 @@ for (const u of updates) {
 
 existing.generatedAt = new Date().toISOString()
 await writeJsonAtomic(out, existing)
+// The master file above is the append-only record; the app reads the derived
+// shards under public/data/rookies/ instead (see scripts/lib/rookie-shards.mjs).
+const shards = await writeRookieShards(dirname(out), existing)
 console.log(
   `wrote ${out} (${Object.keys(existing.players).length} players total, checked ${toCheck.length} open candidates, ${added} newly added, ${closed} newly closed)`,
 )
+console.log(`wrote public/data/rookies/ (status + ${shards.shards} record shards)`)

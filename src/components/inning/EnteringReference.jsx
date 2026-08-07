@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { defenseEntering } from '../../api/defense.js'
 import { lineupEntering } from '../../api/battingorder.js'
 import { selectDueUpNext } from '../../api/dueup.js'
@@ -59,7 +59,11 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // "Defense" on its own, which doubles as this app's own runs-allowed sense
 // elsewhere (StatBox's R/H/E row) — see
 // .scratch/pbp-scoring-review/issues/05-substitution-surface-asymmetries.md.
-export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
+// Memoized (both sections): the caller-gated entering selectors below walk the
+// whole game's plays, and these two cards hang off InningViewer, which
+// re-renders on every live report during a live game. The reveal mark is a prop,
+// so the memo comparison covers the gate itself.
+export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
   const [open, setOpen] = useState(true)
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
@@ -86,7 +90,7 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
       {open && <DefenseDiamond defense={defense} />}
     </section>
   )
-}
+})
 
 // Both teams' lineup cards as they stand ENTERING this half — the nine
 // batting-order slots per side, each name with its jersey number and fielding
@@ -113,7 +117,7 @@ export function DefenseSection({ feed, inning, half, fieldingSide, fieldingName,
 // the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
-export function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
+export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
   const [open, setOpen] = useState(true)
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
@@ -145,7 +149,7 @@ export function LineupSection({ feed, inning, half, awayName, homeName, prospect
       )}
     </section>
   )
-}
+})
 
 // One team's lineup column: the club name spelled out, then a numbered list of
 // its nine batting slots. Each row reads name(s) on the left and the standing

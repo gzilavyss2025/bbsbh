@@ -1,3 +1,4 @@
+import '../styles/42-first-scorebook.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { loadAllStarRosters } from '../api/allStarRosters.js'
 import { topActiveByAppearances, currentRosterLegacyByTeam } from '../api/allStarLegacy.js'

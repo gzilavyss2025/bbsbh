@@ -47,14 +47,12 @@
   .screen.standings-screen {
     max-width: 840px;
   }
-  .standings--full .st-ext {
-    display: table-cell;
-  }
-  .standings--full th,
-  .standings--full td {
-    padding: 8px 9px;
-    font-size: var(--fs-small);
-  }
+  /* The two `.standings--full` wide-layout rules that used to live here moved
+     to 30-standings.css. They override that file's phone defaults at EQUAL
+     specificity, so load order alone decides the winner — and 30 is now a
+     per-route chunk that links AFTER this core sheet, which silently inverted
+     them (the extra columns vanished at desktop width). Two files, identical
+     selectors, one of them route-split: keep both halves in the same file. */
 }
 
 /* ranked team stats — a dense two-column ledger of stat / value / rank lines.

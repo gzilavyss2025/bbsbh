@@ -93,6 +93,7 @@
         "components/gamehud/StatBox.jsx",
         "components/inning/HalfInning.jsx",
         "screens/BoxScore.jsx",
+        "screens/boxscore/revealBoxScore.js",
         "screens/PostseasonSeriesPage.jsx"
       ]
     },
@@ -104,7 +105,7 @@
       "class": "mixed",
       "why": "The callout-notes barrel. The live entering-tense builders are caller-gated; the box score's result-aware roll-up is reveal-only. The split lives in callout-notes/ (ADR-0014's two-tense rule).",
       "revealOnlyExports": ["computeGameCalloutNotes"],
-      "importers": ["screens/BoxScore.jsx"]
+      "importers": ["screens/boxscore/revealBoxScore.js"]
     },
     "callout-notes/checkpoints.js": {
       "class": "caller-gated",
@@ -181,7 +182,7 @@
       "importers": [
         "components/gamehud/StatBox.jsx",
         "hooks/useRevealProgress.js",
-        "screens/BoxScore.jsx"
+        "screens/boxscore/revealBoxScore.js"
       ]
     },
     "dueup.js": {
@@ -238,7 +239,7 @@
         "components/highlights/GameVideoRow.jsx",
         "components/highlights/WatchCondensedButton.jsx",
         "components/inning/HalfInning.jsx",
-        "screens/BoxScore.jsx"
+        "screens/boxscore/revealBoxScore.js"
       ]
     },
     "hitterForm.js": {
@@ -266,8 +267,8 @@
         "api/loadScorecard.js",
         "components/gamehud/RollingLine.jsx",
         "components/gamehud/StatBox.jsx",
-        "screens/BoxScore.jsx",
-        "screens/InningViewer.jsx"
+        "screens/InningViewer.jsx",
+        "screens/boxscore/revealBoxScore.js"
       ]
     },
     "liveEdge.js": {
@@ -577,8 +578,8 @@
       "why": "A team's in-game win % is score-revealing — a 4% away win prob in the 8th says the game is all but over. Called either inside the box score's seal or under the innings view's revealedThrough clamp.",
       "importers": [
         "components/charts/WinProbChart.jsx",
-        "screens/BoxScore.jsx",
-        "screens/InningViewer.jsx"
+        "screens/InningViewer.jsx",
+        "screens/boxscore/revealBoxScore.js"
       ]
     },
     "workload.js": {

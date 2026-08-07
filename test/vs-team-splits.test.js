@@ -2,7 +2,11 @@
 // the static-file fetch/cache wrapper plus the pure per-player view-model shaper.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fetchVsTeamSplits, vsTeamSplitsFor } from '../src/api/vsTeamSplits.js'
+import {
+  fetchVsTeamSplitsForPlayer,
+  fetchVsTeamSplitsForTeams,
+  vsTeamSplitsFor,
+} from '../src/api/vsTeamSplits.js'
 
 const TEAMS = [
   { id: 158, abbr: 'MIL', name: 'Brewers' },
@@ -81,23 +85,55 @@ test('vsTeamSplitsFor falls back to the first strip entry when the player has an
 })
 
 // --------------------------------------------------------------------------
-// fetchVsTeamSplits — cached in-memory for the session; this suite is the
-// only place that exercises it (module-level singleton cache).
+// The sharded fetch — one index plus one file per club. Cached in-memory for
+// the session, so this suite exercises it in ONE test (module-level singleton
+// caches; a second test would see the first one's cache).
 // --------------------------------------------------------------------------
-test('fetchVsTeamSplits reads the static file and caches the parsed result', async () => {
+const SHARDS = {
+  '/data/vs-team-splits/index.json': {
+    generatedAt: '2026-08-07',
+    season: 2026,
+    teams: TEAMS,
+    nextOpponent: { 158: 112 },
+    owner: { 1: 158, 2: 112 },
+  },
+  '/data/vs-team-splits/158.json': {
+    players: { 1: { teamId: 158, group: 'hitting', vs: { 112: { car: { g: 3 } } } } },
+  },
+  '/data/vs-team-splits/112.json': {
+    players: { 2: { teamId: 112, group: 'pitching', vs: { 158: { car: { g: 5 } } } } },
+  },
+}
+
+test('the club shards merge back into the whole-file shape, and are fetched once', async () => {
   const originalFetch = globalThis.fetch
-  let calls = 0
+  const urls = []
   globalThis.fetch = async (url) => {
-    calls++
-    assert.equal(url, '/data/vs-team-splits.json')
-    return { ok: true, status: 200, json: async () => ({ players: {}, teams: [] }) }
+    urls.push(url)
+    const body = SHARDS[url]
+    if (!body) throw new Error(`unexpected fetch ${url}`)
+    return { ok: true, status: 200, json: async () => body }
   }
   try {
-    const first = await fetchVsTeamSplits()
-    assert.deepEqual(first, { players: {}, teams: [] })
-    const second = await fetchVsTeamSplits()
-    assert.equal(second, first)
-    assert.equal(calls, 1)
+    // A game reads exactly the two clubs playing — never the other 28.
+    const merged = await fetchVsTeamSplitsForTeams([158, 112])
+    assert.deepEqual(urls.sort(), [
+      '/data/vs-team-splits/112.json',
+      '/data/vs-team-splits/158.json',
+      '/data/vs-team-splits/index.json',
+    ])
+    assert.deepEqual(Object.keys(merged.players).sort(), ['1', '2'])
+    assert.equal(merged.season, 2026)
+    // The header from the index is merged in, so the pure view model that used
+    // to read the single file is unchanged.
+    assert.equal(vsTeamSplitsFor(merged, 1).preselectId, 112)
+
+    // A player page resolves his club through the index's `owner` map — and
+    // here both are already cached, so it costs no further request.
+    const calls = urls.length
+    const one = await fetchVsTeamSplitsForPlayer(1)
+    assert.equal(urls.length, calls)
+    assert.equal(one.players[1].teamId, 158)
   } finally {
     globalThis.fetch = originalFetch
   }

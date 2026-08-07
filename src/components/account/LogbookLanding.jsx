@@ -1,3 +1,4 @@
+import '../../styles/50-logbook-landing.css'
 import { SiteHeader } from '../chrome/SiteHeader.jsx'
 import { ReportFooter } from '../chrome/ReportFooter.jsx'
 import { usePromptDismiss } from '../../hooks/preferences/usePromptDismiss.js'

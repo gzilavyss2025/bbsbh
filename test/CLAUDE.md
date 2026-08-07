@@ -75,7 +75,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
-| rookies.test.js | 13 | src/api/rookies.js | Rookie pill |
+| rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | route.test.js | 32 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
@@ -99,7 +99,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | teams-static.test.js | 2 | src/api/teams-static.js | fetchStaticTeams |
 | teams.test.js | 51 | src/lib/teams.js | Team id/logo/color static data (60+ exports) |
 | uniforms.test.js | 31 | src/api/uniforms.js | Jersey treatment classification (PR #343) |
-| vs-team-splits.test.js | 7 | src/api/vsTeamSplits.js | SPLITS VS TEAM card |
+| vs-team-splits.test.js | 7 | src/api/vsTeamSplits.js | SPLITS VS TEAM card + the per-club shard merge |
 | war.test.js | 6 | src/api/war.js | WAR reader |
 | winprob-atbat-step.test.js | 5 | src/api/playbyplay.js | lastVisibleAtBatIndex |
 | winprob.test.js | 17 | src/api/game.js, src/api/winprob.js | Win probability chart |

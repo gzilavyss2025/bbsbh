@@ -1,3 +1,4 @@
+import '../../styles/26a-percentile-strip.css'
 import { useState } from 'react'
 import { deviationBar, dotFraction } from '../../lib/percentileStrip.js'
 

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { memo, useLayoutEffect, useRef } from 'react'
 import { useNav, useLinkScope } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
 
@@ -16,7 +16,8 @@ import { playerPath } from '../../lib/route.js'
 // (MarginNotes.jsx, api/pitcher-callouts.js's buildMarginNotes), which spans
 // both teams' pitchers and is capped/sorted by worthiness rather than listed
 // per row regardless of how many qualify.
-export function PitchersSection({ teams }) {
+// Memoized on `teams`, which InningViewer builds in a useMemo for that reason.
+export const PitchersSection = memo(function PitchersSection({ teams }) {
   const shown = teams.filter((t) => t.rows.length > 0)
   if (shown.length === 0) return null
   return (
@@ -68,7 +69,7 @@ export function PitchersSection({ teams }) {
       ))}
     </section>
   )
-}
+})
 
 // A pitcher's name, always drawn in caps (see .pitchers__pname), auto-shrunk to
 // fit its column on one line so a long name never widens the table into a

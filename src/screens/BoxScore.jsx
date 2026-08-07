@@ -1,10 +1,7 @@
-import { useMemo, useState } from 'react'
-import { selectBoxscore, computeThreeStars, computePlayOfTheGame, resolveCardPlayer } from '../api/boxscore.js'
-import { revealStampFacts } from '../api/linescore.js'
-import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
-import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../api/derive.js'
-import { computeGameCalloutNotes } from '../api/callout-notes.js'
-import { eligibleHighlightForPlay, highlightPoster } from '../api/highlights.js'
+import { memo, useMemo, useRef, useState } from 'react'
+import { resolveCardPlayer } from '../api/boxscore.js'
+import { highlightPoster } from '../api/highlights.js'
+import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
@@ -111,6 +108,14 @@ export function BoxScore({
   // already goes there, live or final.
   const isFinal = selectIsFinal(feed)
 
+  // The reveal render's own cache (see `revealBoxScore` at the foot of this
+  // file). Declared here because a ref has to be, but it holds NOTHING until
+  // the reveal function runs — the seal is still what decides whether any of
+  // this is ever computed (ADR-0001/0002). ADR-0007's rule is why the key is
+  // the input objects THEMSELVES rather than a gamePk or a timestamp: a poll
+  // mints a fresh feed, a fresh feed is a cache miss, and the sheet recomputes.
+  const revealCacheRef = useRef({ key: null, value: null })
+
   return (
     <div className="boxscore">
       <div className="boxscore__head">
@@ -133,56 +138,22 @@ export function BoxScore({
           pass never touches `revealedThrough`. */}
       <SealBox label="Tap to reveal the box score" forceRevealed={spoilersOff}>
         {() => {
-          const box = selectBoxscore(feed)
-          // Computed here, inside the reveal render, so WPA and the win-prob
-          // path never reach the DOM before the tap — same gate as the box
-          // score itself.
-          const stars = computeThreeStars(winProbability, feed)
-          const potg = computePlayOfTheGame(winProbability, feed)
-          // The video clip for that one play, if MLB cut an eligible one (see
-          // eligibleHighlightForPlay). Looked up HERE, inside the reveal
-          // render, for the same ADR-0001 reason as everything else on this
-          // line — a clip's title and poster narrate the outcome, so neither
-          // may exist in the DOM before the tap. Null is the common case and
-          // renders the card exactly as it did before this button existed.
-          const potgHighlight = eligibleHighlightForPlay(highlights, potg?.playId)
-          const winProbPoints = selectWinProbPath(winProbability)
-          const winProbBigPlays = selectWinProbBigPlays(winProbability)
-          // One per-inning play-by-play pass, shared by the Statcast
-          // superlatives and the By-inning digest below so the feed isn't
-          // walked twice on each reveal.
-          const derivedByInning = computeDerivedByInning(feed)
-          const insights = computeGameSuperlatives(feed, derivedByInning)
-          // Per-half pitches / whiffs / LOB — plain play-by-play, so it holds
-          // up at MiLB parks where the Statcast card can't.
-          const inningDigest = computeInningDigest(feed, derivedByInning)
-          // Every leader/streak/situational-record note that fired somewhere
-          // in the game (see api/callout-notes.js) — the same notes the
-          // innings view shows one at a time on the play they belong to,
-          // rolled up here into the Insights card.
-          const calloutNotes = computeGameCalloutNotes(feed, callouts, vsTeam)
-          // The Logbook stamp's game facts (ADR-0035) — the final score, the two
-          // clubs, the venue, the date. Reveal-only, computed HERE inside the
-          // reveal render for the same reason everything else on this line is:
-          // nothing score-revealing exists before the tap. See StampGameButton
-          // for why its placement inside this render function IS the client-side
-          // reveal gate.
-          const stampFacts = revealStampFacts(feed)
+          const r = revealBoxScore(revealCacheRef, feed, winProbability, highlights, callouts, vsTeam)
           return (
             <BoxScoreBody
-              stampFacts={stampFacts}
+              stampFacts={r.stampFacts}
               feed={feed}
-              box={box}
-              stars={stars}
-              potg={potg}
-              potgHighlight={potgHighlight}
+              box={r.box}
+              stars={r.stars}
+              potg={r.potg}
+              potgHighlight={r.potgHighlight}
               highlights={highlights}
-              winProbPoints={winProbPoints}
-              winProbBigPlays={winProbBigPlays}
+              winProbPoints={r.winProbPoints}
+              winProbBigPlays={r.winProbBigPlays}
               winProbTreatment={winProbTreatment}
-              insights={insights}
-              inningDigest={inningDigest}
-              calloutNotes={calloutNotes}
+              insights={r.insights}
+              inningDigest={r.inningDigest}
+              calloutNotes={r.calloutNotes}
               managers={managers}
               uniforms={uniforms}
               scorebookWeather={scorebookWeather}
@@ -221,7 +192,13 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
+// Memoized: with the reveal cache above returning the same objects for the same
+// inputs, every prop crossing this boundary keeps its identity across a
+// re-render the feed didn't cause, so the whole sheet — hundreds of rows — sits
+// that render out. It cannot render anything the un-memoized version would not
+// have: memo only skips a render whose props are identical, and it is still
+// mounted only from inside the SealBox reveal function (ADR-0002).
+const BoxScoreBody = memo(function BoxScoreBody({ feed, box, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -431,7 +408,7 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, highlights, winPr
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>
   )
-}
+})
 
 // How many insight CARDS the Insights card shows before folding the rest
 // behind a Show-more button (the former-teammates pattern). The notes arrive
