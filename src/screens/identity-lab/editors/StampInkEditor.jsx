@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { GameStamp } from '../../../components/logbook/GameStamp.jsx'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { contrastRatio } from '../../../lib/contrast.js'
+import { isMlbTeamId } from '../../../lib/teams.js'
 import { STAMP_PAPER, deepenToContrast, isHex } from '../../../lib/stampInk.js'
 import { stampInkOverrideFor, stampInkStore } from '../../../lib/stampInkTuning.js'
 import { HexField } from '../HexField.jsx'
@@ -86,7 +87,19 @@ export function StampInkEditor({ teamId, name, abbreviation }) {
   }
 
   const club = { id: teamId, abbreviation, runs: 4 }
-  const game = { ...PREVIEW_GAME, away: club, home: OPPONENT, winnerId: teamId }
+  // The preview's level is the club's own, so a MiLB club is judged against the
+  // INVERTED ring band it actually prints in (stampArt.js's
+  // `stampRingInverted`). That is not cosmetic here: the filled band roughly
+  // doubles how much ink is on the page, which is exactly the thing this editor
+  // asks you to look at. Any non-1 sportId reads as the minors, so the number
+  // itself carries no claim about which level.
+  const game = {
+    ...PREVIEW_GAME,
+    sportId: isMlbTeamId(teamId) ? 1 : 11,
+    away: club,
+    home: OPPONENT,
+    winnerId: teamId,
+  }
 
   return (
     <section className="idlab__stampink" aria-label="Stamp ink">

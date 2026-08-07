@@ -20,7 +20,15 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  BAND_INNER_R,
+  BAND_OUTER_R,
+  INNER_RING_R,
   MARK_BOX,
+  OUTER_RING_R,
+  ARC_BOTTOM_R,
+  ARC_TOP_R,
+  DIAMOND_R,
+  RING_FONT_SIZE,
   MARK_PLACEMENT_DEFAULT,
   MARK_PLACEMENT_LIMITS,
   MARK_SIDES,
@@ -36,6 +44,7 @@ import {
   stampDateText,
   stampIds,
   stampLabel,
+  stampRingInverted,
   stampSeed,
 } from '../src/lib/stampArt.js'
 import { stampLogoTuning, stampLogoTuningRecord } from '../src/lib/stampLogoTuning.js'
@@ -391,4 +400,48 @@ test('both producers of the facts blob agree on the same game', () => {
 test('stampGameFacts drops a row with no gamePk instead of keying on undefined', () => {
   assert.equal(stampGameFacts(null), null)
   assert.equal(stampGameFacts({}), null)
+})
+
+// ---------------------------------------------------------------------------
+// The inverted ring band — a minor-league game's tell
+// ---------------------------------------------------------------------------
+// A MiLB stamp fills the annulus between the two bounding circles and knocks
+// the venue, the date and the separator diamonds out of it. Two things can go
+// wrong silently, so both are pinned here: the wrong games inverting, and the
+// filled band failing to cover the content it is supposed to knock out.
+
+test('stampRingInverted: sportId 1 stays open, every other level inverts', () => {
+  assert.equal(stampRingInverted({ sportId: 1 }), false)
+  for (const sportId of [11, 12, 13, 14, 16]) {
+    assert.equal(stampRingInverted({ sportId }), true, `sportId ${sportId} must invert`)
+  }
+})
+
+test('stampRingInverted: an absent or unreadable sportId stays MLB, never inverts', () => {
+  // Both producers default sportId to 1, so a blob without one means "we never
+  // learned", not "the minors" — and a stamp must never invert on a guess.
+  assert.equal(stampRingInverted({}), false)
+  assert.equal(stampRingInverted(null), false)
+  assert.equal(stampRingInverted(undefined), false)
+  assert.equal(stampRingInverted({ sportId: null }), false)
+  assert.equal(stampRingInverted({ sportId: 'AAA' }), false)
+})
+
+test('the filled band matches the two rings OUTER edges, so the silhouette is unchanged', () => {
+  // 3.5px stroke centred on r=140 and 1.5px centred on r=118. A band drawn to
+  // the centre lines instead would sit a hair small next to an MLB stamp in the
+  // same grid — the kind of drift nothing but this assertion would catch.
+  assert.equal(BAND_OUTER_R, OUTER_RING_R + 3.5 / 2)
+  assert.equal(BAND_INNER_R, INNER_RING_R - 1.5 / 2)
+})
+
+test('the band covers everything it has to knock out', () => {
+  // The top arc's baseline is at r=122 with caps growing OUTWARD; the bottom
+  // arc's is at r=135 with caps growing inward (its sweep-0 direction is why).
+  // Anything reaching past either band edge would be clipped away rather than
+  // knocked out — it would simply vanish from an inverted stamp.
+  assert.ok(ARC_TOP_R + RING_FONT_SIZE <= BAND_OUTER_R, 'venue caps must stay inside the band')
+  assert.ok(ARC_BOTTOM_R - RING_FONT_SIZE >= BAND_INNER_R, 'date caps must stay inside the band')
+  // The separator diamonds are 12px tall, centred on the ring.
+  assert.ok(DIAMOND_R + 6 <= BAND_OUTER_R && DIAMOND_R - 6 >= BAND_INNER_R)
 })

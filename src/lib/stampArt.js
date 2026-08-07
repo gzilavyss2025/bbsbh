@@ -39,6 +39,44 @@ export const ARC_TOP_R = 122
 export const ARC_BOTTOM_R = 135
 export const DIAMOND_R = 129
 
+// ---------------------------------------------------------------------------
+// The inverted ring band — a minor-league game's tell
+// ---------------------------------------------------------------------------
+// An MLB stamp draws its ring as two hairline circles with the venue and the
+// date riding between them on open paper. A MINOR-LEAGUE stamp inverts that
+// band: the annulus fills solid in the same single ink, and the venue, the
+// date/series line and the two separator diamonds knock out of it. Nothing else
+// about the art changes — same ring geometry, same marks, same numerals, still
+// one colour — so the two read as one family with the level legible at a
+// glance, which is the whole point on a page mixing a Brewers game with a
+// Biloxi Shuckers one.
+//
+// The band spans the OUTER EDGE of both bounding strokes rather than their
+// centre lines, so the filled band's silhouette is byte-identical to what the
+// two circles already drew: the 3.5px outer stroke reaches 140+1.75, the 1.5px
+// inner one reaches 118-0.75. Getting this wrong by a hair makes an inverted
+// stamp sit a hair larger than the MLB stamp beside it in a grid.
+export const BAND_OUTER_R = OUTER_RING_R + 1.75
+export const BAND_INNER_R = INNER_RING_R - 0.75
+
+// Whether a game's ring band inverts. The rule is simply "not MLB": sportId 1
+// is the majors and every other level this app lists (AAA 11, AA 12, A+ 13,
+// A 14, ROK 16 — see SPORT_IDS in src/lib/teams.js) is a minor-league game.
+// Stated as `!== 1` rather than as a membership test on purpose — a stamp for
+// some level not yet on the slate should still read as "not the majors"
+// instead of quietly drawing as one. A fact blob with no sportId at all is the
+// one case that stays MLB, because both producers already default it to 1 and
+// an absent value means "we never learned", not "the minors".
+//
+// The test is on the RAW value being a finite number, deliberately not on
+// `Number(game?.sportId)`: that coercion turns both null and '' into 0, which
+// is not 1, which would have inverted every stamp whose blob simply didn't
+// carry the field.
+export function stampRingInverted(game) {
+  const sportId = game?.sportId
+  return typeof sportId === 'number' && Number.isFinite(sportId) && sportId !== 1
+}
+
 // Each club mark is letterboxed into a 150x150 slot and clipped to the inner
 // circle, so it bleeds off that circle's left/right edge instead of sitting in a
 // small fixed box. y 44-194 is ~64% of the inner circle's vertical space.
@@ -286,6 +324,7 @@ export function stampIds(instanceId) {
     homeMask: `stamp-home-${suffix}`,
     arcTop: `stamp-arctop-${suffix}`,
     arcBottom: `stamp-arcbot-${suffix}`,
+    band: `stamp-band-${suffix}`,
   }
 }
 

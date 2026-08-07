@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { GameStamp } from '../../../components/logbook/GameStamp.jsx'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
-import { hasMonoLogo } from '../../../lib/teams.js'
+import { hasMonoLogo, isMlbTeamId } from '../../../lib/teams.js'
 import {
   MARK_PLACEMENT_DEFAULT,
   MARK_PLACEMENT_LIMITS,
@@ -183,8 +183,14 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
 // mock-ups.
 function SidePanel({ side, teamId, name, abbreviation, values, landed, placements, onField, onReset }) {
   const club = { id: teamId, abbreviation, runs: 4 }
+  // The preview carries the club's own level, so a MiLB club's mark is judged
+  // inside the INVERTED ring band its stamps actually print in (stampArt.js's
+  // `stampRingInverted`). The band never touches the mark slot, but a mark that
+  // bleeds to the inner circle's edge reads differently against a filled ring
+  // than against open paper, which is the call this editor exists to make.
   const game = {
     ...PREVIEW_GAME,
+    sportId: isMlbTeamId(teamId) ? 1 : 11,
     away: side === 'away' ? club : OPPONENT,
     home: side === 'home' ? club : OPPONENT,
   }
