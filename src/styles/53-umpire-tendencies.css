@@ -1,0 +1,326 @@
+/* ============================================================
+   UMPIRE TENDENCIES CARD — UmpireTendencies.jsx
+   ============================================================
+   Split out of 38-umpire-pages.css, which this pushed past
+   check-file-size.mjs's 600-line cap. It sits at 53 rather than
+   beside 38 because renumbering every partial after it would
+   churn the whole cascade for no gain: this file introduces a
+   fresh `.umptend__*` namespace and overrides nothing, so its
+   position in the order is not load-bearing. It does reuse
+   .metricbar (44) for its masthead and .zonemap (14) for the
+   grid, both of which it must come AFTER — which it does.
+   ============================================================ */
+
+/* ----------------------------------------------------- Umpire Tendencies card
+   UmpireTendencies.jsx — the broadcast-style read on how an umpire calls the
+   zone, shown at the top of the umpire detail page and inside
+   UmpireAccuracyModal (which a crew member's name opens from the lineup page).
+
+   Structure follows the reference TV graphic band for band; the palette is
+   this app's own. The register is LABELS AND NUMBERS — no prose lives on this
+   card, so nearly every string here is simply uppercase, which the global
+   ALL-CAPS invariant already handles. See .scratch/umpire-tendencies/PRD.md. */
+.umptend {
+  background: var(--surface-card);
+  border: 1px solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.umptend__bar {
+  border-radius: 0;
+}
+.umptend__season {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  color: var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- identity. The home-plate mark means "this man was behind the plate",
+   which is what the band is about — deliberately not a league crest. There is
+   no service-time line: statsapi carries none (PRD §2 Band 2). --- */
+.umptend__id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px 12px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+.umptend__mark {
+  flex: none;
+  display: block;
+  color: var(--navy);
+}
+.umptend__mark svg {
+  width: 32px;
+  height: 32px;
+}
+.umptend__first {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  line-height: var(--lh-solid);
+}
+.umptend__last {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+  line-height: var(--lh-tight);
+  margin-top: 2px;
+}
+.umptend__sub {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- zone lean. The reference's VERTICAL five-band stack. The ramp runs navy
+   (pitcher) to kraft amber (hitter): deliberately NOT the app's
+   --accent-positive/--accent-negative pair, which means good/bad — neither end
+   of this scale is good or bad, and red/green would say otherwise. It is also
+   what the reference's own blue-to-yellow maps onto. No text ever sits on the
+   ramp, so nothing here needs to clear contrast against a gradient. --- */
+.umptend__lean {
+  padding: 13px 13px 0;
+}
+.umptend__leanhd {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  padding-right: 7px;
+}
+.umptend__scale {
+  display: flex;
+  margin-top: 10px;
+}
+.umptend__gutter {
+  position: relative;
+  width: 30px;
+  flex: none;
+}
+.umptend__ramp {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  border: 1px solid var(--border-rule);
+  border-radius: 2px;
+  /* Holding each pole for its first stretch is load-bearing: a plain
+     navy-to-rule two-stop spends the whole cool half in olive-grey and the
+     pitcher end stops reading as a pole at all. --rule rather than
+     --rule-soft at the midpoint for the same reason — the softer token
+     disappears against --surface-card and the stripe looks broken in half. */
+  background: linear-gradient(
+    180deg,
+    var(--navy) 0%,
+    var(--navy) 16%,
+    var(--rule) 46%,
+    var(--seal) 72%,
+    var(--marker) 92%,
+    var(--marker) 100%
+  );
+}
+/* The caret rides the gutter at the umpire's true position (statTiers.js's
+   leanCaretFraction), so the card shows WHERE on the continuum he falls and
+   not merely which band. It sits clear of the ramp rather than on it — an ink
+   caret drawn over the navy pole would be invisible. */
+.umptend__caret {
+  position: absolute;
+  left: 17px;
+  width: 0;
+  height: 0;
+  margin-top: -5px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--text-heading);
+}
+.umptend__rows {
+  flex: 1;
+  min-width: 0;
+}
+.umptend__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 3px;
+}
+.umptend__row + .umptend__row {
+  box-shadow: inset 0 1px 0 var(--rule-grid);
+}
+.umptend__rowl {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
+}
+/* The band he occupies: paper chip plus an ink keyline. Two encodings rather
+   than one, so it survives greyscale and colour-vision deficiency without
+   depending on the ramp beside it. */
+.umptend__row--on {
+  background: var(--surface-inset);
+  box-shadow: inset 0 0 0 1.5px var(--text-heading);
+}
+.umptend__row--on .umptend__rowl {
+  color: var(--text-heading);
+}
+
+/* --- area to watch. A solid navy panel: the card's one concrete "where"
+   earns its second ink anchor. Deliberately NOT the kraft-tape hatch, which in
+   this app means "sealed, do not look" and must not be spent on a panel that
+   is neither sealed nor tappable. --- */
+.umptend__watch {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 13px;
+  padding: 12px 13px;
+  background: var(--navy);
+}
+.umptend__watchbody {
+  flex: 1;
+  min-width: 0;
+}
+.umptend__watchlbl {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--rule);
+}
+.umptend__watchtxt {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-on-ink);
+  line-height: var(--lh-tight);
+  margin-top: 3px;
+}
+.umptend__watchtxt--none {
+  color: var(--rule);
+}
+/* A paper plate behind the grid, or the navy panel swallows every
+   low-opacity navy cell in the map. */
+.umptend__watchmap {
+  flex: none;
+  padding: 4px;
+  background: var(--surface-inset);
+  border-radius: 2px;
+}
+.umptend__watchmap .zonemap {
+  display: block;
+  width: 78px;
+  height: auto;
+}
+
+/* --- tiles. Ruled 2x2, label over figure. Four across would squeeze every
+   label below anything in the type scale. --- */
+.umptend__tiles,
+.umptend__chalrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.umptend__tile {
+  padding: 11px 8px;
+  text-align: center;
+  border-top: 1px solid var(--border-hairline);
+}
+.umptend__tile:nth-child(odd) {
+  border-right: 1px solid var(--border-hairline);
+}
+.umptend__tilel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.umptend__tilev {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  margin-top: 3px;
+}
+.umptend__tilesup {
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* --- ABS challenges. Its own labelled sub-table plus the reference's one
+   asterisked footnote, which is the only natural-case string on the card. --- */
+.umptend__chal {
+  border-top: 1px solid var(--border-hairline);
+  padding-top: 10px;
+}
+.umptend__challbl {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  padding: 0 13px;
+}
+.umptend__chalfoot {
+  margin: 0;
+  padding: 7px 13px 9px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+}
+.umptend__prov {
+  padding: 9px 13px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  border-top: 1px solid var(--border-hairline);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ADR-0030's club theme dresses the lineup page's section mastheads, and it
+   finds them by `.is-themed .metricbar` — which catches this card too, since
+   the modal opens inside that page. Opt back out. The theme's whole contract
+   is that it expresses ONE CLUB's identity; this card is about the umpire, and
+   a crew member's tendencies wearing the home side's colours would claim a
+   relationship that doesn't exist. Equal specificity to the rule in
+   09-team-info.css, and this partial loads later, so it wins on order. */
+.is-themed .umptend__bar {
+  background: var(--navy);
+  border-bottom-color: var(--seal);
+}
+.is-themed .umptend__bar .metricbar__title {
+  color: var(--text-on-ink);
+}
+
+/* Inside the modal the card IS the content, so it loses its own frame — the
+   dialog already provides one. */
+.umpmodal .umptend {
+  border: 0;
+  border-radius: 0;
+}

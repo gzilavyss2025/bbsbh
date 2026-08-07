@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
-import { UmpireZoneMap } from '../components/umpire/UmpireAccuracyModal.jsx'
+import { UmpireZoneMap } from '../components/umpire/UmpireZoneMap.jsx'
+import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
 import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { gamePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
@@ -199,6 +200,9 @@ export function UmpirePage({ id }) {
       </header>
 
       <div className="umpage__cards">
+        {/* The headline read, above the card that carries its detail. Renders
+            nothing for an umpire with no plate-accuracy record. */}
+        <UmpireTendencies umpire={data} />
         <PlateAccuracyCard
           accuracy={data.accuracy}
           rank={data.rank}

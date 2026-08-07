@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Umpire Tendencies — visual mock</title>
+<style>
+/* Token values copied from src/tokens/colors.css + typography.css — this is a
+   static mock, not wired to the real stylesheets. The shipped component uses
+   var(--…). Nothing here invents a hue: every fill is a listed token or a
+   listed token at reduced alpha over paper. No --clay and no --field appear on
+   the lean scale: neither pole is "good", so no red/green may signal it. */
+:root{
+  --paper-0:#F6EFDC; --paper-1:#F3ECD8; --paper-2:#FBF6E9; --paper-3:#FFFDF6;
+  --ink-0:#16222F; --ink-1:#1B2A3A; --ink-2:#3C4A5A;
+  --graphite:#6B6558; --graphite-soft:#938C7C;
+  --rule:#CBC1A7; --rule-soft:#DED6C0; --rule-grid:#EDE6D1;
+  --clay:#B4453A; --navy:#1B2A3A;
+  --seal:#B5824A; --seal-ink:#1E1405; --marker:#E9C33F;
+
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
+  font-family:var(--font-body);color:var(--ink-1);text-transform:uppercase;
+  display:flex;flex-wrap:wrap;gap:26px;justify-content:center;align-items:flex-start}
+
+/* ---- mock chrome (not part of the card) ---- */
+.note{width:100%;max-width:1000px;text-transform:none;color:var(--graphite);
+  font-size:13px;line-height:1.6;margin:0 auto 6px;text-align:center}
+.note b{color:var(--ink-1)}
+.wrap{width:340px}
+.phase{font-family:var(--font-display);font-size:11px;letter-spacing:.12em;
+  color:var(--graphite);text-align:center;margin:0 0 9px;font-weight:700}
+.phase em{font-style:normal;color:var(--ink-1)}
+
+/* ================================================================
+   THE CARD — labels and numbers, one asterisked footnote. Nothing
+   on it is a sentence; the reference graphic isn't either.
+   ================================================================ */
+.card{background:var(--paper-2);border:1px solid var(--rule);border-radius:8px;
+  overflow:hidden;box-shadow:0 1px 0 rgba(22,34,47,.05),0 6px 18px rgba(22,34,47,.07)}
+
+/* 1 — masthead. Reuses .metricbar exactly: navy bar, 3px kraft-seal underline,
+   condensed uppercase title, right-aligned aside. */
+.mast{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--navy);color:var(--paper-2);padding:9px 13px;
+  border-bottom:3px solid var(--seal)}
+.mast__t{font-family:var(--font-display);font-size:14px;font-weight:700;
+  letter-spacing:.05em;line-height:1}
+.mast__a{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;
+  color:var(--rule);font-variant-numeric:tabular-nums}
+
+/* 2 — identity. Given/surname split on two lines, exactly as the reference
+   sets it, so the surname can carry real display weight at 340px. The
+   home-plate mark is the app's own glyph (UmpireTierGlyph.jsx) — the reference
+   uses a league crest we neither own nor need. */
+.id{display:flex;gap:11px;align-items:center;padding:11px 13px 12px;
+  border-bottom:1px solid var(--rule-soft)}
+.id__mark{width:30px;height:30px;flex:none;display:block;color:var(--navy)}
+.id__who{flex:1;min-width:0}
+.id__first{font-family:var(--font-display);font-size:11px;font-weight:700;
+  letter-spacing:.14em;color:var(--graphite);line-height:1}
+.id__last{font-family:var(--font-display);font-size:26px;font-weight:700;
+  letter-spacing:.005em;color:var(--ink-0);line-height:1.02;margin-top:2px}
+.id__sub{font-family:var(--font-mono);font-size:9px;letter-spacing:.02em;
+  color:var(--graphite);margin-top:5px;font-variant-numeric:tabular-nums;
+  white-space:nowrap}
+
+/* ================================================================
+   3 — ZONE LEAN. The reference's VERTICAL five-band stack, restored.
+   Ramp is the reference's own blue→yellow, mapped onto this palette:
+   --navy (pitcher) → --rule (bare pencil paper) → --seal → --marker
+   (hitter). No red, no green: neither end of this axis is good or bad.
+   The band he lands in is boxed; the ink caret beside the stripe sits at
+   his TRUE position inside that band, so the card says both which bucket
+   and where in it. No text ever sits on the ramp.
+   ================================================================ */
+.lean{padding:12px 13px 13px;border-bottom:1px solid var(--rule-soft)}
+/* Two column heads for the table below: the band names on the left, the run
+   figures on the right. The unit is stated once, here, so neither figure in
+   the table has to carry it. */
+.lean__hd{padding-right:7px}
+.lean__k{font-family:var(--font-display);font-size:9px;font-weight:700;
+  letter-spacing:.15em;color:var(--graphite)}
+
+.scale{display:flex;margin-top:10px}
+.scale__gut{position:relative;width:30px;flex:none}
+/* The ramp. Continuous, not segmented, so nothing on it can contradict the
+   caret's position. --rule at the midpoint reads as bare paper — "nothing
+   here" — which is what neutral means; the hairline keeps the stripe reading
+   as one object where the midtone meets the card. */
+.scale__ramp{position:absolute;left:0;top:0;bottom:0;width:12px;border-radius:2px;
+  border:1px solid var(--rule);
+  background:linear-gradient(180deg,
+    var(--navy) 0%, var(--navy) 16%, var(--rule) 46%,
+    var(--seal) 72%, var(--marker) 92%, var(--marker) 100%)}
+/* Caret: ink, in the gutter, never over a fill. top is the true z position
+   mapped through the band boundaries, so it always lands inside the boxed
+   band and its offset within that band is the reading. */
+.scale__ptr{position:absolute;right:4px;transform:translateY(-50%);
+  width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;
+  border-left:8px solid var(--ink-0)}
+.scale__rows{flex:1;min-width:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  height:24px;padding:0 7px;border-radius:3px}
+.row + .row{box-shadow:inset 0 1px 0 var(--rule-grid)}
+.row__l{font-family:var(--font-display);font-size:13px;font-weight:700;
+  letter-spacing:.05em;color:var(--graphite);line-height:1;white-space:nowrap}
+/* The band he occupies: paper chip + ink keyline + ink type. Two encodings,
+   so it survives greyscale and colour-vision deficiency without the ramp. */
+.row.is-on{background:var(--paper-3);box-shadow:inset 0 0 0 1.5px var(--ink-0)}
+.row.is-on .row__l{color:var(--ink-0)}
+
+/* ================================================================
+   4 — AREA TO WATCH. Solid navy panel, as the reference sets it: the
+   one concrete "where" gets the card's second ink anchor. Kraft --seal
+   is deliberately NOT used — the diagonal kraft hatch is the app's
+   promise that something is sealed and tappable, and this isn't.
+   --marker is spent on the ramp instead, where it does real work.
+   ================================================================ */
+.watch{display:flex;align-items:center;gap:12px;padding:11px 13px;
+  background:var(--navy);color:var(--paper-2)}
+.watch__body{flex:1;min-width:0}
+.watch__lbl{font-family:var(--font-display);font-size:8.5px;font-weight:700;
+  letter-spacing:.16em;color:var(--rule)}
+.watch__txt{font-family:var(--font-display);font-size:21px;font-weight:700;
+  letter-spacing:.01em;line-height:1.1;color:var(--paper-2);margin-top:5px}
+
+/* The existing 3×3 zone map, from UmpireZoneMap + .zonemap CSS, on its own
+   --surface-inset plate so the navy cells keep their value against the panel.
+   Shading = strike-call rate; outlined cells = misses over the league
+   baseline. The band's own label already says these are the areas to watch,
+   so it needs no caption. */
+.zonemap{display:block;width:78px;height:auto;flex:none}
+.zonemap__cell{fill:var(--navy)}
+.zonemap__frame{fill:none;stroke:var(--rule);stroke-width:1.5}
+.zonemap__grid{stroke:var(--rule-soft);stroke-width:1}
+.zonemap__over{fill:none;stroke:var(--clay)}
+
+/* ================================================================
+   5 — TILES. A ruled 2×2 table, not four chips: at 340px a 4-up row
+   forces 8px labels (.umpage__accrow's own comment says the same).
+   Label over figure, centred, as the reference sets its two tiles.
+   ================================================================ */
+.tiles{display:grid;grid-template-columns:1fr 1fr}
+.tile{padding:9px 6px 10px;text-align:center;min-width:0}
+.tiles .tile:nth-child(odd){border-right:1px solid var(--rule-soft)}
+.tiles .tile:nth-child(-n+2){border-bottom:1px solid var(--rule-soft)}
+.tile__l{display:block;font-family:var(--font-display);font-size:8.5px;
+  font-weight:700;letter-spacing:.12em;color:var(--graphite);white-space:nowrap}
+.tile__v{display:block;font-family:var(--font-mono);font-size:22px;font-weight:700;
+  line-height:1;color:var(--ink-1);font-variant-numeric:tabular-nums;
+  letter-spacing:-.01em;margin-top:6px}
+.tile__v sup{font-size:.5em;vertical-align:.85em;font-weight:400;
+  color:var(--graphite)}
+
+/* Phase-2 challenge band — its own labelled sub-table plus the reference's
+   one asterisked footnote. */
+.chal{border-top:1px solid var(--rule-soft)}
+.chal__lbl{font-family:var(--font-display);font-size:8.5px;font-weight:700;
+  letter-spacing:.16em;color:var(--graphite);padding:10px 13px 0}
+.chal__row{display:grid;grid-template-columns:1fr 1fr}
+.chal__row .tile:first-child{border-right:1px solid var(--rule-soft)}
+.chal__foot{margin:0;padding:9px 13px 10px;font-family:var(--font-mono);
+  font-size:9px;letter-spacing:.01em;color:var(--graphite);
+  text-align:center;font-variant-numeric:tabular-nums}
+
+/* 6 — provenance */
+.prov{padding:9px 13px 10px;border-top:1px solid var(--rule-soft);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.03em;
+  color:var(--graphite);text-align:center;font-variant-numeric:tabular-nums}
+
+/* Mock-only annotation: what the backfill buys. Dotted graphite chip, flows
+   inline, reads as marginalia rather than card chrome. */
+.newtag{display:inline-block;vertical-align:2px;margin-left:6px;padding:1px 5px;
+  border:1px dashed var(--graphite-soft);border-radius:3px;
+  font-family:var(--font-display);font-size:8px;font-weight:700;
+  letter-spacing:.1em;line-height:1.3;color:var(--graphite);
+  white-space:nowrap}
+.watch .newtag{border-color:var(--graphite);color:var(--rule)}
+
+@media (min-width:900px){
+  .wrap{width:360px}
+}
+</style>
+</head>
+<body>
+
+<p class="note">
+  <b>Umpire Tendencies — visual mock.</b> Structure follows the broadcast graphic band for band,
+  including its vertical five-band lean scale; palette is the paper-scorebook system (navy ink,
+  manila paper, pencil rule, kraft amber, highlighter yellow).
+  Both cards show <b>Erich Bacchus' real numbers</b> from <code>public/data/umpire-accuracy.json</code>,
+  including the 3&times;3 zone map, which is drawn from his real <code>cellStrikeCall</code> /
+  <code>cellMiss</code> against the league miss baseline.
+  Left is Phase 1 (ships today, no data work). Right is Phase 2, after one generator change and one
+  backfill — the dotted <span style="border:1px dashed #938C7C;border-radius:3px;padding:0 4px;font-size:11px">+ backfill</span>
+  chips mark exactly what the backfill buys.
+</p>
+
+<!-- ===================== PHASE 1 ===================== -->
+<div class="wrap">
+  <p class="phase">Phase 1 — <em>ships today</em></p>
+  <div class="card">
+
+    <!-- 1 masthead -->
+    <div class="mast">
+      <span class="mast__t">Umpire tendencies</span>
+      <span class="mast__a">2026</span>
+    </div>
+
+    <!-- 2 identity -->
+    <div class="id">
+      <svg class="id__mark" viewBox="0 0 20 20" aria-hidden="true">
+        <polygon points="3,4 17,4 17,11 10,17 3,11" fill="currentColor"/>
+      </svg>
+      <div class="id__who">
+        <div class="id__first">Erich</div>
+        <div class="id__last">Bacchus</div>
+        <div class="id__sub">84 games · 21 behind the plate</div>
+      </div>
+    </div>
+
+    <!-- 3 zone lean -->
+    <div class="lean">
+      <div class="lean__hd">
+        <span class="lean__k">Zone lean</span>
+      </div>
+
+      <div class="scale" role="img"
+           aria-label="Zone lean: very hitter friendly — plus 0.46 net runs per game to hitters, 1.6 standard deviations above the league average of plus 0.18, on a five-band scale from very pitcher friendly to very hitter friendly.">
+        <div class="scale__gut">
+          <span class="scale__ramp"></span>
+          <span class="scale__ptr" style="top:92%"></span>
+        </div>
+        <div class="scale__rows">
+          <div class="row"><span class="row__l">Very pitcher friendly</span></div>
+          <div class="row"><span class="row__l">Pitcher friendly</span></div>
+          <div class="row"><span class="row__l">Neutral</span></div>
+          <div class="row"><span class="row__l">Hitter friendly</span></div>
+          <div class="row is-on"><span class="row__l">Very hitter friendly</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 area to watch -->
+    <div class="watch">
+      <div class="watch__body">
+        <div class="watch__lbl">Area to watch</div>
+        <div class="watch__txt">Low in the zone</div>
+      </div>
+      <svg class="zonemap" viewBox="0 0 144 162" role="img"
+           aria-label="Where this umpire misses more than a typical umpire">
+        <rect x="3" y="3" width="138" height="156" fill="#FFFDF6"/>
+        <rect class="zonemap__cell" x="3"  y="3"   width="46" height="52" opacity="0.238"/>
+        <rect class="zonemap__cell" x="49" y="3"   width="46" height="52" opacity="0.521"/>
+        <rect class="zonemap__cell" x="95" y="3"   width="46" height="52" opacity="0.255"/>
+        <rect class="zonemap__cell" x="3"  y="55"  width="46" height="52" opacity="0.497"/>
+        <rect class="zonemap__cell" x="49" y="55"  width="46" height="52" opacity="1"/>
+        <rect class="zonemap__cell" x="95" y="55"  width="46" height="52" opacity="0.498"/>
+        <rect class="zonemap__cell" x="3"  y="107" width="46" height="52" opacity="0.199"/>
+        <rect class="zonemap__cell" x="49" y="107" width="46" height="52" opacity="0.424"/>
+        <rect class="zonemap__cell" x="95" y="107" width="46" height="52" opacity="0.200"/>
+        <rect class="zonemap__over" x="5.5"  y="5.5"   width="41" height="47" style="stroke-width:2.32"/>
+        <rect class="zonemap__over" x="97.5" y="5.5"   width="41" height="47" style="stroke-width:1.64"/>
+        <rect class="zonemap__over" x="51.5" y="109.5" width="41" height="47" style="stroke-width:1.80"/>
+        <rect class="zonemap__frame" x="3" y="3" width="138" height="156"/>
+        <line class="zonemap__grid" x1="49" y1="3" x2="49" y2="159"/>
+        <line class="zonemap__grid" x1="95" y1="3" x2="95" y2="159"/>
+        <line class="zonemap__grid" x1="3" y1="55" x2="141" y2="55"/>
+        <line class="zonemap__grid" x1="3" y1="107" x2="141" y2="107"/>
+      </svg>
+    </div>
+
+    <!-- 5 tiles -->
+    <div class="tiles">
+      <div class="tile"><span class="tile__l">Accuracy</span><span class="tile__v">93.5%</span></div>
+      <div class="tile"><span class="tile__l">Rank</span><span class="tile__v">51<sup>/90</sup></span></div>
+      <div class="tile"><span class="tile__l">Consistency</span><span class="tile__v">92.0%</span></div>
+      <div class="tile"><span class="tile__l">Run impact/gm</span><span class="tile__v">1.5</span></div>
+    </div>
+
+    <!-- 6 provenance -->
+    <div class="prov">2026 season · 20 scored games · updated nightly</div>
+  </div>
+</div>
+
+<!-- ===================== PHASE 2 ===================== -->
+<div class="wrap">
+  <p class="phase">Phase 2 — <em>after backfill</em></p>
+  <div class="card">
+
+    <div class="mast">
+      <span class="mast__t">Umpire tendencies</span>
+      <span class="mast__a">2026</span>
+    </div>
+
+    <div class="id">
+      <svg class="id__mark" viewBox="0 0 20 20" aria-hidden="true">
+        <polygon points="3,4 17,4 17,11 10,17 3,11" fill="currentColor"/>
+      </svg>
+      <div class="id__who">
+        <div class="id__first">Erich</div>
+        <div class="id__last">Bacchus</div>
+        <div class="id__sub">84 games · 21 behind the plate</div>
+      </div>
+    </div>
+
+    <div class="lean">
+      <div class="lean__hd">
+        <span class="lean__k">Zone lean</span>
+      </div>
+
+      <div class="scale" role="img"
+           aria-label="Zone lean: very hitter friendly — plus 0.46 net runs per game to hitters, 1.6 standard deviations above the league average of plus 0.18, on a five-band scale from very pitcher friendly to very hitter friendly.">
+        <div class="scale__gut">
+          <span class="scale__ramp"></span>
+          <span class="scale__ptr" style="top:92%"></span>
+        </div>
+        <div class="scale__rows">
+          <div class="row"><span class="row__l">Very pitcher friendly</span></div>
+          <div class="row"><span class="row__l">Pitcher friendly</span></div>
+          <div class="row"><span class="row__l">Neutral</span></div>
+          <div class="row"><span class="row__l">Hitter friendly</span></div>
+          <div class="row is-on"><span class="row__l">Very hitter friendly</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="watch">
+      <div class="watch__body">
+        <div class="watch__lbl">Area to watch <span class="newtag">+ backfill</span></div>
+        <div class="watch__txt">Outside to right-handers</div>
+      </div>
+      <svg class="zonemap" viewBox="0 0 144 162" role="img"
+           aria-label="Where this umpire misses more than a typical umpire">
+        <rect x="3" y="3" width="138" height="156" fill="#FFFDF6"/>
+        <rect class="zonemap__cell" x="3"  y="3"   width="46" height="52" opacity="0.238"/>
+        <rect class="zonemap__cell" x="49" y="3"   width="46" height="52" opacity="0.521"/>
+        <rect class="zonemap__cell" x="95" y="3"   width="46" height="52" opacity="0.255"/>
+        <rect class="zonemap__cell" x="3"  y="55"  width="46" height="52" opacity="0.497"/>
+        <rect class="zonemap__cell" x="49" y="55"  width="46" height="52" opacity="1"/>
+        <rect class="zonemap__cell" x="95" y="55"  width="46" height="52" opacity="0.498"/>
+        <rect class="zonemap__cell" x="3"  y="107" width="46" height="52" opacity="0.199"/>
+        <rect class="zonemap__cell" x="49" y="107" width="46" height="52" opacity="0.424"/>
+        <rect class="zonemap__cell" x="95" y="107" width="46" height="52" opacity="0.200"/>
+        <rect class="zonemap__over" x="5.5"  y="5.5"   width="41" height="47" style="stroke-width:2.32"/>
+        <rect class="zonemap__over" x="97.5" y="5.5"   width="41" height="47" style="stroke-width:1.64"/>
+        <rect class="zonemap__over" x="51.5" y="109.5" width="41" height="47" style="stroke-width:1.80"/>
+        <rect class="zonemap__frame" x="3" y="3" width="138" height="156"/>
+        <line class="zonemap__grid" x1="49" y1="3" x2="49" y2="159"/>
+        <line class="zonemap__grid" x1="95" y1="3" x2="95" y2="159"/>
+        <line class="zonemap__grid" x1="3" y1="55" x2="141" y2="55"/>
+        <line class="zonemap__grid" x1="3" y1="107" x2="141" y2="107"/>
+      </svg>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><span class="tile__l">Accuracy</span><span class="tile__v">93.5%</span></div>
+      <div class="tile"><span class="tile__l">Rank</span><span class="tile__v">51<sup>/90</sup></span></div>
+      <div class="tile"><span class="tile__l">Consistency</span><span class="tile__v">92.0%</span></div>
+      <div class="tile"><span class="tile__l">Run impact/gm</span><span class="tile__v">1.5</span></div>
+    </div>
+
+    <div class="chal">
+      <div class="chal__lbl">ABS challenges <span class="newtag">+ backfill</span></div>
+      <div class="chal__row">
+        <div class="tile"><span class="tile__l">Per game</span><span class="tile__v">3.1</span></div>
+        <div class="tile"><span class="tile__l">Overturned</span><span class="tile__v">43.8%*</span></div>
+      </div>
+      <p class="chal__foot">*League average: 53.6% overturned</p>
+    </div>
+
+    <div class="prov">2026 season · 20 scored games · updated nightly</div>
+  </div>
+</div>
+
+<p class="note" style="margin-top:16px">
+  <b>The backfill has landed — every number on both cards is now real.</b> Bacchus' ABS figures
+  come out at <b>3.1 challenges per game, 43.8% overturned</b>; the broadcast graphic this card is
+  modelled on says <b>3.1</b> and <b>44.8%</b>, which is about as close to a confirmation of the
+  extraction as we could hope for. The league average is 53.6% (MLB regular season, 1,725 games).
+  Note Bacchus still reads <b>very hitter friendly</b> here where the broadcast called him pitcher
+  friendly: different metric, unknown methodology on their side. See PRD §2 Band 3.
+</p>
+<p class="note">
+  <b>Two things the zone map exposes, for the implementing engineer.</b>
+  (1) The <em>Area to watch</em> phrase and the map are computed from different partitions and
+  currently disagree: <code>accuracyTendency()</code> picks the top of the four edge-region tallies,
+  where Bacchus is low&nbsp;70 vs high&nbsp;61 — a nine-call lead out of 213 missed calls — while the
+  league-relative 3&times;3 grid flags <em>high-and-outside</em> hardest (+3.5&nbsp;pts of his miss share
+  over the league baseline), then low-middle, then high-inside. The map drawn above is honest; the
+  phrase above it is a coin flip presented as a finding. Derive both from the same grid, or gate the
+  phrase on a real margin over the runner-up region.
+  Related: the handedness clause must be gated the same way. Bacchus' backfilled split puts
+  <em>low</em> at 33.0% of his misses against lefties and 32.8% against righties — no story at all —
+  while <em>outside</em> runs 14.8% vs 7.7%, which is why the Phase&nbsp;2 card above says outside to
+  right-handers rather than inheriting Phase&nbsp;1's region and bolting a hand onto it.
+  (2) The <code>1.5</code> tile — labelled <code>Run impact/gm</code> — is
+  <code>favorMagnitude</code>, unsigned and counting misses in both directions. The band the scale
+  selects is driven by a different figure, the <b>signed net</b> (+0.46 for Bacchus). Those two
+  numbers are not comparable, so if a signed figure is ever printed on this card again it must not
+  be labelled anything a reader could confuse with this tile.
+  (3) <b>Nothing on the card now says the scale is league-relative.</b> The net R/G column was
+  removed at the maintainer's request, and with it the <code>lg avg +0.18</code> marker that sat in
+  the NEUTRAL row. The buckets are still z-scored against the qualifying pool, whose mean is
+  <b>+0.18 runs per game to hitters, not zero</b> — so NEUTRAL means "average umpire", not "favours
+  nobody". That distinction now survives only in the <code>aria-label</code> and in the PRD.
+</p>
+
+</body>
+</html>

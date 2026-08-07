@@ -234,10 +234,17 @@ function Umpires({ officials }) {
   // Under tonight's plate ump: his season accuracy TIER (Elite/Good/Average/
   // Below Average — see api/umpires.js's tierForZ), as a tap glyph next to
   // his name (UmpireTierGlyph) that unfolds the tier tag + rank in place
-  // before the full accuracy modal (zone map, accuracy %, tendency, last
-  // five plate games) one tap further. Rides its own async load (keyed to
-  // his id). It's a season aggregate of Final games only, so it can't leak
-  // tonight's (unplayed) result; hidden for MiLB / umps with no data.
+  // before the full accuracy modal (the Umpire Tendencies card + his last five
+  // plate games) one tap further. Rides its own async load (keyed to his id).
+  // It's a season aggregate of Final games only, so it can't leak tonight's
+  // (unplayed) result; hidden for MiLB / umps with no data.
+  //
+  // EVERY crew member's NAME opens that modal, not only the plate umpire's and
+  // not only via the glyph. A base umpire has plate work of his own on other
+  // nights, and "how does the guy at first base call a zone" is a real question
+  // — it just had no answer short of navigating away to his page. The modal's
+  // own "Full umpire page" button keeps that route one tap further on, so
+  // nothing was taken away by making the name open a sheet instead.
   const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)
@@ -257,7 +264,7 @@ function Umpires({ officials }) {
           <li key={o.role}>
             <span className="umps__role">{o.role}</span>
             <span className="umps__namerow">
-              <UmpireLink id={o.id} className="umps__name">
+              <UmpireLink id={o.id} className="umps__name" onOpen={() => setModalId(o.id)}>
                 {o.name}
               </UmpireLink>
               {o.role === 'HP' && hpAccuracy?.tier && (
