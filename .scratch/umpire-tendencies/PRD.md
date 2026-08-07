@@ -288,7 +288,26 @@ bare paper between.
 
 **If the bucket geometry encodes z, specify the domain**, or two implementations
 will silently diverge. Equal fifths and z-proportional bands are different
-pictures; pick one and write it down.
+pictures; pick one and write it down. The shipped mock uses **equal-height rows**
+with the caret's offset *inside* its row carrying the sub-bucket reading — see
+`design-notes.md` for the piecewise mapping.
+
+**No numeric column.** Maintainer direction, 2026-08-07: the `NET R/G` column —
+the per-row figures and the `LG AVG +0.18` marker in the NEUTRAL row — is
+removed. The band label and the caret are the whole reading.
+
+The cost is worth stating once, because it is invisible on the card: **nothing
+on the card now says the scale is league-relative.** The buckets are still
+z-scored against the qualifying pool, whose mean is **+0.18 runs/game to hitters,
+not zero**, so NEUTRAL means "an average umpire", not "favours nobody". Keep that
+in the `aria-label`. If it ever needs to be visible again, the reference
+graphic's own idiom is an asterisked footnote, not a column.
+
+**No accuracy tier pill in the identity band.** Same direction: the `ACCURACY` /
+`AVERAGE` unit is removed from the header. Accuracy still appears once, as a
+tile. Note this is the app's existing `UmpireTierPill`/`UmpireTierGlyph`
+vocabulary being deliberately *not* repeated here — the glyph still does that job
+on the lineup page's Umpires card, which is where a tier belongs.
 
 ### Area to watch: `--marker`, not `--seal`
 

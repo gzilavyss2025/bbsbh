@@ -508,3 +508,33 @@ tiles than argue this label, drop it; do not ship it labelled `RUNS/GAME`.**
    1px `--surface-card` notches at 25 / 41.25 / 58.75 / 75%, **not** as
    segmentation of the fill.
 4. **`RUN IMPACT/GM` is a compromise, not a great label.** See §6.
+
+## Trim pass — 2026-08-07 (maintainer direction)
+
+Two removals, both requested directly.
+
+**The `NET R/G` column is gone** — the column head, the per-row figures, and the
+`LG AVG +0.18` marker that sat in the NEUTRAL row. The band label and the caret
+are now the entire reading.
+
+Worth recording what this costs, since it is invisible once removed: that marker
+was the only thing on the card saying the scale is measured against a **league
+average of +0.18 runs/game to hitters** rather than against zero. The buckets are
+still z-scored against the qualifying pool, so NEUTRAL still means "an average
+umpire", not "favours nobody" — but a reader can no longer tell. The figure
+survives in the `aria-label` and in PRD §3. If it ever needs to be visible again,
+the reference graphic's own idiom is an asterisked footnote, not a column.
+
+**The `ACCURACY` / `AVERAGE` tier pill is gone from the identity band.** Accuracy
+now appears exactly once on the card, as a tile. The tier vocabulary
+(`UmpireTierPill` / `UmpireTierGlyph`) still does its job on the lineup page's
+Umpires card, which is a better home for it than a header that was competing with
+the umpire's own name.
+
+Orphaned CSS was removed with the markup (`.id__tag`, `.id__tagk`, `.pill`,
+`.lean__u`, `.row__n` and its `is-on` variant), and `.lean__hd` lost a
+`space-between` that no longer had two children to separate.
+
+Card height 538px → 547px. It grew slightly: the identity band no longer has a
+right-hand column, so the name block sets on its own and the band relaxes. No
+horizontal overflow at 390px.

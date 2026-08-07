@@ -68,13 +68,6 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
 .id__sub{font-family:var(--font-mono);font-size:9px;letter-spacing:.02em;
   color:var(--graphite);margin-top:5px;font-variant-numeric:tabular-nums;
   white-space:nowrap}
-.id__tag{flex:none;text-align:right}
-.id__tagk{display:block;font-family:var(--font-display);font-size:8px;
-  font-weight:700;letter-spacing:.13em;color:var(--graphite);margin-bottom:3px}
-.pill{display:inline-block;padding:2px 7px;border-radius:999px;
-  border:1px solid var(--rule);background:var(--paper-1);color:var(--ink-2);
-  font-family:var(--font-display);font-size:10px;font-weight:700;
-  letter-spacing:.05em;line-height:1.35;white-space:nowrap}
 
 /* ================================================================
    3 — ZONE LEAN. The reference's VERTICAL five-band stack, restored.
@@ -89,12 +82,9 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
 /* Two column heads for the table below: the band names on the left, the run
    figures on the right. The unit is stated once, here, so neither figure in
    the table has to carry it. */
-.lean__hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;
-  padding-right:7px}
+.lean__hd{padding-right:7px}
 .lean__k{font-family:var(--font-display);font-size:9px;font-weight:700;
   letter-spacing:.15em;color:var(--graphite)}
-.lean__u{font-family:var(--font-display);font-size:9px;font-weight:700;
-  letter-spacing:.12em;color:var(--graphite);white-space:nowrap}
 
 .scale{display:flex;margin-top:10px}
 .scale__gut{position:relative;width:30px;flex:none}
@@ -119,13 +109,10 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
 .row + .row{box-shadow:inset 0 1px 0 var(--rule-grid)}
 .row__l{font-family:var(--font-display);font-size:13px;font-weight:700;
   letter-spacing:.05em;color:var(--graphite);line-height:1;white-space:nowrap}
-.row__n{font-family:var(--font-mono);font-size:9px;letter-spacing:.02em;
-  color:var(--graphite);font-variant-numeric:tabular-nums;white-space:nowrap}
 /* The band he occupies: paper chip + ink keyline + ink type. Two encodings,
    so it survives greyscale and colour-vision deficiency without the ramp. */
 .row.is-on{background:var(--paper-3);box-shadow:inset 0 0 0 1.5px var(--ink-0)}
 .row.is-on .row__l{color:var(--ink-0)}
-.row.is-on .row__n{color:var(--ink-0);font-weight:700;font-size:11px}
 
 /* ================================================================
    4 — AREA TO WATCH. Solid navy panel, as the reference sets it: the
@@ -235,17 +222,12 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
         <div class="id__last">Bacchus</div>
         <div class="id__sub">84 games · 21 behind the plate</div>
       </div>
-      <div class="id__tag">
-        <span class="id__tagk">Accuracy</span>
-        <span class="pill">Average</span>
-      </div>
     </div>
 
     <!-- 3 zone lean -->
     <div class="lean">
       <div class="lean__hd">
         <span class="lean__k">Zone lean</span>
-        <span class="lean__u">net r/g</span>
       </div>
 
       <div class="scale" role="img"
@@ -257,9 +239,9 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
         <div class="scale__rows">
           <div class="row"><span class="row__l">Very pitcher friendly</span></div>
           <div class="row"><span class="row__l">Pitcher friendly</span></div>
-          <div class="row"><span class="row__l">Neutral</span><span class="row__n">lg avg +0.18</span></div>
+          <div class="row"><span class="row__l">Neutral</span></div>
           <div class="row"><span class="row__l">Hitter friendly</span></div>
-          <div class="row is-on"><span class="row__l">Very hitter friendly</span><span class="row__n">+0.46</span></div>
+          <div class="row is-on"><span class="row__l">Very hitter friendly</span></div>
         </div>
       </div>
     </div>
@@ -325,16 +307,11 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
         <div class="id__last">Bacchus</div>
         <div class="id__sub">84 games · 21 behind the plate</div>
       </div>
-      <div class="id__tag">
-        <span class="id__tagk">Accuracy</span>
-        <span class="pill">Average</span>
-      </div>
     </div>
 
     <div class="lean">
       <div class="lean__hd">
         <span class="lean__k">Zone lean</span>
-        <span class="lean__u">net r/g</span>
       </div>
 
       <div class="scale" role="img"
@@ -346,9 +323,9 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
         <div class="scale__rows">
           <div class="row"><span class="row__l">Very pitcher friendly</span></div>
           <div class="row"><span class="row__l">Pitcher friendly</span></div>
-          <div class="row"><span class="row__l">Neutral</span><span class="row__n">lg avg +0.18</span></div>
+          <div class="row"><span class="row__l">Neutral</span></div>
           <div class="row"><span class="row__l">Hitter friendly</span></div>
-          <div class="row is-on"><span class="row__l">Very hitter friendly</span><span class="row__n">+0.46</span></div>
+          <div class="row is-on"><span class="row__l">Very hitter friendly</span></div>
         </div>
       </div>
     </div>
@@ -422,11 +399,16 @@ body{margin:0;padding:22px 16px 44px;background:var(--paper-0);
   <em>low</em> at 33.0% of his misses against lefties and 32.8% against righties — no story at all —
   while <em>outside</em> runs 14.8% vs 7.7%, which is why the Phase&nbsp;2 card above says outside to
   right-handers rather than inheriting Phase&nbsp;1's region and bolting a hand onto it.
-  (2) The <code>1.5</code> tile — now labelled <code>Run impact/gm</code> — is
-  <code>favorMagnitude</code> (unsigned, both directions), while the lean band's <b>+0.46 net R/G</b>
-  is the signed net. Two different "runs per game" in one card will read as an error, so the two
-  labels must stay distinct (<em>net</em> vs <em>impact</em>) and the signed one must keep its sign.
-  Both figures are shown unchanged here on purpose — see <code>design-notes.md</code>.
+  (2) The <code>1.5</code> tile — labelled <code>Run impact/gm</code> — is
+  <code>favorMagnitude</code>, unsigned and counting misses in both directions. The band the scale
+  selects is driven by a different figure, the <b>signed net</b> (+0.46 for Bacchus). Those two
+  numbers are not comparable, so if a signed figure is ever printed on this card again it must not
+  be labelled anything a reader could confuse with this tile.
+  (3) <b>Nothing on the card now says the scale is league-relative.</b> The net R/G column was
+  removed at the maintainer's request, and with it the <code>lg avg +0.18</code> marker that sat in
+  the NEUTRAL row. The buckets are still z-scored against the qualifying pool, whose mean is
+  <b>+0.18 runs per game to hitters, not zero</b> — so NEUTRAL means "average umpire", not "favours
+  nobody". That distinction now survives only in the <code>aria-label</code> and in the PRD.
 </p>
 
 </body>
