@@ -102,15 +102,22 @@ const BUDGETS = {
   // so its exact position is not load-bearing, only its being after 14
   // (.zonemap) and 44 (.metricbar), which it reuses.
   //
-  // +1 again for 48-stamp-strip.css, for the same reason and by the same
+  // 57 -> 58 for `21a-box-score-stars.css`: the box score's Three Stars card
+  // pushed 21-box-score.css past check-file-size.mjs's 1000-line budget once
+  // it grew a horizontal-row wide-breakpoint layout. `21a` rather than
+  // appending at the end so the numeric prefix still tells the ordering
+  // truth — it cascades immediately after the file it was split out of, not
+  // wherever the next free integer happened to be.
+  //
+  // 58 -> 59 for `48-stamp-strip.css`, for the same reason and by the same
   // remedy: redesigning the Game Log's mint affordance into a strip across the
-  // head of the box score pushed 48-logbook.css past check-file-size.mjs's
-  // 600-line ceiling, and that guard's fix is to split, not to raise. It takes
-  // a DUPLICATE 48 (precedent: 11-innings / 11-pregame-scoreboard) rather than
+  // head of the box score pushed 48-logbook.css past that same 600-line
+  // ceiling, and that guard's fix is to split, not to raise. It takes a
+  // DUPLICATE 48 (precedent: 11-innings / 11-pregame-scoreboard) rather than
   // renumbering the eight partials after it, since the cascade contract is
   // ORDER, not unique numbers — and here the order is load-bearing: it has to
   // land after 48-logbook.css, which sizes and inks the `.gamestamp` it frames.
-  'src/styles': 58,
+  'src/styles': 59,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

@@ -482,9 +482,11 @@
     width: 166px;
   }
 
-  /* ---- box score: totals beside the decisions, line score beside the three
-     stars, then each club's header card + batting/pitching as its own column
-     (away beside home). */
+  /* ---- box score: totals + win-prob arc beside the decisions/Play of the
+     Game/Photos column; Three Stars breaks out below as its own full-width
+     row (see .stars3__row's own wide-breakpoint override in
+     21a-box-score-stars.css); then each club's header card + batting/pitching
+     as its own column (away beside home). */
   .bs__duo {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -514,9 +516,9 @@
     flex: 1 1 0;
   }
 
-  /* GamePhotosStrip.jsx, stacked under Three Stars in .bs__col above: three
-     rows tall instead of one, so it fills the column's leftover height
-     beside the left column's totals/win-prob arc instead of leaving a gap. */
+  /* GamePhotosStrip.jsx, the last card in .bs__col above: three rows tall
+     instead of one, so it fills the column's leftover height beside the
+     left column's totals/win-prob arc instead of leaving a gap. */
   .photostrip__body {
     grid-template-rows: repeat(3, 163px);
   }

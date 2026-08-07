@@ -82,7 +82,7 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1200, // 1140
   'src/styles/20-charts.css': 700, // 684
-  'src/styles/21-box-score.css': 1000, // 918
+  'src/styles/21-box-score.css': 800, // 797 — the Three Stars card split out to 21a-box-score-stars.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
   'src/styles/26-player-page.css': 1400, // 1383

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { TallyLockup } from './TallyBrand.jsx'
 import { SiteSearchButton } from './SiteSearch.jsx'
 import { SiteMenuButton } from './SiteMenu.jsx'
+import { LogbookButton } from './LogbookButton.jsx'
 import { goHome } from '../../lib/home.js'
 import { isClerkEnabled } from '../../lib/clerkConfig.js'
 
@@ -16,10 +17,11 @@ const AccountButton = isClerkEnabled
 // The Tally wordmark shown atop every screen (except
 // the slate, which is already home) — tapping it returns to '/' with a full
 // reload (see lib/home.js). Not sticky; each screen still owns whatever
-// page-specific header sits below it. The search + menu buttons ride on the
-// same row so site-wide search and the standalone pages (standings,
-// prospects, etc.) are reachable from anywhere (the slate gets its own copy
-// in its topbar — see GameSelect — since it doesn't render SiteHeader).
+// page-specific header sits below it. The search + Game Log + menu buttons
+// ride on the same row so site-wide search, the Game Log, and the standalone
+// pages (standings, prospects, etc.) are reachable from anywhere (the slate
+// gets its own copy in its topbar — see GameSelect — since it doesn't render
+// SiteHeader).
 export function SiteHeader() {
   return (
     <div className="sitebar">
@@ -33,6 +35,7 @@ export function SiteHeader() {
       </button>
       <div className="sitebar__actions">
         <SiteSearchButton />
+        <LogbookButton />
         <SiteMenuButton />
         {AccountButton && (
           <Suspense fallback={null}>

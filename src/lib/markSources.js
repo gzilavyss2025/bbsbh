@@ -14,7 +14,7 @@
 // being treated as a path. Change the vocabulary here and there in one commit.
 
 import { LOGO_TREATMENT_DIRS, LOGO_ART_URL_ROOT, logoUploadTarget } from './logoArt.js'
-import { customMarksFor } from './customMarks.js'
+import { customMarkFor, customMarksFor } from './customMarks.js'
 import { LOGO_VARIANTS, teamLogoUrl } from './teams.js'
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
@@ -74,4 +74,33 @@ export function clubMarkSources(teamId) {
     sources.push({ key: `custom:${mark.slug}`, kind: 'custom', label: mark.name, url: mark.url, vector: true })
   }
   return sources.filter((s) => s.url)
+}
+
+// The marks the sketch modal offers, in picker order — the sketcher's subset of
+// the list above, not the lab's. Three of the four are fixed:
+//
+//   Cap → Base → (City Connect) → Wordmark
+//
+// `base` sits where `primary` used to. The CDN serves both, but for most clubs
+// the primary mark is the base mark redrawn at a slightly different crop, so
+// offering both spent a slot on a near-duplicate; base is the one that differs
+// most from the cap logo, which is the whole reason the picker exists (draw
+// something other than the same roundel every time).
+//
+// City Connect is the one entry that isn't on the CDN at all (teams.js's
+// LOGO_VARIANTS note) — it appears only for a club whose CC art we actually
+// have, which is either a procured file on disk or a mark recolored in the lab
+// and assigned to that treatment, the same two sources `localLogoUrl` resolves
+// through. Asked of the manifest rather than by probing the URL, so a club
+// without it never renders a tab that would fall back to the base mark.
+export function sketchMarkVariants(teamId) {
+  const hasCityConnectArt = Boolean(
+    teamId && (procuredArt(teamId, 'city-connect') || customMarkFor(teamId, 'city-connect'))
+  )
+  return [
+    { key: 'cap', label: 'Cap' },
+    { key: 'base', label: 'Base' },
+    ...(hasCityConnectArt ? [{ key: 'city-connect', label: 'City Connect' }] : []),
+    { key: 'wordmark', label: 'Wordmark' },
+  ]
 }
