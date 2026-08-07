@@ -6,6 +6,7 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PerformerCard } from '../player/PerformerCard.jsx'
+import { WatchCondensedButton } from '../highlights/WatchCondensedButton.jsx'
 import {
   SCENARIO_LABEL,
   SCENARIO_STYLE,
@@ -113,6 +114,15 @@ export function GameResultFace({
         >
           Box score
         </button>
+        {/* Beside Box score, because both are "where this card can take you"
+            — and in the row that already exists, so video costs the card no
+            height. MLB only: an affiliate game has no content package at all,
+            so the button would only ever dead-end. `game` is absent on the
+            Postseason Series page's reuse of this face, which simply gets no
+            button (same graceful-omission convention as the pills). */}
+        {game?.sportId === 1 && game?.gamePk != null && (
+          <WatchCondensedButton gamePk={game.gamePk} />
+        )}
         <ResultPills game={game} cardMeta={cardMeta} />
       </div>
       <div className="flipback__linescore">

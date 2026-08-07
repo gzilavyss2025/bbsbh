@@ -27,7 +27,7 @@ import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 // carry no additional spoiler risk here — unlike the WATCH BUTTON itself,
 // which must stay generic (see PlayByPlay.jsx). No `poster` attribute is set
 // on the video, matching that same discipline.
-export function HighlightSheet({ item, onClose }) {
+export function HighlightSheet({ item, loading = false, notice = '', title: fallbackTitle = '', onClose }) {
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
     window.addEventListener('keydown', onKey)
@@ -66,13 +66,18 @@ export function HighlightSheet({ item, onClose }) {
     return () => video.textTracks.removeEventListener?.('addtrack', silence)
   }, [item])
 
-  if (!item) return null
-  const { hls, mp4 } = highlightPlaybacks(item)
-  const title = item.title || item.headline || 'Highlight'
+  // Three ways to be open with no video in hand yet: `loading` (a caller that
+  // fetches on tap — see WatchCondensedButton, which opens the dialog first so
+  // the tap doesn't sit there looking dead through a 430 KB fetch), `notice`
+  // (fetched, nothing to play, and a sentence explaining why), and neither, in
+  // which case there is nothing to show at all.
+  if (!item && !loading && !notice) return null
+  const { hls, mp4 } = item ? highlightPlaybacks(item) : {}
+  const title = item?.title || item?.headline || fallbackTitle || 'Highlight'
   // "condensed-game-mil-stl-7-7-26.mp4" — the content item's own readable slug
   // (see classifyHighlight's note on why `id` is the stable identity, not
   // `guid`), so a saved file says what it is in the camera roll.
-  const filename = `${item.id || 'highlight'}.mp4`
+  const filename = `${item?.id || 'highlight'}.mp4`
 
   return (
     <ModalPortal>
@@ -95,7 +100,13 @@ export function HighlightSheet({ item, onClose }) {
           </div>
 
           <div className="hlsheet__video">
-            {hls || mp4 ? (
+            {loading ? (
+              // Holds the 16:9 box the video will occupy, so the dialog doesn't
+              // resize under the pointer the moment the fetch lands.
+              <p className="hlsheet__empty hlsheet__empty--wait">Loading&hellip;</p>
+            ) : notice ? (
+              <p className="hlsheet__empty">{notice}</p>
+            ) : hls || mp4 ? (
               // playsInline keeps this from taking over the whole screen on
               // iPhone Safari; no poster (see the spoiler note above). HLS
               // plays natively in Safari, so no hls.js dependency is needed for
@@ -109,7 +120,7 @@ export function HighlightSheet({ item, onClose }) {
             )}
           </div>
 
-          {item.description && <p className="hlsheet__desc">{item.description}</p>}
+          {item?.description && <p className="hlsheet__desc">{item.description}</p>}
         </div>
       </div>
     </ModalPortal>

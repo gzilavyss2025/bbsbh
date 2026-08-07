@@ -288,6 +288,18 @@
   border-radius: var(--radius-sm);
 }
 
+/* While a tap-to-fetch caller is loading (WatchCondensedButton): holds the
+   16:9 box the video is about to occupy, so the dialog doesn't jump to a new
+   size under the pointer the moment the fetch lands. */
+.hlsheet__empty--wait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  background: var(--bg-page);
+}
+
 .hlsheet__desc {
   margin: 12px 0 0;
   font-size: var(--fs-small);

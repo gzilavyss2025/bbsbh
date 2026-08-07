@@ -321,3 +321,40 @@
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
 }
+
+/* ---- "Condensed game" button on a revealed slate card.
+
+   It lives HERE, not beside its .flipback__* siblings in
+   22-box-score-tables.css, for two reasons: that file is at its
+   check-file-size ceiling, and this rule belongs to the video family
+   anyway — every affordance in the app that means "there is video
+   here" wears kraft tape (the WATCH tab above, the condensed panel's
+   tab, the player's SAVE pill), and they should be read together. Ink
+   is for navigation, tape is for video. */
+.flipback__watchbtn {
+  width: auto;
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.flipback__watchbtn:hover:not(:disabled) {
+  background: var(--seal-hatch);
+  border-color: var(--seal-hatch);
+}
+/* The same border-drawn ▶ the clip cards use, at caption scale. */
+.flipback__watchIcon {
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid currentColor;
+}
