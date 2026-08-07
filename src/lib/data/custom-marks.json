@@ -6,6 +6,17 @@
       "milb-away": "cdn:primary"
     }
   },
+  "108": {
+    "marks": [
+      {
+        "slug": "laacityconnect",
+        "name": "laacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "laacityconnect"
+    }
+  },
   "109": {
     "marks": [
       {
@@ -90,9 +101,15 @@
       {
         "slug": "wordmarkwhite",
         "name": "WORDMARKWHITE"
+      },
+      {
+        "slug": "ladcityconnect",
+        "name": "ladcityconnect"
       }
     ],
-    "assignments": {}
+    "assignments": {
+      "city-connect-masthead": "ladcityconnect"
+    }
   },
   "133": {
     "marks": [
