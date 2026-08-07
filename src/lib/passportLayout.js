@@ -34,16 +34,22 @@
 // columns across and over the rows down, and the STAMP HAS TO FIT INSIDE ITS
 // CELL — otherwise the guide is a lie the moment anything lands on it:
 //
-//   2 x 4 -> cell 0.44 x 0.22 of the page, stamp 0.3 x 0.211
-//            (stampHeightFraction). Fits, with room across and a hair to spare
-//            down. Adjacent centres sit 0.44 apart across and 0.31 apart down
-//            IN WIDTH-UNITS, both clear of MIN_SEPARATION — so `autoLayout`
-//            and `nudgeFromCollisions` still agree about what overlaps.
-//   3 x 3 -> cell 0.293 wide: narrower than the stamp itself.
-//   2 x 5 -> cell 0.176 tall: shorter than the stamp, and the rows only 0.25
-//            apart, inside MIN_SEPARATION — overlapping by this module's own
-//            definition, which is exactly the disagreement the last test in
-//            test/passport-layout.test.js exists to catch.
+//   2 x 4 -> cell 0.475 x 0.238 of the page, stamp 0.3 x 0.211
+//            (stampHeightFraction). Fits comfortably, with 0.175 to spare
+//            across and 0.026 down — a tighter margin only WIDENS every cell,
+//            so shrinking PAGE_MARGIN never puts this fit at risk. Adjacent
+//            centres sit 0.475 apart across and 0.337 apart down IN
+//            WIDTH-UNITS, both clear of MIN_SEPARATION — so `autoLayout` and
+//            `nudgeFromCollisions` still agree about what overlaps.
+//   3 x 3 -> cell 0.317 wide: at this margin that is technically wider than
+//            the 0.3 stamp, but only by 0.017 — under a tenth of 2x4's own
+//            spare, not the comfortable working room `nudgeFromCollisions`
+//            needs to walk a stamp clear of a neighbour.
+//   2 x 5 -> cell 0.19 tall: still shorter than the 0.211 stamp, so the mark
+//            would not fit its box at all, even though the rows are now 0.27
+//            apart IN WIDTH-UNITS — just clear of MIN_SEPARATION, where the
+//            old 0.06 margin left them at 0.25, inside it (the disagreement
+//            the last test in test/passport-layout.test.js exists to catch).
 //
 // Capacity is therefore DERIVED, never typed: it is the number of boxes the
 // page is ruled into, and so it cannot drift from the guide the user is
@@ -74,8 +80,10 @@ export const STAMP_WIDTH = 0.3
 export const PAGE_ASPECT = 88 / 125
 
 // The margin no stamp may cross, as a fraction of the page. Keeps the art off
-// the spine and off the page number in the corner.
-export const PAGE_MARGIN = 0.06
+// the spine and off the page number in the corner — tight enough that the
+// ruled grid reads as close to the page edges as a real passport's does; see
+// the arithmetic above for why 0.025 still leaves every cell room to spare.
+export const PAGE_MARGIN = 0.025
 
 // How far a stamp may tilt, in degrees. Small on purpose: a real cancellation
 // is stamped by a hand that is trying to be straight and failing slightly, not
@@ -173,10 +181,10 @@ export function pageSlots() {
 
 // Keep a stamp's centre inside ONE box of that grid — the same job clampToPage
 // does for the page, one scale down, and the reason a wobbled auto-layout can
-// never push a stamp across the rule the user is looking at. A cell is barely
-// taller than the stamp is (0.22 against 0.211), so this leaves real room
-// across and almost none down; that asymmetry is the grid working as intended,
-// not a bug to tune away.
+// never push a stamp across the rule the user is looking at. A cell is only a
+// little taller than the stamp is (0.238 against 0.211), so this leaves real
+// room across and not much down; that asymmetry is the grid working as
+// intended, not a bug to tune away.
 //
 // Falls back to the plain page clamp for a slot it can't read, so a caller that
 // loses one still lands a stamp on the paper.
