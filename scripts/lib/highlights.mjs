@@ -20,6 +20,7 @@ import {
   highlightPoster,
   isEligibleForPositiveFilter,
 } from '../../src/api/highlights.js'
+import { pickHeroPhoto } from '../../src/api/gamePhotos.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 export const OUT_DIR = join(here, '..', '..', 'public', 'data', 'highlights')
@@ -46,15 +47,28 @@ export async function clipsForGame(gamePk, blocklist) {
   return clipsFromItems(await fetchHighlights(gamePk), blocklist)
 }
 
-// One game's content, read TWICE from a single fetch: the per-play clips for
-// the team files, and the condensed cut for the day index. Both generators'
-// sweeps already pay for this request — asking the same endpoint again for the
-// condensed game would double a nightly sweep's traffic for one extra object
-// per game. `clipsForGame` above stays as-is for the backfill, which doesn't
-// build day files.
+// One game's content, read THREE ways from a single fetch: the per-play clips
+// for the team files, the condensed cut for the day index, and its hero photo
+// (see pickHeroPhoto's header). All three generators' sweeps already pay for
+// this one request — asking the same endpoint again for either would double a
+// nightly sweep's traffic. `clipsForGame` above stays as-is for the backfill,
+// which doesn't build day files.
 export async function sweepGame(gamePk, blocklist) {
   const items = await fetchHighlights(gamePk)
-  return { clips: clipsFromItems(items, blocklist), condensed: condensedEntry(items) }
+  return {
+    clips: clipsFromItems(items, blocklist),
+    condensed: condensedEntry(items),
+    heroPhoto: await pickHeroPhoto(items),
+  }
+}
+
+// The day index's per-game row: the condensed cut plus its hero photo (or
+// `null` for either half a game happens to lack), composed in one place so the
+// two generators that write day files (gen-highlights.mjs, the backfill) and
+// the unit suite all agree on the shape. `condensed` itself is never `null`
+// here — callers only invoke this once they've already checked that.
+export function dayIndexEntry(condensed, heroPhoto) {
+  return { ...condensed, heroPhoto: heroPhoto ?? null }
 }
 
 // The condensed game as the day index stores it: enough to render the card's

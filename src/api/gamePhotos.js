@@ -310,3 +310,63 @@ export function photosForTeam(photos, teamId) {
 export function onlyPhotographer(photos) {
   return (photos ?? []).filter((photo) => photo.kind === 'photographer')
 }
+
+// The single best still for a game, for scripts/gen-highlights.mjs's day
+// index — the home slate's revealed result cards use this as the condensed
+// game's poster instead of MLB's own "CONDENSED GAME" graphic card. Takes the
+// highlight ITEMS array the generator already fetched via fetchHighlights()
+// for that same game (no second content request), so it only ever sees the
+// attributed pass — never the recursive stray walk fetchGamePhotos does, which
+// needs the full content payload this call site doesn't have. That cost every
+// game in a 30-game live sample (2026-08-07) exactly nothing: all 30 resolved
+// to a `photographer` still off the attributed items alone.
+//
+// EARLY-EXITS the moment a `photographer` candidate turns up — the top rank
+// KIND_ORDER assigns, so nothing later in the list can beat it. That is what
+// keeps this affordable in a nightly sweep: the common case costs a title
+// check and at most a couple of shape probes, not one probe per photo the way
+// fetchGamePhotos pays (that function has to classify EVERY photo for its
+// gallery; this one only needs the first best one). Falls back to the first
+// `broadcast` frame if no photographer still exists, and to `null` if the game
+// has nothing usable — same "fail open, never guess" posture as
+// classifyPhotoAsset.
+//
+// RETURNS BARE URLs ONLY — no `headline`, no `focus`. This feeds
+// public/data/highlights/day/<date>.json, which the slate fetches whole for
+// EVERY game on the date the instant the page loads, regardless of which of
+// those games the visitor has actually revealed yet (see gen-highlights.mjs's
+// day-index comment) — so nothing legible as plain text may ride along, same
+// reason that file stores the condensed cut's structural title and never the
+// recap's. A photo URL is safe there by the reasoning that already covers that
+// same file's condensed-cut poster/playback URLs: GameResultFace.jsx renders
+// it only once the flip card's already-revealed back face has mounted, so nothing
+// paints before the visitor chose to reveal that specific game.
+export async function pickHeroPhoto(items) {
+  const seen = new Set()
+  let fallback = null
+  for (const item of items ?? []) {
+    const image = item?.image
+    const original = originalPhotoUrl(image?.templateUrl) ?? originalPhotoUrl(image?.cuts?.[0]?.src)
+    if (!original) continue
+    const id = original.slice(CDN_PREFIX.length)
+    if (seen.has(id)) continue
+    seen.add(id)
+
+    const title = typeof image?.title === 'string' ? image.title : ''
+    let kind
+    if (PHOTOGRAPHER_NAME_PATTERNS.some((re) => re.test(title))) {
+      kind = 'photographer'
+    } else {
+      const keywords = Array.isArray(item?.keywordsAll) ? item.keywordsAll : []
+      const taxonomy = keywords
+        .filter((k) => k?.type === 'taxonomy' && typeof k.value === 'string')
+        .map((k) => k.value)
+      const shape = await fetchAssetShape(id)
+      kind = classifyPhotoAsset({ title, taxonomy, shape })
+    }
+
+    if (kind === 'photographer') return { original, thumb: thumbUrl(original) }
+    if (kind === 'broadcast' && !fallback) fallback = { original, thumb: thumbUrl(original) }
+  }
+  return fallback
+}

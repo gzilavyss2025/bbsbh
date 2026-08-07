@@ -335,15 +335,15 @@ don't run these by hand.
 
 - `gen-highlights.mjs` also → `public/data/highlights/day/{MMDDYYYY}.json` — the
   per-slate-date **condensed-game index**, `{gamePk: {title, duration, poster,
-  playbacks}}`, ~8 KB for a 16-game day (all 16 had a cut in the 2026-07-07
-  sweep). Same one fetch per game as the clips above (`sweepGame` reads the
-  content package twice rather than requesting it twice) and the same
-  `MMDDYYYY` per-date file convention as `gen-callouts.mjs`. REWRITTEN per run,
-  not merged — a day's file is complete in one pass, so there's no accumulated
-  history to protect. Read by the home slate's revealed result cards
-  (`fetchDayVideos`), which can't go live: `content` is 430 KB per game and
-  ignores `?fields=`, so 16 cards would parse ~6.9 MB. Stores the CONDENSED cut
-  only, never the recap — a recap's title carries the final score.
+  playbacks, heroPhoto}}`, ~8 KB for a 16-game day. One fetch per game
+  (`sweepGame` reads the content package three ways, not three requests),
+  MERGED into whatever the file already holds (`writeDayFiles`) so a partial
+  re-sweep stays additive. Read by the home slate's revealed result cards
+  (`fetchDayVideos`), which can't go live (`content` is 430 KB/game). Stores
+  the CONDENSED cut only, never the recap (score in its title). `heroPhoto`
+  (`{original, thumb} | null`, `pickHeroPhoto` via `dayIndexEntry`) is a real
+  still shown instead of MLB's "CONDENSED GAME" graphic — URLs only, no
+  caption, since the file is fetched whole for every game, revealed or not.
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
   per MLB club holding its per-play video highlights, game by game, newest first.
   Feeds the Team hub's Games-tab rail and the player page's rail; the box score's
