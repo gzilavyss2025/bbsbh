@@ -111,6 +111,17 @@
       "city-connect-masthead": "ladcityconnect"
     }
   },
+  "120": {
+    "marks": [
+      {
+        "slug": "wascityconnect",
+        "name": "wascityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "wascityconnect"
+    }
+  },
   "133": {
     "marks": [
       {
@@ -120,6 +131,50 @@
     ],
     "assignments": {
       "alternate-2": "base-white"
+    }
+  },
+  "136": {
+    "marks": [
+      {
+        "slug": "seacityconnect",
+        "name": "seacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "seacityconnect"
+    }
+  },
+  "139": {
+    "marks": [
+      {
+        "slug": "tbcityconnect",
+        "name": "tbcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "tbcityconnect"
+    }
+  },
+  "140": {
+    "marks": [
+      {
+        "slug": "texcityconnect",
+        "name": "texcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "texcityconnect"
+    }
+  },
+  "141": {
+    "marks": [
+      {
+        "slug": "torcityconnect",
+        "name": "torcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "torcityconnect"
     }
   },
   "142": {

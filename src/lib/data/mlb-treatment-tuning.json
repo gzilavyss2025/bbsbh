@@ -699,7 +699,8 @@
         "header": {
           "bar": "#131e29",
           "accent": "#5c82a5",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#5c82a5",
@@ -986,7 +987,8 @@
         "header": {
           "bar": "#203F79",
           "accent": "#fcc730",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         }
       }
     }
@@ -1139,7 +1141,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#7bc35e",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.4
         }
       }
     }
@@ -1180,7 +1183,8 @@
         "header": {
           "bar": "#892535",
           "accent": "#EBDFCB",
-          "onBar": "#F8F8F5"
+          "onBar": "#EBDFCB",
+          "markScale": 1.2
         },
         "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
       },
@@ -1230,7 +1234,8 @@
         "header": {
           "bar": "#161827",
           "accent": "#C22028",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         },
         "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
