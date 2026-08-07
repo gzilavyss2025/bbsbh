@@ -36,6 +36,9 @@ export function HighlightClipCard({ clip, caption, label = 'Watch', variant, onO
     >
       <span className="hlclip__frame">
         <img className="hlclip__poster" src={clip.poster} alt="" loading="lazy" />
+        {/* The pointer-only hover wash (see .hlclip__wash) — its own element
+            rather than a ::after so the kraft tab below can stack above it. */}
+        <span className="hlclip__wash" aria-hidden="true" />
         {/* The triangle glyph is the tab's CSS ::before */}
         <span className="hlclip__play" aria-hidden="true">
           {label}

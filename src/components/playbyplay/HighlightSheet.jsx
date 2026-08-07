@@ -42,6 +42,29 @@ export function HighlightSheet({ item, onClose }) {
     }
   }, [])
 
+  // Captions OFF by default. MLB's HLS manifests carry subtitle tracks, and
+  // Safari/Chrome will auto-enable one whenever the viewer's OS caption
+  // preference says to — which on a 30-second clip means burned-in text over
+  // the play you opened it to watch. Disabling them is a DEFAULT, not a
+  // removal: the tracks stay in the manifest and the player's own captions
+  // menu still turns them back on for anyone who wants them.
+  //
+  // Two passes are needed because an HLS track list is populated
+  // asynchronously, after the manifest parses — the tracks almost never exist
+  // yet at mount, so the `addtrack` listener is what actually does the work
+  // most of the time, and the initial sweep covers the progressive-mp4 case.
+  const videoRef = useRef(null)
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const silence = () => {
+      for (const track of video.textTracks) track.mode = 'disabled'
+    }
+    silence()
+    video.textTracks.addEventListener?.('addtrack', silence)
+    return () => video.textTracks.removeEventListener?.('addtrack', silence)
+  }, [item])
+
   if (!item) return null
   const { hls, mp4 } = highlightPlaybacks(item)
   const title = item.title || item.headline || 'Highlight'
@@ -66,7 +89,7 @@ export function HighlightSheet({ item, onClose }) {
               // iPhone Safari; no poster (see the spoiler note above). HLS
               // plays natively in Safari, so no hls.js dependency is needed for
               // this app's primary target — mp4Avc is the fallback <source>.
-              <video controls playsInline preload="none">
+              <video ref={videoRef} controls playsInline preload="none">
                 {hls && <source src={hls} type="application/vnd.apple.mpegurl" />}
                 {mp4 && <source src={mp4} type="video/mp4" />}
               </video>

@@ -22,10 +22,19 @@
    goes down by hand — solid --seal, like .sstrip__cell--home's tape
    tone, deliberately NOT the --seal-texture hatch, which is the
    spoiler-cover weave and would claim "sealed" on a card that is the
-   opposite. No gradient scrim, no hover zoom: prints don't dim and
-   don't move, and both are the generic video-thumbnail playbook this
-   card exists to avoid — the amber tape carries its own contrast
-   (--text-on-seal is a validated pair) against any poster frame.
+   opposite. The amber tape carries its own contrast (--text-on-seal is
+   a validated pair) against any poster frame, so nothing here needs a
+   scrim to stay legible.
+
+   HOVER DOES WASH THE PRINT, though, and that is a deliberate later
+   revision of this block's original "no gradient scrim, no hover zoom"
+   rule (which held that prints don't dim). Product call: a rail of
+   posters reads as pictures until you point at one, and the wash is
+   what says "this one is a video you can play". It stays a wash and not
+   the full playbook — no zoom, no lift on the poster itself, and the
+   card's own hover (kraft edge + 1px rise) is unchanged — and it is
+   pointer-only, so a touchscreen, where every card would otherwise
+   sit permanently "hovered", never sees it. See .hlclip__wash.
 
    Numbered last-in-sequence, not beside 28/29 where its one consumer
    renders: same append-at-the-end reasoning as 51-similar-players.css
@@ -85,6 +94,52 @@
   display: block;
 }
 
+/* ---- The hover wash: a white-to-black gradient that fades in over the
+   poster while the pointer is on the card, so a rail of stills says
+   which one you're about to play.
+
+   Drawn as its own element rather than a ::after on the frame because
+   the kraft tab lives inside that frame and has to stay ON TOP of the
+   wash — it's tape stuck to the print, not something under the glass.
+   Both get a stacking order here (wash 1, tab 2) instead of relying on
+   source order, since a sibling ::after would paint over the tab.
+
+   Top-light to bottom-dark, matching where the light already is on the
+   paper: the page's own --shadow-card falls downward, so a wash that
+   brightened the bottom would light the card from underneath. The white
+   end is deliberately faint (0.22) — it's a sheen on a print, not a
+   fog — while the black end goes far enough (0.55) to read as a real
+   state change on a bright afternoon-baseball still. */
+.hlclip__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.28), rgba(0, 0, 0, 0.62));
+  transition: opacity var(--dur-snappy) var(--ease-standard);
+}
+/* Keyboard gets it too — :focus-visible is the same "you are pointed at
+   this card" state, and a focus ring alone says less about a video. */
+.hlclip:hover .hlclip__wash,
+.hlclip:focus-visible .hlclip__wash {
+  opacity: 1;
+}
+/* On a touchscreen :hover latches after a tap, which would leave cards
+   washed at random with no pointer to explain why. There is no hover
+   state to communicate on a phone, so there is no wash. */
+@media (hover: none), (pointer: coarse) {
+  .hlclip__wash {
+    display: none;
+  }
+}
+/* The condensed game is exempt, by request: it's a single feature print
+   that isn't in a rail of siblings, so there is nothing to distinguish
+   it FROM, and washing the one poster on the page is just dimming it. */
+.hlclip--feature .hlclip__wash {
+  display: none;
+}
+
 /* The kraft-tape Watch tab — rotated a hair off-square (tape goes down
    by hand) and shadowed with the same soft paper elevation as the slip
    itself, so it reads as stuck ON the print rather than floating over
@@ -95,6 +150,8 @@
   position: absolute;
   left: var(--space-2);
   bottom: var(--space-2);
+  /* Above .hlclip__wash — tape sits on the print, not under the wash. */
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 5px;
