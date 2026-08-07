@@ -41,13 +41,14 @@
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { logoCdnUrl } from '../src/lib/logoCdn.js'
 import { monoLogoFingerprint, monoLogoSvg } from '../src/lib/logoMono.js'
 import {
-  LOGO_CDN_BASE,
   MONO_LOGO_MANIFEST_PATH,
   monoLogoHash,
   pinsFor,
   readMonoInkStore,
+  sourceVariantFor,
 } from './lib/mono-logo-art.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -97,9 +98,13 @@ async function teamList() {
 }
 
 async function convert(team, inkStore) {
+  // 'base' unless the lab picked a different CDN source for this club — see
+  // sourceVariantFor (some MiLB clubs' plain base mark converts worse than
+  // their primary/cap/wordmark art on the same CDN).
+  const variant = sourceVariantFor(inkStore, team.id)
   let svg
   try {
-    const res = await fetch(`${LOGO_CDN_BASE}/${team.id}.svg`)
+    const res = await fetch(logoCdnUrl(team.id, variant))
     // A club with no art on the CDN isn't an error — MiLB coverage has always
     // been partial, and the app falls back on its own (see TeamLogo.jsx).
     if (!res.ok) return { ...team, skipped: `HTTP ${res.status}` }
@@ -116,7 +121,15 @@ async function convert(team, inkStore) {
   const stalePins = Boolean(saved && Object.keys(saved).length && !pins)
   const mono = monoLogoSvg(svg, { maskId: `ink-${team.id}`, pins })
   if (!mono) return { ...team, skipped: 'not convertible' }
-  return { ...team, svg, mono, pinned: Boolean(pins), stalePins, art: monoLogoFingerprint(svg) }
+  return {
+    ...team,
+    svg,
+    mono,
+    pinned: Boolean(pins),
+    stalePins,
+    art: monoLogoFingerprint(svg),
+    nonBaseSource: variant !== 'base' ? variant : null,
+  }
 }
 
 function contactSheet(rows) {
@@ -193,8 +206,13 @@ if (wantSheet) {
 const skipped = rows.filter((r) => r.skipped)
 const pinned = rows.filter((r) => r.pinned)
 const stale = rows.filter((r) => r.stalePins)
+const nonBase = rows.filter((r) => r.nonBaseSource)
 console.log(`wrote ${written.size} mono logos to ${outDir}`)
 if (pinned.length) console.log(`${pinned.length} used hand-picked ink/knockout pins (src/lib/data/mono-ink.json)`)
+if (nonBase.length) {
+  console.log(`${nonBase.length} converted from a non-base CDN source (picked in /identity-lab):`)
+  for (const n of nonBase) console.log(`  ${n.id} ${n.name} — ${n.nonBaseSource}`)
+}
 if (stale.length) {
   console.log(`${stale.length} have pins picked against DIFFERENT art — converted automatically instead:`)
   for (const s of stale) console.log(`  ${s.id} ${s.name} — re-pick in /identity-lab (art is now ${s.art})`)

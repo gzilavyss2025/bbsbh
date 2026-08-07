@@ -25,6 +25,10 @@ const AA_TEXT = 4.5
 // section mastheads wear (ADR-0031) — it's half of what a themed bar looks
 // like, and a flat silhouette that reads on navy can vanish or muddy on a
 // club's own fill, which is exactly the judgement this page exists to make.
+// It also wears the same `crop="bar"` treatment as the real .metricbar
+// mastheads: the mark bleeds to the bar's full height, 7% clipped off its
+// own top and bottom (TeamLogo.jsx, 07-team-logo-and-buttons.css), so what's
+// tuned here previews the actual crop, not a fixed-size stand-in for it.
 // Re-inked dark on a light bar by the same midpoint the app uses
 // (`barMarkTone`), so what shows here is what TeamInfo draws. A club with no
 // knockout art yet falls back to its full-color mark — TeamLogo's own chain,
@@ -44,7 +48,7 @@ export function HeaderBarMock({ teamId, name, colors, unset }) {
       className={`idlab__barmock${tone === 'dark' ? ' idlab__barmock--darkmark' : ''}`}
       style={{ '--header-bar': colors.bar, '--header-accent': colors.accent, '--header-onbar': colors.onBar }}
     >
-      <TeamLogo teamId={teamId} name={name} size={22} variant="mono" className="idlab__barmock__logo" />
+      <TeamLogo teamId={teamId} name={name} variant="mono" crop="bar" className="idlab__barmock__logo" />
       <span className="idlab__barmock__title">{name}</span>
     </div>
   )

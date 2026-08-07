@@ -158,3 +158,44 @@ or an `ignoreSearch` override. The dev-only regenerate route (`writeMonoLogo`,
 `scripts/lib/mono-logo-art.mjs`) updates the same manifest for the one club it
 touches, so a local save and a full generator run can never disagree about a
 hash.
+
+## Amendment (2026-08-07): the CDN source is also pickable, per club
+
+The ink/knockout pins above fix a bad CLASSIFICATION of a club's real art.
+They can't fix bad ART — and mlbstatic's plain `base` mark is sometimes worse
+than it needs to be, mostly at the lower MiLB levels: a busier crest that
+converts to a knockout worse than the cleaner mark the same CDN already
+carries under a different path. `TeamLogo`'s sketcher already draws from three
+other marks per club (`primary`, `cap`, `wordmark` — verified live to be real,
+distinct art at every level, not the base logo echoed back), so the fix isn't
+new art, it's pointing the existing pipeline at art that was already there.
+
+A club's mono-ink.json entry may now carry a `source` field alongside its
+pins — `'base'` (the default, needing no entry at all) or one of the three
+`LOGO_VARIANTS` keys. Three decisions worth recording, same shape as the pins
+amendment above:
+
+- **A fetch-URL choice, not art applied to shapes.** `sourceVariantFor`
+  (`scripts/lib/mono-logo-art.mjs`) has no fingerprint check the way `pinsFor`
+  does — there's no shape list that could point at the wrong shapes if the
+  source moved, only a different URL to fetch before the same conversion runs.
+  Both the nightly generator and the dev regenerate route read it from the
+  same store, so they can't disagree about which mark a club wears.
+- **One base URL, in one place.** `src/lib/logoCdn.js` is a dependency-free
+  leaf module now shared by `teams.js` (the browser) and
+  `scripts/lib/mono-logo-art.mjs` (plain Node, run outside Vite) — the two
+  paths that must build byte-identical CDN URLs can't drift into building them
+  two different ways.
+- **Picked by eye, next to the pins.** The Knockout mark editor's source
+  picker (`MonoInkEditor.jsx`) refetches and reconverts on every click, so
+  comparing Base against Primary against Cap is immediate — the same
+  judgment-by-looking the pins amendment already established for this editor,
+  one level up the pipeline. Switching sources drops any in-progress
+  (unsaved) pins: shape indices from the old source's art don't mean anything
+  against the new source's, so they'd otherwise misapply to whichever shape
+  happens to share that index.
+
+Game Log stamps (`GameStamp.jsx`) need no separate change: they already draw
+the one file this generator produces (`hasMonoLogo` + `teamLogoUrl(id,
+'mono')`), so a better source for the masthead mark is a better source for
+the stamp mark for free.

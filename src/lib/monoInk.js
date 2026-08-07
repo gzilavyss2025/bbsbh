@@ -19,13 +19,17 @@
 
 import store from './data/mono-ink.json' with { type: 'json' }
 
-// `{ art, parts }` for a club, or null. `parts` is `{ [partIndex]: 'ink' |
-// 'knockout' }` and `art` is the monoLogoFingerprint of the source the pins
-// were picked against.
+// `{ art, parts, source }` for a club, or null. `parts` is `{ [partIndex]:
+// 'ink' | 'knockout' }`, `art` is the monoLogoFingerprint of the source the
+// pins were picked against, and `source` is which CDN mark that was —
+// `'base'` unless the lab picked `'primary'`/`'cap'`/`'wordmark'` instead
+// (some MiLB clubs' base mark is worse art than an alternate on the same
+// CDN — scripts/lib/mono-logo-art.mjs's sourceVariantFor is the generator's
+// copy of this same default).
 export function monoInkFor(teamId) {
   const entry = store[String(teamId)]
   if (!entry) return null
-  return { art: entry.art ?? null, parts: entry.parts ?? {} }
+  return { art: entry.art ?? null, parts: entry.parts ?? {}, source: entry.source ?? 'base' }
 }
 
 // The whole store, for the lab's save path (which posts it back in full, like

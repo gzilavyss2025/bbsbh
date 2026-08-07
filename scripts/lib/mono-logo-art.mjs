@@ -15,6 +15,7 @@ import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { logoCdnUrl } from '../../src/lib/logoCdn.js'
 import { monoLogoFingerprint, monoLogoSvg } from '../../src/lib/logoMono.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -60,8 +61,6 @@ export async function writeMonoLogoManifestEntry(teamId, hash) {
   await writeFile(MONO_LOGO_MANIFEST_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
 }
 
-export const LOGO_CDN_BASE = 'https://www.mlbstatic.com/team-logos'
-
 export async function readMonoInkStore() {
   try {
     return JSON.parse(await readFile(inkStorePath, 'utf8'))
@@ -83,8 +82,19 @@ export function pinsFor(store, teamId, sourceSvg) {
   return parts
 }
 
-export async function fetchClubArt(teamId) {
-  const res = await fetch(`${LOGO_CDN_BASE}/${teamId}.svg`)
+// Which CDN source feeds this club's mono conversion — `'base'` unless the
+// lab picked a different one. Some MiLB clubs' plain `base` mark is worse art
+// than their `primary`/`cap`/`wordmark` mark on the same CDN (a low-res
+// scrape, a busier crest that converts to knockout worse than the cleaner
+// alternative) — this is that escape hatch. No fingerprint check needed the
+// way pinsFor has one: this is just a fetch-URL choice, not art applied to a
+// shape list that could point at the wrong shapes if the art moved.
+export function sourceVariantFor(store, teamId) {
+  return store?.[String(teamId)]?.source ?? 'base'
+}
+
+export async function fetchClubArt(teamId, variant = 'base') {
+  const res = await fetch(logoCdnUrl(teamId, variant))
   if (!res.ok) return { problem: `HTTP ${res.status}` }
   return { svg: await res.text() }
 }
@@ -94,7 +104,7 @@ export async function fetchClubArt(teamId) {
 // to the full-color mark on its own), not an error to throw over.
 export async function writeMonoLogo(teamId, { store, svg } = {}) {
   const inkStore = store ?? (await readMonoInkStore())
-  const art = svg ? { svg } : await fetchClubArt(teamId)
+  const art = svg ? { svg } : await fetchClubArt(teamId, sourceVariantFor(inkStore, teamId))
   if (art.problem) return { problem: art.problem }
   const mono = monoLogoSvg(art.svg, { maskId: `ink-${teamId}`, pins: pinsFor(inkStore, teamId, art.svg) })
   if (!mono) return { problem: 'not convertible' }
