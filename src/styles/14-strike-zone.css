@@ -638,6 +638,15 @@
   animation: fade var(--dur-med) var(--ease-out);
 }
 
+/* Centers its dialog instead of docking it to the bottom edge. Opt-in, one
+   modifier on the scrim rather than a change to the base rule, because every
+   other dialog in the app IS a sheet you pull up from the bottom — this is for
+   the highlight player (HighlightSheet.jsx), which is a thing you look at. */
+.scrim--center {
+  align-items: center;
+  padding: var(--space-3);
+}
+
 @keyframes fade {
   from {
     opacity: 0;
