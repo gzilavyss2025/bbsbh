@@ -1,6 +1,6 @@
 # 02 — The Umpire Tendencies card (UI)
 
-Status: `ready-for-agent`
+Status: `done` (shipped 2026-08-07)
 Phase: 1
 Blocked by: 01
 

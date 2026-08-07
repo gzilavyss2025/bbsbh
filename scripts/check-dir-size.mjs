@@ -88,7 +88,20 @@ const BUDGETS = {
   // (already near ITS OWN budget) or either My Tally partial (a different
   // subject — onboarding chrome, not the settings page), same "one new file,
   // one new number" rule as the entry above.
-  'src/styles': 56,
+  //
+  // 56 -> 57 for `53-umpire-tendencies.css`, and the reason is the same one
+  // the two entries above give: this directory is a NUMBERED CASCADE, the
+  // prefix IS the cascade position ("order is the contract", src/CLAUDE.md),
+  // so the guard's usual remedy of a subdirectory would break the single
+  // property the whole scheme rests on. The file exists because the Umpire
+  // Tendencies card pushed 38-umpire-pages.css past check-file-size.mjs's
+  // 600-line ceiling, and THAT guard's remedy is to split rather than raise —
+  // so a split has to cost a number here. It took the free 53 slot (nothing
+  // has ever claimed it) rather than renumbering all nineteen partials after
+  // 38; it introduces a fresh `.umptend__*` namespace and overrides nothing,
+  // so its exact position is not load-bearing, only its being after 14
+  // (.zonemap) and 44 (.metricbar), which it reuses.
+  'src/styles': 57,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

@@ -1,6 +1,6 @@
 # 01 — The tendency derivation (data layer)
 
-Status: `ready-for-agent`
+Status: `done` (shipped 2026-08-07)
 Phase: 1 (no generator change, no backfill)
 
 Add the read-time derivations the card needs. Pure logic only — no component

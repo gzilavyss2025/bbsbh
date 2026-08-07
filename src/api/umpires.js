@@ -1,4 +1,4 @@
-import { tierForZ, meanAndSd } from '../lib/statTiers.js'
+import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -42,6 +42,137 @@ const indexCached = new Map()
 // his peers — below it a hot/cold handful of games would swing the ordering
 // wildly. Tunable; a plate ump reaches it within the first few weeks of work.
 const MIN_RANK_GAMES = 5
+
+// --- the Umpire Tendencies card's figures --------------------------------------
+// A cell must carry this much MORE of the umpire's misses than the league
+// baseline before the "area to watch" phrase will name it. Same constant, and
+// the same reasoning, as UmpireAccuracyModal's OVER_FLOOR, which decides
+// whether the zone map OUTLINES a cell — deliberately shared so the phrase can
+// only ever name a cell the map beside it has actually flagged. Below it is
+// noise, not a tendency.
+const WATCH_OVER_FLOOR = 0.02
+// …and he needs this many missed calls in total before any of it means
+// anything. Mirrors accuracyTendency's own floor.
+const WATCH_MIN_MISSES = 5
+// One batter side must carry this much more of its own misses in a region than
+// the other before the phrase names a hand. Bacchus is the case this exists
+// for: his LOW misses split 33.0% / 32.8% across hands (no story at all) while
+// his OUTSIDE misses run 14.8% / 7.7%. Without the gate, a region gets a hand
+// bolted onto it and the card publishes a finding that isn't there.
+const WATCH_HAND_MARGIN = 0.05
+
+// Row-major 3x3, matching gen-umpire-accuracy.mjs's cellIndex exactly: rows run
+// high -> middle -> low, columns run outside -> middle -> inside, both oriented
+// to the BATTER. Spelled out as nine phrases rather than composed from row and
+// column words because "middle/middle" and the two bare-column cells don't read
+// naturally when assembled mechanically.
+const CELL_PHRASE = [
+  'Up and outside',
+  'Up in the zone',
+  'Up and inside',
+  'Outside',
+  'Over the middle',
+  'Inside',
+  'Low and outside',
+  'Low in the zone',
+  'Low and inside',
+]
+// Which of the four flat miss REGIONS each cell belongs to, for the handedness
+// clause — the L/R split is tallied by region (missL/missR), not per cell, so a
+// cell has to resolve to one. A corner cell answers to its column (inside /
+// outside reads more naturally than up / low there); the centre column answers
+// to its row; the true middle has no region and so never takes a hand.
+const CELL_REGION = ['outside', 'high', 'inside', 'outside', null, 'inside', 'outside', 'low', 'inside']
+
+// Net runs handed to HITTERS per game — the pitcher/hitter lean the Tendencies
+// card's scale plots. Positive means his missed calls have handed runs to the
+// batting team.
+//
+// Derived at READ time from the per-game signed favor rows (favorAway +
+// favorHome, the run-expectancy swing each missed call handed whoever was
+// batting), because the season aggregate only keeps favorMagnitude — the
+// UNSIGNED total, which answers a different question and is what the card's
+// "run impact" tile shows. Do not confuse the two; they are 1.55 and 0.43 for
+// the same umpire.
+//
+// Restricted to one level's regular-season rows, the same split the aggregates
+// use: a different level is a different regime and a different peer pool.
+export function umpireLeanFor(games, season, level = 'MLB') {
+  let net = 0
+  let n = 0
+  for (const g of games ?? []) {
+    if ((g.level ?? 'MLB') !== level) continue
+    if ((g.gameType ?? 'R') !== 'R') continue
+    if (g.favorAway == null || g.favorHome == null) continue
+    net += g.favorAway + g.favorHome
+    n++
+  }
+  if (n) return { lean: net / n, source: 'favor', games: n }
+
+  // Fallback for a file built before gen-run-expectancy.mjs was ever run, when
+  // no row carries favor at all. The raw zone lean, NEGATED so the sign
+  // convention still points at hitters: a generous zone (expanded > squeezed)
+  // helps PITCHERS. It correlates at -0.86 with the favor figure across the
+  // qualifying pool but is NOT the same number — it counts every miss equally
+  // where favor weights by leverage — so callers carry `source` rather than
+  // implying they're interchangeable. Whole-pool by nature: the table either
+  // exists or it doesn't, so a pool never mixes the two sources and the
+  // z-scores below stay comparable.
+  if (!season?.called) return null
+  return {
+    lean: -((season.expanded - season.squeezed) / season.called),
+    source: 'zone',
+    games: season.games ?? 0,
+  }
+}
+
+// Where this umpire misses most, relative to the league — the card's "area to
+// watch" phrase, plus the hand it belongs to when one side is clearly worse.
+//
+// Derived from the SAME 3x3 league-relative grid the zone map draws, and that
+// is the whole point of the function: accuracyTendency() answers a similar
+// question off the four flat edge tallies and, on real data, disagrees. For
+// Erich Bacchus it picks "low" on a nine-call margin out of 213 misses while
+// the grid's heaviest flags are up-and-outside and up-and-inside. A phrase
+// printed beside a picture that contradicts it is worse than no phrase, so
+// this reads the picture.
+//
+// Returns null rather than reaching for a weaker signal when there's nothing
+// to say. A card that says nothing is correct; one that invents a tendency
+// is not.
+export function umpireWatchArea(season, leagueShare) {
+  const cells = umpireZoneCells(season, leagueShare)
+  if (!cells) return null
+  if ((season.expanded ?? 0) + (season.squeezed ?? 0) < WATCH_MIN_MISSES) return null
+
+  let best = -1
+  cells.forEach((c, i) => {
+    if (best < 0 || c.over > cells[best].over) best = i
+  })
+  if (best < 0 || cells[best].over < WATCH_OVER_FLOOR) return null
+
+  return {
+    cell: best,
+    over: cells[best].over,
+    phrase: CELL_PHRASE[best],
+    hand: watchHand(season, CELL_REGION[best]),
+  }
+}
+
+// 'L' | 'R' | null — which batter side carries a clearly larger share of its
+// own misses in this region. Null when the split is even, when the region has
+// no handedness story to tell (the middle cell), or when the rows predate
+// missL/missR.
+function watchHand(season, region) {
+  if (!region || !season?.missL || !season?.missR) return null
+  const totalL = Object.values(season.missL).reduce((a, b) => a + b, 0)
+  const totalR = Object.values(season.missR).reduce((a, b) => a + b, 0)
+  if (!totalL || !totalR) return null
+  const shareL = (season.missL[region] ?? 0) / totalL
+  const shareR = (season.missR[region] ?? 0) / totalR
+  if (Math.abs(shareL - shareR) < WATCH_HAND_MARGIN) return null
+  return shareL > shareR ? 'L' : 'R'
+}
 
 async function load() {
   if (cached) return cached
@@ -105,7 +236,7 @@ async function accuracyIndex(level = 'MLB') {
   // the ranking/baseline logic below reads `u.season` unchanged. Umpires with no
   // aggregate at this level (e.g. never worked AAA) drop out.
   const all = Object.values(umpires)
-    .map((u) => ({ id: u.id, name: u.name, season: seasonForLevel(u, level) }))
+    .map((u) => ({ id: u.id, name: u.name, season: seasonForLevel(u, level), games: u.games ?? [] }))
     .filter((u) => u.season)
 
   const qualified = all
@@ -140,7 +271,48 @@ async function accuracyIndex(level = 'MLB') {
   const missTotal = leagueMiss.reduce((a, b) => a + b, 0)
   const leagueShare = leagueMiss.map((m) => (missTotal ? m / missTotal : 0))
 
-  const index = { rankById, ranked, mean, sd, leagueShare }
+  // The pitcher/hitter lean, z-scored against this same qualifying pool. It
+  // rides accuracyIndex's one pass rather than taking a pass of its own, and it
+  // uses the SAME pool `rankById` uses — two definitions of "qualifies" is how
+  // a tier pill and a scale start disagreeing about the same umpire.
+  const leanRaw = []
+  for (const u of qualified) {
+    const l = umpireLeanFor(u.games, u.season, level)
+    if (l) leanRaw.push({ id: u.id, ...l })
+  }
+  const { mean: leanMean, sd: leanSd } = meanAndSd(leanRaw.map((l) => l.lean))
+  const leanById = new Map()
+  for (const l of leanRaw) {
+    const z = leanSd ? (l.lean - leanMean) / leanSd : 0
+    leanById.set(String(l.id), {
+      lean: l.lean,
+      z,
+      tier: leanTierForZ(z),
+      source: l.source,
+      leagueMean: leanMean,
+      leagueSd: leanSd,
+    })
+  }
+
+  // League ABS-challenge baseline, for the card's asterisked footnote. Pooled
+  // over every game row at this level (Σ overturned / Σ challenges), the same
+  // shape as leagueShare above — a mean of per-umpire rates would let a man
+  // with three challenges pull it as hard as one with eighty. Null until the
+  // challenge schema has been swept in.
+  let chSum = 0
+  let ovSum = 0
+  let chGames = 0
+  for (const u of all) {
+    if (u.season.challenges == null) continue
+    chSum += u.season.challenges
+    ovSum += u.season.challengesOverturned ?? 0
+    chGames += u.season.challengeGames ?? 0
+  }
+  const leagueChallenges = chSum
+    ? { perGame: chGames ? chSum / chGames : null, overturnRate: ovSum / chSum }
+    : null
+
+  const index = { rankById, ranked, mean, sd, leagueShare, leanById, leanMean, leanSd, leagueChallenges }
   indexCached.set(level, index)
   return index
 }
@@ -242,6 +414,30 @@ export async function loadUmpire(id) {
     zoneCellsAAA: accuracyAAA ? umpireZoneCells(accuracyAAA.season, idxAaa.leagueShare) : null,
     accuracyPost,
     zoneCellsPost: accuracyPost ? umpireZoneCells(accuracyPost.season, idxMlb.leagueShare) : null,
+    // --- the Umpire Tendencies card, MLB only (see UmpireTendencies.jsx) ---
+    // `lean` is null below the ranking floor: the scale is a position within a
+    // pool, so an umpire who isn't ranked against that pool has no position on
+    // it. `watchArea` and `challenges` stand alone and survive that.
+    lean: idxMlb.leanById.get(String(id)) ?? null,
+    watchArea: accuracy ? umpireWatchArea(accuracy.season, idxMlb.leagueShare) : null,
+    challenges: challengesFor(accuracy?.season),
+    leagueChallenges: idxMlb.leagueChallenges,
+  }
+}
+
+// The ABS challenge pair for the card's two tiles, or null on a row set swept
+// before the challenge schema shipped. Absence, never zero — a game nobody
+// challenged and a game nobody counted are different facts (see
+// gen-umpire-accuracy.mjs's aggregate()). `challengeGames`, not `games`, is the
+// denominator: they are only equal once every row has been re-swept.
+function challengesFor(season) {
+  if (!season || season.challenges == null) return null
+  return {
+    perGame: season.challengesPerGame ?? null,
+    overturnRate: season.overturnRate ?? null,
+    total: season.challenges,
+    overturned: season.challengesOverturned ?? 0,
+    games: season.challengeGames ?? null,
   }
 }
 

@@ -1,6 +1,6 @@
 # 03 — ABS challenges + handedness split (generator + backfill)
 
-Status: `needs-triage`
+Status: `done` (shipped 2026-08-07)
 Phase: 2
 Blocked by: 02
 
