@@ -229,6 +229,45 @@ lines below it. **Do not import that module anywhere else.**
   so a surface with its own opinion still wins — which is how the mint card's
   un-minted preview stays graphite.
 
+## Addendum (2026-08-07) — a club may choose its own ink, and "Final" is gone
+
+Two smaller changes to the same stamp, neither touching the reveal gate.
+
+### A club's own pick, still floored the same way
+
+The winner's-darkest-brand-colour pick above is a good DEFAULT, not a promise
+that every club agrees with what "its" ink looks like. `src/lib/data/stamp-ink.json`
+now lets a club override it with a hex of its own choosing, picked in
+`/identity-lab`'s Stamp ink editor (`StampInkEditor.jsx`) and read at render
+time by `stampInkFor`'s new `overrideHex` option (`src/lib/stampInk.js`).
+
+The override does **not** exempt a club from the contrast floor argued for
+above — `deepenToContrast` still runs on it. That floor is a fact about what a
+stamp needs to read at hairline widths on cream paper, not a property of "the
+darkest thing a club owns"; a club's own pick needs it exactly as much as the
+automatic one does, so a light pick still deepens rather than shipping
+illegible. The editor shows both numbers — what was typed and what actually
+prints — so that deepening is never a silent surprise.
+
+`GameStamp.jsx` gained a second lab-only preview prop, `inkOverride`, the same
+shape as `placements`: any string the caller passes (including an empty one)
+wins over the landed store, so the editor can preview a draft or "what if I
+clear this" without saving first. Every real caller omits it.
+
+### "Final" said nothing a stamp wasn't already saying
+
+The footer inside the bottom lens (`stampArt.js`'s `stampLabel`) used to read
+"Final", optionally with extra-innings or doubleheader facts folded in. A
+stamp only ever exists for a game its owner already finished revealing
+(the spoiler-containment rule at the top of this file) — the artifact IS a
+final score, by construction, so printing the word added nothing the keepsake
+wasn't already saying by existing. It's gone; the footer now carries only the
+facts the ring and run totals don't — extra innings, a doubleheader's game
+number — and is empty (no footer text at all) for the ordinary nine-inning
+single game, which is most of them. `.scratch/game-stamps/designs/stamp-concepts.md`'s
+contact sheet still shows the old word; that document is a record of the
+design process, not a living spec, and is not being kept in sync with this.
+
 ## Alternatives considered
 
 - **Snap placement to a fixed grid of ten slots.** Rejected: only a slot index

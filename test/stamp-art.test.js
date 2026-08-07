@@ -201,21 +201,22 @@ test('both run totals drop together the moment either club reaches double digits
   assert.equal(runFontSize(12, 0), 48)
 })
 
-test('the footer label folds extras and a doubleheader game number into one line', () => {
-  assert.equal(stampLabel({ innings: 9, gameNumber: 1 }), 'Final')
-  assert.equal(stampLabel({ innings: 11, gameNumber: 1 }), 'Final / 11')
-  assert.equal(stampLabel({ innings: 9, gameNumber: 2 }), 'Final — GM 2')
-  assert.equal(stampLabel({ innings: 11, gameNumber: 2 }), 'Final / 11 — GM 2')
-  // A rain-shortened game is still nine-or-fewer, so it reads plainly.
-  assert.equal(stampLabel({ innings: 6, gameNumber: 1 }), 'Final')
-  assert.equal(stampLabel({}), 'Final')
+test('the footer label folds extras and a doubleheader game number into one line, and says nothing plain', () => {
+  // A stamp only exists for a game already revealed as final, so a plain
+  // nine-inning single game has nothing left to say here.
+  assert.equal(stampLabel({ innings: 9, gameNumber: 1 }), '')
+  assert.equal(stampLabel({ innings: 11, gameNumber: 1 }), '11 innings')
+  assert.equal(stampLabel({ innings: 9, gameNumber: 2 }), 'Game 2')
+  assert.equal(stampLabel({ innings: 11, gameNumber: 2 }), '11 innings — Game 2')
+  // A rain-shortened game is still nine-or-fewer, so it stays silent too.
+  assert.equal(stampLabel({ innings: 6, gameNumber: 1 }), '')
+  assert.equal(stampLabel({}), '')
 })
 
 test('the label steps down only as far as it has to', () => {
-  assert.deepEqual(labelType('Final'), { size: 9, tracking: 2.5 })
-  assert.deepEqual(labelType('Final / 11'), { size: 9, tracking: 2.5 })
-  assert.deepEqual(labelType('Final — GM 2'), { size: 8, tracking: 1.5 })
-  assert.deepEqual(labelType('Final / 11 — GM 2'), { size: 7, tracking: 1 })
+  assert.deepEqual(labelType('11 innings'), { size: 9, tracking: 2.5 })
+  assert.deepEqual(labelType('Game 2'), { size: 9, tracking: 2.5 })
+  assert.deepEqual(labelType('11 innings — Game 2'), { size: 7, tracking: 1 })
 })
 
 test('the ring date is the calendar day, not the reader’s time zone', () => {
@@ -337,7 +338,7 @@ test('extra innings are counted from the innings actually played', () => {
   const facts = revealStampFacts(feedFixture({ innings, awayRuns: 4, homeRuns: 6 }))
   assert.equal(facts.innings, 11)
   assert.equal(facts.homeBattedLast, true)
-  assert.equal(stampLabel(facts), 'Final / 11')
+  assert.equal(stampLabel(facts), '11 innings')
 })
 
 test('a tie carries no winner rather than inventing one', () => {

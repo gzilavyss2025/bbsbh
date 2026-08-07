@@ -1,4 +1,11 @@
 {
+  "105": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "113": {
     "marks": [
       {
@@ -62,6 +69,34 @@
       "milb-away": "cdn:cap"
     }
   },
+  "414": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "418": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "424": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "436": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "453": {
     "marks": [],
     "assignments": {
@@ -97,10 +132,24 @@
       "milb-away": "cdn:primary"
     }
   },
+  "507": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "512": {
     "marks": [],
     "assignments": {
       "milb-away": "cdn:base"
+    }
+  },
+  "521": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
     }
   },
   "531": {
@@ -148,7 +197,8 @@
       }
     ],
     "assignments": {
-      "milb-home": "primary1"
+      "milb-home": "primary1",
+      "milb-away": "primary1"
     }
   },
   "568": {
@@ -176,11 +226,36 @@
       "milb-away": "baseorangeonwhite"
     }
   },
+  "3712": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "5368": {
+    "marks": [
+      {
+        "slug": "primaryonlypoodle",
+        "name": "Primaryonlypoodle"
+      }
+    ],
+    "assignments": {
+      "milb-home": "primaryonlypoodle"
+    }
+  },
   "6324": {
     "marks": [],
     "assignments": {
       "milb-home": "cdn:cap",
       "milb-away": "cdn:cap"
+    }
+  },
+  "6482": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
     }
   }
 }

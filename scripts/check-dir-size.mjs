@@ -149,7 +149,14 @@ const BUDGETS = {
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
-  'src/lib': 47,
+  // +1 for logoCdn.js — the mlbstatic CDN base URL and per-variant paths,
+  // split out of teams.js so scripts/lib/mono-logo-art.mjs (plain Node, not a
+  // Vite module) can build the same URLs without importing teams.js's whole
+  // browser-side dependency graph. A leaf constants module, not a subsystem.
+  // +1 for stampInkTuning.js — the per-club stamp-ink override reader
+  // (src/lib/data/stamp-ink.json), same small reader/store-file pairing as
+  // the existing stampLogoTuning.js beside it, not a new subsystem.
+  'src/lib': 49,
   'src/screens': 38,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now

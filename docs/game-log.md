@@ -309,9 +309,13 @@ character.
 `src/components/logbook/GameStamp.jsx` is a tracing with no numbers of its own;
 the geometry is pure math in `src/lib/stampArt.js` (unit-tested), the ink in
 `src/lib/stampInk.js`, and per-club mark placement in `src/lib/stampLogoTuning.js`
-— tunable from the Identity Lab. **A stamp stores the game, never the art**, so it
-redraws from those numbers every time: retuning a club restyles every stamp of it
-already sitting in every user's collection, the moment the change ships.
+— tunable from the Identity Lab. The ink defaults to the winning club's darkest
+brand colour but a club may override it (`src/lib/stampInkTuning.js` +
+`src/lib/data/stamp-ink.json`, tuned from the Identity Lab's Stamp ink editor),
+still walked through the same contrast floor either way (ADR-0036). **A stamp
+stores the game, never the art**, so it redraws from those numbers every time:
+retuning a club restyles every stamp of it already sitting in every user's
+collection, the moment the change ships.
 
 ---
 

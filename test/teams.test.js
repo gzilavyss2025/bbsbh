@@ -25,6 +25,7 @@ import {
   mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
+  cityConnectMastheadUrl,
   MAIN_OVERRIDES,
   offDayTreatmentFor,
   isMlbTeamId,
@@ -316,6 +317,27 @@ test('mainOverrideLogoUrl is null for the one MAIN_USES_BASE_LOGO exception even
 
 test('mainOverrideLogoUrl resolves the Yankees\' procured main override, no longer a MAIN_USES_BASE_LOGO exception', () => {
   assert.equal(mainOverrideLogoUrl(147), '/team-logos/main-overrides/NYY.png')
+})
+
+// --------------------------------------------------------------------------
+// cityConnectMastheadUrl — a club's own override of the mark its themed
+// .metricbar mastheads draw while it's wearing City Connect (ADR-0031),
+// normally the club-wide precomputed knockout SVG. Reads logo-art.json's
+// masthead-city-connect entries the exact way mainOverrideLogoUrl reads
+// main-overrides — disk presence alone, no companion flag to keep in sync.
+// --------------------------------------------------------------------------
+test('cityConnectMastheadUrl is null for a club with no override uploaded yet', () => {
+  assert.equal(cityConnectMastheadUrl(158), null) // Brewers — no file procured
+})
+
+test('cityConnectMastheadUrl is null for a club with no City Connect uniform at all', () => {
+  assert.equal(cityConnectMastheadUrl(147), null) // Yankees — opted out of the program (NO_CITY_CONNECT)
+  assert.equal(cityConnectMastheadUrl(112), null) // Cubs — City Connect moved to Alternate 2
+})
+
+test('cityConnectMastheadUrl is null for an id with no abbreviation to file art under', () => {
+  assert.equal(cityConnectMastheadUrl(999999), null)
+  assert.equal(cityConnectMastheadUrl(null), null)
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and

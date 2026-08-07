@@ -79,6 +79,15 @@
   filter: brightness(0);
 }
 
+/* A club's own uploaded City Connect masthead override (teams.js's
+   cityConnectMastheadUrl) is already finished art, deliberately colored for
+   its own bar — not a flat silhouette the theme's ink re-inks, but the
+   club's actual pick. Higher specificity than the dark-re-ink rule above
+   (two classes, not one) rather than an !important. */
+.is-themed--dark .metricbar__logo.metricbar__logo--custom {
+  filter: none;
+}
+
 /* The box score's ABS and Defense cards (.bs__abscard/.bs__defensecard,
    BoxScore.jsx) carry no club mark of their own — just a text title — so
    unlike .metricbar above there's no light/dark re-inking to do, only the

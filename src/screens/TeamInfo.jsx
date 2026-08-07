@@ -53,7 +53,7 @@ import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, cityConnectMastheadUrl, isMlbTeamId } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -123,6 +123,17 @@ export function TeamInfo({
     () => headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment)),
     [oppMeta.id, oppSide, oppTreatment],
   )
+  // A club's own uploaded override for the mark ITS mastheads draw while it's
+  // wearing City Connect (teams.js's cityConnectMastheadUrl) — null the
+  // moment either half of that isn't true, so TeamLogo's normal club-wide
+  // mono mark is what every OTHER jersey and every club with no override
+  // still draws. Identity-only inputs (teamId, treatment), same invariant
+  // headerThemeFor keeps just above — MiLB has no City Connect vocabulary at
+  // all, hence the isMlbTeamId guard.
+  const ownMastheadOverrideUrl =
+    isMlbTeamId(meta.id) && treatment === 'city-connect' ? cityConnectMastheadUrl(meta.id) : null
+  const oppMastheadOverrideUrl =
+    isMlbTeamId(oppMeta.id) && oppTreatment === 'city-connect' ? cityConnectMastheadUrl(oppMeta.id) : null
 
   return (
     <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
@@ -171,6 +182,8 @@ export function TeamInfo({
         feed={feed}
         side={side}
         oppTheme={oppTheme}
+        ownMastheadOverrideUrl={ownMastheadOverrideUrl}
+        oppMastheadOverrideUrl={oppMastheadOverrideUrl}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
@@ -358,6 +371,8 @@ function TeamSections({
   feed,
   side,
   oppTheme,
+  ownMastheadOverrideUrl,
+  oppMastheadOverrideUrl,
   oppPitcherLine,
   prospectsData,
   rookiesData,
@@ -472,6 +487,7 @@ function TeamSections({
         teamName={oppMeta.teamName}
         orgTeamId={oppOrgTeamId}
         theme={oppTheme}
+        mastheadOverrideUrl={oppMastheadOverrideUrl}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
@@ -494,7 +510,8 @@ function TeamSections({
                 size={22}
                 variant="mono"
                 crop="bar"
-                className="metricbar__logo"
+                overrideUrl={ownMastheadOverrideUrl}
+                className={`metricbar__logo${ownMastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
               />
             }
           >
@@ -660,7 +677,8 @@ function TeamSections({
                   size={22}
                   variant="mono"
                   crop="bar"
-                  className="metricbar__logo"
+                  overrideUrl={oppMastheadOverrideUrl}
+                  className={`metricbar__logo${oppMastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
                 />
               }
             />
@@ -705,6 +723,7 @@ function OpposingStarterCard({
   teamName,
   orgTeamId,
   theme,
+  mastheadOverrideUrl,
   prospectsData,
   rookiesData,
   callouts,
@@ -726,7 +745,8 @@ function OpposingStarterCard({
             size={22}
             variant="mono"
             crop="bar"
-            className="metricbar__logo"
+            overrideUrl={mastheadOverrideUrl}
+            className={`metricbar__logo${mastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
           />
         }
       />

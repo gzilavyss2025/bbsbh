@@ -158,13 +158,44 @@
    white art, re-inked to black on a light bar (.idlab__barmock--darkmark, the
    lab's copy of .is-themed--dark .metricbar__logo). Same caveat as there: this
    is not the brightness(0) invert(1) whitening ADR-0031 forbids, because the
-   art arrives already flat. */
+   art arrives already flat.
+   `crop="bar"` (TeamLogo.jsx) gives the wrapper this explicit height so it
+   bleeds to .idlab__barmock's own full height, 7% clipped off its own top and
+   bottom (07-team-logo-and-buttons.css) — since .idlab__barmock's height is
+   already an explicit px value rather than auto-computed, no negative-margin
+   padding-cancel trick is needed here the way .metricbar__logo needs one. */
 .idlab__barmock__logo {
   flex: 0 0 auto;
+  height: 100%;
 }
 
 .idlab__barmock--darkmark .idlab__barmock__logo {
   filter: brightness(0);
+}
+
+/* The City Connect bar's own uploaded override (HeaderBarMock's overrideUrl)
+   is finished art, not a silhouette to re-ink — same reasoning and the same
+   specificity trick (two classes beat one) as .metricbar__logo--custom in
+   09-team-info.css, this file's copy of the real masthead rule. */
+.idlab__barmock--darkmark .idlab__barmock__logo.idlab__barmock__logo--custom {
+  filter: none;
+}
+
+.idlab__barmastheadhint {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin: var(--space-2) 0 0;
+}
+
+/* LogoDropZone's own shell (.colorlab__logodrop, 15-team-color-lab.css) is
+   sized for a small square tile — centered, capped at 190px. The bar mock it
+   wraps here is the full-width bar, not a tile, so both constraints have to
+   go: stretch to the column's width instead of shrinking to content, and
+   drop the cap so the bar reads the same as it does everywhere else in this
+   panel. */
+.idlab__barunit .colorlab__logodrop {
+  align-items: stretch;
+  max-width: none;
 }
 
 /* The knockout-mark picker: the club's real art on the left with every shape
@@ -201,7 +232,8 @@
    screens/identity-lab/editors/LogoRecolorEditor.jsx. */
 .idlab__monoink,
 .idlab__recolor,
-.idlab__stampplace {
+.idlab__stampplace,
+.idlab__stampink {
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -214,6 +246,38 @@
    need the room, and they're only comparable at one size. */
 .idlab__stampplace {
   margin-top: var(--space-4);
+}
+
+/* Stamp ink — one preview stamp beside its one field, unlike placement's two
+   side-by-side slots: there's one ink for the whole club, not one per side.
+   screens/identity-lab/editors/StampInkEditor.jsx. */
+.idlab__stampink {
+  margin-top: var(--space-4);
+}
+
+.idlab__stampinkrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.idlab__stampinkfield {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+
+.idlab__stampinkfield label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.idlab__stampinkfield code {
+  font-family: var(--font-mono);
 }
 
 .idlab__stampplacewarn {
@@ -520,6 +584,45 @@
   color: var(--accent-negative);
 }
 
+/* Which CDN mark feeds the conversion (SOURCE_OPTIONS) — a segmented toggle,
+   not a select, since there are only four stops to compare by eye. */
+.idlab__monoinksource {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-2) 0;
+}
+
+.idlab__monoinksourcelabel {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin-right: var(--space-1);
+}
+
+.idlab__monoinksourcebtn {
+  height: 22px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-size: var(--fs-compact);
+  cursor: pointer;
+}
+
+.idlab__monoinksourcebtn--active {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-semibold);
+}
+
+.idlab__monoinksourcebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .idlab__monoinkparts {
   display: flex;
   flex-wrap: wrap;
@@ -534,7 +637,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-1) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
+  border: var(--bw-heavy) solid var(--border-rule); /* always 2px — see --pinned */
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   font-size: var(--fs-compact);
@@ -542,15 +645,26 @@
   cursor: pointer;
 }
 
-/* A pinned shape is the whole point of the row — it reads as decided, while an
-   automatic one stays quiet. */
+/* Pinned reads as decided, automatic stays quiet — color only, never a
+   border-WIDTH change: this list wraps (.idlab__monoinkparts), so a pill that
+   resizes on its own verdict flip shoves every pill after it to a new spot
+   mid-click, turning "click this pill" into "click whichever pill slid under
+   the pointer" a moment later. */
 .idlab__monoinkpart--pinned {
   border-color: var(--accent-primary);
-  border-width: var(--bw-heavy);
 }
 
 .idlab__monoinkpart--knockout .idlab__monoinkpartverdict {
   color: var(--text-caption);
+}
+
+/* Fixed to fit "Knockout" (measured, not a `ch` guess — `ch` sizes off the
+   font's '0' glyph, narrower than this font's actual word width) — the other
+   half of the no-resize-on-click fix above; without it the TEXT still widens
+   the pill on Ink -> Knockout. */
+.idlab__monoinkpartverdict {
+  display: inline-block;
+  min-width: 76px;
 }
 
 .idlab__monoinkswatch {

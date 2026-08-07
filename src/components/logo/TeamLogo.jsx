@@ -36,20 +36,30 @@ export function TeamLogo({
   // for them `loading="lazy"` defers the largest visible images past the
   // initial layout pass, delaying the page's LCP for no bandwidth saved.
   eager = false,
+  // A caller's own art to try FIRST, ahead of `variant` entirely — the City
+  // Connect masthead override (teams.js's cityConnectMastheadUrl) is the one
+  // caller today. Absent for every other caller, which is what keeps this
+  // whole prop invisible to them. Still just the first rung of the same
+  // fallback chain below: if it 404s, `onError` drops straight to the normal
+  // `variant` resolution exactly as a failed non-base variant drops to
+  // 'base' — so a club whose override file goes missing quietly gets its
+  // ordinary mark back instead of a broken image.
+  overrideUrl = null,
 }) {
   const cropSquare = crop === true
   const cropBar = crop === 'bar'
   // 'stage' tracks how far down the fallback chain we are for the current
-  // (teamId, variant). Reset whenever either changes so a re-picked mark starts
-  // fresh instead of inheriting a prior failure.
-  const [stage, setStage] = useState('variant')
+  // (teamId, variant, overrideUrl). Reset whenever any of them change so a
+  // re-picked mark — or a freshly re-uploaded override — starts fresh
+  // instead of inheriting a prior failure.
+  const [stage, setStage] = useState(overrideUrl ? 'override' : 'variant')
   // Reset computed during render (React's "adjust state while rendering"
   // pattern) rather than in an effect — see Headshot.jsx for the same shape.
-  const identityKey = `${teamId}|${variant}`
+  const identityKey = `${teamId}|${variant}|${overrideUrl ?? ''}`
   const [prevIdentityKey, setPrevIdentityKey] = useState(identityKey)
   if (identityKey !== prevIdentityKey) {
     setPrevIdentityKey(identityKey)
-    setStage('variant')
+    setStage(overrideUrl ? 'override' : 'variant')
   }
 
   // A single-letter monogram fallback, not a re-uppercase of displayed text.
@@ -57,7 +67,12 @@ export function TeamLogo({
   const bwClass = bw ? 'teamlogo--bw' : ''
 
   const effectiveVariant = stage === 'variant' ? variant : 'base'
-  const url = stage === 'monogram' ? null : teamLogoUrl(teamId, effectiveVariant)
+  const url =
+    stage === 'override'
+      ? overrideUrl
+      : stage === 'monogram'
+        ? null
+        : teamLogoUrl(teamId, effectiveVariant)
 
   // A wordmark's own SVG is wide-and-short (verified live across the league:
   // ratios from ~1.75:1 up to ~7:1 width:height, never square), unlike every
@@ -77,8 +92,14 @@ export function TeamLogo({
     : { width: size, height: size }
 
   const onError = () => {
-    // A non-base variant that fails drops to base; anything else is unrecoverable.
-    setStage((s) => (s === 'variant' && variant !== 'base' ? 'base' : 'monogram'))
+    // A failed override drops to the normal variant chain, which then gets
+    // its own shot at 'base' before giving up — a non-base variant that
+    // fails drops to base; anything else is unrecoverable.
+    setStage((s) => {
+      if (s === 'override') return 'variant'
+      if (s === 'variant' && variant !== 'base') return 'base'
+      return 'monogram'
+    })
   }
 
   if (!url) {

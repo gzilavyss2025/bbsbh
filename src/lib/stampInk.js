@@ -56,7 +56,10 @@ export const MIN_INK_CONTRAST = 4.5
 
 const HEX = /^#[0-9a-f]{6}$/i
 
-const isHex = (value) => typeof value === 'string' && HEX.test(value)
+// Exported for the lab editor (validating a draft before it previews/saves)
+// and the dev save endpoint's store validator, so a hex is "valid" the same
+// way in all three places.
+export const isHex = (value) => typeof value === 'string' && HEX.test(value)
 
 function toRgb(hex) {
   const h = hex.slice(1)
@@ -147,11 +150,23 @@ export function stampWinnerId(game) {
 }
 
 // The whole answer: the hex a stamp for `game` is drawn in, or null for "use
-// the book's own ink" — no winner, or a club with no colour on file.
-export function stampInkFor(game, { paper = STAMP_PAPER } = {}) {
+// the book's own ink" — no winner, or a club with no colour on file (and no
+// override either).
+//
+// `overrideHex` is the winning club's own pick (src/lib/stampInkTuning.js),
+// resolved by the caller rather than read here — this module stays a pure
+// function of `game` plus whatever ink candidates it's handed, the same
+// discipline stampArt.js's markTransform keeps for stamp-logo-tuning.json.
+// An override still walks through `deepenToContrast`: ADR-0036's contrast
+// floor is not a property of "the darkest thing a club owns", it is a
+// property of what a stamp needs to read at hairline widths, and a club's
+// own pick needs it exactly as much as the automatic one does. A malformed
+// or absent override (anything `isHex` rejects) just falls through to the
+// automatic pick, same as no override at all.
+export function stampInkFor(game, { paper = STAMP_PAPER, overrideHex } = {}) {
   const winnerId = stampWinnerId(game)
   if (winnerId == null) return null
-  const darkest = darkestInk(inkCandidates(winnerId))
-  if (!darkest) return null
-  return deepenToContrast(darkest, paper)
+  const chosen = isHex(overrideHex) ? overrideHex : darkestInk(inkCandidates(winnerId))
+  if (!chosen) return null
+  return deepenToContrast(chosen, paper)
 }

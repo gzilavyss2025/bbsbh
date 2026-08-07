@@ -2,6 +2,7 @@
 
 import { readableTextColor } from './contrast.js'
 import { isFriday } from './dates.js'
+import { LOGO_CDN_BASE as LOGO_BASE, LOGO_VARIANTS } from './logoCdn.js'
 import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
 import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
 import { customMarkFor } from './customMarks.js'
@@ -175,28 +176,21 @@ export const MILB_LEVELS = [
 //
 // To pull a reference logo at any size for sketching, open the URL directly —
 // e.g. https://www.mlbstatic.com/team-logos/158.svg for the Brewers (158).
-const LOGO_BASE = 'https://www.mlbstatic.com/team-logos'
-
-// The same CDN serves three *distinct* marks per club — the cap logo, the full
-// primary logo, and the script wordmark — each keyed by the team id we already
-// carry, under a subfolder path. Verified live across MLB and MiLB (every level
-// returns real, different art, not the base logo echoed back). This gives the
-// sketcher more than one thing to draw for a team instead of the same roundel
-// every time. We use the `-on-light` treatment throughout since every surface
-// that renders a logo is the app's light "paper"; the one dark surface, the
-// navy section mastheads, wears the locally precomputed `mono` mark below
-// rather than the CDN's own `-on-dark` variant, which keeps each club's REAL
-// colors (verified live: only a mostly-monochrome mark like the Yankees'
-// actually turns white there; a multicolor mark like the Brewers' does not) —
-// not the uniform one-color lockup this app wants. There is NO alternate /
-// per-uniform / home-road mark on this CDN (those paths 404), so this is the
-// full set. `base` is the plain `{id}.svg` default that every existing caller
-// already uses.
-export const LOGO_VARIANTS = [
-  { key: 'primary', label: 'Primary', path: 'team-primary-on-light' },
-  { key: 'cap', label: 'Cap', path: 'team-cap-on-light' },
-  { key: 'wordmark', label: 'Wordmark', path: 'team-wordmark-on-light' },
-]
+// The base URL and the three *distinct* per-variant marks a club's page draws
+// from (the cap logo, the full primary logo, and the script wordmark) live in
+// logoCdn.js — a leaf module scripts/lib/mono-logo-art.mjs (plain Node, not a
+// Vite module) also imports, so the app and the mono-knockout generator can
+// never build these URLs two different ways. We use the `-on-light` treatment
+// throughout since every surface that renders a logo is the app's light
+// "paper"; the one dark surface, the navy section mastheads, wears the
+// locally precomputed `mono` mark below rather than the CDN's own `-on-dark`
+// variant, which keeps each club's REAL colors (verified live: only a
+// mostly-monochrome mark like the Yankees' actually turns white there; a
+// multicolor mark like the Brewers' does not) — not the uniform one-color
+// lockup this app wants. There is NO alternate / per-uniform / home-road mark
+// on this CDN (those paths 404), so this is the full set. `base` is the plain
+// `{id}.svg` default that every existing caller already uses.
+export { LOGO_VARIANTS }
 
 // The `mono` variant is NOT on this CDN — it's the one-color knockout mark the
 // navy section mastheads wear, precomputed from the base art by
@@ -262,6 +256,24 @@ const NO_CITY_CONNECT = new Set([
 
 export function hasCityConnect(teamId) {
   return !NO_CITY_CONNECT.has(teamId)
+}
+
+// A club's own uploaded override for the mark its themed `.metricbar`
+// mastheads draw while it's wearing City Connect — normally the club-wide
+// precomputed knockout SVG every masthead shares (ADR-0031's `mono` variant),
+// here swapped for one club's own PNG, one bar only. Read the same way
+// mainOverrideLogoUrl reads main-overrides/: off the manifest upload rewrites
+// on every save (logo-art.json, ADR-0029), so a fresh upload needs no
+// companion code change to take effect. Null for a club with no file there
+// (the overwhelming majority) or no City Connect uniform at all — callers
+// fall back to the normal club-wide mono mark exactly as an absent
+// mainOverrideLogoUrl falls back to the CDN base logo.
+export function cityConnectMastheadUrl(teamId) {
+  if (!hasCityConnect(teamId)) return null
+  const abbr = teamAbbr({ id: teamId })
+  if (!abbr) return null
+  const entries = LOGO_ART['masthead-city-connect'] ?? {}
+  return entries[`${abbr}.png`] ? `/team-logos/masthead-city-connect/${abbr}.png` : null
 }
 
 // A club's own curated pick for its home/away predictive fallback

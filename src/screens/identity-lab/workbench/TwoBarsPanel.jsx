@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
+import { cityConnectMastheadUrl } from '../../../lib/teams.js'
 import { HeaderBarMock, HeaderFields, UmpireCall } from '../editors/HeaderPreview.jsx'
+import { LogoDropZone } from '../LogoDropZone.jsx'
 import { MarkImage } from './MarkImage.jsx'
 
 // A club has two header bars, not one per jersey — Main's, which every
@@ -26,8 +29,30 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
   )
 }
 
+// The City Connect bar's own escape hatch: a club may drop in its own PNG
+// for the mark that bar's mastheads draw (teams.js's cityConnectMastheadUrl),
+// in place of the club-wide knockout mark every other bar still shares. Bumps
+// on every successful upload so the mock re-fetches the just-written bytes
+// instead of a stale browser cache of the same URL — same `?v=` trick
+// JerseyBench's own art uploads use.
 function BarUnit({ unit, onHover, onSelectWearer }) {
   const { header } = unit
+  const isCityConnect = unit.slot === 'city-connect'
+  const [mastheadVersion, setMastheadVersion] = useState(0)
+  const rawMastheadUrl = isCityConnect ? cityConnectMastheadUrl(unit.teamId) : null
+  const mastheadUrl =
+    rawMastheadUrl && mastheadVersion > 0 ? `${rawMastheadUrl}?v=${mastheadVersion}` : rawMastheadUrl
+
+  const mock = (
+    <HeaderBarMock
+      teamId={unit.teamId}
+      name={unit.name}
+      colors={header.colors}
+      unset={header.unset}
+      overrideUrl={mastheadUrl}
+    />
+  )
+
   return (
     <div
       className="idlab__barunit"
@@ -58,7 +83,27 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
         <CopyIconButton text={header.copyText} label={`Copy ${unit.name} ${unit.label} header-color context`} />
       </div>
 
-      <HeaderBarMock teamId={unit.teamId} name={unit.name} colors={header.colors} unset={header.unset} />
+      {isCityConnect ? (
+        <>
+          <LogoDropZone
+            teamId={unit.teamId}
+            treatment="city-connect-masthead"
+            label={`${unit.name} City Connect masthead mark`}
+            onUploaded={() => setMastheadVersion((v) => v + 1)}
+          >
+            {mock}
+          </LogoDropZone>
+          <p className="idlab__barmastheadhint">
+            {mastheadUrl
+              ? 'Custom mark — this bar draws it instead of the automatic knockout mark.'
+              : 'Automatic knockout mark.'}{' '}
+            Drop a 512×512 PNG, transparent background, under 400 KB — colors print as-is (not
+            auto-recolored), so paint it in whatever reads against this exact bar.
+          </p>
+        </>
+      ) : (
+        mock
+      )}
 
       <div className="idlab__wearers">
         {unit.wearers.map((wearer) => (

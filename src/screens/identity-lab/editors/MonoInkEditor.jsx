@@ -8,6 +8,7 @@ import {
 } from '../../../lib/logoMono.js'
 import { monoInkFor, monoInkStore } from '../../../lib/monoInk.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
+import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 
 // Pick, by eye, which SHAPES of a club's logo are the mark and which are the
@@ -27,23 +28,52 @@ import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 // Dev-only, like the rest of the lab (ADR-0029): the save endpoint only exists
 // under `vite dev`, and the screen itself is DEV-gated in App.jsx.
 
-const LOGO_CDN = 'https://www.mlbstatic.com/team-logos'
-
-// Clicking cycles rather than opening a menu — with two verdicts and an
-// "unpinned" state, a three-step cycle is one gesture per shape and reads
-// straight off the preview.
-const NEXT_VERDICT = { auto: 'ink', ink: 'knockout', knockout: 'auto' }
-
+// Clicking a shape flips it straight between the two verdicts — whichever way
+// it currently reads (automatic or already pinned) is the one thing the click
+// isn't, so there is no third "back to automatic" stop to click past on the
+// way to the one you want. "Reset to automatic" (below) is the bulk undo.
 const VERDICT_LABEL = {
   auto: 'Automatic',
   ink: 'Ink — part of the mark',
   knockout: 'Knockout — the paper behind it',
 }
 
+// Which CDN mark feeds the conversion — 'base' is every club's plain
+// `{id}.svg`, and the other three are the same alternates the sketcher offers
+// (teams.js's LOGO_VARIANTS). Exists because a handful of MiLB clubs' base
+// mark is worse art than an alternate on the same CDN (lower-res, a busier
+// crest that converts to knockout worse than the cleaner mark) — picking a
+// different source here is scripts/lib/mono-logo-art.mjs's sourceVariantFor
+// escape hatch, picked by eye the same way ink/knockout pins are.
+const SOURCE_OPTIONS = [{ key: 'base', label: 'Base' }, ...LOGO_VARIANTS.map((v) => ({ key: v.key, label: v.label }))]
+
 // Navy is what an unthemed club's masthead actually is, and most of the app's
 // mastheads are unthemed (header coverage is partial by design), so the mark
 // gets judged there as well as on this club's own bar.
 const DEFAULT_CHROME_BAR = '#12233F'
+
+// Rendered whether the current source's art is still loading, failed, or
+// loaded — switching sources is the point of this row, so it can't disappear
+// the moment a click starts a refetch, or comparing Base against Primary
+// means waiting out a loading flash between every pair of clicks.
+function SourcePicker({ sourceVariant, onChange }) {
+  return (
+    <div className="idlab__monoinksource" role="group" aria-label="Source art">
+      <span className="idlab__monoinksourcelabel">Source</span>
+      {SOURCE_OPTIONS.map((opt) => (
+        <button
+          key={opt.key}
+          type="button"
+          className={`idlab__monoinksourcebtn${sourceVariant === opt.key ? ' idlab__monoinksourcebtn--active' : ''}`}
+          aria-pressed={sourceVariant === opt.key}
+          onClick={() => onChange(opt.key)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 export function MonoInkEditor({ teamId, name }) {
   // Both forms of the art, and the split between them matters.
@@ -60,14 +90,24 @@ export function MonoInkEditor({ teamId, name }) {
   // only ever removes script/foreignObject-class elements and `on*` attributes,
   // none of which are drawable, so the two forms enumerate the same shapes in
   // the same order.
+  //
+  // Which source feeds all of this: `sourceOverride` stays null until the
+  // picker below is actually clicked, same "null means untouched" shape as
+  // `edited` below it — the saved choice (or 'base') is the baseline rather
+  // than a copy of it seeded into state.
+  const landed = monoInkFor(teamId)
+  const landedSource = landed?.source ?? 'base'
+  const [sourceOverride, setSourceOverride] = useState(null)
+  const sourceVariant = sourceOverride ?? landedSource
+
   const art = useAsync(async () => {
-    const res = await fetch(`${LOGO_CDN}/${teamId}.svg`)
-    if (!res.ok) throw new Error(`no art on the CDN for team ${teamId} (HTTP ${res.status})`)
+    const res = await fetch(teamLogoUrl(teamId, sourceVariant))
+    if (!res.ok) throw new Error(`no ${sourceVariant} art on the CDN for team ${teamId} (HTTP ${res.status})`)
     const raw = await res.text()
     const safe = sanitizeSvgMarkup(raw)
     if (!safe) throw new Error(`this club's art didn't parse as SVG`)
     return { raw, safe }
-  }, [teamId])
+  }, [teamId, sourceVariant])
 
   const source = art.data?.raw ?? null
   const safe = art.data?.safe ?? null
@@ -77,8 +117,9 @@ export function MonoInkEditor({ teamId, name }) {
 
   // Saved pins are only adopted when they were picked against THIS art — the
   // same fingerprint rule the generator applies (src/lib/monoInk.js). A club
-  // whose art moved starts from automatic here rather than from answers that
-  // now point at different shapes.
+  // whose art moved (a rebrand, or just switching the source picker above)
+  // starts from automatic here rather than from answers that now point at
+  // different shapes.
   //
   // `edited` stays null until something is actually clicked, so the landed set
   // is the baseline rather than a copy of it made in an effect: the art arrives
@@ -87,7 +128,6 @@ export function MonoInkEditor({ teamId, name }) {
   // (`key`), which is what makes "null means untouched" safe across teams.
   const [edited, setEdited] = useState(null)
   const [saveState, setSaveState] = useState(null)
-  const landed = monoInkFor(teamId)
   const landedStale = Boolean(landed?.art && fingerprint && landed.art !== fingerprint)
   const savedPins = useMemo(
     () => (landed && !landedStale ? landed.parts : {}),
@@ -100,19 +140,35 @@ export function MonoInkEditor({ teamId, name }) {
     [source, teamId, pins],
   )
 
-  const dirty = useMemo(() => {
+  const pinsDirty = useMemo(() => {
     const keys = new Set([...Object.keys(savedPins), ...Object.keys(pins)])
     return [...keys].some((k) => savedPins[k] !== pins[k])
   }, [savedPins, pins])
+  const dirty = pinsDirty || sourceVariant !== landedSource
 
+  // A click always flips straight to the OTHER verdict from whatever this
+  // shape currently reads as — its own pin if it has one, else the automatic
+  // classifier's call — never routing back through a third "unpinned" stop.
+  // "Reset to automatic" (below) is the only way back to unpinned, in bulk.
   function cycle(index) {
     setEdited((prev) => {
-      const next = { ...(prev ?? savedPins) }
-      const verdict = NEXT_VERDICT[next[index] ?? 'auto']
-      if (verdict === 'auto') delete next[String(index)]
-      else next[String(index)] = verdict
-      return next
+      const base = prev ?? savedPins
+      const current = base[index] ?? parts.find((p) => p.index === index)?.auto ?? 'ink'
+      return { ...base, [String(index)]: current === 'ink' ? 'knockout' : 'ink' }
     })
+    setSaveState(null)
+  }
+
+  // Switching the source picker points the whole editor at different art —
+  // shape indices from the old source don't mean anything against it, so any
+  // in-progress (unsaved) pins are dropped rather than silently misapplied to
+  // whatever shape happens to share that index in the new art. Landed pins
+  // aren't touched here: they're keyed to their own fingerprint and the
+  // `landedStale` check above already stops them from applying to the wrong
+  // shapes — this only clears the draft this session made.
+  function changeSource(key) {
+    setSourceOverride(key)
+    setEdited(null)
     setSaveState(null)
   }
 
@@ -120,8 +176,18 @@ export function MonoInkEditor({ teamId, name }) {
     setSaveState({ kind: 'busy', text: 'Saving' })
     const store = structuredClone(monoInkStore())
     const key = String(teamId)
-    if (Object.keys(pins).length === 0) delete store[key]
-    else store[key] = { name, art: fingerprint, parts: pins, ...(store[key]?.note ? { note: store[key].note } : {}) }
+    const noPins = Object.keys(pins).length === 0
+    const noSourceOverride = sourceVariant === 'base'
+    if (noPins && noSourceOverride) delete store[key]
+    else {
+      store[key] = {
+        name,
+        art: fingerprint,
+        parts: pins,
+        ...(noSourceOverride ? {} : { source: sourceVariant }),
+        ...(store[key]?.note ? { note: store[key].note } : {}),
+      }
+    }
 
     if (!(await saveStores([{ key: 'mono-ink', body: store }]))) {
       setSaveState({ kind: 'error', text: 'could not write mono-ink.json — is `npm run dev` running?' })
@@ -137,10 +203,16 @@ export function MonoInkEditor({ teamId, name }) {
     setSaveState({ kind: 'ok', text: `saved — ${result.file} rebuilt` })
   }
 
-  if (art.loading) return <Panel>Loading the club mark…</Panel>
+  if (art.loading) {
+    return (
+      <Panel sourceVariant={sourceVariant} onChangeSource={changeSource}>
+        Loading the club mark…
+      </Panel>
+    )
+  }
   if (art.error || !picker) {
     return (
-      <Panel>
+      <Panel sourceVariant={sourceVariant} onChangeSource={changeSource}>
         {art.error?.message ?? 'This art has no shapes to pick from — the app falls back to the full-color mark.'}
       </Panel>
     )
@@ -164,6 +236,8 @@ export function MonoInkEditor({ teamId, name }) {
           Save mark
         </button>
       </div>
+
+      <SourcePicker sourceVariant={sourceVariant} onChange={changeSource} />
 
       {landedStale && (
         <p className="idlab__monoinkwarn">
@@ -213,10 +287,7 @@ export function MonoInkEditor({ teamId, name }) {
                   aria-hidden="true"
                 />
                 <span className="idlab__monoinkpartnum">{part.index + 1}</span>
-                <span className="idlab__monoinkpartverdict">
-                  {effective === 'ink' ? 'Ink' : 'Knockout'}
-                  {verdict === 'auto' ? ' (auto)' : ''}
-                </span>
+                <span className="idlab__monoinkpartverdict">{effective === 'ink' ? 'Ink' : 'Knockout'}</span>
               </button>
             </li>
           )
@@ -236,12 +307,13 @@ function monoDataUrl(mono) {
   return `data:image/svg+xml,${encodeURIComponent(mono)}`
 }
 
-function Panel({ children }) {
+function Panel({ sourceVariant, onChangeSource, children }) {
   return (
     <section className="idlab__monoink" aria-label="Knockout mark">
       <div className="colorlab__wpapreviewhead">
         <span className="colorlab__wpapreviewlabel">Knockout mark</span>
       </div>
+      <SourcePicker sourceVariant={sourceVariant} onChange={onChangeSource} />
       <p className="idlab__monoinkhint">{children}</p>
     </section>
   )

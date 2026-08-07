@@ -1,16 +1,67 @@
 {
+  "102": {
+    "name": "Round Rock Express",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 19,
+        "offsetY": 12,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -13,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "103": {
+    "name": "Lake Elsinore Storm",
+    "treatments": {
+      "away": {
+        "scale": 1.35,
+        "offsetX": 1,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.35,
+        "offsetX": 8,
+        "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
+  "105": {
+    "name": "Sacramento River Cats",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 12,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -18,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "108": {
     "name": "Los Angeles Angels",
     "treatments": {
       "away": {
-        "scale": 0.92,
-        "offsetX": 32,
+        "scale": 0.97,
+        "offsetX": 28,
         "offsetY": 0,
         "rotation": 0
       },
       "home": {
-        "scale": 0.92,
-        "offsetX": -17,
+        "scale": 0.98,
+        "offsetX": -11,
         "offsetY": 0,
         "rotation": 0
       }
@@ -88,15 +139,15 @@
     "name": "Cincinnati Reds",
     "treatments": {
       "away": {
-        "scale": 0.71,
-        "offsetX": 20,
-        "offsetY": 15,
+        "scale": 0.96,
+        "offsetX": 18,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.69,
-        "offsetX": -15,
-        "offsetY": 14,
+        "scale": 0.88,
+        "offsetX": -25,
+        "offsetY": 10,
         "rotation": 0
       }
     }
@@ -174,14 +225,14 @@
     "treatments": {
       "away": {
         "scale": 0.77,
-        "offsetX": 32,
+        "offsetX": 28,
         "offsetY": 14,
         "rotation": 0
       },
       "home": {
-        "scale": 0.73,
-        "offsetX": -17,
-        "offsetY": 0,
+        "scale": 0.86,
+        "offsetX": -8,
+        "offsetY": 12,
         "rotation": 0
       }
     }
@@ -207,13 +258,13 @@
     "name": "Washington Nationals",
     "treatments": {
       "away": {
-        "scale": 0.72,
-        "offsetX": 20,
+        "scale": 0.83,
+        "offsetX": 14,
         "offsetY": 7,
         "rotation": 0
       },
       "home": {
-        "scale": 0.72,
+        "scale": 0.83,
         "offsetX": -15,
         "offsetY": 6,
         "rotation": 0
@@ -377,14 +428,14 @@
     "name": "Toronto Blue Jays",
     "treatments": {
       "away": {
-        "scale": 0.8,
-        "offsetX": 17,
-        "offsetY": 18,
+        "scale": 0.88,
+        "offsetX": 14,
+        "offsetY": 10,
         "rotation": 0
       },
       "home": {
-        "scale": 0.85,
-        "offsetX": -2,
+        "scale": 0.88,
+        "offsetX": -9,
         "offsetY": 10,
         "rotation": 0
       }
@@ -394,15 +445,15 @@
     "name": "Minnesota Twins",
     "treatments": {
       "away": {
-        "scale": 0.87,
+        "scale": 0.9,
         "offsetX": 13,
-        "offsetY": 13,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.87,
+        "scale": 0.9,
         "offsetX": -10,
-        "offsetY": 13,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -427,6 +478,12 @@
   "144": {
     "name": "Atlanta Braves",
     "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 10,
+        "offsetY": 0,
+        "rotation": 0
+      },
       "home": {
         "scale": 1,
         "offsetX": -22,
@@ -490,15 +547,15 @@
     "name": "Milwaukee Brewers",
     "treatments": {
       "away": {
-        "scale": 0.9,
-        "offsetX": 17,
+        "scale": 0.94,
+        "offsetX": 13,
         "offsetY": 9,
         "rotation": 0,
         "note": "The reference entry: every field at its default, i.e. exactly how an untuned club draws. Kept so the store is never empty and so the shape a Save writes stays pinned by test/identity-lab-stores.test.js."
       },
       "home": {
-        "scale": 0.9,
-        "offsetX": -10,
+        "scale": 0.94,
+        "offsetX": -6,
         "offsetY": 9,
         "rotation": 0,
         "note": "Same as the away side above — the baseline, not a tuning."
@@ -556,6 +613,74 @@
       }
     }
   },
+  "238": {
+    "name": "Oklahoma City Comets",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 20,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -16,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "247": {
+    "name": "Birmingham Barons",
+    "treatments": {
+      "away": {
+        "scale": 1.14,
+        "offsetX": 11,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.17,
+        "offsetX": -11,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "249": {
+    "name": "Wilson Warbirds",
+    "treatments": {
+      "away": {
+        "scale": 0.94,
+        "offsetX": 15,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.94,
+        "offsetX": -9,
+        "offsetY": 2,
+        "rotation": 0
+      }
+    }
+  },
+  "259": {
+    "name": "Fresno Grizzlies",
+    "treatments": {
+      "away": {
+        "scale": 0.87,
+        "offsetX": 31,
+        "offsetY": 20,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -7,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "260": {
     "name": "Tulsa Drillers",
     "treatments": {
@@ -568,6 +693,23 @@
       "home": {
         "scale": 1,
         "offsetX": -13,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
+  "279": {
+    "name": "Palm Beach Cardinals",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 20,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.93,
+        "offsetX": -9,
         "offsetY": 7,
         "rotation": 0
       }
@@ -607,20 +749,37 @@
       }
     }
   },
+  "401": {
+    "name": "Inland Empire 66ers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 35,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.02,
+        "offsetX": -17,
+        "offsetY": 4,
+        "rotation": 0
+      }
+    }
+  },
   "402": {
     "name": "Akron RubberDucks",
     "treatments": {
       "away": {
         "scale": 1,
-        "offsetX": 14,
+        "offsetX": 19,
         "offsetY": 14,
-        "rotation": 0
+        "rotation": -18
       },
       "home": {
         "scale": 1.08,
-        "offsetX": 0,
-        "offsetY": 0,
-        "rotation": 0
+        "offsetX": -24,
+        "offsetY": 3,
+        "rotation": -11
       }
     }
   },
@@ -637,6 +796,23 @@
         "scale": 0.91,
         "offsetX": -14,
         "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "414": {
+    "name": "Salem RidgeYaks",
+    "treatments": {
+      "away": {
+        "scale": 1.25,
+        "offsetX": 12,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.25,
+        "offsetX": -8,
+        "offsetY": 7,
         "rotation": 0
       }
     }
@@ -658,18 +834,35 @@
       }
     }
   },
+  "418": {
+    "name": "Chesapeake Baysox",
+    "treatments": {
+      "away": {
+        "scale": 0.89,
+        "offsetX": 23,
+        "offsetY": 4,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.89,
+        "offsetX": -15,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "419": {
     "name": "Hillsboro Hops",
     "treatments": {
       "away": {
-        "scale": 1,
-        "offsetX": 14,
+        "scale": 1.01,
+        "offsetX": 16,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
         "scale": 1,
-        "offsetX": -14,
+        "offsetX": -17,
         "offsetY": 10,
         "rotation": 0
       }
@@ -688,6 +881,23 @@
         "scale": 0.85,
         "offsetX": -13,
         "offsetY": 4,
+        "rotation": 0
+      }
+    }
+  },
+  "424": {
+    "name": "Dunedin Blue Jays",
+    "treatments": {
+      "away": {
+        "scale": 0.86,
+        "offsetX": 28,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.87,
+        "offsetX": -20,
+        "offsetY": 8,
         "rotation": 0
       }
     }
@@ -730,15 +940,15 @@
     "name": "Greenville Drive",
     "treatments": {
       "away": {
-        "scale": 1,
+        "scale": 1.13,
         "offsetX": 11,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
-        "scale": 0.91,
-        "offsetX": -26,
-        "offsetY": 17,
+        "scale": 1.07,
+        "offsetX": -27,
+        "offsetY": 14,
         "rotation": 0
       }
     }
@@ -790,6 +1000,23 @@
         "scale": 0.89,
         "offsetX": -20,
         "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "436": {
+    "name": "Fredericksburg Nationals",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 12,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -8,
+        "offsetY": 3,
         "rotation": 0
       }
     }
@@ -862,19 +1089,36 @@
       }
     }
   },
+  "448": {
+    "name": "Hickory Crawdads",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 30,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -13,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
   "450": {
     "name": "Daytona Tortugas",
     "treatments": {
       "away": {
         "scale": 1.1,
         "offsetX": 1,
-        "offsetY": 0,
+        "offsetY": 10,
         "rotation": 0
       },
       "home": {
         "scale": 1.01,
-        "offsetX": -33,
-        "offsetY": 19,
+        "offsetX": -30,
+        "offsetY": 15,
         "rotation": 0
       }
     }
@@ -901,8 +1145,8 @@
     "treatments": {
       "away": {
         "scale": 1,
-        "offsetX": 20,
-        "offsetY": 11,
+        "offsetX": 18,
+        "offsetY": 14,
         "rotation": 0
       }
     }
@@ -911,15 +1155,15 @@
     "name": "Brooklyn Cyclones",
     "treatments": {
       "away": {
-        "scale": 0.89,
-        "offsetX": 29,
+        "scale": 1.11,
+        "offsetX": 13,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
-        "scale": 0.9,
-        "offsetX": -19,
-        "offsetY": 10,
+        "scale": 1.06,
+        "offsetX": -17,
+        "offsetY": 12,
         "rotation": 0
       }
     }
@@ -992,19 +1236,87 @@
       }
     }
   },
+  "476": {
+    "name": "San Jose Giants",
+    "treatments": {
+      "away": {
+        "scale": 0.88,
+        "offsetX": 25,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -22,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
   "477": {
     "name": "Greensboro Grasshoppers",
     "treatments": {
       "away": {
-        "scale": 0.9,
-        "offsetX": 9,
-        "offsetY": 9,
+        "scale": 0.93,
+        "offsetX": 17,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.86,
+        "scale": 0.95,
+        "offsetX": -6,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "478": {
+    "name": "Augusta GreenJackets",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 7,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.92,
         "offsetX": -22,
+        "offsetY": 5,
+        "rotation": 0
+      }
+    }
+  },
+  "479": {
+    "name": "Jupiter Hammerheads",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 19,
         "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -26,
+        "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "481": {
+    "name": "Hill City Howlers",
+    "treatments": {
+      "away": {
+        "scale": 1.1,
+        "offsetX": 20,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.19,
+        "offsetX": -14,
+        "offsetY": 13,
         "rotation": 0
       }
     }
@@ -1030,14 +1342,31 @@
     "name": "Spokane Indians",
     "treatments": {
       "away": {
-        "scale": 1.02,
-        "offsetX": 40,
-        "offsetY": 16,
+        "scale": 0.92,
+        "offsetX": 27,
+        "offsetY": 9,
         "rotation": 0
       },
       "home": {
-        "scale": 0.98,
-        "offsetX": -10,
+        "scale": 0.93,
+        "offsetX": -5,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "487": {
+    "name": "Kannapolis Cannon Ballers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 10,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -24,
         "offsetY": 9,
         "rotation": 0
       }
@@ -1066,13 +1395,13 @@
       "away": {
         "scale": 1,
         "offsetX": 28,
-        "offsetY": 8,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
         "scale": 1,
         "offsetX": -20,
-        "offsetY": 16,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -1089,7 +1418,24 @@
       "home": {
         "scale": 0.77,
         "offsetX": -22,
-        "offsetY": 18,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "498": {
+    "name": "Chattanooga Lookouts",
+    "treatments": {
+      "away": {
+        "scale": 0.89,
+        "offsetX": 8,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.86,
+        "offsetX": -15,
+        "offsetY": 9,
         "rotation": 0
       }
     }
@@ -1107,6 +1453,51 @@
         "scale": 0.87,
         "offsetX": -27,
         "offsetY": 6,
+        "rotation": 0
+      }
+    }
+  },
+  "505": {
+    "name": "Binghamton Rumble Ponies",
+    "treatments": {
+      "home": {
+        "scale": 0.85,
+        "offsetX": -30,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "507": {
+    "name": "St. Lucie Mets",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 17,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -15,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
+  "509": {
+    "name": "Fort Myers Mighty Mussels",
+    "treatments": {
+      "away": {
+        "scale": 1.09,
+        "offsetX": 22,
+        "offsetY": 15,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.09,
+        "offsetX": -16,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -1141,6 +1532,74 @@
         "scale": 1,
         "offsetX": -3,
         "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "516": {
+    "name": "Visalia Rawhide",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 12,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -7,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "521": {
+    "name": "Myrtle Beach Pelicans",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 17,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "524": {
+    "name": "Stockton Ports",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -29,
+        "offsetY": 0,
+        "rotation": 0
+      }
+    }
+  },
+  "526": {
+    "name": "Rancho Cucamonga Quakes",
+    "treatments": {
+      "away": {
+        "scale": 1.22,
+        "offsetX": 23,
+        "offsetY": 3,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.17,
+        "offsetX": -22,
+        "offsetY": 12,
         "rotation": 0
       }
     }
@@ -1196,6 +1655,23 @@
       }
     }
   },
+  "534": {
+    "name": "Rochester Red Wings",
+    "treatments": {
+      "away": {
+        "scale": 1.07,
+        "offsetX": 14,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.07,
+        "offsetX": -23,
+        "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
   "537": {
     "name": "Hudson Valley Renegades",
     "treatments": {
@@ -1209,6 +1685,40 @@
         "scale": 0.9,
         "offsetX": -18,
         "offsetY": 17,
+        "rotation": 0
+      }
+    }
+  },
+  "541": {
+    "name": "Omaha Storm Chasers",
+    "treatments": {
+      "away": {
+        "scale": 1.07,
+        "offsetX": 13,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.09,
+        "offsetX": -11,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
+  "548": {
+    "name": "Delmarva Shorebirds",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 15,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 8,
         "rotation": 0
       }
     }
@@ -1247,19 +1757,36 @@
       }
     }
   },
+  "556": {
+    "name": "Nashville Sounds",
+    "treatments": {
+      "away": {
+        "scale": 0.88,
+        "offsetX": 25,
+        "offsetY": 3,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.88,
+        "offsetX": -12,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "561": {
     "name": "Salt Lake Bees",
     "treatments": {
       "away": {
-        "scale": 1,
-        "offsetX": 23,
-        "offsetY": 0,
+        "scale": 0.97,
+        "offsetX": 16,
+        "offsetY": 4,
         "rotation": 0
       },
       "home": {
-        "scale": 1,
-        "offsetX": -14,
-        "offsetY": 0,
+        "scale": 0.97,
+        "offsetX": -12,
+        "offsetY": 4,
         "rotation": 0
       }
     }
@@ -1302,15 +1829,66 @@
     "name": "Clearwater Threshers",
     "treatments": {
       "away": {
-        "scale": 1.18,
-        "offsetX": 15,
+        "scale": 1.35,
+        "offsetX": 7,
         "offsetY": 20,
         "rotation": 0
       },
       "home": {
+        "scale": 1.18,
+        "offsetX": -15,
+        "offsetY": 19,
+        "rotation": 0
+      }
+    }
+  },
+  "568": {
+    "name": "Norfolk Tides",
+    "treatments": {
+      "away": {
         "scale": 1,
-        "offsetX": -11,
-        "offsetY": 18,
+        "offsetX": 21,
+        "offsetY": 14,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -18,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "570": {
+    "name": "Lakeland Flying Tigers",
+    "treatments": {
+      "away": {
+        "scale": 1.35,
+        "offsetX": 15,
+        "offsetY": 20,
+        "rotation": -29
+      },
+      "home": {
+        "scale": 1.35,
+        "offsetX": -8,
+        "offsetY": 20,
+        "rotation": 29
+      }
+    }
+  },
+  "574": {
+    "name": "Arkansas Travelers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 8,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -19,
+        "offsetY": 7,
         "rotation": 0
       }
     }
@@ -1345,6 +1923,40 @@
         "scale": 1.06,
         "offsetX": -33,
         "offsetY": 16,
+        "rotation": 0
+      }
+    }
+  },
+  "584": {
+    "name": "Fort Wayne TinCaps",
+    "treatments": {
+      "away": {
+        "scale": 1.11,
+        "offsetX": 11,
+        "offsetY": -7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.08,
+        "offsetX": -29,
+        "offsetY": -4,
+        "rotation": 0
+      }
+    }
+  },
+  "587": {
+    "name": "Tampa Tarpons",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 14,
         "rotation": 0
       }
     }
@@ -1417,6 +2029,23 @@
       }
     }
   },
+  "2310": {
+    "name": "Reno Aces",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 14,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -25,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
   "2498": {
     "name": "Bowling Green Hot Rods",
     "treatments": {
@@ -1430,6 +2059,23 @@
         "scale": 0.93,
         "offsetX": -4,
         "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
+  "3390": {
+    "name": "Bradenton Marauders",
+    "treatments": {
+      "away": {
+        "scale": 1.19,
+        "offsetX": 11,
+        "offsetY": 16,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.19,
+        "offsetX": 0,
+        "offsetY": 10,
         "rotation": 0
       }
     }
@@ -1464,6 +2110,40 @@
         "scale": 1,
         "offsetX": -13,
         "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "3712": {
+    "name": "Fayetteville Woodpeckers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 21,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -11,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
+  "3898": {
+    "name": "Wichita Wind Surge",
+    "treatments": {
+      "away": {
+        "scale": 1.23,
+        "offsetX": 10,
+        "offsetY": 15,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.98,
+        "offsetX": -19,
+        "offsetY": 15,
         "rotation": 0
       }
     }
@@ -1519,6 +2199,23 @@
       }
     }
   },
+  "5368": {
+    "name": "Amarillo Sod Poodles",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 25,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -15,
+        "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
   "5434": {
     "name": "Sugar Land Space Cowboys",
     "treatments": {
@@ -1541,14 +2238,31 @@
     "treatments": {
       "away": {
         "scale": 1,
-        "offsetX": 14,
-        "offsetY": 8,
+        "offsetX": 19,
+        "offsetY": 13,
         "rotation": 0
       },
       "home": {
-        "scale": 0.93,
-        "offsetX": -27,
+        "scale": 1.01,
+        "offsetX": -19,
         "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "6482": {
+    "name": "Ontario Tower Buzzers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 22,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 8,
         "rotation": 0
       }
     }
