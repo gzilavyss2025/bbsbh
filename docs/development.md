@@ -164,6 +164,28 @@ routing parses the pathname only — so use it everywhere by habit.
   and a `Bash` PreToolUse advisory hook (`.claude/hooks/remind-nointro.mjs`)
   nudges if a slate URL slips through without it.
 
+## Don't read the precompute output whole
+
+`public/data/` is ~28 MB of generated JSON and `scripts/data/` ~6.7 MB of SQLite
+TEXT dumps; several single files are over a megabyte (`vs-team-splits.json` 3.2 MB,
+`umpires.json` 3.2 MB, `pitch-arsenal.sql` 2.2 MB). None is written or reviewed by
+hand, and reading one whole answers a question nobody has — it just spends a large
+part of an agent's context on repeated records.
+
+A `Read` PreToolUse hook (`.claude/hooks/block-large-generated-read.mjs`) refuses
+those reads and says what to do instead. Two thresholds: **60 KB** under
+`public/data/`, `scripts/data/` or `dist/`, and a **250 KB** universal backstop for
+anything else (no hand-written source file here is close — the largest,
+`src/styles/12-sealbox.css`, is under 60 KB; what the backstop catches is
+`package-lock.json` and whatever generated thing lands next).
+
+It is an economics rule, not a safety one, so the escape hatches are deliberate and
+plentiful: **Bash is not guarded** (`jq 'keys[:20]'`, `jq -c 'to_entries[:2]'`,
+`head -c 600` all return a bounded answer), and a `Read` with an explicit
+`offset`/`limit` passes through untouched. Usually the real answer is the prose —
+each file's shape and reason live in `src/api/CLAUDE.md` (the reader module) and
+`scripts/CLAUDE.md` (the generator).
+
 ## Local visual handoff
 
 For every user-visible change:
