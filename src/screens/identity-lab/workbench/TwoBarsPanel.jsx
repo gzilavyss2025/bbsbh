@@ -98,7 +98,8 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
               ? 'Custom mark — this bar draws it instead of the automatic knockout mark.'
               : 'Automatic knockout mark.'}{' '}
             Drop a 512×512 PNG, transparent background, under 400 KB — colors print as-is (not
-            auto-recolored), so paint it in whatever reads against this exact bar.
+            auto-recolored), so paint it in whatever reads against this exact bar. Art that arrives
+            as SVG source goes in the City Connect bar mark panel below instead.
           </p>
         </>
       ) : (

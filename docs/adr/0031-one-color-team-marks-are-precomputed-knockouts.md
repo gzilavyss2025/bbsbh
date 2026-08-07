@@ -256,3 +256,49 @@ every alternate) keeps drawing the one club-wide knockout mark untouched.
   against, not a separate upload panel elsewhere on the page. The mock's
   `HeaderBarMock` carries the exact same `overrideUrl`/no-re-ink treatment
   the real masthead does, so what's approved there is what ships.
+
+### Addendum (2026-08-07): that override may also be pasted in as SVG source
+
+The amendment above gives the City Connect bar one way in — drop a finished
+512×512 PNG on the bar itself. This adds a second, for the same slot and under
+the same rules: paste the mark's SVG source into the lab's **City Connect bar
+mark** panel, name it, and pick it.
+
+**Why a second way.** Club art arrives as often as markup as it does as a file,
+and a PNG is a fixed 512 px where this bar bleeds the mark to its full height —
+vector stays crisp there. Nothing about the slot changes; only how the bytes
+get in.
+
+- **No new machinery, and no new store.** A paste rides the two dev endpoints
+  the Logo art editor's recolors already ride
+  (`scripts/lib/dev-custom-marks.mjs`): SAVE writes
+  `public/team-logos/custom/{teamId}-{slug}.svg` and adds it to the club's
+  library; ASSIGN points one key at one library mark. The key is the same
+  synthetic `'city-connect-masthead'` the amendment introduced, which
+  `assignCustomMark` already accepts because it is in `LOGO_TREATMENT_DIRS`.
+  Server-side: unchanged.
+- **The library's two rules carry over intact.** Saving never overwrites (a
+  taken name is a 409), and wearing a mark is a POINTER — clearing it hands back
+  whatever the bar had before, an uploaded PNG or the club-wide knockout mark.
+- **An assignment outranks the uploaded PNG**, and that ordering is deliberate:
+  the pointer is the one a click can undo, so letting a PNG beat it would make
+  the pointer unusable on any club that ever had one dropped on it.
+  `pickCityConnectMasthead` (`teams.js`) is that precedence on its own, pinned in
+  `test/teams.test.js` without needing a real entry in the committed store — the
+  same split `customMarks.js` makes for `parseMarkAssignmentKey`.
+- **A `cdn:` assignment is ignored here, not resolved.** The library's other
+  assignment kind points at one of the CDN's stock vectors, and that is exactly
+  the art the knockout pipeline already converts — resolving one into this slot
+  would put a full-color mark on a bar nothing re-inks.
+- **Parsed, not filtered, before it is posted.** The pasted markup goes through
+  `src/lib/svgSanitize.js` (a real `DOMParser` pass, see that file's header) in
+  the browser, so what previews is what posts, and markup that isn't SVG says so
+  before a request is made. `describeMarkRejection` server-side is still the
+  backstop for a hand-crafted POST.
+- **Judged against the bar, like its PNG sibling.** The panel draws the same
+  `HeaderBarMock` the Header bars panel does, showing the paste in progress on
+  this club's own City Connect colours with the same no-re-ink treatment the
+  real masthead uses. It sits stacked directly under the Knockout mark editor
+  (`.idlab__markstack`) because it is the exception to exactly that rule, and it
+  renders for no club without a City Connect bar — every MiLB affiliate, and the
+  two `NO_CITY_CONNECT` clubs.

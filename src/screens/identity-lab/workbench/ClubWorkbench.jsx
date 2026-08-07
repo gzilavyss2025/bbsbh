@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { teamAbbr } from '../../../lib/teams.js'
 import { CrestStrip } from './CrestStrip.jsx'
 import { LogoRecolorEditor } from '../editors/LogoRecolorEditor.jsx'
+import { MastheadMarkEditor } from '../editors/MastheadMarkEditor.jsx'
 import { MonoInkEditor } from '../editors/MonoInkEditor.jsx'
 import { StampInkEditor } from '../editors/StampInkEditor.jsx'
 import { StampPlacementEditor } from '../editors/StampPlacementEditor.jsx'
@@ -44,6 +45,10 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
   const barColors = units
     .filter((u) => !u.header.unset)
     .map((u) => ({ label: u.label, bar: u.header.colors.bar, onBar: u.header.colors.onBar }))
+  // The one bar that may take its mark OFF the club-wide knockout conversion
+  // (ADR-0031's second amendment). Absent for every MiLB club — that vocabulary
+  // has no City Connect — which is what keeps that editor off their bench.
+  const cityConnectUnit = units.find((u) => u.slot === 'city-connect') ?? null
 
   const rackItems = items.map((item) => {
     const slot = profile.headerSlotFor(item.treatment)
@@ -87,10 +92,24 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
           build jersey art the CDN doesn't carry. Same shape numbering in both
           (logoMono.js), so a shape means one thing across the row. */}
       <div className="idlab__markspair">
-        {/* Club-level, not per-bar — one knockout mark rides every bar this
-            club has, which is why it sits under the pair of bars rather than
-            inside either one. */}
-        <MonoInkEditor key={`mono-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
+        <div className="idlab__markstack">
+          {/* Club-level, not per-bar — one knockout mark rides every bar this
+              club has, which is why it sits under the pair of bars rather than
+              inside either one. */}
+          <MonoInkEditor key={`mono-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
+          {/* The exception directly under the rule it excepts: one bar, and one
+              bar only, may wear pasted art instead of that conversion. */}
+          <MastheadMarkEditor
+            key={`ccmark-${team.id}`}
+            teamId={team.id}
+            name={team.name}
+            cityConnect={
+              cityConnectUnit
+                ? { colors: cityConnectUnit.header.colors, unset: cityConnectUnit.header.unset }
+                : null
+            }
+          />
+        </div>
         <LogoRecolorEditor key={`art-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
       </div>
 

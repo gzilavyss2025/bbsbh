@@ -258,22 +258,53 @@ export function hasCityConnect(teamId) {
   return !NO_CITY_CONNECT.has(teamId)
 }
 
-// A club's own uploaded override for the mark its themed `.metricbar`
-// mastheads draw while it's wearing City Connect — normally the club-wide
-// precomputed knockout SVG every masthead shares (ADR-0031's `mono` variant),
-// here swapped for one club's own PNG, one bar only. Read the same way
-// mainOverrideLogoUrl reads main-overrides/: off the manifest upload rewrites
-// on every save (logo-art.json, ADR-0029), so a fresh upload needs no
-// companion code change to take effect. Null for a club with no file there
-// (the overwhelming majority) or no City Connect uniform at all — callers
-// fall back to the normal club-wide mono mark exactly as an absent
-// mainOverrideLogoUrl falls back to the CDN base logo.
+// The synthetic key both halves of the City Connect masthead override answer
+// to — an upload directory in logoArt.js's LOGO_TREATMENT_DIRS, and an
+// assignment key in custom-marks.json. Never a real treatment: it appears in
+// no jersey record and no tuning store (ADR-0031's second amendment).
+export const CITY_CONNECT_MASTHEAD_KEY = 'city-connect-masthead'
+
+// A club's own override for the mark its themed `.metricbar` mastheads draw
+// while it's wearing City Connect — normally the club-wide precomputed
+// knockout SVG every masthead shares (ADR-0031's `mono` variant), here
+// swapped for one club's own art, one bar only.
+//
+// TWO ways in, checked in this order, both written by the Identity Lab:
+//
+//   1. An ASSIGNED library mark (custom-marks.json) — an SVG pasted into the
+//      Knockout mark section, or one recolored by the Logo art editor. A
+//      pointer, so clearing it hands the mark below straight back.
+//   2. An uploaded PNG, read the same way mainOverrideLogoUrl reads
+//      main-overrides/: off the manifest an upload rewrites on every save
+//      (logo-art.json, ADR-0029), so a fresh drop needs no companion code
+//      change to take effect.
+//
+// The assignment wins because it is the one a click can undo — a PNG has to be
+// deleted off disk, so letting it outrank a pointer would make the pointer
+// unusable on any club that ever had one dropped on it.
+//
+// Null for a club with neither (the overwhelming majority) or with no City
+// Connect uniform at all — callers fall back to the normal club-wide mono mark
+// exactly as an absent mainOverrideLogoUrl falls back to the CDN base logo.
 export function cityConnectMastheadUrl(teamId) {
   if (!hasCityConnect(teamId)) return null
   const abbr = teamAbbr({ id: teamId })
-  if (!abbr) return null
   const entries = LOGO_ART['masthead-city-connect'] ?? {}
-  return entries[`${abbr}.png`] ? `/team-logos/masthead-city-connect/${abbr}.png` : null
+  const uploaded = abbr && entries[`${abbr}.png`] ? `/team-logos/masthead-city-connect/${abbr}.png` : null
+  return pickCityConnectMasthead(customMarkFor(teamId, CITY_CONNECT_MASTHEAD_KEY), uploaded)
+}
+
+// The precedence above, on its own so it can be pinned without needing a real
+// entry in the committed store — the same reason customMarks.js splits
+// parseMarkAssignmentKey out of customMarkFor.
+//
+// A `cdn:` assignment (which customMarkFor answers as `{ cdnVariant }`, no
+// `url`) is IGNORED rather than resolved. This slot exists for art the knockout
+// pipeline cannot produce, and a stock CDN vector is precisely what that
+// pipeline already converts — resolving one here would hand the bar a
+// full-color mark that nothing re-inks.
+export function pickCityConnectMasthead(assigned, uploadedUrl) {
+  return assigned?.url ?? uploadedUrl ?? null
 }
 
 // A club's own curated pick for its home/away predictive fallback

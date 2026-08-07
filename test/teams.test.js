@@ -26,6 +26,9 @@ import {
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
   cityConnectMastheadUrl,
+  pickCityConnectMasthead,
+  CITY_CONNECT_MASTHEAD_KEY,
+  MLB_TREATMENT_TUNING,
   MAIN_OVERRIDES,
   offDayTreatmentFor,
   isMlbTeamId,
@@ -338,6 +341,42 @@ test('cityConnectMastheadUrl is null for a club with no City Connect uniform at 
 test('cityConnectMastheadUrl is null for an id with no abbreviation to file art under', () => {
   assert.equal(cityConnectMastheadUrl(999999), null)
   assert.equal(cityConnectMastheadUrl(null), null)
+})
+
+// The second way into that slot: a mark PASTED as SVG source in the lab's City
+// Connect bar mark panel, saved into the club's library and assigned to the
+// synthetic 'city-connect-masthead' key. Pinned through the pure picker rather
+// than through a real store entry — same reason customMarks.js splits
+// parseMarkAssignmentKey out: the precedence has to be checkable whether or not
+// any club currently wears one.
+test('an assigned library mark outranks an uploaded PNG on the City Connect bar', () => {
+  const assigned = { slug: 'cc-wordmark', name: 'CC wordmark', url: '/team-logos/custom/158-cc-wordmark.svg' }
+  assert.equal(
+    pickCityConnectMasthead(assigned, '/team-logos/masthead-city-connect/MIL.png'),
+    '/team-logos/custom/158-cc-wordmark.svg',
+    'the pointer wins, because clearing it is a click and deleting a PNG is not',
+  )
+})
+
+test('with no assignment the City Connect bar falls back to the uploaded PNG, then to nothing', () => {
+  assert.equal(pickCityConnectMasthead(null, '/team-logos/masthead-city-connect/MIL.png'), '/team-logos/masthead-city-connect/MIL.png')
+  assert.equal(pickCityConnectMasthead(null, null), null)
+})
+
+test('a cdn: assignment is ignored on the City Connect bar rather than resolved', () => {
+  // customMarkFor answers a `cdn:` assignment as { cdnVariant } with no url.
+  // Drawing a stock CDN vector here would put full-color art on a bar nothing
+  // re-inks — and that vector is what the knockout pipeline already converts.
+  assert.equal(pickCityConnectMasthead({ cdnVariant: 'wordmark' }, null), null)
+})
+
+test('the City Connect masthead key is never a real jersey treatment', () => {
+  // It names an upload directory and an assignment slot only. A club's own
+  // treatment tuning must never carry an entry under it (ADR-0031's amendment).
+  assert.equal(CITY_CONNECT_MASTHEAD_KEY, 'city-connect-masthead')
+  for (const entry of Object.values(MLB_TREATMENT_TUNING)) {
+    assert.ok(!entry.treatments?.[CITY_CONNECT_MASTHEAD_KEY], `${entry.name} carries a masthead-key treatment record`)
+  }
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and
