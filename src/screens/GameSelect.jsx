@@ -35,6 +35,7 @@ import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import {
   FILTER_CHIPS,
   reorderGameOfTheNight,
+  reorderLiveGames,
   reorderNationalBroadcasts,
   stackDoubleHeaders,
 } from '../lib/resultCards.js'
@@ -407,19 +408,21 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
     [slateRevealAll, dateStr],
   )
 
-  // The slate's actual render order: `sorted` (soonest → latest, favorite
-  // pinned first), then every national-broadcast game grouped in right behind
-  // the favorite's own game (reorderNationalBroadcasts), then the crowned
-  // "Game of the Night" game promoted to that same front slot (see
+  // The slate's actual render order, in four tiers: the favorite team's own
+  // game, then the games already underway (reorderLiveGames), then the
+  // national-broadcast games among those that haven't started
+  // (reorderNationalBroadcasts), then the rest — each tier internally still in
+  // `sorted`'s soonest → latest order, and the Finals still last. A game in
+  // progress outranks a national game that hasn't thrown a pitch, which is why
+  // the live pass runs FIRST and the national pass is confined to what's left.
+  // The crowned "Game of the Night" is then promoted to the front slot (see
   // reorderGameOfTheNight) — a no-op until cardMetaByGamePk is populated, so
   // this can't leak which game is crowned ahead of the reveal-all gate above.
   const gamesForDisplay = useMemo(() => {
-    const nationallyOrdered = reorderNationalBroadcasts(sorted, nationalBroadcasts.data, (g) =>
-      isPinned(g, favoriteTeamId, favoriteAffiliateIds),
-    )
-    return reorderGameOfTheNight(nationallyOrdered, cardMetaByGamePk, (g) =>
-      isPinned(g, favoriteTeamId, favoriteAffiliateIds),
-    )
+    const pinned = (g) => isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+    const liveFirst = reorderLiveGames(sorted, pinned)
+    const nationallyOrdered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts.data, pinned)
+    return reorderGameOfTheNight(nationallyOrdered, cardMetaByGamePk, pinned)
   }, [sorted, nationalBroadcasts.data, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
 
   // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS

@@ -388,17 +388,6 @@
   object-fit: contain;
 }
 
-/* ESPN Unlimited's "Unlmtd" tag, appended after the bare ESPN logo — see
-   NationalTvIcon's comment for why the logo alone would misrepresent this
-   as ordinary cable ESPN. Inherits size/family/tracking/caps from the
-   parent .gamecard__nationaltv; only weight and color depart from its
-   muted-gray siblings, in ESPN's own brand red rather than a paper-
-   scorebook token (tokens/colors.css). */
-.gamecard__nationaltv-unlimited {
-  font-weight: var(--w-bold);
-  color: var(--espn-red);
-}
-
 /* ---------------------------------------------------------------- buttons */
 .btn {
   min-height: var(--tap-min);

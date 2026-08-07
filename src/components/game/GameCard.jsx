@@ -8,7 +8,7 @@ import { doubleHeaderLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
-import { broadcastLogoFor, isEspnUnlimited } from '../../lib/broadcastLogos.js'
+import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -335,21 +335,17 @@ function ReadyPill({ game }) {
 // the pips only show pre-game, so this is the first thing on the line for a
 // Final). The name prints as-is (ESPN's own casing) with CSS text-transform
 // doing the visual uppercase, per the ALL-CAPS invariant (no per-component
-// .toUpperCase() — scripts/check-name-casing.mjs). ESPN's Unlimited
-// streaming tier shares the plain ESPN logo (broadcastLogos.js has no
-// separate mark for it), so wearing that logo bare would misrepresent a
-// $40/mo add-on as ordinary cable ESPN — the "Unlmtd" tag after the logo is
-// the one exception to "the logo alone is the label," in ESPN's own brand
-// red (bold, --espn-red) rather than the row's muted gray.
+// .toUpperCase() — scripts/check-name-casing.mjs). The logo alone is the
+// label, with no exceptions: ESPN's streaming-only "Unlmtd" tier used to earn
+// a red tag beside the bare ESPN mark, but it is an out-of-market
+// subscription package rather than a national TV broadcast and api/broadcast.js
+// now filters it out the same way it filters MLB.TV, so it never reaches here.
 function NationalTvIcon({ network }) {
   const logo = broadcastLogoFor(network)
   if (logo) {
     return (
       <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
         <img className="gamecard__nationaltv-logo" src={logo} alt="" />
-        {isEspnUnlimited(network) && (
-          <span className="gamecard__nationaltv-unlimited">Unlmtd</span>
-        )}
       </span>
     )
   }

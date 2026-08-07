@@ -47,6 +47,18 @@
       "4": "knockout"
     }
   },
+  "106": {
+    "name": "Erie SeaWolves",
+    "art": "13:6b7c2fca",
+    "parts": {
+      "2": "knockout",
+      "3": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "10": "knockout",
+      "12": "knockout"
+    }
+  },
   "108": {
     "name": "Los Angeles Angels",
     "art": "9:87bdd82a",
@@ -1285,6 +1297,17 @@
       "3": "knockout",
       "4": "knockout",
       "8": "knockout"
+    }
+  },
+  "547": {
+    "name": "Harrisburg Senators",
+    "art": "10:243e78c0",
+    "parts": {
+      "0": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "8": "ink",
+      "9": "knockout"
     }
   },
   "548": {

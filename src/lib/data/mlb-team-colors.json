@@ -48,7 +48,7 @@
     "secondary": "#000000",
     "accent": "#C6011F",
     "defaultHomeTreatment": "main",
-    "defaultAwayTreatment": "alternate-3"
+    "defaultAwayTreatment": "main"
   },
   "114": {
     "name": "Cleveland Guardians",
