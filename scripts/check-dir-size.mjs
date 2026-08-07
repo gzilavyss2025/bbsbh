@@ -101,7 +101,14 @@ const BUDGETS = {
   // 38; it introduces a fresh `.umptend__*` namespace and overrides nothing,
   // so its exact position is not load-bearing, only its being after 14
   // (.zonemap) and 44 (.metricbar), which it reuses.
-  'src/styles': 57,
+  //
+  // 57 -> 58 for `21a-box-score-stars.css`: the box score's Three Stars card
+  // pushed 21-box-score.css past check-file-size.mjs's 1000-line budget once
+  // it grew a horizontal-row wide-breakpoint layout. `21a` rather than
+  // appending at the end so the numeric prefix still tells the ordering
+  // truth — it cascades immediately after the file it was split out of, not
+  // wherever the next free integer happened to be.
+  'src/styles': 58,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

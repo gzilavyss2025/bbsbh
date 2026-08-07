@@ -1,0 +1,226 @@
+/* ------------------------------------------------------- box score: three
+   stars. Split out of 21-box-score.css (ADR-0038 — that file was pushing its
+   line budget and this section is a self-contained card) rather than folded
+   into 22/23's existing box-score splits, which were both already close to
+   their own budgets with no headroom left for ~200 more lines. */
+
+/* Three stars of the game — WPA leaders under the decisions. Card matches
+   the decisions block above it. One markup for all three entries
+   (.stars3__card) so they read as a single family of cards; the top mover
+   gets a `--hero` modifier layered on top (an inset gradient panel, modeled
+   on the Team Score card's .team-score__grade) for extra weight, not a
+   different shape. Below 740px the cards stack as rows (phone width can't
+   fit three side by side); from 740px up they lay out in one horizontal
+   row — see the media query at the bottom of this block. */
+.bs__stars {
+  padding: 12px 14px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+}
+
+.stars3__row {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.stars3__card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px;
+  border-top: var(--bw-hair) solid var(--rule-soft);
+}
+/* First card in the list — no rule above it, it isn't a continuation of a
+   row before it. */
+.stars3__card:first-child {
+  border-top: none;
+}
+/* The hero card gets its own panel treatment layered over the shared
+   .stars3__card layout: an inset gradient background instead of the bare
+   list-row rule above it, so the top mover reads as the headline entry. */
+.stars3__card--hero {
+  padding: 10px 12px;
+  border-top: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--seal) 12%, transparent), transparent 58%),
+    var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+/* A hero card followed by a plain row needs its own top gap back — the
+   plain .stars3__card rule above only clears it for two plain rows in a
+   row. */
+.stars3__card--hero + .stars3__card {
+  margin-top: 6px;
+  border-top: none;
+}
+
+/* Compound with .shot/.shot--fallback so this outranks the base .shot
+   sizing — the "player-of-game" scale, same size on every card so all
+   three stars' headshots line up; only the surrounding panel/copy marks
+   the hero. */
+.shot.stars3__shot {
+  flex: none;
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.shot.stars3__shot.shot--fallback {
+  font-size: var(--fs-num-lg);
+}
+.stars3__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+.stars3__marks {
+  font-size: var(--fs-compact);
+  line-height: var(--lh-ui);
+  letter-spacing: var(--ls-fixed);
+  color: var(--seal);
+}
+.stars3__card--hero .stars3__marks {
+  font-size: var(--fs-small);
+}
+.stars3__name {
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.stars3__card--hero .stars3__name {
+  font-size: var(--fs-title-sm);
+}
+.stars3__meta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.stars3__stat {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  text-align: right;
+}
+/* Capped and wrapping (not nowrap) so a big stat line — multi-extra-base-hit
+   games routinely run past 25 characters — wraps onto its own lines instead
+   of forcing .stars3__copy's flex:1/min-width:0 name column to collapse,
+   which let the stat text render on top of the player name. */
+.stars3__card--hero .stars3__stat {
+  max-width: 38%;
+  color: var(--text-heading);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+}
+
+/* On a phone, every card's stat line drops to its own full-width row below
+   the name/meta lines instead of squeezing beside them in the same row as
+   the headshot — a big extra-base-hit line otherwise fights the name column
+   for width (see the .stars3__card--hero .stars3__stat comment above). A
+   grid (not flex-wrap) so the photo gets its own fixed column and the
+   copy/stat blocks share the SAME second column — see the identical
+   reasoning on .pitchernotice's own phone-only override just above the
+   "Row 2" comment for why a flex-wrap + flex-basis:100% attempt here would
+   instead push the name/meta block below the photo rather than beside it. */
+@media (max-width: 739.98px) {
+  .stars3__card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+  .shot.stars3__shot {
+    grid-row: 1 / 3;
+  }
+  .stars3__copy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__stat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+}
+
+/* From the tablet/desktop breakpoint (kept in sync with 25-wide-layout.css)
+   the three cards have room to sit in one horizontal row instead of a
+   stacked list. Same photo-left, copy-stacked-right grid the phone layout
+   above uses (just re-declared at card scale rather than a plain list row),
+   left-aligned like the opposing-starter card (.startercard__body,
+   10-lineup.css) instead of the phone list's compact idiom — headshot and
+   name lead the eye the same way there and here. flex on the row, not a
+   3-col grid: with only 1 or 2 stars (WPA can turn up short of 3 candidates
+   — see computeThreeStars), a hard grid would leave a stretched empty
+   track; flex-grow:0 with a content-sized basis lets 1-2 cards sit at their
+   natural width instead, and the row's own centering keeps them from
+   reading as abandoned in a wide empty gutter. Every card — hero included —
+   now shares one photo size and one type scale, so the top mover's panel
+   background is the only thing marking it as the headline entry. */
+@media (min-width: 740px) {
+  .stars3__row {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  .stars3__card {
+    flex: 0 1 300px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--space-3);
+    row-gap: 4px;
+    align-items: center;
+    padding: var(--space-3);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-sm);
+    background: var(--surface-inset);
+  }
+  /* The phone list's first-card/top-rule handling doesn't apply once every
+     card carries its own full border in a row — restore the rule the
+     :first-child rule above strips for the list idiom. */
+  .stars3__card:first-child {
+    border-top: var(--bw-hair) solid var(--border-rule);
+  }
+  .shot.stars3__shot {
+    grid-row: 1 / 3;
+    width: var(--shot-lg-w);
+    height: var(--shot-lg-h);
+  }
+  .stars3__copy {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .stars3__stat {
+    grid-column: 2;
+    grid-row: 2;
+    max-width: none;
+    text-align: left;
+  }
+  .stars3__card--hero .stars3__marks {
+    font-size: var(--fs-compact);
+  }
+  .stars3__card--hero .stars3__name {
+    font-size: var(--fs-body);
+  }
+  .stars3__card--hero .stars3__stat {
+    font-size: var(--fs-caption);
+    max-width: none;
+  }
+}
