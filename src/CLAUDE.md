@@ -389,11 +389,11 @@ shape-gated in `lib/recentSearches.js` (identity fields only, never a score) wit
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
-`src/index.css` holds **no rules** — it is a banner comment and 55 `@import`s:
+`src/index.css` holds **no rules** — it is a banner comment and 66 `@import`s:
 the six `src/tokens/*.css` files (colors, typography, spacing, layout, effects,
-fonts), then the 49 `src/styles/NN-name.css` partials in cascade order. It was a
+fonts), then the 60 `src/styles/NN-name.css` partials in cascade order. It was a
 single 30,326-line file until it was cut at verified brace-depth-0 boundaries;
-`cat src/styles/*.css` still reproduces that file's body byte-for-byte, and the
+`cat src/styles/*.css` reproduced that file's body byte-for-byte at the time, and the
 built stylesheet is unchanged, because Vite inlines `@import` at build time.
 
 **Order is the contract.** The numeric prefix IS the cascade — later partials

@@ -180,62 +180,45 @@ export const PITCHER_METRICS = [
   },
 ]
 
-// Which five metrics the radar plots, in clockwise order from 12 o'clock.
+// The rows the percentile strip draws, joining a player's percentile ranks to
+// the raw rates behind them. One row per metric he qualifies for, in the
+// canonical BATTER_METRICS/PITCHER_METRICS order.
 //
-// FIVE, not all of them: a pentagon's five sides are individually legible on a
-// phone, and past six or seven spokes the labels crowd and the shape stops
-// being a silhouette a reader can recognise. The metrics left out aren't
-// dropped — they're in the labelled percentile cards directly beneath, which is
-// where the exhaustive list belongs.
+// EVERY qualifying metric, and the canonical order — the two properties the
+// five-spoke radar this replaced could not have. A pentagon holds five labels
+// legibly, so a hitter's sprint speed and a pitcher's chase and fastball velo
+// sat in the card grid below but never in the shape above it; a reader taking
+// the summary at its word got a profile with the player's worst tool quietly
+// missing from it. And a polygon's silhouette depends on which arbitrary order
+// the spokes are listed in, so the same numbers in a different order drew a
+// different player. A shared axis has neither problem: rows are independent, so
+// the list can hold as many as the player has, and it can stay in one fixed
+// order across every player — which is the entire point of a percentile rank.
+// See ADR-0040.
 //
-// The ORDER is chosen so related skills sit adjacent, because the polygon's
-// shape is the whole point: a pitcher's stuff (K%, whiff) makes one lobe and
-// his contact management (hard-hit) another, so "power arm" and "soft-contact
-// specialist" come out as visibly different silhouettes. Shuffling these keys
-// changes what every player's shape looks like — it isn't a cosmetic list.
-export const RADAR_KEYS = {
-  pitching: ['xera', 'k', 'whiff', 'bb', 'hardHit'],
-  hitting: ['xwoba', 'brl', 'ev', 'hardHit', 'chase'],
-}
-
-// Spoke labels drop the trailing "%" the card versions carry. Not a style
-// preference: a radar's side labels run outward from their anchor toward the
-// viewBox edge, so every character costs gutter, and the raw value printed
-// directly beneath already carries the unit ("43.0%"). Only the labels that
-// actually need shortening have an entry.
-const RADAR_LABELS = {
-  k: 'K',
-  bb: 'BB',
-  whiff: 'Whiff',
-  chase: 'Chase',
-  hardHit: 'Hard-hit',
-  brl: 'Barrel',
-  ev: 'Exit velo',
-}
-
-// The spoke list radarGeometry consumes, joining a player's percentiles to his
-// raw rates. `percentile` is null for a metric he's under Savant's sample floor
-// for (the geometry keeps its side and marks it unknown); `value` is null when
-// the raw-rate map is missing, which only costs the labels.
+// `value` is the formatted raw rate, or null when the raw-rate map is missing
+// (which costs only the middle column). A metric the player is under Savant's
+// own sample floor for has no percentile and is left out entirely, same as the
+// card grid always did.
 //
-// Returns null when there's no percentile data at all, or when fewer than three
-// of the five spokes are known — a pentagon with two real corners is a shape
-// that misleads rather than informs.
-export function radarSpokes(savant, raw, group) {
+// Returns null when fewer than three metrics are known — a two-row strip is a
+// stat line, not a profile, and the labelled season tables above already say it
+// better.
+export function percentileRows(savant, raw, group) {
   if (!savant) return null
   const metrics = group === 'pitching' ? PITCHER_METRICS : BATTER_METRICS
-  const keys = RADAR_KEYS[group === 'pitching' ? 'pitching' : 'hitting']
-  const spokes = keys.map((key) => {
-    const m = metrics.find((x) => x.key === key)
-    const pct = savant[key]
-    const rawValue = raw?.[key]
-    return {
-      key,
-      label: RADAR_LABELS[key] ?? m?.label ?? key,
-      percentile: Number.isFinite(pct) ? pct : null,
-      value: Number.isFinite(rawValue) && m?.fmt ? m.fmt(rawValue) : null,
-      lowerIsBetter: Boolean(m?.lowerIsBetter),
-    }
-  })
-  return spokes.filter((s) => s.percentile != null).length >= 3 ? spokes : null
+  const rows = metrics
+    .filter((m) => Number.isFinite(savant[m.key]))
+    .map((m) => {
+      const rawValue = raw?.[m.key]
+      return {
+        key: m.key,
+        label: m.label,
+        percentile: savant[m.key],
+        value: Number.isFinite(rawValue) && m.fmt ? m.fmt(rawValue) : null,
+        lowerIsBetter: Boolean(m.lowerIsBetter),
+        def: m.def,
+      }
+    })
+  return rows.length >= 3 ? rows : null
 }

@@ -318,8 +318,8 @@
 
 /* The worst-call card: label, a fixed-scale zone diagram beside the call
    pills, a batter/inning locator, and the before→after count blink. Same
-   card chrome as .statcast__card/.favormeter (paper-2 fill, hairline border,
-   inset shadow) so it reads as their sibling. */
+   card chrome as .favormeter (paper-2 fill, hairline border, inset shadow)
+   so it reads as its sibling. */
 .wcall {
   display: flex;
   flex-direction: column;
@@ -490,9 +490,9 @@
    center toward whichever side missed calls have added value to, a
    plain-English caption underneath, and a routine/standout/outlier tier
    badge in the top-right corner (favorTier — see .favormeter__tierpill
-   below). Same card treatment as .statcast__card (it's a grid sibling of
-   one) — background/border/radius/shadow — so the two read as one
-   consistent row rather than a tile next to a bare block. Away/home fill
+   below). The shared insight-tile treatment —
+   background/border/radius/shadow — so the cards read as one consistent row
+   rather than a tile next to a bare block. Away/home fill
    colors default to WinProbChart's own soft-clay/soft-navy pair — the same
    "which side" visual language already on this page — but the fill's own
    inline style usually overrides that with the favored club's real
@@ -613,8 +613,8 @@
 .favormeter__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  /* Same size StatcastCard uses for its own value (.statcast__value) — this
-     card is its grid sibling, so the headline figures should match. */
+  /* The insight tiles' headline-figure size, shared with its grid siblings
+     so the numbers across a row match. */
   font-size: var(--fs-num-lg);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
@@ -638,70 +638,6 @@
   font-style: italic;
   font-weight: var(--w-regular);
   color: var(--text-muted);
-}
-
-/* Statcast tile base (see StatcastCard.jsx) — the player page's season-
-   percentile grid (.statcast-section below) is the only remaining user; each
-   card reads top-to-bottom: the measure, the value with its unit trailing
-   small, then who did it. */
-.statcast {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: var(--bw-hair) dashed var(--border-rule);
-}
-.statcast > * {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.statcast__card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-  padding: 10px 6px;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
-}
-
-.statcast__label {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-}
-
-.statcast__value {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-lg);
-  font-weight: var(--w-bold);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-}
-
-.statcast__unit {
-  font-style: normal;
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  opacity: 0.7;
-}
-
-.statcast__who {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  line-height: var(--lh-compact);
 }
 
 /* Pre-pitch subs/pitching changes for the half about to be revealed, shown
@@ -1026,7 +962,7 @@
 
 /* Wide layout (.screen widens to 960px from here up — see the 740px media
    query further down): the 1-3 superlatives go three across in one row
-   instead of stacking, same auto-fit-evenly idea as the base .statcast grid;
+   instead of stacking, the same auto-fit-evenly idea;
    the divider between them switches from a horizontal rule to a vertical
    one. */
 @media (min-width: 740px) {

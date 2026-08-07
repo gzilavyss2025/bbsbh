@@ -45,9 +45,9 @@ const METRICS = {
   },
 }
 
-// The RAW rate behind each percentile above, for the radar's spoke labels
-// (src/components/playercard/StatRadar.jsx) — ".422" and "21.7%" beside the
-// shape, so the polygon reports a season and not just a ranking.
+// The RAW rate behind each percentile above, for the percentile strip's own
+// column (src/components/charts/PercentileStrip.jsx) — ".422" and "21.7%"
+// beside the plotted rank, so a row reports a season and not just a ranking.
 //
 // This is a SECOND leaderboard because the percentile-rankings CSV fetched
 // below carries percentiles only: every column in it is already a 0–100 rank,

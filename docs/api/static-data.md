@@ -294,12 +294,14 @@ for each generator; the reader modules:
   percentile board carries no raw values at all, every column already a rank).
   `BATTER_METRICS`/`PITCHER_METRICS` hold display order, labels, plain-language
   definitions, per-metric raw formatting and the `lowerIsBetter` flag;
-  `RADAR_KEYS` + `radarSpokes` join the two maps into the spoke list
-  `lib/radarGeometry.js` consumes. Surfaces: `StatcastPercentiles.jsx`'s flip
-  cards and the percentile radar (`components/playercard/StatRadar.jsx`) above
-  them. That pre-flip is exactly what makes a radar possible — it's what lets
-  five metrics in five different units share one "farther out is better" axis —
-  so read `radarGeometry.js`'s header before changing how any of it is scaled.
+  `percentileRows` joins the two maps into the row list
+  `components/charts/PercentileStrip.jsx` draws. That pre-flip is what lets
+  every metric, in its own unit, share ONE 0–100 axis where farther right is
+  always better — so read `lib/percentileStrip.js`'s header before changing how
+  any of it is scaled. Surface: `StatcastPercentiles.jsx`'s percentile strip
+  (ADR-0040, which records why the five-spoke radar it replaced could show only
+  five of the metrics and drew a different shape for the same numbers depending
+  on the order the spokes were listed in).
   `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
   "Hits like" card, the batter counterpart of `pitchArsenal.js`'s
   `similarPitchersFor`: it flattens the `bat` percentile map into a pool and
