@@ -41,7 +41,15 @@
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
-import { sweepGame, fileByTeam, loadBlocklist, writeTeamFiles, writeDayFiles, OUT_DIR } from './lib/highlights.mjs'
+import {
+  sweepGame,
+  fileByTeam,
+  loadBlocklist,
+  writeTeamFiles,
+  writeDayFiles,
+  dayIndexEntry,
+  OUT_DIR,
+} from './lib/highlights.mjs'
 
 const DEFAULT_DAYS = 3
 // Matches the two existing per-game sweepers (gen-umpire-accuracy.mjs's 6).
@@ -89,7 +97,7 @@ const byDate = new Map()
 for (const g of swept) {
   if (!g?.condensed || !g.date) continue
   if (!byDate.has(g.date)) byDate.set(g.date, {})
-  byDate.get(g.date)[g.gamePk] = g.condensed
+  byDate.get(g.date)[g.gamePk] = dayIndexEntry(g.condensed, g.heroPhoto)
 }
 const { days, entries } = await writeDayFiles(byDate, { generatedAt })
 
