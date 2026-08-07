@@ -227,9 +227,19 @@
     },
     "highlights.js": {
       "class": "mixed",
-      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM.",
-      "revealOnlyExports": ["highlightsByPlayId", "eligibleHighlightForPlay"],
-      "importers": ["components/inning/HalfInning.jsx", "screens/BoxScore.jsx"]
+      "why": "A clip's title narrates the play's outcome, so the play JOIN is reveal-only — but fetching is safe eagerly, and the cascade's classification helpers are a plain data transform the Node generator runs with no DOM. selectCondensedGame/selectGameClips joined the sealed list in PR #601: a condensed cut and a game's own reel narrate the whole result, and their only protection is WHERE they mount — inside the box score's SealBox reveal (GameVideoRow), or on a slate card that has already been revealed (WatchCondensedButton, rendered by GameResultFace — which is on boxscore.js's allowlist for that same already-revealed reason, and imports only formatClipDuration from here). formatClipDuration stays spoiler-free: it formats a duration string and reads no game state, which is why GameResultFace is NOT on this list.",
+      "revealOnlyExports": [
+        "highlightsByPlayId",
+        "eligibleHighlightForPlay",
+        "selectCondensedGame",
+        "selectGameClips"
+      ],
+      "importers": [
+        "components/highlights/GameVideoRow.jsx",
+        "components/highlights/WatchCondensedButton.jsx",
+        "components/inning/HalfInning.jsx",
+        "screens/BoxScore.jsx"
+      ]
     },
     "hitterForm.js": {
       "class": "cutoff-gated",

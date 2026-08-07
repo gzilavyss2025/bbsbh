@@ -4,8 +4,8 @@ Node `.mjs` scripts: the `gen-*.mjs` generators that precompute the static JSON 
 app reads at runtime (the **build-time-fetch pattern**, see `src/api/CLAUDE.md`),
 plus the lint guards. Most `gen-*.mjs` run on the nightly GitHub Actions cron
 (`.github/workflows/update-nightly-data.yml`); a few are hand-run because their data
-is immutable. The reader modules are documented in `src/api/CLAUDE.md`; this file
-documents the generators.
+is immutable. Each generator's READER module is documented in
+`docs/api/static-data.md`; this file documents the generators.
 
 ## Everyday commands
 
@@ -604,12 +604,12 @@ process automatically.
   (≥4.5:1 text, ≥3:1 large/UI) for the known text-on-background pairings (seal ink
   on the kraft stripes, white on the IL clay stripes, the core semantic text roles).
   Fix a failure by retuning the hex, never by lowering the threshold. See ADR-0023.
-- `check-claude-md.mjs` — guards the CLAUDE.md leanness rule: fails if the root
-  `CLAUDE.md` exceeds `MAX_LINES` (200). Keeps subsystem detail in the nested
-  `CLAUDE.md` files (this one, `src/CLAUDE.md`, `src/api/CLAUDE.md`) that load only
-  when Claude works in that directory, so the always-loaded root stays cheap. When
-  it fails, move detail into the relevant nested file or `docs/*` and leave a pointer
-  in root — don't just raise the cap.
+- `check-claude-md.mjs` — guards the CLAUDE.md leanness rule: the root `CLAUDE.md`
+  at `ROOT_MAX` (200) lines, AND every nested one at `NESTED_MAX` (250) or a pinned
+  `BUDGETS` entry (ratcheting DOWNWARD only, like `check-dir-size.mjs`). A nested
+  file still loads IN FULL whenever anyone works in its directory — for this file
+  and `src/api/`, most sessions — so "move it to the nested file" was only half a
+  fix. Move detail to `docs/*` and leave a pointer; don't raise a cap.
 - `check-spoiler-manifest.mjs` — guards `src/api/spoiler-manifest.json`, the
   machine-readable spoiler classification of every module in `src/api/`. Four
   assertions: every module has an entry, every entry names a real file, entries are
