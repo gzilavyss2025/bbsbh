@@ -12,11 +12,30 @@
   },
   "103": {
     "name": "Lake Elsinore Storm",
-    "art": "8:41a2d55d",
+    "art": "45:8fd931a4",
     "parts": {
-      "3": "knockout",
-      "5": "knockout"
-    }
+      "3": "ink",
+      "4": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "8": "ink",
+      "9": "knockout",
+      "13": "knockout",
+      "15": "knockout",
+      "17": "knockout",
+      "19": "knockout",
+      "22": "knockout",
+      "23": "knockout",
+      "25": "knockout",
+      "27": "knockout",
+      "28": "knockout",
+      "35": "knockout",
+      "41": "knockout",
+      "42": "knockout",
+      "43": "knockout",
+      "44": "knockout"
+    },
+    "source": "primary"
   },
   "105": {
     "name": "Sacramento River Cats",
@@ -356,15 +375,26 @@
   },
   "249": {
     "name": "Wilson Warbirds",
-    "art": "14:c5d70efd",
+    "art": "29:56bcc57",
     "parts": {
       "0": "knockout",
-      "1": "ink",
-      "3": "ink",
-      "4": "ink",
-      "6": "knockout",
-      "7": "knockout"
-    }
+      "1": "knockout",
+      "2": "knockout",
+      "7": "ink",
+      "9": "ink",
+      "10": "ink",
+      "11": "knockout",
+      "17": "knockout",
+      "18": "knockout",
+      "20": "knockout",
+      "22": "knockout",
+      "23": "knockout",
+      "24": "knockout",
+      "25": "knockout",
+      "26": "knockout",
+      "27": "knockout"
+    },
+    "source": "primary"
   },
   "259": {
     "name": "Fresno Grizzlies",
@@ -847,7 +877,8 @@
       "5": "knockout",
       "11": "knockout",
       "13": "knockout",
-      "22": "knockout"
+      "22": "knockout",
+      "23": "knockout"
     }
   },
   "481": {
@@ -927,8 +958,16 @@
     "name": "Kannapolis Cannon Ballers",
     "art": "14:2ceb49c2",
     "parts": {
+      "0": "knockout",
+      "1": "ink",
+      "2": "knockout",
       "3": "knockout",
+      "4": "knockout",
+      "5": "ink",
+      "6": "knockout",
+      "7": "ink",
       "8": "knockout",
+      "9": "knockout",
       "10": "knockout",
       "11": "knockout",
       "12": "knockout"
@@ -1005,12 +1044,15 @@
   },
   "507": {
     "name": "St. Lucie Mets",
-    "art": "5:2d020cba",
+    "art": "56:62f02a9b",
     "parts": {
-      "0": "knockout",
-      "1": "knockout",
-      "2": "knockout"
-    }
+      "3": "knockout",
+      "5": "knockout",
+      "7": "knockout",
+      "17": "ink",
+      "39": "ink"
+    },
+    "source": "primary"
   },
   "509": {
     "name": "Fort Myers Mighty Mussels",
@@ -1072,6 +1114,7 @@
     "name": "Stockton Ports",
     "art": "23:aafe2afe",
     "parts": {
+      "0": "knockout",
       "10": "knockout"
     }
   },
@@ -1308,6 +1351,13 @@
       "19": "ink"
     }
   },
+  "570": {
+    "name": "Lakeland Flying Tigers",
+    "art": "13:54173537",
+    "parts": {
+      "10": "knockout"
+    }
+  },
   "572": {
     "name": "Wisconsin Timber Rattlers",
     "art": "19:c827005a",
@@ -1386,10 +1436,16 @@
     "name": "Tampa Tarpons",
     "art": "11:5a90ef5d",
     "parts": {
-      "1": "knockout",
-      "3": "ink",
-      "6": "ink",
-      "7": "ink"
+      "0": "knockout",
+      "1": "ink",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "ink",
+      "8": "ink",
+      "9": "knockout"
     }
   },
   "1350": {

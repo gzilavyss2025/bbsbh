@@ -125,6 +125,13 @@
       "milb-away": "cdn:primary"
     }
   },
+  "507": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "512": {
     "marks": [],
     "assignments": {

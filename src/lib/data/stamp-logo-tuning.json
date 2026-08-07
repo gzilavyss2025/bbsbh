@@ -16,6 +16,23 @@
       }
     }
   },
+  "103": {
+    "name": "Lake Elsinore Storm",
+    "treatments": {
+      "away": {
+        "scale": 1.35,
+        "offsetX": 1,
+        "offsetY": 13,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.35,
+        "offsetX": 8,
+        "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
   "105": {
     "name": "Sacramento River Cats",
     "treatments": {
@@ -630,6 +647,23 @@
       }
     }
   },
+  "249": {
+    "name": "Wilson Warbirds",
+    "treatments": {
+      "away": {
+        "scale": 0.94,
+        "offsetX": 15,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.94,
+        "offsetX": -9,
+        "offsetY": 2,
+        "rotation": 0
+      }
+    }
+  },
   "259": {
     "name": "Fresno Grizzlies",
     "treatments": {
@@ -1151,6 +1185,23 @@
       }
     }
   },
+  "476": {
+    "name": "San Jose Giants",
+    "treatments": {
+      "away": {
+        "scale": 0.88,
+        "offsetX": 25,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.9,
+        "offsetX": -22,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
   "477": {
     "name": "Greensboro Grasshoppers",
     "treatments": {
@@ -1185,6 +1236,40 @@
       }
     }
   },
+  "479": {
+    "name": "Jupiter Hammerheads",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 19,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -26,
+        "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "481": {
+    "name": "Hill City Howlers",
+    "treatments": {
+      "away": {
+        "scale": 1.1,
+        "offsetX": 20,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.19,
+        "offsetX": -14,
+        "offsetY": 13,
+        "rotation": 0
+      }
+    }
+  },
   "484": {
     "name": "Indianapolis Indians",
     "treatments": {
@@ -1215,6 +1300,23 @@
         "scale": 0.93,
         "offsetX": -5,
         "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "487": {
+    "name": "Kannapolis Cannon Ballers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 10,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -24,
+        "offsetY": 9,
         "rotation": 0
       }
     }
@@ -1315,6 +1417,23 @@
       }
     }
   },
+  "507": {
+    "name": "St. Lucie Mets",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 17,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -15,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "509": {
     "name": "Fort Myers Mighty Mussels",
     "treatments": {
@@ -1362,6 +1481,23 @@
         "scale": 1,
         "offsetX": -3,
         "offsetY": 9,
+        "rotation": 0
+      }
+    }
+  },
+  "524": {
+    "name": "Stockton Ports",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -29,
+        "offsetY": 0,
         "rotation": 0
       }
     }
@@ -1591,15 +1727,15 @@
     "name": "Clearwater Threshers",
     "treatments": {
       "away": {
-        "scale": 1.18,
-        "offsetX": 15,
+        "scale": 1.35,
+        "offsetX": 7,
         "offsetY": 20,
         "rotation": 0
       },
       "home": {
-        "scale": 1,
-        "offsetX": -11,
-        "offsetY": 18,
+        "scale": 1.18,
+        "offsetX": -15,
+        "offsetY": 19,
         "rotation": 0
       }
     }
@@ -1618,6 +1754,23 @@
         "offsetX": -18,
         "offsetY": 10,
         "rotation": 0
+      }
+    }
+  },
+  "570": {
+    "name": "Lakeland Flying Tigers",
+    "treatments": {
+      "away": {
+        "scale": 1.35,
+        "offsetX": 15,
+        "offsetY": 20,
+        "rotation": -29
+      },
+      "home": {
+        "scale": 1.35,
+        "offsetX": -8,
+        "offsetY": 20,
+        "rotation": 29
       }
     }
   },
@@ -1685,6 +1838,23 @@
         "scale": 1.08,
         "offsetX": -29,
         "offsetY": -4,
+        "rotation": 0
+      }
+    }
+  },
+  "587": {
+    "name": "Tampa Tarpons",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 24,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 14,
         "rotation": 0
       }
     }

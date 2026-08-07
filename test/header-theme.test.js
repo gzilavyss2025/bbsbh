@@ -158,6 +158,8 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // records today (95 total), then one more final tuning pass landed 1
   // more, 38 MiLB records today (96 total), then this session's tuning
   // pass landed 52 more, 90 MiLB records today (148 total), then one more
-  // final tuning pass landed 7 more, 97 MiLB records today (155 total).
-  assert.equal(checked, 155, 'expected the 155 landed triads — update this count deliberately')
+  // final tuning pass landed 7 more, 97 MiLB records today (155 total),
+  // then a further tuning pass landed 5 more, 102 MiLB records today (160
+  // total).
+  assert.equal(checked, 160, 'expected the 160 landed triads — update this count deliberately')
 })
