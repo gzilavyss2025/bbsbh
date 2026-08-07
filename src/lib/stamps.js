@@ -22,7 +22,8 @@
 // What this module deliberately does NOT hold: the score. A local stamp record
 // is `{ state, mode, stampedAt, updatedAt, note, date, placement }` — no runs,
 // no result, no winner. (`placement` is where the stamp sits in the passport
-// book: a page number and two fractions. A picture, not an outcome.) The
+// book: a page number and two fractions, and now also which book — see
+// `bookId` below. A picture, not an outcome.) The
 // Logbook resolves the score from the game facts at render time — from Redis
 // when signed in, from statsapi when not — so localStorage stays exactly as
 // non-score-bearing as `bbsbh:reveal:{gamePk}` already is.
@@ -119,8 +120,12 @@ export function sanitizeNote(value) {
 // src/lib/passportLayout.js. Only the BOUNDS are restated here, because this
 // module is bundled into the serverless function and has no business pulling
 // the layout module in behind it (same reasoning as `halfIndexOf` above).
+// `DEFAULT_BOOK_ID` is restated here for the identical reason: it is
+// src/lib/books.js's constant, and this module must not import that one
+// either.
 export const MAX_PLACEMENT_PAGE = 60
 export const MAX_PLACEMENT_TILT = 7
+export const DEFAULT_BOOK_ID = 'default'
 
 export function normalizePlacement(raw) {
   if (!raw || typeof raw !== 'object') return null
@@ -137,14 +142,31 @@ export function normalizePlacement(raw) {
   // Rounded so a placement round-tripping through JSON and two devices can't
   // drift by a float epsilon and read as a change worth republishing.
   const round = (n) => Math.round(n * 10000) / 10000
-  return { page, x: round(clamp01(x)), y: round(clamp01(y)), tilt: Math.round(tilt * 100) / 100 }
+  // A book that predates this feature has no bookId on its placements, and
+  // an out-of-range or foreign one is not this app's problem to validate here
+  // (src/lib/books.js owns whether a book actually exists) — either way a
+  // placement always names SOME book, so every stamp has a shelf to live on.
+  const bookId =
+    typeof raw.bookId === 'string' && raw.bookId.length > 0 && raw.bookId.length <= 64
+      ? raw.bookId
+      : DEFAULT_BOOK_ID
+  return {
+    bookId,
+    page,
+    x: round(clamp01(x)),
+    y: round(clamp01(y)),
+    tilt: Math.round(tilt * 100) / 100,
+  }
 }
 
 // Whether two placements are the same spot — used by the sync diff, which must
-// not republish a stamp whose placement merely round-tripped.
+// not republish a stamp whose placement merely round-tripped. Two otherwise-
+// identical placements in different books are NOT the same spot: moving a
+// stamp to another book's page is a real change worth syncing, even if the
+// page/x/y/tilt it lands on happen to match where it sat before.
 export function samePlacement(a, b) {
   if (!a || !b) return !a && !b
-  return a.page === b.page && a.x === b.x && a.y === b.y && a.tilt === b.tilt
+  return a.bookId === b.bookId && a.page === b.page && a.x === b.x && a.y === b.y && a.tilt === b.tilt
 }
 
 // ---------------------------------------------------------------------------

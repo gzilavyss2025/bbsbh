@@ -156,12 +156,18 @@ const BUDGETS = {
   // +1 for stampInkTuning.js — the per-club stamp-ink override reader
   // (src/lib/data/stamp-ink.json), same small reader/store-file pairing as
   // the existing stampLogoTuning.js beside it, not a new subsystem.
-  'src/lib': 49,
+  // +1 for books.js — the pure rules for multiple named Game Log books
+  // (ADR-0036's shelf), the same React-free-core-beside-its-hook shape as
+  // stamps.js/useStamps.js, not a new subsystem.
+  'src/lib': 50,
   'src/screens': 38,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
-  'src/hooks': 19,
+  // 19 -> 20 for useBooks.js — useStamps.js's sibling for the new multi-book
+  // store (src/lib/books.js), same React-wiring-over-a-pure-core shape as the
+  // hook it sits beside.
+  'src/hooks': 20,
   'src/screens/identity-lab': 15,
 }
 
