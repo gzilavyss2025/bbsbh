@@ -1,3 +1,4 @@
+import '../../styles/53-umpire-tendencies.css'
 import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../../lib/statTiers.js'
 import { HomePlateIcon } from '../badges/UmpireTierGlyph.jsx'
 import { UmpireZoneMap } from './UmpireZoneMap.jsx'

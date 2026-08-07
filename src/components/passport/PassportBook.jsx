@@ -1,3 +1,4 @@
+import '../../styles/49-passport-book.css'
 import { useCallback, useEffect, useMemo } from 'react'
 import { MAX_PAGES, PAGE_ASPECT, stampsOnPage } from '../../lib/passportLayout.js'
 import { useMediaQuery } from '../../hooks/useMediaQuery.js'

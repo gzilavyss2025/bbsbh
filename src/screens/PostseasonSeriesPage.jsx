@@ -1,3 +1,4 @@
+import '../styles/35-postseason-series.css'
 import { loadPostseasonHistory } from '../api/postseasonHistory.js'
 import {
   loadSeriesStats,

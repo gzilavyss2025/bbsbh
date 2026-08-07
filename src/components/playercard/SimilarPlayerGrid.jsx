@@ -1,3 +1,4 @@
+import '../../styles/51-similar-players.css'
 import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { splitDisplayName } from '../../api/person.js'

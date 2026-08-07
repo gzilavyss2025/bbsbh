@@ -1,3 +1,4 @@
+import '../styles/15-team-color-lab.css'
 import { useEffect, useMemo, useState } from 'react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'

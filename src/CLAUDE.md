@@ -389,12 +389,12 @@ shape-gated in `lib/recentSearches.js` (identity fields only, never a score) wit
 
 ## Design system (`src/styles/*` + `src/tokens/*`)
 
-`src/index.css` holds **no rules** — it is a banner comment and 66 `@import`s:
-the six `src/tokens/*.css` files (colors, typography, spacing, layout, effects,
-fonts), then the 60 `src/styles/NN-name.css` partials in cascade order. It was a
-single 30,326-line file until it was cut at verified brace-depth-0 boundaries;
-`cat src/styles/*.css` reproduced that file's body byte-for-byte at the time, and the
-built stylesheet is unchanged, because Vite inlines `@import` at build time.
+`src/index.css` holds **no rules** — a banner comment and `@import`s: the six
+`src/tokens/*.css` files, then the `src/styles/NN-name.css` partials in cascade
+order. It is the **core** sheet, not every partial: `main.jsx` imports it, so every
+line render-blocks every route, and a partial only one lazy screen uses is imported
+by that screen instead (a per-route chunk; 521 KB blocking → 368 KB). Files stay in
+`src/styles/`, guards unchanged; index.css says which left, who owns each, and the two rules for leaving.
 
 **Order is the contract.** The numeric prefix IS the cascade — later partials
 override earlier ones at equal specificity, exactly as later lines did in the

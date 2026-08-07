@@ -1,3 +1,4 @@
+import '../../styles/37-all-star-rosters.css'
 import { useState } from 'react'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { Headshot } from '../player/Headshot.jsx'

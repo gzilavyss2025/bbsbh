@@ -1,3 +1,4 @@
+import '../styles/45-admin-copy-editor.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth, useUser } from '@clerk/clerk-react'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'

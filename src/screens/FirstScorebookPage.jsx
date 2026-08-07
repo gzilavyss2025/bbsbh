@@ -1,3 +1,4 @@
+import '../styles/42-first-scorebook.css'
 import { useMemo, useState } from 'react'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

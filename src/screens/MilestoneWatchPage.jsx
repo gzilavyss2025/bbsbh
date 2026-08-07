@@ -1,3 +1,4 @@
+import '../styles/32-milestone-watch.css'
 import { useState } from 'react'
 import { loadMilestoneWatch, formatMilestoneProjection } from '../api/milestones.js'
 import { useAsync } from '../hooks/useAsync.js'

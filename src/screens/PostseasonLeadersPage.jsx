@@ -1,3 +1,4 @@
+import '../styles/36-postseason-leaders.css'
 import {
   loadPostseasonLeaders,
   BATTING_CATEGORIES,

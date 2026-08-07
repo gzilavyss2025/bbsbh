@@ -1,3 +1,4 @@
+import '../styles/47-trade-deadline.css'
 import { useState } from 'react'
 import { loadTradeDeadlineSeason, SEASONS } from '../api/tradeDeadline.js'
 import { useAsync } from '../hooks/useAsync.js'
