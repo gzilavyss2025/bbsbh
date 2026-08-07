@@ -1,7 +1,16 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { headerThemeFor, headerThemeStyle, headerThemeClass } from '../src/lib/headerTheme.js'
+import {
+  headerThemeFor,
+  headerThemeStyle,
+  headerThemeClass,
+  headerDraftMatchesLanded,
+  markScaleValue,
+  withMarkScale,
+  MARK_SCALE_LIMITS,
+} from '../src/lib/headerTheme.js'
+import { draftFieldsMatchLanded } from '../src/screens/identity-lab/useDraftStore.js'
 import { milbHeaderColorOverride, MILB_HEADER_COLOR_OVERRIDES } from '../src/lib/milbColors.js'
 import { contrastRatio } from '../src/lib/contrast.js'
 import MLB_TREATMENT_TUNING from '../src/lib/data/mlb-treatment-tuning.json' with { type: 'json' }
@@ -163,4 +172,59 @@ test('every landed triad resolves and clears WCAG AA for normal text', () => {
   // total), then a further tuning pass landed 18 more, 120 MiLB records
   // today (178 total).
   assert.equal(checked, 178, 'expected the 178 landed triads — update this count deliberately')
+})
+
+// ---------------------------------------------------------------------------
+// The mark size's two asymmetries with the store. Both of these shipped broken
+// and were caught by a real bar reporting itself Themed and landed while its
+// draft refused to clear, so both are pinned here.
+// ---------------------------------------------------------------------------
+
+test('a blank mark size means NO override, not a clamped zero', () => {
+  // `Number('')` is 0 — finite, not the default — so the naive rule wrote a
+  // clamped 0.5 for a field the owner had just cleared.
+  assert.equal(markScaleValue(''), null)
+  assert.equal(markScaleValue(null), null)
+  assert.equal(markScaleValue(undefined), null)
+  assert.deepEqual(withMarkScale({ bar: '#000' }, ''), { bar: '#000' })
+})
+
+test('the default mark size is dropped, and anything else is clamped in', () => {
+  assert.equal(markScaleValue(1), null)
+  assert.equal(markScaleValue(1.2), 1.2)
+  assert.equal(markScaleValue(99), MARK_SCALE_LIMITS.max)
+  assert.equal(markScaleValue(0.01), MARK_SCALE_LIMITS.min)
+  assert.deepEqual(withMarkScale({ bar: '#000' }, 1.2), { bar: '#000', markScale: 1.2 })
+})
+
+test('a draft sitting at the default mark size matches a landed record with none', () => {
+  // THE BUG: the save path drops a default mark size, so a raw field compare
+  // could never match and the draft stayed "pending" forever — on the colours
+  // too, since one stuck field holds the whole (team, treatment) draft open.
+  const landed = { bar: '#005A9C', accent: '#A5ACAF', onBar: '#FFFFFF' }
+  const draft = { bar: '#005A9C', accent: '#A5ACAF', onBar: '#FFFFFF', markScale: 1 }
+  assert.equal(headerDraftMatchesLanded(draft, landed, draftFieldsMatchLanded), true)
+})
+
+test('clearing a mark size the store still holds stays a pending change', () => {
+  // The reason this compares the LANDED FORM rather than ignoring the field:
+  // dropping a club's mark size is a real edit, and auto-clearing that draft
+  // would silently revert it.
+  const landed = { bar: '#005A9C', accent: '#A5ACAF', onBar: '#FFFFFF', markScale: 1.2 }
+  assert.equal(
+    headerDraftMatchesLanded({ markScale: '' }, landed, draftFieldsMatchLanded),
+    false,
+  )
+  assert.equal(
+    headerDraftMatchesLanded({ markScale: 1.2 }, landed, draftFieldsMatchLanded),
+    true,
+  )
+})
+
+test('a changed colour is still pending however the mark size compares', () => {
+  const landed = { bar: '#005A9C', accent: '#A5ACAF', onBar: '#FFFFFF' }
+  assert.equal(
+    headerDraftMatchesLanded({ bar: '#123456', markScale: 1 }, landed, draftFieldsMatchLanded),
+    false,
+  )
 })

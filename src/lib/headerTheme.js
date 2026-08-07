@@ -128,9 +128,42 @@ export const MARK_SCALE_LIMITS = { min: 0.5, max: 2.5, step: 0.05, default: 1 }
 // the one that says which bars actually needed a hand — the same rule the stamp
 // placement editor keeps for its four fields.
 export function withMarkScale(record, markScale) {
+  const n = markScaleValue(markScale)
+  if (n === null) return record
+  return { ...record, markScale: n }
+}
+
+// A draft's mark size as it would LAND: a clamped number, or null for "no
+// override" — which is what a cleared field, a missing one, and the default all
+// mean. Blank has to be spelled out rather than left to `Number`, because
+// `Number('')` is 0: finite, not the default, and so silently written as a
+// clamped 0.5 by the rule above until this existed.
+export function markScaleValue(markScale) {
+  if (markScale === '' || markScale == null) return null
   const n = Number(markScale)
-  if (!Number.isFinite(n) || n === MARK_SCALE_LIMITS.default) return record
-  return { ...record, markScale: clampMarkScale(n) }
+  if (!Number.isFinite(n) || n === MARK_SCALE_LIMITS.default) return null
+  return clampMarkScale(n)
+}
+
+// Whether a header DRAFT, once landed, would equal what is already landed —
+// which is the question the lab's auto-clear sweep is really asking, and the one
+// a raw field-by-field compare gets wrong here.
+//
+// The asymmetry is the mark size: the save path DROPS a default or blank one
+// rather than writing it, so a draft carrying `markScale: 1` can never equal a
+// landed record that (correctly) has no `markScale` at all. Left to the generic
+// comparison that read as a change still pending, forever — the bar reported
+// itself Themed and landed while its draft refused to clear.
+//
+// Deliberately compares the LANDED FORM rather than just ignoring the field:
+// clearing a club's mark size back to the default IS a pending change when the
+// store still holds one, and this keeps saying so.
+export function headerDraftMatchesLanded(fields, landed, matchColors) {
+  if (!landed) return false
+  const { markScale, ...colors } = fields
+  if (!matchColors(colors, landed)) return false
+  if (!Object.hasOwn(fields, 'markScale')) return true
+  return markScaleValue(markScale) === (markScaleValue(landed.markScale) ?? null)
 }
 
 // The mark this club's mastheads draw on the bar it wears in this jersey, and

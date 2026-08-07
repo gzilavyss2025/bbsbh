@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
-import { MARK_SCALE_LIMITS, withMarkScale } from '../../../lib/headerTheme.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
@@ -544,8 +544,11 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
     pos: (teamId, variant, fields) =>
       draftFieldsMatchLanded(fields, MILB_LOGO_POS_OVERRIDES[teamId]?.[variant]),
     wpa: (teamId, variant, fields) => draftFieldsMatchLanded(fields, wpaLandedFlat(teamId, variant)),
+    // Through headerDraftMatchesLanded, not a bare field compare: the save path
+    // drops a default/blank mark size rather than writing it, so a raw compare
+    // could never match and the draft showed as pending forever.
     header: (teamId, variant, fields) =>
-      draftFieldsMatchLanded(fields, milbHeaderColorOverride(teamId, variant)),
+      headerDraftMatchesLanded(fields, milbHeaderColorOverride(teamId, variant), draftFieldsMatchLanded),
   },
   buildAllChangesText,
   buildSaves,

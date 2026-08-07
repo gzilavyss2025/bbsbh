@@ -14,7 +14,7 @@ import {
 } from '../../../lib/wpa/wpaBandColors.js'
 import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpa/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
-import { MARK_SCALE_LIMITS, withMarkScale } from '../../../lib/headerTheme.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import {
@@ -1476,8 +1476,11 @@ export const mlbProfile = {
       const wpaWordmark = resolveWpaWordmark(teamId, treatment, null)
       return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt, wpaWordmark })
     },
+    // Through headerDraftMatchesLanded, not a bare field compare: the save path
+    // drops a default/blank mark size rather than writing it, so a raw compare
+    // could never match and the draft showed as pending forever.
     header: (teamId, treatment, fields) =>
-      draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
+      headerDraftMatchesLanded(fields, treatmentHeaderColorOverride(teamId, treatment), draftFieldsMatchLanded),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     offDay: (teamId, fields) => offDayDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     defaultLogos: (teamId, fields) => defaultLogosDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),

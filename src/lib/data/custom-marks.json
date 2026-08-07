@@ -193,10 +193,15 @@
       {
         "slug": "torcityconnect",
         "name": "torcityconnect"
+      },
+      {
+        "slug": "tormain",
+        "name": "tormain"
       }
     ],
     "assignments": {
-      "city-connect-masthead": "torcityconnect"
+      "city-connect-masthead": "torcityconnect",
+      "main-masthead": "tormain"
     }
   },
   "142": {
@@ -204,10 +209,26 @@
       {
         "slug": "wordmarkwhite",
         "name": "wordmarkwhite"
+      },
+      {
+        "slug": "mincityconnect",
+        "name": "mincityconnect"
       }
     ],
     "assignments": {
-      "alternate-3": "wordmarkwhite"
+      "alternate-3": "wordmarkwhite",
+      "city-connect-masthead": "mincityconnect"
+    }
+  },
+  "143": {
+    "marks": [
+      {
+        "slug": "phicityconnect",
+        "name": "phicityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "phicityconnect"
     }
   },
   "144": {

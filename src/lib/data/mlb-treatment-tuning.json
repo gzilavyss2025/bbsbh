@@ -134,14 +134,15 @@
         "header": {
           "bar": "#DF4601",
           "accent": "#000000",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.1
         },
-        "note": "Alt 2 Orange",
         "colors": {
           "primary": "#DF4601",
           "secondary": "#000000",
           "accent1": "#DF4601"
-        }
+        },
+        "note": "Alt 2 Orange"
       },
       "alternate": {
         "note": "Alt 1 Black",
@@ -166,12 +167,13 @@
         "header": {
           "bar": "#E1D2BE",
           "accent": "#ff7a29",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.15
         },
-        "note": "City Connect 2.0",
         "colors": {
           "primary": "#E1D2BE"
-        }
+        },
+        "note": "City Connect 2.0"
       }
     }
   },
@@ -188,7 +190,8 @@
         "header": {
           "bar": "#0C2340",
           "accent": "#BD3039",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "note": "white, not any of the three brand swatches"
       },
@@ -225,7 +228,8 @@
         "header": {
           "bar": "#48776f",
           "accent": "#0A0A0A",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.1
         }
       }
     }
@@ -245,7 +249,8 @@
         "header": {
           "bar": "#0E3386",
           "accent": "#CC3433",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their Home Pinstripe jersey, instead of a flat Secondary tile; the Home Pinstripe mark reads better nudged right"
       },
@@ -294,7 +299,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#fe2c38",
-          "onBar": "#fe2c38"
+          "onBar": "#fe2c38",
+          "markScale": 1.45
         },
         "colors": {
           "primary": "#C6011F",
@@ -593,8 +599,8 @@
         "scale": 0.75,
         "header": {
           "bar": "#005A9C",
-          "accent": "#EF3E42",
-          "onBar": "#FBF6E9"
+          "accent": "#A5ACAF",
+          "onBar": "#FFFFFF"
         },
         "colors": {
           "primary": "#005A9C",
@@ -727,7 +733,8 @@
         "header": {
           "bar": "#002D72",
           "accent": "#FF5910",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         }
       },
       "alternate": {
@@ -768,7 +775,8 @@
         "header": {
           "bar": "#383a35",
           "accent": "#FF5910",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 0.95
         }
       }
     }
@@ -1317,7 +1325,8 @@
         "header": {
           "bar": "#00549f",
           "accent": "#ffde00",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         },
         "colors": {
           "primary": "#00549f",
@@ -1367,7 +1376,8 @@
         "header": {
           "bar": "#00163b",
           "accent": "#169fda",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#00163b",
