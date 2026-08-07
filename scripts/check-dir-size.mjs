@@ -130,7 +130,11 @@ const BUDGETS = {
   // this repo sits flat in scripts/ (only shared helpers live in scripts/lib,
   // where this pair's shared body does go), so nesting these two alone would
   // split the generator catalog rather than subdivide it.
-  scripts: 69,
+  // +1 for check-spoiler-manifest.mjs — another flat lint guard, same shape as
+  // check-dead-exports.mjs and check-stamp-surfaces.mjs already here. Its data
+  // (src/api/spoiler-manifest.json) deliberately does NOT live beside it: the
+  // classification is a fact about the modules, so it sits with them.
+  scripts: 70,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
