@@ -298,11 +298,17 @@ export default function App() {
   } else if (route.name === 'logbook') {
     // `season: null` means "newest season with stamps" — only the local
     // collection knows which that is, so LogbookPage resolves it (see route.js).
-    content = <LogbookPage season={route.season} placing={route.placing} />
+    // `bookId` is absent on the two original routes ('/logbook',
+    // '/logbook/{season}') and present only on the additive
+    // '/logbook/book/{id}[/{season}]' routes — LogbookPage.jsx's own resolver
+    // treats "absent" as "let the book count decide" (ADR-0036's multi-book
+    // addendum).
+    content = <LogbookPage season={route.season} placing={route.placing} bookId={route.bookId ?? null} />
   } else if (route.name === 'logbook-stats') {
-    // Spans every season, so it takes no route params — see route.js for why
-    // this branch has to parse ahead of the numeric-season one.
-    content = <LogbookStatsPage />
+    // Spans every season, so it takes no season param — see route.js for why
+    // this branch has to parse ahead of the numeric-season one. `bookId` is
+    // the same additive/optional hand-off as the 'logbook' branch above.
+    content = <LogbookStatsPage bookId={route.bookId ?? null} />
   } else if (route.name === 'photos') {
     // Keyed on the deep-linked gamePk so navigating between `/photos` and
     // `/photos/{gamePk}` (e.g. the page's own footer link back to the plain

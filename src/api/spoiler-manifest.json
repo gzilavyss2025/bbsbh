@@ -288,7 +288,7 @@
     "logbook.js": {
       "class": "reveal-only",
       "why": "The ONE fetcher here that deliberately asks statsapi FOR the score (every other schedule fetcher prunes it with fields=). Safe only because its input is the user's own stamps, and a stamp cannot exist for a game they have not finished revealing. Do not call it with an arbitrary game list.",
-      "importers": ["screens/LogbookPage.jsx", "screens/LogbookStatsPage.jsx"]
+      "importers": ["screens/LogbookCollection.jsx", "screens/LogbookStatsPage.jsx"]
     },
     "logbookStats.js": {
       "class": "reveal-only",

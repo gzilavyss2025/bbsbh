@@ -3,16 +3,29 @@ import { useMemo } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { computeLogbookStats } from '../api/logbookStats.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useBooks } from '../hooks/useBooks.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
-import { logbookPath } from '../lib/route.js'
+import { DEFAULT_BOOK_ID } from '../lib/books.js'
+import { bookPath, logbookPath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 
 // The Logbook retrospective — what your collection adds up to (ADR-0035, the
 // game-stamps PRD §6, Tier 1).
+//
+// ===========================================================================
+// One book, or every book (ADR-0036's multi-book addendum)
+// ===========================================================================
+// The bare route (`/logbook/stats`) is UNCHANGED: the retrospective over the
+// WHOLE collection, every book included, exactly as it always has been —
+// `useStamps().all`/`forSeason` have never cared which book a stamp is filed
+// in, so nothing about that source needed to change. `bookId`, when given
+// (the additive `/logbook/book/{id}/stats` route), narrows the SAME
+// computation to one book's own placements instead of duplicating this
+// page's logic or markup.
 //
 // ===========================================================================
 // THIS PAGE RENDERS FINAL SCORES PLAINLY. The containment argument, again.
@@ -83,17 +96,29 @@ function Tally({ items }) {
   )
 }
 
-export function LogbookStatsPage() {
+export function LogbookStatsPage({ bookId = null }) {
   useDocumentTitle('Game Log Stats')
   const navigate = useNav()
+  const { books } = useBooks()
   const { seasons, forSeason } = useStamps()
 
-  // Every live stamp, all seasons — the retrospective is about the whole book,
-  // which is why this route is deliberately not season-paged (see route.js).
-  const stamps = useMemo(
-    () => seasons.flatMap((season) => forSeason(season)),
-    [seasons, forSeason],
-  )
+  // The book this retrospective is scoped to, when it is scoped at all — only
+  // used to print its name and to build the back link; `book == null` is the
+  // ordinary whole-collection page, unaffected by any of this.
+  const book = bookId ? books.find((b) => b.id === bookId) ?? null : null
+
+  // Every live stamp, all seasons — deliberately not season-paged (see
+  // route.js), because the retrospective is about the whole collection by
+  // default. Narrowed to one book's own PLACEMENTS when `bookId` is given —
+  // an unplaced stamp (still in some book's tray) has no book of its own yet,
+  // so it is correctly left out of a per-book retrospective the same way it
+  // is left out of that book's passport pages (LogbookPage.jsx).
+  const stamps = useMemo(() => {
+    const every = seasons.flatMap((season) => forSeason(season))
+    return bookId
+      ? every.filter((s) => (s.placement?.bookId ?? DEFAULT_BOOK_ID) === bookId)
+      : every
+  }, [seasons, forSeason, bookId])
   const gamePks = useMemo(() => stamps.map((s) => s.gamePk), [stamps])
   // Keyed on the pk list rather than the array identity, so editing a note
   // (which rewrites the stamp objects) doesn't refetch every game's facts.
@@ -108,6 +133,14 @@ export function LogbookStatsPage() {
     [stamps, facts.data],
   )
 
+  // Back to the book this page is scoped to — the default book's bare
+  // address when there is no `bookId`, or when the named book can no longer
+  // be found (removed since this link was opened; the bare route re-resolves
+  // to whatever remains, the same fallback LogbookPage.jsx's own dead-link
+  // handling uses).
+  const backPath = book && book.id !== DEFAULT_BOOK_ID ? bookPath(book.id) : logbookPath()
+  const title = book ? `${book.title || 'Game Log'} Stats` : 'Stats'
+
   if (!stats.stamps) {
     return (
       <div className="screen">
@@ -115,10 +148,10 @@ export function LogbookStatsPage() {
         {/* Same header as the populated page below — an empty collection is a
             state of this screen, not a different screen. */}
         <header className="topbar">
-          <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
+          <button type="button" className="topbar__back" onClick={() => navigate(backPath)}>
             ‹ Game Log
           </button>
-          <h1 className="topbar__title">Stats</h1>
+          <h1 className="topbar__title">{title}</h1>
         </header>
         <p className="hint hint--prose">
           No stamps yet. Reveal a game’s box score and stamp it — once a few are in
@@ -135,10 +168,10 @@ export function LogbookStatsPage() {
     <div className="screen logbookstats">
       <SiteHeader />
       <header className="topbar">
-        <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
+        <button type="button" className="topbar__back" onClick={() => navigate(backPath)}>
           ‹ Game Log
         </button>
-        <h1 className="topbar__title">Stats</h1>
+        <h1 className="topbar__title">{title}</h1>
       </header>
 
       {stats.dateRange && (
