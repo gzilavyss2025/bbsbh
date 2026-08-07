@@ -44,6 +44,15 @@ export const SYNCED_ITEMS = Object.freeze([
     module: 'src/components/sync/StampsCloudSync.jsx',
   },
   {
+    id: 'books',
+    channel: 'books',
+    label: 'Book covers',
+    // A book's name, subtitle, and cover club (ADR-0036) — never the stamps
+    // filed inside it, which are the `stamps` claim above.
+    blurb: 'The names, subtitles, and cover clubs on your books, carried to every device.',
+    module: 'src/components/sync/BooksCloudSync.jsx',
+  },
+  {
     id: 'continuation',
     channel: 'reveal',
     label: 'Pick up your pencil',

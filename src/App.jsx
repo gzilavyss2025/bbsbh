@@ -45,6 +45,20 @@ const StampsCloudSync = isClerkEnabled
     )
   : null
 
+// Headless cross-device sync for the Game Log's named books — the cover half
+// of ADR-0036. Same shape as StampsCloudSync right above it: imports
+// @clerk/clerk-react at its top, so it is only ever dynamically imported and
+// only on a deploy that configures Clerk. App-wide rather than per screen, for
+// the same reason as StampsCloudSync: a book created or renamed inside the
+// Logbook has to keep publishing even after the user navigates away from it.
+const BooksCloudSync = isClerkEnabled
+  ? lazy(() =>
+      import('./components/sync/BooksCloudSync.jsx').then((m) => ({
+        default: m.BooksCloudSync,
+      })),
+    )
+  : null
+
 // Headless cross-device sync for the My Tally preference document — the club,
 // the slate's level, keep-awake, motion. Same shape as the two above: imports
 // @clerk/clerk-react at its top, so it is only ever dynamically imported and
@@ -374,6 +388,11 @@ export default function App() {
         {StampsCloudSync && (
           <Suspense fallback={null}>
             <StampsCloudSync />
+          </Suspense>
+        )}
+        {BooksCloudSync && (
+          <Suspense fallback={null}>
+            <BooksCloudSync />
           </Suspense>
         )}
         {PreferencesCloudSync && (
