@@ -14,6 +14,7 @@ const RANKSTRIP_VISIBLE = 5
 const RANKSTRIP_STEP = 38
 const RANKSTRIP_STEP_COMPACT = 28
 const signed = (n) => `${n >= 0 ? '+' : ''}${n}`
+const rate3 = (n) => n.toFixed(3).replace(/^(-?)0(?=\.)/, '$1')
 
 // Illustrative anchors for the "How this is calculated" modal — run through
 // the same formula the app scores real teams with (see teamScoreFormula.js),
@@ -258,6 +259,9 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
             <div><dt>Record</dt><dd>{record(detail)}</dd></div>
             <div><dt>Run differential</dt><dd>{signed(detail.runDifferential)}</dd></div>
             <div><dt>Expected wins from run differential</dt><dd>{detail.pythagWins.toFixed(1)}</dd></div>
+            {kind === 'quality' && detail.avgOpponentWinPct != null && (
+              <div><dt>Strength of schedule</dt><dd>{rate3(detail.avgOpponentWinPct)} avg opponent · {signed(detail.sosAdjustment)} wins</dd></div>
+            )}
           </>
         )}
         {kind === 'surprise' && surprise && (
@@ -529,13 +533,17 @@ function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             Quality gives 60 percent of the weight to actual wins and 40 percent to the wins
             suggested by run differential. That keeps the standings in charge while noticing
             when a pile of close wins or losses makes the record look stronger or weaker than
-            the club&apos;s overall play.
+            the club&apos;s overall play. A capped strength-of-schedule adjustment then rewards
+            a tough slate of opponents and discounts a soft one.
           </p>
           {season && (
             <dl className="tscoremodal__figs">
               <div><dt>Record</dt><dd>{record(season)}</dd></div>
               <div><dt>Run differential</dt><dd>{signed(season.runDifferential)}</dd></div>
               <div><dt>“Should-have” wins from runs</dt><dd>{season.pythagWins.toFixed(1)}</dd></div>
+              {season.avgOpponentWinPct != null && (
+                <div><dt>Strength of schedule</dt><dd>{rate3(season.avgOpponentWinPct)} avg opponent · {signed(season.sosAdjustment)} wins</dd></div>
+              )}
               <div><dt>Quality</dt><dd>{scoreValue(season)} / 10</dd></div>
             </dl>
           )}

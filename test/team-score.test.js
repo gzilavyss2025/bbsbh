@@ -4,6 +4,7 @@ import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '
 import { leagueSeasonGradesFor, teamScoreFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
 import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
+import { scheduleStrengthAdjustment, SOS_ADJUSTMENT_CAP } from '../src/api/teamScoreFormula.js'
 
 test('Pythagorean quality is neutral with equal runs and rewards a run advantage', () => {
   assert.equal(pythagoreanPct(20, 20), 0.5)
@@ -52,6 +53,64 @@ test('classifyLateGame detects a late collapse as a blown lead for the leader an
   assert.equal(home.blownLeadRuns, 4)
   assert.equal(away.clutchWin, true)
   assert.equal(away.clutchWinRuns, 4)
+})
+
+test('scheduleStrengthAdjustment is zero at a .500 schedule, signed away from it, and caps at extremes', () => {
+  assert.equal(scheduleStrengthAdjustment(0.5, 162), 0)
+  assert.equal(scheduleStrengthAdjustment(null, 162), 0)
+  assert.equal(scheduleStrengthAdjustment(0.55, 0), 0)
+  assert.ok(scheduleStrengthAdjustment(0.55, 162) > 0)
+  assert.ok(scheduleStrengthAdjustment(0.45, 162) < 0)
+  assert.equal(scheduleStrengthAdjustment(0.9, 162), SOS_ADJUSTMENT_CAP)
+  assert.equal(scheduleStrengthAdjustment(0.1, 162), -SOS_ADJUSTMENT_CAP)
+  // Half a season's games earns roughly half the wins-equivalent credit of a
+  // full season at the same opponent strength.
+  const full = scheduleStrengthAdjustment(0.52, 162)
+  const half = scheduleStrengthAdjustment(0.52, 81)
+  assert.ok(Math.abs(half - full / 2) < 1e-9)
+})
+
+test('Quality credits a tougher schedule and debits a softer one for two teams with identical records', () => {
+  // X and Y each go 5-5 in ten identical-shaped games (same run pattern, so
+  // wins/pythagWins/weightedWins match exactly) — the only thing that
+  // differs is who they played. X's only opponent (A) has a weak overall
+  // record (5-15 once A's games against B are folded in); Y's only
+  // opponent (C) has a strong one (15-5 once C's games against D are folded
+  // in). Quality must separate them on strength of schedule alone.
+  const winLossGames = (gamePkStart, homeId, awayId, count, homeWinsFirst) =>
+    Array.from({ length: count }, (_, index) => ({
+      gamePk: gamePkStart + index,
+      date: `2026-04-${String(index + 1).padStart(2, '0')}`,
+      homeId,
+      awayId,
+      homeRuns: index < homeWinsFirst ? 5 : 2,
+      awayRuns: index < homeWinsFirst ? 2 : 5,
+    }))
+
+  const X = 101, Y = 102, A = 201, C = 202, B = 301, D = 302
+  const games = [
+    ...winLossGames(1, X, A, 10, 5),
+    ...winLossGames(101, Y, C, 10, 5),
+    ...winLossGames(201, B, A, 10, 10), // A loses every game here — drags its record down
+    ...winLossGames(301, C, D, 10, 10), // C wins every game here — lifts its record up
+  ]
+
+  const snapshots = buildTeamScoreSnapshots({ games, asOf: '2026-05-01' })
+  const x = snapshots[X].season
+  const y = snapshots[Y].season
+
+  // Identical underlying performance...
+  assert.equal(x.wins, y.wins)
+  assert.equal(x.runDifferential, y.runDifferential)
+  assert.equal(x.pythagWins, y.pythagWins)
+  // ...but opposite schedule strength, and a Quality score that reflects it.
+  assert.equal(x.avgOpponentWinPct, 0.25)
+  assert.equal(y.avgOpponentWinPct, 0.75)
+  assert.ok(x.sosAdjustment < 0)
+  assert.ok(y.sosAdjustment > 0)
+  assert.ok(y.score > x.score)
+  assert.equal(x.score, 4.2)
+  assert.equal(y.score, 5.8)
 })
 
 test('snapshots retain season quality and a last-10 form window', () => {
