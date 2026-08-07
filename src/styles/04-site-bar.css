@@ -28,11 +28,12 @@
   color: var(--text-heading);
 }
 
-/* Persistent site-wide search trigger (SiteSearch.jsx) plus the "more pages"
-   menu trigger (SiteMenu.jsx) — plain icon buttons (no docked input; there's
-   no room for one on a phone-width header, and a tap-to-open modal is the
-   standard mobile pattern) that ride together at the far right of the site
-   bar, the menu just to the right of search. */
+/* Persistent site-wide search trigger (SiteSearch.jsx), the Game Log shortcut
+   (LogbookButton.jsx), and the "more pages" menu trigger (SiteMenu.jsx) —
+   plain icon buttons (no docked input; there's no room for one on a
+   phone-width header, and a tap-to-open modal is the standard mobile
+   pattern) that ride together at the far right of the site bar, in that
+   order — matching the slate's own topbar__iconcluster (GameSelect.jsx). */
 .sitebar__actions {
   margin-left: auto;
   display: flex;
