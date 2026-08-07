@@ -609,7 +609,9 @@ export function InningViewer({
             Back button). */}
         {sectionNav && <div className="inningchrome">{sectionNav}</div>}
         <PregameScoreboard feed={feed} />
-        <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
+        <div className="pregameboard__refresh">
+          <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
+        </div>
       </div>
     )
   }

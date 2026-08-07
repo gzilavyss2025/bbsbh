@@ -111,6 +111,14 @@
   font-size: var(--fs-label);
 }
 
+/* The countdown-active board (PregameScoreboard's `showClock`) drops the
+   MIN · MIL line and the PREGAME tag entirely, so "First pitch in" becomes
+   the board's first line and no longer needs the runway the teams row used
+   to provide above it. */
+.pregameboard--counting .pregameboard__lead {
+  margin-top: 0;
+}
+
 .pregameboard__countdown {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
@@ -197,6 +205,13 @@
   line-height: var(--lh-prose);
 }
 
+/* No PREGAME tag sits above this while the countdown runs, so the divider
+   that used to separate the two has nothing left to divide. */
+.pregameboard--counting .pregameboard__meta {
+  border-top: 0;
+  padding-top: 0;
+}
+
 .pregameboard__meta p {
   margin: 0;
 }
@@ -220,6 +235,19 @@
   font-size: var(--fs-ui);
   line-height: var(--lh-body);
   color: var(--text-muted);
+}
+
+/* Refresh + its "as of 7:42 PM" stamp (InningViewer.jsx's pre-first-pitch
+   branch): unlike the other RefreshButton call sites, this one isn't inside a
+   flex row that already supplies a gap, so the button and the stamp rendered
+   flush against each other with none. */
+.pregameboard__refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: var(--app-width);
+  margin: 0 auto;
 }
 
 @media (max-width: 370px) {

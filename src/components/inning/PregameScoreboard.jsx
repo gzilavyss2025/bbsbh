@@ -111,15 +111,20 @@ export function PregameScoreboard({ feed }) {
   const showClock = !boardMessage && clock.kind === 'countdown'
 
   return (
-    <section className="pregameboard" aria-labelledby="pregameboard-title">
+    <section
+      className={`pregameboard${showClock ? ' pregameboard--counting' : ''}`}
+      aria-labelledby="pregameboard-title"
+    >
       <div className="pregameboard__board">
         <span className="pregameboard__clock" aria-hidden="true">
           <span className="pregameboard__clockhour" />
           <span className="pregameboard__clockminute" />
         </span>
-        <p className="pregameboard__teams">
-          {away} <span aria-hidden="true">·</span> {home}
-        </p>
+        {!showClock && (
+          <p className="pregameboard__teams">
+            {away} <span aria-hidden="true">·</span> {home}
+          </p>
+        )}
         <p className="pregameboard__lead">First pitch{showClock ? ' in' : ''}</p>
 
         {showClock ? (
@@ -134,7 +139,7 @@ export function PregameScoreboard({ feed }) {
           <p className="pregameboard__message" aria-hidden="true">{boardMessage}</p>
         )}
 
-        {statusTag && <p className="pregameboard__status">{statusTag}</p>}
+        {statusTag && !showClock && <p className="pregameboard__status">{statusTag}</p>}
         {(schedule || venue) && (
           <div className="pregameboard__meta">
             {schedule && <p>Scheduled {schedule}</p>}
@@ -144,8 +149,18 @@ export function PregameScoreboard({ feed }) {
         <p className="sr-only" aria-live="polite" aria-atomic="true">{accessible}</p>
       </div>
 
-      <h2 className="pregameboard__title" id="pregameboard-title">{headline}</h2>
-      <p className="pregameboard__detail">{detail}</p>
+      {/* The default "Top 1st is on deck" copy only earns its place once first
+          pitch has actually arrived — while the countdown is still running the
+          board above already says everything there is to say. The heading
+          stays in the DOM (sr-only) rather than disappearing, since
+          aria-labelledby above still points at its id. */}
+      <h2
+        className={`pregameboard__title${showClock ? ' sr-only' : ''}`}
+        id="pregameboard-title"
+      >
+        {headline}
+      </h2>
+      {!showClock && <p className="pregameboard__detail">{detail}</p>}
     </section>
   )
 }
