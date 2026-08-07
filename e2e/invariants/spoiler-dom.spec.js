@@ -80,6 +80,38 @@ test('Play of the Game poster and Watch button stay behind the box score seal', 
   await expect(page.locator('.hlsheet')).toBeVisible()
 })
 
+// The home slate's result cards carry video too (a precomputed condensed-game
+// poster, or the tap-to-fetch button on a day the nightly job hasn't covered),
+// and both live on the flip card's BACK face — which only exists once the day
+// has been revealed. This asserts the whole day is quiet until then: no
+// poster, no button, and no request to MLB's video CDN.
+test('slate result cards carry no video until the day is revealed', async ({ page }) => {
+  const videoRequests = []
+  page.on('request', (r) => {
+    if (/mlb-cuts-diamond|highlights\/day|\/content(\?|$)/.test(r.url())) videoRequests.push(r.url())
+  })
+
+  await page.goto('/07072026')
+  await page.getByRole('button', { name: /Reveal all results/i }).first().waitFor()
+
+  await expect(page.locator('.hlclip')).toHaveCount(0)
+  await expect(page.locator('.flipback__watchbtn')).toHaveCount(0)
+  expect(videoRequests).toEqual([])
+
+  await page.getByRole('button', { name: /Reveal all results/i }).first().click()
+
+  // One of the two affordances shows up per card — the poster when the day's
+  // index has an entry, the fetch-on-tap button when it doesn't. Which one
+  // depends on whether the nightly job has covered this date, so assert that
+  // SOMETHING arrived rather than pinning the branch.
+  await expect
+    .poll(async () =>
+      (await page.locator('.flipback .hlclip--feature').count()) +
+      (await page.locator('.flipback__watchbtn').count()),
+    )
+    .toBeGreaterThan(0)
+})
+
 // The video row under the line score (GameVideoRow.jsx) is a whole reel of the
 // same material the test above guards one clip of: MLB's condensed cut plus
 // every per-play highlight, each one a poster frame and a title that narrates

@@ -20,6 +20,7 @@ export function PastGameFlipCard({
   pinnedTeamId,
   prospectCount,
   cardMeta = null,
+  video = null,
   liveJerseys = null,
   national = '',
   eager = false,
@@ -90,6 +91,7 @@ export function PastGameFlipCard({
             game={game}
             pinnedTeamId={pinnedTeamId}
             cardMeta={cardMeta}
+            video={video}
           />
         )
       }}

@@ -43,7 +43,47 @@ export async function loadBlocklist() {
 // the shipped JSON only ever holds clips already past every filter. Readers
 // stay dumb.
 export async function clipsForGame(gamePk, blocklist) {
+  return clipsFromItems(await fetchHighlights(gamePk), blocklist)
+}
+
+// One game's content, read TWICE from a single fetch: the per-play clips for
+// the team files, and the condensed cut for the day index. Both generators'
+// sweeps already pay for this request — asking the same endpoint again for the
+// condensed game would double a nightly sweep's traffic for one extra object
+// per game. `clipsForGame` above stays as-is for the backfill, which doesn't
+// build day files.
+export async function sweepGame(gamePk, blocklist) {
   const items = await fetchHighlights(gamePk)
+  return { clips: clipsFromItems(items, blocklist), condensed: condensedEntry(items) }
+}
+
+// The condensed game as the day index stores it: enough to render the card's
+// poster AND play it with no live fetch at all, which is the entire point of
+// precomputing this. `playbacks` is already resolved to `{hls, mp4}` here, the
+// shape highlightPlaybacks accepts back on the read side (see its header), so
+// the reader stays dumb.
+//
+// `title` is safe to store and to render: a condensed cut's title is
+// "Condensed Game: NYM@CLE - 8/4/26" — structural, no score in it, unlike the
+// per-play titles above and unlike the RECAP's ("...fuels Mets' 6-2 win"),
+// which is why the recap is not in this file.
+export function condensedEntry(items) {
+  const item = (items ?? []).find((i) =>
+    (i?.keywordsAll ?? []).some((k) => k.type === 'taxonomy' && k.value === 'condensed-game'),
+  )
+  if (!item) return null
+  const playbacks = highlightPlaybacks(item)
+  if (!playbacks.hls && !playbacks.mp4) return null
+  return {
+    id: item.id ?? null,
+    title: item.title || item.headline || null,
+    duration: item.duration ?? null,
+    poster: highlightPoster(item),
+    playbacks,
+  }
+}
+
+function clipsFromItems(items, blocklist) {
   const out = []
   for (const item of items) {
     const c = classifyHighlight(item)
@@ -124,6 +164,42 @@ export async function writeTeamFiles(byTeam, { generatedAt }) {
     teams++
   }
   return { added, teams }
+}
+
+// The per-DAY condensed-game index: public/data/highlights/day/<MMDDYYYY>.json,
+// one file per slate date, `{ gamePk: condensedEntry }`. Read by the home
+// slate's revealed result cards (src/api/gamehighlights.js), which need a
+// poster for every game on the day and cannot afford the live alternative —
+// `content` is 430 KB per game and doesn't honor `?fields=`, so 16 cards would
+// parse ~6.9 MB. This file is ~7 KB for a full slate.
+//
+// MMDDYYYY, matching public/data/callouts/ — the same per-slate-date file
+// convention, keyed the way the app's own routes spell a date.
+//
+// REWRITTEN, not merged, unlike the team files: a day's file is complete in one
+// pass (every Final game on that date), so there is no accumulated history to
+// protect. A re-run of an older date simply rebuilds it identically.
+export async function writeDayFiles(byDate, { generatedAt }) {
+  let days = 0
+  let entries = 0
+  for (const [date, games] of byDate) {
+    if (!Object.keys(games).length) continue
+    await writeJsonAtomic(join(OUT_DIR, 'day', `${urlDateFor(date)}.json`), {
+      date,
+      generatedAt,
+      games,
+    })
+    days++
+    entries += Object.keys(games).length
+  }
+  return { days, entries }
+}
+
+// "2026-07-07" -> "07072026", the form the app's routes and the callouts files
+// both use.
+function urlDateFor(isoDate) {
+  const [y, m, d] = isoDate.split('-')
+  return `${m}${d}${y}`
 }
 
 // Every gamePk already on file, across every team file that exists — the

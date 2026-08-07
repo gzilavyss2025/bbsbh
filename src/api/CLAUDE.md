@@ -121,6 +121,16 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   result) — so `HighlightSheet.jsx` can stay the one consumer for both the
   box score's raw per-play item and a rail's precomputed clip, with neither
   rail re-deriving playback URLs by hand.
+- `gamehighlights.js`'s `fetchDayVideos(urlDate)` — one slate date's condensed
+  games keyed by gamePk, from `public/data/highlights/day/{MMDDYYYY}.json`
+  (~8 KB per day, written by the same nightly sweep). For the home slate's
+  revealed result cards, which need EVERY game's poster at once and so can't
+  use the live path the box score uses — `content` is 430 KB per game and
+  ignores `?fields=`, making 16 cards ~6.9 MB of JSON. Playback URLs ride
+  along, so tapping a card's poster opens the player with no network at all.
+  Known lag, and the reason the live path still exists: TODAY's slate has no
+  file, so a miss is normal and the card falls back to fetching on tap
+  (`WatchCondensedButton`). Degrades to `{ games: {} }`, cached per date.
 - `gamehighlights.js` — the reader half of the cascade: the static per-team
   archive `scripts/gen-highlights.mjs` precomputes
   (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
