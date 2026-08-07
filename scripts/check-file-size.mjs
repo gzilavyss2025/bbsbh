@@ -77,7 +77,7 @@ const BUDGETS = {
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 686
   'src/styles/10-lineup.css': 800, // 798
-  'src/styles/12-sealbox.css': 1900, // 1810
+  'src/styles/12-sealbox.css': 1800, // 1746 — the Statcast tile base left with StatcastCard (ADR-0040)
   'src/styles/14-strike-zone.css': 1100, // 1027
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1200, // 1140
@@ -85,7 +85,7 @@ const BUDGETS = {
   'src/styles/21-box-score.css': 800, // 797 — the Three Stars card split out to 21a-box-score-stars.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
-  'src/styles/26-player-page.css': 1400, // 1383
+  'src/styles/26-player-page.css': 1300, // 1262 — the percentile strip split out to 26a-percentile-strip.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 1000, // 984
   'src/styles/29-team-transactions.css': 900, // 844

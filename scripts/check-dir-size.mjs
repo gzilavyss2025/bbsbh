@@ -117,7 +117,15 @@ const BUDGETS = {
   // renumbering the eight partials after it, since the cascade contract is
   // ORDER, not unique numbers — and here the order is load-bearing: it has to
   // land after 48-logbook.css, which sizes and inks the `.gamestamp` it frames.
-  'src/styles': 59,
+  // 59 -> 60 for `26a-percentile-strip.css`, for the third time by the same
+  // remedy: replacing the Statcast radar with the percentile strip (ADR-0040)
+  // pushed 26-player-page.css past its own file-size budget, and that guard's
+  // fix is to split, not to raise. A lettered sibling (precedent: the 21/21a
+  // and 48/48 pairs above) rather than renumbering the partials after it,
+  // since the cascade contract is ORDER, not unique numbers — and the order
+  // matters here: it has to land after 26-player-page.css, which owns the
+  // `.statcast-section` the strip sits inside.
+  'src/styles': 60,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

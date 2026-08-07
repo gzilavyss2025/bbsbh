@@ -45,8 +45,8 @@ export const PROFILE_KEYS = ['ev', 'hardHit', 'brl', 'chase', 'sprintSpeed']
 
 // How many of the five have to be on file before a hitter is comparable at all.
 //
-// The same floor in spirit as radarSpokes' three-of-five: a shape drawn from
-// two corners misleads rather than informs, and a "hits like" claim built on
+// The same floor in spirit as percentileRows' three-of-N: a profile drawn from
+// two metrics misleads rather than informs, and a "hits like" claim built on
 // two metrics overclaims worse, because it is asserting a resemblance rather
 // than just drawing one. Four of five keeps a hitter who is under Savant's
 // sample floor on exactly one board while refusing the pairs that would be

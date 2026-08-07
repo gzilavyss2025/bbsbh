@@ -19,7 +19,7 @@ about what it is. Do not tidy it into a folder.
 | --- | --- | --- |
 | `ui/` | `Loader`, `SectionMasthead`, `SectionTitle`, `ChevronLink`, `CopyBox`, `ModalPortal`, `InfoPopover`, `MasonryColumns`, `FlipCard`, `BreakableLocation`, `AsyncGate`, `BuildStamp` | **No baseball knowledge.** No `api/` import, no feed access, no team or game concept. Safe to reach for from anywhere |
 | `badges/` | `ProspectPill`, `RookiePill`, `DebutPill`, `MilestonePill`, `InjuredMark`, `RadarPill`, `TierPill`, `UmpireTierPill`, `UmpireTierGlyph` | An inline mark that adorns a name in a dense row, and **renders nothing when inactive** — so a caller can splice it in unconditionally |
-| `charts/` | `WinProbChart`, `UsagePips`, `PitchMix`, `BattedBallMix`, `PitchArsenalMix`, `StatcastPercentiles` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
+| `charts/` | `WinProbChart`, `UsagePips`, `PitchMix`, `BattedBallMix`, `PitchArsenalMix`, `StatcastPercentiles`, `PercentileStrip` | Draws a quantity. Every value arrives **already reveal-gated by its caller** — nothing here decides what may be shown |
 | `account/` | `AccountButton`, `AccountPitch`, `FavoriteTeamModal`, `LogbookAccountGate`, `LogbookLanding` | Clerk sign-in/account-menu surfaces and the signed-out Game Log pitch |
 | `allstar/` | `AllStarGameResult`, `DerbyCard` | All-Star Game / Derby result cards (ADR-0019's plain-score exception) |
 | `ballpark/` | `BallparkDiagram`, `BallparkModal` | Park diagram + its modal |
@@ -31,7 +31,7 @@ about what it is. Do not tidy it into a folder.
 | `logbook/` | `GameStamp`, `StampGameButton` | The Logbook stamp (ADR-0035) — `check-stamp-surfaces.mjs` allowlists these by path |
 | `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos` | Club-mark rendering and its sketch/print modal |
 | `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail`, `PlayerHighlightsRail` | Player-identity primitives and career-level cards |
-| `playerstats/` | `StatcastCard`, `RecentFormCard`, `SplitsVsTeam`, `FoulCard`, `MilestoneWatchCard`, `PitcherWorkloadCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities) |
+| `playerstats/` | `RecentFormCard`, `SplitsVsTeam`, `FoulCard`, `MilestoneWatchCard`, `PitcherWorkloadCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities) |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `PinchRunNotice`, `CalloutNote`, `DueUpNextCard`, `UpNextBatters`, `HighlightSheet` | The at-bat feed's notification-card family (ADR-0017) |
 | `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
@@ -44,7 +44,7 @@ about what it is. Do not tidy it into a folder.
 Three untouched subdirectories predate this bucketing and follow their own
 internal convention rather than the domain-bucket one above: `page-turn/` (the
 forward inning-transition animation), `passport/` (the Logbook's passport-book
-UI, ADR-0036), `playercard/` (player-page radar/similar-players cards).
+UI, ADR-0036), `playercard/` (the player page's similar-players cards).
 
 ## Two constraints that outrank tidiness
 

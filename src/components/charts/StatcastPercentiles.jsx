@@ -1,41 +1,30 @@
-import { useState } from 'react'
-import { BATTER_METRICS, PITCHER_METRICS, radarSpokes } from '../../api/savantPercentiles.js'
-import { FlipCard } from '../ui/FlipCard.jsx'
-import { StatcastCard } from '../playerstats/StatcastCard.jsx'
-import { StatRadar } from '../playercard/StatRadar.jsx'
+import { percentileRows } from '../../api/savantPercentiles.js'
+import { PercentileStrip } from './PercentileStrip.jsx'
 
-// STATCAST — season percentile ranks (Baseball Savant), one small card per
-// metric rather than a bar chart mimicking Savant's own — reuses the
-// StatcastCard tile so "Statcast" reads as one visual family across the app.
-// Savant computes the percentiles AND their own qualification floor (see
-// api/savantPercentiles.js) — this is a pure presentational read of whatever
-// it hands back. Season aggregates are spoiler-free and, unlike
-// SplitsVsTeam's last-game row, carry no single-game granularity to gate
-// against the page's asOf cutoff — see .scratch/savant-percentiles/plan.md §4
-// for the full spoiler audit.
+// STATCAST — season percentile ranks (Baseball Savant), drawn as one ruled
+// strip on a shared 0–100 axis (PercentileStrip.jsx). Savant computes the
+// percentiles AND their own qualification floor (see api/savantPercentiles.js)
+// — this is a pure presentational read of whatever it hands back. Season
+// aggregates are spoiler-free and, unlike SplitsVsTeam's last-game row, carry
+// no single-game granularity to gate against the page's asOf cutoff — see
+// .scratch/savant-percentiles/plan.md §4 for the full spoiler audit.
 //
-// Renders nothing when there's no data at all (MiLB player, or under
-// Savant's sample floor for every metric this app keeps) — no empty state,
-// same as SplitsVsTeam/conversionNote.
+// Renders nothing when there's no data at all (MiLB player, or under Savant's
+// sample floor for all but a couple of metrics) — no empty state, same as
+// SplitsVsTeam/conversionNote.
 //
-// Each card is tappable: the acronym alone (xwOBA, Chase %, …) doesn't mean
-// anything to a casual reader, so tapping it turns the card over — the same
-// blackjack-style FlipCard the slate uses to reveal a past game's Final line
-// — to a plain-language definition (`m.def`) on the back. Unlike the slate's
-// flip, there's no score to guard here, so each card is free to flip back and
-// forth on its own; MetricFlipCard just owns a local open/closed boolean.
+// ONE ELEMENT, NOT TWO. This section used to render a five-spoke radar above a
+// grid of flip cards holding the same percentiles again — the radar's own
+// header called it "the same data twice on purpose", shape first and then the
+// numbers. The strip is what makes that split unnecessary rather than merely
+// redundant: a row already IS the label, the raw rate, the plotted rank and
+// the rank in figures, on one line, so there is nothing left for a second
+// element to add. Tapping a row still turns up the plain-language definition
+// the flip cards carried — as an inline disclosure now, which keeps the
+// columns aligned where a flipping tile would not. ADR-0040.
 export function StatcastPercentiles({ savant, raw, group }) {
-  if (!savant) return null
-  const metrics = group === 'pitching' ? PITCHER_METRICS : BATTER_METRICS
-  const rows = metrics.filter((m) => savant[m.key] != null)
-  if (!rows.length) return null
-
-  // The polygon summarises five of the same percentiles the cards below list
-  // individually — shape first, then the numbers. It's the same data twice on
-  // purpose: the radar is for recognising a TYPE of player at a glance, the
-  // cards for reading any one metric. Null (too few known spokes) just leaves
-  // the cards, which is what this section has always been.
-  const spokes = radarSpokes(savant, raw, group)
+  const rows = percentileRows(savant, raw, group)
+  if (!rows) return null
 
   return (
     <section className="statcast-section">
@@ -43,36 +32,7 @@ export function StatcastPercentiles({ savant, raw, group }) {
         <span>Statcast</span>
         <em>percentile rank</em>
       </h3>
-      {spokes && <StatRadar spokes={spokes} />}
-      <div className="statcast">
-        {rows.map((m) => (
-          <MetricFlipCard key={m.key} metric={m} pct={savant[m.key]} />
-        ))}
-      </div>
+      <PercentileStrip rows={rows} />
     </section>
-  )
-}
-
-function MetricFlipCard({ metric, pct }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <button
-      type="button"
-      className="statcast__flipbtn"
-      aria-expanded={open}
-      aria-label={open ? `${metric.label}: ${metric.def}` : `${metric.label}, ${pct}th percentile — tap for definition`}
-      onClick={() => setOpen((o) => !o)}
-    >
-      <FlipCard
-        flipped={open}
-        renderFront={() => <StatcastCard label={metric.label} value={pct} unit="%ILE" />}
-        renderBack={() => (
-          <div className="statcast__card statcast__card--back">
-            <span className="statcast__label">{metric.label}</span>
-            <p className="statcast__def">{metric.def}</p>
-          </div>
-        )}
-      />
-    </button>
   )
 }

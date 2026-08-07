@@ -1,0 +1,203 @@
+/* ============================================================
+   STATCAST PERCENTILE STRIP
+   The player page's season percentile ranks (ADR-0040) — split
+   out of 26-player-page.css, which was at its size budget.
+   Loaded straight after it, so these rules keep the same
+   position in the cascade they had when they lived there.
+   ============================================================ */
+
+/* ---- the Statcast percentile strip (PercentileStrip.jsx) ----
+   A ruled ledger, not a chart pasted onto the page: one shared 0–100 axis,
+   one row per metric, and the league-average rule running straight down the
+   middle of the track column like the margin line on a scorebook page. Navy
+   ink on manila and nothing else — no seal amber, that ink means "score
+   cover" (CLAUDE.md's spoiler rule) and this is spoiler-free season data.
+
+   All scale math is lib/percentileStrip.js; the only arithmetic here is the
+   dot inset (see .pctstrip__dot), which depends on the rendered dot size and
+   so can't live anywhere but CSS.
+
+   The four columns are declared ONCE, on the row, so every dot on the page
+   sits on the same axis — the whole point of the form. The track column is
+   the flexible one; the other three are sized to their content. ---- */
+.pctstrip {
+  /* ONE grid for the whole strip, not one per row. This is the load-bearing
+     rule of the whole element: every dot has to sit on the same axis, and the
+     league-average rule has to be a single straight line down the page. Give
+     each row its own grid and the columns size to that row's own label, so the
+     rule zig-zags and two dots at the same percentile land at different x.
+
+     The rows and their buttons are therefore `subgrid` — they inherit these
+     four tracks rather than declaring their own. This is the first subgrid in
+     the codebase; it's here because the alternative (hard-coding a px width
+     for the label and value columns) makes the alignment a coincidence that
+     the longest label in a future metric list would quietly break. */
+  display: grid;
+  grid-template-columns: auto auto minmax(96px, 1fr) auto;
+  column-gap: var(--space-2);
+  /* Capped rather than filling the wide breakpoint's 960px. A 0–100 scale
+     spread over ~900px is over-resolved: it turns the gap between the 57th
+     and the 65th percentile into a centimetre of travel and invites the
+     reader to read precision the rank does not carry. */
+  max-width: 620px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.pctstrip__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The whole row is the pressable target for its own definition. */
+.pctstrip__btn {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+/* Reset to a plain row (see .agents/skills/review-animations STANDARDS.md
+   "button press feedback") — but no scale transform here, because a row that
+   shrinks would pull its dot off the shared axis, which is the one thing this
+   form promises. It tints instead. */
+.pctstrip__btn {
+  appearance: none;
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 7px 0;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-snappy) var(--ease-out);
+}
+.pctstrip__btn:active {
+  background-color: var(--surface-inset);
+}
+.pctstrip__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.pctstrip__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  justify-self: start;
+}
+.pctstrip__downMark {
+  color: var(--text-caption);
+}
+
+/* The raw rate the rank was computed from. Mono tabular so the decimal points
+   line up down the column — the radar drew these as SVG text at five
+   different angles, where they never could. */
+.pctstrip__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  justify-self: end;
+}
+
+/* The track: a hairline rule the full width of the column, with the
+   league-average reference drawn at its midpoint. That reference is full row
+   height and the rows sit flush, so it joins into one continuous pencilled
+   line down the whole strip rather than reading as six separate ticks — the
+   graphic's own way of saying "average", with no caption to write. Dashed,
+   the way a pencilled reference line would be, so it can't be mistaken for
+   the track it crosses. */
+.pctstrip__track {
+  position: relative;
+  align-self: stretch;
+  min-height: 20px;
+}
+.pctstrip__track::before {
+  content: '';
+  position: absolute;
+  inset-block: -7px;
+  left: 50%;
+  width: 0;
+  border-left: var(--bw-hair) dashed var(--text-caption);
+}
+.pctstrip__track::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: var(--bw-hair);
+  background: var(--rule-soft);
+  transform: translateY(-50%);
+}
+
+/* The deviation bar — league average to the dot. Its LENGTH is how far from
+   average the player is and its SIDE is which way, so direction is carried by
+   position, never by colour. One ink for both. */
+.pctstrip__bar {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--start) * 100%);
+  width: calc(var(--width) * 100%);
+  height: 3px;
+  background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+  transform: translateY(-50%);
+  /* Above the track's two pseudo-element rules, which are painted by the
+     parent and would otherwise draw their hairline back across the bar. */
+  z-index: 1;
+}
+.pctstrip__bar--above {
+  border-radius: 0 1.5px 1.5px 0;
+}
+.pctstrip__bar--below {
+  border-radius: 1.5px 0 0 1.5px;
+}
+
+/* The player's rank. The inset by the dot's own width is what keeps a 0th- and
+   a 100th-percentile dot fully on the track instead of hanging half off the
+   end — see lib/percentileStrip.js's dotFraction, which deliberately does NOT
+   do this arithmetic because it depends on the rendered size. */
+.pctstrip__dot {
+  --pctstrip-dot: 9px;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--pct) * (100% - var(--pctstrip-dot)));
+  width: var(--pctstrip-dot);
+  height: var(--pctstrip-dot);
+  border-radius: 50%;
+  background: var(--accent-primary);
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.pctstrip__rank {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+  justify-self: end;
+  min-width: 2.2em;
+  text-align: right;
+}
+
+/* The plain-language gloss, revealed in place. The flip cards this replaced
+   turned a tile over to show it; an inline disclosure keeps the columns
+   aligned, which a flipping row could not. */
+.pctstrip__def {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0 0 9px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
