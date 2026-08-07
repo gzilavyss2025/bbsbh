@@ -41,10 +41,22 @@
   align-items: center;
   overflow: hidden;
 }
+/* `--masthead-mark-scale` is the per-BAR hand tuning (lib/headerTheme.js's
+   MARK_SCALE_LIMITS, set as an inline custom property by TeamInfo and by the
+   lab's bar mock). Marks carry wildly different amounts of their own internal
+   whitespace — a cap logo drawn tight to its viewBox and a roundel with a wide
+   margin are the same file and read at very different weights on a bar — so
+   this zooms past that margin. The wrapper above clips (`overflow: hidden`),
+   which is what makes growing it a CROP rather than an overflow.
+
+   Defaulted to 1 in the var() itself, so every bar that has never been tuned —
+   and every OTHER `crop="bar"` caller, like the pre-game cards — renders
+   byte-identically to before this existed. */
 .teamlogo--crop-bar {
   height: 116.28%;
   width: auto;
   object-fit: contain;
+  transform: scale(var(--masthead-mark-scale, 1));
 }
 
 .teamlogo--fallback {

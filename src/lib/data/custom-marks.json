@@ -74,6 +74,17 @@
       "city-connect-masthead": "colcityconnect"
     }
   },
+  "118": {
+    "marks": [
+      {
+        "slug": "kccityconnect",
+        "name": "kccityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "kccityconnect"
+    }
+  },
   "119": {
     "marks": [
       {

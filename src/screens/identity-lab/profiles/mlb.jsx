@@ -14,6 +14,7 @@ import {
 } from '../../../lib/wpa/wpaBandColors.js'
 import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpa/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
+import { MARK_SCALE_LIMITS, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import {
@@ -400,6 +401,10 @@ function headerColorsFor(colors, draft, override) {
     bar: draft?.bar ?? override?.bar ?? (colors[0]?.hex || DEFAULT_HEADER_BAR),
     accent: draft?.accent ?? override?.accent ?? (colors[1]?.hex || DEFAULT_HEADER_ACCENT),
     onBar: draft?.onBar ?? override?.onBar ?? DEFAULT_HEADER_ON_BAR,
+    // Not a colour, and it has no brand-pair fallback to reach for: an untuned
+    // bar draws its mark at the size the art itself is, so the resolved value
+    // is simply the default.
+    markScale: draft?.markScale ?? override?.markScale ?? MARK_SCALE_LIMITS.default,
   }
 }
 
@@ -842,6 +847,9 @@ function headerProps(team, slot, drafts, extras, on) {
     bar: draft?.bar ?? landed?.bar,
     accent: draft?.accent ?? landed?.accent,
     onBar: draft?.onBar ?? landed?.onBar,
+    // Undefined at the default, like every field here: the input shows its "1"
+    // placeholder rather than a value that looks saved but isn't.
+    markScale: draft?.markScale ?? landed?.markScale,
   }
   const name = team.name
   // The same label buildAllChangesText uses for this slot, so the copy icon
@@ -855,6 +863,7 @@ function headerProps(team, slot, drafts, extras, on) {
     landed: Boolean(landed),
     contrast: contrastRatio(resolved.onBar, resolved.bar),
     hasDraft: Boolean(draft && Object.keys(draft).length > 0),
+    markScale: resolved.markScale,
     copyText: buildHeaderCopyText(name, teamId, slot, treatmentLabel, resolved),
     onField: (field, value) => on.headerField(slot, field, value),
     onReset: () => on.headerReset(slot),
@@ -1314,8 +1323,8 @@ function buildSaves(drafts, extras) {
       mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
       drafts.header,
       (record, fields) => {
-        const { bar, accent, onBar } = { ...record.header, ...fields }
-        return { ...record, header: { bar, accent, onBar } }
+        const { bar, accent, onBar, markScale } = { ...record.header, ...fields }
+        return { ...record, header: withMarkScale({ bar, accent, onBar }, markScale) }
       },
       { name },
     ),

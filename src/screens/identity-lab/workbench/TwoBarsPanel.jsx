@@ -75,6 +75,7 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
       colors={header.colors}
       unset={header.unset}
       overrideUrl={panelOverride ?? mastheadUrl}
+      markScale={header.markScale}
     />
   )
 

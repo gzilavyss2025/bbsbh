@@ -1,4 +1,4 @@
-import { treatmentHeaderColorOverride, isMlbTeamId } from './teams.js'
+import { treatmentHeaderColorOverride, isMlbTeamId, mastheadBarFor, mastheadMarkUrl } from './teams.js'
 import { milbHeaderColorOverride } from './milbColors.js'
 import { contrastRatio } from './contrast.js'
 
@@ -86,17 +86,80 @@ export function headerThemeFor(teamId, treatment) {
 }
 
 // The inline custom properties a themed surface sets, or undefined for an
-// unthemed one — so a caller spreads one value onto `style` instead of building
-// the same three-property object at each call site. The fallbacks live in the
-// CSS (`var(--bar-fill, var(--navy))`), which is what keeps an unthemed page
-// byte-identical to how it rendered before this feature existed.
-export function headerThemeStyle(theme) {
-  if (!theme) return undefined
+// unthemed one carrying no mark scale either — so a caller spreads one value
+// onto `style` instead of building the same object at each call site. The
+// fallbacks live in the CSS (`var(--bar-fill, var(--navy))`), which is what
+// keeps an unthemed page byte-identical to how it rendered before this feature
+// existed.
+//
+// `markScale` rides along rather than living in the triad because it applies
+// INDEPENDENTLY of one: a club with no curated colours still wears default navy
+// chrome, still draws its knockout mark there, and may still need that mark
+// sized up. So an unthemed bar with a scale gets a style object carrying only
+// the scale, and a themed bar with no scale carries only the three colours.
+export function headerThemeStyle(theme, markScale = null) {
+  if (!theme && !markScale) return undefined
   return {
-    '--bar-fill': theme.bar,
-    '--bar-accent': theme.accent,
-    '--bar-text': theme.onBar,
+    ...(theme && {
+      '--bar-fill': theme.bar,
+      '--bar-accent': theme.accent,
+      '--bar-text': theme.onBar,
+    }),
+    ...(markScale && { '--masthead-mark-scale': markScale }),
   }
+}
+
+// How far a bar's mark may be sized, and in what steps. A club's knockout art
+// is letterboxed into the bar's height, and marks carry wildly different
+// amounts of their own internal whitespace — a cap logo drawn tight to its
+// viewBox and a roundel with a wide margin are the same file size and read at
+// very different weights on the bar. This scales past that margin (the mark's
+// wrapper clips, so growing it crops rather than overflowing).
+//
+// Floored below 1 as well as raised above it: the fix for a mark drawn tight to
+// its edges is to pull it IN, and one control that only grows would leave that
+// case with no answer.
+export const MARK_SCALE_LIMITS = { min: 0.5, max: 2.5, step: 0.05, default: 1 }
+
+// How a mark size LANDS in a tuning store, shared by both profiles so MLB and
+// MiLB can't disagree about it: appended to the bar's colour record when it is
+// anything other than the default, and dropped entirely when it isn't. An
+// identity entry and an absent one render the same, and the shorter store is
+// the one that says which bars actually needed a hand — the same rule the stamp
+// placement editor keeps for its four fields.
+export function withMarkScale(record, markScale) {
+  const n = Number(markScale)
+  if (!Number.isFinite(n) || n === MARK_SCALE_LIMITS.default) return record
+  return { ...record, markScale: clampMarkScale(n) }
+}
+
+// The mark this club's mastheads draw on the bar it wears in this jersey, and
+// how big: `{ url, scale }`. `url` is null for a bar nobody has dressed (the
+// override is the exception, not the rule) and `scale` is null at the default,
+// so an untuned club emits no custom property at all rather than an identity
+// one.
+//
+// Identity-only inputs, the same invariant this whole module keeps: which bar a
+// jersey maps to is `mastheadBarFor`, and the scale is read off the same
+// per-bar header record the colour triad above comes from.
+export function mastheadMarkFor(teamId, treatment) {
+  const record = isMlbTeamId(teamId)
+    ? treatmentHeaderColorOverride(teamId, treatment)
+    : milbHeaderColorOverride(teamId, treatment)
+  const scale = Number(record?.markScale)
+  return {
+    url: mastheadMarkUrl(teamId, mastheadBarFor(teamId, treatment)),
+    scale: Number.isFinite(scale) && scale !== MARK_SCALE_LIMITS.default ? clampMarkScale(scale) : null,
+  }
+}
+
+// Clamped in the resolver as well as in the editor's input, the same
+// belt-and-braces the stamp placement fields keep (ADR-0035's amendment): a
+// hand-edited store must not be able to fling a mark off its bar.
+export function clampMarkScale(value) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return MARK_SCALE_LIMITS.default
+  return Math.min(MARK_SCALE_LIMITS.max, Math.max(MARK_SCALE_LIMITS.min, n))
 }
 
 // The class a themed surface adds. The `--dark` variant is what re-inks the

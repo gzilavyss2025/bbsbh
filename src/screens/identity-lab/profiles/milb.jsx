@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
+import { MARK_SCALE_LIMITS, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
@@ -218,7 +219,11 @@ function headerProps(team, slot, drafts, extras, on) {
       bar: draft?.bar ?? landed?.bar,
       accent: draft?.accent ?? landed?.accent,
       onBar: draft?.onBar ?? landed?.onBar,
+      // Undefined at the default, so the input shows its "1" placeholder rather
+      // than a value that looks saved but isn't.
+      markScale: draft?.markScale ?? landed?.markScale,
     },
+    markScale: draft?.markScale ?? landed?.markScale ?? MARK_SCALE_LIMITS.default,
     unset: false,
     landed: Boolean(landed),
     contrast: contrastRatio(colors.onBar, colors.bar),
@@ -472,7 +477,12 @@ function buildSaves(drafts) {
   })
   store = mergeDraftIntoStore(store, drafts.header, (record, fields, variant, teamId) => ({
     ...record,
-    header: milbHeaderColorsFor(teamId, variant, fields),
+    // milbHeaderColorsFor answers the colour triad only, as its name says; the
+    // bar's mark size is appended by the one rule both profiles share.
+    header: withMarkScale(
+      milbHeaderColorsFor(teamId, variant, fields),
+      { ...record.header, ...fields }.markScale,
+    ),
   }))
   return [{ key: 'milb-treatment-tuning', body: store }]
 }

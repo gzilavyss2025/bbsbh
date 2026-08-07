@@ -60,7 +60,8 @@
         "header": {
           "bar": "#A71930",
           "accent": "#000000",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.05
         },
         "colors": {
           "primary": "#A71930",
@@ -110,7 +111,8 @@
         "header": {
           "bar": "#523178",
           "accent": "#0097A9",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.2
         },
         "colors": {
           "primary": "#0097A9",
@@ -545,7 +547,8 @@
         "header": {
           "bar": "#004687",
           "accent": "#BD9B60",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         },
         "note": "navy recolored to white"
       },
@@ -567,13 +570,17 @@
         "scale": 0.81,
         "header": {
           "bar": "#FFFFFF",
-          "accent": "#B5824A",
-          "onBar": "#004687"
+          "accent": "#5e4196",
+          "onBar": "#5e4196",
+          "markScale": 1.1
         },
-        "note": "same KC mark + scale as Main's own override; City Connect 2.0",
         "colors": {
-          "primary": "#FFFFFF"
-        }
+          "primary": "#FFFFFF",
+          "secondary": "#5e4196",
+          "accent1": "#22407d",
+          "accent2": "#a93fa9"
+        },
+        "note": "same KC mark + scale as Main's own override; City Connect 2.0"
       }
     }
   },
@@ -777,7 +784,8 @@
         "header": {
           "bar": "#003831",
           "accent": "#EFB21E",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         }
       },
       "alternate-2": {
@@ -805,7 +813,8 @@
         "header": {
           "bar": "#003831",
           "accent": "#EFB21E",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "scale": 1.07,
         "offsetY": -5
@@ -1385,14 +1394,15 @@
         "header": {
           "bar": "#7BA7D8",
           "accent": "#D32826",
-          "onBar": "#13274F"
+          "onBar": "#13274F",
+          "markScale": 1.25
         },
-        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down",
         "colors": {
           "primary": "#D32826",
           "secondary": "#374EA1",
           "accent1": "#7BA7D8"
-        }
+        },
+        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down"
       },
       "alternate": {
         "scale": 1.04,

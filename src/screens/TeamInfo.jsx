@@ -53,8 +53,8 @@ import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL, mastheadBarFor, mastheadMarkUrl } from '../lib/teams.js'
-import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
+import { SPORT_LABEL } from '../lib/teams.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
 // header from, so facts run in the sheet's order (date, park, first pitch,
@@ -131,11 +131,12 @@ export function TeamInfo({
   // Connect onto its own, MiLB onto a third — the grouping headerThemeFor's own
   // override tables use. Identity-only inputs, same invariant; MiLB needs no
   // special case here any more, it is simply the third bar.
-  const ownMastheadOverrideUrl = mastheadMarkUrl(meta.id, mastheadBarFor(meta.id, treatment))
-  const oppMastheadOverrideUrl = mastheadMarkUrl(oppMeta.id, mastheadBarFor(oppMeta.id, oppTreatment))
+  // `{ url, scale }` — the override art, and how big this bar draws its mark.
+  const ownMasthead = mastheadMarkFor(meta.id, treatment)
+  const oppMasthead = mastheadMarkFor(oppMeta.id, oppTreatment)
 
   return (
-    <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+    <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme, ownMasthead.scale)}>
       <div className="teaminfo__head">
         <h2 className="teaminfo__name">
           <TeamLink id={meta.id} className="teaminfo__namelink">
@@ -181,8 +182,8 @@ export function TeamInfo({
         feed={feed}
         side={side}
         oppTheme={oppTheme}
-        ownMastheadOverrideUrl={ownMastheadOverrideUrl}
-        oppMastheadOverrideUrl={oppMastheadOverrideUrl}
+        ownMasthead={ownMasthead}
+        oppMasthead={oppMasthead}
         oppPitcherLine={oppPitcherLine}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
@@ -370,8 +371,8 @@ function TeamSections({
   feed,
   side,
   oppTheme,
-  ownMastheadOverrideUrl,
-  oppMastheadOverrideUrl,
+  ownMasthead,
+  oppMasthead,
   oppPitcherLine,
   prospectsData,
   rookiesData,
@@ -486,7 +487,7 @@ function TeamSections({
         teamName={oppMeta.teamName}
         orgTeamId={oppOrgTeamId}
         theme={oppTheme}
-        mastheadOverrideUrl={oppMastheadOverrideUrl}
+        masthead={oppMasthead}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         callouts={callouts}
@@ -509,8 +510,8 @@ function TeamSections({
                 size={22}
                 variant="mono"
                 crop="bar"
-                overrideUrl={ownMastheadOverrideUrl}
-                className={`metricbar__logo${ownMastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
+                overrideUrl={ownMasthead.url}
+                className={`metricbar__logo${ownMasthead.url ? ' metricbar__logo--custom' : ''}`}
               />
             }
           >
@@ -664,7 +665,7 @@ function TeamSections({
         {oppDefense.length > 0 && (
           <section
             className={`opp ${headerThemeClass(oppTheme)}`.trim()}
-            style={headerThemeStyle(oppTheme)}
+            style={headerThemeStyle(oppTheme, oppMasthead.scale)}
           >
             <SectionMasthead
               as="h3"
@@ -676,8 +677,8 @@ function TeamSections({
                   size={22}
                   variant="mono"
                   crop="bar"
-                  overrideUrl={oppMastheadOverrideUrl}
-                  className={`metricbar__logo${oppMastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
+                  overrideUrl={oppMasthead.url}
+                  className={`metricbar__logo${oppMasthead.url ? ' metricbar__logo--custom' : ''}`}
                 />
               }
             />
@@ -722,7 +723,7 @@ function OpposingStarterCard({
   teamName,
   orgTeamId,
   theme,
-  mastheadOverrideUrl,
+  masthead,
   prospectsData,
   rookiesData,
   callouts,
@@ -732,7 +733,7 @@ function OpposingStarterCard({
   return (
     <section
       className={`startercard ${headerThemeClass(theme)}`.trim()}
-      style={headerThemeStyle(theme)}
+      style={headerThemeStyle(theme, masthead.scale)}
     >
       <SectionMasthead
         as="h3"
@@ -744,8 +745,8 @@ function OpposingStarterCard({
             size={22}
             variant="mono"
             crop="bar"
-            overrideUrl={mastheadOverrideUrl}
-            className={`metricbar__logo${mastheadOverrideUrl ? ' metricbar__logo--custom' : ''}`}
+            overrideUrl={masthead.url}
+            className={`metricbar__logo${masthead.url ? ' metricbar__logo--custom' : ''}`}
           />
         }
       />
