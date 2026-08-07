@@ -160,6 +160,17 @@
       "city-connect-masthead": "cwscityconnect"
     }
   },
+  "146": {
+    "marks": [
+      {
+        "slug": "miacityconnect",
+        "name": "miacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "miacityconnect"
+    }
+  },
   "158": {
     "marks": [
       {

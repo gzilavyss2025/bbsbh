@@ -1535,7 +1535,8 @@
         "header": {
           "bar": "#ee4790",
           "accent": "#3ca2b3",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.3
         },
         "note": "City Connect 2.0 nudged left"
       },
@@ -1588,7 +1589,8 @@
         "header": {
           "bar": "#12284B",
           "accent": "#6CACE4",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.15
         },
         "note": "cream, not any of the three brand swatches"
       },
@@ -1617,7 +1619,8 @@
         "header": {
           "bar": "#0C436A",
           "accent": "#ff6c58",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         },
         "colors": {
           "primary": "#0C436A",
