@@ -203,10 +203,19 @@
   animation: slideup var(--dur-slow) var(--ease-out);
 }
 
+/* A fixed 240px stage, and the wordmark is why the width caps are written the
+   way they are. TeamLogo sizes a wordmark inline to a wide box (size x 3.5,
+   see TeamLogo.jsx) because a wordmark's own SVG is wide-and-short — an INLINE
+   width, which no `width` declaration here can beat, so at 240 tall it asked
+   for 840px and ran straight out through both sides of the dialog. `max-width`
+   does win over an inline width, so it is the clamp that matters: the mark
+   shrinks to the card's own content box and `object-fit: contain` letterboxes
+   it inside the square stage. 66vw is deliberately not that clamp — it tracks
+   the viewport, not this card, so on a wide window it wasn't a limit at all. */
 .logomodal__art {
   width: 240px;
   height: 240px;
-  max-width: 66vw;
+  max-width: 100%;
   max-height: 66vw;
 }
 
@@ -220,9 +229,14 @@
   text-align: center;
 }
 
-/* Segmented control to flip between a club's marks (primary / cap / wordmark). */
+/* Segmented control to flip between a club's marks (cap / base / City Connect,
+   where we have it / wordmark — see markSources.js's sketchMarkVariants). Wraps
+   because a four-way row with "City Connect" in it can outrun a narrow phone. */
 .logomodal__variants {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
   gap: 4px;
   padding: 3px;
   border: var(--bw-hair) solid var(--border-rule);
@@ -242,6 +256,15 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
+}
+
+/* Four marks (a club with City Connect art) can't sit on one phone-width row —
+   "City Connect" alone is wider than a third of the card. Rather than let the
+   row wrap ragged, with one orphan underneath three, a four-up group goes 2x2:
+   half the track each, minus its share of the 4px gap. A three-up group keeps
+   the single row it has always had. */
+.logomodal__variants:has(> :nth-child(4)) .logomodal__variant {
+  flex: 1 0 calc(50% - 2px);
 }
 
 .logomodal__variant.is-active {

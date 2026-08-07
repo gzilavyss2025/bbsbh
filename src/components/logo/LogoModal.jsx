@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { LOGO_VARIANTS } from '../../lib/teams.js'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { sketchMarkVariants } from '../../lib/markSources.js'
 import { TeamLogo } from './TeamLogo.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 
@@ -9,12 +9,15 @@ import { TeamLink } from '../team/TeamLink.jsx'
 // spoiler-safe like the rest of the team pages. Dismiss by tapping the backdrop,
 // the close button, or Escape.
 //
-// A club has three distinct marks on the CDN (primary / cap / wordmark, see
-// teams.js); the segmented control flips between them so the sketcher can pick a
-// different one instead of drawing the same roundel every time. Any mark a club
+// The segmented control flips between a club's distinct marks — cap, base,
+// City Connect where we have the art, wordmark — so the sketcher can pick a
+// different one instead of drawing the same roundel every time. The list is
+// built per club by `sketchMarkVariants` (markSources.js), which is where the
+// ordering and the City Connect condition are explained. Any mark a club
 // happens to lack degrades to the base logo via TeamLogo's own fallback.
 export function LogoModal({ teamId, name, onClose }) {
-  const [variant, setVariant] = useState('primary')
+  const variants = useMemo(() => sketchMarkVariants(teamId), [teamId])
+  const [variant, setVariant] = useState(variants[0].key)
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && onClose()
@@ -57,7 +60,7 @@ export function LogoModal({ teamId, name, onClose }) {
           className="logomodal__art"
         />
         <div className="logomodal__variants" role="group" aria-label="Logo style">
-          {LOGO_VARIANTS.map((v) => (
+          {variants.map((v) => (
             <button
               key={v.key}
               className={`logomodal__variant ${
@@ -73,7 +76,7 @@ export function LogoModal({ teamId, name, onClose }) {
         <TeamLink id={teamId} className="logomodal__name">
           {name}
         </TeamLink>
-        <p className="logomodal__caption">Reference marks — not the tuned jersey tile</p>
+        <p className="logomodal__caption">Reference marks — not the tinted jersey tile</p>
       </div>
     </div>
   )
