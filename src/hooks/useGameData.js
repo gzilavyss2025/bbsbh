@@ -22,7 +22,7 @@ import { fetchFeverRadar } from '../api/feverRadar.js'
 import { fetchSavantPercentiles } from '../api/savantPercentiles.js'
 import { fetchPitchArsenal } from '../api/pitchArsenal.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
-import { fetchVsTeamSplits } from '../api/vsTeamSplits.js'
+import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
 import { loadCareerMatchups } from '../api/careerMatchups.js'
 import { fetchRunExpectancy } from '../api/umpireFavor.js'
@@ -407,15 +407,19 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const careerMatchupsData = careerMatchupsQuery.data ?? null
 
-  // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static file
+  // Career vs-opponent lines (see api/vsTeamSplits.js) — the same static data
   // the player page's SPLITS VS TEAM card reads, reused here for the
   // "Turang is a career .303 against the Pirates" call-out (see
   // buildCallouts's vsTeamCareerLine). Season aggregates, spoiler-free, so it
-  // rides the same deferred tier as prospects/former-teammates — no gamePk key,
-  // one cached same-origin read for the whole app.
+  // rides the same deferred tier as prospects/former-teammates. Only the TWO
+  // clubs playing are read — the dataset is sharded by club, so a game costs
+  // two small same-origin reads instead of the whole league's 3.2 MB.
   const vsTeamSplits = useAsync(
-    () => (enrichmentReady ? fetchVsTeamSplits() : Promise.resolve(null)),
-    [enrichmentReady],
+    () =>
+      enrichmentReady
+        ? fetchVsTeamSplitsForTeams([game.away.id, game.home.id])
+        : Promise.resolve(null),
+    [enrichmentReady, game.away.id, game.home.id],
   )
   const vsTeamSplitsData = vsTeamSplits.data ?? null
 

@@ -69,11 +69,17 @@ would need dozens of statsapi calls per page load). `war.js` is the template.
 `scripts/CLAUDE.md` documents each GENERATOR; `docs/api/static-data.md` documents
 each READER.
 
-Two rules that keep biting: a file that grows without bound (`rookies.json`,
-`vs-team-splits.json`, per-date `callouts/*.json`) is kept OUT of the PWA precache
-and fetched at runtime — see `vite.config.js`. And for a hand-seeded generator
-(`milb-history`, `mono-ink`, the highlight blocklist) you **edit the seed, never
-the output**.
+Three rules that keep biting. A file that grows without bound (the rookie
+dataset, the vs-team splits, per-date `callouts/*.json`) is kept OUT of the PWA
+precache and fetched at runtime — see `vite.config.js`. For a hand-seeded
+generator (`milb-history`, `mono-ink`, the highlight blocklist) you **edit the
+seed, never the output**. And **a static file is sized against the ONE surface
+that opens it, not against the dataset**: the whole-league file is the easy
+generator output, but a game page paying a 3 MB parse to print one line is the
+bug that shape hides. `rookies.js` and `vsTeamSplits.js` are the two worked
+examples — sharded by the key their callers actually hold (the club) or split
+by role when no id key fits (the pills need a compact whole-league answer; only
+the player page wants dates). `docs/api/static-data.md` has both.
 
 ## Callouts
 

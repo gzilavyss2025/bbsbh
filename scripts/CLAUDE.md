@@ -163,11 +163,12 @@ don't run these by hand.
   safely computed before that night's games are played — the nightly cron
   timing itself is the spoiler guard, not extra code. App reads it via
   `src/api/careerMatchups.js`.
-- `gen-vs-team-splits.mjs` → `public/data/vs-team-splits.json` — for every MLB
+- `gen-vs-team-splits.mjs` → `public/data/vs-team-splits/` — for every MLB
   active-roster player, his career line vs each opposing club + the last meeting's
   line. The API's vs-team splits carry no game granularity, so it sweeps each
-  player's whole MLB game log season by season. Self-contained; MLB only. Large
-  (~3MB), kept OUT of the PWA precache. App reads it via `src/api/vsTeamSplits.js`.
+  player's whole MLB game log season by season. Self-contained; MLB only. ~3MB, out
+  of the PWA precache, **SHARDED BY THE PLAYER'S OWN CLUB** (`index.json` + one
+  `{teamId}.json`, written together); read via `src/api/vsTeamSplits.js`.
 - `gen-game-notes.mjs` → `public/data/game-notes.json` — each MLB club's pre-game
   "Game Notes" PDF links (title/date/url). **APPEND-ONLY**: the source feed
   (dapi.mlbinfra.com) only lists a club's last ~10 games, so the job MERGES new links
@@ -296,21 +297,20 @@ don't run these by hand.
   `src/api/person.js` (pure, no DOM deps) — extend the projection math there, not in
   the script. MLB careers only.
 - `gen-rookies.mjs` → `public/data/rookies.json` — each player's rookie window
-  (debut date + the date, if any, his career crossed the rookie limit: 130
-  at-bats or 50 innings pitched — AB/IP only, not MLB's full official rule,
-  which also has a 45-active-roster-days clause). Feeds `RookiePill` + the
-  player page's "Lost Rookie Status" timeline row (`src/api/rookies.js`).
-  Same `fullRoster` scan as `gen-milestones.mjs`, but APPEND-ONLY/incremental
-  like `gen-game-notes.mjs`/`gen-umpire-accuracy.mjs`, not a full rebuild: a
-  closed record is a frozen historical fact the timeline already shows, so
-  this script only ever adds a new debut or closes a still-open one — it
-  never recomputes a closed record, and never touches a player who's fallen
-  off every MLB org's roster (his existing record, open or closed, is left
-  alone). `scripts/gen-rookies-backfill.mjs` (hand-run, below) establishes
-  everyone else. Shares its crossing-detection helpers with that script by
-  deliberate small duplication (self-contained generators, same convention as
-  `gen-rehab.mjs` mirroring `person.js`'s `detectRehabAssignment`), not a
-  shared import.
+  (debut date + the date, if any, his career crossed the rookie limit: 130 at-bats
+  or 50 innings pitched — AB/IP only, not MLB's full official rule, which also has
+  a 45-active-roster-days clause). Feeds `RookiePill` + the player page's "Lost
+  Rookie Status" timeline row (`src/api/rookies.js`). Same `fullRoster` scan as
+  `gen-milestones.mjs`, but APPEND-ONLY/incremental like `gen-game-notes.mjs`, not
+  a full rebuild: a closed record is a frozen historical fact the timeline already
+  shows, so this script only ever adds a new debut or closes a still-open one —
+  never recomputing a closed record, never touching a player who's fallen off every
+  MLB org's roster. `gen-rookies-backfill.mjs` (hand-run, below) does everyone else.
+  **rookies.json is the MASTER; the app reads the derived `rookies/` views instead**
+  — `scripts/lib/rookie-shards.mjs`, called by both scripts, splits those by ROLE
+  rather than by id (`docs/api/static-data.md` has why). Shares its crossing-detection
+  helpers with the backfill by deliberate small duplication (self-contained generators,
+  like `gen-rehab.mjs` mirroring `detectRehabAssignment`), not an import.
 - `gen-season-score.mjs` → `public/data/season-score.json` — an MLB-only,
   date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
   snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
@@ -489,8 +489,8 @@ Re-run only to fold in a new season.
   recomputes — or overwrites — anyone already done. Not "immutable data" in
   quite the same sense as the other two generators in this section (a
   player's crossing date doesn't change once computed, but the file is still
-  actively appended to every night by `gen-rookies.mjs`) — it's here because,
-  like them, it's a large one-time crawl, never re-run wholesale.
+  actively appended to every night by `gen-rookies.mjs`) — it's here because, like
+  them, it's a large one-time crawl. Rewrites the derived `rookies/` shards too.
 
 ## Assets / off-app
 

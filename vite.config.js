@@ -391,21 +391,25 @@ export default defineConfig({
         // Offline app shell. API responses are network-first so we never
         // serve a stale (and possibly spoiler-revealing) score from cache.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
-        // The SPLITS VS TEAM dataset (public/data/vs-team-splits.json) is large
-        // (~3 MB — a career-vs-club line for every active-roster player) and
-        // refreshed nightly, so it's kept OUT of the app-shell precache to keep
-        // the PWA install lean; it's fetched on demand and runtime-cached
-        // instead (see the NetworkFirst rule below). Same treatment for
+        // The SPLITS VS TEAM dataset (public/data/vs-team-splits/) is large
+        // (~3 MB all told — a career-vs-club line for every active-roster
+        // player, sharded one file per club) and refreshed nightly, so it's
+        // kept OUT of the app-shell precache to keep the PWA install lean; a
+        // game fetches the two clubs it needs on demand and they're
+        // runtime-cached instead (see the NetworkFirst rule below). Same for
         // umpires.json — it grows across the season (every game × 4 officials)
         // and is only ever read from the umpire detail page. Same for
         // game-notes.json — an append-only archive of press-notes PDF links that
         // grows every game day (see scripts/gen-game-notes.mjs).
         // Same for the per-date callouts bundles — since they cover the MiLB
         // levels too each day's file runs ~0.5-1 MB, and the folder holds ~10
-        // days of them; only the day being scored is ever read. Same for
-        // rookies.json — a debut/rookie-limit row for every player who's ever
+        // days of them; only the day being scored is ever read. Same for the
+        // rookie dataset — a debut/rookie-limit row for every player who's ever
         // appeared in MLB (~1.3 MB and growing, see scripts/gen-rookies.mjs /
-        // gen-rookies-backfill.mjs).
+        // gen-rookies-backfill.mjs). rookies.json there is the generator's
+        // MASTER record, never fetched by the app at all; public/data/rookies/
+        // holds what is (a compact status map plus id-sharded full records).
+        // Both stay out of the install.
         globIgnores: [
           // The curated club marks (~2.5 MB even after compress-logos.mjs,
           // across ~10 treatment directories). One slate shows a handful and
@@ -414,7 +418,7 @@ export default defineConfig({
           // knockout SVGs below, 1.5x the bytes. The CacheFirst runtime rule
           // below keeps every mark actually seen available offline.
           '**/team-logos/**',
-          '**/data/vs-team-splits.json',
+          '**/data/vs-team-splits/*.json',
           '**/data/umpires.json',
           '**/data/game-notes.json',
           '**/data/callouts/*.json',
@@ -425,6 +429,7 @@ export default defineConfig({
           // 133 entries and 782 KiB to the install for nothing.
           '**/data/highlights/day/*.json',
           '**/data/rookies.json',
+          '**/data/rookies/**/*.json',
           // Route-specific snapshots are fetched on demand instead of adding
           // hundreds of KB to every install. The runtime rule below keeps the
           // last successful copy available for offline browsing.
@@ -462,7 +467,7 @@ export default defineConfig({
           // Per-team video-highlight archives (scripts/gen-highlights.mjs) —
           // one file per club, each growing all season. A 3-day sample already
           // runs 6-24 KB per team, so a full season lands well past the
-          // vs-team-splits.json threshold when summed across the league, and a
+          // vs-team-splits threshold when summed across the league, and a
           // user browsing one club's rail needs exactly one of the 30. Read on
           // demand by the Team hub's Games tab and the player page.
           '**/data/highlights/*.json',
@@ -569,12 +574,12 @@ export default defineConfig({
             },
           },
           {
-            // The on-demand SPLITS VS TEAM dataset (excluded from precache
-            // above). NetworkFirst so a fresh nightly copy wins when online but
-            // the card still works offline from the last good fetch. It carries
-            // no live score (career + past-game data only), so this is
-            // spoiler-safe — unlike the score feeds below.
-            urlPattern: ({ url }) => url.pathname === '/data/vs-team-splits.json',
+            // The on-demand SPLITS VS TEAM shards and their index (excluded
+            // from precache above). NetworkFirst so a fresh nightly copy wins
+            // when online but the card still works offline from the last good
+            // fetch. They carry no live score (career + past-game data only),
+            // so this is spoiler-safe — unlike the score feeds below.
+            urlPattern: ({ url }) => url.pathname.startsWith('/data/vs-team-splits/'),
             handler: 'NetworkFirst',
             method: 'GET',
           },
@@ -586,10 +591,11 @@ export default defineConfig({
             method: 'GET',
           },
           {
-            // The on-demand rookie-status dataset (excluded from precache
-            // above), same rationale as the SPLITS VS TEAM rule — career facts
-            // only, no live score, so NetworkFirst is spoiler-safe.
-            urlPattern: ({ url }) => url.pathname === '/data/rookies.json',
+            // The on-demand rookie status map and record shards (excluded from
+            // precache above), same rationale as the SPLITS VS TEAM rule —
+            // career facts only, no live score, so NetworkFirst is
+            // spoiler-safe.
+            urlPattern: ({ url }) => url.pathname.startsWith('/data/rookies/'),
             handler: 'NetworkFirst',
             method: 'GET',
           },

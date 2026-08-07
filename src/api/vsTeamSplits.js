@@ -1,6 +1,6 @@
 // The player page's SPLITS VS TEAM card data — for each MLB player, his career
 // regular-season line against every club he's faced plus the last meeting's stat
-// line — read from a static same-origin file (public/data/vs-team-splits.json)
+// line — read from static same-origin files under public/data/vs-team-splits/
 // rather than computed live.
 //
 // Building it can't be done cheaply on a page load: the API's vs-team split
@@ -12,6 +12,20 @@
 // Same build-time-fetch pattern as war.js / former-teammates.js (see
 // docs/data-enrichment.md §5).
 //
+// SHARDED BY THE PLAYER'S OWN CLUB. The dataset was one 3.2 MB file, and every
+// game page downloaded and parsed all of it — 30 clubs' rosters — to print one
+// line about two of them. It is now one small index plus one file per club:
+//
+//   /data/vs-team-splits/index.json   { generatedAt, season, teams,
+//                                       nextOpponent, owner: {personId: teamId} }
+//   /data/vs-team-splits/{teamId}.json  { players: {personId: {teamId, group, vs}} }
+//
+// The shard key is the club the player was on at generation time, because that
+// is exactly how the data is asked for: a game needs the two clubs playing
+// (~220 KB), and a player page needs one club (`owner` resolves which). The
+// merged result keeps the ORIGINAL whole-file shape, so every pure consumer
+// below and in callout-notes/vsTeamNote.js is unchanged.
+//
 // Spoiler note: the player page is a spoiler-FREE surface (it shows open game
 // logs and season splits), so career-vs-club totals belong here just like the
 // "Season splits" card. The one score-revealing element is the last-game line —
@@ -19,20 +33,68 @@
 // cutoff the same way the game log does (see SplitsVsTeam.jsx), never surfacing
 // a meeting on or after the day of a game you're actively scoring.
 //
-// Degrades to null before the file exists or on any failure — the card simply
-// doesn't render. Cached in-memory for the session (the file changes once a day).
-let cached
+// Degrades to null before the files exist or on any failure — the card simply
+// doesn't render. Cached in-memory for the session (the files change once a day).
+let indexCached
+const shardCache = new Map() // teamId (string) -> { players } | null
 
-export async function fetchVsTeamSplits() {
-  if (cached !== undefined) return cached
+async function fetchJsonOrNull(path) {
   try {
-    const res = await fetch('/data/vs-team-splits.json')
-    if (!res.ok) throw new Error(`vs-team-splits.json ${res.status}`)
-    cached = await res.json()
+    const res = await fetch(path)
+    if (!res.ok) throw new Error(`${path} ${res.status}`)
+    return await res.json()
   } catch {
-    cached = null
+    return null
   }
-  return cached
+}
+
+// The shared header: the club catalog, each club's next opponent, and the
+// personId -> club map that says which shard holds a given player.
+export async function fetchVsTeamSplitsIndex() {
+  if (indexCached !== undefined) return indexCached
+  indexCached = await fetchJsonOrNull('/data/vs-team-splits/index.json')
+  return indexCached
+}
+
+async function fetchShard(teamId) {
+  const key = String(teamId)
+  if (shardCache.has(key)) return shardCache.get(key)
+  const shard = await fetchJsonOrNull(`/data/vs-team-splits/${key}.json`)
+  shardCache.set(key, shard)
+  return shard
+}
+
+// Merge the index header with the named clubs' shards, producing the same shape
+// the single file used to have: { generatedAt, season, teams, nextOpponent,
+// players }. Null when the index itself is missing (nothing can be shown).
+async function merge(teamIds) {
+  const index = await fetchVsTeamSplitsIndex()
+  if (!index) return null
+  const shards = await Promise.all([...new Set(teamIds.filter(Boolean).map(String))].map(fetchShard))
+  const players = {}
+  for (const shard of shards) Object.assign(players, shard?.players ?? {})
+  return {
+    generatedAt: index.generatedAt ?? null,
+    season: index.season ?? null,
+    teams: index.teams ?? [],
+    nextOpponent: index.nextOpponent ?? {},
+    players,
+  }
+}
+
+// The two clubs in a game (see useGameData.js) — the vs-opponent callout reads
+// `players[personId].vs[oppTeamId]` off the result.
+export function fetchVsTeamSplitsForTeams(teamIds) {
+  return merge(teamIds)
+}
+
+// One player (the player page). His shard is whichever club the last generator
+// run had him on, which the index's `owner` map records.
+export async function fetchVsTeamSplitsForPlayer(personId) {
+  const index = await fetchVsTeamSplitsIndex()
+  if (!index) return null
+  const teamId = index.owner?.[String(personId)] ?? null
+  return merge(teamId ? [teamId] : [])
 }
 
 // The SPLITS VS TEAM view model for one player, or null when he isn't in the

@@ -1,9 +1,21 @@
-// Regenerates public/data/vs-team-splits.json — for every player on an MLB
+// Regenerates public/data/vs-team-splits/ — for every player on an MLB
 // active roster, his CAREER regular-season stats against each opposing club plus
 // the stat line of the LAST game he played against them. Feeds the player page's
-// SPLITS VS TEAM card (src/api/vsTeamSplits.js just reads this file) and the
+// SPLITS VS TEAM card (src/api/vsTeamSplits.js just reads these files) and the
 // play-by-play/box-score vs-opponent callout (src/api/callout-notes.js), whose
 // rate comparisons read the hitter line's pa/bb/xbh component sums.
+//
+// SHARDED BY THE PLAYER'S OWN CLUB, one file per club plus a small index:
+//
+//   vs-team-splits/index.json   { generatedAt, season, teams, nextOpponent,
+//                                 owner: { personId: teamId } }
+//   vs-team-splits/{teamId}.json  { players: { personId: {teamId, group, vs} } }
+//
+// It was one 3.2 MB file, and a game page parsed all 30 clubs' rosters to print
+// a line about two of them. The club is the right shard key because that is the
+// unit the data is asked for in — a game reads two shards, a player page reads
+// the one his `owner` entry names. Keep the two writes together: an index that
+// names a club with no shard file is a card that silently never renders.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Building it is expensive: the API's vs-team split types return
@@ -30,7 +42,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'vs-team-splits.json')
+const outDir = join(here, '..', 'public', 'data', 'vs-team-splits')
 // How far ahead to look for each club's next game (to pre-select the opponent).
 const NEXT_GAME_WINDOW_DAYS = 14
 
@@ -293,13 +305,27 @@ ids.forEach((id, i) => {
   connections += Object.keys(vs).length
 })
 
-await writeJsonAtomic(out, {
+// One shard per club, holding only that club's own players. A club whose
+// roster produced nothing still gets an (empty) file, so a shard fetch is
+// never a 404 for a club the index names.
+const byTeam = new Map(teams.map((t) => [t.id, {}]))
+const owner = {}
+for (const [id, p] of Object.entries(players)) {
+  if (!byTeam.has(p.teamId)) byTeam.set(p.teamId, {})
+  byTeam.get(p.teamId)[id] = p
+  owner[id] = p.teamId
+}
+
+for (const [teamId, shardPlayers] of byTeam) {
+  await writeJsonAtomic(join(outDir, `${teamId}.json`), { players: shardPlayers })
+}
+await writeJsonAtomic(join(outDir, 'index.json'), {
   generatedAt: new Date().toISOString(),
   season: new Date().getUTCFullYear(),
   teams,
   nextOpponent,
-  players,
+  owner,
 })
 console.log(
-  `wrote ${out} (${teams.length} teams, ${Object.keys(players).length} players, ${connections} player-opponent splits)`,
+  `wrote ${outDir} (${byTeam.size} club shards + index, ${Object.keys(players).length} players, ${connections} player-opponent splits)`,
 )

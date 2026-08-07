@@ -29,6 +29,12 @@ name: Update nightly data
 # hand-run backfill. The slate card's per-game logo swap fell back to
 # defaultTreatmentFor's side-only guess for every game since, with no
 # generator failure to surface it. Fixed 2026-07-25.
+# A GENERATOR THAT WRITES A DIRECTORY MUST STAGE THE DIRECTORY. Two do now:
+# gen-vs-team-splits.mjs writes public/data/vs-team-splits/ (one shard per
+# club plus an index — it used to be one file), and gen-rookies.mjs writes
+# BOTH public/data/rookies.json (the append-only master) and the derived
+# public/data/rookies/ the app actually reads. Staging only the old path
+# would be the jerseys.json bug again, one level up.
 # scripts/warm-previews.mjs (added 2026-07-22) is the one step here that
 # ISN'T a gen-*.mjs data generator — it writes no public/data/* file, so it
 # deliberately has no entry in the commit step's `git add` list, only in the
@@ -36,7 +42,7 @@ name: Update nightly data
 # cache for today's MLB slate against bbsbh.vercel.app itself.
 # The generators here are otherwise unchanged and fully independent (each
 # writes its own public/data/* file with no read dependency on another's
-# output — gen-callouts.mjs reads vs-team-splits.json only at app runtime,
+# output — gen-callouts.mjs reads the vs-team splits only at app runtime,
 # never at generation time), so continue-on-error lets one script's failure
 # fall through to the rest instead of blocking the batch; the job still
 # fails at the end (for cron-failure visibility in the Actions tab) if
@@ -193,7 +199,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits.json public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal.json scripts/data/pitch-arsenal.sql public/data/highlights public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/game-notes.json public/data/war.json public/data/rehab.json public/data/umpires.json public/data/umpire-accuracy.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates.json public/data/career-matchups.json public/data/fouls.json public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal.json scripts/data/pitch-arsenal.sql public/data/highlights public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main

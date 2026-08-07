@@ -74,8 +74,7 @@ for each generator; the reader modules:
   current-day view (`asOf` unset) since the precompute can't be retrofit to an old
   game's cutoff.
 - `rookies.js` — `RookiePill` (roster/lineup surfaces) + the player page's
-  "Lost Rookie Status" timeline row, from `public/data/rookies.json`
-  (`{personId: {debutDate, rookieUntil}}`). Rule is AB/IP thresholds only (130
+  "Lost Rookie Status" timeline row. Rule is AB/IP thresholds only (130
   career at-bats or 50 innings pitched) — not MLB's full official rookie rule,
   which also has a 45-active-roster-days clause, deliberately left out. A
   closed record (`rookieUntil` set) is a frozen historical fact, so
@@ -87,10 +86,21 @@ for each generator; the reader modules:
   lookup; `showRookiePill(data, id, isMlb)` is what RookiePill call sites
   actually use — MLB-only by design, since a debuted-but-still-rookie player
   showing up in a MiLB game (rehab, option) gets `hasDebuted`/DebutPill there
-  instead, not a second ROOKIE claim. `rookieRecordFor(data, id)` feeds
+  instead, not a second ROOKIE claim. `fetchRookieRecord(id)` feeds
   `rookieUntil` into `transactionTimelineView` (`person.js`) via `loadPlayer.js`.
-  Kept OUT of the PWA precache (~1.3 MB and growing — see `vite.config.js`),
-  fetched at runtime like `vs-team-splits.json`.
+  **Three files, split by role.** `public/data/rookies.json`
+  (`{personId: {debutDate, rookieUntil}}`, ~1.3 MB and growing) is the
+  generator's MASTER record and is never fetched by the app. From it,
+  `scripts/lib/rookie-shards.mjs` derives what is:
+  `public/data/rookies/status.json` — the compact whole-league answer the pills
+  need (`{personId: 1 | 0}`, open or closed, ~230 KB) — and
+  `public/data/rookies/records/{NN}.json`, the full records bucketed on
+  `personId % 100` for the player page's one-player lookup (`rookieShardKey`).
+  The status map cannot be id-sharded: a game asks about ~80 scattered
+  personIds at once and would touch nearly every bucket. All three stay OUT of
+  the PWA precache (see `vite.config.js`). Every predicate here reads a record
+  or the compact flag interchangeably, which is what lets the two files share
+  them.
 - `umpires.js` — the umpire detail page (every game an umpire worked this season +
   base, most recent first), from `public/data/umpires.json`, keyed by umpire
   personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a
@@ -140,13 +150,21 @@ for each generator; the reader modules:
   accuracy rank. See `umpireFavor.js` above for the LIVE per-game companion.
 - `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each
   opposing club + last meeting's line, per MLB active-roster player), from
-  `public/data/vs-team-splits.json`. Cost-driven: the API's vs-team split types
+  `public/data/vs-team-splits/`, and the play-by-play vs-opponent callout
+  (`callout-notes/vsTeamNote.js`). Cost-driven: the API's vs-team split types
   carry no game granularity, so `gen-vs-team-splits.mjs` sweeps each player's whole
   MLB game log season by season. `loadPlayer.js` (`vsTeamSplitsFor`) pre-selects the
   club's next opponent. The career totals are spoiler-free like "Season splits"; the
   one score-revealing element — the last-game line — is gated against the page's
-  `asOf` cutoff in `SplitsVsTeam.jsx`. Large (~3MB), so kept OUT of the PWA precache
-  and fetched at runtime (see `vite.config.js`).
+  `asOf` cutoff in `SplitsVsTeam.jsx`. **SHARDED BY THE PLAYER'S OWN CLUB**
+  (~3 MB all told, so a single file made every game page parse 30 rosters to
+  print a line about two): `index.json` carries the club catalog, each club's
+  next opponent, and the `owner` map (`personId → teamId`) that says which
+  shard holds a player; `{teamId}.json` carries that club's players.
+  `fetchVsTeamSplitsForTeams([away, home])` serves a game, and
+  `fetchVsTeamSplitsForPlayer(id)` the player page — both return the ORIGINAL
+  whole-file shape, so every pure consumer is unchanged. Kept OUT of the PWA
+  precache and fetched at runtime (see `vite.config.js`).
 - `gameNotes.js` — the lineup page's Game notes button: each MLB club's pre-game
   press-notes PDF, resolved to the game's date. TWO sources, one shape: the LIVE
   feed at `dapi.mlbinfra.com` (CORS-open, keyed by `teamid-{n}`) for the game being
