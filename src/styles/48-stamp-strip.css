@@ -108,13 +108,17 @@
 }
 
 /* A quiet disclosure rather than a button: everything behind it is a second
-   thought about a stamp you already have. */
+   thought about a stamp you already have. It sits INLINE at the end of the
+   lede (StampGameButton.jsx), so it is sized to the sentence — no min-height,
+   which in an inline-flex would stretch the line box it shares with the copy.
+   `position: relative` is only here to anchor the hit area below. */
 .stampstrip__disclose {
+  position: relative;
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-1);
-  min-height: var(--tap-min);
-  padding: 0 var(--space-2);
+  margin-left: var(--space-2);
+  padding: 0;
   border: 0;
   background: none;
   color: var(--text-muted);
@@ -122,7 +126,22 @@
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
+  text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
+}
+
+/* The tap target, grown off the glyphs rather than out of the text flow: the
+   control reads at caption size beside the copy, but answers to a thumb at the
+   --tap-min the rest of the app promises. */
+.stampstrip__disclose::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-2) * -1);
+  right: calc(var(--space-2) * -1);
+  top: 50%;
+  height: var(--tap-min);
+  transform: translateY(-50%);
 }
 
 .stampstrip__disclose:focus-visible {
