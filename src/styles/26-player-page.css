@@ -954,14 +954,8 @@
     padding-right: 6px;
   }
 }
-/* Neutral caption for the small post-debut stints kept out of the ledger, plus
-   the "converted to pitcher" note that sits above the stat blocks. */
-.reg-footnote {
-  margin: 8px 2px 0;
-  font-size: var(--fs-compact);
-  font-style: italic;
-  color: var(--graphite);
-}
+/* The "converted to pitcher" note that sits above the stat blocks. (The
+   register's own footnote is gone — it shows every stint as a row now.) */
 .reg-convert {
   margin: 0 2px 14px;
   font-size: var(--fs-compact);

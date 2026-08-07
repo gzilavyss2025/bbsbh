@@ -98,3 +98,172 @@ test('careerRegisterView: a same-season AA -> AAA promotion produces two indepen
   assert.notEqual(aaaRow.cells[0], 20)
   assert.notEqual(aaaRow.cells[4], '27.2')
 })
+
+// ---------------------------------------------------------------------------
+// The register shows EVERYTHING. It used to drop a small post-debut minor-league
+// stint out of the table into an "Also: 4.2 IP at AAA" caption below it, and to
+// fold a season split between two clubs into one row labelled with both. Both
+// are gone: one row per (season, level, club), no workload threshold anywhere.
+// ---------------------------------------------------------------------------
+
+// A four-appearance AAA cameo three years after the player's debut — well under
+// the rehab cap (15 outings / 30 IP) that used to banish it to the caption.
+const REHAB_STAT = {
+  gamesPlayed: 2, gamesStarted: 0, wins: 0, losses: 0, saves: 0,
+  inningsPitched: '4.2', earnedRuns: 1, hits: 3, baseOnBalls: 1, strikeOuts: 5,
+  era: '1.93', whip: '0.86',
+}
+const MLB_STAT = {
+  gamesPlayed: 60, gamesStarted: 0, wins: 4, losses: 2, saves: 1,
+  inningsPitched: '61.0', earnedRuns: 25, hits: 55, baseOnBalls: 20, strikeOuts: 70,
+  era: '3.69', whip: '1.23',
+}
+
+test('careerRegisterView: a small post-debut MiLB stint is a real row, not a footnote', () => {
+  const register = careerRegisterView({
+    mlbSplits: [{ season: 2026, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT }],
+    milbSplits: [{ season: 2026, sport: { id: SPORT_IDS.AAA }, team: { id: 5015 }, stat: REHAB_STAT }],
+    group: 'pitching',
+    role: null,
+    debutYear: 2023,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+
+  assert.equal(register.footnote, undefined, 'the register no longer emits a caption')
+  const aaa = register.rows.find((r) => r.sportId === SPORT_IDS.AAA)
+  assert.ok(aaa, 'the 4.2 IP AAA stint must appear as its own row')
+  assert.equal(aaa.cells[4], '4.2')
+  assert.equal(aaa.pill, 'AAA')
+})
+
+test('careerRegisterView: an MLB season split between two clubs is one row per club', () => {
+  const bosStat = { ...MLB_STAT, gamesPlayed: 40, inningsPitched: '41.0' }
+  const nyyStat = { ...MLB_STAT, gamesPlayed: 20, inningsPitched: '20.0' }
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: bosStat },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: nyyStat },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2026,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    // A season's WAR is not published per club: it belongs to the first row of
+    // the season, and the total must count it once — never once per club.
+    warByYear: { 2026: 1.8 },
+    transactions: [],
+  })
+
+  assert.equal(register.rows.length, 2)
+  assert.deepEqual(register.rows.map((r) => r.teamIds), [[111], [147]])
+  assert.deepEqual(register.rows.map((r) => r.year), ['2026', '2026'])
+  // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
+  assert.deepEqual(register.rows.map((r) => r.cells[8]), ['1.8', '—'])
+  const mlbTotal = register.totals.find((t) => t.label === 'MLB')
+  assert.equal(mlbTotal.cells[0], 60, 'the two clubs foot to the whole season')
+  assert.equal(mlbTotal.cells[8], '1.8', 'season WAR counted once, not twice')
+  // Distinct row keys, or React collapses the second club's line.
+  assert.equal(new Set(register.rows.map((r) => r.key)).size, 2)
+})
+
+test('careerRegisterView: a subtotal appears only when its side has more than one row', () => {
+  const oneEach = careerRegisterView({
+    mlbSplits: [{ season: 2026, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT }],
+    milbSplits: [{ season: 2022, sport: { id: SPORT_IDS.AAA }, team: { id: 5015 }, stat: REHAB_STAT }],
+    group: 'pitching',
+    role: null,
+    debutYear: 2023,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+  // One MLB line and one MiLB line: each foots itself, so neither gets a footer
+  // that would just restate it.
+  assert.deepEqual(oneEach.totals, [])
+
+  const twoLevels = careerRegisterView({
+    mlbSplits: [{ season: 2026, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT }],
+    milbSplits: [
+      { season: 2022, sport: { id: SPORT_IDS.AAA }, team: { id: 5015 }, stat: REHAB_STAT },
+      { season: 2021, sport: { id: SPORT_IDS.AA }, team: { id: 5016 }, stat: AA_STAT },
+    ],
+    group: 'pitching',
+    role: null,
+    debutYear: 2023,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+  assert.deepEqual(twoLevels.totals.map((t) => t.label), ['MiLB'])
+  // 2 G (AAA) + 19 G (AA), and 4.2 + 26.2 innings.
+  const milb = twoLevels.totals[0]
+  assert.equal(milb.cells[0], 21)
+  assert.equal(milb.cells[4], '31.1')
+})
+
+test('careerRegisterView: the current season splits per club from the date-cut splits', () => {
+  // What buildBlock hands in for a player traded this year: the raw, date-cut
+  // per-club rows. The register must use THOSE (they can't move mid-game), not
+  // the live year-by-year line, and must still split them per club.
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: { ...MLB_STAT, gamesPlayed: 44 } },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: { ...MLB_STAT, gamesPlayed: 22 } },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2026,
+    currentStat: { ...MLB_STAT, gamesPlayed: 60 },
+    currentSplits: [
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: { ...MLB_STAT, gamesPlayed: 40 } },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: { ...MLB_STAT, gamesPlayed: 20 } },
+    ],
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+
+  assert.deepEqual(register.rows.map((r) => r.cells[0]), [40, 20], 'the date-cut figures, per club')
+})
+
+test('careerRegisterView: with no date-cut splits the current season collapses to one row that keeps its clubs', () => {
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2026, sport: { id: 1 }, team: { id: 111 }, stat: { ...MLB_STAT, gamesPlayed: 44 } },
+      { season: 2026, sport: { id: 1 }, team: { id: 147 }, stat: { ...MLB_STAT, gamesPlayed: 22 } },
+    ],
+    milbSplits: [],
+    group: 'pitching',
+    role: null,
+    debutYear: 2026,
+    currentStat: { ...MLB_STAT, gamesPlayed: 55 },
+    currentSplits: [],
+    currentSeason: 2026,
+    currentSportId: 1,
+    careerStat: null,
+    warByYear: {},
+    transactions: [],
+  })
+
+  assert.equal(register.rows.length, 1)
+  assert.equal(register.rows[0].cells[0], 55, 'still the date-cut stat, never the live line')
+  assert.deepEqual(register.rows[0].teamIds, [111, 147], 'the clubs survive the collapse')
+})

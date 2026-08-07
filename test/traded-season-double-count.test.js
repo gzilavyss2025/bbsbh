@@ -100,7 +100,7 @@ test('resolveCurrentSeasonStat: a traded MLB season is not doubled into the tile
   assert.equal(levelOnlyStat.gamesPlayed, 37)
 })
 
-test('careerRegisterView: a traded season is one row summing its stints once, and the MLB total stays consistent', () => {
+test('careerRegisterView: a traded season is one row PER CLUB, each counted once, and the MLB total stays consistent', () => {
   const priorStat = {
     gamesPlayed: 16, gamesStarted: 0, wins: 1, losses: 0, saves: 0,
     inningsPitched: '23.1', earnedRuns: 10, hits: 20, baseOnBalls: 8, strikeOuts: 25,
@@ -115,8 +115,10 @@ test('careerRegisterView: a traded season is one row summing its stints once, an
     group: 'pitching',
     role: null,
     debutYear: 2024,
-    // What buildBlock passes: the date-cut current-season line, itself derived
-    // from the same three-row traded-season fetch.
+    // What buildBlock passes: the date-cut current-season splits, still one row
+    // per club, plus the aggregate of them as the empty-fetch fallback. Both
+    // come from the same three-row traded-season response.
+    currentSplits: tradedSeasonSplits(),
     currentStat: aggregateSplits(tradedSeasonSplits(), 'pitching'),
     currentSeason: 2026,
     currentSportId: 1,
@@ -126,14 +128,21 @@ test('careerRegisterView: a traded season is one row summing its stints once, an
   })
 
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
-  const row = register.rows.find((r) => r.year === '2026')
-  assert.equal(row.cells[0], 37, 'the traded season must count each stint once')
-  assert.equal(row.cells[4], '52.1')
-  // Both clubs still label the row — deduping the stat must not lose the teams.
-  assert.deepEqual(row.teamIds, [135, 134])
+  // The traded season is TWO rows now, one per club, in the order he played for
+  // them — and the team-less roll-up must not become a phantom third row.
+  const rows2026 = register.rows.filter((r) => r.year === '2026')
+  assert.equal(rows2026.length, 2, 'one row per club, and no row for the roll-up')
+  assert.deepEqual(rows2026.map((r) => r.teamIds), [[135], [134]])
+  assert.deepEqual(rows2026.map((r) => r.cells[0]), [33, 4])
+  assert.deepEqual(rows2026.map((r) => r.cells[4]), ['47.0', '5.1'])
+  // The bug's fingerprint, restated for the split rows: no row may carry the
+  // roll-up's own 37 G / 52.1 IP, and the two must still sum to exactly that.
+  assert.ok(!rows2026.some((r) => r.cells[0] === 37), 'no row may be the roll-up')
+  assert.equal(rows2026[0].cells[0] + rows2026[1].cells[0], 37)
 
   // With no API career line supplied the MLB footer sums the shown rows, so it
-  // is the register's own internal check: 37 + 16 = 53, and 52.1 + 23.1 = 75.2.
+  // is the register's own internal check: 33 + 4 + 16 = 53, and the innings
+  // 47.0 + 5.1 + 23.1 = 75.2.
   const mlbTotal = register.totals.find((t) => t.label === 'MLB')
   assert.equal(mlbTotal.cells[0], 53)
   assert.equal(mlbTotal.cells[4], '75.2')

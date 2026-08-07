@@ -333,8 +333,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             )}
 
             {/* An up-and-down player's OTHER level(s) this season (e.g. a big
-                leaguer's AAA line) — promoted beside the main tiles instead of
-                buried in the register footnote. Full-season figures, so labeled
+                leaguer's AAA line) — promoted beside the main tiles rather than
+                read off the register below. Full-season figures, so labeled
                 "this season", not the main tiles' frozen "entering today". */}
             {block.otherLevels?.map((lvl) => (
               <div className="player__otherlevel" key={lvl.sportId}>
@@ -636,16 +636,17 @@ function GameLink({ path, className = '', children }) {
 }
 
 // The unified MLB + MiLB career table (see api/person.js careerRegisterView).
-// MLB rows are inked, MiLB rows penciled with a level pill beside the team —
-// every season the player climbed is its own row; the footer carries separate
-// MLB and MiLB totals, and small post-debut stints ride a neutral caption beneath.
+// MLB rows are inked, MiLB penciled with a level pill; one row per season, level
+// AND club, with no workload threshold anywhere, so a split season repeats the
+// year on each club's line. The footer's separate MLB and MiLB totals each show
+// only when their side of the ledger has more than one row.
 // The secondary pitching columns that drop out on a phone (see the Ledger's
 // hideNarrow + the col-narrow-hide media query) — the essentials (G, W–L/SV,
 // ERA, IP, WHIP) stay; GS, K and BB return once there's room.
 const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
 
 function CareerRegister({ register }) {
-  const { columns, rows, totals, footnote } = register
+  const { columns, rows, totals } = register
   // +2 for the leading Year + Team columns this table prepends to the stat cells.
   const hideNarrow = columns
     .map((c, i) => (NARROW_HIDE_COLS.has(c) ? i + 2 : -1))
@@ -692,7 +693,6 @@ function CareerRegister({ register }) {
           className: t.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
         }))}
       />
-      {footnote && <p className="hint reg-footnote">{footnote}</p>}
     </>
   )
 }
