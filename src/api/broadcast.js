@@ -28,23 +28,34 @@ function sameTeam(statsTeam, espnTeam) {
   return !!nickA && !!nickB && nickA === nickB
 }
 
+// The out-of-market streaming packages, filtered out of every broadcast fact
+// this module produces. Neither is the broadcast (with its own announcers)
+// that identifies who is calling a game: each is an add-on subscription sold
+// alongside whatever else airs it. "MLB.TV" is the league's own; "ESPN Unlmtd"
+// is ESPN's streaming-only tier, which reports as a national-market entry even
+// though it is a paid add-on rather than a national TV broadcast — treated the
+// same way here on purpose. MLB.TV's filter was verified against the last 15
+// days of games (2026-07-23 through 2026-08-06, 185 games carrying MLB.TV): it
+// was never the sole broadcast entry, always alongside a national network
+// and/or each club's own regional feed (home+away both present in 156 of the
+// 185), so dropping it never empties the fact. A game carried ONLY by ESPN
+// Unlmtd degrades to no broadcast fact at all, which is the intended reading —
+// no national TV broadcast exists for it.
+const PACKAGE_NAMES = new Set(['mlb.tv', 'espn unlmtd'])
+
+function isPackage(name) {
+  return PACKAGE_NAMES.has((name ?? '').trim().toLowerCase())
+}
+
 // Collapses ESPN's per-market broadcast list to one display string, national
 // feed first (what most viewers would recognize), then home market, then any
 // other market, deduped and capped so the fact stays a single readable line.
-// "MLB.TV" is filtered out throughout: it's the league's own out-of-market
-// streaming package, sold alongside whatever else airs a game, not itself
-// the broadcast (with its own announcers) that would identify who's calling
-// it — same reasoning as nationalName's filter below. Verified against the
-// last 15 days of games (2026-07-23 through 2026-08-06, 185 games carrying
-// MLB.TV): it was never the sole broadcast entry, always alongside a
-// national network and/or each club's own regional feed (home+away both
-// present in 156 of the 185), so dropping it never empties the fact.
 function summarizeBroadcasts(broadcasts) {
   if (!Array.isArray(broadcasts) || broadcasts.length === 0) return ''
   const order = ['national', 'home', 'away']
   const names = []
   const add = (list) => {
-    for (const n of list ?? []) if (n && n !== 'MLB.TV' && !names.includes(n)) names.push(n)
+    for (const n of list ?? []) if (n && !isPackage(n) && !names.includes(n)) names.push(n)
   }
   for (const market of order) {
     add(broadcasts.find((b) => b.market === market)?.names)
@@ -57,15 +68,15 @@ function summarizeBroadcasts(broadcasts) {
 
 // The national-market network name only (FOX/ESPN/TBS/Apple TV+/…), or ''
 // when this game has no such assignment. ESPN's national-market list carries
-// "MLB.TV" on nearly every game (the league's own out-of-market package, sold
-// alongside whatever else airs — never itself the blackout-triggering
-// broadcast) — filtered out so the icon flags only a genuine TV/streaming
-// exclusive (verified 2026-08-02 against a live slate: two real games that
-// day carried "Peacock" and "NBC"/"Peacock" respectively, both alongside or
-// instead of "MLB.TV").
+// "MLB.TV" on nearly every game and "ESPN Unlmtd" on some — both out-of-market
+// subscription packages (see PACKAGE_NAMES above), never themselves the
+// national TV broadcast, so both are filtered out and the icon flags only a
+// genuine national network (verified 2026-08-02 against a live slate: two real
+// games that day carried "Peacock" and "NBC"/"Peacock" respectively, both
+// alongside or instead of "MLB.TV").
 function nationalName(broadcasts) {
   const national = (broadcasts ?? []).find((b) => b.market === 'national')
-  const names = (national?.names ?? []).filter((n) => n && n !== 'MLB.TV')
+  const names = (national?.names ?? []).filter((n) => n && !isPackage(n))
   return names[0] ?? ''
 }
 
