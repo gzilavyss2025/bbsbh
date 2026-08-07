@@ -63,9 +63,17 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   // in the real-game case study) it can be several cards deep. Depends on
   // `canScroll` too: the nav arrows above narrow the strip's width once they
   // mount, and centering against the pre-arrows width would leave the
-  // current cell off-center once they appear.
+  // current cell off-center once they appear. Sets the strip's own
+  // `scrollLeft` rather than `scrollIntoView` — on the phone layout the strip
+  // sits further down the page than the viewport, and `scrollIntoView`
+  // scrolls every scrollable ancestor (the page included) to satisfy
+  // `block`, which starved the horizontal centering; same fix as
+  // TeamFilterStrip.jsx / SplitsVsTeam.jsx.
   useLayoutEffect(() => {
-    currentCellRef.current?.scrollIntoView({ inline: 'center', block: 'nearest' })
+    const strip = stripRef.current
+    const cell = currentCellRef.current
+    if (!strip || !cell) return
+    strip.scrollLeft = cell.offsetLeft - strip.clientWidth / 2 + cell.clientWidth / 2
   }, [cells.length, canScroll])
 
   if (cells.length < 2) return null
