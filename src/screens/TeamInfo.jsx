@@ -53,7 +53,7 @@ import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
-import { SPORT_LABEL, cityConnectMastheadUrl, isMlbTeamId } from '../lib/teams.js'
+import { SPORT_LABEL, mastheadBarFor, mastheadMarkUrl } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 
 // Away/home info + lineup page — the staging page you copy the scorebook
@@ -123,17 +123,16 @@ export function TeamInfo({
     () => headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment)),
     [oppMeta.id, oppSide, oppTreatment],
   )
-  // A club's own uploaded override for the mark ITS mastheads draw while it's
-  // wearing City Connect (teams.js's cityConnectMastheadUrl) — null the
-  // moment either half of that isn't true, so TeamLogo's normal club-wide
-  // mono mark is what every OTHER jersey and every club with no override
-  // still draws. Identity-only inputs (teamId, treatment), same invariant
-  // headerThemeFor keeps just above — MiLB has no City Connect vocabulary at
-  // all, hence the isMlbTeamId guard.
-  const ownMastheadOverrideUrl =
-    isMlbTeamId(meta.id) && treatment === 'city-connect' ? cityConnectMastheadUrl(meta.id) : null
-  const oppMastheadOverrideUrl =
-    isMlbTeamId(oppMeta.id) && oppTreatment === 'city-connect' ? cityConnectMastheadUrl(oppMeta.id) : null
+  // A club's own override for the mark ITS mastheads draw on the BAR it wears
+  // tonight (teams.js's mastheadMarkUrl) — null for a bar nobody has dressed,
+  // the overwhelming default, so TeamLogo's club-wide mono mark still draws.
+  // Keyed by BAR, not by jersey, exactly as the theme above it is:
+  // `mastheadBarFor` collapses Main and every alternate onto one answer, City
+  // Connect onto its own, MiLB onto a third — the grouping headerThemeFor's own
+  // override tables use. Identity-only inputs, same invariant; MiLB needs no
+  // special case here any more, it is simply the third bar.
+  const ownMastheadOverrideUrl = mastheadMarkUrl(meta.id, mastheadBarFor(meta.id, treatment))
+  const oppMastheadOverrideUrl = mastheadMarkUrl(oppMeta.id, mastheadBarFor(oppMeta.id, oppTreatment))
 
   return (
     <div className={`teaminfo ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>

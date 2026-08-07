@@ -41,10 +41,37 @@
       {
         "slug": "cincityconnect",
         "name": "cincityconnect"
+      },
+      {
+        "slug": "cincityconnectred",
+        "name": "cincityconnectred"
       }
     ],
     "assignments": {
-      "main": "basewhite"
+      "main": "basewhite",
+      "city-connect-masthead": "cincityconnectred"
+    }
+  },
+  "114": {
+    "marks": [
+      {
+        "slug": "clecityconnect",
+        "name": "clecityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "clecityconnect"
+    }
+  },
+  "115": {
+    "marks": [
+      {
+        "slug": "colcityconnect",
+        "name": "colcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "colcityconnect"
     }
   },
   "119": {

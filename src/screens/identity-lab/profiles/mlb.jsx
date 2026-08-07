@@ -810,9 +810,19 @@ function headerUnits(teamId) {
   const wearers = treatmentsForTeam(teamId)
     .filter((t) => headerSlotFor(t.key) === 'main')
     .map((t) => SHORT_LABEL[t.key])
-  const units = [{ slot: 'main', label: 'Main bar', wearerCaption: `Worn by ${wearers.join(', ')}` }]
+  // `mastheadBar` is which masthead-override slot this bar answers to
+  // (teams.js's MASTHEAD_MARK_KEYS). Named per vocabulary rather than derived
+  // from `slot`, because MiLB's one bar is slotted 'home' and keyed 'milb'.
+  const units = [
+    { slot: 'main', label: 'Main bar', mastheadBar: 'main', wearerCaption: `Worn by ${wearers.join(', ')}` },
+  ]
   if (hasCityConnect(teamId)) {
-    units.push({ slot: 'city-connect', label: 'City Connect bar', wearerCaption: 'Worn by City Connect only' })
+    units.push({
+      slot: 'city-connect',
+      label: 'City Connect bar',
+      mastheadBar: 'city-connect',
+      wearerCaption: 'Worn by City Connect only',
+    })
   }
   return units
 }

@@ -291,14 +291,15 @@
         "scale": 0.84,
         "header": {
           "bar": "#000000",
-          "accent": "#C6011F",
-          "onBar": "#FBF6E9"
+          "accent": "#fe2c38",
+          "onBar": "#fe2c38"
         },
-        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
         "colors": {
           "primary": "#C6011F",
-          "secondary": "#000000"
-        }
+          "secondary": "#000000",
+          "accent1": "#fe2c38"
+        },
+        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
       "alternate-3": {
         "note": "Away Grey",
@@ -341,13 +342,15 @@
         "scale": 0.76,
         "header": {
           "bar": "#00385D",
-          "accent": "#E31937",
-          "onBar": "#FBF6E9"
+          "accent": "#f0e4ce",
+          "onBar": "#f0e4ce"
         },
-        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed",
         "colors": {
-          "primary": "#00385D"
-        }
+          "primary": "#00385D",
+          "secondary": "#f0e4ce",
+          "accent1": "#d8ccb8"
+        },
+        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed"
       },
       "alternate": {
         "colors": {

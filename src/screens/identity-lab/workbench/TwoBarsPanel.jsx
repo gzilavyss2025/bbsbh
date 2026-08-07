@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
-import { cityConnectMastheadUrl } from '../../../lib/teams.js'
+import { mastheadMarkUrl } from '../../../lib/teams.js'
 import { HeaderBarMock, HeaderFields, UmpireCall } from '../editors/HeaderPreview.jsx'
 import { MastheadMarkEditor } from '../editors/MastheadMarkEditor.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
@@ -39,12 +39,16 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
   )
 }
 
-// The City Connect bar's own escape hatch, in TWO forms, both editable here
-// because both are judged against this exact bar: a club may drop its own PNG
-// on the mock, or paste SVG source into the mark panel at the foot of this
-// unit (ADR-0031's second amendment and its addendum). Either replaces the mark
-// that bar's mastheads draw (teams.js's cityConnectMastheadUrl), in place of the
-// club-wide knockout mark every other bar still shares.
+// EVERY bar carries its own mark panel (MastheadMarkEditor, at the foot of the
+// unit): paste SVG source and this bar's mastheads draw it instead of the
+// club-wide knockout mark every other bar still shares (teams.js's
+// mastheadMarkUrl, ADR-0031's addendum). Editable here because it is judged
+// here — against this exact bar, in this club's own colours.
+//
+// The City Connect bar has a SECOND way in, and only it: a dropped PNG on the
+// mock itself (the earlier amendment, which gave that one bar an upload
+// directory). Hence the drop zone below is still City-Connect-only while the
+// panel is not.
 //
 // `mastheadVersion` bumps on every successful UPLOAD so the mock re-fetches the
 // just-written bytes instead of a stale browser cache of the same URL — the same
@@ -60,7 +64,7 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
   const isCityConnect = unit.slot === 'city-connect'
   const [mastheadVersion, setMastheadVersion] = useState(0)
   const [panelOverride, setPanelOverride] = useState(null)
-  const rawMastheadUrl = isCityConnect ? cityConnectMastheadUrl(unit.teamId) : null
+  const rawMastheadUrl = unit.mastheadBar ? mastheadMarkUrl(unit.teamId, unit.mastheadBar) : null
   const mastheadUrl =
     rawMastheadUrl && mastheadVersion > 0 ? `${rawMastheadUrl}?v=${mastheadVersion}` : rawMastheadUrl
 
@@ -120,7 +124,7 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
               : 'Automatic knockout mark.'}{' '}
             Drop a 512×512 PNG, transparent background, under 400 KB — colors print as-is (not
             auto-recolored), so paint it in whatever reads against this exact bar. Art that arrives
-            as SVG source goes in the City Connect bar mark panel below instead.
+            as SVG source goes in this bar&rsquo;s own mark panel below instead.
           </p>
         </>
       ) : (
@@ -154,12 +158,14 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
           hang off the bar's bottom edge and that connection is the panel's own
           idea. The mark it edits still previews on the bar at the top of this
           card, which is the whole reason it lives in here. */}
-      {isCityConnect && (
+      {unit.mastheadBar && (
         <MastheadMarkEditor
-          key={`ccmark-${unit.teamId}`}
+          key={`barmark-${unit.teamId}-${unit.mastheadBar}`}
           teamId={unit.teamId}
           name={unit.name}
-          cityConnect={{ colors: header.colors, unset: header.unset }}
+          bar={unit.mastheadBar}
+          barLabel={unit.label}
+          colors={header.colors}
           onPreview={setPanelOverride}
         />
       )}

@@ -2,28 +2,36 @@ import { useEffect, useMemo, useState } from 'react'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../lib/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
-import { CITY_CONNECT_MASTHEAD_KEY } from '../../../lib/teams.js'
+import { MASTHEAD_MARK_KEYS } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'
 import { ShapeInkPicker, flipVerdict } from './ShapeInkPicker.jsx'
 import { assignCustomMark, saveCustomMark } from '../saveStores.js'
 
-// Paste a finished mark in as SVG source, name it, and let the City Connect
-// bar wear it — the one bar a club may take off the automatic knockout mark
-// (ADR-0031's second amendment).
+// Paste a finished mark in as SVG source, name it, and let THIS BAR wear it in
+// place of the club-wide automatic knockout mark (ADR-0031's addendum). One
+// panel, mounted inside each of a club's bar units — MLB's Main and City
+// Connect, MiLB's single bar — so the bar it dresses is the bar it sits in.
 //
-// Why paste rather than upload: the knockout mark next door is a CONVERSION of
-// the CDN's art, and a club's City Connect identity is sometimes its own thing
-// entirely — a wordmark, an alternate crest — that no amount of ink/knockout
-// pinning reproduces, because the source art isn't that design. The amendment
-// already allowed a dropped-in PNG for exactly this; SVG source is the same
-// escape hatch for art that arrives as markup rather than as a file, and it
-// stays crisp at the bar's full bleed where a 512px PNG does not.
+// Why paste rather than upload: the knockout mark elsewhere on the bench is a
+// CONVERSION of the CDN's art, and a club's identity on a given bar is
+// sometimes its own thing entirely — a City Connect wordmark, an alternate
+// crest, an affiliate's secondary mark — that no amount of ink/knockout pinning
+// reproduces, because the source art isn't that design. The earlier amendment
+// allowed a dropped-in PNG on the City Connect bar for exactly this; SVG source
+// is the same escape hatch for art that arrives as markup rather than as a
+// file, it stays crisp at the bar's full bleed where a 512px PNG does not, and
+// it needs no upload directory — which is what lets the other two bars have it.
+//
+// KEYED BY BAR, NOT BY JERSEY (teams.js's MASTHEAD_MARK_KEYS). A club has fewer
+// bars than jerseys — Main's bar is worn by Main and every alternate, MiLB's one
+// bar by both Home and Away — so dressing a bar dresses every jersey that wears
+// it. Same grouping the colour triad above this panel already uses.
 //
 // Nothing here is new machinery. A paste rides the SAME two dev endpoints the
 // Logo art editor's recolors ride (scripts/lib/dev-custom-marks.mjs): SAVE
 // writes public/team-logos/custom/{teamId}-{slug}.svg and adds it to the club's
-// library, ASSIGN points one key at one library mark. The key is the synthetic
-// 'city-connect-masthead' — never a real treatment, so no jersey's Replace-art
+// library, ASSIGN points one key at one library mark — here, this bar's own
+// synthetic masthead key. Never a real treatment, so no jersey's Replace-art
 // select can see it and no tuning store has an entry for it.
 //
 // The two rules the library already had, and this inherits:
@@ -41,12 +49,12 @@ import { assignCustomMark, saveCustomMark } from '../saveStores.js'
 //
 // The knockout route BAKES ITS INK IN rather than leaving the conversion's own
 // white. logoMono.js emits `fill="#fff"` because the club-wide mono mark is
-// re-inked at render time by CSS; this slot's whole contract is the opposite
-// (`.metricbar__logo--custom` turns that filter back off, ADR-0031's second
-// amendment), so a white silhouette saved here would simply vanish on a light
-// bar. Picking the color at save time keeps that contract intact — what lands
-// on disk is finished art either way, and this panel never becomes a second
-// thing the renderer has to know about.
+// re-inked at render time by CSS; a bar override's whole contract is the
+// opposite (`.metricbar__logo--custom` turns that filter back off), so a white
+// silhouette saved here would simply vanish on a light bar. Picking the color
+// at save time keeps that contract intact — what lands on disk is finished art
+// either way, and this panel never becomes a second thing the renderer has to
+// know about.
 //
 // Dev-only, like the rest of the lab (ADR-0029).
 
@@ -88,7 +96,8 @@ function inkConversion(converted, maskId, ink) {
   return converted.replace(target, `fill="${ink}" mask="url(#${maskId})"`)
 }
 
-export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
+export function MastheadMarkEditor({ teamId, name, bar, barLabel, colors, onPreview }) {
+  const markKey = MASTHEAD_MARK_KEYS[bar]
   const [markup, setMarkup] = useState('')
   const [markName, setMarkName] = useState('')
   const [state, setState] = useState(null)
@@ -105,7 +114,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
     () => [...landedLibrary, ...savedHere.filter((m) => !landedLibrary.some((l) => l.slug === m.slug))],
     [landedLibrary, savedHere],
   )
-  const worn = wornOverride ?? customMarkAssignment(teamId, CITY_CONNECT_MASTHEAD_KEY)
+  const worn = wornOverride ?? customMarkAssignment(teamId, markKey)
 
   // The draft is sanitized by a real parser before anything looks at it
   // (src/lib/svgSanitize.js), so what previews here is what posts — and markup
@@ -120,7 +129,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
   const [knockout, setKnockout] = useState(false)
   const [pins, setPins] = useState({})
   const [ink, setInk] = useState(null)
-  const inkHex = ink ?? inkChoices(cityConnect?.colors).at(0).hex
+  const inkHex = ink ?? inkChoices(colors).at(0).hex
 
   // Same modules, same shape numbering, as the editor above (logoMono.js) — so
   // shape 3 here is shape 3 there. `parts` and the clickable art come off the
@@ -128,7 +137,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
   // drift between what is clicked and what is saved.
   const parts = useMemo(() => (draft ? monoLogoParts(draft) : []), [draft])
   const picker = useMemo(() => (draft ? monoLogoPickerSvg(draft) : null), [draft])
-  const maskId = `idlab-ccmark-${teamId}`
+  const maskId = `idlab-barmark-${teamId}-${bar}`
   const converted = useMemo(
     () => (draft ? monoLogoSvg(draft, { maskId, pins }) : null),
     [draft, maskId, pins],
@@ -188,7 +197,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
 
   async function wear(slug) {
     setState({ kind: 'note', text: slug ? 'Putting it on the bar' : 'Taking it off the bar' })
-    const result = await assignCustomMark({ teamId, treatment: CITY_CONNECT_MASTHEAD_KEY, slug })
+    const result = await assignCustomMark({ teamId, treatment: markKey, slug })
     if (result.error) {
       setState({ kind: 'error', text: result.error })
       return
@@ -197,32 +206,30 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
     setState({
       kind: 'ok',
       text: slug
-        ? 'this bar wears it now — every other bar keeps the knockout mark'
+        ? 'this bar wears it now — the club’s other bars keep the knockout mark'
         : 'back to the automatic knockout mark',
     })
   }
 
-  // A club with no City Connect bar has nothing for this panel to dress — a
-  // MiLB affiliate (whose vocabulary has no City Connect at all), or one of the
-  // two MLB clubs teams.js's hasCityConnect excludes. The resolver answers null
-  // for them, so an editor here could only write an assignment nothing reads.
+  // A bar with no masthead key is one the resolver answers null for, so an
+  // editor here could only ever write an assignment nothing reads.
   // After the hooks, deliberately: this component is mounted per club by key.
-  if (!cityConnect) return null
+  if (!markKey) return null
 
   return (
-    <section className="idlab__mastheadmark" aria-label="City Connect bar mark">
+    <section className="idlab__mastheadmark" aria-label={`${barLabel} mark`}>
       <div className="colorlab__wpapreviewhead">
-        <span className="colorlab__wpapreviewlabel">City Connect bar mark</span>
+        <span className="colorlab__wpapreviewlabel">{barLabel} mark</span>
         <span className="idlab__monoinkhint">
           {worn ? 'Wearing a pasted mark' : 'Automatic knockout mark'}
         </span>
       </div>
 
       <p className="idlab__monoinkhint">
-        Paste a mark for this one bar. Every other bar — Main and each alternate — keeps the
-        club-wide knockout mark beside this panel, untouched. Keep the pasted colors, or convert it
-        to a one-color knockout below and pick the ink; either way what lands is finished art, so
-        nothing recolors it on the page.
+        Paste a mark for this bar and every jersey that wears it. The club&rsquo;s other bars keep the
+        club-wide knockout mark, untouched. Keep the pasted colors, or convert it to a one-color
+        knockout below and pick the ink; either way what lands is finished art, so nothing recolors
+        it on the page.
       </p>
 
       <textarea
@@ -233,7 +240,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
           setState(null)
         }}
         placeholder={PASTE_PLACEHOLDER}
-        aria-label="SVG source for this club's City Connect bar mark"
+        aria-label={`SVG source for this club's ${barLabel} mark`}
         spellCheck="false"
         rows={4}
       />
@@ -262,7 +269,7 @@ export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
           </button>
           {knockout && convertible && (
             <>
-              {inkChoices(cityConnect.colors).map((choice) => (
+              {inkChoices(colors).map((choice) => (
                 <button
                   key={choice.label}
                   type="button"

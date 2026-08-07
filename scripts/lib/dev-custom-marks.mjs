@@ -25,6 +25,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { LOGO_TREATMENT_DIRS } from '../../src/lib/logoArt.js'
+import { MASTHEAD_MARK_ASSIGN_KEYS } from '../../src/lib/teams.js'
 import { markSlug } from '../../src/lib/logoRecolor.js'
 
 const REPO_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)))
@@ -138,14 +139,16 @@ const CDN_PREFIX = 'cdn:'
 
 // Point a treatment at a library mark or a CDN vector, or clear it with an
 // empty slug. The treatment key is checked against the same closed allowlist
-// an upload resolves through, so this can't invent a treatment the app
-// doesn't have. A `cdn:` assignment needs no prior save — unlike a library
+// an upload resolves through, PLUS the bar-keyed masthead slots (teams.js's
+// MASTHEAD_MARK_KEYS), which are assignable without being upload destinations —
+// a bar's own mark is pasted, never dropped, for two of the three. Either way
+// this can't invent a key the app doesn't have. A `cdn:` assignment needs no prior save — unlike a library
 // mark, there's nothing to have saved first — so it creates the team's entry
 // on first use instead of requiring one already exist.
 export async function assignCustomMark({ teamId, treatment, slug }) {
   if (!Number.isInteger(teamId) || teamId <= 0) return { problem: 'teamId must be a positive integer', status: 400 }
-  if (!Object.hasOwn(LOGO_TREATMENT_DIRS, treatment)) {
-    return { problem: `"${treatment}" is not a treatment`, status: 400 }
+  if (!Object.hasOwn(LOGO_TREATMENT_DIRS, treatment) && !MASTHEAD_MARK_ASSIGN_KEYS.has(treatment)) {
+    return { problem: `"${treatment}" is not a treatment or a masthead slot`, status: 400 }
   }
   const store = await readStore()
   const key = String(teamId)

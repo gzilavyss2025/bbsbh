@@ -196,7 +196,10 @@ function headerSlotFor() {
 }
 
 function headerUnits() {
-  return [{ slot: 'home', label: 'Header bar', wearerCaption: 'Worn by Home and Away' }]
+  // One bar, worn by both sides (milbHeaderColorOverride collapses them), so one
+  // masthead override too — keyed 'milb' rather than by the 'home' slot, which
+  // names the colour store's side and not a bar of its own.
+  return [{ slot: 'home', label: 'Header bar', mastheadBar: 'milb', wearerCaption: 'Worn by Home and Away' }]
 }
 
 function headerProps(team, slot, drafts, extras, on) {

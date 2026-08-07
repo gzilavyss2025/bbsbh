@@ -326,3 +326,36 @@ that safe to bolt on rather than a second pipeline:
   ink shape and `monoLogoSvg` rightly bails; in that state the panel saves
   NOTHING and says why, rather than falling back to the full-colour paste — which
   is the one result turning the mode on was meant to avoid.
+
+**Every bar gets one, not just City Connect — and the key is the BAR.** The
+addendum above shipped on the one bar that already had an override slot. The
+same panel now mounts inside every bar unit: MLB's Main, MLB's City Connect,
+and MiLB's single bar. `teams.js`'s `mastheadMarkUrl(teamId, bar)` is the one
+resolver behind all three, and `cityConnectMastheadUrl` is gone rather than kept
+as a second name for it.
+
+- **A club has fewer BARS than jerseys, and that is the whole grouping.**
+  `treatmentHeaderColorOverride` already sends Main and every alternate to one
+  bar and City Connect to the other; `milbHeaderColorOverride` already sends Home
+  and Away to a single bar. `mastheadBarFor(teamId, treatment)` collapses a
+  jersey onto its bar the same way, so dressing "the Main bar" dresses Main and
+  every alternate at once — the same answer the colour triad above it gives.
+  Anything finer would be a promise the header theming itself doesn't make.
+- **`TeamInfo.jsx` needed no MiLB special case any more.** It used to guard the
+  override with `isMlbTeamId(...) && treatment === 'city-connect'` because City
+  Connect is an MLB-only vocabulary. MiLB is now simply the third bar, so both
+  sides resolve through one call and the guard came out.
+- **Two of the three keys are assignment-only.** `city-connect-masthead` is both
+  a `LOGO_TREATMENT_DIRS` upload destination (from the second amendment) and a
+  masthead key; `main-masthead` and `milb-masthead` are keys with no directory,
+  so a paste is the only way into them. The dev assign endpoint therefore accepts
+  `MASTHEAD_MARK_ASSIGN_KEYS` alongside the real treatment directories — the one
+  server change the whole feature needed.
+- **The keys live in `teams.js`, not `logoArt.js`**, even though one of them is
+  also an upload directory there. `logoArt.js` imports `teams.js`; declaring them
+  the other way round would close an import cycle for a constant neither the
+  manifest builder nor the disk sweep reads.
+- **Bars stay isolated, and a test says so.** The two MLB bars read different
+  keys, so a club wearing a pasted City Connect mark still draws the automatic
+  knockout mark on Main. `test/teams.test.js` asserts that over whichever clubs
+  are actually dressed in the committed store, rather than over a fixture.

@@ -91,6 +91,12 @@ export const LOGO_TREATMENT_DIRS = {
 // the manifest builder and the on-disk sweep.
 export const LOGO_ART_DIRS = Object.values(LOGO_TREATMENT_DIRS)
 
+// The bar-keyed masthead mark overrides (MASTHEAD_MARK_KEYS) are NOT here, even
+// though `city-connect-masthead` is both one of them and an upload directory
+// above. They live beside their resolver in teams.js, which this file already
+// imports — declaring them here would close the cycle src/lib/CLAUDE.md warns
+// about, for a constant neither the manifest builder nor the disk sweep reads.
+
 // The subset of LOGO_ART_DIRS keyed by team id instead of club abbreviation
 // (PRD 1.7 — TEAM_ABBR is MLB-only and teamAbbr()'s 3-letter fallback collides
 // across MiLB). logoUploadTarget and the manifest builder both branch on this
