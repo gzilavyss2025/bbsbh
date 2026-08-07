@@ -698,6 +698,23 @@
       }
     }
   },
+  "279": {
+    "name": "Palm Beach Cardinals",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 20,
+        "offsetY": 0,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.93,
+        "offsetX": -9,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "342": {
     "name": "Albuquerque Isotopes",
     "treatments": {
@@ -732,6 +749,23 @@
       }
     }
   },
+  "401": {
+    "name": "Inland Empire 66ers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 35,
+        "offsetY": 5,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.02,
+        "offsetX": -17,
+        "offsetY": 4,
+        "rotation": 0
+      }
+    }
+  },
   "402": {
     "name": "Akron RubberDucks",
     "treatments": {
@@ -762,6 +796,23 @@
         "scale": 0.91,
         "offsetX": -14,
         "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "414": {
+    "name": "Salem RidgeYaks",
+    "treatments": {
+      "away": {
+        "scale": 1.25,
+        "offsetX": 12,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.25,
+        "offsetX": -8,
+        "offsetY": 7,
         "rotation": 0
       }
     }
@@ -1485,6 +1536,40 @@
       }
     }
   },
+  "516": {
+    "name": "Visalia Rawhide",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 12,
+        "offsetY": 9,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -7,
+        "offsetY": 8,
+        "rotation": 0
+      }
+    }
+  },
+  "521": {
+    "name": "Myrtle Beach Pelicans",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 17,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 14,
+        "rotation": 0
+      }
+    }
+  },
   "524": {
     "name": "Stockton Ports",
     "treatments": {
@@ -1498,6 +1583,23 @@
         "scale": 1,
         "offsetX": -29,
         "offsetY": 0,
+        "rotation": 0
+      }
+    }
+  },
+  "526": {
+    "name": "Rancho Cucamonga Quakes",
+    "treatments": {
+      "away": {
+        "scale": 1.22,
+        "offsetX": 23,
+        "offsetY": 3,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.17,
+        "offsetX": -22,
+        "offsetY": 12,
         "rotation": 0
       }
     }
@@ -2144,6 +2246,23 @@
         "scale": 1.01,
         "offsetX": -19,
         "offsetY": 11,
+        "rotation": 0
+      }
+    }
+  },
+  "6482": {
+    "name": "Ontario Tower Buzzers",
+    "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 22,
+        "offsetY": 10,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1,
+        "offsetX": -14,
+        "offsetY": 8,
         "rotation": 0
       }
     }

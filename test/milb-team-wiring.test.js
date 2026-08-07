@@ -22,7 +22,7 @@ test('isMlbTeamId separates the 30 MLB clubs from every MiLB affiliate', () => {
 })
 
 test('milbTreatmentTile swaps bg/accent between home and away for a team with no landed position override', () => {
-  const teamId = 401 // Inland Empire 66ers — has a researched pair, no MILB_LOGO_POS_OVERRIDES entry
+  const teamId = 235 // Memphis Redbirds — has a researched pair, no MILB_LOGO_POS_OVERRIDES entry
   const [primary, secondary] = milbColorPair(teamId)
   const home = milbTreatmentTile(teamId, 'home')
   const away = milbTreatmentTile(teamId, 'away')
