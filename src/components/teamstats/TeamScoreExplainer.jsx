@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { currentFormScoreFromGames, CURRENT_FORM_GAMES } from '../../api/teamScoreFormula.js'
+import { HOME_WIN_PROBABILITY } from '../../api/seasonScoreFormula.js'
 import { record, signed, scoreValue, rate3 } from './TeamScoreCard.jsx'
 
 // Illustrative anchors for the "How this is calculated" modal — run through
@@ -83,13 +84,17 @@ export function TeamScoreExplainer({ snapshot, surprise, grade, onClose }) {
             Before Opening Day, every club gets a baseline from the consensus market win
             total; when that is unavailable, a regressed three-year record supplies a
             clearly labeled fallback. Each game then carries a schedule-adjusted expectation
-            based on the two teams and the venue. Actual wins above or below that running
-            total become the Vs. expectation score: 5.0 means the club is exactly on assignment.
+            based on the two teams, the venue, and each club&apos;s own trailing home-field
+            record. Actual wins above or below that running total become the Vs. expectation
+            score: 5.0 means the club is exactly on assignment.
           </p>
           {surprise && (
             <dl className="tscoremodal__figs">
               <div><dt>Preseason expectation{surprise.baselineKind === 'marcel' ? ' (model)' : ''}</dt><dd>{surprise.baselineWins.toFixed(1)} wins</dd></div>
               <div><dt>Expected through this date</dt><dd>{surprise.expectedWinsToDate.toFixed(1)}</dd></div>
+              {surprise.homeFieldFactor != null && (
+                <div><dt>Home-field edge</dt><dd>{(surprise.homeFieldFactor * 100).toFixed(1)}% (league {(HOME_WIN_PROBABILITY * 100).toFixed(1)}%)</dd></div>
+              )}
               <div><dt>Actual wins</dt><dd>{surprise.wins}</dd></div>
               <div><dt>Vs. expectation</dt><dd>{scoreValue(surprise)} · {signed(surprise.residualWins)} wins</dd></div>
             </dl>

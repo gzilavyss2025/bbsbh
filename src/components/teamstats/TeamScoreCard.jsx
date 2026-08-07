@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ordinal } from '../../api/person.js'
 import { leagueRank, leagueRankNoTies, rankedNoTies } from '../../api/teamScore.js'
 import { CURRENT_FORM_GAMES } from '../../api/teamScoreFormula.js'
+import { HOME_WIN_PROBABILITY } from '../../api/seasonScoreFormula.js'
 import { seasonGradeFor } from '../../api/seasonGradeFormula.js'
 import { teamClubName } from '../../lib/teams.js'
 import { beeswarmRows } from '../../lib/beeswarm.js'
@@ -263,6 +264,9 @@ function ScoreDetail({ kind, grade, quality, surprise, form }) {
           <>
             <div><dt>Preseason expectation{surprise.baselineKind === 'marcel' ? ' (model)' : ''}</dt><dd>{surprise.baselineWins.toFixed(1)} wins</dd></div>
             <div><dt>Expected through this date</dt><dd>{surprise.expectedWinsToDate.toFixed(1)}</dd></div>
+            {surprise.homeFieldFactor != null && (
+              <div><dt>Home-field edge</dt><dd>{(surprise.homeFieldFactor * 100).toFixed(1)}% (league {(HOME_WIN_PROBABILITY * 100).toFixed(1)}%)</dd></div>
+            )}
             <div><dt>Actual record</dt><dd>{surprise.wins}–{surprise.losses}</dd></div>
             <div><dt>Above/below expectation</dt><dd>{signed(surprise.residualWins)} wins</dd></div>
           </>

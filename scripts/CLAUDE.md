@@ -314,13 +314,13 @@ don't run these by hand.
 - `gen-season-score.mjs` → `public/data/season-score.json` — an MLB-only,
   date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
   snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
-  generator sums schedule-adjusted preseason win expectations through the
-  cutoff, stores actual-vs-expected as the headline, and keeps earned pace plus
-  last-30 form as diagnostics. Market baselines live in the hand-curated
-  `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
-  `docs/season-score.md` and ADR-0018. Backed by the SQLite layer above
-  (`team_snapshots`, `metric='surprise'`); `public/data/season-score.json` is
-  exported from the table, byte-for-byte the same reader shape.
+  generator sums schedule-adjusted preseason win expectations (home edge
+  blended from trailing PRIOR seasons, never this one — `seasonScoreFormula.js`)
+  through the cutoff, stores actual-vs-expected as the headline, and keeps
+  earned pace plus last-30 form as diagnostics. Market baselines live in the
+  hand-curated `season-expectations-seed.json`; incomplete seasons fall back
+  to Marcel. See `docs/season-score.md` and ADR-0018; backed by the SQLite
+  layer above (`team_snapshots`, `metric='surprise'`).
 - `gen-team-score.mjs` → `public/data/team-score.json` — date-keyed MLB Quality
   plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
   40% Pythagorean wins off park-adjusted run differential, plus a capped
