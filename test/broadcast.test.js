@@ -97,3 +97,59 @@ test('fetchNationalBroadcasts never reports MLB.TV as the national network', asy
     assert.deepEqual(out, {})
   })
 })
+
+// "ESPN Unlmtd" is ESPN's streaming-only tier — an out-of-market subscription
+// package like MLB.TV, not a national TV broadcast, even though ESPN reports
+// it in the national market. It gets MLB.TV's treatment in both facts.
+test('fetchNationalBroadcasts never reports ESPN Unlmtd as the national network', async () => {
+  const officialDate = '2026-08-02'
+  const events = [
+    eventFor(
+      HOME,
+      AWAY,
+      [{ market: 'national', names: ['ESPN Unlmtd', 'MLB.TV'] }],
+      `${officialDate}T18:10Z`,
+    ),
+  ]
+  const games = [{ gamePk: 1, gameDate: `${officialDate}T18:10Z`, home: HOME, away: AWAY }]
+
+  await withFetch(events, async () => {
+    const out = await fetchNationalBroadcasts(officialDate, games)
+    assert.deepEqual(out, {})
+  })
+})
+
+// Linear ESPN is a real national broadcast and must keep flagging one — the
+// filter is on the "Unlmtd" tier alone, matched case-insensitively.
+test('fetchNationalBroadcasts still reports plain ESPN', async () => {
+  const officialDate = '2026-08-01'
+  const events = [
+    eventFor(HOME, AWAY, [{ market: 'national', names: ['ESPN'] }], `${officialDate}T18:10Z`),
+  ]
+  const games = [{ gamePk: 1, gameDate: `${officialDate}T18:10Z`, home: HOME, away: AWAY }]
+
+  await withFetch(events, async () => {
+    const out = await fetchNationalBroadcasts(officialDate, games)
+    assert.deepEqual(out, { 1: 'ESPN' })
+  })
+})
+
+test('fetchGameBroadcast drops ESPN Unlmtd from the summary', async () => {
+  const officialDate = '2026-07-31'
+  const events = [
+    eventFor(
+      HOME,
+      AWAY,
+      [
+        { market: 'national', names: ['espn unlmtd'] },
+        { market: 'home', names: ['FanDuel Sports Network Wisconsin'] },
+      ],
+      `${officialDate}T18:10Z`,
+    ),
+  ]
+
+  await withFetch(events, async () => {
+    const summary = await fetchGameBroadcast(feedFor(HOME, AWAY, officialDate))
+    assert.equal(summary, 'FanDuel Sports Network Wisconsin')
+  })
+})
