@@ -43,11 +43,19 @@ export async function fetchTeamHighlights(teamId) {
   return data
 }
 
-// One slate date's condensed games, keyed by gamePk — the poster, runtime and
-// playback URLs for every Final MLB game that day, from
+// One slate date's condensed games, keyed by gamePk — the poster, runtime,
+// playback URLs, and hero photo for every Final MLB game that day, from
 // public/data/highlights/day/<MMDDYYYY>.json (written by the same nightly
 // sweep as the team files above; see scripts/lib/highlights.mjs's
-// writeDayFiles). ~8 KB for a full 16-game slate.
+// writeDayFiles/dayIndexEntry). ~8 KB for a full 16-game slate.
+//
+// `heroPhoto` (`{ original, thumb } | null`, from gamePhotos.js's
+// pickHeroPhoto) is what GameResultFace.jsx shows on the condensed-game card
+// INSTEAD of `poster` when present — a real photographer/broadcast still
+// rather than MLB's own "CONDENSED GAME" graphic card. It carries no caption
+// text on purpose (see pickHeroPhoto's header): this file is fetched whole for
+// every game on the date regardless of which ones are revealed yet, so only a
+// bare image URL rides along, never anything legible as plain text.
 //
 // WHY PRECOMPUTED, when the box score fetches the same thing live. Because the
 // slate needs ALL of them at once: `content` is 430 KB per game and does not

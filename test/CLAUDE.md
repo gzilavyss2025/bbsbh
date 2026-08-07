@@ -21,6 +21,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
+| condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | copy-registry.test.js | 22 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026) |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
 | day-highlights.test.js | 35 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) |
