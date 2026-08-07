@@ -207,7 +207,18 @@
   /* ---- opposing-starter card, wide layout: the pitch-mix bar (see
      .startercard__arsenal above) fills the open space next to the
      name/badges/stats column, which otherwise stretches full width for no
-     reason — cap it so the mix has real room rather than a sliver. */
+     reason — cap it so the mix has real room rather than a sliver.
+
+     The body's own centering goes with it. A five- or six-pitch arsenal is the
+     tallest thing in the card, and centering floated the headshot + name +
+     season line + last outing down its middle, leaving a ragged gap above the
+     face. Top-aligned, the two columns start on the same line no matter how many
+     pitches the arm throws. Only inside this breakpoint: below it the mix is
+     display:none and the headshot has nothing to be taller than it, so the base
+     rule's `align-items: center` still reads best there. */
+  .startercard__body {
+    align-items: flex-start;
+  }
   .startercard__info {
     flex: 0 1 320px;
   }
