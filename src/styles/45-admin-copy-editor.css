@@ -257,6 +257,11 @@
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
+  /* A group with no modal to stage (the ballpark notes) has no second column to
+     give half the width to — the fields take the whole row instead. */
+  .admincopy__groupGrid--plain {
+    grid-template-columns: 1fr;
+  }
   .admincopy__preview {
     position: sticky;
     top: var(--space-6);

@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { BallparkDiagram } from './BallparkDiagram.jsx'
 import { Facts, RankGroup } from './BallparkFacts.jsx'
-import { rankedDimensions } from '../../lib/ballparkData.js'
+import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
 // heights, each ranked against the 30 MLB parks ("Center field 420′ — 1st of 29").
 // Opened by tapping the venue name on the lineup page's game facts.
 //
-// Spoiler-safe: everything here is static park geometry (src/lib/ballparkData.js),
+// Spoiler-safe: everything here is static park geometry (src/lib/ballpark/ballparkData.js),
 // no score, so it sits outside any seal like the rest of the lineup page. Same
 // dialog contract as WhatsBrewingModal — dismiss via backdrop, close button, or
 // Escape; focus moves into the sheet on open and back to the trigger on close.

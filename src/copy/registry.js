@@ -1,7 +1,9 @@
 // The copy registry — the single source of truth for every piece of
-// admin-editable UI text in the app. It is a plain, dependency-free module so
-// three very different consumers can share ONE definition of what a copy key
-// is, what it defaults to, and what a valid value looks like:
+// admin-editable UI text in the app. It is a plain, side-effect-free module —
+// its one import is the static ballpark table, which it reads to derive one
+// note field per park — so three very different consumers can share ONE
+// definition of what a copy key is, what it defaults to, and what a valid value
+// looks like:
 //
 //   - the runtime (src/copy/CopyProvider.jsx + copyContext.js) reads DEFAULTS
 //     for instant, offline, backend-free rendering — the app works identically
@@ -24,10 +26,19 @@
 // one place a user trades away the spoiler protection the whole app exists to
 // provide, so the trade must be stated plainly even while having fun with it.
 
+import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
+import { venueKey } from '../lib/ballpark/ballparkArt.js'
+
 // Groups order the admin panel and let it render section headers. Keep ids
 // stable — they are the Redis field names and the localStorage cache keys.
+//
+// `preview: 'consentModal'` marks a group whose fields together compose one
+// ConsentModal, so the panel can offer the live rehearsal of it. A group without
+// the flag renders as plain fields — the ballpark notes are 30 unrelated
+// paragraphs with no shared modal to stage.
 export const GROUPS = [
-  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)' },
+  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
+  { id: 'ballparks', label: 'Ballpark notes (team hub → Overview)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -45,8 +56,13 @@ export const GROUPS = [
 //   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
 //              "Top 7th"). Used only by `scoresUnlocked.liveEdgeLabel`.
 //
-// SPOILER GUARD (do not relax): every field here is consent/chrome copy only,
-// and no field may be rendered inside a sealed/reveal-gated surface. A token may
+// SPOILER GUARD (do not relax): no field here may be rendered inside a
+// sealed/reveal-gated surface, and no field's VALUE may be derived from game
+// data — an admin types every one of them by hand, about a subject that has no
+// score. That covers the consent/chrome copy and, since ADR-0025's amendment,
+// the per-park notes: a ballpark is a building, the team hub's Overview is one
+// of the surfaces CLAUDE.md keeps deliberately outside the scoring flow, and a
+// sentence about the Green Monster cannot leak tonight's result. A token may
 // be added ONLY if its value is categorically incapable of carrying a score. The
 // two above qualify: a clock time is not game data at all, and `{inning}` is the
 // same structural half-inning label the innings chrome already prints for the
@@ -57,6 +73,36 @@ export const GROUPS = [
 // score. If this panel ever grows to govern other app copy, keep score-bearing
 // contexts out of the registry entirely — see ADR-0025.
 export const TOKENS = Object.freeze(['time', 'inning'])
+
+// The ballpark notes: one free-text paragraph per park, shown on the team hub's
+// Overview between the built/roof/capacity facts and the outfield dimensions.
+//
+// DERIVED, not hand-listed, and that is the point. BALLPARKS is the one place
+// the set of parks is written down; a hand-kept second list here would drift the
+// first time a park is renamed, and a drifted id is not a cosmetic bug — ids are
+// Redis field names, so a park whose id moved would silently lose the paragraph
+// somebody wrote for it. Deriving from `park.name` also means the three ALIAS
+// keys (Minute Maid/Daikin, Guaranteed Rate/Rate, the Dodger Stadium pair)
+// collapse to one field, which is what an editor expects: one park, one note.
+//
+// Every default is EMPTY on purpose. The card renders no paragraph at all until
+// the owner writes one, so nothing ships in a voice they did not choose — and
+// `sanitizeOverrides` already treats '' as "no override", so clearing a box in
+// the panel is the same operation as never having filled it.
+function parkNoteFields() {
+  return [...new Set(Object.values(BALLPARKS))]
+    .map((park) => park.name)
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({
+      id: `ballpark.${venueKey(name)}`,
+      group: 'ballparks',
+      label: name,
+      help: `A few sentences on ${name} — what the place is like, what makes it odd, what a visitor notices. Leave empty to show no note for this park.`,
+      maxLength: 700,
+      multiline: true,
+      default: '',
+    }))
+}
 
 export const FIELDS = [
   // ---- Scores Unlocked: the one "just show me the scores" switch. It covers
@@ -155,6 +201,7 @@ export const FIELDS = [
     multiline: false,
     default: 'Live · {inning} in progress',
   },
+  ...parkNoteFields(),
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.

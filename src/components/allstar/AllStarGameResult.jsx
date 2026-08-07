@@ -4,7 +4,7 @@ import { Headshot } from '../player/Headshot.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { BallparkModal } from '../ballpark/BallparkModal.jsx'
 import { leagueLogoUrl } from '../../lib/teams.js'
-import { ballparkFor } from '../../lib/ballparkData.js'
+import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
 
 // The All-Star Rosters page's one game-result card. Layout: the date sits
 // left-aligned on its own line, the score (AL/NL marks + runs) on the line

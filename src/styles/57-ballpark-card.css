@@ -1,0 +1,126 @@
+/* --------------------------------------------------- team hub: Ballpark card
+   The Overview's Ballpark card (src/screens/team/modules/BallparkCard.jsx).
+   Split out of 09-team-info.css when the photo hero pushed that file past its
+   size budget — the card is a self-contained block with its own two-row
+   layout, so it reads better alone than buried in the team-hub sheet.
+
+   Every rule here is a `.ballparkcard__*` element. The shared `.bpsheet__*` /
+   `.rankgrp__*` bits it also renders belong to BallparkFacts.jsx and stay
+   where the modal already defined them. */
+/* The hero row: a photograph of the park beside its name. Stacked on a phone,
+   60/40 side by side on desktop — the photo earns the larger share because it
+   is the thing you actually look at; the name is a caption to it. */
+.ballparkcard__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+@media (min-width: 740px) {
+  .ballparkcard__hero {
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .ballparkcard__photoWrap {
+    flex: 1 1 60%;
+    min-width: 0;
+  }
+  .ballparkcard__title {
+    flex: 1 1 40%;
+    min-width: 0;
+  }
+}
+
+.ballparkcard__photoWrap {
+  margin: 0;
+  min-width: 0;
+}
+/* A fixed 16:9 box with object-fit: cover, because the 30 bundled photos are
+   every shape from a 4:3 phone snap to a wide aerial. Cropping in CSS keeps one
+   consistent card silhouette without re-encoding 30 files. */
+.ballparkcard__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken, rgba(0, 0, 0, 0.06));
+}
+/* Attribution, not decoration — CC BY / CC BY-SA require it. Quiet, but never
+   display: none. See src/lib/ballparkArt.js. */
+.ballparkcard__credit {
+  margin-top: var(--space-1);
+  font-size: var(--fs-micro, var(--fs-caption));
+  color: var(--text-muted);
+}
+.ballparkcard__credit a {
+  color: inherit;
+  text-decoration: none;
+}
+.ballparkcard__credit a:hover {
+  text-decoration: underline;
+}
+
+/* The name column. Centred against the photo on desktop, flush left when the
+   row has collapsed to a stack on a phone. */
+.ballparkcard__title {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+@media (min-width: 740px) {
+  .ballparkcard__title {
+    justify-content: center;
+    text-align: center;
+  }
+}
+.ballparkcard__name {
+  margin: 0;
+  font-family: var(--font-display, inherit);
+  font-size: var(--fs-h2, var(--fs-body));
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-tight, normal);
+  color: var(--text-body);
+  text-wrap: balance;
+}
+/* A park's own wordmark when one is on file (LOGO_KEYS in ballparkArt.js).
+   Bounded so a tall mark can't out-scale the photo beside it. */
+.ballparkcard__logo {
+  display: block;
+  max-width: 100%;
+  max-height: 5rem;
+  width: auto;
+  object-fit: contain;
+}
+
+/* The admin-written note, sitting between the built/roof/capacity facts and the
+   ranked dimensions. Absent entirely until somebody writes one. */
+.ballparkcard__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+  white-space: pre-line;
+}
+
+/* Stacked (diagram over details) below the app's one responsive breakpoint;
+   50/50 side by side at/above it — kept in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js, same as every other min-width: 740px rule. */
+.ballparkcard__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+@media (min-width: 740px) {
+  .ballparkcard__layout {
+    flex-direction: row;
+    align-items: center;
+  }
+  .ballparkcard__diagram,
+  .ballparkcard__details {
+    flex: 1 1 50%;
+    min-width: 0;
+  }
+}

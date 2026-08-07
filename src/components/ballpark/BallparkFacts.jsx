@@ -1,4 +1,4 @@
-import { ordinal } from '../../lib/ballparkData.js'
+import { ordinal } from '../../lib/ballpark/ballparkData.js'
 
 // The two small building blocks of a park's "details" — a labeled built/roof/
 // capacity stat, and one ranked dimension family (distances or wall heights).

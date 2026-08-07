@@ -125,7 +125,7 @@ const BUDGETS = {
   // since the cascade contract is ORDER, not unique numbers — and the order
   // matters here: it has to land after 26-player-page.css, which owns the
   // `.statcast-section` the strip sits inside.
-  'src/styles': 60,
+  'src/styles': 61,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -146,7 +146,7 @@ const BUDGETS = {
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
-  'src/lib': 51,
+  'src/lib': 47,
   'src/screens': 38,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now

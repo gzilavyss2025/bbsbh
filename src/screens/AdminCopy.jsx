@@ -346,19 +346,25 @@ function Editor({ onDirty }) {
       {GROUPS.map((group) => {
         const groupFields = FIELDS.filter((f) => f.group === group.id)
         const ids = Object.fromEntries(groupFields.map((f) => [f.id.split('.')[1], f.id]))
+        // Only a group that composes ONE modal can be staged as one. The
+        // ballpark notes are 30 independent paragraphs on a plain page, so they
+        // render as a bare field list — no preview pane, no "View real modal".
+        const stageable = group.preview === 'consentModal'
         return (
           <section key={group.id} className="admincopy__group" aria-label={group.label}>
             <div className="admincopy__groupHead">
               <h2 className="admincopy__groupTitle">{group.label}</h2>
-              <button
-                type="button"
-                className="admincopy__previewOpen"
-                onClick={() => setPreview(group.id)}
-              >
-                View real modal
-              </button>
+              {stageable && (
+                <button
+                  type="button"
+                  className="admincopy__previewOpen"
+                  onClick={() => setPreview(group.id)}
+                >
+                  View real modal
+                </button>
+              )}
             </div>
-            <div className="admincopy__groupGrid">
+            <div className={stageable ? 'admincopy__groupGrid' : 'admincopy__groupGrid admincopy__groupGrid--plain'}>
               <div className="admincopy__fields">
                 {groupFields.map((f) => (
                   <Field
@@ -370,7 +376,7 @@ function Editor({ onDirty }) {
                   />
                 ))}
               </div>
-              <ModalPreview values={values} ids={ids} />
+              {stageable && <ModalPreview values={values} ids={ids} />}
             </div>
           </section>
         )

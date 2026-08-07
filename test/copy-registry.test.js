@@ -16,12 +16,86 @@ import {
   resolveCopy,
   sanitizeOverrides,
 } from '../src/copy/registry.js'
+import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
+import { CREDITS, creditLine, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 
-test('every field has a non-empty default within its own maxLength', () => {
+test('every field has a string default within its own maxLength', () => {
   for (const f of FIELDS) {
     assert.equal(typeof f.default, 'string', `${f.id} default is a string`)
-    assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
     assert.ok(f.default.length <= f.maxLength, `${f.id} default fits its maxLength`)
+  }
+})
+
+// The non-empty rule is REAL but it belongs to the fields the app renders
+// unconditionally: a consent modal with a blank title or a blank accept button
+// is a broken, unusable consent moment, so those defaults may never be empty.
+// The ballpark notes are the deliberate other case — BallparkCard renders the
+// paragraph only `&& note`, so an empty default means "no note yet", which is
+// the correct shipped state for a park nobody has written about. Splitting the
+// assertion keeps the strong guarantee exactly where it protects something.
+test('every unconditionally-rendered field has a non-empty default', () => {
+  for (const f of FIELDS) {
+    if (f.group === 'ballparks') continue
+    assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
+  }
+})
+
+test('ballpark notes ship empty, so no park carries prose nobody wrote', () => {
+  const notes = FIELDS.filter((f) => f.group === 'ballparks')
+  assert.ok(notes.length >= 30, 'every MLB park has a note field')
+  for (const f of notes) {
+    assert.equal(f.default, '', `${f.id} ships with no note`)
+    assert.equal(f.multiline, true, `${f.id} is a paragraph field`)
+  }
+})
+
+// The note ids are Redis field names. If BALLPARKS and the derived ids ever
+// drifted — a park renamed, a key normalized differently — the paragraph an
+// admin wrote would silently detach from the park it describes and the card
+// would go blank with no error anywhere. Pin the derivation to its source.
+test('every ballpark has exactly one note field, keyed off its canonical name', () => {
+  const parks = [...new Set(Object.values(BALLPARKS))]
+  const expected = parks.map((p) => `ballpark.${venueKey(p.name)}`).sort()
+  const actual = FIELDS.filter((f) => f.group === 'ballparks')
+    .map((f) => f.id)
+    .sort()
+  assert.deepEqual(actual, [...new Set(expected)].sort())
+  // 33 BALLPARKS keys collapse to 30 parks: the three alias names share a
+  // record, and must therefore share ONE editable note, not carry two.
+  assert.equal(actual.length, parks.length)
+  assert.ok(Object.keys(BALLPARKS).length > parks.length, 'alias keys exist to collapse')
+})
+
+// A note that has no photo beside it renders a lopsided hero row, and a photo
+// with no CREDITS entry would put the app out of CC BY-SA compliance. Both
+// tables are keyed the same way, so pin them to each other.
+test('every ballpark has a credited photo on file', () => {
+  for (const park of new Set(Object.values(BALLPARKS))) {
+    const key = venueKey(park.name)
+    const credit = CREDITS[key]
+    assert.ok(credit, `${park.name} has a photo credit`)
+    assert.ok(credit.artist, `${park.name} names its photographer`)
+    assert.ok(credit.license, `${park.name} states its licence`)
+    assert.ok(credit.source.startsWith('https://'), `${park.name} links its source`)
+  }
+})
+
+// creditLine is what actually satisfies the licence on screen. A CC BY / CC
+// BY-SA photo must name BOTH the author and the licence; public-domain and CC0
+// owe nothing, so they name the photographer only, as a courtesy.
+test('creditLine names the licence for every photo that requires it', () => {
+  assert.equal(
+    creditLine({ artist: 'Chris6d', license: 'CC BY-SA 4.0' }),
+    'Photo: Chris6d · CC BY-SA 4.0',
+  )
+  assert.equal(creditLine({ artist: 'Jeffme', license: 'CC0' }), 'Photo: Jeffme')
+  assert.equal(creditLine({ artist: 'Rick Berry', license: 'Public domain' }), 'Photo: Rick Berry')
+  assert.equal(creditLine(null), '')
+  for (const [key, credit] of Object.entries(CREDITS)) {
+    const line = creditLine(credit)
+    assert.ok(line.includes(credit.artist), `${key} credits its photographer on screen`)
+    const free = credit.license === 'CC0' || credit.license === 'Public domain'
+    assert.equal(line.includes(credit.license), !free, `${key} states its licence when obliged`)
   }
 })
 
