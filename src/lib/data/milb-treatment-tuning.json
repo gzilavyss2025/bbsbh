@@ -6,7 +6,8 @@
         "header": {
           "bar": "#022f63",
           "accent": "#a4aaaf",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.25
         },
         "position": {
           "scale": 1,
@@ -99,11 +100,12 @@
       "home": {
         "header": {
           "bar": "#98002e",
-          "accent": "#000000",
-          "onBar": "#F8F8F5"
+          "accent": "#cbb677",
+          "onBar": "#F8F8F5",
+          "markScale": 1.25
         },
         "position": {
-          "scale": 1.25,
+          "scale": 1.1,
           "offsetX": 0,
           "offsetY": 0,
           "bg": "#98002e",
@@ -124,10 +126,10 @@
       },
       "away": {
         "position": {
-          "scale": 1.25,
+          "scale": 1.1,
           "offsetX": 0,
           "offsetY": 0,
-          "bg": "#231f20",
+          "bg": "#cbb677",
           "pinstripe": false,
           "pinstripeBg": ""
         },
@@ -169,7 +171,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#d10c47",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -200,7 +203,8 @@
         "header": {
           "bar": "#00274c",
           "accent": "#fdb913",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.08,
@@ -270,7 +274,8 @@
         "header": {
           "bar": "#0054A4",
           "accent": "#B15C12",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -302,7 +307,8 @@
         "header": {
           "bar": "#002B5C",
           "accent": "#D31245",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.25
         },
         "wpaLayout": {
           "size": 37,
@@ -354,7 +360,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#f3901d",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -386,7 +393,8 @@
         "header": {
           "bar": "#005DAA",
           "accent": "#EF3E42",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.3
         },
         "wpaLayout": {
           "size": 65,
@@ -455,7 +463,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#d11242",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -505,7 +514,8 @@
         "header": {
           "bar": "#00274d",
           "accent": "#98002e",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -557,7 +567,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -608,7 +619,8 @@
         "header": {
           "bar": "#0067b1",
           "accent": "#b9e0f7",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -640,7 +652,8 @@
         "header": {
           "bar": "#d31245",
           "accent": "#002b5c",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         },
         "wpaLayout": {
           "size": 94,
@@ -716,14 +729,16 @@
         "header": {
           "bar": "#0A2240",
           "accent": "#FF4D00",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.4
         },
         "position": {
-          "scale": 0.99,
+          "scale": 1.2,
           "offsetX": -3,
           "offsetY": 0,
           "bg": "#fe8200",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 43,
@@ -738,11 +753,12 @@
       },
       "away": {
         "position": {
-          "scale": 0.99,
+          "scale": 1.2,
           "offsetX": -3,
           "offsetY": 0,
           "bg": "#FF4D00",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 43,
@@ -764,7 +780,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#79bde8",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.4
         },
         "position": {
           "scale": 1.13,
@@ -884,7 +901,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#d6e03e",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.55
         }
       },
       "away": {
@@ -934,7 +952,8 @@
         "header": {
           "bar": "#0b2340",
           "accent": "#0455ad",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.6
         }
       },
       "away": {
@@ -966,7 +985,8 @@
         "header": {
           "bar": "#151240",
           "accent": "#EC1B2B",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
         }
       }
     }
@@ -996,7 +1016,8 @@
         "header": {
           "bar": "#010101",
           "accent": "#FC4C02",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -1047,7 +1068,8 @@
         "header": {
           "bar": "#002d55",
           "accent": "#7bc143",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -1097,7 +1119,8 @@
         "header": {
           "bar": "#0b2b76",
           "accent": "#febe28",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -1145,7 +1168,8 @@
         "header": {
           "bar": "#0054A4",
           "accent": "#CE1141",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.25
         },
         "wpaWordmark": true
       },
@@ -1196,7 +1220,8 @@
         "header": {
           "bar": "#00285d",
           "accent": "#134a8e",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.4
         }
       },
       "away": {
@@ -1228,7 +1253,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#96c0e6",
-          "onBar": "#f8f8f5"
+          "onBar": "#f8f8f5",
+          "markScale": 1.5
         },
         "position": {
           "scale": 1.33,
@@ -1299,7 +1325,8 @@
         "header": {
           "bar": "#0071ce",
           "accent": "#c10230",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.1
         }
       },
       "away": {
@@ -1351,7 +1378,8 @@
         "header": {
           "bar": "#e31837",
           "accent": "#002b5c",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.1
         }
       },
       "away": {
@@ -1393,7 +1421,8 @@
         "header": {
           "bar": "#0D223F",
           "accent": "#73AA4F",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.15
         },
         "position": {
           "scale": 0.95,
@@ -1450,7 +1479,8 @@
         "header": {
           "bar": "#010101",
           "accent": "#da291c",
-          "onBar": "#fbf6e9"
+          "onBar": "#fbf6e9",
+          "markScale": 1.4
         }
       },
       "away": {
@@ -1483,7 +1513,8 @@
         "header": {
           "bar": "#b30838",
           "accent": "#ed174f",
-          "onBar": "#f8f8f5"
+          "onBar": "#f8f8f5",
+          "markScale": 1.3
         },
         "wpaLayout": {
           "size": 38,
@@ -1536,7 +1567,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#d31245",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -1587,7 +1619,8 @@
         "header": {
           "bar": "#002d56",
           "accent": "#fdb913",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -1637,7 +1670,8 @@
         "header": {
           "bar": "#d31245",
           "accent": "#002b5c",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -1687,7 +1721,8 @@
         "header": {
           "bar": "#d31245",
           "accent": "#ffd457",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -1717,11 +1752,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1,
+          "scale": 1.09,
           "offsetX": 4,
           "offsetY": 0,
           "bg": "#002A5C",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 86,
@@ -1736,17 +1772,19 @@
         "header": {
           "bar": "#002A5C",
           "accent": "#68ACDB",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.15
         },
         "wpaWordmark": true
       },
       "away": {
         "position": {
-          "scale": 1,
+          "scale": 1.09,
           "offsetX": 4,
           "offsetY": 0,
           "bg": "#68ACDB",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 87,
@@ -1769,7 +1807,8 @@
         "header": {
           "bar": "#e31b2c",
           "accent": "#231f20",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       }
     }
@@ -1781,7 +1820,8 @@
         "header": {
           "bar": "#005847",
           "accent": "#7ac143",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.1,
@@ -1851,7 +1891,8 @@
         "header": {
           "bar": "#0E3386",
           "accent": "#D12325",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -1893,7 +1934,8 @@
         "header": {
           "bar": "#b5121b",
           "accent": "#231f20",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -1935,7 +1977,8 @@
         "header": {
           "bar": "#00245d",
           "accent": "#ffc425",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -1987,7 +2030,8 @@
         "header": {
           "bar": "#006f51",
           "accent": "#bf311a",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -2031,7 +2075,8 @@
         "header": {
           "bar": "#00853f",
           "accent": "#231f20",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -2083,7 +2128,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#cfaa7a",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.4
         }
       },
       "away": {
@@ -2135,7 +2181,8 @@
         "header": {
           "bar": "#008265",
           "accent": "#8ac640",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.55
         }
       },
       "away": {
@@ -2185,7 +2232,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#e31837",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.05
         }
       },
       "away": {
@@ -2216,7 +2264,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#e44014",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.05
         },
         "position": {
           "scale": 0.88,
@@ -2264,9 +2313,9 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 1.1,
-          "offsetX": -7,
-          "offsetY": -4,
+          "scale": 0.95,
+          "offsetX": 0,
+          "offsetY": 0,
           "bg": "#00843D",
           "pinstripe": false,
           "pinstripeBg": ""
@@ -2284,14 +2333,15 @@
         "header": {
           "bar": "#008752",
           "accent": "#f68b1f",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.15
         }
       },
       "away": {
         "position": {
-          "scale": 1.1,
-          "offsetX": -7,
-          "offsetY": -4,
+          "scale": 0.95,
+          "offsetX": 0,
+          "offsetY": 0,
           "bg": "#f79e44",
           "pinstripe": false,
           "pinstripeBg": ""
@@ -2317,7 +2367,8 @@
         "header": {
           "bar": "#008265",
           "accent": "#62bb46",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         },
         "position": {
           "scale": 1,
@@ -2378,7 +2429,8 @@
         "header": {
           "bar": "#949ca1",
           "accent": "#0081c6",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.5
         }
       },
       "away": {
@@ -2429,7 +2481,8 @@
         "header": {
           "bar": "#005596",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.75
         }
       },
       "away": {
@@ -2478,7 +2531,8 @@
         "header": {
           "bar": "#012b5d",
           "accent": "#4f91ca",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -2526,7 +2580,8 @@
         "header": {
           "bar": "#00243A",
           "accent": "#CD2132",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.65
         }
       },
       "away": {
@@ -2576,7 +2631,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#d31145",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -2628,7 +2684,8 @@
         "header": {
           "bar": "#003d79",
           "accent": "#e31b23",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -2680,7 +2737,8 @@
         "header": {
           "bar": "#00814d",
           "accent": "#002d62",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -2732,7 +2790,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#f15d22",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -2773,7 +2832,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#00AEDB",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.05
         },
         "wpaWordmark": true
       },
@@ -2824,7 +2884,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#ef3e42",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -2856,7 +2917,8 @@
         "header": {
           "bar": "#c8102e",
           "accent": "#010101",
-          "onBar": "#f3f6e9"
+          "onBar": "#f3f6e9",
+          "markScale": 1.25
         },
         "position": {
           "scale": 0.93,
@@ -2923,7 +2985,8 @@
         "header": {
           "bar": "#d31245",
           "accent": "#002b5c",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -2976,7 +3039,8 @@
         "header": {
           "bar": "#004b8d",
           "accent": "#f47d30",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -3041,7 +3105,8 @@
         "header": {
           "bar": "#6b5ba7",
           "accent": "#002b5c",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.4
         }
       }
     }
@@ -3070,7 +3135,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#cfab7a",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         },
         "band": "#00244f"
       },
@@ -3106,7 +3172,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#fdb913",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.1,
@@ -3157,7 +3224,8 @@
         "header": {
           "bar": "#BA0C2F",
           "accent": "#cfab7a",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.15
         }
       }
     }
@@ -3187,7 +3255,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#ffc425",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -3237,7 +3306,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -3287,7 +3357,8 @@
         "header": {
           "bar": "#004b8d",
           "accent": "#6a737b",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -3337,7 +3408,8 @@
         "header": {
           "bar": "#003263",
           "accent": "#ce1141",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -3381,7 +3453,8 @@
         "header": {
           "bar": "#002448",
           "accent": "#e31837",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.1
         }
       },
       "away": {
@@ -3425,7 +3498,8 @@
         "header": {
           "bar": "#003366",
           "accent": "#840026",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -3476,7 +3550,8 @@
         "header": {
           "bar": "#073059",
           "accent": "#e31837",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -3508,7 +3583,8 @@
         "header": {
           "bar": "#454142",
           "accent": "#EE3124",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.3
         }
       }
     }
@@ -3539,7 +3615,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#adafb2",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.05
         }
       },
       "away": {
@@ -3570,11 +3647,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.96,
-          "offsetX": 8,
+          "scale": 1.07,
+          "offsetX": 0,
           "offsetY": 0,
           "bg": "#002c76",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -3589,16 +3667,18 @@
         "header": {
           "bar": "#004b8d",
           "accent": "#00a160",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.2
         }
       },
       "away": {
         "position": {
-          "scale": 0.96,
-          "offsetX": 8,
+          "scale": 1.07,
+          "offsetX": 0,
           "offsetY": 0,
           "bg": "#009a49",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -3638,7 +3718,8 @@
         "header": {
           "bar": "#326295",
           "accent": "#e0c398",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.1
         }
       },
       "away": {
@@ -3670,7 +3751,8 @@
         "header": {
           "bar": "#004A8D",
           "accent": "#B9976A",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.07,
@@ -3720,11 +3802,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.82,
-          "offsetX": -5,
-          "offsetY": 6,
-          "bg": "#e03a3e",
-          "pinstripe": false
+          "scale": 0.95,
+          "offsetX": -7,
+          "offsetY": -5,
+          "bg": "#e31837",
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -3735,20 +3818,22 @@
           "paddingY": 8,
           "rowShift": 0
         },
-        "band": "#e03a3e",
+        "band": "#e31837",
         "header": {
-          "bar": "#e03a3e",
-          "accent": "#fbb040",
-          "onBar": "#000000"
+          "bar": "#e31837",
+          "accent": "#cbccce",
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
         "position": {
-          "scale": 0.82,
-          "offsetX": -5,
-          "offsetY": 6,
+          "scale": 0.95,
+          "offsetX": -7,
+          "offsetY": -5,
           "bg": "#cbccce",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 55,
@@ -3768,11 +3853,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.87,
+          "scale": 1.05,
           "offsetX": -6,
-          "offsetY": 7,
+          "offsetY": 9,
           "bg": "#d10c47",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -3792,11 +3878,12 @@
       },
       "away": {
         "position": {
-          "scale": 0.87,
+          "scale": 1.05,
           "offsetX": -6,
-          "offsetY": 7,
+          "offsetY": 9,
           "bg": "#042e61",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 45,
@@ -3818,7 +3905,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#f26531",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         },
         "position": {
           "scale": 1.18,
@@ -3870,7 +3958,8 @@
         "header": {
           "bar": "#005596",
           "accent": "#e31837",
-          "onBar": "#fbf6e9"
+          "onBar": "#fbf6e9",
+          "markScale": 1.3
         },
         "position": {
           "scale": 0.95,
@@ -3941,7 +4030,8 @@
         "header": {
           "bar": "#004b8d",
           "accent": "#f47d30",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -3983,7 +4073,8 @@
         "header": {
           "bar": "#005596",
           "accent": "#e31937",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.05
         }
       },
       "away": {
@@ -4032,7 +4123,8 @@
         "header": {
           "bar": "#010101",
           "accent": "#00A3E0",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -4080,7 +4172,8 @@
         "header": {
           "bar": "#C8102E",
           "accent": "#071D49",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.25
         },
         "wpaWordmark": true
       },
@@ -4130,7 +4223,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#ef3e42",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -4161,7 +4255,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#FDB913",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.35
         },
         "position": {
           "scale": 1.16,
@@ -4215,7 +4310,8 @@
         "header": {
           "bar": "#002D62",
           "accent": "#ef3e42",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
         },
         "position": {
           "scale": 1.05,
@@ -4263,7 +4359,8 @@
         "header": {
           "bar": "#00549e",
           "accent": "#ad8505",
-          "onBar": "#fbf6e9"
+          "onBar": "#fbf6e9",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.18,
@@ -4321,7 +4418,8 @@
         "header": {
           "bar": "#00245d",
           "accent": "#005695",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         },
         "wpaLayout": {
           "size": 54,
@@ -4373,7 +4471,8 @@
         "header": {
           "bar": "#009A44",
           "accent": "#231f20",
-          "onBar": "#010101"
+          "onBar": "#010101",
+          "markScale": 1.3
         },
         "position": {
           "scale": 1.49,
@@ -4431,7 +4530,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#df7a1c",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.1
         }
       },
       "away": {
@@ -4462,9 +4562,9 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.83,
+          "scale": 0.92,
           "offsetX": 0,
-          "offsetY": 1,
+          "offsetY": 2,
           "bg": "#862633",
           "pinstripe": false,
           "pinstripeBg": ""
@@ -4483,15 +4583,16 @@
         "header": {
           "bar": "#8a2432",
           "accent": "#c49d6f",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.05
         }
       },
       "away": {
         "position": {
-          "scale": 0.83,
+          "scale": 0.92,
           "offsetX": 0,
-          "offsetY": 1,
-          "bg": "#010101",
+          "offsetY": 2,
+          "bg": "#c49d6f",
           "pinstripe": false,
           "pinstripeBg": ""
         },
@@ -4538,7 +4639,8 @@
         "header": {
           "bar": "#0C2340",
           "accent": "#236192",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.05
         }
       }
     }
@@ -4560,7 +4662,8 @@
         "header": {
           "bar": "#98002e",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -4603,7 +4706,8 @@
         "header": {
           "bar": "#492f92",
           "accent": "#231f20",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -4655,7 +4759,8 @@
         "header": {
           "bar": "#004990",
           "accent": "#79bde8",
-          "onBar": "#f8f8f5"
+          "onBar": "#f8f8f5",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -4688,7 +4793,8 @@
         "header": {
           "bar": "#b5121b",
           "accent": "#807f83",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.5
         },
         "position": {
           "scale": 1.14,
@@ -4750,7 +4856,8 @@
         "header": {
           "bar": "#081f2c",
           "accent": "#009cde",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.35
         }
       },
       "away": {
@@ -4800,7 +4907,8 @@
         "header": {
           "bar": "#005596",
           "accent": "#ffda02",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -4832,7 +4940,8 @@
         "header": {
           "bar": "#05173C",
           "accent": "#C90116",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
         }
       }
     }
@@ -4862,7 +4971,8 @@
         "header": {
           "bar": "#0a2240",
           "accent": "#b2b3aa",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -4911,7 +5021,8 @@
         "header": {
           "bar": "#00539f",
           "accent": "#000000",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         }
       },
       "away": {
@@ -4944,8 +5055,50 @@
         "header": {
           "bar": "#00285A",
           "accent": "#D21146",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.2
+        },
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#D0D0D0",
+          "pinstripe": true,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 31,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": {
+          "pinstripe": true,
+          "color": "rgba(0, 0, 0, 0.16)"
         }
+      },
+      "away": {
+        "position": {
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#9EA2A2",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 37,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 4,
+          "paddingY": 4,
+          "rowShift": 0
+        },
+        "band": "#D21146"
       }
     }
   },
@@ -4956,7 +5109,8 @@
         "header": {
           "bar": "#0C2340",
           "accent": "#FF6A14",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.1
         },
         "position": {
           "scale": 1.04,
@@ -5007,7 +5161,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#ef3e42",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         },
         "position": {
           "scale": 1.2,
@@ -5076,7 +5231,8 @@
         "header": {
           "bar": "#231f20",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.95
         }
       },
       "away": {
@@ -5116,7 +5272,8 @@
         "header": {
           "bar": "#002d5b",
           "accent": "#bfd22b",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         },
         "wpaLayout": {
           "size": 70,
@@ -5179,7 +5336,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#d31245",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -5230,7 +5388,8 @@
         "header": {
           "bar": "#002b5c",
           "accent": "#e31837",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.05
         }
       },
       "away": {
@@ -5280,7 +5439,8 @@
         "header": {
           "bar": "#002d62",
           "accent": "#e20177",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -5322,7 +5482,8 @@
         "header": {
           "bar": "#d31245",
           "accent": "#000000",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.25
         },
         "position": {
           "scale": 0.93,
@@ -5372,7 +5533,8 @@
         "header": {
           "bar": "#0067b1",
           "accent": "#e2b880",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.2
         },
         "wpaLayout": {
           "size": 44,
@@ -5412,7 +5574,8 @@
         "header": {
           "bar": "#003A70",
           "accent": "#00A9E0",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         }
       },
       "away": {
@@ -5436,7 +5599,8 @@
         "header": {
           "bar": "#082439",
           "accent": "#38C2CD",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.55
         },
         "position": {
           "scale": 1.16,
@@ -5505,7 +5669,8 @@
         "header": {
           "bar": "#002b5e",
           "accent": "#7ac143",
-          "onBar": "#ffffff"
+          "onBar": "#ffffff",
+          "markScale": 1.2
         }
       },
       "away": {
@@ -5554,7 +5719,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#f58b6d",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.25
         }
       },
       "away": {
@@ -5603,7 +5769,8 @@
         "header": {
           "bar": "#1a468c",
           "accent": "#92c1e9",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.3
         }
       },
       "away": {

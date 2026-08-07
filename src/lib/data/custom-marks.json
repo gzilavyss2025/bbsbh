@@ -1,11 +1,4 @@
 {
-  "105": {
-    "marks": [],
-    "assignments": {
-      "milb-home": "cdn:primary",
-      "milb-away": "cdn:primary"
-    }
-  },
   "108": {
     "marks": [
       {
@@ -33,10 +26,19 @@
       {
         "slug": "balcityconnect",
         "name": "balcityconnect"
+      },
+      {
+        "slug": "oriolesotherway",
+        "name": "oriolesotherway"
+      },
+      {
+        "slug": "oriolesos",
+        "name": "oriolesos"
       }
     ],
     "assignments": {
-      "city-connect-masthead": "balcityconnect"
+      "city-connect-masthead": "balcityconnect",
+      "main-masthead": "oriolesos"
     }
   },
   "113": {
@@ -82,7 +84,8 @@
       }
     ],
     "assignments": {
-      "city-connect-masthead": "colcityconnect"
+      "city-connect-masthead": "colcityconnect",
+      "main-masthead": "colcityconnect"
     }
   },
   "118": {
@@ -329,6 +332,13 @@
     }
   },
   "461": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
+  "477": {
     "marks": [],
     "assignments": {
       "milb-home": "cdn:primary",
