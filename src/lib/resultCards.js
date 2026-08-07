@@ -116,30 +116,61 @@ export function reorderGameOfTheNight(games, cardMetaByGamePk, isPinned = () => 
   return next
 }
 
+// Underway, by the same test the slate card's own LIVE pill uses
+// (GameCard.jsx) — so what the card says and where it sits can't disagree.
+const isLiveGame = (game) => game.abstractState === 'Live'
+
+// The stretch of the slate the two reorders below may rearrange: from behind a
+// pinned favorite (slot 0, which outranks every other draw) down to the first
+// Final. `games` is assumed to already be in sortGames' order, so a contiguous
+// run of `abstractState !== 'Final'` from the front marks that stretch. The
+// Finals are left alone on purpose — nothing there is still worth watching, so
+// no promotion may lift one above a game that is.
+function openBlock(games, isPinned) {
+  const finalIdx = games.findIndex((g) => g.abstractState === 'Final')
+  const end = finalIdx === -1 ? games.length : finalIdx
+  return { start: isPinned(games[0]) ? 1 : 0, end }
+}
+
+// Floats every game already underway above the ones that haven't thrown a
+// pitch — the slate's second tier, behind the favorite team's own game and
+// ahead of the national-TV grouping below. A game in progress is the thing a
+// second screen is FOR; a 7:05 national game that hasn't started is a plan.
+// Both groups keep their existing relative (start-time) order, so this only
+// ever moves a game across the live/scheduled line, never within a group.
+export function reorderLiveGames(games, isPinned = () => false) {
+  if (games.length === 0) return games
+  const { start, end } = openBlock(games, isPinned)
+  if (start >= end) return games
+  const active = games.slice(start, end)
+  const live = active.filter(isLiveGame)
+  if (live.length === 0 || live.length === active.length) return games
+  const scheduled = active.filter((g) => !isLiveGame(g))
+  return [...games.slice(0, start), ...live, ...scheduled, ...games.slice(end)]
+}
+
 // Promotes every nationally-broadcast game (GameSelect's nationalBroadcasts,
-// keyed by gamePk → network name) to sit right behind the favorite team's own
-// game — same anchor slot reorderGameOfTheNight uses, and for the same reason:
-// a pinned favorite outranks any other draw. Unlike the crown (always exactly
-// one game, promoted from anywhere in the slate), a day can have several
-// national games, so this stably groups all of them together in their
-// existing relative (start-time) order rather than picking just one.
+// keyed by gamePk → network name) to the front of the games that HAVEN'T
+// STARTED — the slate's third tier. Unlike the crown (always exactly one game,
+// promoted from anywhere in the slate), a day can have several national games,
+// so this stably groups all of them together in their existing relative
+// (start-time) order rather than picking just one.
 //
-// Confined to the STILL-PLAYING games sortGames already floated above the
-// Finals — a national Final shouldn't leapfrog a game still worth watching
-// live just because it happened to air on FOX. `games` is assumed already in
-// sortGames' order (non-final block first, so a contiguous run of
-// `abstractState !== 'Final'` from the front marks that block).
+// It may not touch the live games above it: airing on FOX is a reason to pick
+// this game over that one tonight, not a reason to outrank a game already in
+// the sixth inning. `games` is assumed to have been through reorderLiveGames
+// already, so the live block is the contiguous run at the front of
+// openBlock's stretch and skipping it is what confines this to the scheduled
+// games.
 export function reorderNationalBroadcasts(games, nationalByGamePk, isPinned = () => false) {
   if (!nationalByGamePk || games.length === 0) return games
-  const finalIdx = games.findIndex((g) => g.abstractState === 'Final')
-  const activeEnd = finalIdx === -1 ? games.length : finalIdx
-  const target = isPinned(games[0]) ? 1 : 0
-  if (target >= activeEnd) return games
-  const head = games.slice(0, target)
-  const active = games.slice(target, activeEnd)
-  const rest = games.slice(activeEnd)
-  const national = active.filter((g) => !!nationalByGamePk[g.gamePk])
+  const { start, end } = openBlock(games, isPinned)
+  let from = start
+  while (from < end && isLiveGame(games[from])) from += 1
+  if (from >= end) return games
+  const scheduled = games.slice(from, end)
+  const national = scheduled.filter((g) => !!nationalByGamePk[g.gamePk])
   if (national.length === 0) return games
-  const others = active.filter((g) => !nationalByGamePk[g.gamePk])
-  return [...head, ...national, ...others, ...rest]
+  const others = scheduled.filter((g) => !nationalByGamePk[g.gamePk])
+  return [...games.slice(0, from), ...national, ...others, ...games.slice(end)]
 }

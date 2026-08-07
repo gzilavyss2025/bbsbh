@@ -24,7 +24,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | copy-registry.test.js | 22 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026) |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
-| day-highlights.test.js | 35 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) |
+| day-highlights.test.js | 46 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) + the slate's four display tiers (favorite → live → national scheduled → rest) |
 | derive-live-state.test.js | 9 | src/api/playbyplay.js | Core spoiler-safe HUD state (cap, bases, batterDone) |
 | dev-custom-marks.test.js | 3 | scripts/lib/dev-custom-marks.mjs | Dev-only recolored-mark lab (ADR-0029) |
 | dev-data-stores.test.js | 24 | scripts/lib/dev-data-stores.mjs | Dev-lab data-store validators/allowlists |
