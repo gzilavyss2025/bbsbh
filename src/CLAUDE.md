@@ -259,6 +259,13 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   `StampGameButton.jsx` renders **inside** the box score's `SealBox` reveal
   render function (`screens/BoxScore.jsx`), which is what puts a stamp out of
   reach until you open the box score — ADR-0002 again, used a third time. That
+  gate is the render **function**, not a position on the page: the affordance is
+  a thin strip across the HEAD of the revealed sheet (ADR-0035's third
+  amendment), and it stays ONE row — mount, a line of copy, one action — with
+  everything a minted stamp additionally offers behind its `Details` disclosure.
+  Its two positions are CSS, not two renders: first child of the Highlights
+  section, with `48-stamp-strip.css` floating that section's title and the
+  R/H/E/LOB totals above it below the wide breakpoint. That
   host `SealBox` still has **no
   `onReveal` and persists nothing**, and must stay that way: give it one and a
   box score opened under the Scores Unlocked pass would silently ratchet the

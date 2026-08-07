@@ -320,6 +320,20 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, wi
   return (
     <div className="bs">
       <section className="bs__section">
+        {/* The Logbook stamp, first thing on the sheet. It used to sit at the
+            very bottom, on the reasoning that a keepsake is not a headline —
+            which made the one thing here you can KEEP the one thing you had to
+            scroll a whole box score to find. It is now a thin strip across the
+            head of the page, and it is ONE element ordered two ways rather than
+            two renders: on a wide screen it sits above this section's
+            HIGHLIGHTS rule (its natural DOM position), and on a phone the flex
+            `order` rules in styles/48-stamp-strip.css float that title and the
+            R/H/E/LOB totals above it so it lands directly under the score.
+            Everything about why it is safe here — and only here — is in
+            StampGameButton.jsx's header: it renders inside this page's SealBox
+            reveal render, which is the whole client-side guarantee, and that is
+            a render-function boundary, not a position on the page. */}
+        <StampGameButton game={stampFacts} />
         <h2 className="bs__sectionTitle">Highlights</h2>
         {/* The duo/col wrappers are transparent on a phone (display: contents
             — everything keeps stacking in this order on .bs__section's own
@@ -406,14 +420,6 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, wi
         </div>
         <GameInfo rows={box.footNotes} />
       </section>
-
-      {/* The Logbook stamp, last on the page — you finish reading the sheet,
-          then you keep the game. Deliberately NOT above the box score: it is a
-          keepsake, not a headline, and the sheet is what you came for.
-          Everything about why it is safe here (and only here) is in
-          StampGameButton.jsx's header — it renders inside this page's SealBox
-          reveal render, which is the whole client-side guarantee. */}
-      <StampGameButton game={stampFacts} />
 
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>

@@ -23,7 +23,7 @@ test('a stamp is absent from the DOM until the box score seal is tapped', async 
   await page.goto(`${GAME}/boxscore`)
 
   await expect(page.locator('.gamestamp')).toHaveCount(0)
-  await expect(page.locator('.stampcard')).toHaveCount(0)
+  await expect(page.locator('.stampstrip')).toHaveCount(0)
   // Belt and braces: the affordance's own copy must not be in the markup
   // either, which catches a rendered-then-hidden regression that a class
   // rename would slip past.
@@ -31,7 +31,7 @@ test('a stamp is absent from the DOM until the box score seal is tapped', async 
 
   await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
 
-  await expect(page.locator('.stampcard')).toHaveCount(1)
+  await expect(page.locator('.stampstrip')).toHaveCount(1)
   await expect(page.locator('.gamestamp')).toHaveCount(1)
 })
 
@@ -48,8 +48,11 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
   await expect(mint).toBeVisible()
   await mint.click()
 
-  // Minted: the card switches to its stamped face.
-  await expect(page.getByRole('button', { name: 'Remove stamp' })).toBeVisible()
+  // Minted: the strip switches to its stamped face. The row itself only ever
+  // offers the way into the book — everything a stamp you already HAVE can do
+  // sits behind Details, which is what keeps the strip one row tall (see
+  // StampGameButton.jsx), so un-stamping is reached through it below.
+  await expect(page.getByRole('button', { name: 'Place it in your book' })).toBeVisible()
 
   // The collection page resolves this game's facts itself (api/logbook.js) —
   // signed out, there is no server to ask, which is the whole local-first
@@ -62,6 +65,7 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
   // keepsake, deliberately NOT ratcheted the way revealedThrough is.
   await page.goto(`${GAME}/boxscore`)
   await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
+  await page.getByRole('button', { name: 'Details' }).click()
   await page.getByRole('button', { name: 'Remove stamp' }).click()
   await expect(page.getByRole('button', { name: 'Stamp this game' })).toBeVisible()
 
@@ -85,7 +89,7 @@ test('the Game Log retrospective counts your stamps, and nothing else', async ({
   await page.goto(`${GAME}/boxscore`)
   await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
   await page.getByRole('button', { name: 'Stamp this game' }).click()
-  await expect(page.getByRole('button', { name: 'Remove stamp' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Place it in your book' })).toBeVisible()
 
   await page.goto('/logbook/stats')
   const games = page.locator('.logbookstats__tally').first().locator('strong').first()

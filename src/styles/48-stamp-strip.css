@@ -1,0 +1,293 @@
+/* ====================================================== the mint strip
+   The Game Log's mint affordance, across the head of a revealed box score
+   (ADR-0035). Its own partial rather than a section of 48-logbook.css: that
+   file is the stamp INK plus the collection page, this is one component with
+   its own two-breakpoint layout and its own placement rules, and together they
+   ran the file past its size budget (ADR-0038). Loaded straight after it, so
+   `.gamestamp`'s sizing/ink is already in the cascade when these rules land.
+
+   A band the width of the sheet, about one stamp tall: mount, a line of copy,
+   one action. It replaced a 300–500px card that sat at the FOOT of the page;
+   StampGameButton.jsx's header records why the keepsake moved to the top and
+   why the row has to stay one row.
+   ====================================================== */
+
+/* Grid rather than flex so ONE markup serves both widths: on a phone the
+   action drops beneath the copy and the mount spans both rows; from the wide
+   breakpoint the three sit in a single row. */
+.stampstrip {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+.stampstrip__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    'mount say'
+    'mount do';
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Nothing to offer — the game isn't final, or the season's book is full. The
+   second row goes away rather than sitting empty under the copy. */
+.stampstrip__row--quiet {
+  grid-template-areas: 'mount say';
+}
+
+/* The mount: an album hinge. Solid well once a stamp is pressed into it,
+   dashed and empty until then. Sized in the box, not on the stamp — .gamestamp
+   is width:100%/height:auto, so the padding sets how much air it keeps. */
+.stampstrip__mount {
+  grid-area: mount;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  padding: var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+}
+
+.stampstrip__mount--empty {
+  border-style: dashed;
+  background: transparent;
+}
+
+/* Un-stamped, the stamp is a preview of what you'd keep — pale, like an
+   un-inked die. Once minted it comes up to the winner's full ink. Paler than
+   the old card's 0.5 would leave it unreadable at this size: the preview is a
+   third of the width it used to be, so it needs the ink back to still read as
+   a stamp rather than a smudge. */
+.stampstrip__mount--empty .gamestamp {
+  color: var(--graphite-soft);
+  opacity: 0.7;
+}
+
+.stampstrip__say {
+  grid-area: say;
+  min-width: 0;
+}
+
+.stampstrip__eyebrow {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+
+.stampstrip__lede {
+  margin: 0;
+  padding: 0;
+  max-width: 64ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+.stampstrip__lede--full {
+  color: var(--accent-negative);
+}
+
+.stampstrip__do {
+  grid-area: do;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* A quiet disclosure rather than a button: everything behind it is a second
+   thought about a stamp you already have. It sits INLINE at the end of the
+   lede (StampGameButton.jsx), so it is sized to the sentence — no min-height,
+   which in an inline-flex would stretch the line box it shares with the copy.
+   `position: relative` is only here to anchor the hit area below. */
+.stampstrip__disclose {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* The tap target, grown off the glyphs rather than out of the text flow: the
+   control reads at caption size beside the copy, but answers to a thumb at the
+   --tap-min the rest of the app promises. */
+.stampstrip__disclose::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-2) * -1);
+  right: calc(var(--space-2) * -1);
+  top: 50%;
+  height: var(--tap-min);
+  transform: translateY(-50%);
+}
+
+.stampstrip__disclose:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.stampstrip__details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+
+.stampstrip__modes {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.stampstrip__modes button {
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+}
+
+.stampstrip__modes button.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.stampstrip__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 200px;
+  min-width: 0;
+  max-width: 320px;
+}
+
+.stampstrip__notelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.stampstrip__note input {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-canvas);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+.stampstrip__note input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.stampstrip__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.stampstrip__remove {
+  border: 0;
+  background: none;
+  padding: var(--space-1) var(--space-2);
+  color: var(--accent-negative);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-decoration: underline;
+}
+
+.stampstrip__remove:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* One row from the wide breakpoint up. Kept in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js and with 25-wide-layout.css's own 740px. */
+@media (min-width: 740px) {
+  .stampstrip__row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'mount say do';
+    column-gap: var(--space-5);
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .stampstrip__row--quiet {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: 'mount say';
+  }
+
+  .stampstrip__mount {
+    width: 74px;
+    height: 74px;
+  }
+
+  .stampstrip__details {
+    padding-left: var(--space-5);
+    padding-right: var(--space-5);
+  }
+}
+
+/* ---- where the strip lands in the box score ----------------------------
+   The strip is the FIRST child of the Highlights section in the DOM
+   (BoxScore.jsx), which is where it belongs on a wide screen: a band across
+   the head of the sheet, above that section's own HIGHLIGHTS rule. Nothing
+   below the breakpoint is needed for that — DOM order already says it — so
+   there is deliberately no min-width half to this pair.
+
+   On a phone the ask is different: the strip should be the first thing after
+   the R/H/E/LOB totals. The two live in different wrappers, so `order` is what
+   reconciles them rather than a second render of the component, and it works
+   for one reason — .bs__duo/.bs__col are `display: contents` below the wide
+   breakpoint (25-wide-layout.css), so LineTotals' card is itself a flex item
+   of .bs__section, in the same ordering context as the title and the strip.
+
+   Only these two move. The strip and everything under it stay at the default
+   order 0, where DOM order decides, so the strip lands third and the rest of
+   Highlights follows it untouched. */
+@media (max-width: 739.98px) {
+  .bs__sectionTitle {
+    order: -2;
+  }
+
+  .bs__totalsCard {
+    order: -1;
+  }
+}
