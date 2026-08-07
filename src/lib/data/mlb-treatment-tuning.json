@@ -221,9 +221,9 @@
           "primary": "#5A8D84"
         },
         "header": {
-          "bar": "#5A8D84",
+          "bar": "#48776f",
           "accent": "#0A0A0A",
-          "onBar": "#0A0A0A"
+          "onBar": "#FFFFFF"
         }
       }
     }

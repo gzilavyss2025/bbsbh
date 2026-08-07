@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
 import { cityConnectMastheadUrl } from '../../../lib/teams.js'
 import { HeaderBarMock, HeaderFields, UmpireCall } from '../editors/HeaderPreview.jsx'
+import { MastheadMarkEditor } from '../editors/MastheadMarkEditor.jsx'
 import { LogoDropZone } from '../LogoDropZone.jsx'
 import { MarkImage } from './MarkImage.jsx'
 
@@ -21,24 +22,44 @@ export function TwoBarsPanel({ units, onHover, onSelectWearer }) {
     <section className="idlab__bars" aria-label="Header bars">
       <p className="idlab__barslead">Header bars — every jersey wears one of these.</p>
       <div className="idlab__barsrow">
+        {/* Keyed by club as well as slot: a unit now holds per-club state of its
+            own (a fresh upload's cache-buster, the mark panel's pending
+            preview), and re-using one instance across a club switch would carry
+            the previous club's answers into the new one's bar. */}
         {units.map((unit) => (
-          <BarUnit key={unit.slot} unit={unit} onHover={onHover} onSelectWearer={onSelectWearer} />
+          <BarUnit
+            key={`${unit.teamId}-${unit.slot}`}
+            unit={unit}
+            onHover={onHover}
+            onSelectWearer={onSelectWearer}
+          />
         ))}
       </div>
     </section>
   )
 }
 
-// The City Connect bar's own escape hatch: a club may drop in its own PNG
-// for the mark that bar's mastheads draw (teams.js's cityConnectMastheadUrl),
-// in place of the club-wide knockout mark every other bar still shares. Bumps
-// on every successful upload so the mock re-fetches the just-written bytes
-// instead of a stale browser cache of the same URL — same `?v=` trick
-// JerseyBench's own art uploads use.
+// The City Connect bar's own escape hatch, in TWO forms, both editable here
+// because both are judged against this exact bar: a club may drop its own PNG
+// on the mock, or paste SVG source into the mark panel at the foot of this
+// unit (ADR-0031's second amendment and its addendum). Either replaces the mark
+// that bar's mastheads draw (teams.js's cityConnectMastheadUrl), in place of the
+// club-wide knockout mark every other bar still shares.
+//
+// `mastheadVersion` bumps on every successful UPLOAD so the mock re-fetches the
+// just-written bytes instead of a stale browser cache of the same URL — the same
+// `?v=` trick JerseyBench's own art uploads use. A paste never needs it: a saved
+// mark lands at a URL nothing has requested before.
+//
+// The panel reports what IT is responsible for — a paste in progress, or the
+// library mark this bar now wears — and this unit draws that ahead of its own
+// resolution. Each owns one rung, so a fresh upload's `?v=` can't be lost behind
+// a panel that answers for the same URL without one.
 function BarUnit({ unit, onHover, onSelectWearer }) {
   const { header } = unit
   const isCityConnect = unit.slot === 'city-connect'
   const [mastheadVersion, setMastheadVersion] = useState(0)
+  const [panelOverride, setPanelOverride] = useState(null)
   const rawMastheadUrl = isCityConnect ? cityConnectMastheadUrl(unit.teamId) : null
   const mastheadUrl =
     rawMastheadUrl && mastheadVersion > 0 ? `${rawMastheadUrl}?v=${mastheadVersion}` : rawMastheadUrl
@@ -49,7 +70,7 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
       name={unit.name}
       colors={header.colors}
       unset={header.unset}
-      overrideUrl={mastheadUrl}
+      overrideUrl={panelOverride ?? mastheadUrl}
     />
   )
 
@@ -128,6 +149,20 @@ function BarUnit({ unit, onHover, onSelectWearer }) {
 
       <HeaderFields rawColors={header.rawColors} onField={header.onField} />
       <UmpireCall contrast={header.contrast} />
+
+      {/* Last in the unit, not between the bar and its strings: those strings
+          hang off the bar's bottom edge and that connection is the panel's own
+          idea. The mark it edits still previews on the bar at the top of this
+          card, which is the whole reason it lives in here. */}
+      {isCityConnect && (
+        <MastheadMarkEditor
+          key={`ccmark-${unit.teamId}`}
+          teamId={unit.teamId}
+          name={unit.name}
+          cityConnect={{ colors: header.colors, unset: header.unset }}
+          onPreview={setPanelOverride}
+        />
+      )}
     </div>
   )
 }

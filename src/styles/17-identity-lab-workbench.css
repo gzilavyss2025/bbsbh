@@ -223,8 +223,7 @@
    fitting on one line — wrap them rather than letting the heading crush into a
    two-line stack beside a squeezed button. */
 .idlab__monoink .colorlab__wpapreviewhead,
-.idlab__recolor .colorlab__wpapreviewhead,
-.idlab__mastheadmark .colorlab__wpapreviewhead {
+.idlab__recolor .colorlab__wpapreviewhead {
   flex-wrap: wrap;
 }
 
@@ -233,9 +232,7 @@
    screens/identity-lab/editors/LogoRecolorEditor.jsx. */
 .idlab__monoink,
 .idlab__recolor,
-.idlab__mastheadmark,
-.idlab__stampplace,
-.idlab__stampink {
+.idlab__stampplace {
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -251,19 +248,17 @@
   margin-top: var(--space-4);
 }
 
-/* Stamp ink — one preview stamp beside its one field, unlike placement's two
-   side-by-side slots: there's one ink for the whole club, not one per side.
-   screens/identity-lab/editors/StampInkEditor.jsx. */
-.idlab__stampink {
-  margin-top: var(--space-4);
-}
-
+/* Stamp ink — the FOOT of the placement card, not a card of its own: one ink
+   for the whole club, judged on the two previews above it (which the draft hex
+   recolours live) rather than on a third stamp that agreed with neither.
+   A hairline rule separates it from those previews, the same way the City
+   Connect mark panel separates itself inside its bar unit — a raised panel
+   inside a raised panel reads as a second card.
+   screens/identity-lab/editors/StampPlacementEditor.jsx. */
 .idlab__stampinkrow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  align-items: center;
-  margin-top: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 .idlab__stampinkfield {

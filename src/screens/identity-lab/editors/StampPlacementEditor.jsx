@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { GameStamp } from '../../../components/logbook/GameStamp.jsx'
 import { CopyIconButton } from '../../../components/ui/CopyBox.jsx'
+import { contrastRatio } from '../../../lib/contrast.js'
 import { hasMonoLogo } from '../../../lib/teams.js'
 import {
   MARK_PLACEMENT_DEFAULT,
@@ -8,7 +9,10 @@ import {
   MARK_SIDES,
   resolveMarkPlacement,
 } from '../../../lib/stampArt.js'
+import { STAMP_PAPER, deepenToContrast, isHex } from '../../../lib/stampInk.js'
+import { stampInkOverrideFor, stampInkStore } from '../../../lib/stampInkTuning.js'
 import { stampLogoTuningRecord, stampLogoTuningStore } from '../../../lib/stampLogoTuning.js'
+import { HexField } from '../HexField.jsx'
 import { saveStores } from '../saveStores.js'
 import { shiftStepKeys } from './numberSteps.js'
 
@@ -44,6 +48,20 @@ import { shiftStepKeys } from './numberSteps.js'
 // and placed in other people's passport books. That is the intended behaviour
 // (one club, one placement, forever), not a bug, but it is why the fields clamp
 // and why the reference preview is worth trusting before you save.
+//
+// THE CLUB'S STAMP INK LIVES HERE TOO, at the foot of the same card, and used
+// to be a card of its own with a third preview stamp on it. One card, because
+// both questions are asked of the same two stamps and answered by looking at
+// them: the draft hex rides straight into BOTH previews above as GameStamp's
+// `inkOverride`, so a colour is judged on the same art whose placement is being
+// judged rather than on a third stamp that agreed with neither. Two stores, two
+// Save buttons, two "applies retroactively" warnings — deliberately not merged,
+// because they are genuinely separate files and separate decisions.
+//
+// The ink is walked through `deepenToContrast` before it reaches the art
+// (src/lib/stampInk.js); the "as pressed" line reports what actually prints
+// when that differs from what was typed, so a light pick doesn't quietly turn
+// into a different colour with no explanation.
 
 const FIELDS = [
   { key: 'scale', label: 'Scale' },
@@ -75,6 +93,7 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
   // this per club with a `key`).
   const [edited, setEdited] = useState(null)
   const [saveState, setSaveState] = useState(null)
+  const ink = useStampInk(teamId, name, setSaveState)
 
   const landed = useMemo(
     () => Object.fromEntries(MARK_SIDES.map((side) => [side, resolveMarkPlacement(stampLogoTuningRecord(teamId, side))])),
@@ -123,11 +142,17 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
     )
   }
 
+  // No mark to PLACE — but the club still has a stamp, drawn with its bold
+  // abbreviation, and that stamp still presses in an ink. So the ink row stays
+  // rather than disappearing along with the two placement previews.
   if (!hasMonoLogo(teamId)) {
     return (
       <Panel>
-        No knockout mark on file for this club, so a stamp draws its bold abbreviation instead — there is
-        nothing here to place. Generate the mark first (scripts/gen-mono-logos.mjs).
+        <p className="idlab__monoinkhint">
+          No knockout mark on file for this club, so a stamp draws its bold abbreviation instead — there is
+          nothing here to place. Generate the mark first (scripts/gen-mono-logos.mjs).
+        </p>
+        <StampInkRow ink={ink} />
       </Panel>
     )
   }
@@ -162,11 +187,14 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
             values={placement[side]}
             landed={landed[side]}
             placements={placement}
+            inkOverride={ink.rawHex}
             onField={(field, value) => setField(side, field, value)}
             onReset={() => resetSide(side)}
           />
         ))}
       </div>
+
+      <StampInkRow ink={ink} />
 
       {saveState && (
         <p className={`colorlab__logodropmsg colorlab__logodropmsg--${saveState.kind === 'busy' ? 'note' : saveState.kind}`}>
@@ -181,7 +209,7 @@ export function StampPlacementEditor({ teamId, name, abbreviation }) {
 // it there. The stamp is drawn with BOTH sides' current values, so the pair of
 // panels shows the same two decisions from each end rather than two independent
 // mock-ups.
-function SidePanel({ side, teamId, name, abbreviation, values, landed, placements, onField, onReset }) {
+function SidePanel({ side, teamId, name, abbreviation, values, landed, placements, inkOverride, onField, onReset }) {
   const club = { id: teamId, abbreviation, runs: 4 }
   const game = {
     ...PREVIEW_GAME,
@@ -201,10 +229,14 @@ function SidePanel({ side, teamId, name, abbreviation, values, landed, placement
       </div>
 
       <div className="idlab__stampplaceart">
+        {/* The ink draft rides in here too, so typing a hex below recolours
+            both of these before anything is saved — the same "the preview is
+            the real art" discipline the placements already keep. */}
         <GameStamp
           game={game}
           instanceId={`idlab-${teamId}-${side}`}
           placements={placements}
+          inkOverride={inkOverride}
           title={`${name} in a stamp's ${SIDE_SLOT_PHRASE[side]}`}
         />
       </div>
@@ -256,7 +288,115 @@ function Panel({ children }) {
       <div className="colorlab__wpapreviewhead">
         <span className="colorlab__wpapreviewlabel">Stamp placement</span>
       </div>
-      <p className="idlab__monoinkhint">{children}</p>
+      {children}
     </section>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Stamp ink — which colour this club's stamp presses in when it wins, the
+// hand-picked override of the automatic pick ADR-0036's addendum computes (the
+// winner's darkest brand colour). Exists for the clubs whose automatic answer
+// isn't the one they want: the darkest thing a club owns is a defensible
+// default, not always the club's own idea of what "its" ink looks like.
+//
+// A hook plus a row rather than its own component file, because the card it
+// belongs to is this one — see this module's header for why the two questions
+// share one pair of previews. The state is lifted so those previews can read
+// the draft; `report` is the host's own save-message setter, so both stores'
+// results land in the one message line at the foot of the card.
+// ---------------------------------------------------------------------------
+
+function useStampInk(teamId, name, report) {
+  // `edited` stays null until something is actually typed or Reset is clicked,
+  // so the landed value is the baseline rather than a copy of it — the same
+  // "null means untouched" contract every other editor here keeps, made safe
+  // the same way (ClubWorkbench mounts the host per club with a `key`).
+  const landed = stampInkOverrideFor(teamId)
+  const [edited, setEdited] = useState(null)
+
+  const rawHex = edited ?? landed ?? ''
+  const dirty = edited !== null && edited !== (landed ?? '')
+  // What actually prints, or null while the field is empty/mid-edit and not yet
+  // a real hex — the automatic pick isn't computed here (GameStamp does that
+  // itself when `inkOverride` is blank), so this only ever describes a DRAFT and
+  // never claims to speak for the automatic answer.
+  const pressed = isHex(rawHex) ? deepenToContrast(rawHex, STAMP_PAPER) : null
+  const contrast = pressed ? contrastRatio(pressed, STAMP_PAPER) : null
+  const wasDeepened = pressed !== null && pressed.toUpperCase() !== rawHex.toUpperCase() // caps-js-exempt: hex compare, not display text
+
+  function onField(value) {
+    setEdited(value)
+    report(null)
+  }
+
+  function reset() {
+    setEdited('')
+    report(null)
+  }
+
+  async function save() {
+    report({ kind: 'busy', text: 'Saving ink' })
+    const store = structuredClone(stampInkStore())
+    const key = String(teamId)
+    if (isHex(rawHex)) store[key] = rawHex
+    else delete store[key]
+
+    const ok = await saveStores([{ key: 'stamp-ink', body: store }])
+    report(
+      ok
+        ? { kind: 'ok', text: 'ink saved — every stamp this club wins redraws from it' }
+        : { kind: 'error', text: 'could not write stamp-ink.json — is `npm run dev` running?' },
+    )
+  }
+
+  return { rawHex, dirty, pressed, contrast, wasDeepened, onField, reset, save, copyText: inkCopyText(name, teamId, rawHex) }
+}
+
+function StampInkRow({ ink }) {
+  return (
+    <div className="idlab__stampinkrow">
+      <div className="colorlab__wpapreviewhead">
+        <span className="colorlab__wpapreviewlabel">Stamp ink</span>
+        <span className="idlab__monoinkhint">
+          {ink.rawHex ? 'Custom' : 'Automatic — winner’s darkest brand colour'}
+        </span>
+        <CopyIconButton text={ink.copyText} label="Copy this club's stamp-ink context" />
+        <button type="button" className="colorlab__wparesetbtn" onClick={ink.reset} disabled={!ink.rawHex}>
+          Reset to automatic
+        </button>
+        <button type="button" className="colorlab__wparesetbtn" onClick={ink.save} disabled={!ink.dirty}>
+          Save ink
+        </button>
+      </div>
+
+      <div className="idlab__stampinkfield">
+        <label>
+          <span>Ink</span>
+          <HexField placeholder="automatic" value={ink.rawHex} onChange={ink.onField} />
+        </label>
+        {ink.pressed && (
+          <p className="idlab__monoinkhint">
+            As pressed: <code>{ink.pressed}</code>
+            {ink.wasDeepened ? ' (deepened for contrast)' : ''} — {ink.contrast.toFixed(2)}:1 on stamp paper
+          </p>
+        )}
+      </div>
+
+      <p className="idlab__stampplacewarn">
+        Applies to every stamp this club wins, including ones already minted — still walked through the same
+        contrast floor the automatic pick uses, so a light colour still prints legibly if it needs to darken.
+      </p>
+    </div>
+  )
+}
+
+// The same snippet every other editor's copy icon produces: which club, which
+// file, and the value to land there.
+function inkCopyText(name, teamId, rawHex) {
+  return (
+    `Team: ${name} (id ${teamId})\n` +
+    `Where: src/lib/data/stamp-ink.json\n` +
+    (rawHex ? `"${teamId}": "${rawHex}"` : `(no override — automatic)`)
   )
 }

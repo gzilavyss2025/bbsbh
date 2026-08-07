@@ -238,8 +238,11 @@ Two smaller changes to the same stamp, neither touching the reveal gate.
 The winner's-darkest-brand-colour pick above is a good DEFAULT, not a promise
 that every club agrees with what "its" ink looks like. `src/lib/data/stamp-ink.json`
 now lets a club override it with a hex of its own choosing, picked in
-`/identity-lab`'s Stamp ink editor (`StampInkEditor.jsx`) and read at render
-time by `stampInkFor`'s new `overrideHex` option (`src/lib/stampInk.js`).
+`/identity-lab`'s Stamp ink row — the foot of its Stamp placement card
+(`StampPlacementEditor.jsx`; it had a card of its own until the two questions
+were merged onto the one pair of previews they are both judged against) — and
+read at render time by `stampInkFor`'s `overrideHex` option
+(`src/lib/stampInk.js`).
 
 The override does **not** exempt a club from the contrast floor argued for
 above — `deepenToContrast` still runs on it. That floor is a fact about what a

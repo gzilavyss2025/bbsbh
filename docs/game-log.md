@@ -346,7 +346,8 @@ the geometry is pure math in `src/lib/stampArt.js` (unit-tested), the ink in
 `src/lib/stampInk.js`, and per-club mark placement in `src/lib/stampLogoTuning.js`
 — tunable from the Identity Lab. The ink defaults to the winning club's darkest
 brand colour but a club may override it (`src/lib/stampInkTuning.js` +
-`src/lib/data/stamp-ink.json`, tuned from the Identity Lab's Stamp ink editor),
+`src/lib/data/stamp-ink.json`, tuned from the Stamp ink row at the foot of the
+Identity Lab's Stamp placement card),
 still walked through the same contrast floor either way (ADR-0036). **A stamp
 stores the game, never the art**, so it redraws from those numbers every time:
 retuning a club restyles every stamp of it already sitting in every user's

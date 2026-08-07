@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { monoLogoParts, monoLogoPickerSvg, monoLogoSvg } from '../../../lib/logoMono.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
-import { CITY_CONNECT_MASTHEAD_KEY, cityConnectMastheadUrl } from '../../../lib/teams.js'
+import { CITY_CONNECT_MASTHEAD_KEY } from '../../../lib/teams.js'
 import { HexField } from '../HexField.jsx'
-import { HeaderBarMock } from './HeaderPreview.jsx'
 import { ShapeInkPicker, flipVerdict } from './ShapeInkPicker.jsx'
 import { assignCustomMark, saveCustomMark } from '../saveStores.js'
 
@@ -67,6 +66,13 @@ function inkChoices(colors) {
   ]
 }
 
+// Whether a quick-pick swatch is the ink currently in the field. Two hex
+// strings, compared case-blind because the field is typed by hand and the
+// swatches are literals here.
+function sameHex(a, b) {
+  return String(a ?? '').toLowerCase() === String(b ?? '').toLowerCase() // caps-js-exempt — hex values, not rendered text
+}
+
 // logoMono.js closes its markup with `<rect … fill="#fff" mask="url(#id)"/>` —
 // the one place the drawn color appears (the mask's own `<g fill="#fff">` is
 // mask space and must stay white). Swapping that one attribute is how the
@@ -76,20 +82,13 @@ function inkChoices(colors) {
 // Returns null when the swap finds nothing, rather than a white mark quietly
 // saved as if it were inked: that means logoMono.js's output shape moved, and
 // the panel says so instead of writing art nobody asked for.
-// Whether a quick-pick swatch is the ink currently in the field. Two hex
-// strings, compared case-blind because the field is typed by hand and the
-// swatches are literals here.
-function sameHex(a, b) {
-  return String(a ?? '').toLowerCase() === String(b ?? '').toLowerCase() // caps-js-exempt — hex values, not rendered text
-}
-
 function inkConversion(converted, maskId, ink) {
   const target = `fill="#fff" mask="url(#${maskId})"`
   if (!converted?.includes(target)) return null
   return converted.replace(target, `fill="${ink}" mask="url(#${maskId})"`)
 }
 
-export function MastheadMarkEditor({ teamId, name, cityConnect }) {
+export function MastheadMarkEditor({ teamId, name, cityConnect, onPreview }) {
   const [markup, setMarkup] = useState('')
   const [markName, setMarkName] = useState('')
   const [state, setState] = useState(null)
@@ -150,13 +149,20 @@ export function MastheadMarkEditor({ teamId, name, cityConnect }) {
   // moment would hand back the one thing the mode was turned on to avoid.
   const outgoing = knockout ? (convertible ? inked : null) : draft
 
-  // The bar draws the paste in progress if there is one, else whatever this
-  // club's bar actually wears today. `worn` is consulted before the resolver for
-  // the same session-lag reason as above.
+  // What this panel asks the bar above it to draw: the paste in progress if
+  // there is one, else the library mark it now wears, else NOTHING — a null
+  // hands the bar back its own resolution (an uploaded PNG, or the club-wide
+  // knockout mark), which is the one rung this panel doesn't own.
   const wornUrl = library.find((m) => m.slug === worn)?.url ?? null
-  const previewUrl = outgoing
-    ? `data:image/svg+xml,${encodeURIComponent(outgoing)}`
-    : (wornUrl ?? cityConnectMastheadUrl(teamId))
+  const previewUrl = outgoing ? `data:image/svg+xml,${encodeURIComponent(outgoing)}` : wornUrl
+
+  // Reported up rather than drawn here: the bar this mark has to read on is
+  // already at the top of the unit this panel sits in, and two of the same bar
+  // stacked is one more than anyone can judge against. An effect, not a render
+  // call — telling a parent to re-render mid-render is the loop React warns of.
+  useEffect(() => {
+    onPreview?.(previewUrl)
+  }, [onPreview, previewUrl])
 
   function toggleShape(index) {
     setPins((prev) => ({ ...prev, [String(index)]: flipVerdict(parts, prev, index) }))
@@ -218,14 +224,6 @@ export function MastheadMarkEditor({ teamId, name, cityConnect }) {
         to a one-color knockout below and pick the ink; either way what lands is finished art, so
         nothing recolors it on the page.
       </p>
-
-      <HeaderBarMock
-        teamId={teamId}
-        name={name}
-        colors={cityConnect.colors}
-        unset={cityConnect.unset}
-        overrideUrl={previewUrl}
-      />
 
       <textarea
         className="idlab__mastheadsource"

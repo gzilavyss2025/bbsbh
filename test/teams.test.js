@@ -25,6 +25,8 @@ import {
   mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
+  ALL_MLB_TEAM_IDS,
+  teamAbbr,
   cityConnectMastheadUrl,
   pickCityConnectMasthead,
   CITY_CONNECT_MASTHEAD_KEY,
@@ -38,6 +40,8 @@ import {
   coachHeadshotUrl,
 } from '../src/lib/teams.js'
 import { MLB_TEAM_COLORS } from '../src/lib/brandColors.js'
+import { customMarkAssignment, customMarksFor } from '../src/lib/customMarks.js'
+import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
 
 // --------------------------------------------------------------------------
 // localLogoUrl
@@ -329,8 +333,36 @@ test('mainOverrideLogoUrl resolves the Yankees\' procured main override, no long
 // masthead-city-connect entries the exact way mainOverrideLogoUrl reads
 // main-overrides — disk presence alone, no companion flag to keep in sync.
 // --------------------------------------------------------------------------
-test('cityConnectMastheadUrl is null for a club with no override uploaded yet', () => {
-  assert.equal(cityConnectMastheadUrl(158), null) // Brewers — no file procured
+// Derived, not a named club: the Identity Lab writes these overrides one club
+// at a time, so pinning "team 158 has none" only held until someone gave 158
+// one. The subject is whichever City Connect club the stores are currently
+// silent about, which keeps the assertion true no matter who gets dressed next.
+test('cityConnectMastheadUrl is null for a club with no override of either kind', () => {
+  const bare = ALL_MLB_TEAM_IDS.find(
+    (id) => hasCityConnect(id) && !customMarkAssignment(id, CITY_CONNECT_MASTHEAD_KEY) && !uploadedMastheadPng(id),
+  )
+  assert.ok(bare, 'every City Connect club now carries an override — this test needs a different subject')
+  assert.equal(cityConnectMastheadUrl(bare), null)
+})
+
+// The other rung cityConnectMastheadUrl reads, spelled out here so the test
+// above can tell "no override at all" from "an override of the other kind".
+function uploadedMastheadPng(teamId) {
+  const abbr = teamAbbr({ id: teamId })
+  return Boolean(abbr && (LOGO_ART['masthead-city-connect'] ?? {})[`${abbr}.png`])
+}
+
+test('every club with an assigned masthead mark resolves to that mark', () => {
+  // Vacuous until a club is dressed, real the moment one is — and it is the
+  // committed store being checked, so a mark deleted off disk without its
+  // assignment being cleared shows up here rather than as a broken bar.
+  for (const id of ALL_MLB_TEAM_IDS) {
+    const slug = customMarkAssignment(id, CITY_CONNECT_MASTHEAD_KEY)
+    if (!slug || !hasCityConnect(id)) continue
+    const mark = customMarksFor(id).find((m) => m.slug === slug)
+    assert.ok(mark, `team ${id} is assigned "${slug}", which is not in its library`)
+    assert.equal(cityConnectMastheadUrl(id), mark.url)
+  }
 })
 
 test('cityConnectMastheadUrl is null for a club with no City Connect uniform at all', () => {
