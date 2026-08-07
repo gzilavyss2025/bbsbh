@@ -388,18 +388,19 @@ export function ilStintRow(s, levelByTeamId) {
 // half of an up-and-down big leaguer (Rowdy Tellez — Braves + Gwinnett), or the
 // MLB half of a player currently optioned down. Surfaced as their own tile row
 // (see PlayerPage) right beside the main "Current season" tiles, so a split
-// season shows BOTH levels prominently instead of leaving one buried in the
-// career register's "Also:" footnote.
+// season shows BOTH levels prominently rather than only in the career register
+// below.
 //
-// Rules — deliberately the SAME ones the career register already applies, so the
-// promoted tiles and the register rows never disagree on which stints are real:
+// Rules — a tile row is a curated HIGHLIGHT, not a record, so unlike the career
+// register (which now shows every stint at every level, with no threshold at
+// all) this keeps a workload gate:
 //   • the current-activity level is skipped — its line already leads the main
 //     "Current season" tiles;
 //   • MLB action is always real team history, so an MLB stint always promotes;
-//   • a MiLB stint promotes only when it clears the rehab cap (meetsStintCap) —
-//     the same absolute test the register uses to tell a genuine option-down
-//     from rehab/shuttle noise, so a handful of rehab at-bats never lights up a
-//     promoted tile row.
+//   • a MiLB stint promotes only when it clears the rehab cap (meetsStintCap),
+//     so a handful of rehab at-bats never lights up a promoted tile row. That
+//     stint still gets its own line in the register — the tile row is what it
+//     does not earn.
 // Full-season figures (like the register rows they mirror — NOT the date-cut
 // "entering today" the main tiles use), highest level first. Null when the
 // player stayed at one level all year (the common case).
@@ -441,7 +442,7 @@ export function otherLevelSeasonBlocks({ mlbSplits, milbSplits, group, currentSe
 // has one block; a two-way player has two (batting then pitching).
 // ---------------------------------------------------------------------------
 
-export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, logTagLevel = false, warByYear = {}, transactions = [] }) {
+export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff, currentSeason, currentSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits, logTagLevel = false, warByYear = {}, transactions = [] }) {
   // The date-cut current-season stat at the player's CURRENT level. It leads
   // the "Current season" tiles, so it can't move mid-game. `tileStat` (see
   // loadPlayer) resolves to the live level for an active MLB/single-level
@@ -484,11 +485,14 @@ export function buildBlock({ group, role, seasonSplits, careerSplits, lrSplits, 
     splits: splitsView(lrSplits, group),
     gameLog: gameLogView(gameLogSplits, group, cutoff, group === 'pitching' ? 6 : 8, { tagLevel: logTagLevel }),
     // The unified MLB + MiLB career table. `career` (the API's MLB career line
-    // for a debuted player) foots the MLB total; the current-season row uses
-    // the date-cut `tile` so it can't move mid-game.
+    // for a debuted player) foots the MLB total; the current-season rows use
+    // the date-cut `levelOnlySplits` so they can't move mid-game — the raw
+    // per-club rows, since the register prints a line per club. `currentStat`
+    // stays alongside them as the fallback for when that fetch came back empty.
     register: careerRegisterView({
       mlbSplits: mlbYbySplits, milbSplits: milbYbySplits, group, role, debutYear,
-      currentStat: levelOnlyStat ?? tile, currentSeason, currentSportId, careerStat: career, warByYear,
+      currentStat: levelOnlyStat ?? tile, currentSplits: levelOnlySplits,
+      currentSeason, currentSportId, careerStat: career, warByYear,
       transactions,
     }),
     milestones: milestoneWatchView(milestoneStat, group),

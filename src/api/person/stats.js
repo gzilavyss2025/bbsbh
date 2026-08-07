@@ -23,7 +23,12 @@ import { ordinal } from './teamPage.js'
 // test: drop the roll-up only when the rows it summarizes are present to be
 // summed instead. That also leaves alone the team-less rows callers synthesize
 // by hand (mlbCareerThroughCutoff, and the register's own footer totals).
-function withoutMultiTeamAggregate(splits) {
+//
+// Exported because the career register splits a season into its per-club rows
+// (byTeamStints) BEFORE it aggregates: grouping on `team.id` would give the
+// team-less roll-up a group of its own and print a phantom row equal to the sum
+// of the real ones, so it has to be dropped a step earlier than usual.
+export function withoutMultiTeamAggregate(splits) {
   const rows = splits ?? []
   if (!rows.some((s) => s.team?.id)) return rows
   return rows.filter((s) => s.team?.id || !(Number(s.numTeams) > 1))

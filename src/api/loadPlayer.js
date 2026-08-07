@@ -100,28 +100,26 @@ function dayBefore(iso) {
 // AA -> AAA promotion), reported at his current MiLB level.
 //
 // That blended `stat` is right for the TILES (one "how's he doing this year"
-// line) but wrong for the career register's current-level row, which must
-// stay level-scoped (one row per season+level, never blended — see
-// careerRegisterView) — so this also returns `levelOnlyStat`, the same
-// date-cut window filtered to just `sportId`, for the register to key its
-// current-season row on instead. A recent AA -> AAA call-up would otherwise
-// show his AAA row as AA+AAA combined while a separate, correct AA row also
-// exists (the AA line double-counted into both rows).
-export async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat }) {
-  if (sportId === 1) return { stat: levelStat, sportId: 1, levelOnlyStat: levelStat }
+// line) but wrong for the career register's current-level row, which must stay
+// level-scoped (see careerRegisterView) — so this also returns `levelOnlyStat`,
+// the same date-cut window filtered to just `sportId`. A recent AA -> AAA
+// call-up would otherwise show his AAA row as AA+AAA combined while a separate,
+// correct AA row also exists (the AA line double-counted into both rows). And
+// `levelOnlySplits` is that window's RAW rows, still one per club: the register
+// prints a line per club, which only rows that still carry a `team` allow.
+export async function resolveCurrentSeasonStat({ id, group, season, startDate, endDate, sportId, hasDebuted, levelStat, levelSplits }) {
+  if (sportId === 1) return { stat: levelStat, sportId: 1, levelOnlyStat: levelStat, levelOnlySplits: levelSplits ?? [] }
   if (hasDebuted) {
     const mlbSplits = await fetchPersonStats(id, {
       type: 'byDateRange', group, season, startDate, endDate, sportId: 1,
     })
     const mlbStat = aggregateSplits(mlbSplits, group)
-    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return { stat: mlbStat, sportId: 1, levelOnlyStat: mlbStat }
+    if (mlbStat && Number(mlbStat.gamesPlayed) > 0) return { stat: mlbStat, sportId: 1, levelOnlyStat: mlbStat, levelOnlySplits: mlbSplits }
   }
   const milbSplits = await fetchMilbByDateRange(id, group, season, startDate, endDate)
-  return {
-    stat: aggregateSplits(milbSplits, group),
-    sportId,
-    levelOnlyStat: aggregateSplits(milbSplits.filter((s) => s.sport?.id === sportId), group),
-  }
+  const levelRows = milbSplits.filter((s) => s.sport?.id === sportId)
+  const stat = aggregateSplits(milbSplits, group)
+  return { stat, sportId, levelOnlyStat: aggregateSplits(levelRows, group), levelOnlySplits: levelRows }
 }
 
 // Fetch the position-innings data for one CAREER scope ('mlb' | 'milb') — the
@@ -314,15 +312,15 @@ export async function loadPlayer(id, asOf) {
         // live club is a MiLB affiliate (Rowdy Tellez), else his current level.
         // The register and the promoted other-level tiles both key off it, so
         // the current-season line lands on the right level's row.
-        const { stat: tileStat, sportId: tileSportId, levelOnlyStat } = await resolveCurrentSeasonStat({
+        const { stat: tileStat, sportId: tileSportId, levelOnlyStat, levelOnlySplits } = await resolveCurrentSeasonStat({
           id, group, season, startDate, endDate, sportId: currentActivitySportId,
-          hasDebuted: Boolean(bio.debut), levelStat: seasonStat,
+          hasDebuted: Boolean(bio.debut), levelStat: seasonStat, levelSplits: seasonSplits,
         })
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
           gameLogSplits, arsenalSplits, mlbYbySplits, milbYbySplits, cutoff,
-          currentSeason: season, currentSportId: tileSportId, debutYear, tileStat, levelOnlyStat,
+          currentSeason: season, currentSportId: tileSportId, debutYear, tileStat, levelOnlyStat, levelOnlySplits,
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
           transactions: txns,
@@ -547,9 +545,11 @@ export async function loadPlayer(id, asOf) {
   const allStarByYear = new Map(
     await Promise.all([...allStarYears].map(async (yr) => [yr, await fetchAllStarRosterIds(yr)])),
   )
+  // The star marks the SEASON, and a split season is two rows, so it goes on
+  // that season's lead row only (see careerRegisterView).
   for (const b of blocks) {
     for (const r of b.register?.rows ?? []) {
-      if (r.tier === 'mlb') r.allStar = allStarByYear.get(Number(r.year))?.has(bio.id) ?? false
+      if (r.tier === 'mlb') r.allStar = r.seasonLead && (allStarByYear.get(Number(r.year))?.has(bio.id) ?? false)
     }
   }
   const isAllStar = allStarByYear.get(currentYear)?.has(bio.id) ?? false

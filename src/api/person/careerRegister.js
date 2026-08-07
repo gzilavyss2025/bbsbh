@@ -3,9 +3,9 @@
 // header for the module's overall spoiler footing.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../../lib/teams.js'
-import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, meetsStintCap, txnDate } from '../rehab-policy.js'
+import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, txnDate } from '../rehab-policy.js'
 import { DASH, num } from './shared.js'
-import { aggregateSplits } from './stats.js'
+import { aggregateSplits, withoutMultiTeamAggregate } from './stats.js'
 import { isIlPlacementTxn } from './activity.js'
 
 // ---------------------------------------------------------------------------
@@ -61,44 +61,51 @@ const CAREER_ORDER = [16, 14, 13, 12, 11, 1]
 
 // ---------------------------------------------------------------------------
 // Career register — the unified MLB + MiLB stat table (replaces the separate
-// MLB year-by-year and minor-league tables). One row per (season, level),
-// newest season first, MLB rows inked and MiLB rows penciled with a level pill.
+// MLB year-by-year and minor-league tables). One row per (season, level,
+// CLUB), newest season first, MLB rows inked and MiLB rows penciled with a
+// level pill.
 //
-// Every minor-league season in a player's ascent (pre-debut seasons and the
-// debut year's own pre-call-up stint) is its own real row, penciled and
-// level-badged next to the team — the climb reads season by season rather than
-// folding into a single collapsed summary. Only a SMALL post-debut minor-league
-// stint (below the rehab cap, meetsStintCap) drops to a neutral caption, so a
-// handful of rehab at-bats doesn't clutter the ledger.
+// **The register shows everything.** Every season at every level the player
+// appeared at is its own row — there is no workload threshold anywhere in this
+// view, and no summary caption. A one-week AAA rehab stint gets the same line a
+// full season does, and a season split between two clubs gets ONE LINE PER
+// CLUB rather than a single row labelled "SD/PIT". That per-club split applies
+// to the majors too, which is what the register used to fold away.
+//
+// It used to be otherwise: a small post-debut minor-league stint dropped out of
+// the table into an "Also: 4.2 IP at AAA" footnote under it. The threshold was
+// removed by request — a register is a record, and a line a reader has to
+// decode from a footnote is worse than a short line in the table. Do not put a
+// workload gate back here. The neighbouring surfaces still have one and should:
+// activity.js's promoted other-level TILES are a curated highlight, not a
+// record, and the career timeline drops rehab noise for the same reason.
 //
 // Totals never blend levels: a separate MLB and MiLB footer, each footing only
-// the rows shown (captioned stints stay out of both the rows AND the totals, so
-// the MiLB column actually sums to its total). The MLB total uses the API's own
-// career line when supplied (authoritative), the MiLB total sums the shown rows.
+// its own side of the ledger. The MLB total uses the API's own career line when
+// supplied (authoritative), the MiLB total sums the shown rows. A side gets a
+// subtotal only when it has more than one row — two clubs in a season, two
+// levels in a climb, or two seasons anywhere. A single line already foots
+// itself, and a footer repeating it verbatim reads as a second season.
 // ---------------------------------------------------------------------------
 
-function stintLabel(st, group) {
-  const w = group === 'pitching' ? `${st.stat?.inningsPitched ?? DASH} IP` : `${num(st.stat?.gamesPlayed)} G`
-  return `${w} at ${SPORT_LABEL[st.sid] ?? ''} (${st.year})`
-}
-
-// The neutral one-line caption for the small post-debut stints kept out of the
-// ledger: the most recent few spelled out, the rest summarized as a count + a
-// two-digit year range. Deliberately says "at AAA", never "rehab" — the
-// workload can't prove intent (a shuttle option and an injury rehab look
-// identical here), so the caption states what happened, not why.
-function stintCaption(stints, group, shown = 3) {
-  if (!stints.length) return null
-  const head = stints.slice(0, shown).map((s) => stintLabel(s, group))
-  let text = `Also: ${head.join(' · ')}`
-  const rest = stints.slice(shown)
-  if (rest.length) {
-    const yrs = rest.map((s) => s.year)
-    const a = Math.min(...yrs), b = Math.max(...yrs)
-    const range = a === b ? `’${String(a).slice(2)}` : `’${String(a).slice(2)}–’${String(b).slice(2)}`
-    text += ` · +${rest.length} more, ${range}`
+// Split one (season, level) bucket into its per-club stints, keeping the order
+// the API returned them in (statsapi lists a traded season's stints
+// chronologically, so a row's clubs read in the order he played for them).
+//
+// The synthetic team-less roll-up a team change emits has to be dropped HERE,
+// before the grouping, not left to aggregateSplits: grouped on `team.id` it
+// would form a `null` group of its own and print a phantom third row equal to
+// the sum of the two real ones. A row synthesized by hand (the current-season
+// fallback below, which carries no team) is not a roll-up and survives — it
+// forms one group whose Team cell renders as a dash.
+function byTeamStints(splits) {
+  const byTeam = new Map()
+  for (const s of withoutMultiTeamAggregate(splits ?? [])) {
+    const id = s.team?.id ?? null
+    if (!byTeam.has(id)) byTeam.set(id, [])
+    byTeam.get(id).push(s)
   }
-  return text
+  return byTeam
 }
 
 // A career-register year between debut and now with literally no stat row
@@ -135,7 +142,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
   return rows
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [] }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [] }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -155,45 +162,43 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     if (!bySeason.has(cur)) bySeason.set(cur, new Map())
     if (!bySeason.get(cur).has(currentSportId)) bySeason.get(cur).set(currentSportId, [])
   }
-  // One stint per (season, level): the current level's current season uses the
-  // date-cut aggregate; every other stint is the deduped per-team sum
-  // (aggregateSplits drops the synthetic roll-up row a mid-season trade emits —
-  // and so does the `currentStat` the caller hands in, built the same way).
-  const stints = []
+  // One stint per (season, level, club). Every stint is the deduped sum of that
+  // club's rows at that level — one row in the ordinary case, several only when
+  // the API splits a club's season (byDateRange emits duplicates; aggregateSplits
+  // dedupes them).
+  //
+  // The current level's current season is the exception: it must read from the
+  // caller's DATE-CUT splits, never the live year-by-year rows, so it can't move
+  // mid-game. Those splits carry the same per-club shape, so the split below
+  // stays uniform. If that fetch came back empty, the season collapses to the
+  // ONE date-cut aggregate the caller also hands in — still date-cut, so still
+  // safe, but a single line; it keeps the year-by-year rows' club ids so the
+  // Team cell reads "SD/PIT" rather than losing the clubs altogether.
+  const real = []
+  const stint = (yr, sid, stat, teamIds) => {
+    if (!stat) return
+    real.push({ year: yr, sid, tier: sid === 1 ? 'mlb' : 'milb', stat, teamIds })
+  }
   for (const [yr, byLevel] of bySeason) {
     for (const [sid, rows] of byLevel) {
       const isCurLevel = yr === cur && sid === currentSportId && currentStat
-      const stat = isCurLevel ? currentStat : levelSeasonStat(rows, group)
-      if (!stat) continue
-      stints.push({
-        year: yr,
-        sid,
-        tier: sid === 1 ? 'mlb' : 'milb',
-        stat,
-        teamIds: [...new Set(rows.map((r) => r.team?.id).filter(Boolean))],
-      })
+      if (isCurLevel && !currentSplits?.length) {
+        stint(yr, sid, currentStat, [...new Set(rows.map((r) => r.team?.id).filter(Boolean))])
+        continue
+      }
+      for (const [teamId, teamRows] of byTeamStints(isCurLevel ? currentSplits : rows)) {
+        stint(yr, sid, aggregateSplits(teamRows, group), teamId ? [teamId] : [])
+      }
     }
   }
-  if (!stints.length) return null
-  const presentYears = new Set(stints.map((s) => s.year))
+  if (!real.length) return null
+  const presentYears = new Set(real.map((s) => s.year))
 
-  // Classify. MLB is always a full row. A minor-league stint in the ascent
-  // (pre-debut, or the debut year itself) is a full row too — every level the
-  // player climbed reads as its own line, level-badged next to the team. Only a
-  // SMALL post-debut stint (below the rehab cap) drops to a neutral caption, so
-  // a handful of rehab at-bats doesn't clutter the ledger.
-  const real = []
-  const foot = []
-  for (const st of stints) {
-    if (st.tier === 'mlb') { real.push(st); continue }
-    if (!debutYear || st.year <= debutYear) { real.push(st); continue }
-    if (meetsStintCap(st.stat, group)) real.push(st)
-    else foot.push(st)
-  }
-
+  // Newest season first, and within a season the higher level first. Clubs
+  // within one (season, level) keep the API's own order — Array#sort is stable,
+  // so the chronological run of a traded season survives the sort untouched.
   const bySeasonOrder = (a, b) => b.year - a.year || LEVEL_ORDER_DESC.indexOf(a.sid) - LEVEL_ORDER_DESC.indexOf(b.sid)
   real.sort(bySeasonOrder)
-  foot.sort(bySeasonOrder)
 
   // SV leads the register (instead of W–L) for anyone who regularly closes —
   // the player's CURRENT role (mirrors the season tiles), or, failing that, a
@@ -209,31 +214,48 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // worth a column when the player has an MLB row to carry a value — a pure
   // prospect's all-MiLB register would otherwise gain a dead all-dashes column.
   const showWar = real.some((s) => s.tier === 'mlb')
-  const warCell = (st) =>
-    st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
+  const warCell = (st, lead) =>
+    lead && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
   const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
 
-  const rows = real.map((st) => ({
-    key: `${st.year}-${st.sid}`,
-    year: String(st.year),
-    tier: st.tier,
-    level: SPORT_LABEL[st.sid] ?? '',
-    sportId: st.sid,
-    pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
-    teamIds: st.teamIds,
-    cells: withWar(yearByYearCells(st.stat ?? {}, group, showSaves), warCell(st)),
-  }))
+  // A season split across clubs is several rows, so `seasonLead` marks the FIRST
+  // of them — the one row that may carry anything belonging to the SEASON rather
+  // than to the stint. Two things do: WAR (FanGraphs publishes it per season, not
+  // per club) below, and the All-Star star the caller adds afterwards. On both
+  // rows either would read as double. MLB sorts ahead of every MiLB level within
+  // a season, so the lead of a split big-league year is always the big-league row.
+  const seasonsSeen = new Set()
+  const rows = real.map((st) => {
+    const lead = !seasonsSeen.has(st.year)
+    seasonsSeen.add(st.year)
+    return {
+      key: `${st.year}-${st.sid}-${st.teamIds[0] ?? 'na'}`,
+      year: String(st.year),
+      seasonLead: lead,
+      tier: st.tier,
+      level: SPORT_LABEL[st.sid] ?? '',
+      sportId: st.sid,
+      pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
+      teamIds: st.teamIds,
+      cells: withWar(yearByYearCells(st.stat ?? {}, group, showSaves), warCell(st, lead)),
+    }
+  })
 
   // Split totals — never blend levels. MLB uses the API career line when we have
-  // it; MiLB sums the rows actually shown (every ascent/demotion row above).
+  // it; MiLB sums the rows actually shown (every stint above, at every level).
+  // A side foots only when it has MORE THAN ONE row: a subtotal under a single
+  // line restates it, and an identical second line reads as another season.
   const totals = []
   const mlbStints = real.filter((s) => s.tier === 'mlb')
   const milbVisible = real.filter((s) => s.tier === 'milb')
-  if (mlbStints.length) {
-    // Career WAR = sum of the shown MLB years' WAR (one row per season, so no
-    // double-count). Only the seasons the history/live files cover contribute;
-    // pre-coverage years quietly add nothing (matches their dash rows).
-    const warYears = mlbStints.map((s) => warByYear[s.year]).filter((w) => w != null)
+  if (mlbStints.length > 1) {
+    // Career WAR = sum of the shown MLB SEASONS' WAR. Deduped by year, since a
+    // season split across clubs is now several rows carrying one season figure.
+    // Only the seasons the history/live files cover contribute; pre-coverage
+    // years quietly add nothing (matches their dash rows).
+    const warYears = [...new Set(mlbStints.map((s) => s.year))]
+      .map((yr) => warByYear[yr])
+      .filter((w) => w != null)
     const warTotal = warYears.length
       ? (Math.round(warYears.reduce((a, b) => a + b, 0) * 10) / 10).toFixed(1)
       : DASH
@@ -243,7 +265,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
       cells: withWar(yearByYearCells(careerStat ?? aggregateSplits(mlbStints.map((s) => ({ stat: s.stat })), group) ?? {}, group, showSaves), warTotal),
     })
   }
-  if (milbVisible.length) {
+  if (milbVisible.length > 1) {
     totals.push({
       label: 'MiLB',
       tier: 'milb',
@@ -262,7 +284,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group) : []
   const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
 
-  return { columns, rows: allRows, totals, footnote: stintCaption(foot, group) }
+  return { columns, rows: allRows, totals }
 }
 
 // A one-line "converted to pitcher" note for a debuted pitcher who has a real
