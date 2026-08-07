@@ -38,7 +38,7 @@ import { venueKey } from '../lib/ballpark/ballparkArt.js'
 // paragraphs with no shared modal to stage.
 export const GROUPS = [
   { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
-  { id: 'ballparks', label: 'Ballpark notes (team hub → Overview)' },
+  { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -89,19 +89,68 @@ export const TOKENS = Object.freeze(['time', 'inning'])
 // the owner writes one, so nothing ships in a voice they did not choose — and
 // `sanitizeOverrides` already treats '' as "no override", so clearing a box in
 // the panel is the same operation as never having filled it.
-function parkNoteFields() {
+//
+// FOUR fields per park, not one — the note plus the three that let the owner
+// replace the art without a deploy. `subgroup` keeps a park's four boxes
+// together under one heading in the panel instead of scattering 120 inputs.
+//
+// A pattern-validated field is a NEW kind here, and it matters: `photo` and
+// `focus` are not prose, they are a URL that becomes an `<img src>` and a pair
+// of numbers that become a CSS `object-position`. sanitizeOverrides enforces
+// the pattern on BOTH sides (panel and api/copy.js), so a hand-crafted POST
+// cannot put `javascript:` in an image source or arbitrary text in a style.
+const PHOTO_URL = /^https:\/\/[^\s"'<>]+$/
+// "x y", each 0–100, as percentages of the image. "50 50" is dead centre.
+const FOCAL_POINT = /^(100|\d{1,2}) (100|\d{1,2})$/
+
+function parkFields() {
   return [...new Set(Object.values(BALLPARKS))]
     .map((park) => park.name)
     .sort((a, b) => a.localeCompare(b))
-    .map((name) => ({
-      id: `ballpark.${venueKey(name)}`,
-      group: 'ballparks',
-      label: name,
-      help: `A few sentences on ${name} — what the place is like, what makes it odd, what a visitor notices. Leave empty to show no note for this park.`,
-      maxLength: 700,
-      multiline: true,
-      default: '',
-    }))
+    .flatMap((name) => {
+      const key = venueKey(name)
+      const base = { group: 'ballparks', subgroup: name }
+      return [
+        {
+          ...base,
+          id: `ballpark.${key}`,
+          label: `${name} — note`,
+          help: `A few sentences on ${name} — what the place is like, what makes it odd, what a visitor notices. Leave empty to show no note for this park.`,
+          maxLength: 700,
+          multiline: true,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Photo`,
+          label: `${name} — photo URL`,
+          help: 'Replaces the bundled photo. Must be a full https:// link to an image file. Leave empty to keep the shipped photo. You are responsible for having the right to use whatever you point at here.',
+          maxLength: 500,
+          multiline: false,
+          pattern: PHOTO_URL,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Credit`,
+          label: `${name} — photo credit`,
+          help: 'Only used with a photo URL above. Names the photographer and licence for YOUR photo, since the bundled credit no longer applies. Leave empty for a photo that needs no credit.',
+          maxLength: 160,
+          multiline: false,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Focus`,
+          label: `${name} — focal point`,
+          help: 'Which part of the photo to keep when it is cropped to the widescreen box. Two numbers 0–100, across then down — "50 50" is centre, "50 20" favours the top, "50 80" the bottom. Leave empty for centre.',
+          maxLength: 7,
+          multiline: false,
+          pattern: FOCAL_POINT,
+          default: '',
+        },
+      ]
+    })
 }
 
 export const FIELDS = [
@@ -201,7 +250,7 @@ export const FIELDS = [
     multiline: false,
     default: 'Live · {inning} in progress',
   },
-  ...parkNoteFields(),
+  ...parkFields(),
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.
@@ -233,6 +282,12 @@ export function sanitizeOverrides(raw) {
     const cleaned = stripControlChars(value, field.multiline).replace(/[ \t]+$/g, '')
     if (cleaned.length === 0) continue // empty = "use the default", not stored
     if (cleaned.length > field.maxLength) continue
+    // A field that declares a `pattern` is not prose — its value ends up in an
+    // `<img src>` or a CSS `object-position`, where "any bounded string" is no
+    // longer a safe contract. Dropping a non-matching value here covers the
+    // admin panel AND api/copy.js, so a hand-crafted POST cannot store a
+    // `javascript:` URL or arbitrary text that would land in a style.
+    if (field.pattern && !field.pattern.test(cleaned)) continue
     out[id] = cleaned
   }
   return out

@@ -1,5 +1,5 @@
 import { rankedDimensions } from '../../../lib/ballpark/ballparkData.js'
-import { ballparkLogoUrl, ballparkPhoto, creditLine, venueKey } from '../../../lib/ballpark/ballparkArt.js'
+import { ballparkLogoUrl, resolvePhoto, venueKey } from '../../../lib/ballpark/ballparkArt.js'
 import { useCopy } from '../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../components/ballpark/BallparkDiagram.jsx'
 import { Facts, RankGroup } from '../../../components/ballpark/BallparkFacts.jsx'
@@ -18,6 +18,48 @@ import { Facts, RankGroup } from '../../../components/ballpark/BallparkFacts.jsx
 // static snapshot (gen-teams.mjs), so there is no live fetch either. Renders
 // nothing for a park not on file, the same graceful-degrade convention as
 // ballparkFor — which is every MiLB park.
+// The photo itself, cropped to widescreen with the admin's chosen focal point.
+//
+// ATTRIBUTION WITHOUT A CAPTION. There is no visible credit line under the
+// photo any more, which is a licence question and not only a layout one: CC BY
+// and CC BY-SA require attribution, and a `title` tooltip alone would show
+// NOTHING on a phone — this app's primary device. So a bundled photo wraps in a
+// link to its Commons file page, where the author and licence live. That is the
+// alternative the licence itself sanctions ("a URI or hyperlink to a resource
+// that includes the required information"), it survives touch, and the credit
+// still rides in `title` and `alt` for hover and screen readers.
+//
+// An admin's own photo has no Commons page to point at, so it renders as a bare
+// image — credited in `title`/`alt` only if they typed a credit. Whatever they
+// point at is their call and their licence to hold; see the field's help text.
+function ParkPhoto({ park, photo }) {
+  const alt = photo.creditText
+    ? `${park.name}. ${photo.creditText}`
+    : `${park.name}, seen from the stands`
+  const img = (
+    <img
+      className="ballparkcard__photo"
+      src={photo.src}
+      alt={alt}
+      title={photo.creditText || undefined}
+      style={{ objectPosition: photo.focus }}
+      loading="lazy"
+      decoding="async"
+    />
+  )
+  if (!photo.creditHref) return <div className="ballparkcard__photoWrap">{img}</div>
+  return (
+    <a
+      className="ballparkcard__photoWrap"
+      href={photo.creditHref}
+      target="_blank"
+      rel="noreferrer noopener"
+    >
+      {img}
+    </a>
+  )
+}
+
 export function BallparkCard({ team }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
@@ -29,11 +71,19 @@ export function BallparkCard({ team }) {
 
   // Art is looked up by the park's CANONICAL name, never the raw feed string,
   // so a renamed venue resolves through its alias to the one shared record.
-  const photo = ballparkPhoto(park.name)
+  const key = venueKey(park.name)
   const logo = ballparkLogoUrl(park.name)
   // Empty until the owner writes one in /admin — most parks have no note, and a
   // card with an empty paragraph in it looks broken rather than unwritten.
-  const note = t(`ballpark.${venueKey(park.name)}`)
+  const note = t(`ballpark.${key}`)
+  // The bundled photo, or the owner's replacement, with the crop and credit
+  // that belong to whichever won. All three come from the copy store already
+  // pattern-validated (registry.js), so nothing here needs re-checking.
+  const photo = resolvePhoto(park.name, {
+    photo: t(`ballpark.${key}Photo`),
+    credit: t(`ballpark.${key}Credit`),
+    focus: t(`ballpark.${key}Focus`),
+  })
 
   return (
     <div className="thub-card">
@@ -42,24 +92,7 @@ export function BallparkCard({ team }) {
       </div>
       <div className="thub-card__body">
         <div className="ballparkcard__hero">
-          {photo && (
-            <figure className="ballparkcard__photoWrap">
-              <img
-                className="ballparkcard__photo"
-                src={photo.src}
-                alt={`${park.name}, seen from the stands`}
-                loading="lazy"
-                decoding="async"
-              />
-              {/* Not decoration — CC BY / CC BY-SA oblige us to name the
-                  photographer wherever the photo appears. See ballparkArt.js. */}
-              <figcaption className="ballparkcard__credit">
-                <a href={photo.credit.source} target="_blank" rel="noreferrer noopener">
-                  {creditLine(photo.credit)}
-                </a>
-              </figcaption>
-            </figure>
-          )}
+          {photo && <ParkPhoto park={park} photo={photo} />}
           <div className="ballparkcard__title">
             {logo ? (
               <img className="ballparkcard__logo" src={logo} alt={park.name} loading="lazy" />

@@ -111,3 +111,48 @@ export function creditLine(credit) {
     ? `Photo: ${who}`
     : `Photo: ${who} · ${credit.license}`
 }
+
+// Dead centre — what an unset focal point means.
+const CENTRE = '50% 50%'
+
+// Resolve what the card should actually show for a park: the bundled photo, or
+// the admin's replacement, plus the credit and crop that go with whichever won.
+//
+// `overrides` is the three admin fields for this park ({ photo, credit, focus }),
+// already sanitized by the copy registry — `photo` matched an https:// URL and
+// `focus` matched "x y" with both numbers 0–100, or they were dropped before
+// reaching here. This function does NOT re-validate; it assumes the registry's
+// choke point held, the same assumption every other consumer of resolved copy
+// makes.
+//
+// The CREDIT is the subtle part. A bundled photo carries a Commons credit and a
+// `source` page we can link to, which is how the app satisfies CC BY / CC BY-SA
+// (see the PHOTOS note above). An admin's own photo carries NEITHER unless they
+// typed a credit, so an override deliberately DROPS the bundled attribution
+// rather than inheriting it — leaving Carol H. Highsmith's name under somebody
+// else's photograph would be a worse failure than showing no credit at all.
+export function resolvePhoto(parkName, overrides = {}) {
+  const bundled = ballparkPhoto(parkName)
+  const focus = overrides.focus ? toObjectPosition(overrides.focus) : CENTRE
+
+  if (overrides.photo) {
+    const text = overrides.credit || ''
+    return { src: overrides.photo, focus, creditText: text, creditHref: null, isOverride: true }
+  }
+  if (!bundled) return null
+  return {
+    src: bundled.src,
+    focus,
+    creditText: creditLine(bundled.credit),
+    creditHref: bundled.credit.source,
+    isOverride: false,
+  }
+}
+
+// "50 20" -> "50% 20%". The registry already guaranteed the shape; anything
+// else falls back to centre rather than emitting a broken CSS value.
+function toObjectPosition(focus) {
+  const [x, y] = String(focus).trim().split(/\s+/)
+  if (x === undefined || y === undefined) return CENTRE
+  return `${Number(x)}% ${Number(y)}%`
+}

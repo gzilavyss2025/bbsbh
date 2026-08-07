@@ -30,34 +30,31 @@
   }
 }
 
+/* The wrapper is an <a> to the photo's Commons file page for a bundled photo,
+   and a plain <div> for an admin's own. display:block covers both, so the link
+   form carries no underline or inherited link colour of its own. */
 .ballparkcard__photoWrap {
+  display: block;
   margin: 0;
   min-width: 0;
 }
-/* A fixed 16:9 box with object-fit: cover, because the 30 bundled photos are
-   every shape from a 4:3 phone snap to a wide aerial. Cropping in CSS keeps one
-   consistent card silhouette without re-encoding 30 files. */
+/* 1.85:1 — the widescreen cinema ratio, deliberately wider than 16:9 (1.78:1).
+   The bundled photos run every shape from a 4:3 phone snap to a panoramic
+   aerial, so `object-fit: cover` crops them all to one silhouette without
+   re-encoding a single file. WHICH part survives the crop is the admin's call:
+   `object-position` is set inline from that park's focal-point field, and
+   defaults to centre (resolvePhoto in ballpark/ballparkArt.js).
+
+   There is no visible credit caption — attribution rides on the wrapping link,
+   plus `title`/`alt`. That is a licence decision, not a layout one; the
+   reasoning is in ParkPhoto's header in BallparkCard.jsx. */
 .ballparkcard__photo {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1.85 / 1;
   object-fit: cover;
   border-radius: var(--radius-sm);
   background: var(--surface-sunken, rgba(0, 0, 0, 0.06));
-}
-/* Attribution, not decoration — CC BY / CC BY-SA require it. Quiet, but never
-   display: none. See src/lib/ballparkArt.js. */
-.ballparkcard__credit {
-  margin-top: var(--space-1);
-  font-size: var(--fs-micro, var(--fs-caption));
-  color: var(--text-muted);
-}
-.ballparkcard__credit a {
-  color: inherit;
-  text-decoration: none;
-}
-.ballparkcard__credit a:hover {
-  text-decoration: underline;
 }
 
 /* The name column. Centred against the photo on desktop, flush left when the

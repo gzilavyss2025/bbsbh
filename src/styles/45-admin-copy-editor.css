@@ -268,3 +268,31 @@
   }
 }
 
+
+/* Per-park blocks inside the Ballparks group — 30 parks x 4 fields is 120
+   boxes, and without a heading per park you cannot tell which note belongs to
+   which photo URL. Groups whose fields declare no subgroup render one untitled
+   run and are visually unchanged. */
+.admincopy__subgroup {
+  margin-bottom: var(--space-5);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.admincopy__subgroup:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+.admincopy__subgroupTitle {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  color: var(--text-heading);
+}
+
+/* Shown when a pattern-validated box (photo URL, focal point) holds something
+   sanitizeOverrides would drop — otherwise the save looks like it worked. */
+.admincopy__invalid {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-warning, var(--accent-primary));
+}
