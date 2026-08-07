@@ -12,6 +12,7 @@
 
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { isHex } from '../../src/lib/stampInk.js'
 
 // Every store is a few hundred bytes per club at most. This is a generous
 // ceiling against a runaway/malformed POST, not a real-world size — the largest
@@ -278,6 +279,21 @@ function isStampLogoTuningStore(parsed) {
   return null
 }
 
+// stamp-ink.json: a club's own override of the Logbook stamp ink ADR-0036's
+// addendum computes automatically (src/lib/stampInkTuning.js). A flat
+// `{ teamId: hex }` map — one ink for the whole club, not per side — and
+// strictly `#rrggbb`, unlike the looser `isColorish` swatch stores below: this
+// value feeds contrast math (deepenToContrast) directly, which needs a real
+// hex to walk toward black, not a CSS keyword or rgba() string.
+function isStampInkStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, hex] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isHex(hex)) return `team ${teamId}'s ink "${hex}" is not a #rrggbb hex color`
+  }
+  return null
+}
+
 // A flat uniformAssetCode -> display-name string map (src/api/uniforms.js's
 // fetchUniformNameOverrides). Rejects an array, nested objects, or non-string
 // values rather than writing a shape the app's readers don't expect.
@@ -353,6 +369,10 @@ export const DEV_DATA_STORES = {
   'stamp-logo-tuning': {
     file: 'src/lib/data/stamp-logo-tuning.json',
     validate: isStampLogoTuningStore,
+  },
+  'stamp-ink': {
+    file: 'src/lib/data/stamp-ink.json',
+    validate: isStampInkStore,
   },
   'alt-colors': {
     file: 'src/lib/data/alt-colors.json',

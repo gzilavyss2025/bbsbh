@@ -15,6 +15,11 @@
 // tracing of these numbers with no math of its own, and every number the art
 // depends on can be pinned by the unit suite (test/stamp-art.test.js) rather
 // than only by looking at it.
+//
+// One deliberate re-lock (2026-08-07): `stampLabel`'s footer used to read
+// "Final" (plus extras). The design doc's contact sheet still shows that
+// word — see `stampLabel` below for why it's gone rather than treat the doc
+// as still current.
 
 // The canvas. viewBox-only in the component — nothing here sets width/height, so
 // CSS sizes a stamp in a grid and nothing fights its container.
@@ -215,13 +220,18 @@ export function runFontSize(awayRuns, homeRuns) {
   return away >= 10 || home >= 10 ? 48 : 62
 }
 
-// The footer label inside the bottom lens: the game state, in the one slot the
-// stamp has for it. Extra innings and a doubleheader's game number both fold in
-// here rather than claiming a line of their own.
+// The footer label inside the bottom lens: whatever is worth saying about the
+// game that the ring/run totals don't already, in the one slot the stamp has
+// for it. A stamp only ever exists for a completed, revealed game (GameStamp.jsx's
+// spoiler-containment rule), so saying "Final" there was saying nothing the
+// artifact wasn't already saying by existing — dropped for exactly that reason.
+// Extra innings and a doubleheader's game number are real facts the ring/totals
+// don't carry, so they still fold in here; a plain nine-inning single game now
+// carries no footer text at all.
 export function stampLabel({ innings, gameNumber } = {}) {
-  const extras = Number.isInteger(innings) && innings > 9 ? ` / ${innings}` : ''
-  const gm = Number.isInteger(gameNumber) && gameNumber > 1 ? ` — GM ${gameNumber}` : ''
-  return `Final${extras}${gm}`
+  const extras = Number.isInteger(innings) && innings > 9 ? `${innings} innings` : ''
+  const gm = Number.isInteger(gameNumber) && gameNumber > 1 ? `Game ${gameNumber}` : ''
+  return [extras, gm].filter(Boolean).join(' — ')
 }
 
 // The label band is ~95px wide at the inner ring at y=258; 90 leaves the wobble

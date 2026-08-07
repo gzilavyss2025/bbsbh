@@ -1,5 +1,6 @@
 import { hasMonoLogo, teamLogoUrl } from '../../lib/teams.js'
-import { stampInkFor } from '../../lib/stampInk.js'
+import { stampInkFor, stampWinnerId } from '../../lib/stampInk.js'
+import { stampInkOverrideFor } from '../../lib/stampInkTuning.js'
 import { stampMarkPlacement } from '../../lib/stampLogoTuning.js'
 import {
   INNER_RING_R,
@@ -49,15 +50,19 @@ import {
 // One colour — and WHICH colour (ADR-0036's addendum)
 // ===========================================================================
 // A stamp is drawn in ONE ink, and that ink is the WINNING club's darkest brand
-// colour: the mark a game leaves behind is in the colours of whoever won it, so
-// a page of keepsakes reads as a season rather than as a print run. The pick
-// itself is src/lib/stampInk.js — including why darkest rather than primary,
-// and the contrast floor under it — and it is published here as `--stamp-ink`
-// rather than as a `color`, so the CSS keeps the last word: a surface that
-// wants its own ink (the un-minted preview in the mint card, pale as an
-// un-inked die) simply sets `color` and wins. No winner on file — a tie, a
-// suspended game, facts that never resolved — omits the property entirely and
-// the stamp is pressed in the book's default navy.
+// colour by default: the mark a game leaves behind is in the colours of
+// whoever won it, so a page of keepsakes reads as a season rather than as a
+// print run. A club may override that automatic pick with its own hex
+// (src/lib/data/stamp-ink.json, picked in /identity-lab's Stamp ink editor) —
+// still walked through the SAME contrast floor, because that floor is about
+// what a stamp needs to read at hairline widths, not about which colour a
+// club owns. The pick itself is src/lib/stampInk.js — including why darkest
+// rather than primary, and the contrast floor under it — and it is published
+// here as `--stamp-ink` rather than as a `color`, so the CSS keeps the last
+// word: a surface that wants its own ink (the un-minted preview in the mint
+// card, pale as an un-inked die) simply sets `color` and wins. No winner on
+// file — a tie, a suspended game, facts that never resolved — omits the
+// property entirely and the stamp is pressed in the book's default navy.
 //
 // Everything else about the one-colour discipline is unchanged. Every element
 // including the logos is `currentColor` — the stamp inherits its ink from
@@ -96,11 +101,15 @@ import {
 // fetchStampGames (src/api/logbook.js, from the schedule). One shape, so the
 // two sources cannot drift.
 //
-// `placements` is the lab's live-preview seam and nothing else: `{ away, home }`
-// records standing IN for what the store holds, so /identity-lab's Stamp
-// placement editor can show an unsaved edit on the real stamp instead of on a
-// mock-up of it. Every real caller omits it and reads the landed store.
-export function GameStamp({ game, seriesText = null, instanceId, className = '', title, placements }) {
+// `placements` and `inkOverride` are the lab's live-preview seam and nothing
+// else. `placements` (`{ away, home }`) stands in for what stamp-logo-tuning.json
+// holds, so /identity-lab's Stamp placement editor can show an unsaved edit on
+// the real stamp instead of a mock-up. `inkOverride` does the same job for
+// stamp-ink.json's per-club ink (src/lib/stampInkTuning.js): pass any string,
+// including an EMPTY one, to force the preview to ignore the landed override
+// and show what that draft (or clearing it back to automatic) would actually
+// print. Every real caller omits both and reads the landed stores.
+export function GameStamp({ game, seriesText = null, instanceId, className = '', title, placements, inkOverride }) {
   if (!game) return null
 
   const ids = stampIds(instanceId ?? game.gamePk)
@@ -116,8 +125,12 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
   const runText = (runs) => (typeof runs === 'number' ? String(runs) : '—')
   // The winner's ink, or null for a game with no winner — which leaves the
   // property off entirely rather than writing an empty one, so the CSS
-  // fallback in `.gamestamp` is what answers.
-  const ink = stampInkFor(game)
+  // fallback in `.gamestamp` is what answers. A landed per-club override
+  // (stamp-ink.json) wins over the automatic darkest-brand-colour pick;
+  // `inkOverride`, when passed at all, wins over that landed value in turn.
+  const winnerId = stampWinnerId(game)
+  const overrideHex = inkOverride !== undefined ? inkOverride : stampInkOverrideFor(winnerId)
+  const ink = stampInkFor(game, { overrideHex })
 
   const accessibleTitle =
     title ??
@@ -263,18 +276,22 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
           {runText(game.home?.runs)}
         </text>
 
-        {/* Game-state footer inside the bottom lens. */}
-        <text
-          x={STAMP_CENTER}
-          y={LABEL_BASELINE}
-          textAnchor="middle"
-          fontFamily='"IBM Plex Mono", ui-monospace, monospace'
-          fontSize={labelFont.size}
-          fontWeight="400"
-          letterSpacing={labelFont.tracking}
-        >
-          {label}
-        </text>
+        {/* Game-state footer inside the bottom lens — extras/doubleheader facts
+            only (stampArt.js's stampLabel); a plain nine-inning single game has
+            nothing to say here, so nothing renders. */}
+        {label && (
+          <text
+            x={STAMP_CENTER}
+            y={LABEL_BASELINE}
+            textAnchor="middle"
+            fontFamily='"IBM Plex Mono", ui-monospace, monospace'
+            fontSize={labelFont.size}
+            fontWeight="400"
+            letterSpacing={labelFont.tracking}
+          >
+            {label}
+          </text>
+        )}
       </g>
     </svg>
   )

@@ -207,7 +207,8 @@
    screens/identity-lab/editors/LogoRecolorEditor.jsx. */
 .idlab__monoink,
 .idlab__recolor,
-.idlab__stampplace {
+.idlab__stampplace,
+.idlab__stampink {
   padding: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -220,6 +221,38 @@
    need the room, and they're only comparable at one size. */
 .idlab__stampplace {
   margin-top: var(--space-4);
+}
+
+/* Stamp ink — one preview stamp beside its one field, unlike placement's two
+   side-by-side slots: there's one ink for the whole club, not one per side.
+   screens/identity-lab/editors/StampInkEditor.jsx. */
+.idlab__stampink {
+  margin-top: var(--space-4);
+}
+
+.idlab__stampinkrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.idlab__stampinkfield {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+
+.idlab__stampinkfield label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+.idlab__stampinkfield code {
+  font-family: var(--font-mono);
 }
 
 .idlab__stampplacewarn {

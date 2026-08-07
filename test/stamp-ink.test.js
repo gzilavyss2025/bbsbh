@@ -120,6 +120,35 @@ test('the winner’s darkest colour is what the stamp is pressed in', () => {
 })
 
 // ---------------------------------------------------------------------------
+// A club's own override (src/lib/stampInkTuning.js) — same floor, different pick
+// ---------------------------------------------------------------------------
+
+test('a valid override wins over the automatic darkest-brand-colour pick', () => {
+  // Not the Brewers' navy, not their gold — a club's own choice, once given one.
+  assert.equal(stampInkFor(game(), { overrideHex: '#663399' }), '#663399')
+})
+
+test('an override still walks through the same contrast floor as the automatic pick', () => {
+  const pale = '#3378C2' // Rocket City's own under-floor colour, reused as a stand-in pick
+  assert.ok(contrastRatio(pale, STAMP_PAPER) < MIN_INK_CONTRAST)
+  const ink = stampInkFor(game(), { overrideHex: pale })
+  assert.ok(contrastRatio(ink, STAMP_PAPER) >= MIN_INK_CONTRAST)
+  assert.equal(ink, deepenToContrast(pale, STAMP_PAPER))
+})
+
+test('a malformed or absent override falls through to automatic, same as no option at all', () => {
+  assert.equal(stampInkFor(game(), { overrideHex: 'not a colour' }), stampInkFor(game()))
+  assert.equal(stampInkFor(game(), { overrideHex: '' }), stampInkFor(game()))
+  assert.equal(stampInkFor(game(), { overrideHex: undefined }), stampInkFor(game()))
+})
+
+test('an override for a game with no winner still leaves the stamp in the book’s own ink', () => {
+  // Nobody won, so there is no club whose override could even apply.
+  const tie = game({ winnerId: null, away: { id: BREWERS, runs: 4 }, home: { id: CUBS, runs: 4 } })
+  assert.equal(stampInkFor(tie, { overrideHex: '#663399' }), null)
+})
+
+// ---------------------------------------------------------------------------
 // The floor: ink that actually reads on cream paper
 // ---------------------------------------------------------------------------
 

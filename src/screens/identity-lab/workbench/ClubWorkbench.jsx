@@ -3,6 +3,7 @@ import { teamAbbr } from '../../../lib/teams.js'
 import { CrestStrip } from './CrestStrip.jsx'
 import { LogoRecolorEditor } from '../editors/LogoRecolorEditor.jsx'
 import { MonoInkEditor } from '../editors/MonoInkEditor.jsx'
+import { StampInkEditor } from '../editors/StampInkEditor.jsx'
 import { StampPlacementEditor } from '../editors/StampPlacementEditor.jsx'
 import { TwoBarsPanel } from './TwoBarsPanel.jsx'
 import { LogoShelf } from './LogoShelf.jsx'
@@ -99,6 +100,16 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
           the same mark — not "which shapes are ink" but "where does it sit". */}
       <StampPlacementEditor
         key={`stamp-${team.id}`}
+        teamId={team.id}
+        name={team.name}
+        abbreviation={teamAbbr(team)}
+      />
+
+      {/* Same club-level reasoning as placement above it, one concern over:
+          not where the mark sits, but what colour the whole stamp presses in
+          when this club wins. */}
+      <StampInkEditor
+        key={`stampink-${team.id}`}
         teamId={team.id}
         name={team.name}
         abbreviation={teamAbbr(team)}
