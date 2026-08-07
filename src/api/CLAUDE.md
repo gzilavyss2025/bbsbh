@@ -26,6 +26,21 @@ spoiler-free only when restricted to the half the user has reached
 (`halfIndex <= revealedThrough + 1`). See the root `CLAUDE.md` spoiler section and
 `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010) before touching any of these.
 
+**The classification is also machine-readable.** `spoiler-manifest.json` in this
+directory carries one entry per module — its class (`reveal-only`, `reveal-gated`,
+`caller-gated`, `cutoff-gated`, `progress-only`, `mixed`, `spoiler-free`), a `why`,
+and for the gated classes an `importers` allowlist.
+`scripts/check-spoiler-manifest.mjs` (run by `npm run lint`) fails if a module here
+has no entry, if an entry names a file that no longer exists, or if a gated module
+gains an importer that isn't on its list. **A new module in this directory does not
+lint until it is classified** — that is the point. It cannot prove a reveal-only call
+sits inside a `SealBox` reveal (ADR-0002's render-function shape is what does that);
+what it buys is that a spoiler audit is a diff against that file rather than a
+re-trace of the whole graph. The motivating case is in the manifest's own header:
+`loadScorecard.js`'s header claimed for months that the module read only spoiler-free
+data while importing `revealInning`/`revealTotals` two lines below it. Prose can be
+wrong; this cannot be wrong silently.
+
 **This classification is about the SCORING surfaces only** — the slate's score
 cells, the lineup pages, the innings viewer, the box score. Most modules below
 feed OPEN surfaces instead (season and career stats, team and player pages,

@@ -599,6 +599,16 @@ process automatically.
   when Claude works in that directory, so the always-loaded root stays cheap. When
   it fails, move detail into the relevant nested file or `docs/*` and leave a pointer
   in root — don't just raise the cap.
+- `check-spoiler-manifest.mjs` — guards `src/api/spoiler-manifest.json`, the
+  machine-readable spoiler classification of every module in `src/api/`. Four
+  assertions: every module has an entry, every entry names a real file, entries are
+  well-formed (known class, non-empty `why`, `importers` on exactly the gated
+  classes), and a `reveal-only`/`reveal-gated` module — or a `mixed` module's named
+  reveal-only EXPORTS — is imported only from its allowlist. Stale allowlist entries
+  fail too, the same ratchet rule `check-dir-size.mjs` uses. Unlike its siblings it
+  RESOLVES import specifiers rather than substring-matching a basename, because
+  `highlights.js` is a substring of `gamehighlights.js` and those two carry opposite
+  classifications. See `src/api/CLAUDE.md` and the manifest's own header.
 - `check-dir-size.mjs` — caps source files per directory (`MAX_FILES` 12) across
   `src/`, `api/`, `scripts/`, giving the "flat directories don't stay flat" rule in
   root `CLAUDE.md` the enforcement it never had (that rule was broken to 126 files
