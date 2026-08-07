@@ -468,11 +468,19 @@
 
 /* Page number and the add-a-page control, in the bottom corner where a
    passport's page number lives. Above the watermark, below a stamp — a
-   stamp that lands near the corner covers it, exactly as a real one would. */
+   stamp that lands near the corner covers it, exactly as a real one would.
+
+   The inset is deliberately smaller than the page's OWN old --space-3/
+   --space-2 pairing: PAGE_MARGIN dropped to 0.025 (src/lib/passportLayout.js)
+   so the ruled grid now runs close to the page edge, and at a phone-width
+   page that margin band is only about 9-13px wide — narrower than the
+   --space-3 (12px) / --space-2 (8px) this chip used to sit at. --space-1 (4px)
+   on both sides keeps the chip inside that band at every page size this book
+   renders, rather than spilling into the grid's own bottom-right cell. */
 .passportpage__foot {
   position: absolute;
-  right: var(--space-3);
-  bottom: var(--space-2);
+  right: var(--space-1);
+  bottom: var(--space-1);
   z-index: 1;
   display: flex;
   align-items: center;
@@ -703,7 +711,17 @@
   opacity: 0.92;
 }
 
+/* `.passcover` is aspect-ratio-locked to its WIDTH, not sized to its content,
+   and clips anything past its own box (`overflow: hidden`) — so a title has
+   to wrap rather than run wide. A book's title can now be user-authored, up
+   to MAX_BOOK_TITLE_LENGTH (24 chars, src/lib/books.js), and a single long
+   word with no spaces (nothing stops that at the sanitizer) would otherwise
+   overflow the board's width and be silently clipped instead of wrapping.
+   `max-width: 100%` keeps it inside the flex column's own cross size; `anywhere`
+   over `break-word` because it also counts toward the browser's line-breaking
+   score instead of only kicking in as a last resort. */
 .passcover__title {
+  max-width: 100%;
   font-family: var(--font-display);
   font-size: var(--fs-h1);
   font-weight: var(--w-black);
@@ -711,9 +729,11 @@
   letter-spacing: var(--ls-display);
   color: inherit;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .passcover__club {
+  max-width: 100%;
   font-family: var(--font-display);
   font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
@@ -722,6 +742,7 @@
   color: inherit;
   text-align: center;
   text-wrap: balance;
+  overflow-wrap: anywhere;
   opacity: 0.88;
 }
 
@@ -944,4 +965,72 @@
 .logbook__unplace:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* ---- CoverColorPicker (ADR-0036's shelf) ---- */
+/* A thin wrapper around ClubPicker (the strip's own rules live in
+   26-player-page.css and are reused untouched); this only adds the explicit
+   favourite-team option and a live preview of the pair PassportCover would
+   actually paint the board in. */
+.covercolorpicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.covercolorpicker__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.covercolorpicker__favorite {
+  padding: var(--space-1) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.covercolorpicker__favorite.is-active {
+  border-color: var(--accent-primary);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}
+
+.covercolorpicker__favorite:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.covercolorpicker__preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The pair PassportCover.jsx would paint the board in — split diagonally so
+   both the board colour and its own foil are visible in one small chip. */
+.covercolorpicker__swatch {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, var(--swatch-ink) 0 60%, var(--swatch-foil) 60% 100%);
+}
+
+.covercolorpicker__previewname {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
 }

@@ -39,6 +39,9 @@
 //   '/logbook?place={gamePk}'            -> { name: 'logbook', placing: gamePk } (book in placement mode)
 //   '/logbook/stats'                     -> { name: 'logbook-stats' }          (what the collection adds up to)
 //   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
+//   '/logbook/book/{bookId}'             -> { name: 'logbook', bookId, season: null }   (a specific named book)
+//   '/logbook/book/{bookId}/{season}'    -> { name: 'logbook', bookId, season }
+//   '/logbook/book/{bookId}/stats'       -> { name: 'logbook-stats', bookId }  (one book's retrospective)
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
@@ -176,6 +179,39 @@ export function parseRoute(url) {
   // stale link to it degrades to the plain book.
   if (parts.length === 1 && parts[0] === 'logbook')
     return { name: 'logbook', season: null, placing: toGamePkParam(q.get('place')) }
+  // A specific named BOOK (ADR-0036's shelf), additive alongside the two
+  // routes above rather than a replacement for them: '/logbook' and
+  // '/logbook/{season}' keep meaning exactly what they always have — the
+  // default book's content, since every stamp minted before this feature
+  // already lives in DEFAULT_BOOK_ID (src/lib/books.js's migration). This is
+  // the only way to deep-link or bookmark a NON-default book. Same `?place=`
+  // hand-off as the bare route, for the same reason: opening a specific book
+  // from the box score's mint card should drop straight into placement mode.
+  if (parts.length === 3 && parts[0] === 'logbook' && parts[1] === 'book')
+    return {
+      name: 'logbook',
+      bookId: parts[2],
+      season: null,
+      placing: toGamePkParam(q.get('place')),
+    }
+  // THIS BRANCH MUST STAY ABOVE THE SEASON BRANCH BELOW, for the identical
+  // reason '/logbook/stats' has to stay above '/logbook/{season}' above:
+  // `Number(parts[3])` would parse 'stats' as NaN and silently fall through to
+  // the bare book page instead of the retrospective.
+  if (parts.length === 4 && parts[0] === 'logbook' && parts[1] === 'book' && parts[3] === 'stats')
+    return { name: 'logbook-stats', bookId: parts[2] }
+  // One season of a specific book. A non-numeric or out-of-range segment falls
+  // back to that book's bare page (same idea as the invalid-date fallback
+  // above) rather than stranding it on a season that cannot exist.
+  if (parts.length === 4 && parts[0] === 'logbook' && parts[1] === 'book') {
+    const season = Number(parts[3])
+    return {
+      name: 'logbook',
+      bookId: parts[2],
+      season: Number.isInteger(season) && season >= 1876 && season <= 2200 ? season : null,
+      placing: toGamePkParam(q.get('place')),
+    }
+  }
   // High-res game photo finder — unsealed, see root CLAUDE.md's spoiler section.
   if (parts.length === 1 && parts[0] === 'photos') return { name: 'photos' }
   // Same page, deep-linked straight to one game's gallery (e.g. from the box
@@ -375,6 +411,18 @@ export function logbookPath(season = null) {
 // so 'stats' can never collide with a season segment.
 export function logbookStatsPath() {
   return '/logbook/stats'
+}
+// A specific named book (ADR-0036's shelf), optionally paged to one season —
+// the additive counterpart to logbookPath() for a user with more than one
+// book. Never build bookPath(DEFAULT_BOOK_ID): the bare logbookPath() already
+// reaches that book, and building both would give one book two addresses.
+export function bookPath(bookId, season = null) {
+  return season ? `/logbook/book/${bookId}/${season}` : `/logbook/book/${bookId}`
+}
+// The retrospective over one specific book, additive counterpart to
+// logbookStatsPath().
+export function bookStatsPath(bookId) {
+  return `/logbook/book/${bookId}/stats`
 }
 // The book, opened in placement mode for one freshly minted stamp. See the
 // `?place=` note in parseRoute for why this is a query rather than a route.

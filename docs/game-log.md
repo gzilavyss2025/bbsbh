@@ -12,9 +12,11 @@ will tell you when you get them wrong. The voice is not, and won't.
 
 Deeper reading, in order of specificity: `docs/adr/0035-logbook-stamps-are-gated-by-the-reveal-mark.md`
 (why a stamp may carry a score at all), `docs/adr/0036-the-logbook-is-a-passport-book-you-arrange-by-hand.md`
-(why the collection is a book you arrange), `.scratch/game-stamps/PRD.md` (the
-original scoping, plus a running list of where the build deliberately departed
-from it), and `src/CLAUDE.md` for the component wiring.
+(why the collection is a book you arrange), `docs/adr/0041-the-game-log-holds-more-than-one-book.md`
+(why a user may hold more than one, and what stayed the same when that shipped),
+`.scratch/game-stamps/PRD.md` (the original scoping, plus a running list of
+where the build deliberately departed from it), and `src/CLAUDE.md` for the
+component wiring.
 
 ---
 
@@ -25,12 +27,16 @@ head of that revealed sheet, once the game is final, you can **stamp** it — mi
 a one-color commemorative mark carrying the final score, the two clubs, the
 date, and the venue. That stamp is yours to keep.
 
-Stamps accumulate into your **Game Log**: a passport book you arrange by hand.
-Freshly minted stamps wait in a **tray** until you tap a spot on a page to place
-them. Pages hold eight, in two columns of four, and each stamp lands with a
-slight tilt so a filled page reads as pressed by hand rather than laid out by a
-grid. A **retrospective** (`/logbook/stats`) adds the collection up — clubs seen,
-your record watching them, the span of dates you covered.
+Stamps accumulate into your **Game Log**: one or more passport books you
+arrange by hand (ADR-0041 — most users will only ever need the one that's
+there from the start). Freshly minted stamps wait in a **tray** until you tap
+a spot on a page to place them, which is also the moment a stamp is filed
+into whichever book you had open. Pages hold eight, in two columns of four,
+and each stamp lands with a slight tilt so a filled page reads as pressed by
+hand rather than laid out by a grid. A **retrospective** (`/logbook/stats`)
+adds the WHOLE collection up, across every book — clubs seen, your record
+watching them, the span of dates you covered; a single book's own
+retrospective is `/logbook/book/{bookId}/stats`.
 
 The Game Log is per-user and local-first. On a Clerk-configured deployment,
 signed-out visitors see the feature pitch and account entry at `/logbook`;
@@ -60,7 +66,7 @@ rename. Do not "complete" it.
 | Layer | Name | Examples |
 |---|---|---|
 | Everything a user reads or hears | **Game Log** | headings, buttons, menu labels, tab titles, `aria-label`s, OG cards |
-| Route | `logbook` | `/logbook`, `/logbook/{season}`, `/logbook/stats`, `?place={gamePk}` |
+| Route | `logbook` | `/logbook`, `/logbook/{season}`, `/logbook/stats`, `/logbook/book/{bookId}[/{season}\|/stats]`, `?place={gamePk}` |
 | Modules, components, CSS, storage | `logbook` / `Logbook` | `LogbookPage.jsx`, `api/logbook.js`, `.logbook__cell`, `bbsbh:stamps` |
 
 **Why the route can never change:** a stamped game's `/logbook` link is shared,
@@ -75,19 +81,26 @@ ever sees the path segment as a word.
 lint guard (`scripts/check-stamp-surfaces.mjs`), and the e2e specs; renaming
 half of them leaves the next reader unsure which name means what.
 
-### The nine files display copy lives in
+### The twelve files display copy lives in
 
-If you are changing the user-facing name or wording, these are all of them:
+If you are changing the user-facing name or wording, these are all of them.
+Three are new since ADR-0041 gave the Game Log more than one book —
+`LogbookPage.jsx` shrank to the route shell + book resolver when the shelf
+pushed it past the file-size guard, and its old page-level copy (empty
+state, tray and placement ledes) moved to `LogbookCollection.jsx` with it:
 
 | File | What it carries |
 |---|---|
 | `src/components/chrome/LogbookButton.jsx` | the slate header's labelled entry point |
 | `src/components/account/LogbookLanding.jsx` | the signed-out feature pitch, process, benefits, trust note, and account CTAs |
 | `src/lib/reportPages.js` | the label in the More menu, site footer, and report footer |
-| `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title, empty state, tray and placement ledes |
-| `src/screens/LogbookStatsPage.jsx` | retrospective tab title, back links, empty state |
+| `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title — the route shell only now; see `LogbookCollection.jsx` below for the rest |
+| `src/screens/LogbookCollection.jsx` | one open book's page: empty state, tray and placement ledes |
+| `src/components/passport/LogbookShelf.jsx` | the multi-book shelf's copy — "your books," the new-book tile |
+| `src/components/passport/BookManagementSheet.jsx` | create/rename/re-cover/remove-a-book copy |
+| `src/screens/LogbookStatsPage.jsx` | retrospective tab title, back links, empty state — both the whole-collection and the per-book views |
 | `src/components/logbook/StampGameButton.jsx` | the whole mint strip inside the box score |
-| `src/components/passport/PassportCover.jsx` | the book's foil-stamped cover and its `aria-label` |
+| `src/components/passport/PassportCover.jsx` | a book's foil-stamped cover and its `aria-label` — the default title/subtitle when a book carries no custom text |
 | `src/screens/identity-lab/editors/StampPlacementEditor.jsx` | Identity Lab hints that name the destination |
 | `api/_lib/cards.js` | the shared-link Open Graph card (`logbook` key) |
 
@@ -274,19 +287,32 @@ must not move when a note is edited.
 `attended` was cut from the mode enum for v1 — it wants its own overprint on the
 stamp art, and adding an enum value later is cheap.
 
-### 4.3 The book, and placement
+### 4.3 The book(s), and placement
 
 `src/lib/passportLayout.js` is the geometry, as pure math. A placement is
-`{ page, x, y, tilt }` with **x/y as fractions of the page box**, not pixels —
-that is the entire reason a book arranged on a phone reads correctly on a laptop,
-and the reason a placement is worth syncing at all. Note what a placement adds to
-the record: a page number and two fractions. Nothing score-bearing, so a hostile
-client that forges one has moved a picture, not minted a score.
+`{ bookId, page, x, y, tilt }` with **x/y as fractions of the page box**, not
+pixels — that is the entire reason a book arranged on a phone reads correctly
+on a laptop, and the reason a placement is worth syncing at all. Note what a
+placement adds to the record: which book, a page number, two fractions.
+Nothing score-bearing, so a hostile client that forges one has moved a
+picture, not minted a score.
 
-Minting and placing are deliberately **two steps**. The mint happens in the box
-score, inside the seal, where the safety argument lives; the book — a whole page
-of other games' stamps — never has to render inside a game screen. An unplaced
-stamp is not a lost one; it waits in the tray.
+A book is separate metadata (`src/lib/books.js`, `{ id, state, title,
+subtitle, coverTeamId, createdAt, updatedAt }`) from the stamps filed in it —
+it never holds the collection itself, only names a shelf slot. Every device
+always has at least one (`DEFAULT_BOOK_ID`, synthesised the first time
+`useBooks.js` mounts and finds none), so there is no "zero books" state
+anywhere. `passportLayout.js` needed no changes to support more than one book:
+every function there already took a `stamps` ARRAY as input, and a caller
+pre-filtering that array to one book's stamps is enough — see ADR-0041.
+
+Minting and placing are deliberately **two steps**, and now placing is also
+the moment a stamp is filed into a book. The mint happens in the box score,
+inside the seal, where the safety argument lives; the book — a whole page of
+other games' stamps — never has to render inside a game screen. An unplaced
+stamp is not a lost one, and belongs to no book yet; it waits in the tray,
+book-agnostic, until a tap on a specific book's page both places it and
+assigns it there in one motion.
 
 Placement mode is `?place={gamePk}`, a **query and not a route name**: it is a
 transient mode of the same page, not an address worth sharing, and a stale link
@@ -303,6 +329,15 @@ is what let a backlog of unsyncable stamps finally upload. Notes commit on blur,
 not per keystroke — every save bumps `updatedAt`, which
 is what the sync diffs on, so per-keystroke writes would publish a request per
 character.
+
+A book's own identity (title, subtitle, cover club) syncs on a separate
+`books` channel — `api/books.js` + `src/components/sync/BooksCloudSync.jsx`,
+modeled on `api/spoiled-days.js`'s shape (one small per-user Redis hash, no
+season sharding, since a user holds at most `MAX_BOOKS` of them) rather than
+`api/stamps.js`'s. Same removability-sync shape as stamps: a removed book
+publishes an explicit `'off'` rather than being deleted, so a device that was
+offline for the removal still learns about it on reconnect instead of a plain
+union merge resurrecting it. See ADR-0041.
 
 ### 4.5 Stamp art
 
@@ -323,10 +358,13 @@ collection, the moment the change ships.
 
 | Route | Screen | Notes |
 |---|---|---|
-| `/logbook` | `LogbookPage.jsx` | signed out on a Clerk-configured deploy: feature pitch; signed in (or Clerk unavailable): the book. `season: null` means "newest season you have stamps in", resolved by the page |
-| `/logbook/{season}` | same | one season; out-of-range falls back to the bare book |
+| `/logbook` | `LogbookPage.jsx` → `LogbookCollection.jsx` or `LogbookShelf.jsx` | signed out on a Clerk-configured deploy: feature pitch; signed in (or Clerk unavailable): exactly one live book opens directly (today's behaviour, unchanged); two or more show the shelf. `season: null` means "newest season you have stamps in", resolved by the page |
+| `/logbook/{season}` | `LogbookCollection.jsx` | one season of the DEFAULT book, byte-for-byte unchanged parsing since before ADR-0041; out-of-range falls back to the bare book |
 | `/logbook?place={gamePk}` | same | placement mode for one stamp |
-| `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
+| `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective over the WHOLE collection, every book — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
+| `/logbook/book/{bookId}` | `LogbookCollection.jsx` | a specific non-default book, newest season — additive since ADR-0041, the only way to deep-link one |
+| `/logbook/book/{bookId}/{season}` | same | one season of that book |
+| `/logbook/book/{bookId}/stats` | `LogbookStatsPage.jsx` | that one book's retrospective — **must stay above the season branch above it, for the identical parsing reason** |
 
 Entry points: the labelled pill in the slate header (`LogbookButton.jsx`), the
 More menu and both footers (via `reportPages.js`), and the mint strip across the
@@ -350,6 +388,10 @@ unknown to us.
 5. **The record never stores a score**, only enough to resolve one at render time.
 6. **The OG card never names a game, club, record, or count.** §5.
 7. **"The score on it never changes" stays true**, in behavior and in copy. §3.1.
+8. **A user is never left with zero books.** `useBooks.js`'s migration
+   guarantees one always exists; the remove-a-book UI refuses to tombstone
+   the last live one, the same way a full season is refused rather than
+   silently doing nothing. ADR-0041.
 
 ## 7. Open threads
 

@@ -125,7 +125,13 @@ const BUDGETS = {
   // since the cascade contract is ORDER, not unique numbers — and the order
   // matters here: it has to land after 26-player-page.css, which owns the
   // `.statcast-section` the strip sits inside.
-  'src/styles': 61,
+  // 61 -> 62 for `58-logbook-shelf.css`: the Game Log shelf and its book
+  // create/rename/re-cover/remove sheet (ADR-0036's multi-book addendum) —
+  // a genuinely new UI, not a split-out of an over-budget file, so it earns
+  // the next free integer rather than a lettered sibling. Loaded directly by
+  // `LogbookShelf.jsx`/`BookManagementSheet.jsx`, same "the component that
+  // uses it carries it" convention as `49-passport-book.css`.
+  'src/styles': 62,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -156,12 +162,30 @@ const BUDGETS = {
   // +1 for stampInkTuning.js — the per-club stamp-ink override reader
   // (src/lib/data/stamp-ink.json), same small reader/store-file pairing as
   // the existing stampLogoTuning.js beside it, not a new subsystem.
-  'src/lib': 49,
-  'src/screens': 38,
+  // +1 for books.js — the pure rules for multiple named Game Log books
+  // (ADR-0036's shelf), the same React-free-core-beside-its-hook shape as
+  // stamps.js/useStamps.js, not a new subsystem.
+  // +1 for logbookNav.js — the book-path helpers shared by LogbookPage.jsx
+  // and LogbookCollection.jsx once that split landed (see the src/screens
+  // entry below), pulled out rather than defined twice. A leaf module, not a
+  // new subsystem.
+  'src/lib': 51,
+  // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
+  // the passport book, the season grid), split out of LogbookPage.jsx when
+  // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
+  // ceiling. LogbookPage.jsx keeps the route-facing shell (the Clerk gate,
+  // and the shelf-vs-single-book resolver); this file is the part that draws
+  // one book. It is the reason GameStamp.jsx's containment allowlist
+  // (scripts/check-stamp-surfaces.mjs) now names this file instead of
+  // LogbookPage.jsx — a mechanical move, not a new spoiler-relevant surface.
+  'src/screens': 39,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
-  'src/hooks': 19,
+  // 19 -> 20 for useBooks.js — useStamps.js's sibling for the new multi-book
+  // store (src/lib/books.js), same React-wiring-over-a-pure-core shape as the
+  // hook it sits beside.
+  'src/hooks': 20,
   'src/screens/identity-lab': 15,
 }
 

@@ -30,6 +30,8 @@ import {
   logbookPath,
   logbookStatsPath,
   logbookPlacePath,
+  bookPath,
+  bookStatsPath,
   profilePath,
 } from '../src/lib/route.js'
 
@@ -391,6 +393,74 @@ test('an unknown Logbook sub-segment still falls back to the bare page', () => {
   // 'stats' is matched by name, not by "non-numeric", so every other mangled
   // link keeps the old forgiving behavior instead of 404-ing.
   assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null, placing: null })
+})
+
+// --------------------------------------------------------------------------
+// A specific named book (ADR-0036's shelf) — additive routes, byte-for-byte
+// alongside the two above rather than a replacement for them.
+// --------------------------------------------------------------------------
+test('a bare book route opens that book with no season resolved yet', () => {
+  assert.deepEqual(parseRoute('/logbook/book/b1abcxyz'), {
+    name: 'logbook',
+    bookId: 'b1abcxyz',
+    season: null,
+    placing: null,
+  })
+  assert.equal(bookPath('b1abcxyz'), '/logbook/book/b1abcxyz')
+  assert.deepEqual(parseRoute(bookPath('b1abcxyz')), {
+    name: 'logbook',
+    bookId: 'b1abcxyz',
+    season: null,
+    placing: null,
+  })
+})
+
+test('?place= rides along on a book route the same way it does the bare one', () => {
+  assert.deepEqual(parseRoute('/logbook/book/b1abcxyz?place=823035'), {
+    name: 'logbook',
+    bookId: 'b1abcxyz',
+    season: null,
+    placing: 823035,
+  })
+})
+
+test("a book's season segment parses, and an impossible one falls back to that book's bare page", () => {
+  assert.deepEqual(parseRoute('/logbook/book/b1abcxyz/2026'), {
+    name: 'logbook',
+    bookId: 'b1abcxyz',
+    season: 2026,
+    placing: null,
+  })
+  assert.equal(bookPath('b1abcxyz', 2026), '/logbook/book/b1abcxyz/2026')
+  assert.deepEqual(parseRoute(bookPath('b1abcxyz', 2026)), {
+    name: 'logbook',
+    bookId: 'b1abcxyz',
+    season: 2026,
+    placing: null,
+  })
+  for (const bad of ['/logbook/book/b1abcxyz/1200', '/logbook/book/b1abcxyz/9999']) {
+    assert.deepEqual(
+      parseRoute(bad),
+      { name: 'logbook', bookId: 'b1abcxyz', season: null, placing: null },
+      bad,
+    )
+  }
+})
+
+// The identical regression the bare '/logbook/stats' block above exists for,
+// one segment deeper: `Number(parts[3])` would parse 'stats' as NaN and
+// silently fall through to that book's bare page unless the 'stats' branch is
+// checked FIRST.
+test("a book's /stats is the retrospective, not season NaN falling through to that book's bare page", () => {
+  assert.deepEqual(parseRoute('/logbook/book/b1abcxyz/stats'), {
+    name: 'logbook-stats',
+    bookId: 'b1abcxyz',
+  })
+  assert.equal(bookStatsPath('b1abcxyz'), '/logbook/book/b1abcxyz/stats')
+  assert.deepEqual(parseRoute(bookStatsPath('b1abcxyz')), {
+    name: 'logbook-stats',
+    bookId: 'b1abcxyz',
+  })
 })
 
 // --------------------------------------------------------------------------

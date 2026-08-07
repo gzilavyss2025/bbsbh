@@ -1,4 +1,4 @@
-// What the four cross-device sync channels are actually doing — pure, so the
+// What the cross-device sync channels are actually doing — pure, so the
 // rules below are pinned by test/sync-status.test.js rather than inferred from
 // a component's effect ordering. The React seam is
 // src/components/sync/SyncStatusProvider.jsx; the surface that renders it is My
@@ -16,8 +16,10 @@
 // phase and two timestamps. There is no room in it for a game, a score, or a
 // count of anything — by construction, not by discipline.
 
-// The four things that cross devices. Ordered as the receipt reads them.
-export const SYNC_CHANNELS = Object.freeze(['reveal', 'spoiledDays', 'stamps', 'prefs'])
+// The things that cross devices. Ordered as the receipt reads them. `books`
+// sits next to `stamps` — the Game Log's named books and its stamps are one
+// feature (ADR-0036) and read as one thing to a user.
+export const SYNC_CHANNELS = Object.freeze(['reveal', 'spoiledDays', 'stamps', 'books', 'prefs'])
 
 // off          this deploy configures no account at all (no Clerk publishable
 //              key) — there is nothing to sync and nothing is wrong.

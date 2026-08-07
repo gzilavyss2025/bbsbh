@@ -25,8 +25,8 @@ import {
 const report = (state, channel, phase, extra = {}) =>
   reduceSync(state, { channel, phase, at: 1000, ...extra })
 
-test('the four channels are the four things that cross devices', () => {
-  assert.deepEqual([...SYNC_CHANNELS], ['reveal', 'spoiledDays', 'stamps', 'prefs'])
+test('the channels are the things that cross devices', () => {
+  assert.deepEqual([...SYNC_CHANNELS], ['reveal', 'spoiledDays', 'stamps', 'books', 'prefs'])
 })
 
 test('a deploy with no account feature starts (and stays) off', () => {

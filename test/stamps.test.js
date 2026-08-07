@@ -12,6 +12,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  DEFAULT_BOOK_ID,
   DEFAULT_STAMP_MODE,
   MAX_NOTE_LENGTH,
   MAX_PLACEMENT_PAGE,
@@ -173,7 +174,7 @@ test('season views count and order only live stamps', () => {
 // about staying READABLE (clamp, don't reject) rather than about failing
 // closed, the opposite posture from the reveal gate above.
 
-const SPOT = { page: 2, x: 0.42, y: 0.61, tilt: 3.5 }
+const SPOT = { bookId: DEFAULT_BOOK_ID, page: 2, x: 0.42, y: 0.61, tilt: 3.5 }
 
 test('normalizePlacement takes a readable spot and refuses an unreadable one', () => {
   assert.deepEqual(normalizePlacement(SPOT), SPOT)
@@ -199,6 +200,7 @@ test('normalizePlacement takes a readable spot and refuses an unreadable one', (
 
 test('normalizePlacement clamps a spot onto the page rather than dropping it', () => {
   assert.deepEqual(normalizePlacement({ page: 1, x: -3, y: 12, tilt: 0 }), {
+    bookId: DEFAULT_BOOK_ID,
     page: 1,
     x: 0,
     y: 1,
@@ -229,6 +231,44 @@ test('samePlacement compares the spot, not the object', () => {
   assert.equal(samePlacement(SPOT, { ...SPOT, x: 0.43 }), false)
   assert.equal(samePlacement(SPOT, { ...SPOT, y: 0.62 }), false)
   assert.equal(samePlacement(SPOT, { ...SPOT, tilt: -3.5 }), false)
+  // Same page/x/y/tilt, different book, is NOT the same spot — moving a stamp
+  // to another book's page is a real change worth syncing.
+  assert.equal(samePlacement(SPOT, { ...SPOT, bookId: 'roadtrip' }), false)
+})
+
+// ---------------------------------------------------------------------------
+// bookId — which book a placement is filed in (foundation for src/lib/books.js)
+// ---------------------------------------------------------------------------
+
+test('normalizePlacement defaults bookId to DEFAULT_BOOK_ID when absent or invalid', () => {
+  assert.equal(normalizePlacement({ page: 1, x: 0.5, y: 0.5, tilt: 0 }).bookId, DEFAULT_BOOK_ID)
+  assert.equal(normalizePlacement({ ...SPOT, bookId: '' }).bookId, DEFAULT_BOOK_ID)
+  assert.equal(normalizePlacement({ ...SPOT, bookId: 'x'.repeat(65) }).bookId, DEFAULT_BOOK_ID)
+  assert.equal(normalizePlacement({ ...SPOT, bookId: 42 }).bookId, DEFAULT_BOOK_ID)
+  assert.equal(normalizePlacement({ ...SPOT, bookId: null }).bookId, DEFAULT_BOOK_ID)
+})
+
+test('normalizePlacement keeps a real bookId', () => {
+  assert.equal(normalizePlacement({ ...SPOT, bookId: 'roadtrip-2026' }).bookId, 'roadtrip-2026')
+  assert.equal(normalizePlacement({ ...SPOT, bookId: 'x'.repeat(64) }).bookId, 'x'.repeat(64))
+})
+
+test('addStamp and placeStamp round-trip a bookId through a stamp record', () => {
+  const spot = { ...SPOT, bookId: 'roadtrip-2026' }
+  const stamped = addStamp({}, 1, { date: '2026-05-18', now: 1000, placement: spot })
+  assert.equal(stampFor(stamped, 1).placement.bookId, 'roadtrip-2026')
+
+  const moved = placeStamp(
+    addStamp({}, 2, { date: '2026-05-18', now: 1000 }),
+    2,
+    spot,
+    { now: 2000 },
+  )
+  assert.equal(stampFor(moved, 2).placement.bookId, 'roadtrip-2026')
+
+  // A placement with no bookId at all still lands in the default book.
+  const defaulted = addStamp({}, 3, { date: '2026-05-18', now: 1000, placement: SPOT })
+  assert.equal(stampFor(defaulted, 3).placement.bookId, DEFAULT_BOOK_ID)
 })
 
 test('every record carries a placement, and an unreadable one never voids it', () => {

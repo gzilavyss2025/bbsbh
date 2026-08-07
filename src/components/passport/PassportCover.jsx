@@ -7,8 +7,30 @@ import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 // The Logbook passport book's FRONT COVER (ADR-0035, the passport-book
 // redesign). A real passport cover is one board of one colour with everything
 // on it foil-stamped in a single second colour — no photographs, no gradients,
-// no third ink. This is that, painted in the user's favourite club's primary
-// brand colour, and it is a real button: tapping it opens the book.
+// no third ink. This is that, and it is a real button: tapping it opens the
+// book.
+//
+// ===========================================================================
+// Which book, and whose colours — the `book` prop (ADR-0036's shelf)
+// ===========================================================================
+// A book is `{ id, state, title, subtitle, coverTeamId, createdAt, updatedAt }`
+// (src/lib/books.js) — already sanitized by whoever calls this component, so
+// this file trusts the shape rather than re-validating it, but still treats a
+// missing or partially-shaped `book` as a degrade case, not a crash, the same
+// posture it already held for an unrecognised team id.
+//
+//   - `book?.coverTeamId`, when it is a real positive integer, picks whose
+//     colours paint the board. Anything else — no `book` at all (every caller
+//     before this feature shipped a shelf UI), or a `book` with no cover pick
+//     yet — falls back to EXACTLY today's behaviour, `useFavoriteTeam()`, so a
+//     not-yet-customized book still themes off the user's own club with zero
+//     regression for anyone who never touches the new feature.
+//   - `book?.title` prints in the `.passcover__title` slot in place of the
+//     literal "Game Log"; `book?.subtitle` prints in `.passcover__club` in
+//     place of the resolved club's full name. Both are empty-string-safe
+//     (books.js's own contract: an empty string means "use the default word
+//     at render time", which is exactly this component's job — see the two
+//     `||` fallbacks below).
 //
 // ===========================================================================
 // Where the two colours come from — one chain, never a palette of our own
@@ -87,14 +109,33 @@ import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 // it is given — never assume aspect.
 const CREST_BOX = 100
 
-export function PassportCover({ onOpen }) {
+export function PassportCover({ book, onOpen }) {
+  // Called unconditionally (react-hooks/rules-of-hooks) even for a book with
+  // its own cover pick — cheap (localStorage-backed, already memoized by
+  // usePreferences), and the one branch below that needs it is itself
+  // conditional on `book`, which is NOT known before this hook runs.
   const { favoriteTeamId } = useFavoriteTeam()
-  const colors = teamChipColors(favoriteTeamId)
+
+  // The one id every visible thing on the board resolves from — colour,
+  // crest, and abbreviation alike, so a customized cover reads as ONE club's
+  // identity rather than someone else's colours behind a stranger's crest.
+  // A `book` with no cover pick, or no `book` at all (every caller before the
+  // shelf UI existed), is exactly today's cover: the user's own favourite.
+  const hasCoverPick = Number.isInteger(book?.coverTeamId) && book.coverTeamId > 0
+  const teamId = hasCoverPick ? book.coverTeamId : favoriteTeamId
+
+  const colors = teamChipColors(teamId)
   const maskId = `passcover-crest-${useId().replace(/:/g, '')}`
 
-  const abbr = teamAbbr({ id: favoriteTeamId })
-  const clubName = teamFullName(favoriteTeamId)
-  const hasMark = Boolean(favoriteTeamId) && hasMonoLogo(favoriteTeamId)
+  const abbr = teamAbbr({ id: teamId })
+  const clubName = teamFullName(teamId)
+  const hasMark = Boolean(teamId) && hasMonoLogo(teamId)
+
+  // '' is a valid, meaningful value from books.js's own contract ("use the
+  // default word at render time") — never something invented on the record's
+  // behalf, and this is the render time that contract points to.
+  const title = book?.title || 'Game Log'
+  const subtitleContent = book?.subtitle || clubName
 
   // The page aspect is imported, never restated, so a cover and the pages it
   // opens onto can't drift apart. Passed as a custom property rather than a
@@ -131,7 +172,7 @@ export function PassportCover({ onOpen }) {
               <defs>
                 <mask id={maskId}>
                   <image
-                    href={teamLogoUrl(favoriteTeamId, 'mono')}
+                    href={teamLogoUrl(teamId, 'mono')}
                     x="0"
                     y="0"
                     width={CREST_BOX}
@@ -166,11 +207,12 @@ export function PassportCover({ onOpen }) {
         tight
       />
 
-      <span className="passcover__title">Game Log</span>
+      <span className="passcover__title">{title}</span>
 
-      {/* MiLB ids have no name in the static table and answer null — the line
-          is dropped rather than filled with a placeholder. */}
-      {clubName && <span className="passcover__club">{clubName}</span>}
+      {/* Empty for a book with no custom subtitle AND a MiLB club (no name in
+          the static table, answers null) — the line is dropped rather than
+          filled with a placeholder, same as before this prop existed. */}
+      {subtitleContent && <span className="passcover__club">{subtitleContent}</span>}
 
       <span className="passcover__rule" aria-hidden="true" />
       <span className="passcover__open">Open</span>

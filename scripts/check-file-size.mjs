@@ -93,7 +93,12 @@ const BUDGETS = {
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
-  'src/styles/49-passport-book.css': 1000, // 953
+  // 1000 -> 1100: CoverColorPicker.jsx's rules (ADR-0036's shelf) — a thin
+  // wrapper around ClubPicker's own strip that adds the explicit
+  // favourite-team option and a live cover-colour preview swatch. It belongs
+  // beside PassportCover's own rules in this same partial rather than a new
+  // stylesheet, for the identical reason PassportCover's already do.
+  'src/styles/49-passport-book.css': 1100, // 1036
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470

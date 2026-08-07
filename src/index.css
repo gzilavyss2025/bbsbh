@@ -105,4 +105,6 @@
      50-logbook-landing       components/account/LogbookLanding.jsx
      51-similar-players       components/playercard/SimilarPlayerGrid.jsx
      53-umpire-tendencies     components/umpire/UmpireTendencies.jsx
+     58-logbook-shelf         components/passport/LogbookShelf.jsx,
+                              components/passport/BookManagementSheet.jsx
    ------------------------------------------------------------ */

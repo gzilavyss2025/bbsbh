@@ -57,9 +57,18 @@ const STAMP_ALLOWLIST = {
   // invented preview game, same DEV-only surface — judging a different
   // question about the same mark (what colour it presses in, not where it
   // sits). Read ADR-0035 before adding a fifth.
+  //
+  // `screens/LogbookCollection.jsx` replaced `screens/LogbookPage.jsx` here
+  // (ADR-0036's multi-book addendum) when that file's multi-book shelf pushed
+  // it past check-file-size.mjs's 600-line ceiling: LogbookPage.jsx now holds
+  // only the Clerk gate and the shelf-vs-single-book resolver, and the actual
+  // collection UI — the file that renders GameStamp, in the tray and the
+  // season grid — moved to LogbookCollection.jsx. A mechanical relocation,
+  // not a new spoiler-relevant surface: its entire input is still this user's
+  // own collection (src/hooks/useStamps.js), never a schedule, never a slate.
   'components/logbook/GameStamp.jsx': [
     'components/logbook/StampGameButton.jsx',
-    'screens/LogbookPage.jsx',
+    'screens/LogbookCollection.jsx',
     'components/passport/PassportPage.jsx',
     'screens/identity-lab/editors/StampPlacementEditor.jsx',
     'screens/identity-lab/editors/StampInkEditor.jsx',

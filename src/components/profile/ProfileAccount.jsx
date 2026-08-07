@@ -9,7 +9,7 @@ import { MergeReceipt } from './MergeReceipt.jsx'
 // My Tally's account section — the only part of the page that knows Clerk
 // exists. It imports @clerk/clerk-react at its top level, so ProfilePage
 // dynamically imports it and only when `isClerkEnabled`, exactly like
-// AccountPitch, LogbookAccountGate and the four cloud-sync components. Never a
+// AccountPitch, LogbookAccountGate and the cloud-sync components. Never a
 // conditionally-called hook: Clerk's hooks throw with no ClerkProvider ancestor,
 // so the CONDITION is the render of this component, not a call inside it.
 //
@@ -71,7 +71,7 @@ export function ProfileAccount({ status, counts, clubName }) {
           <DeviceHandoff className="mytally__handoff" />
           <p className="mytally__pitchlede caps-exempt">
             Everything on this page already works, on this device. An account carries the
-            four things below to your other screens — start a game on the phone at the
+            things below to your other screens — start a game on the phone at the
             park, pick it up on the iPad at home, right where you left off.
           </p>
           <ul className="mytally__claims">

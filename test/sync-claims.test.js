@@ -59,10 +59,10 @@ test('every claim reports through a real status channel', () => {
   }
 })
 
-test('the four approved claims are exactly what the PRD scoped, plus preferences', () => {
+test('the approved claims are exactly what the PRD scoped, plus preferences and book covers', () => {
   assert.deepEqual(
     SYNCED_ITEMS.map((i) => i.id),
-    ['reveal', 'spoiledDays', 'stamps', 'continuation', 'prefs'],
+    ['reveal', 'spoiledDays', 'stamps', 'books', 'continuation', 'prefs'],
   )
 })
 
