@@ -88,15 +88,15 @@
     "name": "Cincinnati Reds",
     "treatments": {
       "away": {
-        "scale": 0.71,
-        "offsetX": 20,
-        "offsetY": 15,
+        "scale": 0.96,
+        "offsetX": 18,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.69,
-        "offsetX": -15,
-        "offsetY": 14,
+        "scale": 0.88,
+        "offsetX": -25,
+        "offsetY": 10,
         "rotation": 0
       }
     }
@@ -394,15 +394,15 @@
     "name": "Minnesota Twins",
     "treatments": {
       "away": {
-        "scale": 0.87,
+        "scale": 0.9,
         "offsetX": 13,
-        "offsetY": 13,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.87,
+        "scale": 0.9,
         "offsetX": -10,
-        "offsetY": 13,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -427,6 +427,12 @@
   "144": {
     "name": "Atlanta Braves",
     "treatments": {
+      "away": {
+        "scale": 1,
+        "offsetX": 10,
+        "offsetY": 0,
+        "rotation": 0
+      },
       "home": {
         "scale": 1,
         "offsetX": -22,
@@ -490,15 +496,15 @@
     "name": "Milwaukee Brewers",
     "treatments": {
       "away": {
-        "scale": 0.9,
-        "offsetX": 17,
+        "scale": 0.94,
+        "offsetX": 13,
         "offsetY": 9,
         "rotation": 0,
         "note": "The reference entry: every field at its default, i.e. exactly how an untuned club draws. Kept so the store is never empty and so the shape a Save writes stays pinned by test/identity-lab-stores.test.js."
       },
       "home": {
-        "scale": 0.9,
-        "offsetX": -10,
+        "scale": 0.94,
+        "offsetX": -6,
         "offsetY": 9,
         "rotation": 0,
         "note": "Same as the away side above — the baseline, not a tuning."
@@ -552,6 +558,23 @@
         "scale": 0.88,
         "offsetX": -17,
         "offsetY": 16,
+        "rotation": 0
+      }
+    }
+  },
+  "247": {
+    "name": "Birmingham Barons",
+    "treatments": {
+      "away": {
+        "scale": 1.14,
+        "offsetX": 11,
+        "offsetY": 11,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.17,
+        "offsetX": -11,
+        "offsetY": 10,
         "rotation": 0
       }
     }
@@ -675,18 +698,35 @@
       }
     }
   },
+  "418": {
+    "name": "Chesapeake Baysox",
+    "treatments": {
+      "away": {
+        "scale": 0.89,
+        "offsetX": 23,
+        "offsetY": 4,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.89,
+        "offsetX": -15,
+        "offsetY": 7,
+        "rotation": 0
+      }
+    }
+  },
   "419": {
     "name": "Hillsboro Hops",
     "treatments": {
       "away": {
-        "scale": 1,
-        "offsetX": 14,
+        "scale": 1.01,
+        "offsetX": 16,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
         "scale": 1,
-        "offsetX": -14,
+        "offsetX": -17,
         "offsetY": 10,
         "rotation": 0
       }
@@ -764,15 +804,15 @@
     "name": "Greenville Drive",
     "treatments": {
       "away": {
-        "scale": 1,
+        "scale": 1.13,
         "offsetX": 11,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
-        "scale": 0.91,
-        "offsetX": -26,
-        "offsetY": 17,
+        "scale": 1.07,
+        "offsetX": -27,
+        "offsetY": 14,
         "rotation": 0
       }
     }
@@ -979,15 +1019,15 @@
     "name": "Brooklyn Cyclones",
     "treatments": {
       "away": {
-        "scale": 0.89,
-        "offsetX": 29,
+        "scale": 1.11,
+        "offsetX": 13,
         "offsetY": 10,
         "rotation": 0
       },
       "home": {
-        "scale": 0.9,
-        "offsetX": -19,
-        "offsetY": 10,
+        "scale": 1.06,
+        "offsetX": -17,
+        "offsetY": 12,
         "rotation": 0
       }
     }
@@ -1064,15 +1104,15 @@
     "name": "Greensboro Grasshoppers",
     "treatments": {
       "away": {
-        "scale": 0.9,
-        "offsetX": 9,
-        "offsetY": 9,
+        "scale": 0.93,
+        "offsetX": 17,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
-        "scale": 0.86,
-        "offsetX": -22,
-        "offsetY": 7,
+        "scale": 0.95,
+        "offsetX": -6,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -1115,15 +1155,15 @@
     "name": "Spokane Indians",
     "treatments": {
       "away": {
-        "scale": 1.02,
-        "offsetX": 40,
-        "offsetY": 16,
+        "scale": 0.92,
+        "offsetX": 27,
+        "offsetY": 9,
         "rotation": 0
       },
       "home": {
-        "scale": 0.98,
-        "offsetX": -10,
-        "offsetY": 9,
+        "scale": 0.93,
+        "offsetX": -5,
+        "offsetY": 8,
         "rotation": 0
       }
     }
@@ -1151,13 +1191,13 @@
       "away": {
         "scale": 1,
         "offsetX": 28,
-        "offsetY": 8,
+        "offsetY": 11,
         "rotation": 0
       },
       "home": {
         "scale": 1,
         "offsetX": -20,
-        "offsetY": 16,
+        "offsetY": 11,
         "rotation": 0
       }
     }
@@ -1175,6 +1215,23 @@
         "scale": 0.77,
         "offsetX": -22,
         "offsetY": 10,
+        "rotation": 0
+      }
+    }
+  },
+  "498": {
+    "name": "Chattanooga Lookouts",
+    "treatments": {
+      "away": {
+        "scale": 0.89,
+        "offsetX": 8,
+        "offsetY": 7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 0.86,
+        "offsetX": -15,
+        "offsetY": 9,
         "rotation": 0
       }
     }
@@ -1485,6 +1542,23 @@
       }
     }
   },
+  "584": {
+    "name": "Fort Wayne TinCaps",
+    "treatments": {
+      "away": {
+        "scale": 1.11,
+        "offsetX": 11,
+        "offsetY": -7,
+        "rotation": 0
+      },
+      "home": {
+        "scale": 1.08,
+        "offsetX": -29,
+        "offsetY": -4,
+        "rotation": 0
+      }
+    }
+  },
   "1350": {
     "name": "Northwest Arkansas Naturals",
     "treatments": {
@@ -1711,13 +1785,13 @@
     "treatments": {
       "away": {
         "scale": 1,
-        "offsetX": 14,
-        "offsetY": 8,
+        "offsetX": 19,
+        "offsetY": 13,
         "rotation": 0
       },
       "home": {
-        "scale": 0.93,
-        "offsetX": -27,
+        "scale": 1.01,
+        "offsetX": -19,
         "offsetY": 11,
         "rotation": 0
       }

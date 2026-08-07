@@ -380,7 +380,7 @@
         "pinstripe": true,
         "header": {
           "bar": "#33006F",
-          "accent": "#000000",
+          "accent": "#c4ced4",
           "onBar": "#FBF6E9"
         },
         "colors": {
@@ -1572,7 +1572,7 @@
         "offsetY": 4,
         "header": {
           "bar": "#12284B",
-          "accent": "#FFC52F",
+          "accent": "#6CACE4",
           "onBar": "#F8F8F5"
         },
         "note": "cream, not any of the three brand swatches"

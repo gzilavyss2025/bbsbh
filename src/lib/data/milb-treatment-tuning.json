@@ -649,10 +649,10 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.79,
-          "offsetX": 5,
-          "offsetY": 5,
-          "bg": "#010101",
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#31c0be",
           "pinstripe": false,
           "pinstripeBg": ""
         },
@@ -674,10 +674,10 @@
       },
       "away": {
         "position": {
-          "scale": 0.79,
-          "offsetX": 5,
-          "offsetY": 5,
-          "bg": "#D0D0D0",
+          "scale": 1,
+          "offsetX": 0,
+          "offsetY": 0,
+          "bg": "#ef7b2f",
           "pinstripe": false,
           "pinstripeBg": ""
         },
@@ -2251,11 +2251,12 @@
     "treatments": {
       "home": {
         "position": {
-          "scale": 0.87,
-          "offsetX": -7,
-          "offsetY": 7,
+          "scale": 0.97,
+          "offsetX": 0,
+          "offsetY": 0,
           "bg": "#ec3b46",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 46,
@@ -2275,11 +2276,12 @@
       },
       "away": {
         "position": {
-          "scale": 0.85,
+          "scale": 0.97,
           "offsetX": 0,
           "offsetY": 0,
           "bg": "#9EA2A2",
-          "pinstripe": false
+          "pinstripe": false,
+          "pinstripeBg": ""
         },
         "wpaLayout": {
           "size": 42,
@@ -3752,7 +3754,36 @@
           "bar": "#b5121b",
           "accent": "#807f83",
           "onBar": "#ffffff"
+        },
+        "position": {
+          "scale": 1.14,
+          "offsetX": -13,
+          "offsetY": -12,
+          "bg": "#ee2a24",
+          "pinstripe": false,
+          "pinstripeBg": ""
         }
+      },
+      "away": {
+        "position": {
+          "scale": 1.14,
+          "offsetX": -13,
+          "offsetY": -12,
+          "bg": "#8f8e92",
+          "pinstripe": false,
+          "pinstripeBg": ""
+        },
+        "wpaLayout": {
+          "size": 82,
+          "rotate": -14,
+          "offsetX": 8,
+          "offsetY": 6,
+          "paddingX": 14,
+          "paddingY": -43,
+          "rowShift": 0
+        },
+        "band": "#8f8e92",
+        "wpaWordmark": true
       }
     }
   },
