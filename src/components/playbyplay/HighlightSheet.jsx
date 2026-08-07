@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { highlightPlaybacks } from '../../api/highlights.js'
 import { ModalPortal } from '../ui/ModalPortal.jsx'
+import { SaveClipButton } from '../highlights/SaveClipButton.jsx'
 
 // The video-highlight player: opened from any "Watch" button in the app — a
 // revealed play (PlayByPlay.jsx), the box score's Play of the Game and video
@@ -68,6 +69,10 @@ export function HighlightSheet({ item, onClose }) {
   if (!item) return null
   const { hls, mp4 } = highlightPlaybacks(item)
   const title = item.title || item.headline || 'Highlight'
+  // "condensed-game-mil-stl-7-7-26.mp4" — the content item's own readable slug
+  // (see classifyHighlight's note on why `id` is the stable identity, not
+  // `guid`), so a saved file says what it is in the camera roll.
+  const filename = `${item.id || 'highlight'}.mp4`
 
   return (
     <ModalPortal>
@@ -78,9 +83,15 @@ export function HighlightSheet({ item, onClose }) {
         <div className="sheet hlsheet" role="dialog" aria-modal="true" aria-label={title}>
           <div className="hlsheet__head">
             <h2 className="sheet__title">{title}</h2>
-            <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
-              ✕
-            </button>
+            <div className="hlsheet__actions">
+              {/* Only ever the MP4: the HLS stream is a manifest of segments,
+                  not a file anything can save. A clip with no MP4 rendition
+                  simply gets no save button. */}
+              {mp4 && <SaveClipButton url={mp4} title={title} filename={filename} />}
+              <button ref={closeRef} className="hlsheet__close" onClick={onClose} aria-label="Close">
+                ✕
+              </button>
+            </div>
           </div>
 
           <div className="hlsheet__video">

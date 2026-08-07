@@ -177,6 +177,76 @@
   font-size: var(--fs-h3);
 }
 
+/* Save + ✕, top-right of the head row. Baseline-aligned with the title
+   through .hlsheet__head, so the pair reads as one trailing cluster. */
+.hlsheet__actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The save button: a small kraft-tape pill, the same amber affordance
+   language as a clip card's WATCH tab — you are taking the print out of the
+   scorebook, so it wears the tape rather than a generic outline button. The
+   states it moves through (idle → percent → SAVE TO PHOTOS → SAVED) are
+   labeled in SaveClipButton.jsx; only two of them change how it looks. */
+.hlsheet__save {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: var(--seal);
+  color: var(--text-on-seal);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-compact);
+  cursor: pointer;
+  transition: background var(--dur-snappy) var(--ease-standard);
+}
+/* A solid down-triangle, drawn from borders exactly like a clip card's WATCH
+   tab draws its ▶ — same idiom, quarter-turned, so the pair reads as one
+   family: point right to watch it, point down to keep it. */
+.hlsheet__save::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid currentColor;
+}
+.hlsheet__save:hover:not(:disabled) {
+  background: var(--seal-hatch);
+}
+.hlsheet__save:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Mid-download: no arrow (it's reporting, not inviting), and the tape goes
+   flat so it stops looking like something to press. */
+.hlsheet__save--working {
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  cursor: default;
+}
+.hlsheet__save--working::before {
+  display: none;
+}
+/* Finished: quiet confirmation, not a second invitation. */
+.hlsheet__save--done {
+  background: var(--surface-inset);
+  color: var(--text-caption);
+}
+.hlsheet__save--done::before {
+  display: none;
+}
+
 .hlsheet__close {
   flex: none;
   background: none;
