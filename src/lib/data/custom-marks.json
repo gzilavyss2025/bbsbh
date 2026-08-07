@@ -1,4 +1,11 @@
 {
+  "105": {
+    "marks": [],
+    "assignments": {
+      "milb-home": "cdn:primary",
+      "milb-away": "cdn:primary"
+    }
+  },
   "113": {
     "marks": [
       {
@@ -196,6 +203,17 @@
     "assignments": {
       "milb-home": "baseorangeonwhite",
       "milb-away": "baseorangeonwhite"
+    }
+  },
+  "5368": {
+    "marks": [
+      {
+        "slug": "primaryonlypoodle",
+        "name": "Primaryonlypoodle"
+      }
+    ],
+    "assignments": {
+      "milb-home": "primaryonlypoodle"
     }
   },
   "6324": {

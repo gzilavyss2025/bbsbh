@@ -1,4 +1,15 @@
 {
+  "102": {
+    "name": "Round Rock Express",
+    "art": "13:52bb6de9",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "4": "knockout",
+      "9": "knockout",
+      "12": "knockout"
+    }
+  },
   "103": {
     "name": "Lake Elsinore Storm",
     "art": "8:41a2d55d",
@@ -149,14 +160,9 @@
   },
   "141": {
     "name": "Toronto Blue Jays",
-    "art": "6:5d91fbd6",
-    "parts": {
-      "0": "knockout",
-      "2": "knockout",
-      "3": "ink",
-      "4": "ink",
-      "5": "knockout"
-    }
+    "art": "24:9941914f",
+    "parts": {},
+    "source": "primary"
   },
   "143": {
     "name": "Philadelphia Phillies",
@@ -699,11 +705,15 @@
     "name": "Altoona Curve",
     "art": "12:2b2a333",
     "parts": {
-      "1": "knockout",
+      "0": "knockout",
+      "1": "ink",
       "2": "knockout",
-      "5": "ink",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
       "7": "ink",
-      "8": "ink"
+      "8": "ink",
+      "11": "knockout"
     }
   },
   "453": {
@@ -1096,6 +1106,21 @@
       "3": "knockout"
     }
   },
+  "534": {
+    "name": "Rochester Red Wings",
+    "art": "9:fbe59f4f",
+    "parts": {
+      "0": "knockout",
+      "1": "ink",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "ink",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout"
+    }
+  },
   "537": {
     "name": "Hudson Valley Renegades",
     "art": "5:9c532e44",
@@ -1121,6 +1146,11 @@
     "name": "Omaha Storm Chasers",
     "art": "6:6ede8587",
     "parts": {
+      "0": "ink",
+      "1": "knockout",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "ink",
       "5": "knockout"
     }
   },
@@ -1208,15 +1238,20 @@
   },
   "561": {
     "name": "Salt Lake Bees",
-    "art": "9:899e3ac7",
+    "art": "14:8bc70142",
     "parts": {
-      "3": "knockout",
-      "4": "knockout",
+      "2": "knockout",
+      "3": "ink",
+      "4": "ink",
       "5": "knockout",
-      "6": "knockout",
-      "7": "knockout",
-      "8": "knockout"
-    }
+      "6": "ink",
+      "7": "ink",
+      "8": "ink",
+      "9": "ink",
+      "10": "ink",
+      "11": "knockout"
+    },
+    "source": "primary"
   },
   "564": {
     "name": "Jacksonville Jumbo Shrimp",
@@ -1265,7 +1300,12 @@
     "name": "Norfolk Tides",
     "art": "23:a331fd3a",
     "parts": {
-      "8": "knockout"
+      "5": "ink",
+      "8": "knockout",
+      "10": "knockout",
+      "15": "ink",
+      "18": "ink",
+      "19": "ink"
     }
   },
   "572": {
@@ -1390,6 +1430,16 @@
       "0": "knockout"
     }
   },
+  "2310": {
+    "name": "Reno Aces",
+    "art": "5:4fd3751e",
+    "parts": {
+      "0": "knockout",
+      "1": "knockout",
+      "2": "knockout",
+      "4": "knockout"
+    }
+  },
   "2498": {
     "name": "Bowling Green Hot Rods",
     "art": "3:4c158bf7",
@@ -1402,11 +1452,20 @@
     "name": "Bradenton Marauders",
     "art": "15:ba88ccf3",
     "parts": {
-      "1": "knockout",
-      "2": "ink",
-      "5": "ink",
-      "7": "ink",
-      "13": "ink"
+      "0": "knockout",
+      "1": "ink",
+      "2": "knockout",
+      "3": "knockout",
+      "4": "knockout",
+      "5": "knockout",
+      "6": "knockout",
+      "7": "knockout",
+      "8": "knockout",
+      "10": "knockout",
+      "11": "knockout",
+      "12": "knockout",
+      "13": "knockout",
+      "14": "knockout"
     }
   },
   "3410": {
