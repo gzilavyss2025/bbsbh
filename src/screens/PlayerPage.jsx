@@ -151,7 +151,6 @@ export function PlayerPage({ id, asOf, sportId }) {
             <span className="lastplayed-banner__text">Last played in {data.lastPlayedYear}</span>
           </div>
         )}
-        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="player__hero">
@@ -606,6 +605,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             The current-year row, the splits and the Advanced rates are full-season figures.
           </p>
         )}
+
+        <AsOfBanner asOf={asOf} sportId={sportId} />
       </div>
     </LinkScope>
   )
