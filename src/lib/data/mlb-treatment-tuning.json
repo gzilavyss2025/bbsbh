@@ -60,7 +60,8 @@
         "header": {
           "bar": "#A71930",
           "accent": "#000000",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.05
         },
         "colors": {
           "primary": "#A71930",
@@ -110,7 +111,8 @@
         "header": {
           "bar": "#523178",
           "accent": "#0097A9",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.2
         },
         "colors": {
           "primary": "#0097A9",
@@ -132,14 +134,15 @@
         "header": {
           "bar": "#DF4601",
           "accent": "#000000",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.1
         },
-        "note": "Alt 2 Orange",
         "colors": {
           "primary": "#DF4601",
           "secondary": "#000000",
           "accent1": "#DF4601"
-        }
+        },
+        "note": "Alt 2 Orange"
       },
       "alternate": {
         "note": "Alt 1 Black",
@@ -164,12 +167,13 @@
         "header": {
           "bar": "#E1D2BE",
           "accent": "#ff7a29",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.15
         },
-        "note": "City Connect 2.0",
         "colors": {
           "primary": "#E1D2BE"
-        }
+        },
+        "note": "City Connect 2.0"
       }
     }
   },
@@ -186,7 +190,8 @@
         "header": {
           "bar": "#0C2340",
           "accent": "#BD3039",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "note": "white, not any of the three brand swatches"
       },
@@ -221,9 +226,10 @@
           "primary": "#5A8D84"
         },
         "header": {
-          "bar": "#5A8D84",
+          "bar": "#48776f",
           "accent": "#0A0A0A",
-          "onBar": "#0A0A0A"
+          "onBar": "#FFFFFF",
+          "markScale": 1.1
         }
       }
     }
@@ -243,7 +249,8 @@
         "header": {
           "bar": "#0E3386",
           "accent": "#CC3433",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "note": "white with the shared black pinstripe (mainTreatmentPinstripe) to match their Home Pinstripe jersey, instead of a flat Secondary tile; the Home Pinstripe mark reads better nudged right"
       },
@@ -291,14 +298,16 @@
         "scale": 0.84,
         "header": {
           "bar": "#000000",
-          "accent": "#C6011F",
-          "onBar": "#FBF6E9"
+          "accent": "#fe2c38",
+          "onBar": "#fe2c38",
+          "markScale": 1.45
         },
-        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile",
         "colors": {
           "primary": "#C6011F",
-          "secondary": "#000000"
-        }
+          "secondary": "#000000",
+          "accent1": "#fe2c38"
+        },
+        "note": "the \"C\" mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
       "alternate-3": {
         "note": "Away Grey",
@@ -341,13 +350,15 @@
         "scale": 0.76,
         "header": {
           "bar": "#00385D",
-          "accent": "#E31937",
-          "onBar": "#FBF6E9"
+          "accent": "#f0e4ce",
+          "onBar": "#f0e4ce"
         },
-        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed",
         "colors": {
-          "primary": "#00385D"
-        }
+          "primary": "#00385D",
+          "secondary": "#f0e4ce",
+          "accent1": "#d8ccb8"
+        },
+        "note": "the \"CLE\" wordmark, barely shrunk off the default 1.32 edge-bleed"
       },
       "alternate": {
         "colors": {
@@ -542,7 +553,8 @@
         "header": {
           "bar": "#004687",
           "accent": "#BD9B60",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         },
         "note": "navy recolored to white"
       },
@@ -564,13 +576,17 @@
         "scale": 0.81,
         "header": {
           "bar": "#FFFFFF",
-          "accent": "#B5824A",
-          "onBar": "#004687"
+          "accent": "#5e4196",
+          "onBar": "#5e4196",
+          "markScale": 1.1
         },
-        "note": "same KC mark + scale as Main's own override; City Connect 2.0",
         "colors": {
-          "primary": "#FFFFFF"
-        }
+          "primary": "#FFFFFF",
+          "secondary": "#5e4196",
+          "accent1": "#22407d",
+          "accent2": "#a93fa9"
+        },
+        "note": "same KC mark + scale as Main's own override; City Connect 2.0"
       }
     }
   },
@@ -583,8 +599,8 @@
         "scale": 0.75,
         "header": {
           "bar": "#005A9C",
-          "accent": "#EF3E42",
-          "onBar": "#FBF6E9"
+          "accent": "#A5ACAF",
+          "onBar": "#FFFFFF"
         },
         "colors": {
           "primary": "#005A9C",
@@ -624,7 +640,8 @@
         "header": {
           "bar": "#11284b",
           "accent": "#005A9C",
-          "onBar": "#fff7df"
+          "onBar": "#fff7df",
+          "markScale": 1.15
         },
         "scale": 1.03,
         "offsetX": 3,
@@ -686,14 +703,16 @@
       "city-connect": {
         "scale": 1,
         "header": {
-          "bar": "#131e29",
-          "accent": "#5c82a5",
-          "onBar": "#F8F8F5"
+          "bar": "#4a6b8a",
+          "accent": "#131e29",
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#5c82a5",
           "secondary": "#131e29"
-        }
+        },
+        "note": "City Connect bar is the light blue, deepened from #5c82a5 to #4a6b8a: the original read 3.80:1 against the near-white ink and that mid-tone cannot carry near-white text at any value (4.05:1 even against pure white)."
       }
     }
   },
@@ -714,7 +733,8 @@
         "header": {
           "bar": "#002D72",
           "accent": "#FF5910",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         }
       },
       "alternate": {
@@ -755,7 +775,8 @@
         "header": {
           "bar": "#383a35",
           "accent": "#FF5910",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 0.95
         }
       }
     }
@@ -774,7 +795,8 @@
         "header": {
           "bar": "#003831",
           "accent": "#EFB21E",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         }
       },
       "alternate-2": {
@@ -802,7 +824,8 @@
         "header": {
           "bar": "#003831",
           "accent": "#EFB21E",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.1
         },
         "scale": 1.07,
         "offsetY": -5
@@ -852,7 +875,8 @@
         "header": {
           "bar": "#201a1c",
           "accent": "#a81f2f",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.35
         },
         "colors": {
           "primary": "#201a1c",
@@ -973,7 +997,8 @@
         "header": {
           "bar": "#203F79",
           "accent": "#fcc730",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         }
       }
     }
@@ -993,7 +1018,8 @@
         "header": {
           "bar": "#27251F",
           "accent": "#FD5A1E",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         }
       },
       "alternate": {
@@ -1013,7 +1039,8 @@
         "header": {
           "bar": "#f0653b",
           "accent": "#704195",
-          "onBar": "#27251F"
+          "onBar": "#27251F",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#27251F",
@@ -1126,7 +1153,8 @@
         "header": {
           "bar": "#000000",
           "accent": "#7bc35e",
-          "onBar": "#FFFDF6"
+          "onBar": "#FFFDF6",
+          "markScale": 1.4
         }
       }
     }
@@ -1167,7 +1195,8 @@
         "header": {
           "bar": "#892535",
           "accent": "#EBDFCB",
-          "onBar": "#F8F8F5"
+          "onBar": "#EBDFCB",
+          "markScale": 1.2
         },
         "note": "shrunk 5%, then another 10%; tile bg matches the png's own red so the new edge gap is seamless"
       },
@@ -1217,7 +1246,8 @@
         "header": {
           "bar": "#161827",
           "accent": "#C22028",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         },
         "note": "the T/leaf mark already touches all four edges of its own canvas, so the default 1.32 edge-bleed crops it; shrink down so the whole mark stays inside the tile"
       },
@@ -1295,7 +1325,8 @@
         "header": {
           "bar": "#00549f",
           "accent": "#ffde00",
-          "onBar": "#FFFFFF"
+          "onBar": "#FFFFFF",
+          "markScale": 1.15
         },
         "colors": {
           "primary": "#00549f",
@@ -1345,7 +1376,8 @@
         "header": {
           "bar": "#00163b",
           "accent": "#169fda",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#00163b",
@@ -1382,14 +1414,15 @@
         "header": {
           "bar": "#7BA7D8",
           "accent": "#D32826",
-          "onBar": "#13274F"
+          "onBar": "#13274F",
+          "markScale": 1.25
         },
-        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down",
         "colors": {
           "primary": "#D32826",
           "secondary": "#374EA1",
           "accent1": "#7BA7D8"
-        }
+        },
+        "note": "City Connect 2.0 mark nudged up 4% off the default edge-bleed, nudged right and down"
       },
       "alternate": {
         "scale": 1.04,
@@ -1443,7 +1476,8 @@
         "header": {
           "bar": "#C8102E",
           "accent": "#000000",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         },
         "colors": {
           "primary": "#C8102E"
@@ -1520,7 +1554,8 @@
         "header": {
           "bar": "#ee4790",
           "accent": "#3ca2b3",
-          "onBar": "#000000"
+          "onBar": "#000000",
+          "markScale": 1.3
         },
         "note": "City Connect 2.0 nudged left"
       },
@@ -1573,7 +1608,8 @@
         "header": {
           "bar": "#12284B",
           "accent": "#6CACE4",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.15
         },
         "note": "cream, not any of the three brand swatches"
       },
@@ -1602,7 +1638,8 @@
         "header": {
           "bar": "#0C436A",
           "accent": "#ff6c58",
-          "onBar": "#FBF6E9"
+          "onBar": "#FBF6E9",
+          "markScale": 1.3
         },
         "colors": {
           "primary": "#0C436A",

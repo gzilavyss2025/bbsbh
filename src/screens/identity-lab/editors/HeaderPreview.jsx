@@ -1,5 +1,6 @@
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
-import { barMarkTone } from '../../../lib/headerTheme.js'
+import { MARK_SCALE_LIMITS, barMarkTone } from '../../../lib/headerTheme.js'
+import { shiftStepKeys } from './numberSteps.js'
 import { HexField } from '../HexField.jsx'
 
 // The header chrome a lineup page wears when this club is in this jersey —
@@ -35,12 +36,15 @@ const AA_TEXT = 4.5
 // unchanged, which is also the honest preview: that fallback is what the real
 // bar would show too.
 //
-// `overrideUrl` is the City Connect bar's own escape hatch (teams.js's
-// cityConnectMastheadUrl, dropped in from TwoBarsPanel's LogoDropZone): a
-// club's uploaded PNG, tried ahead of the mono mark and never re-inked —
-// that finished art is the club's own pick for THIS exact bar, not a
-// silhouette this preview should be repainting.
-export function HeaderBarMock({ teamId, name, colors, unset, overrideUrl }) {
+// `overrideUrl` is this bar's own escape hatch (teams.js's mastheadMarkUrl —
+// a mark pasted into the bar's mark panel, or, on City Connect, a PNG dropped
+// on this very mock): the club's own art, tried ahead of the mono mark and
+// never re-inked, because finished art is the club's pick for THIS exact bar
+// rather than a silhouette this preview should be repainting.
+//
+// `markScale` is the same bar's hand-tuned mark size, previewed through the
+// exact custom property the real masthead reads.
+export function HeaderBarMock({ teamId, name, colors, unset, overrideUrl, markScale }) {
   if (unset) {
     return (
       <div className="idlab__barmock idlab__barmock--unset">
@@ -52,7 +56,14 @@ export function HeaderBarMock({ teamId, name, colors, unset, overrideUrl }) {
   return (
     <div
       className={`idlab__barmock${tone === 'dark' ? ' idlab__barmock--darkmark' : ''}`}
-      style={{ '--header-bar': colors.bar, '--header-accent': colors.accent, '--header-onbar': colors.onBar }}
+      style={{
+        '--header-bar': colors.bar,
+        '--header-accent': colors.accent,
+        '--header-onbar': colors.onBar,
+        // Same custom property the real masthead reads (TeamInfo via
+        // headerThemeStyle), so what is judged here is the size that ships.
+        ...(markScale ? { '--masthead-mark-scale': markScale } : null),
+      }}
     >
       <TeamLogo
         teamId={teamId}
@@ -95,6 +106,33 @@ export function HeaderFields({ rawColors, onField }) {
           placeholder="not set"
           value={rawColors.onBar ?? ''}
           onChange={(v) => onField('onBar', v)}
+        />
+      </label>
+      {/* Not a colour, but a fact about the same bar, so it sits with the
+          triad rather than in a panel of its own: how big this bar draws its
+          club mark (lib/headerTheme.js's MARK_SCALE_LIMITS).
+
+          Shows 1 on an untuned bar rather than sitting blank like the hex
+          fields beside it, and the difference is real: a blank hex means "no
+          colour picked", but there is no such thing as "no size" — an untuned
+          mark is drawn at exactly 1. Blank here also made the native stepper
+          jump to `min` (0.5) on the first click, since a number input with no
+          value steps from its floor. Clearing the field is still how you drop
+          the tuning; the store drops a 1 either way. */}
+      <label>
+        <span>Mark size</span>
+        <input
+          type="number"
+          className="idlab__marksizefield"
+          placeholder="1"
+          step={MARK_SCALE_LIMITS.step}
+          min={MARK_SCALE_LIMITS.min}
+          max={MARK_SCALE_LIMITS.max}
+          value={rawColors.markScale ?? MARK_SCALE_LIMITS.default}
+          onChange={(e) => onField('markScale', e.target.value === '' ? '' : Number(e.target.value))}
+          onKeyDown={shiftStepKeys(rawColors.markScale ?? MARK_SCALE_LIMITS.default, MARK_SCALE_LIMITS.step, (v) =>
+            onField('markScale', v),
+          )}
         />
       </label>
     </div>

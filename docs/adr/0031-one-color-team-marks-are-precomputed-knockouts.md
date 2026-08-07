@@ -256,3 +256,106 @@ every alternate) keeps drawing the one club-wide knockout mark untouched.
   against, not a separate upload panel elsewhere on the page. The mock's
   `HeaderBarMock` carries the exact same `overrideUrl`/no-re-ink treatment
   the real masthead does, so what's approved there is what ships.
+
+### Addendum (2026-08-07): that override may also be pasted in as SVG source
+
+The amendment above gives the City Connect bar one way in — drop a finished
+512×512 PNG on the bar itself. This adds a second, for the same slot and under
+the same rules: paste the mark's SVG source into the lab's **City Connect bar
+mark** panel, name it, and pick it.
+
+**Why a second way.** Club art arrives as often as markup as it does as a file,
+and a PNG is a fixed 512 px where this bar bleeds the mark to its full height —
+vector stays crisp there. Nothing about the slot changes; only how the bytes
+get in.
+
+- **No new machinery, and no new store.** A paste rides the two dev endpoints
+  the Logo art editor's recolors already ride
+  (`scripts/lib/dev-custom-marks.mjs`): SAVE writes
+  `public/team-logos/custom/{teamId}-{slug}.svg` and adds it to the club's
+  library; ASSIGN points one key at one library mark. The key is the same
+  synthetic `'city-connect-masthead'` the amendment introduced, which
+  `assignCustomMark` already accepts because it is in `LOGO_TREATMENT_DIRS`.
+  Server-side: unchanged.
+- **The library's two rules carry over intact.** Saving never overwrites (a
+  taken name is a 409), and wearing a mark is a POINTER — clearing it hands back
+  whatever the bar had before, an uploaded PNG or the club-wide knockout mark.
+- **An assignment outranks the uploaded PNG**, and that ordering is deliberate:
+  the pointer is the one a click can undo, so letting a PNG beat it would make
+  the pointer unusable on any club that ever had one dropped on it.
+  `pickCityConnectMasthead` (`teams.js`) is that precedence on its own, pinned in
+  `test/teams.test.js` without needing a real entry in the committed store — the
+  same split `customMarks.js` makes for `parseMarkAssignmentKey`.
+- **A `cdn:` assignment is ignored here, not resolved.** The library's other
+  assignment kind points at one of the CDN's stock vectors, and that is exactly
+  the art the knockout pipeline already converts — resolving one into this slot
+  would put a full-color mark on a bar nothing re-inks.
+- **Parsed, not filtered, before it is posted.** The pasted markup goes through
+  `src/lib/svgSanitize.js` (a real `DOMParser` pass, see that file's header) in
+  the browser, so what previews is what posts, and markup that isn't SVG says so
+  before a request is made. `describeMarkRejection` server-side is still the
+  backstop for a hand-crafted POST.
+- **Judged against the bar, like its PNG sibling.** The panel draws the same
+  `HeaderBarMock` the Header bars panel does, showing the paste in progress on
+  this club's own City Connect colours with the same no-re-ink treatment the
+  real masthead uses. It sits stacked directly under the Knockout mark editor
+  (`.idlab__markstack`) because it is the exception to exactly that rule, and it
+  renders for no club without a City Connect bar — every MiLB affiliate, and the
+  two `NO_CITY_CONNECT` clubs.
+
+**A paste may also be CONVERTED, not just kept.** The panel offers the same
+shape-by-shape ink/knockout verdicts the Knockout mark editor does, applied to
+the paste instead of to the club's CDN art — for City Connect art that arrives
+in full colour but wants to read as one colour on that bar. Three things make
+that safe to bolt on rather than a second pipeline:
+
+- **One picker, shared.** `editors/ShapeInkPicker.jsx` is the clickable art and
+  the numbered verdict list, used by both editors; `logoMono.js` already numbers
+  shapes once, so shape 3 means the same thing in each. Neither editor holds the
+  other's pins — this one's are per paste and are dropped with it, since an index
+  into one mark's shapes means nothing against another's.
+- **The ink is BAKED IN at save time.** `logoMono.js` emits `fill="#fff"` because
+  the club-wide mono mark is re-inked by CSS at render; this slot's contract is
+  the exact opposite (`.metricbar__logo--custom` turns that filter off), so a
+  white silhouette saved here would vanish on a light bar. The panel swaps that
+  one attribute for a colour picked against the bar — defaulting to its own
+  `onBar` — and what lands on disk is finished art either way. `logoMono.js` gains
+  no option the generator would then have to carry, and the renderer learns
+  nothing new.
+- **An empty conversion is refused, never quietly downgraded.** Pin away the last
+  ink shape and `monoLogoSvg` rightly bails; in that state the panel saves
+  NOTHING and says why, rather than falling back to the full-colour paste — which
+  is the one result turning the mode on was meant to avoid.
+
+**Every bar gets one, not just City Connect — and the key is the BAR.** The
+addendum above shipped on the one bar that already had an override slot. The
+same panel now mounts inside every bar unit: MLB's Main, MLB's City Connect,
+and MiLB's single bar. `teams.js`'s `mastheadMarkUrl(teamId, bar)` is the one
+resolver behind all three, and `cityConnectMastheadUrl` is gone rather than kept
+as a second name for it.
+
+- **A club has fewer BARS than jerseys, and that is the whole grouping.**
+  `treatmentHeaderColorOverride` already sends Main and every alternate to one
+  bar and City Connect to the other; `milbHeaderColorOverride` already sends Home
+  and Away to a single bar. `mastheadBarFor(teamId, treatment)` collapses a
+  jersey onto its bar the same way, so dressing "the Main bar" dresses Main and
+  every alternate at once — the same answer the colour triad above it gives.
+  Anything finer would be a promise the header theming itself doesn't make.
+- **`TeamInfo.jsx` needed no MiLB special case any more.** It used to guard the
+  override with `isMlbTeamId(...) && treatment === 'city-connect'` because City
+  Connect is an MLB-only vocabulary. MiLB is now simply the third bar, so both
+  sides resolve through one call and the guard came out.
+- **Two of the three keys are assignment-only.** `city-connect-masthead` is both
+  a `LOGO_TREATMENT_DIRS` upload destination (from the second amendment) and a
+  masthead key; `main-masthead` and `milb-masthead` are keys with no directory,
+  so a paste is the only way into them. The dev assign endpoint therefore accepts
+  `MASTHEAD_MARK_ASSIGN_KEYS` alongside the real treatment directories — the one
+  server change the whole feature needed.
+- **The keys live in `teams.js`, not `logoArt.js`**, even though one of them is
+  also an upload directory there. `logoArt.js` imports `teams.js`; declaring them
+  the other way round would close an import cycle for a constant neither the
+  manifest builder nor the disk sweep reads.
+- **Bars stay isolated, and a test says so.** The two MLB bars read different
+  keys, so a club wearing a pasted City Connect mark still draws the automatic
+  knockout mark on Main. `test/teams.test.js` asserts that over whichever clubs
+  are actually dressed in the committed store, rather than over a fixture.

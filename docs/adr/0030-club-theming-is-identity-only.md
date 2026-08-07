@@ -121,3 +121,45 @@ Applied only to art that is already a silhouette, only on a themed bar.
   properties, scoped narrower than the page. Still only `(teamId, treatment)`
   in, still null-safe: with no curated pair for the opponent it falls through
   to whatever the page's own theme (or default navy) already set.
+
+## Amendment (2026-08-07): a bar may also size the mark it draws
+
+The triad above answers what colour a bar is. It now carries a fourth field,
+`markScale`, answering how big that bar draws the club's mark — same store, same
+per-bar record, same `(teamId, treatment)`-only inputs, so the invariant at the
+top of `headerTheme.js` is untouched.
+
+**Why it is needed at all.** A club's knockout mark is letterboxed into the
+bar's height, and marks carry wildly different amounts of their own internal
+whitespace. A cap logo drawn tight to its viewBox and a roundel with a wide
+margin are the same file, at the same nominal size, and read at very different
+weights on the bar. Nothing in the pipeline can tell those apart — the whitespace
+is inside art nobody controls — so it is picked by eye, like every other value
+in these stores.
+
+- **It scales the ART, not the theme, so it applies without one.** A club with
+  no curated triad still wears default navy chrome, still draws its mark there,
+  and may still need it sized. `headerThemeStyle(theme, markScale)` therefore
+  emits a style object when EITHER is present: an unthemed bar with a scale
+  carries only `--masthead-mark-scale`, a themed bar with no scale only the three
+  colours. `mastheadMarkFor(teamId, treatment)` is what resolves both halves of
+  what a bar's mark is — `{ url, scale }`.
+- **A crop, not an overflow.** `.teamlogo-crop-bar` already clips
+  (`overflow: hidden`), so `transform: scale()` on the mark inside it zooms past
+  the art's own margin and trims what leaves the bar. The property defaults to
+  `1` in the `var()` itself, which is what keeps every untuned bar — and every
+  other `crop="bar"` caller, like the pre-game cards — byte-identical.
+- **Floored as well as raised** (`MARK_SCALE_LIMITS`, 0.5–2.5): the fix for a
+  mark drawn tight to its edges is to pull it in, and a control that only grows
+  would have no answer for that. Clamped in the resolver as well as the input,
+  the same belt-and-braces the stamp placement fields keep.
+- **The default is DROPPED, never written.** `withMarkScale` is the one rule both
+  lab profiles share for landing the value, so MLB and MiLB cannot disagree: an
+  identity entry and an absent one render the same, and the shorter store is the
+  one that says which bars actually needed a hand.
+- **The field shows `1`, not a blank.** Unlike the hex fields beside it, there is
+  no such thing as "no size" — an untuned mark is drawn at exactly 1, so showing
+  it is accurate rather than presumptuous. It also fixes a real papercut: a
+  number input with no value steps from its `min`, so the first click on the
+  stepper jumped a bar straight to 0.5. Clearing the field is still how the
+  tuning is dropped.

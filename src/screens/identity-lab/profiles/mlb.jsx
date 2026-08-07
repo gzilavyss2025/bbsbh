@@ -14,6 +14,7 @@ import {
 } from '../../../lib/wpa/wpaBandColors.js'
 import { WPA_TUNING, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES, wpaLogoLayout } from '../../../lib/wpa/wpaLogo.js'
 import { MLB_TEAM_COLORS } from '../../../lib/brandColors.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import {
@@ -400,6 +401,10 @@ function headerColorsFor(colors, draft, override) {
     bar: draft?.bar ?? override?.bar ?? (colors[0]?.hex || DEFAULT_HEADER_BAR),
     accent: draft?.accent ?? override?.accent ?? (colors[1]?.hex || DEFAULT_HEADER_ACCENT),
     onBar: draft?.onBar ?? override?.onBar ?? DEFAULT_HEADER_ON_BAR,
+    // Not a colour, and it has no brand-pair fallback to reach for: an untuned
+    // bar draws its mark at the size the art itself is, so the resolved value
+    // is simply the default.
+    markScale: draft?.markScale ?? override?.markScale ?? MARK_SCALE_LIMITS.default,
   }
 }
 
@@ -810,9 +815,19 @@ function headerUnits(teamId) {
   const wearers = treatmentsForTeam(teamId)
     .filter((t) => headerSlotFor(t.key) === 'main')
     .map((t) => SHORT_LABEL[t.key])
-  const units = [{ slot: 'main', label: 'Main bar', wearerCaption: `Worn by ${wearers.join(', ')}` }]
+  // `mastheadBar` is which masthead-override slot this bar answers to
+  // (teams.js's MASTHEAD_MARK_KEYS). Named per vocabulary rather than derived
+  // from `slot`, because MiLB's one bar is slotted 'home' and keyed 'milb'.
+  const units = [
+    { slot: 'main', label: 'Main bar', mastheadBar: 'main', wearerCaption: `Worn by ${wearers.join(', ')}` },
+  ]
   if (hasCityConnect(teamId)) {
-    units.push({ slot: 'city-connect', label: 'City Connect bar', wearerCaption: 'Worn by City Connect only' })
+    units.push({
+      slot: 'city-connect',
+      label: 'City Connect bar',
+      mastheadBar: 'city-connect',
+      wearerCaption: 'Worn by City Connect only',
+    })
   }
   return units
 }
@@ -832,6 +847,9 @@ function headerProps(team, slot, drafts, extras, on) {
     bar: draft?.bar ?? landed?.bar,
     accent: draft?.accent ?? landed?.accent,
     onBar: draft?.onBar ?? landed?.onBar,
+    // Undefined at the default, like every field here: the input shows its "1"
+    // placeholder rather than a value that looks saved but isn't.
+    markScale: draft?.markScale ?? landed?.markScale,
   }
   const name = team.name
   // The same label buildAllChangesText uses for this slot, so the copy icon
@@ -845,6 +863,7 @@ function headerProps(team, slot, drafts, extras, on) {
     landed: Boolean(landed),
     contrast: contrastRatio(resolved.onBar, resolved.bar),
     hasDraft: Boolean(draft && Object.keys(draft).length > 0),
+    markScale: resolved.markScale,
     copyText: buildHeaderCopyText(name, teamId, slot, treatmentLabel, resolved),
     onField: (field, value) => on.headerField(slot, field, value),
     onReset: () => on.headerReset(slot),
@@ -1304,8 +1323,8 @@ function buildSaves(drafts, extras) {
       mergeDraftIntoStore(MLB_TREATMENT_TUNING, drafts.pos, applyPositionDraft, { name }),
       drafts.header,
       (record, fields) => {
-        const { bar, accent, onBar } = { ...record.header, ...fields }
-        return { ...record, header: { bar, accent, onBar } }
+        const { bar, accent, onBar, markScale } = { ...record.header, ...fields }
+        return { ...record, header: withMarkScale({ bar, accent, onBar }, markScale) }
       },
       { name },
     ),
@@ -1457,8 +1476,11 @@ export const mlbProfile = {
       const wpaWordmark = resolveWpaWordmark(teamId, treatment, null)
       return draftFieldsMatchLanded(fields, { ...layout, pinstripe, bandColor: band, bandBg, ownArt, wpaWordmark })
     },
+    // Through headerDraftMatchesLanded, not a bare field compare: the save path
+    // drops a default/blank mark size rather than writing it, so a raw compare
+    // could never match and the draft showed as pending forever.
     header: (teamId, treatment, fields) =>
-      draftFieldsMatchLanded(fields, treatmentHeaderColorOverride(teamId, treatment)),
+      headerDraftMatchesLanded(fields, treatmentHeaderColorOverride(teamId, treatment), draftFieldsMatchLanded),
     colors: (teamId, fields) => colorsDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     offDay: (teamId, fields) => offDayDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),
     defaultLogos: (teamId, fields) => defaultLogosDraftMatchesLanded(fields, MLB_TEAM_COLORS[teamId]),

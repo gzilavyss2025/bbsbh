@@ -655,6 +655,13 @@
   padding: 2px var(--space-1);
 }
 
+/* Mark size is a small number, not a hex — its own width so it doesn't sit in
+   a box sized for "#1B2A3A" with six characters of empty space after it.
+   editors/HeaderPreview.jsx. */
+.idlab__marksizefield {
+  width: 62px;
+}
+
 .colorlab__headerfields input:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

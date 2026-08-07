@@ -238,8 +238,11 @@ Two smaller changes to the same stamp, neither touching the reveal gate.
 The winner's-darkest-brand-colour pick above is a good DEFAULT, not a promise
 that every club agrees with what "its" ink looks like. `src/lib/data/stamp-ink.json`
 now lets a club override it with a hex of its own choosing, picked in
-`/identity-lab`'s Stamp ink editor (`StampInkEditor.jsx`) and read at render
-time by `stampInkFor`'s new `overrideHex` option (`src/lib/stampInk.js`).
+`/identity-lab`'s Stamp ink row — the foot of its Stamp placement card
+(`StampPlacementEditor.jsx`; it had a card of its own until the two questions
+were merged onto the one pair of previews they are both judged against) — and
+read at render time by `stampInkFor`'s `overrideHex` option
+(`src/lib/stampInk.js`).
 
 The override does **not** exempt a club from the contrast floor argued for
 above — `deepenToContrast` still runs on it. That floor is a fact about what a
@@ -267,6 +270,57 @@ number — and is empty (no footer text at all) for the ordinary nine-inning
 single game, which is most of them. `.scratch/game-stamps/designs/stamp-concepts.md`'s
 contact sheet still shows the old word; that document is a record of the
 design process, not a living spec, and is not being kept in sync with this.
+
+## Addendum (2026-08-07) — a minor-league game inverts the ring band
+
+A Game Log page mixes levels. The same user charts a Brewers game and a Biloxi
+Shuckers one, and both stamps land in the same book drawn by the same art, so
+the page said nothing about which was which unless you stopped and read the
+venue name in 16px mono around the rim.
+
+A **minor-league** game now inverts its ring band: the annulus between the two
+bounding circles fills solid in the stamp's own ink, and the venue, the
+date/series line and the two separator diamonds knock out of it as paper. An
+MLB game is unchanged — two hairline circles with the ring text riding between
+them on open paper.
+
+Three properties this deliberately keeps:
+
+- **Still one ink.** The knockout is a `<mask>` over a single `currentColor`
+  rect, not a second colour and not an opacity trick, so the one-colour
+  discipline this ADR's ink section argues for is untouched. The band is the
+  winner's ink like everything else on the stamp.
+- **Still the same silhouette.** `BAND_OUTER_R`/`BAND_INNER_R` are the two
+  strokes' OUTER edges (140+1.75 and 118-0.75), not their centre lines, so a
+  filled band occupies exactly the pixels the two circles already did. An
+  inverted stamp sits the same size as an MLB stamp beside it in a grid —
+  pinned in `test/stamp-art.test.js` because nothing else would catch that
+  drift.
+- **Still nothing else changed.** Same ring geometry, same mark slots, same
+  numerals, same footer, same per-club placement and ink tuning. The level is
+  the only thing the inversion says.
+
+The test is `stampRingInverted` (`src/lib/stampArt.js`): sportId 1 is the
+majors and everything else inverts, stated as `!== 1` rather than as a
+membership test on the five known MiLB codes, so a level not yet on the slate
+still reads as "not the majors" instead of quietly drawing as one. A blob with
+**no** sportId stays MLB — both producers already default the field to 1, so an
+absent value means "we never learned", never "the minors", and a stamp must not
+invert on a guess. The check is on the raw value being a number, because
+`Number(null)` is `0`, which is not `1`, which would have inverted every stamp
+whose facts simply didn't carry the field.
+
+`/identity-lab`'s two stamp editors now stamp the open club's own level onto
+their fabricated preview game, so a MiLB club's ink and mark placement are
+judged against the art they actually print in. For the ink editor especially
+that is not cosmetic: the filled band roughly doubles how much ink is on the
+page, which is the exact thing that editor asks you to look at.
+
+This is a change to art described above as LOCKED. What "locked" protects is a
+keepsake not silently reshaping under its owner — and the constants are all
+still the locked ones. What moved is which of two recipes draws them, on a fact
+about the game that never changes. A stamp already in someone's book redraws
+identically unless it was a minor-league game, in which case it now says so.
 
 ## Alternatives considered
 

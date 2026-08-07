@@ -41,8 +41,27 @@
   align-items: center;
   overflow: hidden;
 }
+/* `--masthead-mark-scale` is the per-BAR hand tuning (lib/headerTheme.js's
+   MARK_SCALE_LIMITS, set as an inline custom property by TeamInfo and by the
+   lab's bar mock). Marks carry wildly different amounts of their own internal
+   whitespace — a cap logo drawn tight to its viewBox and a roundel with a wide
+   margin are the same file and read at very different weights on a bar — so
+   this sizes past that margin.
+
+   MULTIPLIED INTO THE HEIGHT, not applied as `transform: scale()`, and the
+   difference is the whole point. A transform doesn't change layout size, so a
+   scaled-up mark overflowed the wrapper on ALL FOUR sides and the
+   `overflow: hidden` above — which exists only to make the 7% top/bottom crop —
+   sheared the mark's left and right edges off too. Growing the height instead
+   grows the <img>'s `width: auto` with it, and the inline-flex wrapper grows to
+   match, so the mark gets WIDER on the bar rather than clipped. Only the
+   vertical bleed still overflows, which is what that clip was for.
+
+   Defaulted to 1 in the var() itself, so every bar that has never been tuned —
+   and every OTHER `crop="bar"` caller, like the pre-game cards — renders
+   byte-identically to before this existed. */
 .teamlogo--crop-bar {
-  height: 116.28%;
+  height: calc(116.28% * var(--masthead-mark-scale, 1));
   width: auto;
   object-fit: contain;
 }

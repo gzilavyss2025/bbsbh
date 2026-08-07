@@ -78,7 +78,7 @@ own `note`.
 | `stampLogoTuning.js` | Where that knockout mark sits inside a Logbook stamp's mark slot, per side (`data/stamp-logo-tuning.json`, ADR-0035's amendment) |
 | `stampInk.js` | Which colour a Logbook stamp is pressed in — the WINNING club's darkest brand colour, floored for contrast against the page's paper (ADR-0036's second addendum). The one module here that reads game state; see "The rule that must not drift" below |
 | `logoRecolor.js` | Repainting individual shapes in full color — how a club's missing jersey art gets built |
-| `customMarks.js` | The library of those recolored marks, and which treatment wears one (`data/custom-marks.json`) |
+| `customMarks.js` | The library of those recolored marks, and which treatment wears one — plus each BAR's own pasted-SVG masthead mark (Main, City Connect, MiLB's one bar), under synthetic keys (`data/custom-marks.json`; ADR-0031's addendum) |
 
 `treatmentTile(teamId, treatment)` is the single resolver behind the slate card
 (`GameCard`), the in-game masthead (`GameView`), and the lab's own grid — a club

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 import { teamLogoUrl } from '../../../lib/teams.js'
 import { contrastRatio } from '../../../lib/contrast.js'
+import { MARK_SCALE_LIMITS, headerDraftMatchesLanded, withMarkScale } from '../../../lib/headerTheme.js'
 import { customMarkAssignment, customMarksFor } from '../../../lib/customMarks.js'
 import { clubMarkSources } from '../../../lib/markSources.js'
 import { NeutralSwatchesSidebar } from '../NeutralSwatchesSidebar.jsx'
@@ -196,7 +197,10 @@ function headerSlotFor() {
 }
 
 function headerUnits() {
-  return [{ slot: 'home', label: 'Header bar', wearerCaption: 'Worn by Home and Away' }]
+  // One bar, worn by both sides (milbHeaderColorOverride collapses them), so one
+  // masthead override too — keyed 'milb' rather than by the 'home' slot, which
+  // names the colour store's side and not a bar of its own.
+  return [{ slot: 'home', label: 'Header bar', mastheadBar: 'milb', wearerCaption: 'Worn by Home and Away' }]
 }
 
 function headerProps(team, slot, drafts, extras, on) {
@@ -215,7 +219,11 @@ function headerProps(team, slot, drafts, extras, on) {
       bar: draft?.bar ?? landed?.bar,
       accent: draft?.accent ?? landed?.accent,
       onBar: draft?.onBar ?? landed?.onBar,
+      // Undefined at the default, so the input shows its "1" placeholder rather
+      // than a value that looks saved but isn't.
+      markScale: draft?.markScale ?? landed?.markScale,
     },
+    markScale: draft?.markScale ?? landed?.markScale ?? MARK_SCALE_LIMITS.default,
     unset: false,
     landed: Boolean(landed),
     contrast: contrastRatio(colors.onBar, colors.bar),
@@ -469,7 +477,12 @@ function buildSaves(drafts) {
   })
   store = mergeDraftIntoStore(store, drafts.header, (record, fields, variant, teamId) => ({
     ...record,
-    header: milbHeaderColorsFor(teamId, variant, fields),
+    // milbHeaderColorsFor answers the colour triad only, as its name says; the
+    // bar's mark size is appended by the one rule both profiles share.
+    header: withMarkScale(
+      milbHeaderColorsFor(teamId, variant, fields),
+      { ...record.header, ...fields }.markScale,
+    ),
   }))
   return [{ key: 'milb-treatment-tuning', body: store }]
 }
@@ -531,8 +544,11 @@ export const milbProfiles = MILB_COLOR_LAB_LEVELS.map((level) => ({
     pos: (teamId, variant, fields) =>
       draftFieldsMatchLanded(fields, MILB_LOGO_POS_OVERRIDES[teamId]?.[variant]),
     wpa: (teamId, variant, fields) => draftFieldsMatchLanded(fields, wpaLandedFlat(teamId, variant)),
+    // Through headerDraftMatchesLanded, not a bare field compare: the save path
+    // drops a default/blank mark size rather than writing it, so a raw compare
+    // could never match and the draft showed as pending forever.
     header: (teamId, variant, fields) =>
-      draftFieldsMatchLanded(fields, milbHeaderColorOverride(teamId, variant)),
+      headerDraftMatchesLanded(fields, milbHeaderColorOverride(teamId, variant), draftFieldsMatchLanded),
   },
   buildAllChangesText,
   buildSaves,

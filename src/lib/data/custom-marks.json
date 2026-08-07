@@ -6,6 +6,39 @@
       "milb-away": "cdn:primary"
     }
   },
+  "108": {
+    "marks": [
+      {
+        "slug": "laacityconnect",
+        "name": "laacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "laacityconnect"
+    }
+  },
+  "109": {
+    "marks": [
+      {
+        "slug": "azcityconnect",
+        "name": "azcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "azcityconnect"
+    }
+  },
+  "110": {
+    "marks": [
+      {
+        "slug": "balcityconnect",
+        "name": "balcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "balcityconnect"
+    }
+  },
   "113": {
     "marks": [
       {
@@ -15,10 +48,52 @@
       {
         "slug": "baseredwhite",
         "name": "baseredwhite"
+      },
+      {
+        "slug": "cincityconnect",
+        "name": "cincityconnect"
+      },
+      {
+        "slug": "cincityconnectred",
+        "name": "cincityconnectred"
       }
     ],
     "assignments": {
-      "main": "basewhite"
+      "main": "basewhite",
+      "city-connect-masthead": "cincityconnectred"
+    }
+  },
+  "114": {
+    "marks": [
+      {
+        "slug": "clecityconnect",
+        "name": "clecityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "clecityconnect"
+    }
+  },
+  "115": {
+    "marks": [
+      {
+        "slug": "colcityconnect",
+        "name": "colcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "colcityconnect"
+    }
+  },
+  "118": {
+    "marks": [
+      {
+        "slug": "kccityconnect",
+        "name": "kccityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "kccityconnect"
     }
   },
   "119": {
@@ -26,9 +101,26 @@
       {
         "slug": "wordmarkwhite",
         "name": "WORDMARKWHITE"
+      },
+      {
+        "slug": "ladcityconnect",
+        "name": "ladcityconnect"
       }
     ],
-    "assignments": {}
+    "assignments": {
+      "city-connect-masthead": "ladcityconnect"
+    }
+  },
+  "120": {
+    "marks": [
+      {
+        "slug": "wascityconnect",
+        "name": "wascityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "wascityconnect"
+    }
   },
   "133": {
     "marks": [
@@ -41,15 +133,102 @@
       "alternate-2": "base-white"
     }
   },
+  "134": {
+    "marks": [
+      {
+        "slug": "pitcityconnect",
+        "name": "pitcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "pitcityconnect"
+    }
+  },
+  "136": {
+    "marks": [
+      {
+        "slug": "seacityconnect",
+        "name": "seacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "seacityconnect"
+    }
+  },
+  "137": {
+    "marks": [
+      {
+        "slug": "sfcityconnect",
+        "name": "sfcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "sfcityconnect"
+    }
+  },
+  "139": {
+    "marks": [
+      {
+        "slug": "tbcityconnect",
+        "name": "tbcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "tbcityconnect"
+    }
+  },
+  "140": {
+    "marks": [
+      {
+        "slug": "texcityconnect",
+        "name": "texcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "texcityconnect"
+    }
+  },
+  "141": {
+    "marks": [
+      {
+        "slug": "torcityconnect",
+        "name": "torcityconnect"
+      },
+      {
+        "slug": "tormain",
+        "name": "tormain"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "torcityconnect",
+      "main-masthead": "tormain"
+    }
+  },
   "142": {
     "marks": [
       {
         "slug": "wordmarkwhite",
         "name": "wordmarkwhite"
+      },
+      {
+        "slug": "mincityconnect",
+        "name": "mincityconnect"
       }
     ],
     "assignments": {
-      "alternate-3": "wordmarkwhite"
+      "alternate-3": "wordmarkwhite",
+      "city-connect-masthead": "mincityconnect"
+    }
+  },
+  "143": {
+    "marks": [
+      {
+        "slug": "phicityconnect",
+        "name": "phicityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "phicityconnect"
     }
   },
   "144": {
@@ -57,10 +236,48 @@
       {
         "slug": "atl1",
         "name": "ATL1"
+      },
+      {
+        "slug": "atlcityconnect",
+        "name": "atlcityconnect"
       }
     ],
     "assignments": {
-      "alternate-2": "atl1"
+      "alternate-2": "atl1",
+      "city-connect-masthead": "atlcityconnect"
+    }
+  },
+  "145": {
+    "marks": [
+      {
+        "slug": "cwscityconnect",
+        "name": "CWScityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "cwscityconnect"
+    }
+  },
+  "146": {
+    "marks": [
+      {
+        "slug": "miacityconnect",
+        "name": "miacityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "miacityconnect"
+    }
+  },
+  "158": {
+    "marks": [
+      {
+        "slug": "milcityconnect",
+        "name": "MILCityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "milcityconnect"
     }
   },
   "238": {

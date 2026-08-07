@@ -52,11 +52,11 @@ const STAMP_ALLOWLIST = {
   // behind `import.meta.env.DEV` in App.jsx, so the import is dropped from a
   // production build.
   //
-  // `screens/identity-lab/editors/StampInkEditor.jsx` is the fourth name, on
-  // the exact same footing as StampPlacementEditor.jsx beside it — same
-  // invented preview game, same DEV-only surface — judging a different
-  // question about the same mark (what colour it presses in, not where it
-  // sits). Read ADR-0035 before adding a fifth.
+  // That file also owns the club's stamp INK, which was briefly a fourth name
+  // (`StampInkEditor.jsx`) and is now a row of the placement card — the two
+  // questions are asked of the same pair of previews, so they were merged onto
+  // one. The allowlist got shorter rather than longer for it. Read ADR-0035
+  // before adding a fourth.
   //
   // `screens/LogbookCollection.jsx` replaced `screens/LogbookPage.jsx` here
   // (ADR-0036's multi-book addendum) when that file's multi-book shelf pushed
@@ -71,7 +71,6 @@ const STAMP_ALLOWLIST = {
     'screens/LogbookCollection.jsx',
     'components/passport/PassportPage.jsx',
     'screens/identity-lab/editors/StampPlacementEditor.jsx',
-    'screens/identity-lab/editors/StampInkEditor.jsx',
   ],
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.

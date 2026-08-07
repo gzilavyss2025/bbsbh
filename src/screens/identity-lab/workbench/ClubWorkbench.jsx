@@ -3,7 +3,6 @@ import { teamAbbr } from '../../../lib/teams.js'
 import { CrestStrip } from './CrestStrip.jsx'
 import { LogoRecolorEditor } from '../editors/LogoRecolorEditor.jsx'
 import { MonoInkEditor } from '../editors/MonoInkEditor.jsx'
-import { StampInkEditor } from '../editors/StampInkEditor.jsx'
 import { StampPlacementEditor } from '../editors/StampPlacementEditor.jsx'
 import { TwoBarsPanel } from './TwoBarsPanel.jsx'
 import { LogoShelf } from './LogoShelf.jsx'
@@ -89,27 +88,21 @@ export function ClubWorkbench({ profile, team, prev, next, onStepTeam, extras, d
       <div className="idlab__markspair">
         {/* Club-level, not per-bar — one knockout mark rides every bar this
             club has, which is why it sits under the pair of bars rather than
-            inside either one. */}
+            inside either one. The one bar that may come OFF that mark edits
+            inside its own bar unit above (TwoBarsPanel), against the bar it
+            has to read on. */}
         <MonoInkEditor key={`mono-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
         <LogoRecolorEditor key={`art-${team.id}`} teamId={team.id} name={team.name} bars={barColors} />
       </div>
 
       {/* Club-level for the same reason the knockout editor above it is: a
           stamp wears the one mono mark, whatever jersey the club had on that
-          night. It sits under that pair because it asks the next question about
-          the same mark — not "which shapes are ink" but "where does it sit". */}
+          night. It sits under that pair because it asks the next questions
+          about the same mark — where does it sit, and what colour does the
+          stamp press in. Both are judged on the one pair of previews inside
+          it, which is why the ink is a row of that card rather than a card. */}
       <StampPlacementEditor
         key={`stamp-${team.id}`}
-        teamId={team.id}
-        name={team.name}
-        abbreviation={teamAbbr(team)}
-      />
-
-      {/* Same club-level reasoning as placement above it, one concern over:
-          not where the mark sits, but what colour the whole stamp presses in
-          when this club wins. */}
-      <StampInkEditor
-        key={`stampink-${team.id}`}
         teamId={team.id}
         name={team.name}
         abbreviation={teamAbbr(team)}

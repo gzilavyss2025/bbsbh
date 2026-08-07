@@ -80,7 +80,7 @@ const BUDGETS = {
   'src/styles/12-sealbox.css': 1800, // 1746 — the Statcast tile base left with StatcastCard (ADR-0040)
   'src/styles/14-strike-zone.css': 1100, // 1027
   'src/styles/15-team-color-lab.css': 700, // 691
-  'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — new StampInkEditor.jsx rules
+  'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684
   'src/styles/21-box-score.css': 800, // 797 — the Three Stars card split out to 21a-box-score-stars.css
   'src/styles/22-box-score-tables.css': 800, // 789

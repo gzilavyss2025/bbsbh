@@ -25,7 +25,13 @@ import {
   mainTreatmentPinstripeColor,
   mainTreatmentRecolor,
   mainOverrideLogoUrl,
-  cityConnectMastheadUrl,
+  ALL_MLB_TEAM_IDS,
+  teamAbbr,
+  mastheadMarkUrl,
+  mastheadBarFor,
+  pickMastheadMark,
+  MASTHEAD_MARK_KEYS,
+  MLB_TREATMENT_TUNING,
   MAIN_OVERRIDES,
   offDayTreatmentFor,
   isMlbTeamId,
@@ -35,6 +41,8 @@ import {
   coachHeadshotUrl,
 } from '../src/lib/teams.js'
 import { MLB_TEAM_COLORS } from '../src/lib/brandColors.js'
+import { customMarkAssignment, customMarksFor } from '../src/lib/customMarks.js'
+import LOGO_ART from '../src/lib/data/logo-art.json' with { type: 'json' }
 
 // --------------------------------------------------------------------------
 // localLogoUrl
@@ -320,24 +328,127 @@ test('mainOverrideLogoUrl resolves the Yankees\' procured main override, no long
 })
 
 // --------------------------------------------------------------------------
-// cityConnectMastheadUrl — a club's own override of the mark its themed
-// .metricbar mastheads draw while it's wearing City Connect (ADR-0031),
-// normally the club-wide precomputed knockout SVG. Reads logo-art.json's
-// masthead-city-connect entries the exact way mainOverrideLogoUrl reads
-// main-overrides — disk presence alone, no companion flag to keep in sync.
+// mastheadMarkUrl — a club's own override of the mark its themed .metricbar
+// mastheads draw on ONE BAR (ADR-0031's addendum), normally the club-wide
+// precomputed knockout SVG. Two rungs: an assigned library mark (a paste), and
+// — City Connect only, the one bar with an upload directory — a PNG read off
+// logo-art.json the exact way mainOverrideLogoUrl reads main-overrides, disk
+// presence alone with no companion flag to keep in sync.
 // --------------------------------------------------------------------------
-test('cityConnectMastheadUrl is null for a club with no override uploaded yet', () => {
-  assert.equal(cityConnectMastheadUrl(158), null) // Brewers — no file procured
+test('mastheadBarFor collapses jerseys onto bars, not one answer per jersey', () => {
+  // Main's bar is worn by Main and every alternate — the same grouping
+  // treatmentHeaderColorOverride uses for the colour triad.
+  assert.equal(mastheadBarFor(158, 'main'), 'main')
+  assert.equal(mastheadBarFor(158, 'alternate'), 'main')
+  assert.equal(mastheadBarFor(158, 'alternate-3'), 'main')
+  assert.equal(mastheadBarFor(158, 'city-connect'), 'city-connect')
+  // Every MiLB club is the third bar, whichever side it is playing: its two
+  // variations share one bar (milbHeaderColorOverride).
+  assert.equal(mastheadBarFor(556, 'home'), 'milb') // Nashville Sounds
+  assert.equal(mastheadBarFor(556, 'away'), 'milb')
 })
 
-test('cityConnectMastheadUrl is null for a club with no City Connect uniform at all', () => {
-  assert.equal(cityConnectMastheadUrl(147), null) // Yankees — opted out of the program (NO_CITY_CONNECT)
-  assert.equal(cityConnectMastheadUrl(112), null) // Cubs — City Connect moved to Alternate 2
+// Derived, not a named club: the Identity Lab writes these overrides one club
+// at a time, so pinning "team 158 has none" only held until someone gave 158
+// one. The subject is whichever club the stores are currently silent about,
+// which keeps the assertion true no matter who gets dressed next.
+test('mastheadMarkUrl is null for a bar with no override of either kind', () => {
+  for (const bar of ['main', 'city-connect']) {
+    const bare = ALL_MLB_TEAM_IDS.find(
+      (id) =>
+        (bar !== 'city-connect' || hasCityConnect(id)) &&
+        !customMarkAssignment(id, MASTHEAD_MARK_KEYS[bar]) &&
+        !uploadedMastheadPng(id),
+    )
+    assert.ok(bare, `every club now carries a ${bar} override — this test needs a different subject`)
+    assert.equal(mastheadMarkUrl(bare, bar), null)
+  }
 })
 
-test('cityConnectMastheadUrl is null for an id with no abbreviation to file art under', () => {
-  assert.equal(cityConnectMastheadUrl(999999), null)
-  assert.equal(cityConnectMastheadUrl(null), null)
+// The other rung mastheadMarkUrl reads, spelled out here so the test above can
+// tell "no override at all" from "an override of the other kind".
+function uploadedMastheadPng(teamId) {
+  const abbr = teamAbbr({ id: teamId })
+  return Boolean(abbr && (LOGO_ART['masthead-city-connect'] ?? {})[`${abbr}.png`])
+}
+
+test('every club with an assigned masthead mark resolves to that mark, on every bar', () => {
+  // Vacuous until a club is dressed, real the moment one is — and it is the
+  // committed store being checked, so a mark deleted off disk without its
+  // assignment being cleared shows up here rather than as a broken bar.
+  for (const id of ALL_MLB_TEAM_IDS) {
+    for (const bar of ['main', 'city-connect']) {
+      const slug = customMarkAssignment(id, MASTHEAD_MARK_KEYS[bar])
+      if (!slug || (bar === 'city-connect' && !hasCityConnect(id))) continue
+      const mark = customMarksFor(id).find((m) => m.slug === slug)
+      assert.ok(mark, `team ${id} is assigned "${slug}" on ${bar}, which is not in its library`)
+      assert.equal(mastheadMarkUrl(id, bar), mark.url)
+    }
+  }
+})
+
+test('one bar dressed leaves the club\u2019s other bars alone', () => {
+  // The point of keying by bar: the two MLB bars read different keys, so a club
+  // wearing a pasted City Connect mark still draws the automatic knockout mark
+  // on Main. Asserted over whoever is actually dressed today.
+  for (const id of ALL_MLB_TEAM_IDS) {
+    const cc = customMarkAssignment(id, MASTHEAD_MARK_KEYS['city-connect'])
+    const main = customMarkAssignment(id, MASTHEAD_MARK_KEYS.main)
+    if (cc && !main) assert.equal(mastheadMarkUrl(id, 'main'), null, `team ${id}: a CC paste leaked onto Main`)
+    if (main && !cc && !uploadedMastheadPng(id)) {
+      assert.equal(mastheadMarkUrl(id, 'city-connect'), null, `team ${id}: a Main paste leaked onto City Connect`)
+    }
+  }
+})
+
+test('mastheadMarkUrl is null for a bar that does not exist', () => {
+  assert.equal(mastheadMarkUrl(158, 'alternate'), null) // a jersey, not a bar
+  assert.equal(mastheadMarkUrl(158, undefined), null)
+})
+
+test('mastheadMarkUrl is null on City Connect for a club with no City Connect uniform', () => {
+  assert.equal(mastheadMarkUrl(147, 'city-connect'), null) // Yankees — opted out (NO_CITY_CONNECT)
+  assert.equal(mastheadMarkUrl(112, 'city-connect'), null) // Cubs — City Connect moved to Alternate 2
+})
+
+test('mastheadMarkUrl is null for an id with no abbreviation to file art under', () => {
+  assert.equal(mastheadMarkUrl(999999, 'city-connect'), null)
+  assert.equal(mastheadMarkUrl(null, 'city-connect'), null)
+})
+
+// The precedence itself, pinned through the pure picker rather than through a
+// real store entry — same reason customMarks.js splits parseMarkAssignmentKey
+// out: it has to be checkable whether or not any club currently wears one.
+test('an assigned library mark outranks an uploaded PNG', () => {
+  const assigned = { slug: 'cc-wordmark', name: 'CC wordmark', url: '/team-logos/custom/158-cc-wordmark.svg' }
+  assert.equal(
+    pickMastheadMark(assigned, '/team-logos/masthead-city-connect/MIL.png'),
+    '/team-logos/custom/158-cc-wordmark.svg',
+    'the pointer wins, because clearing it is a click and deleting a PNG is not',
+  )
+})
+
+test('with no assignment a bar falls back to the uploaded PNG, then to nothing', () => {
+  assert.equal(pickMastheadMark(null, '/team-logos/masthead-city-connect/MIL.png'), '/team-logos/masthead-city-connect/MIL.png')
+  assert.equal(pickMastheadMark(null, null), null)
+})
+
+test('a cdn: assignment is ignored on a bar rather than resolved', () => {
+  // customMarkFor answers a `cdn:` assignment as { cdnVariant } with no url.
+  // Drawing a stock CDN vector here would put full-color art on a bar nothing
+  // re-inks — and that vector is what the knockout pipeline already converts.
+  assert.equal(pickMastheadMark({ cdnVariant: 'wordmark' }, null), null)
+})
+
+test('no masthead key is ever a real jersey treatment', () => {
+  // They name assignment slots (and, for City Connect, an upload directory).
+  // A club's own treatment tuning must never carry an entry under one.
+  assert.deepEqual(Object.keys(MASTHEAD_MARK_KEYS).sort(), ['city-connect', 'main', 'milb'])
+  for (const key of Object.values(MASTHEAD_MARK_KEYS)) {
+    for (const entry of Object.values(MLB_TREATMENT_TUNING)) {
+      assert.ok(!entry.treatments?.[key], `${entry.name} carries a "${key}" treatment record`)
+    }
+  }
 })
 
 // treatmentTile — the one resolver the slate card, the in-game masthead, and
