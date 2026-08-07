@@ -440,17 +440,15 @@
       "14": "knockout",
       "18": "knockout",
       "20": "knockout",
-      "21": "ink"
+      "21": "ink",
+      "22": "knockout"
     }
   },
   "424": {
     "name": "Dunedin Blue Jays",
-    "art": "10:7987726d",
-    "parts": {
-      "1": "ink",
-      "2": "knockout",
-      "3": "knockout"
-    }
+    "art": "65:d4685546",
+    "parts": {},
+    "source": "primary"
   },
   "426": {
     "name": "Wilmington Blue Rocks",
@@ -527,11 +525,11 @@
   },
   "436": {
     "name": "Fredericksburg Nationals",
-    "art": "3:bc11af0c",
+    "art": "16:4f365d91",
     "parts": {
-      "0": "knockout",
-      "1": "ink"
-    }
+      "0": "knockout"
+    },
+    "source": "primary"
   },
   "437": {
     "name": "Lake County Captains",
@@ -586,7 +584,8 @@
       "0": "knockout",
       "2": "knockout",
       "3": "knockout",
-      "5": "knockout"
+      "5": "knockout",
+      "6": "knockout"
     }
   },
   "448": {

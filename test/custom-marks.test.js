@@ -22,16 +22,20 @@ test('parseMarkAssignmentKey: a cdn:-prefixed key is a CDN-variant assignment', 
 })
 
 // Nashville Sounds (556) — a real, currently-landed assignment
-// (src/lib/data/custom-marks.json): Home wears their saved "primary1" mark.
+// (src/lib/data/custom-marks.json): both Home and Away wear their saved
+// "primary1" mark.
 test('customMarkFor resolves a real landed custom-mark assignment', () => {
   assert.equal(customMarkAssignment(556, 'milb-home'), 'primary1')
   const resolved = customMarkFor(556, 'milb-home')
   assert.equal(resolved.slug, 'primary1')
   assert.ok(resolved.url.includes('556-primary1'))
+  assert.equal(customMarkAssignment(556, 'milb-away'), 'primary1')
 })
 
+// Athletics (133) — a real club with a saved mark, but only assigned to
+// Alternate 2 (src/lib/data/custom-marks.json): Main has no assignment.
 test('customMarkFor is null for a treatment with no assignment', () => {
-  assert.equal(customMarkFor(556, 'milb-away'), null)
+  assert.equal(customMarkFor(133, 'main'), null)
   assert.equal(customMarkFor(999999, 'main'), null)
 })
 
