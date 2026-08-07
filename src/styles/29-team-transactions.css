@@ -37,6 +37,15 @@
    as a trailing sentinel nears the visible edge. */
 .txcard__scroll {
   display: flex;
+  /* Cards size to their own story rather than stretching to the tallest one in
+     the deck. A day's cutline runs from one clause to ten, so stretch printed
+     a three-line roster move as a bordered box with 250px of nothing under it —
+     an empty box reads as content that failed to load, where a short card just
+     reads as a short story. The deck's own height is unchanged (a single flex
+     line is still as tall as its tallest item), so only the dead space inside
+     the short cards goes away. .txcard__more keeps its own align-self: stretch
+     and so stays a full-height tap target. */
+  align-items: flex-start;
   gap: 10px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -105,7 +114,10 @@
    room than the base width — now that a player's name wraps properly
    (.txstory__cutline .plink's display:contents above), the card no longer
    needs to be this wide just to dodge an awkward name break, but the
-   floated rail itself is still wider with a 3rd photo. See the wide flag in
+   floated rail itself is still wider with a 3rd photo. Beyond that the rail is
+   a .photorail--strip and no longer floats at all, but the width still earns
+   its keep there: it fits a 4th slot per row and takes a line or two off the
+   long cutline those stories carry. See the wide flag in
    TeamTransactionsCard.jsx. */
 .txstory--wide {
   width: 360px;
@@ -122,15 +134,48 @@
 
 /* The rail floats top-right; the type pill + cutline run as normal text flow
    after it, so the pill sits flush with the rail's top edge and the cutline
-   sentence wraps around it — a magazine caption wrapping a floated photo. */
+   sentence wraps around it — a magazine caption wrapping a floated photo.
+
+   flex-wrap + max-width are the structural guard, not the layout: a float is
+   sized by its CONTENT, and `display: flow-root` on .txstory contains a float
+   vertically but does nothing about a float that is simply wider than the card.
+   A right float that overflows does so to the LEFT, i.e. straight over the
+   PREVIOUS card in the deck, which is exactly the escape a big roster shuffle
+   used to stage (photos and banners printed across a neighbour's sentence).
+   TeamTransactionsCard sends any rail past RAIL_FLOAT_MAX to --strip below
+   before it can get there; these two declarations mean a rail that somehow
+   arrives here anyway wraps inside its own card instead of escaping it. */
 .photorail {
   float: right;
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+  max-width: 100%;
   margin: 0 0 6px 10px;
+}
+/* Past RAIL_FLOAT_MAX headshots there is no usable measure left beside the
+   rail (see that constant for the arithmetic), so the photos stop being a
+   floated inset and run the full measure across the top of the card, with the
+   type pill and cutline in ordinary flow underneath — the same thing a picture
+   desk does with a group shot it can't fit in one column.
+
+   auto-fill (not auto-fit) keeps the empty tracks, so a 4-photo strip packs
+   left against the same column pitch a 2-row 8-photo strip uses, rather than
+   spreading out to fill the row on its own. The ragged right edge on a short
+   row is deliberate and matches .last10__card's strip. Tracks are ≥ the
+   headshot and share the slack evenly, which also gives the surname caption
+   (a little wider than its photo on a long name like MELENDEZ) room to sit
+   without touching its neighbour. */
+.photorail--strip {
+  float: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--shot-sm-w), 1fr));
+  justify-items: center;
+  margin: 0 0 8px;
 }
 .photorail__slot {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
   gap: 3px;
