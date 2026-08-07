@@ -7,6 +7,8 @@ import { stampInkFor, stampWinnerId } from '../../lib/stampInk.js'
 import { stampInkOverrideFor } from '../../lib/stampInkTuning.js'
 import { stampMarkPlacement } from '../../lib/stampLogoTuning.js'
 import {
+  BAND_INNER_R,
+  BAND_OUTER_R,
   INNER_RING_R,
   MARK_BOX,
   OUTER_RING_R,
@@ -25,6 +27,7 @@ import {
   stampDateText,
   stampIds,
   stampLabel,
+  stampRingInverted,
   stampSeed,
 } from '../../lib/stampArt.js'
 
@@ -132,6 +135,10 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
   // fallback in `.gamestamp` is what answers. A landed per-club override
   // (stamp-ink.json) wins over the automatic darkest-brand-colour pick;
   // `inkOverride`, when passed at all, wins over that landed value in turn.
+  // A minor-league game inverts the ring band — see stampArt.js's
+  // `stampRingInverted`. Purely a render fork on a fact the blob already
+  // carries; nothing about the stamp's stored record changes.
+  const inverted = stampRingInverted(game)
   const winnerId = stampWinnerId(game)
   const overrideHex = inkOverride !== undefined ? inkOverride : stampInkOverrideFor(winnerId)
   const ink = stampInkFor(game, { overrideHex })
@@ -178,51 +185,63 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
       </defs>
 
       <g filter={`url(#${ids.ink})`} fill="currentColor">
-        {/* Chrome: the double bounding ring */}
-        <circle
-          cx={STAMP_CENTER}
-          cy={STAMP_CENTER}
-          r={OUTER_RING_R}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3.5"
-        />
-        <circle
-          cx={STAMP_CENTER}
-          cy={STAMP_CENTER}
-          r={INNER_RING_R}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-        />
-
-        {/* Ring text: the venue up top, the date (or series line) below, each
-            running its natural length in fixed-width mono — the typewriter
-            rhythm the design settled on after rejecting a textLength force-fit.
-            Both are rendered mixed-case and shouted by the app's global
-            ALL-CAPS invariant, same as every other live value. */}
-        <text
-          fontFamily='"IBM Plex Mono", ui-monospace, monospace'
-          fontSize={RING_FONT_SIZE}
-          fontWeight="400"
-          letterSpacing={RING_TRACKING}
-        >
-          <textPath href={`#${ids.arcTop}`} startOffset="50%" textAnchor="middle">
-            {venueText}
-          </textPath>
-        </text>
-        <text
-          fontFamily='"IBM Plex Mono", ui-monospace, monospace'
-          fontSize={RING_FONT_SIZE}
-          fontWeight="400"
-          letterSpacing={RING_TRACKING}
-        >
-          <textPath href={`#${ids.arcBottom}`} startOffset="50%" textAnchor="middle">
-            {bottomText}
-          </textPath>
-        </text>
-        <path d={ring.diamondLeft} />
-        <path d={ring.diamondRight} />
+        {inverted ? (
+          <>
+            {/* MiLB: the band fills and the ring content knocks out of it.
+                White paints, black punches — so the annulus is a white disc
+                with a black disc dropped in the middle, then the same venue /
+                date / diamonds painted black on top. One ink still: the only
+                thing that ever renders is the currentColor rect below. */}
+            <mask
+              id={ids.band}
+              maskUnits="userSpaceOnUse"
+              x="0"
+              y="0"
+              width={STAMP_SIZE}
+              height={STAMP_SIZE}
+            >
+              <circle cx={STAMP_CENTER} cy={STAMP_CENTER} r={BAND_OUTER_R} fill="#fff" />
+              <circle cx={STAMP_CENTER} cy={STAMP_CENTER} r={BAND_INNER_R} fill="#000" />
+              <g fill="#000">
+                <RingContent
+                  ids={ids}
+                  ring={ring}
+                  venueText={venueText}
+                  bottomText={bottomText}
+                />
+              </g>
+            </mask>
+            <rect
+              x="0"
+              y="0"
+              width={STAMP_SIZE}
+              height={STAMP_SIZE}
+              fill="currentColor"
+              mask={`url(#${ids.band})`}
+            />
+          </>
+        ) : (
+          <>
+            {/* Chrome: the double bounding ring */}
+            <circle
+              cx={STAMP_CENTER}
+              cy={STAMP_CENTER}
+              r={OUTER_RING_R}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+            <circle
+              cx={STAMP_CENTER}
+              cy={STAMP_CENTER}
+              r={INNER_RING_R}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+            <RingContent ids={ids} ring={ring} venueText={venueText} bottomText={bottomText} />
+          </>
+        )}
 
         {/* Top half: the two club marks, clipped to the inner circle so they
             bleed off its left/right edge instead of sitting in a small box. */}
@@ -298,6 +317,46 @@ export function GameStamp({ game, seriesText = null, instanceId, className = '',
         )}
       </g>
     </svg>
+  )
+}
+
+// What rides in the ring: the venue up top, the date (or series line) below,
+// each running its natural length in fixed-width mono — the typewriter rhythm
+// the design settled on after rejecting a textLength force-fit — plus the two
+// separator diamonds that bound them. Both strings are rendered mixed-case and
+// shouted by the app's global ALL-CAPS invariant, same as every other live
+// value.
+//
+// Factored out because it is drawn TWICE by two different recipes and must stay
+// one drawing: painted in currentColor on open paper for an MLB game, and
+// painted black inside a <mask> to knock out of the filled band for a MiLB one.
+// Nothing here states a fill, so each caller's context decides.
+function RingContent({ ids, ring, venueText, bottomText }) {
+  return (
+    <>
+      <text
+        fontFamily='"IBM Plex Mono", ui-monospace, monospace'
+        fontSize={RING_FONT_SIZE}
+        fontWeight="400"
+        letterSpacing={RING_TRACKING}
+      >
+        <textPath href={`#${ids.arcTop}`} startOffset="50%" textAnchor="middle">
+          {venueText}
+        </textPath>
+      </text>
+      <text
+        fontFamily='"IBM Plex Mono", ui-monospace, monospace'
+        fontSize={RING_FONT_SIZE}
+        fontWeight="400"
+        letterSpacing={RING_TRACKING}
+      >
+        <textPath href={`#${ids.arcBottom}`} startOffset="50%" textAnchor="middle">
+          {bottomText}
+        </textPath>
+      </text>
+      <path d={ring.diamondLeft} />
+      <path d={ring.diamondRight} />
+    </>
   )
 }
 

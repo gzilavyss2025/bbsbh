@@ -278,9 +278,8 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
   signed-out user has a real Logbook on that device, holding no scores at all —
   the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
-  mirrors the collection across a signed-in user's devices; it used to push the
-  local reveal mark to `/api/reveal` before each mint to satisfy the gate, and
-  its header records why that could never work and what replaced it.
+  mirrors the collection across a signed-in user's devices; its header records
+  why the old pre-mint reveal-mark push could never satisfy the retired gate.
   The stamp ART is locked (PR #502) and lives as pure math in `lib/stampArt.js`,
   with **one tunable part**: where a club's knockout mark sits in its slot
   (`lib/stampLogoTuning.js` + `data/stamp-logo-tuning.json`, tuned in
@@ -289,10 +288,11 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   ADR-0035's amendment first: that store is consulted on every render, so
   retuning a club restyles its stamps in every Logbook that already holds one.
   The stamp's **ink** is the winning club's darkest brand colour
-  (`lib/stampInk.js` → the `--stamp-ink` custom property `.gamestamp` falls back
-  from) — the one module in `src/lib/` that colours anything from game state,
-  contained by the same allowlist and safe for the same reason. ADR-0036's
-  second addendum has the argument; do not import it anywhere else.
+  (`lib/stampInk.js` → the `--stamp-ink` property `.gamestamp` falls back from) —
+  the one module in `src/lib/` that colours anything from game state, contained
+  by the same allowlist and safe for the same reason (ADR-0036's second
+  addendum); do not import it anywhere else. A **minor-league** game inverts the
+  ring band — same ink, same silhouette (`stampRingInverted`, ADR-0036's fourth).
 - **The forward page-turn transition** (`src/components/page-turn/`) mounts an
   inert preview of the destination half — real (possibly still-sealed)
   content — underneath the active one during the animation. `SealBox`'s own
