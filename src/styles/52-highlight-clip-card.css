@@ -163,6 +163,91 @@
   color: var(--text-caption);
 }
 
+/* ---- The feature print: the same slip blown up to fill its column,
+   used for the box score's condensed game (GameVideoRow.jsx). It drops
+   the fixed rail width and the lower margin — no caption element is
+   rendered at all — so the card is exactly a matted 16:9 frame with
+   the kraft tab on it. The tab carries a longer line here ("CONDENSED
+   GAME (12:20)") on a much larger print, so it steps up from caption
+   to compact and takes a touch more padding; the rotation, tone and
+   shadow stay put, because it's the same piece of tape. */
+.hlclip--feature {
+  flex: 1 1 auto;
+  width: 100%;
+  scroll-snap-align: none;
+}
+.hlclip--feature .hlclip__play {
+  padding: 5px 10px;
+  font-size: var(--fs-compact);
+}
+
+/* ---- Clip rail: the horizontal track these cards scroll in, sized by
+   the card rather than by any one page's data (contrast .teamphotos,
+   the team hub's own rail shell, which is measured to its photo
+   thumbnails). Lives here with the card because it is the card's
+   container — see GameVideoRow.jsx, its first consumer. */
+.cliprail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.cliprail__nav {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.cliprail__nav:hover:not(:disabled) {
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--text-on-seal);
+}
+.cliprail__nav:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cliprail__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+/* A touchscreen already swipes the track, so the arrows are reserved for a
+   mouse/trackpad — on a phone they'd only be clutter eating ~70px of the
+   width the prints want. Same rule (and same reasoning) as
+   .photostrip__nav, which pairs it with the same `canScroll` JS gate. */
+@media (hover: none), (pointer: coarse) {
+  .cliprail__nav {
+    display: none;
+  }
+}
+/* The negative margin pulls the padding back out: the padding exists
+   only so a card's hover lift and focus ring aren't clipped by the
+   scroll container. */
+.cliprail__track {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--space-1);
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cliprail__track::-webkit-scrollbar {
+  display: none;
+}
+
 /* Rail-side loading tile, same footprint as a card so the track
    doesn't reflow when real clips land (used by TeamHighlightsRail
    while the static highlights file is in flight). */

@@ -95,6 +95,17 @@ aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
   `boxscore.js`'s `computePlayOfTheGame` — see its `playIdForWinProbEntry` for
   why the join reads the FEED by `about.atBatIndex` rather than the win-prob
   entry's own (pruned-away) `playEvents`.
+  `selectCondensedGame(items)` / `selectGameClips(items)` are the THIRD reader
+  of that same one fetch — the box score's video row under the line score
+  (`GameVideoRow.jsx`): MLB's ~12-minute condensed cut plus this game's whole
+  reel, oldest first by publish time. Reveal-only in the same sense, and the
+  row's only protection is being mounted inside the box score's `SealBox`
+  reveal function, like `GamePhotosStrip`. `selectCondensedGame` reads the
+  `condensed-game` taxonomy tag DIRECTLY rather than loosening
+  `NON_PLAY_TAXONOMY`, which must keep excluding it for the rails' sake.
+  A condensed cut posts ~30 min after the final out, so its absence (a live
+  game, MiLB, or that window) is routine, not an edge. `formatClipDuration`
+  turns the feed's `"00:12:20"` into the `(12:20)` the kraft tab says.
   Also holds the highlights **cascade**'s pure classification —
   `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
   `highlightPoster` — which is NOT reveal-only: it's plain data transform over
