@@ -2,9 +2,14 @@
 
 Fetch wrappers and selectors around the public MLB Stats API, split by topic (all
 share `statsapi.js`'s `getJson`; a shared header there notes the gamePk field
-paths were verified against). This file is the per-module catalog; the always-loaded
-root `CLAUDE.md` carries only the spoiler-rule summary that governs these modules.
-`../CLAUDE.md` covers how they're consumed by the screens.
+paths were verified against). The always-loaded root `CLAUDE.md` carries only the
+spoiler-rule summary that governs these modules; `../CLAUDE.md` covers how they're
+consumed by the screens.
+
+**This file is the RULE, not the catalog.** It loads in full whenever anyone works
+in this directory, so it holds only what you need before touching any module here.
+The per-module notes live in `docs/api/` and load when you're pointed at them —
+see "Where the per-module notes live" at the bottom.
 
 ## The spoiler rule, applied here
 
@@ -17,8 +22,8 @@ function (next to `revealDerived`), never at `InningViewer`'s top level; the
 fetch itself (`fetchHighlights`) is safe eagerly with respect to spoilers,
 same as `game.js`'s `fetchWinProbability` — a raw fetch result produces no DOM
 on its own — but `useGameData` still waits to fire either until its consuming
-surface is actually opened (`useEverActive`, see below), since "safe" here
-only ever meant spoiler-safe, not free.
+surface is actually opened (`useEverActive`), since "safe" here only ever meant
+spoiler-safe, not free.
 `select.js` is spoiler-**free**. In between sit
 **caller-gated pre-pitch selectors** (`selectPrePitchChanges` in `select.js`,
 `defenseEntering` in `defense.js`, `lineupEntering` in `battingorder.js`),
@@ -42,730 +47,33 @@ data while importing `revealInning`/`revealTotals` two lines below it. Prose can
 wrong; this cannot be wrong silently.
 
 **This classification is about the SCORING surfaces only** — the slate's score
-cells, the lineup pages, the innings viewer, the box score. Most modules below
+cells, the lineup pages, the innings viewer, the box score. Most modules here
 feed OPEN surfaces instead (season and career stats, team and player pages,
 leader boards, standings), correctly need no seal at all, and say so; a season
 aggregate over completed games is spoiler-free, not spoiler-adjacent. Don't read
-"no `SealBox`" on one of those as an omission waiting to be fixed.
+"no `SealBox`" on one of those as an omission waiting to be fixed, and don't add
+one — that is the mistake ADR-0034 undid.
 
-## Core feed / selectors
-
-- `statsapi.js` — the one `getJson` fetch wrapper every topic file below calls.
-- `schedule.js` — slate/schedule (`hydrate=team` for the abbreviation +
-  teamName the bare row lacks), `resolveGame`, `fetchGamesByPk`,
-  `fetchHeadToHead`, `fetchTeamSchedule`. `fetchGameCardsByPk` is the
-  cross-date sibling of `fetchGamesByPk` — full `normalizeGame`-shaped rows
-  (+ `officialDate`) for a gamePk list spanning many dates/levels, e.g. the
-  All-Star Rosters page, where each card needs its own team identity rather
-  than inheriting one date's sportId like the ordinary slate.
-- `uniforms.js` — `/api/v1/uniforms/game` for what each club is wearing (not in
-  the live feed; spoiler-free but empty until ~first pitch, so it rides the
-  feed's fetch/reload in `GameView` and renders on the lineup pages + box
-  score). Also `fetchTeamUniformCatalog` (per-team season catalog) and, for the
-  Team Page's record-by-jersey strip (`components/logo/JerseyCombos.jsx`),
-  `fetchGameJerseys` (batched per-game worn-jersey join) + the pure
-  `buildJerseyCombos` (one card per catalog jersey → its logo treatment + the
-  club's W-L in games it wore it, joined by `uniformAssetCode`; the record is
-  gated by the schedule's own cutoff so it can't leak a result the standings
-  don't already show). A MiLB club has no catalog at all, so its Team Page gets
-  the two-card Home/Away form of that strip instead, with no record — there is
-  no per-game MiLB jersey feed to attribute one to.
-- `jerseys.js` — the nightly `gamePk:teamId → treatment` export
-  (`public/data/jerseys.json`). `jerseyTreatmentFor` swaps a slate card's logo,
-  drives the WPA band, and since ADR-0030 picks the lineup page's club theme.
-  `jerseyWearDates` joins it to a dated team schedule — neither half carries
-  what the other has — for `/identity-lab`'s per-tile links into a real game's
-  photo gallery.
-- `game.js` — the full game feed (`/api/v1.1/game/{gamePk}/feed/live`), a
-  **separate** `/teams/{id}/coaches` call for managers (they are **not** in the
-  live feed), and a **separate** `/api/v1/game/{gamePk}/winProbability` call
-  for per-play WPA — the sole source of the box score's three stars and the
-  innings view's WinProbChart band. It's score-revealing, so `GameView` fetches
-  it lazily (waiting on `useGameData`'s `useEverActive` for the innings view or
-  the box score to actually be opened, not merely the feed landing — a cold
-  open always starts on a lineup page, which reads neither) and the DOM only
-  gets it inside a seal/reveal clamp; it's null-guarded (absent at most MiLB
-  parks). Also exports `fetchGameFeedDiff`/`mergeFeedDiff`, the
-  undocumented diffPatch polling path `useGameData` uses ONLY during the
-  tight Follow Live/Scores Unlocked cadence (ADR-0032) — `mergeFeedDiff`
-  never mutates its `base` argument (see `../lib/jsonPatch.js`) and never
-  throws, falling back to `null` (→ a normal `fetchGameFeed` call) on any
-  apply failure or gamePk mismatch.
-- `highlights.js` — video highlight clips (`/api/v1/game/{gamePk}/content`),
-  joined to a specific play by matching a clip's `guid` to the terminal pitch
-  event's `playId` in `feed/live` (the only reliable join key; verified live
-  against both batted-ball and strikeout-ending plays — see
-  `.scratch/video-highlights/`). Reveal-only (see above): `useGameData`
-  fetches it lazily, same `useEverActive`-gated tier as `winProb` (waiting on
-  the innings view specifically, its only consumer), but `highlightsByPlayId`
-  is only ever called inside `HalfInning`'s `SealBox` reveal function.
-  Degrades to `[]` on failure or off-MLB. `eligibleHighlightForPlay(items,
-  playId)` is the SECOND consumer of that join and reveal-only in the same
-  sense — one play's clip for the box score's Play of the Game card, gated by
-  `isEligibleForPositiveFilter` so an `abs`/`challenge` review can't anchor a
-  card claiming "the best play" (the per-play button deliberately shows ANY
-  clip). It requires no significance tag: the play is picked by this app's own
-  WPA ranking, and requiring MLB's tag on top measured out at 57% of games
-  losing a button that had a real matched clip. The card's `playId` comes from
-  `boxscore.js`'s `computePlayOfTheGame` — see its `playIdForWinProbEntry` for
-  why the join reads the FEED by `about.atBatIndex` rather than the win-prob
-  entry's own (pruned-away) `playEvents`.
-  `selectCondensedGame(items)` / `selectGameClips(items)` are the THIRD reader
-  of that same one fetch — the box score's video row under the line score
-  (`GameVideoRow.jsx`): MLB's ~12-minute condensed cut plus this game's whole
-  reel, oldest first by publish time. Reveal-only in the same sense, and the
-  row's only protection is being mounted inside the box score's `SealBox`
-  reveal function, like `GamePhotosStrip`. `selectCondensedGame` reads the
-  `condensed-game` taxonomy tag DIRECTLY rather than loosening
-  `NON_PLAY_TAXONOMY`, which must keep excluding it for the rails' sake.
-  A condensed cut posts ~30 min after the final out, so its absence (a live
-  game, MiLB, or that window) is routine, not an edge. `formatClipDuration`
-  turns the feed's `"00:12:20"` into the `(12:20)` the kraft tab says.
-  Also holds the highlights **cascade**'s pure classification —
-  `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
-  `highlightPoster` — which is NOT reveal-only: it's plain data transform over
-  the same raw items, run by `scripts/gen-highlights.mjs` in Node with no DOM.
-  It lives here rather than in a parallel module because it reads the same
-  `content` payload, and the FILTER POLICY must have exactly one home (a second
-  copy is how a rail and its generator drift apart). Field names and the
-  taxonomy vocabulary were verified live over 1,150 clips / 41 games; see
-  `.scratch/highlights-cascade/`. `highlightPlaybacks` accepts either the raw
-  `content` item's `playbacks` array OR an already-resolved `{hls, mp4}`
-  object — the shape a highlights-cascade team/player file stores per clip
-  (the generator calls this function once at write time and keeps the
-  result) — so `HighlightSheet.jsx` can stay the one consumer for both the
-  box score's raw per-play item and a rail's precomputed clip, with neither
-  rail re-deriving playback URLs by hand.
-- `gamehighlights.js`'s `fetchDayVideos(urlDate)` — one slate date's condensed
-  games keyed by gamePk, from `public/data/highlights/day/{MMDDYYYY}.json`
-  (~8 KB per day, written by the same nightly sweep). For the home slate's
-  revealed result cards, which need EVERY game's poster at once and so can't
-  use the live path the box score uses — `content` is 430 KB per game and
-  ignores `?fields=`, making 16 cards ~6.9 MB of JSON. Playback URLs ride
-  along, so tapping a card's poster opens the player with no network at all.
-  Known lag, and the reason the live path still exists: TODAY's slate has no
-  file, so a miss is normal and the card falls back to fetching on tap
-  (`WatchCondensedButton`). Degrades to `{ games: {} }`, cached per date.
-- `gamehighlights.js` — the reader half of the cascade: the static per-team
-  archive `scripts/gen-highlights.mjs` precomputes
-  (`public/data/highlights/{teamId}.json`), for the Team hub's Games-tab rail
-  and the player page's rail. Build-time-fetch pattern (below), same
-  thin-static-reader-beside-a-live-fetcher split as `war.js`. Deliberately
-  DUMB — every filter already ran in the generator, so there is no policy here
-  to drift; a caller's only job on top is identity scoping (the player rail
-  keeps `clip.playerId === personId` from his CURRENT team's file). Decided
-  games only, so not a spoiler surface. Degrades to `{ games: [] }`, cached per
-  team for the session. `flattenPositiveClips(data)` is the shared shaping step
-  both rails call on top of a fetch result — flattens `games[].clips[]` into
-  one OLDEST-first list, each clip annotated with its `gamePk`/`date`, so both
-  rails' newest-at-right scroll anchor (PRD's "Rail ordering") lands at the end
-  of the array with no separate reverse step, and the two rails can only ever
-  differ in which clips they keep after this call, never in how they unpack
-  the file. Both rails also render the same `HighlightClipCard`
-  (`src/components/highlights/`) for each clip — purely presentational, no
-  fetching of its own — so a clip object only ever needs shaping once, here,
-  regardless of which rail is reading it. `highlightPlaybacks`
-  (`highlights.js` above) also had to grow a second branch for this cascade —
-  a shipped clip's `playbacks` field is already the resolved `{hls, mp4}`
-  object the generator wrote, not the raw MLB array of named sources
-  `HighlightSheet.jsx`'s box-score caller passes, so the function now accepts
-  either shape rather than a rail needing to re-derive playback URLs itself.
-- `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
-  (see `person.js` for the pure shaping). Read by the player page only —
-  never wired into a sealed game surface. **`currentTeam` is not a roster
-  claim**: the API keeps aiming a released, unsigned, or long-retired player at
-  the last club he was contracted to (Pujols still reads "St. Louis Cardinals"),
-  which the hero used to render as his team. `fetchPerson` therefore hydrates
-  `rosterEntries` — one row per STINT, `startDate`/`endDate` — and `person.js`'s
-  `rosterStatusView(person, onDate)` answers "is he on ANY club that day",
-  splitting a gap into free agent vs. retired on `person.active` (a fact about
-  today, so it may only classify a gap that runs to the present). Null means
-  rostered, i.e. render the club exactly as before; non-null makes `PlayerPage`
-  swap the club crest for the league mark and the club name for the status word,
-  and drop the club's header theme and headshot tint. Its companion
-  `lastPlayedSeason` backs the "Last played in 2022" banner, shown only for the
-  unrostered — a signed player who has missed the whole year is the IL banner's
-  story, not this one. Both are pure and take the page's cutoff date, so a
-  player page opened from an old box score reports his status THAT day.
-- `team.js` — team identity, roster, affiliates, standings, ranked team stats.
-- `search.js` — the footer's player/team directory search.
-- `select.js` — pure, spoiler-free selectors over the raw feed. `selectLineup`
-  returns the STARTING nine, from each boxscore player's own `battingOrder`
-  value (a starter's is an exact multiple of 100; a sub's is offset 801/802…) —
-  never `team.battingOrder`, which mutates to the current slot occupants and
-  would sprout PH rows on the staging pages late in a game. It also feeds
-  `DefenseDiamond` (the scorebook-style opposing-defense drawing on the lineup
-  pages).
-- `liveEdge.js` — a THIRD classification, neither reveal-only nor an ordinary
-  spoiler-free selector: `selectLiveEdge(feed, spoilersOff)` reports only how far
-  the game has progressed (the last play's half-index), never a score, and only
-  when the user has consented (returns null unless the flag is exactly `true`, and
-  before first pitch / on empty play data). Under the Scores Unlocked pass
-  (ADR-0026) it keeps a caught-up viewer on the newest half — NAVIGATION only. It
-  deliberately feeds no reveal mark: everything already renders open under the
-  pass, so there is nothing to ratchet.
-- `challenges.js` — reveal-only ABS (Automated Ball-Strike) challenge history
-  for the R/H/E card's third row (`StatBox`), clamped to the reached half. Each
-  club's success/fail outcome list from the pitch-event `reviewDetails`
-  (`isOverturned` + `challengeTeamId`); MLB only (`gameHasAbs`). See ADR/`docs`
-  research on the retain-on-success rule + extra-inning bonus challenges.
-- `umpireFavor.js` — reveal-only, cumulative-through-the-revealed-half plate-
-  umpire consistency + favor, same `StatBox` row tier and half-clamp pattern as
-  `challenges.js` — a per-game companion to `umpires.js`'s season aggregate.
-  `selectUmpireFavor(feed, table, inning, half)` walks base occupancy/outs the
-  same way `gen-run-expectancy.mjs`/`gen-umpire-accuracy.mjs` do, then calls
-  `src/lib/euz.js`'s `estimateGameConsistency` and `src/lib/runExpectancy.js`'s
-  `pitchFavor`. `fetchRunExpectancy()` (the static `run-expectancy.json` table)
-  is safe to fetch EAGERLY like `vsTeamSplits.js`/`highlights.js` — it carries no
-  game/score info of its own — wired into `useGameData`'s deferred
-  `enrichmentReady` tier and threaded down to `StatBox` as a prop; only the
-  selector combining it with this game's plays runs inside the `SealBox` reveal.
-  `hasPitchTracking(feed)` gates to MLB + AAA. See
-  `.scratch/umpire-accuracy/consistency-favor-scope.md` §3.
-- `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
-  `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
-  (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches
-  as `game:final:{gamePk}`. Its one caller is `StampGameButton` inside the box
-  score's `SealBox` reveal render — ADR-0035. Two fields there are load-bearing,
-  not decoration: `innings` and `homeBattedLast` must match what the SERVER
-  derives from the schedule feed, because a stamp is drawn from whichever
-  producer resolved it and has to look identical either way. Both are derived by
-  scanning for the last half anyone actually batted in rather than off
-  `innings.length`, because the live feed pads its linescore out to
-  `scheduledInnings` and the schedule feed does not. A rain-shortened game is
-  where those two disagree; `test/stamp-art.test.js` pins it.
-  `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
-  hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
-  at most MiLB parks, so every field is null-guarded and the UI hides the row.
-  Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
-  `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
-  top-level plays are NOT plate appearances for PA/BF counts, but their pitches
-  DO count. `computeHalfInningFeed` emits three entry kinds — `atbat`, `event`,
-  and `placed`, the extra-innings automatic runner. His card exists so he can
-  enter `originIndex` with `progress` seeded to the base he was given: that
-  registration is what lets the shared advancement bookkeeping write his legs,
-  his out on the bases, and his run onto a card, instead of computing the whole
-  trip and discarding it for want of an origin. See
-  `.scratch/placed-runner-card/PRD.md`. `legAdvanceCode`'s per-runner advance
-  codes (`ADVANCE_CODES`) have a couple of rare, deliberately-unresolved
-  fallback gaps — see `docs/unresolved-scoring-conventions.md`.
-
-- `logbook.js` — the Logbook's game facts for a set of STAMPED gamePks
-  (`fetchStampGames`, `stampGameFacts`), ADR-0035. The one fetcher here that
-  deliberately asks statsapi FOR the score: every other schedule fetcher prunes
-  it out with `fields=` (see the `GAMES_BY_PK_FIELDS` block in `schedule.js`),
-  which is exactly why this one lives in its own file rather than beside them —
-  so nobody reaches for the wrong function. Safe only because its input is the
-  user's own stamps, and a stamp cannot exist for a game they have not finished
-  revealing. `stampGameFacts` produces the same blob `revealStampFacts` does, so
-  a stamp renders identically whichever source resolved it. Do not call it with
-  an arbitrary game list.
-
-- `logbookStats.js` — the Logbook's retrospective, Tier 1 (`computeLogbookStats`),
-  ADR-0035. **Pure**: `(stamps, gameFacts) -> numbers`, no fetching, so the
-  record/streak/aggregation math lands in the CI-gated suite
-  (`test/logbook-stats.test.js`) instead of being verifiable only by eye —
-  deliberately unlike `FirstScorebookPage.jsx`, which derives the same family of
-  numbers inline in `useMemo`s where nothing can reach it. **Reveal-only by
-  classification** (it handles scores, so ADR-0001 applies); with no seal to sit
-  inside, the discipline is the INPUT — only ever the user's own stamps, never an
-  arbitrary game list. Rendered by `screens/LogbookStatsPage.jsx` at
-  `/logbook/stats`.
-
-## The account layer (`src/lib/account/`, not `src/api/`)
-
-Not a statsapi topic — the per-user state that crosses a signed-in user's own
-devices. It lives in `src/lib/account/` rather than here because it fetches
-nothing from MLB, but it belongs in this file's mental model: it is the other
-half of the four `api/` functions that authenticate a real end user.
-
-- **`preferences.js`** — the My Tally preference document (`bbsbh:prefs`), the
-  **fifth** backend exception (**ADR-0039**, which also carries invariants
-  P1–P10, the Option A/B argument and the deferred `user.deleted` webhook). A
-  **closed** four-field registry: `club`
-  (teamId), `level` (a statsapi sportId, the same vocabulary `teams.js`
-  speaks — not a second string name for it), `keepAwake`, `motion`. Pure,
-  React-free, and imported **verbatim** by `api/preferences.js`, the same
-  contract `src/lib/stamps.js` has with `api/stamps.js`, so the client and the
-  server cannot disagree about what a valid preference is.
-  - **Never score-bearing, and never derived from game state.** That is the
-    invariant that keeps it on the same footing as `revealedThrough`. The module
-    has no idea what a gamePk is; the field registry is the enforcement.
-  - **Last-write-wins per FIELD**, on a per-field `updatedAt`, not per document.
-    Two devices changing two different preferences must both win — a whole-object
-    write silently drops one of the user's own taps, which is exactly why this
-    is not stored in Clerk's `unsafeMetadata`.
-  - **Absence means "no opinion", never "erase"** (same rule as
-    `spoiled-days.js`), and there is deliberately no tombstone: a preference
-    cannot be removed, only changed. `updatedAt: 0` is legal and meaningful — it
-    is what a value migrated from a legacy key carries, so it loses to any real
-    choice from any device.
-  - `preferencesToPublish(local, known)` is a **comparison against the remote**,
-    never a change log. Read its header before "simplifying" it: a change log
-    cannot describe state that predates sign-in, which is the backfill gap
-    ADR-0026's 2026-08-06 amendment and PR #545 both had to fix after shipping.
-  - `mergeStrategyFor(owner, userId)` is the **shared-device guard**. `backfill`
-    when the local document is this user's or nobody's; `adopt` when it belongs
-    to a different account, so user A's club can never be published into user
-    B's. The owner tag (`bbsbh:prefsOwner`) is what makes that answerable.
-- **`preferencesStorage.js`** — every localStorage access, each individually
-  guarded, so **private mode is a tested path** (`test/preferences-storage.test.js`)
-  rather than an assumed one. Reading `window.localStorage` at all can throw, not
-  just calling it. Failure always degrades to in-session memory, never a crash
-  and never a wrong answer.
-- **`syncStatus.js`** — the pure reducer behind the sync receipt. Four channels
-  (`reveal`, `spoiledDays`, `stamps`, `prefs`), and the distinction worth
-  protecting is `unavailable` (a 501 — a deploy with no store, a **supported**
-  state) versus `error` (a real fault). Collapsing them would either cry wolf on
-  a correct deployment or hide a broken one — the four-outcomes-into-one
-  flattening `api/_lib/auth.js` exists to undo. The React seam is
-  `components/sync/SyncStatusProvider.jsx`, an external store so a sync report
-  re-renders only what reads it.
-- **`syncClaims.js`** — the closed ledger of what account copy may CLAIM syncs.
-  `test/sync-claims.test.js` fails when a claim names a module that does not
-  exist, so a promise cannot outrun the implementation. `scoresUnlocked` is on
-  the `NEVER_SYNCED` list with its reason: mirroring the pass expiry would
-  unseal a device the user never consented on (ADR-0026).
-- **`localData.js`** — `tallyKeysIn` / `countGamesInProgress` /
-  `clearTallyDataIn` / `buildGameLogExport`. The **local** half of erase and
-  export: `api/account.js` only ever clears the server, so the confirm sheet
-  has to clear this device itself. It takes a storage object as an argument
-  rather than reaching for `window`, which is the only reason it is testable.
-- **`intro.js`, `prompts.js`, `mergeReceiptFlag.js`** — the onboarding
-  one-shots (`bbsbh:intro`, `bbsbh:prompts`, `bbsbh:mergeReceipt:{userId}`).
-  **None of them sync, deliberately**: a dismissal is a fact about this browser,
-  not about the account, and syncing one would let a second device suppress a
-  note the user there has never seen. Each returns the **same object reference**
-  when it changes nothing — a contract the tests assert with `assert.equal`, not
-  `assert.deepEqual`, because a freshly-allocated identical map still re-renders
-  React. `markPromptSeen`'s first draft scrubbed before it compared and broke
-  exactly that; check the raw map first.
-
-`api/account.js` is the erase counterpart — it deletes every per-user key from
-the verified `sub`, resolving the reveal family through `reveal:index:{userId}`
-(a set of gamePks `api/reveal.js` maintains alongside each ratchet, so the erase
-is complete rather than best-effort). It never deletes `game:final:{gamePk}`,
-which is a shared, immutable cache of public facts belonging to no user.
-
-**`api/` now holds nine functions of the Hobby plan's twelve.** That is not a
-crisis and it is the last time one should be added casually — the next feature
-that wants an endpoint should first ask whether it can ride an existing
-handler's query string.
-
-Related research docs (read before wiring a new source):
-- `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
-  enrichment endpoints (statsapi season/matchup/standings stats, Baseball
-  Savant `/gf` with xBA/barrels/bat speed) with per-endpoint spoiler risk.
-- `docs/uniforms-and-logos.md` — verified (July 2026) findings on statsapi's
-  `/api/v1/uniforms/team` and `/api/v1/uniforms/game`, plus the full inventory of
-  what logo art the mlbstatic CDNs do and don't serve (no alternate/City Connect
-  marks exist).
+**Start from the manifest, not from a grep.** For any module in this directory,
+`spoiler-manifest.json` answers "what is this and who may import it" in one line,
+and `docs/api/` answers "how does it work". Reading a module's own header is the
+third step, not the first — a header can be wrong, as `loadScorecard.js`'s was.
 
 ## The build-time-fetch pattern
 
 Several modules read a static, same-origin `public/data/*.json` file that a
 `scripts/gen-*.mjs` generator precomputes (mostly on a nightly GitHub Actions
 cron, `.github/workflows/update-nightly-data.yml`; a couple are hand-run). The
-driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
-that would need dozens of statsapi calls per page load). See `scripts/CLAUDE.md`
-for each generator; the reader modules:
+driver is either an **unofficial/bulk source** (WAR) or **cost** (everything that
+would need dozens of statsapi calls per page load). `war.js` is the template.
+`scripts/CLAUDE.md` documents each GENERATOR; `docs/api/static-data.md` documents
+each READER.
 
-- `war.js` — season WAR per player, from `public/data/war.json`. FanGraphs'
-  leaderboard API is CORS-open but bulk-only (~1MB) and unofficial, so
-  `scripts/gen-war.mjs` trims it to `{personId: war}` on a nightly cron. Keyed by
-  MLB Stats API `personId` (FanGraphs' `xMLBAMID` is that same id, so no
-  name-matching). This is the **template** for the pattern (bulk/unofficial →
-  nightly script → static JSON → same-origin read; see `docs/data-enrichment.md`
-  §5). A companion `public/data/war-history.json` (keyed by season, hand-run by
-  `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons;
-  `fetchWarHistory` + `warByYearFor(personId, group, current, history)` union the
-  two into a player's `{season: war}` map (live season from war.json wins its own
-  year), which `loadPlayer.js` threads into the player page. MLB-only at source,
-  so MiLB rows fall back to a dash.
-- `jerseys.js` — what a team actually wore in a given game, from
-  `public/data/jerseys.json` (`scripts/gen-jerseys.mjs`, nightly). Keyed
-  `${gamePk}:${teamId}` → `'alternate' | 'city-connect'`; a standard jersey or
-  an unposted assignment simply has no key. `jerseyTreatmentFor(data, gamePk,
-  teamId)` returns that or `null`. `GameCard.jsx` reads it to pick which
-  `TeamLogo` variant to render for the home-page slate — `null` (or a team
-  with no curated art in `public/team-logos/`) falls back to `'base'` via
-  `TeamLogo`'s own fallback chain, never a broken image. Spoiler-free: a
-  jersey choice, not game state.
-- `rehab.js` — the Rehab Assignments page, from `public/data/rehab.json`.
-  Cost-driven: a league-wide transaction scan then per-candidate verification
-  against his game log + rehab club's schedule to drop ended stints — dozens of
-  calls. `gen-rehab.mjs` (daily cron) keeps its own copy of the transaction-scan
-  logic, which mirrors `person.js`'s `detectRehabAssignment`.
-- `milestones.js` — the Milestone Watch page + the player page's Milestone Watch
-  card, from `public/data/milestones.json`. Cost-driven: a career-total + this
-  season's pace pull per debuted player on any MLB org's full roster (active,
-  IL, or minors — so an injured or optioned veteran near a milestone still
-  shows; undebuted prospects are gated out on the roster's hydrated
-  `mlbDebutDate`) plus every team's season schedule (`gen-milestones.mjs`, daily
-  cron), so the projection can scale by how often a player actually plays rather
-  than assuming a #5 starter takes the mound every team game. An inclusion floor
-  (`MILESTONE_PROGRESS_FLOOR`, 75% of the threshold) keeps it to genuine chases,
-  since the distance-based `farWindow` alone is wider than the smallest
-  thresholds. `milestonesForPlayer` filters the league-wide file to one
-  player for the card; the projection math (`projectMilestoneETA`,
-  `careerPerSeasonRate`, `milestoneRarityRank`) lives in `person.js` alongside
-  `MILESTONE_DEFS`, shared by the generator. Counting-stat totals carry no
-  individual game's score (same footing as League Leaders/WAR), so the page needs
-  no `SealBox`; the player-page card still only shows its projection on a bare
-  current-day view (`asOf` unset) since the precompute can't be retrofit to an old
-  game's cutoff.
-- `rookies.js` — `RookiePill` (roster/lineup surfaces) + the player page's
-  "Lost Rookie Status" timeline row, from `public/data/rookies.json`
-  (`{personId: {debutDate, rookieUntil}}`). Rule is AB/IP thresholds only (130
-  career at-bats or 50 innings pitched) — not MLB's full official rookie rule,
-  which also has a 45-active-roster-days clause, deliberately left out. A
-  closed record (`rookieUntil` set) is a frozen historical fact, so
-  `scripts/gen-rookies.mjs` (nightly) is APPEND-ONLY — it only adds a new
-  debut or closes a still-open one, never recomputes a closed record or drops
-  a player who's fallen off every MLB org's roster. `scripts/gen-rookies-backfill.mjs`
-  (hand-run, not on the cron) is the one-time historical sweep that establishes
-  everyone else. `isActiveRookie(data, id)` is the level-agnostic rookie-record
-  lookup; `showRookiePill(data, id, isMlb)` is what RookiePill call sites
-  actually use — MLB-only by design, since a debuted-but-still-rookie player
-  showing up in a MiLB game (rehab, option) gets `hasDebuted`/DebutPill there
-  instead, not a second ROOKIE claim. `rookieRecordFor(data, id)` feeds
-  `rookieUntil` into `transactionTimelineView` (`person.js`) via `loadPlayer.js`.
-  Kept OUT of the PWA precache (~1.3 MB and growing — see `vite.config.js`),
-  fetched at runtime like `vs-team-splits.json`.
-- `umpires.js` — the umpire detail page (every game an umpire worked this season +
-  base, most recent first), from `public/data/umpires.json`, keyed by umpire
-  personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a
-  full-season schedule scan (`hydrate=officials,team`) then re-indexes thousands of
-  rows by umpire id. MLB + AAA (one scan each, sportId 1 + 11; the same umpires
-  shuttle between the levels, so each game row is `level`-tagged). Wired via
-  `selectOfficials` (`select.js`) threading
-  each official's `id` to the Umpires card (`TeamInfo.jsx`), rendered as an
-  `UmpireLink` to `/umpire/{id}`; the page needs no `SealBox` (assignments + dates
-  carry no score). Each entry carries the venue, so `UmpirePage.jsx` tallies
-  most-worked teams + ballparks client-side. A COMPANION file
-  `public/data/umpire-accuracy.json` (`gen-umpire-accuracy.mjs`, same cron) adds
-  each home-plate umpire's season called-pitch accuracy + a compact zone-tendency
-  breakdown, keyed by the same personId; unlike `umpires.json`'s cheap full nightly
-  rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
-  batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
-  Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few
-  days' finals, deduped by gamePk. It covers MLB + AAA (AAA parks feed the pitch
-  tracking; AA/below don't and score to null), and the two levels are kept SEPARATE
-  — different regime (AAA runs the ABS challenge system) + different peer pool — so
-  the per-umpire aggregate splits into `season` (MLB) + `seasonAAA` and every row is
-  `level`-tagged. It also splits by game CONTEXT (`gameType`): only regular-season
-  rows feed the ranked aggregates, postseason (F/D/L/W) rolls into an unranked
-  `seasonPost`, and the All-Star Game (A) counts toward no aggregate (per-game figure
-  only) — a different-stakes sample never moves the season rank. Each row also carries
-  a 3×3 zone grid; a memoized `accuracyIndex(level)` ranks every qualifying plate ump
-  at that level by REGULAR-SEASON accuracy (`MIN_RANK_GAMES` floor) and builds the
-  level's miss-share baseline the zone map compares against. (Crew SIZE varies —
-  two/three-man in the low minors, six-man with Left/Right Field for the ASG +
-  postseason; `selectOfficials` in `select.js` renders whatever crew the feed carries,
-  the source of the live Umpires card.) `loadUmpire` merges it all in as `accuracy` (`{ season,
-  byGamePk }`) + `rank` + `zoneCells` (via `umpireZoneCells`) — plus a parallel
-  `accuracyAAA`/`rankAAA`/`zoneCellsAAA` triplet and an unranked `accuracyPost`/
-  `zoneCellsPost` (postseason) — for `UmpirePage.jsx`'s plate-accuracy cards (one per
-  level + a separate postseason card, rank line + `UmpireZoneMap`) and per-HP-row
-  figures; `umpireAccuracySummary(id)` serves the MLB rank the lineup page's Umpires
-  card (`TeamInfo.jsx`) shows for tonight's plate ump, which opens
-  `UmpireAccuracyModal` (zone map + last-5 plate games linking to their box scores).
-  The summary, modal, and rankings page stay MLB-only (they front an MLB game).
-  Still no `SealBox` — accuracy counts ball/strike JUDGMENTS, not runs or hits, and
-  the lineup rank aggregates Final games only, so it can't leak tonight's result.
-  Umps below AAA / with no data degrade to absent. Each `season`/`seasonAAA`
-  aggregate also carries `consistency` (proportion, agreement with the umpire's OWN
-  game-fitted zone) and `favorMagnitude`/`favorPerGame` (runs of missed-call
-  impact) — same spoiler footing as accuracy (season sums over Final games only);
-  `umpireAccuracySummary`/`UmpireAccuracyModal` surface both alongside the
-  accuracy rank. See `umpireFavor.js` above for the LIVE per-game companion.
-- `vsTeamSplits.js` — the player page's SPLITS VS TEAM card (career line vs each
-  opposing club + last meeting's line, per MLB active-roster player), from
-  `public/data/vs-team-splits.json`. Cost-driven: the API's vs-team split types
-  carry no game granularity, so `gen-vs-team-splits.mjs` sweeps each player's whole
-  MLB game log season by season. `loadPlayer.js` (`vsTeamSplitsFor`) pre-selects the
-  club's next opponent. The career totals are spoiler-free like "Season splits"; the
-  one score-revealing element — the last-game line — is gated against the page's
-  `asOf` cutoff in `SplitsVsTeam.jsx`. Large (~3MB), so kept OUT of the PWA precache
-  and fetched at runtime (see `vite.config.js`).
-- `gameNotes.js` — the lineup page's Game notes button: each MLB club's pre-game
-  press-notes PDF, resolved to the game's date. TWO sources, one shape: the LIVE
-  feed at `dapi.mlbinfra.com` (CORS-open, keyed by `teamid-{n}`) for the game being
-  staged, and a static `public/data/game-notes.json` archive for older games.
-  `gen-game-notes.mjs` snapshots the feed daily and **APPENDS** (never drops old
-  links — the `img.mlbstatic.com` PDF asset stays live forever, so the archive
-  keeps a game reachable after mlb.com de-lists it). MLB only; the button hides for
-  MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
-  PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
-  Kept OUT of the PWA precache (grows each game day).
-- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; all
-  30 MLB clubs as of this writing), the Game notes button opens an in-app modal
-  (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF. Parses
-  client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
-  main bundle — see `vite.config.js`) rather than in the cron, because tonight's
-  note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
-  template needs its own calibration, so `CONFIG` carries a `layout` per club —
-  `column` (Brewers' narrow-column sheet) or `flow-bold`/`flow` (league-standard
-  full-width, most other clubs) — plus font/geometry tunables (single zone or a
-  `columns:` array for multi-column pages). `hasWhatsBrewing`/
-  `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
-  teamId→title map) rather than here, so `TeamInfo.jsx`'s gate check can import
-  them statically without pulling this whole parser out of its lazy chunk; add a
-  club = add a `CONFIG` entry here + a title there (not a new parser). See
-  `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
-  and `docs/whats-brewing.md` for parsing details + the Node harness
-  (`extractForTeam`).
-- `minorsLeaders.js` — the combined ALL-MINORS leaderboard, from
-  `public/data/minors-leaders.json`. Cost-driven: a league-wide four-level board is
-  eight full-level stat pulls (~4,700 players), so `gen-minors-leaders.mjs` (daily
-  cron) precomputes it. Stores PRE-RANKED top rows per category (via the app's own
-  `combineToPool` + `computeLeaders`, so it can't drift from the live `org` board)
-  rather than the raw pool — keeps the file ~150KB and bakes in the leader-relative
-  qualifier's playing-time floor. `LeadersPage` reads it for the `minors` scope and
-  hands rows to `TeamLeaders`'s `precomputed` path.
-- `allStarRosters.js` — the All-Star Rosters page, from
-  `public/data/all-star-rosters.json`. Hand-run (`gen-all-star-rosters.mjs`) — a
-  season's roster is decided once and never changes. Every named selectee,
-  including one who withdrew and never played, since the source is the official
-  ALAS/NLAS selections endpoint, not a boxscore scan (same source
-  `fetchAllStarRosterIds` in `person-fetch.js` uses). Stores each season's
-  `gamePk` only; the screen resolves live team/date info via `fetchGameCardsByPk`
-  (`schedule.js`). `rosters[season]` is
-  `{ AL, NL }`, each precomputed into `{ starters, bullpen, substitutes }` by the
-  generator (one extra boxscore fetch per season resolves who actually started)
-  so the page renders the sections directly with no client-side grouping. It
-  shows each season's final score plainly (a small full-width result card, not
-  `GameCard`) — not an exception to the spoiler rule but a page outside its
-  scope, since the subject is who was NAMED to a squad and an All-Star Game's
-  result is decades-settled exhibition trivia carrying no individual game's
-  stakes; see ADR-0019, and the root `CLAUDE.md` for the scope it sits outside
-  of. The same card also shows `mvps[season]` (absent before
-  1962) and `venues[season]` (a name always, plus a best-effort host-team id
-  the generator resolves against the CURRENT 30 teams' home parks — an older
-  or relocated venue falls back to name-only). Kept OUT of the PWA precache
-  (~650 KB) and fetched at runtime, like `war-history.json`.
-- `milbHistory.js` — historical MiLB affiliate/franchise data, from
-  `public/data/milb-history.json`. Script-generated (`gen-milb-history.mjs`) but
-  **not on a cron** — affiliate history is near-immutable, so it's a hand-run
-  regenerate. Derives 2005+ eras from statsapi's season-scoped team snapshots and
-  merges a small hand-verified seed (`scripts/milb-history-seed.json`) for pre-2005
-  eras (statsapi's own affiliate data is unreliable before ~2005). **Edit the seed,
-  never the output.** Fixes a specific illusion: a MiLB affiliate's PARENT org can
-  be reassigned (esp. the 2021 reorganization) independent of the player changing
-  orgs, so a naive "current parent org" lookup mislabels an old stint as a trade.
-  `historicalParentOrg(teamId, year)` is a preferred-when-covered override in the
-  career timeline (`loadPlayer.js`) ahead of the live `fetchTeam()` lookup;
-  deliberately thin, so most (team, year) pairs fall through unchanged. A parallel
-  `historicalClubName()` covers renames/relocations but isn't wired into any screen
-  yet (no historical logo art; see `docs/milb-historical-logos.md`).
-- `postseasonHistory.js` — the Postseason History page's completed bracket
-  (who played, who won, series length, each team's 1-6 seed, round MVP) for
-  every MLB postseason back to 2000, from `public/data/postseason-history.json`.
-  Hand-run (`gen-postseason-history.mjs`) — a finished postseason's results are
-  immutable, same footing as `awards-history.json`/`milb-history.json`. Only
-  `teamId`s and each game's `gamePk` are stored (never a score-bearing
-  abbreviation or a live-resolvable field) — team names/logos resolve
-  client-side via `src/lib/teams.js` so this file can't drift from the rest of
-  the app's team identity.
-- `postseasonLeaders.js` — the Postseason Leaders page's since-2000 career
-  batting/pitching leaderboards plus franchise/award leaders, from
-  `public/data/postseason-leaders.json`. Hand-run (`gen-postseason-leaders.mjs`,
-  same immutable-history footing as `postseasonHistory.js` above) — batting/
-  pitching need per-game boxscore lines `postseasonHistory.js`'s own generator
-  never fetches, so this is the one file backed by the shared SQLite layer's
-  `postseason_batting_totals`/`postseason_pitching_totals` (scripts/lib/
-  schema.sql, docs/adr/0021) — the genuine cross-game aggregation case that ADR
-  calls out, storing CAREER totals rather than a per-game ledger to keep the
-  committed dump lean. Entries are pre-shaped into `teamLeaders.js`'s
-  `precomputed` category-map contract so `PostseasonLeadersPage.jsx` reuses
-  `TeamLeaders` (Featured-leader/chasers layout) for the batting/pitching
-  sections, same as `minorsLeaders.js` does for the all-minors board; the
-  franchise/repeat-MVP boards are plain rank lists (team-keyed, not the
-  player-keyed pool `TeamLeaders` expects).
-
-- `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls.json`
-  (`gen-fouls.mjs`). Completed-game aggregates → spoiler-free, no SealBox
-  (same footing as WAR); MLB only. Feeds the Foul Tracker page (`/fouls`,
-  `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
-  the precompute can't be cut to a spoiler `asOf`, so the card hides under
-  one, same rule as the Milestone Watch projection). `FOUL_PRIORS` carries the
-  SABR foul-accumulation hit-probability constants used in copy. The LIVE
-  per-half foul counters (`fouls`/`twoStrikeFouls`) live in `derive.js`'s
-  bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
-- `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
-  average velocity per type), from `public/data/pitch-arsenal.json`
-  (`gen-pitch-arsenal.mjs`). Completed-game aggregates → spoiler-free, no
-  SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
-  below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
-  to null there). `pitchArsenalFor(data, personId, isMlb)` picks the level
-  matching the game being staged, sorts most-thrown first, and gates on
-  `MIN_ARSENAL_PITCHES` so a two-pitch cameo doesn't render a misleadingly
-  confident-looking mix. `pitchFamily(code)` groups codes into
-  fastball/breaking/offspeed/other for `PitchArsenalMix.jsx`'s bar coloring
-  (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
-  wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling
-  the space the name/stats column leaves open on a wide screen.
-  `similarPitchersFor(data, personId, isMlb)` is the SECOND surface — the
-  player page's "Pitches like" card. It only flattens the file's per-level
-  entries into a pool (same level as the subject, never both — MLB and AAA are
-  different peer pools); the ranking itself is `src/lib/pitcherSimilarity.js`,
-  pure and unit-tested. Runs at RUNTIME with no precompute: ~500 arms × ~4 pitch
-  types is one pass over a file the page has already loaded, so a neighbour-table
-  generator would buy nothing. Handedness does NOT enter the ranking — not as a
-  filter, not as a distance term. It was a hard filter until August 2026 and was
-  dropped deliberately (the claim is about the REPERTOIRE, not the platoon
-  matchup), so a mirror-image lefty can top a righty's card and a pitcher with
-  no `throws` on file is ranked like anyone else. Measured effect, before
-  re-arguing it: closer neighbours for 327 of 538 MLB arms, by ~1 match point,
-  and no change to coverage at all — see `pitcherSimilarity.js`. The file's
-  `throws` is still exported and still carried on every returned row — it is
-  what `SimilarPitchers.jsx` prints as the RHP/LHP line, now the only place the
-  hand appears. Two floors guard against overclaiming —
-  `MIN_SIMILARITY_PITCHES` to enter the pool, `MIN_MATCH` below which a pairing
-  is dropped — so an unusual arsenal returns a SHORT list or none rather than
-  filler. See `.scratch/player-profile-card/scope.md` §4.
-- `savantPercentiles.js` — season Statcast percentile ranks, from
-  `public/data/savant-percentiles.json` (`gen-savant-percentiles.mjs`, nightly).
-  MLB only; completed-game season aggregates, so spoiler-free with no `SealBox`
-  (same footing as `war.js`). Savant computes the percentiles AND its own
-  qualification floor, and PRE-FLIPS them so a higher percentile is always the
-  good direction even where a low raw number is the good one (xERA, BB%, chase).
-  Two maps per group: `savantPercentilesFor` (the ranks) and `savantRawFor` (the
-  RAW season rates behind them — a SEPARATE Savant leaderboard, because the
-  percentile board carries no raw values at all, every column already a rank).
-  `BATTER_METRICS`/`PITCHER_METRICS` hold display order, labels, plain-language
-  definitions, per-metric raw formatting and the `lowerIsBetter` flag;
-  `RADAR_KEYS` + `radarSpokes` join the two maps into the spoke list
-  `lib/radarGeometry.js` consumes. Surfaces: `StatcastPercentiles.jsx`'s flip
-  cards and the percentile radar (`components/playercard/StatRadar.jsx`) above
-  them. That pre-flip is exactly what makes a radar possible — it's what lets
-  five metrics in five different units share one "farther out is better" axis —
-  so read `radarGeometry.js`'s header before changing how any of it is scaled.
-  `similarHittersFor(data, personId)` is the THIRD surface — the hitter page's
-  "Hits like" card, the batter counterpart of `pitchArsenal.js`'s
-  `similarPitchersFor`: it flattens the `bat` percentile map into a pool and
-  ranks it with `src/lib/hitterSimilarity.js` (pure, unit-tested, calibration
-  constants documented against the real file's measured distance
-  distributions). Skill space only (ev/hardHit/brl/chase/sprintSpeed —
-  deliberately NOT xwoba, which would double-count contact quality), no
-  handedness filter (nothing here inverts with batting side — and since
-  August 2026 the pitching side has none either), and the file carries no
-  names — `SimilarHitters.jsx` resolves its
-  three rows' names/clubs itself with one batched
-  `people?personIds=…&hydrate=currentTeam` call.
-- `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
-  slot the pitcher page fills with `workload.js`'s Recent workload): live
-  `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
-  out in one `Promise.all`; `hitterFormView` is the pure facts-list shaping.
-  Current-day only (the card skips under a spoiler `asOf`), and NOT
-  `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
-  projection — the name differs on purpose so the two never collide.
-- `workload.js` — rolling pitcher workload, from `public/data/workload.json`
-  (`gen-workload.mjs`). Spoiler-free (completed appearances only). The reader
-  owns the math, all relative to a caller-supplied `asOfDate`: `workloadFor`
-  (1/3/10-appearance buckets, days spanned, consecutive-day pattern),
-  `availabilityFor` (rule-based fresh/limited/down with human-readable
-  reasons — ESPN-published thresholds), `workloadVsBaseline` (vs. own norm +
-  role baseline). Surfaces: `BullpenBoard` on the lineup pages (gated to
-  slate-current games — the file describes "now"), the player page's
-  `PitcherWorkloadCard`, and the laboring baseline for `pitcherHealth.js`.
-- `pitcherHealth.js` — IN-GAME pitching health, ADR-0009 footing like
-  `pitchers.js` (gated by `revealedThrough`, never SealBox-wrapped):
-  `laboringFor` (tonight's pitches/inning vs. his own season norm from
-  workload.json — deliberately raw volume, not situation-weighted; see
-  `.scratch/metric-engines/pitching-health.md` for the research trail) and
-  `computeVeloDecay` (fastball-family velo, first-two-innings anchor vs.
-  latest revealed inning, within one pitch type; null at untracked MiLB
-  parks). Folded into Margin Notes (`pitcher-callouts.js`'s `buildMarginNotes`,
-  see below and `docs/callouts.md`), not rendered directly.
-- `seasonScore.js` — the MLB Team Page's Season Surprise Score, from
-  `public/data/season-score.json`. The nightly generator stores snapshots by
-  season, team, and completed date rather than one mutable current row;
-  `seasonScoreFor` selects the latest snapshot at or before the Team Page's
-  standings cutoff. The static reader degrades to no badge before the first
-  generated file exists. See `docs/season-score.md` and ADR-0018.
-- `teamScore.js` + `seasonGradeFormula.js` — dated Quality/Current Form readers
-  and the Team Page's headroom-aware Season Grade. Grade combines Quality with
-  the same-cutoff Season Surprise snapshot; both drivers remain visible and a
-  club enters the league Grade pool only when both exist. See
-  `docs/season-grade.md` and ADR-0020.
-- `comebackWins.js` — the Team Page's "Comeback wins" card, from
-  `public/data/comeback-wins.json` (`gen-comeback-wins.mjs`). Per-team,
-  per-season comeback WINS (`sub10/20/30`) over ATTEMPTS (`att10/20/30`, times
-  the club fell that low win or lose) after its win prob dropped below 10/20/30%
-  (both nested). `comebackRatesFor(data, teamId, season)` is what the card uses:
-  per threshold the club's `wins`/`att`/`rate` (`sub/att`) plus the pooled MLB
-  baseline `leagueRate` (`Σsub/Σatt`) and a count-based `rank`/`of`/`tied` (raw
-  win count, sample-size-proof — a rate rank would let a 1-of-1 club top it).
-  `comebackWinsFor` selects one raw row; `leagueComebackWinsFor` is the legacy
-  `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
-  Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
-  only when the club has at least one comeback win.
-- `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
-  prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
-  opinion, deliberately NOT a callout family (see docs/callouts.md's
-  worthiness rubric and `gen-fever-radar.mjs`'s header for why: every callout
-  is a fact bbsbh derives and can reconcile against the official record,
-  Fever's `overlay` score is a third-party model output it can't reconcile
-  the same way) — surfaced only via the attributed `RadarPill`, wired onto
-  the batting-order rows in `TeamInfo.jsx` next to `MilestonePill`/
-  `RookiePill`. MLB hitters only (there's no MLB pitcher board), so it never
-  appears on the opposing-pitcher card. Backed by the SQLite layer above
-  (`player_snapshots`); each exported row's `movement` is a self-join against
-  the nearest prior snapshot bbsbh itself recorded, not Fever's own
-  `/api/data/movers` feed.
-
-- `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
-  finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
-  uses for video. MLB serves every editorial photo through img.mlbstatic.com
-  with a Cloudinary resize transform baked into the URL path;
-  `fetchGamePhotos` strips each URL's transform segment back to the
-  photographer's original upload and dedupes by photo id.
-  Deliberately NOT reveal-only or SealBox-wrapped — a recap/celebration photo
-  narrates the outcome just by looking at it, same risk as a highlight clip's
-  title, but this is a standalone page outside the scoring flow, so it sits
-  outside the spoiler rule's scope rather than carving a hole in it (its page
-  carries its own disclaimer instead). See the root `CLAUDE.md` for that scope.
-  Every image is a video THUMBNAIL (`editorial` has been empty on every game
-  checked), so each carries a `kind` — `photographer` (a Getty/AP/MLB
-  Photos-Greenfly still), `broadcast` (a frame off the TV feed), `graphic` (a
-  Statcast darkroom card or GAME HIGHLIGHTS recap art), or `unknown`. The
-  decisive test is the ORIGINAL asset's aspect ratio, which Cloudinary reports
-  without serving the file (`fl_getinfo`): cameras shoot 3:2, video is 16:9.
-  `image.title` (the asset filename) is checked first as a free shortcut but is
-  NOT sufficient alone, and taxonomy keywords describe the VIDEO not the image
-  — **read the module header before touching `classifyPhotoAsset`**, it records
-  which signals were tried and the specific ways each one fails on its own.
-  Each photo also carries `focus` (subject player + team, from the item's own
-  `keywordsAll` ids — never name matching), which is what `photosForPlayer`/
-  `photosForTeam` query. `withoutGraphics` is the camera-only filter both the
-  page and `GamePhotosStrip` apply (keeps `broadcast` + `unknown`, drops
-  `graphic`); `onlyPhotographer` is stricter still — `kind === 'photographer'`
-  only, dropping broadcast frames too — for a surface that wants camera stills
-  alone, e.g. an ABS-challenge result card (`graphic`, from a taxonomy/shape
-  match) or a broadcast frame grab slipping in.
-  `photosForPlayer` is still unused groundwork; `photosForTeam` now backs the
-  Team Page's Photos rail (`TeamPhotosRail`, on the hub's Games tab),
-  which walks that team's own `seasonGames` (already `asOf`-cutoff-filtered,
-  the same list the tab's `AllGames` grid renders off) backward from the newest game,
-  fetching `fetchGamePhotos` per game on demand rather than reading a
-  precomputed index — that page already has the one team's full decided-game
-  list in memory, so a bounded live walk-back was enough. The cross-game
-  "photos by player / by team, from anywhere" index scoped in
-  `.scratch/game-photos-by-subject/` (PRD + issue 01) is still open for a
-  surface with no such list already loaded (a player page, say) — read that
-  doc, including its note on what shipped without it, before building it.
-
-## Leader boards (live)
-
-- `leaders.js` / `teamLeaders.js` / `statsLevels.js` — ranking is pool-agnostic:
-  `teamLeaders.js` holds the category descriptors + `computeLeaders`, which ranks
-  any normalized `PoolPlayer[]`; `leaders.js` produces the pool for a scope (a team
-  level or MLB/AL/NL via `fetchTeamRoster` fan-out; an `org` via `statsLevels.js`).
-  `statsLevels.js` reads the roster-INDEPENDENT season-stats endpoint and SUMS a
-  player's lines across levels into one combined row (recomputing rate stats from
-  summed components) — what lets a promoted farmhand rank on his A+ + AA total.
-  Rosters miss him (he's off the club he's left); the stats endpoint doesn't.
+Two rules that keep biting: a file that grows without bound (`rookies.json`,
+`vs-team-splits.json`, per-date `callouts/*.json`) is kept OUT of the PWA precache
+and fetched at runtime — see `vite.config.js`. And for a hand-seeded generator
+(`milb-history`, `mono-ink`, the highlight blocklist) you **edit the seed, never
+the output**.
 
 ## Callouts
 
@@ -775,3 +83,41 @@ score) and ADR-0014 (the two-tense rule). Extend the nightly precompute — do N
 build a parallel generation path. Before adding a data source, check whether an
 existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per-PA
 `playLog`). Notes computable from data on hand should be computed live.
+
+## Conventions
+
+- **Verify a new field path against a real response.** The feed shape is
+  undocumented; `statsapi.js`'s header names the gamePk each path was checked
+  against. Don't guess, and record what you checked it against.
+- **MiLB degrades, it doesn't crash.** Minor-league feeds (sportIds 11–14) often
+  miss lineups, weather, coaches and logos. Every selector falls back to
+  `''`/`null`/`—` and the caller renders "not posted yet".
+- **A generator that needs app logic imports it** rather than keeping a second
+  copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
+  `gen-milestones.mjs` imports the projection math from `person.js`). The
+  deliberate exceptions are self-contained scripts that mirror a small helper —
+  see `scripts/CLAUDE.md`.
+
+## Where the per-module notes live
+
+The catalogs were split out of this file so the per-session cost of working here
+stays small. Each is tier-3 reference (root `CLAUDE.md`'s doc tiers) — read the
+one you need:
+
+| File | Covers |
+| --- | --- |
+| `docs/api/live-game.md` | The live-feed modules: fetchers, `feed/live` selectors, the reveal-only derivations, the pre-pitch staging selectors, and the live leader boards. |
+| `docs/api/static-data.md` | The build-time-fetch readers — one entry per `public/data/*.json` file and the module that reads it. |
+| `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
+
+The three subdirectories here — `person/`, `playbyplay/`, `callout-notes/` — carry
+their notes in each file's own header plus a barrel file that explains the split
+(`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it is
+the one that states the directory's shared spoiler footing.
+
+Related research docs, worth reading before wiring a NEW source:
+- `docs/data-enrichment.md` — verified (July 2026) catalog of free, CORS-open
+  enrichment endpoints, with per-endpoint spoiler risk.
+- `docs/uniforms-and-logos.md` — verified (July 2026) findings on statsapi's
+  uniform endpoints and what logo art the mlbstatic CDNs do and don't serve.
+- `docs/MLB_STATS_API.md` — the endpoint reference.
