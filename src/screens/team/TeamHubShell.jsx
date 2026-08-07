@@ -106,7 +106,6 @@ export function TeamHubShell({
         style={headerThemeStyle(theme)}
       >
         <SiteHeader />
-        <AsOfBanner asOf={asOf} sportId={sportId} />
         <BackBtn onClick={back} />
 
         <header className="team-hub__id">
@@ -186,6 +185,8 @@ export function TeamHubShell({
         />
 
         {children}
+
+        <AsOfBanner asOf={asOf} sportId={sportId} />
       </div>
     </LinkScope>
   )
