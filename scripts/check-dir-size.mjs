@@ -131,7 +131,15 @@ const BUDGETS = {
   // the next free integer rather than a lettered sibling. Loaded directly by
   // `LogbookShelf.jsx`/`BookManagementSheet.jsx`, same "the component that
   // uses it carries it" convention as `49-passport-book.css`.
-  'src/styles': 62,
+  //
+  // 62 -> 63 for `17a-identity-lab-mark-panels.css`: the Identity Lab's per-bar
+  // mark panel, sharing the `17-` prefix with the workbench sheet it sits
+  // beside (a sibling, not a renumbering — same pair convention as 21/21a and
+  // 26/26a above). Its own home rather than more lines in
+  // 17-identity-lab-workbench.css, which is at its check-file-size budget; the
+  // two alternatives were both worse — growing a file that guard already flags,
+  // or nesting and breaking the ordering the exception below exists to protect.
+  'src/styles': 63,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

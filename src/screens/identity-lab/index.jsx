@@ -1,6 +1,7 @@
 import '../../styles/15-team-color-lab.css'
 import '../../styles/16-identity-lab-shell.css'
 import '../../styles/17-identity-lab-workbench.css'
+import '../../styles/17a-identity-lab-mark-panels.css'
 import { useEffect, useState } from 'react'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { LabShell } from './LabShell.jsx'

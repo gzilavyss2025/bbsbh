@@ -10,6 +10,7 @@ import { monoInkFor, monoInkStore } from '../../../lib/monoInk.js'
 import { sanitizeSvgMarkup } from '../../../lib/svgSanitize.js'
 import { LOGO_VARIANTS, teamLogoUrl } from '../../../lib/teams.js'
 import { regenerateMonoLogo, saveStores } from '../saveStores.js'
+import { ShapeInkPicker, flipVerdict } from './ShapeInkPicker.jsx'
 
 // Pick, by eye, which SHAPES of a club's logo are the mark and which are the
 // paper it's drawn against — the hand correction to logoMono.js's automatic
@@ -28,15 +29,10 @@ import { regenerateMonoLogo, saveStores } from '../saveStores.js'
 // Dev-only, like the rest of the lab (ADR-0029): the save endpoint only exists
 // under `vite dev`, and the screen itself is DEV-gated in App.jsx.
 
-// Clicking a shape flips it straight between the two verdicts — whichever way
-// it currently reads (automatic or already pinned) is the one thing the click
-// isn't, so there is no third "back to automatic" stop to click past on the
-// way to the one you want. "Reset to automatic" (below) is the bulk undo.
-const VERDICT_LABEL = {
-  auto: 'Automatic',
-  ink: 'Ink — part of the mark',
-  knockout: 'Knockout — the paper behind it',
-}
+// The clickable art and the numbered verdict list are ShapeInkPicker's, shared
+// with the City Connect bar's own paste-and-convert panel — a shape has to mean
+// the same thing in both, and logoMono.js already numbers them once for both.
+// "Reset to automatic" (below) is this editor's bulk undo.
 
 // Which CDN mark feeds the conversion — 'base' is every club's plain
 // `{id}.svg`, and the other three are the same alternates the sketcher offers
@@ -153,8 +149,7 @@ export function MonoInkEditor({ teamId, name }) {
   function cycle(index) {
     setEdited((prev) => {
       const base = prev ?? savedPins
-      const current = base[index] ?? parts.find((p) => p.index === index)?.auto ?? 'ink'
-      return { ...base, [String(index)]: current === 'ink' ? 'knockout' : 'ink' }
+      return { ...base, [String(index)]: flipVerdict(parts, base, index) }
     })
     setSaveState(null)
   }
@@ -246,20 +241,7 @@ export function MonoInkEditor({ teamId, name }) {
         </p>
       )}
 
-      <div className="idlab__monoinkrow">
-        {/* The art is a picture, not a control surface: every shape in it also
-            has a real button in the list below, which is the keyboard and
-            screen-reader path. Clicking the shape you are looking at is the
-            convenience, not the only way in. */}
-        <div
-          className="idlab__monoinkart"
-          onClick={(e) => {
-            const index = e.target?.closest?.('[data-mono-part]')?.dataset?.monoPart
-            if (index !== undefined) cycle(Number(index))
-          }}
-          dangerouslySetInnerHTML={{ __html: picker }}
-        />
-
+      <ShapeInkPicker picker={picker} parts={parts} pins={pins} onToggle={cycle}>
         <div className="idlab__monoinkbar" style={{ background: DEFAULT_CHROME_BAR }} aria-label="Default navy chrome">
           {mono ? (
             <img className="idlab__monoinkmark" src={monoDataUrl(mono)} alt="" />
@@ -267,32 +249,7 @@ export function MonoInkEditor({ teamId, name }) {
             <span className="idlab__monoinkempty">Nothing left to draw</span>
           )}
         </div>
-      </div>
-
-      <ul className="idlab__monoinkparts">
-        {parts.map((part) => {
-          const verdict = pins[part.index] ?? 'auto'
-          const effective = verdict === 'auto' ? part.auto : verdict
-          return (
-            <li key={part.index}>
-              <button
-                type="button"
-                className={`idlab__monoinkpart idlab__monoinkpart--${effective}${verdict === 'auto' ? '' : ' idlab__monoinkpart--pinned'}`}
-                onClick={() => cycle(part.index)}
-                title={`Shape ${part.index + 1} (${part.tag}) — ${VERDICT_LABEL[verdict]}`}
-              >
-                <span
-                  className="idlab__monoinkswatch"
-                  style={{ background: part.fill ?? 'transparent' }}
-                  aria-hidden="true"
-                />
-                <span className="idlab__monoinkpartnum">{part.index + 1}</span>
-                <span className="idlab__monoinkpartverdict">{effective === 'ink' ? 'Ink' : 'Knockout'}</span>
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+      </ShapeInkPicker>
 
       {saveState && <p className={`colorlab__logodropmsg colorlab__logodropmsg--${saveState.kind === 'busy' ? 'note' : saveState.kind}`}>{saveState.text}</p>}
     </section>

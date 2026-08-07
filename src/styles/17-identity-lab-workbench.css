@@ -242,46 +242,6 @@
   background: var(--surface-card);
 }
 
-/* The knockout column: the club-wide conversion, and directly under it the one
-   bar allowed off it (screens/identity-lab/editors/MastheadMarkEditor.jsx).
-   Stacked rather than given a third column of the pair above — it is the
-   exception to its neighbour, so it has to read as sitting under it. */
-.idlab__markstack {
-  display: grid;
-  gap: var(--space-4);
-  align-content: start;
-}
-
-/* Pasted SVG source. Wraps nothing and scrolls instead: a mark's markup is one
-   very long line, and soft-wrapping it into a paragraph makes a paste look like
-   an editable document rather than the opaque blob it is. */
-.idlab__mastheadsource {
-  width: 100%;
-  margin-top: var(--space-3);
-  padding: var(--space-1) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  white-space: pre;
-  overflow: auto;
-  resize: vertical;
-}
-
-.idlab__mastheadwear {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  margin-top: var(--space-3);
-  font-size: var(--fs-compact);
-}
-
-.idlab__mastheadwear select {
-  flex: 1 1 auto;
-  min-width: 0;
-}
 
 /* Stamp placement — the two mark slots of a Logbook stamp, each a real stamp
    with its own knobs under it. screens/identity-lab/editors/StampPlacementEditor.jsx.

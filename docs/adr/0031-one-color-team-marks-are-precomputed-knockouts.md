@@ -302,3 +302,27 @@ get in.
   (`.idlab__markstack`) because it is the exception to exactly that rule, and it
   renders for no club without a City Connect bar — every MiLB affiliate, and the
   two `NO_CITY_CONNECT` clubs.
+
+**A paste may also be CONVERTED, not just kept.** The panel offers the same
+shape-by-shape ink/knockout verdicts the Knockout mark editor does, applied to
+the paste instead of to the club's CDN art — for City Connect art that arrives
+in full colour but wants to read as one colour on that bar. Three things make
+that safe to bolt on rather than a second pipeline:
+
+- **One picker, shared.** `editors/ShapeInkPicker.jsx` is the clickable art and
+  the numbered verdict list, used by both editors; `logoMono.js` already numbers
+  shapes once, so shape 3 means the same thing in each. Neither editor holds the
+  other's pins — this one's are per paste and are dropped with it, since an index
+  into one mark's shapes means nothing against another's.
+- **The ink is BAKED IN at save time.** `logoMono.js` emits `fill="#fff"` because
+  the club-wide mono mark is re-inked by CSS at render; this slot's contract is
+  the exact opposite (`.metricbar__logo--custom` turns that filter off), so a
+  white silhouette saved here would vanish on a light bar. The panel swaps that
+  one attribute for a colour picked against the bar — defaulting to its own
+  `onBar` — and what lands on disk is finished art either way. `logoMono.js` gains
+  no option the generator would then have to carry, and the renderer learns
+  nothing new.
+- **An empty conversion is refused, never quietly downgraded.** Pin away the last
+  ink shape and `monoLogoSvg` rightly bails; in that state the panel saves
+  NOTHING and says why, rather than falling back to the full-colour paste — which
+  is the one result turning the mode on was meant to avoid.
