@@ -253,6 +253,21 @@
 .standings--full.is-expanded .st-ext {
   display: table-cell;
 }
+/* Wide layout shows the extra columns outright — moved here from
+   31-wild-card.css, which stays in the core sheet. These override the phone
+   defaults above at EQUAL specificity (a media query adds none), so load order
+   is the only thing deciding them; splitting them across two files broke the
+   moment this file became a per-route chunk that links after the core. */
+@media (min-width: 740px) {
+  .standings--full .st-ext {
+    display: table-cell;
+  }
+  .standings--full th,
+  .standings--full td {
+    padding: 8px 9px;
+    font-size: var(--fs-small);
+  }
+}
 /* Team column pinned as a safety net: the phone set fits without scroll, but a
    large accessibility font (or a very long club name) can still force overflow,
    and a stuck team name keeps the row readable when it does. */

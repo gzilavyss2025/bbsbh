@@ -4,7 +4,7 @@
 // This repo commits ~28 MB of precomputed JSON under public/data/ (the
 // build-time-fetch pattern — see src/api/CLAUDE.md) plus ~6.7 MB of SQLite
 // TEXT dumps under scripts/data/. Several single files are over a megabyte:
-// vs-team-splits.json is 3.2 MB, umpires.json 3.2 MB, pitch-arsenal.sql 2.2 MB.
+// umpires.json is 3.2 MB, pitch-arsenal.sql 2.2 MB, rookies.json 1.2 MB.
 //
 // None of them is written or reviewed by hand, and reading one whole answers a
 // question nobody has: the SHAPE is documented in prose (src/api/CLAUDE.md for
