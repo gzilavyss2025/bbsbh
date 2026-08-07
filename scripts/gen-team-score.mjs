@@ -1,15 +1,18 @@
 // Regenerates public/data/team-score.json — MLB's date-keyed Quality and
 // Current Form. Both are team-quality measures: 60% actual wins and 40%
 // Pythagorean run quality, centered on .500 and damped for small samples;
-// Quality also folds in a capped strength-of-schedule nudge from opponents'
-// own season winning percentage (Current Form does not — see
-// teamScoreFormula.js). Season Surprise remains in season-score.json as the
-// Grade's separate, visible Vs. expectation driver. The composite Season
-// Grade is derived in src/api/seasonGradeFormula.js from same-cutoff
-// snapshots. The formula itself lives in src/api/teamScoreFormula.js (pure,
-// no node imports) so the team page's "how this is calculated" explainer can
-// run the same math client-side — re-exported here so this script stays the
-// existing import site for test/team-score.test.js.
+// Quality also folds in a per-game park adjustment to that run differential
+// and a capped strength-of-schedule nudge from opponents' own season winning
+// percentage (Current Form does neither — see teamScoreFormula.js). Season
+// Surprise remains in season-score.json as the Grade's separate, visible Vs.
+// expectation driver. The composite Season Grade is derived in
+// src/api/seasonGradeFormula.js from same-cutoff snapshots. The formula
+// itself lives in src/api/teamScoreFormula.js (pure, no node imports) so the
+// team page's "how this is calculated" explainer can run the same math
+// client-side — re-exported here so this script stays the existing import
+// site for test/team-score.test.js. `game.venue.id`/`.name` were verified
+// present on the schedule fetch below with no added hydration, checked
+// against a live 2026-08-01 STL@TOR window.
 import { dirname, join } from 'node:path'
 import { writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -19,6 +22,7 @@ import {
   currentFormScoreFromGames,
   lateGameAdjustment,
   scheduleStrengthAdjustment,
+  venueRunFactor,
   CURRENT_FORM_GAMES,
 } from '../src/api/teamScoreFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
@@ -46,6 +50,7 @@ function parseArgs(argv) {
   return args
 }
 
+const round1 = (n) => Math.round(n * 10) / 10
 const round2 = (n) => Math.round(n * 100) / 100
 const round3 = (n) => Math.round(n * 1000) / 1000
 
@@ -87,6 +92,48 @@ function avgOpponentWinPct(games, winPctByTeam) {
   return total / games.length
 }
 
+// Every completed game's own venue, so Quality's park adjustment (see
+// teamScoreFormula.js) can compare a game's actual runs to what a neutral
+// park would have produced, from the SAME completed-games list summarize()
+// already draws from — no separate fetch, and it can never look past the
+// snapshot's own cutoff (asOf) because `games` already is.
+function venueRunFactorLookup(games) {
+  const byVenue = new Map()
+  let leagueRuns = 0, leagueGames = 0
+  for (const g of games) {
+    const runs = g.homeRuns + g.awayRuns
+    leagueRuns += runs
+    leagueGames += 1
+    if (g.venueId == null) continue
+    const bucket = byVenue.get(g.venueId) ?? { runs: 0, games: 0 }
+    bucket.runs += runs
+    bucket.games += 1
+    byVenue.set(g.venueId, bucket)
+  }
+  const leagueAvg = leagueGames ? leagueRuns / leagueGames : 0
+  const factorByVenue = new Map()
+  for (const [venueId, { runs, games: n }] of byVenue) {
+    factorByVenue.set(venueId, venueRunFactor(runs / n, leagueAvg, n))
+  }
+  return factorByVenue
+}
+
+// Per-team season totals with each game's runs divided by that game's own
+// venue factor — the Pythagorean half's actual inputs. The raw runsScored/
+// runsAllowed/runDifferential summarize() already computes stay untouched
+// and keep feeding the displayed Record/Run differential.
+function parkAdjustedTotals(games) {
+  return games.reduce(
+    (totals, g) => {
+      const factor = g.parkFactor ?? 1
+      totals.runsScored += g.runsFor / factor
+      totals.runsAllowed += g.runsAllowed / factor
+      return totals
+    },
+    { runsScored: 0, runsAllowed: 0 },
+  )
+}
+
 function gameOutcome(game) {
   const home = game.teams?.home
   const away = game.teams?.away
@@ -99,11 +146,13 @@ function gameOutcome(game) {
     awayId: away.team.id,
     homeRuns: home.score,
     awayRuns: away.score,
+    venueId: game.venue?.id ?? null,
     innings: game.linescore?.innings ?? [],
   }
 }
 
 export function buildTeamScoreSnapshots({ games, asOf }) {
+  const venueFactorByVenue = venueRunFactorLookup(games)
   const byTeam = new Map()
   const ensure = (teamId) => {
     if (!byTeam.has(teamId)) byTeam.set(teamId, [])
@@ -112,6 +161,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
 
   for (const game of games) {
     const late = classifyLateGame({ innings: game.innings, homeRuns: game.homeRuns, awayRuns: game.awayRuns })
+    const parkFactor = game.venueId != null ? (venueFactorByVenue.get(game.venueId) ?? 1) : 1
     ensure(game.homeId).push({
       gamePk: game.gamePk,
       date: game.date,
@@ -120,6 +170,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
       runsAllowed: game.awayRuns,
       opponentId: game.awayId,
       late: late.home,
+      parkFactor,
     })
     ensure(game.awayId).push({
       gamePk: game.gamePk,
@@ -129,6 +180,7 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
       runsAllowed: game.homeRuns,
       opponentId: game.homeId,
       late: late.away,
+      parkFactor,
     })
   }
 
@@ -146,12 +198,27 @@ export function buildTeamScoreSnapshots({ games, asOf }) {
 
     const oppWinPct = avgOpponentWinPct(ordered, winPctByTeam)
     const sos = scheduleStrengthAdjustment(oppWinPct, ordered.length)
+    const parkAdjusted = parkAdjustedTotals(ordered)
+    const avgParkFactor = ordered.length
+      ? round3(ordered.reduce((sum, g) => sum + (g.parkFactor ?? 1), 0) / ordered.length)
+      : null
     snapshots[teamId] = {
       asOf,
-      season: summarize(ordered, qualityScoreFromGames, { adjustment: sos }, {
-        avgOpponentWinPct: oppWinPct == null ? null : round3(oppWinPct),
-        sosAdjustment: round2(sos),
-      }),
+      season: summarize(
+        ordered,
+        qualityScoreFromGames,
+        {
+          adjustment: sos,
+          parkAdjustedRunsScored: parkAdjusted.runsScored,
+          parkAdjustedRunsAllowed: parkAdjusted.runsAllowed,
+        },
+        {
+          avgOpponentWinPct: oppWinPct == null ? null : round3(oppWinPct),
+          sosAdjustment: round2(sos),
+          avgParkFactor,
+          parkAdjustedRunDifferential: round1(parkAdjusted.runsScored - parkAdjusted.runsAllowed),
+        },
+      ),
       currentForm,
     }
   }

@@ -4,7 +4,30 @@ import { buildTeamScoreSnapshots, pythagoreanPct, qualityScoreFromGames } from '
 import { leagueSeasonGradesFor, teamScoreFor, gradeTiersByTeamId } from '../src/api/teamScore.js'
 import { seasonGradeFromScores, seasonGradeFor } from '../src/api/seasonGradeFormula.js'
 import { classifyLateGame } from '../src/api/lateGameSwing.js'
-import { scheduleStrengthAdjustment, SOS_ADJUSTMENT_CAP } from '../src/api/teamScoreFormula.js'
+import {
+  scheduleStrengthAdjustment,
+  SOS_ADJUSTMENT_CAP,
+  venueRunFactor,
+  VENUE_FACTOR_PRIOR_GAMES,
+  PARK_FACTOR_MIN,
+  PARK_FACTOR_MAX,
+} from '../src/api/teamScoreFormula.js'
+
+const round1 = (n) => Math.round(n * 10) / 10
+
+// Repeats the same fixed score between two teams at one venue — the building
+// block for the park-adjustment fixtures below, which need a well-sampled
+// venue (50-60 games) rather than the handful winLossGames below produces.
+const repeatedGames = ({ gamePkStart, homeId, awayId, count, homeRuns, awayRuns, venueId }) =>
+  Array.from({ length: count }, (_, index) => ({
+    gamePk: gamePkStart + index,
+    date: `2026-04-${String((index % 28) + 1).padStart(2, '0')}`,
+    homeId,
+    awayId,
+    homeRuns,
+    awayRuns,
+    venueId,
+  }))
 
 test('Pythagorean quality is neutral with equal runs and rewards a run advantage', () => {
   assert.equal(pythagoreanPct(20, 20), 0.5)
@@ -15,6 +38,139 @@ test('quality score is neutral for a .500-quality ten-game sample and damped ear
   assert.equal(qualityScoreFromGames({ wins: 5, games: 10, runsScored: 40, runsAllowed: 40 }).score, 5)
   assert.equal(qualityScoreFromGames({ wins: 5, games: 9, runsScored: 40, runsAllowed: 40 }), null)
   assert.ok(qualityScoreFromGames({ wins: 10, games: 10, runsScored: 60, runsAllowed: 20 }).score < 9)
+})
+
+test('venueRunFactor is neutral at equal averages, guards zero denominators, and signs with the deviation', () => {
+  // Neutral regardless of sample size — a venue that scores exactly like the
+  // league gets no adjustment whether it's hosted 1 game or 500.
+  assert.equal(venueRunFactor(9, 9, 1), 1)
+  assert.equal(venueRunFactor(9, 9, 500), 1)
+  // Zero-guards: no league average or no games at the venue yet both mean
+  // "nothing to compare against," so stay neutral rather than divide by zero.
+  assert.equal(venueRunFactor(9, 0, 20), 1)
+  assert.equal(venueRunFactor(9, 9, 0), 1)
+  // Sign follows the deviation: a higher venue average than the league's
+  // pushes the factor above 1, a lower one pulls it below.
+  assert.ok(venueRunFactor(11, 9, 20) > 1)
+  assert.ok(venueRunFactor(7, 9, 20) < 1)
+})
+
+test('venueRunFactor shrinks a raw ratio exactly halfway to neutral at VENUE_FACTOR_PRIOR_GAMES games', () => {
+  const raw = 11 / 9
+  const factor = venueRunFactor(11, 9, VENUE_FACTOR_PRIOR_GAMES)
+  assert.ok(Math.abs(factor - (1 + (raw - 1) / 2)) < 1e-9)
+})
+
+test('venueRunFactor clamps an extreme raw ratio even at a large sample', () => {
+  assert.equal(venueRunFactor(30, 9, 1000), PARK_FACTOR_MAX)
+  assert.equal(venueRunFactor(2, 9, 1000), PARK_FACTOR_MIN)
+})
+
+// Two well-sampled "anchor" venues (HI averages well above league runs/game,
+// LO well below, each hosting 65 games so their factor sits close to the raw
+// ratio rather than the small-sample shrinkage — VENUE_FACTOR_PRIOR_GAMES=30
+// is well under 65) plus two comparison teams, X and Y, who both finish 5-5
+// with IDENTICAL raw runsScored/runsAllowed/runDifferential — the only
+// difference is WHERE each of their 10 games happened. THE TRAP this pins:
+// giving every one of a team's own games the same run ratio would make the
+// park adjustment a no-op in aggregate, for the same scale-invariance reason
+// a team-level multiplier is (see teamScoreFormula.js's header comment on
+// venueRunFactor) — so X and Y each need two DIFFERENT game shapes (a 9-1
+// blowout win and a 1-2 narrow loss), with venues assigned the OPPOSITE way
+// between them: X's blowouts at HI / narrow losses at LO, Y's blowouts at LO
+// / narrow losses at HI. Real per-venue run factors are genuinely
+// heterogeneous (Coors ~1.26, T-Mobile ~0.84), which is what this asymmetry
+// stands in for.
+function parkFixtureGames() {
+  const HI = 9001, LO = 9002
+  const C = 401, D = 402, E = 403, F = 404
+  const X = 501, OX = 502, Y = 503, OY = 504
+  return {
+    X,
+    Y,
+    games: [
+      ...repeatedGames({ gamePkStart: 1, homeId: C, awayId: D, count: 55, homeRuns: 7, awayRuns: 3, venueId: HI }),
+      ...repeatedGames({ gamePkStart: 101, homeId: E, awayId: F, count: 55, homeRuns: 4, awayRuns: 2, venueId: LO }),
+      // X's 5 blowout wins at HI, 5 narrow losses at LO.
+      ...repeatedGames({ gamePkStart: 201, homeId: X, awayId: OX, count: 5, homeRuns: 9, awayRuns: 1, venueId: HI }),
+      ...repeatedGames({ gamePkStart: 206, homeId: X, awayId: OX, count: 5, homeRuns: 1, awayRuns: 2, venueId: LO }),
+      // Y gets the SAME two game shapes at the SWAPPED venues.
+      ...repeatedGames({ gamePkStart: 301, homeId: Y, awayId: OY, count: 5, homeRuns: 9, awayRuns: 1, venueId: LO }),
+      ...repeatedGames({ gamePkStart: 306, homeId: Y, awayId: OY, count: 5, homeRuns: 1, awayRuns: 2, venueId: HI }),
+    ],
+  }
+}
+
+test('Quality park-adjusts identical raw records differently depending on which venue hosted which games', () => {
+  const { X, Y, games } = parkFixtureGames()
+  const snapshots = buildTeamScoreSnapshots({ games, asOf: '2026-06-01' })
+  const x = snapshots[X].season
+  const y = snapshots[Y].season
+
+  // Raw figures are provably untouched by the park adjustment.
+  assert.equal(x.wins, y.wins)
+  assert.equal(x.runsScored, y.runsScored)
+  assert.equal(x.runsAllowed, y.runsAllowed)
+  assert.equal(x.runDifferential, y.runDifferential)
+  assert.equal(x.runsScored, 50)
+  assert.equal(x.runsAllowed, 15)
+  assert.equal(x.runDifferential, 35)
+
+  // avgParkFactor is an unweighted mean of the SAME two venue factors for
+  // both teams (each plays exactly 5 games at HI and 5 at LO, just with the
+  // shapes swapped) — a straight average can't tell the two teams apart,
+  // which is exactly why parkAdjustedRunDifferential (below), not this
+  // figure alone, is what has to carry the effect.
+  assert.equal(x.avgParkFactor, 1)
+  assert.equal(y.avgParkFactor, 1)
+
+  // Y's blowout wins happened at the LOW-scoring park (their 9 runs get
+  // divided by a below-1 factor, inflating them) while X's blowout wins
+  // happened at the HIGH-scoring park (their 9 runs get divided by an
+  // above-1 factor, shrinking them) — so despite identical raw stat lines,
+  // Y's park-adjusted output comes out ahead.
+  assert.ok(y.parkAdjustedRunDifferential > x.parkAdjustedRunDifferential)
+  assert.ok(y.pythagWins > x.pythagWins)
+  assert.ok(y.score > x.score)
+
+  // Pinned exact values from a real run of buildTeamScoreSnapshots against
+  // this fixture (scripts/_check.mjs, deleted after use — see the SOS
+  // commit for the same workflow).
+  assert.equal(x.parkAdjustedRunDifferential, 28.9)
+  assert.equal(y.parkAdjustedRunDifferential, 42.7)
+  assert.equal(x.pythagWins, 8.7)
+  assert.equal(y.pythagWins, 9.2)
+  assert.equal(x.score, 6)
+  assert.equal(y.score, 6.1)
+})
+
+test('Current Form ignores the park adjustment even over a window straddling both venues', () => {
+  // X's own 10 games already straddle HI and LO (5 blowout wins at one, 5
+  // narrow losses at the other), and 10 games is exactly CURRENT_FORM_GAMES,
+  // so X's whole season IS its current-form window — the same fixture Test B
+  // uses, reused here as the regression that nothing leaked into
+  // currentFormScoreFromGames via the qualityScoreFromGames core they share.
+  const { X, games } = parkFixtureGames()
+  const snapshots = buildTeamScoreSnapshots({ games, asOf: '2026-06-01' })
+  const form = snapshots[X].currentForm
+  const rawPythagWins = round1(pythagoreanPct(50, 15) * 10)
+  assert.equal(form.pythagWins, rawPythagWins)
+  assert.equal(form.pythagWins, 9)
+})
+
+test('a thin two-game sample at a brand-new venue shrinks close to neutral despite an extreme raw ratio', () => {
+  const NEW_VENUE = 9003
+  const Z = 601, W = 602, P = 701, Q = 702
+  const games = [
+    // A modest-scoring baseline league so there's a real average to compare
+    // against — venueId null, same as a game whose venue never resolved.
+    ...repeatedGames({ gamePkStart: 1, homeId: P, awayId: Q, count: 20, homeRuns: 5, awayRuns: 4, venueId: null }),
+    // Z's whole sample at the new venue: 2 games, both lopsided 15-3 — an
+    // extreme raw ratio a real park would never sustain.
+    ...repeatedGames({ gamePkStart: 101, homeId: Z, awayId: W, count: 2, homeRuns: 15, awayRuns: 3, venueId: NEW_VENUE }),
+  ]
+  const snapshots = buildTeamScoreSnapshots({ games, asOf: '2026-06-01' })
+  assert.ok(Math.abs(snapshots[Z].season.avgParkFactor - 1) < 0.1)
 })
 
 test('classifyLateGame detects a walk-off as the home clutch win and the away blown-tie loss', () => {

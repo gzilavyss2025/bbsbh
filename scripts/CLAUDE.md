@@ -323,11 +323,11 @@ don't run these by hand.
   exported from the table, byte-for-byte the same reader shape.
 - `gen-team-score.mjs` → `public/data/team-score.json` — date-keyed MLB Quality
   plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
-  40% Pythagorean wins. The browser combines same-cutoff Quality and Season
-  Surprise into the headroom-aware Season Grade; see `docs/season-grade.md` and
-  ADR-0020. Backed by the SQLite layer above (`team_snapshots`,
-  `metric='quality'`/`'current_form'`); `public/data/team-score.json` is
-  exported from the table.
+  40% Pythagorean wins off park-adjusted run differential, plus a capped
+  strength-of-schedule nudge (Current Form skips both — see
+  `src/api/teamScoreFormula.js`). Combined with Season Surprise into the
+  headroom-aware Season Grade; see `docs/season-grade.md`/ADR-0020. Backed by
+  the SQLite layer above (`team_snapshots`, `metric='quality'`/`'current_form'`).
 - `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
   an MLB-only, season-chunked roster-move story feed for all 30 organizations.
   The nightly job rebuilds only the current season; once the season file is
