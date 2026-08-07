@@ -79,3 +79,69 @@ test('Play of the Game poster and Watch button stay behind the box score seal', 
   await watch.click()
   await expect(page.locator('.hlsheet')).toBeVisible()
 })
+
+// The home slate's result cards carry video too (a precomputed condensed-game
+// poster, or the tap-to-fetch button on a day the nightly job hasn't covered),
+// and both live on the flip card's BACK face — which only exists once the day
+// has been revealed. This asserts the whole day is quiet until then: no
+// poster, no button, and no request to MLB's video CDN.
+test('slate result cards carry no video until the day is revealed', async ({ page }) => {
+  const videoRequests = []
+  page.on('request', (r) => {
+    if (/mlb-cuts-diamond|highlights\/day|\/content(\?|$)/.test(r.url())) videoRequests.push(r.url())
+  })
+
+  await page.goto('/07072026')
+  await page.getByRole('button', { name: /Reveal all results/i }).first().waitFor()
+
+  await expect(page.locator('.hlclip')).toHaveCount(0)
+  await expect(page.locator('.flipback__watchbtn')).toHaveCount(0)
+  expect(videoRequests).toEqual([])
+
+  await page.getByRole('button', { name: /Reveal all results/i }).first().click()
+
+  // One of the two affordances shows up per card — the poster when the day's
+  // index has an entry, the fetch-on-tap button when it doesn't. Which one
+  // depends on whether the nightly job has covered this date, so assert that
+  // SOMETHING arrived rather than pinning the branch.
+  await expect
+    .poll(async () =>
+      (await page.locator('.flipback .hlclip--feature').count()) +
+      (await page.locator('.flipback__watchbtn').count()),
+    )
+    .toBeGreaterThan(0)
+})
+
+// The video row under the line score (GameVideoRow.jsx) is a whole reel of the
+// same material the test above guards one clip of: MLB's condensed cut plus
+// every per-play highlight, each one a poster frame and a title that narrates
+// its own outcome. Its ONLY protection is where it is mounted — inside the box
+// score's SealBox reveal function — so this asserts exactly that, on the
+// element that would exist if someone hoisted it out.
+//
+// Same pinned fixture game as above (gamePk 823035, verified 2026-08-06 to
+// carry both a condensed cut and eligible clips), so the post-reveal half
+// can't pass vacuously.
+test('the condensed game and highlight rail stay behind the box score seal', async ({ page }) => {
+  await page.goto(`${GAME}/boxscore`)
+
+  await expect(page.locator('.hlclip')).toHaveCount(0)
+  await expect(page.locator('.hlclip__poster')).toHaveCount(0)
+  await expect(page.locator('.cliprail')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
+
+  // Exactly one feature print — the condensed game — and a rail of clips
+  // beside it.
+  await expect(page.locator('.hlclip--feature')).toHaveCount(1)
+  await expect(page.locator('.cliprail .hlclip')).not.toHaveCount(0)
+
+  // The kraft tab names the feed and its runtime: "CONDENSED GAME (12:20)".
+  await expect(page.locator('.hlclip--feature .hlclip__play')).toHaveText(
+    /Condensed Game \(\d{1,2}:\d{2}\)/i,
+  )
+
+  // And it opens the same shared sheet every other clip does.
+  await page.locator('.hlclip--feature').click()
+  await expect(page.locator('.hlsheet')).toBeVisible()
+})

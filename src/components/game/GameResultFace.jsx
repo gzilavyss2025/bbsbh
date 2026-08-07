@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { selectBoxscore, computePlayOfTheGame } from '../../api/boxscore.js'
 import { useNav } from '../../lib/nav.js'
 import { favoriteAccentColor } from '../../lib/teams.js'
@@ -6,6 +7,10 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PerformerCard } from '../player/PerformerCard.jsx'
+import { WatchCondensedButton } from '../highlights/WatchCondensedButton.jsx'
+import { HighlightClipCard } from '../highlights/HighlightClipCard.jsx'
+import { HighlightSheet } from '../playbyplay/HighlightSheet.jsx'
+import { formatClipDuration } from '../../api/highlights.js'
 import {
   SCENARIO_LABEL,
   SCENARIO_STYLE,
@@ -40,6 +45,7 @@ export function GameResultFace({
   game = null,
   pinnedTeamId = null,
   cardMeta = null,
+  video = null,
 }) {
   const navigate = useNav()
   const box = selectBoxscore(feed)
@@ -113,6 +119,18 @@ export function GameResultFace({
         >
           Box score
         </button>
+        {/* Beside Box score, because both are "where this card can take you"
+            — and in the row that already exists, so video costs the card no
+            height. MLB only: an affiliate game has no content package at all,
+            so the button would only ever dead-end. `game` is absent on the
+            Postseason Series page's reuse of this face, which simply gets no
+            button (same graceful-omission convention as the pills). */}
+        {/* The button is the fallback for a day the nightly job hasn't
+            covered — with a precomputed poster (`video`) the card shows the
+            print instead, at the foot below. */}
+        {!video && game?.sportId === 1 && game?.gamePk != null && (
+          <WatchCondensedButton gamePk={game.gamePk} />
+        )}
         <ResultPills game={game} cardMeta={cardMeta} />
       </div>
       <div className="flipback__linescore">
@@ -134,7 +152,34 @@ export function GameResultFace({
         </ul>
       )}
       {showPlay && <PlayOfTheGame potg={potg} box={box} />}
+      {/* Last on the card, under the night's story — you read what happened,
+          then you watch it. Same feature print as the box score's condensed
+          panel, so the two surfaces teach the same object once. */}
+      {video && <CondensedPrint video={video} />}
     </div>
+  )
+}
+
+// The precomputed condensed game as a poster on the card. Everything it needs
+// — poster, runtime, and the playback URLs — came down in the day's 8 KB
+// index, so tapping it opens the player with NO network at all. The object
+// handed to HighlightSheet is shaped like a content item on purpose:
+// `highlightPlaybacks` already accepts an ALREADY-RESOLVED `{hls, mp4}` (the
+// branch it grew for the highlights cascade's team files), so nothing here
+// re-derives a URL.
+function CondensedPrint({ video }) {
+  const [open, setOpen] = useState(false)
+  const runtime = formatClipDuration(video.duration)
+  return (
+    <>
+      <HighlightClipCard
+        clip={{ poster: video.poster, title: video.title }}
+        variant="feature"
+        label={`Condensed Game${runtime ? ` (${runtime})` : ''}`}
+        onOpen={() => setOpen(true)}
+      />
+      {open && <HighlightSheet item={video} onClose={() => setOpen(false)} />}
+    </>
   )
 }
 

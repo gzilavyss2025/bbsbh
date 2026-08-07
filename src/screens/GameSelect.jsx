@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useNav } from '../lib/nav.js'
-import { slatePath, teamPath } from '../lib/route.js'
+import { apiDateToUrl, slatePath, teamPath } from '../lib/route.js'
+import { fetchDayVideos } from '../api/gamehighlights.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
@@ -383,6 +384,17 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // Blowout / Close Game / Extra Innings) for every card in `finals` — see
   // GameResultFace.jsx's ResultPills. Empty until revealedAll flips true.
   const cardMetaByGamePk = useDayCardMeta(finals, dateStr, slateRevealAll)
+  // This day's condensed-game posters, one 8 KB static file for the whole
+  // slate (see fetchDayVideos — the live alternative is 430 KB PER GAME). Same
+  // reveal gate as the card meta above, though for presentation rather than
+  // spoiler safety: the file carries no score, but nothing about a result card
+  // should be fetched before the day is revealed. A day the nightly job hasn't
+  // covered yet — today's, above all — simply resolves to no entries, and each
+  // card falls back to fetching its own on tap (WatchCondensedButton).
+  const dayVideos = useAsync(
+    () => (slateRevealAll ? fetchDayVideos(apiDateToUrl(dateStr)) : Promise.resolve({ games: {} })),
+    [slateRevealAll, dateStr],
+  )
 
   // The slate's actual render order: `sorted` (soonest → latest, favorite
   // pinned first), then every national-broadcast game grouped in right behind
@@ -748,6 +760,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     pinnedTeamId={pinnedTeamId}
                     prospectCount={pCount}
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
+                    video={dayVideos.data?.games?.[g.gamePk] ?? null}
                     liveJerseys={liveJerseys.data}
                     national={nationalBroadcasts.data?.[g.gamePk]}
                     eager={eager}

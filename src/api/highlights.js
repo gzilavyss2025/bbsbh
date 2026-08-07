@@ -210,6 +210,66 @@ export function isEligibleForPositiveFilter(classified) {
   return !taxonomy.some((t) => NON_PLAY_TAXONOMY.has(t))
 }
 
+// ---------------------------------------------------------------------------
+// One game's own video row (the box score's condensed game + clip rail). Same
+// raw `content` items the Play of the Game button already reads — this is a
+// second view over the ONE fetch GameView makes, not a second request.
+//
+// REVEAL-ONLY, both of these, for the same ADR-0001 reason as
+// eligibleHighlightForPlay above: a clip title narrates the outcome ("Luis
+// Torrens' three-run home run"), so call them from inside the box score's
+// SealBox reveal render, never at render top-level or in an eager useMemo.
+// The condensed game's OWN title happens to be score-free ("Condensed Game:
+// NYM@CLE - 8/4/26"), but it renders beside the clips inside the same seal and
+// gets the same discipline rather than a carve-out nobody would maintain.
+// ---------------------------------------------------------------------------
+
+// The condensed game — MLB's ~12-minute every-consequential-pitch cut, posted
+// roughly half an hour after the final out (verified 2026-08-06: gamePk 824403
+// ended ~01:55Z, the condensed item carries date 02:25:58Z). Null for a game in
+// progress, for the window right after it ends, and for MiLB, which gets no
+// content package at all — every caller must handle that, it is not an edge.
+//
+// Deliberately NOT a loosening of isEligibleForPositiveFilter: `condensed-game`
+// sits in NON_PLAY_TAXONOMY because it is not a per-play clip, and the rails
+// depend on it staying there. This is a separate question asked of the same
+// items ("which item IS the condensed game"), so it reads the tag directly.
+export function selectCondensedGame(items) {
+  for (const item of items ?? []) {
+    const taxonomy = (item?.keywordsAll ?? []).filter((k) => k.type === 'taxonomy').map((k) => k.value)
+    if (taxonomy.includes('condensed-game')) return item
+  }
+  return null
+}
+
+// Every per-play clip MLB cut for this game, BOTH clubs, oldest first — the
+// game's own highlight reel in the order it happened.
+//
+// Ordered by each item's `date` (its publish time), not by feed order, which is
+// neither chronological nor stable: MLB publishes a clip within a minute or two
+// of the play, so publish order tracks game order closely enough to read as the
+// game's sequence. The exceptions are the multi-play compilations ("Luis
+// Torrens' three-hit, four-RBI game", "Sean Manaea's seven strikeouts") — those
+// are cut after the fact and so land late in the rail, which is where a summary
+// belongs anyway.
+export function selectGameClips(items) {
+  return (items ?? [])
+    .filter((item) => isEligibleForPositiveFilter(classifyHighlight(item)))
+    .sort((a, b) => String(a?.date ?? '').localeCompare(String(b?.date ?? '')))
+}
+
+// A content item's `duration` ("00:12:20") as the runtime you'd say out loud —
+// "12:20", or "1:02:03" for the rare hour-long cut. Empty string for a missing
+// or unparseable value, so a caller can drop the parenthetical rather than
+// print "(undefined)".
+export function formatClipDuration(duration) {
+  const parts = String(duration ?? '').split(':')
+  if (parts.length !== 3 || parts.some((p) => !/^\d+$/.test(p))) return ''
+  const [h, m, s] = parts.map(Number)
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 // The best playable source for a clip: prefer the HLS stream (native support
 // in Safari on iPhone, this app's primary target — see CLAUDE.md), fall back
 // to the standard MP4 for any other engine. Returns { hls, mp4 } with either

@@ -110,16 +110,59 @@
   text-transform: uppercase;
 }
 
-/* ---------------------------------------------------------- highlight sheet
-   The "Watch highlight" bottom sheet (see HighlightSheet.jsx). Same .scrim/
-   .sheet dialog contract as the ballpark sheet — docked, slide-up, safe-area
-   padding — carrying a 16:9 video instead of a diagram. */
+/* --------------------------------------------------------- highlight player
+   The "Watch" video dialog (see HighlightSheet.jsx). Built on the same
+   .scrim/.sheet contract as the ballpark sheet, but CENTERED (`scrim--center`)
+   and sized to the video rather than docked to the bottom edge: a clip is
+   something you look at, and a 16:9 frame pinned to the bottom of a desktop
+   window wastes the screen it most wants.
+
+   THE WIDTH IS THREE COMPETING LIMITS, smallest wins:
+
+     max(70vw, 420px)  the target — about seven-tenths of the viewport's
+                       width, with a floor so a phone doesn't get a postage
+                       stamp (70vw of a 390px phone is 273px).
+     92vw              leaves the scrim visible around it at every size, so
+                       the dialog always reads as floating ON the page rather
+                       than replacing it — and so there is always backdrop
+                       left to tap to dismiss.
+     124vh             the HEIGHT guard, expressed as a width: a 16:9 video
+                       124vh wide is 70vh tall (124 × 9/16 ≈ 70), so this is
+                       the same seven-tenths rule applied to the short axis.
+                       It's what binds in a landscape phone or a short window,
+                       where an unbounded width would push the video's own
+                       height off both ends of the screen.
+
+   On a 1280×1000 desktop the first limit wins at ~896px; on a 390px phone the
+   second does at ~359px (near-full width, which is what a phone wants); tip a
+   phone to landscape and the third takes over. No breakpoints — the same
+   three numbers hold the whole range. */
 .hlsheet {
-  max-height: min(90vh, 640px);
+  width: min(max(70vw, 420px), 92vw, 124vh);
+  max-width: none;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  /* All four corners: it's no longer growing out of the bottom edge. */
+  border-radius: var(--radius-lg);
+  /* The docked sheet's safe-area allowance is inherited from .sheet and is
+     meaningless once the dialog floats clear of the bottom inset. */
+  padding-bottom: 20px;
+  /* Rises and settles rather than sliding up from the edge — reduced-motion
+     flattens it to a plain fade via the global override in 14-strike-zone.css. */
+  animation: hlsheet-pop var(--dur-med) var(--ease-out);
+}
+
+@keyframes hlsheet-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .hlsheet__head {
@@ -132,6 +175,76 @@
 .hlsheet__head .sheet__title {
   margin: 0;
   font-size: var(--fs-h3);
+}
+
+/* Save + ✕, top-right of the head row. Baseline-aligned with the title
+   through .hlsheet__head, so the pair reads as one trailing cluster. */
+.hlsheet__actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The save button: a small kraft-tape pill, the same amber affordance
+   language as a clip card's WATCH tab — you are taking the print out of the
+   scorebook, so it wears the tape rather than a generic outline button. The
+   states it moves through (idle → percent → SAVE TO PHOTOS → SAVED) are
+   labeled in SaveClipButton.jsx; only two of them change how it looks. */
+.hlsheet__save {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: var(--seal);
+  color: var(--text-on-seal);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-compact);
+  cursor: pointer;
+  transition: background var(--dur-snappy) var(--ease-standard);
+}
+/* A solid down-triangle, drawn from borders exactly like a clip card's WATCH
+   tab draws its ▶ — same idiom, quarter-turned, so the pair reads as one
+   family: point right to watch it, point down to keep it. */
+.hlsheet__save::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid currentColor;
+}
+.hlsheet__save:hover:not(:disabled) {
+  background: var(--seal-hatch);
+}
+.hlsheet__save:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Mid-download: no arrow (it's reporting, not inviting), and the tape goes
+   flat so it stops looking like something to press. */
+.hlsheet__save--working {
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  cursor: default;
+}
+.hlsheet__save--working::before {
+  display: none;
+}
+/* Finished: quiet confirmation, not a second invitation. */
+.hlsheet__save--done {
+  background: var(--surface-inset);
+  color: var(--text-caption);
+}
+.hlsheet__save--done::before {
+  display: none;
 }
 
 .hlsheet__close {
@@ -173,6 +286,18 @@
   color: var(--text-muted);
   background: var(--surface-card);
   border-radius: var(--radius-sm);
+}
+
+/* While a tap-to-fetch caller is loading (WatchCondensedButton): holds the
+   16:9 box the video is about to occupy, so the dialog doesn't jump to a new
+   size under the pointer the moment the fetch lands. */
+.hlsheet__empty--wait {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  background: var(--bg-page);
 }
 
 .hlsheet__desc {

@@ -21,6 +21,7 @@ import { HighlightSheet } from '../components/playbyplay/HighlightSheet.jsx'
 import { GameStoryCard } from '../components/game/GameStoryCard.jsx'
 import { StampGameButton } from '../components/logbook/StampGameButton.jsx'
 import { GamePhotosStrip } from '../components/game/GamePhotosStrip.jsx'
+import { GameVideoRow } from '../components/highlights/GameVideoRow.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
@@ -175,6 +176,7 @@ export function BoxScore({
               stars={stars}
               potg={potg}
               potgHighlight={potgHighlight}
+              highlights={highlights}
               winProbPoints={winProbPoints}
               winProbBigPlays={winProbBigPlays}
               winProbTreatment={winProbTreatment}
@@ -219,7 +221,7 @@ export function BoxScore({
 // team's crew and first pitch above its batting/pitching, the home team's
 // ballpark/weather/times above its own — with the complete MLB-style
 // game-info text at the very bottom so nothing is lost.
-function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
+function BoxScoreBody({ feed, box, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -401,6 +403,11 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, wi
           onSection={onSection}
           treatments={winProbTreatment}
         />
+        {/* Headingless on purpose — the kraft tab and the posters say what it
+            is, and the page already spends "Highlights" on the section above.
+            Rendered here, inside the seal, is what makes it safe: see
+            GameVideoRow.jsx. */}
+        <GameVideoRow items={highlights} />
         <InningTally rows={inningDigest} away={box.away} home={box.home} treatments={winProbTreatment} />
         <div className="bs__duo">
           <div className="bs__col">
