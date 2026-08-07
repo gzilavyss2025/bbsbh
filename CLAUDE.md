@@ -4,52 +4,52 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Tally Baseball** (repository name: `bbsbh`) is a spoiler-safe, read-only second-screen
-PWA for scoring baseball by hand. It displays lineups, umpires, rosters, and
-inning totals pulled live from the public MLB Stats API — but the numbers that
-would spoil the game you are scoring stay sealed until you tap to reveal them.
-It is **not** a data-entry tool; the user keeps scoring on paper.
+**Tally Baseball** (repo name `bbsbh`) is a PWA for scoring baseball by hand. It is
+spoiler-safe and read-only, made for use as a second screen next to a live game. It
+shows lineups, umpires, rosters, and inning totals from the public MLB Stats API. Any
+number that would spoil the game stays sealed until you tap to reveal it. This app is
+**not** a data-entry tool. The user keeps score on paper.
 
 React 18 + Vite, phone-first (iPhone), installable PWA, **no backend**.
 
 ## Maintaining these docs
 
-This file is loaded into context on **every** session and persists the whole
-session, so its size is a fixed per-session token tax. **Keep it lean** — under
-**200 lines**, enforced by `scripts/check-claude-md.mjs` (run by `npm run lint`,
-gated in CI). Detail lives in three tiers, most-specific first:
+This file loads into every session and stays loaded for the whole session. Its size
+is a fixed token cost per session. **Keep it lean**: stay under **200 lines**.
+`scripts/check-claude-md.mjs` enforces this cap; `npm run lint` runs the check in CI.
+Detail lives in three tiers, most specific first:
 
-- **Nested `CLAUDE.md`** in `src/`, `src/api/`, and `scripts/` — loaded only when
-  Claude Code navigates into that directory, so subsystem detail is paid for on
-  demand, not every session. Per-module and per-script prose goes here.
+- **Nested `CLAUDE.md`** files in `src/`, `src/api/`, and `scripts/`. Claude Code
+  loads these only when it opens that directory, so this detail costs tokens on
+  demand, not every session. Put per-module and per-script prose here.
 - **`docs/*` and `docs/adr/`** — reference catalogs and the *why* behind decisions.
-- **`CONTEXT.md`** — the domain glossary the spoiler/architecture prose relies on.
+- **`CONTEXT.md`** — the domain glossary the spoiler and architecture prose relies on.
 
-When you're tempted to add detail here, add it to the right tier and leave a
-one-line pointer. If the leanness check fails, move content out — don't raise the
-cap. After structural work, check whether the nested `CLAUDE.md` or `docs/adr/` entry
-it touched needs updating too — a stale tier is worse than none.
+When you want to add detail here, add it to the right tier instead and leave a
+one-line pointer. If the leanness check fails, move content out. Do not raise the
+cap. After structural work, check whether the nested `CLAUDE.md` or `docs/adr/`
+entry you touched also needs an update. A stale tier is worse than none.
 
 ## Workflow & deployment
 
 **All sessions use task branches and pull requests. Never push directly to `main`
-or invoke a Vercel deployment.** This is a Vercel Hobby project, so keep
-work-in-progress off `main`, batch related changes, and reduce deployment-triggering
-merges ruthlessly. Non-`main` previews are disabled; verify locally instead.
+or trigger a Vercel deployment.** This is a Vercel Hobby project: keep
+work-in-progress off `main`, batch related changes, and cut deployment-triggering
+merges to a minimum. Non-`main` previews are disabled. Verify changes locally instead.
 
-Multiple agents may be active at once. Treat unfamiliar changes as another agent's
-work, inspect status/diffs before editing, isolate work by branch/worktree, and stop
-to coordinate any overlapping files. Never reset, stash, overwrite, or reformat
-someone else's work. In a fresh context, fetch and inventory worktrees/open PRs
-before choosing a base: independent work starts from current `origin/main`; work that
-needs an unmerged PR must name and intentionally base on that PR branch. Record
-branch/worktree/PR state in the final handoff so the next context can resume safely.
+Multiple agents may work at once. Treat unfamiliar changes as another agent's work.
+Check status and diffs before you edit. Isolate your work by branch or worktree. Stop
+and coordinate on any file another agent may be using. Never reset, stash, overwrite, or
+reformat someone else's work. In a fresh context, fetch and list worktrees and open PRs
+before you pick a base branch: independent work starts from current `origin/main`; work
+needing an unmerged PR must name and deliberately base on that PR branch. Record branch,
+worktree, and PR state in your handoff, so the next context resumes safely.
 
-For user-visible changes, start the first free reserved localhost dev server, verify
-the exact changed route, keep it running, and include that clickable local URL in the
-final handoff. **Append `?nointro` to any test URL** so the first-visit welcome modal
-doesn't cover the slate (e2e specs get it via `e2e/fixtures.js`). See
-`docs/development.md` for the full workflow.
+For a user-visible change, start the first free reserved localhost dev server, load
+the exact route you changed, and keep the server running. Put that clickable local
+URL in your final handoff. **Add `?nointro` to any test URL**, so the first-visit
+welcome modal does not cover the slate (`e2e` specs add this through
+`e2e/fixtures.js`). See `docs/development.md` for the full workflow.
 
 ## Commands
 
@@ -64,126 +64,126 @@ npm run test:coverage  # same, with a per-file coverage report
 npm run e2e        # playwright test — browser verification harness, not CI-gated
 ```
 
-**Reserved dev ports (multi-agent safe).** `dev`/`preview` are `5173`/`4173`
-(`strictPort` — no silent auto-increment); if a slot is taken by another worktree use
-the next numbered one, `npm run dev:2..5` (`5172`→`5169`) / `preview:2..5`
-(`4172`→`4169`). Rationale + the tally-nfl band split are in `vite.config.js`.
+**Reserved dev ports (multi-agent safe).** `dev` uses port `5173`; `preview` uses
+`4173`. `strictPort` is on, so neither port auto-increments. If another worktree
+holds that port, use the next numbered script: `npm run dev:2` through `dev:5`
+(ports `5172`→`5169`), or `preview:2` through `preview:5` (`4172`→`4169`).
+`vite.config.js` has the rationale and the tally-nfl band split.
 
-The `scripts/gen-*.mjs` data generators (WAR, rehab, umpires, callouts,
-…) are documented in `scripts/CLAUDE.md`. The `npm test` unit suite (`test/*.test.js`,
-CI-gated) covers the pure data layer — reveal-only derivations, spoiler gates,
-routing, run-expectancy/tiering math — including the spoiler invariant pinned on a
-captured real-game feed (`docs/testing.md`). It is not a substitute for the
-browser-level check: for anything user-visible also run `npm run dev` / `npm run e2e`
-against a live or recent game. `docs/test-games.md` has verified gamePks with rare
-in-game events; `.claude/skills/run.md` documents the loop.
+`scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
+`scripts/CLAUDE.md` documents them. The `npm test` unit suite (`test/*.test.js`,
+CI-gated) covers the pure data layer: reveal-only derivations, spoiler gates,
+routing, and run-expectancy/tiering math, including the spoiler invariant pinned on a
+captured real-game feed (`docs/testing.md`). This suite does not replace the
+browser-level check. For anything user-visible, also run `npm run dev` or `npm run
+e2e` against a live or recent game. `docs/test-games.md` lists verified gamePks with
+rare in-game events; `.claude/skills/run.md` documents that loop.
 
-**Test discipline (the suite only has value if it stays honest).** Never delete,
-skip, or loosen a test's assertions to make CI or a commit pass — fix the code, or
-stop and ask. A fix for a real bug lands with a test that FAILS without the fix (add
-it first, watch it fail, then fix); product code and its tests land in the same PR.
-`main` requires the `lint-and-build` check (lint + `npm test` + build); the nightly
-data crons bypass it via an admin PAT (`GH_BOT_TOKEN`) — see `docs/testing.md` before
-changing CI or that token.
+**Test discipline: the suite only has value if it stays honest.** Never delete,
+skip, or loosen a test's assertions to make CI or a commit pass — fix the code,
+or stop and ask. A fix for a real bug ships with a test that FAILS without the
+fix: add the test first, watch it fail, then fix the code. Product code and its
+tests land in the same PR. `main` requires the `lint-and-build` check (lint +
+`npm test` + build); the nightly data crons bypass it with an admin PAT
+(`GH_BOT_TOKEN`) — read `docs/testing.md` before you change CI or that token.
 
 ## The spoiler rule — and its scope, which is half the rule
 
-This is the whole point of the app. **Don't let either half drift.** On the
-surfaces where you score a game — the slate's score cells, the lineup pages, the
-innings viewer, the box score — a score-revealing value never exists in the DOM
-until you reveal it: not fetched-then-hidden, never computed. Everything else
-about baseball opens live — season and career stats, player and team pages,
-leader boards, standings, and the standalone pages outside the scoring flow. A
-stat line is not a score, and gating one was the rule reaching past what it
-protects (ADR-0034, "The cutoff is opt-in now"). One **opt-in, consented**
-departure lifts the seal inside the scope: the site-wide **Scores Unlocked**
-switch, a *render* override that unseals a day you agree to spoil (and keeps a
-live game's view current) while never writing the persisted reveal mark —
-ADR-0026. `CONTEXT.md` has the vocabulary; `docs/adr/` has the *why* — read the
-linked ADR before "simplifying" any of this.
+This is the whole point of the app. **Don't let either half drift.** On the surfaces
+where you score a game — the slate's score cells, the lineup pages, the innings viewer,
+the box score — a score-revealing value never exists in the DOM until you reveal it. It
+is never fetched-then-hidden, and never computed early. Everything else about baseball
+opens live: season and career stats, player and team pages, leader boards, standings,
+and the standalone pages outside the scoring flow. A stat line is not a score, and
+gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is opt-in
+now"). One **opt-in, consented** departure lifts the seal inside the scope: the
+site-wide **Scores Unlocked** switch. It is a *render* override that unseals a day you
+agree to spoil, and keeps a live game's view current, but it never writes the persisted
+reveal mark (ADR-0026). `CONTEXT.md` has the vocabulary; `docs/adr/` has the *why*. Read
+the linked ADR before you "simplify" any of this.
 
-Inside that scope it is enforced structurally, by two conventions:
+Inside that scope, two conventions enforce it structurally:
 
-1. **Reveal-only modules** (`src/api/linescore.js`, `src/api/derive.js`), callable
-   only from inside a `SealBox`'s reveal render function — never at render
-   top-level or in an eager `useMemo` (ADR-0001). Contrast `src/api/select.js`,
-   spoiler-**free**. Between them sit **caller-gated pre-pitch selectors**
-   (`selectPrePitchChanges`, `defenseEntering`, `lineupEntering`), spoiler-free
-   only for the half the user has reached (`halfIndex <= revealedThrough + 1`) —
-   ADR-0003/0010. Rule in `src/api/CLAUDE.md`, catalog `docs/api/`, UI `src/CLAUDE.md`.
+1. **Reveal-only modules** (`src/api/linescore.js`, `src/api/derive.js`) are callable
+   only inside a `SealBox`'s reveal render function — never at render top-level or in an
+   eager `useMemo` (ADR-0001). Contrast `src/api/select.js`, spoiler-**free**. Between
+   them sit **caller-gated pre-pitch selectors** (`selectPrePitchChanges`,
+   `defenseEntering`, `lineupEntering`), spoiler-free only for the half the user has
+   reached (`halfIndex <= revealedThrough + 1`) — ADR-0003/0010. Rule in
+   `src/api/CLAUDE.md`, catalog `docs/api/`, UI `src/CLAUDE.md`.
 
-2. **`src/components/SealBox.jsx`** takes `children` as a render function, invoked
-   only once revealed; reveal is one-directional, and re-sealing on inning
-   navigation works by the parent remounting with `key={inning}` (see
+2. **`src/components/SealBox.jsx`** takes `children` as a render function and
+   calls it only once revealed. Reveal is one-directional. Re-sealing on inning
+   navigation works because the parent remounts with `key={inning}` (see
    `InningViewer.jsx`) (ADR-0002).
 
-The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (`vite.config.js`)
+The PWA service worker uses `NetworkOnly` for `statsapi.mlb.com` (`vite.config.js`),
 so a stale, spoiler-revealing score is never served from cache (ADR-0004).
 
 Three gotchas each caused a real spoiler bug and are now ADRs: roster-card
-membership/position labels (ADR-0005), per-inning `errors` being a *fielding* stat
-(ADR-0006), and `useRef` caches of reveal-only derivations needing to key on the
-`feed` object (ADR-0007). **The Pitchers table** is gated by `revealedThrough`
-directly rather than wrapped in a `SealBox` (ADR-0009), and **extra innings never
-spoil** — only `regulation` innings show up front, extras unlocking one at a time
-as `revealedThrough` advances (ADR-0008). Both detailed in `src/CLAUDE.md`.
+membership and position labels (ADR-0005); per-inning `errors` being a *fielding*
+stat, not a score (ADR-0006); and `useRef` caches of reveal-only derivations that
+must key on the `feed` object (ADR-0007). **The Pitchers table** is gated by
+`revealedThrough` directly, not wrapped in a `SealBox` (ADR-0009). **Extra innings
+never spoil** — only `regulation` innings show up front; extras unlock one at a
+time as `revealedThrough` advances (ADR-0008). Both are detailed in `src/CLAUDE.md`.
 
 ## Architecture (map)
 
-**No backend, by default.** Every device queries `https://statsapi.mlb.com` directly.
-Each game's reveal high-water mark (`revealedThrough`) persists in `localStorage`
-under `bbsbh:reveal:{gamePk}` — only that half-index, never a score, so the spoiler
-rule still holds on return; a same-device tab picks up another tab's reveal via a
-`storage` listener in `useRevealProgress.js`.
+**No backend, by default.** Every device queries `https://statsapi.mlb.com`
+directly. Each game's reveal high-water mark (`revealedThrough`) persists in
+`localStorage` under `bbsbh:reveal:{gamePk}` — only that half-index, never a score,
+so the spoiler rule still holds on return. A same-device tab picks up another tab's
+reveal through a `storage` listener in `useRevealProgress.js`.
 
 **Five narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
 unconfigured. **Four never render or fetch a score.** Link previews (`api/og.js` +
-`api/preview.js` + `api/_lib/cards.js`) render dynamic Open Graph cards for shared deep
-links, failing safe to the static default card — ADR-0012. Multi-device reveal sync
-(Clerk, off unless `VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across
-a user's own devices via `api/reveal.js` + Upstash Redis, ratcheted both sides, inert if
-unconfigured — ADR-0022; its companion `api/spoiled-days.js` mirrors which DAYS the user
-consented to spoil (consent, never a mark — a per-day on/off state map, since that one
-can move back) — ADR-0026. Admin-editable copy (`api/copy.js` + `src/copy/`) stores the
-consent-pop-up wording (never a score, closed registry, public-cached read, allowlisted
-write) so the owner tunes it without a deploy — ADR-0025. **My Tally**'s preferences
-(`api/preferences.js` + `src/lib/account/`) mirror a CLOSED four-field set — club, level,
-keep-awake, motion — last-write-wins per FIELD, never score-derived; `api/account.js`
-erases every per-user key — ADR-0039. **The fifth stores a score, by design**: the
-**Game Log**'s game stamps (`api/stamps.js` + `src/lib/stamps.js`, at `/logbook` and
-inside the box score's seal) — safe because of WHERE stamp art may render
-(`check-stamp-surfaces`, never an unrevealed-game surface), not a mint-time check; the
-gate was retired in ADR-0035's second amendment. Naming/voice: `docs/game-log.md`.
+`api/preview.js` + `api/_lib/cards.js`) render Open Graph cards for shared links,
+failing safe to the default card (ADR-0012). Multi-device reveal sync (Clerk, off unless
+`VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's devices
+via `api/reveal.js` and Upstash Redis, ratcheted both sides (ADR-0022). Its companion
+`api/spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, never a
+mark, a per-day on/off map since consent can move back (ADR-0026). Admin-editable copy
+(`api/copy.js` + `src/copy/`) stores the consent-pop-up wording, never a score, behind a
+public-cached read and an allowlisted write, so the owner tunes it without a deploy
+(ADR-0025). **My Tally**'s preferences (`api/preferences.js` + `src/lib/account/`)
+mirror a CLOSED four-field set — club, level, keep-awake, motion — last-write-wins per
+field, never score-derived; `api/account.js` erases every per-user key (ADR-0039). **The
+fifth stores a score, by design**: the **Game Log**'s game stamps (`api/stamps.js` +
+`src/lib/stamps.js`, at `/logbook` and in the box score's seal) — safe because of WHERE
+stamp art may render (`check-stamp-surfaces`, never an unrevealed-game surface), not a
+mint-time check; the gate was retired in ADR-0035's second amendment. Naming/voice:
+`docs/game-log.md`.
 
-Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
+Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
   InningViewer`), routing (`src/lib/route.js`, `src/App.jsx`), fetching (`useAsync`),
-  the token-based design system, and the UI-side spoiler enforcement. `/team/{id}`
-  is a five-tab hub, each tab a real route loading only its own data — ADR-0034.
-- **`src/api/CLAUDE.md`** — the data layer's RULE, not its catalog: the reveal-only
-  vs. spoiler-free split (machine-readable in `spoiler-manifest.json`), the
+  the token-based design system, and the UI-side spoiler enforcement. `/team/{id}` is a
+  five-tab hub; each tab is a real route that loads only its own data (ADR-0034).
+- **`src/api/CLAUDE.md`** — the data layer's RULE, not its catalog: the reveal-only vs.
+  spoiler-free split (machine-readable in `spoiler-manifest.json`), the
   **build-time-fetch pattern** (static `public/data/*.json` precomputed by
   `scripts/gen-*.mjs`), and the conventions. Per-module notes live a tier down in
   `docs/api/` (`live-game`, `static-data`, `account-layer`), loaded on reference.
 
 ## Conventions to follow
 
-- **MiLB data degrades gracefully.** MLB feeds are complete; minor-league feeds
+- **MiLB data degrades gracefully.** MLB feeds are complete. Minor-league feeds
   (sportIds 11–14, see `src/lib/teams.js`) often miss lineups, weather, coaches, or
-  logos. Every selector falls back to `''`/`null`/`—` and callers render "not posted
-  yet" instead of crashing. Keep this for any new field you read.
+  logos. Every selector falls back to `''`/`null`/`—`, and callers render "not
+  posted yet" instead of crashing. Keep this pattern for any new field you read.
 - **Team ids are the universal key.** The same `teamId` drives schedule data, box
   scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The Brewers (id 158) are
   pinned to the top of the slate (`PINNED_TEAM_ID`).
 - **Verify feed field paths against a live game.** The MLB feed shape is
-  undocumented; `api/statsapi.js` notes paths were checked against a specific gamePk.
-  Confirm a new field against a real response, don't guess.
-- **Styling is a token-based design system.** `src/index.css` is `@import`s only —
-  `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where rules live.
-  The metaphor is a paper scorebook (manila paper, navy ink, pencil graphite,
-  kraft-tape amber seals). Use semantic CSS variables, not raw hex. See `src/CLAUDE.md`.
-- **Flat directories don't stay flat.** Subdivide before roughly the 10th file in a
-  directory; `check-dir-size`/`check-file-size` enforce it (ADR-0038).
+  undocumented; `api/statsapi.js` notes which paths were checked against which
+  gamePk. Confirm a new field against a real response; do not guess.
+- **Styling is a token-based design system.** `src/index.css` holds only `@import`s:
+  `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where the rules live.
+  The metaphor is a paper scorebook (manila paper, navy ink, pencil graphite, kraft-tape
+  amber seals). Use semantic CSS variables, not raw hex. See `src/CLAUDE.md`.
+- **Flat directories don't stay flat.** Subdivide a directory before roughly its
+  10th file; `check-dir-size`/`check-file-size` enforce this (ADR-0038).
 
 ## Agent skills
 
@@ -195,6 +195,6 @@ Two nested `CLAUDE.md` files carry the detail, loaded when you work there:
   `docs/agents/domain.md`.
 - **Callouts / Team Leaders** — the callout catalog (families, triggers, surfaces,
   gates, worthiness scores) is `docs/callouts.md`; the tense rule is ADR-0014.
-  Callouts are generated by the nightly `gen-callouts.mjs` precompute — extend that
-  pipeline, don't build a parallel path. See `scripts/CLAUDE.md` + `docs/api/`.
+  Callouts come from the nightly `gen-callouts.mjs` precompute — extend that
+  pipeline, do not build a parallel path. See `scripts/CLAUDE.md` + `docs/api/`.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on. See `docs/agents/writing-style.md`.
