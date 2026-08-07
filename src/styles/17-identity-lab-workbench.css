@@ -173,6 +173,31 @@
   filter: brightness(0);
 }
 
+/* The City Connect bar's own uploaded override (HeaderBarMock's overrideUrl)
+   is finished art, not a silhouette to re-ink — same reasoning and the same
+   specificity trick (two classes beat one) as .metricbar__logo--custom in
+   09-team-info.css, this file's copy of the real masthead rule. */
+.idlab__barmock--darkmark .idlab__barmock__logo.idlab__barmock__logo--custom {
+  filter: none;
+}
+
+.idlab__barmastheadhint {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  margin: var(--space-2) 0 0;
+}
+
+/* LogoDropZone's own shell (.colorlab__logodrop, 15-team-color-lab.css) is
+   sized for a small square tile — centered, capped at 190px. The bar mock it
+   wraps here is the full-width bar, not a tile, so both constraints have to
+   go: stretch to the column's width instead of shrinking to content, and
+   drop the cap so the bar reads the same as it does everywhere else in this
+   panel. */
+.idlab__barunit .colorlab__logodrop {
+  align-items: stretch;
+  max-width: none;
+}
+
 /* The knockout-mark picker: the club's real art on the left with every shape
    clickable, the converted mark on each of its bars on the right, and one
    button per shape below (the keyboard path — the art itself is a picture).

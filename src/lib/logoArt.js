@@ -61,6 +61,14 @@ export const LOGO_ART_URL_ROOT = '/team-logos'
 // `wpaArtUrl`), keyed by a synthetic `'<treatment>-wpa'` string that is never
 // a real treatment on its own (it never appears in mlb-treatment-tuning.json,
 // jerseys.json, or any teams.js resolver — only here and in wpa/wpaLogo.js).
+//
+// `'city-connect-masthead'` is a THIRD kind of synthetic destination, same
+// shape as the `-wpa` family (never a real treatment, only here and in
+// teams.js's cityConnectMastheadUrl) but for a different slot: the club mark
+// a themed `.metricbar` masthead draws when this club is wearing City
+// Connect — normally the club-wide precomputed knockout SVG (ADR-0031), here
+// overridable per club with an uploaded PNG. Only one, not per-side like the
+// stamp's mark slots, because a masthead shows one club at a time.
 export const LOGO_TREATMENT_DIRS = {
   main: 'main-overrides',
   alternate: 'alternate',
@@ -76,6 +84,7 @@ export const LOGO_TREATMENT_DIRS = {
   'alternate-3-wpa': 'wpa-alternate-3',
   'alternate-4-wpa': 'wpa-alternate-4',
   'city-connect-wpa': 'wpa-city-connect',
+  'city-connect-masthead': 'masthead-city-connect',
 }
 
 // Every directory an upload may land in — the same set as above, as a list, for

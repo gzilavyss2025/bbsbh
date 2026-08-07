@@ -199,3 +199,60 @@ Game Log stamps (`GameStamp.jsx`) need no separate change: they already draw
 the one file this generator produces (`hasMonoLogo` + `teamLogoUrl(id,
 'mono')`), so a better source for the masthead mark is a better source for
 the stamp mark for free.
+
+## Amendment (2026-08-07, second): a club may swap the City Connect bar's mark for its own PNG
+
+Both amendments above still answer the same question — which SOURCE feeds
+the automatic one-color conversion — for one club-wide mark every bar shares.
+This one is different in kind: a club may now REPLACE that mark, wholesale,
+for exactly one bar.
+
+**Why one bar, not the mark itself.** A club's City Connect identity is
+sometimes its own thing entirely — a wordmark, an alternate crest — that no
+amount of ink/knockout tuning of the base CDN mark will reproduce, because
+the source art it would tune simply isn't that design. Rather than stretch
+the knockout pipeline to cover art it was never given, a club may drop in a
+finished PNG that draws on the City Connect bar ONLY; every other bar (Main,
+every alternate) keeps drawing the one club-wide knockout mark untouched.
+
+- **Read straight off disk presence, same discipline as `mainOverrideLogoUrl`.**
+  `teams.js`'s `cityConnectMastheadUrl(teamId)` checks `logo-art.json`'s
+  `masthead-city-connect` entries — the manifest `scripts/lib/dev-logo-upload.mjs`
+  already rebuilds from disk on every upload — and answers `null` for a club
+  with no file there. Null is not a placeholder to fill in later; it's the
+  overwhelming default, and it is exactly what makes "don't give me one and
+  it falls back to the automatic mark" true without any code path that
+  treats "no override" as a special case.
+- **A NEW synthetic upload destination, same shape as the `-wpa` family.**
+  `'city-connect-masthead'` in `logoArt.js`'s `LOGO_TREATMENT_DIRS` is never a
+  real treatment (it appears in no jersey record, no `mlb-treatment-tuning.json`
+  entry) — only here and in the Identity Lab's upload control — so it rides
+  the existing upload endpoint, its existing 512×512/400 KB PNG standard, and
+  its existing traversal-proof path resolution with no server change at all.
+- **`TeamLogo`'s `overrideUrl` prop tries the override FIRST, then falls
+  through to the normal chain on failure** — the same self-healing shape the
+  variant→base→monogram chain already had, just with one more rung ahead of
+  it. A club whose override file goes missing (a bad deploy, a hand-deleted
+  file) quietly gets its ordinary knockout mark back instead of a broken
+  image; nothing has to notice or handle that case specially.
+- **Never re-inked.** The knockout mark is re-inked dark on a light bar
+  (`.is-themed--dark .metricbar__logo`) because it is a flat silhouette with
+  nothing left to lose by filtering. An uploaded override is finished art —
+  the club's own deliberate color choice for that specific bar — so
+  `.metricbar__logo--custom` (a second class, beating the re-ink rule on
+  specificity rather than `!important`) turns the filter back off. This is
+  why the upload standard tells the owner to paint it in whatever color
+  reads against that exact bar rather than leaving it white: nothing recolors
+  it at render time the way the mono mark's mask does.
+- **Identity-only inputs, same invariant as the theme it rides on.**
+  `TeamInfo.jsx` only reaches for the override when `treatment === 'city-connect'`
+  for THIS specific side (own club or opponent, computed once beside `theme`/
+  `oppTheme`) — the same `(teamId, treatment)`-only rule `headerThemeFor`
+  documents at the top of `headerTheme.js`. MiLB has no City Connect
+  vocabulary at all, hence the `isMlbTeamId` guard alongside it.
+- **Uploaded from the bar itself.** The Identity Lab's Header bars panel
+  (`TwoBarsPanel.jsx`) wraps the City Connect bar's own live mock in
+  `LogoDropZone` — drop a PNG directly onto the bar you're judging it
+  against, not a separate upload panel elsewhere on the page. The mock's
+  `HeaderBarMock` carries the exact same `overrideUrl`/no-re-ink treatment
+  the real masthead does, so what's approved there is what ships.

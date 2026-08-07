@@ -34,7 +34,13 @@ const AA_TEXT = 4.5
 // knockout art yet falls back to its full-color mark — TeamLogo's own chain,
 // unchanged, which is also the honest preview: that fallback is what the real
 // bar would show too.
-export function HeaderBarMock({ teamId, name, colors, unset }) {
+//
+// `overrideUrl` is the City Connect bar's own escape hatch (teams.js's
+// cityConnectMastheadUrl, dropped in from TwoBarsPanel's LogoDropZone): a
+// club's uploaded PNG, tried ahead of the mono mark and never re-inked —
+// that finished art is the club's own pick for THIS exact bar, not a
+// silhouette this preview should be repainting.
+export function HeaderBarMock({ teamId, name, colors, unset, overrideUrl }) {
   if (unset) {
     return (
       <div className="idlab__barmock idlab__barmock--unset">
@@ -48,7 +54,14 @@ export function HeaderBarMock({ teamId, name, colors, unset }) {
       className={`idlab__barmock${tone === 'dark' ? ' idlab__barmock--darkmark' : ''}`}
       style={{ '--header-bar': colors.bar, '--header-accent': colors.accent, '--header-onbar': colors.onBar }}
     >
-      <TeamLogo teamId={teamId} name={name} variant="mono" crop="bar" className="idlab__barmock__logo" />
+      <TeamLogo
+        teamId={teamId}
+        name={name}
+        variant="mono"
+        crop="bar"
+        overrideUrl={overrideUrl}
+        className={`idlab__barmock__logo${overrideUrl ? ' idlab__barmock__logo--custom' : ''}`}
+      />
       <span className="idlab__barmock__title">{name}</span>
     </div>
   )

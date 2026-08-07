@@ -100,7 +100,7 @@ const BUDGETS = {
   'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1300, // 1216
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
-  'src/lib/teams.js': 1100, // 1098
+  'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 912

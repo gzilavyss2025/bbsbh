@@ -258,6 +258,24 @@ export function hasCityConnect(teamId) {
   return !NO_CITY_CONNECT.has(teamId)
 }
 
+// A club's own uploaded override for the mark its themed `.metricbar`
+// mastheads draw while it's wearing City Connect — normally the club-wide
+// precomputed knockout SVG every masthead shares (ADR-0031's `mono` variant),
+// here swapped for one club's own PNG, one bar only. Read the same way
+// mainOverrideLogoUrl reads main-overrides/: off the manifest upload rewrites
+// on every save (logo-art.json, ADR-0029), so a fresh upload needs no
+// companion code change to take effect. Null for a club with no file there
+// (the overwhelming majority) or no City Connect uniform at all — callers
+// fall back to the normal club-wide mono mark exactly as an absent
+// mainOverrideLogoUrl falls back to the CDN base logo.
+export function cityConnectMastheadUrl(teamId) {
+  if (!hasCityConnect(teamId)) return null
+  const abbr = teamAbbr({ id: teamId })
+  if (!abbr) return null
+  const entries = LOGO_ART['masthead-city-connect'] ?? {}
+  return entries[`${abbr}.png`] ? `/team-logos/masthead-city-connect/${abbr}.png` : null
+}
+
 // A club's own curated pick for its home/away predictive fallback
 // (mlb-team-colors.json's `defaultHomeTreatment`/`defaultAwayTreatment`,
 // edited from the Team Identity Lab) — the side-scoped counterpart to
