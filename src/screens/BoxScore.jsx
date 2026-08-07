@@ -325,7 +325,7 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, wi
             — everything keeps stacking in this order on .bs__section's own
             gap) and become a two-up grid at the wide breakpoint: the left
             column runs totals above the win-prob arc, the right column runs
-            the decisions above Play of the Game above Three Stars. */}
+            the decisions above Play of the Game above Photos. */}
         <div className="bs__duo">
           <div className="bs__col">
             <LineTotals away={box.away} home={box.home} />
@@ -351,17 +351,19 @@ function BoxScoreBody({ feed, box, stars, potg, potgHighlight, winProbPoints, wi
               awayAbbr={box.away.abbreviation}
               homeAbbr={box.home.abbreviation}
             />
-            <ThreeStars stars={stars} />
-            {/* Stacked under Three Stars in this same right-hand column
-                (rather than a full-width row of its own) so on desktop/ipad
-                it fills the space the shorter right column leaves beside the
-                left column's totals/win-prob arc — see GamePhotosStrip.jsx
-                for why it's safe here (inside the seal) but not above it. */}
+            {/* Stacked in this right-hand column (rather than a full-width
+                row of its own) so on desktop/ipad it fills the space the
+                shorter right column leaves beside the left column's
+                totals/win-prob arc — see GamePhotosStrip.jsx for why it's
+                safe here (inside the seal) but not above it. */}
             <GamePhotosStrip gamePk={feed?.gamePk} />
           </div>
         </div>
-        {/* Full-width, directly under the totals/stars duo — right beneath
-            Three Stars, ahead of the day-level Statcast/Insights digests. */}
+        {/* Three Stars breaks out of the duo into its own full-width row —
+            right beneath Photos, ahead of the day-level Statcast/Insights
+            digests — so its three cards can lay out horizontally instead of
+            being squeezed into the half-width right column. */}
+        <ThreeStars stars={stars} />
         <GameStoryCard feed={feed} />
         {/* Its own full-width row — three tiles across on desktop/ipad,
             stacked on phone (see .bs__statcastRow's wide-breakpoint
@@ -1222,48 +1224,37 @@ function PlayOfTheGame({ play, highlight, awayAbbr, homeAbbr }) {
 
 // The three stars of the game — the hockey-tradition nod, ranked by
 // win-probability added (see computeThreeStars). Hidden entirely when WPA
-// isn't available (most MiLB parks). The top mover gets its own hero
-// treatment (.team-score__grade's inset gradient panel, borrowed as
-// .stars3__hero) since it's the single most important line on the card;
-// #2/#3 fall into compact rows below, same idiom as .team-score__row--compact.
+// isn't available (most MiLB parks). One card markup for all entries (0-3
+// of them — a candidate can be missing, not just WPA-unavailable) so the
+// row reads as one family of cards at any width; the top mover gets a
+// `--hero` modifier for extra weight (the inset gradient panel, borrowed
+// from .team-score__grade) since it's still the single most important line
+// on the card. On phone that pairs with a bigger typeface; from the
+// horizontal-row breakpoint up, every card shares one photo size and one
+// type scale (see 21a-box-score-stars.css) so the panel alone carries the
+// emphasis in a row that otherwise reads as one uniform family.
 function ThreeStars({ stars }) {
   if (!stars || stars.length === 0) return null
-  const [mvp, ...rest] = stars
   return (
     <div className="bs__stars">
       <SectionMasthead as="h3" title="Three stars" />
-      <div className="stars3__hero">
-        <Headshot personId={mvp.id} name={mvp.name} teamId={mvp.teamId} className="stars3__heroShot" />
-        <div className="stars3__heroCopy">
-          <span className="stars3__heroKicker" aria-label={`${mvp.stars} star`}>
-            {'★'.repeat(mvp.stars)}
-          </span>
-          <PlayerLink id={mvp.id} className="stars3__heroName">{mvp.name}</PlayerLink>
-          {(mvp.teamName || mvp.pos) && (
-            <span className="stars3__heroMeta">{[mvp.teamName, mvp.pos].filter(Boolean).join(' · ')}</span>
-          )}
-        </div>
-        <span className="stars3__heroStat">{mvp.stat}</span>
-      </div>
-      {rest.length > 0 && (
-        <ol className="stars3__list">
-          {rest.map((s) => (
-            <li className="stars3__row" key={s.id}>
-              <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="stars3__rowShot" />
-              <span className="stars3__rowWho">
-                <span className="stars3__rowMarks" aria-label={`${s.stars} star`}>
-                  {'★'.repeat(s.stars)}
-                </span>
-                <PlayerLink id={s.id} className="stars3__rowName">{s.name}</PlayerLink>
-                {(s.teamName || s.pos) && (
-                  <span className="stars3__rowMeta">{[s.teamName, s.pos].filter(Boolean).join(' · ')}</span>
-                )}
+      <ol className="stars3__row">
+        {stars.map((s, i) => (
+          <li className={`stars3__card${i === 0 ? ' stars3__card--hero' : ''}`} key={s.id}>
+            <Headshot personId={s.id} name={s.name} teamId={s.teamId} className="stars3__shot" />
+            <span className="stars3__copy">
+              <span className="stars3__marks" aria-label={`${s.stars} star`}>
+                {'★'.repeat(s.stars)}
               </span>
-              <span className="stars3__rowStat">{s.stat}</span>
-            </li>
-          ))}
-        </ol>
-      )}
+              <PlayerLink id={s.id} className="stars3__name">{s.name}</PlayerLink>
+              {(s.teamName || s.pos) && (
+                <span className="stars3__meta">{[s.teamName, s.pos].filter(Boolean).join(' · ')}</span>
+              )}
+            </span>
+            <span className="stars3__stat">{s.stat}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }
