@@ -139,7 +139,13 @@ const BUDGETS = {
   // 17-identity-lab-workbench.css, which is at its check-file-size budget; the
   // two alternatives were both worse — growing a file that guard already flags,
   // or nesting and breaking the ordering the exception below exists to protect.
-  'src/styles': 63,
+  //
+  // 63 -> 64 for `28a-team-hub-hero.css`: the team hub's identity header, sharing
+  // the `28-` prefix with the rest of the hub (same pair convention as 21/21a,
+  // 26/26a and 17/17a above). Split out because 28-team-hub.css was at its
+  // check-file-size budget and still covers four unrelated surfaces below the
+  // hero; nothing left there names a hero selector, so the two never compete.
+  'src/styles': 64,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
