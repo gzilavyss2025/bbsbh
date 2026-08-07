@@ -697,15 +697,16 @@
       "city-connect": {
         "scale": 1,
         "header": {
-          "bar": "#131e29",
-          "accent": "#5c82a5",
+          "bar": "#4a6b8a",
+          "accent": "#131e29",
           "onBar": "#F8F8F5",
           "markScale": 1.1
         },
         "colors": {
           "primary": "#5c82a5",
           "secondary": "#131e29"
-        }
+        },
+        "note": "City Connect bar is the light blue, deepened from #5c82a5 to #4a6b8a: the original read 3.80:1 against the near-white ink and that mid-tone cannot carry near-white text at any value (4.05:1 even against pure white)."
       }
     }
   },
@@ -866,7 +867,8 @@
         "header": {
           "bar": "#201a1c",
           "accent": "#a81f2f",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 1.35
         },
         "colors": {
           "primary": "#201a1c",
@@ -1008,7 +1010,8 @@
         "header": {
           "bar": "#27251F",
           "accent": "#FD5A1E",
-          "onBar": "#F8F8F5"
+          "onBar": "#F8F8F5",
+          "markScale": 0.95
         }
       },
       "alternate": {
@@ -1028,7 +1031,8 @@
         "header": {
           "bar": "#f0653b",
           "accent": "#704195",
-          "onBar": "#27251F"
+          "onBar": "#27251F",
+          "markScale": 1.1
         },
         "colors": {
           "primary": "#27251F",

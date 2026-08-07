@@ -133,6 +133,17 @@
       "alternate-2": "base-white"
     }
   },
+  "134": {
+    "marks": [
+      {
+        "slug": "pitcityconnect",
+        "name": "pitcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "pitcityconnect"
+    }
+  },
   "136": {
     "marks": [
       {
@@ -142,6 +153,17 @@
     ],
     "assignments": {
       "city-connect-masthead": "seacityconnect"
+    }
+  },
+  "137": {
+    "marks": [
+      {
+        "slug": "sfcityconnect",
+        "name": "sfcityconnect"
+      }
+    ],
+    "assignments": {
+      "city-connect-masthead": "sfcityconnect"
     }
   },
   "139": {
