@@ -37,6 +37,7 @@ import {
   reorderGameOfTheNight,
   reorderLiveGames,
   reorderNationalBroadcasts,
+  stackDoubleHeaders,
 } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
@@ -181,9 +182,15 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
     [affiliates.data],
   )
 
+  // A back-to-back twin bill collapses to one card until game 1 starts —
+  // see stackDoubleHeaders for why game 2's scheduled time is a placeholder
+  // rather than a time. Applied BEFORE everything downstream (jersey/broadcast
+  // batching, the filter bar's "showing N of M", the reorder passes) so the
+  // whole screen agrees on how many cards this day has.
+  const stackedDh = useMemo(() => stackDoubleHeaders(data ?? []), [data])
   const sorted = useMemo(
-    () => sortGames(data ?? [], favoriteTeamId, favoriteAffiliateIds),
-    [data, favoriteTeamId, favoriteAffiliateIds],
+    () => sortGames(stackedDh.games, favoriteTeamId, favoriteAffiliateIds),
+    [stackedDh, favoriteTeamId, favoriteAffiliateIds],
   )
 
   // A same-day alternate/City Connect posting doesn't reach jerseysData
@@ -783,6 +790,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     liveJerseys={liveJerseys.data}
                     national={nationalBroadcasts.data?.[g.gamePk]}
                     eager={eager}
+                    stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? null}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={null}
                   />
