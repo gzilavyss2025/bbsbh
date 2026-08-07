@@ -1,9 +1,13 @@
 // Regenerates public/data/teams.json — every active club's identity metadata
-// (name, abbreviation, league/division ids+names, MiLB parent org) at each
-// searchable level. Team/org structure (realignment, expansion, affiliate
-// shuffles) changes roughly once a decade, so this is pulled from statsapi
-// weekly (.github/workflows/update-teams.yml) rather than fetched live on
-// every LogoSheet level switch or team-directory search.
+// (name, abbreviation, league/division ids+names, MiLB parent org, home venue)
+// at each searchable level. Team/org structure (realignment, expansion,
+// affiliate shuffles) changes roughly once a decade, so this is pulled from
+// statsapi weekly (.github/workflows/update-teams.yml) rather than fetched
+// live on every LogoSheet level switch or team-directory search.
+//
+// `venue` needs no hydrate param — verified live against sportId 1 and 11
+// (2026-08-07): every team in both responses already carries
+// `venue: { id, name, link }` on the plain /teams call.
 //
 // One call per sportId to /api/v1/teams already returns everything BOTH
 // fetchTeams() (src/api/schedule.js) and fetchTeam() (src/api/team.js) need,
@@ -41,6 +45,8 @@ async function fetchLevel(sportId) {
       divisionName: t.division?.name ?? null,
       parentOrgId: t.parentOrgId ?? null,
       parentOrgName: t.parentOrgName ?? null,
+      venueId: t.venue?.id ?? null,
+      venueName: t.venue?.name ?? null,
     }))
 }
 

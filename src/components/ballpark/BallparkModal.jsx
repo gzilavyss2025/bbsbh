@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { BallparkDiagram } from './BallparkDiagram.jsx'
-import { rankedDimensions, ordinal } from '../../lib/ballparkData.js'
+import { Facts, RankGroup } from './BallparkFacts.jsx'
+import { rankedDimensions } from '../../lib/ballparkData.js'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
@@ -65,40 +66,5 @@ export function BallparkModal({ venue, onClose }) {
         </p>
       </div>
     </div>
-  )
-}
-
-function Facts({ label, value }) {
-  return (
-    <div className="bpfact">
-      <dt className="bpfact__label">{label}</dt>
-      <dd className="bpfact__value">{value || '—'}</dd>
-    </div>
-  )
-}
-
-// One ranked family (distances or wall heights). Each row pairs the value with
-// its league rank; the extremes (1st / last) are called out so a bandbox or a
-// cavern jumps off the list.
-function RankGroup({ title, rows }) {
-  return (
-    <section className="rankgrp">
-      <h3 className="rankgrp__title">{title}</h3>
-      <ul className="rankgrp__list">
-        {rows.map((r) => {
-          const extreme = r.rank === 1 ? 'is-most' : r.rank === r.total ? 'is-least' : ''
-          return (
-            <li key={`${r.group}-${r.key}`} className="rankrow">
-              <span className="rankrow__label">{r.label}</span>
-              <span className="rankrow__value">{r.value}′</span>
-              <span className={`rankrow__rank ${extreme}`}>
-                {ordinal(r.rank)}
-                <span className="rankrow__of"> of {r.total}</span>
-              </span>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
   )
 }

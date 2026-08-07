@@ -187,6 +187,34 @@
   padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
+.ballparkcard__name {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+/* Stacked (diagram over details) below the app's one responsive breakpoint;
+   50/50 side by side at/above it — kept in sync with WIDE_QUERY in
+   src/hooks/useMediaQuery.js, same as every other min-width: 740px rule. */
+.ballparkcard__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+@media (min-width: 740px) {
+  .ballparkcard__layout {
+    flex-direction: row;
+    align-items: center;
+  }
+  .ballparkcard__diagram,
+  .ballparkcard__details {
+    flex: 1 1 50%;
+    min-width: 0;
+  }
+}
+
 .team-hub.is-themed .thub-card__head,
 .team-hub.is-themed .tstats-card__head,
 .team-hub.is-themed .roster-super__head,
