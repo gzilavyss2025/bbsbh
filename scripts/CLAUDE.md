@@ -469,26 +469,15 @@ Re-run only to fold in a new season.
   leader boards' floor) so a single pinch-hit or mop-up inning can't top a
   rate-stat board. App reads it via `src/api/postseasonLeaders.js`.
 - `gen-highlights-backfill.mjs` → `public/data/highlights/{teamId}.json` **and
-  `public/data/highlights/day/{MMDDYYYY}.json`** — the one-time historical sweep
-  that establishes the season the nightly `gen-highlights.mjs` (above) can't
-  reach back to. Same relationship, and same reasoning, as
-  `gen-rookies-backfill.mjs` below: one `/content` call per Final MLB game makes
-  a from-scratch season a genuinely large crawl (~2,430 games), so
-  `--since`/`--until` chunk it across invocations. **TWO OUTPUTS, TWO
-  INDEPENDENT "done" SETS** — `ingestedGamePks()` answers "are this game's clips
-  filed", `dayIndexedGamePks()` answers "is its condensed cut indexed", and a
-  game can be done in one and missing from the other (every game swept before
-  day files existed is). A game is fetched if EITHER is missing, and each output
-  only takes what it lacked, so widening the range never re-sweeps what's done.
-  **`--days-only` writes the day index alone**: a full-season day index is ~1 MB
-  across ~130 small files the slate reads one of, while a full-season CLIP
-  backfill grows every team file to ~0.5 MB — and the team/player rails fetch a
-  whole team file to render, so that is a page-weight decision about a different
-  surface, not a free side effect. Note `writeDayFiles` MERGES rather than
-  rewrites, precisely so a partial re-sweep of a date can't drop the games it
-  didn't fetch. Shares all its per-game logic with the nightly job
-  (`scripts/lib/highlights.mjs`) — the two differ only in how they source their
-  target games.
+  the day index above** — the one-time historical sweep establishing the season
+  the nightly `gen-highlights.mjs` can't reach back to. Same relationship, and
+  same ~2,430-game cost, as `gen-rookies-backfill.mjs` below; `--since`/`--until`
+  chunk it. TWO OUTPUTS, TWO INDEPENDENT "done" sets (`ingestedGamePks` vs
+  `dayIndexedGamePks`) — a game can be filed in one and missing from the other,
+  so it sweeps if EITHER is. **`--days-only`** writes just the index: a full CLIP
+  backfill grows every team file to ~0.5 MB and the rails fetch a whole one to
+  render, so that is a page-weight call about a different surface. Per-game
+  logic is shared with the nightly job (`scripts/lib/highlights.mjs`).
 - `gen-rookies-backfill.mjs` → `public/data/rookies.json` — the one-time
   historical sweep that establishes every player's rookie window before
   `gen-rookies.mjs` (nightly, above) is ever live. Enumerates every MLB
