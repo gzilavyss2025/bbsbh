@@ -41,6 +41,13 @@ export function GameCard({
   // True for the slate's first cards, whose marks are the page's largest
   // above-the-fold images — threaded to TeamLogo to skip lazy loading there.
   eager = false,
+  // The game 2 this card is standing in for, on a back-to-back twin bill that
+  // hasn't started yet (resultCards.js's stackDoubleHeaders) — null on every
+  // other card, and on this one again the moment game 1 goes live. It turns the
+  // corner pill
+  // into DOUBLEHEADER and floats a second sheet under the card; the card still
+  // opens game 1, which is the game you'd score first either way.
+  stackedGame = null,
   onSelect,
   onBoxScore,
 }) {
@@ -58,7 +65,8 @@ export function GameCard({
   // card, "is the scorebook ready" is answered). Pre-game cards keep both:
   // no line renders before first pitch.
   const hasScoreLine = !!liveLine && !postponed
-  const dhLabel = doubleHeaderLabel(game)
+  const stacked = !!stackedGame
+  const dhLabel = doubleHeaderLabel(game, stacked)
   const pinned = !!pinnedTeamId
   // Sets --pin-accent for the pinned border/gradient + star (see index.css);
   // left unset (undefined) when not pinned or the team has no known color, so
@@ -68,7 +76,7 @@ export function GameCard({
   // cache" shape as every other public/data/*.json reader — this is not one
   // network request per card, just a cache hit after the first card mounts.
   const { data: jerseysData } = useAsync(fetchJerseysData, [])
-  return (
+  const card = (
     <div
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
       style={style}
@@ -151,7 +159,18 @@ export function GameCard({
           {dateLabel && game.sportLabel && game.sportLabel !== 'MLB' && (
             <span className="gamecard__level">{game.sportLabel}</span>
           )}
-          {dhLabel && <span className="gamecard__dh">{dhLabel}</span>}
+          {dhLabel && (
+            <span
+              className="gamecard__dh"
+              title={stacked ? 'Two games. Game 2 starts after game 1 ends.' : undefined}
+            >
+              {dhLabel}
+              {/* The pill alone reads as a fact about the day; a card that
+                  opens ONE of the two games has to say which. Visual readers
+                  get that from the start time already on the card (game 1's). */}
+              {stacked && <span className="sr-only"> — this card opens game 1</span>}
+            </span>
+          )}
           {prospectCount > 0 && (
             <span className="gamecard__prospects">
               <img src={leagueLogoUrl()} alt="" className="gamecard__prospects-logo" />
@@ -176,6 +195,20 @@ export function GameCard({
           Box score ›
         </button>
       )}
+    </div>
+  )
+  if (!stacked) return card
+  // Game 2's own sheet, offset behind game 1's card, so a twin bill LOOKS like
+  // two games before you read the pill. The sheet is a SIBLING placed before
+  // the card rather than a child of it: both are positioned elements at
+  // z-index auto, so they paint in DOM order and game 1's card — border, fill
+  // and all — lands whole on top. As a child it would paint OVER the card's
+  // own background instead, and pushing it under with a negative z-index would
+  // put it behind the page as well.
+  return (
+    <div className="gamecardstack">
+      <span className="gamecardstack__sheet" aria-hidden="true" />
+      {card}
     </div>
   )
 }

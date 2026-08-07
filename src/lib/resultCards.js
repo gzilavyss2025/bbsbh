@@ -1,6 +1,7 @@
 // Presentation vocabulary shared by the slate's game cards, both faces — the
 // pill/chip labels and colors, the doubleheader label, the plain score line,
-// and the slate's crowned-game promotion. Lives here, not inside a component,
+// the MiLB twin-bill stack, and the slate's crowned-game promotion. Lives here,
+// not inside a component,
 // because four modules need it and they would otherwise import each other:
 // GameResultFace renders PerformerCard, and PerformerCard needs
 // scorePairsLine, which used to live in GameResultFace — a real import cycle;
@@ -8,17 +9,26 @@
 // GameSelect (a screen) likewise needs the labels/colors for its filter chips
 // without pulling in a component module for two constants.
 //
-// Spoiler-free: nothing here reads a feed. The CLASSIFICATION that decides
+// Spoiler-free: nothing here reads a score. The CLASSIFICATION that decides
 // which label a card wears is reveal-only (dayHighlights.js's
-// classifyGameCards); these are just the words and hues it maps onto.
+// classifyGameCards); these are just the words and hues it maps onto. The three
+// list-reshaping functions at the bottom do take schedule rows, but only their
+// identity, clock, and coarse abstract state — never a run, an inning, or a
+// linescore.
 
 // "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or
 // split), so the two same-matchup rows on the slate are told apart at a
 // glance. A lone game (doubleHeader 'N') gets nothing. Shared by the card's
 // pregame front face (GameCard) and its revealed back face's pill row
 // (GameResultFace), so the two can't drift.
-export function doubleHeaderLabel(game) {
+//
+// `stacked` is the MiLB back-to-back twin bill before first pitch, where the
+// slate hides game 2 behind game 1's card (stackDoubleHeaders below): one card
+// is standing for both games, so numbering it "Game 1" would name only half of
+// what it opens. The word lives here, next to the labels it replaces.
+export function doubleHeaderLabel(game, stacked = false) {
   if (!game.doubleHeader || game.doubleHeader === 'N') return null
+  if (stacked) return 'Doubleheader'
   return `Game ${game.gameNumber ?? 1}`
 }
 
@@ -89,6 +99,111 @@ export function showsPerformerCard(cardMeta) {
     !!performer &&
     (scenario === 'dominant' || ((scenario === 'blowout' || scenario === 'extras') && playChoice === 'performer'))
   )
+}
+
+// The back-to-back twin bill, and why the slate shows it as one card until it
+// starts.
+//
+// A traditional doubleheader is two games played straight through: game 2
+// begins about half an hour after game 1 ENDS. The schedule feed has no way to
+// say "after the first one," so it stamps game 2 with a placeholder start a few
+// minutes past game 1's. Taken at face value that puts two cards for the same
+// matchup at the top of the slate, five minutes apart, and neither one is wrong
+// enough to tell apart at a glance.
+//
+// So before first pitch the two collapse into ONE card: game 1's, wearing a
+// DOUBLEHEADER pill instead of GAME 1 (doubleHeaderLabel above) and game 2's
+// sheet offset behind it. Once game 1 is under way the placeholder has done its
+// job — the two games are now genuinely distinguishable, one live and one not —
+// and game 2 returns to the slate in its own right, both cards back to GAME 1 /
+// GAME 2.
+//
+// Same shape as the two reorder functions below, and applied before them: take
+// the slate's games, return the list the slate should actually render.
+
+// How close two scheduled starts must be for the second to read as a
+// placeholder rather than a time. This is the WHOLE rule — no level gate, and
+// no reading of the feed's own doubleHeader letter beyond "is this a twin
+// bill at all," because the clock is what a reader can and can't act on.
+//
+// Every doubleheader on the 2026 schedule through Aug 7 splits cleanly either
+// side of it, at both levels:
+//
+//   traditional ('Y')  gap = 5 min      MiLB: OMA@TOL Aug 7 (5:35 / 5:40 PM,
+//                                        gamePks 815575 / 815573)
+//                                       MLB:  CHC@CLE Apr 5, COL@NYM Apr 26,
+//                                        HOU@BAL Apr 30 — all exactly 5 min
+//   split ('S')        gap = 240-405 min  14 MLB pairs, an afternoon game and
+//                                        an evening one, each a real time
+//
+// An hour is clear of both by a wide margin, so a split doubleheader keeps its
+// two cards and its two honest start times.
+export const STACK_WINDOW_MINUTES = 60
+
+// Groups a level's slate rows by matchup so a twin bill's two rows land
+// together. Date is part of the key because a caller may hand over more than
+// one day's games (nothing on the slate does today, but the team pages do).
+function matchupKey(game) {
+  return [game.sportId, game.officialDate, game.away?.id, game.home?.id].join('|')
+}
+
+// Minutes between two schedule rows' first pitches, or Infinity when either row
+// carries no parseable gameDate (lean MiLB rows do occur — see the
+// degrade-gracefully convention in the root CLAUDE.md).
+function minutesApart(a, b) {
+  const ta = new Date(a.gameDate).getTime()
+  const tb = new Date(b.gameDate).getTime()
+  if (!Number.isFinite(ta) || !Number.isFinite(tb)) return Infinity
+  return Math.abs(ta - tb) / 60000
+}
+
+// Whether these two rows are the same twin bill, scheduled back to back, with
+// game 1 still to come. `first` must be game 1 and `second` game 2 — gamePk
+// order does NOT settle that (Toledo's game 2 carries the LOWER pk), so the
+// caller pairs on gameNumber.
+function isStackablePair(first, second) {
+  if (first.doubleHeader === 'N' || second.doubleHeader === 'N') return false
+  if (minutesApart(first, second) > STACK_WINDOW_MINUTES) return false
+  // The whole point of stacking is that the placeholder start is unreadable
+  // BEFORE the day gets going. The moment game 1 is live or final, the two
+  // games tell themselves apart and both belong on the slate.
+  return first.abstractState === 'Preview' && second.abstractState === 'Preview'
+}
+
+// Collapses every back-to-back twin bill in `games` into its game 1.
+//
+// Returns `{ games, stackedBehind }` — the list with each stacked game 2
+// removed, and a Map from game 1's gamePk to the game 2 hiding behind it. The
+// partner rides in a Map rather than on the game object because that object is
+// also the navigation seed handed to `onPick`; a card looks its partner up, and
+// nothing downstream inherits a field it does not understand.
+//
+// A no-op for a day with no twin bill, for a split doubleheader, and for one
+// already under way — in each of those it returns the SAME array reference it
+// was given, so a caller memoizing on it re-renders nothing.
+export function stackDoubleHeaders(games) {
+  if (!Array.isArray(games) || games.length < 2) {
+    return { games: games ?? [], stackedBehind: new Map() }
+  }
+  const byMatchup = new Map()
+  for (const g of games) {
+    if (!g.doubleHeader || g.doubleHeader === 'N') continue
+    const key = matchupKey(g)
+    if (!byMatchup.has(key)) byMatchup.set(key, [])
+    byMatchup.get(key).push(g)
+  }
+  const stackedBehind = new Map()
+  const hidden = new Set()
+  for (const rows of byMatchup.values()) {
+    const first = rows.find((g) => (g.gameNumber ?? 1) === 1)
+    const second = rows.find((g) => g.gameNumber === 2)
+    if (!first || !second) continue
+    if (!isStackablePair(first, second)) continue
+    stackedBehind.set(first.gamePk, second)
+    hidden.add(second.gamePk)
+  }
+  if (hidden.size === 0) return { games, stackedBehind }
+  return { games: games.filter((g) => !hidden.has(g.gamePk)), stackedBehind }
 }
 
 // Promotes the crowned "Game of the Night" (dayHighlights.js's

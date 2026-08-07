@@ -186,6 +186,34 @@
   box-shadow: var(--shadow-card);
 }
 
+/* A back-to-back twin bill before first pitch: one card standing for two
+   games (see lib/resultCards.js's stackDoubleHeaders). Game 2's sheet sits
+   behind game 1's card, a little down and a little to the right, so the two
+   read as a stack of scorebook pages. Game 1's card keeps its whole border and
+   fill — the sheet paints first (see GameCard.jsx for why it's a sibling, not
+   a child) and only its offset corner shows.
+
+   The sheet is inset on the left and hangs past the bottom, never past the
+   right: a card that reached outside its own column would overflow the slate
+   at every width. The wrapper claims the overhang as margin so the sheet
+   doesn't crowd the next card. */
+.gamecardstack {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.gamecardstack__sheet {
+  position: absolute;
+  top: 8px;
+  left: 14px;
+  right: 4px;
+  bottom: -8px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
 /* Full-width date banner (All-Star Rosters page — see GameCard.jsx's
    `dateLabel` prop). Negative margin cancels the card's own padding so the
    strip reaches edge to edge, radius matched to the card's own top corners. */
