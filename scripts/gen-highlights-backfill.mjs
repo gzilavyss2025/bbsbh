@@ -43,6 +43,7 @@ import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
 import {
   dayIndexedGamePks,
+  dayIndexEntry,
   fileByTeam,
   ingestedGamePks,
   loadBlocklist,
@@ -110,7 +111,7 @@ const byDate = new Map()
 for (const g of swept) {
   if (!g?.condensed || !g.date) continue
   if (!byDate.has(g.date)) byDate.set(g.date, {})
-  byDate.get(g.date)[g.gamePk] = g.condensed
+  byDate.get(g.date)[g.gamePk] = dayIndexEntry(g.condensed, g.heroPhoto)
 }
 const { days, entries } = await writeDayFiles(byDate, { generatedAt })
 

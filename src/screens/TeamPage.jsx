@@ -13,6 +13,7 @@ import { hiddenTeamTabs } from './team/data/shared.js'
 import { StandingsCard } from './team/modules/StandingsCard.jsx'
 import { LastTenGames } from './team/modules/TeamGames.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
+import { BallparkCard } from './team/modules/BallparkCard.jsx'
 
 // How many rows each preview shows. A preview is a DOOR, not a smaller
 // duplicate — every one of these ends in a link to the tab that holds the whole
@@ -98,6 +99,13 @@ export function TeamPage({ id, asOf, sportId }) {
           divisionPostseasonOdds={divisionPostseasonOdds}
         />
       )}
+
+      {/* Ballpark — the diagram alongside its built/roof/capacity + ranked
+          dimensions, in full (same content the lineup page's BallparkModal
+          shows). No door to another tab: this IS the full detail view. MLB
+          only in practice — renders nothing for a park not on file (every
+          MiLB park). */}
+      <BallparkCard team={team} />
 
       {/* Form — the season grade and form rails, in full. This is the page's
           headline, and the one preview that isn't a smaller version of

@@ -393,52 +393,57 @@
   color: var(--text-body);
 }
 
-/* Ranked dimension lists. */
+/* Ranked dimensions — a horizontal strip of posts in fence order (LF -> LC ->
+   CF -> RC -> RF), left to right exactly as BallparkDiagram draws them,
+   rather than a top-to-bottom list that fights the outfield's own shape.
+   Distances then walls, stacked (each strip wants its own full width). */
 .bpsheet__ranks {
   display: flex;
-  flex-wrap: wrap;
-  gap: 18px 24px;
+  flex-direction: column;
+  gap: 16px;
   margin-top: 14px;
-}
-
-.rankgrp {
-  flex: 1;
-  min-width: 150px;
 }
 
 .rankgrp__title {
   margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
   color: var(--text-caption);
 }
 
-.rankgrp__list {
+.rankgrp__strip {
+  display: flex;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.rankrow {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: baseline;
-  gap: 8px;
-  padding: 4px 0;
-  border-top: var(--bw-hair) solid var(--border-hairline);
+.rankpost {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 4px;
+  border-left: var(--bw-hair) solid var(--border-hairline);
+  text-align: center;
 }
 
-.rankrow:first-child {
-  border-top: none;
+.rankpost:first-child {
+  border-left: none;
 }
 
-.rankrow__label {
-  font-size: var(--fs-small);
-  color: var(--text-muted);
+.rankpost__pos {
+  display: block;
+  font-family: var(--font-condensed, var(--font-mono));
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
 }
 
-.rankrow__value {
+.rankpost__value {
+  display: block;
+  margin-top: 2px;
   font-family: var(--font-mono);
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
@@ -446,26 +451,15 @@
   font-variant-numeric: tabular-nums;
 }
 
-.rankrow__rank {
-  font-family: var(--font-mono);
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-  font-variant-numeric: tabular-nums;
-  min-width: 62px;
-  text-align: right;
-}
-
-.rankrow__rank.is-most {
-  color: var(--accent-primary);
-  font-weight: var(--w-semibold);
-}
-
-.rankrow__rank.is-least {
-  color: var(--accent-negative);
-  font-weight: var(--w-semibold);
-}
-
-.rankrow__of {
+/* Deliberately NOT mono/tabular like .rankpost__value — a plain-language
+   phrase in the body font reads as a fact about the number, not a second
+   number stacked under the first. Only shown for genuine outliers
+   (outlierNote() in BallparkFacts.jsx), so most posts have no third line. */
+.rankpost__note {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
   color: var(--graphite-soft);
 }
 

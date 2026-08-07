@@ -218,7 +218,7 @@
     },
     "gamePhotos.js": {
       "class": "spoiler-free",
-      "why": "Deliberately NOT reveal-only. A recap photo narrates the outcome by looking at it, but /photos is a standalone page OUTSIDE the scoring flow — it sits outside the rule's scope rather than carving a hole in it, and carries its own disclaimer."
+      "why": "Deliberately NOT reveal-only. A recap photo narrates the outcome by looking at it, but /photos is a standalone page OUTSIDE the scoring flow — it sits outside the rule's scope rather than carving a hole in it, and carries its own disclaimer. pickHeroPhoto() is the one export with a scoring-surface consumer (the slate's condensed-game poster) and earns its safety separately: it runs in scripts/gen-highlights.mjs, returns bare URLs with no caption text, and its one reader renders the image only on an already-revealed flip-card back face — see pickHeroPhoto's own header."
     },
     "gameStory.js": {
       "class": "reveal-only",
@@ -486,6 +486,10 @@
     "seasonScore.js": {
       "class": "cutoff-gated",
       "why": "Selects the latest snapshot at or before the Team Page's standings cutoff. The generator stores snapshots by completed date rather than one mutable current row precisely so this selection is possible."
+    },
+    "seasonScoreFormula.js": {
+      "class": "spoiler-free",
+      "why": "Pure home-field-factor formula (the league constant and the trailing-prior-seasons blend) over standings splits, no game score involved."
     },
     "seasonSeries.js": {
       "class": "cutoff-gated",

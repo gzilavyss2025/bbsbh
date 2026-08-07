@@ -314,20 +314,20 @@ don't run these by hand.
 - `gen-season-score.mjs` → `public/data/season-score.json` — an MLB-only,
   date-keyed 0.0–10.0 Season Surprise Score. One normal run adds yesterday's
   snapshot; `--date` and `--from`/`--to` make a reproducible backfill. The
-  generator sums schedule-adjusted preseason win expectations through the
-  cutoff, stores actual-vs-expected as the headline, and keeps earned pace plus
-  last-30 form as diagnostics. Market baselines live in the hand-curated
-  `season-expectations-seed.json`; incomplete seasons fall back to Marcel. See
-  `docs/season-score.md` and ADR-0018. Backed by the SQLite layer above
-  (`team_snapshots`, `metric='surprise'`); `public/data/season-score.json` is
-  exported from the table, byte-for-byte the same reader shape.
+  generator sums schedule-adjusted preseason win expectations (home edge
+  blended from trailing PRIOR seasons, never this one — `seasonScoreFormula.js`)
+  through the cutoff, stores actual-vs-expected as the headline, and keeps
+  earned pace plus last-30 form as diagnostics. Market baselines live in the
+  hand-curated `season-expectations-seed.json`; incomplete seasons fall back
+  to Marcel. See `docs/season-score.md` and ADR-0018; backed by the SQLite
+  layer above (`team_snapshots`, `metric='surprise'`).
 - `gen-team-score.mjs` → `public/data/team-score.json` — date-keyed MLB Quality
   plus a last-10 Current Form diagnostic. Quality blends 60% actual wins with
-  40% Pythagorean wins. The browser combines same-cutoff Quality and Season
-  Surprise into the headroom-aware Season Grade; see `docs/season-grade.md` and
-  ADR-0020. Backed by the SQLite layer above (`team_snapshots`,
-  `metric='quality'`/`'current_form'`); `public/data/team-score.json` is
-  exported from the table.
+  40% Pythagorean wins off park-adjusted run differential, plus a capped
+  strength-of-schedule nudge (Current Form skips both — see
+  `src/api/teamScoreFormula.js`). Combined with Season Surprise into the
+  headroom-aware Season Grade; see `docs/season-grade.md`/ADR-0020. Backed by
+  the SQLite layer above (`team_snapshots`, `metric='quality'`/`'current_form'`).
 - `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
   an MLB-only, season-chunked roster-move story feed for all 30 organizations.
   The nightly job rebuilds only the current season; once the season file is
@@ -335,15 +335,15 @@ don't run these by hand.
 
 - `gen-highlights.mjs` also → `public/data/highlights/day/{MMDDYYYY}.json` — the
   per-slate-date **condensed-game index**, `{gamePk: {title, duration, poster,
-  playbacks}}`, ~8 KB for a 16-game day (all 16 had a cut in the 2026-07-07
-  sweep). Same one fetch per game as the clips above (`sweepGame` reads the
-  content package twice rather than requesting it twice) and the same
-  `MMDDYYYY` per-date file convention as `gen-callouts.mjs`. REWRITTEN per run,
-  not merged — a day's file is complete in one pass, so there's no accumulated
-  history to protect. Read by the home slate's revealed result cards
-  (`fetchDayVideos`), which can't go live: `content` is 430 KB per game and
-  ignores `?fields=`, so 16 cards would parse ~6.9 MB. Stores the CONDENSED cut
-  only, never the recap — a recap's title carries the final score.
+  playbacks, heroPhoto}}`, ~8 KB for a 16-game day. One fetch per game
+  (`sweepGame` reads the content package three ways, not three requests),
+  MERGED into whatever the file already holds (`writeDayFiles`) so a partial
+  re-sweep stays additive. Read by the home slate's revealed result cards
+  (`fetchDayVideos`), which can't go live (`content` is 430 KB/game). Stores
+  the CONDENSED cut only, never the recap (score in its title). `heroPhoto`
+  (`{original, thumb} | null`, `pickHeroPhoto` via `dayIndexEntry`) is a real
+  still shown instead of MLB's "CONDENSED GAME" graphic — URLs only, no
+  caption, since the file is fetched whole for every game, revealed or not.
 - `gen-highlights.mjs` → `public/data/highlights/{teamId}.json` — one small file
   per MLB club holding its per-play video highlights, game by game, newest first.
   Feeds the Team hub's Games-tab rail and the player page's rail; the box score's

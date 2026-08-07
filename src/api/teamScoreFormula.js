@@ -1,8 +1,10 @@
 // The Team Score formula — 60% actual wins blended with 40% Pythagorean
-// "run-quality" wins, centered on .500 and damped for small samples. Pulled
-// out of scripts/gen-team-score.mjs (which imports node:fs and can't be
-// bundled for the browser) so the "How this is calculated" modal can compute
-// the Current Form window's real ceiling/floor instead of hardcoding them.
+// "run-quality" wins, plus a park adjustment to that run differential and a
+// capped strength-of-schedule nudge (Season Quality only), centered on .500
+// and damped for small samples. Pulled out
+// of scripts/gen-team-score.mjs (which imports node:fs and can't be bundled
+// for the browser) so the "How this is calculated" modal can compute the
+// Current Form window's real ceiling/floor instead of hardcoding them.
 export const MIN_GAMES = 10
 export const CURRENT_FORM_GAMES = 10
 export const PythagoreanExponent = 1.83
@@ -12,9 +14,72 @@ export const PythagoreanExponent = 1.83
 const SEASON_PRIOR_GAMES = 9
 const SEASON_TANH_SCALE = 2
 
+// Strength-of-schedule nudge (Season Quality only — see below for why
+// Current Form skips it). The Pythagorean half of Quality already scores a
+// team's OWN run differential; it has no idea whether that differential came
+// against the league's best or worst clubs. This converts the gap between a
+// team's average opponent's actual season winning percentage and .500 into a
+// small wins-equivalent credit or debit, scaled to games played so a half
+// season can't earn a full season's credit. `SOS_WINS_PER_POINT` is a
+// calibrated product coefficient, not an empirical truth (same caveat as
+// SEASON_GRADE_ACHIEVEMENT_WEIGHT in seasonGradeFormula.js): real MLB
+// schedules rarely deviate more than 2-3 points from a .500 average
+// opponent, so the cap mostly guards against small-sample extremes early in
+// a season rather than binding on a full one.
+export const SOS_WINS_PER_POINT = 0.8
+export const SOS_ADJUSTMENT_CAP = 2.5
+
+export function scheduleStrengthAdjustment(avgOpponentWinPct, games) {
+  if (avgOpponentWinPct == null || !games) return 0
+  const deviationPoints = (avgOpponentWinPct - 0.5) * 100
+  const raw = SOS_WINS_PER_POINT * deviationPoints * (games / 162)
+  return clamp(raw, -SOS_ADJUSTMENT_CAP, SOS_ADJUSTMENT_CAP)
+}
+
+// Park-adjustment for Season Quality's Pythagorean half only (Current Form
+// skips it — see currentFormScoreFromGames below, same reasoning as the
+// strength-of-schedule nudge above). Each completed game's total runs are
+// compared to the league's own season-to-date average to estimate how much
+// that game's VENUE, not either team, inflated or deflated scoring; both
+// sides' runsFor/runsAllowed for that game are then divided by the same
+// per-game factor before they're summed into the season's Pythagorean
+// inputs — see venueRunFactorLookup/parkAdjustedTotals in gen-team-score.mjs.
+// This has to happen PER GAME, not as one team-level multiplier: dividing a
+// team's WHOLE season by one constant cancels out of the pythag ratio
+// (rs^e/(rs^e+ra^e) is scale-invariant), so only heterogeneity ACROSS a
+// team's games — different venues, different factors — can move the number.
+//
+// `VENUE_FACTOR_PRIOR_GAMES` is a calibrated product coefficient, not an
+// empirical truth (same caveat as SOS_WINS_PER_POINT and
+// SEASON_GRADE_ACHIEVEMENT_WEIGHT). A single game's total runs is noisy
+// relative to genuine park effects (roughly 5-25%) at the ~15 games a park
+// has typically hosted by May 1, so the prior halves a venue's raw weight
+// until it has hosted VENUE_FACTOR_PRIOR_GAMES games (~30, roughly two
+// months of an 81-home-game slate). Real, well-sampled parks (Coors ~1.26,
+// T-Mobile ~0.84 at ~59 games into the season) never approach
+// PARK_FACTOR_MIN/MAX even well into a season; the clamp exists to bound a
+// data anomaly or a still-thin sample (a 2-game neutral-site series shrinks
+// to roughly 1.04 before the clamp would ever matter), not to suppress a
+// legitimate park effect.
+export const VENUE_FACTOR_PRIOR_GAMES = 30
+export const PARK_FACTOR_MIN = 0.80
+export const PARK_FACTOR_MAX = 1.30
+
+export function venueRunFactor(avgVenueRunsPerGame, leagueAvgRunsPerGame, venueGames) {
+  if (!venueGames || !leagueAvgRunsPerGame) return 1
+  const raw = avgVenueRunsPerGame / leagueAvgRunsPerGame
+  const weight = venueGames / (venueGames + VENUE_FACTOR_PRIOR_GAMES)
+  return clamp(1 + weight * (raw - 1), PARK_FACTOR_MIN, PARK_FACTOR_MAX)
+}
+
 // Current Form is a hot/cold-streak gauge over CURRENT_FORM_GAMES, not a
 // talent estimate — a real short stretch is *supposed* to read as volatile,
-// so it shrinks much less than the season formula.
+// so it shrinks much less than the season formula. It skips the
+// strength-of-schedule nudge above on purpose, and the park adjustment above
+// that: ten games is already a small, deliberately noisy sample, and
+// layering a second or third context adjustment on top of the late-swing
+// nudge below would stack multiple "how much does context matter"
+// corrections in a window too short to support any of them.
 export const CURRENT_FORM_PRIOR_GAMES = 2
 export const CURRENT_FORM_TANH_SCALE = 1.4
 
@@ -38,17 +103,26 @@ export function pythagoreanPct(runsScored, runsAllowed) {
   return rs / (rs + ra)
 }
 
+// `parkAdjustedRunsScored`/`parkAdjustedRunsAllowed` default to the raw
+// totals, so a caller that never passes them (Current Form, via
+// currentFormScoreFromGames below) is completely unaffected. When a caller
+// DOES pass park-adjusted totals (Season Quality, via gen-team-score.mjs's
+// parkAdjustedTotals), the returned `pythagPct`/`pythagWins` are computed
+// from THOSE adjusted totals — a meaning change on both fields, not just an
+// addition: they now read "park-neutral" rather than raw.
 export function qualityScoreFromGames({
   wins,
   games,
   runsScored,
   runsAllowed,
+  parkAdjustedRunsScored = runsScored,
+  parkAdjustedRunsAllowed = runsAllowed,
   priorGames = SEASON_PRIOR_GAMES,
   tanhScale = SEASON_TANH_SCALE,
   adjustment = 0,
 }) {
   if (!games || games < MIN_GAMES) return null
-  const pythagPct = pythagoreanPct(runsScored, runsAllowed)
+  const pythagPct = pythagoreanPct(parkAdjustedRunsScored, parkAdjustedRunsAllowed)
   const pythagWins = games * pythagPct
   const weightedWins = 0.6 * wins + 0.4 * pythagWins
   const weightedWinsAbove500 = weightedWins - 0.5 * games + adjustment

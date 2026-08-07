@@ -16,12 +16,177 @@ import {
   resolveCopy,
   sanitizeOverrides,
 } from '../src/copy/registry.js'
+import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
+import { CREDITS, creditLine, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 
-test('every field has a non-empty default within its own maxLength', () => {
+test('every field has a string default within its own maxLength', () => {
   for (const f of FIELDS) {
     assert.equal(typeof f.default, 'string', `${f.id} default is a string`)
-    assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
     assert.ok(f.default.length <= f.maxLength, `${f.id} default fits its maxLength`)
+  }
+})
+
+// The non-empty rule is REAL but it belongs to the fields the app renders
+// unconditionally: a consent modal with a blank title or a blank accept button
+// is a broken, unusable consent moment, so those defaults may never be empty.
+// The ballpark notes are the deliberate other case — BallparkCard renders the
+// paragraph only `&& note`, so an empty default means "no note yet", which is
+// the correct shipped state for a park nobody has written about. Splitting the
+// assertion keeps the strong guarantee exactly where it protects something.
+test('every unconditionally-rendered field has a non-empty default', () => {
+  for (const f of FIELDS) {
+    if (f.group === 'ballparks') continue
+    assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
+  }
+})
+
+test('every ballpark field ships empty, so no park carries content nobody chose', () => {
+  const fields = FIELDS.filter((f) => f.group === 'ballparks')
+  assert.ok(fields.length >= 120, 'every MLB park has its four fields')
+  for (const f of fields) {
+    assert.equal(f.default, '', `${f.id} ships empty`)
+    assert.ok(f.subgroup, `${f.id} names the park it belongs to`)
+  }
+})
+
+// The note ids are Redis field names. If BALLPARKS and the derived ids ever
+// drifted — a park renamed, a key normalized differently — the paragraph an
+// admin wrote would silently detach from the park it describes and the card
+// would go blank with no error anywhere. Pin the derivation to its source.
+test('every ballpark has exactly its four fields, keyed off its canonical name', () => {
+  const parks = [...new Set(Object.values(BALLPARKS))]
+  const expected = parks
+    .flatMap((p) => {
+      const k = venueKey(p.name)
+      return [`ballpark.${k}`, `ballpark.${k}Photo`, `ballpark.${k}Credit`, `ballpark.${k}Focus`]
+    })
+    .sort()
+  const actual = FIELDS.filter((f) => f.group === 'ballparks')
+    .map((f) => f.id)
+    .sort()
+  assert.deepEqual(actual, expected)
+  // 33 BALLPARKS keys collapse to 30 parks: the three alias names share a
+  // record, and must therefore share ONE set of fields, not carry two.
+  assert.equal(actual.length, parks.length * 4)
+  assert.ok(Object.keys(BALLPARKS).length > parks.length, 'alias keys exist to collapse')
+})
+
+// The photo URL becomes an `<img src>` and the focal point becomes a CSS
+// `object-position`. Neither is prose, so "bounded string" stops being a
+// sufficient contract — these are the first registry fields where the VALUE's
+// shape is a safety property, enforced in sanitizeOverrides for the panel and
+// api/copy.js alike.
+test('photo-URL fields accept only an https URL', () => {
+  const id = `ballpark.${venueKey('Fenway Park')}Photo`
+  const keep = (v) => sanitizeOverrides({ [id]: v })[id]
+  assert.equal(keep('https://example.com/fenway.jpg'), 'https://example.com/fenway.jpg')
+  // Everything that is not a plain https URL is dropped, not stored-and-hoped.
+  for (const bad of [
+    'javascript:alert(1)',
+    'http://example.com/x.jpg',
+    'data:image/png;base64,AAAA',
+    '//example.com/x.jpg',
+    'https://example.com/a b.jpg',
+    'https://example.com/x.jpg" onerror="alert(1)',
+    'not a url at all',
+  ]) {
+    assert.equal(keep(bad), undefined, `${bad} is refused`)
+  }
+})
+
+test('focal-point fields accept only two numbers 0-100', () => {
+  const id = `ballpark.${venueKey('Fenway Park')}Focus`
+  const keep = (v) => sanitizeOverrides({ [id]: v })[id]
+  assert.equal(keep('50 50'), '50 50')
+  assert.equal(keep('0 100'), '0 100')
+  assert.equal(keep('100 0'), '100 0')
+  for (const bad of ['101 50', '50 101', '50', '50,50', '-1 50', 'center', '50 50; color:red']) {
+    assert.equal(keep(bad), undefined, `${bad} is refused`)
+  }
+})
+
+// The note and credit are ordinary prose and must NOT have inherited a pattern
+// — a rule that silently ate an apostrophe would be worse than no rule.
+test('prose ballpark fields stay unpatterned', () => {
+  const k = venueKey('Fenway Park')
+  for (const id of [`ballpark.${k}`, `ballpark.${k}Credit`]) {
+    const field = FIELDS.find((f) => f.id === id)
+    assert.equal(field.pattern, undefined, `${id} is prose, not a pattern`)
+  }
+  const text = "The Green Monster's 37 feet — still the loudest wall in baseball."
+  assert.equal(sanitizeOverrides({ [`ballpark.${k}`]: text })[`ballpark.${k}`], text)
+})
+
+// A note that has no photo beside it renders a lopsided hero row, and a photo
+// with no CREDITS entry would put the app out of CC BY-SA compliance. Both
+// tables are keyed the same way, so pin them to each other.
+test('every ballpark has a credited photo on file', () => {
+  for (const park of new Set(Object.values(BALLPARKS))) {
+    const key = venueKey(park.name)
+    const credit = CREDITS[key]
+    assert.ok(credit, `${park.name} has a photo credit`)
+    assert.ok(credit.artist, `${park.name} names its photographer`)
+    assert.ok(credit.license, `${park.name} states its licence`)
+    assert.ok(credit.source.startsWith('https://'), `${park.name} links its source`)
+  }
+})
+
+test('resolvePhoto falls back to the bundled photo, credited and linked', () => {
+  const p = resolvePhoto('Fenway Park')
+  assert.equal(p.src, '/ballparks/fenwaypark.jpg')
+  assert.equal(p.isOverride, false)
+  assert.equal(p.focus, '50% 50%', 'no focal point set means dead centre')
+  assert.match(p.creditText, /Rick Berry/)
+  assert.ok(p.creditHref.startsWith('https://commons.wikimedia.org/'))
+  assert.equal(resolvePhoto('Some MiLB Yard'), null)
+})
+
+// The reason an override drops the bundled credit rather than inheriting it:
+// leaving the Commons photographer's name and licence attached to somebody
+// else's photograph misattributes BOTH images at once. Losing a credit is a
+// smaller wrong than printing a false one.
+test('an override replaces the photo AND its credit, never inheriting the old one', () => {
+  const p = resolvePhoto('Fenway Park', { photo: 'https://example.com/mine.jpg' })
+  assert.equal(p.src, 'https://example.com/mine.jpg')
+  assert.equal(p.isOverride, true)
+  assert.equal(p.creditText, '', 'the bundled credit does not carry over')
+  assert.equal(p.creditHref, null, 'and neither does its Commons link')
+
+  const credited = resolvePhoto('Fenway Park', {
+    photo: 'https://example.com/mine.jpg',
+    credit: 'Photo: G. Zilavy',
+  })
+  assert.equal(credited.creditText, 'Photo: G. Zilavy')
+  assert.equal(credited.creditHref, null)
+})
+
+test('the focal point becomes a CSS object-position, on bundled and override alike', () => {
+  assert.equal(resolvePhoto('Fenway Park', { focus: '50 20' }).focus, '50% 20%')
+  assert.equal(resolvePhoto('Fenway Park', { focus: '0 100' }).focus, '0% 100%')
+  assert.equal(
+    resolvePhoto('Fenway Park', { photo: 'https://example.com/m.jpg', focus: '75 10' }).focus,
+    '75% 10%',
+  )
+  // A value the registry would never have stored still cannot emit broken CSS.
+  assert.equal(resolvePhoto('Fenway Park', { focus: 'garbage' }).focus, '50% 50%')
+})
+
+// creditLine is what actually satisfies the licence on screen. A CC BY / CC
+// BY-SA photo must name BOTH the author and the licence; public-domain and CC0
+// owe nothing, so they name the photographer only, as a courtesy.
+test('creditLine names the licence for every photo that requires it', () => {
+  assert.equal(
+    creditLine({ artist: 'Chris6d', license: 'CC BY-SA 4.0' }),
+    'Photo: Chris6d · CC BY-SA 4.0',
+  )
+  assert.equal(creditLine({ artist: 'Jeffme', license: 'CC0' }), 'Photo: Jeffme')
+  assert.equal(creditLine({ artist: 'Rick Berry', license: 'Public domain' }), 'Photo: Rick Berry')
+  assert.equal(creditLine(null), '')
+  for (const [key, credit] of Object.entries(CREDITS)) {
+    const line = creditLine(credit)
+    assert.ok(line.includes(credit.artist), `${key} credits its photographer on screen`)
+    const free = credit.license === 'CC0' || credit.license === 'Public domain'
+    assert.equal(line.includes(credit.license), !free, `${key} states its licence when obliged`)
   }
 })
 

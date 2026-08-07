@@ -14,13 +14,27 @@ date-cutoff decision.
 ## Formula
 
 Each completed regular-season game receives an expected win probability from
-the two clubs' preseason baselines plus a fixed 54% home-field probability:
+the two clubs' preseason baselines plus a team-specific home-field factor for
+the home club:
 
 ```
 p(home win) = logistic(logit(home baseline / 162)
                      − logit(away baseline / 162)
-                     + logit(0.54))
+                     + logit(homeFieldFactor))
 ```
+
+`homeFieldFactor` is computed once per season, from the home team's trailing
+THREE completed prior seasons' standings home/road splits, shrunk toward the
+league-average 54% constant and then held fixed for every game the club hosts
+all season. It is deliberately **not** recomputed from the current season's
+own home/road record: Vs. expectation's whole premise is judging a team's
+actual wins against an expectation set independently of those wins, and a
+team's in-season home/road split is built from the very wins being judged — a
+team on a home hot streak would lower its own bar mid-season. The trailing
+sample gets only about half weight toward its own observed split (see
+`HOME_FIELD_PRIOR_GAMES` in `src/api/seasonScoreFormula.js`), and a team with
+no trailing split at all (an expansion team) falls back to the league
+constant.
 
 For all games through the snapshot date, the generator sums those probabilities
 to `expectedWinsToDate`, then calculates:
@@ -59,6 +73,9 @@ The score sheet also shows, without changing the score:
   by runs scored and allowed.
 - **Last 30** — the result over the club's latest 30 completed games. It is a
   trend indicator, not an extra reward or penalty.
+- **`homeFieldFactor`** — the club's own home-field win probability used in
+  every one of its home games this season (see Formula above), shown next to
+  the league-average 54% constant for comparison.
 
 Roster churn is deliberately excluded. A preseason market number already
 incorporates publicly known departures and arrivals; scoring churn again would
@@ -80,6 +97,7 @@ The output retains daily snapshots by season, team, and date:
             "wins": 56,
             "expectedWinsToDate": 46.9,
             "baselineWins": 84.5,
+            "homeFieldFactor": 0.562,
             "earnedPaceWins": 90.7
           }
         }

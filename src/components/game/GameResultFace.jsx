@@ -167,13 +167,21 @@ export function GameResultFace({
 // `highlightPlaybacks` already accepts an ALREADY-RESOLVED `{hls, mp4}` (the
 // branch it grew for the highlights cascade's team files), so nothing here
 // re-derives a URL.
+//
+// PREFERS `heroPhoto` OVER `poster`: MLB's own poster for this clip is always
+// the same designed "CONDENSED GAME" card over both clubs' marks, which reads
+// as a template rather than a photo of this actual game — see
+// gamePhotos.js's pickHeroPhoto. Falls back to `poster` when a game has no
+// usable photographer/broadcast still (a MiLB game, or one MLB simply didn't
+// shoot much of), so the card never goes blank. Tapping still opens the SAME
+// condensed-game video either way; only the still image changes.
 function CondensedPrint({ video }) {
   const [open, setOpen] = useState(false)
   const runtime = formatClipDuration(video.duration)
   return (
     <>
       <HighlightClipCard
-        clip={{ poster: video.poster, title: video.title }}
+        clip={{ poster: video.heroPhoto?.thumb ?? video.poster, title: video.title }}
         variant="feature"
         label={`Condensed Game${runtime ? ` (${runtime})` : ''}`}
         onOpen={() => setOpen(true)}

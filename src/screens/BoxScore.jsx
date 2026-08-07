@@ -34,7 +34,7 @@ import { UmpireLink } from '../components/umpire/UmpireLink.jsx'
 import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
-import { ballparkFor } from '../lib/ballparkData.js'
+import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 
 // Manager fill-in value, surname-first with the uniform number riding along —

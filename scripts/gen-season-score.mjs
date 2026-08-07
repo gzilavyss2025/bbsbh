@@ -2,8 +2,12 @@
 // Surprise Score. It answers one narrow question: how far above or below its
 // preseason expectation has a club performed THROUGH a completed date? The
 // headline uses actual wins only; run-differential "earned pace" and last-30
-// form are stored as diagnostics, not blended into the grade. See
-// docs/season-score.md and ADR-0018.
+// form are stored as diagnostics, not blended into the grade. Each game's
+// home-field edge is also team-specific now — blended from the home team's
+// trailing three prior seasons' standings home/road splits, never the
+// current season's own record (see teamHomeFieldFactor in
+// src/api/seasonScoreFormula.js for why). See docs/season-score.md and
+// ADR-0018.
 //
 // The file stores date-keyed snapshots so a historical Team Page can use its
 // exact spoiler-safe cutoff rather than today's season result. Normal nightly
@@ -15,16 +19,17 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
+import { HOME_WIN_PROBABILITY, teamHomeFieldFactor } from '../src/api/seasonScoreFormula.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'season-score.json')
 const seedPath = join(here, 'season-expectations-seed.json')
 const MLB_LEAGUES = [103, 104]
-const HOME_WIN_PROBABILITY = 0.54
 const EARLY_SEASON_VARIANCE = 9 // keeps a 10-game hot streak below the ceiling
 
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n))
 const round1 = (n) => Math.round(n * 10) / 10
+const round3 = (n) => Math.round(n * 1000) / 1000
 const isoDay = (d) => d.toISOString().slice(0, 10)
 const addDays = (date, n) => {
   const d = new Date(`${date}T00:00:00Z`)
@@ -43,14 +48,17 @@ function parseArgs(argv) {
 }
 
 // Converts team strength into a per-game expectation. Log-odds preserves the
-// relative gap between two projections, and the 54% home baseline applies only
-// to that game's venue. It is deliberately not a live-strength forecast.
-export function expectedHomeWinProbability(homeWins, awayWins) {
+// relative gap between two projections, and the home-field factor applies
+// only to that game's venue. It is deliberately not a live-strength forecast.
+// `homeFieldFactor` defaults to the league constant so existing callers (and
+// the `expectedHomeWinProbability(81, 81) === 0.54` test) are unchanged;
+// buildSnapshots below passes each home team's own factor explicitly.
+export function expectedHomeWinProbability(homeWins, awayWins, homeFieldFactor = HOME_WIN_PROBABILITY) {
   const logit = (p) => Math.log(p / (1 - p))
   const logistic = (x) => 1 / (1 + Math.exp(-x))
   const home = clamp(homeWins / 162, 0.25, 0.75)
   const away = clamp(awayWins / 162, 0.25, 0.75)
-  return logistic(logit(home) - logit(away) + logit(HOME_WIN_PROBABILITY))
+  return logistic(logit(home) - logit(away) + logit(homeFieldFactor))
 }
 
 // A damped residual maps cleanly onto 5.0 at expectation while a short sample
@@ -106,7 +114,7 @@ function gameOutcome(game) {
   }
 }
 
-export function buildSnapshots({ games, baselines, standings, asOf }) {
+export function buildSnapshots({ games, baselines, standings, asOf, homeFieldByTeam = {} }) {
   const state = new Map()
   const ensure = (id) => {
     if (!state.has(id)) state.set(id, { wins: 0, losses: 0, expectedWins: 0, variance: 0, games: [] })
@@ -116,7 +124,8 @@ export function buildSnapshots({ games, baselines, standings, asOf }) {
   for (const game of games) {
     const home = ensure(game.homeId)
     const away = ensure(game.awayId)
-    const homeP = expectedHomeWinProbability(baselines[game.homeId].wins, baselines[game.awayId].wins)
+    const homeFieldFactor = homeFieldByTeam[game.homeId] ?? HOME_WIN_PROBABILITY
+    const homeP = expectedHomeWinProbability(baselines[game.homeId].wins, baselines[game.awayId].wins, homeFieldFactor)
     const gameVariance = homeP * (1 - homeP)
     home.expectedWins += homeP
     away.expectedWins += 1 - homeP
@@ -154,6 +163,7 @@ export function buildSnapshots({ games, baselines, standings, asOf }) {
       baselineWins: baselines[teamId].wins,
       baselineKind: baselines[teamId].kind,
       baselineSource: baselines[teamId].source ?? null,
+      homeFieldFactor: round3(homeFieldByTeam[teamId] ?? HOME_WIN_PROBABILITY),
       paceWins: round1((s.wins / gamesPlayed) * 162),
       earnedPaceWins: pythagoreanPace(standing, gamesPlayed),
       trend: { wins: trendWins, losses: trendGames.length - trendWins, games: trendGames.length },
@@ -196,10 +206,19 @@ function exportJson(db) {
   return { version: 1, generatedAt: new Date().toISOString(), seasons }
 }
 
+// `date` is OPTIONAL: pass it for a spoiler-safe as-of cutoff on the season
+// being scored (buildDate below); omit it for an already-completed prior
+// season, where it fetches that season's final standings. The MLB endpoint's
+// `date` param only resolves to a real snapshot on a date that season
+// actually played a game — a completed season's OWN closing date (Dec 31,
+// or any offseason date) returns empty `records`, verified live across
+// several past seasons. fetchPriorRecords below relies on the no-date form
+// for exactly that reason.
 async function fetchStandingRows(season, date) {
+  const dateParam = date ? `&date=${date}` : ''
   const results = await Promise.all(
     MLB_LEAGUES.map((leagueId) =>
-      getJson(`/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason&date=${date}`),
+      getJson(`/api/v1/standings?leagueId=${leagueId}&season=${season}&standingsTypes=regularSeason${dateParam}`),
     ),
   )
   const out = {}
@@ -212,9 +231,7 @@ async function fetchStandingRows(season, date) {
 }
 
 async function fetchPriorRecords(season, teamIds) {
-  const prior = await Promise.all(
-    [season - 1, season - 2, season - 3].map(async (year) => fetchStandingRows(year, `${year}-12-31`)),
-  )
+  const prior = await Promise.all([season - 1, season - 2, season - 3].map((year) => fetchStandingRows(year)))
   const out = {}
   for (const teamId of teamIds) out[teamId] = prior.map((rows) => rows[teamId] ?? null)
   return out
@@ -256,6 +273,7 @@ async function buildDate(asOf, seed) {
   const priorRecords = await fetchPriorRecords(season, teamIds)
   const seasonSeed = seed[season] ?? {}
   const baselines = {}
+  const homeFieldByTeam = {}
   for (const teamId of teamIds) {
     const seeded = seasonSeed[teamId]
     if (Number.isFinite(seeded?.baselineWins)) {
@@ -263,8 +281,9 @@ async function buildDate(asOf, seed) {
     } else {
       baselines[teamId] = { wins: marcelBaseline(priorRecords[teamId]), kind: 'marcel', source: null }
     }
+    homeFieldByTeam[teamId] = teamHomeFieldFactor(priorRecords[teamId])
   }
-  return { season, snapshots: buildSnapshots({ games, baselines, standings, asOf }) }
+  return { season, snapshots: buildSnapshots({ games, baselines, standings, asOf, homeFieldByTeam }) }
 }
 
 async function main() {

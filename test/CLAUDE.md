@@ -21,6 +21,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
+| condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | copy-registry.test.js | 22 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026) |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
 | day-highlights.test.js | 35 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) |
@@ -81,7 +82,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 16 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer |
-| season-score.test.js | 7 | scripts/gen-season-score.mjs, src/api/seasonScore.js | Season score / Marcel baseline |
+| season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
@@ -92,7 +93,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
-| team-score.test.js | 11 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js | Quality/Current Form readers |
+| team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
 | team-transactions.test.js | 30 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
 | team.test.js | 28 | src/api/team.js | Team fetch/roster/affiliates/standings |
 | teams-static.test.js | 2 | src/api/teams-static.js | fetchStaticTeams |

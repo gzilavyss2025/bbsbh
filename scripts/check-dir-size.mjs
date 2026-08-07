@@ -125,11 +125,14 @@ const BUDGETS = {
   // since the cascade contract is ORDER, not unique numbers — and the order
   // matters here: it has to land after 26-player-page.css, which owns the
   // `.statcast-section` the strip sits inside.
-  'src/styles': 60,
+  'src/styles': 61,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
-  'src/api': 84,
+  // +1 for seasonScoreFormula.js — pure home-field-factor formula pulled out
+  // of gen-season-score.mjs so it can be bundled client-side, same reason
+  // teamScoreFormula.js already sits here.
+  'src/api': 85,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -153,7 +156,7 @@ const BUDGETS = {
   // +1 for stampInkTuning.js — the per-club stamp-ink override reader
   // (src/lib/data/stamp-ink.json), same small reader/store-file pairing as
   // the existing stampLogoTuning.js beside it, not a new subsystem.
-  'src/lib': 53,
+  'src/lib': 49,
   'src/screens': 38,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
