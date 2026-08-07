@@ -315,9 +315,13 @@ headshot fallbacks). That's correct, not a gap: those surfaces carry no
 jersey/treatment context for an override to key into. Only `TeamTreatmentMark`
 (routes through `treatmentTile`/`milbTreatmentTile`), the WPA resolvers
 (`wpaLogoFor`/`wpaLogoWithFallback`), and `variant="mono"` sites reflect Lab
-tuning. `LogoModal.jsx`'s sketch view is the same story on purpose — it cycles
-the CDN's own `primary`/`cap`/`wordmark` vectors for reference and says so in
-its caption, rather than showing the tuned tile.
+tuning. `LogoModal.jsx`'s sketch view is *mostly* the same story on purpose — it cycles
+the CDN's own `cap`/`base`/`wordmark` vectors for reference and says so in its
+caption, rather than showing the tuned tile. Its one lab-fed entry is City
+Connect, which has no CDN mark at all: `markSources.js`'s `sketchMarkVariants`
+offers that tab only for a club whose CC art exists (a procured file, or a
+recolor assigned to the treatment), so the mark it draws is the lab's — but
+still the mark alone, never the tinted tile.
 
 ## Club theming (`headerTheme.js`)
 
