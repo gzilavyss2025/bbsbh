@@ -176,23 +176,49 @@ export async function writeTeamFiles(byTeam, { generatedAt }) {
 // MMDDYYYY, matching public/data/callouts/ — the same per-slate-date file
 // convention, keyed the way the app's own routes spell a date.
 //
-// REWRITTEN, not merged, unlike the team files: a day's file is complete in one
-// pass (every Final game on that date), so there is no accumulated history to
-// protect. A re-run of an older date simply rebuilds it identically.
+// MERGED into whatever the file already holds, not rewritten over it. The
+// nightly job sweeps a whole date at once and so would be safe either way, but
+// the BACKFILL is not: it only fetches games missing an entry, so a date where
+// one game was previously missed would be rebuilt from that single game and
+// the other fifteen would vanish. Merging makes a partial sweep additive, the
+// same append-only guarantee the team files have, and a Final game's condensed
+// cut is immutable so a re-swept entry overwrites itself with equal content.
 export async function writeDayFiles(byDate, { generatedAt }) {
   let days = 0
   let entries = 0
   for (const [date, games] of byDate) {
     if (!Object.keys(games).length) continue
-    await writeJsonAtomic(join(OUT_DIR, 'day', `${urlDateFor(date)}.json`), {
-      date,
-      generatedAt,
-      games,
-    })
+    const path = join(OUT_DIR, 'day', `${urlDateFor(date)}.json`)
+    const prev = await readJsonOr(path, { date, games: {} })
+    const merged = { ...(prev.games ?? {}), ...games }
+    await writeJsonAtomic(path, { date, generatedAt, games: merged })
     days++
     entries += Object.keys(games).length
   }
   return { days, entries }
+}
+
+// Every gamePk that already has a day-index entry — the backfill's "don't
+// re-fetch what's done" guard for THIS output, which is a different question
+// from ingestedGamePks below: that one answers "are this game's clips filed",
+// and a game can easily be done there and missing here (every game swept
+// before day files existed is). A game needs fetching if EITHER is missing.
+//
+// An absent directory (no day file written yet) is an empty set, not an error.
+export async function dayIndexedGamePks() {
+  const seen = new Set()
+  let files = []
+  try {
+    files = (await readdir(join(OUT_DIR, 'day'))).filter((f) => /^\d{8}\.json$/.test(f))
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+    return seen
+  }
+  for (const file of files) {
+    const data = await readJsonOr(join(OUT_DIR, 'day', file), { games: {} })
+    for (const gamePk of Object.keys(data.games ?? {})) seen.add(Number(gamePk))
+  }
+  return seen
 }
 
 // "2026-07-07" -> "07072026", the form the app's routes and the callouts files

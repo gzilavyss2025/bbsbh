@@ -418,6 +418,12 @@ export default defineConfig({
           '**/data/umpires.json',
           '**/data/game-notes.json',
           '**/data/callouts/*.json',
+          // Same reasoning for the per-date condensed-game index: one small
+          // file per slate date, ~6 KB each but one per DAY OF THE SEASON
+          // (132 of them by August, and growing every night). A visitor reads
+          // the one date they're looking at; precaching the whole season added
+          // 133 entries and 782 KiB to the install for nothing.
+          '**/data/highlights/day/*.json',
           '**/data/rookies.json',
           // Route-specific snapshots are fetched on demand instead of adding
           // hundreds of KB to every install. The runtime rule below keeps the

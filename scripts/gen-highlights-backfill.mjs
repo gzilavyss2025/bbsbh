@@ -1,6 +1,14 @@
-// One-time historical sweep for public/data/highlights/{teamId}.json — every
-// Final MLB game in a date range that isn't already on file, classified and
-// filed the same way the nightly job files a game.
+// One-time historical sweep for public/data/highlights/{teamId}.json AND
+// public/data/highlights/day/{MMDDYYYY}.json — every Final MLB game in a date
+// range that isn't already on file, classified and filed the same way the
+// nightly job files a game.
+//
+// TWO OUTPUTS, ONE FETCH, TWO INDEPENDENT "already done" SETS. The per-team
+// clip files and the per-day condensed-game index answer different questions
+// and were built at different times, so a game can be complete in one and
+// absent from the other — every game swept before day files existed is exactly
+// that. A game is swept if EITHER is missing, and each output only takes what
+// it was missing.
 //
 // NOT ON THE NIGHTLY CRON (see scripts/gen-highlights.mjs for that) — same
 // category as gen-rookies-backfill.mjs / gen-war-history.mjs: a large one-time
@@ -18,17 +26,28 @@
 // minutes at this concurrency); --since/--until let it be chunked across
 // invocations instead of one very long run.
 //
+// --days-only writes ONLY the day index, leaving the team files untouched.
+// That matters because the two backfills have very different consequences: a
+// full-season day index is ~1 MB total across ~130 small files that the slate
+// reads one of, while a full-season CLIP backfill grows every team file to
+// ~0.5 MB — and the team/player rails fetch a whole team file to render, so
+// that is a page-weight decision about a different surface, not a free
+// side effect of asking for posters.
+//
 // Run by hand:
 //   node scripts/gen-highlights-backfill.mjs                        # season start → yesterday
 //   node scripts/gen-highlights-backfill.mjs --since=2026-04-01 --until=2026-05-31
+//   node scripts/gen-highlights-backfill.mjs --days-only            # condensed-game index only
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
 import { parseArgs, isoDay } from './lib/args.mjs'
 import {
-  clipsForGame,
+  dayIndexedGamePks,
   fileByTeam,
   ingestedGamePks,
   loadBlocklist,
+  sweepGame,
+  writeDayFiles,
   writeTeamFiles,
   OUT_DIR,
 } from './lib/highlights.mjs'
@@ -56,26 +75,48 @@ for (const d of schedule.dates ?? []) {
   }
 }
 
-// Skip every game already present in a team file — the "don't recompute what's
-// done" guard that makes a widened re-run cheap.
+// Skip every game already done in BOTH outputs — the "don't recompute what's
+// done" guard that makes a widened re-run cheap. The two are separate
+// questions: a game's clips can be filed while its condensed cut isn't
+// indexed, which is true of every game swept before day files existed, so a
+// game is a target if EITHER is missing.
 const done = await ingestedGamePks()
-const targets = all.filter((t) => !done.has(t.gamePk))
+const dayDone = await dayIndexedGamePks()
+const daysOnly = Boolean(args['days-only'] ?? args.daysOnly)
+const targets = all.filter(
+  (t) => (!daysOnly && !done.has(t.gamePk)) || !dayDone.has(t.gamePk),
+)
 console.log(
-  `${all.length} finals in ${startDate}..${endDate}; ${done.size} game(s) already on file; sweeping ${targets.length}`,
+  `${all.length} finals in ${startDate}..${endDate}; ${done.size} with clips on file, ` +
+    `${dayDone.size} in the day index; sweeping ${targets.length}`,
 )
 
 const blocklist = await loadBlocklist()
+// One fetch, both outputs — see sweepGame. A game re-swept only for its day
+// entry hands back its clips for free, so `games` below drops the ones already
+// filed rather than re-writing team rows that exist.
 const swept = await mapConcurrent(targets, CONCURRENCY, async (t) => ({
   ...t,
-  clips: await clipsForGame(t.gamePk, blocklist),
+  ...(await sweepGame(t.gamePk, blocklist)),
 }))
 
-const games = swept.filter((g) => g && g.clips.length)
+const generatedAt = new Date().toISOString()
+
+const games = daysOnly ? [] : swept.filter((g) => g && g.clips.length && !done.has(g.gamePk))
 const byTeam = fileByTeam(games)
-const { added, teams } = await writeTeamFiles(byTeam, { generatedAt: new Date().toISOString() })
+const { added, teams } = await writeTeamFiles(byTeam, { generatedAt })
+
+const byDate = new Map()
+for (const g of swept) {
+  if (!g?.condensed || !g.date) continue
+  if (!byDate.has(g.date)) byDate.set(g.date, {})
+  byDate.get(g.date)[g.gamePk] = g.condensed
+}
+const { days, entries } = await writeDayFiles(byDate, { generatedAt })
 
 const clipCount = games.reduce((n, g) => n + g.clips.length, 0)
 console.log(
   `wrote ${teams} team files under ${OUT_DIR} — ${clipCount} clips from ${games.length} clipped games ` +
     `(+${added} new game rows of ${targets.length} swept)`,
 )
+console.log(`wrote ${days} day files under ${OUT_DIR}/day — ${entries} condensed games`)
