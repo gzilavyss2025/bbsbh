@@ -101,7 +101,16 @@ const BUDGETS = {
   // 38; it introduces a fresh `.umptend__*` namespace and overrides nothing,
   // so its exact position is not load-bearing, only its being after 14
   // (.zonemap) and 44 (.metricbar), which it reuses.
-  'src/styles': 57,
+  //
+  // +1 again for 48-stamp-strip.css, for the same reason and by the same
+  // remedy: redesigning the Game Log's mint affordance into a strip across the
+  // head of the box score pushed 48-logbook.css past check-file-size.mjs's
+  // 600-line ceiling, and that guard's fix is to split, not to raise. It takes
+  // a DUPLICATE 48 (precedent: 11-innings / 11-pregame-scoreboard) rather than
+  // renumbering the eight partials after it, since the cascade contract is
+  // ORDER, not unique numbers — and here the order is load-bearing: it has to
+  // land after 48-logbook.css, which sizes and inks the `.gamestamp` it frames.
+  'src/styles': 58,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

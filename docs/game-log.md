@@ -20,10 +20,10 @@ from it), and `src/CLAUDE.md` for the component wiring.
 
 ## 1. The product, in one pass
 
-You reveal a game's box score by hand, the way this whole app works. At the foot
-of that revealed sheet, once the game is final, you can **stamp** it — mint a
-one-color commemorative mark carrying the final score, the two clubs, the date,
-and the venue. That stamp is yours to keep.
+You reveal a game's box score by hand, the way this whole app works. Across the
+head of that revealed sheet, once the game is final, you can **stamp** it — mint
+a one-color commemorative mark carrying the final score, the two clubs, the
+date, and the venue. That stamp is yours to keep.
 
 Stamps accumulate into your **Game Log**: a passport book you arrange by hand.
 Freshly minted stamps wait in a **tray** until you tap a spot on a page to place
@@ -86,7 +86,7 @@ If you are changing the user-facing name or wording, these are all of them:
 | `src/lib/reportPages.js` | the label in the More menu, site footer, and report footer |
 | `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title, empty state, tray and placement ledes |
 | `src/screens/LogbookStatsPage.jsx` | retrospective tab title, back links, empty state |
-| `src/components/logbook/StampGameButton.jsx` | the whole mint card inside the box score |
+| `src/components/logbook/StampGameButton.jsx` | the whole mint strip inside the box score |
 | `src/components/passport/PassportCover.jsx` | the book's foil-stamped cover and its `aria-label` |
 | `src/screens/identity-lab/editors/StampPlacementEditor.jsx` | Identity Lab hints that name the destination |
 | `api/_lib/cards.js` | the shared-link Open Graph card (`logbook` key) |
@@ -163,7 +163,9 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Season full | *"Your {season} Game Log is full. Remove a stamp to make room."* |
 | Stamped, placed | *"Stamped, and on page {n} of your book."* |
 | Stamped, unplaced | *"Stamped. It's waiting to be placed in your book."* |
-| Mint-card actions | `Place it in your book` / `Move it in your book` / `Open Game Log` |
+| Mint-strip eyebrow | `Game Log` — the strip's own label, since the copy beside it is one line and can't carry the name in every state |
+| Mint-strip row action | `Place it in your book` / `Move it in your book` — the row offers exactly one thing, and it is the way into the book |
+| Mint-strip disclosure | `Details` — the collapsed second thought on a stamp you already have (mode, note, `Open Game Log`, `Remove stamp`). Plain and unsentimental on purpose: this is the one control here that is chrome rather than voice |
 | Note field | label `Note`, placeholder *"Dad's first game here"* |
 | Mode picker | group label *"How you took this game in"*, options `watched` / `followed` |
 | Tray | *"{n} stamps are waiting for a page."* (singular: *"1 stamp is waiting for a page."*) |
@@ -323,8 +325,8 @@ already sitting in every user's collection, the moment the change ships.
 | `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
 
 Entry points: the labelled pill in the slate header (`LogbookButton.jsx`), the
-More menu and both footers (via `reportPages.js`), and the mint card at the foot
-of a revealed box score.
+More menu and both footers (via `reportPages.js`), and the mint strip across the
+head of a revealed box score.
 
 **The Open Graph card** (`api/_lib/cards.js`, key `logbook`) is generic and static
 — it describes the feature, never a collection. It must stay that way: the card is

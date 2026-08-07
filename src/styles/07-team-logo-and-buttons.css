@@ -515,3 +515,25 @@
   font-weight: var(--w-bold);
 }
 
+/* The two solid fills the Game Log's actions use, named here rather than at a
+   call site because all three of those sites — the box score's mint strip, the
+   book's "Stamp it here" and "Move it" confirmations — want the same two, and
+   two of them used to borrow a component class belonging to the third.
+
+   --seal is the kraft amber of a spoiler cover, and minting is the one action
+   in the app that leaves something behind on the far side of a seal, so it is
+   the one place outside SealBox that wears that colour. --ink is the ordinary
+   navy primary, for the follow-on step (putting the stamp in the book):
+   important, but not what the strip is asking for. */
+.btn--seal {
+  background: var(--seal-cover);
+  border-color: var(--seal-cover);
+  color: var(--text-on-seal);
+}
+
+.btn--ink {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+

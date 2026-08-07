@@ -333,3 +333,65 @@ of that moves. Nothing here loosens what happens while you are scoring a game.
   might stamp", no club's other results, no league context.
 - ADR-0026's spoiled-day map keeps its own job (which days you agreed to see) and
   simply stops having a second one. It is no longer consulted at mint time.
+
+## Third amendment (2026-08-07) — the mint moved to the head of the sheet
+
+**The affordance is now a thin strip across the top of the revealed box score,
+not a tall card at the bottom of it.** Nothing about the containment argument
+changes, and the reason it doesn't is worth stating plainly, because the
+original wording invited the opposite reading.
+
+### The gate is a render function, not a place on the page
+
+This ADR's client-side half is: *the mint affordance renders inside the box
+score's `SealBox` reveal render function* (ADR-0002). `children` is a function
+invoked only once revealed, so nothing it returns exists in the DOM before the
+tap — **wherever in that returned tree it happens to sit.** Top of the sheet and
+foot of the sheet are the same side of the seal. The invariant spec
+(`e2e/invariants/logbook-stamp.spec.js`) asserts exactly that and needed no new
+assertion for the move: it checks *absent from the DOM while sealed*, which is a
+statement about the boundary, not about scroll position.
+
+The two things that must not change are unchanged and still stated in
+`StampGameButton.jsx`'s header: the host `SealBox` has **no `onReveal`** and
+**persists nothing**.
+
+### Why it moved
+
+The old placement had a real argument — a keepsake is not a headline, and the
+sheet is what you came for. In practice it made the one thing on the page you
+can *keep* the one thing you had to scroll a full box score to find, past the
+win-probability arc, three stars, Statcast leaders, both clubs' batting and
+pitching tables and the game-info footnotes. An offer nobody scrolls to is not a
+restrained offer; it is a hidden one.
+
+A strip at the head of the page inverts that without shouting: it is one row
+tall (about one stamp), it is declined by scrolling past it, and it is where the
+eye already is when the seal lifts.
+
+### The constraint that keeps it honest
+
+The old card was 300–500px because every affordance a *minted* stamp offers was
+laid out at once — the mode picker, the note field, three actions. At the top of
+the page that is unaffordable, so the strip carries **one row: mount, one line
+of copy, one action**, and everything a stamp you already have can do sits
+behind a `Details` disclosure. That is the rule to keep: new affordances go in
+the disclosure, the row does not grow. A future change that puts a fourth
+control in the row has re-created the card in a worse position.
+
+### Consequences
+
+- Placement is CSS, not a second render. The strip is the first child of the
+  Highlights section (`BoxScore.jsx`); on a phone `48-stamp-strip.css` floats
+  the section title and the R/H/E/LOB totals above it with flex `order`, which
+  works only because `.bs__duo`/`.bs__col` are `display: contents` below the
+  wide breakpoint. One component, two positions, no duplicated state.
+- `.stampcard__*` is now `.stampstrip__*`. The two solid button fills the Game
+  Log's actions share are named `.btn--seal` / `.btn--ink`
+  (`07-team-logo-and-buttons.css`) instead of the book borrowing the mint
+  card's own class.
+- The rules live in a new `48-stamp-strip.css`, because folding them back into
+  `48-logbook.css` puts that file past `check-file-size.mjs`'s ceiling. It takes
+  a duplicate `48` (precedent: the two `11-` partials); the cascade contract is
+  order, not unique numbers, and this one has to land after `48-logbook.css`,
+  which sizes and inks the `.gamestamp` it frames.

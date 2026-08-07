@@ -336,7 +336,7 @@ function LogbookCollection({ season: requestedSeason = null, placing = null }) {
                 </button>
                 <button
                   type="button"
-                  className="btn stampcard__mint"
+                  className="btn btn--seal"
                   onClick={() => startMove(selectedStamp)}
                 >
                   Move it
@@ -379,7 +379,7 @@ function LogbookCollection({ season: requestedSeason = null, placing = null }) {
               </p>
               <div className="logbook__placingactions">
                 {pending && (
-                  <button type="button" className="btn stampcard__mint" onClick={confirmPlacement}>
+                  <button type="button" className="btn btn--seal" onClick={confirmPlacement}>
                     {movingFrom ? 'Move it here' : 'Stamp it here'}
                   </button>
                 )}
