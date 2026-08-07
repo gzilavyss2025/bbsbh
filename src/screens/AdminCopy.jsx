@@ -67,11 +67,28 @@ function ModalPreview({ values, ids }) {
   )
 }
 
+// Split a group's fields into consecutive runs sharing a `subgroup`, preserving
+// registry order. The ballparks group is 30 parks x 4 fields; without this the
+// panel is 120 undifferentiated boxes and you cannot tell which note belongs to
+// which photo URL. A group whose fields declare no subgroup (Scores Unlocked)
+// comes back as one untitled run, so its markup is unchanged.
+function subgroups(fields) {
+  const runs = []
+  for (const f of fields) {
+    const title = f.subgroup ?? null
+    const last = runs[runs.length - 1]
+    if (last && last.title === title) last.fields.push(f)
+    else runs.push({ title, fields: [f] })
+  }
+  return runs
+}
+
 function Field({ field, value, onChange, onReset }) {
   const defaults = field.default
   const isDefault = (value ?? '') === defaults || (value ?? '') === ''
   const count = (value ?? '').length
   const over = count > field.maxLength
+  const invalid = Boolean(field.pattern && count > 0 && !field.pattern.test(value))
   const Input = field.multiline ? 'textarea' : 'input'
   return (
     <div className="admincopy__field">
@@ -86,6 +103,16 @@ function Field({ field, value, onChange, onReset }) {
         rows={field.multiline ? 3 : undefined}
         onChange={(e) => onChange(field.id, e.target.value)}
       />
+      {invalid && (
+        // sanitizeOverrides DROPS a value that fails its pattern, silently and
+        // on both sides. Without this line the box would look saved and the
+        // page would keep showing the old art, with nothing to explain why.
+        <p className="admincopy__invalid">
+          {field.id.endsWith('Photo')
+            ? 'Not saved yet — must be a full https:// link with no spaces.'
+            : 'Not saved yet — needs two numbers 0–100 separated by a space, like "50 35".'}
+        </p>
+      )}
       <div className="admincopy__fieldMeta">
         <span className={over ? 'admincopy__count admincopy__count--over' : 'admincopy__count'}>
           {count} / {field.maxLength}
@@ -346,31 +373,42 @@ function Editor({ onDirty }) {
       {GROUPS.map((group) => {
         const groupFields = FIELDS.filter((f) => f.group === group.id)
         const ids = Object.fromEntries(groupFields.map((f) => [f.id.split('.')[1], f.id]))
+        // Only a group that composes ONE modal can be staged as one. The
+        // ballpark notes are 30 independent paragraphs on a plain page, so they
+        // render as a bare field list — no preview pane, no "View real modal".
+        const stageable = group.preview === 'consentModal'
         return (
           <section key={group.id} className="admincopy__group" aria-label={group.label}>
             <div className="admincopy__groupHead">
               <h2 className="admincopy__groupTitle">{group.label}</h2>
-              <button
-                type="button"
-                className="admincopy__previewOpen"
-                onClick={() => setPreview(group.id)}
-              >
-                View real modal
-              </button>
+              {stageable && (
+                <button
+                  type="button"
+                  className="admincopy__previewOpen"
+                  onClick={() => setPreview(group.id)}
+                >
+                  View real modal
+                </button>
+              )}
             </div>
-            <div className="admincopy__groupGrid">
+            <div className={stageable ? 'admincopy__groupGrid' : 'admincopy__groupGrid admincopy__groupGrid--plain'}>
               <div className="admincopy__fields">
-                {groupFields.map((f) => (
-                  <Field
-                    key={f.id}
-                    field={f}
-                    value={values[f.id]}
-                    onChange={onChange}
-                    onReset={onReset}
-                  />
+                {subgroups(groupFields).map(({ title, fields }) => (
+                  <div key={title ?? '_'} className="admincopy__subgroup">
+                    {title && <h3 className="admincopy__subgroupTitle">{title}</h3>}
+                    {fields.map((f) => (
+                      <Field
+                        key={f.id}
+                        field={f}
+                        value={values[f.id]}
+                        onChange={onChange}
+                        onReset={onReset}
+                      />
+                    ))}
+                  </div>
                 ))}
               </div>
-              <ModalPreview values={values} ids={ids} />
+              {stageable && <ModalPreview values={values} ids={ids} />}
             </div>
           </section>
         )

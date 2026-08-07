@@ -27,6 +27,7 @@ export async function fetchTeam(teamId) {
         division: { id: t.divisionId, name: t.divisionName },
         parentOrgId: t.parentOrgId,
         parentOrgName: t.parentOrgName,
+        venue: t.venueName ? { id: t.venueId, name: t.venueName } : null,
       }
     }
   }

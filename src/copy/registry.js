@@ -1,7 +1,9 @@
 // The copy registry — the single source of truth for every piece of
-// admin-editable UI text in the app. It is a plain, dependency-free module so
-// three very different consumers can share ONE definition of what a copy key
-// is, what it defaults to, and what a valid value looks like:
+// admin-editable UI text in the app. It is a plain, side-effect-free module —
+// its one import is the static ballpark table, which it reads to derive one
+// note field per park — so three very different consumers can share ONE
+// definition of what a copy key is, what it defaults to, and what a valid value
+// looks like:
 //
 //   - the runtime (src/copy/CopyProvider.jsx + copyContext.js) reads DEFAULTS
 //     for instant, offline, backend-free rendering — the app works identically
@@ -24,10 +26,19 @@
 // one place a user trades away the spoiler protection the whole app exists to
 // provide, so the trade must be stated plainly even while having fun with it.
 
+import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
+import { venueKey } from '../lib/ballpark/ballparkArt.js'
+
 // Groups order the admin panel and let it render section headers. Keep ids
 // stable — they are the Redis field names and the localStorage cache keys.
+//
+// `preview: 'consentModal'` marks a group whose fields together compose one
+// ConsentModal, so the panel can offer the live rehearsal of it. A group without
+// the flag renders as plain fields — the ballpark notes are 30 unrelated
+// paragraphs with no shared modal to stage.
 export const GROUPS = [
-  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)' },
+  { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
+  { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -45,8 +56,13 @@ export const GROUPS = [
 //   {inning} — the half-inning label of the half ALREADY ON SCREEN (e.g.
 //              "Top 7th"). Used only by `scoresUnlocked.liveEdgeLabel`.
 //
-// SPOILER GUARD (do not relax): every field here is consent/chrome copy only,
-// and no field may be rendered inside a sealed/reveal-gated surface. A token may
+// SPOILER GUARD (do not relax): no field here may be rendered inside a
+// sealed/reveal-gated surface, and no field's VALUE may be derived from game
+// data — an admin types every one of them by hand, about a subject that has no
+// score. That covers the consent/chrome copy and, since ADR-0025's amendment,
+// the per-park notes: a ballpark is a building, the team hub's Overview is one
+// of the surfaces CLAUDE.md keeps deliberately outside the scoring flow, and a
+// sentence about the Green Monster cannot leak tonight's result. A token may
 // be added ONLY if its value is categorically incapable of carrying a score. The
 // two above qualify: a clock time is not game data at all, and `{inning}` is the
 // same structural half-inning label the innings chrome already prints for the
@@ -57,6 +73,85 @@ export const GROUPS = [
 // score. If this panel ever grows to govern other app copy, keep score-bearing
 // contexts out of the registry entirely — see ADR-0025.
 export const TOKENS = Object.freeze(['time', 'inning'])
+
+// The ballpark notes: one free-text paragraph per park, shown on the team hub's
+// Overview between the built/roof/capacity facts and the outfield dimensions.
+//
+// DERIVED, not hand-listed, and that is the point. BALLPARKS is the one place
+// the set of parks is written down; a hand-kept second list here would drift the
+// first time a park is renamed, and a drifted id is not a cosmetic bug — ids are
+// Redis field names, so a park whose id moved would silently lose the paragraph
+// somebody wrote for it. Deriving from `park.name` also means the three ALIAS
+// keys (Minute Maid/Daikin, Guaranteed Rate/Rate, the Dodger Stadium pair)
+// collapse to one field, which is what an editor expects: one park, one note.
+//
+// Every default is EMPTY on purpose. The card renders no paragraph at all until
+// the owner writes one, so nothing ships in a voice they did not choose — and
+// `sanitizeOverrides` already treats '' as "no override", so clearing a box in
+// the panel is the same operation as never having filled it.
+//
+// FOUR fields per park, not one — the note plus the three that let the owner
+// replace the art without a deploy. `subgroup` keeps a park's four boxes
+// together under one heading in the panel instead of scattering 120 inputs.
+//
+// A pattern-validated field is a NEW kind here, and it matters: `photo` and
+// `focus` are not prose, they are a URL that becomes an `<img src>` and a pair
+// of numbers that become a CSS `object-position`. sanitizeOverrides enforces
+// the pattern on BOTH sides (panel and api/copy.js), so a hand-crafted POST
+// cannot put `javascript:` in an image source or arbitrary text in a style.
+const PHOTO_URL = /^https:\/\/[^\s"'<>]+$/
+// "x y", each 0–100, as percentages of the image. "50 50" is dead centre.
+const FOCAL_POINT = /^(100|\d{1,2}) (100|\d{1,2})$/
+
+function parkFields() {
+  return [...new Set(Object.values(BALLPARKS))]
+    .map((park) => park.name)
+    .sort((a, b) => a.localeCompare(b))
+    .flatMap((name) => {
+      const key = venueKey(name)
+      const base = { group: 'ballparks', subgroup: name }
+      return [
+        {
+          ...base,
+          id: `ballpark.${key}`,
+          label: `${name} — note`,
+          help: `A few sentences on ${name} — what the place is like, what makes it odd, what a visitor notices. Leave empty to show no note for this park.`,
+          maxLength: 700,
+          multiline: true,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Photo`,
+          label: `${name} — photo URL`,
+          help: 'Replaces the bundled photo. Must be a full https:// link to an image file. Leave empty to keep the shipped photo. You are responsible for having the right to use whatever you point at here.',
+          maxLength: 500,
+          multiline: false,
+          pattern: PHOTO_URL,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Credit`,
+          label: `${name} — photo credit`,
+          help: 'Only used with a photo URL above. Names the photographer and licence for YOUR photo, since the bundled credit no longer applies. Leave empty for a photo that needs no credit.',
+          maxLength: 160,
+          multiline: false,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Focus`,
+          label: `${name} — focal point`,
+          help: 'Which part of the photo to keep when it is cropped to the widescreen box. Two numbers 0–100, across then down — "50 50" is centre, "50 20" favours the top, "50 80" the bottom. Leave empty for centre.',
+          maxLength: 7,
+          multiline: false,
+          pattern: FOCAL_POINT,
+          default: '',
+        },
+      ]
+    })
+}
 
 export const FIELDS = [
   // ---- Scores Unlocked: the one "just show me the scores" switch. It covers
@@ -155,6 +250,7 @@ export const FIELDS = [
     multiline: false,
     default: 'Live · {inning} in progress',
   },
+  ...parkFields(),
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.
@@ -186,6 +282,12 @@ export function sanitizeOverrides(raw) {
     const cleaned = stripControlChars(value, field.multiline).replace(/[ \t]+$/g, '')
     if (cleaned.length === 0) continue // empty = "use the default", not stored
     if (cleaned.length > field.maxLength) continue
+    // A field that declares a `pattern` is not prose — its value ends up in an
+    // `<img src>` or a CSS `object-position`, where "any bounded string" is no
+    // longer a safe contract. Dropping a non-matching value here covers the
+    // admin panel AND api/copy.js, so a hand-crafted POST cannot store a
+    // `javascript:` URL or arbitrary text that would land in a style.
+    if (field.pattern && !field.pattern.test(cleaned)) continue
     out[id] = cleaned
   }
   return out

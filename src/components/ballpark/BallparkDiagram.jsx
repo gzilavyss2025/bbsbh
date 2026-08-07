@@ -1,4 +1,4 @@
-import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballparkGeometry.js'
+import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballpark/ballparkGeometry.js'
 
 // The scorebook's ballpark drawing: an ink-on-manila sketch of the full field —
 // infield diamond, outfield grass, the warning track hugging the fence, and the
@@ -6,7 +6,7 @@ import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballpar
 // true corners — Fenway's Monster, PNC's angular RF) when we have the digitized
 // polygon, else a straight five-point outline; either way it's drawn thicker where
 // the wall is taller. Geometry (and the fixed-scale reasoning) lives in
-// lib/ballparkGeometry.js; this file just paints it. Pure and spoiler-free.
+// lib/ballpark/ballparkGeometry.js; this file just paints it. Pure and spoiler-free.
 
 const f = (n) => Math.round(n * 100) / 100
 

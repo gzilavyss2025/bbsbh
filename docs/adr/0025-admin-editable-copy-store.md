@@ -107,3 +107,42 @@ outage returns an error to the admin panel and changes nothing; a read outage
 falls back to cache-then-defaults in the provider's try/catch. The `/admin`
 route is parsed and rendered but linked from nowhere, matching the existing
 unlinked QA/dev pages (`scorecard-lab`, `team-color-lab`).
+
+## Amendment (2026-08-07) — the registry also governs ballpark notes
+
+The consent-copy-only guard above said "chrome/consent copy only". That was the
+right rule for the wrong reason: it named a CATEGORY of copy when the property
+that actually keeps a registry string safe is structural. The rule is now stated
+as what it always enforced:
+
+> No field may be rendered inside a sealed/reveal-gated surface, and no field's
+> value may be derived from game data.
+
+Consent copy satisfies that. So does a paragraph about a ballpark, which is why
+the registry now carries one free-text note per park (`ballpark.{venueKey}`,
+rendered by the team hub's `BallparkCard`). A ballpark is a building; the team
+hub's Overview is one of the surfaces CLAUDE.md keeps deliberately outside the
+scoring flow (ADR-0034); and a sentence about the Green Monster cannot leak
+tonight's result. The old wording would have blocked this on a technicality
+while permitting a genuinely unsafe field that happened to be called "chrome".
+
+Three things follow from the change:
+
+- **The note fields are DERIVED from `BALLPARKS`, not hand-listed.** Field ids
+  are Redis field names, so a hand-kept second list of parks would, on the first
+  venue rename, silently detach a paragraph from the park it describes — no
+  error, just a blank card. `test/copy-registry.test.js` pins the derivation to
+  its source, including that the three alias keys collapse to one note per park.
+- **Their defaults are empty, and that is legal now.** The "every field has a
+  non-empty default" test was split: it still holds for every field the app
+  renders unconditionally (a consent modal with a blank accept button is
+  broken), while the notes ship empty and `BallparkCard` renders no paragraph
+  until someone writes one. `sanitizeOverrides` already treats `''` as "no
+  override", so clearing a box equals never having filled it.
+- **`GROUPS` entries now carry an optional `preview` flag.** The panel offered
+  every group a "View real modal" rehearsal, which only makes sense for a group
+  whose fields compose one modal. The 30 notes are independent paragraphs, so
+  the flag marks which groups are stageable instead of assuming all are.
+
+The registry keeps its closed-set guarantee unchanged: an unknown id still
+cannot be stored, and every value is still length-bounded server-side.

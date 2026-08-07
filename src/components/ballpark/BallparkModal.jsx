@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { BallparkDiagram } from './BallparkDiagram.jsx'
-import { rankedDimensions, ordinal } from '../../lib/ballparkData.js'
+import { Facts, RankGroup } from './BallparkFacts.jsx'
+import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 
 // The Ballpark sheet: a to-scale ink sketch of the field (BallparkDiagram) over a
 // facts strip (built / roof / capacity) and the park's outfield distances + wall
 // heights, each ranked against the 30 MLB parks ("Center field 420′ — 1st of 29").
 // Opened by tapping the venue name on the lineup page's game facts.
 //
-// Spoiler-safe: everything here is static park geometry (src/lib/ballparkData.js),
+// Spoiler-safe: everything here is static park geometry (src/lib/ballpark/ballparkData.js),
 // no score, so it sits outside any seal like the rest of the lineup page. Same
 // dialog contract as WhatsBrewingModal — dismiss via backdrop, close button, or
 // Escape; focus moves into the sheet on open and back to the trigger on close.
@@ -65,40 +66,5 @@ export function BallparkModal({ venue, onClose }) {
         </p>
       </div>
     </div>
-  )
-}
-
-function Facts({ label, value }) {
-  return (
-    <div className="bpfact">
-      <dt className="bpfact__label">{label}</dt>
-      <dd className="bpfact__value">{value || '—'}</dd>
-    </div>
-  )
-}
-
-// One ranked family (distances or wall heights). Each row pairs the value with
-// its league rank; the extremes (1st / last) are called out so a bandbox or a
-// cavern jumps off the list.
-function RankGroup({ title, rows }) {
-  return (
-    <section className="rankgrp">
-      <h3 className="rankgrp__title">{title}</h3>
-      <ul className="rankgrp__list">
-        {rows.map((r) => {
-          const extreme = r.rank === 1 ? 'is-most' : r.rank === r.total ? 'is-least' : ''
-          return (
-            <li key={`${r.group}-${r.key}`} className="rankrow">
-              <span className="rankrow__label">{r.label}</span>
-              <span className="rankrow__value">{r.value}′</span>
-              <span className={`rankrow__rank ${extreme}`}>
-                {ordinal(r.rank)}
-                <span className="rankrow__of"> of {r.total}</span>
-              </span>
-            </li>
-          )
-        })}
-      </ul>
-    </section>
   )
 }
