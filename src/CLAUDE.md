@@ -273,7 +273,8 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection
-  (`screens/LogbookPage.jsx`, `/logbook` + `/logbook/{season}`) and its store
+  (`screens/LogbookCollection.jsx`, `/logbook` + `/logbook/{season}` — a user
+  may hold more than one book, ADR-0041) and its store
   (`hooks/useStamps.js` over the pure `lib/stamps.js`) are **local-first**: a
   signed-out user has a real Logbook on that device, holding no scores at all —
   the facts are resolved at render time by `api/logbook.js`. `StampsCloudSync`
@@ -314,10 +315,16 @@ you place by tapping the page. Three rules, each with a reason:
   invert and one already was: a y-fraction converts to width-units by
   **dividing** by `PAGE_ASPECT`, while a stamp's width-fraction converts to a
   height-fraction by **multiplying**.
-- **A placement is `{ page, x, y, tilt }` with x/y as FRACTIONS**, stored on the
-  stamp record and synced (`src/lib/stamps.js`). Pixels would be a fact about
-  one screen; the same book has to render on a phone page and a desktop spread,
-  and on both of one user's devices.
+- **A placement is `{ bookId, page, x, y, tilt }` with x/y as FRACTIONS**,
+  stored on the stamp record and synced (`src/lib/stamps.js`). Pixels would be
+  a fact about one screen; the same book has to render on a phone page and a
+  desktop spread, and on both of one user's devices. A book is separate
+  metadata (`src/lib/books.js` + `hooks/useBooks.js`) never holding the
+  collection itself — every device always has at least one (`DEFAULT_BOOK_ID`),
+  so `/logbook` opens it directly for as long as it's the only one; two or more
+  surface `LogbookShelf.jsx` instead. `passportLayout.js` needed no bookId
+  awareness at all — every function there already took a `stamps` array, and
+  the caller pre-filters it to one book first. ADR-0041.
 - **Minting and placing are separate.** The mint stays in the box score's
   `SealBox` (ADR-0035); placing happens here via `?place={gamePk}`. An unplaced
   stamp waits in the book's tray, so abandoning the flow never loses a keepsake.
@@ -349,7 +356,10 @@ you place by tapping the page. Three rules, each with a reason:
 `PassportPage.jsx` is the ONE name added to `scripts/check-stamp-surfaces.mjs`'s
 allowlist since that guard was written — justified because a page's entire input
 is the user's own collection. `/logbook/stats` renders no stamp art and stays
-off it. Read ADR-0036 before adding a third name.
+off it. Read ADR-0036 before adding a third name; the multi-book split
+(ADR-0041) renamed the `LogbookPage.jsx` entry there to `LogbookCollection.jsx`
+rather than adding one — `LogbookShelf.jsx` and `BookManagementSheet.jsx`
+render no stamp art and are not on it.
 
 ## Notification cards, casing, color, and button copy (ADR-0017)
 

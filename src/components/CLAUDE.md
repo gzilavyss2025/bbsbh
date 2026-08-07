@@ -35,7 +35,7 @@ about what it is. Do not tidy it into a folder.
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `PinchRunNotice`, `CalloutNote`, `DueUpNextCard`, `UpNextBatters`, `HighlightSheet` | The at-bat feed's notification-card family (ADR-0017) |
 | `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
-| `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync`, `BooksCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036) |
+| `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync`, `BooksCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041) |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |
 | `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal`, `StarterMatchups` | Team-level statistical cards |
 | `transactions/` | `TeamTransactionsCard`, `TradeCard`, `TransactionTimeline` | Roster-move surfaces |
@@ -44,7 +44,7 @@ about what it is. Do not tidy it into a folder.
 Three untouched subdirectories predate this bucketing and follow their own
 internal convention rather than the domain-bucket one above: `page-turn/` (the
 forward inning-transition animation), `passport/` (the Logbook's passport-book
-UI, ADR-0036), `playercard/` (the player page's similar-players cards).
+UI, ADR-0036/0041), `playercard/` (the player page's similar-players cards).
 
 ## Two constraints that outrank tidiness
 

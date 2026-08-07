@@ -50,7 +50,7 @@ const BUDGETS = {
   // The natural split is docs/, the same move src/api/CLAUDE.md just made.
   'scripts/CLAUDE.md': 667,
   // Screens, routing, the design system, and the UI half of the spoiler rule.
-  'src/CLAUDE.md': 441,
+  'src/CLAUDE.md': 451,
   // The club-identity data model and the dev-only lab that writes it.
   'src/lib/CLAUDE.md': 385,
 }
