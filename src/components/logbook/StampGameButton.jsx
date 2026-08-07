@@ -42,7 +42,7 @@ import { GameStamp } from './GameStamp.jsx'
 // the width of the sheet, about one stamp tall — so the stamp is an offer you
 // decline by scrolling past rather than a reward you have to find. Where it
 // lands is set by BoxScore.jsx plus the ordering rules in
-// styles/21-box-score.css: above the Highlights rule on a wide screen, and
+// styles/48-stamp-strip.css: above the Highlights rule on a wide screen, and
 // directly under the R/H/E/LOB totals on a phone.
 //
 // Staying thin is the constraint, not a preference. The strip is ONE row —
@@ -67,7 +67,11 @@ export function StampGameButton({ game }) {
   // refuses a non-Final mint outright (409), so the affordance says why rather
   // than offering a button that can only fail.
   const isFinal = game.status === 'Final'
-  const full = !existing && season != null && seasonIsFull(season)
+  // `isFinal` is part of this and not just a sibling test: a full book is only
+  // worth saying once it is the ONLY thing standing between you and a stamp.
+  // While the game is still going the lede has a truer reason to give, and the
+  // one below reads the two in that order.
+  const full = isFinal && !existing && season != null && seasonIsFull(season)
   // Two states have nothing to offer — the game isn't final yet, and the
   // season's book is full. The row drops its action column rather than
   // reserving an empty one.
