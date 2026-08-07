@@ -129,7 +129,10 @@ const BUDGETS = {
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
-  'src/api': 84,
+  // +1 for seasonScoreFormula.js — pure home-field-factor formula pulled out
+  // of gen-season-score.mjs so it can be bundled client-side, same reason
+  // teamScoreFormula.js already sits here.
+  'src/api': 85,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

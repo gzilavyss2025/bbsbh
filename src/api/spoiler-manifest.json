@@ -487,6 +487,10 @@
       "class": "cutoff-gated",
       "why": "Selects the latest snapshot at or before the Team Page's standings cutoff. The generator stores snapshots by completed date rather than one mutable current row precisely so this selection is possible."
     },
+    "seasonScoreFormula.js": {
+      "class": "spoiler-free",
+      "why": "Pure home-field-factor formula (the league constant and the trailing-prior-seasons blend) over standings splits, no game score involved."
+    },
     "seasonSeries.js": {
       "class": "cutoff-gated",
       "why": "Per-cell season-series view model. The game matching `currentGamePk` NEVER carries a score even when the feed reports it Final — that game's result stays sealed on its own page. Every OTHER game is a genuinely different game."
