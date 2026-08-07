@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { prospectBadge } from '../../api/prospects.js'
 import { showRookiePill } from '../../api/rookies.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
@@ -12,7 +12,11 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 // longer eligible — but ONLY once his entry sits at or below the reveal mark;
 // a substitution the user hasn't revealed their way to yet renders like any
 // other available player, so the card never hints at a sealed inning.
-export function RosterPanel({ title, roster, revealedThrough, prospectsData, rookiesData, isMlb }) {
+// Memoized: this panel's props (the split roster card, the reveal mark, the
+// badge data) change only when the feed or the reveal mark does, but it hangs
+// off InningViewer, which re-renders on every scorebug/step/live report during
+// a live game. Two of these render at once, each a full player list.
+export const RosterPanel = memo(function RosterPanel({ title, roster, revealedThrough, prospectsData, rookiesData, isMlb }) {
   const [open, setOpen] = useState(false)
   const empty =
     roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
@@ -100,7 +104,7 @@ export function RosterPanel({ title, roster, revealedThrough, prospectsData, roo
       )}
     </section>
   )
-}
+})
 
 // 'Left' / 'Right' handedness -> pitcher shorthand.
 function handAbbr(hand) {

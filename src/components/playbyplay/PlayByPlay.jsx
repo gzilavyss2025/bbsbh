@@ -124,12 +124,21 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // at all his was silently dropped from this sum, so every extra half he
   // scored in built a linescore cell one short (verified against gamePk
   // 777747's bottom 10: a walk-off grand slam totalled 3).
+  //
+  // The dependency is the COUNT, not `entries`. `entries` is a fresh array every
+  // render (computeHalfInningFeed runs at render top-level — reveal-only,
+  // ADR-0001, so it cannot be hoisted into a memo above the seal), so an
+  // `[entries]` dependency re-ran this effect on every render, the report
+  // re-rendered InningViewer, which re-rendered this component, which re-ran the
+  // effect… one "Next at-bat" tap cost 264 renders of the whole innings tree
+  // (measured). A number compares by value.
+  const runsSoFar = entries.filter(
+    (e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored,
+  ).length
   useEffect(() => {
     if (!stepping) return
-    onRunsSoFar?.(
-      entries.filter((e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored).length,
-    )
-  }, [stepping, entries]) // eslint-disable-line react-hooks/exhaustive-deps
+    onRunsSoFar?.(runsSoFar)
+  }, [stepping, runsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The scorebug HUD's live snapshot (bases/outs/pitches/current batter),
   // reported for the SCOREBUG'S benefit only — deliberately NOT gated on
@@ -139,9 +148,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // (stepCap null, effectiveCap null) or the HUD would go blank the instant
   // the last at-bat reveals. `deriveLiveState` itself is what keeps this
   // spoiler-safe either way — it never reads past `effectiveCap`.
+  // Same `entries`-identity trap as onRunsSoFar above: the dependency is the set
+  // of INPUTS `entries` is derived from — a poll minting a fresh feed still
+  // re-reports, a bare re-render no longer does.
   useEffect(() => {
     onLiveState?.(deriveLiveState(entries, effectiveCap ?? entries.length))
-  }, [entries, effectiveCap]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [feed, inning, half, battingSide, effectiveCap]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // (This file used to report the currently-revealed pitcher back up to
   // HalfInning, which overrode its persistent "Now Pitching" header. That put

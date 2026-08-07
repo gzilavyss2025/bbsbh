@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { halfIndex } from '../../api/select.js'
 import { StatBox, AbsCard } from '../../components/gamehud/StatBox.jsx'
 import { DueUpNextCard } from '../../components/playbyplay/DueUpNextCard.jsx'
@@ -25,7 +26,21 @@ function noop() {}
 // (onReveal, onStepInfo), so a preview mount/unmount can never itself advance
 // the reveal mark or double-report a step. It is not a second reveal
 // boundary; see ADR-0024.
-export function InningPage({
+// Memoized — the one boundary on this page that matters most. Everything under
+// it (HalfInning, its SealBox, PlayByPlay's per-render passes over the whole
+// play-by-play) is the most expensive subtree in the app, and InningViewer above
+// it re-renders on every scorebug snapshot, step report and live-edge check.
+// Every prop here is either a value, a memoized derivation, or one of
+// InningViewer's three stable report-back handlers, so the comparison only
+// misses when something real changed. Those handlers take this page's own
+// half-index as their first argument — that is what lets them stay stable up
+// there while still telling one half's report from another's.
+//
+// This changes nothing about what is computed or when: memo can only SKIP a
+// render whose props are identical to the last one. A sealed half stays sealed,
+// `revealedThrough` is a compared prop, and SealBox's render-function gate
+// (ADR-0002) and the key-driven remount are untouched.
+export const InningPage = memo(function InningPage({
   feed,
   inning,
   half,
@@ -64,6 +79,11 @@ export function InningPage({
           wrapper element itself has to exist for that rule to have anything
           to select. */}
       <div className="inning">
+        {/* The three report-backs are tagged with this page's own half-index on
+            the way up, so InningViewer's handlers can stay stable across
+            renders. Rebuilding these wrappers each render costs nothing:
+            HalfInning is not a memo boundary, and neither it nor PlayByPlay
+            lists them in an effect's dependencies. */}
         <HalfInning
           feed={feed}
           inning={inning}
@@ -89,9 +109,9 @@ export function InningPage({
           vsTeam={vsTeam}
           highlights={highlights}
           revealedAtBatCount={atBatCountFor(inning, half)}
-          onStepInfo={presentationOnly ? undefined : onStepInfo}
-          onRunsSoFar={presentationOnly ? undefined : onRunsSoFar}
-          onLiveState={presentationOnly ? undefined : onLiveState}
+          onStepInfo={presentationOnly ? undefined : (info) => onStepInfo?.(idx, info)}
+          onRunsSoFar={presentationOnly ? undefined : (runs) => onRunsSoFar?.(idx, runs)}
+          onLiveState={presentationOnly ? undefined : (data) => onLiveState?.(idx, data)}
         />
       </div>
 
@@ -162,4 +182,4 @@ export function InningPage({
       </div>
     </>
   )
-}
+})

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   selectInningCount,
   selectRegulationInnings,
@@ -78,6 +78,28 @@ function sameLiveState(a, b) {
     a.batter?.line === b.batter?.line &&
     a.pitcher?.last === b.pitcher?.last &&
     a.pitcher?.pitches === b.pitcher?.pitches
+  )
+}
+
+// Value-equality checks for the other two things PlayByPlay reports back up
+// (`runsInProgress`, `stepInfo`), for exactly the reason `sameLiveState` above
+// exists: each report arrives as a freshly-built object every time, so a plain
+// setState replaced state — and re-rendered this whole tree — even when the
+// content was identical. See `reportStepInfo`/`reportRunsSoFar` in the component.
+function sameRunsInProgress(a, b) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return a.idx === b.idx && a.runs === b.runs
+}
+
+function sameStepInfo(a, b) {
+  if (a === b) return true
+  if (!a || !b) return false
+  return (
+    a.forIdx === b.forIdx &&
+    a.nextCap === b.nextCap &&
+    a.isLastStep === b.isLastStep &&
+    a.lastAtBatIndex === b.lastAtBatIndex
   )
 }
 
@@ -381,13 +403,9 @@ export function InningViewer({
         vsTeam={vsTeam}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
-        onStepInfo={(info) => setStepInfo({ ...info, forIdx: idx })}
-        onRunsSoFar={(runs) => setRunsInProgress({ idx, runs })}
-        onLiveState={(data) =>
-          setLiveState((prev) =>
-            prev && prev.forIdx === idx && sameLiveState(prev.data, data) ? prev : { forIdx: idx, data: data ?? null },
-          )
-        }
+        onStepInfo={reportStepInfo}
+        onRunsSoFar={reportRunsSoFar}
+        onLiveState={reportLiveState}
         getDerived={getDerived}
         runExpectancy={runExpectancy}
         winProbPoints={winProbPoints}
@@ -450,6 +468,36 @@ export function InningViewer({
   // user has since navigated away from self-invalidate on read, with no
   // separate reset step to race.
   const [stepInfo, setStepInfo] = useState(null)
+
+  // The three things a half-inning page reports back up. Each takes the
+  // reporting half's own index as its first argument, so all three can be
+  // stable for the life of the component: `InningPage` is memoized, and a memo
+  // boundary is only worth anything if the props crossing it keep their
+  // identity — an arrow rebuilt per render would miss on every render.
+  //
+  // Each is value-guarded. PlayByPlay rebuilds its report object on every render
+  // (its `entries` are a reveal-only derivation, so they cannot be memoized
+  // above the seal — ADR-0001), and replacing state on an unchanged report is
+  // what turned one report into another render into another report: one
+  // "Next at-bat" tap cost 264 renders of this whole tree before React's
+  // nested-update ceiling stopped it.
+  const reportStepInfo = useCallback((idx, info) => {
+    setStepInfo((prev) => {
+      const next = { ...info, forIdx: idx }
+      return sameStepInfo(prev, next) ? prev : next
+    })
+  }, [])
+  const reportRunsSoFar = useCallback((idx, runs) => {
+    setRunsInProgress((prev) => (sameRunsInProgress(prev, { idx, runs }) ? prev : { idx, runs }))
+  }, [])
+  const reportLiveState = useCallback((idx, data) => {
+    setLiveState((prev) =>
+      prev && prev.forIdx === idx && sameLiveState(prev.data, data)
+        ? prev
+        : { forIdx: idx, data: data ?? null },
+    )
+  }, [])
+
   const curStepInfo = stepInfo?.forIdx === curIdx ? stepInfo : null
   // The literal `1` for a fresh half's first tap is a starting guess, not a
   // guarantee: this component has no legitimate way to know whether the
@@ -477,7 +525,14 @@ export function InningViewer({
   // who drops the token gets the gap tidied like every other field. The value is
   // the structural label of the half ALREADY on screen, never a score (see
   // registry.js's TOKENS spoiler guard).
-  const liveEdgeIdx = passActive ? selectLiveEdge(feed, passActive) : null
+  // Memoized like every other derivation on this page: it walks the whole
+  // play-by-play backwards, and Follow Live is exactly the state in which this
+  // component re-renders most often. The consent argument stays a dependency,
+  // so the selector is still called only under a running pass.
+  const liveEdgeIdx = useMemo(
+    () => (passActive ? selectLiveEdge(feed, passActive) : null),
+    [feed, passActive],
+  )
   const atLiveEdge = liveEdgeIdx != null && curIdx >= liveEdgeIdx && !selectIsFinal(feed)
   const liveEdgeLabel = atLiveEdge
     ? copy('scoresUnlocked.liveEdgeLabel', {
@@ -500,6 +555,16 @@ export function InningViewer({
   const pitcherLines = useMemo(
     () => computePitcherLines(feed, renderRevealedThrough),
     [feed, renderRevealedThrough],
+  )
+
+  // PitchersSection's own prop, memoized rather than built inline: the section
+  // is memoized, and an array literal rebuilt each render would defeat that.
+  const pitcherTeams = useMemo(
+    () => [
+      { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
+      { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
+    ],
+    [rosters, pitcherLines],
   )
 
   // The workload file describes "now" — its availability rules only apply to
@@ -721,12 +786,7 @@ export function InningViewer({
         <div className="innings__ref">
           <div className="innings__ref-left">
             <MarginNotes notes={marginNotes} feed={feed} bundle={callouts} />
-            <PitchersSection
-              teams={[
-                { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
-                { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
-              ]}
-            />
+            <PitchersSection teams={pitcherTeams} />
             {safeToShowEntering(renderRevealedThrough, effInning, effHalf) && (
               <div className="innings__ref-defense">
                 <DefenseSection

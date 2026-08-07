@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Headshot } from '../player/Headshot.jsx'
 
 // Show only the first handful up front and let a button reveal the rest —
@@ -39,7 +39,9 @@ function groupNotesBySubject(shown) {
 // the same per-card attribution the old Pitchers-table row implied for free.
 // `notes` is already sorted (and deduped) by the caller; renders nothing when
 // empty (no bundle, or nothing yet qualifies).
-export function MarginNotes({ notes, feed, bundle }) {
+// Memoized: `notes` is already a memoized digest in InningViewer, so this whole
+// card can sit out any re-render the feed and the reveal mark didn't cause.
+export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle }) {
   const [showAll, setShowAll] = useState(false)
   if (!notes || notes.length === 0) return null
   const shown = showAll ? notes : notes.slice(0, MARGIN_NOTES_SHOWN)
@@ -80,4 +82,4 @@ export function MarginNotes({ notes, feed, bundle }) {
       )}
     </section>
   )
-}
+})
