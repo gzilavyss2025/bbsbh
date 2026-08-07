@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { loadUmpire } from '../api/umpires.js'
-import { UmpireZoneMap } from '../components/umpire/UmpireZoneMap.jsx'
 import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
-import { UmpireTierPill } from '../components/badges/UmpireTierPill.jsx'
 import { gamePath } from '../lib/route.js'
 import { ALL_MLB_TEAM_IDS, teamClubName } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -92,61 +90,6 @@ function hpTeamRecords(games) {
   return [...byTeam.values()].sort((a, b) => b.wins + b.losses - (a.wins + a.losses))
 }
 
-// The plate-accuracy summary: season called-pitch accuracy, its league rank,
-// and the miss-tendency zone map, from the append-only umpire-accuracy.json
-// (merged into the umpire record by loadUmpire). Absent — like the other
-// cards here — when the umpire has no accuracy data (MiLB, or no scored games
-// yet), so it never shows an empty shell. Called-pitch counts carry no score;
-// see the plan's spoiler audit.
-function PlateAccuracyCard({ accuracy, rank, zoneCells, title = 'Plate accuracy', subtitle = null }) {
-  const s = accuracy?.season
-  if (!s || !s.called) return null
-  const pct = (s.accuracy * 100).toFixed(1)
-  return (
-    <section className="umpage__card umpage__acccard">
-      <h2 className="umpage__cardtitle">{title}</h2>
-      {subtitle && <p className="umpage__cardsub">{subtitle}</p>}
-      <div className="umpage__accrow">
-        <div className="umpage__acctile">
-          <span className="umpage__accpct">{pct}%</span>
-          <span className="umpage__acctilelabel">Accuracy</span>
-        </div>
-        {rank && (
-          <div className="umpage__acctile">
-            <span className="umpage__accpct">#{rank.rank}</span>
-            <span className="umpage__acctilelabel">of {rank.total} plate umpires</span>
-          </div>
-        )}
-        {s.consistency != null && (
-          <div className="umpage__acctile">
-            <span className="umpage__accpct">{(s.consistency * 100).toFixed(1)}%</span>
-            <span className="umpage__acctilelabel">Consistent</span>
-          </div>
-        )}
-        {s.favorPerGame != null && (
-          <div className="umpage__acctile">
-            <span className="umpage__accpct">{s.favorPerGame.toFixed(1)}</span>
-            <span className="umpage__acctilelabel">Runs/game impact</span>
-          </div>
-        )}
-      </div>
-      <p className="umpage__acclabel">
-        {s.correct.toLocaleString()} of {s.called.toLocaleString()} called pitches
-        {s.games > 0 && ` · ${s.games} ${s.games === 1 ? 'game' : 'games'} behind the plate`}
-      </p>
-      {zoneCells && (
-        <div className="umpage__acczone">
-          <UmpireZoneMap cells={zoneCells} />
-          <p className="umpage__acczonecap">
-            The red boxes show the parts of the strike zone where he misses the most calls,
-            compared to a typical umpire.
-          </p>
-        </div>
-      )}
-    </section>
-  )
-}
-
 // An umpire's page: every MLB game he's worked this season, most recent
 // first, with a toggle to show only the games he had behind the plate. Game
 // dates and who-worked-what carry no score, so — unlike the player/team pages
@@ -169,8 +112,6 @@ export function UmpirePage({ id }) {
   // disjoint gamePks, so a plain union keys every scored HP row.
   const accByGamePk = { ...(data.accuracyAAA?.byGamePk ?? {}), ...(data.accuracy?.byGamePk ?? {}) }
   const hpCount = games.filter((g) => g.role === 'HP').length
-  const aaaCount = games.filter((g) => g.level === 'AAA').length
-  const mlbCount = games.length - aaaCount
   const shown = hpOnly ? games.filter((g) => g.role === 'HP') : games
   // The teams grid is the 30-club MLB league, so it counts MLB games only; AAA
   // games still show in the venue list and the game log below.
@@ -185,120 +126,85 @@ export function UmpirePage({ id }) {
       <SiteHeader />
       <BackBtn onClick={back} />
 
-      <header className="umpage__head">
-        <div className="umpage__namerow">
-          <h1 className="umpage__name">{data.name}</h1>
-          {data.rank?.tier && <UmpireTierPill tier={data.rank.tier} />}
+
+      <div className="umpage__toprow">
+        <div className="umpage__tendcol">
+          <UmpireTendencies umpire={data} />
         </div>
-        <p className="umpage__sub">
-          {data.season ? `${data.season} season` : 'This season'} ·{' '}
-          {aaaCount > 0
-            ? `${mlbCount} MLB · ${aaaCount} AAA`
-            : `${games.length} ${games.length === 1 ? 'game' : 'games'}`}
-          {hpCount > 0 && ` · ${hpCount} behind the plate`}
-        </p>
-      </header>
+        <div className="umpage__sidecol">
+          {teams.length > 0 && (
+            <section className="umpage__card">
+              <h2 className="umpage__cardtitle">Most worked teams</h2>
+              <ul className="umpage__teamgrid">
+                {teams.map((t) => (
+                  <li
+                    key={t.id}
+                    className={`umpage__teamitem ${t.count === 0 ? 'umpage__teamitem--unworked' : ''}`}
+                  >
+                    <TeamLink id={t.id} className="umpage__teamlink">
+                      <TeamLogo teamId={t.id} name={t.abbr} size={34} bw={t.count === 0} />
+                      {t.count > 0 && <span className="umpage__teamcount">{t.count}</span>}
+                    </TeamLink>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
-      <div className="umpage__cards">
-        {/* The headline read, above the card that carries its detail. Renders
-            nothing for an umpire with no plate-accuracy record. */}
-        <UmpireTendencies umpire={data} />
-        <PlateAccuracyCard
-          accuracy={data.accuracy}
-          rank={data.rank}
-          zoneCells={data.zoneCells}
-          title={data.accuracyAAA ? 'MLB plate accuracy' : 'Plate accuracy'}
-        />
-        {data.accuracyAAA && (
-          <PlateAccuracyCard
-            accuracy={data.accuracyAAA}
-            rank={data.rankAAA}
-            zoneCells={data.zoneCellsAAA}
-            title="AAA plate accuracy"
-          />
-        )}
-        {data.accuracyPost && (
-          <PlateAccuracyCard
-            accuracy={data.accuracyPost}
-            rank={null}
-            zoneCells={data.zoneCellsPost}
-            title="Postseason plate accuracy"
-            subtitle="Playoff games — not counted in the season ranking."
-          />
-        )}
-
-        {teams.length > 0 && (
-          <section className="umpage__card">
-            <h2 className="umpage__cardtitle">Most worked teams</h2>
-            <ul className="umpage__teamgrid">
-              {teams.map((t) => (
-                <li
-                  key={t.id}
-                  className={`umpage__teamitem ${t.count === 0 ? 'umpage__teamitem--unworked' : ''}`}
+          {venues.length > 0 && (
+            <section className="umpage__card">
+              <h2 className="umpage__cardtitle">Most worked ballparks</h2>
+              <ul className="umpage__venuelist">
+                {shownVenues.map((v, i) => (
+                  <li key={v.id} className="umpage__venuerow">
+                    <span className="umpage__venuerank">{i + 1}</span>
+                    <span className="umpage__venuename">
+                      {v.name || 'Unknown'}
+                      {v.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
+                    </span>
+                    <span className="umpage__venuecount">{v.count}</span>
+                  </li>
+                ))}
+              </ul>
+              {!showAllVenues && venues.length > TOP_VENUES_LIMIT && (
+                <button
+                  type="button"
+                  className="plink umpage__showall"
+                  onClick={() => setShowAllVenues(true)}
                 >
-                  <TeamLink id={t.id} className="umpage__teamlink">
-                    <TeamLogo teamId={t.id} name={t.abbr} size={34} bw={t.count === 0} />
-                    {t.count > 0 && <span className="umpage__teamcount">{t.count}</span>}
-                  </TeamLink>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+                  Show all {venues.length}
+                </button>
+              )}
+            </section>
+          )}
 
-        {venues.length > 0 && (
-          <section className="umpage__card">
-            <h2 className="umpage__cardtitle">Most worked ballparks</h2>
-            <ul className="umpage__venuelist">
-              {shownVenues.map((v, i) => (
-                <li key={v.id} className="umpage__venuerow">
-                  <span className="umpage__venuerank">{i + 1}</span>
-                  <span className="umpage__venuename">
-                    {v.name || 'Unknown'}
-                    {v.level === 'AAA' && <span className="umpage__levelchip">AAA</span>}
-                  </span>
-                  <span className="umpage__venuecount">{v.count}</span>
-                </li>
-              ))}
-            </ul>
-            {!showAllVenues && venues.length > TOP_VENUES_LIMIT && (
-              <button
-                type="button"
-                className="plink umpage__showall"
-                onClick={() => setShowAllVenues(true)}
-              >
-                Show all {venues.length}
-              </button>
-            )}
-          </section>
-        )}
-
-        {hpRecords.length > 0 && (
-          <section className="umpage__card">
-            <h2 className="umpage__cardtitle">Team records, this ump behind the plate</h2>
-            <ul className="umpage__venuelist">
-              {shownRecords.map((r, i) => (
-                <li key={r.id} className="umpage__venuerow">
-                  <span className="umpage__venuerank">{i + 1}</span>
-                  <TeamLogo teamId={r.id} name={r.abbr} size={18} className="umpage__reclogo" />
-                  <span className="umpage__venuename">{r.abbr}</span>
-                  <span className="umpage__venuecount">
-                    {r.wins}-{r.losses}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {!showAllRecords && hpRecords.length > HP_RECORDS_LIMIT && (
-              <button
-                type="button"
-                className="plink umpage__showall"
-                onClick={() => setShowAllRecords(true)}
-              >
-                Show all {hpRecords.length}
-              </button>
-            )}
-          </section>
-        )}
+          {hpRecords.length > 0 && (
+            <section className="umpage__card">
+              <h2 className="umpage__cardtitle">Team records, this ump behind the plate</h2>
+              <ul className="umpage__venuelist">
+                {shownRecords.map((r, i) => (
+                  <li key={r.id} className="umpage__venuerow">
+                    <span className="umpage__venuerank">{i + 1}</span>
+                    <TeamLogo teamId={r.id} name={r.abbr} size={18} className="umpage__reclogo" />
+                    <span className="umpage__venuename">{r.abbr}</span>
+                    <span className="umpage__venuecount">
+                      {r.wins}-{r.losses}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {!showAllRecords && hpRecords.length > HP_RECORDS_LIMIT && (
+                <button
+                  type="button"
+                  className="plink umpage__showall"
+                  onClick={() => setShowAllRecords(true)}
+                >
+                  Show all {hpRecords.length}
+                </button>
+              )}
+            </section>
+          )}
+        </div>
       </div>
 
       <div className="umpage__filter" role="group" aria-label="Filter games by base">
