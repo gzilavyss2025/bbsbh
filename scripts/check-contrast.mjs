@@ -115,6 +115,14 @@ const PAIRINGS = [
   // the card pill (.flipback__pill--crown) and on the filter chip that selects
   // it (FILTER_CHIPS, src/lib/resultCards.js) — same pairing, asserted once.
   { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
+  // Stamp In's row action, in both states (ADR-0042): a soft neutral until you
+  // press it, field green once you hold that stamp. The green pair is the same
+  // one the win stamp already asserts above; the neutral pair is asserted here
+  // rather than assumed, because --surface-inset is the lightest paper in the
+  // system and a later nudge to either token is exactly the kind of change
+  // nothing else would catch.
+  { fg: 'text-body', bg: 'surface-inset', min: TEXT, note: 'Stamp In row action, unpressed' },
+  { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'Stamp In row action, stamped' },
   // The slate's Scores Unlocked live band: run totals (heading ink) and the
   // centered state token (muted ink) over the field-green wash.
   { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },

@@ -145,7 +145,15 @@ const BUDGETS = {
   // 26/26a and 17/17a above). Split out because 28-team-hub.css was at its
   // check-file-size budget and still covers four unrelated surfaces below the
   // hero; nothing left there names a hero selector, so the two never compete.
-  'src/styles': 64,
+  //
+  // 64 -> 65 for `59-stamp-in.css`: the Stamp In page (ADR-0042), a genuinely
+  // new route rather than a split-out of an over-budget file, so it earns the
+  // next free integer rather than a lettered sibling. Loaded directly by
+  // `screens/team/StampInPage.jsx`, same "the component that uses it carries
+  // it" convention as `49-passport-book.css` and `58-logbook-shelf.css`. Its
+  // position IS load-bearing: it de-chromes the `.flipback` card that
+  // `22-box-score-tables.css` owns, so it has to cascade after it.
+  'src/styles': 65,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -183,7 +191,12 @@ const BUDGETS = {
   // and LogbookCollection.jsx once that split landed (see the src/screens
   // entry below), pulled out rather than defined twice. A leaf module, not a
   // new subsystem.
-  'src/lib': 51,
+  // +1 for stampIn.js — the Stamp In page's pure rules (ADR-0042): its
+  // one-time consent record, the played-games filter, and the row action's
+  // three states. The same React-free-core-beside-its-screen shape as
+  // scoresUnlocked.js and spoiledDays.js, both of which are the consent
+  // modules this one is modelled on. A leaf module, not a new subsystem.
+  'src/lib': 52,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

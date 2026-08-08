@@ -14,6 +14,8 @@ Deeper reading, in order of specificity: `docs/adr/0035-logbook-stamps-are-gated
 (why a stamp may carry a score at all), `docs/adr/0036-the-logbook-is-a-passport-book-you-arrange-by-hand.md`
 (why the collection is a book you arrange), `docs/adr/0041-the-game-log-holds-more-than-one-book.md`
 (why a user may hold more than one, and what stayed the same when that shipped),
+`docs/adr/0042-stamp-in-is-a-consented-season-of-results.md` (why one page may
+show a club's whole played season, and the four things that keep it contained),
 `.scratch/game-stamps/PRD.md` (the original scoping, plus a running list of
 where the build deliberately departed from it), and `src/CLAUDE.md` for the
 component wiring.
@@ -370,6 +372,18 @@ collection, the moment the change ships.
 | `/logbook/book/{bookId}/{season}` | same | one season of that book |
 | `/logbook/book/{bookId}/stats` | `LogbookStatsPage.jsx` | that one book's retrospective — **must stay above the season branch above it, for the identical parsing reason** |
 
+There is one more surface that MINTS a stamp without being part of the Game
+Log's own routes — **Stamp In**, `/team/{id}/stamp-in` (ADR-0042). It lists a
+club's played season with every result showing, behind a one-time per-device
+consent, so a reader can press a stamp for each game they watched instead of
+opening every box score in turn. Three properties keep it honest and all three
+are enforced: it is **render-only** (it never writes `bbsbh:reveal:{gamePk}` or
+advances `revealedThrough`), it has **exactly one entry point** (the Schedule
+card's button on the Games tab — not a tab, not in `reportPages.js`, not linked
+from the Game Log), and it **may mint a stamp but never draw one**
+(`check-stamp-surfaces.mjs`'s `FORBIDDEN_ART_FILES`). Its copy lives in the
+`stampIn` group of `src/copy/registry.js`, not in the twelve files above.
+
 Entry points: the labelled pill in the slate header (`LogbookButton.jsx`), the
 More menu and both footers (via `reportPages.js`), and the mint strip across the
 head of a revealed box score.
@@ -387,7 +401,9 @@ unknown to us.
    inside a revealed box score, and renderable only where the guard allows. §4.1.
 2. **The box score's stamp `SealBox` gets no `onReveal` and persists nothing.**
 3. **`GameStamp.jsx` and `StampGameButton.jsx` stay inside their import
-   allowlists** — `scripts/check-stamp-surfaces.mjs` is not advisory.
+   allowlists** — `scripts/check-stamp-surfaces.mjs` is not advisory. A surface
+   that mints without drawing (Stamp In) joins `FORBIDDEN_ART_FILES` instead of
+   widening either allowlist.
 4. **The `/logbook` route never changes.** §2.
 5. **The record never stores a score**, only enough to resolve one at render time.
 6. **The OG card never names a game, club, record, or count.** §5.

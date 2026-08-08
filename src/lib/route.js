@@ -47,6 +47,9 @@
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
 //   '/team/{id}/{roster|games|numbers|minors}'
 //                                       -> { name: 'team-{tab}', id, asOf, sportId }
+//   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
+//                                          (a club's played season, every result showing, one
+//                                           stamp per game you watched — ADR-0042. NOT a tab.)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
@@ -278,6 +281,15 @@ export function parseRoute(url) {
   // (date='leaders'/'team').
   if (parts.length === 3 && parts[0] === 'leaders' && parts[1] === 'org')
     return { name: 'leaders', scope: 'org', orgId: Number(parts[2]), asOf, sportId }
+  // Stamp In (ADR-0042) — a club's played season with every result showing, so
+  // the reader can press a stamp for each game they watched. Deliberately NOT
+  // in TEAM_TAB_ROUTES above: it is a standalone page with exactly one entry
+  // point (the Schedule card's button on the Games tab), not a sixth tab, and
+  // TeamTabBar draws a button for every name in that table. Same 3-segment
+  // shape as the tabs, so it needs the same placement above the generic game
+  // branch below, which would otherwise read it as date='team'.
+  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'stamp-in')
+    return { name: 'team-stamp-in', id: parts[1], asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: parts[1], asOf, sportId }
   if (parts.length === 3) {
@@ -446,6 +458,15 @@ export function teamLeadersPath(id, opts = {}) {
 // answer "entering April 1" on one tab and "today" on the next.
 export function teamTabPath(id, tab, opts = {}) {
   return tab === 'overview' ? teamPath(id, opts) : `/team/${id}/${tab}${linkQuery(opts)}`
+}
+// Stamp In — the club's played season, one stamp per game you watched
+// (ADR-0042). Built in exactly one place, the Schedule card's button on the
+// Games tab, and carried through linkQuery like every other team link so a
+// dated visit stays dated across the hop. Do not build a second entry point:
+// the page's consent gate is the address's own, and every other surface in the
+// app is sealed by default.
+export function teamStampInPath(id, opts = {}) {
+  return `/team/${id}/stamp-in${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.

@@ -1,0 +1,156 @@
+/* ============================================================
+   Stamp In — /team/{id}/stamp-in (ADR-0042)
+
+   A club's played season, newest first, each game drawn as the slate's own
+   revealed result card (GameResultFace) with one thing changed in its top
+   row: a stamp action pinned to the right of the Box score button.
+
+   Imported by screens/team/StampInPage.jsx rather than by src/index.css, so
+   only this route pays for it — same convention as 43-foul-tracker.css and
+   49-passport-book.css. It has to cascade AFTER 22-box-score-tables.css,
+   which owns the .flipback card it de-chromes.
+   ============================================================ */
+
+.stampin__title {
+  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-weight: var(--w-black);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+.stampin__lede {
+  margin: 0 0 var(--space-4);
+  max-width: 46ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+.stampin__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* One game. A ruled entry rather than a free-floating card — the page reads as
+   a season's worth of lines in a ledger, which is also what stops 162 chromed
+   slate cards stacking into visual noise. */
+.stampin__row {
+  padding: var(--space-3) 0;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+
+.stampin__rowhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.stampin__opp {
+  color: var(--graphite-soft);
+}
+
+/* GameResultFace assumes the flip card's fixed-height chromed face
+   (width/height 100%, its own border and shadow). Embedded in the ledger it
+   takes its height from content and drops the chrome, so only the page's own
+   paper shows — the same de-chroming .psseries__facewrap does on the
+   Postseason Series page, and for the same reason. */
+.stampin__facewrap .flipback {
+  height: auto;
+  padding: var(--space-2) 0 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* The top row is the one part of the card this page redraws: Box score stays
+   left, the stamp action is pushed to the right-hand end. `auto` margin rather
+   than space-between, so the row still reads correctly if anything else is
+   ever put between them. */
+.stampin__facewrap .flipback__topRow .stampin__mark {
+  margin-left: auto;
+}
+
+/* Quieted to a compact secondary button, same treatment (and same reason) as
+   the Postseason Series ledger gives it: a full navy band per entry would
+   fight the stamp action beside it 162 times over. */
+.stampin__facewrap .flipback__boxbtn {
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-body);
+  font-size: var(--fs-small);
+}
+
+/* The stamp action, in two states.
+
+   OFF — a soft neutral: the page's own brightest inset paper, hairlined. It
+   offers rather than demands, which is the posture the whole Game Log takes
+   (docs/game-log.md §3: the games matter, the app is just holding them).
+
+   ON — the field green every "this happened, and it was good" mark in this app
+   already wears (--accent-positive), with the knockout ink the contrast guard
+   already asserts against it (text-on-ink / field). Deliberately NOT a
+   progress colour: it says you hold this one, never that you are N of 162. */
+.stampin__mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+}
+
+.stampin__mark--off {
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.stampin__mark--off:disabled {
+  color: var(--text-caption);
+  cursor: default;
+}
+
+.stampin__mark--off:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.stampin__mark--on {
+  border: var(--bw-hair) solid var(--accent-positive);
+  background: var(--accent-positive);
+  color: var(--text-on-ink);
+}
+
+.stampin__check {
+  font-size: var(--fs-small);
+  line-height: var(--lh-solid);
+}
+
+/* The season cap refuses rather than prunes (ADR-0035), so the row says so
+   instead of leaving a dead control to be poked at. */
+.stampin__refusal {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+
+.stampin__back {
+  margin: var(--space-5) 0 var(--space-4);
+  width: 100%;
+}
