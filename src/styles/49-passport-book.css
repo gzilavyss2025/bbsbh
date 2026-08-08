@@ -708,12 +708,17 @@
   aspect-ratio: auto;
 }
 
+/* A league mark REPLACES the club crest, so it has to carry the same weight.
+   Both are landscape, so matching the crest's 38% WIDTH would leave them a
+   third of its height; these are set so each reads as the cover's mark rather
+   than a stamp in the corner. The MiLB wordmark is 4.8:1 and can only gain
+   height by growing wide, hence the gap between the two. */
 .passcover__crest--mlb {
-  width: 34%;
+  width: 52%;
 }
 
 .passcover__crest--milb {
-  width: 62%;
+  width: 80%;
 }
 
 /* The <rect fill="currentColor"> inside the mask picks the foil up from here,

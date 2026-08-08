@@ -96,11 +96,12 @@ is never fetched-then-hidden, and never computed early. Everything else about ba
 opens live: season and career stats, player and team pages, leader boards, standings,
 and the standalone pages outside the scoring flow. A stat line is not a score, and
 gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is opt-in
-now"). One **opt-in, consented** departure lifts the seal inside the scope: the
-site-wide **Scores Unlocked** switch. It is a *render* override that unseals a day you
-agree to spoil, and keeps a live game's view current, but it never writes the persisted
-reveal mark (ADR-0026). `CONTEXT.md` has the vocabulary; `docs/adr/` has the *why*. Read
-the linked ADR before you "simplify" any of this.
+now"). Two **opt-in, consented** departures lift the seal inside the scope, both *render*
+overrides that never write the persisted reveal mark: the site-wide **Scores Unlocked**
+switch, unsealing a day you agree to spoil (ADR-0026); and **Stamp In**
+(`/team/{id}/stamp-in`), one club's played season with every result showing so you can
+stamp what you watched, gated on the PAGE so nothing renders or is fetched until you
+agree (ADR-0042). A third is a spoiler-rule call. `docs/adr/` has the *why* — read it.
 
 Inside that scope, two conventions enforce it structurally:
 
@@ -136,24 +137,23 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Five narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
-unconfigured. **Four never render or fetch a score.** Link previews (`api/og.js` +
-`api/preview.js` + `api/_lib/cards.js`) render Open Graph cards for shared links,
-failing safe to the default card (ADR-0012). Multi-device reveal sync (Clerk, off unless
-`VITE_CLERK_PUBLISHABLE_KEY` is set) mirrors `revealedThrough` across a user's devices
-via `api/reveal.js` and Upstash Redis, ratcheted both sides (ADR-0022). Its companion
-`api/spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, never a
-mark, a per-day on/off map since consent can move back (ADR-0026). Admin-editable copy
-(`api/copy.js` + `src/copy/`) stores the consent-pop-up wording, never a score, behind a
-public-cached read and an allowlisted write, so the owner tunes it without a deploy
-(ADR-0025). **My Tally**'s preferences (`api/preferences.js` + `src/lib/account/`)
-mirror a CLOSED four-field set — club, level, keep-awake, motion — last-write-wins per
-field, never score-derived; `api/account.js` erases every per-user key (ADR-0039). **The
-fifth stores a score, by design**: the **Game Log**'s game stamps (`api/stamps.js` +
-`src/lib/stamps.js`, at `/logbook` and in the box score's seal) — safe because of WHERE
-stamp art may render (`check-stamp-surfaces`, never an unrevealed-game surface), not a
-mint-time check; the gate was retired in ADR-0035's second amendment. Naming/voice:
-`docs/game-log.md`.
+**Seven narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when
+unconfigured; **six never render or fetch a score.** Link previews (`og.js` +
+`preview.js` + `_lib/cards.js`) render Open Graph cards, failing safe to the default
+card (ADR-0012). Reveal sync (Clerk, off unless `VITE_CLERK_PUBLISHABLE_KEY` is set)
+mirrors `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides
+(ADR-0022); its companion `spoiled-days.js` mirrors which DAYS the user consented to
+spoil — consent, never a mark, and reversible (ADR-0026). `copy.js` + `src/copy/` store
+the consent-pop-up wording behind a public-cached read and an allowlisted write, so the
+owner tunes it without a deploy (ADR-0025). **My Tally**'s `preferences.js` +
+`src/lib/account/` mirror a CLOSED four-field set, last-write-wins per field;
+`account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the
+shelf — a cover's title, subtitle, club and mark, never a stamp (ADR-0041).
+`game-story.js` is a CORS hop to MLB.com's team RSS feeds, which send none. **The
+seventh stores a score, by design**: the Game Log's stamps (`stamps.js` +
+`src/lib/stamps.js`) — safe because of WHERE stamp art may render
+(`check-stamp-surfaces`), not a mint-time check; the gate was retired in ADR-0035's
+second amendment. Naming/voice: `docs/game-log.md`.
 
 Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
@@ -193,8 +193,8 @@ Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
   `docs/agents/domain.md`.
-- **Callouts / Team Leaders** — the callout catalog (families, triggers, surfaces,
-  gates, worthiness scores) is `docs/callouts.md`; the tense rule is ADR-0014.
-  Callouts come from the nightly `gen-callouts.mjs` precompute — extend that
-  pipeline, do not build a parallel path. See `scripts/CLAUDE.md` + `docs/api/`.
+- **Callouts / Team Leaders** — catalog (families, triggers, surfaces, gates,
+  worthiness) is `docs/callouts.md`; the tense rule is ADR-0014. They come from the
+  nightly `gen-callouts.mjs` precompute — extend it, do not build a parallel path.
+  See `scripts/CLAUDE.md` + `docs/api/`.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on. See `docs/agents/writing-style.md`.

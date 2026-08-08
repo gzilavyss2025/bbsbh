@@ -153,7 +153,16 @@ const BUDGETS = {
   // it" convention as `49-passport-book.css` and `58-logbook-shelf.css`. Its
   // position IS load-bearing: it de-chromes the `.flipback` card that
   // `22-box-score-tables.css` owns, so it has to cascade after it.
-  'src/styles': 65,
+  //
+  // 65 -> 66 for `60-book-cover-picker.css`: the OPPOSITE case to the two
+  // above — this is a split of `58-logbook-shelf.css`, which reached
+  // check-file-size's 600-line ceiling once the shelf became furniture and the
+  // cover picker grew its six presets and phone stepper. That guard's remedy
+  // is to split, and this directory cannot nest (a partial's numeric prefix IS
+  // its cascade order, and `index.css` imports them as one ordered sheet), so
+  // the split has to land here. Loaded by `BookCoverPicker.jsx`; must cascade
+  // after `49-passport-book.css`, whose `.passcover` its preview reuses.
+  'src/styles': 66,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

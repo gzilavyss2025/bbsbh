@@ -110,7 +110,7 @@
      53-umpire-tendencies     components/umpire/UmpireTendencies.jsx
      58-logbook-shelf         components/passport/LogbookShelf.jsx,
                               components/passport/BookManagementSheet.jsx,
-                              components/passport/BookCoverPicker.jsx,
                               screens/logbook/NewBookPage.jsx
      59-stamp-in              screens/team/StampInPage.jsx
+     60-book-cover-picker     components/passport/BookCoverPicker.jsx
    ------------------------------------------------------------ */

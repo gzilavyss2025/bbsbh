@@ -1,5 +1,5 @@
 import '../../styles/49-passport-book.css'
-import '../../styles/58-logbook-shelf.css'
+import '../../styles/60-book-cover-picker.css'
 import { useId, useMemo, useState } from 'react'
 import { useAsync } from '../../hooks/useAsync.js'
 import { WIDE_QUERY, useMediaQuery } from '../../hooks/useMediaQuery.js'
