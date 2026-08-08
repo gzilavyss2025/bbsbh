@@ -13,6 +13,7 @@ import {
   PAGE_CAPACITY,
   autoLayout,
   firstOpenPage,
+  layoutInDateOrder,
   otherPlacementsOn,
   pageCountFor,
   pageIsFullFor,
@@ -23,6 +24,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { GameStamp } from '../components/logbook/GameStamp.jsx'
 import { PassportBook } from '../components/passport/PassportBook.jsx'
 import { PassportCover } from '../components/passport/PassportCover.jsx'
+import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
 import { BookManagementSheet } from '../components/passport/BookManagementSheet.jsx'
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
@@ -204,6 +206,28 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
       )
     },
     [byPk, navigate],
+  )
+
+  // Re-place this book's PLACED stamps in date order (ADR-0036's amendment).
+  // Every one gets a real placement write, so the arrangement survives a reload
+  // and reaches the user's other devices. `layoutInDateOrder` skips the tray,
+  // which this book's list carries when it is the default book.
+  const reorderBook = useCallback(
+    (direction) => {
+      placeAll(
+        layoutInDateOrder(bookStamps, { direction }).map((p) => ({
+          ...p,
+          placement: { ...p.placement, bookId },
+        })),
+      )
+      // The book now runs from page 1 with nothing skipped, so it needs no
+      // pages past the ones it filled — and the user is turned back to the
+      // first of them rather than left looking at a page this just emptied.
+      setAddedPages(1)
+      setOpenPage(1)
+      setSelectedPk(null)
+    },
+    [bookStamps, bookId, placeAll],
   )
 
   const addPage = useCallback(() => {
@@ -405,6 +429,14 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                 </p>
               )}
             </section>
+          )}
+
+          {/* An action on the whole book, so it sits with the book's other
+              controls above the pages rather than over them. Never while a bar
+              is up: placing and a stamp's options are both conversations about
+              ONE keepsake, and one bar at a time is the rule of this slot. */}
+          {!placingPk && !selectedStamp && (
+            <BookOrderControl count={bookStamps.length} onReorder={reorderBook} />
           )}
 
           <PassportBook

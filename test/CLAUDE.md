@@ -59,7 +59,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
 | node-handler.test.js | 14 | api/_lib/nodeHandler.js | Vercel Node runtime request adapter |
 | page-turn-state.test.js | 13 | src/components/page-turn/pageTurnState.js | Forward page-turn transition (ADR-0024) |
-| passport-layout.test.js | 39 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, the ruled 2x4 guide + capacity (ADR-0035/0036) |
+| passport-layout.test.js | 46 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, the ruled 2x4 guide + capacity, the by-date re-order (ADR-0035/0036) |
 | pinch-hitter-notice.test.js | 2 | src/api/playbyplay.js | Mid-half PH notice (ADR-0017 tiers) |
 | pitch-arsenal.test.js | 8 | scripts/gen-pitch-arsenal.mjs, src/api/pitchArsenal.js | Pitch arsenal aggregation/reader |
 | pitch-challenge-marker.test.js | 2 | src/api/challenges.js | ABS challenge marker on one pitch (PR #344) |

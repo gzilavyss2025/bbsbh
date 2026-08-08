@@ -24,6 +24,8 @@ import {
   clampToPage,
   clampToSlot,
   firstOpenPage,
+  layoutInDateOrder,
+  orderByDate,
   nudgeFromCollisions,
   otherPlacementsOn,
   pageCountFor,
@@ -611,6 +613,167 @@ test('a tombstoned stamp does not occupy a page slot', () => {
   const withDead = [placed(1, 1), { ...placed(2, 1), state: 'off' }, placed(3, 1)]
   assert.equal(stampsOnPage(withDead, 1).length, 2)
   assert.deepEqual(stampsOnPage(withDead, 1).map((s) => s.gamePk), [1, 3])
+})
+
+// ---------------------------------------------------------------------------
+// orderByDate / layoutInDateOrder — the one arrangement the module makes itself
+// ---------------------------------------------------------------------------
+// Every other function here answers "the user tapped HERE". These two answer
+// "put these in date order", which the book offers as a deliberate, confirmed
+// action over a book the user arranged by hand (ADR-0036). So the order has to
+// be TOTAL and repeatable — two devices, and the same device twice, must arrive
+// at the same book — and the layout has to fill from page 1 with no gaps, or a
+// re-ordered book strands its owner on an empty page.
+
+// Already on a page — what "re-place this book" operates on.
+const dated = (gamePk, date, stampedAt = 1) => ({
+  gamePk,
+  date,
+  stampedAt,
+  state: 'on',
+  placement: { bookId: 'default', page: 1, x: 0.5, y: 0.5, tilt: 0 },
+})
+// Minted but never placed: it lives in the tray, which is shared by every book.
+const inTray = (gamePk, date, stampedAt = 1) => ({ gamePk, date, stampedAt, state: 'on' })
+
+test('orderByDate reads oldest first, and newest first is its exact reverse', () => {
+  const stamps = [
+    dated(776003, '2026-07-04'),
+    dated(776001, '2026-04-12'),
+    dated(776002, '2026-05-30'),
+  ]
+  assert.deepEqual(orderByDate(stamps).map((s) => s.gamePk), [776001, 776002, 776003])
+  assert.deepEqual(orderByDate(stamps, 'newest').map((s) => s.gamePk), [776003, 776002, 776001])
+  // The input is never mutated — the caller's own list is the user's book.
+  assert.equal(stamps[0].gamePk, 776003)
+})
+
+// Two games on one date is a doubleheader, or two levels in an afternoon. The
+// tiebreak is WHEN YOU PRESSED THE STAMP, the same total order allStamps()
+// (src/lib/stamps.js) already puts the collection in, and gamePk behind it so
+// the answer is total even for two keepsakes minted in one millisecond.
+test('orderByDate settles two stamps on one date on when they were pressed', () => {
+  const stamps = [
+    dated(776020, '2026-06-01', 5000),
+    dated(776010, '2026-06-01', 9000),
+    dated(776030, '2026-05-31', 1000),
+  ]
+  assert.deepEqual(orderByDate(stamps).map((s) => s.gamePk), [776030, 776020, 776010])
+  // Reversing means reversing the tiebreak too: the stamp pressed later leads
+  // its own day when the book reads newest first.
+  assert.deepEqual(orderByDate(stamps, 'newest').map((s) => s.gamePk), [776010, 776020, 776030])
+
+  // Same date, same press — gamePk is the last resort, so the order is total.
+  const tied = [dated(776041, '2026-06-02', 7000), dated(776040, '2026-06-02', 7000)]
+  assert.deepEqual(orderByDate(tied).map((s) => s.gamePk), [776040, 776041])
+})
+
+test('orderByDate survives an empty book, and leaves a tombstone out of it', () => {
+  assert.deepEqual(orderByDate([]), [])
+  assert.deepEqual(orderByDate(null), [])
+  // removeStamp keeps the placement on the 'off' tombstone it writes, exactly
+  // as stampsOnPage guards against — a dead stamp taking a box would leave a
+  // gap in an arrangement that promises none.
+  const withDead = [
+    dated(776050, '2026-04-01'),
+    { ...dated(776051, '2026-04-02'), state: 'off' },
+    dated(776052, '2026-04-03'),
+  ]
+  assert.deepEqual(orderByDate(withDead).map((s) => s.gamePk), [776050, 776052])
+})
+
+test('layoutInDateOrder lays out an empty book as nothing at all', () => {
+  assert.deepEqual(layoutInDateOrder([]), [])
+  assert.deepEqual(layoutInDateOrder(null, { direction: 'newest' }), [])
+})
+
+// LogbookCollection resolves an unplaced stamp's bookId to the DEFAULT book, so
+// on that book its list carries the whole tray. Re-ordering must leave those
+// alone: the control promises the tray stays as it is, and a user who has not
+// decided where a keepsake goes has not asked us to decide for them.
+test('layoutInDateOrder re-places what is on the pages and leaves the tray alone', () => {
+  const stamps = [
+    dated(776200, '2026-04-02'),
+    inTray(776201, '2026-04-01'),
+    dated(776202, '2026-04-03'),
+    inTray(776203, '2026-04-04'),
+  ]
+  assert.deepEqual(layoutInDateOrder(stamps).map((e) => e.gamePk), [776200, 776202])
+  assert.deepEqual(layoutInDateOrder(stamps, { direction: 'newest' }).map((e) => e.gamePk), [776202, 776200])
+  // A book whose stamps are all still in the tray has nothing to re-place.
+  assert.deepEqual(layoutInDateOrder([inTray(776204, '2026-04-05')]), [])
+})
+
+test('layoutInDateOrder fills one full page, a box per stamp, in date order', () => {
+  // Exactly PAGE_CAPACITY — the boundary a full page sits on. Built newest
+  // first so the ordering has something to do.
+  const stamps = Array.from({ length: PAGE_CAPACITY }, (_, i) =>
+    dated(776100 + i, `2026-06-${String(PAGE_CAPACITY - i + 9).padStart(2, '0')}`),
+  )
+  const laid = layoutInDateOrder(stamps)
+  const slots = pageSlots()
+
+  assert.equal(laid.length, PAGE_CAPACITY)
+  assert.deepEqual(
+    laid.map((e) => e.gamePk),
+    orderByDate(stamps).map((s) => s.gamePk),
+  )
+  laid.forEach(({ gamePk, placement }, i) => {
+    assert.equal(placement.page, 1, `stamp ${i} left page 1`)
+    assert.equal(placement.tilt, tiltFor(gamePk))
+    assert.ok(onPage(placement))
+    // One stamp to a box, in reading order — the guide the user is looking at.
+    assert.ok(
+      Math.abs(placement.x - slots[i].x) < slots[i].width / 2 &&
+        Math.abs(placement.y - slots[i].y) < slots[i].height / 2,
+      `stamp ${i} landed at ${JSON.stringify(placement)}, outside box ${i}`,
+    )
+  })
+})
+
+test('layoutInDateOrder fills page after page from page 1, with no gaps', () => {
+  const count = PAGE_CAPACITY * 2 + 3
+  const stamps = Array.from({ length: count }, (_, i) =>
+    dated(776200 + i, `2026-0${1 + Math.floor(i / 9)}-${String((i % 9) + 1).padStart(2, '0')}`),
+  )
+  const laid = layoutInDateOrder(stamps)
+
+  assert.equal(laid.length, count)
+  assert.deepEqual(
+    laid.map((e) => e.gamePk),
+    orderByDate(stamps).map((s) => s.gamePk),
+  )
+  // Page 1 fills before page 2 opens, and the roll happens at the boundary.
+  laid.forEach(({ placement }, i) => {
+    assert.equal(placement.page, Math.floor(i / PAGE_CAPACITY) + 1)
+    assert.ok(onPage(placement))
+  })
+  const perPage = new Map()
+  for (const { placement } of laid) {
+    perPage.set(placement.page, (perPage.get(placement.page) ?? 0) + 1)
+  }
+  assert.deepEqual([...perPage.keys()], [1, 2, 3])
+  assert.equal(perPage.get(1), PAGE_CAPACITY)
+  assert.equal(perPage.get(2), PAGE_CAPACITY)
+  assert.equal(perPage.get(3), 3)
+})
+
+test('layoutInDateOrder newest first is the same book read backwards', () => {
+  const stamps = Array.from({ length: PAGE_CAPACITY + 5 }, (_, i) =>
+    dated(776300 + i, `2026-05-${String(i + 1).padStart(2, '0')}`),
+  )
+  const oldest = layoutInDateOrder(stamps)
+  const newest = layoutInDateOrder(stamps, { direction: 'newest' })
+
+  assert.deepEqual(
+    newest.map((e) => e.gamePk),
+    oldest.map((e) => e.gamePk).reverse(),
+  )
+  // Both start at page 1, whichever end of the collection leads.
+  assert.equal(newest[0].placement.page, 1)
+  // Nothing here reads a clock or a random draw, so the same book re-ordered
+  // twice is the same book.
+  assert.deepEqual(layoutInDateOrder(stamps, { direction: 'newest' }), newest)
 })
 
 // The bound lives in normalizePlacement (src/lib/stamps.js); if it did not also

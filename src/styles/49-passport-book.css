@@ -943,6 +943,50 @@
   gap: var(--space-2) var(--space-3);
 }
 
+/* "By date" — the book's own re-order control (ADR-0036's amendment). Quiet
+   chrome in normal flow, like the tray it sits under: it is an action ON the
+   book, so it must not float over the pages the way the placement bar
+   deliberately does. */
+.logbook__order {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+/* Asking takes the kraft-amber of the bars above the book, because that is the
+   same conversation — "confirm it, or leave it" — and stacks, because the cost
+   of a re-order is two sentences rather than a label. Still not sticky: this
+   one is answered where it stands. */
+.logbook__order--asking {
+  flex-direction: column;
+  align-items: stretch;
+  border-style: solid;
+  border-color: var(--seal-cover);
+  background: var(--award-soft);
+}
+
+.logbook__orderlede {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbook__orderscope {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--seal-cover-ink);
+}
+
 /* Which page a stamp sits on, in the grid below the book — and the way back to
    it: the control turns the book to that page and opens the stamp's options,
    where moving it and returning it to the tray are both named. */
