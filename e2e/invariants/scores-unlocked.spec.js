@@ -128,7 +128,10 @@ const liveGame = (gamePk, away, home) => ({
   doubleHeader: 'N',
 })
 
-test('switching the pass off re-seals the slate immediately, without a reload', async ({ page }) => {
+// Two synthetic Live games on today's slate, with run totals behind the
+// linescore hydrate. Shared by the two tests below that need to see a SCORE on
+// a card rather than just a storage key.
+const stubLiveSlate = async (page) => {
   const day = localToday()
   const games = [
     liveGame(776001, { id: 158, name: 'Milwaukee Brewers', teamName: 'Brewers', abbreviation: 'MIL' }, { id: 112, name: 'Chicago Cubs', teamName: 'Cubs', abbreviation: 'CHC' }),
@@ -150,7 +153,7 @@ test('switching the pass off re-seals the slate immediately, without a reload', 
     (url) => url.hostname === 'statsapi.mlb.com',
     (route) => {
       const u = route.request().url()
-      // The two requests this test cares about, told apart by their hydrate:
+      // The two requests these tests care about, told apart by their hydrate:
       // the slate itself never asks for a linescore (that is the whole point of
       // fetchSchedule staying score-free), and the score line's own request is
       // the only one that does.
@@ -166,6 +169,10 @@ test('switching the pass off re-seals the slate immediately, without a reload', 
       })
     },
   )
+}
+
+test('switching the pass off re-seals the slate immediately, without a reload', async ({ page }) => {
+  await stubLiveSlate(page)
 
   await page.goto('/')
   await clearPass(page)
@@ -188,6 +195,42 @@ test('switching the pass off re-seals the slate immediately, without a reload', 
   await toggle.click()
   await expect(toggle).toHaveAttribute('aria-checked', 'false')
   await expect(scoreLines).toHaveCount(0)
+  expect(
+    JSON.parse((await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)) ?? '[]'),
+  ).toHaveLength(0)
+})
+
+// The switch must never read "off" over a slate that is painting live scores.
+// Two things can put today's date in `bbsbh:spoiledDays` with no live pass
+// behind it: another signed-in device's consent, mirrored in by
+// SpoiledDaysCloudSync; and — before gameDayAt existed — this device's own
+// consent given between midnight and 8am, which recorded the calendar date
+// while the pass expired that same morning. Either way the day is unsealed and
+// the user is looking at scores they did not ask for TODAY, so the switch has
+// to say so and has to be able to take it back. It used to report `passActive`
+// alone: off, and a tap opened the consent sheet for a day already consented to.
+test('a day consented to with no live pass reads ON, and the switch re-seals it', async ({
+  page,
+}) => {
+  await stubLiveSlate(page)
+  await page.addInitScript(
+    ([d, day]) => window.localStorage.setItem(d, JSON.stringify([day])),
+    [DAYS_KEY, localToday()],
+  )
+  await page.goto('/')
+
+  // No pass — only the durable day consent.
+  expect(await page.evaluate((p) => window.localStorage.getItem(p), PASS_KEY)).toBeNull()
+  await expect(page.locator('.gamecard')).toHaveCount(2)
+  await expect(page.locator('.gamecard__scoreline')).toHaveCount(2)
+
+  const toggle = page.getByTestId('scores-unlock-switch')
+  await expect(toggle).toHaveAttribute('aria-checked', 'true')
+
+  // One tap re-seals the day — in the DOM, not just in storage.
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-checked', 'false')
+  await expect(page.locator('.gamecard__scoreline')).toHaveCount(0)
   expect(
     JSON.parse((await page.evaluate((d) => window.localStorage.getItem(d), DAYS_KEY)) ?? '[]'),
   ).toHaveLength(0)

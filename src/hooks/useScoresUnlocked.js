@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { isUnlocked, msUntilReset, nextResetAt } from '../lib/scoresUnlocked.js'
-import { toApiDate } from '../lib/dates.js'
+import { gameDayAt, isUnlocked, msUntilReset, nextResetAt } from '../lib/scoresUnlocked.js'
 import {
   SPOILED_DAYS_KEY,
   addSpoiledDay,
   applyRemoteStates,
   isDaySpoiled,
+  isDayString,
   parseSpoiledDays,
   removeSpoiledDay,
   serializeSpoiledDays,
@@ -120,16 +120,21 @@ export function useScoresUnlocked() {
     setDays(() => parseSpoiledDays(readKey(SPOILED_DAYS_KEY)))
   }, [])
 
-  // Consent: start the pass AND record today as a day the user agreed to see
-  // plainly. Recording it now (rather than at the 8am rollover) is what makes the
-  // promise durable even if this tab never survives to see 8am.
+  // Consent: start the pass AND record the current GAME day as a day the user
+  // agreed to see plainly. Recording it now (rather than at the 8am rollover) is
+  // what makes the promise durable even if this tab never survives to see 8am.
+  //
+  // gameDayAt, not the calendar date: the day recorded must be the day the pass
+  // covers, and between midnight and 8am those differ. Read that function's
+  // header — pairing `nextResetAt` with `toApiDate(new Date())` is what let a
+  // 1am consent permanently unseal a whole day of unplayed baseball.
   const enable = useCallback(() => {
     const at = String(nextResetAt())
     writeKey(SCORES_UNLOCKED_KEY, at)
     setExpiry(at)
-    const today = toApiDate(new Date())
+    const day = gameDayAt()
     setDays((prev) => {
-      const next = addSpoiledDay(prev, today)
+      const next = addSpoiledDay(prev, day)
       writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
       return next
     })
@@ -137,16 +142,26 @@ export function useScoresUnlocked() {
     notifyLocalChange(SPOILED_DAYS_KEY)
   }, [])
 
-  // Turning the pass off the same day takes the consent back — this is what makes
-  // an accidental tap on the confirm button recoverable. It only ever un-does
-  // TODAY: an older day, already locked in when its pass expired, is never passed
-  // to removeSpoiledDay and so can't be walked back from here.
-  const disable = useCallback(() => {
+  // Turning the pass off takes the consent back — this is what makes an
+  // accidental tap on the confirm button recoverable. Symmetric with `enable`:
+  // it un-does the current GAME day, so a consent given at 11pm is still
+  // walk-back-able at 1am. An older day, already locked in when its pass
+  // expired, is never passed to removeSpoiledDay and so can't be reached here.
+  //
+  // `alsoDay` is the one exception, and it exists for a state this device may
+  // not have created: a day mirrored in as 'on' by another device's consent
+  // (SpoiledDaysCloudSync), which unseals the slate here with no local pass
+  // behind it. The slate's switch passes the date it is actually showing so
+  // that day can be re-sealed from the surface it is unsealing — see
+  // GameSelect.jsx. Ignored unless it is a real YYYY-MM-DD, because the profile
+  // page wires this straight to onClick and would otherwise hand it an event.
+  const disable = useCallback((alsoDay = null) => {
     dropKey(SCORES_UNLOCKED_KEY)
     setExpiry(null)
-    const today = toApiDate(new Date())
+    const day = gameDayAt()
     setDays((prev) => {
-      const next = removeSpoiledDay(prev, today)
+      let next = removeSpoiledDay(prev, day)
+      if (isDayString(alsoDay)) next = removeSpoiledDay(next, alsoDay)
       writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays(next))
       return next
     })
