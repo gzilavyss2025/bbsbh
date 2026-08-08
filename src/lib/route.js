@@ -38,6 +38,7 @@
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
 //   '/logbook?place={gamePk}'            -> { name: 'logbook', placing: gamePk } (book in placement mode)
 //   '/logbook/stats'                     -> { name: 'logbook-stats' }          (what the collection adds up to)
+//   '/logbook/new'                       -> { name: 'logbook', creating: true } (start a new book, no other book on screen)
 //   '/logbook/{season}'                  -> { name: 'logbook', season }        (one season's stamps)
 //   '/logbook/book/{bookId}'             -> { name: 'logbook', bookId, season: null }   (a specific named book)
 //   '/logbook/book/{bookId}/{season}'    -> { name: 'logbook', bookId, season }
@@ -237,6 +238,10 @@ export function parseRoute(url) {
   // the same placement.
   if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'stats')
     return { name: 'logbook-stats' }
+  // Starting a new book. A named second segment, so it sits above the season
+  // branch below for the reason the block just above spells out.
+  if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'new')
+    return { name: 'logbook', creating: true, season: null, placing: null }
   // One season of the Logbook. A non-numeric or out-of-range segment falls back
   // to the bare page (same idea as the invalid-date fallback above) rather than
   // stranding it on a season that cannot exist.
@@ -423,6 +428,11 @@ export function logbookPath(season = null) {
 // so 'stats' can never collide with a season segment.
 export function logbookStatsPath() {
   return '/logbook/stats'
+}
+// Starting a new book — its own page, so no other book is on screen while you
+// decide what one looks like.
+export function logbookNewPath() {
+  return '/logbook/new'
 }
 // A specific named book (ADR-0036's shelf), optionally paged to one season —
 // the additive counterpart to logbookPath() for a user with more than one

@@ -6,12 +6,14 @@ import { useNav } from '../lib/nav.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
 import { pathForBook } from '../lib/logbookNav.js'
+import { logbookNewPath, logbookPath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { LogbookShelf } from '../components/passport/LogbookShelf.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { LogbookLanding } from '../components/account/LogbookLanding.jsx'
 import { LogbookCollection } from './LogbookCollection.jsx'
+import { NewBookPage } from './logbook/NewBookPage.jsx'
 
 const LogbookAccountGate = isClerkEnabled
   ? lazy(() =>
@@ -88,7 +90,12 @@ function LogbookGateLoader() {
 // actually draws one. `useBooks()`'s migration guarantees `books` is never
 // empty, so every branch below has a real record to render — there is no
 // "zero books" state downstream of this component.
-function LogbookRoot({ bookId: routeBookId = null, season: requestedSeason = null, placing = null }) {
+function LogbookRoot({
+  bookId: routeBookId = null,
+  season: requestedSeason = null,
+  placing = null,
+  creating = false,
+}) {
   const navigate = useNav()
   const { books, createBook, updateCover, removeBook } = useBooks()
   // Only the shelf branch below actually needs this (its management sheet's
@@ -96,6 +103,21 @@ function LogbookRoot({ bookId: routeBookId = null, season: requestedSeason = nul
   // anyway, same as every other hook here, per the rules of hooks. Cheap:
   // localStorage-backed, same as useBooks().
   const { all, unplace } = useStamps()
+
+  // '/logbook/new'. FIRST, and above every book-resolving branch below, which
+  // is the whole point of giving the create flow its own address: nothing else
+  // on the shelf is mounted while a cover is being chosen. `createBook` comes
+  // from THIS hook instance rather than a second one nested inside the page —
+  // see BookManagementSheet.jsx's header for what a second instance races.
+  if (creating) {
+    return (
+      <NewBookPage
+        createBook={createBook}
+        onCreated={(id) => navigate(pathForBook({ id }))}
+        onCancel={() => navigate(logbookPath())}
+      />
+    )
+  }
 
   if (routeBookId) {
     const named = books.find((b) => b.id === routeBookId)
@@ -132,14 +154,17 @@ function LogbookRoot({ bookId: routeBookId = null, season: requestedSeason = nul
   return (
     <div className="screen logbook">
       <SiteHeader />
-      <header className="topbar">
+      {/* Title first and hard left, the same shape the open book's own head
+          takes — the page says what it is before it says what you can do to
+          it. */}
+      <header className="topbar logbook__head">
         <h1 className="topbar__title">Game Log</h1>
       </header>
       <LogbookShelf
         books={books}
         placing={placing}
         onOpenBook={(book) => navigate(pathForBook(book, { placing }))}
-        createBook={createBook}
+        onNewBook={() => navigate(logbookNewPath())}
         updateCover={updateCover}
         removeBook={removeBook}
         stamps={all}

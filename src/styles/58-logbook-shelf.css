@@ -175,3 +175,205 @@
   line-height: var(--lh-prose);
   color: var(--text-body);
 }
+
+/* ---- the page head shared by the shelf and one open book ----
+   The title leads, hard left; whatever the page lets you DO sits at the right
+   of the same line, and the way out of the book goes on the line below. The
+   title used to sit BETWEEN two controls, which centred it and squeezed a long
+   book name on a phone. */
+.logbook__head {
+  justify-content: flex-start;
+}
+
+.logbook__head .topbar__title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.logbook__headtools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 0 0 auto;
+}
+
+.logbook__headstats {
+  display: block;
+  padding-top: 0;
+}
+
+/* ---- BookCoverPicker ---- */
+.coverpick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The draft cover, kept on screen through every step. Narrower than a real
+   shelf cover: it is a reference for the choice below it, not the book. */
+.coverpick__preview {
+  display: flex;
+  justify-content: center;
+}
+
+.coverpick__preview .passcover {
+  max-width: 168px;
+  cursor: default;
+  box-shadow: var(--shadow-card);
+}
+
+.coverpick__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* Wide screens only — the two halves are rendered by the component's own
+   layout branch, so this is the arrangement, not the decision. */
+.coverpick__halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.coverpick__half {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.coverpick__presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+/* Each preset IS the board it makes — the same --cover-ink/--cover-foil pair
+   the cover itself paints with (.passcover--board-*), so a swatch can never
+   claim a colour the cover does not use. */
+.coverpick__preset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  padding: var(--space-3);
+  border: var(--bw-rule) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--cover-ink);
+  color: var(--cover-foil);
+  cursor: pointer;
+}
+
+.coverpick__preset.is-active {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.coverpick__preset:focus-visible,
+.coverpick__color:focus-visible,
+.coverpick__step:focus-visible,
+.coverpick__favorite:focus-visible,
+.coverpick__back:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.coverpick__presetmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  color: inherit;
+}
+
+.coverpick__presetfallback {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: inherit;
+}
+
+.coverpick__colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.coverpick__color {
+  flex: 1 1 0;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--cover-ink);
+  color: var(--cover-foil);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+
+.coverpick__color.is-active {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-card);
+}
+
+/* ---- the phone stepper ---- */
+.coverpick__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.coverpick__step {
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-align: left;
+  cursor: pointer;
+}
+
+.coverpick__back {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: var(--space-2) 0;
+  color: var(--field);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+
+.coverpick__favorite {
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.coverpick__favorite.is-active {
+  border-color: var(--accent-primary);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}

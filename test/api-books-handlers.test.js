@@ -98,9 +98,56 @@ test('bookEntry builds a create record and ignores a forged state/createdAt', ()
     title: 'Dad and me',
     subtitle: 'Road trip',
     coverTeamId: 158,
+    coverMark: 'team',
+    coverColor: null,
     createdAt: 5000,
     updatedAt: 5000,
   })
+})
+
+test('bookEntry stores a league-mark cover and rejects a hostile one to the default', () => {
+  const preset = bookEntry({ id: 'b1', coverMark: 'milb', coverColor: 'blue' }, null, 5000)
+  assert.equal(preset.coverMark, 'milb')
+  assert.equal(preset.coverColor, 'blue')
+
+  // An unknown value must be REJECTED to the safe default, never stored: this
+  // endpoint builds its record field by field precisely so a body can't smuggle
+  // a value the client would then have to defend against at render time.
+  const hostile = bookEntry({ id: 'b1', coverMark: 'nfl', coverColor: 'url(evil)' }, null, 5000)
+  assert.equal(hostile.coverMark, 'team')
+  assert.equal(hostile.coverColor, null)
+})
+
+test('bookEntry patches the mark and board colour only when the body names them', () => {
+  const existing = {
+    id: 'b1',
+    state: 'on',
+    title: 'Old title',
+    subtitle: '',
+    coverTeamId: null,
+    coverMark: 'mlb',
+    coverColor: 'red',
+    createdAt: 1000,
+    updatedAt: 1000,
+  }
+  const renamed = bookEntry({ id: 'b1', title: 'New title' }, existing, 9000)
+  assert.equal(renamed.coverMark, 'mlb', 'an omitted field survives the patch untouched')
+  assert.equal(renamed.coverColor, 'red', 'an omitted field survives the patch untouched')
+
+  const backToClub = bookEntry({ id: 'b1', coverMark: 'team', coverColor: null }, existing, 9000)
+  assert.equal(backToClub.coverMark, 'team')
+  assert.equal(backToClub.coverColor, null)
+
+  // A revived tombstone has no existing value to fall back to, so an unnamed
+  // field lands on the same defaults a fresh book gets.
+  const revived = bookEntry({ id: 'b1' }, { ...existing, state: 'off' }, 9000)
+  assert.equal(revived.coverMark, 'team')
+  assert.equal(revived.coverColor, null)
+})
+
+test('bookEntry keeps a MiLB coverTeamId — the store holds no opinion about level', () => {
+  const entry = bookEntry({ id: 'b1', coverTeamId: 5015 }, null, 5000)
+  assert.equal(entry.coverTeamId, 5015)
 })
 
 test('bookEntry keeps the existing createdAt on an update', () => {
@@ -357,4 +404,36 @@ test('books handler rejects an unsupported method without throwing', async () =>
   const res = nodeRes()
   await booksHandler({ url: '/api/books', method: 'PUT', headers: {} }, res)
   assert.equal(res.statusCode, 405)
+})
+
+test('postBook writes a MiLB-club, league-mark cover through the real handler', async () => {
+  const redis = fakeRedis()
+  const res = nodeRes()
+  await postBook(
+    nodeReq({ id: 'b1', title: 'Sounds', coverTeamId: 5015, coverMark: 'milb', coverColor: 'kraft' }),
+    res,
+    redis,
+    USER,
+  )
+
+  assert.equal(res.statusCode, 201)
+  assert.equal(res.json.book.coverTeamId, 5015)
+  assert.equal(res.json.book.coverMark, 'milb')
+  assert.equal(res.json.book.coverColor, 'kraft')
+  assert.equal(redis.hashes[KEY].b1.coverMark, 'milb')
+})
+
+test('postBook reads a LEGACY stored book — neither field — back at its defaults', async () => {
+  const redis = fakeRedis({
+    [KEY]: {
+      b1: { id: 'b1', state: 'on', title: 'Before the picker', subtitle: '', coverTeamId: 158, createdAt: 1000, updatedAt: 1000 },
+    },
+  })
+  const res = nodeRes()
+  await postBook(nodeReq({ id: 'b1', title: 'Renamed' }), res, redis, USER)
+
+  assert.equal(res.statusCode, 200)
+  assert.equal(res.json.book.coverTeamId, 158, 'the club cover survives the upgrade')
+  assert.equal(res.json.book.coverMark, 'team')
+  assert.equal(res.json.book.coverColor, null)
 })

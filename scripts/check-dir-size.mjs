@@ -173,7 +173,12 @@ const BUDGETS = {
   // check-dead-exports.mjs and check-stamp-surfaces.mjs already here. Its data
   // (src/api/spoiler-manifest.json) deliberately does NOT live beside it: the
   // classification is a fact about the modules, so it sits with them.
-  scripts: 70,
+  // +1 for gen-league-logos.mjs — the two LEAGUE knockout marks the Game Log's
+  // cover picker stamps on a board. Deliberately NOT a loop inside
+  // gen-mono-logos.mjs: that script prunes its output directory of anything
+  // not keyed by a numeric team id on every full run, so a league mark living
+  // there would be deleted nightly. Flat here like every other gen-*.mjs.
+  scripts: 71,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

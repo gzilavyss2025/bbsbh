@@ -308,7 +308,9 @@ export default function App() {
     // '/logbook/book/{id}[/{season}]' routes — LogbookPage.jsx's own resolver
     // treats "absent" as "let the book count decide" (ADR-0036's multi-book
     // addendum).
-    content = <LogbookPage season={route.season} placing={route.placing} bookId={route.bookId ?? null} />
+    // `creating` is '/logbook/new' — a mode of this same resolver, so no other
+    // book is ever mounted beside the one being started.
+    content = <LogbookPage season={route.season} placing={route.placing} bookId={route.bookId ?? null} creating={route.creating ?? false} />
   } else if (route.name === 'logbook-stats') {
     // Spans every season, so it takes no season param — see route.js for why
     // this branch has to parse ahead of the numeric-season one. `bookId` is

@@ -83,10 +83,10 @@ ever sees the path segment as a word.
 lint guard (`scripts/check-stamp-surfaces.mjs`), and the e2e specs; renaming
 half of them leaves the next reader unsure which name means what.
 
-### The thirteen files display copy lives in
+### The fifteen files display copy lives in
 
 If you are changing the user-facing name or wording, these are all of them.
-Three are new since ADR-0041 gave the Game Log more than one book —
+Six are new since ADR-0041 gave the Game Log more than one book —
 `LogbookPage.jsx` shrank to the route shell + book resolver when the shelf
 pushed it past the file-size guard, and its old page-level copy (empty
 state, tray and placement ledes) moved to `LogbookCollection.jsx` with it:
@@ -99,7 +99,9 @@ state, tray and placement ledes) moved to `LogbookCollection.jsx` with it:
 | `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title — the route shell only now; see `LogbookCollection.jsx` below for the rest |
 | `src/screens/LogbookCollection.jsx` | one open book's page: empty state, tray and placement ledes |
 | `src/components/passport/LogbookShelf.jsx` | the multi-book shelf's copy — "your books," the new-book tile |
-| `src/components/passport/BookManagementSheet.jsx` | create/rename/re-cover/remove-a-book copy |
+| `src/components/passport/BookManagementSheet.jsx` | one book's Settings — rename, re-cover, and what removing it does to its stamps |
+| `src/components/passport/BookCoverPicker.jsx` | the cover picker's own labels — the league presets, the board colours, the team rail, the phone stepper's steps |
+| `src/screens/logbook/NewBookPage.jsx` | the whole start-a-new-book page |
 | `src/components/passport/BookOrderControl.jsx` | the by-date re-order control and its confirm |
 | `src/screens/LogbookStatsPage.jsx` | retrospective tab title, back links, empty state — both the whole-collection and the per-book views |
 | `src/components/logbook/StampGameButton.jsx` | the whole mint strip inside the box score |
@@ -192,6 +194,9 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Re-order confirm | *"This re-places every stamp in this book — each one lifted off its page and pressed back down {oldest\|newest} first, from page 1. The order you put them in by hand does not come back."* · *"The tray and your other books stay as they are."* → `Re-place them` / `Leave it as it is` |
 | Selected stamp | `Open game ›` / `Move it` |
 | Unplaced marker | `unplaced` |
+| Book settings | `Settings` (shelf and open book alike) · `Remove this book` → *"Remove “{title}”? Every stamp in it goes back to the tray, keeping its game, its note and its score — nothing is deleted, and you can press each one into another book."* · refused on the last book: *"This is the only book you hold, and the Game Log always keeps one. Start another and you can remove this one."* |
+| Starting a book | `Add +` → page heading `New book` · *"Name it and choose its cover — both keep changing as long as you hold the book."* → `Start this book` |
+| Cover picker | wide: `Use a league logo` / `Use team colors` · phone: `Use team colors` / `Use MLB logo` / `Use MiLB logo`, then `Pick a level` / `Pick a color` / `Pick a club`, each behind `‹ Back` · boards `Kraft` / `Red` / `Blue` · `Match my favorite team` |
 
 ### 3.3 Rules for writing new copy here
 
@@ -303,7 +308,7 @@ Nothing score-bearing, so a hostile client that forges one has moved a
 picture, not minted a score.
 
 A book is separate metadata (`src/lib/books.js`, `{ id, state, title,
-subtitle, coverTeamId, createdAt, updatedAt }`) from the stamps filed in it —
+subtitle, coverTeamId, coverMark, coverColor, createdAt, updatedAt }`) from the stamps filed in it —
 it never holds the collection itself, only names a shelf slot. Every device
 always has at least one (`DEFAULT_BOOK_ID`, synthesised the first time
 `useBooks.js` mounts and finds none), so there is no "zero books" state
@@ -318,6 +323,36 @@ other games' stamps — never has to render inside a game screen. An unplaced
 stamp is not a lost one, and belongs to no book yet; it waits in the tray,
 book-agnostic, until a tap on a specific book's page both places it and
 assigns it there in one motion.
+
+#### The cover — a club crest, or a league mark
+
+`PassportCover.jsx` is the ONE cover renderer, and the picker
+(`BookCoverPicker.jsx`) previews with it rather than drawing its own, so what
+the picker shows and what the shelf shows cannot disagree. Three fields decide
+what it draws:
+
+- **`coverMark`** — `'team'` (a club crest on that club's colours, which is
+  everything a cover could be before this shipped), `'mlb'` or `'milb'` (a
+  LEAGUE mark, on one of three house boards).
+- **`coverColor`** — `'kraft' | 'red' | 'blue'`, the board a LEAGUE-mark cover
+  prints on, `null` for a club cover, which takes its board from the club.
+- **`coverTeamId`** — the club, and it now accepts a **MiLB** id: the picker's
+  rail carries MLB/AAA/AA/A+/A. It is KEPT on the record through a league-mark
+  detour, so switching back never asks the user to pick their club again.
+
+**A record carrying neither of the two new fields normalizes to
+`'team' + null`, which is byte-for-byte what it already drew** — that is what
+keeps ADR-0041's "every pre-existing collection lands in one book" true. Both
+fields fail CLOSED (`sanitizeCoverMark`/`sanitizeCoverColor`, `src/lib/books.js`;
+`bookEntry`, `api/books.js`): an unknown value never reaches storage.
+
+The league art is precomputed by `scripts/gen-league-logos.mjs` into
+`public/data/logos/league/{mlb,milb}.svg` through the same `src/lib/logoMono.js`
+knockout pipeline the club marks use, with each mark's viewBox recorded in
+`src/lib/data/league-logo-manifest.json` — MLB is a near-square badge and MiLB a
+wide wordmark, so no one crest slot fits both. The three boards are real tokens
+(`--book-board-kraft/red/blue`) and `scripts/check-contrast.mjs` asserts all
+three against the foil stamped on them.
 
 Placement mode is `?place={gamePk}`, a **query and not a route name**: it is a
 transient mode of the same page, not an address worth sharing, and a stale link
@@ -368,6 +403,7 @@ collection, the moment the change ships.
 | `/logbook/{season}` | `LogbookCollection.jsx` | one season of the DEFAULT book, byte-for-byte unchanged parsing since before ADR-0041; out-of-range falls back to the bare book |
 | `/logbook?place={gamePk}` | same | placement mode for one stamp |
 | `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective over the WHOLE collection, every book — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
+| `/logbook/new` | `LogbookPage.jsx` → `screens/logbook/NewBookPage.jsx` | start a new book. A page and not a sheet, so no other book is on screen while you decide what one looks like. Same above-the-season-branch rule as `/logbook/stats` |
 | `/logbook/book/{bookId}` | `LogbookCollection.jsx` | a specific non-default book, newest season — additive since ADR-0041, the only way to deep-link one |
 | `/logbook/book/{bookId}/{season}` | same | one season of that book |
 | `/logbook/book/{bookId}/stats` | `LogbookStatsPage.jsx` | that one book's retrospective — **must stay above the season branch above it, for the identical parsing reason** |

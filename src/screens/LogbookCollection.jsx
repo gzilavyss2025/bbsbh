@@ -8,7 +8,7 @@ import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
 import { pathForBook, statsPathFor } from '../lib/logbookNav.js'
-import { gamePath, logbookPath } from '../lib/route.js'
+import { gamePath, logbookNewPath, logbookPath } from '../lib/route.js'
 import {
   PAGE_CAPACITY,
   autoLayout,
@@ -50,7 +50,7 @@ function monthDay(date) {
 
 export function LogbookCollection({ book, season: requestedSeason = null, placing = null }) {
   const navigate = useNav()
-  const { books, createBook, updateCover, removeBook } = useBooks()
+  const { books, updateCover, removeBook } = useBooks()
   const { counts, seasons, forSeason, all, unplaced, place, unplace, placeAll } = useStamps()
   const bookId = book.id
 
@@ -238,45 +238,54 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
   return (
     <div className="screen logbook">
       <SiteHeader />
-      <header className="topbar">
-        {/* One leading control regardless of how many books exist, so its
-            position never jumps: back to the shelf when there is one to go
-            back to, otherwise the management sheet for this book — which is
-            how a single-book user discovers "make a second book" without
-            ever seeing a shelf first (ADR-0036's multi-book addendum). */}
-        <button
-          type="button"
-          className="topbar__back"
-          onClick={() => (books.length > 1 ? navigate(logbookPath()) : setManaging(true))}
-        >
-          {books.length > 1 ? '‹ Shelf' : 'Manage book'}
-        </button>
+      {/* The book's name leads the page, hard left, with its controls on the
+          right of the same line and the way OUT of the book on the line under
+          it. The title used to sit between two controls, which centred it and
+          let a long one squeeze. */}
+      <header className="topbar logbook__head">
         <h1 className="topbar__title">{book.title || 'Game Log'}</h1>
-        {total > 0 && (
+        <div className="logbook__headtools">
+          {/* Settings and Add + are always both here — rename, re-cover and
+              remove belong to the book you have open, however many you keep.
+              The way back to the shelf leads them, and only exists once there
+              is a shelf to go back to. */}
+          {books.length > 1 && (
+            <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
+              ‹ Shelf
+            </button>
+          )}
+          <button type="button" className="topbar__back" onClick={() => setManaging(true)}>
+            Settings
+          </button>
           <button
             type="button"
-            className="topbar__back"
-            onClick={() => navigate(statsPathFor(book))}
+            className="topbar__back logbook__add"
+            onClick={() => navigate(logbookNewPath())}
           >
-            Stats ›
+            Add +
           </button>
-        )}
+        </div>
       </header>
+
+      {total > 0 && (
+        <button
+          type="button"
+          className="topbar__back logbook__headstats"
+          onClick={() => navigate(statsPathFor(book))}
+        >
+          Stats ›
+        </button>
+      )}
 
       {managing && (
         <BookManagementSheet
           book={book}
           books={books}
-          createBook={createBook}
           updateCover={updateCover}
           removeBook={removeBook}
           stamps={all}
           unplaceStamp={unplace}
           onClose={() => setManaging(false)}
-          onCreated={(id) => {
-            setManaging(false)
-            navigate(pathForBook({ id }))
-          }}
           onRemoved={() => {
             setManaging(false)
             // The book just removed can no longer be resolved; the bare

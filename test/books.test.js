@@ -7,6 +7,8 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import {
+  COVER_COLORS,
+  COVER_MARKS,
   DEFAULT_BOOK_ID,
   MAX_BOOKS,
   MAX_BOOK_SUBTITLE_LENGTH,
@@ -26,6 +28,8 @@ import {
   sameBookRecord,
   sanitizeBookSubtitle,
   sanitizeBookTitle,
+  sanitizeCoverColor,
+  sanitizeCoverMark,
   serializeBooks,
   updateBookCover,
 } from '../src/lib/books.js'
@@ -359,4 +363,168 @@ test('the full round trip: two devices, neither empty, converge', () => {
   const phoneMerged = applyRemoteBooks(phone, server2)
   assert.deepEqual(Object.keys(phoneMerged).sort(), ['a', 'b', 'c'])
   assert.deepEqual(booksToPublish(phoneMerged, server2), [])
+})
+
+// ---------------------------------------------------------------------------
+// The cover's mark and board colour (the six league-mark presets)
+// ---------------------------------------------------------------------------
+// `coverMark` says WHAT is stamped on the board — the club's own crest
+// ('team', the only thing a cover could carry before this shipped) or one of
+// the two league marks. `coverColor` is the board a LEAGUE-mark cover is
+// printed on; a club cover takes its board from the club, so it leaves this
+// null. Both must fail closed: an unknown value is the default, never stored.
+
+test('sanitizeCoverMark takes the three known marks and defaults everything else to team', () => {
+  for (const mark of COVER_MARKS) assert.equal(sanitizeCoverMark(mark), mark)
+  assert.deepEqual(COVER_MARKS, ['team', 'mlb', 'milb'])
+  assert.equal(sanitizeCoverMark(undefined), 'team')
+  assert.equal(sanitizeCoverMark(null), 'team')
+  assert.equal(sanitizeCoverMark('MLB'), 'team')
+  assert.equal(sanitizeCoverMark('<script>'), 'team')
+  assert.equal(sanitizeCoverMark(7), 'team')
+})
+
+test('sanitizeCoverColor takes the three board colours and defaults everything else to null', () => {
+  for (const color of COVER_COLORS) assert.equal(sanitizeCoverColor(color), color)
+  assert.deepEqual(COVER_COLORS, ['kraft', 'red', 'blue'])
+  assert.equal(sanitizeCoverColor(undefined), null)
+  assert.equal(sanitizeCoverColor('#ff0000'), null)
+  assert.equal(sanitizeCoverColor('green'), null)
+  assert.equal(sanitizeCoverColor(0), null)
+})
+
+test('a legacy record carrying NEITHER field reads exactly as it renders today', () => {
+  // The ADR-0041 guarantee: every book that existed before this picker shipped
+  // keeps its club-coloured cover, and a book with no cover pick keeps falling
+  // back to the favourite club. Both are what `coverMark: 'team'` +
+  // `coverColor: null` mean at render time.
+  const legacy = normalizeBook({ id: 'default', createdAt: 1000, updatedAt: 1000 })
+  assert.deepEqual(legacy, {
+    id: 'default',
+    state: 'on',
+    title: '',
+    subtitle: '',
+    coverTeamId: null,
+    coverMark: 'team',
+    coverColor: null,
+    createdAt: 1000,
+    updatedAt: 1000,
+  })
+
+  const legacyWithClub = normalizeBook({ id: 'trip', createdAt: 1, coverTeamId: 158 })
+  assert.equal(legacyWithClub.coverTeamId, 158)
+  assert.equal(legacyWithClub.coverMark, 'team')
+  assert.equal(legacyWithClub.coverColor, null)
+})
+
+test('normalizeBook rejects a hostile coverMark/coverColor to the default rather than storing it', () => {
+  const hostile = normalizeBook({
+    id: 'x',
+    createdAt: 1,
+    coverMark: { toString: () => 'mlb' },
+    coverColor: 'javascript:alert(1)',
+  })
+  assert.equal(hostile.coverMark, 'team')
+  assert.equal(hostile.coverColor, null)
+  assert.equal(normalizeBook({ id: 'x', createdAt: 1, coverMark: 'milb' }).coverMark, 'milb')
+  assert.equal(normalizeBook({ id: 'x', createdAt: 1, coverColor: 'kraft' }).coverColor, 'kraft')
+})
+
+test('coverTeamId accepts a MiLB club id — the picker is no longer MLB-only', () => {
+  // 5015 is Nashville (AAA) in the MLB Stats API; the store never held an
+  // opinion about level, and must not grow one now that the rail offers them.
+  assert.equal(normalizeBook({ id: 'x', createdAt: 1, coverTeamId: 5015 }).coverTeamId, 5015)
+  const made = createBook({}, { id: 'nash', coverTeamId: 5015, now: 1000 })
+  assert.equal(bookFor(made, 'nash').coverTeamId, 5015)
+})
+
+test('createBook stores a league-mark cover and defaults an unnamed one to the club crest', () => {
+  const preset = createBook({}, { id: 'p', coverMark: 'milb', coverColor: 'blue', now: 1000 })
+  assert.equal(bookFor(preset, 'p').coverMark, 'milb')
+  assert.equal(bookFor(preset, 'p').coverColor, 'blue')
+
+  const plain = createBook({}, { id: 'q', now: 1000 })
+  assert.equal(bookFor(plain, 'q').coverMark, 'team')
+  assert.equal(bookFor(plain, 'q').coverColor, null)
+
+  const junk = createBook({}, { id: 'r', coverMark: 'nfl', coverColor: 'chartreuse', now: 1000 })
+  assert.equal(bookFor(junk, 'r').coverMark, 'team')
+  assert.equal(bookFor(junk, 'r').coverColor, null)
+})
+
+test('updateBookCover patches the mark and board colour only when they are passed', () => {
+  const made = createBook({}, { id: 'trip', title: 'Road trip', coverTeamId: 158, now: 1000 })
+  const marked = updateBookCover(made, 'trip', { coverMark: 'mlb', coverColor: 'red', now: 2000 })
+  assert.equal(bookFor(marked, 'trip').coverMark, 'mlb')
+  assert.equal(bookFor(marked, 'trip').coverColor, 'red')
+  // The club id survives a re-cover that never mentioned it: switching back to
+  // a club crest must not have to re-pick the club.
+  assert.equal(bookFor(marked, 'trip').coverTeamId, 158)
+
+  const renamed = updateBookCover(marked, 'trip', { title: 'Renamed', now: 3000 })
+  assert.equal(bookFor(renamed, 'trip').coverMark, 'mlb')
+  assert.equal(bookFor(renamed, 'trip').coverColor, 'red')
+
+  const backToClub = updateBookCover(renamed, 'trip', { coverMark: 'team', coverColor: null, now: 4000 })
+  assert.equal(bookFor(backToClub, 'trip').coverMark, 'team')
+  assert.equal(bookFor(backToClub, 'trip').coverColor, null)
+
+  const junked = updateBookCover(backToClub, 'trip', { coverMark: 'nhl', now: 5000 })
+  assert.equal(bookFor(junked, 'trip').coverMark, 'team')
+})
+
+test('sameBookRecord notices a changed mark or board colour', () => {
+  const a = {
+    id: 'x',
+    state: 'on',
+    title: 't',
+    subtitle: 's',
+    coverTeamId: 1,
+    coverMark: 'team',
+    coverColor: null,
+    createdAt: 1,
+    updatedAt: 2,
+  }
+  assert.equal(sameBookRecord(a, { ...a }), true)
+  assert.equal(sameBookRecord(a, { ...a, coverMark: 'mlb' }), false)
+  assert.equal(sameBookRecord(a, { ...a, coverColor: 'kraft' }), false)
+})
+
+test('a legacy server record and a defaulted local one are the SAME record — no publish storm', () => {
+  // The upgrade path: a device that already synced its shelf holds records
+  // with neither field. Reading one back must not look like a local edit, or
+  // every book on every device would republish itself on first load.
+  const legacyRemote = { b: { id: 'b', state: 'on', title: '', subtitle: '', coverTeamId: null, createdAt: 1, updatedAt: 2 } }
+  const localAfterUpgrade = { b: { ...legacyRemote.b, coverMark: 'team', coverColor: null } }
+  assert.deepEqual(booksToPublish(localAfterUpgrade, legacyRemote), [])
+
+  // A real re-cover still publishes.
+  const recovered = { b: { ...localAfterUpgrade.b, coverMark: 'mlb', coverColor: 'kraft', updatedAt: 9 } }
+  assert.deepEqual(booksToPublish(recovered, legacyRemote), ['b'])
+})
+
+test('a remote re-cover merges, and a tombstone still outranks it on updatedAt', () => {
+  const local = createBook({}, { id: 'trip', coverMark: 'mlb', coverColor: 'red', now: 1000 })
+  const merged = applyRemoteBooks(local, {
+    trip: { id: 'trip', state: 'on', coverMark: 'milb', coverColor: 'blue', createdAt: 1000, updatedAt: 5000 },
+  })
+  assert.equal(bookFor(merged, 'trip').coverMark, 'milb')
+  assert.equal(bookFor(merged, 'trip').coverColor, 'blue')
+
+  const tombstoned = applyRemoteBooks(merged, {
+    trip: { id: 'trip', state: 'off', coverMark: 'milb', createdAt: 1000, updatedAt: 6000 },
+  })
+  assert.equal(bookFor(tombstoned, 'trip'), null)
+
+  // A revive that names the fields again brings them back intact.
+  const revived = applyRemoteBooks(tombstoned, {
+    trip: { id: 'trip', state: 'on', coverMark: 'mlb', coverColor: 'kraft', createdAt: 7000, updatedAt: 7000 },
+  })
+  assert.equal(bookFor(revived, 'trip').coverMark, 'mlb')
+  assert.equal(bookFor(revived, 'trip').coverColor, 'kraft')
+})
+
+test('serializeBooks round-trips the mark and board colour', () => {
+  const map = createBook({}, { id: 'p', coverMark: 'milb', coverColor: 'kraft', now: 1000 })
+  assert.deepEqual(parseBooks(serializeBooks(map)), map)
 })

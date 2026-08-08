@@ -121,9 +121,17 @@ export function useBooks() {
   // execute. A single tap of "new book" is not a rapid-fire path where the
   // committed render's `books` could plausibly be stale by the time this runs.
   const createBook = useCallback(
-    (title, subtitle, coverTeamId) => {
+    ({ title, subtitle, coverTeamId, coverMark, coverColor } = {}) => {
       const id = genBookId()
-      const next = createBookRecord(books, { id, title, subtitle, coverTeamId, now: Date.now() })
+      const next = createBookRecord(books, {
+        id,
+        title,
+        subtitle,
+        coverTeamId,
+        coverMark,
+        coverColor,
+        now: Date.now(),
+      })
       if (next === books) return null
       setBooks(next)
       writeBooks(next)
