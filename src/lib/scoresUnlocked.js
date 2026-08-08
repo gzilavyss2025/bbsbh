@@ -11,6 +11,12 @@
 // value all resolve to sealed by default. isUnlocked() is the single predicate
 // every reader goes through, and it fails closed.
 
+// The one import: toApiDate, so `gameDayAt` below can answer in the same
+// YYYY-MM-DD vocabulary spoiledDays.js stores and the feed's `officialDate`
+// carries. dates.js is itself dependency-free, so the unit suite still loads
+// this module in plain Node with nothing else pulled in.
+import { toApiDate } from './dates.js'
+
 // The reset hour, in local time. Hard-coded for v1 (see the spec's open
 // questions); a game-day mentally ends in the small hours, so 8am both covers a
 // west-coast night game watched the next morning and guarantees the pass never
@@ -53,6 +59,32 @@ export function isUnlocked(rawExpiry, now = Date.now()) {
 export function msUntilReset(rawExpiry, now = Date.now()) {
   if (!isUnlocked(rawExpiry, now)) return null
   return Math.min(Number(rawExpiry) - now, MAX_WINDOW_MS)
+}
+
+// The DAY a consent given right now is a consent TO — the day whose baseball
+// the pass will cover, in the app's YYYY-MM-DD vocabulary. This is a GAME day,
+// not a calendar day: it runs 8am to 8am, the same boundary `nextResetAt`
+// measures against, so a pass started now always expires at the END of the day
+// this returns. From 8am to midnight the two are identical; from midnight to
+// 8am the game day is YESTERDAY, because the games you are watching at 1am are
+// the previous date's.
+//
+// That eight-hour gap is not a nicety — it was a spoiler bug. `enable` used to
+// pair `nextResetAt()` with the plain calendar date, so consenting at 1am wrote
+// an expiry seven hours out and stamped the WHOLE NEW DAY as consented-to.
+// spoiledDays entries are durable by design (ADR-0026: a day you agreed to see
+// stays open), so from 8am onward that day's slate rendered every live score
+// plainly — for games that had not been played when the user consented — while
+// the toggle, which reports the expired pass, still read "off". It got the
+// other half wrong too: the day actually watched was never recorded, so it
+// re-sealed at 8am, which is exactly the fiction spoiledDays.js exists to end.
+//
+// Derived by stepping the local Date back a day rather than subtracting 8h of
+// wall clock, so a DST transition can't land it on the wrong date.
+export function gameDayAt(now = new Date()) {
+  const d = new Date(now)
+  if (d.getHours() < RESET_HOUR) d.setDate(d.getDate() - 1)
+  return toApiDate(d)
 }
 
 // Format an expiry as a short local clock time (e.g. "8:00 AM") for the consent

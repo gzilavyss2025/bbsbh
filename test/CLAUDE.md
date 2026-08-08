@@ -82,7 +82,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
 | scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
-| scores-unlocked.test.js | 16 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer |
+| scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |

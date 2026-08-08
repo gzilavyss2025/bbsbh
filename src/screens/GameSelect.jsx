@@ -609,17 +609,31 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               <button
                 type="button"
                 role="switch"
+                // Checked reports `scoresUnlocked` — what this slate is ACTUALLY
+                // doing — not `passActive`, the local pass alone. The two can
+                // disagree: a day mirrored in as consented by another device
+                // (SpoiledDaysCloudSync) unseals every card here with no pass
+                // behind it, and a switch that reads "off" over a slate full of
+                // live scores is the one thing this control must never do. Same
+                // reason it is the off switch in that state — before this, the
+                // only affordance was a tap that opened the consent sheet for a
+                // day already consented to.
                 data-testid="scores-unlock-switch"
-                aria-checked={passActive}
+                aria-checked={scoresUnlocked}
                 aria-label={
                   passActive
                     ? `Live scores — on, resets ${resetLabel}`
-                    : 'Live scores — off'
+                    : scoresUnlocked
+                      ? 'Live scores — on for today'
+                      : 'Live scores — off'
                 }
-                className={`daystate__chip daystate__chip--live${passActive ? ' daystate__chip--live-on' : ''}`}
+                className={`daystate__chip daystate__chip--live${scoresUnlocked ? ' daystate__chip--live-on' : ''}`}
                 onClick={() => {
-                  if (passActive) {
-                    disableUnlock()
+                  if (scoresUnlocked) {
+                    // `dateStr` is today here (the chip renders only when
+                    // isToday) — named so the day being re-sealed is the day on
+                    // screen, never a clock read that could disagree with it.
+                    disableUnlock(dateStr)
                     // The note says "Live scores stays on this device". Once
                     // the pass is off there is no "live scores" to say it
                     // about, and leaving it up asserted a scope for a setting

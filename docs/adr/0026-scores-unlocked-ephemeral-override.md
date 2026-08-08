@@ -258,6 +258,48 @@ Two details the state map forced, and both are load-bearing:
   `'on'` is what keeps a day the merge itself removed from being echoed back at
   the server that sent it.
 
+## Amendment (2026-08-08) — a consent names a GAME day, and the switch reports what the slate does
+
+Two halves of the same defect, reported as "live scores are passing through even
+with the toggle off."
+
+**The day recorded was the wrong day between midnight and 8am.** `enable` paired
+`nextResetAt()` — the next local 8am — with `toApiDate(new Date())`, the plain
+calendar date. Those agree for sixteen hours a day and disagree for eight. A
+consent at 1am wrote an expiry seven hours out and stamped THAT WHOLE NEW
+CALENDAR DATE as consented-to. Because a consented day is durable on purpose
+(the point of this ADR), from 8am onward every game on that date rendered its
+score plainly — games that had not been played when the user agreed to anything.
+It got the other half wrong too: the day actually being watched at 1am was never
+recorded, so it re-sealed at 8am, which is precisely the fiction
+`spoiledDays.js` exists to end. One line, both directions wrong.
+
+The fix is `gameDayAt` (`src/lib/scoresUnlocked.js`): the day a pass started now
+covers, measured on the same 8am-to-8am boundary the expiry already used, so
+midnight-to-8am resolves to YESTERDAY. `enable` and `disable` both go through it,
+which also makes a consent given at 11pm still walk-back-able at 1am. The unit
+test that pins it is stated as a RELATIONSHIP between the two functions — a pass
+started now must expire at the END of the day it records, at every hour — because
+the bug was never in either function alone, it was in the pairing.
+
+**And the switch could not say so.** `aria-checked` and the on-state reported
+`passActive`, the local pass; the slate renders on `spoilersOffFor(date)`, which
+is `passActive || the day was consented to`. Whenever the second held without the
+first, the switch read "off" over a slate full of live scores and its only
+affordance was a tap that opened the consent sheet for a day already consented
+to. It now reports the effective state and re-seals in that state, naming the
+date on screen (`disable(alsoDay)`).
+
+That second half matters beyond the boundary bug, which is why it stayed after
+the boundary bug was fixed: **cross-device sync reaches the same state by
+design.** The pass is device-local, but the day map syncs (the amendment above),
+so a consent on the phone unseals today's slate on the laptop with no pass there.
+That is the intended durability, and the note the slate shows on consent — "Live
+scores stays on this device" — is true of the pass and not of its effect. The
+switch now tells the truth on the second device and can take the day back from
+it. The in-game banner deliberately keeps the older rule (no banner without a
+live pass, ADR text above): consent lives on the slate, so the off switch does too.
+
 ## Known gaps (deliberately recorded, not yet closed)
 
 - **The sync component itself is untested end-to-end.** Its merge logic is pinned

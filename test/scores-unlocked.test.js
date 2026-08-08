@@ -11,6 +11,7 @@ import {
   MAX_WINDOW_MS,
   RESET_HOUR,
   formatResetTime,
+  gameDayAt,
   isUnlocked,
   msUntilReset,
   nextResetAt,
@@ -110,6 +111,47 @@ test('formatResetTime yields a non-empty clock string for a valid expiry', () =>
 test('formatResetTime is empty for garbage', () => {
   assert.equal(formatResetTime('nope'), '')
   assert.equal(formatResetTime(null), '')
+})
+
+// gameDayAt ----------------------------------------------------------------
+// The day a consent RECORDS has to be the day the pass actually covers. Those
+// are the same thing from 8am to midnight and different from midnight to 8am,
+// which is the whole reason this function exists — see its header.
+
+test('after the reset hour, the game day is the calendar day', () => {
+  assert.equal(gameDayAt(new Date(2026, 7, 8, 20, 30, 0)), '2026-08-08')
+  assert.equal(gameDayAt(new Date(2026, 7, 8, 8, 0, 0)), '2026-08-08')
+})
+
+test('before the reset hour, the game day is the day that has not ended yet', () => {
+  // 1:00am Aug 8 is still Aug 7's baseball — the west-coast games are on.
+  assert.equal(gameDayAt(new Date(2026, 7, 8, 1, 0, 0)), '2026-08-07')
+  assert.equal(gameDayAt(new Date(2026, 7, 8, 7, 59, 0)), '2026-08-07')
+})
+
+test('the game day rolls the month and the year back, not just the date', () => {
+  assert.equal(gameDayAt(new Date(2026, 7, 1, 2, 0, 0)), '2026-07-31')
+  assert.equal(gameDayAt(new Date(2026, 0, 1, 3, 0, 0)), '2025-12-31')
+})
+
+// THE INVARIANT the bug broke: a pass started now expires at the END of the
+// game day it records, never at the start of one. Stated as a relationship
+// between the two functions, because that pairing is what `enable` performs and
+// what was wrong — recording the calendar date at 1am both marked a day of
+// baseball nobody had watched (permanently unsealed, with the toggle still
+// reading off) and let the day they HAD watched re-seal at 8am.
+test('a consent records the day whose END is the pass expiry, at every hour', () => {
+  for (const hour of [0, 1, 7, 8, 9, 12, 20, 23]) {
+    const now = new Date(2026, 7, 8, hour, 15, 0)
+    const [y, m, d] = gameDayAt(now).split('-').map(Number)
+    // 8am on the morning AFTER the recorded day is exactly when the pass dies.
+    const dayEnd = new Date(y, m - 1, d + 1, RESET_HOUR, 0, 0, 0)
+    assert.equal(
+      nextResetAt(now),
+      dayEnd.getTime(),
+      `hour ${hour}: recorded ${gameDayAt(now)} but the pass expires ${new Date(nextResetAt(now))}`,
+    )
+  }
 })
 
 // DST ----------------------------------------------------------------------
