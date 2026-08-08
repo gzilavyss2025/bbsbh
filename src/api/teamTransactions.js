@@ -577,6 +577,9 @@ function railSlot(row, role, banner, ctx) {
     surname: surnameOf(row.person?.fullName ?? ''),
     pos: resolvePosition(row, ctx),
     tintTeamId: ctx.orgId,
+    // Drives Headshot's MiLB photo rung; `tintTeamId` can't answer it, being
+    // the parent org even for a farmhand. No Set at all never claims MLB.
+    isMlb: ctx.debutedIds?.has(row.person?.id) ?? false,
   }
 }
 
@@ -883,7 +886,8 @@ function shapeStory(draft, ctx) {
 
 // One org's already-bucketed, deduped, filtered rows -> [{ date, stories }],
 // newest day first. `ctx.positions` is the generator's batched /people
-// fallback; `ctx.orgId` is required (drives trade in/out + headshot tint).
+// fallback; `ctx.orgId` is required (drives trade in/out + headshot tint);
+// `ctx.debutedIds` flags which rail faces are confirmed major-leaguers.
 export function groupIntoStories(rows, ctx = {}) {
   const byDate = new Map()
   for (const t of rows ?? []) {

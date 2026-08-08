@@ -55,11 +55,21 @@ const RAIL_FLOAT_MAX = 3
 // One rail slot: kicker banner (In/Out/Up/Down/Up-Down/IL-N) over a headshot,
 // a surname caption below that links to the player's page (same spoiler-safe
 // PlayerLink treatment used everywhere else in the app).
+//
+// `tintTeamId` is the MLB parent org for every slot, prospects included, so
+// `isMlb` must come from the slot itself — Headshot's teamId-derived default
+// would read a farmhand as a major-leaguer and skip his MiLB photo rung.
 function RailSlot({ slot }) {
   return (
     <div className="photorail__slot">
       <span className={`banner ${BANNER_TONE[slot.role] ?? 'banner--move'}`}>{slot.banner}</span>
-      <Headshot personId={slot.playerId} name={slot.name} teamId={slot.tintTeamId} className="txstory__shot" />
+      <Headshot
+        personId={slot.playerId}
+        name={slot.name}
+        teamId={slot.tintTeamId}
+        isMlb={slot.isMlb ?? false}
+        className="txstory__shot"
+      />
       <PlayerLink id={slot.playerId} className="photo__cap">{slot.surname}</PlayerLink>
     </div>
   )

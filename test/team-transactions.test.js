@@ -412,7 +412,7 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
   const doubleMove = stories[1]
   assert.deepEqual(doubleMove.rail[0], {
     role: 'out', banner: 'Down', playerId: 689441, name: 'Coleman Crow',
-    surname: 'Crow', pos: 'RHP', tintTeamId: 158,
+    surname: 'Crow', pos: 'RHP', tintTeamId: 158, isMlb: false,
   })
   assert.equal(
     doubleMove.cutline.map((s) => s.text).join(''),
@@ -425,18 +425,39 @@ test('Jul 12: trade+clear, same-player double-move, solo option, transfer with i
   const soloOption = stories[2]
   assert.deepEqual(soloOption.rail[0], {
     role: 'out', banner: 'Down', playerId: 668831, name: 'Garrett Stallings',
-    surname: 'Stallings', pos: 'RHP', tintTeamId: 158,
+    surname: 'Stallings', pos: 'RHP', tintTeamId: 158, isMlb: false,
   })
 
   const transfer = stories[3]
   assert.deepEqual(transfer.rail, [{
     role: 'move', banner: 'IL-60', playerId: 605540, name: 'Brandon Woodruff',
-    surname: 'Woodruff', pos: 'RHP', tintTeamId: 158,
+    surname: 'Woodruff', pos: 'RHP', tintTeamId: 158, isMlb: false,
   }])
   assert.equal(
     transfer.cutline.map((s) => s.text).join(''),
     'Transferred RHP Brandon Woodruff from the 15-day injured list to the 60-day injured list. Right shoulder inflammation.',
   )
+})
+
+// A rail slot's tint is always the MLB parent org, so the slot has to carry
+// the player's own MLB status — Headshot would otherwise read that tint as
+// "confirmed major-leaguer" and drop his MiLB photo rung.
+test('a rail slot flags a confirmed major-leaguer from ctx.debutedIds, not the tint club', () => {
+  const kept = filterStoryworthy(dedupeTransactions(JUL12), { orgId: 158 })
+  const railOf = (days) => days.flatMap((d) => d.stories.flatMap((s) => s.rail))
+
+  const rail = railOf(groupIntoStories(kept, { positions: {}, orgId: 158, debutedIds: new Set([689441]) }))
+  const crow = rail.find((s) => s.playerId === 689441)
+  const stallings = rail.find((s) => s.playerId === 668831)
+  assert.equal(crow.tintTeamId, 158)
+  assert.equal(stallings.tintTeamId, 158)
+  assert.equal(crow.isMlb, true)
+  assert.equal(stallings.isMlb, false)
+
+  // No signal at all never claims MLB: falling back to a real MiLB face beats
+  // dropping straight to the club logo.
+  const blind = railOf(groupIntoStories(kept, { positions: {}, orgId: 158 }))
+  assert.equal(blind.find((s) => s.playerId === 689441).isMlb, false)
 })
 
 test('Jul 7: injured-list+replacement, 3-player shuffle, transfer with its own photo', () => {
@@ -536,7 +557,7 @@ test('Jul 14: the two-perspective trade mirror de-dupes to one trade-away story'
   assert.equal(stories[0].type, 'trade')
   assert.deepEqual(stories[0].rail, [{
     role: 'out', banner: 'Out', playerId: 668834, name: 'Easton McGee',
-    surname: 'McGee', pos: 'RHP', tintTeamId: 158,
+    surname: 'McGee', pos: 'RHP', tintTeamId: 158, isMlb: false,
   }])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),
@@ -601,7 +622,7 @@ test('Jul 15: a trade leg immediately optioned the same day still joins the trad
   const optionStory = stories[1]
   assert.deepEqual(optionStory.rail, [{
     role: 'out', banner: 'Down', playerId: 700502, name: 'Colton Gordon',
-    surname: 'Gordon', pos: 'LHP', tintTeamId: 158,
+    surname: 'Gordon', pos: 'LHP', tintTeamId: 158, isMlb: false,
   }])
 })
 
@@ -627,7 +648,7 @@ test('Jul 16: an outright assignment + same-day elected free agency merge into o
   assert.equal(stories[0].type, 'roster-move')
   assert.deepEqual(stories[0].rail, [{
     role: 'out', banner: 'Out', playerId: 675659, name: 'Greg Jones',
-    surname: 'Jones', pos: 'LF', tintTeamId: 158,
+    surname: 'Jones', pos: 'LF', tintTeamId: 158, isMlb: false,
   }])
   assert.equal(
     stories[0].cutline.map((s) => s.text).join(''),

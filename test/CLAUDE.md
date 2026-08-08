@@ -94,7 +94,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
-| team-transactions.test.js | 30 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
+| team-transactions.test.js | 31 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
 | team.test.js | 28 | src/api/team.js | Team fetch/roster/affiliates/standings |
 | teams-static.test.js | 2 | src/api/teams-static.js | fetchStaticTeams |
 | teams.test.js | 51 | src/lib/teams.js | Team id/logo/color static data (60+ exports) |
