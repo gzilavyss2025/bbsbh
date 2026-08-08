@@ -18,6 +18,7 @@ import {
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
+import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
@@ -213,6 +214,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = (
             <AtBatCard
               entry={entry}
+              battingTeamId={battingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
             />
@@ -503,7 +505,7 @@ function EventCard({ code, runnerId, teamId, segments }) {
   )
 }
 
-function AtBatCard({ entry, calloutCtx, highlight }) {
+function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
   const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
@@ -511,7 +513,9 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
   // The pitch-zone diagram only exists where the park tracked plate locations
   // (most MiLB parks don't). On a phone it opens in a modal from an icon button
   // tucked into the card's bottom-left whitespace; the desktop layout shows it
-  // inline instead (the button is hidden ≥740, see .pbp__zonebtn).
+  // inline instead (the button is hidden ≥740, see .pbp__zonebtn). With no
+  // locations there is no right-hand pane at all, so the row drops to one
+  // column rather than leaving the card penned into 38fr beside a gap.
   const hasZone = hasPitchLocations(pitchDetails)
   // A batter pinch-run for is crossed out on the card, with the pinch runner
   // penciled in beneath at the PR spot; the diamond gets a red PR by the base he
@@ -520,122 +524,130 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
   const prBase = replaced ? pinchRunners[pinchRunners.length - 1].base : null
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
-    <div className="pbp__atbat">
-    <div className="pbp__card">
-      <div className="pbp__main">
-        <div className="pbp__top">
-          <span className="pbp__batter">
-            <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
-              <PlayerLink id={batter.id}>
-                {batter.last}
-                {batter.first ? `, ${batter.first}` : ''}
-              </PlayerLink>
-              {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
-            </span>
-            {pinchRunners?.map((pr, i) => (
-              <span
-                key={pr.id}
-                className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
-              >
-                <PlayerLink id={pr.id}>
-                  {pr.last}
-                  {pr.first ? `, ${pr.first}` : ''}
+    <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
+      {/* Fills the room the missing zone pane leaves, so it rides with
+          --nozone. Decorative — the card's first line already names him — and
+          desktop-only, .pbp__batshot being display:none below 740. */}
+      {!hasZone && (
+        <div className="pbp__batshot" aria-hidden="true">
+          <PitcherPhoto personId={batter.id} name={batter.last} teamId={battingTeamId} />
+        </div>
+      )}
+      <div className="pbp__card">
+        <div className="pbp__main">
+          <div className="pbp__top">
+            <span className="pbp__batter">
+              <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
+                <PlayerLink id={batter.id}>
+                  {batter.last}
+                  {batter.first ? `, ${batter.first}` : ''}
                 </PlayerLink>
-                <span className="pbp__pos">PR</span>
+                {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
               </span>
-            ))}
-          </span>
-          {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
-        </div>
-        <div className="pbp__desc">
-          {descSegments.map((seg, i) =>
-            seg.id != null ? (
-              <span key={i} className="pbp__name">
-                {seg.text}
-              </span>
-            ) : (
-              seg.text
-            ),
-          )}
-        </div>
-        {/* A normal at-bat's own baserunning notes (a WP/PB/SB during the
-            count) now get their own leading EventCard, hoisted out in
-            computeHalfInningFeed — this sub-line only still fires for the
-            rare interrupted-at-bat case (an inning-ending baserunning play
-            mid-count), which isn't split out that way. */}
-        {entry.interrupted && baserunningNotes?.map((note, i) => (
-          <BaserunningNote key={i} segments={note.segments} />
-        ))}
-        {calloutNotes.map((note, i) => (
-          <CalloutNote key={`c-${i}`} text={note.text} />
-        ))}
-        {hasZone && (
-          <button
-            type="button"
-            className="pbp__zonebtn"
-            onClick={() => setZoneOpen(true)}
-            aria-label={`Show pitch zone for ${batter.last}`}
-          >
-            <StrikeZoneGlyph className="pbp__zoneicon" />
-          </button>
-        )}
-        {/* Generic label only — never the clip's own title/description, which
-            would spoil the play for anyone glancing at the card before
-            reading the prose above it (see HighlightSheet's spoiler note).
-            Just "Watch" + the play icon, not "Watch highlight" — the wide
-            breakpoint's card column is only 38fr of the row (see
-            .pbp__atbat), too narrow for the longer label. The full context
-            still reaches screen readers via aria-label. */}
-        {highlight && (
-          <button
-            type="button"
-            className="pbp__hlbtn"
-            onClick={() => setHighlightOpen(true)}
-            aria-label={`Watch highlight for ${batter.last}`}
-          >
-            <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch
-          </button>
-        )}
-      </div>
-      <div className="pbp__side">
-        <PitchLadder pitches={pitches} />
-        <div className="pbp__play">
-          {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
-            <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
-          )}
-          <PlayDiamond
-            reached={reached}
-            scored={scored}
-            earned={earned}
-            legNotations={legNotations}
-            outAt={outAt}
-            outCode={outCode}
-            prBase={prBase}
-            prJersey={prJersey}
-          />
-          {codeKind === 'out' &&
-            (calledLooking ? (
-              <span className="pbp__code pbp__code--center pbp__klooking" aria-label="strikeout looking">
-                K
-              </span>
-            ) : (
-              code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
-            ))}
-          {/* An interrupted at-bat's carry-over mark ("CS →") is penciled in
-              the MIDDLE of the diamond, where the scorer writes it — the
-              otherwise-empty diamond (nobody aboard, no out) is what keeps it
-              from reading as this batter's own baserunning. */}
-          {codeKind === 'interrupted' && code && (
-            <span className="pbp__code pbp__code--center pbp__code--interrupted">{code}</span>
-          )}
-          {outNumber != null && (
-            <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
-              {outNumber}
+              {pinchRunners?.map((pr, i) => (
+                <span
+                  key={pr.id}
+                  className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
+                >
+                  <PlayerLink id={pr.id}>
+                    {pr.last}
+                    {pr.first ? `, ${pr.first}` : ''}
+                  </PlayerLink>
+                  <span className="pbp__pos">PR</span>
+                </span>
+              ))}
             </span>
+            {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
+          </div>
+          <div className="pbp__desc">
+            {descSegments.map((seg, i) =>
+              seg.id != null ? (
+                <span key={i} className="pbp__name">
+                  {seg.text}
+                </span>
+              ) : (
+                seg.text
+              ),
+            )}
+          </div>
+          {/* A normal at-bat's own baserunning notes (a WP/PB/SB during the
+              count) now get their own leading EventCard, hoisted out in
+              computeHalfInningFeed — this sub-line only still fires for the
+              rare interrupted-at-bat case (an inning-ending baserunning play
+              mid-count), which isn't split out that way. */}
+          {entry.interrupted && baserunningNotes?.map((note, i) => (
+            <BaserunningNote key={i} segments={note.segments} />
+          ))}
+          {calloutNotes.map((note, i) => (
+            <CalloutNote key={`c-${i}`} text={note.text} />
+          ))}
+          {hasZone && (
+            <button
+              type="button"
+              className="pbp__zonebtn"
+              onClick={() => setZoneOpen(true)}
+              aria-label={`Show pitch zone for ${batter.last}`}
+            >
+              <StrikeZoneGlyph className="pbp__zoneicon" />
+            </button>
+          )}
+          {/* Generic label only — never the clip's own title/description, which
+              would spoil the play for anyone glancing at the card before
+              reading the prose above it (see HighlightSheet's spoiler note).
+              Just "Watch" + the play icon, not "Watch highlight" — the wide
+              breakpoint's card column is only 38fr of the row (see
+              .pbp__atbat), too narrow for the longer label. The full context
+              still reaches screen readers via aria-label. */}
+          {highlight && (
+            <button
+              type="button"
+              className="pbp__hlbtn"
+              onClick={() => setHighlightOpen(true)}
+              aria-label={`Watch highlight for ${batter.last}`}
+            >
+              <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch
+            </button>
           )}
         </div>
+        <div className="pbp__side">
+          <PitchLadder ladder={pitchLadder(pitches)} />
+          <div className="pbp__play">
+            {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
+              <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
+            )}
+            <PlayDiamond
+              reached={reached}
+              scored={scored}
+              earned={earned}
+              legNotations={legNotations}
+              outAt={outAt}
+              outCode={outCode}
+              prBase={prBase}
+              prJersey={prJersey}
+            />
+            {codeKind === 'out' &&
+              (calledLooking ? (
+                <span className="pbp__code pbp__code--center pbp__klooking" aria-label="strikeout looking">
+                  K
+                </span>
+              ) : (
+                code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
+              ))}
+            {/* An interrupted at-bat's carry-over mark ("CS →") is penciled in
+                the MIDDLE of the diamond, where the scorer writes it — the
+                otherwise-empty diamond (nobody aboard, no out) is what keeps it
+                from reading as this batter's own baserunning. */}
+            {codeKind === 'interrupted' && code && (
+              <span className="pbp__code pbp__code--center pbp__code--interrupted">{code}</span>
+            )}
+            {outNumber != null && (
+              <span className="pbp__outcircle" aria-label={`Out ${outNumber} of the inning`}>
+                {outNumber}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
       {/* Desktop/iPad: the pitch zone + sequence ride in the at-bat's right
           column (hidden on a phone, which uses the icon button + modal above).
           Just the pitches and their plot — the batter/pitcher matchup is
@@ -659,41 +671,6 @@ function AtBatCard({ entry, calloutCtx, highlight }) {
       {highlightOpen && highlight && (
         <HighlightSheet item={highlight} onClose={() => setHighlightOpen(false)} />
       )}
-    </div>
-  )
-}
-
-// Numbers Game #22-style ball/strike lanes beside the diamond: two thin
-// vertical columns — a light "ball" lane and a shaded "strike" lane (strikes,
-// fouls, and balls in play, the last shown as X). Each lane lists its pitches'
-// 1-based numbers stacked from the TOP independently, so a strike on the 4th
-// pitch sits at the top of the strike lane even if the first three were balls.
-function PitchLadder({ pitches }) {
-  const ladder = pitchLadder(pitches)
-  if (ladder.length === 0) return null
-  const balls = ladder.filter((p) => p.side === 'ball')
-  const strikes = ladder.filter((p) => p.side === 'strike')
-  const label = ladder
-    .map((p) => (p.side === 'ball' ? `ball ${p.label}` : p.label === 'X' ? 'in play' : `strike ${p.label}`))
-    .join(', ')
-  return (
-    <div className="pbp__ladder" role="img" aria-label={`Pitch sequence: ${label}`}>
-      <div className="pbp__laddercol pbp__laddercol--ball">
-        <span className="pbp__ladderhead">B</span>
-        {balls.map((p, i) => (
-          <span key={i} className="pbp__cell">
-            {p.label}
-          </span>
-        ))}
-      </div>
-      <div className="pbp__laddercol pbp__laddercol--strike">
-        <span className="pbp__ladderhead">S</span>
-        {strikes.map((p, i) => (
-          <span key={i} className="pbp__cell">
-            {p.label}
-          </span>
-        ))}
-      </div>
     </div>
   )
 }

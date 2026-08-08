@@ -63,6 +63,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pinch-hitter-notice.test.js | 2 | src/api/playbyplay.js | Mid-half PH notice (ADR-0017 tiers) |
 | pitch-arsenal.test.js | 8 | scripts/gen-pitch-arsenal.mjs, src/api/pitchArsenal.js | Pitch arsenal aggregation/reader |
 | pitch-challenge-marker.test.js | 2 | src/api/challenges.js | ABS challenge marker on one pitch (PR #344) |
+| pitch-locations.test.js | 7 | src/api/playbyplay.js (pitchInfo) | Whether a park tracked plate locations — gates the strike-zone pane and the at-bat row's second column |
 | pitcher-advanced.test.js | 9 | src/api/person.js | Player page Advanced card, situational splits, rank chips, QS flag |
 | pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
