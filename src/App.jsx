@@ -133,6 +133,11 @@ const RosterTab = lazyNamed(() => import('./screens/team/RosterTab.jsx'), 'Roste
 const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTab')
 const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
 const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'MinorsTab')
+// Stamp In (ADR-0042) — NOT a sixth tab. A standalone page under the team's
+// address, reached only from the Schedule card's button on the Games tab, and
+// lazily loaded like every other screen so nobody who never opens it pays for
+// it (or for its own stylesheet).
+const StampInPage = lazyNamed(() => import('./screens/team/StampInPage.jsx'), 'StampInPage')
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const UmpireRankingsPage = lazyNamed(
@@ -303,7 +308,9 @@ export default function App() {
     // '/logbook/book/{id}[/{season}]' routes — LogbookPage.jsx's own resolver
     // treats "absent" as "let the book count decide" (ADR-0036's multi-book
     // addendum).
-    content = <LogbookPage season={route.season} placing={route.placing} bookId={route.bookId ?? null} />
+    // `creating` is '/logbook/new' — a mode of this same resolver, so no other
+    // book is ever mounted beside the one being started.
+    content = <LogbookPage season={route.season} placing={route.placing} bookId={route.bookId ?? null} creating={route.creating ?? false} />
   } else if (route.name === 'logbook-stats') {
     // Spans every season, so it takes no season param — see route.js for why
     // this branch has to parse ahead of the numeric-season one. `bookId` is
@@ -331,6 +338,8 @@ export default function App() {
     content = <NumbersTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-minors') {
     content = <MinorsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-stamp-in') {
+    content = <StampInPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage

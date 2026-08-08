@@ -28,12 +28,12 @@ about what it is. Do not tidy it into a folder.
 | `gamehud/` | `RollingLine`, `Scorebug`, `StatBox` | Persistent live-game heads-up widgets shown while scoring |
 | `highlights/` | `HighlightClipCard` | Purely presentational video-clip cards — no fetching, no game-shape knowledge; the caller precomputes the caption and owns the `HighlightSheet` it opens |
 | `inning/` | `HalfInning`, `PitchersSection`, `RosterPanel`, `PreHalfCallouts`, `EnteringReference`, `ExtrasBanner`, `DelayCard`, `MarginNotes` | The innings-viewer shell around the at-bat feed |
-| `logbook/` | `GameStamp`, `StampGameButton` | The Logbook stamp (ADR-0035) — `check-stamp-surfaces.mjs` allowlists these by path |
+| `logbook/` | `GameStamp`, `StampGameButton`, `StampInButton` | The Logbook stamp (ADR-0035) — `check-stamp-surfaces.mjs` allowlists the first two by path. `StampInButton` is the Stamp In page's plain mint control (ADR-0042): it may mint, never draw, so it sits on that guard's `FORBIDDEN_ART_FILES` instead |
 | `logo/` | `TeamLogo`, `LogoModal`, `TeamTreatmentMark`, `JerseyCombos` | Club-mark rendering and its sketch/print modal |
 | `player/` | `Headshot`, `PlayerLink`, `Ledger`, `PerformerCard`, `CareerTimeline`, `TrophyCase`, `AdvancedStatsCard`, `LevelProgressionCard`, `PositionInnings`, `PlayerPhotosRail`, `PlayerHighlightsRail` | Player-identity primitives and career-level cards |
 | `playerstats/` | `RecentFormCard`, `SplitsVsTeam`, `FoulCard`, `MilestoneWatchCard`, `PitcherWorkloadCard` | Player statistical cards (as distinct from `charts/`'s plotted quantities) |
 | `playbyplay/` | `PlayByPlay`, `BatterNotice`, `PitcherNotice`, `FielderNotice`, `PinchRunNotice`, `CalloutNote`, `DueUpNextCard`, `UpNextBatters`, `HighlightSheet` | The at-bat feed's notification-card family (ADR-0017) |
-| `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |
+| `scoring/` | `AtBatBox`, `ScorecardSheet`, `PlayDiamond`, `BaseoutDiamond`, `BaseState`, `DefenseDiamond`, `PlacedRunnerCard`, `StrikeZone`, `PitchLadder`, `playDiamondGeometry.js` | The scorebook-diamond drawing family |
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
 | `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync`, `BooksCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041) |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |

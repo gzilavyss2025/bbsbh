@@ -467,6 +467,13 @@
     gap: 0 var(--space-4);
     align-items: stretch;
   }
+  /* A park with no plate locations renders no zone pane, so the card takes the
+     whole row instead of reserving 62fr for nothing — and the batter's
+     headshot leads it in the room that frees up. A tracked park keeps the
+     two-column rule above, headshot and all, untouched. */
+  .pbp__atbat--nozone {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
   .pbp__zonebtn {
     display: none;
   }

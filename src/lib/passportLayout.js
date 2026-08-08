@@ -373,3 +373,41 @@ export function autoLayout(stamps, { startPage = 1 } = {}) {
   })
   return out
 }
+
+// The order a book reads in by date, oldest first ('oldest') or newest first
+// ('newest'). A NEW array; the caller's own list is never touched.
+//
+// The order is TOTAL, so two devices arrange the same collection identically
+// and re-ordering twice never shuffles: date, then `stampedAt`, then gamePk —
+// the same settling `allStamps` (src/lib/stamps.js) uses, so the book and the
+// grid below it never disagree about two games on one date. 'newest' is the
+// exact reverse, tiebreak included. A tombstone is dropped (it would leave a
+// gap); an unreadable date sorts to the oldest end rather than being lost.
+function byDatePressedThenGame(a, b) {
+  const dateA = typeof a?.date === 'string' ? a.date : ''
+  const dateB = typeof b?.date === 'string' ? b.date : ''
+  if (dateA !== dateB) return dateA < dateB ? -1 : 1
+  const pressedA = Number(a?.stampedAt) || 0
+  const pressedB = Number(b?.stampedAt) || 0
+  if (pressedA !== pressedB) return pressedA - pressedB
+  return (Number(a?.gamePk) || 0) - (Number(b?.gamePk) || 0)
+}
+
+export function orderByDate(stamps, direction = 'oldest') {
+  const live = (stamps ?? []).filter((s) => s && s.state !== 'off')
+  const sorted = live.sort(byDatePressedThenGame)
+  return direction === 'newest' ? sorted.reverse() : sorted
+}
+
+// "Re-place this book by date": order the stamps, then hand them to
+// `autoLayout`, which fills the ruled boxes from `startPage` with no gaps.
+//
+// Stamps already ON a page, and only those. A caller's book list resolves an
+// UNPLACED stamp's bookId to the default book (LogbookCollection.jsx), so on
+// that book the tray would otherwise be swept onto the pages by a control that
+// promises the tray stays put. Laying the tray out is `autoLayout`'s own job,
+// asked for separately.
+export function layoutInDateOrder(stamps, { direction = 'oldest', startPage = 1 } = {}) {
+  const placed = (stamps ?? []).filter((s) => s?.placement)
+  return autoLayout(orderByDate(placed, direction), { startPage })
+}

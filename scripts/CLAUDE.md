@@ -494,54 +494,54 @@ Re-run only to fold in a new season.
 
 ## Assets / off-app
 
-- `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR
-  knockout version of every club's mlbstatic mark, worn by the navy section
-  mastheads (Batting order / Starting pitcher / Defense / Due up next) on the
-  lineup, innings, and box score pages. Replaces a `filter: brightness(0)
-  invert(1)` that flattened any mark with light interior detail into an
-  unreadable blob — see ADR-0031 and `src/lib/logoMono.js`, which holds the pure
-  ink-vs-paper conversion this script fetches for (`test/logo-mono.test.js` pins
-  it). Runs on the WEEKLY `update-teams.yml` right after `gen-teams.mjs`, whose
-  `teams.json` is its team list, so coverage can't drift from the club set.
-  Partial coverage is fine by design: a club with no file falls through
-  `TeamLogo`'s variant → base chain to its full-color mark, so a new affiliate
-  self-heals on the next run. The ink/paper split is a heuristic over art nobody
-  controls — after a run that adds clubs, use **`--sheet`**
-  (`.scratch/mono-logos/contact-sheet.html`, gitignored) and LOOK at every mark
-  beside its original; a bad conversion is a wrong-looking logo, not a crash,
-  and a blank cell means that file doesn't decode as an image at all.
-  `--ids=158,498` spot-checks a few. A club the heuristic gets wrong is corrected
-  by SHAPE rather than by retuning the thresholds for everyone: `src/lib/data/mono-ink.json`
-  pins individual shapes to ink or knockout, picked by eye in `/identity-lab`'s
-  Knockout mark editor, and this script applies them (`scripts/lib/mono-logo-art.mjs`,
-  shared with the lab's dev-only regenerate route so both produce identical art).
-  Pins carry a fingerprint of the art they were picked against — a club that
-  rebrands drops back to automatic and is REPORTED at the end of a run rather
-  than having yesterday's answers applied to today's shapes.
-  Kept OUT of the PWA precache (~1.7 MB for
-  the league, two marks per game) with a CacheFirst runtime rule instead — see
-  `vite.config.js`. Also writes `src/lib/data/mono-logo-manifest.json` (a
-  `teamId -> content hash` map), which `teamLogoUrl` (`teams.js`) appends to
-  the mono URL as `?v=` so a corrected mark's changed hash busts that
-  CacheFirst rule immediately instead of waiting on its 30-day expiry — see
-  ADR-0031's amendment.
+- `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR knockout
+  version of every club's mlbstatic mark, worn by the navy section mastheads (Batting
+  order / Starting pitcher / Defense / Due up next) on the lineup, innings, and box
+  score pages. Replaces a `filter: brightness(0) invert(1)` that flattened any mark
+  with light interior detail into an unreadable blob — see ADR-0031 and
+  `src/lib/logoMono.js`, which holds the pure ink-vs-paper conversion this script
+  fetches for (`test/logo-mono.test.js` pins it). Runs on the WEEKLY
+  `update-teams.yml` right after `gen-teams.mjs`, whose `teams.json` is its team list,
+  so coverage can't drift from the club set. Partial coverage is fine by design: a
+  club with no file falls through `TeamLogo`'s variant → base chain to its full-color
+  mark, so a new affiliate self-heals on the next run. The ink/paper split is a
+  heuristic over art nobody controls — after a run that adds clubs, use **`--sheet`**
+  (`.scratch/mono-logos/contact-sheet.html`, gitignored) and LOOK at every mark beside
+  its original; a bad conversion is a wrong-looking logo, not a crash, and a blank
+  cell means that file doesn't decode as an image at all. `--ids=158,498` spot-checks
+  a few. A club the heuristic gets wrong is corrected by SHAPE rather than by retuning
+  the thresholds for everyone: `src/lib/data/mono-ink.json` pins individual shapes to
+  ink or knockout, picked by eye in `/identity-lab`'s Knockout mark editor, and this
+  script applies them (`scripts/lib/mono-logo-art.mjs`, shared with the lab's dev-only
+  regenerate route so both produce identical art). Pins carry a fingerprint of the art
+  they were picked against — a club that rebrands drops back to automatic and is
+  REPORTED at the end of a run rather than having yesterday's answers applied to
+  today's shapes. Kept OUT of the PWA precache (~1.7 MB for the league, two marks per
+  game) with a CacheFirst runtime rule instead — see `vite.config.js`. Also writes
+  `src/lib/data/mono-logo-manifest.json` (a `teamId -> content hash` map), which
+  `teamLogoUrl` (`teams.js`) appends to the mono URL as `?v=` so a corrected mark's
+  changed hash busts that CacheFirst rule immediately instead of waiting on its 30-day
+  expiry — see ADR-0031's amendment.
+- `gen-league-logos.mjs` → `public/data/logos/league/{mlb,milb}.svg` + a viewBox manifest
+  — the same knockout conversion run on the two LEAGUE marks, for the Game Log covers
+  carrying one instead of a club crest. NOT a loop inside the script above, which prunes
+  its output of anything not keyed by a numeric team id. Hand-run; see `docs/game-log.md`.
 - `gen-logo-art.mjs` → `src/lib/data/logo-art.json` — the coverage manifest for the
-  curated club marks under `public/team-logos/`. Fetches nothing; the source of
-  truth is the working tree. Normally you never run it: the Team Identity Lab's
+  curated club marks under `public/team-logos/`. Fetches nothing; the source of truth
+  is the working tree. Normally you never run it: the Team Identity Lab's
   `/__dev/team-logo` upload rewrites the manifest itself after every drop
-  (`lib/dev-logo-upload.mjs`, ADR-0029). It exists for the two cases an upload
-  can't cover — the first build, and art added or deleted by hand.
-  `test/logo-upload.test.js` compares the committed manifest against disk and
-  names this script when they disagree, so a hand-dropped file can't sit
-  unrecorded.
-- `compress-logos.mjs` — palette-quantizes (TinyPNG-style, via sharp) every
-  curated PNG under `public/team-logos/` in place, typically 60-80% smaller with
-  no visible change at rendered sizes. Runs nightly in `update-nightly-data.yml`
-  to sweep up new Identity Lab uploads, or by hand as `npm run compress-logos`
-  (which also rebuilds the manifest). **Skips palette PNGs (color type 3)** —
-  that guard is what stops the nightly run from re-quantizing its own output
-  and cumulatively degrading the art; don't remove it. Always regenerate
-  `logo-art.json` after a run that changed anything (it pins exact byte sizes).
+  (`lib/dev-logo-upload.mjs`, ADR-0029). It exists for the two cases an upload can't
+  cover — the first build, and art added or deleted by hand.
+  `test/logo-upload.test.js` compares the committed manifest against disk and names
+  this script when they disagree, so a hand-dropped file can't sit unrecorded.
+- `compress-logos.mjs` — palette-quantizes (TinyPNG-style, via sharp) every curated
+  PNG under `public/team-logos/` in place, typically 60-80% smaller with no visible
+  change at rendered sizes. Runs nightly in `update-nightly-data.yml` to sweep up new
+  Identity Lab uploads, or by hand as `npm run compress-logos` (which also rebuilds
+  the manifest). **Skips palette PNGs (color type 3)** — that guard is what stops the
+  nightly run from re-quantizing its own output and cumulatively degrading the art;
+  don't remove it. Always regenerate `logo-art.json` after a run that changed anything
+  (it pins exact byte sizes).
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +
@@ -551,8 +551,8 @@ Re-run only to fold in a new season.
 - `game-buzz.mjs <gamePk>` — post-game: top social posts from the game's time window,
   ranked by engagement, to seed handwritten GAME NOTES. FREE sources — Bluesky (no
   auth) always, plus the Reddit game thread when `REDDIT_CLIENT_ID/SECRET` are set.
-  Deliberately a terminal script, NOT part of the app (game-night posts are
-  spoilers). Source scoping/queries: `docs/game-buzz.md`.
+  Deliberately a terminal script, NOT part of the app (game-night posts are spoilers).
+  Source scoping/queries: `docs/game-buzz.md`.
 
 ## Local-environment reporters (read-only; run by `session-start.sh`)
 

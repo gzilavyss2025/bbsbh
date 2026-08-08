@@ -1,0 +1,200 @@
+/* The book-cover picker — the six league presets, the club rail, and the phone
+   stepper that walks a small screen through the same choice one step at a
+   time (BookCoverPicker.jsx). Split out of 58-logbook-shelf.css when that file
+   hit check-file-size's ceiling: the shelf is furniture, the management sheet
+   is a form, and this is a third surface with its own vocabulary, used by both
+   the new-book page and the settings sheet.
+
+   Imported by BookCoverPicker.jsx, so it loads only where the picker does. It
+   must cascade AFTER 49-passport-book.css, which owns .passcover — the preview
+   here is a real PassportCover and the two must not fight over it. */
+
+/* ---- BookCoverPicker ---- */
+.coverpick {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* The draft cover, kept on screen through every step. Narrower than a real
+   shelf cover: it is a reference for the choice below it, not the book. */
+.coverpick__preview {
+  display: flex;
+  justify-content: center;
+}
+
+/* Wide screens scroll the picker past the cover, and a preview you cannot see
+   while you choose is not a preview. Sticking it keeps the draft in view for
+   the whole of both halves without taking a column away from the 50/50 split
+   below. z-index so a club rail scrolling under it does not cross it. */
+@media (min-width: 740px) {
+  .coverpick__preview {
+    position: sticky;
+    top: var(--space-3);
+    z-index: 1;
+    padding-block-end: var(--space-2);
+    background: linear-gradient(var(--bg-page) 82%, transparent);
+  }
+}
+
+.coverpick__preview .passcover {
+  max-width: 168px;
+  cursor: default;
+  box-shadow: var(--shadow-card);
+}
+
+.coverpick__heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* Wide screens only — the two halves are rendered by the component's own
+   layout branch, so this is the arrangement, not the decision. */
+.coverpick__halves {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.coverpick__half {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.coverpick__presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+/* Each preset IS the board it makes — the same --cover-ink/--cover-foil pair
+   the cover itself paints with (.passcover--board-*), so a swatch can never
+   claim a colour the cover does not use. */
+.coverpick__preset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  padding: var(--space-3);
+  border: var(--bw-rule) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--cover-ink);
+  color: var(--cover-foil);
+  cursor: pointer;
+}
+
+.coverpick__preset.is-active {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.coverpick__preset:focus-visible,
+.coverpick__color:focus-visible,
+.coverpick__step:focus-visible,
+.coverpick__favorite:focus-visible,
+.coverpick__back:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.coverpick__presetmark {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  color: inherit;
+}
+
+.coverpick__presetfallback {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  color: inherit;
+}
+
+.coverpick__colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.coverpick__color {
+  flex: 1 1 0;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-rule) solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--cover-ink);
+  color: var(--cover-foil);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+
+.coverpick__color.is-active {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-card);
+}
+
+/* ---- the phone stepper ---- */
+.coverpick__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.coverpick__step {
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  text-align: left;
+  cursor: pointer;
+}
+
+.coverpick__back {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: var(--space-2) 0;
+  color: var(--field);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  cursor: pointer;
+}
+
+.coverpick__favorite {
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.coverpick__favorite.is-active {
+  border-color: var(--accent-primary);
+  color: var(--text-heading);
+  box-shadow: var(--shadow-card);
+}

@@ -40,6 +40,12 @@
                             WCAG AA (≥4.5:1) against BOTH kraft stripes of
                             --seal-texture (5.4:1 base, 4.5:1 hatch) */
 
+  /* ---- Book board (Game Log cover) ---- a passport board is one deep,
+     saturated colour with everything on it foil-stamped in paper. Kraft here
+     is much darker than --seal: the tape amber only ever carries --seal-ink,
+     while a board carries paper foil and has to hold AA against it. */
+  --kraft-board: #6B4A22;
+
   /* ---- Highlight / marker ---- */
   --marker:   #E9C33F;   /* highlighter yellow — "watch" flag */
 
@@ -72,6 +78,15 @@
 
   --seal-cover:       var(--seal);
   --seal-cover-ink:   var(--seal-ink);
+
+  /* The three house boards a Game Log book prints on when its cover carries a
+     LEAGUE mark rather than a club crest (src/lib/books.js's `coverColor`). A
+     club cover still takes its board from the club. All three are stamped in
+     --book-board-foil and are asserted against it by check-contrast.mjs. */
+  --book-board-kraft: var(--kraft-board);
+  --book-board-red:   var(--clay-deep);
+  --book-board-blue:  var(--allstar-blue-deep);
+  --book-board-foil:  var(--text-on-ink);
 
   --focus-ring:       var(--field);
 

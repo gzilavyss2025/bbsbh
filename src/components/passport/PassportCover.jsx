@@ -3,6 +3,7 @@ import { PAGE_ASPECT } from '../../lib/passportLayout.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { hasMonoLogo, teamAbbr, teamChipColors, teamFullName, teamLogoUrl } from '../../lib/teams.js'
 import { TallyWordmark } from '../chrome/TallyBrand.jsx'
+import { leagueMarkBox, leagueMarkUrl } from './leagueMarks.js'
 
 // The Logbook passport book's FRONT COVER (ADR-0035, the passport-book
 // redesign). A real passport cover is one board of one colour with everything
@@ -104,12 +105,34 @@ import { TallyWordmark } from '../chrome/TallyBrand.jsx'
 // gets no crest at all and the cover reads as the wordmark alone. Never a
 // broken image, never an invented mark.
 
+// ===========================================================================
+// The league marks — a cover that carries no club at all
+// ===========================================================================
+// `book.coverMark` (src/lib/books.js) is 'team' | 'mlb' | 'milb'. 'team' is
+// everything above and everything this component ever did before the cover
+// picker shipped; the other two swap the club crest for a LEAGUE mark and take
+// the board from `book.coverColor` (one of three house tokens) instead of from
+// a club. A record carrying neither field normalizes to `'team' + null`, which
+// is why an untouched book is byte-for-byte what it always drew.
+//
+// The two league marks are precomputed by scripts/gen-league-logos.mjs through
+// the SAME src/lib/logoMono.js pipeline as a club's, so warning (1) above
+// applies to them identically: the <image> resolves only while this SVG is
+// inline. They differ from a club mark in one way that matters here — MLB is a
+// near-square badge and MiLB a wide wordmark — so they get their own viewBox
+// (leagueMarks.js) rather than letterboxing into the square CREST_BOX below.
+
 // The club crest's user-space box. Square, because a mono mark is not
 // (Brewers 157x172 portrait, Cubs 234x234) and letterboxes into whatever slot
 // it is given — never assume aspect.
 const CREST_BOX = 100
 
-export function PassportCover({ book, onOpen }) {
+// `preview` draws the same board with nothing behind it: the cover picker
+// needs a live picture of what it is about to write, and a SECOND cover
+// renderer is the one way this could ever show something the book itself does
+// not. A disabled button is not focusable, which is what makes `aria-hidden`
+// legitimate here — the picker names the choice around it.
+export function PassportCover({ book, onOpen, preview = false }) {
   // Called unconditionally (react-hooks/rules-of-hooks) even for a book with
   // its own cover pick — cheap (localStorage-backed, already memoized by
   // usePreferences), and the one branch below that needs it is itself
@@ -124,12 +147,20 @@ export function PassportCover({ book, onOpen }) {
   const hasCoverPick = Number.isInteger(book?.coverTeamId) && book.coverTeamId > 0
   const teamId = hasCoverPick ? book.coverTeamId : favoriteTeamId
 
-  const colors = teamChipColors(teamId)
+  // A league mark is the whole identity of the cover it sits on, so it
+  // suppresses the club entirely — colours, crest and the club-name subtitle
+  // alike. `coverTeamId` is kept on the record through all of it, so switching
+  // back to a club crest never asks the user to re-pick the club.
+  const leagueMark = book?.coverMark === 'mlb' || book?.coverMark === 'milb' ? book.coverMark : null
+  const leagueBox = leagueMark ? leagueMarkBox(leagueMark) : null
+  const leagueHref = leagueMark ? leagueMarkUrl(leagueMark) : null
+
+  const colors = leagueMark ? null : teamChipColors(teamId)
   const maskId = `passcover-crest-${useId().replace(/:/g, '')}`
 
-  const abbr = teamAbbr({ id: teamId })
-  const clubName = teamFullName(teamId)
-  const hasMark = Boolean(teamId) && hasMonoLogo(teamId)
+  const abbr = leagueMark ? '' : teamAbbr({ id: teamId })
+  const clubName = leagueMark ? '' : teamFullName(teamId)
+  const hasMark = !leagueMark && Boolean(teamId) && hasMonoLogo(teamId)
 
   // '' is a valid, meaningful value from books.js's own contract ("use the
   // default word at render time") — never something invented on the record's
@@ -147,16 +178,60 @@ export function PassportCover({ book, onOpen }) {
     style['--cover-foil'] = colors.text
   }
 
+  // A league-mark board is a token pair, so it is set by a class rather than
+  // an inline hex — the colour stays in the stylesheet where check-contrast.mjs
+  // can reach it. An unrecognised `coverColor` never gets here (books.js
+  // sanitizes it to null); null means the kraft board, the house default.
+  const boardClass = leagueMark ? ` passcover--board-${book.coverColor ?? 'kraft'}` : ''
+
   return (
     <button
       type="button"
-      className="passcover"
+      className={`passcover${boardClass}`}
       style={style}
-      onClick={onOpen}
+      onClick={preview ? undefined : onOpen}
+      disabled={preview || undefined}
+      aria-hidden={preview || undefined}
       // The accessible name says what the control DOES, and contains the word
       // the foot of the cover shows (ADR-0017's button-copy convention).
       aria-label="Open your Game Log"
     >
+      {/* A league mark in place of the club crest. Same mask-over-currentColor
+          recipe as the club mark below, on the mark's OWN viewBox — a square
+          slot would shrink the MiLB wordmark to a sliver. Dropped, not faked,
+          if this build has no art for it. */}
+      {leagueMark && leagueBox && leagueHref && (
+        <span className={`passcover__crest passcover__crest--${leagueMark}`}>
+          <svg
+            viewBox={leagueBox.join(' ')}
+            className="passcover__mark passcover__mark--league"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <mask id={maskId}>
+                <image
+                  href={leagueHref}
+                  x={leagueBox[0]}
+                  y={leagueBox[1]}
+                  width={leagueBox[2]}
+                  height={leagueBox[3]}
+                  preserveAspectRatio="xMidYMid meet"
+                />
+              </mask>
+            </defs>
+            <rect
+              x={leagueBox[0]}
+              y={leagueBox[1]}
+              width={leagueBox[2]}
+              height={leagueBox[3]}
+              fill="currentColor"
+              mask={`url(#${maskId})`}
+            />
+          </svg>
+        </span>
+      )}
+
       {/* No knockout mark AND no abbreviation (an unrecognised id) — the crest
           slot is dropped entirely rather than left as an empty square, and the
           cover reads as the wordmark alone. */}

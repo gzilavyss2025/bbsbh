@@ -11,7 +11,8 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // than conditionally calling a hook, exactly as it does for
 // SpoiledDaysCloudSync and StampsCloudSync.
 //
-// What it syncs: a book's COVER — id, title, subtitle, cover club (ADR-0036).
+// What it syncs: a book's COVER — id, title, subtitle, cover club, and what is
+// stamped on it (`coverMark`/`coverColor`, the league-mark presets) (ADR-0036).
 // Never the stamps filed inside it. Which stamps belong to which book lives on
 // the STAMP record's own `placement.bookId` (src/lib/stamps.js) and travels
 // with StampsCloudSync, not here.
@@ -190,6 +191,8 @@ export function BooksCloudSync() {
                 title: entry.title,
                 subtitle: entry.subtitle,
                 coverTeamId: entry.coverTeamId,
+                coverMark: entry.coverMark,
+                coverColor: entry.coverColor,
               }),
             })
             return res.ok ? null : res.status

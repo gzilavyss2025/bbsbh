@@ -52,6 +52,7 @@ export function GamesTab({ id, asOf, sportId }) {
         <SeasonSchedule
           teamId={team.id}
           asOf={asOf}
+          sportId={sportId}
           schedule={schedule}
           allStarGame={allStarGame}
           refDate={asOf || isoToday()}

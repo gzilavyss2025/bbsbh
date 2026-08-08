@@ -145,7 +145,24 @@ const BUDGETS = {
   // 26/26a and 17/17a above). Split out because 28-team-hub.css was at its
   // check-file-size budget and still covers four unrelated surfaces below the
   // hero; nothing left there names a hero selector, so the two never compete.
-  'src/styles': 64,
+  //
+  // 64 -> 65 for `59-stamp-in.css`: the Stamp In page (ADR-0042), a genuinely
+  // new route rather than a split-out of an over-budget file, so it earns the
+  // next free integer rather than a lettered sibling. Loaded directly by
+  // `screens/team/StampInPage.jsx`, same "the component that uses it carries
+  // it" convention as `49-passport-book.css` and `58-logbook-shelf.css`. Its
+  // position IS load-bearing: it de-chromes the `.flipback` card that
+  // `22-box-score-tables.css` owns, so it has to cascade after it.
+  //
+  // 65 -> 66 for `60-book-cover-picker.css`: the OPPOSITE case to the two
+  // above — this is a split of `58-logbook-shelf.css`, which reached
+  // check-file-size's 600-line ceiling once the shelf became furniture and the
+  // cover picker grew its six presets and phone stepper. That guard's remedy
+  // is to split, and this directory cannot nest (a partial's numeric prefix IS
+  // its cascade order, and `index.css` imports them as one ordered sheet), so
+  // the split has to land here. Loaded by `BookCoverPicker.jsx`; must cascade
+  // after `49-passport-book.css`, whose `.passcover` its preview reuses.
+  'src/styles': 66,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -165,7 +182,12 @@ const BUDGETS = {
   // check-dead-exports.mjs and check-stamp-surfaces.mjs already here. Its data
   // (src/api/spoiler-manifest.json) deliberately does NOT live beside it: the
   // classification is a fact about the modules, so it sits with them.
-  scripts: 70,
+  // +1 for gen-league-logos.mjs — the two LEAGUE knockout marks the Game Log's
+  // cover picker stamps on a board. Deliberately NOT a loop inside
+  // gen-mono-logos.mjs: that script prunes its output directory of anything
+  // not keyed by a numeric team id on every full run, so a league mark living
+  // there would be deleted nightly. Flat here like every other gen-*.mjs.
+  scripts: 71,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -183,7 +205,12 @@ const BUDGETS = {
   // and LogbookCollection.jsx once that split landed (see the src/screens
   // entry below), pulled out rather than defined twice. A leaf module, not a
   // new subsystem.
-  'src/lib': 51,
+  // +1 for stampIn.js — the Stamp In page's pure rules (ADR-0042): its
+  // one-time consent record, the played-games filter, and the row action's
+  // three states. The same React-free-core-beside-its-screen shape as
+  // scoresUnlocked.js and spoiledDays.js, both of which are the consent
+  // modules this one is modelled on. A leaf module, not a new subsystem.
+  'src/lib': 52,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

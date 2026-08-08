@@ -95,6 +95,14 @@ const PAIRINGS = [
   // --surface-card (the literal hex is that composite, precomputed by hand
   // since this checker doesn't parse color-mix()).
   { fg: 'seal-ink', bg: '#C3996A', min: TEXT, note: 'seal ink on Last 10 Games home-game stub' },
+  // The three Game Log book boards a league-mark cover prints on, each carrying
+  // the same paper foil (PassportCover.jsx stamps every line on the board in
+  // --cover-foil). Held to the FULL 4.5:1 text bar rather than the 3:1 large-text
+  // one the cover's own type would allow, because a board colour is picked once
+  // and then worn by whatever the cover grows next.
+  { fg: 'book-board-foil', bg: 'book-board-kraft', min: TEXT, note: 'book cover foil on the kraft board' },
+  { fg: 'book-board-foil', bg: 'book-board-red', min: TEXT, note: 'book cover foil on the red board' },
+  { fg: 'book-board-foil', bg: 'book-board-blue', min: TEXT, note: 'book cover foil on the blue board' },
   // Core semantic text roles on their intended surfaces.
   { fg: 'text-body', bg: 'bg-canvas', min: TEXT, note: 'body text on app canvas' },
   { fg: 'text-heading', bg: 'surface-card', min: TEXT, note: 'heading on raised card' },
@@ -115,6 +123,14 @@ const PAIRINGS = [
   // the card pill (.flipback__pill--crown) and on the filter chip that selects
   // it (FILTER_CHIPS, src/lib/resultCards.js) — same pairing, asserted once.
   { fg: 'text-on-ink', bg: 'award-ink', min: TEXT, note: 'Game of the Night crown pill text' },
+  // Stamp In's row action, in both states (ADR-0042): a soft neutral until you
+  // press it, field green once you hold that stamp. The green pair is the same
+  // one the win stamp already asserts above; the neutral pair is asserted here
+  // rather than assumed, because --surface-inset is the lightest paper in the
+  // system and a later nudge to either token is exactly the kind of change
+  // nothing else would catch.
+  { fg: 'text-body', bg: 'surface-inset', min: TEXT, note: 'Stamp In row action, unpressed' },
+  { fg: 'text-on-ink', bg: 'accent-positive', min: TEXT, note: 'Stamp In row action, stamped' },
   // The slate's Scores Unlocked live band: run totals (heading ink) and the
   // centered state token (muted ink) over the field-green wash.
   { fg: 'text-heading', bg: 'field-soft', min: TEXT, note: 'live score band numerals' },

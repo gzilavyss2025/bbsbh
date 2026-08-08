@@ -72,6 +72,25 @@
    inline with it rather than taking the scorebook's uppercase name style — the
    span stays as a hook for that override. */
 
+/* The batter's headshot, leading his at-bat row at a park with no plate
+   locations (AtBatCard). A phone column has no room beside the card, so it is
+   hidden outright rather than shrunk — which also keeps the lazy image from
+   ever loading there. Two rungs up from the pitching-change photo (--shot-sm),
+   the only other headshot in this feed. */
+.pbp__batshot {
+  display: none;
+}
+@media (min-width: 740px) {
+  .pbp__batshot {
+    display: block;
+    align-self: start;
+  }
+  .pbp__batshot .pitchernotice__shot {
+    width: var(--shot-lg-w);
+    height: var(--shot-lg-h);
+  }
+}
+
 .pbp__card {
   display: flex;
   align-items: stretch;
@@ -314,7 +333,7 @@
 /* Numbers Game #22-style ball/strike lanes beside the diamond: two adjacent
    thin columns — a light "ball" lane and a shaded "strike" lane — stretched
    to a common height, each listing its pitch numbers stacked from the top
-   (see PitchLadder in PlayByPlay.jsx). */
+   (see PitchLadder.jsx). */
 .pbp__ladder {
   display: flex;
   align-items: stretch;

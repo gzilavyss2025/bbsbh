@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { gamePath } from '../../../lib/route.js'
+import { gamePath, teamStampInPath } from '../../../lib/route.js'
 import { useNav } from '../../../lib/nav.js'
 import { TeamLogo } from '../../../components/logo/TeamLogo.jsx'
 
@@ -98,11 +98,25 @@ function SeriesStrip({ games, allStarGame, refDate }) {
   )
 }
 
-export function SeasonSchedule({ teamId, asOf, schedule, allStarGame, refDate }) {
+// `sportId` rides along only so the Stamp In link can reproduce the `?s=` hint
+// a dated team URL arrived with, exactly like every other team link.
+export function SeasonSchedule({ teamId, asOf, sportId, schedule, allStarGame, refDate }) {
+  const navigate = useNav()
   return (
     <div className="thub-card">
       <div className="thub-card__head">
         <span>Schedule</span>
+        {/* The ONLY door to /team/{id}/stamp-in (ADR-0042). One entry point by
+            design: the page's own consent is what makes a season of results
+            legitimate, and a second door would be a second way to walk into
+            them. Reuses .psodds-pill, StandingsCard.jsx's head-button idiom. */}
+        <button
+          type="button"
+          className="psodds-pill"
+          onClick={() => navigate(teamStampInPath(teamId, { d: asOf, s: sportId }))}
+        >
+          Stamp In
+        </button>
       </div>
       <div className="thub-card__body">
         <SeriesStrip

@@ -59,10 +59,11 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
 | node-handler.test.js | 14 | api/_lib/nodeHandler.js | Vercel Node runtime request adapter |
 | page-turn-state.test.js | 13 | src/components/page-turn/pageTurnState.js | Forward page-turn transition (ADR-0024) |
-| passport-layout.test.js | 39 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, the ruled 2x4 guide + capacity (ADR-0035/0036) |
+| passport-layout.test.js | 46 | src/lib/passportLayout.js | Logbook passport book geometry — tilt hash, page clamps, collision nudge, the ruled 2x4 guide + capacity, the by-date re-order (ADR-0035/0036) |
 | pinch-hitter-notice.test.js | 2 | src/api/playbyplay.js | Mid-half PH notice (ADR-0017 tiers) |
 | pitch-arsenal.test.js | 8 | scripts/gen-pitch-arsenal.mjs, src/api/pitchArsenal.js | Pitch arsenal aggregation/reader |
 | pitch-challenge-marker.test.js | 2 | src/api/challenges.js | ABS challenge marker on one pitch (PR #344) |
+| pitch-locations.test.js | 7 | src/api/playbyplay.js (pitchInfo) | Whether a park tracked plate locations — gates the strike-zone pane and the at-bat row's second column |
 | pitcher-advanced.test.js | 9 | src/api/person.js | Player page Advanced card, situational splits, rank chips, QS flag |
 | pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
@@ -94,7 +95,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
-| team-transactions.test.js | 30 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
+| team-transactions.test.js | 31 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |
 | team.test.js | 28 | src/api/team.js | Team fetch/roster/affiliates/standings |
 | teams-static.test.js | 2 | src/api/teams-static.js | fetchStaticTeams |
 | teams.test.js | 51 | src/lib/teams.js | Team id/logo/color static data (60+ exports) |

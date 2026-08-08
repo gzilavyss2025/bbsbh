@@ -53,7 +53,8 @@ async function fetchAffiliateParentMap(orgIds, season) {
 // which personIds have ever appeared in an MLB game (`mlbDebutDate` — rides
 // along on the same response, no extra fetch) — the signal
 // filterStoryworthy's undebuted-signing suppression uses (see its own
-// comment for why that's scoped to signings only).
+// comment for why that's scoped to signings only), and the one groupIntoStories
+// stamps on each rail slot as `isMlb` for the headshot fallback chain.
 async function fetchPositionsAndDebuts(personIds) {
   const list = [...new Set(personIds.filter(Boolean))]
   const positions = {}
@@ -107,7 +108,7 @@ for (const orgId of orgIds) {
   const bucketed = bucketToOrg(raw, orgId, affilToOrg)
   const deduped = dedupeTransactions(bucketed)
   const kept = filterStoryworthy(deduped, { orgId, debutedIds })
-  const days = groupIntoStories(kept, { positions, orgId })
+  const days = groupIntoStories(kept, { positions, orgId, debutedIds })
   if (days.length) byTeamId[orgId] = { days }
 }
 

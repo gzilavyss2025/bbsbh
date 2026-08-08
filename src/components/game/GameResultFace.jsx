@@ -37,6 +37,13 @@ import {
 // pills row (same graceful-omission convention as `hidePlayOfGame` above).
 // `cardMeta` is one entry from dayHighlights.js's classifyGameCards — see
 // that module for what each field means.
+//
+// `trailing` is an ALREADY-RENDERED node the host drops at the right-hand end
+// of the top row, beside Box score. The node arrives finished, so this file
+// never learns what it is — which is what keeps it free of any stamp
+// identifier (check-stamp-surfaces.mjs names it a forbidden surface, and that
+// was not relaxed). Its one caller is the Stamp In page (ADR-0042); every
+// other caller passes nothing and renders nothing extra.
 export function GameResultFace({
   feed,
   winProb,
@@ -46,6 +53,7 @@ export function GameResultFace({
   pinnedTeamId = null,
   cardMeta = null,
   video = null,
+  trailing = null,
 }) {
   const navigate = useNav()
   const box = selectBoxscore(feed)
@@ -132,6 +140,7 @@ export function GameResultFace({
           <WatchCondensedButton gamePk={game.gamePk} />
         )}
         <ResultPills game={game} cardMeta={cardMeta} />
+        {trailing}
       </div>
       <div className="flipback__linescore">
         <div className="flipback__lsHeader" aria-hidden="true">

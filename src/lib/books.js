@@ -9,8 +9,8 @@
 // filed in it — those live in src/lib/stamps.js's per-gamePk records, each
 // carrying its own `bookId` (see the restated constant and the `bookId` field
 // added to `normalizePlacement` there). This module only tracks which named
-// books exist: `{ id, state, title, subtitle, coverTeamId, createdAt,
-// updatedAt }`. Nothing score-bearing, same footing as a stamp's own record —
+// books exist: `{ id, state, title, subtitle, coverTeamId, coverMark,
+// coverColor, createdAt, updatedAt }`. Nothing score-bearing, same footing as a stamp's own record —
 // a book's name and cover club are a picture, not a result.
 //
 // `title`/`subtitle` are allowed to be '' — that is a valid, meaningful value
@@ -34,6 +34,22 @@ export const MAX_BOOKS = 20
 // "Dad and me" or "2026 road trip".
 export const MAX_BOOK_TITLE_LENGTH = 24
 export const MAX_BOOK_SUBTITLE_LENGTH = 30
+
+// What is stamped on a cover's crest, and — for a league mark — which of the
+// house boards it is stamped on.
+//
+// 'team' is the only thing a cover could carry before the picker shipped, so
+// it is the default for BOTH a record that predates these fields and a value
+// this module refuses. That default is what makes ADR-0041's "every
+// pre-existing collection lands in one book" survive: a book with neither
+// field set reads back as a club crest on club colours, which is exactly what
+// it already drew.
+//
+// `coverColor` belongs to a LEAGUE-mark cover: a club cover takes its board
+// from the club (teamChipColors, PassportCover.jsx), so it leaves this null
+// rather than carrying a second, ignored opinion about colour.
+export const COVER_MARKS = ['team', 'mlb', 'milb']
+export const COVER_COLORS = ['kraft', 'red', 'blue']
 
 const BOOK_ID_RE = /^[a-z0-9-]+$/i
 
@@ -88,6 +104,17 @@ export function sanitizeBookSubtitle(value) {
   return stripControlChars(value).replace(/\s+/g, ' ').trim().slice(0, MAX_BOOK_SUBTITLE_LENGTH)
 }
 
+// Both fail CLOSED to the default rather than to null-with-a-shrug: these two
+// values are read straight into a rendered class name and a CSS custom
+// property, so an unrecognised one must never survive the store.
+export function sanitizeCoverMark(value) {
+  return COVER_MARKS.includes(value) ? value : 'team'
+}
+
+export function sanitizeCoverColor(value) {
+  return COVER_COLORS.includes(value) ? value : null
+}
+
 // One book record, validated. Returns null for anything that isn't one, so a
 // hand-edited or cross-version entry is dropped rather than half-read — same
 // "no timestamp, no record" posture as normalizeStamp: a book with no
@@ -105,6 +132,8 @@ export function normalizeBook(raw) {
     title: sanitizeBookTitle(raw.title),
     subtitle: sanitizeBookSubtitle(raw.subtitle),
     coverTeamId: Number.isInteger(raw.coverTeamId) && raw.coverTeamId > 0 ? raw.coverTeamId : null,
+    coverMark: sanitizeCoverMark(raw.coverMark),
+    coverColor: sanitizeCoverColor(raw.coverColor),
     createdAt,
     updatedAt,
   }
@@ -184,7 +213,7 @@ export function bookCount(map) {
 //   - the collection is already at MAX_BOOKS.
 //   - `now` isn't a real timestamp, which would leave a book with no honest
 //     position in "newest first" and nothing for `updatedAt` to sync on.
-export function createBook(map, { id, title, subtitle, coverTeamId, now } = {}) {
+export function createBook(map, { id, title, subtitle, coverTeamId, coverMark, coverColor, now } = {}) {
   const current = normalizeAllBooks(map)
   const at = Number.isInteger(now) && now > 0 ? now : 0
   if (!isBookId(id) || current[id] || !at || bookCount(current) >= MAX_BOOKS) return current
@@ -196,6 +225,8 @@ export function createBook(map, { id, title, subtitle, coverTeamId, now } = {}) 
       title: sanitizeBookTitle(title),
       subtitle: sanitizeBookSubtitle(subtitle),
       coverTeamId: Number.isInteger(coverTeamId) && coverTeamId > 0 ? coverTeamId : null,
+      coverMark: sanitizeCoverMark(coverMark),
+      coverColor: sanitizeCoverColor(coverColor),
       createdAt: at,
       updatedAt: at,
     },
@@ -212,7 +243,7 @@ export function createBook(map, { id, title, subtitle, coverTeamId, now } = {}) 
 // A no-op if the book doesn't exist, is tombstoned (you cannot re-decorate a
 // book you removed — bring it back first, through whatever the UI layer offers
 // for that), or `now` isn't a real timestamp.
-export function updateBookCover(map, id, { title, subtitle, coverTeamId, now } = {}) {
+export function updateBookCover(map, id, { title, subtitle, coverTeamId, coverMark, coverColor, now } = {}) {
   const current = normalizeAllBooks(map)
   const at = Number.isInteger(now) && now > 0 ? now : 0
   const existing = isBookId(id) ? current[id] : null
@@ -223,6 +254,8 @@ export function updateBookCover(map, id, { title, subtitle, coverTeamId, now } =
   if (coverTeamId !== undefined) {
     next.coverTeamId = Number.isInteger(coverTeamId) && coverTeamId > 0 ? coverTeamId : null
   }
+  if (coverMark !== undefined) next.coverMark = sanitizeCoverMark(coverMark)
+  if (coverColor !== undefined) next.coverColor = sanitizeCoverColor(coverColor)
   return { ...current, [id]: next }
 }
 
@@ -291,6 +324,8 @@ export function sameBookRecord(a, b) {
     a.title === b.title &&
     a.subtitle === b.subtitle &&
     a.coverTeamId === b.coverTeamId &&
+    a.coverMark === b.coverMark &&
+    a.coverColor === b.coverColor &&
     a.createdAt === b.createdAt &&
     a.updatedAt === b.updatedAt
   )

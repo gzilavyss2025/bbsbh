@@ -93,11 +93,11 @@ const BUDGETS = {
   'src/styles/35-postseason-series.css': 700, // 693
   'src/styles/42-first-scorebook.css': 900, // 854
   'src/styles/43-foul-tracker.css': 900, // 877
-  // 1000 -> 1100: CoverColorPicker.jsx's rules (ADR-0036's shelf) — a thin
-  // wrapper around ClubPicker's own strip that adds the explicit
-  // favourite-team option and a live cover-colour preview swatch. It belongs
-  // beside PassportCover's own rules in this same partial rather than a new
-  // stylesheet, for the identical reason PassportCover's already do.
+  // 1000 -> 1100 was CoverColorPicker.jsx's rules (ADR-0036's shelf). That
+  // component is gone — BookCoverPicker.jsx replaced it, and its rules live in
+  // 58-logbook-shelf.css beside the rest of the book-management UI — so what is
+  // left here is PassportBook/PassportPage/PassportCover's own art, including
+  // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
   'src/api/whatsBrewing.js': 1600, // 1581
   'scripts/gen-callouts.mjs': 1500, // 1483

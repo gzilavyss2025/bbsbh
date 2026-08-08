@@ -16,6 +16,10 @@
 //   3. A named set of spoiler-critical surfaces mentions no stamp identifier at
 //      all — a belt-and-braces check that also catches a copy-paste of the
 //      markup rather than an import.
+//   4/5. A narrower version of (3) for whole DIRECTORIES and for individual
+//      FILES that may legitimately COUNT or MINT stamps but must never draw
+//      one. See FORBIDDEN_ART_DIRS / FORBIDDEN_ART_FILES for why the two
+//      identifier sets differ.
 //
 // Run by `npm run lint` (so it gates every push). Zero deps, walks src/.
 
@@ -119,6 +123,29 @@ const FORBIDDEN_IDENTIFIERS = ['GameStamp', 'StampGameButton', 'useStamps']
 const FORBIDDEN_ART_DIRS = ['screens/profile', 'components/profile', 'components/account']
 const FORBIDDEN_ART_IDENTIFIERS = ['GameStamp', 'StampGameButton']
 
+// Individual FILES held to the same narrower rule as the directories above:
+// no stamp ART, while `useStamps` stays legal. A file, not a directory,
+// because each of these sits in a directory whose other occupants have the
+// opposite permission — StampInButton.jsx is GameStamp.jsx's own neighbour in
+// components/logbook, and StampInPage.jsx is one screen among the team hub's.
+//
+// Stamp In (/team/{id}/stamp-in, ADR-0042) is the page that lists a club's
+// whole played season with every result showing, behind a one-time consent, so
+// a reader can press a stamp for each game they watched. It legitimately mints
+// stamps — that is the feature — so it MUST be able to call `useStamps`. It
+// must never DRAW one: this is the app's densest score surface, and a stamp
+// there would put 162 finished keepsakes on a page whose whole safety argument
+// is the consent that got you in, not the collection you already hold. The
+// count-versus-art line FORBIDDEN_ART_DIRS draws for My Tally is the same line
+// drawn here, one file at a time.
+//
+// Adding a name here STRENGTHENS the guard. Removing one, or moving a file off
+// this list, is a spoiler-rule decision — read ADR-0035 and ADR-0042 first.
+const FORBIDDEN_ART_FILES = [
+  'screens/team/StampInPage.jsx',
+  'components/logbook/StampInButton.jsx',
+]
+
 function sourceFiles(dir) {
   const out = []
   for (const entry of readdirSync(dir)) {
@@ -206,6 +233,27 @@ for (const dir of FORBIDDEN_ART_DIRS) {
   }
 }
 
+// --- 5: the forbidden files ------------------------------------------------
+for (const surface of FORBIDDEN_ART_FILES) {
+  let src
+  try {
+    src = stripComments(readFileSync(join(SRC, surface), 'utf8'))
+  } catch {
+    // Renamed or removed. Say so rather than silently passing — same reason
+    // the two named-but-missing branches above exist.
+    problems.push(`${surface} is named in this guard's forbidden-file list but no longer exists.`)
+    continue
+  }
+  for (const identifier of FORBIDDEN_ART_IDENTIFIERS) {
+    if (new RegExp(`\\b${identifier}\\b`).test(src)) {
+      problems.push(
+        `${surface} references ${identifier}. It may MINT a stamp, never draw one — ` +
+          `see this guard's FORBIDDEN_ART_FILES note and ADR-0042.`,
+      )
+    }
+  }
+}
+
 if (problems.length) {
   console.error(
     '\n✗ Logbook stamp containment guard failed. A game stamp carries a final\n' +
@@ -223,5 +271,5 @@ if (problems.length) {
 
 console.log(
   '✓ Logbook stamp containment holds — GameStamp.jsx and StampGameButton.jsx are imported only from their allowlists, ' +
-    `and ${FORBIDDEN_ART_DIRS.length} no-game-data directories name neither.`,
+    `and ${FORBIDDEN_ART_DIRS.length} no-game-data directories plus ${FORBIDDEN_ART_FILES.length} mint-only files name neither.`,
 )

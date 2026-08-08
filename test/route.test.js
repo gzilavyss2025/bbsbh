@@ -25,6 +25,7 @@ import {
   leadersPath,
   orgLeadersPath,
   teamLeadersPath,
+  teamStampInPath,
   umpirePath,
   gamePhotosPath,
   logbookPath,
@@ -228,6 +229,40 @@ test('a team tab segment is not mistaken for a date-first game route', () => {
     asOf: null,
     sportId: null,
   })
+})
+
+// --------------------------------------------------------------------------
+// teamStampInPath / parseRoute — the Stamp In page (ADR-0042)
+// --------------------------------------------------------------------------
+test('teamStampInPath builds the page path and carries the cutoff query', () => {
+  assert.equal(teamStampInPath(158), '/team/158/stamp-in')
+  assert.equal(
+    teamStampInPath(158, { d: '2026-07-05', s: 11 }),
+    '/team/158/stamp-in?d=2026-07-05&s=11',
+  )
+})
+
+test('parseRoute resolves the Stamp In page, cutoff query included', () => {
+  assert.deepEqual(parseRoute('/team/158/stamp-in'), {
+    name: 'team-stamp-in',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/team/158/stamp-in?d=2026-07-05&s=11'), {
+    name: 'team-stamp-in',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+})
+
+test('the stamp-in branch wins over the generic 3-segment game branch', () => {
+  // Same ordering trap as the team tabs above: '/team/158/stamp-in' is three
+  // segments, so a generic parse would read it as date='team',
+  // matchup='158', section='stamp-in'.
+  assert.equal(parseRoute('/team/158/stamp-in').name, 'team-stamp-in')
+  assert.equal(parseRoute('/team/158/stamp-in').id, '158')
 })
 
 // --------------------------------------------------------------------------

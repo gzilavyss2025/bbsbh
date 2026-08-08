@@ -38,6 +38,7 @@ import { venueKey } from '../lib/ballpark/ballparkArt.js'
 // paragraphs with no shared modal to stage.
 export const GROUPS = [
   { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
+  { id: 'stampIn', label: 'Stamp In (a club’s played season)', preview: 'consentModal' },
   { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
 ]
 
@@ -249,6 +250,72 @@ export const FIELDS = [
     maxLength: 60,
     multiline: false,
     default: 'Live · {inning} in progress',
+  },
+  // ---- Stamp In: the club's played season, every result showing, one stamp
+  // per game you watched (ADR-0042). The SECOND consented departure from the
+  // spoiler rule, and the second group here to compose a ConsentModal. It is
+  // scoped to one address rather than to a day, so it names no {time} and
+  // carries no reset — the two slots Scores Unlocked leans on hardest.
+  //
+  // Voice: docs/game-log.md §3. Second person, physical verbs, warm and never
+  // cute, and never a word about progress — this page is what you SAW, not a
+  // checklist you are working through. ----
+  {
+    id: 'stampIn.title',
+    group: 'stampIn',
+    label: 'Confirm — title',
+    help: 'Heading of the pop-up shown the first time this page is opened on a device.',
+    maxLength: 80,
+    multiline: false,
+    default: 'This page shows every final score',
+  },
+  {
+    id: 'stampIn.body',
+    group: 'stampIn',
+    label: 'Confirm — explanation',
+    help: 'The main paragraph. Say plainly that the whole played season is laid out with its results showing, and why: so a stamp can be pressed for each game the reader watched.',
+    maxLength: 500,
+    multiline: true,
+    default:
+      'Everywhere else here, a score stays sealed until you lift it yourself. This page does not: it lays the club’s played season out in front of you, every result showing, so you can press a stamp on each game you sat with. Opening it is you choosing to see those scores.',
+  },
+  {
+    id: 'stampIn.changesNote',
+    group: 'stampIn',
+    label: 'Confirm — what changes',
+    help: 'Spell out the concrete limit: nothing else opens, and by-hand scoring is left alone. This must stay true — the page never advances your scoring on any device.',
+    maxLength: 300,
+    multiline: true,
+    default:
+      'Nothing else opens. Every other screen stays sealed, and your by-hand scoring is left exactly where it is — no game is marked as scored, on this phone or any other.',
+  },
+  {
+    id: 'stampIn.resetNote',
+    group: 'stampIn',
+    label: 'Confirm — what is remembered',
+    help: 'Says where the answer is kept. This device only, and it covers this page alone.',
+    maxLength: 240,
+    multiline: true,
+    default:
+      'This device remembers your answer, so the season is here waiting next time you come for it.',
+  },
+  {
+    id: 'stampIn.confirm',
+    group: 'stampIn',
+    label: 'Confirm — accept button',
+    help: 'The button that opens the season.',
+    maxLength: 48,
+    multiline: false,
+    default: 'Show me the season',
+  },
+  {
+    id: 'stampIn.dismiss',
+    group: 'stampIn',
+    label: 'Confirm — decline button',
+    help: 'The safe, default-focused button. It leaves the page and goes back to the club’s schedule.',
+    maxLength: 48,
+    multiline: false,
+    default: 'Back to the schedule',
   },
   ...parkFields(),
 ]

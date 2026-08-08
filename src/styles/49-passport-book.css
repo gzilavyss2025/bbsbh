@@ -680,6 +680,47 @@
   position: relative;
 }
 
+/* A LEAGUE-mark cover (books.js's `coverMark`) takes neither colour from a
+   club, so it sets the same two properties from house tokens instead of from
+   teamChipColors — same two names, so every rule above and below is untouched.
+   check-contrast.mjs asserts all three boards against --book-board-foil. */
+.passcover--board-kraft {
+  --cover-ink: var(--book-board-kraft);
+  --cover-foil: var(--book-board-foil);
+}
+
+.passcover--board-red {
+  --cover-ink: var(--book-board-red);
+  --cover-foil: var(--book-board-foil);
+}
+
+.passcover--board-blue {
+  --cover-ink: var(--book-board-blue);
+  --cover-foil: var(--book-board-foil);
+}
+
+/* The two league marks are not square and not each other's shape — MLB is a
+   near-square badge, MiLB a wide wordmark — so each gets its own slot width
+   and the height follows the mark's own viewBox. A square slot (the club
+   crest's) would shrink the wordmark to a sliver. */
+.passcover__crest--mlb,
+.passcover__crest--milb {
+  aspect-ratio: auto;
+}
+
+/* A league mark REPLACES the club crest, so it has to carry the same weight.
+   Both are landscape, so matching the crest's 38% WIDTH would leave them a
+   third of its height; these are set so each reads as the cover's mark rather
+   than a stamp in the corner. The MiLB wordmark is 4.8:1 and can only gain
+   height by growing wide, hence the gap between the two. */
+.passcover__crest--mlb {
+  width: 52%;
+}
+
+.passcover__crest--milb {
+  width: 80%;
+}
+
 /* The <rect fill="currentColor"> inside the mask picks the foil up from here,
    which is the entire recolour — no filter (ADR-0031). */
 .passcover__mark {
@@ -687,6 +728,12 @@
   width: 100%;
   height: 100%;
   color: inherit;
+}
+
+/* After .passcover__mark on purpose: same specificity, so the cascade order IS
+   the override. The mark's own viewBox sets the aspect. */
+.passcover__mark--league {
+  height: auto;
 }
 
 /* Documented fallback for a club with no precomputed knockout file: its
@@ -943,6 +990,50 @@
   gap: var(--space-2) var(--space-3);
 }
 
+/* "By date" — the book's own re-order control (ADR-0036's amendment). Quiet
+   chrome in normal flow, like the tray it sits under: it is an action ON the
+   book, so it must not float over the pages the way the placement bar
+   deliberately does. */
+.logbook__order {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+/* Asking takes the kraft-amber of the bars above the book, because that is the
+   same conversation — "confirm it, or leave it" — and stacks, because the cost
+   of a re-order is two sentences rather than a label. Still not sticky: this
+   one is answered where it stands. */
+.logbook__order--asking {
+  flex-direction: column;
+  align-items: stretch;
+  border-style: solid;
+  border-color: var(--seal-cover);
+  background: var(--award-soft);
+}
+
+.logbook__orderlede {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbook__orderscope {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--seal-cover-ink);
+}
+
 /* Which page a stamp sits on, in the grid below the book — and the way back to
    it: the control turns the book to that page and opens the stamp's options,
    where moving it and returning it to the tray are both named. */
@@ -967,70 +1058,3 @@
   outline-offset: 2px;
 }
 
-/* ---- CoverColorPicker (ADR-0036's shelf) ---- */
-/* A thin wrapper around ClubPicker (the strip's own rules live in
-   26-player-page.css and are reused untouched); this only adds the explicit
-   favourite-team option and a live preview of the pair PassportCover would
-   actually paint the board in. */
-.covercolorpicker {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.covercolorpicker__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.covercolorpicker__favorite {
-  padding: var(--space-1) var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-body);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.covercolorpicker__favorite.is-active {
-  border-color: var(--accent-primary);
-  color: var(--text-heading);
-  box-shadow: var(--shadow-card);
-}
-
-.covercolorpicker__favorite:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.covercolorpicker__preview {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* The pair PassportCover.jsx would paint the board in — split diagonally so
-   both the board colour and its own foil are visible in one small chip. */
-.covercolorpicker__swatch {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-xs);
-  background: linear-gradient(135deg, var(--swatch-ink) 0 60%, var(--swatch-foil) 60% 100%);
-}
-
-.covercolorpicker__previewname {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  color: var(--text-caption);
-}

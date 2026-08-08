@@ -16,6 +16,13 @@ import { BookManagementSheet } from './BookManagementSheet.jsx'
 // colour/crest chain); this file only arranges covers in a grid and wires
 // taps to navigation.
 //
+// The furniture — the timber plank each row of covers stands on — is drawn
+// entirely by 58-logbook-shelf.css from pseudo-elements on the slots, so a
+// screen reader hears a plain list of books and nothing about boards. The one
+// thing the markup owes that CSS is a FIXED column count per breakpoint (the
+// plank is spanned off the row's first slot); do not change `.shelf__grid`
+// back to an auto-fill track list.
+//
 // `placing` — a gamePk hand-off from the box score's mint card via `?place=`
 // — puts the shelf into "choose a book for this stamp" mode: the lede
 // changes, and `onOpenBook` (owned by the caller, `LogbookPage.jsx`) is
@@ -23,25 +30,24 @@ import { BookManagementSheet } from './BookManagementSheet.jsx'
 // placement mode continues there. This component never itself decides what
 // tapping a cover navigates to — that stays with the router-aware caller.
 //
-// `createBook`/`updateCover`/`removeBook`/`stamps`/`unplaceStamp` are passed
-// straight through to `BookManagementSheet` rather than fetched here via this
+// `updateCover`/`removeBook`/`stamps`/`unplaceStamp` are passed straight
+// through to `BookManagementSheet` rather than fetched here via this
 // component's own `useBooks()`/`useStamps()` — see that file's header for why
 // a second, independent hook instance nested under the caller's own would
-// race it.
+// race it. Creating a book is NOT among them: it is its own page now
+// (`onNewBook` navigates), because no other book may be on screen while a
+// cover is being chosen.
 export function LogbookShelf({
   books,
   placing = null,
   onOpenBook,
-  createBook,
+  onNewBook,
   updateCover,
   removeBook,
   stamps,
   unplaceStamp,
 }) {
-  // Which book (if any) the management sheet has open, or the literal string
-  // 'new' for the create flow. Not a boolean — the sheet needs to know WHICH
-  // book it is editing, and 'new' keeps that in the same piece of state
-  // rather than a second flag that could disagree with this one.
+  // Which book, if any, has its settings open.
   const [managing, setManaging] = useState(null)
 
   return (
@@ -61,7 +67,7 @@ export function LogbookShelf({
               className="shelf__edit"
               onClick={() => setManaging(book)}
             >
-              Edit cover
+              Settings
             </button>
           </li>
         ))}
@@ -71,12 +77,8 @@ export function LogbookShelf({
             the stamp in the tray of whichever book gets opened) that covers
             "I don't want any of these". */}
         {!placing && (
-          <li className="shelf__slot">
-            <button
-              type="button"
-              className="shelf__newtile"
-              onClick={() => setManaging('new')}
-            >
+          <li className="shelf__slot shelf__slot--new">
+            <button type="button" className="shelf__newtile" onClick={onNewBook}>
               <span className="shelf__newtileicon" aria-hidden="true">
                 +
               </span>
@@ -88,22 +90,13 @@ export function LogbookShelf({
 
       {managing && (
         <BookManagementSheet
-          book={managing === 'new' ? null : managing}
+          book={managing}
           books={books}
-          createBook={createBook}
           updateCover={updateCover}
           removeBook={removeBook}
           stamps={stamps}
           unplaceStamp={unplaceStamp}
           onClose={() => setManaging(null)}
-          onCreated={(id) => {
-            setManaging(null)
-            // Only `id` is needed — `onOpenBook` (owned by LogbookPage.jsx)
-            // navigates off it and re-resolves the real record from
-            // `useBooks()` on the next render, the same as tapping any other
-            // cover above.
-            onOpenBook({ id })
-          }}
           onRemoved={() => setManaging(null)}
         />
       )}

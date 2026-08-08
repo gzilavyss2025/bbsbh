@@ -322,6 +322,52 @@ still the locked ones. What moved is which of two recipes draws them, on a fact
 about the game that never changes. A stamp already in someone's book redraws
 identically unless it was a minor-league game, in which case it now says so.
 
+## Addendum (2026-08-08) — the book can be re-ordered by date, if you ask twice
+
+This ADR's whole claim is that the arrangement is the artifact, so a control
+that lays a book out FOR you needs an answer, not a shrug. The answer is that
+re-ordering is offered, and offered as a **deliberate action with a confirm**
+rather than as a view, a preference or a default.
+
+`orderByDate` and `layoutInDateOrder` (`src/lib/passportLayout.js`, §2's rule
+unchanged) put a book's stamps in date order and hand them straight to the
+existing `autoLayout` — there is one layout engine here, and this adds an
+ordering to it rather than a second one. The control is
+`components/passport/BookOrderControl.jsx`, sitting with the book's other
+controls above the pages. Four properties are what make it consistent with the
+decision above rather than a hole in it:
+
+- **It is a verb, never a state.** Two controls, `Oldest first` and `Newest
+  first`, not one toggle that flips — a toggle would read as an order the book
+  IS in, and the book is in whatever order its owner put it in. Nothing is
+  persisted about the choice, nothing re-applies on load, and the next stamp
+  placed by hand is not fought by it.
+- **It names what it costs before it does it.** *"This re-places every stamp in
+  this book — each one lifted off its page and pressed back down oldest first,
+  from page 1. The order you put them in by hand does not come back."* An
+  arrangement made by hand is the one thing in this feature that cannot be
+  reconstructed from anything else, so the confirm says so plainly, in the same
+  inline shape the remove-a-book confirm already uses.
+- **Its scope is one open book.** The tray is book-agnostic (a stamp is filed
+  into a book by being placed), and another book's pages are none of this
+  control's business. `bookId` rides along exactly as it does on a placement
+  born from a tap — `passportLayout.js` still knows nothing about books.
+- **Every stamp moved gets a real placement write**, through `placeStamps` and
+  the same last-write-wins `updatedAt` sync as a single placement. A
+  rearrangement that lived only in a render would be a view by another name.
+
+Two consequences worth stating. The order is **total and repeatable** — date,
+then `stampedAt`, then gamePk — so two devices re-order the same collection
+identically and a doubleheader settles on which game you stamped first;
+`newest` is the exact reverse of `oldest`, tiebreak included. And because the
+layout fills from page 1 with no gaps, the screen resets its added-pages count
+and turns back to page 1 afterwards, so nobody is left looking at a page the
+re-ordering just emptied.
+
+The press animation is deliberately not fired here, for the reason the first
+addendum already gives about "place them all for me": a bookful landing at once
+is a flurry, not a stamping.
+
 ## Alternatives considered
 
 - **Snap placement to a fixed grid of ten slots.** Rejected: only a slot index

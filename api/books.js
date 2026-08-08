@@ -2,8 +2,8 @@
 // on) — the cover half of ADR-0036, riding the same Clerk + Upstash stack as
 // api/spoiled-days.js (ADR-0026) and api/stamps.js (ADR-0035).
 //
-//   GET    /api/books                 -> { books: [ { id, state, title, subtitle, coverTeamId, createdAt, updatedAt } ] }
-//   POST   /api/books { id, title?, subtitle?, coverTeamId? }
+//   GET    /api/books                 -> { books: [ { id, state, title, subtitle, coverTeamId, coverMark, coverColor, createdAt, updatedAt } ] }
+//   POST   /api/books { id, title?, subtitle?, coverTeamId?, coverMark?, coverColor? }
 //                                      -> creates (new id) or updates (existing id) one book -> { book }. 201 new / 200 update.
 //   DELETE /api/books?id={bookId}     -> tombstones -> { ok: true }
 //
@@ -40,7 +40,15 @@
 // and the endpoint 501s, leaving the client local-only. Sync has always been
 // opt-in infrastructure, never a requirement.
 
-import { MAX_BOOKS, isBookId, normalizeBook, sanitizeBookSubtitle, sanitizeBookTitle } from '../src/lib/books.js'
+import {
+  MAX_BOOKS,
+  isBookId,
+  normalizeBook,
+  sanitizeBookSubtitle,
+  sanitizeBookTitle,
+  sanitizeCoverColor,
+  sanitizeCoverMark,
+} from '../src/lib/books.js'
 import { authenticateUser } from './_lib/auth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
@@ -117,12 +125,30 @@ export function bookEntry(body, existing, now) {
       : reviving
         ? null
         : existing.coverTeamId
+  // Both fall to their own safe default rather than to whatever the body said:
+  // sanitizeCoverMark/sanitizeCoverColor (src/lib/books.js) close over the
+  // closed sets, so an unknown value never reaches Redis and never comes back
+  // out at a client that would have to render it.
+  const coverMark =
+    body?.coverMark !== undefined
+      ? sanitizeCoverMark(body.coverMark)
+      : reviving
+        ? 'team'
+        : sanitizeCoverMark(existing.coverMark)
+  const coverColor =
+    body?.coverColor !== undefined
+      ? sanitizeCoverColor(body.coverColor)
+      : reviving
+        ? null
+        : sanitizeCoverColor(existing.coverColor)
   return {
     id: existing?.id ?? body?.id,
     state: 'on',
     title,
     subtitle,
     coverTeamId,
+    coverMark,
+    coverColor,
     // A revived tombstone is a NEW keepsake for this purpose, same as
     // stampEntry's `reviving` — its original createdAt is gone with it.
     createdAt: reviving ? now : existing.createdAt,

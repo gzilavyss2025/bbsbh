@@ -103,10 +103,14 @@
      48-logbook               screens/LogbookPage.jsx,
                               screens/LogbookStatsPage.jsx
      49-passport-book         screens/LogbookPage.jsx,
-                              components/passport/PassportBook.jsx
+                              components/passport/PassportBook.jsx,
+                              components/passport/BookCoverPicker.jsx
      50-logbook-landing       components/account/LogbookLanding.jsx
      51-similar-players       components/playercard/SimilarPlayerGrid.jsx
      53-umpire-tendencies     components/umpire/UmpireTendencies.jsx
      58-logbook-shelf         components/passport/LogbookShelf.jsx,
-                              components/passport/BookManagementSheet.jsx
+                              components/passport/BookManagementSheet.jsx,
+                              screens/logbook/NewBookPage.jsx
+     59-stamp-in              screens/team/StampInPage.jsx
+     60-book-cover-picker     components/passport/BookCoverPicker.jsx
    ------------------------------------------------------------ */
