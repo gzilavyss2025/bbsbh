@@ -16,6 +16,13 @@ import { BookManagementSheet } from './BookManagementSheet.jsx'
 // colour/crest chain); this file only arranges covers in a grid and wires
 // taps to navigation.
 //
+// The furniture — the timber plank each row of covers stands on — is drawn
+// entirely by 58-logbook-shelf.css from pseudo-elements on the slots, so a
+// screen reader hears a plain list of books and nothing about boards. The one
+// thing the markup owes that CSS is a FIXED column count per breakpoint (the
+// plank is spanned off the row's first slot); do not change `.shelf__grid`
+// back to an auto-fill track list.
+//
 // `placing` — a gamePk hand-off from the box score's mint card via `?place=`
 // — puts the shelf into "choose a book for this stamp" mode: the lede
 // changes, and `onOpenBook` (owned by the caller, `LogbookPage.jsx`) is
@@ -70,7 +77,7 @@ export function LogbookShelf({
             the stamp in the tray of whichever book gets opened) that covers
             "I don't want any of these". */}
         {!placing && (
-          <li className="shelf__slot">
+          <li className="shelf__slot shelf__slot--new">
             <button type="button" className="shelf__newtile" onClick={onNewBook}>
               <span className="shelf__newtileicon" aria-hidden="true">
                 +

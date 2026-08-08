@@ -7,6 +7,44 @@
    convention as 49-passport-book.css.
    ============================================================ */
 
+/* ---- the furniture ----
+   The books stand face-out on timber planks, one board per row of covers.
+
+   HOW THE PLANK ALWAYS MATCHES ITS ROW. The board is not a background on the
+   list (a repeating background needs a row pitch in px, and a row is as tall
+   as a cover, which is a ratio of the column width). It is an absolutely
+   positioned ::before on the FIRST SLOT OF EACH ROW, stretched across the
+   whole list. That needs two things to be true, and both are load-bearing:
+
+     1. The column count is EXPLICIT per breakpoint (--shelf-cols), never
+        auto-fill, so "first slot of each row" is a plain :nth-child(Nn + 1).
+        One plank per row leader means exactly ceil(books / N) planks — a row
+        can't exist without its first slot, and a first slot can't exist
+        without a row. There is never an empty board, and never a shelf of
+        books floating over nothing.
+     2. column-gap is ZERO, so a slot is exactly 1/N of the list and the
+        plank's own width can be written as a multiple of it. Sideways
+        breathing room comes from --shelf-pad INSIDE each slot instead.
+
+   Change either one and the boards stop landing under the books. */
+.shelf {
+  --shelf-pad: var(--space-2);
+  /* The board, its front lip, and the label strip below it — the three bands
+     under every cover, in slot-bottom order. */
+  --shelf-plank-h: var(--space-4);
+  --shelf-caption-h: var(--space-8);
+  --shelf-contact-h: var(--space-2);
+  /* A warm timber board, every tone mixed off the same --book-board-kraft the
+     covers print on, so the furniture is the same warm brown family as the
+     books and the manila page. Held lighter than any cover, so a book always
+     reads as the darker object standing on the shelf. */
+  --shelf-wood: color-mix(in srgb, var(--book-board-kraft) 54%, var(--bg-page));
+  --shelf-wood-top: color-mix(in srgb, var(--book-board-kraft) 28%, var(--surface-inset));
+  --shelf-wood-lip: color-mix(in srgb, var(--book-board-kraft) 66%, var(--text-heading));
+  --shelf-grain: color-mix(in srgb, var(--book-board-kraft) 64%, transparent);
+  --shelf-grain-lit: color-mix(in srgb, var(--surface-inset) 38%, transparent);
+}
+
 .shelf__intro {
   margin: 0 0 var(--space-4);
   font-family: var(--font-display);
@@ -16,26 +54,197 @@
 }
 
 .shelf__grid {
+  --shelf-cols: 2;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: var(--space-5);
-  margin: 0 0 var(--space-5);
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 0;
+  row-gap: var(--space-5);
+  margin: 0 0 var(--space-6);
   padding: 0;
   list-style: none;
 }
 
+/* One cover per board below the smallest two-up size — the same single column
+   the old auto-fill track list already fell back to there, rather than two
+   covers too small to read their own titles. */
+@media (max-width: 359px) {
+  .shelf__grid {
+    --shelf-cols: 1;
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 740px is where .screen stops being capped at --app-width (25-wide-layout.css),
+   so it is the only width at which more columns actually buy a wider cover. */
+@media (min-width: 740px) {
+  .shelf {
+    --shelf-pad: var(--space-3);
+  }
+
+  .shelf__grid {
+    --shelf-cols: 3;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .shelf__grid {
+    --shelf-cols: 4;
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Bottom-aligned, so a cover stands ON the board rather than floating in the
+   middle of its cell. The padding is the board and its label strip. */
 .shelf__slot {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--space-2);
+  justify-content: flex-end;
+  padding: 0 var(--shelf-pad) calc(var(--shelf-plank-h) + var(--shelf-caption-h));
 }
 
+/* The plank. Drawn once per row by the row's first slot and stretched over the
+   remaining columns — hence the negative `right` — plus a small overhang each
+   side so the board reads as furniture the books are set down on rather than a
+   rule ending at the last cover. Vertically: a lit top face, the front of the
+   board, then a darker lip and a soft drop onto the paper.
+
+   The grain is four layers, all generated here — no vendored texture, no
+   binary asset, nothing whose licence we cannot read. Top to bottom:
+
+     1. Fibre. An inline feTurbulence tile, stretched wide and flat
+        (baseFrequency 0.85 across, 0.035 down) so the noise comes out as
+        drawn-out horizontal fibre rather than sand, greyed by feColorMatrix
+        and blended `soft-light` so it modulates the timber underneath instead
+        of laying a grey film over it. It carries no colour of its own, which
+        is why it needs no hex: every tone on this board still comes from the
+        tokens below it.
+     2. Growth lines — two hairlines, one dark, one lit, across the face.
+     3. A slow light/dark drift along the length of the board.
+     4. The board itself: top face, front, lip. The top face is 5px — deep
+        enough that a cover's own focus ring (2px at a 3px offset,
+        49-passport-book.css) lands on the LIT band rather than on the darker
+        front, where it would fall under the 3:1 non-text bar. */
+.shelf__slot::before {
+  content: none;
+  position: absolute;
+  bottom: var(--shelf-caption-h);
+  left: calc(-1 * var(--space-2));
+  right: calc(100% * (1 - var(--shelf-cols)) - var(--space-2));
+  height: var(--shelf-plank-h);
+  border-radius: 0 0 var(--radius-xs) var(--radius-xs);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='16'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85 0.035' numOctaves='4' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='16' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E"),
+    linear-gradient(
+      to bottom,
+      transparent 0 6px,
+      var(--shelf-grain) 6px 7px,
+      transparent 7px 9px,
+      var(--shelf-grain-lit) 9px 10px,
+      transparent 10px 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      color-mix(in srgb, var(--book-board-kraft) 14%, transparent) 18%,
+      transparent 34%,
+      color-mix(in srgb, var(--surface-inset) 16%, transparent) 52%,
+      transparent 68%,
+      color-mix(in srgb, var(--book-board-kraft) 12%, transparent) 86%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--shelf-wood-top) 0 5px,
+      var(--shelf-wood) 5px calc(100% - 5px),
+      var(--shelf-wood-lip) calc(100% - 5px) 100%
+    );
+  background-size: 240px 100%, auto, auto, auto;
+  background-blend-mode: soft-light, normal, normal, normal;
+  box-shadow: 0 3px 6px -2px color-mix(in srgb, var(--text-heading) 22%, transparent);
+  pointer-events: none;
+}
+
+/* Which slot leads a row, per breakpoint. Every later rule turns the previous
+   count off first, so a slot that leads a row at two widths still draws once. */
+.shelf__slot:nth-child(2n + 1)::before {
+  content: '';
+}
+
+@media (max-width: 359px) {
+  .shelf__slot::before {
+    content: '';
+  }
+}
+
+@media (min-width: 740px) {
+  .shelf__slot:nth-child(2n + 1)::before {
+    content: none;
+  }
+
+  .shelf__slot:nth-child(3n + 1)::before {
+    content: '';
+  }
+}
+
+@media (min-width: 1024px) {
+  .shelf__slot:nth-child(2n + 1)::before,
+  .shelf__slot:nth-child(3n + 1)::before {
+    content: none;
+  }
+
+  .shelf__slot:nth-child(4n + 1)::before {
+    content: '';
+  }
+}
+
+/* The contact shadow where a cover meets the board. Held entirely BELOW the
+   cover's bottom edge: this pseudo-element comes after the cover in tree order,
+   so anything it overlapped it would paint over. */
+.shelf__slot::after {
+  content: '';
+  position: absolute;
+  bottom: calc(var(--shelf-caption-h) + var(--shelf-plank-h) - var(--shelf-contact-h));
+  left: var(--shelf-pad);
+  right: var(--shelf-pad);
+  height: var(--shelf-contact-h);
+  background-image: radial-gradient(
+    62% 100% at 50% 0%,
+    color-mix(in srgb, var(--text-heading) 38%, transparent),
+    transparent 74%
+  );
+  pointer-events: none;
+}
+
+/* Lift a book off the board a little on the way to picking it up. `:not(:active)`
+   so the cover's own press feedback (49-passport-book.css) still wins the
+   moment it is pressed, rather than being outranked by this longer selector. */
+@media (hover: hover) {
+  .shelf__slot:hover .passcover:not(:active) {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shelf__slot:hover .passcover:not(:active) {
+    transform: none;
+  }
+}
+
+/* The per-book door, on the label strip under its own board — the place a
+   shelf carries writing. Sized to fill that strip so it is a real tap target
+   rather than one line of 11px text. */
 .shelf__edit {
-  align-self: center;
+  position: absolute;
+  bottom: 0;
+  left: var(--shelf-pad);
+  right: var(--shelf-pad);
+  height: var(--shelf-caption-h);
   border: 0;
   background: none;
-  padding: 0 var(--space-2);
+  padding: 0;
   color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -49,23 +258,32 @@
   outline-offset: 2px;
 }
 
-/* The "+ new book" tile sits in the same grid cell shape as a cover, so it
-   reads as one more thing on the shelf rather than a toolbar bolted beside
-   it. */
+/* The "+ new book" tile stands on the board as the last slot, in the flow — an
+   empty slipcase waiting for a book, not a button parked beside the furniture.
+   Same aspect and box as a cover (49-passport-book.css), so it lands on the
+   same line as the covers beside it. */
 .shelf__newtile {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
   aspect-ratio: var(--passport-aspect, 88 / 125);
-  border: var(--bw-rule) dashed var(--border-rule);
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--text-muted);
+  border: var(--bw-rule) dashed color-mix(in srgb, var(--book-board-kraft) 42%, var(--bg-page));
+  border-radius: var(--radius-xs) var(--radius-md) var(--radius-md) var(--radius-xs);
+  background: color-mix(in srgb, var(--surface-card) 72%, transparent);
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-small);
   font-weight: var(--w-semibold);
+}
+
+/* An empty slipcase presses on the board more lightly than a book does. */
+.shelf__slot--new::after {
+  opacity: 0.55;
 }
 
 .shelf__newtile:focus-visible {
