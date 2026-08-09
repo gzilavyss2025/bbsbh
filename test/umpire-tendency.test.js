@@ -6,7 +6,7 @@ import {
   leanTierForZ,
   leanCaretFraction,
 } from '../src/lib/statTiers.js'
-import { umpireLeanFor, umpireWatchArea } from '../src/api/umpires.js'
+import { leanInputFromRows, umpireLeanFor, umpireWatchArea } from '../src/api/umpires.js'
 
 // --- the five-band lean scale -------------------------------------------------
 
@@ -73,53 +73,58 @@ const gameWithFavor = (over, away, home) => ({
   ...over,
 })
 
-test('umpireLeanFor signs positive toward HITTERS', () => {
+// The lean is summed at BUILD time (leanInputFromRows, called by
+// gen-umpire-accuracy.mjs into the season aggregate) and divided at READ time
+// (umpireLeanFor, off that aggregate). Both halves are tested here, because the
+// sign convention has to survive the trip.
+
+test('the lean signs positive toward HITTERS', () => {
   // favorAway/favorHome are signed toward whoever was BATTING, so a positive
   // sum is runs handed to hitters. A flip here inverts the entire card and is
   // invisible in review — this is the assertion most worth having.
   const hitterFriendly = umpireLeanFor(
-    [gameWithFavor({}, 0.5, 0.3), gameWithFavor({}, 0.2, 0.4)],
-    null,
+    leanInputFromRows([gameWithFavor({}, 0.5, 0.3), gameWithFavor({}, 0.2, 0.4)]),
   )
   assert.equal(hitterFriendly.source, 'favor')
   assert.ok(hitterFriendly.lean > 0)
   assert.ok(Math.abs(hitterFriendly.lean - 0.7) < 1e-9)
 
-  const pitcherFriendly = umpireLeanFor([gameWithFavor({}, -0.4, -0.2)], null)
+  const pitcherFriendly = umpireLeanFor(leanInputFromRows([gameWithFavor({}, -0.4, -0.2)]))
   assert.ok(pitcherFriendly.lean < 0)
 })
 
-test('umpireLeanFor counts only the requested level and regular season', () => {
+test('leanInputFromRows counts only the requested level and regular season', () => {
   const games = [
     gameWithFavor({}, 1, 0), // MLB R    — counts
     gameWithFavor({ level: 'AAA' }, 9, 9), // AAA — excluded
     gameWithFavor({ gameType: 'W' }, 9, 9), // World Series — excluded
     { level: 'MLB', gameType: 'R', favorAway: null, favorHome: null }, // no favor — excluded
   ]
-  const mlb = umpireLeanFor(games, null, 'MLB')
+  const mlb = umpireLeanFor(leanInputFromRows(games, 'MLB'))
   assert.equal(mlb.games, 1)
   assert.equal(mlb.lean, 1)
 
-  const aaa = umpireLeanFor(games, null, 'AAA')
+  const aaa = umpireLeanFor(leanInputFromRows(games, 'AAA'))
   assert.equal(aaa.games, 1)
   assert.equal(aaa.lean, 18)
 })
 
-test('umpireLeanFor falls back to zone lean, with the sign still toward hitters', () => {
-  // No row carries favor (run-expectancy.json was never built). A GENEROUS
-  // zone — more expanded than squeezed — helps pitchers, so it must come back
-  // negative.
-  const generous = umpireLeanFor([], { called: 1000, expanded: 120, squeezed: 20, games: 10 })
+test('the lean falls back to zone lean, with the sign still toward hitters', () => {
+  // No row carried favor (run-expectancy.json was never built), so the
+  // aggregate has favorNetGames 0. A GENEROUS zone — more expanded than
+  // squeezed — helps pitchers, so it must come back negative.
+  const generous = umpireLeanFor({ called: 1000, expanded: 120, squeezed: 20, games: 10 })
   assert.equal(generous.source, 'zone')
   assert.ok(generous.lean < 0)
 
-  const tight = umpireLeanFor([], { called: 1000, expanded: 20, squeezed: 120, games: 10 })
+  const tight = umpireLeanFor({ called: 1000, expanded: 20, squeezed: 120, games: 10 })
   assert.ok(tight.lean > 0)
 })
 
-test('umpireLeanFor returns null with nothing to go on', () => {
-  assert.equal(umpireLeanFor([], null), null)
-  assert.equal(umpireLeanFor(undefined, { called: 0 }), null)
+test('the lean returns null with nothing to go on', () => {
+  assert.equal(umpireLeanFor(null), null)
+  assert.equal(umpireLeanFor({ called: 0 }), null)
+  assert.deepEqual(leanInputFromRows([]), { favorNet: 0, favorNetGames: 0 })
 })
 
 // --- area to watch ------------------------------------------------------------

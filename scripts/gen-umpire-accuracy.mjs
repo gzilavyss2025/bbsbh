@@ -1,4 +1,5 @@
-// Regenerates public/data/umpire-accuracy.json — for every home-plate umpire,
+// Regenerates public/data/umpire-accuracy-summary.json + umpire-accuracy/{id}.json
+// (see the two outputs below) — for every home-plate umpire,
 // his season called-pitch accuracy (plus a compact zone-tendency breakdown),
 // aggregated from each game's per-pitch tracking data. Keyed by MLB Stats API
 // personId, the same id space as umpires.json / players.
@@ -90,28 +91,29 @@
 // Both are absent (not zero) on rows swept before this schema — a pre-schema
 // row and a game with genuinely no challenges must stay distinguishable, so
 // aggregate() counts contributing games rather than summing blindly.
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 import { challengeForPlay } from '../src/api/challenges.js'
+import { leanInputFromRows } from '../src/api/umpires.js'
 import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'umpire-accuracy.json')
-// The same file with every umpire's per-game `games` array dropped — season
-// aggregates only. The archive holds every scored pitch-call row of the season
-// and grows all year (~2 MB by August); the aggregates are ~0.1 MB. The lineup
-// page, the box score, and the rankings table read aggregates ONLY, so they
-// read this file, and the full archive stays for the umpire detail page, which
-// draws the game log. Both files are written from the same `result` in the same
-// run, so they cannot disagree. See src/api/umpires.js's loadAccuracySummary().
+// TWO OUTPUTS, and between them they ARE the archive — split by who asks.
+// Every umpire's season aggregates in one file (~0.12 MB: the ranking pool the
+// lineup page, the box score, and the rankings table read), and one file per
+// umpire holding just his scored game rows (~13 KB: his game log). Written from
+// the same `result` in the same run, so they cannot disagree.
+//
+// There is no league-wide archive file any more. It was ~2 MB by August, it was
+// the merge base AND a served file, and once the lean's ingredient moved into
+// the aggregate (see leanInputFromRows) nothing read it. The row shards are the
+// merge base now — one copy of the accumulated history, not two.
 const outSummary = join(here, '..', 'public', 'data', 'umpire-accuracy-summary.json')
-// One file per umpire holding just his game rows — the aggregates live in the
-// summary above, so the two together are the whole archive, split by who asks.
 const outRows = join(here, '..', 'public', 'data', 'umpire-accuracy')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 // Loaded once at startup; null (favor degrades to 0/null everywhere) until
@@ -389,6 +391,13 @@ function aggregate(games) {
   sum.consistency = consistentCalledSum ? consistentSum / consistentCalledSum : null
   sum.favorMagnitude = favorGames ? favorMagnitudeSum : null
   sum.favorPerGame = favorGames ? favorMagnitudeSum / favorGames : null
+  // The SIGNED companion — the pitcher/hitter lean's ingredient, summed here so
+  // the app can rank an umpire on it without downloading the league's game rows.
+  // leanInputFromRows is imported from the reader (src/api/umpires.js) rather
+  // than re-implemented, so build time and read time cannot drift; umpireLeanFor
+  // beside it does the division. `level` is passed even though `games` is
+  // already one level's rows — the filter is the guarantee, not the caller.
+  Object.assign(sum, leanInputFromRows(games, games[0]?.level ?? 'MLB'))
   sum.missL = handedGames ? regionL : null
   sum.missR = handedGames ? regionR : null
   // `challengeGames` is carried, not just used: it is the denominator behind
@@ -432,10 +441,24 @@ const args = parseArgs(process.argv.slice(2))
 const { startDate, endDate } = dateRange(args, DEFAULT_DAYS)
 const season = Number(endDate.slice(0, 4))
 
-// ENOENT → genuine first run; a corrupt committed file must abort rather than
+// The MERGE BASE is the per-umpire row shards this job wrote last night — the
+// same files the app reads. There is no separate league-wide archive to keep in
+// step with them (there was; it was 2 MB, nothing read it, and a second copy of
+// an append-only history is a second thing that can go stale).
+//
+// ENOENT → genuine first run; a corrupt committed shard must abort rather than
 // silently rebuild the aggregate from only the last few days' finals and drop
-// the season's accumulated history.
-const prev = await readJsonOr(out, { umpires: {} })
+// the season's accumulated history, which is what readJsonOr guarantees.
+const prev = { umpires: {} }
+for (const f of await readdir(outRows).catch(() => [])) {
+  if (!f.endsWith('.json')) continue
+  const shard = await readJsonOr(join(outRows, f), null)
+  if (shard?.id != null) {
+    // `name` rides on the shard for exactly this reason: an umpire who worked in
+    // April and not in this run's window would otherwise come back nameless.
+    prev.umpires[shard.id] = { id: shard.id, name: shard.name, games: shard.games ?? [] }
+  }
+}
 
 // The levels swept, most-senior first. AAA rides along because its parks carry
 // the pitch tracking the score needs (see header); AA/below don't, so they stay
@@ -539,7 +562,6 @@ for (const [id, u] of Object.entries(umpires)) {
 }
 
 const generatedAt = new Date().toISOString()
-await writeJsonAtomic(out, { generatedAt, season, umpires: result })
 await writeJsonAtomic(outSummary, {
   generatedAt,
   season,
@@ -548,15 +570,14 @@ await writeJsonAtomic(outSummary, {
   ),
 })
 // …and the other half of that split, one file per umpire: his scored game rows
-// alone. The umpire page and the lineup page's accuracy modal both draw ONE
-// man's rows, so between this and the aggregates file nothing but the lean has
-// a reason to read the whole archive. The archive itself stays because this job
-// is append-only — it is the merge base every run reads back.
+// alone. The umpire page and the lineup page's accuracy modal each draw ONE
+// man's rows, and these files are also this job's merge base next run, so the
+// accumulated history has exactly one copy.
 for (const [id, u] of Object.entries(result)) {
-  await writeJsonAtomic(join(outRows, `${id}.json`), { id: u.id, games: u.games })
+  await writeJsonAtomic(join(outRows, `${id}.json`), { id: u.id, name: u.name, games: u.games })
 }
 const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
 console.log(
-  `wrote ${out} — ${Object.keys(result).length} umpires, ${gamesTotal} games on file ` +
+  `wrote ${outSummary} + ${Object.keys(result).length} row shards — ${gamesTotal} games on file ` +
     `(+${added} new from ${startDate}..${endDate}, ${targets.length} finals swept)`,
 )

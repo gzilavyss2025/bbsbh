@@ -1,66 +1,89 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { leanInputFromRows } from '../src/api/umpires.js'
 
-// public/data/umpire-accuracy.json is the season ARCHIVE (every scored game row,
-// ~2 MB by August); umpire-accuracy-summary.json is the same records with the
-// `games` arrays dropped (~0.12 MB). The lineup page, the box score, and the
-// rankings table read aggregates only, so they read the small one — see
-// src/api/umpires.js's loadAccuracySummary().
+// The season's accuracy data ships as two things, and between them they ARE the
+// archive that used to be one 2 MB file: umpire-accuracy-summary.json, every
+// umpire's season aggregates (the ranking pool), and umpire-accuracy/{id}.json,
+// one man's scored game rows (his game log). No surface loads the league's rows.
 //
-// Two things have to hold for that split to be safe, and both are tested here:
-//   1. the two files carry the SAME aggregates (the generator writes them in one
-//      run from one object, so a difference means one file went stale), and
-//   2. the ranking index reads the same numbers from either source.
+// That only holds while every figure a surface shows is derivable from the
+// aggregates. The lean is the one that nearly wasn't: its ingredient is
+// per-game, so the generator sums it into the aggregate as favorNet/
+// favorNetGames. These tests hold that seam.
 
-const read = (f) => JSON.parse(readFileSync(new URL(`../public/data/${f}`, import.meta.url), 'utf8'))
+const root = new URL('../public/data/', import.meta.url)
+const read = (p) => JSON.parse(readFileSync(new URL(p, root), 'utf8'))
+const summary = read('umpire-accuracy-summary.json')
+const rowFiles = readdirSync(new URL('umpire-accuracy/', root)).filter((f) => f.endsWith('.json'))
 
-test('the summary file is the archive minus its game rows, nothing else', () => {
-  const full = read('umpire-accuracy.json')
-  const slim = read('umpire-accuracy-summary.json')
+test('no league-wide archive is served', () => {
+  // Deleting it is the point of the split: it was the merge base AND a served
+  // file, and a second copy of an append-only history is a second thing that
+  // can go stale. The generator reads the row shards back instead.
+  assert.throws(() => read('umpire-accuracy.json'), /ENOENT/)
+})
 
-  assert.equal(slim.season, full.season)
-  assert.deepEqual(Object.keys(slim.umpires).sort(), Object.keys(full.umpires).sort())
-
-  for (const [id, u] of Object.entries(full.umpires)) {
-    const { games, ...aggregates } = u
-    assert.ok(Array.isArray(games), `${id}: archive row has no game list`)
-    // Byte-for-byte the same aggregates — this is what lets the two sources
-    // produce the same rank, tier, and zone baseline.
-    assert.deepEqual(slim.umpires[id], aggregates, `${id}: aggregates differ between the two files`)
-    assert.equal(slim.umpires[id].games, undefined, `${id}: summary still carries game rows`)
+test('the aggregates file stays small enough for a lineup page to load', () => {
+  const size = statSync(new URL('umpire-accuracy-summary.json', root)).size
+  assert.ok(size < 400 * 1024, `aggregates are ${Math.round(size / 1024)} KB`)
+  // It must also carry no game rows — that is what keeps it flat as the season
+  // grows.
+  for (const [id, u] of Object.entries(summary.umpires)) {
+    assert.equal(u.games, undefined, `${id}: aggregates carry game rows`)
   }
 })
 
-test('the summary file is a small fraction of the archive', () => {
-  // The whole point of the second file. Not a tight bound — just a floor that
-  // fails if someone re-adds the per-game rows and quietly restores the weight
-  // the lineup page pays on every visit.
-  const size = (f) => readFileSync(new URL(`../public/data/${f}`, import.meta.url)).length
-  const ratio = size('umpire-accuracy-summary.json') / size('umpire-accuracy.json')
-  assert.ok(ratio < 0.5, `summary is ${(ratio * 100).toFixed(0)}% of the archive`)
+test("each aggregate's lean matches the rows in that umpire's own shard", () => {
+  // The seam: the generator sums the rows into favorNet/favorNetGames, the app
+  // divides. If the two ever drift, the Tendencies card publishes a number no
+  // game log supports — so recompute it here from the shipped rows.
+  let checked = 0
+  for (const f of rowFiles) {
+    const shard = read(`umpire-accuracy/${f}`)
+    const rec = summary.umpires[String(shard.id)]
+    assert.ok(rec, `${f}: rows with no aggregate`)
+    for (const [key, level] of [
+      ['season', 'MLB'],
+      ['seasonAAA', 'AAA'],
+    ]) {
+      const agg = rec[key]
+      if (!agg) continue
+      const { favorNet, favorNetGames } = leanInputFromRows(shard.games, level)
+      assert.equal(agg.favorNetGames, favorNetGames, `${f}: ${key} game count`)
+      assert.ok(Math.abs((agg.favorNet ?? 0) - favorNet) < 1e-9, `${f}: ${key} net favor`)
+      if (favorNetGames) checked++
+    }
+  }
+  assert.ok(checked > 50, `only ${checked} aggregates had a favor-based lean to check`)
 })
 
-// --- the index reads the same numbers from either file ------------------------
+test('a row shard carries the name its own merge base will need', () => {
+  // The shards are the generator's merge base now. Without the name, an umpire
+  // who worked in April and not in tonight's window comes back nameless.
+  for (const f of rowFiles) {
+    const shard = read(`umpire-accuracy/${f}`)
+    assert.equal(String(shard.id), f.replace('.json', ''), `${f}: id does not match its name`)
+    assert.ok(shard.name, `${f}: no name`)
+    assert.ok(Array.isArray(shard.games) && shard.games.length, `${f}: no rows`)
+  }
+})
 
-// One fetch stub per module instance, serving whichever accuracy file the test
-// wants to expose. A `?case=` suffix on the import gives each case its own copy
-// of the module, because umpires.js memoizes both the file and the index.
+// --- what the surfaces fetch --------------------------------------------------
+
 const fetched = []
-function stubFetch({ archive, summary }) {
+function stubFetch() {
   fetched.length = 0
   globalThis.fetch = async (url) => {
     fetched.push(url)
     const shard = /^\/data\/umpire-accuracy\/(\d+)\.json$/.exec(url)
     const body =
-      url === '/data/umpire-accuracy.json'
-        ? archive
-        : url === '/data/umpire-accuracy-summary.json'
-          ? summary
-          : shard
-            ? { id: Number(shard[1]), games: ARCHIVE.umpires[shard[1]]?.games ?? [] }
-            : UMPIRE_SHARD // /data/umpires/{id}.json — his assignment log
-    if (!body) return { ok: false, status: 404 }
+      url === '/data/umpire-accuracy-summary.json'
+        ? SUMMARY
+        : shard
+          ? { id: Number(shard[1]), name: 'Ada Ump', games: ROWS[shard[1]] ?? [] }
+          : UMPIRE_SHARD // /data/umpires/{id}.json — his assignment log
     return { ok: true, status: 200, json: async () => body }
   }
 }
@@ -68,7 +91,7 @@ function stubFetch({ archive, summary }) {
 const UMPIRE_SHARD = { id: 1, name: 'Ada Ump', season: 2026, generatedAt: 'x', games: [] }
 
 // Two umpires past the five-game ranking floor and one below it.
-const ump = (id, name, accuracy, games, extra = {}) => ({
+const ump = (id, name, accuracy, games, lean) => ({
   id,
   name,
   season: {
@@ -85,89 +108,54 @@ const ump = (id, name, accuracy, games, extra = {}) => ({
     cellCalled: Array(9).fill(100),
     cellStrikeCall: Array(9).fill(40),
     cellMiss: [5, 4, 3, 2, 1, 2, 3, 4, 5],
-    ...extra,
+    favorNet: lean * games,
+    favorNetGames: games,
   },
   seasonAAA: null,
   seasonPost: null,
 })
 
-const game = (gamePk, favorAway, favorHome) => ({
-  gamePk,
-  level: 'MLB',
-  gameType: 'R',
-  favorAway,
-  favorHome,
-})
-
-const ARCHIVE = {
-  season: 2026,
-  umpires: {
-    // The game rows carry favor, so a lean built from the ARCHIVE reads
-    // `source: 'favor'` — a lean built without it could only reach the weaker
-    // zone fallback, which is how the last test tells the two apart.
-    1: { ...ump(1, 'Ada Ump', 0.94, 20), games: [game(1, 0.3, 0.2)] },
-    2: { ...ump(2, 'Bo Ump', 0.91, 12), games: [game(2, -0.1, -0.2)] },
-    3: { ...ump(3, 'Cy Ump', 0.99, 2), games: [game(3, 0.0, 0.1)] },
-  },
-}
 const SUMMARY = {
   season: 2026,
-  umpires: Object.fromEntries(
-    Object.entries(ARCHIVE.umpires).map(([id, { games, ...rest }]) => [id, rest]),
-  ),
+  umpires: {
+    1: ump(1, 'Ada Ump', 0.94, 20, 0.5),
+    2: ump(2, 'Bo Ump', 0.91, 12, -0.3),
+    3: ump(3, 'Cy Ump', 0.99, 2, 0.1),
+  },
 }
+const ROWS = { 1: [{ gamePk: 1, level: 'MLB', gameType: 'R', favorAway: 0.3, favorHome: 0.2 }] }
 
-test('rankings and the one-line summary agree, archive or summary file', async () => {
-  stubFetch({ archive: ARCHIVE, summary: SUMMARY })
-  const slim = await import('../src/api/umpires.js?case=slim')
-  const fromSlim = await slim.loadUmpireRankings()
-  const slimOne = await slim.umpireAccuracySummary(2)
-
-  // Same module, summary file missing: it falls back to the archive and must
-  // reach identical numbers.
-  stubFetch({ archive: ARCHIVE, summary: null })
-  const full = await import('../src/api/umpires.js?case=full')
-  const fromFull = await full.loadUmpireRankings()
-  const fullOne = await full.umpireAccuracySummary(2)
-
-  assert.deepEqual(fromSlim, fromFull)
-  assert.deepEqual(slimOne, fullOne)
-
-  // …and the ranking itself is right: the sub-floor umpire is out, best first.
+test('the umpire page reads one aggregates file and one row shard', async () => {
+  stubFetch()
+  const mod = await import('../src/api/umpires.js?case=page')
+  const u = await mod.loadUmpire(1)
+  assert.ok(u.accuracy, 'his aggregate')
+  assert.ok(u.accuracy.byGamePk[1], 'his rows')
+  assert.equal(u.rank.rank, 1, 'ranked against the pool')
+  // The lean comes off the aggregate, so it survives without the league's rows.
+  assert.equal(u.lean.source, 'favor')
+  assert.ok(Math.abs(u.lean.lean - 0.5) < 1e-9)
+  assert.ok(u.lean.tier, 'and it is placed on the scale')
   assert.deepEqual(
-    fromSlim.ranked.map((r) => [r.id, r.rank]),
+    [...new Set(fetched)].sort(),
+    ['/data/umpire-accuracy-summary.json', '/data/umpire-accuracy/1.json', '/data/umpires/1.json'],
+  )
+})
+
+test('rankings and the one-line summary read the aggregates alone', async () => {
+  stubFetch()
+  const mod = await import('../src/api/umpires.js?case=rank')
+  const ranked = await mod.loadUmpireRankings()
+  const one = await mod.umpireAccuracySummary(2)
+  // The sub-floor umpire is out, best first.
+  assert.deepEqual(
+    ranked.ranked.map((r) => [r.id, r.rank]),
     [
       [1, 1],
       [2, 2],
     ],
   )
-  assert.equal(slimOne.rank, 2)
-  assert.equal(slimOne.total, 2)
-})
-
-test('a lineup-page visit first does not cost the detail page its lean', async () => {
-  // The pitcher/hitter lean is the one figure that reads GAME ROWS, so an index
-  // built from the aggregates alone cannot carry it. The memo has to know that
-  // and rebuild from the archive, or whichever surface loaded first would
-  // decide whether the Tendencies card has a lean at all.
-  stubFetch({ archive: ARCHIVE, summary: SUMMARY })
-  const mod = await import('../src/api/umpires.js?case=lean')
-  await mod.loadUmpireRankings() // builds the aggregates-only index first
-  const u = await mod.loadUmpire(1, { withLean: true }) // …and this one needs the lean
-  assert.ok(u, 'umpire detail should load')
-  // 'favor' = built from the game rows. A cached aggregates-only index would
-  // leave this null (or, unguarded, fall back to the weaker zone figure).
-  assert.equal(u.lean.source, 'favor')
-})
-
-test('the accuracy modal reads two shards, never the league archive', async ({}) => {
-  // The modal one tap from the lineup page shows this umpire's accuracy, zone
-  // map, and game rows — no lean — so nothing it needs justifies the archive.
-  stubFetch({ archive: ARCHIVE, summary: SUMMARY })
-  const mod = await import('../src/api/umpires.js?case=modal')
-  const u = await mod.loadUmpire(1)
-  assert.ok(u.accuracy, 'the modal still gets his aggregate')
-  assert.ok(u.accuracy.byGamePk[1], 'and his per-game rows')
-  assert.equal(u.lean, null, 'but no lean')
-  assert.ok(!fetched.includes('/data/umpire-accuracy.json'), `fetched ${fetched.join(', ')}`)
+  assert.equal(one.rank, 2)
+  assert.equal(one.total, 2)
+  assert.deepEqual([...new Set(fetched)], ['/data/umpire-accuracy-summary.json'])
 })

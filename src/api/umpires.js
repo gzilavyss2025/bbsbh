@@ -15,23 +15,24 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // docs/data-enrichment.md §5). Game dates/assignments carry no score, so the
 // file is spoiler-free like the rest of the roster-move surfaces.
 //
-// A companion public/data/umpire-accuracy.json (scripts/gen-umpire-accuracy.mjs,
-// same cron) adds each plate umpire's season called-pitch accuracy + a compact
-// zone-tendency breakdown. It's an APPEND-ONLY per-game archive keyed by the
-// same personId; loadUmpire() merges it in for the accuracy card + per-row
-// figures, and umpireAccuracySummary() serves the one-line fact the lineup
-// page's Umpires card shows for tonight's plate ump. Accuracy is a count of
+// A companion dataset (scripts/gen-umpire-accuracy.mjs, same cron) adds each
+// plate umpire's season called-pitch accuracy + a compact zone-tendency
+// breakdown, keyed by the same personId — an APPEND-ONLY per-game history, kept
+// as one file per umpire. loadUmpire() merges it in for the accuracy card +
+// per-row figures, and umpireAccuracySummary() serves the one-line fact the
+// lineup page's Umpires card shows for tonight's plate ump. Accuracy is a count of
 // ball/strike JUDGMENTS — no runs/hits/outcome — so it's spoiler-free on the
 // same footing as the game log (see the plan's spoiler audit,
 // .scratch/umpire-accuracy/plan.md §4).
 //
-// TWO FILES, ONE SOURCE. The accuracy archive keeps every scored game row of
-// the season and grows all year (~2 MB by August), but only the umpire DETAIL
-// page draws the game log. The lineup page, the box score, and the rankings
-// table need season aggregates alone, so the same generator run also writes
-// public/data/umpire-accuracy-summary.json — the same records minus `games`,
-// about 6% of the size. loadAccuracySummary() reads it, loadAccuracy() reads
-// the archive, and only the surfaces that show a game log pay for one.
+// TWO FILES, NO ARCHIVE. What the generator accumulates — every scored game row
+// of the season, ~2 MB by August — is a BUILD artifact and is not served. What
+// is served is what a surface reads: public/data/umpire-accuracy-summary.json,
+// every umpire's season aggregates (~0.12 MB, the ranking pool), and
+// public/data/umpire-accuracy/{personId}.json, one man's game rows (~13 KB, his
+// game log). The last figure that needed the league's rows was the
+// pitcher/hitter lean, and its per-game ingredient is now summed into the
+// aggregate at build time — see leanInputFromRows.
 //
 // LEVELS: MLB + AAA (the two levels with the pitch tracking accuracy needs).
 // The two are kept STRICTLY SEPARATE, never blended: they run different regimes
@@ -44,13 +45,10 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // with no data, degrades to null before the file exists or on any failure.
 const cached = new Map() // personId -> his assignment shard, or null if he has none
 const rowsCached = new Map() // personId -> his scored game rows
-let accuracyCached = null
 let summaryCached = null
 // accuracyIndex is memoized per level ('MLB' | 'AAA') — the two levels rank
 // against separate pools and have separate zone-map baselines, so each gets its
-// own index. An index built from the summary file carries no `leanById` (the
-// lean reads per-game rows), so it is tagged `hasLean: false` and a later call
-// that needs the lean rebuilds it from the archive and replaces it.
+// own index.
 const indexCached = new Map()
 
 // A plate umpire needs at least this many scored games before we rank him among
@@ -103,29 +101,47 @@ const CELL_REGION = ['outside', 'high', 'inside', 'outside', null, 'inside', 'ou
 // card's scale plots. Positive means his missed calls have handed runs to the
 // batting team.
 //
-// Derived at READ time from the per-game signed favor rows (favorAway +
-// favorHome, the run-expectancy swing each missed call handed whoever was
-// batting), because the season aggregate only keeps favorMagnitude — the
-// UNSIGNED total, which answers a different question and is what the card's
-// "run impact" tile shows. Do not confuse the two; they are 1.55 and 0.43 for
-// the same umpire.
+// Two halves, split across build time and read time, because the ingredient is
+// PER GAME and the answer is per season:
 //
-// Restricted to one level's regular-season rows, the same split the aggregates
-// use: a different level is a different regime and a different peer pool.
-export function umpireLeanFor(games, season, level = 'MLB') {
-  let net = 0
-  let n = 0
-  for (const g of games ?? []) {
+//   • leanInputFromRows sums the signed favor rows (favorAway + favorHome, the
+//     run-expectancy swing each missed call handed whoever was batting) for one
+//     level's regular-season games. gen-umpire-accuracy.mjs calls it, and the
+//     season aggregate carries the result as `favorNet`/`favorNetGames`.
+//   • umpireLeanFor divides. It reads the aggregate alone, which is what lets
+//     the umpire page rank a man against the league without downloading every
+//     umpire's game rows.
+//
+// Do not confuse `favorNet` with the aggregate's `favorMagnitude`: that one is
+// UNSIGNED and answers a different question (the card's "run impact" tile).
+// They are 0.43 and 1.55 for the same umpire.
+export function leanInputFromRows(rows, level = 'MLB') {
+  let favorNet = 0
+  let favorNetGames = 0
+  for (const g of rows ?? []) {
+    // Filtered here as well as by the caller's own level/context split: one
+    // stray AAA or postseason row would move a number nobody would think to
+    // check against the level it came from.
     if ((g.level ?? 'MLB') !== level) continue
     if ((g.gameType ?? 'R') !== 'R') continue
     if (g.favorAway == null || g.favorHome == null) continue
-    net += g.favorAway + g.favorHome
-    n++
+    favorNet += g.favorAway + g.favorHome
+    favorNetGames++
   }
-  if (n) return { lean: net / n, source: 'favor', games: n }
+  return { favorNet, favorNetGames }
+}
 
-  // Fallback for a file built before gen-run-expectancy.mjs was ever run, when
-  // no row carries favor at all. The raw zone lean, NEGATED so the sign
+export function umpireLeanFor(season) {
+  if (season?.favorNetGames) {
+    return {
+      lean: season.favorNet / season.favorNetGames,
+      source: 'favor',
+      games: season.favorNetGames,
+    }
+  }
+
+  // Fallback for an aggregate built before gen-run-expectancy.mjs was ever run,
+  // when no row carried favor at all. The raw zone lean, NEGATED so the sign
   // convention still points at hitters: a generous zone (expanded > squeezed)
   // helps PITCHERS. It correlates at -0.86 with the favor figure across the
   // qualifying pool but is NOT the same number — it counts every miss equally
@@ -224,37 +240,22 @@ async function loadRows(id) {
   return rows
 }
 
-// The whole season archive — every umpire's rows. Needed for ONE figure, the
-// pitcher/hitter lean, which z-scores a man against the pool's game rows. Every
-// other surface reads the summary and the one shard it wants.
-async function loadAccuracy() {
-  if (accuracyCached) return accuracyCached
-  try {
-    const res = await fetch('/data/umpire-accuracy.json')
-    if (!res.ok) throw new Error(`umpire-accuracy.json ${res.status}`)
-    const data = await res.json()
-    accuracyCached = { season: data.season ?? null, umpires: data.umpires ?? {} }
-  } catch {
-    accuracyCached = { season: null, umpires: {} }
-  }
-  return accuracyCached
-}
-
-// The aggregates-only companion. Falls back to the full archive when the file
-// is missing — a deploy that lands before the nightly cron has written it once
-// still serves the right numbers, just at the old weight.
+// Every umpire's season aggregates — the ranking pool. The one league-wide file
+// any umpire surface reads, and the reason it can stay small is that nothing in
+// it is per-game: ranks, tiers, zone baselines and now the lean all come off
+// aggregates. Degrades to an empty pool, which costs a man his rank and his
+// lean but not his page.
 async function loadAccuracySummary() {
   if (summaryCached) return summaryCached
-  if (accuracyCached) return accuracyCached
   try {
     const res = await fetch('/data/umpire-accuracy-summary.json')
     if (!res.ok) throw new Error(`umpire-accuracy-summary.json ${res.status}`)
     const data = await res.json()
     summaryCached = { season: data.season ?? null, umpires: data.umpires ?? {} }
-    return summaryCached
   } catch {
-    return loadAccuracy()
+    summaryCached = { season: null, umpires: {} }
   }
+  return summaryCached
 }
 
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
@@ -286,23 +287,21 @@ function seasonForLevel(u, level) {
 //     3×3 zone grid, normalized to shares. It's the "typical umpire" baseline
 //     the zone map compares each umpire against (a cell where he misses a
 //     bigger share than the league is where he's worse than average).
-//   • leanById — the pitcher/hitter lean, which reads each umpire's GAME ROWS
-//     and so needs the full archive. Callers that show it pass `withLean`;
-//     everyone else takes the aggregates-only file and gets an empty map.
+//   • leanById — the pitcher/hitter lean, z-scored against the same pool.
 //
-// Every other figure above reads season aggregates ONLY, and the summary file
-// carries those aggregates byte-for-byte as the archive does, so both sources
-// produce the same ranks, tiers, mean/sd and baselines. test/umpire-accuracy-
-// summary.test.js pins that.
-async function accuracyIndex(level = 'MLB', { withLean = false } = {}) {
+// EVERY figure here reads season aggregates, so the whole index is built from
+// the one aggregates file. Nothing on any umpire surface loads the league's game
+// rows: the lean's per-game ingredient is summed at build time into the
+// aggregate's favorNet/favorNetGames (see leanInputFromRows).
+async function accuracyIndex(level = 'MLB') {
   const memo = indexCached.get(level)
-  if (memo && (memo.hasLean || !withLean)) return memo
-  const { umpires } = withLean ? await loadAccuracy() : await loadAccuracySummary()
+  if (memo) return memo
+  const { umpires } = await loadAccuracySummary()
   // A per-level view where each umpire's `season` is that level's aggregate, so
   // the ranking/baseline logic below reads `u.season` unchanged. Umpires with no
   // aggregate at this level (e.g. never worked AAA) drop out.
   const all = Object.values(umpires)
-    .map((u) => ({ id: u.id, name: u.name, season: seasonForLevel(u, level), games: u.games ?? [] }))
+    .map((u) => ({ id: u.id, name: u.name, season: seasonForLevel(u, level) }))
     .filter((u) => u.season)
 
   const qualified = all
@@ -341,12 +340,9 @@ async function accuracyIndex(level = 'MLB', { withLean = false } = {}) {
   // rides accuracyIndex's one pass rather than taking a pass of its own, and it
   // uses the SAME pool `rankById` uses — two definitions of "qualifies" is how
   // a tier pill and a scale start disagreeing about the same umpire.
-  // Skipped outright without the archive, never computed from empty rows:
-  // umpireLeanFor falls back to a zone lean when no row carries favor, so an
-  // absent game list would read as a real (and wrong) answer instead of none.
   const leanRaw = []
-  for (const u of withLean ? qualified : []) {
-    const l = umpireLeanFor(u.games, u.season, level)
+  for (const u of qualified) {
+    const l = umpireLeanFor(u.season)
     if (l) leanRaw.push({ id: u.id, ...l })
   }
   const { mean: leanMean, sd: leanSd } = meanAndSd(leanRaw.map((l) => l.lean))
@@ -391,7 +387,6 @@ async function accuracyIndex(level = 'MLB', { withLean = false } = {}) {
     leanMean,
     leanSd,
     leagueChallenges,
-    hasLean: withLean,
   }
   indexCached.set(level, index)
   return index
@@ -466,18 +461,16 @@ function accuracyFor(rec, rows, level = 'MLB') {
 // (call-up umpires who also work Triple-A), each ranked/baselined against the
 // AAA pool — null throughout when he has no AAA plate games.
 //
-// `withLean` is what the umpire DETAIL page passes for its Tendencies card. It
-// is the one figure that needs the league's game rows, so it is the one thing
-// that costs the whole 2 MB archive; the accuracy modal on the lineup page does
-// not draw a lean and does not pay for one. Everything else here is this man's
-// two shards plus the shared aggregates file.
-export async function loadUmpire(id, { withLean = false } = {}) {
+// Everything here is this man's two shards plus the shared aggregates file —
+// his assignment log, his scored game rows, and the league's season aggregates.
+// No surface loads the league's game rows.
+export async function loadUmpire(id) {
   const [u, rec, rows, idxMlb, idxAaa] = await Promise.all([
     load(id),
     loadAccuracySummary().then((a) => a.umpires[id] ?? null),
     loadRows(id),
-    accuracyIndex('MLB', { withLean }),
-    accuracyIndex('AAA', { withLean }),
+    accuracyIndex('MLB'),
+    accuracyIndex('AAA'),
   ])
   if (!u) return null
   const accuracy = accuracyFor(rec, rows, 'MLB')
