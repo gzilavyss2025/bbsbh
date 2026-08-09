@@ -511,6 +511,10 @@
       "class": "cutoff-gated",
       "why": "Standings W/L and runs ARE score-revealing, but a standings row is a league-wide aggregate, not one game's line, so it is not sealed. Safety comes entirely from the `date` the CALLER requests."
     },
+    "staticJson.js": {
+      "class": "spoiler-free",
+      "why": "The memoized same-origin read every build-time-fetch reader shares. Transport only — like statsapi.js it has no idea what it is fetching, and its callers carry the classification."
+    },
     "statsapi.js": {
       "class": "spoiler-free",
       "why": "The one getJson fetch wrapper. Transport only — it has no idea what it is fetching."

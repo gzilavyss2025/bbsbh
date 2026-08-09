@@ -29,25 +29,18 @@
 // to an empty list before the file exists or on any failure. Cached
 // in-memory for the session since the file only changes on a hand-run
 // regenerate.
-let cached = null
 
-export async function loadAllStarRosters() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/all-star-rosters.json')
-    if (!res.ok) throw new Error(`all-star-rosters.json ${res.status}`)
-    const data = await res.json()
-    cached = {
-      seasons: data.seasons ?? [],
-      rosters: data.rosters ?? {},
-      games: data.games ?? {},
-      scores: data.scores ?? {},
-      mvps: data.mvps ?? {},
-      venues: data.venues ?? {},
-      generatedAt: data.generatedAt ?? null,
-    }
-  } catch {
-    cached = { seasons: [], rosters: {}, games: {}, scores: {}, mvps: {}, venues: {}, generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const loadAllStarRosters = staticJson('/data/all-star-rosters.json', {
+  shape: (d) => ({
+    seasons: d.seasons ?? [],
+    rosters: d.rosters ?? {},
+    games: d.games ?? {},
+    scores: d.scores ?? {},
+    mvps: d.mvps ?? {},
+    venues: d.venues ?? {},
+    generatedAt: d.generatedAt ?? null,
+  }),
+  fallback: { seasons: [], rosters: {}, games: {}, scores: {}, mvps: {}, venues: {}, generatedAt: null },
+})

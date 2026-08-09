@@ -730,16 +730,20 @@ test('buildCutline: injured-list without a replacement has no secondary clause',
 })
 
 // ---------------------------------------------------------------------------
-// §5 Reader — season-chunked pagination over a mocked fetch
+// §5 Reader — per-club, per-season pagination over a mocked fetch
 // ---------------------------------------------------------------------------
 
+// Keyed season -> teamId -> file, matching the shard layout on disk. A season
+// present with no entry for the club still resolves (an empty shard); only a
+// season absent altogether 404s.
 function mockFetch(filesBySeason) {
   return async (url) => {
-    const m = String(url).match(/team-transactions\/(\d+)\.json/)
+    const m = String(url).match(/team-transactions\/(\d+)\/(\d+)\.json/)
     const season = m ? Number(m[1]) : null
-    const file = season != null ? filesBySeason[season] : undefined
-    if (file === undefined) return { ok: false, status: 404 }
-    return { ok: true, json: async () => file }
+    const teamId = m ? Number(m[2]) : null
+    const bySeason = season != null ? filesBySeason[season] : undefined
+    if (bySeason === undefined) return { ok: false, status: 404 }
+    return { ok: true, json: async () => bySeason[teamId] ?? { days: [] } }
   }
 }
 
@@ -767,7 +771,7 @@ test('loadMoreTeamTransactions returns the current season, trimmed to a cutoff, 
   const afterCutoff = syntheticDays(3, 2026, 12)
   const atOrBeforeCutoff = syntheticDays(50, 2026, 7)
   globalThis.fetch = mockFetch({
-    9101: { byTeamId: { 158: { days: [...afterCutoff, ...atOrBeforeCutoff] } } },
+    9101: { 158: { days: [...afterCutoff, ...atOrBeforeCutoff] } },
   })
   try {
     const cutoff = atOrBeforeCutoff[0].date
@@ -788,8 +792,8 @@ test('loadMoreTeamTransactions crosses into the prior season once the current on
   const currentSeasonDays = syntheticDays(10, 2026, 4) // fewer than PAGE_DAYS
   const priorSeasonDays = syntheticDays(50, 2025, 9) // plenty left over after topping up the page
   globalThis.fetch = mockFetch({
-    9201: { byTeamId: { 158: { days: currentSeasonDays } } },
-    9200: { byTeamId: { 158: { days: priorSeasonDays } } },
+    9201: { 158: { days: currentSeasonDays } },
+    9200: { 158: { days: priorSeasonDays } },
   })
   try {
     const page = await loadMoreTeamTransactions(158, { season: 9201, index: 0 }, null)
@@ -809,7 +813,7 @@ test('loadMoreTeamTransactions crosses into the prior season once the current on
 test('loadMoreTeamTransactions reports hasMore:false once a season file 404s (no earlier history)', async () => {
   const originalFetch = globalThis.fetch
   globalThis.fetch = mockFetch({
-    2026: { byTeamId: { 158: { days: [{ date: '2026-04-01', stories: [] }] } } },
+    2026: { 158: { days: [{ date: '2026-04-01', stories: [] }] } },
   })
   try {
     const page = await loadMoreTeamTransactions(158, { season: 2025, index: 0 }, null)
@@ -820,19 +824,39 @@ test('loadMoreTeamTransactions reports hasMore:false once a season file 404s (no
   }
 })
 
+test('a club with an EMPTY shard is not the end of its history — paging crosses that season', async () => {
+  const originalFetch = globalThis.fetch
+  // The generator writes a file for every org every season, so a club that
+  // made no storyworthy move in 9301 has an empty one. Reading that as "no
+  // more history" would hide the year before it — the one difference between
+  // an empty shard and a missing season.
+  const priorSeasonDays = syntheticDays(3, 2024, 9)
+  // A club id of its own: loadSeasonFile's session cache is keyed
+  // season+club and shared across this file's tests.
+  globalThis.fetch = mockFetch({
+    2025: { 159: { days: [] } },
+    2024: { 159: { days: priorSeasonDays } },
+  })
+  try {
+    const page = await loadMoreTeamTransactions(159, { season: 2025, index: 0 }, null)
+    assert.deepEqual(page.days.map((d) => d.date), priorSeasonDays.map((d) => d.date))
+    assert.equal(page.hasMore, false) // 2023 has no file at all — that is the end
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
 test('loadMoreTeamTransactions retries a transient season-file failure in the same session', async () => {
   const originalFetch = globalThis.fetch
   let currentSeasonCalls = 0
   globalThis.fetch = async (url) => {
-    const season = Number(String(url).match(/team-transactions\/(\d+)\.json/)?.[1])
+    const season = Number(String(url).match(/team-transactions\/(\d+)\//)?.[1])
     if (season === 2026) {
       currentSeasonCalls += 1
       if (currentSeasonCalls === 1) return { ok: false, status: 503 }
       return {
         ok: true,
-        json: async () => ({
-          byTeamId: { 158: { days: [{ date: '2026-07-15', stories: [] }] } },
-        }),
+        json: async () => ({ days: [{ date: '2026-07-15', stories: [] }] }),
       }
     }
     return { ok: false, status: 404 }

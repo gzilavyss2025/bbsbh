@@ -1,4 +1,5 @@
 import { similarHitters } from '../lib/hitterSimilarity.js'
+import { staticJson } from './staticJson.js'
 
 // Season Statcast percentile ranks, read from a static same-origin file
 // (public/data/savant-percentiles.json) rather than fetched live from
@@ -9,19 +10,9 @@ import { similarHitters } from '../lib/hitterSimilarity.js'
 // roster entry's person.id. Degrades to empty maps before the file exists or
 // on any fetch failure — the card simply doesn't render. Cached in-memory for
 // the session since the file only changes once a day.
-let cached = null
-
-export async function fetchSavantPercentiles() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/savant-percentiles.json')
-    if (!res.ok) throw new Error(`savant-percentiles.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { season: null, bat: {}, pit: {} }
-  }
-  return cached
-}
+export const fetchSavantPercentiles = staticJson('/data/savant-percentiles.json', {
+  fallback: { season: null, bat: {}, pit: {} },
+})
 
 // A single player's percentile map for one group, or null when he isn't in
 // the file (MiLB-only, or under Savant's own per-metric sample floor for

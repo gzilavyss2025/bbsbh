@@ -1,7 +1,7 @@
 // Pure shapers for the Team Transactions card's data pipeline: de-dupe the raw
 // statsapi transaction feed, drop noise, pair same-day moves into "stories",
 // and build the cutline prose — plus the reader half that loads the static,
-// season-chunked files scripts/gen-team-transactions.mjs precomputes from
+// per-club season files scripts/gen-team-transactions.mjs precomputes from
 // these same functions (the gen-callouts.mjs "import the app's own shaper so
 // the two can't drift" convention). Full design:
 // .scratch/team-transactions/data-layer-scope.md.
@@ -901,21 +901,30 @@ export function groupIntoStories(rows, ctx = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// §5 Reader — static, season-chunked files; lazy 45-day pagination
+// §5 Reader — static per-club, per-season files; lazy 45-day pagination
 // ---------------------------------------------------------------------------
 
 const PAGE_DAYS = 45
-const seasonCache = new Map()
+const seasonCache = new Map() // `${season}:${teamId}` -> Promise<{days} | null>
 
-// Fetches one season's file, session-caching successful reads and confirmed
-// 404s for completed seasons. Current-season 404s, server failures, malformed
-// JSON, and network errors are evicted and rethrown so the caller can keep a
-// retry affordance visible. A confirmed historical 404 alone resolves null.
-async function loadSeasonFile(season) {
-  if (seasonCache.has(season)) return seasonCache.get(season)
+// Fetches ONE club's file for one season, session-caching successful reads and
+// confirmed 404s for completed seasons. Current-season 404s, server failures,
+// malformed JSON, and network errors are evicted and rethrown so the caller can
+// keep a retry affordance visible. A confirmed historical 404 alone resolves
+// null.
+//
+// One file per club per season, not one file holding all 30: the card shows one
+// club, and a season's league-wide feed runs well over a megabyte by August, so
+// a whole-file read spent ~97% of itself on the other 29 orgs. The generator
+// writes a shard for EVERY org each season, including one with no rows at all
+// (`days: []`), which is what lets a 404 here mean "no such season" rather than
+// "quiet club" — the difference between paging further back and stopping.
+async function loadSeasonFile(season, teamId) {
+  const key = `${season}:${teamId}`
+  if (seasonCache.has(key)) return seasonCache.get(key)
   const promise = Promise.resolve()
     .then(async () => {
-      const res = await fetch(`/data/team-transactions/${season}.json`)
+      const res = await fetch(`/data/team-transactions/${season}/${teamId}.json`)
       if (!res.ok) {
         if (res.status === 404 && season < currentYear()) return null
         throw new Error(`team transactions ${res.status}`)
@@ -925,10 +934,10 @@ async function loadSeasonFile(season) {
     .catch((error) => {
       // Only evict if this is still the active request for the season; a
       // future retry may already have installed its own promise.
-      if (seasonCache.get(season) === promise) seasonCache.delete(season)
+      if (seasonCache.get(key) === promise) seasonCache.delete(key)
       throw error
     })
-  seasonCache.set(season, promise)
+  seasonCache.set(key, promise)
   return promise
 }
 
@@ -949,9 +958,9 @@ export async function loadMoreTeamTransactions(teamId, cursor, cutoff) {
   const collected = []
 
   while (collected.length < PAGE_DAYS) {
-    const file = await loadSeasonFile(season)
+    const file = await loadSeasonFile(season, teamId)
     if (!file) return { days: collected, cursor: { season, index }, hasMore: false }
-    const allDays = (file.byTeamId?.[teamId]?.days ?? []).filter((d) => !cutoff || d.date <= cutoff)
+    const allDays = (file.days ?? []).filter((d) => !cutoff || d.date <= cutoff)
     if (index >= allDays.length) {
       season -= 1
       index = 0

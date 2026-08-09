@@ -35,34 +35,14 @@
 //
 // Degrades to null before the files exist or on any failure — the card simply
 // doesn't render. Cached in-memory for the session (the files change once a day).
-let indexCached
-const shardCache = new Map() // teamId (string) -> { players } | null
 
-async function fetchJsonOrNull(path) {
-  try {
-    const res = await fetch(path)
-    if (!res.ok) throw new Error(`${path} ${res.status}`)
-    return await res.json()
-  } catch {
-    return null
-  }
-}
+import { staticJson, staticJsonBy } from './staticJson.js'
 
 // The shared header: the club catalog, each club's next opponent, and the
 // personId -> club map that says which shard holds a given player.
-export async function fetchVsTeamSplitsIndex() {
-  if (indexCached !== undefined) return indexCached
-  indexCached = await fetchJsonOrNull('/data/vs-team-splits/index.json')
-  return indexCached
-}
+export const fetchVsTeamSplitsIndex = staticJson('/data/vs-team-splits/index.json')
 
-async function fetchShard(teamId) {
-  const key = String(teamId)
-  if (shardCache.has(key)) return shardCache.get(key)
-  const shard = await fetchJsonOrNull(`/data/vs-team-splits/${key}.json`)
-  shardCache.set(key, shard)
-  return shard
-}
+const fetchShard = staticJsonBy((teamId) => `/data/vs-team-splits/${teamId}.json`)
 
 // Merge the index header with the named clubs' shards, producing the same shape
 // the single file used to have: { generatedAt, season, teams, nextOpponent,

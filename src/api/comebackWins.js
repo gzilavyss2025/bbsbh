@@ -14,19 +14,10 @@
 // Spoiler-free: a season aggregate over FINAL games carries no live-game score
 // (same footing as WAR / team-score aggregates), so no SealBox — only the live
 // per-play win prob in the innings view is sealed. Degrades to null with no file.
-let cached
 
-export async function fetchComebackWins() {
-  if (cached !== undefined) return cached
-  try {
-    const res = await fetch('/data/comeback-wins.json')
-    if (!res.ok) throw new Error(`comeback-wins.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = null
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const fetchComebackWins = staticJson('/data/comeback-wins.json')
 
 // One team's buckets for a season, or null if the file has no row for it.
 export function comebackWinsFor(data, teamId, season) {

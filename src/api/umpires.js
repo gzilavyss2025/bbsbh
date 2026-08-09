@@ -1,4 +1,5 @@
 import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
+import { staticJson } from './staticJson.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
@@ -45,7 +46,6 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // with no data, degrades to null before the file exists or on any failure.
 const cached = new Map() // personId -> his assignment shard, or null if he has none
 const rowsCached = new Map() // personId -> his scored game rows
-let summaryCached = null
 // accuracyIndex is memoized per level ('MLB' | 'AAA') — the two levels rank
 // against separate pools and have separate zone-map baselines, so each gets its
 // own index.
@@ -245,18 +245,10 @@ async function loadRows(id) {
 // it is per-game: ranks, tiers, zone baselines and now the lean all come off
 // aggregates. Degrades to an empty pool, which costs a man his rank and his
 // lean but not his page.
-async function loadAccuracySummary() {
-  if (summaryCached) return summaryCached
-  try {
-    const res = await fetch('/data/umpire-accuracy-summary.json')
-    if (!res.ok) throw new Error(`umpire-accuracy-summary.json ${res.status}`)
-    const data = await res.json()
-    summaryCached = { season: data.season ?? null, umpires: data.umpires ?? {} }
-  } catch {
-    summaryCached = { season: null, umpires: {} }
-  }
-  return summaryCached
-}
+const loadAccuracySummary = staticJson('/data/umpire-accuracy-summary.json', {
+  shape: (d) => ({ season: d.season ?? null, umpires: d.umpires ?? {} }),
+  fallback: { season: null, umpires: {} },
+})
 
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
 // (back-compat with the pre-AAA file shape); AAA is `seasonAAA`, null when he

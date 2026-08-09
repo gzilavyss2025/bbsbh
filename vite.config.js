@@ -402,9 +402,10 @@ export default defineConfig({
         // officials), and a visitor reads the one umpire he tapped. Same for the
         // per-club game-notes shards — an append-only archive of press-notes PDF
         // links that grows every game day (see scripts/gen-game-notes.mjs).
-        // Same for the per-date callouts bundles — since they cover the MiLB
-        // levels too each day's file runs ~0.5-1 MB, and the folder holds ~10
-        // days of them; only the day being scored is ever read. Same for the
+        // Same for the per-game callouts bundles — since they cover the MiLB
+        // levels too each day's slate runs ~0.5-1 MB across ~76 files, and the
+        // folder holds ~10 days of them; only the game being scored is ever
+        // read. Same for the
         // rookie dataset — a debut/rookie-limit row for every player who's ever
         // appeared in MLB (~1.3 MB and growing, see scripts/gen-rookies.mjs /
         // gen-rookies-backfill.mjs). rookies.json there is the generator's
@@ -422,7 +423,7 @@ export default defineConfig({
           '**/data/vs-team-splits/*.json',
           '**/data/umpires/*.json',
           '**/data/game-notes/*.json',
-          '**/data/callouts/*.json',
+          '**/data/callouts/*/*.json',
           // Same reasoning for the per-date condensed-game index: one small
           // file per slate date, ~6 KB each but one per DAY OF THE SEASON
           // (132 of them by August, and growing every night). A visitor reads
@@ -450,10 +451,11 @@ export default defineConfig({
           // Every named All-Star since 1933 (~650 KB) — only read from the
           // All-Star Rosters page, see scripts/gen-all-star-rosters.mjs.
           '**/data/all-star-rosters.json',
-          // One season-chunked Team Transactions file per season (~2.5 MB,
-          // all 30 orgs — see scripts/gen-team-transactions.mjs), only ever
-          // read a season at a time from one team's page.
-          '**/data/team-transactions/*.json',
+          // Team Transactions, one file per club per season (~55 KB each; the
+          // season's 30 add up past 1.5 MB — see
+          // scripts/gen-team-transactions.mjs). A team page reads its own club,
+          // one season at a time.
+          '**/data/team-transactions/*/*.json',
           // Nightly foul-ball and pitcher-workload aggregates (~170 KB each,
           // refreshed nightly — see scripts/gen-fouls.mjs / gen-workload.mjs);
           // read on demand by the Foul Tracker page, player-page cards, and
@@ -510,25 +512,13 @@ export default defineConfig({
               /^\/data\/(?:top-prospects|minors-leaders|all-star-rosters|fouls|workload|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
               ) ||
-              /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
-              // One file per MATCHUP, keyed by the two team ids ascending.
-              /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
-              // Career WAR and coaching history, both bucketed on personId % 100
-              // like the rookie records.
-              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal)\/\d{2}\.json$/.test(
-                url.pathname,
-              ) ||
-              // One slim similarity pool per level.
-              /^\/data\/pitch-arsenal-pool\/(?:mlb|aaa)\.json$/.test(url.pathname) ||
-              // One video-highlight file per club, same on-demand shape.
-              /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
-              // Trade Deadline is season-chunked the same way. The season list
-              // itself is the hardcoded SEASONS array in api/tradeDeadline.js,
-              // NOT the generated index.json — nothing in the app reads that
-              // file today (gen-trade-deadline.mjs still writes it, and its one
-              // reader, loadTradeDeadlineIndex, was dead and has been deleted).
-              // The `index` arm is kept so a future reader is covered rather
-              // than silently uncached; it simply never fires right now.
+              // Trade Deadline is season-chunked. The season list itself is the
+              // hardcoded SEASONS array in api/tradeDeadline.js, NOT the
+              // generated index.json — nothing in the app reads that file today
+              // (gen-trade-deadline.mjs still writes it, and its one reader,
+              // loadTradeDeadlineIndex, was dead and has been deleted). The
+              // `index` arm is kept so a future reader is covered rather than
+              // silently uncached; it simply never fires right now.
               /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
@@ -537,13 +527,47 @@ export default defineConfig({
               networkTimeoutSeconds: 3,
               expiration: {
                 // Room for one copy of every snapshot the pattern above can
-                // match (18 named + a few team-transactions seasons + the
-                // seven trade-deadline files, index included) — an undersized
-                // cap here silently evicts one page's data to admit another's.
+                // match (12 named + the seven trade-deadline files, index
+                // included) — an undersized cap here silently evicts one page's
+                // data to admit another's.
+                //
+                // WHOLE-FILE SNAPSHOTS ONLY, and that is what makes the cap
+                // safe to state. The per-record shard sets (one file per
+                // player bucket, per club, per matchup) belong to the rule
+                // below: their namespaces run to hundreds of URLs, so pointing
+                // them at a counted cache means browsing a handful of player
+                // pages quietly evicts the standings' data — the exact failure
+                // this comment warns about, arriving through the back door.
                 maxEntries: 32,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },
+          },
+          {
+            // The per-record shard sets: one file per player bucket, per club,
+            // per matchup, per season-and-club. A reader asks for the ONE
+            // record it is showing, so what lands here is what the user
+            // actually visited — hundreds of URLs are reachable but only the
+            // handful read get stored. Uncounted, like the shard rules below
+            // it: an LRU cap sized for a page-snapshot cache would evict a
+            // visited page's data on the next player tap.
+            urlPattern: ({ url }) =>
+              // Career WAR, coaching history, fouls and pitch mix, all bucketed
+              // on personId % 100 like the rookie records.
+              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal)\/\d{2}\.json$/.test(
+                url.pathname,
+              ) ||
+              // One file per MATCHUP, keyed by the two team ids ascending.
+              /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
+              // One slim similarity pool per level.
+              /^\/data\/pitch-arsenal-pool\/(?:mlb|aaa)\.json$/.test(url.pathname) ||
+              // One video-highlight file per club.
+              /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
+              // Team Transactions: one club, one season.
+              /^\/data\/team-transactions\/\d{4}\/(?:index|\d+)\.json$/.test(url.pathname),
+            handler: 'NetworkFirst',
+            method: 'GET',
+            options: { cacheName: 'bbsbh-record-shards', networkTimeoutSeconds: 3 },
           },
           {
             // The one-color club marks (excluded from precache above). Static
@@ -624,10 +648,11 @@ export default defineConfig({
             method: 'GET',
           },
           {
-            // The per-date callouts bundles (excluded from precache above).
-            // Season aggregates only — spoiler-free — so NetworkFirst is safe:
-            // fresh nightly copy when online, last good copy at the park.
-            urlPattern: ({ url }) => /^\/data\/callouts\/\d{8}\.json$/.test(url.pathname),
+            // The per-game callouts bundles, filed by slate date (excluded from
+            // precache above). Season aggregates only — spoiler-free — so
+            // NetworkFirst is safe: fresh nightly copy when online, last good
+            // copy at the park.
+            urlPattern: ({ url }) => /^\/data\/callouts\/\d{8}\/\d+\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
           },

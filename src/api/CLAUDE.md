@@ -81,12 +81,22 @@ examples — sharded by the key their callers actually hold (the club) or split
 by role when no id key fits (the pills need a compact whole-league answer; only
 the player page wants dates). `docs/api/static-data.md` has both.
 
+**Read every one of these files through `staticJson.js`** (`staticJson` for a
+whole file, `staticJsonBy` for a sharded set). It memoizes the REQUEST, not just
+its result. A hand-rolled `let cached` assigned after the `await` looks correct
+and is not: React mounts a page's cards on one tick, so every caller that starts
+before the first resolves fires its own copy. That cost the player page fourteen
+reads of `teams.json` and eight of `milb-history.json` on a single load. Each
+reader still owns its own `shape` and `fallback`; nothing else changes.
+
 ## Callouts
 
 The callout families (`callouts.js` and the nightly `gen-callouts.mjs`) are
 catalogued in `docs/callouts.md` (every family, trigger, surface, gate, worthiness
 score) and ADR-0014 (the two-tense rule). Extend the nightly precompute — do NOT
-build a parallel generation path. Before adding a data source, check whether an
+build a parallel generation path. The checkpoint innings and thresholds live ONCE,
+in `callout-notes/checkpoints.js`, and `gen-callouts.mjs` imports them: a second
+copy would tally one inning while the note spoke about another. Before adding a data source, check whether an
 existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per-PA
 `playLog`). Notes computable from data on hand should be computed live.
 

@@ -176,13 +176,13 @@ don't run these by hand.
   game reachable after mlb.com de-lists it). The twist vs. the other generators,
   which regenerate from scratch. Self-contained; MLB only; kept OUT of the PWA
   precache (grows each game day). App reads it via `src/api/gameNotes.js`.
-- `gen-callouts.mjs` → per-date callout files — every team-record, starter-record,
-  hitter-split, and situational callout. Covers MLB + the four full-season MiLB
-  levels (each MiLB person-stats fetch must carry the level's `sportId` or the API
-  silently returns the empty MLB line); career-derived families + standings splits
-  stay MLB-only. Per-date files are ~1MB, kept out of the PWA precache. Also
-  reads the LOCAL `public/data/fouls.json` once per run for two MLB-only bundle
-  keys — `foulSpoilers` (top-10 foul-per-game hitters on the two clubs) and
+- `gen-callouts.mjs` → `callouts/{MMDDYYYY}/{gamePk}.json` — every team-record,
+  starter-record, hitter-split, and situational callout. Covers MLB + the four
+  full-season MiLB levels (each MiLB person-stats fetch must carry the level's
+  `sportId` or the API silently returns the empty MLB line); career-derived families
+  + standings splits stay MLB-only. A date is ~1 MB across ~76 files, out of
+  precache; a page reads one. Also reads the LOCAL `public/data/fouls.json` for two
+  MLB-only keys — `foulSpoilers` (top-10 foul-per-game hitters on the clubs) and
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
   absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
   parallel path.
@@ -328,10 +328,10 @@ don't run these by hand.
   `src/api/teamScoreFormula.js`). Combined with Season Surprise into the
   headroom-aware Season Grade; see `docs/season-grade.md`/ADR-0020. Backed by
   the SQLite layer above (`team_snapshots`, `metric='quality'`/`'current_form'`).
-- `gen-team-transactions.mjs` → `public/data/team-transactions/{season}.json` —
-  an MLB-only, season-chunked roster-move story feed for all 30 organizations.
-  The nightly job rebuilds only the current season; once the season file is
-  marked `final`, later runs leave it immutable unless explicitly forced.
+- `gen-team-transactions.mjs` → `team-transactions/{season}/{teamId}.json` — an
+  MLB-only roster-move story feed, ONE FILE PER ORG per season, written even with
+  no moves (`days: []`) so a 404 means "no such season", never "quiet club".
+  `index.json` holds the metadata: once `final`, a run skips the season unless forced.
 
 - `gen-highlights.mjs` also → `public/data/highlights/day/{MMDDYYYY}.json` — the
   per-slate-date **condensed-game index**, `{gamePk: {title, duration, poster,

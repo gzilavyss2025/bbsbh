@@ -25,22 +25,16 @@
 //
 // Cached in-memory per team for the session, since a file only changes once a
 // day (mirrors war.js's module-level cache).
-const cache = new Map()
+
+import { staticJsonBy } from './staticJson.js'
+
+const loadTeamHighlights = staticJsonBy((teamId) => `/data/highlights/${teamId}.json`, {
+  shape: (d) => (Array.isArray(d.games) ? d : { ...d, games: [] }),
+  fallback: { games: [] },
+})
 
 export async function fetchTeamHighlights(teamId) {
-  if (!teamId) return { games: [] }
-  if (cache.has(teamId)) return cache.get(teamId)
-  let data
-  try {
-    const res = await fetch(`/data/highlights/${teamId}.json`)
-    if (!res.ok) throw new Error(`highlights/${teamId}.json ${res.status}`)
-    data = await res.json()
-  } catch {
-    data = { games: [] }
-  }
-  if (!Array.isArray(data.games)) data = { ...data, games: [] }
-  cache.set(teamId, data)
-  return data
+  return teamId ? loadTeamHighlights(teamId) : { games: [] }
 }
 
 // One slate date's condensed games, keyed by gamePk — the poster, runtime,

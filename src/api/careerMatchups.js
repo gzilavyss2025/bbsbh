@@ -25,20 +25,13 @@
 // Degrades to an empty map before the file exists or on any failure — the card
 // simply doesn't render. Cached in-memory for the session since the file only
 // changes once a day.
-let cached = null
 
-export async function loadCareerMatchups() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/career-matchups.json')
-    if (!res.ok) throw new Error(`career-matchups.json ${res.status}`)
-    const data = await res.json()
-    cached = { matchups: data.matchups ?? {}, generatedAt: data.generatedAt ?? null }
-  } catch {
-    cached = { matchups: {}, generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const loadCareerMatchups = staticJson('/data/career-matchups.json', {
+  shape: (d) => ({ matchups: d.matchups ?? {}, generatedAt: d.generatedAt ?? null }),
+  fallback: { matchups: {}, generatedAt: null },
+})
 
 // One club's batters against the starter they're about to face, for the game
 // being staged, or null when there's nothing to show (no file yet, a game

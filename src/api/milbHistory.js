@@ -18,19 +18,9 @@
 // this module existed. That makes wiring this in strictly additive: it can
 // only make a resolution MORE correct, never less.
 
-let cached = null
+import { staticJson } from './staticJson.js'
 
-export async function fetchMilbHistory() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/milb-history.json')
-    if (!res.ok) throw new Error(`milb-history.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { clubs: {} }
-  }
-  return cached
-}
+export const fetchMilbHistory = staticJson('/data/milb-history.json', { fallback: { clubs: {} } })
 
 // The era (if any) in `list` whose [startYear, endYear] span contains `year`.
 function eraForYear(list, year) {

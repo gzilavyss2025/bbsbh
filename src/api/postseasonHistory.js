@@ -13,20 +13,10 @@
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session
 // since the file only changes on a hand-run regenerate.
-let cached = null
 
-export async function loadPostseasonHistory() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/postseason-history.json')
-    if (!res.ok) throw new Error(`postseason-history.json ${res.status}`)
-    const data = await res.json()
-    cached = {
-      seasons: data.seasons ?? [],
-      generatedAt: data.generatedAt ?? null,
-    }
-  } catch {
-    cached = { seasons: [], generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const loadPostseasonHistory = staticJson('/data/postseason-history.json', {
+  shape: (d) => ({ seasons: d.seasons ?? [], generatedAt: d.generatedAt ?? null }),
+  fallback: { seasons: [], generatedAt: null },
+})

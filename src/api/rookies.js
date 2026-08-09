@@ -1,4 +1,5 @@
 import { shardKey100 } from '../lib/shardKey.js'
+import { staticJson, staticJsonBy } from './staticJson.js'
 
 // Rookie status, read from static same-origin files under public/data/rookies/
 // rather than computed live. Those files are derived from the append-only
@@ -30,42 +31,21 @@ import { shardKey100 } from '../lib/shardKey.js'
 // map are interchangeable inputs. Degrades to an empty map before the files
 // exist or on any fetch failure — no pill/timeline row, not a broken page.
 // Cached in-memory for the session since the files only change once a day.
-let cached = null
-
-async function fetchJsonOrNull(path) {
-  try {
-    const res = await fetch(path)
-    if (!res.ok) throw new Error(`${path} ${res.status}`)
-    return await res.json()
-  } catch {
-    return null
-  }
-}
-
-export async function fetchRookiesData() {
-  if (cached) return cached
-  cached = (await fetchJsonOrNull('/data/rookies/status.json')) ?? {
-    generatedAt: null,
-    players: {},
-  }
-  return cached
-}
+export const fetchRookiesData = staticJson('/data/rookies/status.json', {
+  fallback: { generatedAt: null, players: {} },
+})
 
 // Which record shard holds a personId. The generator writes the same buckets
 // (scripts/lib/rookie-shards.mjs) by importing THIS function, so the two cannot
 // disagree — see src/lib/shardKey.js.
 export const rookieShardKey = shardKey100
 
-const recordShards = new Map() // shard key -> { players } | null
+const loadRecordShard = staticJsonBy((key) => `/data/rookies/records/${key}.json`)
 
 // One player's full record — { debutDate, rookieUntil } — or null when he has
 // none (undebuted, or off MLB entirely). One ~13 KB shard fetch, session-cached.
 export async function fetchRookieRecord(personId) {
-  const key = rookieShardKey(personId)
-  if (!recordShards.has(key)) {
-    recordShards.set(key, await fetchJsonOrNull(`/data/rookies/records/${key}.json`))
-  }
-  return rookieRecordFor(recordShards.get(key), personId)
+  return rookieRecordFor(await loadRecordShard(rookieShardKey(personId)), personId)
 }
 
 // 'open' | 'closed' | null (no record at all), reading EITHER shape: a full
