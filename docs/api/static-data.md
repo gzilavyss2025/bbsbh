@@ -105,8 +105,11 @@ for each generator; the reader modules:
   or the compact flag interchangeably, which is what lets the two files share
   them.
 - `umpires.js` — the umpire detail page (every game an umpire worked this season +
-  base, most recent first), from `public/data/umpires.json`, keyed by umpire
-  personId. Cost-driven: no "games by umpire" endpoint, so `gen-umpires.mjs` does a
+  base, most recent first), from `public/data/umpires/{personId}.json` — one shard
+  per umpire (~22 KB), because every reader here is after a single man: the detail
+  page, and the accuracy modal one tap away on the lineup page. The league-wide file
+  this replaced reached 3.2 MB by August and grows all season. Cost-driven: no
+  "games by umpire" endpoint, so `gen-umpires.mjs` does a
   full-season schedule scan (`hydrate=officials,team`) then re-indexes thousands of
   rows by umpire id. MLB + AAA (one scan each, sportId 1 + 11; the same umpires
   shuttle between the levels, so each game row is `level`-tagged). Wired via
@@ -117,13 +120,18 @@ for each generator; the reader modules:
   most-worked teams + ballparks client-side. A COMPANION file
   `public/data/umpire-accuracy.json` (`gen-umpire-accuracy.mjs`, same cron) adds
   each home-plate umpire's season called-pitch accuracy + a compact zone-tendency
-  breakdown, keyed by the same personId. It ships in TWO shapes from one run: the
-  full archive, and `umpire-accuracy-summary.json`, the same records with each
-  umpire's per-game `games` array dropped (~2 MB → ~0.12 MB). Only the umpire
-  detail page draws a game log; the lineup page, the box score, and the rankings
-  table need season aggregates alone, so `loadAccuracySummary()` serves them the
-  small file (falling back to the archive when it is missing) and the archive
-  loads on the detail page only. Unlike `umpires.json`'s cheap full nightly
+  breakdown, keyed by the same personId. It ships in THREE shapes from one run:
+  the full archive; `umpire-accuracy-summary.json`, every umpire's season
+  aggregates with the per-game `games` arrays dropped (~2 MB → ~0.12 MB); and
+  `umpire-accuracy/{personId}.json`, the mirror image — one umpire's game rows
+  alone (~13 KB). Together the last two are the archive, split by who asks.
+  `loadAccuracySummary()` + `loadRows(id)` serve every surface: the lineup page,
+  the box score, and the rankings table read aggregates only; the detail page and
+  the lineup page's accuracy modal join the aggregates to ONE man's rows. The
+  whole archive is loaded for exactly one figure, the pitcher/hitter lean, which
+  z-scores an umpire against the pool's game rows — `loadUmpire(id, {withLean})`,
+  passed by the detail page and by nothing else. The summary falls back to the
+  archive when it is missing, so a deploy before the first cron still works. Unlike `umpires.json`'s cheap full nightly
   rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
   batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
   Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few

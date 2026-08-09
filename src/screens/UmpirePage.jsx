@@ -96,7 +96,9 @@ function hpTeamRecords(games) {
 // this mirrors — there's no spoiler cutoff to thread through: the page just
 // shows the umpire's whole season.
 export function UmpirePage({ id }) {
-  const { loading, error, data } = useAsync(() => loadUmpire(id), [id])
+  // withLean: this page draws the Tendencies card, the one figure that needs
+  // the league-wide archive. The accuracy modal does not, and does not load it.
+  const { loading, error, data } = useAsync(() => loadUmpire(id, { withLean: true }), [id])
   const navigate = useNav()
   const [hpOnly, setHpOnly] = useState(false)
   const [showAllVenues, setShowAllVenues] = useState(false)

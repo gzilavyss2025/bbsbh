@@ -168,7 +168,7 @@ routing parses the pathname only — so use it everywhere by habit.
 
 `public/data/` is ~28 MB of generated JSON and `scripts/data/` ~6.7 MB of SQLite
 TEXT dumps; several single files are over a megabyte (`vs-team-splits.json` 3.2 MB,
-`umpires.json` 3.2 MB, `pitch-arsenal.sql` 2.2 MB). None is written or reviewed by
+`pitch-arsenal.sql` 2.2 MB). None is written or reviewed by
 hand, and reading one whole answers a question nobody has — it just spends a large
 part of an agent's context on repeated records.
 
