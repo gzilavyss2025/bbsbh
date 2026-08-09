@@ -49,6 +49,7 @@
 @import './styles/20-charts.css';
 @import './styles/21-box-score.css';
 @import './styles/21a-box-score-stars.css';
+@import './styles/21b-box-score-tally.css';
 @import './styles/22-box-score-tables.css';
 @import './styles/23-box-score-detail.css';
 @import './styles/24-floating-nav-and-hud.css';

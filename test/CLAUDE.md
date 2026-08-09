@@ -14,6 +14,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 |---|---|---|---|
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
 | api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |
+| box-score-note-attribution.test.js | 13 | src/api/boxscore.js, src/api/boxscore/gameNotes.js | Which club each info-block row prints under (HBP/IBB follow the BATTER), and the three parse shapes that used to drop a row into the shared foot |
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
@@ -86,6 +87,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
 | season-series.test.js | 7 | src/api/seasonSeries.js | Season series cells |
 | skipped-bottom-half.test.js | 9 | src/api/select.js | selectSkippedBottomHalf, selectFinalHalfIndex |
+| skipped-half-cells.test.js | 3 | src/api/boxscore.js, src/api/derive.js | A never-batted half prints X on the box score's line score and gets no by-inning row at all (the `runs` KEY, never its value) |
 | slate-scores.test.js | 13 | src/api/schedule.js, src/lib/slateScoreLine.js | Slate score line normalization |
 | spoiled-days.test.js | 21 | src/lib/spoiledDays.js | Spoiled-days consent persistence (ADR-0026) |
 | spoiler-gates.test.js | 4 | select.js, enteringHalf.js | Caller-gated pre-pitch rule |

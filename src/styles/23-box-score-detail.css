@@ -575,15 +575,9 @@
   color: var(--text-caption);
 }
 
-/* The by-inning tally's own cells are wider than Scoreboard's run-count boxes
-   above (26px) — each one reads four slash-joined figures ("24/1/6/1"), not a
-   single digit, and the Totals column carries the same reading, summed
-   (InningTally.jsx's `totalFor`). Same specificity as the rules above
-   (two classes), so this must come after them in the cascade to win. */
-.bs__grid--tally .bs__boardInn,
-.bs__grid--tally .bs__boardFinal {
-  width: 54px;
-}
+/* The by-inning tally no longer borrows these line-score cells: it stopped
+   packing four slash-joined figures into one box and now prints one number per
+   box, on rows of its own (21b-box-score-tally.css).  */
 
 /* Fill-in header: the scorebook's labeled boxes (date, ballpark, umpires,
    managers, weather, attendance…) — styled to match the lineup pages' fact grid,

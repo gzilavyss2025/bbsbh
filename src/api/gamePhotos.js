@@ -341,7 +341,12 @@ export function onlyPhotographer(photos) {
 // same file's condensed-cut poster/playback URLs: GameResultFace.jsx renders
 // it only once the flip card's already-revealed back face has mounted, so nothing
 // paints before the visitor chose to reveal that specific game.
-export async function pickHeroPhoto(items) {
+//
+// `width` sizes the `thumb` render only — same photograph, same CDN id, just a
+// different resize instruction. The 480 default is the slate card's size and is
+// what the day index stores; the box score asks for a wider one because its
+// condensed print fills a half-page column on a desktop, where 480 reads soft.
+export async function pickHeroPhoto(items, { width = 480 } = {}) {
   const seen = new Set()
   let fallback = null
   for (const item of items ?? []) {
@@ -365,8 +370,8 @@ export async function pickHeroPhoto(items) {
       kind = classifyPhotoAsset({ title, taxonomy, shape })
     }
 
-    if (kind === 'photographer') return { original, thumb: thumbUrl(original) }
-    if (kind === 'broadcast' && !fallback) fallback = { original, thumb: thumbUrl(original) }
+    if (kind === 'photographer') return { original, thumb: thumbUrl(original, width) }
+    if (kind === 'broadcast' && !fallback) fallback = { original, thumb: thumbUrl(original, width) }
   }
   return fallback
 }

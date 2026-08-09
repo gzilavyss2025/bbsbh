@@ -87,6 +87,17 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   A condensed cut posts ~30 min after the final out, so its absence (a live
   game, MiLB, or that window) is routine, not an edge. `formatClipDuration`
   turns the feed's `"00:12:20"` into the `(12:20)` the kraft tab says.
+  The card's POSTER is not MLB's own — that is always the same designed
+  "CONDENSED GAME" plate over both clubs' marks. `GameVideoRow` runs
+  `gamePhotos.js`'s `pickHeroPhoto` over the items it already holds and shows
+  the still it returns, which is the identical pick the nightly sweep stores
+  for the slate's own condensed print (`GameResultFace`), so the two surfaces
+  cannot disagree about a game's photograph. Computed live rather than read
+  from the day index because that file is written the night AFTER the games,
+  and so holds nothing for the game you just finished scoring; `pickHeroPhoto`
+  takes a `width` for the render, since the box score's print fills a half-page
+  column where the slate card's 480 reads soft. Null (a MiLB park, or a game
+  MLB shot nothing usable at) leaves MLB's poster in place.
   Also holds the highlights **cascade**'s pure classification —
   `classifyHighlight`, `isEligibleForPositiveFilter`/`NON_PLAY_TAXONOMY`,
   `highlightPoster` — which is NOT reveal-only: it's plain data transform over
@@ -188,6 +199,24 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   selector combining it with this game's plays runs inside the `SealBox` reveal.
   `hasPitchTracking(feed)` gates to MLB + AAA. See
   `.scratch/umpire-accuracy/consistency-favor-scope.md` §3.
+- `boxscore.js` / `boxscore/gameNotes.js` — reveal-only. `boxscore.js` builds
+  the tables; `gameNotes.js` owns the INFO BLOCK, the label/value rows MLB hangs
+  underneath them, and the rule filing each under a club: a row goes to the club
+  of the player it NAMES FIRST. That is a pitcher everywhere except **HBP and
+  IBB**, which name the batter and print in HIS club's BATTING notes beside the
+  2B/RBI/GIDP lines — being hit belongs with the rest of a hitter's night, not
+  under the pitching club's heading. A row the parse can't match to a roster
+  name falls to the shared foot at the bottom of the sheet, which means an entry
+  down there that NAMES A PLAYER is a bug, not a category: three real shapes
+  landed there (a batter hit by two pitchers, a bare "Name N" with no
+  parenthetical, and a `Jr.` whose period was eaten as the row's terminator) and
+  `test/box-score-note-attribution.test.js` pins each. The foot is for rows with
+  no player in them at all — an ejection, written as prose.
+  Both grids also read whether a half was PLAYED off the presence of its `runs`
+  key, never its value (`test/skipped-half-cells.test.js`): the home 9th of a
+  game the home team led entering it carries hits/errors/LOB and no `runs`, and
+  testing the half object instead printed real-looking zeros for an inning that
+  never happened.
 - `linescore.js` / `derive.js` — reveal-only (see spoiler rule above).
   `linescore.js` also holds `revealStampFacts`, the Logbook stamp's game blob
   (final score, clubs, venue, innings) in the exact shape `api/stamps.js` caches

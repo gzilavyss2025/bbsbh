@@ -2,6 +2,7 @@ import { memo, useMemo, useRef, useState } from 'react'
 import { resolveCardPlayer } from '../api/boxscore.js'
 import { highlightPoster } from '../api/highlights.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
+import { InningTally } from './boxscore/InningTally.jsx'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
@@ -961,102 +962,6 @@ function Scoreboard({ away, home, innings, onSection, treatments }) {
   )
 }
 
-// A per-half-inning tally the printed line score never carries: pitches thrown,
-// whiffs (swing-and-miss), fouls, and runners left on base (see
-// computeInningDigest). Everything here is plain play-by-play, so unlike the
-// Statcast/win-prob cards it renders at MiLB parks too — the box score's one
-// enrichment that never goes dark below AAA. Hidden only if the feed carried
-// no plays at all.
-//
-// Laid out as a second line score (Scoreboard above it) rather than one row
-// per half-inning: each team gets its own row on its own jersey-tinted tile
-// (same TeamTreatmentMark as Scoreboard), and each inning column holds all
-// four figures as one slash-joined reading — "24/1/6/1" — instead of a bare
-// run count. TALLY_LEGEND is the one place that order is spelled out; it
-// reads directly above the grid rather than as column headers repeated once
-// per inning. Always open — unlike Scoreboard's run count this card adds
-// nothing spoiler-shaped, so there's no reason to default it collapsed the
-// way the old row-per-half table (with its own toggle) did.
-const TALLY_LEGEND = 'Pitches / Whiffs / Fouls / LOB'
-
-function InningTally({ rows, away, home, treatments }) {
-  if (!rows || rows.length === 0) return null
-  const byInningAndSide = new Map()
-  for (const r of rows) {
-    if (!byInningAndSide.has(r.inning)) byInningAndSide.set(r.inning, {})
-    byInningAndSide.get(r.inning)[r.side] = r
-  }
-  const innings = [...byInningAndSide.keys()].sort((a, b) => a - b)
-  const cellFor = (num, side) => {
-    const r = byInningAndSide.get(num)?.[side]
-    return r ? `${r.pitches}/${r.whiffs}/${r.fouls}/${r.lob}` : 'X'
-  }
-  // Each side's own halves summed across the whole game — the same rows the
-  // inning columns already carry, just added up instead of read one at a time.
-  const totalFor = (side) => {
-    const t = { pitches: 0, whiffs: 0, fouls: 0, lob: 0 }
-    for (const r of rows) {
-      if (r.side !== side) continue
-      t.pitches += r.pitches
-      t.whiffs += r.whiffs
-      t.fouls += r.fouls
-      t.lob += r.lob
-    }
-    return `${t.pitches}/${t.whiffs}/${t.fouls}/${t.lob}`
-  }
-  const sideRows = [
-    { side: 'away', team: away, gameSide: 'away' },
-    { side: 'home', team: home, gameSide: 'home' },
-  ]
-  return (
-    <div className="bs__tally">
-      <div className="bs__tallyHead">
-        <span className="bs__insightsTitle">By inning</span>
-        <span className="bs__tallyLegend">{TALLY_LEGEND}</span>
-      </div>
-      <div className="bs__scroll bs__tallyBody">
-        <table className="bs__grid bs__grid--board bs__grid--tally">
-          <thead>
-            <tr>
-              <th className="bs__boardName" />
-              {innings.map((num) => (
-                <th key={num} className="bs__boardInn">
-                  {num}
-                </th>
-              ))}
-              <th className="bs__boardFinal">Totals</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sideRows.map(({ side, team, gameSide }) => (
-              <tr key={side}>
-                <td className="bs__boardName">
-                  <TeamLink id={team.id} className="bs__boardLogo" ariaLabel={team.teamName}>
-                    <TeamTreatmentMark
-                      teamId={team.id}
-                      name={team.teamName}
-                      treatment={treatments?.[gameSide]}
-                      side={gameSide}
-                      size={24}
-                      block="bs__boardLogobox"
-                    />
-                  </TeamLink>
-                </td>
-                {innings.map((num) => (
-                  <td key={num} className="bs__boardInn">
-                    {cellFor(num, side)}
-                  </td>
-                ))}
-                <td className="bs__boardFinal">{totalFor(side)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
 // Pitchers of record, stacked one per line. Each name carries its season line in
 // parens — (W-L) for the win and loss, (saves) for the save — the way a printed
 // box score writes the decisions.
@@ -1251,9 +1156,15 @@ function ThreeStars({ stars }) {
 
 // What's left of the info block after selectBoxscore peels off the
 // structured fill-in-box fields (umpires, weather+wind, venue, attendance,
-// first pitch, duration) and splits every per-pitcher row onto its own team's
-// TeamBlock (see `pitchNotes` there): whole-game fields with no team owner,
-// plus any entry that couldn't be matched to a roster name.
+// first pitch, duration) and splits every per-player row onto its own team's
+// TeamBlock — pitcher rows into `pitchNotes` there, HBP/IBB into that club's
+// BATTING group: whole-game fields with no team owner (an ejection names its
+// club in prose and has no roster name to key on), plus any entry that
+// couldn't be matched to a roster name.
+//
+// An entry landing HERE that names a player is a parse bug, not a category —
+// that is exactly how a double plunk ("Culpepper, K 2 (by Gasser, by
+// Patrick)") ended up at the foot of the sheet. See splitGameNotes.
 function GameInfo({ rows }) {
   if (rows.length === 0) return null
   return (

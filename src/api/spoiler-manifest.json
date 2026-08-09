@@ -84,6 +84,13 @@
       "class": "caller-gated",
       "why": "`lineupEntering` reports the batting order as a half begins, walking pre-pitch substitution events. Safe only for the half the user has reached (ADR-0003/0010)."
     },
+    "boxscore/gameNotes.js": {
+      "class": "reveal-only",
+      "why": "The info block under the tables — HBP, WP, Balk, Pitches-strikes — and the rule filing each row under a club. Split out of boxscore.js; same footing, because these rows are read off a FINAL box score and several of them state an outcome outright. Runs only from inside `selectBoxscore`.",
+      "importers": [
+        "api/boxscore.js"
+      ]
+    },
     "boxscore.js": {
       "class": "reveal-only",
       "why": "Every number in the full box-score line is score-revealing. `selectBoxscore` must run inside the box score's SealBox reveal.",
@@ -219,7 +226,7 @@
     },
     "gamePhotos.js": {
       "class": "spoiler-free",
-      "why": "Deliberately NOT reveal-only. A recap photo narrates the outcome by looking at it, but /photos is a standalone page OUTSIDE the scoring flow — it sits outside the rule's scope rather than carving a hole in it, and carries its own disclaimer. pickHeroPhoto() is the one export with a scoring-surface consumer (the slate's condensed-game poster) and earns its safety separately: it runs in scripts/gen-highlights.mjs, returns bare URLs with no caption text, and its one reader renders the image only on an already-revealed flip-card back face — see pickHeroPhoto's own header."
+      "why": "Deliberately NOT reveal-only. A recap photo narrates the outcome by looking at it, but /photos is a standalone page OUTSIDE the scoring flow — it sits outside the rule's scope rather than carving a hole in it, and carries its own disclaimer. pickHeroPhoto() is the one export with scoring-surface consumers (the condensed-game poster, on the slate and in the box score) and earns its safety separately: it returns bare URLs with no caption text, and both readers render the image only after a reveal — the slate's on an already-revealed flip-card back face, the box score's from inside its SealBox reveal (GameVideoRow, which calls pickHeroPhoto live because the nightly day index has nothing yet for a game just finished). See pickHeroPhoto's own header."
     },
     "gameStory.js": {
       "class": "reveal-only",

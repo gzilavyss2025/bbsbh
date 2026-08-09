@@ -162,7 +162,15 @@ const BUDGETS = {
   // its cascade order, and `index.css` imports them as one ordered sheet), so
   // the split has to land here. Loaded by `BookCoverPicker.jsx`; must cascade
   // after `49-passport-book.css`, whose `.passcover` its preview reuses.
-  'src/styles': 66,
+  //
+  // 66 -> 67 for `21b-box-score-tally.css`: the by-inning tally's card, split
+  // out of `21-box-score.css` (at its 800-line check-file-size ceiling) when
+  // the card was redesigned from four slash-joined figures per box to one
+  // number per box, and grew a grid and a pencil-wash scale of its own. Same
+  // lettered-sibling shape as `21a-box-score-stars.css` beside it, and for the
+  // same reason. Its position is load-bearing: it overrides `.bs__grid`'s cell
+  // rules in `21-box-score.css`, so it has to cascade after them.
+  'src/styles': 67,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

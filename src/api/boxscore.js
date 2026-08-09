@@ -28,6 +28,11 @@ import { contextNeutralPoints } from './performanceScore.js'
 import { revealTotals, revealInning } from './linescore.js'
 import { computePitcherLines } from './pitchers.js'
 
+// The info block — the label/value rows under the tables, and the rule that
+// files each one under a club. Its own module because it is one self-contained
+// parse with its own failure modes; this file owns the tables.
+import { splitGameNotes, mergeBattingNotes, teamNoteGroups } from './boxscore/gameNotes.js'
+
 // "Cooper Pratt" — first name ahead of the shortened surname, for the three
 // stars' full-name style (the batting/pitching tables use the LAST, First
 // order instead — see lastFirst below). Reuses shortName so
@@ -260,9 +265,25 @@ function scoreboardInnings(feed) {
   const innings = feed?.liveData?.linescore?.innings ?? []
   return innings.map((i) => ({
     num: i.num,
-    away: revealInning(feed, i.num, 'away')?.runs ?? 'X',
-    home: revealInning(feed, i.num, 'home')?.runs ?? 'X',
+    away: halfWasPlayed(i.away) ? (revealInning(feed, i.num, 'away')?.runs ?? 0) : 'X',
+    home: halfWasPlayed(i.home) ? (revealInning(feed, i.num, 'home')?.runs ?? 0) : 'X',
   }))
+}
+
+// Whether a half-inning was actually batted. The feed says so by the PRESENCE
+// of a `runs` key, never its value: a played-but-scoreless half reads
+// `runs: 0`, while a half nobody ever came up for carries hits/errors/
+// leftOnBase and no `runs` at all — which is what the home 9th of every game
+// the home team led entering it looks like (gamePk 823752, 2026-08-08).
+//
+// Testing the half OBJECT instead printed a real-looking `0` for that inning,
+// on this grid and in the by-inning tally alike. Same structural read as
+// select.js's selectSkippedBottomHalf, which documents it at length; kept as a
+// local one-liner here rather than imported, because that function is
+// isFinal-gated for a pre-reveal caller's sake and this one runs only inside
+// the box score's own seal, where the whole line is already on the page.
+function halfWasPlayed(half) {
+  return typeof half?.runs === 'number'
 }
 
 // First-pitch, time-of-game, delay, and game-end clock times for the scorebook
@@ -389,148 +410,6 @@ function parseUmpires(value) {
   return u.hp || u.first || u.second || u.third || u.left || u.right ? u : null
 }
 
-// Info-block rows already shown structured elsewhere in the box score (the
-// fill-in boxes' Umpires/Weather/Venue/Attendance/First-Pitch/duration
-// fields) — dropped from the shared foot rather than repeated verbatim. Wind
-// belongs here too: it's folded into the weather box we compute ourselves
-// (see src/api/weather.js), so the feed's raw Wind row is redundant.
-const DEDUPED_INFO_LABELS = new Set([
-  'Umpires',
-  'Weather',
-  'Wind',
-  'First pitch',
-  'T',
-  'Att',
-  'Venue',
-])
-
-// Rows shaped "Name stat; Name stat…" — one entry per pitcher.
-const STAT_SPLIT_LABELS = new Set([
-  'Pitches-strikes',
-  'Groundouts-flyouts',
-  'Batters faced',
-  'Inherited runners-scored',
-])
-
-// Rows shaped "Name (detail); Name (detail)…" or bare "Name; Name…" — no
-// trailing numeric stat, just a name and an optional parenthetical (an
-// outcome, a role, or a "by Pitcher" attribution).
-const NAME_SPLIT_LABELS = new Set([
-  'Balk',
-  'WP',
-  'IBB',
-  'HBP',
-  'ABS Challenge',
-  'Pitch timer violations',
-])
-
-// Every player in the game, keyed by the exact `boxscoreName` string the feed
-// also uses inside the info-block text (MLB disambiguates same-surname
-// players game-wide, e.g. "Contreras, Wm", so this lookup can't collide
-// across the two teams).
-function nameTeamMap(feed) {
-  const map = new Map()
-  const gdPlayers = feed?.gameData?.players ?? {}
-  for (const side of ['away', 'home']) {
-    const boxPlayers = feed?.liveData?.boxscore?.teams?.[side]?.players ?? {}
-    for (const key of Object.keys(boxPlayers)) {
-      const name = gdPlayers[key]?.boxscoreName
-      if (name) map.set(name, side)
-    }
-  }
-  return map
-}
-
-function splitEntries(value) {
-  return (value ?? '')
-    .split(';')
-    .map((s) => s.trim().replace(/\.\s*$/, '').trim())
-    .filter(Boolean)
-}
-
-// "Holmes, C 90-57" -> { name: 'Holmes, C', stat: '90-57' }
-function splitNameStat(entry) {
-  const m = entry.match(/^(.+?)\s+(\d[\d-]*)$/)
-  return m ? { name: m[1].trim(), stat: m[2] } : { name: entry, stat: '' }
-}
-
-// "Soto, J (by Soriano, G)" -> { name: 'Soto, J', count: '', detail: 'by Soriano, G' }
-// "Jackson, A 4 (Ball-Confirmed, …)" -> { name: 'Jackson, A', count: '4', detail: '…' } —
-// an ABS Challenge row tallies a repeat challenger as "Name N (result; result…)"; the
-// count must be split off before matching, or a player who challenged more than once
-// fails the roster-name lookup below and falls into the unattributed `shared` bucket
-// instead of his own team's (regardless of which side he's on — this isn't a
-// home/away-specific bug, just any name this pattern applies to). Kept separate from
-// `name` so the caller can still show the count in the rendered text.
-function splitNameDetail(entry) {
-  const m = entry.match(/^(.+?)(?:\s+(\d+))?\s*\(([^)]*)\)$/)
-  return m
-    ? { name: m[1].trim(), count: m[2] ?? '', detail: m[3].trim() }
-    : { name: entry, count: '', detail: '' }
-}
-
-// Splits the info block's per-pitcher/per-player rows onto the team of the
-// player named — the pitcher in a "(by X)" attribution (HBP, IBB), else the
-// leading name (Balk, WP, Pitches-strikes…). Anything that can't be matched
-// to a roster name is kept, under its original label, in `shared` rather than
-// dropped or guessed onto the wrong side.
-function splitGameNotes(feed) {
-  const info = feed?.liveData?.boxscore?.info ?? []
-  const teamOf = nameTeamMap(feed)
-  const bucket = { away: [], home: [], shared: [] }
-
-  for (const row of info) {
-    if (!row.label || row.value == null) continue
-    if (DEDUPED_INFO_LABELS.has(row.label)) continue
-
-    const isStat = STAT_SPLIT_LABELS.has(row.label)
-    if (!isStat && !NAME_SPLIT_LABELS.has(row.label)) {
-      bucket.shared.push(row)
-      continue
-    }
-
-    const bySide = { away: [], home: [], other: [] }
-    for (const entry of splitEntries(row.value)) {
-      let name, text, side
-      if (isStat) {
-        const parsed = splitNameStat(entry)
-        name = parsed.name
-        text = parsed.stat ? `${parsed.name} ${parsed.stat}` : parsed.name
-      } else {
-        const parsed = splitNameDetail(entry)
-        const byMatch = parsed.detail.match(/^by\s+(.+)$/i)
-        name = byMatch ? byMatch[1].trim() : parsed.name
-        const nameWithCount = parsed.count ? `${parsed.name} ${parsed.count}` : parsed.name
-        text = parsed.detail ? `${nameWithCount} (${parsed.detail})` : nameWithCount
-      }
-      side = teamOf.get(name)
-      ;(bySide[side] ?? bySide.other).push(text)
-    }
-    for (const side of ['away', 'home']) {
-      if (bySide[side].length) {
-        bucket[side].push({ label: row.label, value: `${bySide[side].join('; ')}.` })
-      }
-    }
-    if (bySide.other.length) {
-      bucket.shared.push({ label: row.label, value: `${bySide.other.join('; ')}.` })
-    }
-  }
-
-  return bucket
-}
-
-// The BATTING / BASERUNNING / FIELDING note groups a printed box score carries
-// under each team (HR detail, 2-out RBI, SB, DP, Team LOB…).
-function teamNoteGroups(feed, side) {
-  const groups = feed?.liveData?.boxscore?.teams?.[side]?.info ?? []
-  return groups
-    .map((g) => ({
-      title: g.title ?? '',
-      rows: (g.fieldList ?? []).filter((r) => r.label || r.value),
-    }))
-    .filter((g) => g.rows.length)
-}
-
 // Per-team footnotes ("a-Homered for Ibáñez in the 6th.") keyed by the marker
 // shown next to a substitute's name.
 function footnotes(feed, side) {
@@ -539,7 +418,7 @@ function footnotes(feed, side) {
   )
 }
 
-function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
+function oneSide(feed, side, decisions, gameNotes, pitcherLines) {
   const meta =
     feed?.gameData?.teams?.[side] ??
     feed?.liveData?.boxscore?.teams?.[side]?.team ??
@@ -558,11 +437,13 @@ function oneSide(feed, side, decisions, pitchNotes, pitcherLines) {
     pitchers: pitchingRows(feed, side, decisions, pitcherLines),
     pitchTotals: pitchingTotals(feed, side),
     line: teamLine(feed, side),
-    notes: teamNoteGroups(feed, side),
+    // The feed's own BATTING/BASERUNNING/FIELDING groups, with this club's
+    // batter rows from the info block (HBP, IBB) folded into the BATTING one.
+    notes: mergeBattingNotes(teamNoteGroups(feed, side), gameNotes.batting),
     footnotes: footnotes(feed, side),
     // This team's half of the info block's per-pitcher rows (Pitches-strikes,
-    // Groundouts-flyouts, Batters faced, HBP, Balk, WP…) — see splitGameNotes.
-    pitchNotes,
+    // Groundouts-flyouts, Batters faced, Balk, WP…) — see splitGameNotes.
+    pitchNotes: gameNotes.pitching,
   }
 }
 

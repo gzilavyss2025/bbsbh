@@ -273,9 +273,15 @@ export function computeInningDigest(feed, derivedMap) {
   for (const inn of innings) {
     const num = inn.num
     if (num == null) continue
-    // A half was played only if the linescore carries that side's sub-object
-    // (a walk-off skips the home half of the last inning).
-    if (inn.away != null) {
+    // A half was played only if its linescore entry carries a `runs` KEY —
+    // never its value. `runs: 0` is a half that was batted and scoreless; a
+    // half nobody ever came up for carries hits/errors/leftOnBase and no
+    // `runs` at all, which is the shape of the home 9th in every game the home
+    // team led entering it (gamePk 823752, 2026-08-08). Testing the half
+    // object instead gave that inning a full row of real-looking zeros —
+    // pitches, whiffs, fouls and LOB for an inning that did not happen. Same
+    // structural read as select.js's selectSkippedBottomHalf.
+    if (typeof inn.away?.runs === 'number') {
       const d = derived[`${num}-top`]
       rows.push({
         inning: num,
@@ -287,7 +293,7 @@ export function computeInningDigest(feed, derivedMap) {
         lob: revealInning(feed, num, 'away')?.leftOnBase ?? 0,
       })
     }
-    if (inn.home != null) {
+    if (typeof inn.home?.runs === 'number') {
       const d = derived[`${num}-bottom`]
       rows.push({
         inning: num,
