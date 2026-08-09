@@ -46,24 +46,26 @@ test('the summary file is a small fraction of the archive', () => {
 // One fetch stub per module instance, serving whichever accuracy file the test
 // wants to expose. A `?case=` suffix on the import gives each case its own copy
 // of the module, because umpires.js memoizes both the file and the index.
+const fetched = []
 function stubFetch({ archive, summary }) {
+  fetched.length = 0
   globalThis.fetch = async (url) => {
+    fetched.push(url)
+    const shard = /^\/data\/umpire-accuracy\/(\d+)\.json$/.exec(url)
     const body =
       url === '/data/umpire-accuracy.json'
         ? archive
         : url === '/data/umpire-accuracy-summary.json'
           ? summary
-          : UMPIRES // umpires.json — the assignment log the detail page opens with
+          : shard
+            ? { id: Number(shard[1]), games: ARCHIVE.umpires[shard[1]]?.games ?? [] }
+            : UMPIRE_SHARD // /data/umpires/{id}.json — his assignment log
     if (!body) return { ok: false, status: 404 }
     return { ok: true, status: 200, json: async () => body }
   }
 }
 
-const UMPIRES = {
-  season: 2026,
-  generatedAt: '2026-08-09T00:00:00.000Z',
-  umpires: { 1: { id: 1, name: 'Ada Ump', games: [] } },
-}
+const UMPIRE_SHARD = { id: 1, name: 'Ada Ump', season: 2026, generatedAt: 'x', games: [] }
 
 // Two umpires past the five-game ranking floor and one below it.
 const ump = (id, name, accuracy, games, extra = {}) => ({
@@ -151,9 +153,21 @@ test('a lineup-page visit first does not cost the detail page its lean', async (
   stubFetch({ archive: ARCHIVE, summary: SUMMARY })
   const mod = await import('../src/api/umpires.js?case=lean')
   await mod.loadUmpireRankings() // builds the aggregates-only index first
-  const u = await mod.loadUmpire(1) // …and this one needs the lean
+  const u = await mod.loadUmpire(1, { withLean: true }) // …and this one needs the lean
   assert.ok(u, 'umpire detail should load')
   // 'favor' = built from the game rows. A cached aggregates-only index would
   // leave this null (or, unguarded, fall back to the weaker zone figure).
   assert.equal(u.lean.source, 'favor')
+})
+
+test('the accuracy modal reads two shards, never the league archive', async ({}) => {
+  // The modal one tap from the lineup page shows this umpire's accuracy, zone
+  // map, and game rows — no lean — so nothing it needs justifies the archive.
+  stubFetch({ archive: ARCHIVE, summary: SUMMARY })
+  const mod = await import('../src/api/umpires.js?case=modal')
+  const u = await mod.loadUmpire(1)
+  assert.ok(u.accuracy, 'the modal still gets his aggregate')
+  assert.ok(u.accuracy.byGamePk[1], 'and his per-game rows')
+  assert.equal(u.lean, null, 'but no lean')
+  assert.ok(!fetched.includes('/data/umpire-accuracy.json'), `fetched ${fetched.join(', ')}`)
 })

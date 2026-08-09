@@ -69,13 +69,13 @@ don't run these by hand.
   list. Starts from a transaction scan, then verifies each candidate against his
   game log + club's schedule to drop ended stints. Keeps its own self-contained copy
   of the transaction-scan logic (mirrors `person.js`'s `detectRehabAssignment`).
-- `gen-umpires.mjs` → `public/data/umpires.json` — every MLB + AAA umpire's season
-  game log, indexed by umpire id. A full-season schedule scan per level
-  (`/api/v1/schedule?...&hydrate=officials,team`, one call each for sportId 1 + 11)
-  re-indexed by umpire id, each game row tagged with its `level` + `gameType`. AAA
-  rides along because the same umpires shuttle between the levels (shared
-  personIds); AA and below stay out (thinner officials data + no pitch tracking for
-  the accuracy companion). Sweeps regular season + postseason + the All-Star Game
+- `gen-umpires.mjs` → `public/data/umpires/{personId}.json` — each MLB + AAA umpire's
+  season game log, ONE FILE PER UMPIRE (readers want one man; the league-wide file hit
+  3.2 MB). Full rebuild, sweeping stale shards, from a season scan per level
+  (`/api/v1/schedule?...&hydrate=officials,team`, one each for sportId 1 + 11)
+  re-indexed by umpire id, each row tagged `level` + `gameType`. AAA rides along
+  because the same umpires shuttle between the levels (shared personIds); AA and below
+  stay out (thinner officials data + no pitch tracking for the accuracy companion). Sweeps regular season + postseason + the All-Star Game
   (`gameType=R,F,D,L,W,A`) so six-man crews (Left/Right Field, ASG + postseason) and
   variable MiLB crews (two/three-man) all land in the log; `UMP_LABELS` maps every
   role incl. LF/RF, and `selectOfficials` (`src/api/select.js`) mirrors it for the

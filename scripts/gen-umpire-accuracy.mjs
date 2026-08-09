@@ -110,6 +110,9 @@ const out = join(here, '..', 'public', 'data', 'umpire-accuracy.json')
 // draws the game log. Both files are written from the same `result` in the same
 // run, so they cannot disagree. See src/api/umpires.js's loadAccuracySummary().
 const outSummary = join(here, '..', 'public', 'data', 'umpire-accuracy-summary.json')
+// One file per umpire holding just his game rows — the aggregates live in the
+// summary above, so the two together are the whole archive, split by who asks.
+const outRows = join(here, '..', 'public', 'data', 'umpire-accuracy')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 // Loaded once at startup; null (favor degrades to 0/null everywhere) until
 // scripts/gen-run-expectancy.mjs has been hand-run at least once.
@@ -544,6 +547,14 @@ await writeJsonAtomic(outSummary, {
     Object.entries(result).map(([id, { games, ...aggregates }]) => [id, aggregates]),
   ),
 })
+// …and the other half of that split, one file per umpire: his scored game rows
+// alone. The umpire page and the lineup page's accuracy modal both draw ONE
+// man's rows, so between this and the aggregates file nothing but the lean has
+// a reason to read the whole archive. The archive itself stays because this job
+// is append-only — it is the merge base every run reads back.
+for (const [id, u] of Object.entries(result)) {
+  await writeJsonAtomic(join(outRows, `${id}.json`), { id: u.id, games: u.games })
+}
 const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
 console.log(
   `wrote ${out} — ${Object.keys(result).length} umpires, ${gamesTotal} games on file ` +

@@ -2,7 +2,10 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 
 // The umpire detail page's data — for a given umpire, every MLB and AAA game
 // he's worked this season plus which base he had — read from a static
-// same-origin file (public/data/umpires.json) rather than computed live.
+// same-origin file (public/data/umpires/{personId}.json) rather than computed
+// live. ONE FILE PER UMPIRE: every surface here reads a single umpire and
+// already knows his id, and the league-wide file this replaced reached 3.2 MB
+// by August. See scripts/gen-umpires.mjs.
 //
 // There's no "games by umpire" endpoint, so getting this list means scanning
 // the whole season's schedule and re-indexing by umpire id — too much to fetch
@@ -39,7 +42,8 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // its own level via a per-level accuracyIndex(). The lineup summary + rankings
 // page stay MLB-only (they front an MLB game). A MiLB umpire below AAA, or one
 // with no data, degrades to null before the file exists or on any failure.
-let cached = null
+const cached = new Map() // personId -> his assignment shard, or null if he has none
+const rowsCached = new Map() // personId -> his scored game rows
 let accuracyCached = null
 let summaryCached = null
 // accuracyIndex is memoized per level ('MLB' | 'AAA') — the two levels rank
@@ -185,19 +189,44 @@ function watchHand(season, region) {
   return shareL > shareR ? 'L' : 'R'
 }
 
-async function load() {
-  if (cached) return cached
+// One umpire's assignment log, or null when he has no shard — an umpire who
+// hasn't worked a game this season, a MiLB umpire below AAA, or a run before
+// the generator has written the file. Memoized per id: the accuracy modal and
+// the detail page behind it ask for the same man twice.
+async function load(id) {
+  if (cached.has(id)) return cached.get(id)
+  let rec = null
   try {
-    const res = await fetch('/data/umpires.json')
-    if (!res.ok) throw new Error(`umpires.json ${res.status}`)
-    const data = await res.json()
-    cached = { season: data.season ?? null, generatedAt: data.generatedAt ?? null, umpires: data.umpires ?? {} }
+    const res = await fetch(`/data/umpires/${id}.json`)
+    if (!res.ok) throw new Error(`umpires/${id}.json ${res.status}`)
+    rec = await res.json()
   } catch {
-    cached = { season: null, generatedAt: null, umpires: {} }
+    rec = null
   }
-  return cached
+  cached.set(id, rec)
+  return rec
 }
 
+// One umpire's scored game rows, from his shard of the archive. Memoized per
+// id, and `[]` for an umpire with no pitch-tracked plate work (MiLB below AAA,
+// or a run before the generator wrote the file) — absence of rows, not an error.
+async function loadRows(id) {
+  if (rowsCached.has(id)) return rowsCached.get(id)
+  let rows = []
+  try {
+    const res = await fetch(`/data/umpire-accuracy/${id}.json`)
+    if (!res.ok) throw new Error(`umpire-accuracy/${id}.json ${res.status}`)
+    rows = (await res.json()).games ?? []
+  } catch {
+    rows = []
+  }
+  rowsCached.set(id, rows)
+  return rows
+}
+
+// The whole season archive — every umpire's rows. Needed for ONE figure, the
+// pitcher/hitter lean, which z-scores a man against the pool's game rows. Every
+// other surface reads the summary and the one shard it wants.
 async function loadAccuracy() {
   if (accuracyCached) return accuracyCached
   try {
@@ -414,14 +443,15 @@ export function accuracyTendency(season) {
 }
 
 // The full accuracy record for one umpire at a level ({ season, byGamePk }) or
-// null. `byGamePk` holds only that level's game rows (a row predating the level
-// tag is treated as MLB, matching the generator).
-function accuracyFor(umpires, id, level = 'MLB') {
-  const a = umpires[id]
-  const season = a && seasonForLevel(a, level)
+// null. The aggregate comes from the summary file, the rows from his shard —
+// the two halves of what used to be one record. `byGamePk` holds only that
+// level's rows (a row predating the level tag is treated as MLB, matching the
+// generator).
+function accuracyFor(rec, rows, level = 'MLB') {
+  const season = rec && seasonForLevel(rec, level)
   if (!season || !season.called) return null
   const byGamePk = {}
-  for (const g of a.games ?? []) {
+  for (const g of rows ?? []) {
     if ((g.level ?? 'MLB') === level) byGamePk[g.gamePk] = g
   }
   return { season, byGamePk }
@@ -435,28 +465,34 @@ function accuracyFor(umpires, id, level = 'MLB') {
 // schema. The `*AAA` triplet mirrors all three for the umpire's AAA plate work
 // (call-up umpires who also work Triple-A), each ranked/baselined against the
 // AAA pool — null throughout when he has no AAA plate games.
-export async function loadUmpire(id) {
-  const [{ umpires, season, generatedAt }, acc, idxMlb, idxAaa] = await Promise.all([
-    load(),
-    loadAccuracy(),
-    accuracyIndex('MLB', { withLean: true }),
-    accuracyIndex('AAA', { withLean: true }),
+//
+// `withLean` is what the umpire DETAIL page passes for its Tendencies card. It
+// is the one figure that needs the league's game rows, so it is the one thing
+// that costs the whole 2 MB archive; the accuracy modal on the lineup page does
+// not draw a lean and does not pay for one. Everything else here is this man's
+// two shards plus the shared aggregates file.
+export async function loadUmpire(id, { withLean = false } = {}) {
+  const [u, rec, rows, idxMlb, idxAaa] = await Promise.all([
+    load(id),
+    loadAccuracySummary().then((a) => a.umpires[id] ?? null),
+    loadRows(id),
+    accuracyIndex('MLB', { withLean }),
+    accuracyIndex('AAA', { withLean }),
   ])
-  const u = umpires[id]
   if (!u) return null
-  const accuracy = accuracyFor(acc.umpires, id, 'MLB')
-  const accuracyAAA = accuracyFor(acc.umpires, id, 'AAA')
+  const accuracy = accuracyFor(rec, rows, 'MLB')
+  const accuracyAAA = accuracyFor(rec, rows, 'AAA')
   // Postseason plate work is aggregated separately and NEVER ranked (a
   // different-stakes, small sample): its zone map is drawn against the MLB
   // regular-season baseline for reference. Null unless he has scored playoff
   // plate games. The All-Star Game feeds no aggregate, so it isn't here — only
   // its per-game figure shows, via the game log.
-  const seasonPost = acc.umpires[id]?.seasonPost
+  const seasonPost = rec?.seasonPost
   const accuracyPost = seasonPost?.called ? { season: seasonPost } : null
   return {
+    // The shard carries id/name/games plus the season and stamp of the run
+    // that wrote it.
     ...u,
-    season,
-    generatedAt,
     accuracy,
     rank: idxMlb.rankById.get(String(id)) ?? null,
     zoneCells: accuracy ? umpireZoneCells(accuracy.season, idxMlb.leagueShare) : null,
@@ -503,7 +539,8 @@ function challengesFor(season) {
 export async function umpireAccuracySummary(id) {
   if (id == null) return null
   const [acc, idx] = await Promise.all([loadAccuracySummary(), accuracyIndex()])
-  const rec = accuracyFor(acc.umpires, id)
+  // No rows needed — the one-line fact is all aggregate.
+  const rec = accuracyFor(acc.umpires[id], null)
   if (!rec) return null
   const rank = idx.rankById.get(String(id)) ?? null
   return {

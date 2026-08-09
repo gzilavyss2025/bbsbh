@@ -1,8 +1,18 @@
-// Regenerates public/data/umpires.json — for every umpire who has worked an
-// MLB game this season, the list of games he's worked and which base he had
-// (src/api/umpires.js just reads this file; the umpire detail page renders it).
-// Keyed by MLB Stats API personId (umpires get real personIds, same id space
-// as players).
+// Regenerates public/data/umpires/{personId}.json — for every umpire who has
+// worked an MLB game this season, the list of games he's worked and which base
+// he had (src/api/umpires.js just reads these files; the umpire detail page
+// renders one). Keyed by MLB Stats API personId (umpires get real personIds,
+// same id space as players).
+//
+// ONE FILE PER UMPIRE, not one file for the league. Every surface that reads
+// this data reads a SINGLE umpire — the detail page and the lineup page's
+// accuracy modal, both of which already know whose id they want. The league-wide
+// file this replaced reached 3.2 MB by August (every game × four officials, and
+// it grows all season), so the modal behind one tap on the lineup page paid for
+// 145 umpires nobody had asked about. A shard is ~22 KB.
+//
+// The run is a FULL REBUILD, so it also deletes shards no longer in the season's
+// schedule — otherwise last season's umpires would linger forever.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at request
 // time. Building a season-wide, umpire-indexed view isn't something a page load
@@ -25,13 +35,14 @@
 // Game dates/assignments carry no score, so the file is spoiler-free.
 // Run by hand: node scripts/gen-umpires.mjs
 import { dirname, join } from 'node:path'
+import { readdir, rm } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { teamAbbr } from '../src/lib/teams.js'
 import { getJson } from './lib/statsapi.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'umpires.json')
+const outDir = join(here, '..', 'public', 'data', 'umpires')
 // Crew roles, mapped to short scorecard labels. Left/Right Field only appear in
 // six-man crews (All-Star Game + postseason); a two- or three-man MiLB crew just
 // omits the bases it doesn't staff. Any role not listed falls through to its raw
@@ -122,13 +133,26 @@ for (const { sportId, level } of LEVELS) {
   }
 }
 
-const result = {}
+const generatedAt = new Date().toISOString()
+const kept = new Set()
 for (const [id, u] of umpires) {
   u.games.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-  result[id] = u
+  // Each shard carries the season + stamp of the run that wrote it, so a reader
+  // needs one fetch, not a shard plus an index.
+  await writeJsonAtomic(join(outDir, `${id}.json`), { generatedAt, season, ...u })
+  kept.add(`${id}.json`)
 }
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, umpires: result })
+// Sweep shards this run didn't write (an umpire who worked last season and not
+// this one). A full rebuild owns the whole directory.
+let swept = 0
+for (const name of await readdir(outDir).catch(() => [])) {
+  if (!name.endsWith('.json') || kept.has(name)) continue
+  await rm(join(outDir, name))
+  swept++
+}
+
 console.log(
-  `wrote ${out} (${umpires.size} umpires across ${gamesSeen} games, MLB + AAA)`,
+  `wrote ${umpires.size} shards to ${outDir} (${gamesSeen} games, MLB + AAA)` +
+    (swept ? `, swept ${swept} stale` : ''),
 )

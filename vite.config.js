@@ -397,8 +397,9 @@ export default defineConfig({
         // kept OUT of the app-shell precache to keep the PWA install lean; a
         // game fetches the two clubs it needs on demand and they're
         // runtime-cached instead (see the NetworkFirst rule below). Same for
-        // umpires.json — it grows across the season (every game × 4 officials)
-        // and is only ever read from the umpire detail page. Same for the
+        // the per-umpire shards (public/data/umpires/ + umpire-accuracy/) — one
+        // file per umpire, each growing across the season (every game × 4
+        // officials), and a visitor reads the one umpire he tapped. Same for the
         // per-club game-notes shards — an append-only archive of press-notes PDF
         // links that grows every game day (see scripts/gen-game-notes.mjs).
         // Same for the per-date callouts bundles — since they cover the MiLB
@@ -419,7 +420,7 @@ export default defineConfig({
           // below keeps every mark actually seen available offline.
           '**/team-logos/**',
           '**/data/vs-team-splits/*.json',
-          '**/data/umpires.json',
+          '**/data/umpires/*.json',
           '**/data/game-notes/*.json',
           '**/data/callouts/*.json',
           // Same reasoning for the per-date condensed-game index: one small
@@ -435,6 +436,7 @@ export default defineConfig({
           // last successful copy available for offline browsing.
           '**/data/manager-history.json',
           '**/data/umpire-accuracy.json',
+          '**/data/umpire-accuracy/*.json',
           '**/data/former-teammates/*.json',
           '**/data/top-prospects.json',
           '**/data/war-history/*.json',
@@ -588,9 +590,11 @@ export default defineConfig({
             method: 'GET',
           },
           {
-            // The on-demand umpire-season dataset, same rationale as the
-            // SPLITS VS TEAM rule above.
-            urlPattern: ({ url }) => url.pathname === '/data/umpires.json',
+            // The on-demand per-umpire shards — his assignment log and his
+            // scored game rows — same rationale as the SPLITS VS TEAM rule above.
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/data/umpires/') ||
+              url.pathname.startsWith('/data/umpire-accuracy/'),
             handler: 'NetworkFirst',
             method: 'GET',
           },
