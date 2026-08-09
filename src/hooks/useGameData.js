@@ -387,13 +387,16 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
 
   // Former-teammate ties (or, when a matchup has none, the ORG TIES fallback —
-  // see orgTiesFor) between the two clubs, for the lineup pages' card. The
-  // whole precomputed file is a single cached same-origin read (see
-  // formerTeammates.js); it now covers MiLB matchups too, so this isn't gated
-  // to MLB games — a matchup outside the build's window just yields no card.
+  // see orgTiesFor) between the two clubs, for the lineup pages' card. One
+  // cached same-origin read of THIS matchup's shard (see formerTeammates.js);
+  // it covers MiLB matchups too, so this isn't gated to MLB games — a matchup
+  // outside the build's window has no shard and just yields no card.
   const teammates = useAsync(
-    () => (enrichmentReady ? loadFormerTeammates() : Promise.resolve(null)),
-    [enrichmentReady],
+    () =>
+      enrichmentReady
+        ? loadFormerTeammates(game.away.id, game.home.id)
+        : Promise.resolve(null),
+    [enrichmentReady, game.away.id, game.home.id],
   )
   const formerTeammatesData = teammates.data ?? null
 

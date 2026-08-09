@@ -25,37 +25,44 @@ export async function fetchWarData() {
   return cached
 }
 
-// Season WAR for COMPLETED seasons — the multi-year companion to war.json above.
-// Same shape but keyed by season: { seasons, bat: { [season]: {id: war} }, pit }.
+// Season WAR for COMPLETED seasons — the multi-year companion to war.json above,
+// keyed by PLAYER: { bat: { [personId]: {season: war} }, pit }.
 // Hand-generated (scripts/gen-war-history.mjs), not on the nightly cron, since a
 // finished season's WAR never changes. Degrades to empty like the current-season
-// file. Separately cached (a page may want one, both, or neither).
-let cachedHistory = null
+// file.
+//
+// Sharded on `personId % 100`, the same bucketing rookies.js uses, and for the
+// same reason: a player page wants ONE career's worth — at most a couple of
+// dozen numbers — and the league-wide file is 416 KB of seasons it will not
+// read. Bucketed rather than one file per player because 100 files of ~4 KB is a
+// reasonable thing to ship and ~2,600 files of 160 bytes is not.
+export function warShardKey(personId) {
+  return String(Math.abs(Number(personId) || 0) % 100).padStart(2, '0')
+}
 
-export async function fetchWarHistory() {
-  if (cachedHistory) return cachedHistory
-  try {
-    const res = await fetch('/data/war-history.json')
-    if (!res.ok) throw new Error(`war-history.json ${res.status}`)
-    cachedHistory = await res.json()
-  } catch {
-    cachedHistory = { seasons: [], bat: {}, pit: {} }
+const historyShards = new Map() // shard key -> { bat, pit }
+
+export async function fetchWarHistory(personId) {
+  const key = warShardKey(personId)
+  if (!historyShards.has(key)) {
+    historyShards.set(
+      key,
+      fetch(`/data/war-history/${key}.json`)
+        .then((r) => (r.ok ? r.json() : { bat: {}, pit: {} }))
+        .catch(() => ({ bat: {}, pit: {} })),
+    )
   }
-  return cachedHistory
+  return historyShards.get(key)
 }
 
 // A single player's WAR by season for one group — a { [season]: number } map
-// unioning the live-season file (current, still-moving season) with the history
-// file (every completed season). The live file wins for its own season. Group
+// unioning the live-season file (current, still-moving season) with his history
+// shard (every completed season). The live file wins for its own season. Group
 // picks bat vs pit WAR (a two-way player has both). MLB-only at the source, so a
 // season the player spent entirely in the minors simply won't have a key.
 export function warByYearFor(personId, group, current, history) {
   const key = group === 'pitching' ? 'pit' : 'bat'
-  const out = {}
-  for (const season of history?.seasons ?? []) {
-    const w = history[key]?.[season]?.[personId]
-    if (w != null) out[season] = w
-  }
+  const out = { ...(history?.[key]?.[personId] ?? {}) }
   if (current?.season != null) {
     const w = current[key]?.[personId]
     if (w != null) out[current.season] = w

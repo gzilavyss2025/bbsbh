@@ -1,7 +1,13 @@
-// Regenerates public/data/game-notes.json — a slim, ACCUMULATING archive of each
-// MLB club's official pre-game "Game Notes" PDF (title, date, url), so the
-// lineup-page button (src/api/gameNotes.js) can still reach a game's notes long
-// after mlb.com de-lists it.
+// Regenerates public/data/game-notes/{teamId}.json — a slim, ACCUMULATING
+// archive of each MLB club's official pre-game "Game Notes" PDF (title, date,
+// url), so the lineup-page button (src/api/gameNotes.js) can still reach a
+// game's notes long after mlb.com de-lists it.
+//
+// ONE FILE PER CLUB. The lineup page and the team page each ask about ONE club,
+// and this archive only grows: the league-wide file it replaced was ~540 KB by
+// August for the ~19 KB one club's rows take. The shards are also this job's
+// own merge base — it reads them back to accumulate, so there is no second copy
+// to drift.
 //
 // Why a committed archive and not just a live fetch: the page every club serves
 // at mlb.com/{team}/news/game-notes — and the dapi.mlbinfra.com feed behind it —
@@ -21,11 +27,12 @@
 // Runs on a cron (.github/workflows/update-nightly-data.yml); also by hand:
 //   node scripts/gen-game-notes.mjs
 import { dirname, join } from 'node:path'
-import { readJsonOr, writeJsonAtomic } from './lib/io.js'
+import { readdir } from 'node:fs/promises'
+import { readJsonOr, writeShards } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'game-notes.json')
+const outDir = join(here, '..', 'public', 'data', 'game-notes')
 const STATSAPI = 'https://statsapi.mlb.com'
 const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 
@@ -107,7 +114,11 @@ async function mapWithConcurrency(items, limit, fn) {
 // ENOENT → genuine first run; any other read/parse error (a corrupt committed
 // file) must abort, not silently rebuild from only the trailing window and
 // discard the archive this whole job exists to preserve.
-const prev = await readJsonOr(out, { notes: {} })
+const prev = { notes: {} }
+for (const f of await readdir(outDir).catch(() => [])) {
+  if (!f.endsWith('.json')) continue
+  prev.notes[f.replace('.json', '')] = (await readJsonOr(join(outDir, f), { notes: [] })).notes ?? []
+}
 
 const teamIds = await fetchMlbTeams()
 const fetched = await mapWithConcurrency(teamIds, 6, async (id) => ({
@@ -124,6 +135,12 @@ for (const row of fetched) {
   added += notes[row.id].length - before
 }
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), notes })
+// Every club in the MERGED set is written, so a club whose fetch failed this
+// run keeps the rows it already had rather than being swept.
+const generatedAt = new Date().toISOString()
+const { written } = await writeShards(
+  outDir,
+  Object.entries(notes).map(([teamId, rows]) => [teamId, { generatedAt, teamId: Number(teamId), notes: rows }]),
+)
 const total = Object.values(notes).reduce((sum, arr) => sum + arr.length, 0)
-console.log(`wrote ${out} — ${total} notes across ${Object.keys(notes).length} teams (+${added} new)`)
+console.log(`wrote ${written} shards to ${outDir} — ${total} notes (+${added} new)`)

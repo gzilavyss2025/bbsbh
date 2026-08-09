@@ -2,17 +2,14 @@
 // wrappers plus the pure year-union helper the player page reads.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { fetchWarData, fetchWarHistory, warByYearFor } from '../src/api/war.js'
+import { fetchWarData, fetchWarHistory, warByYearFor, warShardKey } from '../src/api/war.js'
 
 // --------------------------------------------------------------------------
 // warByYearFor — pure, no fetch involved
 // --------------------------------------------------------------------------
 test('warByYearFor unions history seasons with the live current-season file, current wins its own year', () => {
-  const history = {
-    seasons: [2023, 2024],
-    bat: { 2023: { 660271: 3.2 }, 2024: { 660271: 4.1 } },
-    pit: {},
-  }
+  // History is now the player's own shard — keyed by personId, then season.
+  const history = { bat: { 660271: { 2023: 3.2, 2024: 4.1 } }, pit: {} }
   const current = { season: 2024, bat: { 660271: 4.5 }, pit: {} }
   assert.deepEqual(warByYearFor(660271, 'hitting', current, history), {
     2023: 3.2,
@@ -21,13 +18,13 @@ test('warByYearFor unions history seasons with the live current-season file, cur
 })
 
 test('warByYearFor reads the pitching group from the pit maps', () => {
-  const history = { seasons: [2023], bat: {}, pit: { 2023: { 543037: 5.5 } } }
+  const history = { bat: {}, pit: { 543037: { 2023: 5.5 } } }
   const current = { season: 2024, bat: {}, pit: { 543037: 2.1 } }
   assert.deepEqual(warByYearFor(543037, 'pitching', current, history), { 2023: 5.5, 2024: 2.1 })
 })
 
 test('warByYearFor skips a season/current entry the player has no value in', () => {
-  const history = { seasons: [2023], bat: { 2023: {} }, pit: {} }
+  const history = { bat: {}, pit: {} }
   const current = { season: 2024, bat: {}, pit: {} }
   assert.deepEqual(warByYearFor(1, 'hitting', current, history), {})
 })
@@ -65,13 +62,36 @@ test('fetchWarData reads the static file and caches it across calls', async () =
 // fetchWarHistory — separate cache from fetchWarData, so it can be exercised
 // once more independently for the degrade-on-failure path.
 // --------------------------------------------------------------------------
-test('fetchWarHistory degrades to empty season/bat/pit maps on a non-ok response', async () => {
+test('fetchWarHistory degrades to empty bat/pit maps on a non-ok response', async () => {
   const originalFetch = globalThis.fetch
   globalThis.fetch = async () => ({ ok: false, status: 404 })
   try {
-    const data = await fetchWarHistory()
-    assert.deepEqual(data, { seasons: [], bat: {}, pit: {} })
+    assert.deepEqual(await fetchWarHistory(11), { bat: {}, pit: {} })
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+test('fetchWarHistory asks for the player his bucket, and caches per bucket', async () => {
+  const originalFetch = globalThis.fetch
+  const asked = []
+  globalThis.fetch = async (url) => {
+    asked.push(url)
+    return { ok: true, status: 200, json: async () => ({ bat: {}, pit: {} }) }
+  }
+  try {
+    await fetchWarHistory(660271) // 660271 % 100 = 71
+    await fetchWarHistory(543037) // 543037 % 100 = 37
+    await fetchWarHistory(660271) // …cached, no second call
+    assert.deepEqual(asked, ['/data/war-history/71.json', '/data/war-history/37.json'])
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('warShardKey is a zero-padded two-digit bucket, like the rookie records', () => {
+  assert.equal(warShardKey(660271), '71')
+  assert.equal(warShardKey(500), '00')
+  assert.equal(warShardKey(9), '09')
+  assert.equal(warShardKey(null), '00')
 })

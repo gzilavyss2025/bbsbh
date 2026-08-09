@@ -35,10 +35,13 @@ for each generator; the reader modules:
   MLB Stats API `personId` (FanGraphs' `xMLBAMID` is that same id, so no
   name-matching). This is the **template** for the pattern (bulk/unofficial →
   nightly script → static JSON → same-origin read; see `docs/data-enrichment.md`
-  §5). A companion `public/data/war-history.json` (keyed by season, hand-run by
-  `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons;
-  `fetchWarHistory` + `warByYearFor(personId, group, current, history)` union the
-  two into a player's `{season: war}` map (live season from war.json wins its own
+  §5). A companion `public/data/war-history/{NN}.json` (hand-run by
+  `gen-war-history.mjs` — completed-season WAR is immutable) covers past seasons,
+  keyed by PLAYER and bucketed on `personId % 100` (`warShardKey`, shared with the
+  generator), the same shape as the rookie records and for the same reason: a
+  player page wants one career, not 416 KB of league-seasons.
+  `fetchWarHistory(personId)` + `warByYearFor(personId, group, current, history)`
+  union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash.
 - `jerseys.js` — what a team actually wore in a given game, from
@@ -168,7 +171,8 @@ for each generator; the reader modules:
 - `gameNotes.js` — the lineup page's Game notes button: each MLB club's pre-game
   press-notes PDF, resolved to the game's date. TWO sources, one shape: the LIVE
   feed at `dapi.mlbinfra.com` (CORS-open, keyed by `teamid-{n}`) for the game being
-  staged, and a static `public/data/game-notes.json` archive for older games.
+  staged, and a static `public/data/game-notes/{teamId}.json` archive for older
+  games — one file per club, since every caller asks about one club.
   `gen-game-notes.mjs` snapshots the feed daily and **APPENDS** (never drops old
   links — the `img.mlbstatic.com` PDF asset stays live forever, so the archive
   keeps a game reachable after mlb.com de-lists it). MLB only; the button hides for

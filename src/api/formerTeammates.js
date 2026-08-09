@@ -1,7 +1,9 @@
 // The lineup page's FORMER TEAMMATES card data — for each upcoming matchup
 // (MLB or MiLB), the pairs of players on the two OPPOSING clubs who were once
 // teammates (majors or minors) — read from a static same-origin file
-// (public/data/former-teammates.json) rather than computed live. When a
+// (public/data/former-teammates/{teamA}-{teamB}.json, ids ascending) rather
+// than computed live. ONE FILE PER MATCHUP: a game view wants exactly one, and
+// the league-wide file it replaced was ~550 KB for the ~5 KB a game needs. When a
 // matchup has no literal teammate pairs, the file instead carries an ORG TIES
 // fallback (see orgTiesFor below) — a player whose career passes through the
 // opponent's parent org, even without ever sharing a roster with tonight's
@@ -18,21 +20,36 @@
 // spoiler-free like the rest of the lineup-page surfaces.
 //
 // Degrades to an empty map before the file exists or on any failure — the card
-// simply doesn't render. Cached in-memory for the session since the file only
-// changes once a day.
-let cached = null
+// simply doesn't render, which is also what a matchup outside the build's day
+// window does (no shard, a 404, an empty map). Cached in-memory per matchup for
+// the session, since the files only change once a day.
+const cached = new Map()
 
-export async function loadFormerTeammates() {
-  if (cached) return cached
+// The KEY a matchup is filed under: the two team ids, ascending. Order-
+// independent, so both clubs' pages ask for the same file — the same symmetry
+// the selectors below rely on.
+export function matchupKey(teamIdA, teamIdB) {
+  return teamIdA < teamIdB ? `${teamIdA}-${teamIdB}` : `${teamIdB}-${teamIdA}`
+}
+
+// Returns the same `{ matchups, generatedAt }` shape the league-wide file had,
+// holding this one matchup — so formerTeammatePairs/orgTiesFor below are
+// unchanged and still take (data, teamIdA, teamIdB).
+export async function loadFormerTeammates(teamIdA, teamIdB) {
+  if (!teamIdA || !teamIdB) return { matchups: {}, generatedAt: null }
+  const key = matchupKey(teamIdA, teamIdB)
+  if (cached.has(key)) return cached.get(key)
+  let data = { matchups: {}, generatedAt: null }
   try {
-    const res = await fetch('/data/former-teammates.json')
-    if (!res.ok) throw new Error(`former-teammates.json ${res.status}`)
-    const data = await res.json()
-    cached = { matchups: data.matchups ?? {}, generatedAt: data.generatedAt ?? null }
+    const res = await fetch(`/data/former-teammates/${key}.json`)
+    if (!res.ok) throw new Error(`former-teammates/${key}.json ${res.status}`)
+    const shard = await res.json()
+    data = { matchups: { [key]: shard.matchup ?? {} }, generatedAt: shard.generatedAt ?? null }
   } catch {
-    cached = { matchups: {}, generatedAt: null }
+    data = { matchups: {}, generatedAt: null }
   }
-  return cached
+  cached.set(key, data)
+  return data
 }
 
 // The former-teammate ties for a matchup, as one card per PAIR of players (one
@@ -58,8 +75,7 @@ export async function loadFormerTeammates() {
 //     score: number }
 export function formerTeammatePairs(data, teamIdA, teamIdB) {
   if (!teamIdA || !teamIdB) return []
-  const key = teamIdA < teamIdB ? `${teamIdA}-${teamIdB}` : `${teamIdB}-${teamIdA}`
-  const entry = data?.matchups?.[key]
+  const entry = data?.matchups?.[matchupKey(teamIdA, teamIdB)]
   const rows = entry?.rows
   if (!Array.isArray(rows)) return []
 
@@ -104,8 +120,7 @@ const LEVEL_RANK = (label) => LEVEL_ORDER[label] ?? 0
 //     teamName, level, seasons: [...] }                // the stint that ties him to it
 export function orgTiesFor(data, teamIdA, teamIdB) {
   if (!teamIdA || !teamIdB) return []
-  const key = teamIdA < teamIdB ? `${teamIdA}-${teamIdB}` : `${teamIdB}-${teamIdA}`
-  const entry = data?.matchups?.[key]
+  const entry = data?.matchups?.[matchupKey(teamIdA, teamIdB)]
   if (entry?.kind !== 'orgties' || !Array.isArray(entry.orgTies)) return []
   return [...entry.orgTies].sort((x, y) => (y.score ?? 0) - (x.score ?? 0))
 }
