@@ -13,6 +13,7 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
+  stepBounds,
   lastVisibleAtBatIndex,
   deriveLiveState,
 } from '../../api/playbyplay.js'
@@ -54,7 +55,11 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // full entries list (every entry shown, whether by tapping through or because
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState }) {
+//
+// `focusOne` (focus mode) narrows that revealed PREFIX to ONE step's window.
+// `focusStep` picks which (null = newest); `onFocusInfo(count)` says how many
+// exist. Presentation only — `stepCap` stays the single reveal boundary.
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, focusOne = false, focusStep = null, onFocusInfo }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -94,6 +99,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
+  // Focus mode: the boundaries `nextStepBoundary` walks one tap at a time,
+  // enumerated. Counting only those at or under effectiveCap is what keeps
+  // every window inside the cap.
+  const bounds = focusOne && stepping ? stepBounds(entries) : null
+  const revealedSteps = bounds ? bounds.filter((b) => b <= effectiveCap).length : 0
+
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
   useEffect(() => {
@@ -106,6 +117,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
       onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Up to InningViewer so it can draw the navigator without touching a
+  // reveal-only derivation (ADR-0001). A COUNT, never an entry.
+  useEffect(() => {
+    if (!focusOne) return
+    onFocusInfo?.(revealedSteps)
+  }, [focusOne, revealedSteps]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // How many runs have scored in the STEPPED-THROUGH portion of this half so
   // far — reported upward (InningViewer, via HalfInning) so the linescore
@@ -166,7 +184,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // card. See HalfInning.jsx's nowPitching.)
 
   if (entries.length === 0) return null
-  const visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
+  // One step's WINDOW. `focusStep` null is "the newest"; a number is clamped
+  // rather than trusted, the count it was chosen against being a component away.
+  let visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
+  if (bounds && revealedSteps > 0) {
+    const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
+    visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
+  }
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in

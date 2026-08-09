@@ -37,6 +37,31 @@ export function nextStepBoundary(entries, fromCount) {
   return entries.length
 }
 
+// Every step boundary in a half, as end-indices: walking nextStepBoundary from
+// 0 until it stops moving. `bounds[k]` is the exclusive end of step k, so step
+// k covers entries[bounds[k - 1] ?? 0 .. bounds[k]) — the same bundling one
+// "Next at-bat" tap produces (a plate appearance plus the announcements
+// trailing it), just enumerated up front instead of one tap at a time.
+//
+// Focus mode (InningViewer) uses this to show ONE step at a time and to let
+// the reader page back and forward through the steps already revealed. It
+// reads only entries the caller already holds, so it inherits their cap and
+// can never describe a step past it — the caller still clamps by its own
+// effectiveCap before showing a window (see PlayByPlay.jsx).
+export function stepBounds(entries) {
+  const bounds = []
+  let cap = 0
+  while (cap < entries.length) {
+    const next = nextStepBoundary(entries, cap)
+    // nextStepBoundary returns entries.length when no at-bat card remains, so
+    // this both terminates and folds any trailing notes into the last step.
+    if (next <= cap) break
+    bounds.push(next)
+    cap = next
+  }
+  return bounds
+}
+
 // The `atBatIndex` (matches `play.about.atBatIndex`, same field the
 // /winProbability array's own entries carry — see api/winprob.js's
 // `stepHalfIndex`/`throughAtBatIndex`) of the last COMPLETED at-bat entry

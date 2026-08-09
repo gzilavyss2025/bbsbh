@@ -41,6 +41,9 @@ export function HalfInning({
   vsTeam,
   highlights,
   revealedAtBatCount,
+  focusOne,
+  focusStep,
+  onFocusInfo,
   onStepInfo,
   onRunsSoFar,
   onLiveState,
@@ -354,6 +357,9 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
+                focusOne={focusOne}
+                focusStep={focusStep}
+                onFocusInfo={onFocusInfo}
                 onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => onReveal(inning, half)}

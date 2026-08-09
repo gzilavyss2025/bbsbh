@@ -335,6 +335,78 @@
   display: none;
 }
 
+/* Where the at-bat lands when focus mode scrolls it into view (see
+   useFocusMode's effect): clear of the half's own navy title bar rather than
+   flush under the viewport edge, so the card arrives looking like the top of
+   something rather than cropped. */
+.innings--focus .pbp {
+  scroll-margin-top: var(--space-4);
+}
+
+/* Focus mode's at-bat navigator (FocusControls.jsx) — deliberately the same
+   shape as .inningnav above the feed, one level quieter: paging within a half
+   is the same kind of move as paging between halves, so it should not look
+   like a different mechanism. Its buttons stay borderless until hovered so the
+   row reads as a caption with two affordances, not a third button bar
+   competing with the floating one. */
+.abstep {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.abstep button {
+  min-height: var(--tap-min);
+  padding: 0 12px;
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  cursor: pointer;
+}
+
+.abstep button:hover:not(:disabled) {
+  border-color: var(--border-rule);
+  background: var(--surface-inset);
+}
+
+.abstep button:disabled {
+  color: var(--text-caption);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.abstep button:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.abstep__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.abstep__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
 /* The one control that folds it back open — full width directly under the
    feed, in the quiet paper-and-rule .btn base rather than a filled one: it is
    a way to see more of the page, not the page's primary action (that stays the

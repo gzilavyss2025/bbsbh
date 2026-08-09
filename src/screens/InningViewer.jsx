@@ -23,6 +23,7 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
 import { RollingLine } from '../components/gamehud/RollingLine.jsx'
 import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
+import { FocusControls, useFocusMode } from '../components/inning/FocusControls.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { Scorebug } from '../components/gamehud/Scorebug.jsx'
 import { InningPage } from './innings/InningPage.jsx'
@@ -403,6 +404,9 @@ export function InningViewer({
         vsTeam={vsTeam}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
+        focusOne={focus.focused}
+        focusStep={focus.step}
+        onFocusInfo={focus.reportSteps}
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
         onLiveState={reportLiveState}
@@ -445,12 +449,9 @@ export function InningViewer({
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
   const currentSealed = curIdx > renderRevealedThrough
-  // Focus mode: a sealed half shows the linescore and the at-bat feed alone, so
-  // the at-bat just revealed is the only thing that grew and the page has
-  // nothing to snap past. Visibility only; the folded list and why no seal or
-  // gate is affected are in 11-innings.css. `restOpen` survives navigation.
-  const [restOpen, setRestOpen] = useState(false)
-  const focused = currentSealed && !restOpen
+  // Focus mode: a sealed half shows the linescore and ONE at-bat (useFocusMode
+  // for the state, 11-innings.css for what folds away).
+  const focus = useFocusMode(curIdx, currentSealed)
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
   // the whole half at once. Keyed on the half actually being shown, not a
@@ -515,8 +516,10 @@ export function InningViewer({
   // (or calls it in some other way) must preserve that correction itself, or
   // the "reveal just a lone note" bug this pairing exists to prevent comes
   // back.
-  const revealNextAtBat = () =>
+  const revealNextAtBat = () => {
+    focus.followLatest() // show the new at-bat even if the reader paged back
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
+  }
 
   // "Caught up to live" (ADR-0026): with the pass running on a game in progress,
   // the half being viewed IS the live frontier — everything played is open and
@@ -688,7 +691,7 @@ export function InningViewer({
   }
 
   return (
-    <div className={`innings${focused ? ' innings--focus' : ''}`}>
+    <div className={`innings${focus.focused ? ' innings--focus' : ''}`}>
       {cloudSync}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
@@ -780,18 +783,7 @@ export function InningViewer({
           onStatusChange={setTurnStatus}
         />
 
-        {/* Focus mode's control (see `focused`), above the content it folds. */}
-        {currentSealed && (
-          <button
-            type="button"
-            className="btn innings__foldbtn"
-            aria-expanded={restOpen}
-            aria-disabled={turning || undefined}
-            onClick={() => setRestOpen((v) => !v)}
-          >
-            {restOpen ? 'Hide the rest of the page' : 'Show the rest of the page'}
-          </button>
-        )}
+        <FocusControls focus={focus} sealed={currentSealed} turning={turning} />
 
         {/* Reference band. On the wide layout: pitchers + the fielding defense
             on the left, both lineups on the right. On a phone only Pitchers
