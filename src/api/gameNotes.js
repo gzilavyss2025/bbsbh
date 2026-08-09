@@ -6,8 +6,9 @@
 //    ("teamid-158"). This is the freshest source and the one that matters for the
 //    game being staged right now: a note posts a few hours before first pitch,
 //    after the nightly archive cron has already run.
-//  • ARCHIVE: a static same-origin /data/game-notes.json a daily cron
-//    (scripts/gen-game-notes.mjs) appends to. The live feed only lists a club's
+//  • ARCHIVE: a static same-origin /data/game-notes/{teamId}.json a daily cron
+//    (scripts/gen-game-notes.mjs) appends to — one file per club, since every
+//    caller here asks about one club and the archive only grows. The live feed only lists a club's
 //    last ~10 games, so once a note ages off it's gone from mlb.com — but the
 //    underlying img.mlbstatic.com PDF stays live forever. The archive keeps the
 //    link so an older game stays reachable long after the site drops it.
@@ -33,14 +34,21 @@ const DAPI = 'https://dapi.mlbinfra.com/v2/content/en-us/documents/'
 // territory — serve them straight from the archive without a live round-trip.
 const LIVE_LOOKBACK_DAYS = 3
 
-let archivePromise = null
-function loadArchive() {
-  if (!archivePromise) {
-    archivePromise = fetch('/data/game-notes.json')
-      .then((r) => (r.ok ? r.json() : { notes: {} }))
-      .catch(() => ({ notes: {} }))
+// One club's archived notes, from his shard. Memoized per team id — a game view
+// asks for one club, the team page for one club. `[]` when the club has no
+// shard (every MiLB club, or a run before the generator wrote one).
+const archiveCache = new Map()
+function loadArchive(teamId) {
+  if (!archiveCache.has(teamId)) {
+    archiveCache.set(
+      teamId,
+      fetch(`/data/game-notes/${teamId}.json`)
+        .then((r) => (r.ok ? r.json() : { notes: [] }))
+        .then((d) => d.notes ?? [])
+        .catch(() => []),
+    )
   }
-  return archivePromise
+  return archiveCache.get(teamId)
 }
 
 // The note's true game date is its publish time in America/New_York — NOT the
@@ -97,8 +105,7 @@ function matchByDate(notes, gameDate) {
 // notes, which is every MiLB game and any date the club never posted.
 export async function resolveGameNotes(teamId, gameDate) {
   if (!teamId) return null
-  const archive = await loadArchive()
-  const archived = matchByDate(archive.notes?.[teamId] ?? [], gameDate)
+  const archived = matchByDate(await loadArchive(teamId), gameDate)
 
   // A past date the archive already covers never changes — no need to hit the
   // network. (Recent/today's games fall through to the live feed below, which is

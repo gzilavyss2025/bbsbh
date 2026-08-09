@@ -22,10 +22,11 @@
 // Run by hand: node scripts/gen-war-history.mjs
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeShards } from './lib/io.js'
+import { warShardKey } from '../src/api/war.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'war-history.json')
+const outDir = join(here, '..', 'public', 'data', 'war-history')
 
 const START_SEASON = 2010
 // Only COMPLETED seasons belong here; the live season is war.json's job. Before
@@ -63,5 +64,30 @@ for (let season = START_SEASON; season <= LAST_SEASON; season++) {
   console.log(`${season}: ${Object.keys(b).length} batters, ${Object.keys(p).length} pitchers`)
 }
 
-await writeJsonAtomic(out, { seasons, generatedAt: new Date().toISOString(), bat, pit })
-console.log(`wrote ${out} (${seasons.length} seasons ${START_SEASON}–${LAST_SEASON})`)
+// Pivot from season-keyed to PLAYER-keyed, then bucket on `personId % 100` —
+// the reader wants one career, not one season of the league. warShardKey is
+// imported from the reader (src/api/war.js), never re-implemented, so the two
+// cannot disagree about which bucket a player is in.
+const buckets = new Map() // shard key -> { bat, pit }
+for (const [group, bySeason] of [
+  ['bat', bat],
+  ['pit', pit],
+]) {
+  for (const [season, byId] of Object.entries(bySeason)) {
+    for (const [id, war] of Object.entries(byId)) {
+      const key = warShardKey(id)
+      if (!buckets.has(key)) buckets.set(key, { bat: {}, pit: {} })
+      const player = buckets.get(key)[group]
+      ;(player[id] ??= {})[season] = war
+    }
+  }
+}
+
+const generatedAt = new Date().toISOString()
+const { written } = await writeShards(
+  outDir,
+  [...buckets].map(([key, groups]) => [key, { generatedAt, seasons, ...groups }]),
+)
+console.log(
+  `wrote ${written} shards to ${outDir} (${seasons.length} seasons ${START_SEASON}–${LAST_SEASON})`,
+)

@@ -176,7 +176,7 @@ export async function loadPlayer(id, asOf) {
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
-    fetchWarHistory(),
+    fetchWarHistory(id),
     fetchVsTeamSplitsForPlayer(id),
     fetchSavantPercentiles(),
     fetchPitchArsenal(),

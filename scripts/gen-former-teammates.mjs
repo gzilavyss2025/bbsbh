@@ -1,7 +1,9 @@
-// Regenerates public/data/former-teammates.json — for every upcoming matchup
-// (MLB or MiLB), the pairs of players on the two OPPOSING clubs who were once
-// teammates (majors or minors), already shaped for the lineup page's FORMER
-// TEAMMATES card (src/api/formerTeammates.js just reads this file).
+// Regenerates public/data/former-teammates/{teamA}-{teamB}.json (ids ascending)
+// — for every upcoming matchup (MLB or MiLB), the pairs of players on the two
+// OPPOSING clubs who were once teammates (majors or minors), already shaped for
+// the lineup page's FORMER TEAMMATES card (src/api/formerTeammates.js reads one
+// file). ONE FILE PER MATCHUP, because a game view wants exactly one: the
+// league-wide file this replaced was ~550 KB fetched for the ~5 KB a game used.
 //
 // This runs on a cron via .github/workflows/update-nightly-data.yml, NOT at
 // request time. Building it is expensive: two opposing players are "former
@@ -62,10 +64,10 @@ import { fileURLToPath } from 'node:url'
 import { meetsStintCap } from '../src/api/rehab-policy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeShards } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'former-teammates.json')
+const outDir = join(here, '..', 'public', 'data', 'former-teammates')
 // How many days of the slate to precompute (today + the next two), so late-night
 // and next-day browsing both find their game. Rosters are as-of-build; a club's
 // former-teammate ties barely shift day to day.
@@ -582,10 +584,16 @@ for (const { awayId, homeId } of pairs) {
   matchups[key] = { teamA: awayId, teamB: homeId, kind: 'orgties', orgTies }
 }
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), matchups })
+const generatedAt = new Date().toISOString()
+const { written, swept } = await writeShards(
+  outDir,
+  Object.entries(matchups).map(([key, matchup]) => [key, { generatedAt, matchup }]),
+)
 const teammateMatchups = Object.keys(matchups).length - orgTieMatchups
 const total = Object.values(matchups).reduce((n, m) => n + (m.rows?.length ?? 0), 0)
 console.log(
-  `wrote ${out} (${teammateMatchups} teammate matchups / ${total} connections, ` +
+  `wrote ${written} shards to ${outDir}` +
+    (swept ? ` (swept ${swept} stale)` : '') +
+    ` — ${teammateMatchups} teammate matchups / ${total} connections, ` +
     `${orgTieMatchups} org-tie matchups, ${allPlayerIds.length} players)`,
 )

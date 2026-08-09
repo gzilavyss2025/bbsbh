@@ -398,9 +398,9 @@ export default defineConfig({
         // game fetches the two clubs it needs on demand and they're
         // runtime-cached instead (see the NetworkFirst rule below). Same for
         // umpires.json — it grows across the season (every game × 4 officials)
-        // and is only ever read from the umpire detail page. Same for
-        // game-notes.json — an append-only archive of press-notes PDF links that
-        // grows every game day (see scripts/gen-game-notes.mjs).
+        // and is only ever read from the umpire detail page. Same for the
+        // per-club game-notes shards — an append-only archive of press-notes PDF
+        // links that grows every game day (see scripts/gen-game-notes.mjs).
         // Same for the per-date callouts bundles — since they cover the MiLB
         // levels too each day's file runs ~0.5-1 MB, and the folder holds ~10
         // days of them; only the day being scored is ever read. Same for the
@@ -420,7 +420,7 @@ export default defineConfig({
           '**/team-logos/**',
           '**/data/vs-team-splits/*.json',
           '**/data/umpires.json',
-          '**/data/game-notes.json',
+          '**/data/game-notes/*.json',
           '**/data/callouts/*.json',
           // Same reasoning for the per-date condensed-game index: one small
           // file per slate date, ~6 KB each but one per DAY OF THE SEASON
@@ -435,9 +435,9 @@ export default defineConfig({
           // last successful copy available for offline browsing.
           '**/data/manager-history.json',
           '**/data/umpire-accuracy.json',
-          '**/data/former-teammates.json',
+          '**/data/former-teammates/*.json',
           '**/data/top-prospects.json',
-          '**/data/war-history.json',
+          '**/data/war-history/*.json',
           '**/data/minors-leaders.json',
           '**/data/career-matchups.json',
           '**/data/postseason-odds.json',
@@ -504,10 +504,14 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|umpire-accuracy|former-teammates|top-prospects|war-history|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
+              /^\/data\/(?:manager-history|umpire-accuracy|top-prospects|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
               ) ||
               /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
+              // One file per MATCHUP, keyed by the two team ids ascending.
+              /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
+              // Career WAR, bucketed on personId % 100 like the rookie records.
+              /^\/data\/war-history\/\d{2}\.json$/.test(url.pathname) ||
               // One video-highlight file per club, same on-demand shape.
               /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
               // Trade Deadline is season-chunked the same way. The season list
@@ -600,11 +604,12 @@ export default defineConfig({
             method: 'GET',
           },
           {
-            // The append-only Game Notes archive (excluded from precache above).
-            // NetworkFirst so the fresh daily copy wins online but the lineup-page
-            // button still resolves offline from the last good fetch. Just PDF
-            // links (title/date/url) — no live score, so this is spoiler-safe.
-            urlPattern: ({ url }) => url.pathname === '/data/game-notes.json',
+            // The append-only Game Notes archive, one file per club (excluded
+            // from precache above). NetworkFirst so the fresh daily copy wins
+            // online but the lineup-page button still resolves offline from the
+            // last good fetch. Just PDF links (title/date/url) — no live score,
+            // so this is spoiler-safe.
+            urlPattern: ({ url }) => url.pathname.startsWith('/data/game-notes/'),
             handler: 'NetworkFirst',
             method: 'GET',
           },

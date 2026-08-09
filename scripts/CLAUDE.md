@@ -131,9 +131,9 @@ don't run these by hand.
   **NOT self-contained** — imports the app's own `combineToPool` (`statsLevels.js`) +
   `computeLeaders` (`teamLeaders.js`), the same code the live `org` board uses, to
   stay in lockstep.
-- `gen-former-teammates.mjs` → `public/data/former-teammates.json` — for each
-  upcoming matchup (MLB + MiLB), the pairs of players on the two OPPOSING clubs who
-  were once teammates (majors or minors). Two players are teammates iff their careers
+- `gen-former-teammates.mjs` → `public/data/former-teammates/{a}-{b}.json` (ids
+  ascending; one file per MATCHUP, which is what a game view reads) — for each upcoming
+  matchup (MLB + MiLB), pairs of players on the two OPPOSING clubs once teammates. Two players are teammates iff their careers
   share a (teamId, season) pair — a year-by-year pull PER MiLB level per player.
   Self-contained; scopes to the next few days' slate, skips Rookie/complex ball
   (sportId 16), reuses `person.js`'s REHAB_CAP idea to drop a rehab cameo. App reads
@@ -169,8 +169,8 @@ don't run these by hand.
   player's whole MLB game log season by season. Self-contained; MLB only. ~3MB, out
   of the PWA precache, **SHARDED BY THE PLAYER'S OWN CLUB** (`index.json` + one
   `{teamId}.json`, written together); read via `src/api/vsTeamSplits.js`.
-- `gen-game-notes.mjs` → `public/data/game-notes.json` — each MLB club's pre-game
-  "Game Notes" PDF links (title/date/url). **APPEND-ONLY**: the source feed
+- `gen-game-notes.mjs` → `public/data/game-notes/{teamId}.json` (one file per club,
+  and its own merge base) — each club's pre-game "Game Notes" PDF links. **APPEND-ONLY**: the source feed
   (dapi.mlbinfra.com) only lists a club's last ~10 games, so the job MERGES new links
   and never drops old ones (the img.mlbstatic.com PDF stays live forever, keeping a
   game reachable after mlb.com de-lists it). The twist vs. the other generators,
@@ -388,9 +388,9 @@ don't run these by hand.
 
 Re-run only to fold in a new season.
 
-- `gen-war-history.mjs` → `public/data/war-history.json` — season WAR per player for
-  COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same FanGraphs
-  source/join. A finished season's WAR is immutable.
+- `gen-war-history.mjs` → `public/data/war-history/{NN}.json` (player-keyed, bucketed
+  on `personId % 100` via the reader's `warShardKey`) — season WAR per player for
+  COMPLETED seasons (2010+), the multi-year companion to `war.json`. Same source/join. A finished season's WAR is immutable.
 - `gen-awards-history.mjs` → `public/data/awards-history.json` — who won each major
   MLB award (MVP, Cy Young, Rookie of the Year, Silver Slugger, Gold Glove, Platinum
   Glove, Reliever of the Year, Comeback Player, Hank Aaron, Roberto Clemente, All-MLB
