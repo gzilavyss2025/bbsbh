@@ -102,6 +102,14 @@ import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'umpire-accuracy.json')
+// The same file with every umpire's per-game `games` array dropped — season
+// aggregates only. The archive holds every scored pitch-call row of the season
+// and grows all year (~2 MB by August); the aggregates are ~0.1 MB. The lineup
+// page, the box score, and the rankings table read aggregates ONLY, so they
+// read this file, and the full archive stays for the umpire detail page, which
+// draws the game log. Both files are written from the same `result` in the same
+// run, so they cannot disagree. See src/api/umpires.js's loadAccuracySummary().
+const outSummary = join(here, '..', 'public', 'data', 'umpire-accuracy-summary.json')
 const reTablePath = join(here, '..', 'public', 'data', 'run-expectancy.json')
 // Loaded once at startup; null (favor degrades to 0/null everywhere) until
 // scripts/gen-run-expectancy.mjs has been hand-run at least once.
@@ -527,7 +535,15 @@ for (const [id, u] of Object.entries(umpires)) {
   }
 }
 
-await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season, umpires: result })
+const generatedAt = new Date().toISOString()
+await writeJsonAtomic(out, { generatedAt, season, umpires: result })
+await writeJsonAtomic(outSummary, {
+  generatedAt,
+  season,
+  umpires: Object.fromEntries(
+    Object.entries(result).map(([id, { games, ...aggregates }]) => [id, aggregates]),
+  ),
+})
 const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
 console.log(
   `wrote ${out} — ${Object.keys(result).length} umpires, ${gamesTotal} games on file ` +

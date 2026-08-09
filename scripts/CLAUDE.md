@@ -80,10 +80,10 @@ don't run these by hand.
   variable MiLB crews (two/three-man) all land in the log; `UMP_LABELS` maps every
   role incl. LF/RF, and `selectOfficials` (`src/api/select.js`) mirrors it for the
   live crew card.
-- `gen-umpire-accuracy.mjs` → `public/data/umpire-accuracy.json` — COMPANION to
-  `umpires.json`: each home-plate umpire's season called-pitch accuracy + a compact
-  zone-tendency breakdown, keyed by the same personId. Needs each game's full live
-  feed (per-pitch `pX/pZ` vs the batter's strike zone), so unlike `gen-umpires.mjs`'s
+- `gen-umpire-accuracy.mjs` → `public/data/umpire-accuracy.json` + the aggregates-only
+  `umpire-accuracy-summary.json` — COMPANION to `umpires.json`: each plate umpire's
+  season called-pitch accuracy + a zone-tendency breakdown, keyed by personId. Needs
+  each game's full live feed (per-pitch `pX/pZ` vs the batter's strike zone), so unlike `gen-umpires.mjs`'s
   one-call full rebuild, this is a feed fetch PER GAME — too costly to redo nightly
   for the whole season. Runs APPEND-ONLY/incremental like `gen-game-notes.mjs`: each
   run sweeps a small trailing window of finals and merges per-game rows in, deduped
