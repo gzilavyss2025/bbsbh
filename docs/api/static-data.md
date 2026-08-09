@@ -117,21 +117,26 @@ for each generator; the reader modules:
   each official's `id` to the Umpires card (`TeamInfo.jsx`), rendered as an
   `UmpireLink` to `/umpire/{id}`; the page needs no `SealBox` (assignments + dates
   carry no score). Each entry carries the venue, so `UmpirePage.jsx` tallies
-  most-worked teams + ballparks client-side. A COMPANION file
-  `public/data/umpire-accuracy.json` (`gen-umpire-accuracy.mjs`, same cron) adds
-  each home-plate umpire's season called-pitch accuracy + a compact zone-tendency
-  breakdown, keyed by the same personId. It ships in THREE shapes from one run:
-  the full archive; `umpire-accuracy-summary.json`, every umpire's season
-  aggregates with the per-game `games` arrays dropped (~2 MB → ~0.12 MB); and
-  `umpire-accuracy/{personId}.json`, the mirror image — one umpire's game rows
-  alone (~13 KB). Together the last two are the archive, split by who asks.
-  `loadAccuracySummary()` + `loadRows(id)` serve every surface: the lineup page,
-  the box score, and the rankings table read aggregates only; the detail page and
-  the lineup page's accuracy modal join the aggregates to ONE man's rows. The
-  whole archive is loaded for exactly one figure, the pitcher/hitter lean, which
-  z-scores an umpire against the pool's game rows — `loadUmpire(id, {withLean})`,
-  passed by the detail page and by nothing else. The summary falls back to the
-  archive when it is missing, so a deploy before the first cron still works. Unlike `umpires.json`'s cheap full nightly
+  most-worked teams + ballparks client-side. A COMPANION dataset
+  (`gen-umpire-accuracy.mjs`, same cron) adds each home-plate umpire's season
+  called-pitch accuracy + a compact zone-tendency breakdown, keyed by the same
+  personId. It ships in TWO shapes from one run, and between them
+  they ARE the season archive: `umpire-accuracy-summary.json`, every umpire's
+  season aggregates (~0.12 MB — the ranking pool the lineup page, the box score,
+  and the rankings table read), and `umpire-accuracy/{personId}.json`, one man's
+  scored game rows (~13 KB — the game log the detail page and the accuracy modal
+  draw). There is no league-wide archive file: it was ~2 MB by August, it was
+  both the merge base and a served file, and the row shards are the merge base
+  now, so the accumulated history has exactly one copy.
+
+  The figure that kept the archive alive was the pitcher/hitter LEAN, which
+  z-scores an umpire against the pool's per-game favor rows. Its ingredient is
+  now summed at build time into the aggregate (`favorNet`/`favorNetGames`) by
+  `leanInputFromRows`, which `gen-umpire-accuracy.mjs` imports from the reader
+  rather than re-implementing; `umpireLeanFor(season)` beside it does the
+  division. Do not confuse `favorNet` with `favorMagnitude` — the latter is
+  UNSIGNED and answers the "run impact" tile's question instead.
+  Unlike `umpires.json`'s cheap full nightly
   rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
   batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
   Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few
