@@ -445,6 +445,12 @@ export function InningViewer({
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
   const currentSealed = curIdx > renderRevealedThrough
+  // Focus mode: a sealed half shows the linescore and the at-bat feed alone, so
+  // the at-bat just revealed is the only thing that grew and the page has
+  // nothing to snap past. Visibility only; the folded list and why no seal or
+  // gate is affected are in 11-innings.css. `restOpen` survives navigation.
+  const [restOpen, setRestOpen] = useState(false)
+  const focused = currentSealed && !restOpen
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
   // the whole half at once. Keyed on the half actually being shown, not a
@@ -682,7 +688,7 @@ export function InningViewer({
   }
 
   return (
-    <div className="innings">
+    <div className={`innings${focused ? ' innings--focus' : ''}`}>
       {cloudSync}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
@@ -773,6 +779,19 @@ export function InningViewer({
           onCommit={goTo}
           onStatusChange={setTurnStatus}
         />
+
+        {/* Focus mode's control (see `focused`), above the content it folds. */}
+        {currentSealed && (
+          <button
+            type="button"
+            className="btn innings__foldbtn"
+            aria-expanded={restOpen}
+            aria-disabled={turning || undefined}
+            onClick={() => setRestOpen((v) => !v)}
+          >
+            {restOpen ? 'Hide the rest of the page' : 'Show the rest of the page'}
+          </button>
+        )}
 
         {/* Reference band. On the wide layout: pitchers + the fielding defense
             on the left, both lineups on the right. On a phone only Pitchers

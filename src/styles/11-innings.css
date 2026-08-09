@@ -311,6 +311,51 @@
   gap: 12px;
 }
 
+/* Focus mode (InningViewer's `focused`): while the half on screen is still
+   sealed, the page is the linescore and the at-bat feed and nothing else. The
+   stat/WPA row, the reference band (Margin Notes, Pitchers, defense, lineups)
+   and the rosters fold away, along with both inline copies of the entering
+   lineups/defense the phone layout renders inside the half itself
+   (.half__entering above the seal, .halfentering below it once stepping
+   starts) — the wide layout already hides that pair in favour of
+   .innings__ref-defense / -lineups, which this hides with the band.
+
+   Visibility only. Everything here still mounts and is still gated exactly as
+   before, so no seal, no caller-gated pre-pitch selector (ADR-0010) and no
+   fetch is affected — hiding a card can only ever show less than the rule
+   already allows. Each selector carries .innings--focus, so it outranks the
+   display the wide-breakpoint rules give these same blocks
+   (.innings__ref's grid, .innings__ref-lineups' block) without depending on
+   partial order. */
+.innings--focus .innings__row2,
+.innings--focus .innings__ref,
+.innings--focus .innings__rosters,
+.innings--focus .half__entering,
+.innings--focus .halfentering {
+  display: none;
+}
+
+/* The one control that folds it back open — full width directly under the
+   feed, in the quiet paper-and-rule .btn base rather than a filled one: it is
+   a way to see more of the page, not the page's primary action (that stays the
+   floating bar's Next at-bat / Rest of half). .innings__grid's own flex gap
+   supplies the space around it at both breakpoints. */
+.innings__foldbtn {
+  width: 100%;
+}
+
+/* Folding the page away makes this button its last element, and .innings'
+   130px of bottom room is not enough for it: .pagenav--innings measures ~155px
+   tall (its Refresh row stacks above the action row at every width), so with
+   nothing rendered below the button there is less page under it than there is
+   bar over it — scrolled all the way down it still sat inside the bar's fade,
+   where .btn::after's dead-space claim takes the tap. Enough room here to
+   scroll it clear of the bar, plus a gap. The unfolded page already clears the
+   bar on its own roster panels, so this is scoped to focus mode. */
+.innings--focus {
+  padding-bottom: calc(180px + env(safe-area-inset-bottom));
+}
+
 /* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
    .innings__row2 pairing as .innings__grid's row-2 child. The active layer
    sits in normal flow (so the scene's height still tracks its content, same
@@ -365,6 +410,7 @@
    own first-request-wins guard (pageTurnState.js) is the real backstop. */
 .inningnav button[aria-disabled='true'],
 .rolling__pick[aria-disabled='true'],
+.innings__foldbtn[aria-disabled='true'],
 .pagenav--innings .btn[aria-disabled='true'] {
   opacity: 0.6;
   pointer-events: none;
