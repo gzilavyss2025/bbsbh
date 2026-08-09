@@ -48,7 +48,7 @@ import { RadarPill } from '../components/badges/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
-import { pitchArsenalFor } from '../api/pitchArsenal.js'
+import { fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
@@ -94,7 +94,6 @@ export function TeamInfo({
   rookiesData,
   feverRadarData,
   savantPercentilesData,
-  pitchArsenalData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
@@ -189,7 +188,6 @@ export function TeamInfo({
         rookiesData={rookiesData}
         feverRadarData={feverRadarData}
         savantPercentilesData={savantPercentilesData}
-        pitchArsenalData={pitchArsenalData}
         formerTeammatesData={formerTeammatesData}
         careerMatchupsData={careerMatchupsData}
         workloadData={workloadData}
@@ -378,7 +376,6 @@ function TeamSections({
   rookiesData,
   feverRadarData,
   savantPercentilesData,
-  pitchArsenalData,
   formerTeammatesData,
   careerMatchupsData,
   workloadData,
@@ -408,11 +405,13 @@ function TeamSections({
   const season = feed?.gameData?.game?.season
   const oppPitcher = useMemo(() => selectOpposingPitcher(feed, side), [feed, side])
   // The opposing starter's season pitch-type mix (see api/pitchArsenal.js) —
-  // MLB + AAA only; a lower-level starter's lookup just resolves to null,
-  // same graceful degradation as everywhere else.
+  // MLB + AAA only; a lower-level starter's lookup just resolves to null. Fetched
+  // HERE by his id, not handed down from useGameData: this is the only card that
+  // draws it, and it wants one man's bucket rather than the league's.
+  const { data: arsenalShard } = useAsync(() => fetchPitchArsenalFor(oppPitcher?.id), [oppPitcher?.id])
   const oppArsenal = useMemo(
-    () => pitchArsenalFor(pitchArsenalData, oppPitcher?.id, isMlb),
-    [pitchArsenalData, oppPitcher?.id, isMlb],
+    () => pitchArsenalFor(arsenalShard, oppPitcher?.id, isMlb),
+    [arsenalShard, oppPitcher?.id, isMlb],
   )
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
   const bullpenArms = useMemo(() => selectBullpen(feed, side), [feed, side])

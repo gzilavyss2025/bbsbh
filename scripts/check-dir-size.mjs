@@ -218,7 +218,14 @@ const BUDGETS = {
   // three states. The same React-free-core-beside-its-screen shape as
   // scoresUnlocked.js and spoiledDays.js, both of which are the consent
   // modules this one is modelled on. A leaf module, not a new subsystem.
-  'src/lib': 52,
+  // +1 for shardKey.js — the `personId % 100` bucket three datasets are sharded
+  // on (rookie records, career WAR, coaching history), each of which had its own
+  // copy of the same two lines. It belongs here rather than in one of those
+  // readers because it is a JOIN both sides of a dataset compute: the generator
+  // files a record under a name the reader recomputes from an id, so a drift of
+  // one player is a record that exists and can never be found. Four lines and no
+  // imports — a leaf constant, not a new subsystem.
+  'src/lib': 53,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

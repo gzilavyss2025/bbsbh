@@ -53,11 +53,15 @@ import {
   pitchCallCode,
 } from '../src/api/playbyplay.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeJsonAtomic, writeShards } from './lib/io.js'
+import { shardKey100 } from '../src/lib/shardKey.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'fouls.json')
+// The same batter/pitcher rows, bucketed on `personId % 100` for the player
+// page's card — see writeFouls below and src/api/fouls.js's fetchFoulsFor.
+const outPlayers = join(here, '..', 'public', 'data', 'fouls')
 
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 100
@@ -780,6 +784,26 @@ export function exportFouls(db) {
   }
 }
 
+// The season file the Foul Tracker page reads, plus the per-player buckets the
+// player page reads — both cut from ONE export, so a bucket can never disagree
+// with the file beside it. Every write below goes through here, checkpoints
+// included, so an interrupted backfill leaves the two consistent.
+async function writeFouls(db) {
+  const data = exportFouls(db)
+  await writeJsonAtomic(out, data)
+  const buckets = new Map()
+  for (const group of ['batters', 'pitchers']) {
+    for (const [id, row] of Object.entries(data[group] ?? {})) {
+      const key = shardKey100(id)
+      if (!buckets.has(key)) {
+        buckets.set(key, { season: data.season, asOf: data.asOf, batters: {}, pitchers: {} })
+      }
+      buckets.get(key)[group][id] = row
+    }
+  }
+  await writeShards(outPlayers, [...buckets])
+}
+
 // --- CLI ---------------------------------------------------------------------
 async function main() {
   const args = parseArgs(process.argv.slice(2))
@@ -836,13 +860,13 @@ async function main() {
         if (done % CHECKPOINT_EVERY === 0) {
           console.log(`${done}/${targets.length} backfilled, checkpointing...`)
           await dumpGroup(db, 'fouls')
-          await writeJsonAtomic(out, exportFouls(db))
+          await writeFouls(db)
         }
       }
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, backfillWorker))
     await dumpGroup(db, 'fouls')
-    await writeJsonAtomic(out, exportFouls(db))
+    await writeFouls(db)
     console.log(`backfilled ${done} games' foul_game_totals`)
     db.close()
     return
@@ -897,13 +921,13 @@ async function main() {
         if (done % CHECKPOINT_EVERY === 0) {
           console.log(`${done}/${targets.length} rebuilt, checkpointing...`)
           await dumpGroup(db, 'fouls')
-          await writeJsonAtomic(out, exportFouls(db))
+          await writeFouls(db)
         }
       }
     }
     await Promise.all(Array.from({ length: CONCURRENCY }, teamPitchTypeWorker))
     await dumpGroup(db, 'fouls')
-    await writeJsonAtomic(out, exportFouls(db))
+    await writeFouls(db)
     console.log(`rebuilt foul_team_pitch_types_batting/pitching from ${done} games`)
     db.close()
     return
@@ -929,7 +953,7 @@ async function main() {
 
   const writeOut = async () => {
     await dumpGroup(db, 'fouls')
-    await writeJsonAtomic(out, exportFouls(db))
+    await writeFouls(db)
   }
 
   let done = 0

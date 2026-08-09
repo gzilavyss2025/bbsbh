@@ -1,3 +1,5 @@
+import { shardKey100 } from '../lib/shardKey.js'
+
 // Season-long foul-ball aggregates, read from a static same-origin file
 // (public/data/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
 // build-time-fetch pattern — see src/api/CLAUDE.md and war.js). Foul balls are
@@ -10,9 +12,15 @@
 // It's spoiler-FREE and needs no SealBox; it can render pregame on TeamInfo /
 // PlayerPage. Degrades to null on any failure — a missing card, not a crash.
 //
-// Cached in-memory for the session (the file changes once a day).
+// Cached in-memory for the session (the files change once a day).
 let cached
 
+// The WHOLE season file — every batter, every pitcher, the league blocks, and
+// the top foul games. Only the Foul Tracker page (/fouls) wants this: it ranks
+// the league against itself, so it genuinely needs everyone.
+//
+// A player page does not. It shows one man's line, so it reads
+// fetchFoulsFor(personId) below and never touches this.
 export async function fetchFouls() {
   if (cached !== undefined) return cached
   try {
@@ -23,6 +31,30 @@ export async function fetchFouls() {
     cached = null
   }
   return cached
+}
+
+// One player's slice — his own batter and pitcher rows, from the bucket he
+// falls in (`personId % 100`, shardKey100, the same join the rookie records and
+// career WAR use). Returns the same `{ batters, pitchers }` shape the whole file
+// has, so batterFoulLine/pitcherFoulLine take it unchanged.
+//
+// 2 KB instead of 805 KB: the player page's card is four tiles off one row, and
+// the season file is mostly 625 other batters and a 251 KB table of the year's
+// foul-heaviest games that only /fouls draws.
+const playerShards = new Map()
+
+export async function fetchFoulsFor(personId) {
+  if (personId == null) return null
+  const key = shardKey100(personId)
+  if (!playerShards.has(key)) {
+    playerShards.set(
+      key,
+      fetch(`/data/fouls/${key}.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    )
+  }
+  return playerShards.get(key)
 }
 
 // Qualifier floors for the leaderboards, exported so a caller (or a test) can

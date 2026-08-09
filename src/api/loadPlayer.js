@@ -35,7 +35,7 @@ import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
-import { fetchPitchArsenal, similarPitchersFor } from './pitchArsenal.js'
+import { fetchPitchArsenalPool, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookieRecord } from './rookies.js'
 import {
   personBio,
@@ -172,14 +172,13 @@ export async function loadPlayer(id, asOf) {
   // same-origin static file, session-cached after the first read anywhere in
   // the app (TeamInfo's opposing-starter card already asks for it), and the
   // source of the "Pitches like" card's comparison pool.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, arsenalData, rookieInfo] = await Promise.all([
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookieInfo] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
     fetchWarHistory(id),
     fetchVsTeamSplitsForPlayer(id),
     fetchSavantPercentiles(),
-    fetchPitchArsenal(),
     fetchRookieRecord(id),
   ])
   if (!person) return null
@@ -338,9 +337,12 @@ export async function loadPlayer(id, asOf) {
         // Statcast skill space against the savant file's qualified-MLB pool
         // (see similarHittersFor — a MiLB bat isn't in the file, so the card
         // simply doesn't render). [] under any sample floor.
+        // The arsenal pool is fetched HERE, not up front: it is one level's
+        // worth of arms, only a pitcher's card ranks against it, and a hitter's
+        // page used to pay for the whole league's mix to render nothing.
         block.similar =
           group === 'pitching'
-            ? similarPitchersFor(arsenalData, id, tileSportId === 1)
+            ? similarPitchersFor(await fetchPitchArsenalPool(tileSportId === 1), id)
             : similarHittersFor(savantData, id)
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the

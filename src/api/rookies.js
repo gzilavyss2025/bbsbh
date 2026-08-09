@@ -1,3 +1,5 @@
+import { shardKey100 } from '../lib/shardKey.js'
+
 // Rookie status, read from static same-origin files under public/data/rookies/
 // rather than computed live. Those files are derived from the append-only
 // master record public/data/rookies.json, which
@@ -50,11 +52,9 @@ export async function fetchRookiesData() {
 }
 
 // Which record shard holds a personId. The generator writes the same buckets
-// (scripts/lib/rookie-shards.mjs), so this is the one place the arithmetic
-// lives on the app side — do not inline it at a call site.
-export function rookieShardKey(personId) {
-  return String(Math.abs(Number(personId) || 0) % 100).padStart(2, '0')
-}
+// (scripts/lib/rookie-shards.mjs) by importing THIS function, so the two cannot
+// disagree — see src/lib/shardKey.js.
+export const rookieShardKey = shardKey100
 
 const recordShards = new Map() // shard key -> { players } | null
 

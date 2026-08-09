@@ -1,3 +1,5 @@
+import { shardKey100 } from '../lib/shardKey.js'
+
 // Season WAR, read from a static same-origin file (public/data/war.json)
 // rather than fetched live from FanGraphs. That file is regenerated nightly
 // by scripts/gen-war.mjs (see .github/workflows/update-nightly-data.yml) — this module
@@ -31,14 +33,10 @@ export async function fetchWarData() {
 // finished season's WAR never changes. Degrades to empty like the current-season
 // file.
 //
-// Sharded on `personId % 100`, the same bucketing rookies.js uses, and for the
-// same reason: a player page wants ONE career's worth — at most a couple of
-// dozen numbers — and the league-wide file is 416 KB of seasons it will not
-// read. Bucketed rather than one file per player because 100 files of ~4 KB is a
-// reasonable thing to ship and ~2,600 files of 160 bytes is not.
-export function warShardKey(personId) {
-  return String(Math.abs(Number(personId) || 0) % 100).padStart(2, '0')
-}
+// Sharded on `personId % 100`, the same bucketing rookies.js uses (and for the
+// same reason — see src/lib/shardKey.js): a player page wants ONE career's
+// worth, at most a couple of dozen numbers, out of 416 KB of league-seasons.
+export const warShardKey = shardKey100
 
 const historyShards = new Map() // shard key -> { bat, pit }
 
