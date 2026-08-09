@@ -186,9 +186,9 @@ don't run these by hand.
   `foulRate.perPitch` (league baseline) — skipped gracefully if that file is
   absent. See `docs/callouts.md` + ADR-0014; extend this pipeline, don't build a
   parallel path.
-- `gen-fouls.mjs` → `public/data/fouls.json` — season foul-ball aggregates
-  (per-batter/pitcher/team totals, two-strike fouls, single-game highs, league
-  by-inning + by-pitch-type rates with a starter/reliever split). SQLite-backed
+- `gen-fouls.mjs` → `fouls.json` (league, for `/fouls`) + `fouls/{NN}.json` (`personId
+  % 100`, for the player card) — season foul-ball aggregates (per batter/pitcher/team,
+  two-strike fouls, single-game highs, league by-inning + by-pitch-type rates). SQLite-backed
   (`fouls` group, ADR-0021) APPEND-ONLY incremental sweep of Final MLB games'
   live feeds like `gen-umpire-accuracy.mjs` (`--days` trailing window;
   `--since`/`--until` backfill with checkpoints); `foul_ingested_games` is the
@@ -230,11 +230,11 @@ don't run these by hand.
   in a new logo file is the only step needed to light up a team, no code
   change. v2 idea, not built: guess a likely pre-posting treatment from
   accumulated history instead of always falling back to the base logo.
-- `gen-pitch-arsenal.mjs` → `public/data/pitch-arsenal.json` — each pitcher's
-  season pitch-type mix (share of pitches + average velocity per type), split
-  `mlb`/`aaa` — every AAA park (like MLB's) feeds Hawk-Eye pitch tracking,
-  confirmed live against a real AAA gamePk's feed; AA and below carry none, so
-  they're never swept (same two-level split as `gen-umpire-accuracy.mjs`).
+- `gen-pitch-arsenal.mjs` → `pitch-arsenal/{NN}.json` (per-pitcher buckets) +
+  `pitch-arsenal-pool/{mlb,aaa}.json` (slim similarity pool, `docs/api/static-data.md`) —
+  each pitcher's season pitch mix (share + velocity per type), split `mlb`/`aaa` — every
+  AAA park (like MLB's) feeds Hawk-Eye tracking, confirmed live against a real AAA
+  gamePk's feed; AA and below carry none (same two-level split as `gen-umpire-accuracy`).
   APPEND-ONLY/incremental sweep of Final regular-season games' live feeds like
   `gen-fouls.mjs` (`--days` trailing window; `--since`/`--until` backfill;
   `--sports=1,11` restricts the sweep, its real use being `--since=…

@@ -1,9 +1,14 @@
 import { teamFullName } from '../lib/teams.js'
+import { shardKey100 } from '../lib/shardKey.js'
 
 // The manager detail page's data — one person's FULL coaching career (not
 // just his managerial stints — e.g. Pat Murphy was Padres bench coach years
 // before he became Brewers manager), read from a static same-origin file
-// (public/data/manager-history.json) rather than computed live. Same
+// (public/data/manager-history/{NN}.json, bucketed on `personId % 100` —
+// shardKey100, the same join the rookie records and career WAR use) rather than
+// computed live. The page asks about ONE man and his record is ~280 bytes; the
+// league-wide file it replaced was 1.1 MB of everyone who has held an MLB staff
+// job since 2000. Same
 // build-time-fetch pattern as umpires.js: scripts/gen-manager-history.mjs
 // sweeps every MLB team's /coaches endpoint season by season (too many calls
 // to do on a page load) and re-indexes the result by personId; this module
@@ -21,19 +26,20 @@ import { teamFullName } from '../lib/teams.js'
 // teamFullName always resolves here (unlike most of this app's MiLB-aware
 // helpers).
 
-let cached = null
+const shards = new Map() // bucket key -> { generatedAt, byPersonId }
 
-async function load() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/manager-history.json')
-    if (!res.ok) throw new Error(`manager-history.json ${res.status}`)
-    const data = await res.json()
-    cached = { generatedAt: data.generatedAt ?? null, byPersonId: data.byPersonId ?? {} }
-  } catch {
-    cached = { generatedAt: null, byPersonId: {} }
+async function load(personId) {
+  const key = shardKey100(personId)
+  if (!shards.has(key)) {
+    shards.set(
+      key,
+      fetch(`/data/manager-history/${key}.json`)
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((d) => ({ generatedAt: d.generatedAt ?? null, byPersonId: d.byPersonId ?? {} }))
+        .catch(() => ({ generatedAt: null, byPersonId: {} })),
+    )
   }
-  return cached
+  return shards.get(key)
 }
 
 // Same jobId convention as fetchManager (game.js) and the generator: a
@@ -47,7 +53,7 @@ const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 // stints for a person with no coaching record on file (never held any MLB
 // staff job 2000-present, or the file hasn't loaded).
 export async function loadManagerHistory(personId) {
-  const { byPersonId, generatedAt } = await load()
+  const { byPersonId, generatedAt } = await load(personId)
   const raw = byPersonId[personId] ?? []
   const stints = raw.map((s) => ({
     ...s,

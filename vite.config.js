@@ -434,7 +434,7 @@ export default defineConfig({
           // Route-specific snapshots are fetched on demand instead of adding
           // hundreds of KB to every install. The runtime rule below keeps the
           // last successful copy available for offline browsing.
-          '**/data/manager-history.json',
+          '**/data/manager-history/*.json',
           '**/data/umpire-accuracy/*.json',
           '**/data/former-teammates/*.json',
           '**/data/top-prospects.json',
@@ -459,12 +459,14 @@ export default defineConfig({
           // read on demand by the Foul Tracker page, player-page cards, and
           // the lineup pages' bullpen board, so they stay off the install.
           '**/data/fouls.json',
+          '**/data/fouls/*.json',
           '**/data/workload.json',
           // Season pitch-type mix per pitcher (~700 KB at a full season's
           // coverage — see scripts/gen-pitch-arsenal.mjs), read on demand by the
           // opposing-starter card's pitch-mix bar and by the player page's
           // "Pitches like" card, which ranks the whole league-wide pool.
-          '**/data/pitch-arsenal.json',
+          '**/data/pitch-arsenal/*.json',
+          '**/data/pitch-arsenal-pool/*.json',
           // Per-team video-highlight archives (scripts/gen-highlights.mjs) —
           // one file per club, each growing all season. A 3-day sample already
           // runs 6-24 KB per team, so a full season lands well past the
@@ -505,14 +507,19 @@ export default defineConfig({
             // precache. NetworkFirst keeps them fresh online and usable after
             // a successful visit when the user is offline at the park.
             urlPattern: ({ url }) =>
-              /^\/data\/(?:manager-history|top-prospects|minors-leaders|all-star-rosters|fouls|workload|pitch-arsenal|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
+              /^\/data\/(?:top-prospects|minors-leaders|all-star-rosters|fouls|workload|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
                 url.pathname,
               ) ||
               /^\/data\/team-transactions\/\d{4}\.json$/.test(url.pathname) ||
               // One file per MATCHUP, keyed by the two team ids ascending.
               /^\/data\/former-teammates\/\d+-\d+\.json$/.test(url.pathname) ||
-              // Career WAR, bucketed on personId % 100 like the rookie records.
-              /^\/data\/war-history\/\d{2}\.json$/.test(url.pathname) ||
+              // Career WAR and coaching history, both bucketed on personId % 100
+              // like the rookie records.
+              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal)\/\d{2}\.json$/.test(
+                url.pathname,
+              ) ||
+              // One slim similarity pool per level.
+              /^\/data\/pitch-arsenal-pool\/(?:mlb|aaa)\.json$/.test(url.pathname) ||
               // One video-highlight file per club, same on-demand shape.
               /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
               // Trade Deadline is season-chunked the same way. The season list

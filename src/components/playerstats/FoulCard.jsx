@@ -1,6 +1,6 @@
 import { useNav } from '../../lib/nav.js'
 import { foulsPath } from '../../lib/route.js'
-import { fetchFouls, batterFoulLine, pitcherFoulLine } from '../../api/fouls.js'
+import { fetchFoulsFor, batterFoulLine, pitcherFoulLine } from '../../api/fouls.js'
 import { useAsync } from '../../hooks/useAsync.js'
 
 // The player page's foul-ball card — his season foul line from the nightly
@@ -12,9 +12,10 @@ import { useAsync } from '../../hooks/useAsync.js'
 export function FoulCard({ playerId, group, asOf }) {
   const navigate = useNav()
   const skip = !!asOf
+  // His bucket, not the league — see fetchFoulsFor.
   const { data } = useAsync(
-    () => (skip ? Promise.resolve(null) : fetchFouls()),
-    [skip],
+    () => (skip ? Promise.resolve(null) : fetchFoulsFor(playerId)),
+    [skip, playerId],
   )
   if (skip || !data) return null
 

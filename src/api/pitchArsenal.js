@@ -1,7 +1,8 @@
 import { similarPitchers } from '../lib/pitcherSimilarity.js'
+import { shardKey100 } from '../lib/shardKey.js'
 
-// Season pitch-type mix per pitcher, read from a static same-origin file
-// (public/data/pitch-arsenal.json) precomputed nightly by
+// Season pitch-type mix per pitcher, read from static same-origin files
+// precomputed nightly by
 // scripts/gen-pitch-arsenal.mjs (the build-time-fetch pattern — see
 // src/api/CLAUDE.md and war.js). Pitch mix isn't pre-totaled anywhere in the
 // API, so the generator sweeps completed games' play-by-play; this module
@@ -16,19 +17,48 @@ import { similarPitchers } from '../lib/pitcherSimilarity.js'
 // pitch-type tracking, so a MiLB-below-AAA starter just gets an empty list,
 // same graceful degradation as everywhere else in the app.
 //
-// Cached in-memory for the session (the file changes once a day).
-let cached
+// TWO SHAPES, because the two readers want opposite things and the one file
+// that served both cost 692 KB either way (cached in-memory for the session —
+// the files change once a day):
+//
+//   • ONE PITCHER, everything about him — the opposing-starter card's mix bar.
+//     public/data/pitch-arsenal/{NN}.json, bucketed on `personId % 100`
+//     (shardKey100, the same join the rookie records use). ~12 KB.
+//   • THE WHOLE LEVEL, slimmed — the player page's "Pitches like" card, which
+//     ranks a man against every arm at his level and so genuinely needs a pool.
+//     public/data/pitch-arsenal-pool/{mlb,aaa}.json: ONE level (an MLB arm is
+//     never compared to a AAA arm), only arms past the similarity floor (an arm
+//     under it can never be a candidate), and no `description` strings (the
+//     ranking reads codes). 149 KB for MLB, 194 KB for AAA.
+const shards = new Map()
 
-export async function fetchPitchArsenal() {
-  if (cached !== undefined) return cached
-  try {
-    const res = await fetch('/data/pitch-arsenal.json')
-    if (!res.ok) throw new Error(`pitch-arsenal.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = null
+export async function fetchPitchArsenalFor(personId) {
+  if (personId == null) return null
+  const key = shardKey100(personId)
+  if (!shards.has(key)) {
+    shards.set(
+      key,
+      fetch(`/data/pitch-arsenal/${key}.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    )
   }
-  return cached
+  return shards.get(key)
+}
+
+const pools = new Map()
+
+export async function fetchPitchArsenalPool(isMlb) {
+  const level = isMlb ? 'mlb' : 'aaa'
+  if (!pools.has(level)) {
+    pools.set(
+      level,
+      fetch(`/data/pitch-arsenal-pool/${level}.json`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    )
+  }
+  return pools.get(level)
 }
 
 // A minimum sample so a two-pitch relief cameo doesn't render a misleadingly
@@ -62,19 +92,20 @@ export function pitchArsenalFor(data, personId, isMlb) {
 // The pool is the SAME LEVEL as the subject, never both. MLB and AAA are kept
 // separate everywhere else this data is used (and in gen-pitch-arsenal.mjs
 // itself) because they're different peer pools — a AAA arm's nearest neighbour
-// should be another AAA arm, not a big leaguer he happens to resemble.
+// should be another AAA arm, not a big leaguer he happens to resemble. That
+// split is now the FILE: the caller picks a level by picking a pool file, and
+// this function ranks whatever it is handed.
 //
 // Spoiler footing is unchanged from the rest of this module: a completed-game
 // season aggregate, no SealBox. Returns [] whenever it can't answer — file not
 // loaded, subject not in it, or subject under the similarity floor — so the
 // card simply doesn't render.
-export function similarPitchersFor(data, personId, isMlb, opts) {
+export function similarPitchersFor(data, personId, opts) {
   const entries = data?.pit
   if (!entries) return []
-  const key = isMlb ? 'mlb' : 'aaa'
   const pool = []
   for (const [id, entry] of Object.entries(entries)) {
-    const types = entry?.[key]
+    const types = entry?.types
     if (!types || types.length === 0) continue
     pool.push({
       personId: Number(id),

@@ -284,7 +284,11 @@ for each generator; the reader modules:
   player-keyed pool `TeamLeaders` expects).
 
 - `fouls.js` — season foul-ball lines + leaders, from `public/data/fouls.json`
-  (`gen-fouls.mjs`). Completed-game aggregates → spoiler-free, no SealBox
+  (`gen-fouls.mjs`) for the whole-league Foul Tracker page, and from
+  `public/data/fouls/{NN}.json` — the same batter/pitcher rows bucketed on
+  `personId % 100` (`shardKey100`) — for the player page's one-man card, which
+  used to pull 805 KB to draw four tiles and now reads ~2 KB
+  (`fetchFoulsFor`). Completed-game aggregates → spoiler-free, no SealBox
   (same footing as WAR); MLB only. Feeds the Foul Tracker page (`/fouls`,
   `FoulTrackerPage.jsx`) and the player page's `FoulCard` (current-day only —
   the precompute can't be cut to a spoiler `asOf`, so the card hides under
@@ -293,8 +297,15 @@ for each generator; the reader modules:
   per-half foul counters (`fouls`/`twoStrikeFouls`) live in `derive.js`'s
   bucket instead (reveal-only, surfaced in `StatBox` + the box-score digest).
 - `pitchArsenal.js` — each pitcher's season pitch-type mix (share of pitches +
-  average velocity per type), from `public/data/pitch-arsenal.json`
-  (`gen-pitch-arsenal.mjs`). Completed-game aggregates → spoiler-free, no
+  average velocity per type), from `gen-pitch-arsenal.mjs` in TWO shapes, because
+  its two readers want opposite things: `public/data/pitch-arsenal/{NN}.json`
+  (buckets on `personId % 100`) for the opposing-starter card, which wants ONE
+  pitcher; and `public/data/pitch-arsenal-pool/{mlb,aaa}.json` for the player
+  page's similarity card, which genuinely needs a pool. The pool file is
+  deliberately less than the buckets carry — one level (the two are never ranked
+  against each other), only arms past `MIN_SIMILARITY_PITCHES` (the ranker drops
+  the rest anyway), and no `description` strings (it ranks on `code`). 692 KB
+  became 12 KB for the mix bar and 149/194 KB for the pool. Completed-game aggregates → spoiler-free, no
   SealBox (same footing as `fouls.js`); MLB + AAA (`mlb`/`aaa` keys — AA and
   below carry no Hawk-Eye pitch tracking, so `pitchArsenalFor` just resolves
   to null there). `pitchArsenalFor(data, personId, isMlb)` picks the level
@@ -305,7 +316,7 @@ for each generator; the reader modules:
   (`tokens/colors.css`'s `--arsenal-*`). Surface: the opposing-starter card's
   wide-layout pitch-mix bar (`TeamInfo.jsx`'s `OpposingStarterCard`), filling
   the space the name/stats column leaves open on a wide screen.
-  `similarPitchersFor(data, personId, isMlb)` is the SECOND surface — the
+  `similarPitchersFor(pool, personId)` is the SECOND surface — the
   player page's "Pitches like" card. It only flattens the file's per-level
   entries into a pool (same level as the subject, never both — MLB and AAA are
   different peer pools); the ranking itself is `src/lib/pitcherSimilarity.js`,
