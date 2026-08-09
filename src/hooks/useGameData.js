@@ -20,7 +20,6 @@ import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData } from '../api/rookies.js'
 import { fetchFeverRadar } from '../api/feverRadar.js'
 import { fetchSavantPercentiles } from '../api/savantPercentiles.js'
-import { fetchPitchArsenal } from '../api/pitchArsenal.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -465,16 +464,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const savantPercentilesData = savantPercentiles.data ?? null
 
-  // Season pitch-type mix per pitcher (Hawk-Eye tracking) — the opposing
-  // starter card's arsenal breakdown. MLB + AAA both carry real data (see
-  // gen-pitch-arsenal.mjs's header); not gated by sportId, same as
-  // savantPercentiles above — a lower-level pitcher's lookup just resolves to
-  // nothing.
-  const pitchArsenal = useAsync(
-    () => (enrichmentReady ? fetchPitchArsenal() : Promise.resolve(null)),
-    [enrichmentReady],
-  )
-  const pitchArsenalData = pitchArsenal.data ?? null
 
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
   // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
@@ -563,7 +552,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     rookiesData,
     feverRadarData,
     savantPercentilesData,
-    pitchArsenalData,
     gameCallouts,
     broadcast,
     formerTeammatesData,

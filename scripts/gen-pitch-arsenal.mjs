@@ -36,11 +36,18 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import { getJson } from './lib/statsapi.mjs'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeShards } from './lib/io.js'
+import { shardKey100 } from '../src/lib/shardKey.js'
+import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
-const out = join(here, '..', 'public', 'data', 'pitch-arsenal.json')
+// TWO OUTPUTS, one per reader — see writeArsenal below and src/api/pitchArsenal.js.
+// Per-pitcher buckets for the opposing-starter card, one slim per-level pool for
+// the player page's similarity ranking. Nothing reads the league in full, so
+// nothing is written in full.
+const outDir = join(here, '..', 'public', 'data', 'pitch-arsenal')
+const outPools = join(here, '..', 'public', 'data', 'pitch-arsenal-pool')
 const DEFAULT_DAYS = 3
 const CHECKPOINT_EVERY = 100
 const CONCURRENCY = 8
@@ -210,6 +217,46 @@ export function exportPitchArsenal(db, hands = {}) {
   }
 }
 
+// Both files, cut from ONE export so they cannot disagree:
+//
+//   • pitch-arsenal/{NN}.json — every pitcher's full entry, bucketed on
+//     `personId % 100` (shardKey100, imported from the app so the generator and
+//     the reader agree on where a man went). The mix bar wants one starter.
+//   • pitch-arsenal-pool/{mlb,aaa}.json — the similarity pool, and deliberately
+//     LESS than the buckets carry. One level per file (the two are never ranked
+//     against each other), only arms past MIN_SIMILARITY_PITCHES (an arm below
+//     it is dropped by the ranker anyway, so shipping him is pure weight), and
+//     no `description` — the ranking reads `code`. 692 KB became 149 + 194.
+async function writeArsenal(db, hands) {
+  const data = exportPitchArsenal(db, hands)
+  const buckets = new Map()
+  for (const [id, entry] of Object.entries(data.pit ?? {})) {
+    const key = shardKey100(id)
+    if (!buckets.has(key)) buckets.set(key, { season: data.season, asOf: data.asOf, pit: {} })
+    buckets.get(key).pit[id] = entry
+  }
+  await writeShards(outDir, [...buckets])
+
+  const pools = new Map([
+    ['mlb', { season: data.season, asOf: data.asOf, level: 'mlb', pit: {} }],
+    ['aaa', { season: data.season, asOf: data.asOf, level: 'aaa', pit: {} }],
+  ])
+  for (const [id, entry] of Object.entries(data.pit ?? {})) {
+    for (const level of ['mlb', 'aaa']) {
+      const rows = entry[level]
+      if (!rows?.length) continue
+      if (rows.reduce((n, t) => n + t.pitches, 0) < MIN_SIMILARITY_PITCHES) continue
+      pools.get(level).pit[id] = {
+        name: entry.name,
+        teamId: entry.teamId,
+        throws: entry.throws,
+        types: rows.map((t) => ({ code: t.code, pitches: t.pitches, avgVelo: t.avgVelo })),
+      }
+    }
+  }
+  await writeShards(outPools, [...pools])
+}
+
 // --- CLI ---------------------------------------------------------------------
 // The levels swept, most-senior first — see header for why AAA rides along
 // and AA/below don't.
@@ -241,7 +288,7 @@ async function main() {
   // adding one, this refreshes the committed file in seconds instead of
   // re-fetching every ingested game's feed to change nothing in the database.
   if (args['export-only']) {
-    await writeJsonAtomic(out, exportPitchArsenal(db, hands))
+    await writeArsenal(db, hands)
     console.log(`wrote ${out} (export only — no games swept)`)
     db.close()
     return
@@ -272,7 +319,7 @@ async function main() {
 
   const writeOut = async () => {
     await dumpGroup(db, 'pitch-arsenal')
-    await writeJsonAtomic(out, exportPitchArsenal(db, hands))
+    await writeArsenal(db, hands)
   }
 
   let done = 0
