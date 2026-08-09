@@ -82,7 +82,8 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684
-  'src/styles/21-box-score.css': 800, // 797 — the Three Stars card split out to 21a-box-score-stars.css
+  'src/styles/21-box-score.css': 800, // 771 — the Three Stars card split out to 21a-box-score-stars.css,
+  //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
   'src/styles/26-player-page.css': 1300, // 1262 — the percentile strip split out to 26a-percentile-strip.css
@@ -103,13 +104,13 @@ const BUDGETS = {
   'scripts/gen-callouts.mjs': 1500, // 1483
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   'src/screens/TeamInfo.jsx': 1300, // 1299
-  'src/screens/BoxScore.jsx': 1300, // 1216
+  'src/screens/BoxScore.jsx': 1200, // 1179 — InningTally moved to screens/boxscore/InningTally.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 912
-  'src/api/boxscore.js': 900, // 859
+  'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local
   // contextual prompt (all PRD §6.1/§6.2). GameSelect is already the one

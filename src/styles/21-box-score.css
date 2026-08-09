@@ -640,36 +640,10 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* The by-inning tally: a second line score (own card frame, matches
-   .bs__insights) always open — see InningTally's doc for why this one
-   doesn't default collapsed the way its old row-per-half layout did. */
-.bs__tally {
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--paper-1);
-  box-shadow: var(--shadow-card);
-  margin-top: var(--space-3);
-  overflow: hidden;
-}
-.bs__tallyHead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: 12px 14px;
-}
-/* The legend spells out what the four slash-joined figures in each inning
-   cell mean, once, instead of repeating "P / Wh / F / LOB" column headers
-   above every inning the way Scoreboard repeats "R" once per team. */
-.bs__tallyLegend {
-  font-size: var(--fs-compact);
-  color: var(--text-caption);
-  white-space: nowrap;
-}
-.bs__tallyBody {
-  padding: 0 14px 12px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
+/* The by-inning tally's card frame, grid and pencil wash live in
+   21b-box-score-tally.css, alongside their own component
+   (screens/boxscore/InningTally.jsx). */
+
 /* The box score's own Statcast Leaders card — its own full-width row
    between the linescore column and the two team cards (see
    BoxScoreBody), each superlative rendered as a .playercard__bucket +

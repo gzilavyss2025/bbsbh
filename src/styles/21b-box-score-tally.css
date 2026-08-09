@@ -1,0 +1,217 @@
+/* ============================================================
+   The by-inning tally (InningTally.jsx) — the box score's card of
+   pitches / whiffs / fouls / LOB, one measure per row pair, one number
+   per box, with a pencil wash whose weight is that number's share of
+   the busiest box in its own measure.
+
+   Its own partial rather than more of 21-box-score.css because the card
+   is its own component now and that sheet is at its line budget. Loaded
+   from index.css directly after 21a so it still cascades after
+   .bs__grid's base cell rules in 21, which it overrides on width,
+   padding and border.
+   ============================================================ */
+
+/* The card frame — matches .bs__insights/.bs__stars beside it. Always open:
+   unlike the line score's run counts this card adds nothing spoiler-shaped
+   (it is already inside the box score's one seal), so there is no reason to
+   default it collapsed the way its old row-per-half layout did. */
+.bs__tally {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--paper-1);
+  box-shadow: var(--shadow-card);
+  margin-top: var(--space-3);
+  overflow: hidden;
+}
+.bs__tallyHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 12px 14px;
+}
+/* What the shading means, in three words. This used to spell out the order of
+   four slash-joined figures ("Pitches / Whiffs / Fouls / LOB") because the
+   cells gave no other way to tell them apart; the measures name themselves
+   down the left edge now, so the only thing left to say is how to read the
+   wash. */
+.bs__tallyLegend {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.bs__tallyBody {
+  padding: 2px 14px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ---- the grid -------------------------------------------------------- */
+
+/* No per-cell boxes. The wash is what gives a cell its edge here, and a ruled
+   border around every one of them fought it — so the only rules left are the
+   hairline that closes each measure's pair of rows and the one that fences off
+   the Total column. Cells keep .bs__grid's mono tabular figures. */
+.bs__grid--tally th,
+.bs__grid--tally td {
+  border-bottom: none;
+  padding: 0;
+}
+.bs__grid--tally thead th {
+  padding-bottom: 4px;
+  color: var(--text-caption);
+}
+/* One hairline under each measure, none under the last — the four measures
+   read as four blocks rather than eight loose rows. */
+.bs__tallyGroup:not(:last-child) tr:last-child > * {
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* The measure's name, set once per pair and centred across both rows: the
+   card's real legend, in place of the old line of slash-separated words. */
+.bs__tallyMeasure {
+  width: 1%;
+  padding-right: 8px !important;
+  text-align: left !important;
+  vertical-align: middle;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+/* !important on both: ".bs__grid th, .bs__grid td" is element+class and beats
+   a bare class on specificity, so its centred text-align and 5px 2px padding
+   would otherwise win here and in the club column below. */
+.bs__tallyClub {
+  width: 22px;
+  padding-right: 6px !important;
+}
+.bs__tallyLogo {
+  display: flex;
+  width: 20px;
+  height: 20px;
+}
+/* The club's mark on its own jersey-tinted tile, edge to edge — the same
+   TeamTreatmentMark/treatmentTile pair the line score's .bs__boardLogobox and
+   the scorebug HUD wear, at the smaller size this row needs. */
+.bs__tallyLogobox {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--tint, var(--paper-2));
+}
+.bs__tallyLogobox--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.bs__tallyLogobox .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+}
+
+/* One half-inning. `position: relative` is the wash's containing block; the
+   width is a hint, not a cap — .bs__grid is width:100%, so on a desktop the
+   inning columns share the extra room instead of huddling at the left edge. */
+.bs__tallyCell {
+  position: relative;
+  width: 24px;
+  height: 22px;
+  color: var(--text-body);
+}
+.bs__tallyCell--none {
+  color: var(--text-caption);
+}
+.bs__tallyNum {
+  position: relative;
+}
+/* The pencil wash. Graphite, because that is what shading a box in a scorebook
+   is done with, and one hue only: this encodes magnitude, and magnitude is a
+   single-hue ramp (a second colour here would read as a second category).
+   0.45 is the ceiling because the digit sits ON the wash — at full weight the
+   pair still clears 6:1, well past AA for body text. */
+.bs__tallyWash {
+  position: absolute;
+  inset: 1px;
+  border-radius: 2px;
+  background: var(--graphite);
+  opacity: calc(var(--fill, 0) * 0.45);
+}
+
+/* The game total, fenced off from the innings by a rule and set bold on the
+   card's own paper — the same "these are the final tallies, not an inning"
+   treatment the line score gives R/H/E. */
+.bs__tallyTotal {
+  width: 44px;
+  border-left: var(--bw-hair) solid var(--border-hairline) !important;
+  padding-left: 6px !important;
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.bs__grid--tally thead .bs__tallyTotal {
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+/* Column headers that are structural only — the measure and club columns
+   carry no visible heading, but a screen reader still needs a name for each. */
+.bs__tallySr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Desktop: this card is a full-width row of the sheet, so nine inning boxes
+   dividing ~900px stretch each pencil box into a wide, thin bar. Taller rows
+   put the box back near square at that width, and the measure labels take the
+   card's normal reading size rather than staying at phone scale. */
+@media (min-width: 740px) {
+  .bs__tallyCell {
+    height: 30px;
+  }
+  .bs__tallyMeasure {
+    padding-right: 14px !important;
+    font-size: var(--fs-compact);
+  }
+  .bs__tallyClub {
+    width: 26px;
+    padding-right: 10px !important;
+  }
+  .bs__tallyLogo {
+    width: 24px;
+    height: 24px;
+  }
+  .bs__tallyTotal {
+    width: 56px;
+    padding-left: 10px !important;
+  }
+}
+
+/* Phone: the four measure names are the widest thing on the left, and on a
+   narrow screen they are what pushes the ninth inning off the edge. Dropping
+   the label column's own padding and letting the boxes tighten keeps a
+   nine-inning game inside a 320px screen with no scroll. */
+@media (max-width: 359px) {
+  .bs__tallyMeasure {
+    padding-right: 4px !important;
+    letter-spacing: var(--ls-caps);
+  }
+  .bs__tallyCell {
+    width: 20px;
+  }
+  .bs__tallyTotal {
+    width: 36px;
+  }
+}
