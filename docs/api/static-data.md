@@ -117,7 +117,13 @@ for each generator; the reader modules:
   most-worked teams + ballparks client-side. A COMPANION file
   `public/data/umpire-accuracy.json` (`gen-umpire-accuracy.mjs`, same cron) adds
   each home-plate umpire's season called-pitch accuracy + a compact zone-tendency
-  breakdown, keyed by the same personId; unlike `umpires.json`'s cheap full nightly
+  breakdown, keyed by the same personId. It ships in TWO shapes from one run: the
+  full archive, and `umpire-accuracy-summary.json`, the same records with each
+  umpire's per-game `games` array dropped (~2 MB → ~0.12 MB). Only the umpire
+  detail page draws a game log; the lineup page, the box score, and the rankings
+  table need season aggregates alone, so `loadAccuracySummary()` serves them the
+  small file (falling back to the archive when it is missing) and the archive
+  loads on the detail page only. Unlike `umpires.json`'s cheap full nightly
   rebuild, accuracy needs each game's full live feed (per-pitch `pX/pZ` vs the
   batter's `strikeZoneTop/Bottom` with a plate + ball-radius buffer — the Umpire
   Scorecards convention), so it's an APPEND-ONLY incremental sweep of the last few

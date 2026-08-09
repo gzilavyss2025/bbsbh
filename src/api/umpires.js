@@ -22,6 +22,14 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // same footing as the game log (see the plan's spoiler audit,
 // .scratch/umpire-accuracy/plan.md §4).
 //
+// TWO FILES, ONE SOURCE. The accuracy archive keeps every scored game row of
+// the season and grows all year (~2 MB by August), but only the umpire DETAIL
+// page draws the game log. The lineup page, the box score, and the rankings
+// table need season aggregates alone, so the same generator run also writes
+// public/data/umpire-accuracy-summary.json — the same records minus `games`,
+// about 6% of the size. loadAccuracySummary() reads it, loadAccuracy() reads
+// the archive, and only the surfaces that show a game log pay for one.
+//
 // LEVELS: MLB + AAA (the two levels with the pitch tracking accuracy needs).
 // The two are kept STRICTLY SEPARATE, never blended: they run different regimes
 // (AAA uses the ABS challenge system) and rank against different peer pools, so
@@ -33,9 +41,12 @@ import { tierForZ, meanAndSd, leanTierForZ } from '../lib/statTiers.js'
 // with no data, degrades to null before the file exists or on any failure.
 let cached = null
 let accuracyCached = null
+let summaryCached = null
 // accuracyIndex is memoized per level ('MLB' | 'AAA') — the two levels rank
 // against separate pools and have separate zone-map baselines, so each gets its
-// own index.
+// own index. An index built from the summary file carries no `leanById` (the
+// lean reads per-game rows), so it is tagged `hasLean: false` and a later call
+// that needs the lean rebuilds it from the archive and replaces it.
 const indexCached = new Map()
 
 // A plate umpire needs at least this many scored games before we rank him among
@@ -200,6 +211,23 @@ async function loadAccuracy() {
   return accuracyCached
 }
 
+// The aggregates-only companion. Falls back to the full archive when the file
+// is missing — a deploy that lands before the nightly cron has written it once
+// still serves the right numbers, just at the old weight.
+async function loadAccuracySummary() {
+  if (summaryCached) return summaryCached
+  if (accuracyCached) return accuracyCached
+  try {
+    const res = await fetch('/data/umpire-accuracy-summary.json')
+    if (!res.ok) throw new Error(`umpire-accuracy-summary.json ${res.status}`)
+    const data = await res.json()
+    summaryCached = { season: data.season ?? null, umpires: data.umpires ?? {} }
+    return summaryCached
+  } catch {
+    return loadAccuracy()
+  }
+}
+
 // A umpire's season aggregate for a given level. MLB is the top-level `season`
 // (back-compat with the pre-AAA file shape); AAA is `seasonAAA`, null when he
 // has no AAA plate games.
@@ -229,9 +257,18 @@ function seasonForLevel(u, level) {
 //     3×3 zone grid, normalized to shares. It's the "typical umpire" baseline
 //     the zone map compares each umpire against (a cell where he misses a
 //     bigger share than the league is where he's worse than average).
-async function accuracyIndex(level = 'MLB') {
-  if (indexCached.has(level)) return indexCached.get(level)
-  const { umpires } = await loadAccuracy()
+//   • leanById — the pitcher/hitter lean, which reads each umpire's GAME ROWS
+//     and so needs the full archive. Callers that show it pass `withLean`;
+//     everyone else takes the aggregates-only file and gets an empty map.
+//
+// Every other figure above reads season aggregates ONLY, and the summary file
+// carries those aggregates byte-for-byte as the archive does, so both sources
+// produce the same ranks, tiers, mean/sd and baselines. test/umpire-accuracy-
+// summary.test.js pins that.
+async function accuracyIndex(level = 'MLB', { withLean = false } = {}) {
+  const memo = indexCached.get(level)
+  if (memo && (memo.hasLean || !withLean)) return memo
+  const { umpires } = withLean ? await loadAccuracy() : await loadAccuracySummary()
   // A per-level view where each umpire's `season` is that level's aggregate, so
   // the ranking/baseline logic below reads `u.season` unchanged. Umpires with no
   // aggregate at this level (e.g. never worked AAA) drop out.
@@ -275,8 +312,11 @@ async function accuracyIndex(level = 'MLB') {
   // rides accuracyIndex's one pass rather than taking a pass of its own, and it
   // uses the SAME pool `rankById` uses — two definitions of "qualifies" is how
   // a tier pill and a scale start disagreeing about the same umpire.
+  // Skipped outright without the archive, never computed from empty rows:
+  // umpireLeanFor falls back to a zone lean when no row carries favor, so an
+  // absent game list would read as a real (and wrong) answer instead of none.
   const leanRaw = []
-  for (const u of qualified) {
+  for (const u of withLean ? qualified : []) {
     const l = umpireLeanFor(u.games, u.season, level)
     if (l) leanRaw.push({ id: u.id, ...l })
   }
@@ -312,7 +352,18 @@ async function accuracyIndex(level = 'MLB') {
     ? { perGame: chGames ? chSum / chGames : null, overturnRate: ovSum / chSum }
     : null
 
-  const index = { rankById, ranked, mean, sd, leagueShare, leanById, leanMean, leanSd, leagueChallenges }
+  const index = {
+    rankById,
+    ranked,
+    mean,
+    sd,
+    leagueShare,
+    leanById,
+    leanMean,
+    leanSd,
+    leagueChallenges,
+    hasLean: withLean,
+  }
   indexCached.set(level, index)
   return index
 }
@@ -388,8 +439,8 @@ export async function loadUmpire(id) {
   const [{ umpires, season, generatedAt }, acc, idxMlb, idxAaa] = await Promise.all([
     load(),
     loadAccuracy(),
-    accuracyIndex('MLB'),
-    accuracyIndex('AAA'),
+    accuracyIndex('MLB', { withLean: true }),
+    accuracyIndex('AAA', { withLean: true }),
   ])
   const u = umpires[id]
   if (!u) return null
@@ -451,7 +502,7 @@ function challengesFor(season) {
 // Keeps TeamInfo from needing the whole game list.
 export async function umpireAccuracySummary(id) {
   if (id == null) return null
-  const [acc, idx] = await Promise.all([loadAccuracy(), accuracyIndex()])
+  const [acc, idx] = await Promise.all([loadAccuracySummary(), accuracyIndex()])
   const rec = accuracyFor(acc.umpires, id)
   if (!rec) return null
   const rank = idx.rankById.get(String(id)) ?? null
@@ -472,6 +523,6 @@ export async function umpireAccuracySummary(id) {
 // statistical tier his accuracy falls into. Reuses accuracyIndex()'s single
 // pass, so the table can never disagree with a single umpire's own rank/tier.
 export async function loadUmpireRankings() {
-  const [acc, idx] = await Promise.all([loadAccuracy(), accuracyIndex()])
+  const [acc, idx] = await Promise.all([loadAccuracySummary(), accuracyIndex()])
   return { season: acc.season, mean: idx.mean, sd: idx.sd, ranked: idx.ranked }
 }
