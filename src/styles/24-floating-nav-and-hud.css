@@ -149,15 +149,24 @@
   left: auto;
 }
 
+/* Both BOTTOM corners clear the floating action bar rather than the viewport
+   edge. The dock is only ever rendered by the innings viewer (ScorebugMount),
+   which always has `.pagenav--innings` fixed across the bottom, so parking at
+   `--space-3` from the viewport floor put the dock straight on top of the
+   bar's own buttons — it covered half of "Bottom 1st ›" at iPad and desktop
+   widths and ate the tap. Same collision ADR-0043 removed inside focus mode by
+   anchoring the band; out here the dock still floats, so it is told where the
+   floor actually is. `--pagenav-innings-h` (tokens/layout.css) is that floor,
+   and its header records how the number was measured. */
 .gamehud-dock--bottom-right {
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  bottom: calc(var(--pagenav-innings-h) + var(--space-3) + env(safe-area-inset-bottom));
   right: calc(var(--space-3) + env(safe-area-inset-right));
   top: auto;
   left: auto;
 }
 
 .gamehud-dock--bottom-left {
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  bottom: calc(var(--pagenav-innings-h) + var(--space-3) + env(safe-area-inset-bottom));
   left: calc(var(--space-3) + env(safe-area-inset-left));
   top: auto;
   right: auto;
@@ -316,7 +325,17 @@
     scale(calc(var(--scale, 1) * var(--logo-boost, 1)));
 }
 
-/* A further boost on top of each team's own calibrated --scale (TeamLogo's
+/* BOTH PLACEMENTS, deliberately — the anchored console band AND the floating
+   dock on the ordinary page. These are bare `.gamehud__strip`/`.gamehud__tile`
+   selectors, not `.gamehud--console` ones, and the pair of media queries covers
+   the whole width range, so this is simply how the scorebug's marks are sized
+   now. The reasoning below is written from focus mode because that is where the
+   strip is on screen longest, but the dock wears the same marks for the same
+   reason and looked undersized next to it once the two were compared side by
+   side. Scope it to `.gamehud--console` only if the dock is ever meant to
+   diverge; today they are one object in two places (ADR-0043).
+
+   A further boost on top of each team's own calibrated --scale (TeamLogo's
    per-mark crop/offset tuning) — bigger marks without touching the strip's
    own height (min-height above stays put; a scaled logo is pure paint, not
    layout, so it can grow past its tile without pushing anything else down).
@@ -454,125 +473,6 @@
   .gamehud-dock {
     opacity: 1;
     pointer-events: auto;
-  }
-}
-
-/* ------------------------------------------------ the anchored console band
-   The SAME scorebug, placed rather than floated — focus mode's masthead
-   (ScorebugMount.jsx, ADR-0043). A shape change, not a second scorebug.
-
-   Stacked batter/pitcher lines above the strip, same reading order as the
-   floating dock (Scorebug.jsx's own source order — no `order` override here
-   any more): teams+runs+inning+bases sits UNDER who's up and who's on the
-   mound, not beside it. On a desktop-width stage that keeps the band close to
-   its old ~246px dock width instead of stretching it into a wide horizontal
-   strip — .consolebar (styles/focus/stage.css) is what gives the freed row
-   width to the due-up-next card beside it. On a phone the band still spans
-   the full stage (there is no sibling card to share the row with there), so
-   its own @media block below scales the card's content up to fill it, rather
-   than leaving 246px-card-sized text stranded in a full-width bar.
-
-   Navy ground under a kraft rule, deliberately the masthead signature
-   .half__title already carries, so the band and the half's own title bar read
-   as siblings rather than as a floating chip from somewhere else.
-
-   Lives here with the rest of the .gamehud rules rather than in
-   styles/focus/*: nothing after this file styles .gamehud, so it needs no
-   help from cascade order. Focus mode's GRID PLACEMENT for .consolebar does
-   need that help and stays in 61 with the grid it belongs to. */
-.gamehud--console {
-  width: 100%;
-  border-bottom: 3px solid var(--seal);
-}
-
-/* Between innings nobody is up (Scorebug's `blank`). The band holds its height
-   regardless — a masthead that resized between at-bats would shove the hero
-   card up and down all game. */
-.gamehud--console.gamehud--blank {
-  padding-top: 0;
-}
-
-@media (min-width: 740px) {
-  /* Narrow again, close to the floating dock's own 246px — the rest of
-     .gamehud--console's rules below this point are deliberately the SAME
-     ones the dock uses (marks/runs/lines/row sizing), inherited rather than
-     overridden, since a card this width fits them exactly as it always did. */
-  .gamehud--console {
-    width: 264px;
-    flex: 0 0 auto;
-  }
-
-  /* The two lines above the score strip step up a role each. The dock's own
-     13/12px was sized for a card floating in a page CORNER, read in passing;
-     here the same card is the console's masthead and its batter line is one of
-     the two names the reader is actually working from (the other being the
-     hero card's). Only the type changes — the 264px card and every icon-scale
-     rule below it stay exactly as the dock sets them. */
-  .gamehud--console .gamehud__who,
-  .gamehud--console .gamehud__val {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__row--pitcher .gamehud__who {
-    font-size: var(--fs-small);
-  }
-}
-
-/* Below the wide breakpoint the band has no sibling card to share its row
-   with (DueUpConsole hides — see focus/stage.css), so it stays full width and
-   scales its own content up to use it, rather than stranding the dock's
-   compact type in a bar many times wider than the card it was sized for.
-   `.gamehud--console`'s own width stays the default 100% here (no override
-   needed). Icon-scale props (team marks, base diamond) are threaded in from
-   ScorebugMount's own width check instead of being fought over in CSS — see
-   its `markSize`/`baseSize`. */
-@media (max-width: 739.98px) {
-  .gamehud--console {
-    padding: 12px 14px 0;
-    gap: 8px;
-  }
-
-  .gamehud--console .gamehud__who {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__row--pitcher .gamehud__who {
-    font-size: var(--fs-small);
-  }
-
-  .gamehud--console .gamehud__val {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__strip {
-    min-height: 92px;
-    margin: 6px -14px 0;
-  }
-
-  .gamehud--console .gamehud__runs {
-    font-size: var(--fs-title-sm);
-  }
-
-  .gamehud--console .gamehud__innnum {
-    font-size: var(--fs-title);
-  }
-
-  .gamehud--console .gamehud__tri {
-    border-left-width: 7px;
-    border-right-width: 7px;
-  }
-
-  .gamehud--console .gamehud__tri--up {
-    border-bottom-width: 8px;
-  }
-
-  .gamehud--console .gamehud__tri--down {
-    border-top-width: 8px;
-  }
-
-  .gamehud--console .gamehud__outdot {
-    width: 10px;
-    height: 10px;
   }
 }
 

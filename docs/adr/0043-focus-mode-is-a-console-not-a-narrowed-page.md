@@ -27,6 +27,10 @@ long inning and sat two cards below the thing it navigated. The floating dock,
 which exists to survive a long scrolling page, kept landing on top of a page
 that no longer scrolled: it covered the reveal button entirely at iPad width and
 covered the at-bat card that focus mode had just scrolled into place on a phone.
+(That auto-scroll went with the rebuild — the stage mostly fits one viewport, so
+revealing an at-bat replaces the card where it already is rather than travelling
+to it. Nothing in focus mode calls `scrollIntoView` today; if a comment says
+otherwise it predates this.)
 
 Taken one at a time these read as bugs. Taken together they are one decision
 being wrong.

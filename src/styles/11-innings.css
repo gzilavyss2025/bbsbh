@@ -311,9 +311,10 @@
   gap: 12px;
 }
 
-/* Focus mode's rules (the .innings--focus fold, .abstep navigator, its
-   padding-bottom) live in styles/focus/*.css, which import LAST so they win
-   on cascade order instead of specificity — see that file's header. */
+/* Focus mode's rules (the .innings--focus fold, the .trailstrip at-bat
+   navigator, the reference panel, the one-row action bar) live in
+   styles/focus/*.css, which import LAST so they win on cascade order instead of
+   specificity — see focus/stage.css's header. */
 
 /* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
    .innings__row2 pairing as .innings__grid's row-2 child. The active layer
@@ -369,7 +370,6 @@
    own first-request-wins guard (pageTurnState.js) is the real backstop. */
 .inningnav button[aria-disabled='true'],
 .rolling__pick[aria-disabled='true'],
-.innings__foldbtn[aria-disabled='true'],
 .pagenav--innings .btn[aria-disabled='true'] {
   opacity: 0.6;
   pointer-events: none;

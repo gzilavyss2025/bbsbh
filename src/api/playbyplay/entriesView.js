@@ -4,6 +4,22 @@
 // same entries array (or a cap-clamped slice of it) the caller already has.
 // See ../playbyplay.js's header for the module's overall spoiler footing.
 // Split (ADR-0038, check-file-size.mjs) out of src/api/playbyplay.js.
+//
+// THE TRAP EVERY READER HERE MUST CLEAR. `entries` is NOT a revealed prefix.
+// computeHalfInningFeed pushes a card for every play in the half regardless of
+// `stepCap` (see its own header) — the cap only gates what OTHER, already-
+// pushed cards get retroactively annotated with. So a field READ OFF THE CARD
+// ITSELF (`eventType`, `code`, `batter`) describes plays the reader has not
+// stepped into yet, while a field WRITTEN BY the advancement bookkeeping
+// (`scored`, `reached`, `outNumber`) is already cap-clamped. Anything folding
+// over `entries` must slice to the cap first, or it silently reports the whole
+// half. That is not hypothetical: an in-progress HIT count built on the
+// unclamped array put the half's final H on the running line's totals column
+// from the first "Next at-bat" tap — six hits announced on the leadoff batter
+// of a big inning. `stepTotals` below is the one place that arithmetic lives
+// now, precisely so the slice cannot be forgotten at a call site again.
+
+import { HIT_EVENT_TYPES } from './eventTypes.js'
 
 // At-bat-mode stepping (ADR-0016): the entries index marking the end of the
 // NEXT step from `fromCount` — everything up to and including the next
@@ -60,6 +76,44 @@ export function stepBounds(entries) {
     cap = next
   }
   return bounds
+}
+
+// The half's runs and hits SO FAR — over the first `cap` entries only, which
+// is the entire point of this function existing (read the module header). The
+// caller reports these up so RollingLine's own cell and its R/H totals column
+// build up one "Next at-bat" tap at a time instead of sitting blank until the
+// half's 3rd out.
+//
+// The two are counted from different kinds of field on purpose, and only one
+// of them would survive being read off the unclamped array:
+//
+//  • RUNS fold `scored`, which the advancement bookkeeping writes behind
+//    computeHalfInningFeed's own `visible` gate — so it is already cap-clamped
+//    at the source. Each scoring runner is marked on HIS OWN at-bat card (the
+//    trip he reached base on, not the play that drove him in), so summing every
+//    entry's flag correctly totals a multi-run play: a grand slam scores the
+//    batter's own card plus the three baserunners' earlier ones. The extra-
+//    innings placed runner counts too, on his own 'placed' card — before he had
+//    a card at all his run was dropped, and every extra half he scored in built
+//    a linescore cell one short (verified against gamePk 777747's bottom 10: a
+//    walk-off grand slam totalled 3).
+//  • HITS fold `eventType`, which is stamped at PUSH time and describes plays
+//    well past the cap. The slice is the only thing standing between this
+//    count and the half's final H. Same HIT_EVENT_TYPES set boxscore.js's
+//    computeBatterLine uses for its own revealedThrough-gated total, so a play
+//    can never be a hit on one surface and not the other.
+//
+// `cap` null means "no stepping, the whole half is committed" — the caller
+// only reports while stepping, but the null case keeps this honest standalone.
+export function stepTotals(entries, cap) {
+  const shown = cap == null ? entries : entries.slice(0, cap)
+  let runs = 0
+  let hits = 0
+  for (const e of shown) {
+    if ((e.kind === 'atbat' || e.kind === 'placed') && e.scored) runs += 1
+    if (e.kind === 'atbat' && HIT_EVENT_TYPES.has(e.eventType)) hits += 1
+  }
+  return { runs, hits }
 }
 
 // The `atBatIndex` (matches `play.about.atBatIndex`, same field the
@@ -171,6 +225,17 @@ export function buildTrailItems(entries, bounds, revealedSteps, eventCodeFor) {
     // code already is, rather than the empty-code '···' placeholder a real
     // strikeout should never show.
     if (atbat) return { name: atbat.batter.last, code: atbat.code || (atbat.calledLooking ? 'K' : ''), kind: atbat.codeKind }
+    // The extra-innings automatic runner, when he is ALONE in his step. He
+    // normally isn't — nextStepBoundary bundles a placement forward with the
+    // leadoff plate appearance, so the branch above claims the chip and names
+    // the batter. The exception is the live edge of an extra half, where the
+    // placement is posted before the leadoff PA has resolved and is genuinely
+    // the only entry there is; without this it fell through to the notice
+    // branch, which reads no `eventType` off a placed card and printed a chip
+    // labelled "···  •". He has a name and a mark of his own (`AR`), so use
+    // them.
+    const placed = windowEntries.find((e) => e.kind === 'placed')
+    if (placed) return { name: placed.runner?.last ?? '', code: placed.code || 'AR', kind: 'placed' }
     return { name: noticeLabel(windowEntries[0], eventCodeFor), code: '', kind: 'note' }
   })
 }

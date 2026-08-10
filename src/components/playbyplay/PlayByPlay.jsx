@@ -14,10 +14,10 @@ import {
   pinchHittingBatter,
   nextStepBoundary,
   stepBounds,
+  stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
   buildTrailItems,
-  HIT_EVENT_TYPES,
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
@@ -127,44 +127,27 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
   }, [focusOne, revealedSteps]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // How many runs have scored in the STEPPED-THROUGH portion of this half so
-  // far — reported upward (InningViewer, via HalfInning) so the linescore
-  // grid's own cell for this half can build up as you reveal it one at-bat at
-  // a time, instead of staying blank until the whole half commits. Reveal-
-  // safe by construction: `entries` here is already clamped to `effectiveCap`
-  // (computeHalfInningFeed's own stepCap), so this can never count a run from
-  // an at-bat the user hasn't actually stepped into yet. Each scoring runner
-  // is marked `scored: true` on HIS OWN at-bat card (the trip he reached base
-  // on, not necessarily the play that drove him in), so summing every
-  // entry's own flag — not just the batter of the play that just happened —
-  // correctly totals a multi-run play (a grand slam scores the batter's own
-  // card plus the three baserunners' own earlier cards).
+  // The runs and hits scored in the STEPPED-THROUGH portion of this half —
+  // reported upward (InningViewer, via HalfInning) so the linescore grid's own
+  // cell and its R/H totals column build up as you reveal the half one at-bat
+  // at a time, instead of staying blank until the whole half commits.
   //
-  // The extra-innings placed runner counts here too, on his own 'placed' card.
-  // He has no plate appearance, but a run is a run — and before he had a card
-  // at all his was silently dropped from this sum, so every extra half he
-  // scored in built a linescore cell one short (verified against gamePk
-  // 777747's bottom 10: a walk-off grand slam totalled 3).
+  // `effectiveCap` is passed EXPLICITLY, and stepTotals slices by it. `entries`
+  // is not a revealed prefix — computeHalfInningFeed pushes a card for every
+  // play in the half regardless of stepCap, and only gates the RETROACTIVE
+  // annotations written onto already-pushed cards. Folding a card's own
+  // `eventType` over the unclamped array is how the half's final hit total
+  // reached the running line from the first tap; see entriesView.js's module
+  // header, which owns this arithmetic now so no call site has to remember.
   //
-  // The dependency is the COUNT, not `entries`. `entries` is a fresh array every
-  // render (computeHalfInningFeed runs at render top-level — reveal-only,
+  // The dependency is the two COUNTS, not `entries`. `entries` is a fresh array
+  // every render (computeHalfInningFeed runs at render top-level — reveal-only,
   // ADR-0001, so it cannot be hoisted into a memo above the seal), so an
   // `[entries]` dependency re-ran this effect on every render, the report
   // re-rendered InningViewer, which re-rendered this component, which re-ran the
   // effect… one "Next at-bat" tap cost 264 renders of the whole innings tree
   // (measured). A number compares by value.
-  const runsSoFar = entries.filter(
-    (e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored,
-  ).length
-  // Same reveal-safe footing as runsSoFar above (entries is already clamped to
-  // effectiveCap), and the same eventType classification boxscore.js's
-  // computeBatterLine uses for its own (revealedThrough-gated) hit total —
-  // shared as HIT_EVENT_TYPES so the two can't drift. Reported alongside runs
-  // so RollingLine's totals column can build up hits as you reveal them too,
-  // not just runs.
-  const hitsSoFar = entries.filter(
-    (e) => e.kind === 'atbat' && HIT_EVENT_TYPES.has(e.eventType),
-  ).length
+  const { runs: runsSoFar, hits: hitsSoFar } = stepTotals(entries, effectiveCap)
   useEffect(() => {
     if (!stepping) return
     onRunsSoFar?.(runsSoFar, hitsSoFar)

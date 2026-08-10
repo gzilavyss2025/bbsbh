@@ -220,19 +220,21 @@ function ChallengeMark({ challenge }) {
   )
 }
 
-// The legend for the five pitch-dot categories, shared by the modal and the
-// desktop pane so the colors are always labeled where the zone appears.
-export function StrikeZoneLegend() {
-  return (
-    <div className="strikezone__legend" aria-hidden="true">
-      <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--ball" />Ball</span>
-      <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--called" />Called</span>
-      <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--whiff" />Whiff</span>
-      <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--foul" />Foul</span>
-      <span className="strikezone__li"><i className="strikezone__sw strikezone__sw--inplay" />In play</span>
-    </div>
-  )
-}
+// THE PITCH DOTS CARRY NO LEGEND, ANYWHERE, AND THAT IS THE DECISION — not an
+// omission waiting to be filled in. There used to be two: a `StrikeZoneLegend`
+// row under the modal's zone, and a "Pitch colors" button + `PitchColorsModal`
+// at the foot of the play-by-play card. Both are gone.
+//
+// The five categories decode themselves in place. Every dot sits beside the
+// pitch list naming its own outcome ("94.2 MPH, CALLED STRIKE", "SLIDER, FOUL"),
+// so the colour is learned from the row next to it on the first at-bat a reader
+// ever opens and never needs restating — which is how every other pitch plot in
+// this space works. A legend under a five-dot diagram was chrome explaining
+// something the diagram had already explained.
+//
+// Do not re-add one. If a category ever stops being self-evident, the fix is to
+// name it in the pitch list, next to the dot, not to park a key elsewhere on the
+// page for the reader to look up.
 
 // The phone presentation: the zone is too big to sit inline in a compact card,
 // so a glyph button opens it in a modal. Same dismiss contract as LogoModal
@@ -281,7 +283,6 @@ export function StrikeZoneModal({ pitchDetails, batSide, batter, pitcher, onClos
             <StrikeZone pitchDetails={pitchDetails} batSide={batSide} className="strikezone--modal" />
             <PitchList pitchDetails={pitchDetails} />
           </div>
-          <StrikeZoneLegend />
         </div>
       </div>
     </ModalPortal>

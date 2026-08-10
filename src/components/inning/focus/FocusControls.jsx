@@ -129,28 +129,26 @@ export function useFocusMode(curIdx, currentSealed) {
 // note on `items`). Takes the aria-disabled mid-turn guard every other
 // control on this page uses — paging resizes .turnscene, which
 // InningPageTurn answers by snapping a turn in flight.
+// Renders AtBatTrail directly, with no wrapper element of its own. There used
+// to be a bare <div onKeyDown> here holding the arrow-key handling; it had no
+// role, no tabIndex and no class, it could only ever receive those keys by
+// bubbling from a focused cell inside it, and — because .innings__stage is
+// `display: contents` on a phone — it landed in .innings__grid as an
+// unstyleable flex item in its own right. The handler moved onto the cell
+// container in AtBatTrail, which is the element the keys actually belong to.
 export function FocusControls({ focus, turning }) {
   const { focused, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
   if (!focused || total <= 1) return null
-  const onKeyDown = (e) => {
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      stepBack()
-    } else if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      stepNext()
-    }
-  }
   return (
-    <div onKeyDown={onKeyDown}>
-      <AtBatTrail
-        items={items}
-        cursor={cursor}
-        following={step == null}
-        onSelect={goToStep}
-        onFollowLatest={followLatest}
-        turning={turning}
-      />
-    </div>
+    <AtBatTrail
+      items={items}
+      cursor={cursor}
+      following={step == null}
+      onSelect={goToStep}
+      onStepBack={stepBack}
+      onStepNext={stepNext}
+      onFollowLatest={followLatest}
+      turning={turning}
+    />
   )
 }

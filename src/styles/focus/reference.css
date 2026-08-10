@@ -65,12 +65,30 @@
   white-space: nowrap;
 }
 
+/* A chip's code is inked exactly as the SAME code is inked on the at-bat card
+   it navigates to (13-play-by-play.css's .pbp__code family) — the trail is a
+   miniature of the cards, so a 6-3 cannot be one colour in the strip and
+   another on the card. `codeKind` is the shared vocabulary
+   (playbyplay/scorebookCode.js) and it has five values, not three: the first
+   pass styled `hit`/`out`/`note` and left `reach`, `error` and `interrupted`
+   to fall through to body text — so a reach-on-error, which the card inks
+   clay, was indistinguishable from a walk in the trail. Out and reach both
+   sit at plain ink here for the same reason they do on the card: the code
+   text itself (K, 6-3, BB) is the distinction, and colour is reserved for the
+   two outcomes worth spotting at a glance. */
 .trailcell--hit .trailcell__code {
   color: var(--field-deep);
 }
 
-.trailcell--out .trailcell__code {
+.trailcell--error .trailcell__code {
   color: var(--clay-deep);
+}
+
+/* A scorer's note rather than a batting result — the carry-over mark on an
+   at-bat the half ended in the middle of. Graphite, as .pbp__code--interrupted
+   is. */
+.trailcell--interrupted .trailcell__code {
+  color: var(--text-caption);
 }
 
 .trailcell--note .trailcell__code {

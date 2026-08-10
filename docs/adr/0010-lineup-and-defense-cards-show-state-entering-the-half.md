@@ -45,3 +45,29 @@ reveal-only modules; they are caller-gated pre-pitch selectors alongside
 keeps calling `defenseEntering` with an `Infinity` cutoff to get the whole-game
 alignment, rendered inside the box score's own seal — that use is unchanged.
 `linescore.js` and `derive.js` remain strictly reveal-only.
+
+## Addendum (2026-08-10): the titles stopped naming the half
+
+Both cards used to be titled "Lineups entering the Top 7th" / "Defensive
+alignment entering the Top 7th". They now read **"Lineups"** and **"Defensive
+alignment"**.
+
+The long form existed for a reason worth stating so it isn't reintroduced by
+someone rediscovering it: a card that sits *below* the play-by-play once the
+half is revealed can read as *current* rather than as the state the half opened
+in — and it may sit under an at-bat card that already showed a mid-inning
+defensive change contradicting it.
+
+That reason no longer earns the words. The half is named three times before the
+reader reaches either card — the half-inning navigator ("Top 7th"), the half's
+own title bar, and the URL — and every row on both cards is a pre-pitch fact. A
+fourth statement of the same thing was restating the obvious, and it did so in
+the one place with least room for it: focus mode's reference rail is a fixed
+328px track (ADR-0043), where the long titles wrapped to two lines.
+
+**Nothing about the data changed.** These are still `lineupEntering` and
+`defenseEntering`, still the state entering the half, still caller-gated to the
+reader's own next half by `safeToShowEntering`. This addendum records a copy
+decision, not a semantic one — and the two titles must stay matched to each
+other, long or short, for the reason `12-sealbox.css` gives at
+`.lineupcard__title`.

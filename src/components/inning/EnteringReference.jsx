@@ -64,8 +64,23 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // api/enteringHalf.js's safeToShowEntering), returning null past it, so this
 // is safe to call outside the seal regardless of caller diligence.
 //
-// "Defensive alignment" rather than the bare word "Defense", which doubles as
-// this app's own runs-allowed sense elsewhere (StatBox's R/H/E row) — see
+// TITLES NAME THE TOPIC, NOT THE MOMENT — "Defensive alignment", not
+// "Defensive alignment entering the Top 7th", and the same for LineupSection
+// below. Both used to spell the half out, on the argument that a card sitting
+// UNDER the play-by-play once revealed (ADR-0010) could otherwise read as
+// current rather than as the state the half opened in. That argument does not
+// survive contact with the page it is on: the half is already named in the
+// navigator above ("Top 7th"), on the half's own title bar, and in the URL —
+// three times before the reader reaches this card. A fourth reading, on a card
+// whose every row is a pre-pitch fact, was restating the obvious in the one
+// place the wide layout has least room for it (the reference rail's 328px
+// track, where it wrapped). The SEMANTICS are untouched: these are still
+// defenseEntering/lineupEntering, still the state entering the half, still
+// caller-gated to the reader's own next half. Only the label got shorter.
+//
+// "Defensive alignment" rather than the bare word "Defense" is a separate and
+// still-live distinction: "Defense" doubles as this app's own runs-allowed
+// sense elsewhere (StatBox's R/H/E row) — see
 // .scratch/pbp-scoring-review/issues/05-substitution-surface-asymmetries.md.
 // Memoized (both sections): the caller-gated entering selectors below walk the
 // whole game's plays, and these two cards hang off InningViewer, which
@@ -151,7 +166,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        Lineups entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
+        Lineups
         <span className="lineupcard__chevron" aria-hidden="true">
           {open ? '▾' : '▸'}
         </span>

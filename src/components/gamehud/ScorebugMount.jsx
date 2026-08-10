@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { revealRunsThrough } from '../../api/linescore.js'
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { Scorebug } from './Scorebug.jsx'
@@ -19,17 +18,30 @@ import { Scorebug } from './Scorebug.jsx'
 //    exactly as before — corner-stepping included. That page really does scroll
 //    past its linescore, so the dock still earns its keep there.
 //
-// The corner the dock parks in is state, so this component is mounted
-// unconditionally and returns null itself rather than being conditionally
-// rendered by the caller: `live` goes null on every half change (see
-// InningViewer's forIdx-tagged `liveState`), and a caller-side guard would
-// unmount this on each navigation and reset the reader's chosen corner with it.
+// THE CHOSEN CORNER IS THE CALLER'S STATE, not this component's, and it has to
+// stay that way. This component cannot be mounted once and reused: focus mode
+// renders it as a grid child inside `.consolebar`, the ordinary page renders it
+// as a fixed dock at the end of `.innings`, and those are two different
+// positions in the tree — so InningViewer swaps which one exists as the reader
+// moves between a sealed half and a revealed one. Holding `cornerIdx` HERE
+// meant every such swap unmounted the dock and threw the reader's chosen corner
+// away: move the dock off something at the bottom-left, advance to the next
+// (sealed) half, reveal it, and the dock was back at its default. So the VALUE
+// and its setter arrive as props from InningViewer, which outlives both
+// placements, while the stepping arithmetic — and the media query the default
+// depends on — stay here where they belong. A component's own `useState` is
+// the wrong home for a preference that has to survive the component.
 //
 // Spoiler footing is unchanged from the call site this replaces.
 // `revealRunsThrough` is reveal-only (linescore.js, ADR-0001) and is still
 // reached only under the same `started && live` gate it always was — the early
 // return below IS that gate, just moved one component down.
 const CORNERS = ['top-right', 'bottom-right', 'bottom-left', 'top-left']
+
+// The layout-driven default, held until the reader's first tap so the dock
+// doesn't jump on mount: top-right on mobile, bottom-right on desktop.
+// CORNERS[1] being the desktop default is why a first tap there lands on 2.
+const defaultCornerIdx = (isWide) => (isWide ? 1 : 0)
 
 export function ScorebugMount({
   started,
@@ -42,13 +54,10 @@ export function ScorebugMount({
   treatment,
   focused,
   pastLine,
+  cornerIdx,
+  setCornerIdx,
 }) {
   const isWide = useMediaQuery(WIDE_QUERY)
-  // Null until the reader's first tap so the dock keeps its layout-driven
-  // default (top-right on mobile, bottom-right on desktop) rather than jumping
-  // on mount; CORNERS[1] is that desktop default, so a first tap there advances
-  // to index 2 as expected.
-  const [cornerIdx, setCornerIdx] = useState(null)
   if (!started || !live) return null
 
   // Runs AS OF the reader's own reveal progress: committed halves via
@@ -84,8 +93,9 @@ export function ScorebugMount({
   // sits where it sits, which is the point.
   if (focused) return bug
 
-  const corner = CORNERS[cornerIdx ?? (isWide ? 1 : 0)]
-  const stepCorner = () => setCornerIdx((prev) => ((prev ?? (isWide ? 1 : 0)) + 1) % CORNERS.length)
+  const corner = CORNERS[cornerIdx ?? defaultCornerIdx(isWide)]
+  const stepCorner = () =>
+    setCornerIdx?.((prev) => ((prev ?? defaultCornerIdx(isWide)) + 1) % CORNERS.length)
   return (
     <div
       className={`gamehud-dock gamehud-dock--${corner} ${pastLine ? 'gamehud-dock--show' : ''}`}

@@ -6,8 +6,7 @@
    read as one system. Score-adjacent (part of the at-bat account), so it only
    ever renders inside revealed play-by-play. */
 .strikezone,
-.pitchlist,
-.strikezone__legend {
+.pitchlist {
   --pd-called: var(--accent-negative);
   --pd-whiff: var(--ink-1);
   --pd-foul: var(--graphite);
@@ -177,42 +176,10 @@
   background: var(--accent-negative);
 }
 
-/* Category legend, shared by the modal and the desktop pane. */
-.strikezone__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-top: 8px;
-}
-.strikezone__li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-}
-.strikezone__sw {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex: 0 0 auto;
-}
-.strikezone__sw--called { background: var(--accent-negative); }
-.strikezone__sw--whiff { background: var(--ink-1); }
-.strikezone__sw--foul { background: var(--graphite); }
-.strikezone__sw--ball {
-  background: var(--surface-inset);
-  border: 1.5px solid var(--graphite-soft);
-}
-.strikezone__sw--inplay {
-  background: transparent;
-  border: 2.5px solid var(--accent-positive);
-}
-
+/* No category legend, deliberately — see StrikeZone.jsx's own note where
+   StrikeZoneLegend used to be. The pitch list names every dot's outcome
+   beside it, so the swatch rules that used to live here explained nothing the
+   row next to the dot did not. */
 
 /* The phone icon button, tucked into the card's bottom-left whitespace. Hidden
    from the wide breakpoint up, where the zone rides inline (see the media

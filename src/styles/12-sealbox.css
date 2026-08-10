@@ -1459,12 +1459,13 @@
   overflow: hidden;
 }
 
-/* Names the moment ("Lineups entering the Top 7th") — same navy masthead
-   treatment as .halfdefense__title (deliberately identical rules, not just a
-   similar look: the two cards read as one matched pair, phone and wide
-   layout alike, rather than Defense having a title and Lineups improvising
-   its own). Replaces the old .innings__reference-title, which only existed
-   on the wide layout and left the phone's inline copy with no title at all.
+/* Names the topic ("Lineups") — same navy masthead treatment as
+   .halfdefense__title (deliberately identical rules, not just a similar look:
+   the two read as one matched pair at both layouts, rather than Defense having a
+   title and Lineups improvising its own). Both titles used to name the half too;
+   EnteringReference.jsx has why they stopped and why the pair stays matched
+   either way. Replaces the old .innings__reference-title, which only existed on
+   the wide layout and left the phone's inline copy with no title at all.
    A <button> (LineupSection) toggling .lineupcard__teams below — reset off
    the browser's own button chrome so it still reads as a plain masthead. */
 .lineupcard__title {
@@ -1504,11 +1505,10 @@
   gap: 12px;
 }
 
-/* Same navy-bar recipe as .halfdefense__title (12-sealbox.css) — a themed
-   club recolors it via .lineupteam.is-themed (09-team-info.css); untheme
-   falls back to this same navy/seal/white default every other masthead bar
-   already wears, not a lighter one-off look. */
-/* EDGE TO EDGE: the margin cancels .lineupcard__teams' 10px side padding that
+/* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
+   .lineupteam.is-themed (09-team-info.css); untuned falls back to the same
+   navy/seal/white default every other masthead bar wears, not a one-off look.
+   EDGE TO EDGE: the margin cancels .lineupcard__teams' 10px side padding that
    `width: 100%` cannot reach past (the bar read as a label ON the card, not its
    masthead); padding-inline holds the text at the same x, so only the fill moves. */
 .lineupteam__name {

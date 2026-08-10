@@ -85,6 +85,7 @@ export {
 export {
   nextStepBoundary,
   stepBounds,
+  stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
   buildTrailItems,

@@ -21,19 +21,46 @@
 // `items` is a plain array built by PlayByPlay from entries already ≤
 // effectiveCap (see its own header comment) — this component only lays it out,
 // same discipline as FocusControls/RollingLine/Scorebug.
-export function AtBatTrail({ items, cursor, following, onSelect, onFollowLatest, turning }) {
+// NOT a tablist, though it was written as one first. `role="tab"` is a promise
+// about structure that this strip does not keep: there is no `role="tabpanel"`
+// for a cell to own via `aria-controls` (the thing a cell pages is the at-bat
+// card, which is `.pbp`, a plain region shared with everything else on the
+// stage), and a real tablist owes arrow-key navigation with a roving tabindex,
+// which this never had — every cell sat in the tab order and the arrow keys
+// were handled by an unrelated wrapper div. Announcing a widget contract and
+// then honouring none of it is worse for a screen-reader user than the honest
+// shape: a list of buttons, each naming the at-bat it returns to, with
+// `aria-current` marking the one on screen. `aria-current` is also what the
+// live cell's own styling keys on, so the markup and the CSS agree.
+//
+// The arrow keys live on the cell container now (`onKeyDown` here rather than
+// on a wrapper in FocusControls), which is the element the keys actually mean
+// something on — they fire when any cell has focus, and nowhere else.
+export function AtBatTrail({ items, cursor, following, onSelect, onStepBack, onStepNext, onFollowLatest, turning }) {
   if (items.length <= 1) return null
+  const onKeyDown = (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      onStepBack()
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      onStepNext()
+    }
+  }
   return (
     <div className="trailstrip">
-      <div className="trailstrip__cells" role="tablist" aria-label="At-bats this half">
+      <div
+        className="trailstrip__cells"
+        role="group"
+        aria-label="At-bats this half"
+        onKeyDown={onKeyDown}
+      >
         {items.map((item, i) => (
           <button
             key={i}
             type="button"
             className={`trailcell trailcell--${item.kind || 'note'}`}
-            role="tab"
-            aria-selected={i === cursor}
-            aria-current={i === cursor}
+            aria-current={i === cursor || undefined}
             aria-disabled={turning || undefined}
             aria-label={`${item.name}${item.code ? ` — ${item.code}` : ''}`}
             title={`${item.name}${item.code ? ` — ${item.code}` : ''}`}

@@ -16,14 +16,14 @@ sketch modal) →
 `TeamInfo` (×2, away then home) → `InningViewer`. `LogoSheet` is a standalone
 printable grayscale logo sheet for pencil-sketching, reached from the slate header.
 
-`TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey
-that club is wearing that game (ADR-0030) — three CSS custom properties scoped to
-the `.teaminfo` subtree, resolved by `lib/headerTheme.js`. One masthead is themed
-to the OTHER club: the Starting pitcher card shows the opposing starter, so it
-resolves the triad a second time against `(oppMeta.id, oppTreatment)` and scopes
-it to just that `<section>`. The innings viewer and box score are deliberately
-excluded: navy-and-kraft there *is* the seal metaphor. The theme's only inputs
-are `(teamId, treatment)` — identity, never game state; see `src/lib/CLAUDE.md`.
+`TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
+club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,
+whose only inputs are `(teamId, treatment)`: identity, never game state
+(`src/lib/CLAUDE.md`). The Starting pitcher card resolves the triad a second time
+against the OTHER club (it shows the opposing starter), scoped to its `<section>`.
+Themed surfaces are picked per ELEMENT, not per page: **a club may colour a card
+that identifies the club** (box score and innings view included), never a control,
+cover, or seal-state report — ADR-0030's 2026-08-10 addendum replaces that rule.
 
 ### The team hub (`/team/{id}`, `src/screens/team/`)
 
@@ -230,9 +230,9 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins that, and what must
   stay click-through, at BOTH bar layouts.
 - **Focus mode** — a sealed half being scored is its own COMPOSED screen, not the
-  ordinary page narrowed (ADR-0043): anchored scorebug band, full-width at-bat,
-  wrapping trail, tabbed reference, `RollingLine` demoted but NEVER removed (its
-  cells are the navigator). Presentation only. Rules: `styles/focus/*`, last.
+  page narrowed (ADR-0043): anchored scorebug band, full-width at-bat, wrapping
+  trail, tabbed reference, `RollingLine` demoted but NEVER removed (its cells are
+  the navigator). Presentation only; rules in `styles/focus/*`, imported last.
 - **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
   `InningViewer` without touching its guarantees. `GameView` resolves
   `spoilersOffFor(officialDate)` — the pass is running, or this day was consented

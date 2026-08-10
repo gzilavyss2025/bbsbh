@@ -32,25 +32,49 @@
   --app-gutter:  16px;
   --tap-min:     44px;       /* min hit target */
 
-  /* Focus mode's console masthead (the anchored scorebug band —
-     styles/focus/stage.css, ADR-0043). One source of truth for three things that
-     must agree or the band overlaps what it sits above: the band's own
-     height, the sticky offset the reference rail parks below it, and the
-     scroll-margin useFocusMode's scrollIntoView lands the at-bat card at.
-     Held here rather than in the partial because it is a frame dimension the
-     grid reasons about, same footing as --app-width.
+  /* Focus mode's console masthead — the anchored scorebug band
+     (24-floating-nav-and-hud.css's `.gamehud--console`, ADR-0043). The band's
+     own resting height, as a number two other rules need to agree with it on:
+     the `min-height` that stops it collapsing between halves (when nobody is
+     up, its batter/pitcher rows unmount and it would otherwise shrink and jerk
+     the hero card up the page), and the fixed height of the due-up cards
+     parked beside it. Held here rather than in the partial because it is a
+     frame dimension the grid reasons about, same footing as --app-width.
+
+     MEASURE IT, DON'T GUESS IT. These are the band's rendered heights at 390px
+     and 834px (dev tools, top of the 1st with a batter and pitcher up), not
+     targets — everything keyed to them lines up only while they are true. They
+     were 152/118 through the focus-mode rebuild while the band actually stood
+     at 167/130, which is why the due-up cards sat a visible step short of the
+     band they were meant to match.
 
      Two values, not one: the band's batter/pitcher lines sit ABOVE the score
-     strip (24-floating-nav-and-hud.css's `.gamehud--console`), and below the
-     wide breakpoint that stack scales its own type up to fill the card's full
-     phone width, which makes it taller than the narrow (~264px) desktop card.
-     Redefined below at the same 740px cut both files already share. */
-  --console-hud-h: 152px;
+     strip, and below the wide breakpoint that stack scales its own type up to
+     fill the card's full phone width, which makes it taller than the narrow
+     (264px) desktop card. Redefined below at the same 740px cut both files
+     already share. */
+  --console-hud-h: 167px;
 
   /* Focus mode's action bar — one solid row (refresh + the reveal pair), so
      unlike .pagenav's translucent fade there is a real, measurable height for
      the page to pad clear of. See .innings--focus's padding-bottom. */
   --focus-bar-h: 64px;
+
+  /* The ORDINARY innings bar's height — the two-row `.pagenav--innings` the
+     unfocused page keeps (a duplicate Refresh stacked over the primary action).
+     Its only job is keeping the floating scorebug dock off it: the dock parks
+     itself in a viewport corner, and both BOTTOM corners landed squarely on the
+     bar's buttons at every width the dock is visible at — it covered half of
+     "Bottom 1st ›" on an iPad and a desktop, and swallowed the tap, which is
+     the same collision ADR-0043 fixed inside focus mode by anchoring the band.
+     Outside focus mode the dock still floats, so it has to be told where the
+     floor is.
+
+     156px is the taller of the bar's two states, measured: 136px for a plain
+     advance, 156px when the split pair's labels wrap to two lines (the
+     Summary/next-half bar). One number for both, because a dock that shifted
+     when a label wrapped would be worse than one parked slightly high. */
+  --pagenav-innings-h: 156px;
 
   /* The box-score skeleton's rolling baseball icon (BoxScoreSkeleton.jsx,
      .skel__ball) — its own component-scoped size rather than borrowing a
@@ -59,10 +83,11 @@
 }
 
 /* --console-hud-h's desktop half — see the mobile value above for why this is
-   two numbers, not one. Same 740px cut as 24-floating-nav-and-hud.css's own
-   `.gamehud--console` media block and stage.css's grid breakpoint. */
+   two numbers, not one, and for the rule that both are measured. Same 740px cut
+   as 24-floating-nav-and-hud.css's own `.gamehud--console` media block and
+   stage.css's grid breakpoint. */
 @media (min-width: 740px) {
   :root {
-    --console-hud-h: 118px;
+    --console-hud-h: 130px;
   }
 }

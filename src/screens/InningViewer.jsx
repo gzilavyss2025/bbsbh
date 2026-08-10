@@ -266,6 +266,16 @@ export function InningViewer({
   // so E still only moves once revealedThrough advances. Reset on every half
   // change — RollingLine only trusts this for the exact half-index it's
   // keyed to anyway, but there's no reason to hold it a moment longer.
+  // Which corner the scorebug dock parks in, once the reader has moved it.
+  // Null means "whatever the layout defaults to", so the dock doesn't jump on
+  // mount; ScorebugMount owns both the default and the stepping arithmetic.
+  // The STATE lives up here because that component is unmounted and remounted
+  // every time the reader crosses between a sealed half (focus mode's anchored
+  // band) and a revealed one (the floating dock) — its own state would be
+  // discarded on each crossing, which is what used to throw the chosen corner
+  // away. See ScorebugMount's header.
+  const [cornerIdx, setCornerIdx] = useState(null)
+
   const [runsInProgress, setRunsInProgress] = useState(null)
   // Reset computed during render (not in an effect) on a half change — see
   // Headshot.jsx for the same pattern.
@@ -804,17 +814,29 @@ export function InningViewer({
               treatment={winProbTreatment}
               focused
             />
-            {/* Not before the half's first at-bat is revealed — that's
-                UpNextBatters' own call (HalfInning.jsx), not this console's.
-                Not once the half is OVER either (focus.postHalf) — "who's
-                due up" is meaningless after the 3rd out. */}
-            {focus.steps > 0 && !focus.postHalf && (
+            {/* Three conditions, each shutting off a way this card can lie or
+                loiter:
+                  • `focus.steps > 0` — not before the half's first at-bat is
+                    revealed. That moment is UpNextBatters' own (HalfInning).
+                  • `!focus.postHalf` — not once the half is OVER. "Who's due
+                    up" is meaningless after the 3rd out.
+                  • `stepFrontierIdx != null` — not on a half the reader jumped
+                    to out of order. The card's whole point is tracking the
+                    batting order as the reader steps, and it can only do that
+                    with `lastAtBatIndex`, which InningViewer only has for the
+                    half immediately after the reveal mark (see the win-prob
+                    clamp above). Reach a half via RollingLine's navigator and
+                    step it and the arithmetic silently falls back to the
+                    PRE-half leadoff slot — so the card would name the same
+                    three men no matter how far in the reader got. A card that
+                    quietly stops being true is worse than no card. */}
+            {focus.steps > 0 && !focus.postHalf && stepFrontierIdx != null && (
               <DueUpConsole
                 feed={feed}
                 inning={effInning}
                 half={effHalf}
                 revealedThrough={renderRevealedThrough}
-                stepAtBatIndex={stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null}
+                stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
                 teamId={effHalf === 'top' ? meta.away.id : meta.home.id}
               />
             )}
@@ -917,6 +939,8 @@ export function InningViewer({
           meta={meta}
           treatment={winProbTreatment}
           pastLine={pastLine}
+          cornerIdx={cornerIdx}
+          setCornerIdx={setCornerIdx}
         />
       )}
 

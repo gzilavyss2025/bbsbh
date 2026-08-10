@@ -61,12 +61,26 @@
   color: var(--text-heading);
 }
 
-/* First name (AtBatHero's NameParts) — dropped below the wide breakpoint.
-   Last name alone is what a scorer writes down, and this card is already the
-   tightest fit on the page: two portraits plus the ball glyph beside it, on a
-   phone as narrow as ~360px. */
+/* First names (AtBatHero's NameParts) — dropped on a phone, where the card is
+   at its tightest: two portraits plus the ball glyph, at widths down to ~360px.
+   Last name alone is what a scorer writes down anyway. */
 @media (max-width: 739.98px) {
   .abhero__namefirst {
+    display: none;
+  }
+}
+
+/* And dropped again for the PITCHER alone from 740 to 960, which is not a
+   redundant rule — it is the band the reference rail eats. Above 740 the focus
+   grid reserves --refrail-w (328px), so an iPad-portrait 834px viewport leaves
+   the hero about 478px to seat two portraits, the batter's name at
+   --fs-title-sm, the ball glyph and the arm block. "HUNTER DOBBINS" wanted
+   112px of a 96px box there and clipped mid-surname — an ordinary name, on the
+   one card the whole screen is built around, at a width this app is used at.
+   The batter keeps his first name at every width above the phone breakpoint:
+   he is the payload, and if anything has to give it is the arm. */
+@media (min-width: 740px) and (max-width: 959.98px) {
+  .abhero__arm .abhero__namefirst {
     display: none;
   }
 }
@@ -293,8 +307,10 @@
 
 /* The scorebook denotation IS what gets penciled, so it takes the typographic
    hero role: the out chain written across the diamond steps up two roles, the
-   reach code above it one. Colours are untouched — field green for a reach,
-   clay for an out — because those already carry the meaning. */
+   reach code above it one. Colours are untouched — a base hit in field green,
+   a reach-on-error in clay, everything else in ink (13-play-by-play.css's
+   .pbp__code family) — because those already carry the meaning, and the at-bat
+   trail mirrors the same set (focus/reference.css). */
 .innings--focus .pbp__code {
   font-size: var(--fs-h3);
 }

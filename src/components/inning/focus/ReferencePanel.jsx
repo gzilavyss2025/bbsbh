@@ -67,15 +67,25 @@ export function ReferencePanel(props) {
     setSheetOpen(true)
   }
 
-  const strip = (
+  // Unlike the at-bat trail (see AtBatTrail.jsx's note on why that one is NOT a
+  // tablist), these really are tabs: each selects which section renders, and
+  // there is exactly one panel for them to own. So the contract is spelled out
+  // properly rather than half-declared — `aria-controls` pointing at the panel,
+  // `aria-selected` on the chosen tab, and `role="tabpanel"` + `aria-labelledby`
+  // on the body pointing back. The ids are suffixed per placement because the
+  // rail and the sheet can both exist in the DOM on a resize, and duplicate ids
+  // would cross the wires between them.
+  const strip = (idFor) => (
     <div className="refpanel__tabs" role="tablist" aria-label="Reference">
       {tabs.map((t) => (
         <button
           key={t.key}
           type="button"
           role="tab"
+          id={idFor(`tab-${t.key}`)}
           className="refpanel__tab"
           aria-selected={t.key === active}
+          aria-controls={idFor('panel')}
           onClick={() => setTab(t.key)}
         >
           {t.label}
@@ -85,29 +95,52 @@ export function ReferencePanel(props) {
   )
 
   if (wide) {
+    const idFor = (s) => `refrail-${s}`
     return (
       <aside className="focusrail" aria-label="Reference">
-        {strip}
-        <div className="refpanel__body">
+        {strip(idFor)}
+        <div
+          className="refpanel__body"
+          id={idFor('panel')}
+          role="tabpanel"
+          aria-labelledby={idFor(`tab-${active}`)}
+        >
           <Section tab={active} showEntering={showEntering} {...props} />
         </div>
       </aside>
     )
   }
 
+  const idFor = (s) => `refsheet-${s}`
   return (
     <>
       <div className="refbar">
         {tabs.map((t) => (
-          <button key={t.key} type="button" className="refbar__chip" onClick={() => openSheet(t.key)}>
+          <button
+            key={t.key}
+            type="button"
+            className="refbar__chip"
+            // A chip opens a dialog rather than switching a panel in place, so
+            // it says so — and reports whether that dialog is currently open,
+            // which for a screen-reader user is the difference between "this
+            // did nothing" and "this opened something elsewhere".
+            aria-haspopup="dialog"
+            aria-expanded={sheetOpen && t.key === active}
+            onClick={() => openSheet(t.key)}
+          >
             {t.label}
           </button>
         ))}
       </div>
       {sheetOpen && (
         <RefSheet onClose={() => setSheetOpen(false)}>
-          {strip}
-          <div className="refpanel__body refpanel__body--sheet">
+          {strip(idFor)}
+          <div
+            className="refpanel__body refpanel__body--sheet"
+            id={idFor('panel')}
+            role="tabpanel"
+            aria-labelledby={idFor(`tab-${active}`)}
+          >
             <Section tab={active} showEntering={showEntering} {...props} />
           </div>
         </RefSheet>
