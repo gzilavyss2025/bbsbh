@@ -81,6 +81,12 @@ export {
   firstRispPAIndexByBatter,
 } from './playbyplay/firsts.js'
 
-export { nextStepBoundary, stepBounds, lastVisibleAtBatIndex, deriveLiveState } from './playbyplay/entriesView.js'
+export {
+  nextStepBoundary,
+  stepBounds,
+  lastVisibleAtBatIndex,
+  deriveLiveState,
+  buildTrailItems,
+} from './playbyplay/entriesView.js'
 
 export { computeHalfInningFeed } from './playbyplay/halfInningFeed.js'

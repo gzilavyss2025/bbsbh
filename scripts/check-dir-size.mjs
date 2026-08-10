@@ -188,7 +188,14 @@ const BUDGETS = {
   // out of `31-wild-card.css` (already at its check-file-size budget) rather
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
-  'src/styles': 70,
+  //
+  // 70 -> 71 for `61-focus-mode.css`: split out of `11-innings.css` so its
+  // rules import LAST and win on cascade order instead of specificity — see
+  // that file's own header comment. It cannot merge into an existing
+  // partial: it has to load after every partial whose rules focus mode
+  // overrides (25-wide-layout.css among them), which rules out folding it
+  // back into 11-innings.css, an earlier-loading file.
+  'src/styles': 71,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

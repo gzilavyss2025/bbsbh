@@ -16,6 +16,7 @@ import {
   stepBounds,
   lastVisibleAtBatIndex,
   deriveLiveState,
+  buildTrailItems,
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
@@ -23,6 +24,7 @@ import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
+import { AtBatMatchup } from './AtBatMatchup.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { BatterNotice } from './BatterNotice.jsx'
@@ -118,11 +120,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Up to InningViewer so it can draw the navigator without touching a
-  // reveal-only derivation (ADR-0001). A COUNT, never an entry.
+  // Up to InningViewer (useFocusMode) — see buildTrailItems' own header.
   useEffect(() => {
     if (!focusOne) return
-    onFocusInfo?.(revealedSteps)
+    onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
   }, [focusOne, revealedSteps]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // How many runs have scored in the STEPPED-THROUGH portion of this half so
@@ -239,8 +240,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <AtBatCard
               entry={entry}
               battingTeamId={battingTeamId}
+              pitchingTeamId={pitchingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
+              focusHeader={focusOne}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -534,8 +537,8 @@ function EventCard({ code, runnerId, teamId, segments }) {
   )
 }
 
-function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
-  const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, focusHeader = false }) {
+  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
   const calloutNotes = buildCallouts(entry, calloutCtx)
@@ -554,6 +557,8 @@ function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
     <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
+      {/* Focus mode only — see AtBatMatchup.jsx. */}
+      {focusHeader && <AtBatMatchup batter={batter} pitcher={pitcher} battingTeamId={battingTeamId} pitchingTeamId={pitchingTeamId} />}
       {/* Fills the room the missing zone pane leaves, so it rides with
           --nozone. Decorative — the card's first line already names him — and
           desktop-only, .pbp__batshot being display:none below 740. */}

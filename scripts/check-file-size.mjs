@@ -129,7 +129,12 @@ const BUDGETS = {
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
   'src/api/playbyplay/halfInningFeed.js': 800, // 793
   'src/screens/PlayerPage.jsx': 800, // 772
-  'src/components/playbyplay/PlayByPlay.jsx': 700, // 681
+  // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
+  // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
+  // the at-bat trail. The header itself (AtBatMatchup.jsx) and the trail's
+  // item-building logic (entriesView.js) were both pulled out to keep this
+  // growth to wiring only — see those two files' own headers.
+  'src/components/playbyplay/PlayByPlay.jsx': 750, // 710
   'src/api/loadPlayer.js': 700, // 682
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629

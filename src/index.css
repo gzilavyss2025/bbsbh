@@ -74,6 +74,7 @@
 @import './styles/55-my-tally-account.css';
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
+@import './styles/61-focus-mode.css';
 
 /* ------------------------------------------------------------
    Per-route partials — still in src/styles/, still numbered, still

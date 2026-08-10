@@ -150,3 +150,47 @@ export function deriveLiveState(entries, cap) {
   }
   return { bases, outs, pitchesSoFar, midHalfPitcherId, batter, batterDone }
 }
+
+// The at-bat trail's chip data (AtBatTrail.jsx), built from stepBounds' own
+// boundaries and PlayByPlay's revealedSteps count — a mapping over data
+// already computed for rendering, not a new spoiler surface: every step this
+// covers is already <= effectiveCap, i.e. already a full card on screen this
+// render (see PlayByPlay's onFocusInfo effect).
+//
+// `eventCodeFor` is PlayByPlay's own EVENT_CODES lookup, passed in rather
+// than duplicated here — this stays a pure function over caller-owned data.
+export function buildTrailItems(entries, bounds, revealedSteps, eventCodeFor) {
+  if (!bounds) return []
+  return bounds.slice(0, revealedSteps).map((end, i) => {
+    const windowEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], end)
+    const atbat = windowEntries.find((e) => e.kind !== 'event' && e.kind !== 'placed')
+    if (atbat) return { name: atbat.batter.last, code: atbat.code || '', kind: atbat.codeKind }
+    return { name: noticeLabel(windowEntries[0], eventCodeFor), code: '', kind: 'note' }
+  })
+}
+
+// A short label for a notice step (no plate appearance of its own) —
+// EVENT_CODES' real shorthand where one exists, else a short tag matching
+// the notice card family the step actually renders as in PlayByPlay.jsx.
+function noticeLabel(entry, eventCodeFor) {
+  if (!entry) return '•'
+  const code = eventCodeFor(entry.eventType)
+  if (code) return code
+  switch (entry.eventType) {
+    case 'pitching_substitution':
+      return 'P'
+    case 'defensive_substitution':
+    case 'defensive_switch':
+      return 'D'
+    case 'pinch_running':
+      return 'PR'
+    case 'pinch_hitting':
+      return 'PH'
+    case 'mound_visit':
+      return 'MV'
+    case 'ejection':
+      return 'EJ'
+    default:
+      return '•'
+  }
+}
