@@ -12,6 +12,57 @@
    `min-width: 740px` block below. It has to live OUTSIDE this div: a sticky
    element can only stay stuck for as long as its own parent stays in the
    scrollport, and `.slatehead` alone is only ever one short row tall. */
+/* The team-logo nav banner's wrapper, between the topbar and the date banner
+   below. It exists only to hold --slate-strip-h open while fetchTeams(sportId)
+   is still in flight: the strip inside is conditional, this box is not.
+   Without it the strip's arrival pushed the date banner, the games and the
+   footer down 82px in one step — the slate's largest layout shift on a cold
+   load.
+
+   The margin lives HERE rather than on the strip so the reserved box measures
+   the same whether or not the strip is in it. .teamfilterstrip's own
+   var(--space-2) margin (26-player-page.css) would otherwise apply only once
+   the strip rendered, leaving the empty box 16px short and the shift only
+   mostly cancelled. */
+.slatestrip {
+  min-height: var(--slate-strip-h);
+  margin: var(--space-2) 0;
+}
+.slatestrip .teamfilterstrip {
+  margin: 0;
+}
+
+/* The slate's own cold-load placeholder, reserving a screen for the games
+   still in flight. Same job as .slatestrip above, one row further down: while
+   the loader was a single short row, SiteFooter painted near the top of the
+   FIRST screen and was then shoved out of view entirely the moment the games
+   landed. A ~380px-tall element leaving the viewport is an enormous layout
+   shift — worth ~0.52 CLS here, more than the strip above it.
+
+   The board stays pinned to the top of the reserved box (align-items
+   overriding .loader's center in 06-loader-and-cards.css), exactly where it
+   sat before the box existed, so this cancels the shift without moving
+   anything anyone sees.
+
+   svh, not vh: the small viewport is the height with browser chrome fully
+   shown, so the reserve clears the fold even before the URL bar collapses.
+
+   Scoped to the slate on purpose. `page` is <Loader>'s DEFAULT size, so every
+   AsyncStatus in the app renders one — including section-level statuses that
+   sit inside a page, which a screen-tall floor would tear a hole in. Other
+   cold-load screens share the underlying pattern; give them the same reserve
+   per screen, after measuring that screen, not by widening this one.
+
+   Scoped to the COLD load for the same reason, one level in. On a day with no
+   games `hasData` never becomes true, so the live poll puts the loader back on
+   screen every refresh with the Off Day grid already rendered below it — and a
+   reserve that applied there would wedge a screen-tall gap between the two.
+   See GameSelect's `coldLoad`. */
+.screen--coldload .loader--page {
+  align-items: flex-start;
+  min-height: 100svh;
+}
+
 .slatehead {
   display: flex;
   align-items: center;

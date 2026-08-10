@@ -148,6 +148,16 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const slate = useAsync(() => fetchSchedule(dateStr, sportId), [dateStr, sportId])
   const { loading, error, data } = slate
 
+  // A COLD load — the first fetch for this date/level, with nothing on the page
+  // under the loader yet. Only then does the loader reserve a screen (see
+  // .screen--coldload in 03-slate-header.css). Deliberately not a bare
+  // `loading`: on a day with NO games `hasData` never becomes true, so the live
+  // poll re-renders the loader every refresh, and a permanent reserve would
+  // wedge a screen-tall gap above the Off Day grid. useAsync keeps the last-good
+  // `data` across a reload and nulls it on a deps change, which is exactly the
+  // line wanted here — a date or level switch is a cold load again.
+  const coldLoad = loading && !data
+
   // Slate score line — fetched ONLY while the Scores Unlocked pass is on AND we
   // are on today's slate (a past day has its own reveal-all path). The default
   // slate model stays score-free (see fetchSchedule/normalizeGame); this rides a
@@ -491,7 +501,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   }, [rosterIds.data, prospects.data])
 
   return (
-    <div className="screen screen--slate">
+    <div className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}`}>
       {/* Title + level toggle + search share one row: the Tally wordmark taps
           home (a full reload — see lib/home.js) on the left, the condensed
           MLB/AAA/… buttons and the search trigger ride together to its
@@ -545,18 +555,26 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           strip; centerTeamId lands on the favorite team on arrival (only
           meaningful when it's actually in this level's club set — an MLB
           favorite scrolled to a minor-league level's strip just no-ops). */}
-      {levelTeams.data?.length > 0 && (
-        <TeamFilterStrip
-          teams={levelTeams.data}
-          selectedTeamId={null}
-          onSelect={(id) => navigate(teamPath(id))}
-          showMlbPin={false}
-          showArrows
-          centerTeamId={favoriteTeamId}
-          ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
-          className="teamfilterstrip--nav"
-        />
-      )}
+      {/* The wrapper is ALWAYS rendered, and holds the strip's height open
+          while fetchTeams(sportId) is still in flight — see .slatestrip in
+          03-slate-header.css. The strip used to be a bare conditional, so it
+          appeared out of nothing on arrival and shoved the date banner, the
+          games and the footer down by its own 82px. That single insertion was
+          worth ~0.37 CLS on the slate's cold load. */}
+      <div className="slatestrip">
+        {levelTeams.data?.length > 0 && (
+          <TeamFilterStrip
+            teams={levelTeams.data}
+            selectedTeamId={null}
+            onSelect={(id) => navigate(teamPath(id))}
+            showMlbPin={false}
+            showArrows
+            centerTeamId={favoriteTeamId}
+            ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
+            className="teamfilterstrip--nav"
+          />
+        )}
+      </div>
 
       {/* The date stepper's own solid banner, divided from the game cards by
           a bottom rule — deliberately NOT sticky (see the comment on
