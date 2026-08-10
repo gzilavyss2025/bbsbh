@@ -142,6 +142,7 @@ import {
   COMEBACK_DEFICIT,
 } from '../src/api/callout-notes/checkpoints.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
+import { tallyStarterRecord } from './lib/pitcher-starts.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -321,12 +322,11 @@ const COMEBACK_MIN_GAMES = 5
 // numbers either way.
 const INNING_RUNS_MAX = 9
 
-// Starter-record thresholds (see pitcherEnrich) — a 6+ IP start, a double-
-// digit-strikeout start, and the trailing window for a "Nth appearance in the
-// last N days" bullpen-rest note. Mirrors HOMER_MIN_GAMES's role: a floor
-// before a split is worth surfacing at all.
-const SIX_IP_OUTS = 18 // 6.0 innings, in outs
-const TEN_K_THRESHOLD = 10
+// Starter-record thresholds (see pitcherEnrich) — the trailing window for a
+// "Nth appearance in the last N days" bullpen-rest note, and the minimum
+// sample before a split (home/road, 6+ IP, all-starts) is worth surfacing at
+// all. Mirrors HOMER_MIN_GAMES's role. The 6+ IP / double-digit-strikeout
+// thresholds themselves live in tallyStarterRecord (scripts/lib/pitcher-starts.mjs).
 const STARTER_MIN_GAMES = 3
 const RECENT_APPEARANCE_WINDOW_DAYS = 4
 
@@ -368,15 +368,6 @@ const num = (x) => (Number.isFinite(Number(x)) ? Number(x) : 0)
 function isBirthdayOn(birthDate, dateApi) {
   if (!birthDate) return false
   return birthDate.slice(5) === dateApi.slice(5)
-}
-
-// Innings pitched ("104.1" = 104 ⅓) -> outs, so a 6.0-IP-or-better check
-// compares linearly (raw "104.1" < "104.2" happens to work, but "104.2" plus
-// one more out is "105.0", not "104.3"). Self-contained copy of the same helper
-// in teamLeaders.js/statsLevels.js (not exported there).
-const ipToOuts = (ip) => {
-  const [whole, frac = '0'] = String(ip ?? '0').split('.')
-  return num(whole) * 3 + num(frac[0])
 }
 
 // A tiny bounded-concurrency map so the per-hitter game-log sweep doesn't open
@@ -904,7 +895,7 @@ async function birthdayLine(personId, birthDate, debutDate) {
 // and `leverage` (opponents' AVG/OPS with his club ahead / behind / tied —
 // the API's sah/sbh/sti sitCodes, one extra statSplits fetch, relievers only
 // so the fan-out stays bounded).
-async function pitcherEnrich(personId, sportId) {
+async function pitcherEnrich(personId, sportId, teamId) {
   const mlb = sportId === MLB
   const data = await getJson(
     // `career` rides along for the milestone-watch check (family #9) — one
@@ -917,18 +908,10 @@ async function pitcherEnrich(personId, sportId) {
     ?.splits?.filter((s) => s.date && s.date <= asOf)
     .sort((a, b) => (a.date < b.date ? 1 : -1)) ?? [] // newest first
 
-  let homeW = 0, homeL = 0, awayW = 0, awayL = 0
-  let sixIpW = 0, sixIpL = 0
-  let tenK = 0
-  for (const s of rows) {
-    const st = s.stat ?? {}
-    if (num(st.gamesStarted) === 0) continue // relief outing — not a "start" for any of these
-    const won = s.isWin === true
-    if (s.isHome) won ? homeW++ : homeL++
-    else won ? awayW++ : awayL++
-    if (ipToOuts(st.inningsPitched) >= SIX_IP_OUTS) won ? sixIpW++ : sixIpL++
-    if (num(st.strikeOuts) >= TEN_K_THRESHOLD) tenK++
-  }
+  // Team-attributed tallies (home/road split, 6+ IP record, all-starts
+  // record) only count starts made for HIS CURRENT CLUB — see
+  // tallyStarterRecord's header for the mid-season-trade regression this guards.
+  const { homeW, homeL, awayW, awayL, sixIpW, sixIpL, tenK } = tallyStarterRecord(rows, teamId)
   // The club's record across ALL his starts (`isWin` is the team's result, not
   // his decision — same field homerRecords reads on the hitter side), which is
   // exactly the home + away tallies above summed. Written as numbers so the
@@ -1170,6 +1153,7 @@ const poolById = new Map() // personId -> his own PoolPlayer (for season CG/shut
 const birthDateById = new Map() // personId -> 'YYYY-MM-DD', free off the same roster fetch
 const debutById = new Map() // personId -> mlbDebutDate 'YYYY-MM-DD', also free off the roster hydrate
 const sportIdByPerson = new Map() // personId -> his club's level, scoping every stats fetch
+const teamIdByPerson = new Map() // personId -> his CURRENT club, scoping starterRecords' team-attributed tallies
 const hitterIdsByTeam = new Map() // teamId -> [personId] (position players)
 const pitcherIdsByTeam = new Map() // teamId -> [personId]
 const allHitterIds = new Set()
@@ -1186,9 +1170,23 @@ await mapPool(teamIds, 6, async (teamId) => {
   leadersByTeam.set(teamId, clubLeaders(pool))
   for (const p of pool) poolById.set(p.id, p)
   for (const r of roster) {
-    if (r.person?.id != null && r.person.birthDate) birthDateById.set(r.person.id, r.person.birthDate)
-    if (r.person?.id != null && r.person.mlbDebutDate) debutById.set(r.person.id, r.person.mlbDebutDate)
-    if (r.person?.id != null) sportIdByPerson.set(r.person.id, sportId)
+    const pid = r.person?.id
+    if (pid == null) continue
+    if (r.person.birthDate) birthDateById.set(pid, r.person.birthDate)
+    if (r.person.mlbDebutDate) debutById.set(pid, r.person.mlbDebutDate)
+    // A player optioned/recalled mid-season still shows up on his PARENT
+    // club's 40-man roster with status 'RM' (Reassigned to Minors) alongside
+    // his real, active listing on the affiliate — verified 2026-08-09,
+    // Brandon Sproat (personId 687075) on both Milwaukee's and Nashville's
+    // roster fetch. teamIds' concurrent fan-out (mapPool above) makes write
+    // order a coin flip, so an unconditional last-write-wins is non-
+    // deterministic; require the 'Active' row to win instead — same fix shape
+    // as roster.mjs's dedupeRosterEntries, applied here rather than imported
+    // since this sweep never materializes a combined entries array to dedupe.
+    if (r.status?.code === 'A' || !teamIdByPerson.has(pid)) {
+      sportIdByPerson.set(pid, sportId)
+      teamIdByPerson.set(pid, teamId)
+    }
   }
   const hitters = roster
     .filter((r) => r.position?.type !== 'Pitcher' && r.person?.id)
@@ -1227,7 +1225,7 @@ hitterList.forEach((id, i) => {
 // streak/rest note fires whenever HE actually takes the mound tonight).
 const pitcherList = [...allPitcherIds]
 const pitcherEnrichList = await mapPool(pitcherList, 8, (id) =>
-  pitcherEnrich(id, sportIdByPerson.get(id) ?? MLB),
+  pitcherEnrich(id, sportIdByPerson.get(id) ?? MLB, teamIdByPerson.get(id)),
 )
 const pitcherEnrichById = new Map()
 pitcherList.forEach((id, i) => pitcherEnrichById.set(id, pitcherEnrichList[i]))

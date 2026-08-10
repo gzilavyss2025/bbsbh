@@ -71,6 +71,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pitcher-advanced.test.js | 9 | src/api/person.js | Player page Advanced card, situational splits, rank chips, QS flag |
 | pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
+| pitcher-starts.test.js | 6 | scripts/lib/pitcher-starts.mjs | starterRecords' team-attributed tallies stay scoped to a pitcher's CURRENT club through a mid-season trade/option |
 | placed-runner.test.js | 11 | src/api/playbyplay.js | Placed-runner card |
 | play-diamond-out-geometry.test.js | 5 | src/components/scoring/playDiamondGeometry.js | outLegBases geometry |
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |

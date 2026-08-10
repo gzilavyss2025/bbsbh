@@ -247,6 +247,13 @@ const BUDGETS = {
   // hook it sits beside.
   'src/hooks': 20,
   'src/screens/identity-lab': 15,
+  // 12 -> 13 for pitcher-starts.mjs: gen-callouts.mjs's per-pitcher-game-log
+  // tally (home/road split, 6+ IP record, all-starts record), pulled out so
+  // the mid-season-trade regression it fixes (a new club inheriting a rival's
+  // record) could be unit-tested — a generator is a top-level script, so a
+  // helper worth testing can't stay inline (see roster.mjs's own header,
+  // already in this directory for the same reason).
+  'scripts/lib': 13,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])
