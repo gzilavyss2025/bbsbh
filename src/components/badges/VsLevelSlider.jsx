@@ -8,7 +8,7 @@
 // with every band's plain-language label shown beneath the track, colored the same
 // red/kraft/green the dots themselves use, so the slider reads as the same
 // scale before it's ever touched.
-const RUNGS = ['All', 'Bottom', 'Below', 'In line', 'Above', 'Elite']
+const RUNGS = ['All', 'Bottom', 'Below', 'Middle', 'Above', 'Top']
 
 // tier 1-2 => 'low' (red), 3 => 'mid' (kraft brown), 4-5 => 'high' (green) —
 // same bandFor as ProspectTrendPill's own dot row.

@@ -199,7 +199,9 @@ const BUDGETS = {
   // same split-for-budget reason as 31a/31b, its own lettered sibling.
   // 73 -> 74 for `31d-prospect-card.css`: the Analytics shelf's Prospect Card
   // (ProspectCard.jsx) — same lettered-sibling shape as 31a/31b/31c above.
-  'src/styles': 74,
+  // 74 -> 75 for `31e-prospect-board.css`: /prospects needs its own responsive
+  // board without changing the shared Ledger behavior on unrelated pages.
+  'src/styles': 75,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
