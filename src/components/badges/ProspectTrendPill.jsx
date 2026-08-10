@@ -30,7 +30,10 @@ function bandFor(tier) {
   return tier <= 2 ? 'low' : tier >= 4 ? 'high' : 'mid'
 }
 
-function LevelDots({ tier }) {
+// Exported: ProspectCard.jsx (the player-page Analytics card) draws the same
+// dot row beside its own tier text label, rather than inventing a second dot
+// component that could drift from this one's tier→color mapping.
+export function LevelDots({ tier }) {
   const band = bandFor(tier)
   return (
     <span className={`prospecttrend__dots prospecttrend__dots--${band}`} aria-hidden="true">

@@ -72,6 +72,7 @@ import {
   PITCHER_FIRSTS_DEFS,
 } from './person.js'
 import { fetchTopProspects, prospectRankById, orgProspectRankById } from './prospects.js'
+import { fetchProspectTrend, prospectTrendById, prospectCardView } from './prospectTrend.js'
 import { gamePath } from '../lib/route.js'
 import { teamFullName } from '../lib/teams.js'
 
@@ -249,7 +250,7 @@ export async function loadPlayer(id, asOf) {
   // "games at that level").
   const primaryGroup = bio.isPitcher ? 'pitching' : 'hitting'
 
-  const [results, debutSplits, prospects, convHittingMilb] = await Promise.all([
+  const [results, debutSplits, prospects, convHittingMilb, prospectTrend] = await Promise.all([
     Promise.all(
       groups.map(async (group) => {
         // A rehabbing big leaguer's game log combines his MLB games with his
@@ -376,6 +377,10 @@ export async function loadPlayer(id, asOf) {
     bio.debut && bio.isPitcher && !bio.twoWay
       ? fetchMilbYearByYear(id, 'hitting')
       : Promise.resolve(null),
+    // The Prospect Card's data — bbsbh's own level-relative OPS/ERA percentile
+    // (src/api/prospectTrend.js). Same session-memoized fetch pattern as
+    // fetchTopProspects just above.
+    fetchProspectTrend(),
   ])
   // Transaction timeline enrichment — everything the raw player-scoped feed
   // can't give on its own: each affiliate club's level (for CALLED UP / SENT
@@ -452,6 +457,23 @@ export async function loadPlayer(id, asOf) {
   // The player's rank on his own org's farm-system list — shown as a second
   // pill for anyone who's on their org's list but not the overall Top 100.
   const orgProspectRank = orgProspectRankById(prospects.orgProspects, bio.id)
+  // The Analytics shelf's Prospect Card — MiLB only (an MLB player already
+  // gets StatcastPercentiles/AdvancedStatsCard in that space; this is what
+  // fills it for anyone below the majors). `trendEntry.group` says which stat
+  // block ("hitting"/"pitching") the card belongs under; a player with no
+  // trend row yet still gets a card in his PRIMARY group (same fallback
+  // "Path to the Majors" already uses above), so an untracked prospect's page
+  // isn't silently blank in a DIFFERENT way than before.
+  const trendEntry = prospectTrendById(prospectTrend, bio.id)
+  const isMilb = currentActivitySportId !== 1
+  const prospectCard = isMilb
+    ? prospectCardView(
+        trendEntry,
+        typeof bio.age === 'number' ? bio.age : null,
+        prospectTrend?.levelAverageAge?.[currentActivitySportId] ?? null,
+      )
+    : null
+  const prospectCardGroup = trendEntry?.group ?? primaryGroup
 
   // "Path to the Majors" card, built from the primary group's multi-level MiLB
   // history (already fetched per block above — no extra request). Strip
@@ -692,6 +714,7 @@ export async function loadPlayer(id, asOf) {
     onIL, il, startingToday,
     rosterStatus, lastPlayedYear,
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
+    prospectCard, prospectCardGroup,
     conversionNote, positionInnings, transactions, trophyCase,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,

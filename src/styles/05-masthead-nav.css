@@ -650,6 +650,45 @@
   margin-top: 2px;
 }
 
+/* Container contract shared with the Analytics shelf's Prospect Card
+   (31d-prospect-card.css) — border/radius/header-strip, so "Path to the
+   Majors" and the new card read as one card language on the same page. The
+   individual chevron rungs above keep their own already-correct "pressed
+   cell" look (--inset-cell) untouched; only the section wrapping them changed. */
+.levelprog {
+  margin-top: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+.levelprog .section__title {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.levelprog__body {
+  padding: var(--space-3);
+}
+
+/* The current rung's own vs.-level standing (standingLabel(), the same
+   phrase the /prospects ledger and the Prospect Card both use) — text only
+   for tiers 2-4; "extremes carry color" so a reader scanning a whole career
+   path only stops where it's actually worth stopping. Layered on top of
+   .is-current's own navy fill, so the border reads as an accent underline,
+   not a replacement highlight. */
+.levelprog__standing {
+  display: block;
+  margin-top: 2px;
+}
+.levelprog__step.tier-low {
+  border-bottom: 3px solid var(--accent-negative);
+}
+.levelprog__step.tier-high {
+  border-bottom: 3px solid var(--accent-positive);
+}
+
 /* ---------------------------------------------------------------- hints */
 .hint {
   color: var(--text-muted);

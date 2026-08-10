@@ -50,6 +50,51 @@ export function qualifiedMetrics(splits, group) {
   return values
 }
 
+// Same filter as qualifiedMetrics, but returns player ids instead of metric
+// values — used to gather the population an age benchmark is averaged over,
+// where the metric itself (OPS/ERA) doesn't matter, only who cleared the
+// floor.
+export function qualifiedPlayerIds(splits, group) {
+  const ids = []
+  for (const sp of splits ?? []) {
+    const stat = sp?.stat
+    const id = sp?.player?.id
+    if (!stat || !id) continue
+    if (meetsPlayingTimeFloor(group, stat)) ids.push(id)
+  }
+  return ids
+}
+
+// One percentile population per (sportId, group) — every qualified player
+// (prospect or not) who logged time at that level in the splits given. Shared
+// by gen-prospect-trend.mjs (today's population) and
+// gen-prospect-trend-backfill.mjs (a past checkpoint's population) — same
+// grouping either way, only the splits fed in differ (season-to-date vs.
+// byDateRange-bounded).
+export function populationKey(sportId, group) {
+  return `${sportId}:${group}`
+}
+
+export function buildPopulations(hitSplits, pitSplits) {
+  const populations = new Map()
+  for (const [splits, group] of [
+    [hitSplits, 'hitting'],
+    [pitSplits, 'pitching'],
+  ]) {
+    const bySport = new Map()
+    for (const sp of splits) {
+      const sportId = sp.sport?.id
+      if (!sportId) continue
+      if (!bySport.has(sportId)) bySport.set(sportId, [])
+      bySport.get(sportId).push(sp)
+    }
+    for (const [sportId, sportSplits] of bySport) {
+      populations.set(populationKey(sportId, group), qualifiedMetrics(sportSplits, group))
+    }
+  }
+  return populations
+}
+
 // value's percentile rank within population (0-100, rounded). `higherIsBetter`
 // is true for OPS, false for ERA. A value not present in — or better than
 // every member of — an empty population returns null rather than a

@@ -23,6 +23,7 @@ import { PositionInnings } from '../components/player/PositionInnings.jsx'
 import { SplitsSection, hasSplits } from '../components/playerstats/SplitsSection.jsx'
 import { StatcastPercentiles } from '../components/charts/StatcastPercentiles.jsx'
 import { AdvancedStatsCard } from '../components/player/AdvancedStatsCard.jsx'
+import { ProspectCard } from '../components/playerstats/ProspectCard.jsx'
 import { PitchMix } from '../components/charts/PitchMix.jsx'
 import { BattedBallMix } from '../components/charts/BattedBallMix.jsx'
 import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
@@ -111,6 +112,31 @@ export function PlayerPage({ id, asOf, sportId }) {
   const hasFirsts = data.firsts && firstsOrder.some((key) => data.firsts[key])
   const hasPlayerHistory = Boolean(
     data.positionInnings || hasFirsts || (data.progression && bio.debut) || (data.timeline && bio.debut) || data.transactions,
+  )
+  // "Path to the Majors"'s own read of the Prospect Card's current-level
+  // standing — see LevelProgressionCard.jsx's header for why only the
+  // CURRENT rung ever gets one. `data.prospectCard.state === 'none'` (no
+  // trend row yet) has nothing to add here even though the card itself may
+  // still render elsewhere for its age-edge fact alone.
+  const trendBySportId =
+    data.sportId !== 1 && data.prospectCard && data.prospectCard.state !== 'none'
+      ? {
+          [data.sportId]: {
+            standing: data.prospectCard.standing,
+            tier: data.prospectCard.tier,
+            qualified: data.prospectCard.state === 'qualified',
+          },
+        }
+      : null
+  // The Prospect Card itself only earns a spot on the Analytics shelf when it
+  // has something to say — a rank pill, a real standing/unqualified reading,
+  // or a real age-edge fact. An untracked, unranked MiLB player with none of
+  // those still gets the plain empty shelf, same as before this card existed
+  // — bbsbh genuinely has no prospect-relevant data on him to show.
+  const showProspectCard = Boolean(
+    data.sportId !== 1 &&
+      data.prospectCard &&
+      (data.prospectRank || data.orgProspectRank || data.prospectCard.state !== 'none' || data.prospectCard.ageEdge),
   )
 
   return (
@@ -238,7 +264,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         {data.timeline && !bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.progression && !bio.debut && (
-          <LevelProgressionCard levels={data.progression.levels} />
+          <LevelProgressionCard levels={data.progression.levels} trendBySportId={trendBySportId} />
         )}
 
         <div className="factgrid">
@@ -353,6 +379,22 @@ export function PlayerPage({ id, asOf, sportId }) {
                 Like, under one umbrella label; each still carries its own
                 section title underneath it. */}
             <SectionTitle title="Analytics" bar />
+
+            {/* The one card that fills this shelf below the majors — MLB-only
+                Statcast/Advanced/Foul/BattedBall all render nothing for a
+                MiLB block, same as before; this is what replaces that gap. */}
+            {showProspectCard && block.group === data.prospectCardGroup && (
+              <ProspectCard
+                view={data.prospectCard}
+                level={SPORT_LABEL[data.sportId] ?? ''}
+                badge={{
+                  rank: data.prospectRank,
+                  orgRank: data.orgProspectRank,
+                  orgTeamId: club?.parentOrgId ?? club?.id,
+                  orgTeamName: club?.parentOrgName ?? club?.name,
+                }}
+              />
+            )}
 
             <StatcastPercentiles savant={block.savant} raw={block.savantRaw} group={block.group} />
 
@@ -557,6 +599,7 @@ export function PlayerPage({ id, asOf, sportId }) {
           <LevelProgressionCard
             levels={data.progression.levels}
             debutYear={Number(bio.debut.slice(0, 4))}
+            trendBySportId={trendBySportId}
           />
         )}
 

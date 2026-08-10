@@ -72,7 +72,7 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
-  'src/styles/05-masthead-nav.css': 700, // 692
+  'src/styles/05-masthead-nav.css': 800, // 739 — +1 band: LevelProgressionCard's shared container contract (31d-prospect-card.css's sibling rules)
   'src/styles/06-loader-and-cards.css': 900, // 850
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 687 — the Ballpark card moved out to 57-ballpark-card.css
@@ -128,9 +128,9 @@ const BUDGETS = {
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
   'src/api/playbyplay/halfInningFeed.js': 800, // 793
-  'src/screens/PlayerPage.jsx': 800, // 772
+  'src/screens/PlayerPage.jsx': 900, // 809 — +1 band: wiring the Prospect Card + trendBySportId into the Analytics shelf
   'src/components/playbyplay/PlayByPlay.jsx': 700, // 681
-  'src/api/loadPlayer.js': 700, // 682
+  'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612

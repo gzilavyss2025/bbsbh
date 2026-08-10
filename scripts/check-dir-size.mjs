@@ -194,7 +194,9 @@ const BUDGETS = {
   // 71 -> 72 for `31c-prospect-filters.css`: the Top 100 page's filter row
   // (TeamFilterStrip + the level slider) and the slider control itself —
   // same split-for-budget reason as 31a/31b, its own lettered sibling.
-  'src/styles': 72,
+  // 72 -> 73 for `31d-prospect-card.css`: the Analytics shelf's Prospect Card
+  // (ProspectCard.jsx) — same lettered-sibling shape as 31a/31b/31c above.
+  'src/styles': 73,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -232,7 +234,10 @@ const BUDGETS = {
   // there would be deleted nightly. Flat here like every other gen-*.mjs.
   // +1 for gen-prospect-trend.mjs — the nightly prospect percentile
   // generator, flat here like every other gen-*.mjs in this directory.
-  scripts: 72,
+  // +1 for gen-prospect-trend-backfill.mjs — its one-time historical
+  // backfill, the same pair-of-files shape as gen-rookies.mjs/gen-rookies-
+  // backfill.mjs already noted above.
+  scripts: 73,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -273,7 +278,11 @@ const BUDGETS = {
   // record) could be unit-tested — a generator is a top-level script, so a
   // helper worth testing can't stay inline (see roster.mjs's own header,
   // already in this directory for the same reason).
-  'scripts/lib': 14,
+  // +1 for prospectAgeBenchmark.mjs — the batched birthDate fetch behind the
+  // Prospect Card's age-vs-level fact, its own module since it's the first
+  // caller either gen-prospect-trend.mjs or its backfill has needed for a
+  // /people lookup, not a fit for prospectPercentile.mjs's pure math.
+  'scripts/lib': 15,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

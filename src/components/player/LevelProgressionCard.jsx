@@ -12,7 +12,18 @@
 // ahead). A debuted player passes `debutYear`, which fills that rung in as
 // reached — PlayerPage.jsx then moves the whole card down to sit just above
 // Firsts, reading as "how he got here" instead of "how far he's got left."
-export function LevelProgressionCard({ levels, debutYear }) {
+//
+// `trendBySportId`, when passed, is a map of AT MOST the player's CURRENT
+// level to his prospectCardView reading there ({ standing, tier, qualified }
+// — see src/api/prospectTrend.js) — only the current rung can show a real
+// standing, since bbsbh's percentile history starts this season, so a rung
+// from an earlier year has nothing to compare. A qualified reading appends
+// standingLabel's own phrase, tier 1/5 additionally striping the rung
+// (extremes carry color, same rule the Prospect Card uses); an unqualified
+// one appends a plain "(Too early)" — the same phrase the Prospect Card shows
+// in that state — so the two surfaces never disagree about whether a reader
+// should expect a number yet.
+export function LevelProgressionCard({ levels, debutYear, trendBySportId }) {
   if (!levels?.length) return null
   // A debuted player's MLB rung is where he is now — it takes the blue
   // "current" highlight, unless he's presently back at a lower level (a MiLB
@@ -26,27 +37,39 @@ export function LevelProgressionCard({ levels, debutYear }) {
   return (
     <section className="levelprog">
       <h3 className="section__title"><span>Path to the Majors</span></h3>
-      <div className="levelprog__arrow" aria-label="Minor league level progression">
-        {steps.map((lvl) => (
-          <div
-            key={lvl.sportId}
-            className={[
-              'levelprog__step',
-              lvl.isCurrent && 'is-current',
-              !lvl.reached && 'is-unreached',
-              lvl.target && 'is-target',
-            ].filter(Boolean).join(' ')}
-          >
-            <span className="levelprog__label">{lvl.label}</span>
-            {lvl.reached && (
-              <span className="levelprog__detail">
-                {lvl.firstYear}
-                {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''}
-                {lvl.stat ? ` · ${lvl.stat}` : ''}
-              </span>
-            )}
-          </div>
-        ))}
+      <div className="levelprog__body">
+        <div className="levelprog__arrow" aria-label="Minor league level progression">
+          {steps.map((lvl) => {
+            const trend = lvl.isCurrent ? trendBySportId?.[lvl.sportId] : null
+            const tierClass = trend?.qualified && trend.tier === 1 ? 'tier-low' : trend?.qualified && trend.tier === 5 ? 'tier-high' : null
+            return (
+              <div
+                key={lvl.sportId}
+                className={[
+                  'levelprog__step',
+                  lvl.isCurrent && 'is-current',
+                  !lvl.reached && 'is-unreached',
+                  lvl.target && 'is-target',
+                  tierClass,
+                ].filter(Boolean).join(' ')}
+              >
+                <span className="levelprog__label">{lvl.label}</span>
+                {lvl.reached && (
+                  <span className="levelprog__detail">
+                    {lvl.firstYear}
+                    {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''}
+                    {lvl.stat ? ` · ${lvl.stat}` : ''}
+                    {trend && (
+                      <span className="levelprog__standing">
+                        {trend.qualified ? trend.standing : '(Too early)'}
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
     </section>
   )

@@ -42,6 +42,25 @@ export async function fetchLevelSeasonStats(sportId, group, season) {
   }
 }
 
+// A whole level's CUMULATIVE-THROUGH-DATE lines, bounded to [startDate,
+// endDate] — same bulk, roster-independent shape as fetchLevelSeasonStats
+// (verified live: this returns the same data.stats[0].splits shape, just
+// scoped to the date range instead of "the whole season so far"), used only
+// by scripts/gen-prospect-trend-backfill.mjs to reconstruct a past
+// checkpoint's percentile population. Dates are 'YYYY-MM-DD'.
+export async function fetchLevelDateRangeStats(sportId, group, season, startDate, endDate) {
+  if (!sportId || !season || !startDate || !endDate) return []
+  try {
+    const data = await getJson(
+      `/api/v1/stats?stats=byDateRange&group=${group}&season=${season}&sportId=${sportId}` +
+        `&startDate=${startDate}&endDate=${endDate}&playerPool=all&limit=5000`,
+    )
+    return data.stats?.[0]?.splits ?? []
+  } catch {
+    return []
+  }
+}
+
 // One club's season lines for a group — same shape, scoped by teamId, so an
 // org's combined board is assembled from just its affiliates (not the whole
 // minors). A club's roster churns but its season stat list keeps everyone who

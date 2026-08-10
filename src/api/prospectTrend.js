@@ -87,3 +87,122 @@ export function standingLabel(percentile, group) {
         : 'Middle'
   return metric ? `${band} ${metric}` : band
 }
+
+// The Prospect Card's non-color tier cue (a reviewed accessibility gap: the
+// dots alone are color-only) — always printed beside the dots, never in place
+// of them. Mirrors levelTier's own 1-5 split, so the two can never disagree.
+const TIER_LABELS = {
+  1: 'Well below level',
+  2: 'Below level',
+  3: 'At level',
+  4: 'Above level',
+  5: 'Elite for level',
+}
+export function tierLabel(tier) {
+  return TIER_LABELS[tier] ?? null
+}
+
+// Sample-size honesty for the Prospect Card's percentile dot: the same
+// qualification floor (40 PA / 30 IP-outs, scripts/lib/prospectPercentile.mjs
+// — mirrored here rather than imported, same cross-boundary-constant
+// convention prospects.js's rate3/num2 already use, since scripts/ isn't part
+// of the client bundle) gates whether a percentile exists at all; THIS scales
+// how confidently the dot is drawn once it does. A percentile built on 41 PA
+// and one built on 400 PA look identical otherwise, and a real evaluator
+// would never treat them the same. Three states, at 1x/1.5x/3x the floor:
+// 'early' (hollow ring), 'building' (half-filled), 'established' (full,
+// unflagged — the expected case gets no extra caption).
+export const QUALIFICATION_FLOOR = { hitting: 40, pitching: 30 }
+export function confidenceState(sampleSize, group) {
+  const floor = QUALIFICATION_FLOOR[group]
+  if (!floor || !Number.isFinite(sampleSize) || sampleSize < floor) return null
+  if (sampleSize < floor * 1.5) return 'early'
+  if (sampleSize < floor * 3) return 'building'
+  return 'established'
+}
+
+// The Prospect Card's age-vs-level fact: how many years younger/older a
+// player is than the average QUALIFIED player at his level
+// (gen-prospect-trend.mjs's `levelAverageAge`, itself a real birthDate
+// average, not an estimate). Renders only past a 1-year edge — a 0.3-year
+// gap is noise, not a fact worth a row, same "don't print false precision"
+// stance standingLabel's own Middle band already takes.
+const AGE_EDGE_FLOOR_YEARS = 1.0
+export function ageEdgeFact(ageYears, levelAverageAge) {
+  if (!Number.isFinite(ageYears) || !Number.isFinite(levelAverageAge)) return null
+  const delta = levelAverageAge - ageYears
+  if (Math.abs(delta) < AGE_EDGE_FLOOR_YEARS) return null
+  return { years: Math.round(Math.abs(delta) * 10) / 10, direction: delta > 0 ? 'younger' : 'older' }
+}
+
+// The Prospect Card's whole view model, assembled from one player's trend
+// `entry` (prospectTrendById) plus the two facts it can't carry on its own
+// (his real age, and his level's average) — pure, so the component only ever
+// renders what this returns rather than re-deriving any of it inline.
+//
+//   'none'        — no trend row at all (entry == null): off the board,
+//                    complex ball, or a fresh promotion the generator hasn't
+//                    caught up to yet. The caller still shows an age-edge fact
+//                    if one exists — partial information beats an all-or-
+//                    nothing blank — but nothing else.
+//   'unqualified'  — a real row, under the PA/outs floor. Says why, with the
+//                    real count and the real floor, not just "not yet."
+//   'qualified'    — the full card: standing, tier, confidence, movement,
+//                    trend series.
+export function prospectCardView(entry, ageYears, levelAverageAge) {
+  const ageEdge = ageEdgeFact(ageYears, levelAverageAge)
+  if (!entry) return { state: 'none', ageEdge }
+  if (!entry.qualified) {
+    return {
+      state: 'unqualified',
+      metric: METRIC[entry.group],
+      sampleSize: entry.sampleSize,
+      floor: QUALIFICATION_FLOOR[entry.group],
+      ageEdge,
+    }
+  }
+  const tier = levelTier(entry.percentile)
+  return {
+    state: 'qualified',
+    percentile: entry.percentile,
+    metric: METRIC[entry.group],
+    standing: standingLabel(entry.percentile, entry.group),
+    tier,
+    tierLabel: tierLabel(tier),
+    confidence: confidenceState(entry.sampleSize, entry.group),
+    sampleSize: entry.sampleSize,
+    populationSize: entry.populationSize,
+    movement: entry.movement,
+    ageEdge,
+    trend: deriveTrendMarks(entry.history),
+  }
+}
+
+// Turns a player's full `history` (gen-prospect-trend.mjs's export, oldest
+// first: { date, sportId, percentile, qualified }) into what the Prospect
+// Card's expanded Trend panel draws — chart points, and the level-change
+// events worth a marker on the axis. Pure: no chart math (that's the
+// component's job), just the two derived facts a raw history array doesn't
+// hand over directly.
+//
+// A week the player didn't qualify contributes a point with `percentile:
+// null` rather than being dropped — the caller draws a gap there (a dashed
+// connector, never an interpolated or fabricated value), same "omit under the
+// sample floor" rule PercentileStrip/ADR-0040 already established for a
+// single strip row, applied here across a time axis instead.
+export function deriveTrendMarks(history) {
+  if (!history?.length) return { points: [], promotions: [] }
+  const points = history.map((h) => ({ date: h.date, percentile: h.qualified ? h.percentile : null }))
+  const promotions = []
+  for (let i = 1; i < history.length; i++) {
+    const from = history[i - 1].sportId
+    const to = history[i].sportId
+    if (to != null && from != null && to !== from) {
+      // Level numbering runs opposite to level rank (AAA=11 down to A=14,
+      // src/lib/teams.js's SPORT_IDS) — a LOWER sportId is a HIGHER level, so
+      // a promotion is a decrease.
+      promotions.push({ date: history[i].date, fromSportId: from, toSportId: to, direction: to < from ? 'up' : 'down' })
+    }
+  }
+  return { points, promotions }
+}

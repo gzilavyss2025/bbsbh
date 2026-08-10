@@ -1,0 +1,249 @@
+/* ============================================================
+   PROSPECT CARD
+   The Analytics shelf's fill for a MiLB player (ProspectCard.jsx) — the one
+   card that actually occupies the space StatcastPercentiles/AdvancedStatsCard
+   leave empty below the majors. Shares its container shell (border/radius/
+   header-strip) with LevelProgressionCard's own updated shell in
+   26-player-page.css's .levelprog rules — one card language, not two.
+   ============================================================ */
+
+.prospectcard {
+  margin-top: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.prospectcard__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.prospectcard__eyebrow {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.prospectcard__body {
+  padding: var(--space-3) var(--space-4);
+}
+
+.prospectcard__dash {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+/* ---- Row 1: the percentile track — same scale idiom as the Statcast strip
+   (26a-percentile-strip.css), not a new ring/radar (ADR-0040). ---- */
+.prospectcard__track {
+  position: relative;
+  height: 20px;
+  margin-bottom: var(--space-1);
+}
+.prospectcard__track::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: var(--bw-hair);
+  background: var(--rule-soft);
+  transform: translateY(-50%);
+}
+.prospectcard__bar {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--start) * 100%);
+  width: calc(var(--width) * 100%);
+  height: 3px;
+  background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.prospectcard__bar--above {
+  border-radius: 0 1.5px 1.5px 0;
+}
+.prospectcard__bar--below {
+  border-radius: 1.5px 0 0 1.5px;
+}
+
+/* The dot's own rendering IS the sample-size honesty fix: a percentile on a
+   thin sample is drawn less confidently than one on an established one,
+   rather than looking identical either way. */
+.prospectcard__confdot {
+  --dot: 11px;
+  position: absolute;
+  top: 50%;
+  left: calc(var(--pct, 0) * (100% - var(--dot)));
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  border: 1.5px solid var(--accent-primary);
+}
+.prospectcard__confdot--early {
+  background: var(--surface-card);
+}
+.prospectcard__confdot--building {
+  background: linear-gradient(90deg, var(--accent-primary) 50%, transparent 50%);
+}
+.prospectcard__confdot--established {
+  background: var(--accent-primary);
+}
+
+.prospectcard__standing {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+.prospectcard__move--up {
+  color: var(--accent-positive);
+}
+.prospectcard__move--down {
+  color: var(--accent-negative);
+}
+.prospectcard__pop {
+  font-family: var(--font-body);
+  font-weight: var(--w-regular);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.prospectcard__confcaption {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* ---- Row 2: tier dots + the non-color text label beside them
+   (accessibility — the dots alone are color-only). ---- */
+.prospectcard__tierrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+.prospectcard__tierlabel {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.prospectcard__rule {
+  margin: var(--space-3) 0;
+  border: none;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* ---- Age-vs-level fact — a plain fact, not a badge: no fill, no border,
+   no icon, so it can never optically read as an award beside a high tier. ---- */
+.prospectcard__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.prospectcard__facttitle {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.prospectcard__factvalue {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+}
+
+/* ---- Row 5: the trend disclosure — collapsed by default, same quiet-
+   underline-button idiom as StampGameButton's .stampstrip__disclose. ---- */
+.prospectcard__trend {
+  margin-top: var(--space-3);
+}
+.prospectcard__disclose {
+  position: relative;
+  display: inline-flex;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.prospectcard__disclose::after {
+  content: '';
+  position: absolute;
+  inset: calc(var(--space-2) * -1);
+}
+.prospectcard__disclose:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.prospectcard__chartwrap {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) dashed var(--border-rule);
+}
+.prospectcard__chart {
+  display: block;
+  overflow: visible;
+}
+.prospectcard__chartref {
+  stroke: var(--text-caption);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+.prospectcard__chartline {
+  stroke: var(--ink-1);
+  stroke-width: 1.5;
+  fill: none;
+}
+.prospectcard__chartline--gap {
+  stroke-dasharray: 3 3;
+}
+.prospectcard__chartdot {
+  fill: var(--ink-1);
+}
+.prospectcard__chartmark {
+  stroke: var(--border-rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+}
+.prospectcard__chartmarklabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  fill: var(--text-caption);
+}
+.prospectcard__chartcaption {
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
