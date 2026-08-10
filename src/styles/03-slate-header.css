@@ -51,8 +51,14 @@
    AsyncStatus in the app renders one — including section-level statuses that
    sit inside a page, which a screen-tall floor would tear a hole in. Other
    cold-load screens share the underlying pattern; give them the same reserve
-   per screen, after measuring that screen, not by widening this one. */
-.screen--slate .loader--page {
+   per screen, after measuring that screen, not by widening this one.
+
+   Scoped to the COLD load for the same reason, one level in. On a day with no
+   games `hasData` never becomes true, so the live poll puts the loader back on
+   screen every refresh with the Off Day grid already rendered below it — and a
+   reserve that applied there would wedge a screen-tall gap between the two.
+   See GameSelect's `coldLoad`. */
+.screen--coldload .loader--page {
   align-items: flex-start;
   min-height: 100svh;
 }
