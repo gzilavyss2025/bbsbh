@@ -264,70 +264,6 @@
 .prospects__empty p {
   margin: 0;
 }
-.prospects__ledger-shell {
-  position: relative;
-}
-.prospects__scrollcue {
-  margin: 0;
-  padding: var(--space-1) var(--space-2);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-bottom: 0;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  background: var(--surface-inset);
-  color: var(--text-caption);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-align: right;
-  text-transform: uppercase;
-}
-.prospects__ledger-shell .ledger-wrap {
-  scrollbar-width: thin;
-  scrollbar-color: var(--text-caption) var(--bg-page);
-}
-.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar {
-  height: var(--space-2);
-}
-.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar-track {
-  background: var(--bg-page);
-}
-.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar-thumb {
-  border-radius: var(--radius-pill);
-  background: var(--text-caption);
-}
-.prospects__ledger-shell .prospecttable {
-  min-width: calc(var(--space-16) * 11);
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-.prospects__ledger-shell .prospecttable th:first-child,
-.prospects__ledger-shell .prospecttable td:first-child,
-.prospects__ledger-shell .prospecttable th:nth-child(2),
-.prospects__ledger-shell .prospecttable td:nth-child(2) {
-  position: sticky;
-  z-index: 2;
-  background-color: var(--surface-card);
-}
-.prospects__ledger-shell .prospecttable th:first-child,
-.prospects__ledger-shell .prospecttable th:nth-child(2) {
-  z-index: 3;
-  background-color: var(--bg-page);
-}
-.prospects__ledger-shell .prospecttable th:first-child,
-.prospects__ledger-shell .prospecttable td:first-child {
-  left: 0;
-  width: var(--space-12);
-  min-width: var(--space-12);
-}
-.prospects__ledger-shell .prospecttable th:nth-child(2),
-.prospects__ledger-shell .prospecttable td:nth-child(2) {
-  left: var(--space-12);
-  width: calc(var(--space-12) * 3);
-  min-width: calc(var(--space-12) * 3);
-  border-right: var(--bw-hair) solid var(--border-rule);
-}
-
 @media (min-width: 740px) {
   .prospects__header {
     padding-top: var(--space-5);
@@ -364,20 +300,9 @@
     justify-self: end;
     margin: 0;
   }
-  .prospects__scrollcue {
-    display: none;
-  }
-  .prospects__ledger-shell .prospecttable {
-    min-width: 100%;
-    border-radius: var(--radius-md);
-  }
-  .prospects__ledger-shell .prospecttable th:first-child,
-  .prospects__ledger-shell .prospecttable td:first-child,
-  .prospects__ledger-shell .prospecttable th:nth-child(2),
-  .prospects__ledger-shell .prospecttable td:nth-child(2) {
-    position: static;
-    width: auto;
-    min-width: 0;
-    border-right: 0;
-  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prospects__reset { transition: none; }
+  .prospects__reset:active { transform: none; }
 }

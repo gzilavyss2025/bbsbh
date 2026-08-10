@@ -1,5 +1,7 @@
-// A discrete, labeled filter over the SAME five bands ProspectTrendPill's dot
-// row draws (levelTier, api/prospectTrend.js) — not a level-of-play filter
+import { LEVEL_STANDING_BANDS } from '../../api/prospectTrend.js'
+
+// A discrete, labeled filter over the same five standing bands used by the
+// board and Prospect Card — not a level-of-play filter
 // (see TeamFilterStrip for the club pick, and /prospects' own level slider
 // question this replaced: filtering by WHERE he's playing is a different
 // question from filtering by HOW HE'S PERFORMING there). A real draggable
@@ -8,7 +10,7 @@
 // with every band's plain-language label shown beneath the track, colored the same
 // red/kraft/green the dots themselves use, so the slider reads as the same
 // scale before it's ever touched.
-const RUNGS = ['All', 'Bottom', 'Below', 'Middle', 'Above', 'Top']
+const RUNGS = LEVEL_STANDING_BANDS
 
 // tier 1-2 => 'low' (red), 3 => 'mid' (kraft brown), 4-5 => 'high' (green) —
 // same bandFor as ProspectTrendPill's own dot row.

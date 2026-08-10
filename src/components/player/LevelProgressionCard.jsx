@@ -18,7 +18,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
         <h3 className="levelprog__title">Path to the Majors</h3>
         {current && (
           <p className="levelprog__current">
-            <span>Current assignment</span>
+            <span>Current level</span>
             <strong>{current.label}</strong>
           </p>
         )}
@@ -30,7 +30,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
           style={{ '--level-count': steps.length }}
         >
           {steps.map((level) => {
-            const status = level.isCurrent ? 'Current assignment' : level.reached ? 'Reached' : level.target ? 'MLB destination' : 'Next level'
+            const status = level.isCurrent ? 'Current level' : level.reached ? 'Reached' : level.target ? 'MLB destination' : 'Next level'
             return (
               <li
                 key={level.sportId}

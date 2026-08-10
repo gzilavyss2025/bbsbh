@@ -72,7 +72,7 @@ const SOURCE_EXT = ['.js', '.jsx', '.mjs', '.css']
 // now itemised instead of hidden inside one number.
 const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
-  'src/styles/05-masthead-nav.css': 800, // 739 — +1 band: LevelProgressionCard's shared container contract (31d-prospect-card.css's sibling rules)
+  'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
   'src/styles/06-loader-and-cards.css': 900, // 850
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 700, // 687 — the Ballpark card moved out to 57-ballpark-card.css

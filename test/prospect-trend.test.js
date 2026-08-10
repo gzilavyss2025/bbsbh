@@ -6,6 +6,9 @@ import {
   levelTier,
   tierLabel,
   confidenceState,
+  confidenceLabel,
+  movementState,
+  LEVEL_STANDING_BANDS,
   deriveTrendMarks,
   ageEdgeFact,
   prospectCardView,
@@ -119,18 +122,23 @@ test('a non-numeric percentile has no tier, same empty state as standingLabel', 
 // tierLabel — the non-color cue beside the dots.
 // ---------------------------------------------------------------------------
 
-test('tierLabel names all five tiers', () => {
-  assert.equal(tierLabel(1), 'Bottom band')
-  assert.equal(tierLabel(2), 'Below band')
-  assert.equal(tierLabel(3), 'Middle band')
-  assert.equal(tierLabel(4), 'Above band')
-  assert.equal(tierLabel(5), 'Top band')
+test('tierLabel names all five standing bands', () => {
+  assert.equal(tierLabel(1), 'Bottom')
+  assert.equal(tierLabel(2), 'Below')
+  assert.equal(tierLabel(3), 'Middle')
+  assert.equal(tierLabel(4), 'Above')
+  assert.equal(tierLabel(5), 'Top')
 })
 
 test('tierLabel has no label for an out-of-range or missing tier', () => {
   assert.equal(tierLabel(0), null)
   assert.equal(tierLabel(6), null)
   assert.equal(tierLabel(null), null)
+})
+
+test('the filter and both display surfaces share one standing-band vocabulary', () => {
+  assert.deepEqual(LEVEL_STANDING_BANDS, ['All', 'Bottom', 'Below', 'Middle', 'Above', 'Top'])
+  assert.deepEqual([1, 2, 3, 4, 5].map(tierLabel), LEVEL_STANDING_BANDS.slice(1))
 })
 
 // ---------------------------------------------------------------------------
@@ -167,6 +175,26 @@ test('confidenceState is null for an unrecognised group or non-finite sample siz
   assert.equal(confidenceState(100, 'fielding'), null)
   assert.equal(confidenceState(NaN, 'hitting'), null)
   assert.equal(confidenceState(undefined, 'hitting'), null)
+})
+
+test('confidenceLabel names the three sample-confidence states consistently', () => {
+  assert.equal(confidenceLabel('early'), 'Early sample')
+  assert.equal(confidenceLabel('building'), 'Building sample')
+  assert.equal(confidenceLabel('established'), 'Established sample')
+  assert.equal(confidenceLabel(null), null)
+})
+
+test('movementState uses the same five-point claim floor on every surface', () => {
+  assert.equal(movementState(null), null)
+  assert.deepEqual(movementState({ delta: 4, sinceDate: '2026-07-20' }), {
+    direction: 'steady', amount: 4, sinceDate: '2026-07-20',
+  })
+  assert.deepEqual(movementState({ delta: 5, sinceDate: '2026-07-20' }), {
+    direction: 'up', amount: 5, sinceDate: '2026-07-20',
+  })
+  assert.deepEqual(movementState({ delta: -7, sinceDate: '2026-07-20' }), {
+    direction: 'down', amount: 7, sinceDate: '2026-07-20',
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -269,7 +297,7 @@ test('prospectCardView is state "qualified" with tier, confidence, and trend all
   assert.equal(view.percentile, 93)
   assert.equal(view.standing, 'Top 7% OPS')
   assert.equal(view.tier, 5)
-  assert.equal(view.tierLabel, 'Top band')
+  assert.equal(view.tierLabel, 'Top')
   assert.equal(view.confidence, 'established')
   assert.equal(view.floor, 40)
   assert.equal(view.populationSize, 84)

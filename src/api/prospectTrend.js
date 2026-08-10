@@ -39,13 +39,13 @@ export function prospectTrendById(snapshot, playerId) {
 const TOP_FROM = 60
 const BOTTOM_TO = 40
 
-// Buckets a percentile into the 1-5 rating ProspectTrendPill draws as a dot
-// row — built by splitting standingLabel's own Bottom/Middle/Top bands in
+// Buckets a percentile into the five standing bands used by the board filter
+// and the Prospect Card — built by splitting standingLabel's own
+// Bottom/Middle/Top bands in
 // half rather than inventing a fresh set of edges, so the two stay in step:
 // tier 3 is exactly the Middle band (41-59), and 1/2 and 4/5 split the Bottom
 // and Top bands at their own midpoints (20 and 80). 1-2 mark him below his
-// level's pack, 4-5 above it — ProspectTrendPill colors on that split, not on
-// the tier number itself. Null mirrors standingLabel's own empty state.
+// level's pack, 4-5 above it. Null mirrors standingLabel's own empty state.
 export function levelTier(percentile) {
   if (!Number.isFinite(percentile)) return null
   if (percentile <= BOTTOM_TO) return percentile <= 20 ? 1 : 2
@@ -88,30 +88,28 @@ export function standingLabel(percentile, group) {
   return metric ? `${band} ${metric}` : band
 }
 
-// The Prospect Card's non-color tier cue (a reviewed accessibility gap: the
-// dots alone are color-only) — always printed beside the dots, never in place
-// of them. Mirrors levelTier's own 1-5 split, so the two can never disagree.
+// One user-facing vocabulary for the five level-relative standing bands. The
+// board, filter, and Prospect Card all read these labels from this map.
 const TIER_LABELS = {
-  1: 'Bottom band',
-  2: 'Below band',
-  3: 'Middle band',
-  4: 'Above band',
-  5: 'Top band',
+  1: 'Bottom',
+  2: 'Below',
+  3: 'Middle',
+  4: 'Above',
+  5: 'Top',
 }
 export function tierLabel(tier) {
   return TIER_LABELS[tier] ?? null
 }
 
-// Sample-size honesty for the Prospect Card's percentile dot: the same
+export const LEVEL_STANDING_BANDS = ['All', ...Object.values(TIER_LABELS)]
+
+// Sample-size honesty for every level-relative standing: the same
 // qualification floor (40 PA / 30 IP-outs, scripts/lib/prospectPercentile.mjs
 // — mirrored here rather than imported, same cross-boundary-constant
 // convention prospects.js's rate3/num2 already use, since scripts/ isn't part
 // of the client bundle) gates whether a percentile exists at all; THIS scales
-// how confidently the dot is drawn once it does. A percentile built on 41 PA
-// and one built on 400 PA look identical otherwise, and a real evaluator
-// would never treat them the same. Three states, at 1x/1.5x/3x the floor:
-// 'early' (hollow ring), 'building' (half-filled), 'established' (full,
-// unflagged — the expected case gets no extra caption).
+// how much confidence the sample supports once a percentile exists. The UI
+// states this in text; marker fill does not carry a second meaning.
 export const QUALIFICATION_FLOOR = { hitting: 40, pitching: 30 }
 export function confidenceState(sampleSize, group) {
   const floor = QUALIFICATION_FLOOR[group]
@@ -119,6 +117,29 @@ export function confidenceState(sampleSize, group) {
   if (sampleSize < floor * 1.5) return 'early'
   if (sampleSize < floor * 3) return 'building'
   return 'established'
+}
+
+export function confidenceLabel(confidence) {
+  if (confidence === 'early') return 'Early sample'
+  if (confidence === 'building') return 'Building sample'
+  if (confidence === 'established') return 'Established sample'
+  return null
+}
+
+// A percentile can move by a point or two after one game. Both prospect
+// surfaces call moves below five points steady, so the board and card cannot
+// make different claims from the same snapshot.
+export const MOVEMENT_FLOOR = 5
+export function movementState(movement) {
+  if (!Number.isFinite(movement?.delta)) return null
+  if (Math.abs(movement.delta) < MOVEMENT_FLOOR) {
+    return { direction: 'steady', amount: Math.abs(movement.delta), sinceDate: movement.sinceDate ?? null }
+  }
+  return {
+    direction: movement.delta > 0 ? 'up' : 'down',
+    amount: Math.abs(movement.delta),
+    sinceDate: movement.sinceDate ?? null,
+  }
 }
 
 // The Prospect Card's age-vs-level fact: how many years younger/older a

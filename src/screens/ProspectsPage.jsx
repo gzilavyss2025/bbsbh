@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fetchTopProspects, resolveCurrentLevels, isPitcher } from '../api/prospects.js'
-import { fetchProspectTrend, prospectTrendById, levelTier } from '../api/prospectTrend.js'
+import { fetchProspectTrend, prospectTrendById, levelTier, LEVEL_STANDING_BANDS } from '../api/prospectTrend.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
@@ -17,7 +17,6 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
-const PERFORMANCE_BANDS = ['All', 'Bottom', 'Below', 'Middle', 'Above', 'Top']
 
 function generatedLabel(iso) {
   if (!iso) return ''
@@ -75,14 +74,14 @@ function ProspectBoard({ players, trend, selectedId, onSelect }) {
   return (
     <div className="prospectboard-wrap">
       <table className="prospectboard">
-        <caption className="sr-only">MLB Pipeline Top 100 prospect ranking with current assignment, season line, and performance versus current level</caption>
+        <caption className="sr-only">MLB Pipeline Top 100 ranking with current level, season line, and standing versus level</caption>
         <thead>
           <tr>
             <th scope="col">Pipeline rk</th>
             <th scope="col">Player</th>
-            <th scope="col">Pos · level · club</th>
-            <th scope="col">2026 line</th>
-            <th scope="col">Vs current level</th>
+            <th scope="col">Pos · current level · club</th>
+            <th scope="col">2026 season line</th>
+            <th scope="col">Standing vs level</th>
           </tr>
         </thead>
         <tbody>
@@ -99,9 +98,9 @@ function ProspectBoard({ players, trend, selectedId, onSelect }) {
                 <td className="prospectboard__identity" data-label="Player">
                   <PlayerLink id={player.playerId} className="prospecttable__name">{player.name}</PlayerLink>
                 </td>
-                <td className="prospectboard__assignmentcell" data-label="Assignment"><AssignmentCell player={player} /></td>
-                <td className="prospectboard__linecell" data-label="2026 line"><LineCell lines={player.lines} level={player.levelLabel} /></td>
-                <td className="prospectboard__standingcell" data-label="Vs current level">
+                <td className="prospectboard__assignmentcell" data-label="Current level"><AssignmentCell player={player} /></td>
+                <td className="prospectboard__linecell" data-label="2026 season line"><LineCell lines={player.lines} level={player.levelLabel} /></td>
+                <td className="prospectboard__standingcell" data-label="Standing vs level">
                   <ProspectTrendPill entry={prospectTrendById(trend, player.playerId)} level={player.levelLabel} />
                 </td>
               </tr>
@@ -147,8 +146,8 @@ function GroupPill({ group, onChange }) {
 // snapshot hasn't been generated yet (or the source page's structure broke
 // the scrape). Three independent, stackable filters narrow the list: team
 // (TeamFilterStrip, a true filter per lib/teamFilter.js, not a highlight),
-// vs. Level performance tier (VsLevelSlider, the SAME 1-5 rating the "vs.
-// Level" dots draw, not a level-of-play filter), and batter/pitcher
+// standing band (VsLevelSlider, the same five-band scale every standing cell
+// and Prospect Card names, not a level-of-play filter), and batter/pitcher
 // (GroupPill) — without ever touching `rank`, which is fixed at each
 // player's Top 100 position and never recomputed from the filtered array's
 // own indices.
@@ -171,7 +170,7 @@ export function ProspectsPage() {
   const activeFilters = [
     filterTeamId == null ? null : teamFullName(filterTeamId),
     filterGroup === 'all' ? null : GROUPS.find((group) => group.key === filterGroup)?.label,
-    filterTier == null ? null : PERFORMANCE_BANDS[filterTier],
+    filterTier == null ? null : LEVEL_STANDING_BANDS[filterTier],
   ].filter(Boolean)
   const hasActiveFilters = activeFilters.length > 0
   const selectedId = players.some((p) => p.playerId === selectedPlayerId) ? selectedPlayerId : players[0]?.playerId
@@ -248,11 +247,11 @@ export function ProspectsPage() {
               />
             </div>
             <div className="prospects__filterfield prospects__filterfield--performance">
-              <p className="prospects__filterlabel">Performance vs. current level</p>
+              <p className="prospects__filterlabel">Standing band</p>
               <VsLevelSlider
                 value={filterTier}
                 onChange={setFilterTier}
-                ariaLabel="Filter Top 100 Prospects by performance versus current level"
+                ariaLabel="Filter Top 100 Prospects by standing band versus current level"
               />
             </div>
           </div>
@@ -278,7 +277,7 @@ export function ProspectsPage() {
             selectedId={selectedId}
             onSelect={setSelectedPlayerId}
           />
-          <p className="hint prospects__caption">Pipeline rank stays fixed when the board is filtered. Performance compares each player with qualified hitters or pitchers at his current level.</p>
+          <p className="hint prospects__caption">Pipeline rank stays fixed when the board is filtered. Standing compares OPS or ERA with qualified players at the same level.</p>
         </>
       )}
 

@@ -63,6 +63,7 @@
 .prospectcard {
   margin-top: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
+  border-top: 3px solid var(--accent-primary);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   overflow: hidden;
@@ -175,26 +176,7 @@
   border-left: var(--bw-hair) dotted var(--text-caption);
 }
 
-.prospectcard__bar {
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: calc(var(--start) * 100%);
-  width: calc(var(--width) * 100%);
-  height: 3px;
-  background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
-  transform: translateY(-50%);
-}
-
-.prospectcard__bar--above {
-  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-}
-
-.prospectcard__bar--below {
-  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
-}
-
-.prospectcard__confdot {
+.prospectcard__marker {
   --dot: 12px;
   position: absolute;
   z-index: 3;
@@ -202,14 +184,12 @@
   left: calc(var(--pct, 0) * (100% - var(--dot)));
   width: var(--dot);
   height: var(--dot);
-  border: 2px solid var(--accent-primary);
+  border: 2px solid var(--surface-card);
   border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 0 var(--bw-hair) var(--accent-primary);
   transform: translateY(-50%);
 }
-
-.prospectcard__confdot--early { background: var(--surface-card); }
-.prospectcard__confdot--building { background: linear-gradient(90deg, var(--accent-primary) 50%, var(--surface-card) 50%); }
-.prospectcard__confdot--established { background: var(--accent-primary); }
 
 .prospectcard__scalelabels {
   display: grid;
@@ -231,7 +211,7 @@
 
 .prospectcard__fact {
   display: grid;
-  grid-template-columns: minmax(72px, auto) minmax(0, 1fr);
+  grid-template-columns: minmax(116px, auto) minmax(0, 1fr);
   gap: var(--space-3);
   align-items: baseline;
   min-width: 0;

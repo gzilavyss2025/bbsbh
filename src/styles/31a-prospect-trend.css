@@ -1,15 +1,6 @@
-/* ProspectTrendPill — /prospects' "vs. Level" column, a static Ledger cell
-   (see that component's header for why it's static, not a tap-to-reveal like
-   radarpill's note). Split out of 31-wild-card.css (already at its
-   check-file-size budget) rather than grown there — same "one new file, one
-   new number" rule src/index.css's ordered @import list runs on for every
-   other lettered sibling. Cascades right after it since it extends the same
-   .prospecttable rules. The cell IS the row of five tier dots (the "at a
-   glance" scan signal — 1-2 red, 3 kraft brown, 4-5 green) — no printed
-   standing underneath it any more, so the dots carry the full weight of the
-   cell and are sized accordingly; see ProspectTrendPill.jsx/levelTier for
-   the accessible name that replaces the old printed line. Only the dot fill
-   and the movement arrow ever take color. */
+/* ProspectTrendPill movement tones. The board-specific composition lives in
+   31e-prospect-board.css. Direction uses both an arrow shape and text; color
+   is supplemental. */
 .prospecttrend {
   display: inline-flex;
   align-items: center;
@@ -20,30 +11,6 @@
   font-size: var(--fs-compact);
   color: var(--text-caption);
   white-space: nowrap;
-}
-.prospecttrend__dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-.prospecttrend__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: transparent;
-  border: 1.5px solid var(--border-rule);
-}
-.prospecttrend__dots--low .prospecttrend__dot--filled {
-  background: var(--accent-negative);
-  border-color: var(--accent-negative);
-}
-.prospecttrend__dots--mid .prospecttrend__dot--filled {
-  background: var(--seal-cover);
-  border-color: var(--seal-cover);
-}
-.prospecttrend__dots--high .prospecttrend__dot--filled {
-  background: var(--accent-positive);
-  border-color: var(--accent-positive);
 }
 .prospecttrend__move--up {
   color: var(--accent-positive);

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import '../../styles/31d-prospect-card.css'
-import { dotFraction, deviationBar } from '../../lib/percentileStrip.js'
+import { dotFraction } from '../../lib/percentileStrip.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
+import { confidenceLabel, movementState } from '../../api/prospectTrend.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 
 const CHART_H = 140
@@ -18,18 +19,8 @@ function sampleSizeLabel(metric, sampleSize) {
   return metric === 'OPS' ? `${sampleSize} PA` : `${outsToIp(sampleSize)} IP`
 }
 
-function sampleFloorLabel(metric, sampleSize) {
-  return metric === 'OPS' ? `${sampleSize}+ PA` : `${outsToIp(sampleSize)}+ IP`
-}
-
 function comparisonGroup(metricOrGroup) {
   return metricOrGroup === 'ERA' || metricOrGroup === 'pitching' ? 'pitchers' : 'hitters'
-}
-
-function confidenceLabel(confidence) {
-  if (confidence === 'early') return 'Early sample'
-  if (confidence === 'building') return 'Building sample'
-  return 'Established sample'
 }
 
 function ordinal(value) {
@@ -48,10 +39,11 @@ function shortDate(apiDate) {
 }
 
 function movementLabel(movement) {
-  if (!Number.isFinite(movement?.delta)) return null
-  const amount = Math.abs(movement.delta)
-  const date = shortDate(movement.sinceDate)
-  return `${movement.delta > 0 ? 'Up' : movement.delta < 0 ? 'Down' : 'Even'} ${amount} percentile ${amount === 1 ? 'point' : 'points'}${date ? ` since ${date}` : ''}`
+  const state = movementState(movement)
+  if (!state) return null
+  const date = shortDate(state.sinceDate)
+  if (state.direction === 'steady') return `Steady${date ? ` since ${date}` : ''}`
+  return `${state.direction === 'up' ? 'Up' : 'Down'} ${state.amount} percentile points${date ? ` since ${date}` : ''}`
 }
 
 export function ProspectCard({ view, level, badge, group }) {
@@ -85,7 +77,7 @@ export function ProspectCard({ view, level, badge, group }) {
 function EmptyStanding({ level }) {
   return (
     <div className="prospectcard__empty">
-      <span className="prospectcard__emptylabel">Current-level standing</span>
+      <span className="prospectcard__emptylabel">Standing vs level</span>
       <p>No qualified comparison{level ? ` at ${level}` : ''} yet</p>
     </div>
   )
@@ -106,7 +98,6 @@ function EarlyStanding({ view, level }) {
 
 function QualifiedStanding({ view, level }) {
   const dot = dotFraction(view.percentile)
-  const bar = deviationBar(view.percentile)
   const movement = movementLabel(view.movement)
   const hasTrendData = view.trend.points.some((point) => point.percentile != null)
 
@@ -118,31 +109,25 @@ function QualifiedStanding({ view, level }) {
             <strong className="prospectcard__percentile">{ordinal(view.percentile)} percentile</strong>
             <span className="prospectcard__metric">{view.metric}{level ? ` vs ${level}` : ''}</span>
             <p className="prospectcard__comparison">
-              {view.standing.replace(` ${view.metric}`, '')} among {view.populationSize} qualified {level ? `${level} ` : ''}
-              {comparisonGroup(view.metric)} with {sampleFloorLabel(view.metric, view.floor)}
+              Compared with {view.populationSize} qualified {level ? `${level} ` : ''}
+              {comparisonGroup(view.metric)} with at least {sampleSizeLabel(view.metric, view.floor)}
             </p>
           </div>
 
           <div
             className="prospectcard__scale"
             role="img"
-            aria-label={`${ordinal(view.percentile)} percentile on a scale from 0 to 100; 50 is the level average benchmark`}
+            aria-label={`${ordinal(view.percentile)} percentile on a scale from 0 to 100; 50 is the level median`}
           >
             <div className="prospectcard__track" aria-hidden="true">
               <span
-                className={`prospectcard__confdot prospectcard__confdot--${view.confidence ?? 'established'}`}
+                className="prospectcard__marker"
                 style={dot != null ? { '--pct': dot } : undefined}
               />
-              {bar && (
-                <span
-                  className={`prospectcard__bar prospectcard__bar--${bar.side}`}
-                  style={{ '--start': bar.start, '--width': bar.width }}
-                />
-              )}
             </div>
             <div className="prospectcard__scalelabels" aria-hidden="true">
               <span>0</span>
-              <span>50 · Level average</span>
+              <span>50 · Level median</span>
               <span>100</span>
             </div>
           </div>
@@ -150,18 +135,18 @@ function QualifiedStanding({ view, level }) {
 
         <dl className="prospectcard__facts">
           <div className="prospectcard__fact">
-            <dt>Sample</dt>
+            <dt>Sample confidence</dt>
             <dd>{confidenceLabel(view.confidence)} — {sampleSizeLabel(view.metric, view.sampleSize)}</dd>
           </div>
           <div className="prospectcard__fact">
             <dt>Movement</dt>
-            <dd className={movement ? `prospectcard__move prospectcard__move--${view.movement.delta > 0 ? 'up' : view.movement.delta < 0 ? 'down' : 'even'}` : undefined}>
+            <dd className={movement ? `prospectcard__move prospectcard__move--${movementState(view.movement)?.direction}` : undefined}>
               {movement ?? 'No comparison period yet'}
             </dd>
           </div>
           <div className="prospectcard__fact">
-            <dt>Band</dt>
-            <dd>{view.tierLabel}{level ? ` for ${level}` : ''} {view.metric}</dd>
+            <dt>Standing band</dt>
+            <dd>{view.tierLabel}</dd>
           </div>
         </dl>
       </div>
@@ -250,7 +235,7 @@ function TrendChart({ trend, metric, level }) {
   const latest = qualified.at(-1)
   const gapCount = points.filter((point) => point.percentile == null).length
   const eventSummary = promotions.map((promotion) => {
-    const direction = promotion.direction === 'up' ? 'promoted' : 'moved down'
+    const direction = promotion.direction === 'up' ? 'promoted' : 'assigned down'
     return `${direction} to ${SPORT_LABEL[promotion.toSportId] ?? 'a new level'} on ${shortDate(promotion.date)}`
   }).join('; ')
   const accessibleSummary = [
@@ -299,7 +284,7 @@ function TrendChart({ trend, metric, level }) {
           if (pointIndex < 0) return null
           const markerX = x(pointIndex)
           const nearRight = markerX > width - 150
-          const label = `${promotion.direction === 'up' ? 'Promoted' : 'Moved down'} to ${SPORT_LABEL[promotion.toSportId] ?? ''}`
+          const label = `${promotion.direction === 'up' ? 'Promotion' : 'Assignment'} · ${SPORT_LABEL[promotion.toSportId] ?? ''}`
           return (
             <g key={`${promotion.date}-${index}`}>
               <line x1={markerX} y1={PLOT_TOP} x2={markerX} y2={PLOT_TOP + plotHeight} className="prospectcard__chartmark" />
