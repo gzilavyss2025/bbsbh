@@ -52,6 +52,7 @@ export const SCORE_BASE = {
   birthdayStats: 60,
   birthday: 55,
   homerRec: 55,
+  veloPeak: 55, // a new season-high or elite-tier (ELITE_VELO_MPH+) single pitch — as rare as homerRec
   onBaseEnded: 50,
   onBaseExtended: 45,
   onBaseRiding: 40,

@@ -1,13 +1,16 @@
 // In-game pitching health: the "laboring index" (P3) and the fastball
-// velocity-decay flag (P4) from .scratch/metric-engines/pitching-health.md.
+// velocity-decay flag (P4) from .scratch/metric-engines/pitching-health.md,
+// plus the century-club variety check (`computeVeloVariety`, docs/callouts.md).
 //
 // SPOILER NOTE — same footing as pitchers.js (ADR-0009): everything here is
-// driven by the reveal high-water mark. `computeVeloDecay` walks only plays in
-// revealed half-innings; `laboringFor` reads a pitcher row that
-// computePitcherLines already clamped to `revealedThrough`. Neither is wrapped
-// in a SealBox — a still-active pitcher needs partial-outing granularity.
+// driven by the reveal high-water mark. `computeVeloDecay`/`computeVeloVariety`
+// walk only plays in revealed half-innings; `laboringFor` reads a pitcher row
+// that computePitcherLines already clamped to `revealedThrough`. None is
+// wrapped in a SealBox — a still-active pitcher needs partial-outing
+// granularity.
 //
 import { halfIndex } from './select.js'
+import { CENTURY_MPH } from './pitchArsenal.js'
 
 // The laboring index deliberately compares raw volume against the pitcher's
 // OWN season norm (pitches per inning) rather than weighting pitches by
@@ -120,6 +123,51 @@ export function computeVeloDecay(feed, revealedThrough) {
       type: code,
       flagged: drop >= VELO_DROP_FLAG,
     }
+  }
+  return out
+}
+
+// The "century club" live signal: how many DISTINCT pitch types a pitcher has
+// thrown at CENTURY_MPH+ so far tonight (revealed plays only). Unlike
+// computeVeloDecay this walks every pitch type, not just the fastball family
+// — the whole point is catching a breaking ball or changeup at triple digits,
+// not just a hot heater. Threshold-free like computeVeloDecay: this just
+// reports what happened, and pitcher-callouts.js decides what's noteworthy
+// (2+ types). Returns a plain object, same shape/convention as
+// computeVeloDecay's own return (bracket access, `health?.variety?.[id]`):
+// pitcherId -> { types: [{code, description, maxVelo}], count } — `types`
+// sorted fastest first, `count` its length.
+export function computeVeloVariety(feed, revealedThrough) {
+  const plays = feed?.liveData?.plays?.allPlays ?? []
+  // pitcherId -> code -> { description, maxVelo }
+  const byPitcher = new Map()
+
+  for (const p of plays) {
+    const inn = p?.about?.inning
+    const half = p?.about?.halfInning
+    if (!inn || !half) continue
+    if (halfIndex(inn, half) > revealedThrough) continue // sealed — never read
+    const pid = p?.matchup?.pitcher?.id
+    if (!pid) continue
+    for (const e of p.playEvents ?? []) {
+      if (!e.isPitch) continue
+      const code = e.details?.type?.code
+      const velo = e.pitchData?.startSpeed
+      if (!code || typeof velo !== 'number' || velo < CENTURY_MPH) continue
+      const byCode = byPitcher.get(pid) ?? byPitcher.set(pid, new Map()).get(pid)
+      const t = byCode.get(code)
+      if (!t || velo > t.maxVelo) {
+        byCode.set(code, { description: e.details?.type?.description ?? '', maxVelo: velo })
+      }
+    }
+  }
+
+  const out = {}
+  for (const [pid, byCode] of byPitcher) {
+    const types = [...byCode.entries()]
+      .map(([code, t]) => ({ code, description: t.description, maxVelo: t.maxVelo }))
+      .sort((a, b) => b.maxVelo - a.maxVelo)
+    out[pid] = { types, count: types.length }
   }
   return out
 }

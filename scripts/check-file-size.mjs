@@ -101,7 +101,11 @@ const BUDGETS = {
   // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
   'src/api/whatsBrewing.js': 1600, // 1581
-  'scripts/gen-callouts.mjs': 1500, // 1483
+  // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
+  // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep
+  // (scripts/lib/century-club.mjs) onto starterRecords per pitcher/level. The
+  // query/row-shaping itself already lives in that lib module, not here.
+  'scripts/gen-callouts.mjs': 1600, // 1507
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1200, // 1179 — InningTally moved to screens/boxscore/InningTally.jsx

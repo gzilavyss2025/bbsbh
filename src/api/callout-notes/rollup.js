@@ -288,6 +288,20 @@ export function computeGameCalloutNotes(feed, bundle, vsTeam) {
           ...n,
           text: `Reached base again ${word} — his on-base streak is now ${n.streak} straight games, dating to ${monthDay(n.start)}`,
         }
+        continue
+      }
+
+      // A new season-high (or elite-tier) pitch tonight reads with the
+      // "tonight" framing once the game is decided — the live card's
+      // "New season high for X — …" already named him, so the roll-up drops
+      // that repetition and leads with the result-aware verb instead.
+      if (n.kind === 'veloPeak' && isNum(n.mph)) {
+        ordered[i] = {
+          ...n,
+          text: n.isSeasonHigh
+            ? `Hit a new season-high ${n.mph.toFixed(1)} mph ${word}`
+            : `Touched ${n.mph.toFixed(1)} mph ${word} — one of the hardest pitches he's thrown all season`,
+        }
       }
     }
 

@@ -66,12 +66,27 @@ export async function fetchPitchArsenalPool(isMlb) {
 // floors (src/api/fouls.js).
 export const MIN_ARSENAL_PITCHES = 15
 
+// The two velocity bars the "century club" / veloVariety / veloPeak callout
+// families (src/api/pitcherHealth.js, pitcher-callouts.js,
+// callout-notes/liveAtBat.js, scripts/gen-pitch-arsenal.mjs) all share, so
+// the numbers live once. CENTURY_MPH is the floor a pitch has to clear to
+// count at all; ELITE_VELO_MPH is the higher bar a single pitch has to clear
+// on its own (regardless of season-high) to earn a standalone spotlight —
+// set a couple mph above the century floor since 100-101 is unremarkable for
+// a real flamethrower, while 102+ still isn't.
+export const CENTURY_MPH = 100
+export const ELITE_VELO_MPH = 102
+
 // One pitcher's pitch-type mix for the level the game he's starting is being
 // played at, each entry carrying its share of pitches thrown + average
-// velocity, sorted most-thrown first. Null when the file hasn't loaded, he
-// isn't in it (no MLB/AAA innings logged this season), or his sample is
-// below the qualifier floor (e.g. a September call-up with three pitches on
-// file) — the card simply doesn't render.
+// velocity, sorted most-thrown first. Each entry also carries `century`
+// (pitches at CENTURY_MPH+ this season) and `maxVelo` (his fastest of that
+// type) straight from the generator — the century-club/veloPeak callout
+// families read those off gen-callouts.mjs's own join, not through here, but
+// they ride along on this same file since they're gathered by the same sweep.
+// Null when the file hasn't loaded, he isn't in it (no MLB/AAA innings logged
+// this season), or his sample is below the qualifier floor (e.g. a September
+// call-up with three pitches on file) — the card simply doesn't render.
 export function pitchArsenalFor(data, personId, isMlb) {
   const entry = data?.pit?.[personId]
   const types = isMlb ? entry?.mlb : entry?.aaa
