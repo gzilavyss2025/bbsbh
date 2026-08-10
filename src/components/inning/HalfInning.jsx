@@ -7,7 +7,6 @@ import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
 import { highlightsByPlayId } from '../../api/highlights.js'
 import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
-import { PitchColorsKey } from '../scoring/StrikeZone.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
@@ -41,6 +40,10 @@ export function HalfInning({
   vsTeam,
   highlights,
   revealedAtBatCount,
+  focusOne,
+  focusStep,
+  focusCursor,
+  onFocusInfo,
   onStepInfo,
   onRunsSoFar,
   onLiveState,
@@ -76,6 +79,18 @@ export function HalfInning({
   // drops a PRE-pitch change from the feed (see its anyPitchInHalf guard) and
   // why PrePitchChanges drops one from the staged list; the live override was
   // the one piece pulling the other way.
+  //
+  // Focus mode narrows WHEN this persistent card shows, not what it names:
+  // the ordinary stacked page still pins it at the top of the half for the
+  // whole time the half is on screen (a normal section header). Focus mode
+  // shows one at-bat at a time, and re-announcing the same starter above
+  // every card the reader steps to reads as the banner "coming back" — so
+  // there it's gone the moment the reader has stepped past the half's first
+  // at-bat (focusCursor > 0). A mid-half change still gets its own
+  // announcement at the right moment either way, via the `pitching_substitution`
+  // card above, never this one — that's the "or the first at-bat for the new
+  // pitcher" half of the rule, and it needs no extra gate here.
+  const showNowPitching = !focusOne || focusCursor === 0
   const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
@@ -146,7 +161,16 @@ export function HalfInning({
     // half isn't over, the "current" batter is whoever's next in the order,
     // not the one who just finished (e.g. showing the batter who just
     // doubled forever instead of advancing to the next slot).
-    if (live?.batter && live.batterDone && outs < 3) {
+    //
+    // NOT IN FOCUS MODE, where that same advance is a contradiction. The whole
+    // screen is built around ONE at-bat card, and the band sits directly above
+    // it: the hero named ABRAMS while the band beside it said "2. ORTIZ", who
+    // has not batted. The scorebug's job there is to caption the card under it,
+    // and who's up next is already answered — in more detail, with three names
+    // — by DueUpConsole in the same row. The pitch count is untouched either
+    // way: it stays the tally AFTER the at-bat on screen finished, which is
+    // what a scorer writes down.
+    if (!focusOne && live?.batter && live.batterDone && outs < 3) {
       const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
       const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
       const upcoming =
@@ -248,7 +272,7 @@ export function HalfInning({
         </h3>
 
         {/* Persistent Now Pitching card — see the comment above nowPitching. */}
-        {(revealed || isNextToReveal) && nowPitching && (
+        {(revealed || isNextToReveal) && nowPitching && showNowPitching && (
           <PitcherNotice
             pitcher={nowPitching}
             teamId={battingSide === 'away' ? homeId : awayId}
@@ -334,13 +358,11 @@ export function HalfInning({
             // render top-level or in an eager useMemo (ADR-0001).
             const highlightsMap = highlightsByPlayId(highlights)
             return (
-              // The pitch-color key now lives behind the "Pitch colors" button
-              // at the FOOT of this card (see PitchColorsKey below), not up in
-              // the header. Statcast superlatives (fastest pitch, hardest/
-              // longest ball) used to sit below this feed; they now render in
-              // StatBox.jsx, right under the ABS row, so they're at the top of
-              // the half's content with the rest of the totals instead of
-              // wherever the feed happened to end.
+              // Statcast superlatives (fastest pitch, hardest/longest ball)
+              // used to sit below this feed; they now render in StatBox.jsx,
+              // right under the ABS row, so they're at the top of the half's
+              // content with the rest of the totals instead of wherever the
+              // feed happened to end.
               <PlayByPlay
                 feed={feed}
                 inning={inning}
@@ -354,6 +376,9 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
+                focusOne={focusOne}
+                focusStep={focusStep}
+                onFocusInfo={onFocusInfo}
                 onRunsSoFar={onRunsSoFar}
                 onStepInfo={onStepInfo}
                 onStepComplete={() => onReveal(inning, half)}
@@ -362,15 +387,6 @@ export function HalfInning({
             )
           }}
         </SealBox>
-
-        {/* The pitch-color key: a static legend, no game data, so it's
-            spoiler-free — moved down here from the header so it reads next
-            to the pitch dots it explains rather than beside the team names.
-            Only worth the desktop-only foot space once there are actually
-            pitch dots on screen to explain (startedRevealing); before that,
-            on the wide layout, it'd just be a lone button sitting under an
-            empty card. */}
-        {startedRevealing && <PitchColorsKey className="half__pitchkeyfoot" />}
       </section>
 
       {/* From the first at-bat step onward (startedRevealing — see above), the

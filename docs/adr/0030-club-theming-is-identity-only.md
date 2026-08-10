@@ -74,6 +74,10 @@ them would fight the spoiler UI's own visual language, which is the one thing on
 screen that has to stay legible as *itself*. The properties simply never reach
 them.
 
+> **Superseded in part — see "The line moved: reference cards, not seal chrome"
+> below.** This paragraph drew the line at the page. The line is now drawn at
+> the *element*, and both scoring screens carry themed cards today.
+
 Also unchanged: `buildJerseyCombos`'s per-jersey W-L, which is the one place
 uniform data touches a result and is already gated by the schedule cutoff.
 
@@ -163,3 +167,37 @@ in these stores.
   number input with no value steps from its `min`, so the first click on the
   stepper jumped a bar straight to 0.5. Clearing the field is still how the
   tuning is dropped.
+
+## Addendum (2026-08-10): the line moved — reference cards, not seal chrome
+
+"Not themed: the innings viewer and the box score" drew the boundary at the
+**page**. It is drawn at the **element** now, and both of those pages carry
+themed cards:
+
+- the box score's team cards, its ABS card and its defense card
+  (`screens/BoxScore.jsx`);
+- the innings viewer's lineup mastheads (`.lineupteam__name`), its fielding
+  diamond title (`.halfdefense__title`) and its roster drawers
+  (`.roster__toggle`) — all in `components/inning/`.
+
+Every one of those is a **reference card**: a club's own name printed over its
+own roster, on a surface the reader consults *beside* the scoring, not the
+scoring surface itself. What the original paragraph was actually protecting is
+the seal chrome, and that is untouched — the kraft covers, the `.btn--reveal`
+pair, the amber notification cards, the manila ground, `.half__title`'s navy
+masthead and focus mode's console band all stay in the app's own palette
+regardless of who is playing. A reader can still tell at a glance what is
+sealed and what is open, which was the whole argument.
+
+The rule in one line, replacing the page-level one:
+
+> **A club may colour a card that identifies the club. It may never colour a
+> control, a cover, or a surface that reports the state of the seal.**
+
+The safety argument is unchanged and is what makes this a scope change rather
+than a reversal: `headerThemeFor`'s only inputs are still `(teamId, treatment)`
+— identity, never game state — and `test/header-theme.test.js` still asserts the
+resolver imports no feed, linescore, reveal, or derivation module. A colour
+still cannot encode a score. Untuned `(club, treatment)` pairs still fall back
+to default navy rather than synthesising a triad, so the WCAG guard still covers
+every bar that actually renders.

@@ -11,34 +11,6 @@
   gap: 8px;
 }
 
-/* The "Pitch colors" button at the foot of the play-by-play card (moved down
-   from the header — see HalfInning.jsx) — left-aligned like the zone/
-   highlight buttons above it, with the card's own 14px horizontal inset
-   (.half has no padding of its own; see .half__title's matching padding).
-   Overrides .pitchkeybtn's own var(--surface-inset) fill (a near-white chip,
-   right for sitting on a plain page background) with the card's own
-   var(--surface-card) tone instead — sitting directly on .half's own
-   background here, the brighter inset shade read as a mismatched white
-   patch rather than a chip. */
-.half__pitchkeyfoot {
-  margin: var(--space-3) 14px 12px;
-  background: var(--surface-card);
-}
-
-/* This is a phone-first app, so "mobile" is the default breakpoint below
-   740px — hide the "Pitch colors" legend button/modal there; it still shows
-   at the wider breakpoint. Selector combines both classes (rather than just
-   .half__pitchkeyfoot) so its specificity beats the unconditional
-   `.pitchkeybtn { display: inline-flex }` base rule declared later in this
-   file — with equal (0,1,0) specificity on .half__pitchkeyfoot alone, the
-   later, unconditional rule was winning the cascade and the button was
-   leaking onto mobile despite this "hide" rule. */
-@media (max-width: 739.98px) {
-  .pitchkeybtn.half__pitchkeyfoot {
-    display: none;
-  }
-}
-
 .pbp__note {
   display: flex;
   align-items: center;
@@ -459,9 +431,8 @@
    set off a touch louder than a baserunning subnote with the kraft-amber seal
    accent and a small star, so a "leads the club in walks" note catches the eye
    without shouting. Same var(--surface-card) as its parent .pbp__card, not the
-   brighter var(--surface-inset) chip fill — that read as a mismatched white
-   patch sitting directly on the card's own cream surface (same bug already
-   fixed for .half__pitchkeyfoot). */
+   brighter var(--surface-inset) chip fill — that reads as a mismatched white
+   patch sitting directly on the card's own cream surface. */
 .pbp__callout {
   display: flex;
   align-items: flex-start;
@@ -518,15 +489,20 @@
   box-shadow: var(--shadow-card);
 }
 
+/* A club bar, not a plain paper row — same navy/seal/white recipe
+   .lineupteam__name and .halfdefense__title already wear, and the same
+   `.roster.is-themed` recolour on top of it (09-team-info.css). This is the
+   club's name; it now looks like every other place this app prints one. */
 .roster__toggle {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-2);
   padding: 12px 14px;
-  background: var(--surface-card);
+  background: var(--navy);
   border: none;
-  color: var(--text-heading);
+  border-bottom: 3px solid var(--seal);
+  color: var(--text-on-ink);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -535,8 +511,24 @@
   cursor: pointer;
 }
 
+/* Takes the slack so mark and chevron stay pinned right — three children now,
+   hence gap+flex-fill rather than the old two-child `space-between`. */
+.roster__club {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Same bleed formula as .lineupteam__name's (12-sealbox.css), off this bar's
+   own type + 12px padding, so the mark crops to the bar's edges. */
+.roster__toggle > .teamlogo-crop-bar {
+  height: calc(var(--fs-ui) * var(--lh-solid) + 24px);
+  margin-block: -12px;
+}
+
 .roster__chevron {
-  color: var(--text-caption);
+  color: var(--text-on-ink);
+  opacity: 0.8;
 }
 
 .roster__list {

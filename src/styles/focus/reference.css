@@ -1,0 +1,312 @@
+/* ----------------------------------------------- focus mode: the reference */
+/* The at-bat trail and the tabbed reference panel (its column at wide width,
+   its chip row and sheet on a phone). One of three focus-mode partials — see
+   focus/stage.css's header for the split and the cascade rule they all
+   depend on. */
+
+/* --------------------------------------------------------------- the trail */
+/* AtBatTrail.jsx — the at-bats already scored this half, drawn as the row of
+   scorecard cells they are. WRAPS; never scrolls. The first pass was a
+   snap-scrolling pill carousel, which put a scrollbar under the hero AND hid
+   the earliest at-bats of a long inning off the left edge — the exact thing the
+   trail exists to prevent. A second pass fixed every cell at 48px square,
+   which squeezed a multi-character code (a double play) and clipped every
+   name down to 3 letters; cells now size to their own content instead — a
+   long inning simply wraps to more rows, same as before. No overflow-x here,
+   and none may be added. */
+.trailstrip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.trailstrip__cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.trailcell {
+  flex: 0 0 auto;
+  min-width: 48px;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+
+.trailcell__code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.trailcell__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+
+/* A chip's code is inked exactly as the SAME code is inked on the at-bat card
+   it navigates to (13-play-by-play.css's .pbp__code family) — the trail is a
+   miniature of the cards, so a 6-3 cannot be one colour in the strip and
+   another on the card. `codeKind` is the shared vocabulary
+   (playbyplay/scorebookCode.js) and it has five values, not three: the first
+   pass styled `hit`/`out`/`note` and left `reach`, `error` and `interrupted`
+   to fall through to body text — so a reach-on-error, which the card inks
+   clay, was indistinguishable from a walk in the trail. Out and reach both
+   sit at plain ink here for the same reason they do on the card: the code
+   text itself (K, 6-3, BB) is the distinction, and colour is reserved for the
+   two outcomes worth spotting at a glance. */
+.trailcell--hit .trailcell__code {
+  color: var(--field-deep);
+}
+
+.trailcell--error .trailcell__code {
+  color: var(--clay-deep);
+}
+
+/* A scorer's note rather than a batting result — the carry-over mark on an
+   at-bat the half ended in the middle of. Graphite, as .pbp__code--interrupted
+   is. */
+.trailcell--interrupted .trailcell__code {
+  color: var(--text-caption);
+}
+
+.trailcell--note .trailcell__code {
+  color: var(--graphite-soft);
+}
+
+/* The live cell, inked the way .half__title and RollingLine's current half are
+   — navy fill, paper text. Answers "where is live" at a glance once the reader
+   has paged back. */
+.trailcell[aria-current='true'] {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.trailcell[aria-current='true'] .trailcell__code,
+.trailcell[aria-current='true'] .trailcell__name {
+  color: var(--text-on-ink);
+}
+
+/* ---------------------------------------------------- the reference panel */
+/* ReferencePanel.jsx. Tabbed, and only the selected section is in the DOM —
+   the first pass stacked all five in one column and let it scroll, which is
+   where the visible scrollbar and the truncated lineup came from. */
+.focusrail {
+  min-width: 0;
+}
+
+.refpanel__tabs {
+  display: flex;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-card);
+  flex: 0 0 auto;
+}
+
+/* No reserved column fits beside a phone-width at-bat card, so below 740px the
+   tabs become the surface themselves: a chip row under the trail, each chip
+   opening the same panel in a bottom sheet already showing that section. Four
+   chips replace the first pass's single "Open lineups & defense" button — the
+   same one tap, but the reader picks WHAT they are opening. */
+.refbar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* One condensed-uppercase control recipe, shared rather than spelled out three
+   times: the rail's tabs, the phone chips and the trail's return-to-live button
+   are the same object at three sizes. */
+.refpanel__tab,
+.refbar__chip,
+.trailstrip__followbtn {
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.refpanel__tab {
+  flex: 1 1 0;
+  min-height: 34px;
+  padding: 0 var(--space-1);
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
+.refpanel__tab:first-child {
+  border-left: none;
+}
+
+.refpanel__tab[aria-selected='true'] {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.refbar__chip {
+  flex: 1 1 0;
+  min-height: var(--tap-min);
+  padding: 0 var(--space-1);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* A paper-and-rule pill, not the first pass's underlined text link — nothing
+   else in this app is an inline link, and a bare one read as web furniture
+   dropped into a scorebook. */
+.trailstrip__followbtn {
+  align-self: flex-start;
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  font-size: var(--fs-compact);
+  box-shadow: var(--shadow-card);
+}
+
+.refpanel__tab:hover,
+.refbar__chip:hover,
+.trailstrip__followbtn:hover,
+.trailcell:hover {
+  background: var(--surface-inset);
+}
+
+.trailcell:hover {
+  border-color: var(--border-rule);
+}
+
+.refbar__chip:active {
+  transform: scale(0.96);
+}
+
+.trailcell:focus-visible,
+.refpanel__tab:focus-visible,
+.refbar__chip:focus-visible,
+.trailstrip__followbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.trailcell[aria-disabled='true'],
+.trailstrip__followbtn[aria-disabled='true'] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* The one place in focus mode allowed to scroll, and only when a long section
+   (a 13-man bullpen) outruns the sticky column. Thin, so when it does appear it
+   reads as a rail rather than a browser chrome bar. */
+.refpanel__body {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Sections render bare here rather than inside .innings__ref-* wrappers, so
+   they keep their own card chrome and need no rule un-hiding them below 740px.
+   `width: 100%` is the fix for the ragged column: each section sized itself
+   differently (roster accordions ~190px, defense and lineup cards at two
+   further widths), stacking four right edges inside one track.
+
+   ALL margins zeroed, not just the top one, and that is not tidiness: these
+   cards carry 14px SIDE margins for the stacked page. `width: 100%` plus a side
+   margin is 328px of content in a 300px track, so the panel grew a horizontal
+   scrollbar of its own — the same defect one axis over from the vertical one
+   this rewrite removed. */
+.refpanel__body > * {
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The Pitchers table, refitted for the rail. Widening the column alone did not
+   fix it: the table is ten columns (a name plus nine stats) sized for the
+   unfocused page's ~380px card, and dropped into the rail BOTH ends were
+   clipping — "DOBBINS, HUNTER" needed 99px of an 81px name cell, and a plain
+   "0.2" needed 23px of a 21px stat cell. So the rail buys the name column a
+   bigger share of the table and pays for it out of the numerals, which are the
+   two- and three-character values that can afford a caption-size step and no
+   side padding. Scoped to .focusrail: the same table on the stacked page and in
+   the box score has the room already and is left exactly as it was. */
+.focusrail .pitchers__pitcher {
+  width: 44%;
+}
+
+.focusrail .pitchers__grid th,
+.focusrail .pitchers__grid td {
+  padding: 6px 0;
+  font-size: var(--fs-caption);
+}
+
+/* A section with genuinely nothing in it yet (ReferencePanel's `armsEmpty`) — a
+   caption on paper, so the column reads as "nothing here yet" rather than as a
+   panel that failed to load. */
+.refpanel__empty {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-align: center;
+}
+
+/* The sheet — same .scrim/.sheet chrome as HighlightSheet/StrikeZone, portalled
+   to <body> (ModalPortal) because .turnscene's `isolation: isolate` would
+   otherwise trap it under the floating bar. */
+.focusrail__sheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.focusrail__sheethead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  flex: 0 0 auto;
+}
+
+.refpanel__body--sheet {
+  max-height: 62vh;
+}
+

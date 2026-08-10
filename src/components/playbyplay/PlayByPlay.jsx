@@ -13,8 +13,11 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
+  stepBounds,
+  stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
+  buildTrailItems,
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
@@ -22,6 +25,7 @@ import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
+import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { BatterNotice } from './BatterNotice.jsx'
@@ -54,7 +58,11 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // full entries list (every entry shown, whether by tapping through or because
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState }) {
+//
+// `focusOne` (focus mode) narrows that revealed PREFIX to ONE step's window.
+// `focusStep` picks which (null = newest); `onFocusInfo(count)` says how many
+// exist. Presentation only — `stepCap` stays the single reveal boundary.
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, focusOne = false, focusStep = null, onFocusInfo }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -94,6 +102,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
+  // Focus mode: the boundaries `nextStepBoundary` walks one tap at a time,
+  // enumerated. Counting only those at or under effectiveCap is what keeps
+  // every window inside the cap.
+  const bounds = focusOne && stepping ? stepBounds(entries) : null
+  const revealedSteps = bounds ? bounds.filter((b) => b <= effectiveCap).length : 0
+
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
   useEffect(() => {
@@ -107,39 +121,37 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // How many runs have scored in the STEPPED-THROUGH portion of this half so
-  // far — reported upward (InningViewer, via HalfInning) so the linescore
-  // grid's own cell for this half can build up as you reveal it one at-bat at
-  // a time, instead of staying blank until the whole half commits. Reveal-
-  // safe by construction: `entries` here is already clamped to `effectiveCap`
-  // (computeHalfInningFeed's own stepCap), so this can never count a run from
-  // an at-bat the user hasn't actually stepped into yet. Each scoring runner
-  // is marked `scored: true` on HIS OWN at-bat card (the trip he reached base
-  // on, not necessarily the play that drove him in), so summing every
-  // entry's own flag — not just the batter of the play that just happened —
-  // correctly totals a multi-run play (a grand slam scores the batter's own
-  // card plus the three baserunners' own earlier cards).
+  // Up to InningViewer (useFocusMode) — see buildTrailItems' own header.
+  useEffect(() => {
+    if (!focusOne) return
+    onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
+  }, [focusOne, revealedSteps]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The runs and hits scored in the STEPPED-THROUGH portion of this half —
+  // reported upward (InningViewer, via HalfInning) so the linescore grid's own
+  // cell and its R/H totals column build up as you reveal the half one at-bat
+  // at a time, instead of staying blank until the whole half commits.
   //
-  // The extra-innings placed runner counts here too, on his own 'placed' card.
-  // He has no plate appearance, but a run is a run — and before he had a card
-  // at all his was silently dropped from this sum, so every extra half he
-  // scored in built a linescore cell one short (verified against gamePk
-  // 777747's bottom 10: a walk-off grand slam totalled 3).
+  // `effectiveCap` is passed EXPLICITLY, and stepTotals slices by it. `entries`
+  // is not a revealed prefix — computeHalfInningFeed pushes a card for every
+  // play in the half regardless of stepCap, and only gates the RETROACTIVE
+  // annotations written onto already-pushed cards. Folding a card's own
+  // `eventType` over the unclamped array is how the half's final hit total
+  // reached the running line from the first tap; see entriesView.js's module
+  // header, which owns this arithmetic now so no call site has to remember.
   //
-  // The dependency is the COUNT, not `entries`. `entries` is a fresh array every
-  // render (computeHalfInningFeed runs at render top-level — reveal-only,
+  // The dependency is the two COUNTS, not `entries`. `entries` is a fresh array
+  // every render (computeHalfInningFeed runs at render top-level — reveal-only,
   // ADR-0001, so it cannot be hoisted into a memo above the seal), so an
   // `[entries]` dependency re-ran this effect on every render, the report
   // re-rendered InningViewer, which re-rendered this component, which re-ran the
   // effect… one "Next at-bat" tap cost 264 renders of the whole innings tree
   // (measured). A number compares by value.
-  const runsSoFar = entries.filter(
-    (e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored,
-  ).length
+  const { runs: runsSoFar, hits: hitsSoFar } = stepTotals(entries, effectiveCap)
   useEffect(() => {
     if (!stepping) return
-    onRunsSoFar?.(runsSoFar)
-  }, [stepping, runsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
+    onRunsSoFar?.(runsSoFar, hitsSoFar)
+  }, [stepping, runsSoFar, hitsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The scorebug HUD's live snapshot (bases/outs/pitches/current batter),
   // reported for the SCOREBUG'S benefit only — deliberately NOT gated on
@@ -166,7 +178,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // card. See HalfInning.jsx's nowPitching.)
 
   if (entries.length === 0) return null
-  const visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
+  // One step's WINDOW. `focusStep` null is "the newest"; a number is clamped
+  // rather than trusted, the count it was chosen against being a component away.
+  let visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
+  if (bounds && revealedSteps > 0) {
+    const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
+    visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
+  }
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
@@ -215,8 +233,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
             <AtBatCard
               entry={entry}
               battingTeamId={battingTeamId}
+              pitchingTeamId={pitchingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
+              focusHeader={focusOne}
             />
           )
         } else if (entry.eventType === 'pitching_substitution') {
@@ -510,8 +530,8 @@ function EventCard({ code, runnerId, teamId, segments }) {
   )
 }
 
-function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
-  const { batter, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, focusHeader = false }) {
+  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
   const calloutNotes = buildCallouts(entry, calloutCtx)
@@ -530,6 +550,19 @@ function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
     <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
+      {/* Focus mode only — see AtBatHero.jsx. It REPLACES .pbp__top below
+          (note the matching `!focusHeader` gate), rather than stacking a
+          second name row above it. */}
+      {focusHeader && (
+        <AtBatHero
+          batter={batter}
+          pitcher={pitcher}
+          rbi={rbi}
+          pinchRunners={pinchRunners}
+          battingTeamId={battingTeamId}
+          pitchingTeamId={pitchingTeamId}
+        />
+      )}
       {/* Fills the room the missing zone pane leaves, so it rides with
           --nozone. Decorative — the card's first line already names him — and
           desktop-only, .pbp__batshot being display:none below 740. */}
@@ -540,6 +573,7 @@ function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
       )}
       <div className="pbp__card">
         <div className="pbp__main">
+          {!focusHeader && (
           <div className="pbp__top">
             <span className="pbp__batter">
               <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
@@ -564,6 +598,7 @@ function AtBatCard({ entry, battingTeamId, calloutCtx, highlight }) {
             </span>
             {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
           </div>
+          )}
           <div className="pbp__desc">
             {descSegments.map((seg, i) =>
               seg.id != null ? (

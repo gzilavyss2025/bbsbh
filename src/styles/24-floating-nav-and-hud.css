@@ -149,15 +149,24 @@
   left: auto;
 }
 
+/* Both BOTTOM corners clear the floating action bar rather than the viewport
+   edge. The dock is only ever rendered by the innings viewer (ScorebugMount),
+   which always has `.pagenav--innings` fixed across the bottom, so parking at
+   `--space-3` from the viewport floor put the dock straight on top of the
+   bar's own buttons — it covered half of "Bottom 1st ›" at iPad and desktop
+   widths and ate the tap. Same collision ADR-0043 removed inside focus mode by
+   anchoring the band; out here the dock still floats, so it is told where the
+   floor actually is. `--pagenav-innings-h` (tokens/layout.css) is that floor,
+   and its header records how the number was measured. */
 .gamehud-dock--bottom-right {
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  bottom: calc(var(--pagenav-innings-h) + var(--space-3) + env(safe-area-inset-bottom));
   right: calc(var(--space-3) + env(safe-area-inset-right));
   top: auto;
   left: auto;
 }
 
 .gamehud-dock--bottom-left {
-  bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  bottom: calc(var(--pagenav-innings-h) + var(--space-3) + env(safe-area-inset-bottom));
   left: calc(var(--space-3) + env(safe-area-inset-left));
   top: auto;
   right: auto;
@@ -182,6 +191,13 @@
   overflow: hidden;
   font-family: var(--font-body);
   color: var(--paper-2);
+}
+
+/* Scorebug.jsx's batter/pitcher wrapper — invisible to layout here, so the
+   docked card stacks exactly as it always did. Focus mode's anchored console
+   band (styles/focus/atbat.css) is the only caller that makes it a real box. */
+.gamehud__lines {
+  display: contents;
 }
 
 /* Between innings (Scorebug.jsx's `blank` — no batter/pitcher row left):
@@ -305,7 +321,66 @@
 }
 
 .gamehud__tile .teamlogo {
-  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0))
+    scale(calc(var(--scale, 1) * var(--logo-boost, 1)));
+}
+
+/* BOTH PLACEMENTS, deliberately — the anchored console band AND the floating
+   dock on the ordinary page. These are bare `.gamehud__strip`/`.gamehud__tile`
+   selectors, not `.gamehud--console` ones, and the pair of media queries covers
+   the whole width range, so this is simply how the scorebug's marks are sized
+   now. The reasoning below is written from focus mode because that is where the
+   strip is on screen longest, but the dock wears the same marks for the same
+   reason and looked undersized next to it once the two were compared side by
+   side. Scope it to `.gamehud--console` only if the dock is ever meant to
+   diverge; today they are one object in two places (ADR-0043).
+
+   A further boost on top of each team's own calibrated --scale (TeamLogo's
+   per-mark crop/offset tuning) — bigger marks without touching the strip's
+   own height (min-height above stays put; a scaled logo is pure paint, not
+   layout, so it can grow past its tile without pushing anything else down).
+   `overflow: visible` only turns on here, alongside the boost: at the
+   default scale, .gamehud__tile's hidden overflow is load-bearing (it's how
+   a mark gets cropped into the tile's shape in the first place — see the
+   component doc above), so leaving it on whenever nothing is boosting the
+   logo keeps every other caller of this same crop recipe unchanged. Bigger
+   on mobile (1.6x) than desktop (1.25x): the strip is the one persistent
+   piece of team identity on screen while stepping through a half, and a
+   phone's narrow width has that much more room to spare above/below the
+   fixed-height row than a desktop layout already showing team logos
+   elsewhere on screen. A literal 3x on mobile was tried first and rejected —
+   the two crests overlapped each other and swallowed the run numbers.
+
+   The clip boundary itself moves from the tile to THIS row: `.gamehud__tile`
+   turns its own hidden overflow off (a boosted logo needs room past its own
+   80%/20% grid cell to bleed into its neighbor's), and `.gamehud__strip`
+   takes over clipping the mark to the row's own top/bottom edges only
+   (overflow-y hidden, overflow-x visible — the same "clip vertically, spill
+   horizontally" split the club-mark bar wears, .metricbar > .teamlogo-crop-bar
+   above) — the row's own height still never moves, it just becomes the crop
+   line instead of each tile's own bounds. `.gamehud`'s own hidden overflow
+   (its card corners) is still the backstop against a mark bleeding past the
+   card's sides entirely. */
+@media (max-width: 739.98px) {
+  .gamehud__strip {
+    --logo-boost: 1.6;
+    overflow-x: visible;
+    overflow-y: hidden;
+  }
+  .gamehud__tile {
+    overflow: visible;
+  }
+}
+
+@media (min-width: 740px) {
+  .gamehud__strip {
+    --logo-boost: 1.25;
+    overflow-x: visible;
+    overflow-y: hidden;
+  }
+  .gamehud__tile {
+    overflow: visible;
+  }
 }
 
 .gamehud__runs {

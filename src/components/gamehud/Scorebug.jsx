@@ -38,21 +38,30 @@ export function Scorebug({
   const blank = !batter && !pitcher
   return (
     <div className={`gamehud ${blank ? 'gamehud--blank' : ''} ${className}`}>
-      {batter && (
-        <div className="gamehud__row gamehud__row--batter">
-          <span className="gamehud__who">{`${batter.order}. ${batter.last}`}</span>
-          <span className="gamehud__val">{batter.line ?? '—'}</span>
-        </div>
-      )}
-      {pitcher && (
-        <div className="gamehud__row gamehud__row--pitcher">
-          <span className="gamehud__who">{pitcher.last}</span>
-          <span className="gamehud__val">
-            <span className="gamehud__lbl">P:</span>
-            {pitcher.pitches}
-          </span>
-        </div>
-      )}
+      {/* `display: contents` by default (24-floating-nav-and-hud.css), so the
+          docked card's own column stacking sees straight through this wrapper
+          to the same two rows it always had. It becomes a real box only in the
+          anchored console band (.gamehud--console), where the batter/pitcher
+          pair has to sit as ONE column BESIDE the strip rather than stacked
+          above it — two separate flex siblings can't be grouped by CSS alone.
+          Same idiom as .innings__stage. */}
+      <div className="gamehud__lines">
+        {batter && (
+          <div className="gamehud__row gamehud__row--batter">
+            <span className="gamehud__who">{`${batter.order}. ${batter.last}`}</span>
+            <span className="gamehud__val">{batter.line ?? '—'}</span>
+          </div>
+        )}
+        {pitcher && (
+          <div className="gamehud__row gamehud__row--pitcher">
+            <span className="gamehud__who">{pitcher.last}</span>
+            <span className="gamehud__val">
+              <span className="gamehud__lbl">P:</span>
+              {pitcher.pitches}
+            </span>
+          </div>
+        )}
+      </div>
       <div className="gamehud__strip">
         <div className="gamehud__marks">
           <TeamTreatmentMark

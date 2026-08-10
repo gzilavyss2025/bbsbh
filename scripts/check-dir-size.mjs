@@ -188,6 +188,20 @@ const BUDGETS = {
   // out of `31-wild-card.css` (already at its check-file-size budget) rather
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
+  //
+  // 70 -> 71 -> 70: `61-focus-mode.css` briefly split out of `11-innings.css`,
+  // then LEFT this directory entirely (ADR-0043). Focus mode's rewrite took
+  // that partial past check-file-size's 600-line cap, and the two ordinary
+  // remedies were both shut: it cannot fold back into an earlier partial (it
+  // has to load after everything it overrides, 25-wide-layout.css included),
+  // and it cannot split into a numbered sibling here, because that is exactly
+  // the growth this budget forbids. So it subdivided instead —
+  // `src/styles/focus/{stage,atbat,reference}.css`, its own directory entry,
+  // imported last and in order by `index.css`. That is ADR-0038's own
+  // prescription for a flat directory this size, and it is the first partial
+  // here to take it; a future split under pressure should look at this
+  // precedent before reaching for a 71st sibling.
+  //
   // 70 -> 71 for `05a-career-timeline.css`: CareerTimeline's `.careertl__*`
   // rules, split out of `05-masthead-nav.css` (already at its check-file-size
   // budget) for the same reason as every lettered sibling above.

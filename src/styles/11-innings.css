@@ -10,13 +10,19 @@
   padding-bottom: calc(130px + env(safe-area-inset-bottom));
 }
 
-/* Phone-only: the floating bar's own Refresh (refreshbtn--float, fixed at the
-   page bottom) already covers this viewport, so the top toolbar's copy would
-   be a second Refresh sitting right above the half-inning nav's Next button.
-   Shown again at the wide breakpoint below, where the floating one hides. */
 /* Section tabs + half navigator wrapper. On a phone they stack (each child
    keeps its own margins); the wide layout flips this to a single row (see the
-   740px media query). */
+   740px media query).
+
+   NO REFRESH LIVES HERE, at any width. A comment used to sit above this rule
+   explaining that the toolbar's Refresh was hidden on a phone because the
+   floating bar already carried one, and "shown again at the wide breakpoint
+   below, where the floating one hides" — describing a pair of rules that
+   swapped the two copies by breakpoint. Both rules are gone, and so is the
+   toolbar's copy: `.refreshbtn--float` is the only Refresh on this screen now
+   and it shows at every width (InningViewer.jsx's floating-bar comment has
+   the rest). The comment outlived the rule it was attached to, which is how it
+   came to sit directly on top of an unrelated one. */
 .inningchrome {
   display: flex;
   flex-direction: column;
@@ -311,6 +317,11 @@
   gap: 12px;
 }
 
+/* Focus mode's rules (the .innings--focus fold, the .trailstrip at-bat
+   navigator, the reference panel, the one-row action bar) live in
+   styles/focus/*.css, which import LAST so they win on cascade order instead of
+   specificity — see focus/stage.css's header. */
+
 /* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +
    .innings__row2 pairing as .innings__grid's row-2 child. The active layer
    sits in normal flow (so the scene's height still tracks its content, same
@@ -419,9 +430,8 @@
   font-weight: var(--w-bold);
 }
 
-/* The header's right side: the "X bats • Y pitches" line stacked over the
-   "Pitch colors" key button, right-aligned so both hug the header edge and the
-   pill never crowds the batting/pitching line on a narrow phone. */
+/* The header's right side: the "X bats • Y pitches" line, right-aligned so it
+   hugs the header edge. */
 .half__meta {
   display: flex;
   flex-direction: column;

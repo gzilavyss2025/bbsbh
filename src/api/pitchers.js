@@ -5,10 +5,22 @@
 // (`revealedThrough`, the furthest half-inning the user has uncovered — see
 // InningViewer / RollingLine). Stats are accumulated ONLY from plays in revealed
 // half-innings, so nothing from a sealed inning ever reaches the DOM. Runs and
-// earned runs are attributed to the play's `responsiblePitcher` (so inherited
-// runners are charged correctly), and a pitcher whose whole outing is already
+// earned runs are attributed to the play's `responsiblePitcher` (so an inherited
+// runner's run is charged to the pitcher who put him on, not the one who let him
+// score) — and because that credit is read off the SCORING play itself, an
+// inherited runner never counts against his old pitcher until the play that
+// scores him is itself revealed. A pitcher whose whole outing is already
 // revealed uses his exact boxscore line; a still-active pitcher mid-outing uses
 // the partial computed from revealed plays only.
+//
+// `stepHalfIndex`/`throughAtBatIndex` extend that same clamp one notch finer,
+// for the ONE half currently being STEPPED through one at-bat at a time
+// (ADR-0016) — same shape and same adjacency discipline as
+// api/winprob.js's own `selectWinProbPath`. `throughAtBatIndex` is reported
+// back up from inside PlayByPlay's own SealBox reveal function (its
+// `onStepInfo`); this module never computes that boundary itself, only
+// consumes it, so ADR-0001 still holds. Leaving both at their null default
+// reproduces the old whole-halves-only behavior exactly.
 
 import { halfIndex, personNameParts } from './select.js'
 import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './playbyplay.js'
@@ -18,17 +30,21 @@ function outsToIp(outs) {
 }
 
 // Per-team pitching lines for every pitcher who has appeared in a revealed
-// half-inning. `revealedThrough` is a half-index (see halfIndex); pass -1 for
-// "nothing revealed". Returns { away: [...], home: [...] } in the order pitchers
+// half-inning, or in the currently-stepped half up through `throughAtBatIndex`.
+// `revealedThrough` is a half-index (see halfIndex); pass -1 for "nothing
+// revealed". Returns { away: [...], home: [...] } in the order pitchers
 // entered, each row: { id, last, first, jersey, hand, ip, pitches, bf, h, r,
 // er, bb, k }.
-export function computePitcherLines(feed, revealedThrough) {
+export function computePitcherLines(
+  feed,
+  revealedThrough,
+  { stepHalfIndex = null, throughAtBatIndex = null } = {},
+) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const players = feed?.gameData?.players ?? {}
   const boxTeams = feed?.liveData?.boxscore?.teams ?? {}
 
   const acc = {} // pitcherId -> partial stat accumulator over revealed plays
-  const firstIdx = {} // pitcherId -> first half-index he threw in (spoiler-free)
   const lastIdx = {} // pitcherId -> last half-index he threw in (spoiler-free)
   const get = (id, side) =>
     (acc[id] ??= { id, side, outs: 0, pitches: 0, bf: 0, h: 0, r: 0, er: 0, bb: 0, k: 0 })
@@ -44,11 +60,21 @@ export function computePitcherLines(feed, revealedThrough) {
 
     // Appearance span reads innings only — safe to compute over every play.
     if (pid) {
-      if (firstIdx[pid] == null || i < firstIdx[pid]) firstIdx[pid] = i
       if (lastIdx[pid] == null || i > lastIdx[pid]) lastIdx[pid] = i
     }
 
-    if (i > revealedThrough) continue // sealed inning — never accumulate it
+    if (i > revealedThrough) {
+      // Not committed yet — only in if it's the half being stepped through
+      // right now, and only up to the last at-bat PlayByPlay has revealed.
+      const atBatIndex = p.about?.atBatIndex ?? null
+      const withinStep =
+        stepHalfIndex != null &&
+        i === stepHalfIndex &&
+        throughAtBatIndex != null &&
+        atBatIndex != null &&
+        atBatIndex <= throughAtBatIndex
+      if (!withinStep) continue
+    }
     if (!pid) continue
 
     const side = half === 'top' ? 'home' : 'away' // pitching side works this half
@@ -104,7 +130,12 @@ export function computePitcherLines(feed, revealedThrough) {
     const order = team?.pitchers ?? []
     const boxPlayers = team?.players ?? {}
     for (const id of order) {
-      if (firstIdx[id] == null || firstIdx[id] > revealedThrough) continue // not revealed yet
+      // `acc[id]` exists exactly when at least one revealed-or-stepped-into
+      // play was accumulated for him above — equivalent to, but finer than,
+      // the old whole-half `firstIdx[id] > revealedThrough` check, since it
+      // also picks up a pitcher whose only appearance so far is the partial
+      // step half.
+      if (!acc[id]) continue
 
       const person = players[`ID${id}`] ?? {}
       const box = boxPlayers[`ID${id}`] ?? {}

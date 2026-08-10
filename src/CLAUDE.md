@@ -16,14 +16,14 @@ sketch modal) →
 `TeamInfo` (×2, away then home) → `InningViewer`. `LogoSheet` is a standalone
 printable grayscale logo sheet for pencil-sketching, reached from the slate header.
 
-`TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey
-that club is wearing that game (ADR-0030) — three CSS custom properties scoped to
-the `.teaminfo` subtree, resolved by `lib/headerTheme.js`. One masthead is themed
-to the OTHER club: the Starting pitcher card shows the opposing starter, so it
-resolves the triad a second time against `(oppMeta.id, oppTreatment)` and scopes
-it to just that `<section>`. The innings viewer and box score are deliberately
-excluded: navy-and-kraft there *is* the seal metaphor. The theme's only inputs
-are `(teamId, treatment)` — identity, never game state; see `src/lib/CLAUDE.md`.
+`TeamInfo`'s club-name bar and section mastheads are **themed** to the jersey that
+club wears that game (ADR-0030) — three CSS properties from `lib/headerTheme.js`,
+whose only inputs are `(teamId, treatment)`: identity, never game state
+(`src/lib/CLAUDE.md`). The Starting pitcher card resolves the triad a second time
+against the OTHER club (it shows the opposing starter), scoped to its `<section>`.
+Themed surfaces are picked per ELEMENT, not per page: **a club may colour a card
+that identifies the club** (box score and innings view included), never a control,
+cover, or seal-state report — ADR-0030's 2026-08-10 addendum replaces that rule.
 
 ### The team hub (`/team/{id}`, `src/screens/team/`)
 
@@ -183,56 +183,56 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
 - **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
   `PitchersSection` in `InningViewer.jsx`) is gated by the same `revealedThrough`
   high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009). A
-  pure numeric stat grid — the season-context/health prose that used to stack
-  under each row now lives in **Margin Notes** (`MarginNotes.jsx`, same
-  reveal-clamp footing), a ranked digest spanning both teams' pitchers; see
-  `docs/callouts.md`.
+  pure numeric stat grid — the season-context/health prose that used to stack under
+  each row now lives in **Margin Notes** (`MarginNotes.jsx`, same reveal-clamp
+  footing), a ranked digest spanning both teams' pitchers; see `docs/callouts.md`.
 - **The "Now Pitching" card** (`HalfInning.jsx`) is a persistent header naming
   the arm the half OPENS with, shown for as long as the half is reachable
   (`revealed || isNextToReveal`, same ADR-0010 gate as the lineup/defense
-  cards), from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe,
-  callable before reveal). It names that pitcher and keeps naming him — a
-  **mid-half change belongs in the feed**, where `PlayByPlay` renders it as
-  this same `PitcherNotice` in chronological place. The header used to be
-  overridden by a live "who's on the mound now" report, which put the
-  reliever's card in two places at once and, on a half revealed all at once,
-  pinned the inning's LAST arm above at-bat cards the starter had pitched.
-  Same header-not-feed split as `computeHalfInningFeed` dropping a *pre*-pitch
-  change (its `anyPitchInHalf` guard) and `PrePitchChanges` dropping one from
-  the staged list.
+  cards), from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
+  before reveal). It names that pitcher and keeps naming him — a **mid-half change
+  belongs in the feed**, where `PlayByPlay` renders it as this same `PitcherNotice`
+  in chronological place. The header used to be overridden by a live "who's on the
+  mound now" report, which put the reliever's card in two places at once and, on a
+  half revealed all at once, pinned the inning's LAST arm above at-bat cards the
+  starter had pitched. Same header-not-feed split as `computeHalfInningFeed`
+  dropping a *pre*-pitch change (its `anyPitchInHalf` guard) and `PrePitchChanges`
+  dropping one from the staged list.
 - **Extra innings never spoil** — `InningViewer` and `RollingLine` show only
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator
   (away row = tops, home row = bottoms, current half inked as selected); its
-  Back/Next controls cover the full unlocked range. Each extra half opens with
-  the **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) —
-  the at-bat frame minus the pitch ladder and RBI chip, an `AR` pill where a
-  batting result would go, and `PlayDiamond`'s `placedAt` dotting the bases he
-  was given. Deliberately a THIRD entry kind: `nextStepBoundary` and this file's
-  `hasAtBat` guard both key on `kind === 'atbat'` and stay correct only if a
-  placement doesn't answer to it. Never surface the placement above the seal —
-  he is by rule the previous half's last batter.
-- **At-bat stepping**: a sealed half's floating-bar button splits into "Next
-  at-bat" / "Rest of half" choices, stepping `PlayByPlay`'s cards one plate
-  appearance at a time via a transient cursor (`atBatCountFor`,
-  `useRevealProgress`) that always collapses into a normal `revealTo` commit
-  rather than becoming a second spoiler boundary (ADR-0016). One step is an
-  at-bat **plus the notes trailing it** — the feed nests a stoppage at the head
-  of the PA that follows it, so those notes are the announcements made after
-  the batter you just charted, not a preface to the next one. The exception is
-  a stoppage between pitches (`midAtBat`), which leads its own at-bat's step.
-  A step therefore ends mid-play, which is why the pinch-runner pencil-in keys
-  on its notice's index rather than the play's `visible` gate — read ADR-0016
-  before touching `nextStepBoundary`.
-  Either choice's **tap target is the dead space around it**, not just the
-  button: `.pagenav` is click-through, so a missed thumb used to land on a
-  player card under the fade instead. `.pagenav--innings .btn::after`
-  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button —
-  split down the middle between the pair, Refresh excepted — and its offsets are
-  measured from the
-  button on purpose; anchoring them to the bar re-collapses the area mid-tap
-  under `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins both that
-  and what must stay click-through.
+  Back/Next controls cover the full unlocked range. Each extra half opens with the
+  **placed runner's own card** (`PlacedRunnerCard.jsx`, `kind: 'placed'`) — the
+  at-bat frame minus the pitch ladder and RBI chip, an `AR` pill where a batting
+  result would go, and `PlayDiamond`'s `placedAt` dotting the bases he was given.
+  Deliberately a THIRD entry kind: `nextStepBoundary` and this file's `hasAtBat`
+  guard both key on `kind === 'atbat'` and stay correct only if a placement doesn't
+  answer to it. Never surface the placement above the seal — he is by rule the
+  previous half's last batter.
+- **At-bat stepping**: a sealed half's floating-bar button splits into "Next at-bat"
+  / "Rest of half" choices, stepping `PlayByPlay`'s cards one plate appearance at a
+  time via a transient cursor (`atBatCountFor`, `useRevealProgress`) that always
+  collapses into a normal `revealTo` commit rather than becoming a second spoiler
+  boundary (ADR-0016). One step is an at-bat **plus the notes trailing it** — the
+  feed nests a stoppage at the head of the PA that follows it, so those notes are
+  the announcements made after the batter you just charted, not a preface to the
+  next one. The exception is a stoppage between pitches (`midAtBat`), which leads
+  its own at-bat's step. A step therefore ends mid-play, which is why the
+  pinch-runner pencil-in keys on its notice's index rather than the play's
+  `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Either
+  choice's **tap target is the dead space around it**, not just the button:
+  `.pagenav` is click-through, so a missed thumb used to land on a player card
+  under the fade. `.pagenav--innings .btn::after`
+  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button — split
+  between the pair, Refresh excepted — with offsets measured from the button on
+  purpose; anchoring them to the bar re-collapses the area mid-tap under
+  `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins that, and what must
+  stay click-through, at BOTH bar layouts.
+- **Focus mode** — a sealed half being scored is its own COMPOSED screen, not the
+  page narrowed (ADR-0043): anchored scorebug band, full-width at-bat, wrapping
+  trail, tabbed reference, `RollingLine` demoted but NEVER removed (its cells are
+  the navigator). Presentation only; rules in `styles/focus/*`, imported last.
 - **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
   `InningViewer` without touching its guarantees. `GameView` resolves
   `spoilersOffFor(officialDate)` — the pass is running, or this day was consented

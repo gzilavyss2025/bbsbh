@@ -78,6 +78,16 @@
 @import './styles/55-my-tally-account.css';
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
+/* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
+   rather than three more numbered siblings: src/styles is a flat directory at
+   its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
+   a partial that outgrew the 600-line file cap was to subdivide, which is what
+   ADR-0038 asks for in the first place. These three stay LAST, and in this
+   order — every rule in them wins on cascade order, not specificity. See
+   focus/stage.css's header. */
+@import './styles/focus/stage.css';
+@import './styles/focus/atbat.css';
+@import './styles/focus/reference.css';
 
 /* ------------------------------------------------------------
    Per-route partials — still in src/styles/, still numbered, still

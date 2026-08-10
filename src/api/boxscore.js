@@ -16,7 +16,7 @@
 // suffixes). Lives in select.js so this module and the spoiler-free selectors
 // can't drift apart.
 import { lastName as shortName, halfIndex } from './select.js'
-import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './playbyplay.js'
+import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE, HIT_EVENT_TYPES } from './playbyplay.js'
 
 // Context-neutral half of the three-stars blend (ADR-0013).
 import { contextNeutralPoints } from './performanceScore.js'
@@ -137,8 +137,6 @@ const NOT_AN_AT_BAT = new Set([
   'sac_bunt_double_play',
   'catcher_interf',
 ])
-const HIT_EVENT_TYPES = new Set(['single', 'double', 'triple', 'home_run'])
-
 // The scorebug's "H-AB this game" line, reveal-gated — see
 // src/components/Scorebug.jsx. `feed.liveData.boxscore...stats.batting`
 // (what the box score itself renders) is the TRUE, always-live line, so

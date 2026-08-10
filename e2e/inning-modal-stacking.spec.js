@@ -115,25 +115,13 @@ test.describe('pitch-zone modal', () => {
   })
 })
 
-// The third dialog declared inside a half-inning page. Its trigger — the
-// "Pitch colors" key at the foot of the card — is hidden below the 740px
-// breakpoint (index.css), so this one pins a wide viewport rather than
-// inheriting the project's; `.pagenav` stays fixed at every width, so the
-// collision it guards against is the same one.
-test.describe('pitch-color key', () => {
-  test.use({ viewport: { width: 900, height: 800 } })
-
-  test('sits above the floating bar too', async ({ page }) => {
-    await page.goto(`${GAME}/top1`)
-
-    await clickRestOfHalf(page)
-    await page.getByRole('button', { name: 'Show the pitch-color key' }).first().click()
-
-    await expect(page.locator('.pcmodal')).toBeVisible()
-    await expect(page.locator('.turnscene .scrim')).toHaveCount(0)
-    await expect(page.locator('body > .scrim')).toHaveCount(1)
-  })
-})
+// There used to be a third dialog declared inside a half-inning page — the
+// "Pitch colors" key at the foot of the card, on its own wide-viewport
+// describe because its trigger was hidden below 740px. The key and its modal
+// are gone (see StrikeZone.jsx: the pitch list names each dot's outcome beside
+// it, so nothing needed a legend), and this block went with them rather than
+// being left pointing at a button that no longer renders. The two dialogs
+// above still cover the stacking contract this file exists for.
 
 test('closing a portalled dialog still hands focus back to its trigger', async ({ page }) => {
   await page.goto(`${GAME}/top1`)

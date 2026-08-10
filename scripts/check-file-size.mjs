@@ -75,10 +75,10 @@ const BUDGETS = {
   'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
   'src/styles/06-loader-and-cards.css': 900, // 850
   'src/styles/08-site-shell.css': 1100, // 1016
-  'src/styles/09-team-info.css': 700, // 687 — the Ballpark card moved out to 57-ballpark-card.css
+  'src/styles/09-team-info.css': 800, // 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 798
   'src/styles/12-sealbox.css': 1800, // 1746 — the Statcast tile base left with StatcastCard (ADR-0040)
-  'src/styles/14-strike-zone.css': 1100, // 1027
+  'src/styles/14-strike-zone.css': 1000, // 909 — both pitch-colour keys left (PitchColorsKey's button/modal and StrikeZoneLegend's swatch row); the pitch list names each dot beside it
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684
@@ -113,7 +113,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
-  'src/screens/InningViewer.jsx': 1000, // 912
+  'src/screens/InningViewer.jsx': 1100, // 1022 — focus mode's post-half SUMMARY/next-half bottom bar (focus.postHalf) plus live runs/hits reporting
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local
@@ -133,7 +133,13 @@ const BUDGETS = {
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
   'src/api/playbyplay/halfInningFeed.js': 800, // 793
   'src/screens/PlayerPage.jsx': 800, // 794 — Prospect Card remains, duplicate trendBySportId progression wiring removed
-  'src/components/playbyplay/PlayByPlay.jsx': 700, // 681
+  // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
+  // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
+  // the at-bat trail. The header itself (AtBatHero.jsx), the trail's
+  // item-building logic and the stepped-so-far R/H tally (both entriesView.js)
+  // were all pulled out to keep this growth to wiring only — see those files'
+  // own headers.
+  'src/components/playbyplay/PlayByPlay.jsx': 750, // 716
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629

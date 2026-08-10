@@ -49,6 +49,7 @@ export {
   NON_PA_EVENT_TYPES,
   GAME_ADVISORY_EVENT_TYPE,
   BASERUNNING_NOTE_EVENT_TYPES,
+  HIT_EVENT_TYPES,
 } from './playbyplay/eventTypes.js'
 
 export {
@@ -81,6 +82,13 @@ export {
   firstRispPAIndexByBatter,
 } from './playbyplay/firsts.js'
 
-export { nextStepBoundary, lastVisibleAtBatIndex, deriveLiveState } from './playbyplay/entriesView.js'
+export {
+  nextStepBoundary,
+  stepBounds,
+  stepTotals,
+  lastVisibleAtBatIndex,
+  deriveLiveState,
+  buildTrailItems,
+} from './playbyplay/entriesView.js'
 
 export { computeHalfInningFeed } from './playbyplay/halfInningFeed.js'

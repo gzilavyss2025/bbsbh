@@ -1459,12 +1459,13 @@
   overflow: hidden;
 }
 
-/* Names the moment ("Lineups entering the Top 7th") — same navy masthead
-   treatment as .halfdefense__title (deliberately identical rules, not just a
-   similar look: the two cards read as one matched pair, phone and wide
-   layout alike, rather than Defense having a title and Lineups improvising
-   its own). Replaces the old .innings__reference-title, which only existed
-   on the wide layout and left the phone's inline copy with no title at all.
+/* Names the topic ("Lineups") — same navy masthead treatment as
+   .halfdefense__title (deliberately identical rules, not just a similar look:
+   the two read as one matched pair at both layouts, rather than Defense having a
+   title and Lineups improvising its own). Both titles used to name the half too;
+   EnteringReference.jsx has why they stopped and why the pair stays matched
+   either way. Replaces the old .innings__reference-title, which only existed on
+   the wide layout and left the phone's inline copy with no title at all.
    A <button> (LineupSection) toggling .lineupcard__teams below — reset off
    the browser's own button chrome so it still reads as a plain masthead. */
 .lineupcard__title {
@@ -1504,15 +1505,46 @@
   gap: 12px;
 }
 
+/* Same navy-bar recipe as .halfdefense__title — a themed club recolors it via
+   .lineupteam.is-themed (09-team-info.css); untuned falls back to the same
+   navy/seal/white default every other masthead bar wears, not a one-off look.
+   EDGE TO EDGE: the margin cancels .lineupcard__teams' 10px side padding that
+   `width: 100%` cannot reach past (the bar read as a label ON the card, not its
+   masthead); padding-inline holds the text at the same x, so only the fill moves. */
 .lineupteam__name {
-  margin: 0 0 8px;
-  padding: 4px 8px;
+  width: auto;
+  margin: 0 -10px 8px;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  color: var(--text-body);
+  color: var(--text-on-ink);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+}
+
+/* Same bleed formula as .halfdefense__title's copy above — see its comment. */
+.lineupteam__name > .teamlogo-crop-bar {
+  height: calc(var(--fs-compact) * var(--lh-solid) + 16px);
+  margin-block: -8px;
+}
+
+/* Compact "R" pill in lineup rows only — every other roster surface
+   (RosterPanel.jsx) keeps the full "ROOKIE" word (see .rookiepill's own
+   header); a lineup row already carries a slot number, two names and a
+   position/jersey column, and the full word was the one thing left to trim. */
+.lineupcard__names .rookiepill__full {
+  display: none;
+}
+
+.lineupcard__names .rookiepill__short {
+  display: inline;
 }
 
 .lineupcard__list {
@@ -1651,6 +1683,17 @@
   cursor: pointer;
 }
 
+/* Same bleed formula as .metricbar > .teamlogo-crop-bar
+   (44-pre-game-cards.css) — height from the bar's own type + padding, a
+   matching negative margin so the mark's top/bottom crop clean to the bar's
+   edges instead of sitting inset like a normal inline icon (identity lab's
+   own "the mark may clip" convention). 8px padding here vs. that bar's 10px,
+   so its own numbers, not a shared rule. */
+.halfdefense__title > .teamlogo-crop-bar {
+  height: calc(var(--fs-caption) * var(--lh-solid) + 16px);
+  margin-block: -8px;
+}
+
 .halfdefense__chevron {
   margin-left: auto;
   color: var(--text-on-ink);
@@ -1705,6 +1748,17 @@
   box-shadow: none;
   background: none;
   padding: 12px var(--space-2) var(--space-4);
+}
+
+/* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
+   does would leave this card with no frame (unlike its sibling .lineupcard),
+   so this uses .half .defdiamond's other remedy instead — drop the diamond's
+   own border/shadow/background so its edges stop double-drawing on top of
+   .halfdefense's own (`overflow: hidden` up top already joins the seam). */
+.refpanel__body .defdiamond {
+  border: none;
+  box-shadow: none;
+  background: none;
 }
 
 .stat {
