@@ -298,17 +298,28 @@
 }
 
 .bs__dec {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 50%;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--accent-negative);
+  line-height: var(--lh-solid);
+  /* IBM Plex Sans Condensed's line box carries more room below the baseline
+     than above it, so a flex-centered line still reads low; nudge it up. */
+  padding-bottom: 1px;
+  color: var(--text-on-ink);
+  background: var(--accent-negative);
 }
-/* Decision tag by result: a win or save reads field-green, a loss seam-red. */
+/* Decision tag by result: a win or save fills field-green, a loss seam-red. */
 .bs__dec--win {
-  color: var(--accent-positive);
+  background: var(--accent-positive);
 }
 .bs__dec--loss {
-  color: var(--accent-negative);
+  background: var(--accent-negative);
 }
 
 /* Uniform number — inked seam-red wherever it rides beside a name (the manager
