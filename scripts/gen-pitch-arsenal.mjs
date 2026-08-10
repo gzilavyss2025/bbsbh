@@ -289,7 +289,7 @@ async function main() {
   // re-fetching every ingested game's feed to change nothing in the database.
   if (args['export-only']) {
     await writeArsenal(db, hands)
-    console.log(`wrote ${out} (export only — no games swept)`)
+    console.log(`wrote ${outDir} (export only — no games swept)`)
     db.close()
     return
   }
@@ -344,7 +344,7 @@ async function main() {
   await writeOut()
 
   const total = db.prepare('SELECT COUNT(*) AS n FROM pitch_arsenal_ingested_games').get().n
-  console.log(`wrote ${out} — ${total} games on file (+${done} swept this run)`)
+  console.log(`wrote ${outDir} — ${total} games on file (+${done} swept this run)`)
   db.close()
 }
 
