@@ -6,7 +6,10 @@
    other lettered sibling. Cascades right after it since it extends the same
    .prospecttable rules. The percentile stays plain ink; only the movement
    arrow takes --accent-positive/--accent-negative, the same restriction
-   radarpill's own up/down tag observes. */
+   radarpill's own up/down tag observes. The cell prints a spoken standing
+   ("Top 7%", "Middle", "Bottom 12%"), not the raw percentile — see
+   ProspectTrendPill.jsx. Mono, because the numbers inside those phrases still
+   want to line up down the column. */
 .prospecttrend {
   display: inline-flex;
   align-items: center;

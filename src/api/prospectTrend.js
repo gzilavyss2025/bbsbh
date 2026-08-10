@@ -30,3 +30,46 @@ export function fetchProspectTrend() {
 export function prospectTrendById(snapshot, playerId) {
   return (snapshot?.players ?? []).find((p) => p.playerId === playerId) ?? null
 }
+
+// The band edges for standingLabel. Everything from 41 through 59 reads
+// "Middle" rather than a printed "Top 43%" / "Bottom 47%", both of which are
+// true and neither of which means anything — a player one point either side of
+// the median is not doing two different things, and a column full of near-50
+// figures reads as precision the underlying sample cannot support.
+const TOP_FROM = 60
+const BOTTOM_TO = 40
+
+// The stat each group is ranked on. It is printed in EVERY cell, not defined
+// once in a caption under the table: the column has to say what it measures on
+// its own, and this column measures two different things depending on the row.
+const METRIC = { hitting: 'OPS', pitching: 'ERA' }
+
+// A percentile said the way a broadcast says it, with the stat it is about.
+// The /prospects cell used to print the raw ordinal ("93rd"), which asked a
+// reader to know that an ordinal in this column meant a percentile and not a
+// rank — with an actual rank column two cells to its left — then which end was
+// the good one, and then what stat it was even about.
+//
+//   93, hitting  -> "Top 7% OPS"
+//   54, hitting  -> "Middle OPS"
+//   12, pitching -> "Bottom 12% ERA"
+//
+// Under the "vs. Level" head, each of those is a complete sentence: this stat,
+// this standing, against everyone else at his level. Higher is always better —
+// percentileRank (scripts/lib/prospectPercentile.mjs) already inverts ERA — so
+// "Top 2% ERA" means the ERA is among the level's best, which is also how a fan
+// would hear it.
+//
+// Null for a percentile that isn't a number, which the caller renders as its
+// own "Too early" empty state.
+export function standingLabel(percentile, group) {
+  if (!Number.isFinite(percentile)) return null
+  const metric = METRIC[group]
+  const band =
+    percentile >= TOP_FROM
+      ? `Top ${100 - percentile}%`
+      : percentile <= BOTTOM_TO
+        ? `Bottom ${percentile}%`
+        : 'Middle'
+  return metric ? `${band} ${metric}` : band
+}

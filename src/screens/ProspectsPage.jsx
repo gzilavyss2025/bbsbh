@@ -95,9 +95,16 @@ export function ProspectsPage() {
 
       {players.length > 0 && (
         <>
+          {/* "vs. Level", not "Trend". The cell holds a STANDING against
+              everyone else qualified at this player's own level this season,
+              not a direction, and calling it Trend made a column of static
+              figures look like an arrow column that had broken. It also sits
+              LAST, after Line: dropped in at position five it pushed Team and
+              Line — including the very stat line it summarizes — off the right
+              edge of a 390px phone. */}
           <Ledger
             leftCols={2}
-            head={['Rk', 'Player', 'Pos', 'Level', 'Trend', 'Team', 'Line']}
+            head={['Rk', 'Player', 'Pos', 'Level', 'Team', 'Line', 'vs. Level']}
             rows={players.map((p) => ({
               key: p.playerId,
               cells: [
@@ -105,11 +112,11 @@ export function ProspectsPage() {
                 <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
                 p.position || DASH,
                 p.levelLabel || DASH,
-                <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
                 <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo" ariaLabel={p.team}>
                   <TeamLogo teamId={p.teamId} name={p.team} size={20} />
                 </TeamLink>,
                 p.statLine || DASH,
+                <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
               ],
             }))}
           />

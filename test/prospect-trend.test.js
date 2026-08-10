@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { prospectTrendById } from '../src/api/prospectTrend.js'
+import { prospectTrendById, standingLabel } from '../src/api/prospectTrend.js'
 
 const SNAPSHOT = {
   generatedAt: '2026-08-10',
@@ -26,4 +26,50 @@ test('prospectTrendById returns null for a player with no current-level line', (
 test('prospectTrendById degrades to null on a missing/empty snapshot', () => {
   assert.equal(prospectTrendById(null, 111), null)
   assert.equal(prospectTrendById({}, 111), null)
+})
+
+// ---------------------------------------------------------------------------
+// standingLabel — the /prospects cell says the percentile the way a broadcast
+// says it, because "93rd" in a column two cells from an actual RANK column asks
+// a reader to know it means a percentile, and then which end of it is good.
+// ---------------------------------------------------------------------------
+
+test('a high percentile is stated as the share of the level he is ahead of', () => {
+  assert.equal(standingLabel(93, 'hitting'), 'Top 7% OPS')
+  assert.equal(standingLabel(100, 'hitting'), 'Top 0% OPS')
+  // The boundary belongs to the band it names.
+  assert.equal(standingLabel(60, 'hitting'), 'Top 40% OPS')
+})
+
+test('a low percentile keeps its own number — "Bottom 12%", not "Top 88%"', () => {
+  assert.equal(standingLabel(12, 'hitting'), 'Bottom 12% OPS')
+  assert.equal(standingLabel(40, 'hitting'), 'Bottom 40% OPS')
+})
+
+test('the middle band is named, not printed as false precision', () => {
+  // 41 through 59. A player one point either side of the median is not doing
+  // two different things, and the sample cannot support the distinction.
+  assert.equal(standingLabel(41, 'hitting'), 'Middle OPS')
+  assert.equal(standingLabel(50, 'hitting'), 'Middle OPS')
+  assert.equal(standingLabel(59, 'hitting'), 'Middle OPS')
+})
+
+test('every cell names the stat it ranks, because the column ranks two of them', () => {
+  // No caption under the table defines this — the cell has to stand alone, and
+  // a bat and an arm in the same column are not ranked on the same thing.
+  assert.equal(standingLabel(98, 'pitching'), 'Top 2% ERA')
+  assert.equal(standingLabel(12, 'pitching'), 'Bottom 12% ERA')
+  // Higher is always better: percentileRank already inverts ERA, so a top
+  // percentile means a LOW earned run average.
+  assert.equal(standingLabel(98, 'hitting'), 'Top 2% OPS')
+})
+
+test('an unrecognised group still yields a readable band rather than nothing', () => {
+  assert.equal(standingLabel(93, undefined), 'Top 7%')
+})
+
+test('a non-numeric percentile has no label — the caller renders "Too early"', () => {
+  assert.equal(standingLabel(null, 'hitting'), null)
+  assert.equal(standingLabel(undefined, 'hitting'), null)
+  assert.equal(standingLabel(NaN, 'hitting'), null)
 })

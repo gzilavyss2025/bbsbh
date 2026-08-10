@@ -471,7 +471,21 @@ for each generator; the reader modules:
   Ledger cell, not a tap-to-reveal note like `RadarPill`, since Ledger's rows
   are fixed-shape with no open/close state to lift. `movement` is the same
   self-join-against-bbsbh's-own-history pattern as `feverRadar.js`, just a
-  wider window (stat percentiles move slower than a daily scouting rank).
+  wider window (stat percentiles move slower than a daily scouting rank); the
+  arrow only appears past a 5-point move, since a percentile wobbles a point
+  or two on one good night.
+
+  The column is headed **`vs. Level`** and sits LAST, after `Line`. It does not
+  print the raw percentile: `standingLabel` turns it into the phrase a
+  broadcast uses, with the stat attached — `Top 7% OPS`, `Middle OPS`,
+  `Bottom 12% ERA`. Three reasons, all learned the hard way. An ordinal
+  ("93rd") two cells from a real rank column reads as a second, competing rank;
+  nothing in it says which end is good; and the column ranks a DIFFERENT stat
+  depending on whether the row is a bat or an arm, so the stat has to ride in
+  every cell rather than be defined in a caption under the table. Percentile 41
+  through 59 is `Middle` rather than a printed near-50 figure, which would be
+  precision the sample cannot support. Higher is always better —
+  `percentileRank` inverts ERA — so `Top 2% ERA` means one of the level's best.
 
 - `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
