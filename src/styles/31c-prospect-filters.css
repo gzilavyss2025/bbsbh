@@ -1,0 +1,383 @@
+/* Prospect Desk: the ranking header, one coherent filter band, and the
+   narrow-screen ledger affordances for /prospects. Secondary filters fold
+   behind a native button on phones; the role choice remains immediately
+   reachable. At the wide-layout breakpoint every control is visible. */
+.prospects__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: var(--bw-heavy) solid var(--accent-primary);
+}
+.prospects__dateline,
+.prospects__resultcount {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.prospects__resultcount {
+  flex: 0 0 auto;
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+
+.prospects__filterdeck {
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.prospects__filterhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.prospects__filterhead h2,
+.prospects__filterlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-ui);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.prospects__reset {
+  min-height: var(--tap-min);
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--accent-negative);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+  cursor: pointer;
+  transition: transform var(--dur-snappy) var(--ease-out);
+}
+.prospects__reset:active {
+  transform: scale(0.97);
+}
+.prospects__filterfield {
+  min-width: 0;
+}
+.prospects__filterfield--role {
+  padding-top: var(--space-3);
+}
+.prospects__filterfield .levelnav {
+  margin: var(--space-1) 0 0;
+}
+.prospects__secondary-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-2);
+  padding: 0;
+  border: 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  background: transparent;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.prospects__secondary-toggle::after {
+  content: '+';
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-regular);
+}
+.prospects__secondary-toggle[aria-expanded='true']::after {
+  content: '−';
+}
+.prospects__toggle-summary {
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--text-caption);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--ls-none);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prospects__secondary {
+  display: none;
+  padding-top: var(--space-3);
+}
+.prospects__secondary.is-open {
+  display: grid;
+  gap: var(--space-3);
+}
+.prospects__filterfield .teamfilterstrip {
+  margin: var(--space-1) 0 0;
+}
+.prospects__active-summary {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.prospects__active-summary span {
+  margin-right: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Native range semantics retain drag, touch, click, and arrow-key behavior.
+   The visible scale names the performance bands instead of exposing the
+   implementation's numeric values. */
+.vslevelslider {
+  padding-top: var(--space-1);
+}
+.vslevelslider__input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--space-6);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.vslevelslider__input::-webkit-slider-runnable-track {
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--border-rule) 0%,
+    var(--border-rule) 20%,
+    var(--accent-negative) 20%,
+    var(--seal-cover) 60%,
+    var(--accent-positive) 100%
+  );
+}
+.vslevelslider__input::-moz-range-track {
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--border-rule) 0%,
+    var(--border-rule) 20%,
+    var(--accent-negative) 20%,
+    var(--seal-cover) 60%,
+    var(--accent-positive) 100%
+  );
+}
+.vslevelslider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: var(--space-6);
+  height: var(--space-6);
+  margin-top: calc(-1 * var(--space-2));
+  border: var(--space-1) solid var(--vslevelslider-thumb, var(--accent-primary));
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.vslevelslider__input::-moz-range-thumb {
+  width: var(--space-6);
+  height: var(--space-6);
+  border: var(--space-1) solid var(--vslevelslider-thumb, var(--accent-primary));
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.vslevelslider__input:focus-visible {
+  outline: none;
+}
+.vslevelslider__input:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--ring);
+}
+.vslevelslider__input:focus-visible::-moz-range-thumb {
+  box-shadow: var(--ring);
+}
+.vslevelslider__ticks {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-compact);
+  color: var(--text-caption);
+}
+.vslevelslider__tick {
+  text-align: center;
+}
+.vslevelslider__tick:first-child {
+  text-align: left;
+}
+.vslevelslider__tick:last-child {
+  text-align: right;
+}
+.vslevelslider__tick.is-active {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.vslevelslider__tick--low {
+  color: var(--accent-negative);
+}
+.vslevelslider__tick--mid {
+  color: var(--seal-cover);
+}
+.vslevelslider__tick--high {
+  color: var(--accent-positive);
+}
+
+.prospects__empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+}
+.prospects__empty p {
+  margin: 0;
+}
+.prospects__ledger-shell {
+  position: relative;
+}
+.prospects__scrollcue {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-bottom: 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--surface-inset);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-align: right;
+  text-transform: uppercase;
+}
+.prospects__ledger-shell .ledger-wrap {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-caption) var(--bg-page);
+}
+.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar {
+  height: var(--space-2);
+}
+.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+.prospects__ledger-shell .ledger-wrap::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-pill);
+  background: var(--text-caption);
+}
+.prospects__ledger-shell .prospecttable {
+  min-width: calc(var(--space-16) * 11);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.prospects__ledger-shell .prospecttable th:first-child,
+.prospects__ledger-shell .prospecttable td:first-child,
+.prospects__ledger-shell .prospecttable th:nth-child(2),
+.prospects__ledger-shell .prospecttable td:nth-child(2) {
+  position: sticky;
+  z-index: 2;
+  background-color: var(--surface-card);
+}
+.prospects__ledger-shell .prospecttable th:first-child,
+.prospects__ledger-shell .prospecttable th:nth-child(2) {
+  z-index: 3;
+  background-color: var(--bg-page);
+}
+.prospects__ledger-shell .prospecttable th:first-child,
+.prospects__ledger-shell .prospecttable td:first-child {
+  left: 0;
+  width: var(--space-12);
+  min-width: var(--space-12);
+}
+.prospects__ledger-shell .prospecttable th:nth-child(2),
+.prospects__ledger-shell .prospecttable td:nth-child(2) {
+  left: var(--space-12);
+  width: calc(var(--space-12) * 3);
+  min-width: calc(var(--space-12) * 3);
+  border-right: var(--bw-hair) solid var(--border-rule);
+}
+
+@media (min-width: 740px) {
+  .prospects__header {
+    padding-top: var(--space-5);
+  }
+  .prospects__filterdeck {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-3) var(--space-4);
+    align-items: end;
+    padding: var(--space-4);
+  }
+  .prospects__filterhead {
+    grid-column: 1 / -1;
+  }
+  .prospects__filterfield--role {
+    grid-column: 1;
+    padding-top: 0;
+  }
+  .prospects__secondary-toggle {
+    display: none;
+  }
+  .prospects__secondary,
+  .prospects__secondary.is-open {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--space-4);
+    padding-top: 0;
+  }
+  .prospects__active-summary {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: center;
+    justify-self: end;
+    margin: 0;
+  }
+  .prospects__scrollcue {
+    display: none;
+  }
+  .prospects__ledger-shell .prospecttable {
+    min-width: 100%;
+    border-radius: var(--radius-md);
+  }
+  .prospects__ledger-shell .prospecttable th:first-child,
+  .prospects__ledger-shell .prospecttable td:first-child,
+  .prospects__ledger-shell .prospecttable th:nth-child(2),
+  .prospects__ledger-shell .prospecttable td:nth-child(2) {
+    position: static;
+    width: auto;
+    min-width: 0;
+    border-right: 0;
+  }
+}

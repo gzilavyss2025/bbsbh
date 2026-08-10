@@ -1,4 +1,4 @@
-import { standingLabel } from '../../api/prospectTrend.js'
+import { standingLabel, levelTier } from '../../api/prospectTrend.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
@@ -8,21 +8,45 @@ import { standingLabel } from '../../api/prospectTrend.js'
 // flex-wrap), this lives in a plain table cell, so it stays a static line —
 // Ledger's rows are fixed-shape, with no open/close state to lift.
 //
-// IT DOES NOT PRINT THE PERCENTILE — standingLabel (api/prospectTrend.js) turns
-// it into the phrase a broadcast would use, carrying the stat with it: "Top 7%
-// OPS", "Bottom 12% ERA". The stat rides in every cell rather than being defined
-// in a caption under the table, because a column has to say what it measures
-// without a sentence somewhere else doing it — and this one measures a different
-// stat depending on whether the row is a bat or an arm.
+// THE ROW OF FIVE DOTS *is* the cell — the "at a glance" scan signal
+// (levelTier, api/prospectTrend.js): 1-2 lit red mark him below his level's
+// pack, 3 lit kraft-brown is in line with it, 4-5 lit green mark him above
+// it. Reading a whole page of rows for who's over/underperforming is a color
+// scan across this one column, not a sentence-by-sentence read — the spoken
+// standing ("Top 7% OPS", "Bottom 12% ERA") standingLabel builds no longer
+// prints, on purpose; it still carries the accessible name (role="img" +
+// aria-label below), since a screen reader still needs the stat and the
+// exact number a colored dot can't say on its own.
 //
-// The percentile is plain ink, same as every other Ledger column; only the
-// movement arrow borrows --accent-positive/--accent-negative, the same
-// restriction RadarPill's own tag observes (color marks the DIRECTION it
-// moved, never the level itself), and the triangle carries the direction on
-// its own shape so the colour is never load-bearing.
+// The dot fill is the only load-bearing color here besides the movement
+// arrow, which borrows --accent-positive/--accent-negative the same
+// restrictive way RadarPill's own tag does (color marks the DIRECTION it
+// moved, never the level) — its triangle carries the direction on its own
+// shape so the colour there is never load-bearing either.
+const DOT_COUNT = 5
+
+// tier 1-2 => 'low' (red), 3 => 'mid' (kraft brown), 4-5 => 'high' (green).
+function bandFor(tier) {
+  return tier <= 2 ? 'low' : tier >= 4 ? 'high' : 'mid'
+}
+
+// Exported: ProspectCard.jsx (the player-page Analytics card) draws the same
+// dot row beside its own tier text label, rather than inventing a second dot
+// component that could drift from this one's tier→color mapping.
+export function LevelDots({ tier }) {
+  const band = bandFor(tier)
+  return (
+    <span className={`prospecttrend__dots prospecttrend__dots--${band}`} aria-hidden="true">
+      {Array.from({ length: DOT_COUNT }, (_, i) => (
+        <span key={i} className={i < tier ? 'prospecttrend__dot prospecttrend__dot--filled' : 'prospecttrend__dot'} />
+      ))}
+    </span>
+  )
+}
+
 function DirectionTriangle({ up }) {
   return (
-    <svg viewBox="0 0 20 20" width="8" height="8" aria-hidden="true">
+    <svg viewBox="0 0 20 20" width="11" height="11" aria-hidden="true">
       {up ? (
         <polygon points="8.5,3.5 14.5,14.5 2.5,14.5" fill="currentColor" />
       ) : (
@@ -52,11 +76,13 @@ export function ProspectTrendPill({ entry }) {
   if (!label) {
     return <span className="prospecttrend prospecttrend--unqualified">Too early</span>
   }
+  const tier = levelTier(entry.percentile)
   const delta = entry.movement?.delta
+  const moving = Number.isFinite(delta) && Math.abs(delta) >= MOVE_FLOOR
   return (
-    <span className="prospecttrend">
-      <span className="prospecttrend__value">{label}</span>
-      {Number.isFinite(delta) && Math.abs(delta) >= MOVE_FLOOR && (
+    <span className="prospecttrend" role="img" aria-label={label}>
+      <LevelDots tier={tier} />
+      {moving && (
         <span className={`prospecttrend__move prospecttrend__move--${delta > 0 ? 'up' : 'down'}`}>
           <DirectionTriangle up={delta > 0} />
         </span>
