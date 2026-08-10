@@ -1,0 +1,140 @@
+/* 26b-recent-form.css — the player page's hitter Recent form card.
+   Imported by components/playerstats/RecentFormCard.jsx, not by index.css:
+   only the player route pays for it (same per-route split as
+   26a-percentile-strip.css). Cascade position is right after
+   26-player-page.css, whose .ledger rules this builds on. */
+
+/* ---- recent form: three nested windows read against the season line ----
+   A four-row ledger, not a grid of facts. The three windows NEST (the last 7
+   games are inside the last 15, inside the last 30), so they have to read as
+   one narrowing sequence down a single column — a two-up fact grid laid them
+   out in Z-order and made three overlapping samples look like three
+   independent ones. The season row foots them as the baseline every bar is
+   drawn from. See RecentFormCard.jsx and api/hitterForm.js. */
+.formtrend {
+  margin-top: var(--space-4);
+}
+/* The track is the one column that YIELDS. Every other cell holds a number the
+   reader needs whole; the bar is a redundant picture of the +/- OPS column
+   beside it, so when the phone runs out of room the picture shrinks and the
+   figures stay. No min-width for exactly that reason: a floor here pushed the
+   delta column off the right edge at 390px — the same "table with six columns
+   and a secret" this redesign called out in the splits ledgers. */
+.formtrend__barhead,
+.formtrend .formtrend__bar {
+  width: 30%;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.formtrend__deltahead,
+.formtrend .formtrend__delta {
+  text-align: right;
+}
+/* The season line, set off as the reference rather than printed as a fourth
+   window — the ledger footer's own treatment (heavier rule, tinted row),
+   because that is exactly what this row is. */
+.formtrend .formtrend__anchor td {
+  border-top: var(--bw-rule) solid var(--border-rule);
+  background: var(--bg-page);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.formtrend .formtrend__anchor .yr {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+/* The counting line under the table, and the one window it belongs to named
+   beside it. The old card printed HR/RBI for a FOURTH window (15) beside rate
+   lines covering 7/15/30, with nothing to warn the reader it had changed the
+   subject. It is a CAPTION, not a chip: the bordered, shadowed card it used to
+   wear made the section read as two stacked containers and gave a single line
+   of counting stats the same weight as the ledger above it. */
+.formtrend__count {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 2px 2px 0;
+}
+.formtrend__count-k {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.formtrend__count-v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  color: var(--text-body);
+}
+
+/* ---- the deviation bar ----
+   One row's distance from the season line, diverging off a centred axis: right
+   and kraft amber for better than himself, left and navy for worse — NOT the
+   positive/negative accent pair, which means good and bad, and neither end of
+   this scale is either. A diverging bar is the honest form here for two reasons
+   — the quantity is signed, and its zero is real and is printed as its own row
+   directly beneath the track, so the axis is never an unlabelled claim. The
+   scale is FIXED at ±.300 OPS, never fitted to the player's own worst window,
+   which would draw every hitter alive at full width. A window that does not
+   clear its own standard error draws no bar at all (see DeviationBar). */
+.devbar {
+  position: relative;
+  display: block;
+  height: 11px;
+  border-radius: var(--radius-xs);
+  background: var(--surface-inset);
+  box-shadow: var(--inset-cell);
+}
+/* The season line drawn down the middle of every track, the anchor row's
+   included, so the zero reads as one continuous edge down the column. */
+.devbar::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: var(--bw-rule);
+  transform: translateX(-50%);
+  background: var(--border-rule);
+}
+/* The anchor row IS the zero, so it has no length — axis alone, no groove. A
+   window that came up inside its own noise keeps the plain `.devbar` groove
+   with nothing in it, which is a different statement: the bar could have been
+   drawn there and was not. */
+.devbar--axis {
+  background: none;
+  box-shadow: none;
+}
+.devbar__fill {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+}
+.devbar.is-up .devbar__fill {
+  left: 50%;
+  background: var(--seal);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+.devbar.is-down .devbar__fill {
+  right: 50%;
+  background: var(--navy);
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
+}
+/* A window past the ±.300 domain runs off the end of the track in an arrowhead,
+   so a clamped bar can never be read as one that happens to land exactly on the
+   limit. */
+.devbar.is-clamped.is-up .devbar__fill {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%);
+}
+.devbar.is-clamped.is-down .devbar__fill {
+  border-radius: 0;
+  clip-path: polygon(5px 0, 100% 0, 100% 100%, 5px 100%, 0 50%);
+}

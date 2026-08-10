@@ -1,5 +1,6 @@
 import { fetchAffiliates, fetchRosterIdsForTeams } from '../api/team.js'
 import { fetchTopProspects, prospectAffiliateMap } from '../api/prospects.js'
+import { fetchProspectTrend, prospectTrendById } from '../api/prospectTrend.js'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -7,6 +8,7 @@ import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Ledger } from '../components/player/Ledger.jsx'
+import { ProspectTrendPill } from '../components/badges/ProspectTrendPill.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
@@ -57,10 +59,10 @@ async function resolveCurrentLevels(players) {
 }
 
 async function loadProspects() {
-  const snapshot = await fetchTopProspects()
+  const [snapshot, trend] = await Promise.all([fetchTopProspects(), fetchProspectTrend()])
   const players = snapshot.players ?? []
-  if (!players.length) return snapshot
-  return { ...snapshot, players: await resolveCurrentLevels(players) }
+  if (!players.length) return { ...snapshot, trend }
+  return { ...snapshot, trend, players: await resolveCurrentLevels(players) }
 }
 
 // A standalone replica of MLB Pipeline's Top 100 Prospects list, ranked in
@@ -93,9 +95,16 @@ export function ProspectsPage() {
 
       {players.length > 0 && (
         <>
+          {/* "vs. Level", not "Trend". The cell holds a STANDING against
+              everyone else qualified at this player's own level this season,
+              not a direction, and calling it Trend made a column of static
+              figures look like an arrow column that had broken. It also sits
+              LAST, after Line: dropped in at position five it pushed Team and
+              Line — including the very stat line it summarizes — off the right
+              edge of a 390px phone. */}
           <Ledger
             leftCols={2}
-            head={['Rk', 'Player', 'Pos', 'Level', 'Team', 'Line']}
+            head={['Rk', 'Player', 'Pos', 'Level', 'Team', 'Line', 'vs. Level']}
             rows={players.map((p) => ({
               key: p.playerId,
               cells: [
@@ -107,6 +116,7 @@ export function ProspectsPage() {
                   <TeamLogo teamId={p.teamId} name={p.team} size={20} />
                 </TeamLink>,
                 p.statLine || DASH,
+                <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
               ],
             }))}
           />

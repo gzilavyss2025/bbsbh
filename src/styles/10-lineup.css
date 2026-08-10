@@ -571,8 +571,11 @@
   color: var(--text-caption);
 }
 
-/* The control that both labels and switches the notes, in the batting order
-   masthead's aside slot (where BullpenBoard puts its InfoPopover).
+/* The toggle-pill control shared by every section masthead's aside slot that
+   switches something on/off in place — the batting order's "vs [pitcher]"
+   matchup-notes switch (StarterMatchups.jsx) and the starting pitcher card's
+   "Bullpen" switch (BullpenBoard.jsx). One class so the look only needs
+   tuning once; each caller supplies its own label and press handler.
 
    Colour here is load-bearing, not decorative. Kraft gold as TEXT on the bar
    measures 4.35:1, under the 4.5:1 check-contrast.mjs demands — so neither
@@ -589,7 +592,7 @@
    hollow ring when off, filled when on — leaving three redundant cues
    (aria-pressed, fill colour, dot shape). Don't collapse the dot back to an
    opacity change. */
-.matchupswitch {
+.mastheadpill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -605,19 +608,19 @@
   text-transform: uppercase;
   cursor: pointer;
 }
-.matchupswitch__dot {
+.mastheadpill__dot {
   width: 8px;
   height: 8px;
   border: var(--bw-hair) solid currentColor;
   border-radius: 50%;
   background: none;
 }
-.matchupswitch[aria-pressed='true'] {
+.mastheadpill[aria-pressed='true'] {
   background: var(--seal);
   border-color: var(--seal);
   color: var(--text-on-seal);
 }
-.matchupswitch[aria-pressed='true'] .matchupswitch__dot {
+.mastheadpill[aria-pressed='true'] .mastheadpill__dot {
   background: currentColor;
 }
 
@@ -644,6 +647,20 @@
 .lineup__bench b {
   font-weight: var(--w-semibold);
   color: var(--text-body);
+}
+
+/* The Full roster door closing the pregame roster fallback (TeamInfo.jsx's
+   FullRosterLink) — same closing-row idea as .lineup__bench above. .thub-door's
+   usual home is BETWEEN two already-bordered cards (TeamPage's previews), so a
+   bare margin reads fine there; here it sits inside the SAME card as the
+   batter rows above it, so without its own top edge it read as a stray link
+   adrift in the card's leftover bottom whitespace rather than the list's own
+   closing row. The border/inset match .roster__row's own rhythm (12px
+   horizontal) instead of .thub-door's plain margin. */
+.lineup .thub-door {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 

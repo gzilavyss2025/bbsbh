@@ -20,7 +20,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Ledger } from '../components/player/Ledger.jsx'
 import { spanCell } from '../lib/ledger.js'
 import { PositionInnings } from '../components/player/PositionInnings.jsx'
-import { SplitsVsTeam } from '../components/playerstats/SplitsVsTeam.jsx'
+import { SplitsSection, hasSplits } from '../components/playerstats/SplitsSection.jsx'
 import { StatcastPercentiles } from '../components/charts/StatcastPercentiles.jsx'
 import { AdvancedStatsCard } from '../components/player/AdvancedStatsCard.jsx'
 import { PitchMix } from '../components/charts/PitchMix.jsx'
@@ -452,55 +452,20 @@ export function PlayerPage({ id, asOf, sportId }) {
               <RecentFormCard playerId={bio.id} asOf={asOf} season={data.season} />
             )}
 
-            {/* Splits — the vs-L/R breakdown, situational splits, and career
-                splits vs the next opponent, combined under one heading now
-                that they've moved off the Current-season tiles they used to
-                sit wordlessly beneath. */}
-            {(block.splits || block.situational || (data.vsTeam && block.group === data.vsTeam.group)) && (
+            {/* Splits — the handedness, situational and career-vs-opponent
+                cards. The section's own component owns the three rules that
+                keep them legible together (scope labels, an overall row under
+                every table, a titled first card); PlayerPage keeps only the
+                bar-wearing top-level heading. */}
+            {hasSplits(block, data.vsTeam) && (
               <>
                 <SectionTitle title="Splits" bar />
-                {block.splits && (
-                  <div className="player__seasonsplits">
-                    <Ledger
-                      leftCols={1}
-                      head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                      rows={[
-                        { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-                        { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
-                      ].map(({ key, label, side }) => ({
-                        key,
-                        cells: [label, side.count, side.slash, side.hr, side.rbi, side.xbh, side.soPct, side.bbPct],
-                      }))}
-                    />
-                  </div>
-                )}
-
-                {/* Situational splits — base state, then count leverage; the
-                    same columns as the vs-L/R ledger above so the two read
-                    as one family. Full-season figures (the page caveat
-                    covers both). */}
-                {block.situational && (
-                  <>
-                    <SectionTitle title="Situational" note="full season" />
-                    <Ledger
-                      leftCols={1}
-                      head={['Split', block.group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/OPS', 'HR', 'RBI', 'XBH', 'SO%', 'BB%']}
-                      rows={block.situational.map((r) => ({
-                        key: r.code,
-                        cells: [r.label, r.side.count, r.side.slash, r.side.hr, r.side.rbi, r.side.xbh, r.side.soPct, r.side.bbPct],
-                      }))}
-                    />
-                  </>
-                )}
-
-                {/* Career splits vs the club this player's team is next
-                    facing (a finger-scrollable strip to pick a different
-                    opponent) — a new card underneath the season/situational
-                    tables. Rendered in the primary stat block only, per the
-                    card's spec. */}
-                {data.vsTeam && block.group === data.vsTeam.group && (
-                  <SplitsVsTeam vsTeam={data.vsTeam} season={data.season} asOf={asOf} />
-                )}
+                <SplitsSection
+                  block={block}
+                  vsTeam={data.vsTeam}
+                  season={data.season}
+                  asOf={asOf}
+                />
               </>
             )}
 
@@ -615,6 +580,7 @@ export function PlayerPage({ id, asOf, sportId }) {
 function roleWord(role) {
   return role === 'SP' ? 'starter' : role === 'CL' ? 'closer' : 'reliever'
 }
+
 
 // A plain, spoiler-safe link to a game's (sealed) box score — the game-log
 // opponent and the MLB-debut fact. Mirrors PlayerLink/TeamLink: no underline at
