@@ -17,6 +17,7 @@ import {
   lastVisibleAtBatIndex,
   deriveLiveState,
   buildTrailItems,
+  HIT_EVENT_TYPES,
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
@@ -155,10 +156,19 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const runsSoFar = entries.filter(
     (e) => (e.kind === 'atbat' || e.kind === 'placed') && e.scored,
   ).length
+  // Same reveal-safe footing as runsSoFar above (entries is already clamped to
+  // effectiveCap), and the same eventType classification boxscore.js's
+  // computeBatterLine uses for its own (revealedThrough-gated) hit total —
+  // shared as HIT_EVENT_TYPES so the two can't drift. Reported alongside runs
+  // so RollingLine's totals column can build up hits as you reveal them too,
+  // not just runs.
+  const hitsSoFar = entries.filter(
+    (e) => e.kind === 'atbat' && HIT_EVENT_TYPES.has(e.eventType),
+  ).length
   useEffect(() => {
     if (!stepping) return
-    onRunsSoFar?.(runsSoFar)
-  }, [stepping, runsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
+    onRunsSoFar?.(runsSoFar, hitsSoFar)
+  }, [stepping, runsSoFar, hitsSoFar]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The scorebug HUD's live snapshot (bases/outs/pitches/current batter),
   // reported for the SCOREBUG'S benefit only — deliberately NOT gated on

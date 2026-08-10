@@ -483,10 +483,13 @@
   font-size: 1.1em;
 }
 
-/* Two side-by-side reveal choices for a sealed half (ADR-0016): step to the
-   next at-bat, or reveal the whole half at once. Same kraft-seal button as
-   .btn--reveal, just split into equal-width halves instead of one full-width
-   button. */
+/* Two side-by-side choices in the innings bar, one of two shapes: a sealed
+   half's own reveal pair (ADR-0016 — step to the next at-bat, or reveal the
+   whole half at once, both wearing the kraft-seal .btn--reveal texture), or a
+   just-finished half's Summary/next-half pair (InningViewer's focus.postHalf
+   — plain .btn/.btn--next skins instead, since nothing there is sealed
+   anymore). Same layout either way, just split into equal-width halves
+   instead of one full-width button. */
 .revealsplit {
   display: flex;
   gap: 8px;
@@ -509,6 +512,15 @@
   white-space: normal;
   text-align: center;
   line-height: var(--lh-snug);
+}
+/* Summary's own selected state (focus.summaryOpen) — the same filled-navy
+   look .btn--next wears, so picking it reads as "you are here" the same way
+   RollingLine's own .is-active pick does. */
+.revealsplit__btn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-weight: var(--w-bold);
 }
 
 .btn--ghost {

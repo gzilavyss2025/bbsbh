@@ -47,7 +47,7 @@ export function RollingLine({
   const lineFor = (n, half, side) => {
     const idx = halfIndex(n, half)
     if (idx <= revealedThrough) return revealInning(feed, n, side)
-    if (idx === runsInProgress?.idx) return { runs: runsInProgress.runs }
+    if (idx === runsInProgress?.idx) return { runs: runsInProgress.runs, hits: runsInProgress.hits }
     return null
   }
 
@@ -62,13 +62,26 @@ export function RollingLine({
   // R/H are batting stats gated on the batting half; E is a *fielding* stat, so
   // it accrues in — and is gated on — the opposite (fielding) half. Gating E on
   // the batting half would leak the fielding half's errors before it's revealed.
+  //
+  // R/H also fold in `runsInProgress` for whichever half is currently being
+  // STEPPED through (mutually exclusive with the committed branch above it:
+  // its idx is always past `revealedThrough` until the half fully commits, at
+  // which point the committed branch takes over) — same "build as you reveal"
+  // footing lineFor already gives the half's own cell, just also reaching the
+  // totals column so R/H don't sit frozen until the half's 3rd out. E has no
+  // such in-progress signal (see runsInProgress's own comment, InningViewer.jsx)
+  // and still only moves once the fielding half fully commits.
   const totals = (battingHalf, side) => {
     const fieldingHalf = battingHalf === 'top' ? 'bottom' : 'top'
     let r = 0, h = 0, e = 0
     for (let n = 1; n <= unlocked; n++) {
-      if (halfIndex(n, battingHalf) <= revealedThrough) {
+      const battingIdx = halfIndex(n, battingHalf)
+      if (battingIdx <= revealedThrough) {
         const l = revealInning(feed, n, side)
         if (l) { r += l.runs; h += l.hits }
+      } else if (battingIdx === runsInProgress?.idx) {
+        r += runsInProgress.runs ?? 0
+        h += runsInProgress.hits ?? 0
       }
       if (halfIndex(n, fieldingHalf) <= revealedThrough) {
         e += revealInning(feed, n, side)?.errors ?? 0

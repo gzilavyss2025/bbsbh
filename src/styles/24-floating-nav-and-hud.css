@@ -312,7 +312,56 @@
 }
 
 .gamehud__tile .teamlogo {
-  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1));
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0))
+    scale(calc(var(--scale, 1) * var(--logo-boost, 1)));
+}
+
+/* A further boost on top of each team's own calibrated --scale (TeamLogo's
+   per-mark crop/offset tuning) — bigger marks without touching the strip's
+   own height (min-height above stays put; a scaled logo is pure paint, not
+   layout, so it can grow past its tile without pushing anything else down).
+   `overflow: visible` only turns on here, alongside the boost: at the
+   default scale, .gamehud__tile's hidden overflow is load-bearing (it's how
+   a mark gets cropped into the tile's shape in the first place — see the
+   component doc above), so leaving it on whenever nothing is boosting the
+   logo keeps every other caller of this same crop recipe unchanged. Bigger
+   on mobile (1.6x) than desktop (1.25x): the strip is the one persistent
+   piece of team identity on screen while stepping through a half, and a
+   phone's narrow width has that much more room to spare above/below the
+   fixed-height row than a desktop layout already showing team logos
+   elsewhere on screen. A literal 3x on mobile was tried first and rejected —
+   the two crests overlapped each other and swallowed the run numbers.
+
+   The clip boundary itself moves from the tile to THIS row: `.gamehud__tile`
+   turns its own hidden overflow off (a boosted logo needs room past its own
+   80%/20% grid cell to bleed into its neighbor's), and `.gamehud__strip`
+   takes over clipping the mark to the row's own top/bottom edges only
+   (overflow-y hidden, overflow-x visible — the same "clip vertically, spill
+   horizontally" split the club-mark bar wears, .metricbar > .teamlogo-crop-bar
+   above) — the row's own height still never moves, it just becomes the crop
+   line instead of each tile's own bounds. `.gamehud`'s own hidden overflow
+   (its card corners) is still the backstop against a mark bleeding past the
+   card's sides entirely. */
+@media (max-width: 739.98px) {
+  .gamehud__strip {
+    --logo-boost: 1.6;
+    overflow-x: visible;
+    overflow-y: hidden;
+  }
+  .gamehud__tile {
+    overflow: visible;
+  }
+}
+
+@media (min-width: 740px) {
+  .gamehud__strip {
+    --logo-boost: 1.25;
+    overflow-x: visible;
+    overflow-y: hidden;
+  }
+  .gamehud__tile {
+    overflow: visible;
+  }
 }
 
 .gamehud__runs {

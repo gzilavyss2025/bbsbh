@@ -26,8 +26,17 @@ import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
 // same discipline as the rest of this feed. Headshots use the shared
 // PitcherPhoto fallback chain (silo -> milb -> team logo -> monogram), so a
 // MiLB game with no portrait degrades to a mark rather than a hole.
-function fullNameOf(p) {
-  return p.fullName || [p.first, p.last].filter(Boolean).join(' ')
+// First name, mobile-hidden (see .abhero__namefirst — last name only fits
+// this card's width beside two portraits below the wide breakpoint), plus
+// last name. The trailing space rides inside the first-name span itself so
+// hiding it on mobile doesn't leave a stray gap before the surname.
+function NameParts({ id, first, last }) {
+  return (
+    <PlayerLink id={id}>
+      {first && <span className="abhero__namefirst">{first} </span>}
+      <span className="abhero__namelast">{last}</span>
+    </PlayerLink>
+  )
 }
 
 export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, pitchingTeamId }) {
@@ -39,7 +48,7 @@ export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, p
       </div>
       <div className="abhero__who">
         <span className={`abhero__name ${replaced ? 'pbp__replaced' : ''}`}>
-          <PlayerLink id={batter.id}>{fullNameOf(batter)}</PlayerLink>
+          <NameParts id={batter.id} first={batter.first} last={batter.last} />
         </span>
         <span className="abhero__meta">
           {batter.jersey ? <span className="abhero__jersey">{batter.jersey}</span> : null}
@@ -64,7 +73,7 @@ export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, p
         <>
           <div className="abhero__arm">
             <span className="abhero__armname">
-              <PlayerLink id={pitcher.id}>{fullNameOf(pitcher)}</PlayerLink>
+              <NameParts id={pitcher.id} first={pitcher.first} last={pitcher.last} />
             </span>
             <span className="abhero__meta abhero__meta--arm">
               {pitcher.jersey ? <span className="abhero__jersey">{pitcher.jersey}</span> : null}

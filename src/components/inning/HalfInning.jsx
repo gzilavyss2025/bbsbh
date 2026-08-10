@@ -7,7 +7,6 @@ import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
 import { highlightsByPlayId } from '../../api/highlights.js'
 import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
-import { PitchColorsKey } from '../scoring/StrikeZone.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { PreHalfCallouts } from './PreHalfCallouts.jsx'
 import { EnteringReference } from './EnteringReference.jsx'
@@ -359,13 +358,11 @@ export function HalfInning({
             // render top-level or in an eager useMemo (ADR-0001).
             const highlightsMap = highlightsByPlayId(highlights)
             return (
-              // The pitch-color key now lives behind the "Pitch colors" button
-              // at the FOOT of this card (see PitchColorsKey below), not up in
-              // the header. Statcast superlatives (fastest pitch, hardest/
-              // longest ball) used to sit below this feed; they now render in
-              // StatBox.jsx, right under the ABS row, so they're at the top of
-              // the half's content with the rest of the totals instead of
-              // wherever the feed happened to end.
+              // Statcast superlatives (fastest pitch, hardest/longest ball)
+              // used to sit below this feed; they now render in StatBox.jsx,
+              // right under the ABS row, so they're at the top of the half's
+              // content with the rest of the totals instead of wherever the
+              // feed happened to end.
               <PlayByPlay
                 feed={feed}
                 inning={inning}
@@ -390,15 +387,6 @@ export function HalfInning({
             )
           }}
         </SealBox>
-
-        {/* The pitch-color key: a static legend, no game data, so it's
-            spoiler-free — moved down here from the header so it reads next
-            to the pitch dots it explains rather than beside the team names.
-            Only worth the desktop-only foot space once there are actually
-            pitch dots on screen to explain (startedRevealing); before that,
-            on the wide layout, it'd just be a lone button sitting under an
-            empty card. */}
-        {startedRevealing && <PitchColorsKey className="half__pitchkeyfoot" />}
       </section>
 
       {/* From the first at-bat step onward (startedRevealing — see above), the

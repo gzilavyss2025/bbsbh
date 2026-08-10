@@ -49,6 +49,7 @@ export {
   NON_PA_EVENT_TYPES,
   GAME_ADVISORY_EVENT_TYPE,
   BASERUNNING_NOTE_EVENT_TYPES,
+  HIT_EVENT_TYPES,
 } from './playbyplay/eventTypes.js'
 
 export {

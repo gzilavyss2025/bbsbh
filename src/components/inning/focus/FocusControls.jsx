@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { AtBatTrail } from './AtBatTrail.jsx'
 
 // Focus mode's state for the innings viewer (InningViewer.jsx): while the half
@@ -30,6 +30,16 @@ export function useFocusMode(curIdx, currentSealed) {
   const [step, setStep] = useState(null)
   const [steps, setSteps] = useState(0)
   const [items, setItems] = useState([])
+  // Whether the reader tapped "Summary" for the half that just finished —
+  // see `held`/`postHalf` below. A deliberate choice, so it only ever moves
+  // forward on request, never automatically.
+  const [summaryOpen, setSummaryOpen] = useState(false)
+  // Whether THIS half (curIdx) has been seen sealed at all since the reader
+  // arrived on it — the difference between "I was just stepping through this
+  // and it completed" (held, below) and "I jumped straight to an old,
+  // already-committed half" (never held). Starts at whatever currentSealed
+  // already is, so arriving on a fresh sealed half still counts.
+  const [sealedSeen, setSealedSeen] = useState(currentSealed)
 
   // Reset computed during render (not in an effect) on a half change — the
   // same pattern InningViewer's `runsInProgress` reset and Headshot.jsx use. A
@@ -40,9 +50,24 @@ export function useFocusMode(curIdx, currentSealed) {
     setStep(null)
     setSteps(0)
     setItems([])
+    setSummaryOpen(false)
+    setSealedSeen(currentSealed)
+  } else if (currentSealed && !sealedSeen) {
+    setSealedSeen(true)
   }
 
-  const focused = currentSealed
+  // The half just finished revealing while the reader was watching it (3rd
+  // out, curIdx unchanged) — `held` keeps focus mode's single-at-bat view on
+  // screen (cursor already lands on the final entry, see below) instead of
+  // snapping straight to the unfocused page, until they deliberately tap
+  // Summary (openSummary). `postHalf` covers both that moment and the
+  // summary screen it leads to — the ONE flag the bottom bar keys off to
+  // show Summary/next-half controls instead of the ordinary reveal/advance
+  // ones, for as long as this half stays the one on screen.
+  const held = sealedSeen && !currentSealed && !summaryOpen
+  const postHalf = sealedSeen && !currentSealed
+  const focused = currentSealed || held
+  const openSummary = useCallback(() => setSummaryOpen(true), [])
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -64,31 +89,12 @@ export function useFocusMode(curIdx, currentSealed) {
   // even if the reader had paged back to an earlier one.
   const followLatest = useCallback(() => setStep(null), [])
 
-  // Bring the at-bat to the top of the screen whenever it changes — a fresh
-  // reveal or a page back/forward. Without this the single card still opens
-  // wherever the chrome above it happens to end, which on a phone is below the
-  // fold: the whole point of showing one at-bat is that it is the thing you
-  // are looking at. `start`, not `center`: the trail and the reference chips
-  // sit underneath it, and centring the card put those two inside the floating
-  // bar. .pbp carries the scroll-margin (styles/focus/stage.css), sized to
-  // --console-hud-h so the card lands UNDER the sticky console band rather
-  // than behind it.
-  //
-  // Queries the feed by class rather than threading a ref down through
-  // InningPage -> HalfInning -> SealBox -> PlayByPlay: four components would
-  // have to carry a prop that only this effect uses, and the seal must keep
-  // owning when that subtree exists at all (ADR-0002). Missing is fine — a
-  // sealed half has no .pbp yet, and this simply does nothing.
-  useEffect(() => {
-    if (!focused || steps === 0) return
-    const el = document.querySelector('.pbp')
-    if (!el) return
-    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    el.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' })
-  }, [focused, cursor, steps])
-
   return {
     focused,
+    held,
+    postHalf,
+    summaryOpen,
+    openSummary,
     step,
     steps,
     items,

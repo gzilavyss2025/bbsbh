@@ -118,7 +118,7 @@ export const InningPage = memo(function InningPage({
           focusCursor={focusCursor}
           onFocusInfo={presentationOnly ? undefined : onFocusInfo}
           onStepInfo={presentationOnly ? undefined : (info) => onStepInfo?.(idx, info)}
-          onRunsSoFar={presentationOnly ? undefined : (runs) => onRunsSoFar?.(idx, runs)}
+          onRunsSoFar={presentationOnly ? undefined : (runs, hits) => onRunsSoFar?.(idx, runs, hits)}
           onLiveState={presentationOnly ? undefined : (data) => onLiveState?.(idx, data)}
         />
       </div>

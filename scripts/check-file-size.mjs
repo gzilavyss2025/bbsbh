@@ -78,7 +78,7 @@ const BUDGETS = {
   'src/styles/09-team-info.css': 800, // 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 798
   'src/styles/12-sealbox.css': 1800, // 1746 — the Statcast tile base left with StatcastCard (ADR-0040)
-  'src/styles/14-strike-zone.css': 1100, // 1027
+  'src/styles/14-strike-zone.css': 1000, // 942 — the "Pitch colors" key button/modal (PitchColorsKey) moved out entirely, self-explanatory colors
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684
@@ -109,7 +109,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
-  'src/screens/InningViewer.jsx': 1000, // 912
+  'src/screens/InningViewer.jsx': 1100, // 1022 — focus mode's post-half SUMMARY/next-half bottom bar (focus.postHalf) plus live runs/hits reporting
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local

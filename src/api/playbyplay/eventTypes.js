@@ -98,3 +98,10 @@ export const STOPPAGE_EVENTS = new Set([
   'defensive_switch',
   'ejection',
 ])
+
+// A play's own eventType that counts as a hit for box-score purposes — used
+// both by boxscore.js's computeBatterLine (the revealedThrough-gated total)
+// and PlayByPlay.jsx's hitsSoFar (the step-capped in-progress count for the
+// half currently being revealed), so the two can never classify the same
+// play differently.
+export const HIT_EVENT_TYPES = new Set(['single', 'double', 'triple', 'home_run'])

@@ -61,6 +61,16 @@
   color: var(--text-heading);
 }
 
+/* First name (AtBatHero's NameParts) — dropped below the wide breakpoint.
+   Last name alone is what a scorer writes down, and this card is already the
+   tightest fit on the page: two portraits plus the ball glyph beside it, on a
+   phone as narrow as ~360px. */
+@media (max-width: 739.98px) {
+  .abhero__namefirst {
+    display: none;
+  }
+}
+
 .abhero__meta {
   display: flex;
   align-items: center;
@@ -117,6 +127,17 @@
   flex: 0 0 auto;
   width: 30px;
   height: 30px;
+}
+
+/* Half size on a phone — at the full 30px it competes with the two portraits
+   for a card that's already tight beside them; a scorer glances at it once to
+   register "matchup" and moves on, so it doesn't need to hold its desktop
+   presence here. */
+@media (max-width: 739.98px) {
+  .abhero__vs {
+    width: 15px;
+    height: 15px;
+  }
 }
 
 /* A circular window over a strip of precomputed rotation frames — the same

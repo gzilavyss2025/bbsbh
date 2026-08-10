@@ -424,9 +424,8 @@
   font-weight: var(--w-bold);
 }
 
-/* The header's right side: the "X bats • Y pitches" line stacked over the
-   "Pitch colors" key button, right-aligned so both hug the header edge and the
-   pill never crowds the batting/pitching line on a narrow phone. */
+/* The header's right side: the "X bats • Y pitches" line, right-aligned so it
+   hugs the header edge. */
 .half__meta {
   display: flex;
   flex-direction: column;

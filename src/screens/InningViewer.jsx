@@ -81,7 +81,7 @@ function sameLiveState(a, b) {
 function sameRunsInProgress(a, b) {
   if (a === b) return true
   if (!a || !b) return false
-  return a.idx === b.idx && a.runs === b.runs
+  return a.idx === b.idx && a.runs === b.runs && a.hits === b.hits
 }
 
 function sameStepInfo(a, b) {
@@ -258,16 +258,14 @@ export function InningViewer({
   const turning = turnStatus !== 'idle'
   const requestForwardHalf = (idx) => pageTurnRef.current?.requestHalf(idx)
 
-  // Runs scored so far in the half currently being STEPPED through (ADR-0016
-  // at-bat stepping) — reported up from PlayByPlay (via HalfInning/InningPage,
-  // see onRunsSoFar) so RollingLine's own cell for this half can build up as
-  // you reveal it one at-bat at a time, instead of staying blank ("·") until
-  // the whole half commits. Reset on every half change so a stale reading
-  // from a half you've navigated away from never lingers — RollingLine only
-  // ever trusts this for the exact half-index it's keyed to anyway (a half
-  // that's since fully committed reads its real total the normal way
-  // instead), but there's no reason to hold onto it a moment longer than
-  // the half it describes stays current.
+  // Runs AND hits so far in the half currently being STEPPED through
+  // (ADR-0016) — reported up from PlayByPlay (via HalfInning/InningPage, see
+  // onRunsSoFar) so RollingLine's cell and R/H totals build up as you reveal
+  // the half, instead of staying blank until it commits. No such signal
+  // exists yet for errors (no per-entry classification like HIT_EVENT_TYPES),
+  // so E still only moves once revealedThrough advances. Reset on every half
+  // change — RollingLine only trusts this for the exact half-index it's
+  // keyed to anyway, but there's no reason to hold it a moment longer.
   const [runsInProgress, setRunsInProgress] = useState(null)
   // Reset computed during render (not in an effect) on a half change — see
   // Headshot.jsx for the same pattern.
@@ -474,8 +472,8 @@ export function InningViewer({
       return sameStepInfo(prev, next) ? prev : next
     })
   }, [])
-  const reportRunsSoFar = useCallback((idx, runs) => {
-    setRunsInProgress((prev) => (sameRunsInProgress(prev, { idx, runs }) ? prev : { idx, runs }))
+  const reportRunsSoFar = useCallback((idx, runs, hits) => {
+    setRunsInProgress((prev) => (sameRunsInProgress(prev, { idx, runs, hits }) ? prev : { idx, runs, hits }))
   }, [])
   const reportLiveState = useCallback((idx, data) => {
     setLiveState((prev) =>
@@ -806,14 +804,20 @@ export function InningViewer({
               treatment={winProbTreatment}
               focused
             />
-            <DueUpConsole
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              revealedThrough={renderRevealedThrough}
-              stepAtBatIndex={stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null}
-              teamId={effHalf === 'top' ? meta.away.id : meta.home.id}
-            />
+            {/* Not before the half's first at-bat is revealed — that's
+                UpNextBatters' own call (HalfInning.jsx), not this console's.
+                Not once the half is OVER either (focus.postHalf) — "who's
+                due up" is meaningless after the 3rd out. */}
+            {focus.steps > 0 && !focus.postHalf && (
+              <DueUpConsole
+                feed={feed}
+                inning={effInning}
+                half={effHalf}
+                revealedThrough={renderRevealedThrough}
+                stepAtBatIndex={stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null}
+                teamId={effHalf === 'top' ? meta.away.id : meta.home.id}
+              />
+            )}
           </div>
         )}
 
@@ -920,18 +924,14 @@ export function InningViewer({
           with, and the same destination-named + trailing-› convention their
           nextLabel buttons use ("Home team ›", "Innings ›") — no "Next:"
           prefix, no arrow glyph. On narrow viewports it carries a duplicate
-          Refresh stacked above the primary action, so refreshing live data
-          doesn't mean scrolling back up to the toolbar (hidden again on the
-          wide layout, where the top toolbar stays reachable). The primary
-          action advances to the next half-inning when one is unlocked; at the
-          bottom of the furthest revealed inning it becomes "Box score ›"
-          instead — so the bottom of the 9th (or any extra) never shows a
-          "Top 10th ›" that would leak the game going to extras. Revealing
-          that bottom half unlocks the next inning and the button flips back
-          to the next-half label. A sealed half offers two side-by-side
-          choices instead (ADR-0016): step one plate appearance at a time, or
-          reveal the whole half at once — either flips the bar back once the
-          half is fully committed. */}
+          Refresh stacked above the primary action (hidden again on the wide
+          layout, where the top toolbar stays reachable). Four states: a
+          sealed half offers two reveal choices (ADR-0016) — step one at-bat,
+          or the whole half at once; a half that just finished (or whose
+          Summary the reader is on, focus.postHalf) offers Summary/next-half
+          instead; otherwise it's the plain advance — "Box score ›" at the
+          furthest revealed inning (never "Top 10th ›", which would leak the
+          game going to extras) or the next-half label once one unlocks. */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
         <RefreshButton
           onReload={onReload}
@@ -943,6 +943,33 @@ export function InningViewer({
           <div className="liveedge" role="status" aria-live="polite">
             <span className="liveedge__dot" aria-hidden="true" />
             <span className="liveedge__label">{liveEdgeLabel}</span>
+          </div>
+        ) : focus.postHalf ? (
+          // The half just finished (or the reader's on its Summary,
+          // focus.summaryOpen) — plain .btn/.btn--next skins, not the
+          // kraft-seal .btn--reveal below: nothing here is sealed anymore.
+          <div className="revealsplit">
+            <button
+              type="button"
+              className={`btn revealsplit__btn ${focus.summaryOpen ? 'is-active' : ''}`}
+              onClick={focus.openSummary}
+              aria-current={focus.summaryOpen || undefined}
+            >
+              Summary
+            </button>
+            {nextIdx != null ? (
+              <button
+                className="btn btn--next revealsplit__btn"
+                onClick={() => requestForwardHalf(nextIdx)}
+                aria-disabled={turning || undefined}
+              >
+                {nextLabel} ›
+              </button>
+            ) : (
+              <button className="btn btn--next revealsplit__btn" onClick={onBoxScore}>
+                Box score ›
+              </button>
+            )}
           </div>
         ) : currentSealed ? (
           <div className="revealsplit">

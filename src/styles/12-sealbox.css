@@ -1750,15 +1750,15 @@
   padding: 12px var(--space-2) var(--space-4);
 }
 
-/* Focus mode's Field tab (ReferencePanel.jsx) still had the floating "ears"
-   look the comment above describes — its own .halfdefense wrapper card never
-   got the box-score's join fix. Same remedy: the diamond loses its own top
-   border and rounds only its bottom corners, so the title's square bottom
-   and the diamond's now-square top meet as one seam instead of two stacked
-   pills. */
+/* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score
+   does would leave this card with no frame (unlike its sibling .lineupcard),
+   so this uses .half .defdiamond's other remedy instead — drop the diamond's
+   own border/shadow/background so its edges stop double-drawing on top of
+   .halfdefense's own (`overflow: hidden` up top already joins the seam). */
 .refpanel__body .defdiamond {
-  border-top: none;
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  border: none;
+  box-shadow: none;
+  background: none;
 }
 
 .stat {

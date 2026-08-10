@@ -90,12 +90,19 @@
    bought nothing and cost the top ~120px of every scroll — it just followed
    the reader down the page. It scrolls away with the rest of the console now;
    see the wide block below for the offsets that come off with it. */
+/* align-items: flex-start, not stretch — the due-up cards have their own
+   fixed-height photo (below) and must not be force-stretched to whatever
+   height the scorebug's live content happens to need (its pitcher row and
+   pitch count make that vary run to run). Stretching this far up was what
+   left a gap UNDER each photo: the card grew to match the scorebug, the
+   photo did not. flex-start instead leaves at most some open air beside a
+   taller scorebug — never inside a card. */
 .consolebar {
   position: sticky;
   top: 0;
   z-index: 15;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
@@ -122,8 +129,7 @@
   }
 
   .dueupconsole__col {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    display: flex;
     align-items: stretch;
     gap: var(--space-2);
     flex: 1 1 0;
@@ -134,30 +140,27 @@
     overflow: hidden;
   }
 
-  /* Height-driven, not a fixed rung width stretched to fit — the row's own
-     height varies with the scorebug beside it, and a shot forced to 100% of
-     THAT height at a fixed --shot-2xs-w width lost its 3:4 portrait crop and
-     stretched every face. `height: 100%` paired with `aspect-ratio` here is
-     circular, though, not just wrong-looking: the shot's grid row has no
-     definite height of its own to be 100% OF (nothing else in the row pins
-     one), so the browser falls back to sizing the box off the raw photo's own
-     large intrinsic dimensions instead — a badly cropped, oversized portrait
-     crowding the name/line out of the column entirely. `--console-hud-h` (the
-     scorebug band's own definite height, tokens/layout.css) is what the row
-     actually target-matches, so anchoring to it directly — not a percentage —
-     is what keeps the height real rather than an unresolvable percentage. */
+  /* Fixed, not stretched to the row: `height: 100%`/`auto` paired with
+     `aspect-ratio` here is circular — with nothing else in the column
+     pinning a size, the browser falls back to sizing the box off the raw
+     photo's own large intrinsic dimensions instead of the frame it's meant
+     to fill, ballooning the whole card. `--console-hud-h` (the scorebug
+     band's own target height, tokens/layout.css) anchors it to a fixed
+     number instead — matched by `.consolebar`'s own `align-items: flex-start`
+     above, so THIS card's height, not the scorebug's live (and variable)
+     one, is what the column and the text beside it actually stand on. */
   .dueupconsole__shot {
     width: auto;
     height: calc(var(--console-hud-h) - 2 * var(--space-2));
     aspect-ratio: 3 / 4;
     border-radius: 0;
+    border: none;
   }
 
   .dueupconsole__info {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 2px;
+    justify-content: space-between;
     min-width: 0;
     padding: var(--space-1) var(--space-2) var(--space-1) 0;
   }
