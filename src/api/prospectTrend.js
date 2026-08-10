@@ -92,11 +92,11 @@ export function standingLabel(percentile, group) {
 // dots alone are color-only) — always printed beside the dots, never in place
 // of them. Mirrors levelTier's own 1-5 split, so the two can never disagree.
 const TIER_LABELS = {
-  1: 'Well below level',
-  2: 'Below level',
-  3: 'At level',
-  4: 'Above level',
-  5: 'Elite for level',
+  1: 'Bottom band',
+  2: 'Below band',
+  3: 'Middle band',
+  4: 'Above band',
+  5: 'Top band',
 }
 export function tierLabel(tier) {
   return TIER_LABELS[tier] ?? null
@@ -171,6 +171,7 @@ export function prospectCardView(entry, ageYears, levelAverageAge) {
     tierLabel: tierLabel(tier),
     confidence: confidenceState(entry.sampleSize, entry.group),
     sampleSize: entry.sampleSize,
+    floor: QUALIFICATION_FLOOR[entry.group],
     populationSize: entry.populationSize,
     movement: entry.movement,
     ageEdge,

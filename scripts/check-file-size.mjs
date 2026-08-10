@@ -128,7 +128,7 @@ const BUDGETS = {
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
   'src/api/playbyplay/halfInningFeed.js': 800, // 793
-  'src/screens/PlayerPage.jsx': 900, // 809 — +1 band: wiring the Prospect Card + trendBySportId into the Analytics shelf
+  'src/screens/PlayerPage.jsx': 800, // 794 — Prospect Card remains, duplicate trendBySportId progression wiring removed
   'src/components/playbyplay/PlayByPlay.jsx': 700, // 681
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/person-fetch.js': 700, // 644

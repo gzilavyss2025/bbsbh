@@ -113,21 +113,6 @@ export function PlayerPage({ id, asOf, sportId }) {
   const hasPlayerHistory = Boolean(
     data.positionInnings || hasFirsts || (data.progression && bio.debut) || (data.timeline && bio.debut) || data.transactions,
   )
-  // "Path to the Majors"'s own read of the Prospect Card's current-level
-  // standing — see LevelProgressionCard.jsx's header for why only the
-  // CURRENT rung ever gets one. `data.prospectCard.state === 'none'` (no
-  // trend row yet) has nothing to add here even though the card itself may
-  // still render elsewhere for its age-edge fact alone.
-  const trendBySportId =
-    data.sportId !== 1 && data.prospectCard && data.prospectCard.state !== 'none'
-      ? {
-          [data.sportId]: {
-            standing: data.prospectCard.standing,
-            tier: data.prospectCard.tier,
-            qualified: data.prospectCard.state === 'qualified',
-          },
-        }
-      : null
   // The Prospect Card itself only earns a spot on the Analytics shelf when it
   // has something to say — a rank pill, a real standing/unqualified reading,
   // or a real age-edge fact. An untracked, unranked MiLB player with none of
@@ -264,7 +249,7 @@ export function PlayerPage({ id, asOf, sportId }) {
         {data.timeline && !bio.debut && <CareerTimeline entries={data.timeline.entries} />}
 
         {data.progression && !bio.debut && (
-          <LevelProgressionCard levels={data.progression.levels} trendBySportId={trendBySportId} />
+          <LevelProgressionCard levels={data.progression.levels} />
         )}
 
         <div className="factgrid">
@@ -387,6 +372,7 @@ export function PlayerPage({ id, asOf, sportId }) {
               <ProspectCard
                 view={data.prospectCard}
                 level={SPORT_LABEL[data.sportId] ?? ''}
+                group={block.group}
                 badge={{
                   rank: data.prospectRank,
                   orgRank: data.orgProspectRank,
@@ -599,7 +585,6 @@ export function PlayerPage({ id, asOf, sportId }) {
           <LevelProgressionCard
             levels={data.progression.levels}
             debutYear={Number(bio.debut.slice(0, 4))}
-            trendBySportId={trendBySportId}
           />
         )}
 

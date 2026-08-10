@@ -1,15 +1,71 @@
 /* ============================================================
-   PROSPECT CARD
-   The Analytics shelf's fill for a MiLB player (ProspectCard.jsx) — the one
-   card that actually occupies the space StatcastPercentiles/AdvancedStatsCard
-   leave empty below the majors. Shares its container shell (border/radius/
-   header-strip) with LevelProgressionCard's own updated shell in
-   26-player-page.css's .levelprog rules — one card language, not two.
+   PLAYER DEVELOPMENT DOSSIER
+   Shared shell for LevelProgressionCard and current-level analysis for
+   ProspectCard. Both use one paper ledger and PLAYER DEVELOPMENT kicker.
    ============================================================ */
+
+.levelprog {
+  margin-top: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: 3px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  overflow: hidden;
+}
+
+.levelprog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.levelprog__kicker,
+.levelprog__status,
+.levelprog__current span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.levelprog__title {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-title);
+  color: var(--text-body);
+}
+
+.levelprog__current {
+  flex: 0 0 auto;
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--seal-cover);
+  text-align: right;
+}
+
+.levelprog__current strong {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  color: var(--text-body);
+}
+
+.levelprog__body {
+  padding: var(--space-4);
+}
 
 .prospectcard {
   margin-top: var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
+  border-top: 3px solid var(--accent-primary);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   overflow: hidden;
@@ -19,12 +75,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   background: var(--bg-page);
   border-bottom: var(--bw-hair) solid var(--border-rule);
 }
-.prospectcard__eyebrow {
+
+.prospectcard__kicker,
+.prospectcard__metric,
+.prospectcard__emptylabel,
+.prospectcard__fact dt,
+.prospectcard__age > span {
+  display: block;
   font-family: var(--font-display);
   font-weight: var(--w-semibold);
   font-size: var(--fs-label);
@@ -33,23 +95,73 @@
   color: var(--text-caption);
 }
 
-.prospectcard__body {
-  padding: var(--space-3) var(--space-4);
+.prospectcard__title {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-title);
+  color: var(--text-body);
 }
 
-.prospectcard__dash {
+.prospectcard__body {
+  padding: var(--space-4);
+}
+
+.prospectcard__empty p {
+  margin-top: var(--space-1);
   font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+}
+
+.prospectcard__empty > span:last-child {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
+  line-height: var(--lh-ui);
   color: var(--text-caption);
 }
 
-/* ---- Row 1: the percentile track — same scale idiom as the Statcast strip
-   (26a-percentile-strip.css), not a new ring/radar (ADR-0040). ---- */
+.prospectcard__lead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-1) var(--space-4);
+}
+
+.prospectcard__metric {
+  color: var(--text-body);
+}
+
+.prospectcard__percentile {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-lg);
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+  white-space: nowrap;
+}
+
+.prospectcard__comparison {
+  grid-column: 1 / -1;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+
+.prospectcard__scale {
+  margin-top: var(--space-4);
+}
+
 .prospectcard__track {
   position: relative;
-  height: 20px;
-  margin-bottom: var(--space-1);
+  height: 24px;
 }
+
 .prospectcard__track::after {
   content: '';
   position: absolute;
@@ -59,191 +171,238 @@
   background: var(--rule-soft);
   transform: translateY(-50%);
 }
+
+.prospectcard__track::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  bottom: 1px;
+  left: 50%;
+  border-left: var(--bw-hair) dotted var(--text-caption);
+}
+
 .prospectcard__bar {
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: calc(var(--start) * 100%);
   width: calc(var(--width) * 100%);
   height: 3px;
   background: color-mix(in srgb, var(--accent-primary) 55%, transparent);
   transform: translateY(-50%);
-  z-index: 1;
-}
-.prospectcard__bar--above {
-  border-radius: 0 1.5px 1.5px 0;
-}
-.prospectcard__bar--below {
-  border-radius: 1.5px 0 0 1.5px;
 }
 
-/* The dot's own rendering IS the sample-size honesty fix: a percentile on a
-   thin sample is drawn less confidently than one on an established one,
-   rather than looking identical either way. */
+.prospectcard__bar--above {
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+
+.prospectcard__bar--below {
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
+}
+
 .prospectcard__confdot {
-  --dot: 11px;
+  --dot: 12px;
   position: absolute;
+  z-index: 3;
   top: 50%;
   left: calc(var(--pct, 0) * (100% - var(--dot)));
   width: var(--dot);
   height: var(--dot);
+  border: 2px solid var(--accent-primary);
   border-radius: 50%;
   transform: translateY(-50%);
-  z-index: 2;
-  border: 1.5px solid var(--accent-primary);
-}
-.prospectcard__confdot--early {
-  background: var(--surface-card);
-}
-.prospectcard__confdot--building {
-  background: linear-gradient(90deg, var(--accent-primary) 50%, transparent 50%);
-}
-.prospectcard__confdot--established {
-  background: var(--accent-primary);
 }
 
-.prospectcard__standing {
-  display: flex;
+.prospectcard__confdot--early { background: var(--surface-card); }
+.prospectcard__confdot--building { background: linear-gradient(90deg, var(--accent-primary) 50%, var(--surface-card) 50%); }
+.prospectcard__confdot--established { background: var(--accent-primary); }
+
+.prospectcard__scalelabels {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px;
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-small);
-  color: var(--text-body);
-}
-.prospectcard__move--up {
-  color: var(--accent-positive);
-}
-.prospectcard__move--down {
-  color: var(--accent-negative);
-}
-.prospectcard__pop {
-  font-family: var(--font-body);
-  font-weight: var(--w-regular);
-  font-size: var(--fs-caption);
-  color: var(--text-caption);
-}
-.prospectcard__confcaption {
-  margin-top: 2px;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 
-/* ---- Row 2: tier dots + the non-color text label beside them
-   (accessibility — the dots alone are color-only). ---- */
-.prospectcard__tierrow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-.prospectcard__tierlabel {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
+.prospectcard__scalelabels span:nth-child(2) { text-align: center; }
+.prospectcard__scalelabels span:last-child { text-align: right; }
 
-.prospectcard__rule {
-  margin: var(--space-3) 0;
-  border: none;
+.prospectcard__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: var(--space-4);
   border-top: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 
-/* ---- Age-vs-level fact — a plain fact, not a badge: no fill, no border,
-   no icon, so it can never optically read as an award beside a high tier. ---- */
 .prospectcard__fact {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  min-width: 0;
+  padding: var(--space-3);
 }
-.prospectcard__facttitle {
-  font-family: var(--font-display);
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-label);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-.prospectcard__factvalue {
-  font-family: var(--font-body);
+
+.prospectcard__fact + .prospectcard__fact { border-left: var(--bw-hair) solid var(--border-hairline); }
+
+.prospectcard__fact dd {
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
+  line-height: var(--lh-ui);
   color: var(--text-body);
 }
 
-/* ---- Row 5: the trend disclosure — collapsed by default, same quiet-
-   underline-button idiom as StampGameButton's .stampstrip__disclose. ---- */
-.prospectcard__trend {
-  margin-top: var(--space-3);
-}
+.prospectcard__fact .prospectcard__move--up { color: var(--accent-positive); }
+.prospectcard__fact .prospectcard__move--down { color: var(--accent-negative); }
+
+.prospectcard__trend { margin-top: var(--space-3); }
+
 .prospectcard__disclose {
-  position: relative;
-  display: inline-flex;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--bg-page);
+  color: var(--text-body);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-small);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background-color 160ms ease;
 }
-.prospectcard__disclose::after {
-  content: '';
-  position: absolute;
-  inset: calc(var(--space-2) * -1);
-}
+
+.prospectcard__disclose:active { transform: scale(0.99); }
+
 .prospectcard__disclose:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
+.prospectcard__disclose span {
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+}
+
 .prospectcard__chartwrap {
-  margin-top: var(--space-2);
-  padding-top: var(--space-2);
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
   border-top: var(--bw-hair) dashed var(--border-rule);
 }
+
 .prospectcard__chart {
   display: block;
+  width: 100%;
+  max-width: none;
   overflow: visible;
 }
+
+.prospectcard__axislabel,
+.prospectcard__axisdate,
+.prospectcard__chartreflabel,
+.prospectcard__latest,
+.prospectcard__chartmarklabel {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  fill: var(--text-caption);
+}
+
 .prospectcard__chartref {
   stroke: var(--text-caption);
   stroke-width: 1;
-  stroke-dasharray: 2 2;
+  stroke-dasharray: 2 3;
 }
+
 .prospectcard__chartline {
   stroke: var(--ink-1);
-  stroke-width: 1.5;
+  stroke-width: 2;
   fill: none;
 }
-.prospectcard__chartline--gap {
-  stroke-dasharray: 3 3;
-}
+
+.prospectcard__chartline--gap { stroke-dasharray: 4 4; }
+
 .prospectcard__chartdot {
   fill: var(--ink-1);
-}
-.prospectcard__chartmark {
-  stroke: var(--border-rule);
+  stroke: var(--surface-card);
   stroke-width: 1;
-  stroke-dasharray: 2 2;
 }
-.prospectcard__chartmarklabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
+
+.prospectcard__chartmark {
+  stroke: var(--seal-cover);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.prospectcard__chartflag { fill: var(--seal-cover); }
+
+.prospectcard__chartmarklabel,
+.prospectcard__latest {
   font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  fill: var(--text-caption);
+  fill: var(--text-body);
 }
+
 .prospectcard__chartcaption {
   margin-top: var(--space-1);
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
   color: var(--text-caption);
+}
+
+.prospectcard__age {
+  display: grid;
+  grid-template-columns: minmax(100px, auto) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.prospectcard__age p {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+
+@media (max-width: 560px) {
+  .prospectcard__head,
+  .prospectcard__body { padding-inline: var(--space-3); }
+
+  .prospectcard__lead { display: block; }
+
+  .prospectcard__percentile {
+    display: block;
+    margin-top: var(--space-1);
+    white-space: normal;
+  }
+
+  .prospectcard__comparison { margin-top: var(--space-2); }
+  .prospectcard__facts { grid-template-columns: 1fr; }
+
+  .prospectcard__fact + .prospectcard__fact {
+    border-top: var(--bw-hair) solid var(--border-hairline);
+    border-left: 0;
+  }
+
+  .prospectcard__age {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .prospectcard__chart { height: 128px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prospectcard__disclose { transition: background-color 160ms ease; }
+  .prospectcard__disclose:active { transform: none; }
 }

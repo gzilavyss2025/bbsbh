@@ -1,75 +1,63 @@
-// "Path to the Majors" — a chevron strip showing every MiLB level a player
-// has climbed (from wherever his career started — levels below that are
-// dropped, not dimmed, since he's never going back), when he reached it (a
-// year range, for a level spanning multiple seasons), and his career workload
-// there (at-bats for a position player, innings pitched for a pitcher), with
-// the current level highlighted and levels still ahead dimmed. Each rung is
-// shaped as a chevron pointing at the next one, so the right-hand edge of the
-// strip literally arrows toward MLB; the final MLB rung is the destination,
-// so it gets a flat trailing edge instead of another point.
-//
-// A pre-debut player gets a dimmed, unreached MLB rung (the climb still
-// ahead). A debuted player passes `debutYear`, which fills that rung in as
-// reached — PlayerPage.jsx then moves the whole card down to sit just above
-// Firsts, reading as "how he got here" instead of "how far he's got left."
-//
-// `trendBySportId`, when passed, is a map of AT MOST the player's CURRENT
-// level to his prospectCardView reading there ({ standing, tier, qualified }
-// — see src/api/prospectTrend.js) — only the current rung can show a real
-// standing, since bbsbh's percentile history starts this season, so a rung
-// from an earlier year has nothing to compare. A qualified reading appends
-// standingLabel's own phrase, tier 1/5 additionally striping the rung
-// (extremes carry color, same rule the Prospect Card uses); an unqualified
-// one appends a plain "(Too early)" — the same phrase the Prospect Card shows
-// in that state — so the two surfaces never disagree about whether a reader
-// should expect a number yet.
-export function LevelProgressionCard({ levels, debutYear, trendBySportId }) {
+// A factual level-by-level dossier: reached levels retain their year and
+// workload, the live assignment is explicit, and unreached levels remain the
+// path ahead. Performance analysis belongs to ProspectCard, so this component
+// never repeats or interprets a current-level percentile.
+export function LevelProgressionCard({ levels, debutYear }) {
   if (!levels?.length) return null
-  // A debuted player's MLB rung is where he is now — it takes the blue
-  // "current" highlight, unless he's presently back at a lower level (a MiLB
-  // rung already carries isCurrent), so the chain always marks exactly where
-  // he stands. A pre-debut player's MLB rung is the unreached destination.
-  const someLevelCurrent = levels.some((l) => l.isCurrent)
+
+  const someLevelCurrent = levels.some((level) => level.isCurrent)
   const mlbTarget = debutYear
     ? { sportId: 1, label: 'MLB', reached: true, isCurrent: !someLevelCurrent, target: true, firstYear: debutYear, lastYear: debutYear }
     : { sportId: 1, label: 'MLB', reached: false, isCurrent: false, target: true }
   const steps = [...levels, mlbTarget]
+  const current = steps.find((level) => level.isCurrent)
+
   return (
     <section className="levelprog">
-      <h3 className="section__title"><span>Path to the Majors</span></h3>
+      <header className="levelprog__head">
+        <div>
+          <span className="levelprog__kicker">Player development</span>
+          <h3 className="levelprog__title">Path to the Majors</h3>
+        </div>
+        {current && (
+          <p className="levelprog__current">
+            <span>Current assignment</span>
+            <strong>{current.label}</strong>
+          </p>
+        )}
+      </header>
       <div className="levelprog__body">
-        <div className="levelprog__arrow" aria-label="Minor league level progression">
-          {steps.map((lvl) => {
-            const trend = lvl.isCurrent ? trendBySportId?.[lvl.sportId] : null
-            const tierClass = trend?.qualified && trend.tier === 1 ? 'tier-low' : trend?.qualified && trend.tier === 5 ? 'tier-high' : null
+        <ol
+          className="levelprog__path"
+          aria-label="Minor league level progression"
+          style={{ '--level-count': steps.length }}
+        >
+          {steps.map((level) => {
+            const status = level.isCurrent ? 'Current' : level.reached ? 'Reached' : level.target ? 'MLB destination' : 'Next level'
             return (
-              <div
-                key={lvl.sportId}
+              <li
+                key={level.sportId}
                 className={[
                   'levelprog__step',
-                  lvl.isCurrent && 'is-current',
-                  !lvl.reached && 'is-unreached',
-                  lvl.target && 'is-target',
-                  tierClass,
+                  level.isCurrent && 'is-current',
+                  !level.reached && 'is-unreached',
+                  level.target && 'is-target',
                 ].filter(Boolean).join(' ')}
+                aria-current={level.isCurrent ? 'step' : undefined}
               >
-                <span className="levelprog__label">{lvl.label}</span>
-                {lvl.reached && (
+                <span className="levelprog__status">{status}</span>
+                <span className="levelprog__label">{level.label}</span>
+                {level.reached && (
                   <span className="levelprog__detail">
-                    {lvl.firstYear}
-                    {lvl.lastYear > lvl.firstYear ? `–${lvl.lastYear}` : ''}
-                    {lvl.stat ? ` · ${lvl.stat}` : ''}
-                    {trend && (
-                      <span className="levelprog__standing">
-                        {trend.qualified ? trend.standing : '(Too early)'}
-                      </span>
-                    )}
+                    {level.firstYear}
+                    {level.lastYear > level.firstYear ? `–${level.lastYear}` : ''}
+                    {level.stat ? ` · ${level.stat}` : ''}
                   </span>
                 )}
-              </div>
+              </li>
             )
           })}
-        </div>
+        </ol>
       </div>
     </section>
   )

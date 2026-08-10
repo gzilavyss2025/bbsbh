@@ -120,11 +120,11 @@ test('a non-numeric percentile has no tier, same empty state as standingLabel', 
 // ---------------------------------------------------------------------------
 
 test('tierLabel names all five tiers', () => {
-  assert.equal(tierLabel(1), 'Well below level')
-  assert.equal(tierLabel(2), 'Below level')
-  assert.equal(tierLabel(3), 'At level')
-  assert.equal(tierLabel(4), 'Above level')
-  assert.equal(tierLabel(5), 'Elite for level')
+  assert.equal(tierLabel(1), 'Bottom band')
+  assert.equal(tierLabel(2), 'Below band')
+  assert.equal(tierLabel(3), 'Middle band')
+  assert.equal(tierLabel(4), 'Above band')
+  assert.equal(tierLabel(5), 'Top band')
 })
 
 test('tierLabel has no label for an out-of-range or missing tier', () => {
@@ -269,8 +269,9 @@ test('prospectCardView is state "qualified" with tier, confidence, and trend all
   assert.equal(view.percentile, 93)
   assert.equal(view.standing, 'Top 7% OPS')
   assert.equal(view.tier, 5)
-  assert.equal(view.tierLabel, 'Elite for level')
+  assert.equal(view.tierLabel, 'Top band')
   assert.equal(view.confidence, 'established')
+  assert.equal(view.floor, 40)
   assert.equal(view.populationSize, 84)
   assert.deepEqual(view.movement, { delta: 9, sinceDate: '2026-07-27' })
   assert.deepEqual(view.ageEdge, { years: 2.1, direction: 'younger' })
