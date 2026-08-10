@@ -123,3 +123,63 @@ test('buildMarginNotes returns [] with no bundle', () => {
   const feed = buildFeed()
   assert.deepEqual(buildMarginNotes(feed, 3, null, { away: 'Aways', home: 'Homes' }), [])
 })
+
+// --- centuryClub (season aggregate) --------------------------------------------
+test('buildPitcherNotes omits centuryClub below CENTURY_CLUB_MIN', () => {
+  const row = { id: 'starter1', ip: '5.0' }
+  const b = { starterRecords: { starter1: { centuryClub: { count: 4, types: [{ code: 'FF', description: 'Four-Seam Fastball', count: 4, maxVelo: 100.2 }], seasonMaxVelo: 100.2 } } } }
+  const notes = buildPitcherNotes(row, 'home', 'Miami Marlins', b, {}, true)
+  assert.ok(!notes.some((n) => n.kind === 'centuryClub'))
+})
+
+test('buildPitcherNotes surfaces centuryClub past the floor, naming the rare non-fastball type', () => {
+  const row = { id: 'starter1', ip: '5.0' }
+  const b = {
+    starterRecords: {
+      starter1: {
+        centuryClub: {
+          count: 52,
+          types: [
+            { code: 'FF', description: 'Four-Seam Fastball', count: 40, maxVelo: 103.4 },
+            { code: 'SL', description: 'Slider', count: 9, maxVelo: 101.0 },
+          ],
+          seasonMaxVelo: 103.4,
+        },
+      },
+    },
+  }
+  const notes = buildPitcherNotes(row, 'home', 'Miami Marlins', b, {}, true)
+  const note = notes.find((n) => n.kind === 'centuryClub')
+  assert.ok(note)
+  assert.match(note.text, /52 pitches at 100\+ mph/)
+  assert.match(note.text, /9 sliders/)
+  assert.match(note.text, /103\.4/)
+  assert.equal(note.dedupeKey, 'centuryClub-starter1')
+})
+
+// --- veloVariety (live, tonight-specific) --------------------------------------
+// Boosts two of home starter #200's top-1 pitches (mini-game.js) to two
+// distinct CENTURY_MPH+ pitch types on the SAME (already-revealed) feed clone
+// — safe since buildFeed() returns a fresh deep clone every call.
+test('buildMarginNotes surfaces veloVariety once a pitcher clears 2 distinct CENTURY_MPH+ types', () => {
+  const feed = buildFeed()
+  const plays = feed.liveData.plays.allPlays
+  plays[0].playEvents[0].details.type = { code: 'FF', description: 'Four-Seam Fastball' }
+  plays[0].playEvents[0].pitchData.startSpeed = 101
+  plays[1].playEvents[0].details.type = { code: 'SI', description: 'Sinker' }
+  plays[1].playEvents[0].pitchData.startSpeed = 100.5
+  const notes = buildMarginNotes(feed, 3, { starterRecords: { 200: {} } }, { away: 'Aways', home: 'Homes' })
+  const note = notes.find((n) => n.kind === 'veloVariety' && n.personId === 200)
+  assert.ok(note)
+  assert.equal(note.dedupeKey, 'veloVariety-200')
+  assert.match(note.text, /2 pitch types/)
+})
+
+test('buildMarginNotes withholds veloVariety at only 1 qualifying pitch type', () => {
+  const feed = buildFeed()
+  const plays = feed.liveData.plays.allPlays
+  plays[0].playEvents[0].details.type = { code: 'FF', description: 'Four-Seam Fastball' }
+  plays[0].playEvents[0].pitchData.startSpeed = 101
+  const notes = buildMarginNotes(feed, 3, { starterRecords: { 200: {} } }, { away: 'Aways', home: 'Homes' })
+  assert.ok(!notes.some((n) => n.kind === 'veloVariety'))
+})

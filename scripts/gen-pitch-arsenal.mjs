@@ -39,6 +39,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
+import { CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -57,7 +58,12 @@ const CONCURRENCY = 8
 // Walks one game's live feed and returns each pitcher's pitch-type deltas.
 // No network, no DB — a pure function of the feed, so a synthetic fixture can
 // drive the exact counting rules. Shape: Map personId -> { name, teamId,
-// types: Map code -> { description, pitches, velocitySum, velocityN } }
+// types: Map code -> { description, pitches, velocitySum, velocityN,
+// centuryPitches, maxVelo } } — centuryPitches counts this type's pitches at
+// CENTURY_MPH+ (the veloVariety/centuryClub/veloPeak callout families' data,
+// docs/callouts.md); maxVelo is this type's single fastest pitch on file,
+// regardless of the century floor, so a pitcher's hardest-ever reading is
+// never lost even on a type that never clears it.
 export function aggregateGamePitchTypes(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const awayId = feed?.gameData?.teams?.away?.id ?? null
@@ -78,7 +84,7 @@ export function aggregateGamePitchTypes(feed) {
   const getType = (p, code, desc) => {
     let t = p.types.get(code)
     if (!t) {
-      t = { description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0 }
+      t = { description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0, centuryPitches: 0, maxVelo: null }
       p.types.set(code, t)
     } else if (desc && !t.description) {
       t.description = desc
@@ -104,6 +110,8 @@ export function aggregateGamePitchTypes(feed) {
       if (typeof speed === 'number' && Number.isFinite(speed)) {
         t.velocitySum += speed
         t.velocityN += 1
+        if (speed >= CENTURY_MPH) t.centuryPitches += 1
+        if (t.maxVelo == null || speed > t.maxVelo) t.maxVelo = speed
       }
     }
   }
@@ -115,8 +123,8 @@ export function aggregateGamePitchTypes(feed) {
 const upsertPitchType = (db) =>
   db.prepare(
     `INSERT INTO pitch_arsenal_totals
-       (person_id, level, code, season, name, team_id, description, pitches, velocity_sum, velocity_n)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (person_id, level, code, season, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id, level, code) DO UPDATE SET
        season = excluded.season,
        name = excluded.name,
@@ -124,7 +132,13 @@ const upsertPitchType = (db) =>
        description = excluded.description,
        pitches = pitch_arsenal_totals.pitches + excluded.pitches,
        velocity_sum = pitch_arsenal_totals.velocity_sum + excluded.velocity_sum,
-       velocity_n = pitch_arsenal_totals.velocity_n + excluded.velocity_n`,
+       velocity_n = pitch_arsenal_totals.velocity_n + excluded.velocity_n,
+       century_pitches = pitch_arsenal_totals.century_pitches + excluded.century_pitches,
+       max_velo = CASE
+         WHEN pitch_arsenal_totals.max_velo IS NULL THEN excluded.max_velo
+         WHEN excluded.max_velo IS NULL THEN pitch_arsenal_totals.max_velo
+         ELSE MAX(pitch_arsenal_totals.max_velo, excluded.max_velo)
+       END`,
   )
 
 const markIngested = (db) =>
@@ -139,7 +153,10 @@ async function ingestGame(db, stmts, gamePk, level, date, season) {
   try {
     for (const [id, p] of pitchers) {
       for (const [code, t] of p.types) {
-        stmts.pitchType.run(id, level, code, season, p.name, p.teamId, t.description, t.pitches, t.velocitySum, t.velocityN)
+        stmts.pitchType.run(
+          id, level, code, season, p.name, p.teamId, t.description,
+          t.pitches, t.velocitySum, t.velocityN, t.centuryPitches, t.maxVelo,
+        )
       }
     }
     stmts.mark.run(gamePk, level, date)
@@ -205,6 +222,8 @@ export function exportPitchArsenal(db, hands = {}) {
       description: r.description,
       pitches: r.pitches,
       avgVelo: r.velocity_n > 0 ? Math.round((r.velocity_sum / r.velocity_n) * 10) / 10 : null,
+      century: r.century_pitches,
+      maxVelo: r.max_velo,
     })
   }
 

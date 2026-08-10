@@ -8,6 +8,7 @@ import { FOUL_CODES, FOUL_ENDS_AB_CODES, pitchDotCategory } from '../playbyplay.
 import { dayWordFor } from '../select.js'
 import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skew, SCORE_BASE, parseRecord } from './shared.js'
 import { buildVsTeamNote } from './vsTeamNote.js'
+import { ELITE_VELO_MPH } from '../pitchArsenal.js'
 
 // Fouls in one at-bat, from its ordered pitch call codes alone. The strike
 // count is re-simulated from the codes (called/whiff/foul all add a strike, a
@@ -141,6 +142,38 @@ export function buildCallouts(
         kind: 'marathonAb',
         dedupeKey: `marathon-${entry.atBatIndex}`,
         score: clampScore(SCORE_BASE.marathonAb + Math.min(15, 3 * (fouls - MARATHON_FOULS))),
+      })
+    }
+  }
+
+  // A single pitch that's a new season-high velocity, or clears the elite bar
+  // outright — regardless of pitch-type variety (veloVariety, the Margin
+  // Notes sibling, only fires on 2+ distinct types this game; this fires on
+  // ONE blistering pitch alone). Reads progress.js's per-play `newPeakVelo`
+  // (this game's own running peak, revealed plays only) against
+  // bundle.starterRecords' season-high on file (gen-callouts.mjs's join off
+  // gen-pitch-arsenal.mjs's own sweep). Fires once per pitcher per game — a
+  // later, harder pitch the same game restates it via the shared dedupeKey.
+  if (snap?.newPeakVelo && entry.pitcher) {
+    const { mph, type } = snap.newPeakVelo
+    const seasonMaxVelo = bundle.starterRecords?.[entry.pitcher.id]?.centuryClub?.seasonMaxVelo
+    const isSeasonHigh = seasonMaxVelo != null && mph > seasonMaxVelo
+    const isElite = mph >= ELITE_VELO_MPH
+    if (isSeasonHigh || isElite) {
+      const who = entry.pitcher.last || 'He'
+      const text = isSeasonHigh
+        ? `New season high for ${who} — ${mph.toFixed(1)} mph, topping his previous best of ${seasonMaxVelo.toFixed(1)}`
+        : `${who} touched ${mph.toFixed(1)} mph${type ? ` on a ${type.toLowerCase()}` : ''} — one of the hardest pitches he's thrown all season`
+      notes.push({
+        text,
+        personId: entry.pitcher.id,
+        side: otherSide(battingSide),
+        kind: 'veloPeak',
+        // mph/isSeasonHigh feed the box-score roll-up's folded restatement.
+        mph,
+        isSeasonHigh,
+        dedupeKey: `veloPeak-${entry.pitcher.id}`,
+        score: clampScore(SCORE_BASE.veloPeak + Math.max(0, Math.min(20, 4 * (mph - ELITE_VELO_MPH)))),
       })
     }
   }

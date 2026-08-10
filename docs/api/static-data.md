@@ -467,25 +467,20 @@ for each generator; the reader modules:
   `qualified: false` row means the prospect hasn't cleared the playing-time
   floor (`MIN_PLATE_APPEARANCES`/`MIN_OUTS`,
   `scripts/lib/prospectPercentile.mjs`) yet this season, not that he's off
-  the board. Surfaced via `ProspectTrendPill` on `/prospects` only — a static
-  Ledger cell, not a tap-to-reveal note like `RadarPill`, since Ledger's rows
-  are fixed-shape with no open/close state to lift. `movement` is the same
+  the board. `ProspectTrendPill` presents it on `/prospects`; `ProspectCard`
+  uses the same signal on a minor-league player page. `movement` is the same
   self-join-against-bbsbh's-own-history pattern as `feverRadar.js`, just a
   wider window (stat percentiles move slower than a daily scouting rank); the
   arrow only appears past a 5-point move, since a percentile wobbles a point
   or two on one good night.
 
-  The column is headed **`vs. Level`** and sits LAST, after `Line`. It does not
-  print the raw percentile: `standingLabel` turns it into the phrase a
-  broadcast uses, with the stat attached — `Top 7% OPS`, `Middle OPS`,
-  `Bottom 12% ERA`. Three reasons, all learned the hard way. An ordinal
-  ("93rd") two cells from a real rank column reads as a second, competing rank;
-  nothing in it says which end is good; and the column ranks a DIFFERENT stat
-  depending on whether the row is a bat or an arm, so the stat has to ride in
-  every cell rather than be defined in a caption under the table. Percentile 41
-  through 59 is `Middle` rather than a printed near-50 figure, which would be
-  precision the sample cannot support. Higher is always better —
-  `percentileRank` inverts ERA — so `Top 2% ERA` means one of the level's best.
+  The board column is **`Standing vs level`** and sits last, after the season
+  line. Each row names its metric and exact percentile, then gives the standing
+  band, sample confidence, PA/IP, and meaningful movement. The five bands are
+  Bottom, Below, Middle, Above, and Top. The filter and Prospect Card use those
+  same names. Higher is always better: `percentileRank` inverts ERA before the
+  UI receives it. A move under five percentile points reads as `Steady` on both
+  surfaces because one game can cause a small percentile wobble.
 
 - `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
@@ -527,4 +522,3 @@ for each generator; the reader modules:
   `.scratch/game-photos-by-subject/` (PRD + issue 01) is still open for a
   surface with no such list already loaded (a player page, say) — read that
   doc, including its note on what shipped without it, before building it.
-

@@ -78,6 +78,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
+| prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
+| prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
@@ -98,6 +100,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | stamp-ink.test.js | 11 | src/lib/stampInk.js, contrast.js | Logbook stamp ink — the winner's darkest brand colour + its contrast floor (ADR-0036) |
 | stamps.test.js | 39 | src/lib/stamps.js | Logbook stamp rules — the reveal gate, tombstone sync merge, book placement (ADR-0035) |
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
+| stats-levels.test.js | 5 | src/api/statsLevels.js | sumHitting/sumPitching recomputed rates + combineToPool's raw split passthrough |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |

@@ -122,6 +122,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
 import { writeShards } from './lib/io.js'
+import { loadCenturyClub } from './lib/century-club.mjs'
 import {
   computeLeaders,
   HITTING_CATEGORIES,
@@ -142,7 +143,7 @@ import {
   COMEBACK_DEFICIT,
 } from '../src/api/callout-notes/checkpoints.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
-import { tallyStarterRecord } from './lib/pitcher-starts.mjs'
+import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -243,6 +244,10 @@ async function loadFoulData() {
   return { foulSpoilerBoard: board, foulRatePerPitch }
 }
 const { foulSpoilerBoard, foulRatePerPitch } = await loadFoulData()
+
+// Century-club pitch data, read ONCE (see scripts/lib/century-club.mjs for
+// the shape/why) and joined into starterRecords below by pitchLevel+id.
+const centuryClubByKey = await loadCenturyClub()
 
 // Pitcher strikeouts (not a hit category, so separate from HIT_CATEGORY_KEYS).
 const PIT_KEYS = ['so_p']
@@ -1287,6 +1292,8 @@ for (const g of games) {
   if (awayId == null || homeId == null) continue
   const sportId = teamMeta.get(homeId)?.sportId ?? MLB
   const mlb = sportId === MLB
+  // AAA is the only MiLB level gen-pitch-arsenal.mjs sweeps.
+  const pitchLevel = mlb ? 'mlb' : sportId === 11 ? 'aaa' : null
 
   // Leaders keyed by playerId across BOTH clubs, so AtBatCard looks up batter.id
   // directly. Each carries the club name for the note ("leads the Brewers …").
@@ -1368,7 +1375,7 @@ for (const g of games) {
     const e = pitcherEnrichById.get(id)
     if (!e) continue
     const p = poolById.get(id)
-    const cgShutout = num(p?.pitching?.completeGames) + num(p?.pitching?.shutouts)
+    const cgShutout = starterCgShutoutCount(p?.pitching)
     const entry = {}
     if (e.homeAway) entry.homeAway = e.homeAway
     if (e.teamStarts) entry.teamStarts = e.teamStarts
@@ -1385,6 +1392,8 @@ for (const g of games) {
     const paced = ttoById.get(id)
     if (paced?.tto) entry.tto = paced.tto
     if (paced?.pitchPace) entry.pitchPace = paced.pitchPace
+    const cc = pitchLevel ? centuryClubByKey.get(`${pitchLevel}:${id}`) : null
+    if (cc) entry.centuryClub = cc
     if (Object.keys(entry).length > 0) starterRecords[id] = entry
     if (e.milestone) milestones[id] = e.milestone
   }

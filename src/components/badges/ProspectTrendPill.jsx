@@ -1,4 +1,4 @@
-import { standingLabel } from '../../api/prospectTrend.js'
+import { confidenceLabel, confidenceState, levelTier, movementState, tierLabel } from '../../api/prospectTrend.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
@@ -8,21 +8,16 @@ import { standingLabel } from '../../api/prospectTrend.js'
 // flex-wrap), this lives in a plain table cell, so it stays a static line —
 // Ledger's rows are fixed-shape, with no open/close state to lift.
 //
-// IT DOES NOT PRINT THE PERCENTILE — standingLabel (api/prospectTrend.js) turns
-// it into the phrase a broadcast would use, carrying the stat with it: "Top 7%
-// OPS", "Bottom 12% ERA". The stat rides in every cell rather than being defined
-// in a caption under the table, because a column has to say what it measures
-// without a sentence somewhere else doing it — and this one measures a different
-// stat depending on whether the row is a bat or an arm.
-//
-// The percentile is plain ink, same as every other Ledger column; only the
-// movement arrow borrows --accent-positive/--accent-negative, the same
-// restriction RadarPill's own tag observes (color marks the DIRECTION it
-// moved, never the level itself), and the triangle carries the direction on
-// its own shape so the colour is never load-bearing.
+// The exact percentile, named standing band, sample confidence, and movement
+// each get one job. The former five-dot tier row duplicated the named band and
+// competed with the percentile, so the board now uses the band label alone.
+function bandFor(tier) {
+  return tier <= 2 ? 'low' : tier >= 4 ? 'high' : 'mid'
+}
+
 function DirectionTriangle({ up }) {
   return (
-    <svg viewBox="0 0 20 20" width="8" height="8" aria-hidden="true">
+    <svg viewBox="0 0 20 20" width="11" height="11" aria-hidden="true">
       {up ? (
         <polygon points="8.5,3.5 14.5,14.5 2.5,14.5" fill="currentColor" />
       ) : (
@@ -35,7 +30,38 @@ function DirectionTriangle({ up }) {
 // A percentile wobbles a point or two on a single good night, so the arrow
 // stays off until the move is big enough to be about the player. Five points is
 // roughly one rung on the band scale above.
-const MOVE_FLOOR = 5
+const METRIC = { hitting: 'OPS', pitching: 'ERA' }
+function ordinal(value) {
+  const mod100 = value % 100
+  const suffix = mod100 >= 11 && mod100 <= 13
+    ? 'th'
+    : value % 10 === 1
+      ? 'st'
+      : value % 10 === 2
+        ? 'nd'
+        : value % 10 === 3
+          ? 'rd'
+          : 'th'
+  return `${value}${suffix}`
+}
+
+function shortDate(apiDate) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(apiDate ?? '')
+  if (!match) return ''
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function outsToIp(outs) {
+  return `${Math.floor(outs / 3)}.${outs % 3}`
+}
+
+function sampleLabel(entry) {
+  if (!Number.isFinite(entry?.sampleSize)) return null
+  return entry.group === 'pitching' ? `${outsToIp(entry.sampleSize)} IP` : `${entry.sampleSize} PA`
+}
 
 // `entry` comes from prospectTrendById (prospectTrend.js). Two distinct
 // empty states, on purpose: `entry == null` is bbsbh's own data gap (no
@@ -46,21 +72,44 @@ const MOVE_FLOOR = 5
 // plainly rather than folding into the same silent dash.
 const DASH = '—'
 
-export function ProspectTrendPill({ entry }) {
-  if (!entry) return <span className="prospecttrend prospecttrend--unqualified">{DASH}</span>
-  const label = entry.qualified ? standingLabel(entry.percentile, entry.group) : null
-  if (!label) {
-    return <span className="prospecttrend prospecttrend--unqualified">Too early</span>
+export function ProspectTrendPill({ entry, level }) {
+  const metric = METRIC[entry?.group] ?? 'Performance'
+  const comparison = level ? `${metric} vs ${level}` : `${metric} vs level`
+  if (!entry) {
+    return (
+      <span className="prospecttrend prospecttrend--unqualified">
+        <span className="prospecttrend__headline">{comparison}</span>
+        <span className="prospecttrend__meta">{DASH} No standing yet</span>
+      </span>
+    )
   }
-  const delta = entry.movement?.delta
+  if (!entry.qualified || !Number.isFinite(entry.percentile)) {
+    return (
+      <span className="prospecttrend prospecttrend--unqualified">
+        <span className="prospecttrend__headline">{comparison}</span>
+        <span className="prospecttrend__meta">Too early{sampleLabel(entry) ? ` · ${sampleLabel(entry)}` : ''}</span>
+      </span>
+    )
+  }
+  const tier = levelTier(entry.percentile)
+  const movement = movementState(entry.movement)
+  const moving = movement?.direction === 'up' || movement?.direction === 'down'
+  const confidence = confidenceState(entry.sampleSize, entry.group)
+  const sampleConfidence = confidenceLabel(confidence)
+  const movementDate = shortDate(movement?.sinceDate)
   return (
     <span className="prospecttrend">
-      <span className="prospecttrend__value">{label}</span>
-      {Number.isFinite(delta) && Math.abs(delta) >= MOVE_FLOOR && (
-        <span className={`prospecttrend__move prospecttrend__move--${delta > 0 ? 'up' : 'down'}`}>
-          <DirectionTriangle up={delta > 0} />
+      <span className="prospecttrend__headline">{comparison} · {ordinal(entry.percentile)} percentile</span>
+      <span className="prospecttrend__details">
+        <span className={`prospecttrend__band prospecttrend__band--${bandFor(tier)}`}>
+          {tierLabel(tier)} band
         </span>
-      )}
+        <span className="prospecttrend__sample">{sampleConfidence}{sampleLabel(entry) ? ` · ${sampleLabel(entry)}` : ''}</span>
+        <span className={`prospecttrend__move${moving ? ` prospecttrend__move--${movement.direction}` : ''}`}>
+          {moving ? <DirectionTriangle up={movement.direction === 'up'} /> : <span className="prospecttrend__steady" aria-hidden="true" />}
+          {moving ? `${movement.direction === 'up' ? 'Up' : 'Down'} ${movement.amount} pts${movementDate ? ` since ${movementDate}` : ''}` : `Steady${movementDate ? ` since ${movementDate}` : ''}`}
+        </span>
+      </span>
     </span>
   )
 }

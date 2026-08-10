@@ -50,6 +50,7 @@ table together.
 | birthdayStats | 60 | — |
 | birthday | 55 | — |
 | homerRec | 55 | + 40 × skew |
+| veloPeak | 55 | + min(20, 4 × (velo − ELITE_VELO_MPH)) |
 | onBaseEnded | 50 | + min(15, streak − 8) |
 | onBaseExtended | 45 | + min(15, streak+1 − 8) |
 | marathonAb | 45 | + min(15, 3 × (fouls − 6)) |
@@ -86,11 +87,13 @@ same precedent the pre-half strip sets):
 | Family | Base | Bonus |
 | --- | --- | --- |
 | laboring | 48 | + min(15, 30 × (ratio − 1)) |
+| veloVariety | 47 | + min(20, 5 × (types − 2) + 3 × (peak velo − CENTURY_MPH)) |
 | veloDecay | 46 | + min(15, 6 × (drop − 1.5)) |
 | penFatigue | 42 | — |
 | workload | 38 | — |
 | backToBack | 36 | — |
 | leverage | 34 | + min(15, 100 × (gap − 0.06)) |
+| centuryClub | 34 | + min(15, count / 10) + 10 if a non-fastball type qualifies |
 | tenK | 33 | — |
 | scorelessStreak | 32 | + min(15, streak − 1) |
 | sixIp | 28 | — |
@@ -157,6 +160,23 @@ shape: `src/api/callouts.js`).
   and the moment is the story. With 3+ genuine two-strike fouls the card adds
   the historical odds (SABR BRJ 2018: .291 hit probability for foul-reached
   two-strike counts vs .102 otherwise).
+- **veloPeak** — the pitcher throws a single pitch that's either a new
+  **season** high for him (any pitch type) or clears the absolute
+  `ELITE_VELO_MPH` bar (102, tunable — `src/api/pitchArsenal.js`) even if it
+  isn't, read off progress.js's per-play `newPeakVelo` (the pitcher's own
+  running game-high, revealed plays only) against
+  `starterRecords[pitcherId].centuryClub.seasonMaxVelo` (joined from
+  `gen-pitch-arsenal.mjs`'s sweep, see Margin Notes' `centuryClub` below).
+  Card names the pitcher (like the strikeout-leader note above, since a play
+  card otherwise renders under the BATTER's name): "New season high for
+  Miso — 105.1 mph, topping his previous best of 103.8" or "Miso touched
+  103.2 mph on a slider — one of the hardest pitches he's thrown all
+  season." Fires once per pitcher per game — dedupeKey `veloPeak-{id}` so a
+  later, harder pitch the same game restates it. Independent of
+  `veloVariety` (Margin Notes below), which needs 2+ distinct pitch types
+  this game; this fires on ONE pitch alone, regardless of variety. Roll-up,
+  Final: folded with the day-word framing — "Hit a new season-high 105.1
+  mph tonight."
 - **foulSpoiler** — a league top-10 fouls-per-game batter steps in for his
   first PA ("MLB's No. 2 pitch-spoiler — 4.1 foul balls a game this season"),
   from the nightly `foulSpoilers` join (gen-callouts.mjs reads
@@ -325,8 +345,9 @@ who also has a starts record on file elsewhere in the rotation must not be
 credited with a game he isn't starting.
 
 Alongside the older home/away, CG/shutout, scoreless-streak, 6+ IP and 10-K
-notes (`buildPitcherNotes`), relievers get three workload/pattern notes, all
-season aggregates joined from the pitcher game-log sweep:
+notes (`buildPitcherNotes`), relievers get three workload/pattern notes (all
+season aggregates joined from the pitcher game-log sweep), plus one
+velocity-season note that applies to any pitcher, starter or reliever:
 
 - **workload** — his trailing-window pitch count vs the level's average
   reliever (`starterRecords[id].recentPitches`, `bundle.bullpen`): "Heavy
@@ -348,8 +369,19 @@ season aggregates joined from the pitcher game-log sweep:
   (`leverage`, the API's sah/sbh/sti splits, ≥ 8 IP per bucket, AVG gap
   ≥ .060): "Opponents hit .204 off him with the Sounds ahead this season,
   .301 with them trailing."
+- **centuryClub** — his season total of `CENTURY_MPH`+ (100, tunable —
+  `src/api/pitchArsenal.js`) pitches, joined from `gen-pitch-arsenal.mjs`'s
+  own sweep into `starterRecords[id].centuryClub` (count, per-type
+  breakdown, `seasonMaxVelo`) by `gen-callouts.mjs` (`scripts/lib/century-club.mjs`).
+  Gate: `count ≥ CENTURY_CLUB_MIN` (5) — a one-off 100 mph touch is
+  unremarkable for a real flamethrower. A non-fastball type in the mix leads
+  the phrasing, since a breaking ball or changeup at triple digits is the
+  genuinely rare case: "Has thrown 52 pitches at 100+ mph this season —
+  including 9 sliders, extraordinarily rare for a breaking or offspeed
+  pitch — topping out at 103.4 mph" vs. the plain fastball-only phrasing.
+  Not starter-only — any pitcher on file qualifies.
 
-The two in-game health signals join the same ranked list (`healthNotes` in
+The in-game health signals join the same ranked list (`healthNotes` in
 `pitcher-callouts.js`, wrapping `pitcherHealth.js`'s reads) and carry the
 highest bases in the family — tonight-specific and the most actionable read
 on a pitcher, ahead of every season aggregate above:
@@ -357,6 +389,13 @@ on a pitcher, ahead of every season aggregate above:
 - **laboring** — tonight's pitches/inning vs. his own season norm
   (`laboringFor`, workload.json baseline): "Laboring: 24.7 pitches per
   inning tonight — his season norm is 16.1."
+- **veloVariety** — 2+ DISTINCT pitch types he's thrown at `CENTURY_MPH`+
+  so far this game (`computeVeloVariety`, walks every pitch type, not just
+  the fastball family — unlike `veloDecay` below) — the type-variety
+  counterpart to `veloPeak`'s single-pitch spotlight above, and Margin
+  Notes' own catch for the "breaking ball at triple digits" story: "3 pitch
+  types have touched 100+ mph tonight — FF 101.2, SI 100.4, SL 100.1."
+  Score/text scale with both how many types and how hard the peak one was.
 - **veloDecay** — fastball-family velocity drop from his first two innings
   to his latest revealed one (`computeVeloDecay`): "Fastball down 2.0 mph
   from his early innings (93.9 → 91.9)."

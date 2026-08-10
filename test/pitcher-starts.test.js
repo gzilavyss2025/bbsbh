@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { tallyStarterRecord } from '../scripts/lib/pitcher-starts.mjs'
+import { tallyStarterRecord, starterCgShutoutCount } from '../scripts/lib/pitcher-starts.mjs'
 
 const start = (teamId, isHome, isWin, overrides = {}) => ({
   team: { id: teamId },
@@ -72,4 +72,21 @@ test('tallyStarterRecord returns all zeroes for an empty or absent log', () => {
   assert.deepEqual(tallyStarterRecord(undefined, 158), {
     homeW: 0, homeL: 0, awayW: 0, awayL: 0, sixIpW: 0, sixIpL: 0, tenK: 0,
   })
+})
+
+// Regression: Jacob Misiorowski's callout showed "2 complete games/shutouts"
+// with one CG on the season, because that CG was also a shutout and the two
+// stats were summed. A shutout is always a complete game — never additional
+// to it.
+test('starterCgShutoutCount does not double-count a start that is both a CG and a shutout', () => {
+  assert.equal(starterCgShutoutCount({ completeGames: 1, shutouts: 1 }), 1)
+})
+
+test('starterCgShutoutCount counts a complete game that was not a shutout', () => {
+  assert.equal(starterCgShutoutCount({ completeGames: 2, shutouts: 1 }), 2)
+})
+
+test('starterCgShutoutCount is zero when stats are missing', () => {
+  assert.equal(starterCgShutoutCount(undefined), 0)
+  assert.equal(starterCgShutoutCount({}), 0)
 })

@@ -5,7 +5,8 @@
 // what the rate was measured through.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { laboringFor } from '../src/api/pitcherHealth.js'
+import { laboringFor, computeVeloVariety } from '../src/api/pitcherHealth.js'
+import { CENTURY_MPH } from '../src/api/pitchArsenal.js'
 
 const workload = (seasonPitches, seasonOuts) => ({ season: { pitches: seasonPitches, outs: seasonOuts } })
 
@@ -38,4 +39,54 @@ test('laboringFor reports laboring: false for a normal, non-elevated pace', () =
   const r = laboringFor(line, workload(477, 90))
   assert.ok(r)
   assert.equal(r.laboring, false)
+})
+
+// --- computeVeloVariety --------------------------------------------------------
+const pitch = (typeCode, description, startSpeed) => ({
+  isPitch: true,
+  details: { type: { code: typeCode, description } },
+  pitchData: startSpeed == null ? undefined : { startSpeed },
+})
+const play = (inning, half, pitcherId, events) => ({
+  about: { inning, halfInning: half },
+  matchup: { pitcher: { id: pitcherId } },
+  playEvents: events,
+})
+const feedWith = (plays) => ({ liveData: { plays: { allPlays: plays } } })
+
+test('computeVeloVariety counts distinct pitch types at CENTURY_MPH+, sorted fastest first', () => {
+  const feed = feedWith([
+    play(1, 'top', 300, [
+      pitch('FF', 'Four-Seam Fastball', CENTURY_MPH + 1),
+      pitch('SI', 'Sinker', CENTURY_MPH + 0.4),
+      pitch('SL', 'Slider', 88), // never clears the floor
+    ]),
+  ])
+  const out = computeVeloVariety(feed, 0) // revealedThrough = halfIndex(1, 'top')
+  assert.equal(out[300].count, 2)
+  assert.deepEqual(
+    out[300].types.map((t) => t.code),
+    ['FF', 'SI'],
+    'fastest reading sorts first',
+  )
+  assert.equal(out[300].types[0].maxVelo, CENTURY_MPH + 1)
+})
+
+test('computeVeloVariety never reads a pitch in a half beyond revealedThrough', () => {
+  const feed = feedWith([
+    play(1, 'top', 300, [pitch('FF', 'Four-Seam Fastball', CENTURY_MPH + 1), pitch('SI', 'Sinker', CENTURY_MPH + 0.4)]),
+    play(2, 'top', 300, [pitch('CU', 'Curveball', CENTURY_MPH + 5)]), // halfIndex 2 — sealed
+  ])
+  const out = computeVeloVariety(feed, 0) // only inning 1 top revealed
+  assert.equal(out[300].count, 2, 'the sealed half\'s curveball must not count')
+  assert.ok(
+    !out[300].types.some((t) => t.code === 'CU'),
+    'a spoiler-risk regression would leak the sealed pitch type in here',
+  )
+})
+
+test('computeVeloVariety returns nothing for a pitcher with fewer than 2 qualifying types', () => {
+  const feed = feedWith([play(1, 'top', 300, [pitch('FF', 'Four-Seam Fastball', CENTURY_MPH + 1)])])
+  const out = computeVeloVariety(feed, 0)
+  assert.equal(out[300].count, 1)
 })
