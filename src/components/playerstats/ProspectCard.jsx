@@ -4,7 +4,6 @@ import { dotFraction, deviationBar } from '../../lib/percentileStrip.js'
 import { SPORT_LABEL } from '../../lib/teams.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 
-const DASH = '—'
 const CHART_H = 140
 const PLOT_TOP = 26
 const PLOT_BOTTOM = 24
@@ -62,10 +61,7 @@ export function ProspectCard({ view, level, badge, group }) {
   return (
     <section className="prospectcard">
       <header className="prospectcard__head">
-        <div>
-          <span className="prospectcard__kicker">Player development</span>
-          <h3 className="prospectcard__title">Prospect performance</h3>
-        </div>
+        <h3 className="prospectcard__title">Prospect performance</h3>
         {hasBadge && <ProspectPill {...badge} />}
       </header>
 
@@ -90,8 +86,7 @@ function EmptyStanding({ level }) {
   return (
     <div className="prospectcard__empty">
       <span className="prospectcard__emptylabel">Current-level standing</span>
-      <p>{DASH} No qualified data{level ? ` at ${level}` : ''} yet</p>
-      <span>The percentile will appear after a current-level sample is available.</span>
+      <p>No qualified comparison{level ? ` at ${level}` : ''} yet</p>
     </div>
   )
 }
@@ -101,7 +96,7 @@ function EarlyStanding({ view, level }) {
     <div className="prospectcard__empty">
       <span className="prospectcard__emptylabel">{view.metric}{level ? ` vs ${level}` : ''}</span>
       <p>Early sample — {sampleSizeLabel(view.metric, view.sampleSize)}</p>
-      <span>
+      <span className="prospectcard__emptynote">
         {sampleSizeLabel(view.metric, view.floor)} needed to join the qualified {level ? `${level} ` : ''}
         {comparisonGroup(view.metric)} population.
       </span>
@@ -117,55 +112,59 @@ function QualifiedStanding({ view, level }) {
 
   return (
     <>
-      <div className="prospectcard__lead">
-        <span className="prospectcard__metric">{view.metric}{level ? ` vs ${level}` : ''}</span>
-        <strong className="prospectcard__percentile">{ordinal(view.percentile)} percentile</strong>
-        <p className="prospectcard__comparison">
-          {view.standing.replace(` ${view.metric}`, '')} among {view.populationSize} qualified {level ? `${level} ` : ''}
-          {comparisonGroup(view.metric)} with {sampleFloorLabel(view.metric, view.floor)}
-        </p>
-      </div>
+      <div className="prospectcard__summary">
+        <div>
+          <div className="prospectcard__lead">
+            <strong className="prospectcard__percentile">{ordinal(view.percentile)} percentile</strong>
+            <span className="prospectcard__metric">{view.metric}{level ? ` vs ${level}` : ''}</span>
+            <p className="prospectcard__comparison">
+              {view.standing.replace(` ${view.metric}`, '')} among {view.populationSize} qualified {level ? `${level} ` : ''}
+              {comparisonGroup(view.metric)} with {sampleFloorLabel(view.metric, view.floor)}
+            </p>
+          </div>
 
-      <div
-        className="prospectcard__scale"
-        role="img"
-        aria-label={`${ordinal(view.percentile)} percentile on a scale from 0 to 100; 50 is the level average benchmark`}
-      >
-        <div className="prospectcard__track" aria-hidden="true">
-          <span
-            className={`prospectcard__confdot prospectcard__confdot--${view.confidence ?? 'established'}`}
-            style={dot != null ? { '--pct': dot } : undefined}
-          />
-          {bar && (
-            <span
-              className={`prospectcard__bar prospectcard__bar--${bar.side}`}
-              style={{ '--start': bar.start, '--width': bar.width }}
-            />
-          )}
+          <div
+            className="prospectcard__scale"
+            role="img"
+            aria-label={`${ordinal(view.percentile)} percentile on a scale from 0 to 100; 50 is the level average benchmark`}
+          >
+            <div className="prospectcard__track" aria-hidden="true">
+              <span
+                className={`prospectcard__confdot prospectcard__confdot--${view.confidence ?? 'established'}`}
+                style={dot != null ? { '--pct': dot } : undefined}
+              />
+              {bar && (
+                <span
+                  className={`prospectcard__bar prospectcard__bar--${bar.side}`}
+                  style={{ '--start': bar.start, '--width': bar.width }}
+                />
+              )}
+            </div>
+            <div className="prospectcard__scalelabels" aria-hidden="true">
+              <span>0</span>
+              <span>50 · Level average</span>
+              <span>100</span>
+            </div>
+          </div>
         </div>
-        <div className="prospectcard__scalelabels" aria-hidden="true">
-          <span>0</span>
-          <span>50 · Level average</span>
-          <span>100</span>
-        </div>
-      </div>
 
-      <dl className="prospectcard__facts">
-        <div className="prospectcard__fact">
-          <dt>Sample</dt>
-          <dd>{confidenceLabel(view.confidence)} — {sampleSizeLabel(view.metric, view.sampleSize)}</dd>
-        </div>
-        <div className="prospectcard__fact">
-          <dt>Movement</dt>
-          <dd className={movement ? `prospectcard__move prospectcard__move--${view.movement.delta > 0 ? 'up' : view.movement.delta < 0 ? 'down' : 'even'}` : undefined}>
-            {movement ?? 'No comparison period yet'}
-          </dd>
-        </div>
-        <div className="prospectcard__fact">
-          <dt>Band</dt>
-          <dd>{view.tierLabel}{level ? ` for ${level}` : ''} {view.metric}</dd>
-        </div>
-      </dl>
+        <dl className="prospectcard__facts">
+          <div className="prospectcard__fact">
+            <dt>Sample</dt>
+            <dd>{confidenceLabel(view.confidence)} — {sampleSizeLabel(view.metric, view.sampleSize)}</dd>
+          </div>
+          <div className="prospectcard__fact">
+            <dt>Movement</dt>
+            <dd className={movement ? `prospectcard__move prospectcard__move--${view.movement.delta > 0 ? 'up' : view.movement.delta < 0 ? 'down' : 'even'}` : undefined}>
+              {movement ?? 'No comparison period yet'}
+            </dd>
+          </div>
+          <div className="prospectcard__fact">
+            <dt>Band</dt>
+            <dd>{view.tierLabel}{level ? ` for ${level}` : ''} {view.metric}</dd>
+          </div>
+        </dl>
+      </div>
 
       {hasTrendData && (
         <TrendDisclosure trend={view.trend} metric={view.metric} level={level} />

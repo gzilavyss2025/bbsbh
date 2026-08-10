@@ -15,10 +15,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
   return (
     <section className="levelprog">
       <header className="levelprog__head">
-        <div>
-          <span className="levelprog__kicker">Player development</span>
-          <h3 className="levelprog__title">Path to the Majors</h3>
-        </div>
+        <h3 className="levelprog__title">Path to the Majors</h3>
         {current && (
           <p className="levelprog__current">
             <span>Current assignment</span>
@@ -33,7 +30,7 @@ export function LevelProgressionCard({ levels, debutYear }) {
           style={{ '--level-count': steps.length }}
         >
           {steps.map((level) => {
-            const status = level.isCurrent ? 'Current' : level.reached ? 'Reached' : level.target ? 'MLB destination' : 'Next level'
+            const status = level.isCurrent ? 'Current assignment' : level.reached ? 'Reached' : level.target ? 'MLB destination' : 'Next level'
             return (
               <li
                 key={level.sportId}
@@ -45,7 +42,8 @@ export function LevelProgressionCard({ levels, debutYear }) {
                 ].filter(Boolean).join(' ')}
                 aria-current={level.isCurrent ? 'step' : undefined}
               >
-                <span className="levelprog__status">{status}</span>
+                {level.reached && <span className="sr-only">{status}: </span>}
+                {!level.reached && <span className="levelprog__status">{status}</span>}
                 <span className="levelprog__label">{level.label}</span>
                 {level.reached && (
                   <span className="levelprog__detail">
