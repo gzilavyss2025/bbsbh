@@ -370,6 +370,18 @@ don't run these by hand.
   official MLB record, and a model output can't be reconciled that way, so it
   gets its own clearly-sourced surface (a `RadarPill`) instead of a rank in the
   callout worthiness table. App reads it via `src/api/feverRadar.js`.
+- `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
+  level-relative OPS/ERA percentile for every prospect in
+  `top-prospects.json`, computed straight from statsapi's own season splits
+  (`fetchLevelSeasonStats`/`combineToPool`, `src/api/statsLevels.js`) — no
+  hardcoded Major-League-Equivalency translation coefficients, see
+  `scripts/lib/prospectPercentile.mjs`'s header. Meant to complement the
+  weekly-refreshed Pipeline rank, not replace it: a rank only moves when
+  Pipeline re-ranks, this moves with the prospect's own current-season stat
+  line. Same SQLite `player_snapshots` + self-join `movement` pattern as
+  `gen-fever-radar.mjs`, source `prospect-trend`. Depends on
+  `top-prospects.json` already existing; skips (not a failure) if that
+  snapshot is missing/empty. App reads it via `src/api/prospectTrend.js`.
 
 ## Own-cadence generators (not the nightly batch)
 

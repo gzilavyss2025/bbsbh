@@ -170,7 +170,12 @@ const BUDGETS = {
   // lettered-sibling shape as `21a-box-score-stars.css` beside it, and for the
   // same reason. Its position is load-bearing: it overrides `.bs__grid`'s cell
   // rules in `21-box-score.css`, so it has to cascade after them.
-  'src/styles': 67,
+  //
+  // 67 -> 68 for `31a-prospect-trend.css`: ProspectTrendPill's rules, split
+  // out of `31-wild-card.css` (already at its check-file-size budget) rather
+  // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
+  // 28/28a above, cascading right after the file it extends.
+  'src/styles': 68,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -181,7 +186,10 @@ const BUDGETS = {
   // reader in here now shares. It REMOVES the duplicated cache-after-await
   // block from ~18 of its neighbours (and the race in it), so this entry buys
   // one leaf file to delete a pattern copied eighteen times.
-  'src/api': 86,
+  // +1 for prospectTrend.js — the reader for gen-prospect-trend.mjs's
+  // level-relative OPS/ERA percentile, sibling to prospects.js/feverRadar.js,
+  // not folded into either (different data, different generator).
+  'src/api': 87,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -199,7 +207,9 @@ const BUDGETS = {
   // gen-mono-logos.mjs: that script prunes its output directory of anything
   // not keyed by a numeric team id on every full run, so a league mark living
   // there would be deleted nightly. Flat here like every other gen-*.mjs.
-  scripts: 71,
+  // +1 for gen-prospect-trend.mjs — the nightly prospect percentile
+  // generator, flat here like every other gen-*.mjs in this directory.
+  scripts: 72,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -230,6 +240,11 @@ const BUDGETS = {
   // one player is a record that exists and can never be found. Four lines and no
   // imports — a leaf constant, not a new subsystem.
   'src/lib': 53,
+  // New entry (was under the default 12-file cap): +1 for
+  // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
+  // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
+  // is the worked example), not a new subsystem.
+  'scripts/lib': 13,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

@@ -453,6 +453,20 @@ for each generator; the reader modules:
   (`player_snapshots`); each exported row's `movement` is a self-join against
   the nearest prior snapshot bbsbh itself recorded, not Fever's own
   `/api/data/movers` feed.
+- `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
+  `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
+  `feverRadar.js` above: not a third party, not attributed, and not an MLE —
+  purely "how does his OPS/ERA compare to every other qualified player at his
+  level this season," computed straight from the same `fetchLevelSeasonStats`/
+  `combineToPool` (`statsLevels.js`) the combined minors leaderboard uses. A
+  `qualified: false` row means the prospect hasn't cleared the playing-time
+  floor (`MIN_PLATE_APPEARANCES`/`MIN_OUTS`,
+  `scripts/lib/prospectPercentile.mjs`) yet this season, not that he's off
+  the board. Surfaced via `ProspectTrendPill` on `/prospects` only — a static
+  Ledger cell, not a tap-to-reveal note like `RadarPill`, since Ledger's rows
+  are fixed-shape with no open/close state to lift. `movement` is the same
+  self-join-against-bbsbh's-own-history pattern as `feverRadar.js`, just a
+  wider window (stat percentiles move slower than a daily scouting rank).
 
 - `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`
