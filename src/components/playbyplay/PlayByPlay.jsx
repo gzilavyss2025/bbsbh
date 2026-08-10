@@ -340,11 +340,11 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   )
 }
 
-// Fallback icon for EventNote — only reached when a substitution's fielder/
-// pitcher/runner can't be resolved from gameData.players (a thin feed), so
-// these stay a plain note instead of the FielderNotice/PitcherNotice/
-// PinchRunNotice card. Baserunning/misc events never fall back here — they
-// always resolve to EventCard (see EVENT_CODES below).
+// Icons for EventNote. For a substitution this is a FALLBACK, reached only
+// when the fielder/pitcher/runner can't be resolved from gameData.players (a
+// thin feed) and the entry stays a plain note instead of the FielderNotice/
+// PitcherNotice/PinchRunNotice card. Baserunning/misc events never fall back
+// here — they always resolve to EventCard (see EVENT_CODES below).
 const EVENT_ICONS = {
   mound_visit: '⏱',
   pitching_substitution: '🔄',
@@ -353,6 +353,11 @@ const EVENT_ICONS = {
   ejection: '🚫',
   pinch_running: '🏃',
   pinch_hitting: '🏏',
+  // A delay advisory (injury, on-field, weather) — why a half stopped. Unlike
+  // the rows above, EventNote is this one's INTENDED home rather than a
+  // fallback: there is no person to card, and nothing to add to the sentence
+  // the feed already wrote.
+  game_advisory: '⏸',
 }
 
 // The real scorer's shorthand for a baserunning/misc event with no plate

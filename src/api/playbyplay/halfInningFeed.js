@@ -11,13 +11,21 @@
 
 import { personNameParts } from '../select.js'
 import { defenseEntering } from '../defense.js'
-import { BASE_NUM, resolveBatter, trimLeadingName, buildNameIndex, linkifyNames } from './shared.js'
+import {
+  BASE_NUM,
+  resolveBatter,
+  creditedBatterId,
+  trimLeadingName,
+  buildNameIndex,
+  linkifyNames,
+} from './shared.js'
 import {
   NON_PA_EVENT_TYPES,
   GAME_ADVISORY_EVENT_TYPE,
   BASERUNNING_NOTE_EVENT_TYPES,
   NO_SLOT_CREDIT_EVENT_TYPES,
   STOPPAGE_EVENTS,
+  isDelayAdvisory,
 } from './eventTypes.js'
 import { sentenceCaseEventText, runnerLastName } from './notificationCards.js'
 import { pitchCardInfo, matchupPitcher } from './pitchInfo.js'
@@ -125,6 +133,28 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   // second, duplicate card for it.
   let anyPitchInHalf = false
   for (const play of plays) {
+    const batterId = play.matchup?.batter?.id
+    // `result.type === 'atBat'` is required, not just a truthy eventType — mid-
+    // inning stoppages (pitching changes, defensive subs) can transiently surface
+    // as their OWN top-level play before the feed folds them into the next real
+    // PA's playEvents (see the header comment above); such a play carries the
+    // PREVIOUS batter's stale matchup.batter with a substitution's prose as its
+    // description, which would otherwise be mistaken for that batter's own card.
+    // The pregame/mid-game "Game Advisory" placeholder (GAME_ADVISORY_EVENT_TYPE)
+    // is excluded the same way — it carries the NEXT batter's matchup instead of
+    // a stale one, but is just as much not a real plate appearance. Same guard
+    // `pitchers.js` uses for batters-faced counts.
+    //
+    // Resolved BEFORE the playEvents scan below, not after it, because the scan
+    // needs to know whether this play will get a card: a baserunning note that
+    // leads one is pushed in feed order during the scan (see that branch).
+    const isRealPA =
+      play.result?.type === 'atBat' &&
+      batterId != null &&
+      !NON_PA_EVENT_TYPES.has(play.result?.eventType) &&
+      play.result?.eventType !== GAME_ADVISORY_EVENT_TYPE
+    const runners = play.runners ?? []
+
     // Non-pitch playEvents split two ways: STOPPAGE_EVENTS (mound visits,
     // subs) are their own interstitial notes; baserunning events (caught
     // stealing, pickoffs, steals, wild pitches, passed balls, balks) carry the
@@ -168,6 +198,25 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // too would duplicate that header card once this half is revealed/
         // stepped into. A genuine MID-half change (anyPitchInHalf already
         // true) still gets its own card below, same as ever.
+        continue
+      }
+      if (et === GAME_ADVISORY_EVENT_TYPE) {
+        // Mostly the feed's own lifecycle bookkeeping, which says nothing a
+        // scorer writes down — but the same eventType also carries the in-game
+        // stoppages (injury, on-field, weather), which ARE the account of why a
+        // half stopped. isDelayAdvisory draws that line; see its own doc.
+        if (!isDelayAdvisory(e.details?.description)) continue
+        const text = sentenceCaseEventText(e.details.description)
+        entries.push({
+          kind: 'event',
+          eventType: GAME_ADVISORY_EVENT_TYPE,
+          midAtBat: pitchInPlay,
+          // The man the delay is about when the feed names one — an injury
+          // delay carries the injured player, which is who the note is for.
+          playerId: e.player?.id ?? null,
+          text,
+          segments: linkifyNames(text, nameIndex),
+        })
         continue
       }
       if (STOPPAGE_EVENTS.has(et)) {
@@ -315,58 +364,73 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // call-out about the runner has to name him or it reads as the
         // batter's (see api/callout-notes.js's steal families).
         const rid = e.player?.id ?? null
-        baserunningNotes.push({
+        const note = {
           eventType: et,
           runnerId: rid,
           runnerLast: runnerLastName(feed, rid),
           segments: linkifyNames(e.details.description, nameIndex),
           midAtBat: pitchInPlay,
-        })
+        }
+        baserunningNotes.push(note)
+        // For a play that WILL get an at-bat card, push this event's own
+        // narrative card HERE, in playEvents order, so it keeps its true
+        // position against the stoppage notes pushed inline above. Collecting
+        // these and flushing them after the scan (what the isRealPA branch
+        // below used to do) sorted every baserunning event after every stoppage
+        // in its play no matter when each happened — 49 plays in an 854-game
+        // sweep, reading as cause and effect reversed: a mound visit before the
+        // wild pitch that prompted it (gamePk 823102's top 3), an ejection
+        // before the balk being argued (gamePk 823514's bottom 5). This moves
+        // only WHERE the card lands; `card.baserunningNotes` below still gets
+        // the same array, which is what callout-notes.js reads.
+        //
+        // A play with no card of its own is left alone — the else branch hangs
+        // these on an interrupted card or pushes them standalone, and neither
+        // can run until the scan has finished.
+        if (isRealPA) {
+          entries.push({
+            kind: 'event',
+            eventType: et,
+            midAtBat: note.midAtBat,
+            playerId: rid,
+            segments: note.segments,
+          })
+        }
       }
     }
 
-    const batterId = play.matchup?.batter?.id
-    // `result.type === 'atBat'` is required, not just a truthy eventType — mid-
-    // inning stoppages (pitching changes, defensive subs) can transiently surface
-    // as their OWN top-level play before the feed folds them into the next real
-    // PA's playEvents (see the header comment above); such a play carries the
-    // PREVIOUS batter's stale matchup.batter with a substitution's prose as its
-    // description, which would otherwise be mistaken for that batter's own card.
-    // The pregame/mid-game "Game Advisory" placeholder (GAME_ADVISORY_EVENT_TYPE)
-    // is excluded the same way — it carries the NEXT batter's matchup instead of
-    // a stale one, but is just as much not a real plate appearance. Same guard
-    // `pitchers.js` uses for batters-faced counts.
-    const isRealPA =
-      play.result?.type === 'atBat' &&
-      batterId != null &&
-      !NON_PA_EVENT_TYPES.has(play.result?.eventType) &&
-      play.result?.eventType !== GAME_ADVISORY_EVENT_TYPE
-    const runners = play.runners ?? []
+    // Whose plate appearance this CARD is — normally `matchup.batter`, but a
+    // batter replaced mid-count can still own the result (Rule 9.15(b) — see
+    // shared.js's creditedBatterId for the shape and the games behind it).
+    // Carding it under `matchup.batter` regardless put the substitute's name,
+    // number, position and headshot over the other man's strikeout, and left
+    // trimLeadingName a name the sentence never starts with, so one card
+    // printed both ("GARCIA, EDUARDO — K — Jett Williams strikes out on a foul
+    // tip.", gamePk 816170's top 1).
+    //
+    // Only the card identity moves: `runners[]`, `progress`, `legs` and the
+    // out attribution below keep speaking `matchup.batter`'s id, which is what
+    // the feed's runner entries use on such a play. Safe because the rule
+    // fires on strikeouts only — the credited batter is out, with no trip for
+    // that bookkeeping to lose.
+    const cardBatterId = isRealPA ? creditedBatterId(feed, play, batterId) : batterId
 
     if (isRealPA) {
-      const batter = resolveBatter(feed, battingSide, batterId, positionEntering.get(batterId))
+      const batter = resolveBatter(
+        feed,
+        battingSide,
+        cardBatterId,
+        positionEntering.get(cardBatterId),
+      )
       const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(feed, play)
       const pitcher = matchupPitcher(feed, play)
 
       // A baserunning event nested in THIS play's own events (a steal, wild
       // pitch, passed ball…) happened DURING this plate appearance, before its
-      // own batted-ball result — hoist each into its own leading notification
-      // card (the same EventCard family a standalone, no-PA baserunning play
-      // already gets — see the `else` branch below), positioned right before
-      // the at-bat card it occurred inside of, instead of only ever
-      // surfacing as a sub-line once the batter's own result is already
-      // decided. `card.baserunningNotes` below is left populated too —
-      // callout-notes.js's steal-leader call-out still reads it — this only
-      // adds the narrative card, it doesn't replace that bookkeeping.
-      for (const n of baserunningNotes) {
-        entries.push({
-          kind: 'event',
-          eventType: n.eventType,
-          midAtBat: n.midAtBat,
-          playerId: n.runnerId,
-          segments: n.segments,
-        })
-      }
+      // own batted-ball result, and has already been pushed as its own leading
+      // notification card up in the playEvents scan — in feed order, so it sits
+      // correctly against any stoppage note from the same play. `card
+      // .baserunningNotes` below carries the same events for callout-notes.js.
 
       const cardIndex = entries.length
       // A batter who reaches safely and is then thrown out stretching for an
@@ -386,7 +450,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         runners.find((r) => r.details?.runner?.id === batterId)
       const card = {
         kind: 'atbat',
-        batterId,
+        batterId: cardBatterId,
         // The play's own identity + result event, for the leader/scoring-first
         // call-outs (see api/callouts.js): the batter's PA result eventType
         // (home_run, walk, strikeout…) drives which leader note can fire, and
@@ -434,13 +498,15 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       // whatever's tracked under this batter id. His prior trip is already
       // fully resolved (out or scored) by now, so bank it on his earlier
       // card before resetting for this new trip.
-      if (originIndex.has(batterId)) {
-        finalizeTrip(batterId)
-        progress.delete(batterId)
-        legs.delete(batterId)
-        earnedByBatter.delete(batterId)
+      // Keyed on the card's OWNER (cardBatterId), so this map and `card
+      // .batterId` never disagree about whose card index this is.
+      if (originIndex.has(cardBatterId)) {
+        finalizeTrip(cardBatterId)
+        progress.delete(cardBatterId)
+        legs.delete(cardBatterId)
+        earnedByBatter.delete(cardBatterId)
       }
-      originIndex.set(batterId, cardIndex)
+      originIndex.set(cardBatterId, cardIndex)
 
       if (batterRunner?.movement?.isOut) {
         card.outNumber = batterRunner.movement.outNumber
@@ -634,7 +700,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // a plate appearance credits a hitter; steals/wild pitches advance a
     // runner on their own, so those carry no slot. An out on the bases
     // doesn't advance him.
-    const batterSlot = isRealPA ? battingSlot(feed, battingSide, batterId) : null
+    // The credited batter's slot, not the finisher's — it is his plate
+    // appearance that drove a runner over. A substitute always takes the slot
+    // of the man he replaced anyway, so the two agree in practice.
+    const batterSlot = isRealPA ? battingSlot(feed, battingSide, cardBatterId) : null
     // The feed can split one runner's multi-base move into separate legs, and
     // NOT only across separate plays: when a wild pitch / steal happens mid-
     // count during the FOLLOWING batter's plate appearance, that batter's own

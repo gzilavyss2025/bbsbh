@@ -57,6 +57,30 @@ export const GAME_ADVISORY_EVENT_TYPE = 'game_advisory'
 export const BASERUNNING_NOTE_EVENT_TYPES = new Set([...NON_PA_EVENT_TYPES, 'runner_placed', 'defensive_indiff'])
 export const NO_SLOT_CREDIT_EVENT_TYPES = new Set([...NON_PA_EVENT_TYPES, 'defensive_indiff'])
 
+// A nested `game_advisory` playEvent carries two unrelated kinds of thing, and
+// skipping the whole eventType threw away the half of it a scorer wants.
+//
+// The half worth skipping is the feed's own lifecycle bookkeeping — "Status
+// Change - Pre-Game", "- Warmup" and "- In Progress" lead the first plate
+// appearance of every game and say nothing about the game itself
+// (api/select.js's selectGameStatus reports that state structurally instead).
+// The half worth keeping is the in-game stoppages, which share the eventType:
+// "Injury Delay." (444 across an 854-game sweep), "On-field Delay." (292),
+// "Coaching visit to mound.", and the weather/venue "Status Change - Delayed…"
+// lines (~60). Each is the reason a half stopped, and none of them reached the
+// feed at all — including the injury delay that explains why a pinch-hitter
+// arrives mid-count (gamePk 816170's top 1, the plate appearance Rule 9.15(b)
+// then charges back to the batter who left — see shared.js's creditedBatterId).
+//
+// The split keys on the description because the feed draws no other
+// distinction: a "Status Change" line is lifecycle unless it announces a
+// delay, and anything else under this eventType is an in-game stoppage.
+export function isDelayAdvisory(description) {
+  const text = (description ?? '').trim()
+  if (!text) return false
+  return /^status change/i.test(text) ? /delayed/i.test(text) : true
+}
+
 // Non-pitch playEvents that get their own interstitial note in the feed: mound
 // visits, pitching changes, ejections, and the fielding-side moves (a fresh
 // defender, or a player who stays in the game at a new position — 'X remains
