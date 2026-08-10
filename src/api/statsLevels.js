@@ -202,6 +202,14 @@ export function combineToPool(hittingSplits, pitchingSplits) {
       levels,
       hitting: e.hitting.length ? sumHitting(e.hitting) : null,
       pitching: e.pitching.length ? sumPitching(e.pitching) : null,
+      // The RAW per-split arrays behind the two summed lines above, each
+      // split still carrying its own `sport.id` — kept alongside the sum
+      // rather than only exposing the collapsed total, so a caller that
+      // needs a level-scoped cut (the /prospects "vs. Level" MLB-line /
+      // MiLB-line split, prospects.js's resolveCurrentLevels) can re-sum a
+      // subset with sumHitting/sumPitching instead of re-fetching.
+      hittingSplits: e.hitting,
+      pitchingSplits: e.pitching,
     }
   })
 }

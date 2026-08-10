@@ -1,0 +1,133 @@
+/* The Top 100 Prospects page's filter row — split out of 31-wild-card.css
+   (already at its check-file-size budget) rather than grown there, same
+   "one new file, one new number" rule 31a/31b's own headers document;
+   cascades right after them since all three extend the same page.
+
+   Phone-first: TeamFilterStrip and the VsLevelSlider stack full-width, same
+   as every other control on this page. From the 740px wide-layout breakpoint
+   (25-wide-layout.css) up, they sit in one row — the team strip keeps most
+   of the width (it's the wider control: a whole scrollable club list vs. a
+   6-rung scale) and the slider takes about a quarter, with a gap between
+   them rather than the two touching. */
+.prospects__filterrow {
+  display: flex;
+  flex-direction: column;
+}
+.prospects__filterrow .teamfilterstrip {
+  margin: var(--space-2) 0;
+}
+@media (min-width: 740px) {
+  .prospects__filterrow {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .prospects__filterrow .teamfilterstrip {
+    flex: 3 1 0;
+    min-width: 0;
+    margin: var(--space-2) 0;
+  }
+  .prospects__filterrow .vslevelslider {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* ---- vs. Level slider ------------------------------------------------
+   A real <input type="range">, not a row of buttons standing in for one —
+   native drag/touch/keyboard handling for free — snapped to 6 rungs
+   (VsLevelSlider.jsx's RUNGS: "All" then tiers 1-5, the same rating
+   ProspectTrendPill's dot row draws). The track is a FIXED diverging color
+   scale (red -> kraft brown -> green), not a "filled from zero" bar: this
+   scale is qualitative (under/in-line/over performing), not a quantity
+   accumulating from one end, so painting it as a static gradient the thumb
+   travels across is the correct encoding, not a JS-recomputed fill percent.
+   Color stops land exactly on tiers 1/3/5's thumb positions (20%/60%/100%,
+   step=1 over a 0-5 range) so the gradient and the snap points agree. The
+   thumb itself repaints to the same tier color via --vslevelslider-thumb,
+   set inline from VsLevelSlider.jsx's own bandFor. */
+.vslevelslider {
+  padding: var(--space-2) 2px 0;
+}
+.vslevelslider__input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.vslevelslider__input::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--border-rule) 0%,
+    var(--border-rule) 20%,
+    var(--accent-negative) 20%,
+    var(--seal-cover) 60%,
+    var(--accent-positive) 100%
+  );
+}
+.vslevelslider__input::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(
+    to right,
+    var(--border-rule) 0%,
+    var(--border-rule) 20%,
+    var(--accent-negative) 20%,
+    var(--seal-cover) 60%,
+    var(--accent-positive) 100%
+  );
+}
+.vslevelslider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--vslevelslider-thumb, var(--accent-primary));
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.vslevelslider__input::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--vslevelslider-thumb, var(--accent-primary));
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.vslevelslider__input:focus-visible {
+  outline: none;
+}
+.vslevelslider__input:focus-visible::-webkit-slider-thumb {
+  box-shadow: var(--ring);
+}
+.vslevelslider__input:focus-visible::-moz-range-thumb {
+  box-shadow: var(--ring);
+}
+.vslevelslider__ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.vslevelslider__tick.is-active {
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.vslevelslider__tick--low {
+  color: var(--accent-negative);
+}
+.vslevelslider__tick--mid {
+  color: var(--seal-cover);
+}
+.vslevelslider__tick--high {
+  color: var(--accent-positive);
+}

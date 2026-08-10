@@ -188,7 +188,13 @@ const BUDGETS = {
   // out of `31-wild-card.css` (already at its check-file-size budget) rather
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
-  'src/styles': 70,
+  // 70 -> 71 for `31b-prospect-lines.css`: the Top 100 page's "Line" cell,
+  // split out of `31-wild-card.css` for the same reason 31a was — that file
+  // was back at its own check-file-size budget again.
+  // 71 -> 72 for `31c-prospect-filters.css`: the Top 100 page's filter row
+  // (TeamFilterStrip + the level slider) and the slider control itself —
+  // same split-for-budget reason as 31a/31b, its own lettered sibling.
+  'src/styles': 72,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

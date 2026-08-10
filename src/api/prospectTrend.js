@@ -39,6 +39,20 @@ export function prospectTrendById(snapshot, playerId) {
 const TOP_FROM = 60
 const BOTTOM_TO = 40
 
+// Buckets a percentile into the 1-5 rating ProspectTrendPill draws as a dot
+// row — built by splitting standingLabel's own Bottom/Middle/Top bands in
+// half rather than inventing a fresh set of edges, so the two stay in step:
+// tier 3 is exactly the Middle band (41-59), and 1/2 and 4/5 split the Bottom
+// and Top bands at their own midpoints (20 and 80). 1-2 mark him below his
+// level's pack, 4-5 above it — ProspectTrendPill colors on that split, not on
+// the tier number itself. Null mirrors standingLabel's own empty state.
+export function levelTier(percentile) {
+  if (!Number.isFinite(percentile)) return null
+  if (percentile <= BOTTOM_TO) return percentile <= 20 ? 1 : 2
+  if (percentile >= TOP_FROM) return percentile >= 80 ? 5 : 4
+  return 3
+}
+
 // The stat each group is ranked on. It is printed in EVERY cell, not defined
 // once in a caption under the table: the column has to say what it measures on
 // its own, and this column measures two different things depending on the row.

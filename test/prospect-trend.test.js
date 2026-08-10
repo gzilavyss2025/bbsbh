@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { prospectTrendById, standingLabel } from '../src/api/prospectTrend.js'
+import { prospectTrendById, standingLabel, levelTier } from '../src/api/prospectTrend.js'
 
 const SNAPSHOT = {
   generatedAt: '2026-08-10',
@@ -72,4 +72,36 @@ test('a non-numeric percentile has no label — the caller renders "Too early"',
   assert.equal(standingLabel(null, 'hitting'), null)
   assert.equal(standingLabel(undefined, 'hitting'), null)
   assert.equal(standingLabel(NaN, 'hitting'), null)
+})
+
+// ---------------------------------------------------------------------------
+// levelTier — ProspectTrendPill's 5-dot rating, built by splitting
+// standingLabel's own Bottom/Middle/Top bands in half rather than a fresh set
+// of edges, so the dots and the spoken label never disagree about a boundary.
+// ---------------------------------------------------------------------------
+
+test('the Bottom band (<=40) splits into tiers 1 and 2 at its own midpoint', () => {
+  assert.equal(levelTier(0), 1)
+  assert.equal(levelTier(20), 1)
+  assert.equal(levelTier(21), 2)
+  assert.equal(levelTier(40), 2)
+})
+
+test('the Middle band (41-59) is entirely tier 3', () => {
+  assert.equal(levelTier(41), 3)
+  assert.equal(levelTier(50), 3)
+  assert.equal(levelTier(59), 3)
+})
+
+test('the Top band (>=60) splits into tiers 4 and 5 at its own midpoint', () => {
+  assert.equal(levelTier(60), 4)
+  assert.equal(levelTier(79), 4)
+  assert.equal(levelTier(80), 5)
+  assert.equal(levelTier(100), 5)
+})
+
+test('a non-numeric percentile has no tier, same empty state as standingLabel', () => {
+  assert.equal(levelTier(null), null)
+  assert.equal(levelTier(undefined), null)
+  assert.equal(levelTier(NaN), null)
 })
