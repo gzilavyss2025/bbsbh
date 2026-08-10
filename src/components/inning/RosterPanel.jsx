@@ -1,7 +1,9 @@
 import { memo, useState } from 'react'
 import { prospectBadge } from '../../api/prospects.js'
 import { showRookiePill } from '../../api/rookies.js'
+import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
+import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 
@@ -16,20 +18,33 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 // badge data) change only when the feed or the reveal mark does, but it hangs
 // off InningViewer, which re-renders on every scorebug/step/live report during
 // a live game. Two of these render at once, each a full player list.
-export const RosterPanel = memo(function RosterPanel({ title, roster, revealedThrough, prospectsData, rookiesData, isMlb }) {
+//
+// The collapsed header wears the club's own bar — the SAME curated
+// bar/accent/text triad TeamInfo.jsx, BoxScore.jsx's team cards, the fielding
+// diamond and the innings lineup masthead already wear (headerTheme.js,
+// ADR-0030), with the knockout mark bled against its right edge. It was the
+// last reference card on this surface still showing a club as plain paper-and-
+// ink text, which read as two unlabeled drawers rather than two teams. Untuned
+// (club, treatment) pairs fall back to the app's default navy bar, same as
+// every other caller — never a synthesised triad (see headerTheme.js's header).
+export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = null, side, treatment, revealedThrough, prospectsData, rookiesData, isMlb }) {
   const [open, setOpen] = useState(false)
   const empty =
     roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
   const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
+  const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
-    <section className="roster">
+    <section className={`roster ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <button
         className="roster__toggle"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span>{title}</span>
+        <span className="roster__club">{title}</span>
+        {teamId != null && (
+          <TeamLogo teamId={teamId} name={title} size={20} variant="mono" crop="bar" className="metricbar__logo" />
+        )}
         <span className="roster__chevron" aria-hidden="true">
           {open ? '▾' : '▸'}
         </span>

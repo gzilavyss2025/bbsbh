@@ -119,6 +119,61 @@
   height: 30px;
 }
 
+/* A circular window over a strip of precomputed rotation frames — the same
+   sprite-sheet construction .skel__ball uses (22-box-score-tables.css), for the
+   same reason BoxScoreSkeleton.jsx's header gives: a ball turning on a vertical
+   axis wraps its seam AROUND a sphere, and a flat CSS `rotate()` would spin it
+   like a coin instead. The only difference is that this one is parked: no
+   animation until the pointer is on it. */
+.ballglyph {
+  position: relative;
+  display: inline-block;
+}
+
+.ballglyph__body {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Circular, not square, so a frame's seam art — only guaranteed correct inside
+   the ball's own silhouette — can never paint past the edge. */
+.ballglyph__window {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+}
+
+/* 1200% = BALL_FRAME_COUNT (12) frame-widths laid side by side. The keyframe
+   travels the strip's whole width, so `steps(12)` lands on each frame in turn
+   and the 12th step is frame 0 again — a seamless loop with no double-step at
+   the boundary. Both numbers are hardcoded because `steps()` needs a literal;
+   they must move together with BALL_FRAME_COUNT if it ever changes. */
+.ballglyph__frames {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1200%;
+  height: 100%;
+}
+
+.ballglyph:hover .ballglyph__frames {
+  animation: ballglyph-spin 1.1s steps(12) infinite;
+}
+
+@keyframes ballglyph-spin {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ballglyph:hover .ballglyph__frames {
+    animation: none;
+  }
+}
+
 .ballglyph circle {
   stroke: var(--rule);
   stroke-width: 3;

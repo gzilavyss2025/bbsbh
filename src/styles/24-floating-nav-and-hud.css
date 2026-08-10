@@ -452,6 +452,21 @@
     width: 264px;
     flex: 0 0 auto;
   }
+
+  /* The two lines above the score strip step up a role each. The dock's own
+     13/12px was sized for a card floating in a page CORNER, read in passing;
+     here the same card is the console's masthead and its batter line is one of
+     the two names the reader is actually working from (the other being the
+     hero card's). Only the type changes — the 264px card and every icon-scale
+     rule below it stay exactly as the dock sets them. */
+  .gamehud--console .gamehud__who,
+  .gamehud--console .gamehud__val {
+    font-size: var(--fs-body);
+  }
+
+  .gamehud--console .gamehud__row--pitcher .gamehud__who {
+    font-size: var(--fs-small);
+  }
 }
 
 /* Below the wide breakpoint the band has no sibling card to share its row

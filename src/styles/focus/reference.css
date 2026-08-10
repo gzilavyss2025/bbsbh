@@ -234,6 +234,25 @@
   min-width: 0;
 }
 
+/* The Pitchers table, refitted for the rail. Widening the column alone did not
+   fix it: the table is ten columns (a name plus nine stats) sized for the
+   unfocused page's ~380px card, and dropped into the rail BOTH ends were
+   clipping — "DOBBINS, HUNTER" needed 99px of an 81px name cell, and a plain
+   "0.2" needed 23px of a 21px stat cell. So the rail buys the name column a
+   bigger share of the table and pays for it out of the numerals, which are the
+   two- and three-character values that can afford a caption-size step and no
+   side padding. Scoped to .focusrail: the same table on the stacked page and in
+   the box score has the room already and is left exactly as it was. */
+.focusrail .pitchers__pitcher {
+  width: 44%;
+}
+
+.focusrail .pitchers__grid th,
+.focusrail .pitchers__grid td {
+  padding: 6px 0;
+  font-size: var(--fs-caption);
+}
+
 /* A section with genuinely nothing in it yet (ReferencePanel's `armsEmpty`) — a
    caption on paper, so the column reads as "nothing here yet" rather than as a
    panel that failed to load. */

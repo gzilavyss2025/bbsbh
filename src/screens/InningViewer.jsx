@@ -715,6 +715,8 @@ export function InningViewer({
     rookiesData,
     isMlb,
     revealedThrough: renderRevealedThrough,
+    workload,
+    workloadGameDate,
   }
 
   return (
@@ -880,6 +882,8 @@ export function InningViewer({
             <ReferenceBand {...refProps} />
             <RosterPanels
               rosters={rosters}
+              meta={meta}
+              treatment={winProbTreatment}
               revealedThrough={renderRevealedThrough}
               prospectsData={prospectsData}
               rookiesData={rookiesData}

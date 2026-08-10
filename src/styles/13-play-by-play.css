@@ -518,15 +518,20 @@
   box-shadow: var(--shadow-card);
 }
 
+/* A club bar, not a plain paper row — same navy/seal/white recipe
+   .lineupteam__name and .halfdefense__title already wear, and the same
+   `.roster.is-themed` recolour on top of it (09-team-info.css). This is the
+   club's name; it now looks like every other place this app prints one. */
 .roster__toggle {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-2);
   padding: 12px 14px;
-  background: var(--surface-card);
+  background: var(--navy);
   border: none;
-  color: var(--text-heading);
+  border-bottom: 3px solid var(--seal);
+  color: var(--text-on-ink);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -535,8 +540,24 @@
   cursor: pointer;
 }
 
+/* Takes the slack so mark and chevron stay pinned right — three children now,
+   hence gap+flex-fill rather than the old two-child `space-between`. */
+.roster__club {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Same bleed formula as .lineupteam__name's (12-sealbox.css), off this bar's
+   own type + 12px padding, so the mark crops to the bar's edges. */
+.roster__toggle > .teamlogo-crop-bar {
+  height: calc(var(--fs-ui) * var(--lh-solid) + 24px);
+  margin-block: -12px;
+}
+
 .roster__chevron {
-  color: var(--text-caption);
+  color: var(--text-on-ink);
+  opacity: 0.8;
 }
 
 .roster__list {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { safeToShowEntering } from '../../../api/enteringHalf.js'
+import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
@@ -134,6 +135,8 @@ function Section({
   isMlb,
   revealedThrough,
   rosters,
+  workload,
+  workloadGameDate,
 }) {
   if (tab === 'lineups' && showEntering) {
     return (
@@ -176,6 +179,9 @@ function Section({
             key={side}
             title={rosters[side].name}
             roster={rosters[side]}
+            teamId={meta[side].id}
+            side={side}
+            treatment={treatment?.[side]}
             revealedThrough={revealedThrough}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
@@ -189,9 +195,20 @@ function Section({
   // until a half has been scored, and Margin Notes are built from those same
   // lines. Jump straight to a half ahead of the reveal mark and this section
   // legitimately has nothing — which as bare emptiness read as a broken panel
-  // holding a reserved 300px column open for no reason. Say so instead.
-  const armsEmpty =
-    !marginNotes?.length && !pitcherTeams.some((t) => t.rows?.length)
+  // holding a reserved column open for no reason. Say so instead.
+  //
+  // The pre-half strip's own notes land here too — focus mode folds the strip
+  // out of the reading pane (styles/focus/stage.css) and this is where they go.
+  // SPOILER FOOTING IS THE STRIP'S OWN, UNCHANGED. `buildPreHalfCallouts` gates
+  // every score-reading family on `revealedThrough` INSIDE itself (see that
+  // file's header — the gate lives there precisely so no caller can skip it),
+  // and `showEntering` is the same reached-half caller gate HalfInning applies
+  // before rendering the strip inline (ADR-0010). Both are in force below.
+  const preHalf = showEntering
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate })
+    : []
+  const notes = mergeNotes(preHalf, marginNotes)
+  const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)
   // Deliberately a short label, not a sentence: the app uppercases every string
   // by default (01-base.css's `#root *` invariant, guarded by check-caps.mjs),
   // and a full sentence shouted in caps reads far worse than four words do.
@@ -200,10 +217,30 @@ function Section({
   }
   return (
     <>
-      <MarginNotes notes={marginNotes} feed={feed} bundle={callouts} />
+      <MarginNotes notes={notes} feed={feed} bundle={callouts} />
       <PitchersSection teams={pitcherTeams} />
     </>
   )
+}
+
+// One ranked list out of two already-ranked ones. Both builders emit the same
+// `{ text, personId, side, kind, score, dedupeKey }` note shape and score on the
+// same 0–100 worthiness rubric (docs/callouts.md), so re-sorting on `score` is a
+// merge, not a re-ranking — a strip note and a digest note compete on the terms
+// they were already scored under. Deduped on `dedupeKey` for the case both
+// builders reach the same fact about the same pitcher; the pre-half copy wins
+// ties by arriving first, which is the entering-tense wording (ADR-0014) and
+// the right one for a half still being scored.
+function mergeNotes(preHalf, marginNotes) {
+  const seen = new Set()
+  const out = []
+  for (const n of [...preHalf, ...(marginNotes ?? [])]) {
+    const key = n.dedupeKey ?? n.text
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(n)
+  }
+  return out.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 }
 
 function RefSheet({ onClose, children }) {

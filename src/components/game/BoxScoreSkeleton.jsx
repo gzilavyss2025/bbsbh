@@ -286,8 +286,12 @@ const BALL_STRANDS = [
 // wherever it dips behind the ball, so an arc visibly shrinks toward the
 // limb and vanishes as it turns away, instead of being drawn straight
 // through the far side.
-function buildFrame(theta) {
-  const wobble = wobbleAngleFor(theta)
+// `wobble` is overridable so the at-rest glyph (BallGlyph, below) can ask for
+// the same geometry with the tumble switched OFF. The tumble is right for a
+// ball ROLLING and wrong for one sitting still: canted 22° off its own axis,
+// all four strands of the seam loop face the viewer at once, and a static icon
+// showing every seam it has reads as a ball of yarn rather than a baseball.
+function buildFrame(theta, wobble = wobbleAngleFor(theta)) {
   // Spin, THEN tumble: composing the two as one function keeps every point
   // (seam samples and stitch endpoints alike) transformed identically, so
   // the loop's shared corner coordinates stay shared and it doesn't
@@ -333,28 +337,63 @@ const BALL_FRAMES = Array.from({ length: BALL_FRAME_COUNT }, (_, i) =>
   buildFrame((i / BALL_FRAME_COUNT) * Math.PI * 2),
 )
 
-// One frozen frame of the skeleton's own rolling ball (buildFrame(0), same
-// geometry, no spin/steps sprite) — a small "vs" glyph for AtBatHero.jsx.
-// Its own body+seam classes, not skel__ball*: this is a normal at-rest icon
-// wherever it renders, not a loading placeholder, and the two contexts
-// shouldn't share a token if one of them ever needs to change independently.
+// The same rotation snapshots with the tumble off (see buildFrame's `wobble`
+// argument) — an upright ball turning on a clean vertical axis. Frame 0 is the
+// canonical baseball-icon pose: the two bowed arcs facing you, the connectors
+// edge-on at the limb as the short stubs they really are. That is what the
+// glyph shows at rest, and what it spins through on hover.
+const GLYPH_FRAMES = Array.from({ length: BALL_FRAME_COUNT }, (_, i) =>
+  buildFrame((i / BALL_FRAME_COUNT) * Math.PI * 2, 0),
+)
+
+// A small at-rest baseball — the "vs" glyph between batter and pitcher on
+// AtBatHero.jsx. Its own body/seam classes, not skel__ball*: this is a normal
+// icon wherever it renders, not a loading placeholder, and the two contexts
+// shouldn't share a token if one ever needs to change independently.
+//
+// Structurally it IS the skeleton's sprite sheet, though — a circular window
+// over a strip of precomputed rotation frames — because "spin in place" is the
+// same motion for the same reason (see this file's header: a ball turning on a
+// vertical axis wraps its seam around a sphere; a CSS `rotate()` would spin a
+// flat decal like a coin, which is a different object). The difference is only
+// WHEN it runs: the strip is parked on frame 0 and the animation is attached on
+// hover (styles/focus/atbat.css), so the resting state is one still icon.
+//
+// One loop of BALL_FRAME_COUNT frames, not the skeleton's three — nothing here
+// alternates, so the strip's last frame runs straight back into its first.
 export function BallGlyph({ className = '' }) {
+  // A prefix, not raw ids — several of these can be on screen at once (the
+  // at-bat trail is one card per step), and hardcoded <defs> ids would make
+  // every later instance's <use> point at the first one's frames.
   const idPrefix = useId()
-  const frame = BALL_FRAMES[0]
   return (
-    <svg className={`ballglyph ${className}`} viewBox="0 0 100 100" role="presentation" aria-hidden="true">
-      <defs>
-        <radialGradient id={`${idPrefix}shade`} cx="34%" cy="28%" r="80%">
-          <stop className="ballglyph__shadelight" offset="0%" />
-          <stop className="ballglyph__shadedark" offset="100%" />
-        </radialGradient>
-      </defs>
-      <circle cx="50" cy="50" r={BALL_R} fill={`url(#${idPrefix}shade)`} />
-      <path className="ballglyph__seam" d={frame.seamD} />
-      {frame.stitchLines.map((s, i) => (
-        <line key={i} className="ballglyph__stitch" x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />
-      ))}
-    </svg>
+    <span className={`ballglyph ${className}`} aria-hidden="true">
+      <svg className="ballglyph__body" viewBox="0 0 100 100" role="presentation">
+        <defs>
+          <radialGradient id={`${idPrefix}shade`} cx="34%" cy="28%" r="80%">
+            <stop className="ballglyph__shadelight" offset="0%" />
+            <stop className="ballglyph__shadedark" offset="100%" />
+          </radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r={BALL_R} fill={`url(#${idPrefix}shade)`} />
+      </svg>
+      <span className="ballglyph__window">
+        <svg
+          className="ballglyph__frames"
+          viewBox={`0 0 ${BALL_FRAME_COUNT * 100} 100`}
+          role="presentation"
+        >
+          {GLYPH_FRAMES.map((frame, i) => (
+            <g key={i} transform={`translate(${i * 100} 0)`}>
+              <path className="ballglyph__seam" d={frame.seamD} />
+              {frame.stitchLines.map((s, j) => (
+                <line key={j} className="ballglyph__stitch" x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />
+              ))}
+            </g>
+          ))}
+        </svg>
+      </span>
+    </span>
   )
 }
 

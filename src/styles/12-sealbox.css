@@ -1508,10 +1508,13 @@
    club recolors it via .lineupteam.is-themed (09-team-info.css); untheme
    falls back to this same navy/seal/white default every other masthead bar
    already wears, not a lighter one-off look. */
+/* EDGE TO EDGE: the margin cancels .lineupcard__teams' 10px side padding that
+   `width: 100%` cannot reach past (the bar read as a label ON the card, not its
+   masthead); padding-inline holds the text at the same x, so only the fill moves. */
 .lineupteam__name {
-  width: 100%;
-  margin: 0 0 8px;
-  padding: 8px 10px;
+  width: auto;
+  margin: 0 -10px 8px;
+  padding: 8px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1526,8 +1529,7 @@
   letter-spacing: var(--ls-caps);
 }
 
-/* Same bleed formula as .halfdefense__title's own copy above — see its
-   comment. */
+/* Same bleed formula as .halfdefense__title's copy above — see its comment. */
 .lineupteam__name > .teamlogo-crop-bar {
   height: calc(var(--fs-compact) * var(--lh-solid) + 16px);
   margin-block: -8px;

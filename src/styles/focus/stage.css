@@ -24,17 +24,26 @@
    nothing after 24 styles .gamehud at all. Its grid PLACEMENT stayed here. */
 
 /* ------------------------------------------------------------- what folds */
-/* The stat/WPA row and both inline copies of the entering lineups/defense.
-   All three are end-of-half material or duplicated by the reference panel: the
-   row2 stat card is the R/H/E/LOB summary you write when the half CLOSES, at
-   which point the half commits and focus mode ends anyway.
+/* The stat/WPA row, both inline copies of the entering lineups/defense, and the
+   pre-half callout strip. All are end-of-half material or duplicated by the
+   reference panel: the row2 stat card is the R/H/E/LOB summary you write when
+   the half CLOSES, at which point the half commits and focus mode ends anyway.
+
+   The callout strip folds for a different reason — it MOVED rather than went
+   away. "The Reds are 9-13 in his starts this season" is a margin note in the
+   literal sense: something you glance at beside the page, not something that
+   belongs between the reader and the at-bat they are penciling. It renders in
+   the Arms tab beside the rest of the pitcher digest instead (ReferencePanel's
+   Section, merged into MarginNotes' own ranked list). The unfocused page keeps
+   it staged above the seal exactly as before.
 
    Unconditional now — it used to unhide with the old rail's flap
    (.innings--railopen), which no longer exists. Visibility only: no seal, no
    caller-gated pre-pitch selector (ADR-0010), no fetch is affected. */
 .innings--focus .innings__row2,
 .innings--focus .half__entering,
-.innings--focus .halfentering {
+.innings--focus .halfentering,
+.innings--focus .prehalf {
   display: none;
 }
 
@@ -67,12 +76,20 @@
   gap: var(--space-3);
 }
 
-/* Wraps the scorebug + DueUpConsole (InningViewer.jsx) as one sticky unit —
-   the anchoring that used to live on `.gamehud--console` itself moved here
-   once the band stopped stretching to fill the row on its own
+/* Wraps the scorebug + DueUpConsole (InningViewer.jsx) as one unit — the
+   anchoring that used to live on `.gamehud--console` itself moved here once
+   the band stopped stretching to fill the row on its own
    (24-floating-nav-and-hud.css). Below the wide breakpoint DueUpConsole
    renders null, so this is a one-child row and the scorebug alone fills it,
-   same as before this wrapper existed. */
+   same as before this wrapper existed.
+
+   STICKY ON A PHONE ONLY. There the whole loop is one scrolling column and the
+   band is the only thing holding bases/outs/score in view while the reader
+   pages down to the trail. On desktop the reference column is already sticky
+   beside the stage and the stage itself barely scrolls, so pinning the band
+   bought nothing and cost the top ~120px of every scroll — it just followed
+   the reader down the page. It scrolls away with the rest of the console now;
+   see the wide block below for the offsets that come off with it. */
 .consolebar {
   position: sticky;
   top: 0;
@@ -147,12 +164,19 @@
 
   .dueupconsole__order {
     font-family: var(--font-mono);
-    font-size: var(--fs-caption);
+    font-size: var(--fs-compact);
     color: var(--text-muted);
   }
 
   /* First name over last, last name the bigger of the two — the same weight
-     hierarchy a scorecard gives a surname over a given name. */
+     hierarchy a scorecard gives a surname over a given name.
+
+     Every role here is one step up from where it started. The first pass sized
+     these against the dock's caption scale, which reads as a footnote: these
+     are the next three names the scorer is about to write down, on a card
+     ~130px wide once the portrait takes its share — there is room, and 11px
+     was not using it. The surname keeps its own ellipsis, so a long one still
+     clips rather than reflowing the row. */
   .dueupconsole__name {
     display: block;
     min-width: 0;
@@ -161,7 +185,7 @@
 
   .dueupconsole__first {
     display: block;
-    font-size: var(--fs-caption);
+    font-size: var(--fs-compact);
     font-weight: var(--w-regular);
     color: var(--text-caption);
     white-space: nowrap;
@@ -171,7 +195,7 @@
 
   .dueupconsole__last {
     display: block;
-    font-size: var(--fs-small);
+    font-size: var(--fs-body);
     font-weight: var(--w-bold);
     color: var(--text-heading);
     white-space: nowrap;
@@ -182,7 +206,7 @@
   .dueupconsole__line {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    font-size: var(--fs-caption);
+    font-size: var(--fs-small);
     color: var(--text-muted);
   }
 }
@@ -192,8 +216,14 @@
      card beside it (ADR-0010). 300px rather than the first pass's 268, where
      lineup rows truncated and the defense SVG fought the track for min-content
      width; 300 fits a lineup row whole and still leaves a 478px stage at
-     iPad-portrait width. */
-  --refrail-w: 300px;
+     iPad-portrait width.
+
+     300 -> 328 because the Arms tab is the one section 300 does not fit: the
+     Pitchers table carries a name column plus nine stat columns (R/LIP P BF H
+     R ER BB K), and the name was the column that gave — "SINGER, B…" on a
+     surface whose whole job is telling you which arm the line belongs to. The
+     28px comes out of the column gap beside it, not out of the at-bat card. */
+  --refrail-w: 328px;
 }
 
 @media (min-width: 740px) {
@@ -208,11 +238,18 @@
     align-items: start;
   }
 
-  /* The bar spans both columns and stays put while the stage scrolls under
-     it. */
+  /* The band spans both columns and scrolls with the page — see .consolebar
+     above for why sticky is a phone-only behaviour. */
   .innings--focus .consolebar {
     grid-column: 1 / -1;
     grid-row: 1;
+    position: static;
+  }
+
+  /* No sticky band overhead to clear, so the card lands flush under the
+     viewport edge instead of 118px down it. */
+  .innings--focus .pbp {
+    scroll-margin-top: var(--space-3);
   }
 
   /* Row AND column stated explicitly for both items. An item auto-placed after
@@ -236,10 +273,10 @@
        into column 1, intercepting clicks meant for the at-bat card. */
     min-width: 0;
     position: sticky;
-    /* Parked below the band, which is sticky at 0 and would otherwise cover the
-       column's own tab strip. */
-    top: calc(var(--console-hud-h) + var(--space-4));
-    max-height: calc(100vh - var(--console-hud-h) - var(--space-10));
+    /* Parked at the viewport edge. It used to sit --console-hud-h down, which
+       was the height of a band that no longer pins itself there. */
+    top: var(--space-4);
+    max-height: calc(100vh - var(--space-10));
     display: flex;
     flex-direction: column;
     min-height: 0;

@@ -114,6 +114,21 @@
   color: var(--bar-text, var(--text-on-ink));
 }
 
+/* The roster/bench drawer's own club bar (RosterPanel.jsx) — same triad, same
+   fallback, one per team like the lineup masthead above. It carries a club
+   mark too, so the dark re-ink rule applies for free via `.metricbar__logo`.
+   The chevron is spelled out separately because it inherits nothing: it is a
+   sibling span with its own colour, not text inside the button's own flow. */
+.roster.is-themed .roster__toggle {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+  color: var(--bar-text, var(--text-on-ink));
+}
+
+.roster.is-themed .roster__chevron {
+  color: var(--bar-text, var(--text-on-ink));
+}
+
 /* The player page's section headers — same club bar idiom as
    .teaminfo.is-themed above, but opt-in via `.section__title--bar` rather
    than blanket-applied to every `.section__title` on the page: the eight

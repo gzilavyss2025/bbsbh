@@ -73,25 +73,23 @@ export function ReferenceBand({
   )
 }
 
-export function RosterPanels({ rosters, revealedThrough, prospectsData, rookiesData, isMlb }) {
+export function RosterPanels({ rosters, meta, treatment, revealedThrough, prospectsData, rookiesData, isMlb }) {
   return (
     <div className="innings__rosters">
-      <RosterPanel
-        title={rosters.away.name}
-        roster={rosters.away}
-        revealedThrough={revealedThrough}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
-        isMlb={isMlb}
-      />
-      <RosterPanel
-        title={rosters.home.name}
-        roster={rosters.home}
-        revealedThrough={revealedThrough}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
-        isMlb={isMlb}
-      />
+      {['away', 'home'].map((side) => (
+        <RosterPanel
+          key={side}
+          title={rosters[side].name}
+          roster={rosters[side]}
+          teamId={meta?.[side]?.id ?? null}
+          side={side}
+          treatment={treatment?.[side]}
+          revealedThrough={revealedThrough}
+          prospectsData={prospectsData}
+          rookiesData={rookiesData}
+          isMlb={isMlb}
+        />
+      ))}
     </div>
   )
 }

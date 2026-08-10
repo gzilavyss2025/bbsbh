@@ -162,7 +162,16 @@ export function HalfInning({
     // half isn't over, the "current" batter is whoever's next in the order,
     // not the one who just finished (e.g. showing the batter who just
     // doubled forever instead of advancing to the next slot).
-    if (live?.batter && live.batterDone && outs < 3) {
+    //
+    // NOT IN FOCUS MODE, where that same advance is a contradiction. The whole
+    // screen is built around ONE at-bat card, and the band sits directly above
+    // it: the hero named ABRAMS while the band beside it said "2. ORTIZ", who
+    // has not batted. The scorebug's job there is to caption the card under it,
+    // and who's up next is already answered — in more detail, with three names
+    // — by DueUpConsole in the same row. The pitch count is untouched either
+    // way: it stays the tally AFTER the at-bat on screen finished, which is
+    // what a scorer writes down.
+    if (!focusOne && live?.batter && live.batterDone && outs < 3) {
       const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
       const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
       const upcoming =
