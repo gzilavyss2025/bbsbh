@@ -545,18 +545,26 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
           strip; centerTeamId lands on the favorite team on arrival (only
           meaningful when it's actually in this level's club set — an MLB
           favorite scrolled to a minor-league level's strip just no-ops). */}
-      {levelTeams.data?.length > 0 && (
-        <TeamFilterStrip
-          teams={levelTeams.data}
-          selectedTeamId={null}
-          onSelect={(id) => navigate(teamPath(id))}
-          showMlbPin={false}
-          showArrows
-          centerTeamId={favoriteTeamId}
-          ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
-          className="teamfilterstrip--nav"
-        />
-      )}
+      {/* The wrapper is ALWAYS rendered, and holds the strip's height open
+          while fetchTeams(sportId) is still in flight — see .slatestrip in
+          03-slate-header.css. The strip used to be a bare conditional, so it
+          appeared out of nothing on arrival and shoved the date banner, the
+          games and the footer down by its own 82px. That single insertion was
+          worth ~0.37 CLS on the slate's cold load. */}
+      <div className="slatestrip">
+        {levelTeams.data?.length > 0 && (
+          <TeamFilterStrip
+            teams={levelTeams.data}
+            selectedTeamId={null}
+            onSelect={(id) => navigate(teamPath(id))}
+            showMlbPin={false}
+            showArrows
+            centerTeamId={favoriteTeamId}
+            ariaLabel={`Browse ${LEVELS.find((l) => l.sportId === sportId)?.label ?? ''} teams`}
+            className="teamfilterstrip--nav"
+          />
+        )}
+      </div>
 
       {/* The date stepper's own solid banner, divided from the game cards by
           a bottom rule — deliberately NOT sticky (see the comment on

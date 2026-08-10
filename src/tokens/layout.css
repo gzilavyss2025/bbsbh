@@ -55,6 +55,18 @@
      already share. */
   --console-hud-h: 167px;
 
+  /* The slate's team-logo nav banner (GameSelect's TeamFilterStrip) — the
+     height its wrapper holds open while the club list is still being fetched,
+     so the strip does not shove the whole slate down when it arrives. Same
+     footing as --console-hud-h: a number two rules must agree on, here the
+     empty wrapper's floor and the strip's own rendered height.
+
+     MEASURE IT, DON'T GUESS IT. 66px is the strip's rendered height at 390px
+     (dev tools, MLB level, arrows shown), not a target — the reserve only
+     cancels the shift while it stays true. Re-measure if the logo tray's size
+     changes. */
+  --slate-strip-h: 66px;
+
   /* Focus mode's action bar — one solid row (refresh + the reveal pair), so
      unlike .pagenav's translucent fade there is a real, measurable height for
      the page to pad clear of. See .innings--focus's padding-bottom. */
