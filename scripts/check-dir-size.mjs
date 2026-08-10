@@ -189,13 +189,19 @@ const BUDGETS = {
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
   //
-  // 70 -> 71 for `61-focus-mode.css`: split out of `11-innings.css` so its
-  // rules import LAST and win on cascade order instead of specificity — see
-  // that file's own header comment. It cannot merge into an existing
-  // partial: it has to load after every partial whose rules focus mode
-  // overrides (25-wide-layout.css among them), which rules out folding it
-  // back into 11-innings.css, an earlier-loading file.
-  'src/styles': 71,
+  // 70 -> 71 -> 70: `61-focus-mode.css` briefly split out of `11-innings.css`,
+  // then LEFT this directory entirely (ADR-0043). Focus mode's rewrite took
+  // that partial past check-file-size's 600-line cap, and the two ordinary
+  // remedies were both shut: it cannot fold back into an earlier partial (it
+  // has to load after everything it overrides, 25-wide-layout.css included),
+  // and it cannot split into a numbered sibling here, because that is exactly
+  // the growth this budget forbids. So it subdivided instead —
+  // `src/styles/focus/{stage,atbat,reference}.css`, its own directory entry,
+  // imported last and in order by `index.css`. That is ADR-0038's own
+  // prescription for a flat directory this size, and it is the first partial
+  // here to take it; a future split under pressure should look at this
+  // precedent before reaching for a 71st sibling.
+  'src/styles': 70,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

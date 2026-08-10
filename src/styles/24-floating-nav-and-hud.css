@@ -184,6 +184,13 @@
   color: var(--paper-2);
 }
 
+/* Scorebug.jsx's batter/pitcher wrapper — invisible to layout here, so the
+   docked card stacks exactly as it always did. Focus mode's anchored console
+   band (styles/focus/atbat.css) is the only caller that makes it a real box. */
+.gamehud__lines {
+  display: contents;
+}
+
 /* Between innings (Scorebug.jsx's `blank` — no batter/pitcher row left):
    drop the card's own top padding so the strip flows straight to the top
    edge and picks up the card's own rounding via the `overflow: hidden`
@@ -399,5 +406,90 @@
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+/* ------------------------------------------------ the anchored console band
+   The SAME scorebug, placed rather than floated — focus mode's masthead
+   (ScorebugMount.jsx, ADR-0043). A shape change, not a second scorebug.
+
+   The dock above is a 246px portrait card because it has to survive floating
+   over a long scrolling page. Focus mode has no such page, so the card unrolls
+   into a full-width horizontal band and parks at the top of the stage:
+   teams+runs, inning, bases+outs, then the batter/pitcher lines — left to right
+   in the order a broadcast bug uses, which is the order the reader knows.
+
+   Navy ground under a kraft rule, deliberately the masthead signature
+   .half__title already carries, so the band and the half's own title bar read
+   as siblings rather than as a floating chip from somewhere else.
+
+   Lives here with the rest of the .gamehud rules rather than in
+   styles/focus/*: nothing after this file styles .gamehud, so it needs no
+   help from cascade order. Focus mode's GRID PLACEMENT for the band does need
+   that help and stays in 61 with the grid it belongs to. */
+.gamehud--console {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  width: auto;
+  height: var(--console-hud-h);
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  border-bottom: 3px solid var(--seal);
+}
+
+/* The strip leads. Source order puts the batter/pitcher lines first, which is
+   right for the stacked dock, so the band reorders rather than the component
+   branching on placement. The strip's own negative side margins and dark inset
+   are the dock's edge-to-edge treatment; here the strip is not a band within a
+   card, it IS the card. */
+.gamehud--console .gamehud__strip {
+  order: -1;
+  margin: 0;
+  min-height: 0;
+  flex: 0 0 auto;
+  background: none;
+}
+
+.gamehud--console .gamehud__marks {
+  flex: 0 0 auto;
+  width: 92px;
+  grid-template-columns: minmax(0, 1fr) 30px;
+}
+
+.gamehud--console .gamehud__runs {
+  font-size: var(--fs-small);
+}
+
+/* The batter/pitcher pair becomes the band's one flexible column. A HUD may
+   truncate a name — the at-bat card below prints it in full. */
+.gamehud--console .gamehud__lines {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--space-3);
+}
+
+/* The dock's rows push a name and its figure to opposite ends of a 246px card.
+   Across a 1440px band that same rule stranded ".326" at the far right edge,
+   a foot of empty navy from the batter it belongs to. Grouped left instead. */
+.gamehud--console .gamehud__row {
+  justify-content: flex-start;
+  gap: var(--space-3);
+}
+
+.gamehud--console .gamehud__who {
+  flex: 0 1 auto;
+}
+
+/* Between innings nobody is up (Scorebug's `blank`). The band holds its height
+   regardless — a masthead that resized between at-bats would shove the hero
+   card up and down all game. */
+.gamehud--console.gamehud--blank {
+  padding-top: 0;
 }
 

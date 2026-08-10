@@ -312,7 +312,7 @@
 }
 
 /* Focus mode's rules (the .innings--focus fold, .abstep navigator, its
-   padding-bottom) live in 61-focus-mode.css, which imports LAST so they win
+   padding-bottom) live in styles/focus/*.css, which import LAST so they win
    on cascade order instead of specificity — see that file's header. */
 
 /* The page-turn scene (InningPageTurn.jsx) that replaces the plain .inning +

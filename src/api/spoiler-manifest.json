@@ -268,14 +268,14 @@
     },
     "linescore.js": {
       "class": "reveal-only",
-      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035).",
+      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot.",
       "importers": [
         "api/boxscore.js",
         "api/derive.js",
         "api/loadScorecard.js",
         "components/gamehud/RollingLine.jsx",
+        "components/gamehud/ScorebugMount.jsx",
         "components/gamehud/StatBox.jsx",
-        "screens/InningViewer.jsx",
         "screens/boxscore/revealBoxScore.js"
       ]
     },

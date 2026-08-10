@@ -24,7 +24,7 @@ import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
-import { AtBatMatchup } from './AtBatMatchup.jsx'
+import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
 import { BatterNotice } from './BatterNotice.jsx'
@@ -557,8 +557,20 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
     <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
-      {/* Focus mode only — see AtBatMatchup.jsx. */}
-      {focusHeader && <AtBatMatchup batter={batter} pitcher={pitcher} battingTeamId={battingTeamId} pitchingTeamId={pitchingTeamId} />}
+      {/* Focus mode only — see AtBatHero.jsx. It REPLACES .pbp__top below
+          (note the matching `!focusHeader` gate), rather than stacking a
+          second name row above it. */}
+      {focusHeader && (
+        <AtBatHero
+          batter={batter}
+          pitcher={pitcher}
+          batSide={batSide}
+          rbi={rbi}
+          pinchRunners={pinchRunners}
+          battingTeamId={battingTeamId}
+          pitchingTeamId={pitchingTeamId}
+        />
+      )}
       {/* Fills the room the missing zone pane leaves, so it rides with
           --nozone. Decorative — the card's first line already names him — and
           desktop-only, .pbp__batshot being display:none below 740. */}
@@ -569,6 +581,7 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
       )}
       <div className="pbp__card">
         <div className="pbp__main">
+          {!focusHeader && (
           <div className="pbp__top">
             <span className="pbp__batter">
               <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
@@ -593,6 +606,7 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
             </span>
             {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
           </div>
+          )}
           <div className="pbp__desc">
             {descSegments.map((seg, i) =>
               seg.id != null ? (

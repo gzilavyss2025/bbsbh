@@ -1,0 +1,210 @@
+/* ------------------------------------------------------------ focus mode */
+/* THE SCORER'S CONSOLE (ADR-0043).
+
+   While the half on screen is still sealed this screen stops being a page and
+   becomes an instrument: an anchored game-state band on top, ONE at-bat as the
+   hero, a fixed action bar at the bottom, a tabbed reference column beside it.
+   The reader's loop is tap -> read -> pencil -> glance at bases/outs -> tap,
+   forty times a half-hour, so everything here is arranged to keep the at-bat
+   and the Next button in the same two places for three hours.
+
+   THIS FILE holds the page shell: what folds away, the grid, and the action
+   bar. Its two siblings are focus/atbat.css (the hero card) and
+   focus/reference.css (the trail and the reference panel). Split three ways
+   because one file outgrew the 600-line cap and src/styles is a flat directory
+   at its own ratchet, so subdividing — ADR-0038's own answer — beat adding a
+   fourth numbered sibling.
+
+   All three import LAST in src/index.css, so their rules beat
+   25-wide-layout.css's wide-breakpoint layout on cascade ORDER. That is why the
+   overrides here can be plain single-class selectors instead of specificity
+   ladders, and why any rule moved OUT of this directory must be checked against
+   what 25 declares. The scorebug band's own appearance did move out, to
+   24-floating-nav-and-hud.css with the other .gamehud rules — safe only because
+   nothing after 24 styles .gamehud at all. Its grid PLACEMENT stayed here. */
+
+/* ------------------------------------------------------------- what folds */
+/* The stat/WPA row and both inline copies of the entering lineups/defense.
+   All three are end-of-half material or duplicated by the reference panel: the
+   row2 stat card is the R/H/E/LOB summary you write when the half CLOSES, at
+   which point the half commits and focus mode ends anyway.
+
+   Unconditional now — it used to unhide with the old rail's flap
+   (.innings--railopen), which no longer exists. Visibility only: no seal, no
+   caller-gated pre-pitch selector (ADR-0010), no fetch is affected. */
+.innings--focus .innings__row2,
+.innings--focus .half__entering,
+.innings--focus .halfentering {
+  display: none;
+}
+
+/* Room under the last card for the action bar, which unlike .pagenav's
+   translucent fade is one solid row of a known height. --space-6 of breath on
+   top of it so the trail/reference chips never sit flush against the rule. */
+.innings--focus {
+  padding-bottom: calc(var(--focus-bar-h) + var(--space-6) + env(safe-area-inset-bottom));
+}
+
+/* Where the at-bat lands when focus mode scrolls it into view (useFocusMode's
+   effect). Clear of the sticky console band rather than flush under the
+   viewport edge — without the --console-hud-h term the card scrolls to y=0 and
+   the band, which is sticky at y=0, covers its own hero. */
+.innings--focus .pbp {
+  margin-top: 0;
+  scroll-margin-top: calc(var(--console-hud-h) + var(--space-3));
+}
+
+/* --------------------------------------------------------------- the grid */
+/* .innings__stage wraps the at-bat card and the trail so the wide grid below
+   has ONE explicit item per column. `display: contents` elsewhere keeps the
+   wrapper invisible to layout, so the phone column and the unfocused page see
+   straight through to the same children they always had. */
+.innings__stage {
+  display: contents;
+}
+
+.innings--focus .innings__grid {
+  gap: var(--space-3);
+}
+
+:root {
+  /* Fixed, so opening a tab can never change the track and reflow the at-bat
+     card beside it (ADR-0010). 300px rather than the first pass's 268, where
+     lineup rows truncated and the defense SVG fought the track for min-content
+     width; 300 fits a lineup row whole and still leaves a 478px stage at
+     iPad-portrait width. */
+  --refrail-w: 300px;
+}
+
+@media (min-width: 740px) {
+  /* Only while focused does the grid gain a second, reserved column — an
+     unfocused sealed half, and a fully revealed one, keep the ordinary
+     single-column .innings__grid (25-wide-layout.css) untouched. */
+  .innings--focus .innings__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--refrail-w);
+    column-gap: var(--space-6);
+    row-gap: var(--space-4);
+    align-items: start;
+  }
+
+  /* The band spans both columns and stays put while the stage scrolls under
+     it. */
+  .innings--focus .gamehud--console {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  /* Row AND column stated explicitly for both items. An item auto-placed after
+     an explicitly positioned sibling can resolve into that sibling's column —
+     the spec leaves it ambiguous — which is what put the trail inside the
+     reference column in the first pass. One named cell each, not span math. */
+  .innings--focus .innings__stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+  }
+
+  .focusrail {
+    grid-column: 2;
+    grid-row: 2;
+    /* A grid item's min-width defaults to min-content, not 0. Without this the
+       lineup rows or the defense SVG force the item past the track and overflow
+       into column 1, intercepting clicks meant for the at-bat card. */
+    min-width: 0;
+    position: sticky;
+    /* Parked below the band, which is sticky at 0 and would otherwise cover the
+       column's own tab strip. */
+    top: calc(var(--console-hud-h) + var(--space-4));
+    max-height: calc(100vh - var(--console-hud-h) - var(--space-10));
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+/* ---------------------------------------------------------- the action bar */
+/* One solid row: refresh, then the two reveal choices. The unfocused page keeps
+   .pagenav--innings' stacked two-row bar untouched — this is an extra class,
+   not a replacement.
+
+   SOLID, unlike .pagenav's click-through fade. That fade is what forced
+   .pagenav--innings' invisible ::after hit areas: a thumb that missed the
+   button punched through it and opened whichever card sat underneath. Opaque
+   here, so nothing can be hit through the bar at all. The ::after claims stay
+   anyway — they are what makes a NEAR MISS reveal an at-bat rather than do
+   nothing, a separate and still-wanted property (e2e/reveal-hit-area.spec.js
+   pins both). */
+.pagenav--focus {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--focus-bar-h);
+  padding: var(--space-2) var(--app-gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
+  background: var(--bg-canvas);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  pointer-events: auto;
+}
+
+/* Icon-scale, not a full-width row of its own: giving refresh a whole row is
+   what made this bar 155px tall — a fifth of a phone viewport, on the screen
+   with the least to spare. The raised z-index keeps its own taps clear of the
+   reveal's dead space, same as the two-row bar does. */
+.pagenav--focus .refreshbtn--float {
+  position: relative;
+  z-index: 3;
+  flex: 0 0 auto;
+  min-width: var(--tap-min);
+  padding: 0 var(--space-3);
+  background: var(--surface-card);
+}
+
+/* No room for the staleness stamp on one row. It stays in the DOM for assistive
+   tech and returns to view when the half commits. */
+.pagenav--focus .refreshstamp {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.pagenav--focus .revealsplit {
+  margin-top: 0;
+  flex: 1 1 auto;
+  max-width: calc(var(--app-width) - 2 * var(--app-gutter));
+}
+
+/* One row now, so the dead space a near-miss falls in is the padding above and
+   below the buttons, not the old gap between two rows. Measured from the
+   BUTTON, which is load-bearing: .btn:active nudges it 1px with a transform,
+   making it the containing block for its own absolutely positioned pseudo.
+   Anchor to the bar instead and the press silently re-anchors the hit area
+   mid-tap — pointer down on the button, up on the page, reveal never fires.
+   -8px, not the two-row bar's -76px, which measured the height of a Refresh row
+   that is no longer above the button.
+
+   The `:has()` copy of the selector is not redundant. The rule it must beat is
+   `.pagenav--innings:has(.refreshbtn--float) .btn::after` (0,3,1), and a plain
+   `.pagenav--focus .btn::after` is only (0,2,1) — so it LOST, the -76px claim
+   stayed, and the hit area reached 68px above the bar into real page content.
+   e2e/reveal-hit-area.spec.js's "the page above the bar keeps its own taps"
+   caught exactly that. Matching the `:has()` ties the specificity, and this file
+   imports later, so order decides. */
+.pagenav--focus:has(.refreshbtn--float) .btn::after,
+.pagenav--focus .btn::after {
+  top: calc(-1 * var(--space-2));
+  bottom: calc(-1 * var(--space-2) - env(safe-area-inset-bottom));
+}
+
+@media (min-width: 740px) {
+  .pagenav--focus .revealsplit {
+    max-width: 640px;
+  }
+}
+

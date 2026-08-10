@@ -6,11 +6,15 @@ import { RosterPanel } from './RosterPanel.jsx'
 
 // The reference band (Margin Notes, Pitchers, defense, lineups) and the two
 // roster panels beneath it — pulled out of InningViewer.jsx (which was at its
-// 1000-line file-size ceiling) so ReferenceRail.jsx and the plain inline case
-// can render the exact same markup from one place instead of two copies
-// drifting apart. Same .innings__ref / .innings__rosters classes either way
-// (25-wide-layout.css/12-sealbox.css); only WHERE this renders differs
-// between the two callers.
+// 1000-line file-size ceiling). This is the UNFOCUSED page's arrangement: the
+// wide layout's two-up band (.innings__ref / .innings__rosters — see
+// 25-wide-layout.css/12-sealbox.css) with every section on screen at once.
+//
+// Focus mode does not render this at all. ReferencePanel.jsx composes the same
+// section components (MarginNotes, PitchersSection, DefenseSection,
+// LineupSection, RosterPanel) one tab at a time instead, from the same prop bag
+// InningViewer hands both — so the two arrangements share their contents
+// without either owning the other's layout.
 export function ReferenceBand({
   feed,
   callouts,

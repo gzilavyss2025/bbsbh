@@ -1,0 +1,235 @@
+/* -------------------------------------------------- focus mode: the at-bat */
+/* The hero card, and the motion that brings it in. One of three focus-mode
+   partials — see focus/stage.css's header for the split and the cascade rule
+   they all depend on. */
+
+/* ------------------------------------------------------------ at-bat hero */
+/* AtBatHero.jsx — the focused plate appearance's header, and in focus mode the
+   card's ONLY name row (.pbp__top is not rendered; see AtBatCard's matching
+   gate). Deliberately asymmetric: the batter carries a --shot-sm portrait and
+   title-scale type because he is who the reader is penciling; the pitcher
+   carries the smallest rung at label scale because he is context. */
+.abhero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+/* Portraits PASTED INTO a scorebook, not broadcast cutouts. MLB's silos are
+   full-colour crops on white; dropped raw onto manila paper they were the
+   brightest objects on the page and the card read as a GameDay widget. A paper
+   plate, a hairline rule and a little desaturation put them back in the book's
+   own material — they still identify both men, they just stop shouting. */
+.abhero__shot {
+  flex: 0 0 auto;
+}
+
+.abhero__shot .pitchernotice__shot {
+  border-color: var(--border-rule);
+  background: var(--surface-inset);
+}
+
+.abhero__shot .pitchernotice__shot img {
+  filter: saturate(0.85) contrast(0.96);
+}
+
+.abhero__shot--bat .pitchernotice__shot {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+}
+
+.abhero__shot--arm .pitchernotice__shot {
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+}
+
+.abhero__who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The one thing on this screen that may not truncate — it is what gets written
+   down. At --fs-title-sm condensed caps a 10-letter last name fits beside both
+   portraits at 390px; the pitcher block ellipsizes first if anything gives. */
+.abhero__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.abhero__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.abhero__pos,
+.abhero__hand {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.abhero__rbi {
+  margin: 0;
+}
+
+.abhero__pr {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.abhero__vs {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.abhero__arm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  min-width: 0;
+  text-align: right;
+}
+
+/* `display: block` is load-bearing: this is a <span>, and overflow/text-
+   overflow do nothing on an inline box. Left inline, a long pitcher name was
+   cut clean through its last glyph ("GRACEFFC") with no ellipsis to show it. */
+.abhero__armname {
+  display: block;
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------- the at-bat as the hero */
+/* The card stops sharing a row with the pitch-zone pane and takes the stage's
+   full width, zone stacked beneath it. The 38fr/62fr split (25-wide-layout.css)
+   is sized for the unfocused page's ~780px reading column; inside focus mode's
+   ~478px stage that same ratio left the card ~180px wide — name, description,
+   ladder and diamond crushed into a third of a column while the zone pane sat
+   half empty beside it, its pitch list overprinting the batter silhouette. */
+.innings--focus .pbp__atbat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  padding: 0 0 var(--space-3);
+  overflow: hidden;
+}
+
+/* The inner card sheds its own frame — inside the hero it would be a card
+   within a card. `flex-start`, not the base rule's `stretch`: at hero width the
+   description is a line or two while the ladder stretched to the whole card,
+   drawing a tall kraft bar beside two lines of prose. */
+.innings--focus .pbp__card {
+  border: none;
+  background: none;
+  padding: 0 var(--space-3);
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.innings--focus .pbp__side {
+  align-items: flex-start;
+}
+
+.innings--focus .pbp__zonecell {
+  margin: 0 var(--space-3);
+}
+
+/* The decorative portrait that fills a no-zone row on the unfocused page. The
+   hero header already carries both, so this is a third of the same man. */
+.innings--focus .pbp__batshot {
+  display: none;
+}
+
+/* The scorebook denotation IS what gets penciled, so it takes the typographic
+   hero role: the out chain written across the diamond steps up two roles, the
+   reach code above it one. Colours are untouched — field green for a reach,
+   clay for an out — because those already carry the meaning. */
+.innings--focus .pbp__code {
+  font-size: var(--fs-h3);
+}
+
+.innings--focus .pbp__code--center {
+  font-size: var(--fs-title-lg);
+}
+
+/* The prose account is the secondary read but 11px is a strain on the one card
+   the whole screen is built around. */
+.innings--focus .pbp__desc {
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+}
+
+/* ------------------------------------------------------------------ motion */
+/* Restrained: this is paper. The card is laid on the desk, decelerating — no
+   slide from an edge, no scale, and deliberately not --ease-press, which the
+   token file reserves for the Logbook stamp's one caller. */
+@keyframes focus-deal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes focus-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.innings--focus .pbp__atbat {
+  animation: focus-deal var(--dur-med) var(--ease-out);
+}
+
+.trailcell {
+  animation: focus-fade var(--dur-fast) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .innings--focus .pbp__atbat,
+  .trailcell {
+    animation: none;
+    transition: none;
+  }
+}

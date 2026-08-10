@@ -32,6 +32,20 @@
   --app-gutter:  16px;
   --tap-min:     44px;       /* min hit target */
 
+  /* Focus mode's console masthead (the anchored scorebug band —
+     styles/focus/stage.css, ADR-0043). One source of truth for three things that
+     must agree or the band overlaps what it sits above: the band's own
+     height, the sticky offset the reference rail parks below it, and the
+     scroll-margin useFocusMode's scrollIntoView lands the at-bat card at.
+     Held here rather than in the partial because it is a frame dimension the
+     grid reasons about, same footing as --app-width. */
+  --console-hud-h: 64px;
+
+  /* Focus mode's action bar — one solid row (refresh + the reveal pair), so
+     unlike .pagenav's translucent fade there is a real, measurable height for
+     the page to pad clear of. See .innings--focus's padding-bottom. */
+  --focus-bar-h: 64px;
+
   /* The box-score skeleton's rolling baseball icon (BoxScoreSkeleton.jsx,
      .skel__ball) — its own component-scoped size rather than borrowing a
      --fs-* typography role for an unrelated icon dimension. */
