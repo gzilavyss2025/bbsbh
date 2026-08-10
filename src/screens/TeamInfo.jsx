@@ -16,7 +16,7 @@ import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
 import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
-import { POS_ORDER, rosterPitcherRole, isTwoWay } from '../api/person.js'
+import { POS_ORDER } from '../api/person.js'
 import { prospectBadge } from '../api/prospects.js'
 import { showRookiePill, hasDebuted } from '../api/rookies.js'
 import { formerTeammatePairs, groupTeammateCards, orgTiesFor } from '../api/formerTeammates.js'
@@ -29,6 +29,9 @@ import {
 } from '../components/teamstats/StarterMatchups.jsx'
 import { splitDisplayName } from '../api/person.js'
 import { useAsync } from '../hooks/useAsync.js'
+import { useNav } from '../lib/nav.js'
+import { teamTabPath } from '../lib/route.js'
+import { ChevronLink } from '../components/ui/ChevronLink.jsx'
 import { scorebookDate, monthDay, timeOfDay } from '../lib/dates.js'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
@@ -51,7 +54,7 @@ import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.j
 import { fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
-import { BullpenBoard } from '../components/teamstats/BullpenBoard.jsx'
+import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
 import { SeasonSeriesStrip } from '../components/teamstats/SeasonSeriesStrip.jsx'
 import { SPORT_LABEL } from '../lib/teams.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor, mastheadMarkFor } from '../lib/headerTheme.js'
@@ -295,42 +298,31 @@ function Umpires({ officials }) {
   )
 }
 
-// Groups a full active roster (from fetchTeamRoster) into the same
-// batters/starters/bullpen split the team page uses, for the pregame
-// fallback when the starting lineup isn't posted yet. Roster entries come
-// from the plain /roster endpoint, not the live feed, so names degrade to
-// fullName (no lastFirstName on that thinner person object). Starters won't
-// enter once the game's underway, so they're split from the bullpen using
-// the same season-stats role inference the team page badges pitchers with
-// (rosterPitcherRole — gamesStarted ratio / saves); a pitcher with no
-// resolved role (no starts on record yet) defaults into the bullpen list.
+// The team's full active roster (from fetchTeamRoster), pared to batters, for
+// the pregame fallback when the starting lineup isn't posted yet. Roster
+// entries come from the plain /roster endpoint, not the live feed, so names
+// degrade to fullName (no lastFirstName on that thinner person object).
+//
+// Pitchers are left out rather than grouped into their own Starters/Bullpen
+// lists (a prior version of this card did that): once a real lineup posts,
+// nothing on this page shows this side's own pitching staff either — under
+// the universal DH a starter never carries a battingOrder slot, so
+// selectLineup's nine are batters only — and staging a roster of arms here
+// that then vanishes the moment lineups post was a card that got LESS useful
+// as the page went live. `FullRosterLink` below is the door to that full
+// staff for whoever wants it. A two-way player (Ohtani-type) carries a
+// single roster spot typed 'Two-Way Player', not 'Pitcher', so he lists here
+// same as any other batter.
 function rosterFallbackGroups(roster) {
-  const rows = (roster ?? []).map((r) => {
-    // A two-way player (Ohtani-type) carries a single roster spot typed
-    // 'Two-Way Player', not 'Pitcher' — treat him as a pitcher for the
-    // starters/bullpen split (isTwoWay) without pulling him out of the
-    // batters list below, so he lists in both, same as the team page.
-    const twoWay = isTwoWay(r.person)
-    return {
+  return (roster ?? [])
+    .filter((r) => r.position?.type !== 'Pitcher')
+    .map((r) => ({
       id: r.person?.id,
       name: lastFirst(r.person),
       jersey: r.jerseyNumber ?? '',
       pos: r.position?.abbreviation ?? '',
-      isPitcher: r.position?.type === 'Pitcher',
-      twoWay,
-      role: r.position?.type === 'Pitcher' || twoWay ? rosterPitcherRole(r) : null,
-    }
-  })
-  const batters = rows
-    .filter((r) => !r.isPitcher)
+    }))
     .sort((a, b) => (POS_ORDER[a.pos] ?? 5) - (POS_ORDER[b.pos] ?? 5) || a.name.localeCompare(b.name))
-  const starters = rows
-    .filter((r) => r.role === 'SP')
-    .sort((a, b) => a.name.localeCompare(b.name))
-  const bullpen = rows
-    .filter((r) => (r.isPitcher || r.twoWay) && r.role !== 'SP')
-    .sort((a, b) => a.name.localeCompare(b.name))
-  return { batters, starters, bullpen }
 }
 
 // The ids of every player in TONIGHT's starting lineups, both clubs, plus both
@@ -360,6 +352,23 @@ function BirthdayCake({ show }) {
     <span className="name-cake" role="img" aria-label="Birthday today" title="Birthday today">
       🎂
     </span>
+  )
+}
+
+// The door out of the pregame roster fallback to the team hub's Roster tab —
+// the pitching staff (and everyone else) rosterFallbackGroups no longer lists
+// here now that it's batters-only. Same .thub-door/.chevron-link shell
+// TeamPage's own previews end in (PreviewDoor), reused rather than doubled
+// up. No `?d=` cutoff: a lineup-page link stays live per ADR-0034, same as
+// every other link off this page.
+function FullRosterLink({ teamId, sportId }) {
+  const navigate = useNav()
+  return (
+    <div className="thub-door">
+      <ChevronLink onClick={() => navigate(teamTabPath(teamId, 'roster', { s: sportId }))}>
+        Full roster
+      </ChevronLink>
+    </div>
   )
 }
 
@@ -414,7 +423,14 @@ function TeamSections({
     [arsenalShard, oppPitcher?.id, isMlb],
   )
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
-  const bullpenArms = useMemo(() => selectBullpen(feed, side), [feed, side])
+  // The bullpen this side's lineup is about to face, not its own — it nests
+  // under the opposing starter card (see BullpenBoard's own header), so it
+  // reads the OTHER team's arms same as oppPitcher/oppDefense above.
+  const oppBullpenArms = useMemo(
+    () => selectBullpen(feed, side === 'away' ? 'home' : 'away'),
+    [feed, side],
+  )
+  const { showBullpen, setShowBullpen } = useBullpenReveal()
   // The availability board describes "now" (the nightly workload file's
   // asOf); on an archival game its rested/tired flags would be about the
   // wrong day entirely, so it only renders when this game sits within a few
@@ -492,7 +508,25 @@ function TeamSections({
         callouts={callouts}
         isMlb={isMlb}
         arsenal={oppArsenal}
+        bullpenToggle={
+          <BullpenToggle
+            hasArms={oppBullpenArms.length > 0}
+            showBullpen={showBullpen}
+            onToggle={setShowBullpen}
+          />
+        }
       />
+      {/* Nested under the starting pitcher card it belongs to (his team's
+          pen), collapsible via the pill above — see useBullpenReveal. */}
+      {showBullpen && (
+        <BullpenBoard
+          workload={workloadData}
+          bullpen={oppBullpenArms}
+          gameDate={boardGameDate}
+          theme={oppTheme}
+          masthead={oppMasthead}
+        />
+      )}
 
       {/* Wide screens run the batting order and defense diamond side by side
           rather than 50/50 — the order's the meat of the page, the diamond is
@@ -561,97 +595,49 @@ function TeamSections({
                 />
               )}
             </ol>
-          ) : roster.batters.length > 0 || roster.starters.length > 0 || roster.bullpen.length > 0 ? (
+          ) : roster.length > 0 ? (
             <>
               <p className="roster__notice">
                 Not final{info.scheduledTime ? ` — posts close to first pitch (${info.scheduledTime})` : ' yet'}
               </p>
               <div className="roster">
-                {roster.batters.length > 0 && (
-                  <>
-                    <h4 className="roster__group">Batters</h4>
-                    <ul className="roster__list">
-                      {roster.batters.map((p) => (
-                        <li key={p.id} className="roster__row">
-                          <span className="roster__namewrap">
-                            <PlayerLink id={p.id} className="roster__name">
-                              {p.name}
-                            </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
-                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                            <RadarPill
-                              entry={radarEntryFor(feverRadarData, p.id)}
-                              teamId={meta.id}
-                              evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
-                              evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
-                            />
-                            <BirthdayCake show={birthdayIds.has(p.id)} />
-                            {/* Most visits to this page happen BEFORE the
-                                lineup posts, when this roster list is the whole
-                                card — so the notes attach here too and the data
-                                is visible all day, not only once the nine drop.
-                                No bench row is needed here: with no posted
-                                order, nobody is left over. */}
-                            {showNotes && (
-                              <MatchupNote
-                                row={matchupNotes.byId.get(p.id)}
-                                levelLabel={matchupLevel}
-                                className="roster__vs"
-                              />
-                            )}
-                          </span>
-                          <span className="roster__jersey">{p.jersey}</span>
-                          <span className="roster__pos">{p.pos}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-                {roster.bullpen.length > 0 && (
-                  <>
-                    <h4 className="roster__group">Bullpen</h4>
-                    <ul className="roster__list">
-                      {roster.bullpen.map((p) => (
-                        <li key={p.id} className="roster__row">
-                          <span className="roster__namewrap">
-                            <PlayerLink id={p.id} className="roster__name">
-                              {p.name}
-                            </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
-                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                            <BirthdayCake show={birthdayIds.has(p.id)} />
-                          </span>
-                          <span className="roster__jersey">{p.jersey}</span>
-                          <span className="roster__pos">{p.pos}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-                {roster.starters.length > 0 && (
-                  <>
-                    <h4 className="roster__group">Starters</h4>
-                    <ul className="roster__list">
-                      {roster.starters.map((p) => (
-                        <li key={p.id} className="roster__row">
-                          <span className="roster__namewrap">
-                            <PlayerLink id={p.id} className="roster__name">
-                              {p.name}
-                            </PlayerLink>
-                            <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
-                            <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
-                            <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
-                            <BirthdayCake show={birthdayIds.has(p.id)} />
-                          </span>
-                          <span className="roster__jersey">{p.jersey}</span>
-                          <span className="roster__pos">{p.pos}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+                <ul className="roster__list">
+                  {roster.map((p) => (
+                    <li key={p.id} className="roster__row">
+                      <span className="roster__namewrap">
+                        <PlayerLink id={p.id} className="roster__name">
+                          {p.name}
+                        </PlayerLink>
+                        <ProspectPill {...prospectBadge(prospectsData, p.id, orgTeamId)} />
+                        <RookiePill active={showRookiePill(rookiesData, p.id, isMlb)} />
+                        <DebutPill debuted={!isMlb && hasDebuted(rookiesData, p.id)} />
+                        <RadarPill
+                          entry={radarEntryFor(feverRadarData, p.id)}
+                          teamId={meta.id}
+                          evPercentile={savantPercentilesFor(savantPercentilesData, p.id, 'batting')?.ev ?? null}
+                          evLeagueSize={qualifiedCount(savantPercentilesData, 'batting')}
+                        />
+                        <BirthdayCake show={birthdayIds.has(p.id)} />
+                        {/* Most visits to this page happen BEFORE the
+                            lineup posts, when this roster list is the whole
+                            card — so the notes attach here too and the data
+                            is visible all day, not only once the nine drop.
+                            No bench row is needed here: with no posted
+                            order, nobody is left over. */}
+                        {showNotes && (
+                          <MatchupNote
+                            row={matchupNotes.byId.get(p.id)}
+                            levelLabel={matchupLevel}
+                            className="roster__vs"
+                          />
+                        )}
+                      </span>
+                      <span className="roster__jersey">{p.jersey}</span>
+                      <span className="roster__pos">{p.pos}</span>
+                    </li>
+                  ))}
+                </ul>
+                <FullRosterLink teamId={meta.id} sportId={meta.sportId} />
               </div>
             </>
           ) : (
@@ -691,12 +677,6 @@ function TeamSections({
         )}
       </div>
 
-      <BullpenBoard
-        workload={workloadData}
-        bullpen={bullpenArms}
-        gameDate={boardGameDate}
-      />
-
       <FormerTeammates
         pairs={teammatePairs}
         startingIds={startingIds}
@@ -728,6 +708,7 @@ function OpposingStarterCard({
   callouts,
   isMlb,
   arsenal,
+  bullpenToggle,
 }) {
   return (
     <section
@@ -748,7 +729,9 @@ function OpposingStarterCard({
             className={`metricbar__logo${masthead.url ? ' metricbar__logo--custom' : ''}`}
           />
         }
-      />
+      >
+        {bullpenToggle}
+      </SectionMasthead>
       {pitcher ? (
         <div className="startercard__body">
           <Headshot
