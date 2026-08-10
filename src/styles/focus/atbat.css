@@ -6,9 +6,8 @@
 /* ------------------------------------------------------------ at-bat hero */
 /* AtBatHero.jsx — the focused plate appearance's header, and in focus mode the
    card's ONLY name row (.pbp__top is not rendered; see AtBatCard's matching
-   gate). Deliberately asymmetric: the batter carries a --shot-sm portrait and
-   title-scale type because he is who the reader is penciling; the pitcher
-   carries the smallest rung at label scale because he is context. */
+   gate). Batter and pitcher read as equals: same --shot-sm portrait rung, same
+   name/jersey/position shape — see that file's own header for why. */
 .abhero {
   display: flex;
   align-items: center;
@@ -35,14 +34,10 @@
   filter: saturate(0.85) contrast(0.96);
 }
 
-.abhero__shot--bat .pitchernotice__shot {
+.abhero__shot--bat .pitchernotice__shot,
+.abhero__shot--arm .pitchernotice__shot {
   width: var(--shot-sm-w);
   height: var(--shot-sm-h);
-}
-
-.abhero__shot--arm .pitchernotice__shot {
-  width: var(--shot-2xs-w);
-  height: var(--shot-2xs-h);
 }
 
 .abhero__who {
@@ -73,14 +68,27 @@
   flex-wrap: wrap;
 }
 
-.abhero__pos,
-.abhero__hand {
+.abhero__pos {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+/* Jersey number before position — EnteringReference.jsx's own lineup-row
+   convention (.lineupcard__jersey), reused here rather than reinvented. */
+.abhero__jersey {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--clay);
+}
+
+.abhero__meta--arm {
+  justify-content: flex-end;
 }
 
 .abhero__rbi {
@@ -98,14 +106,43 @@
   color: var(--text-body);
 }
 
+/* The center glyph — BoxScoreSkeleton.jsx's own rolling baseball, frozen on
+   one frame (BallGlyph). A little bigger than the plain "vs" text it
+   replaces, since a static icon this small reads as a smudge rather than a
+   ball at the old caption-text size. Its own component (not skel__ball*, see
+   BallGlyph's header) but styled here rather than beside the skeleton's own
+   rules — 22-box-score-tables.css is at its check-file-size ceiling, and this
+   is currently the glyph's only caller. */
 .abhero__vs {
   flex: 0 0 auto;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
+  width: 30px;
+  height: 30px;
+}
+
+.ballglyph circle {
+  stroke: var(--rule);
+  stroke-width: 3;
+}
+
+.ballglyph__shadelight {
+  stop-color: var(--paper-3);
+}
+
+.ballglyph__shadedark {
+  stop-color: var(--rule-soft);
+}
+
+.ballglyph__seam {
+  fill: none;
+  stroke: var(--clay);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.ballglyph__stitch {
+  stroke: var(--clay);
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 
 .abhero__arm {

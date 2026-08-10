@@ -1,5 +1,6 @@
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherPhoto } from './PitcherNotice.jsx'
+import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
 
 // The focused plate appearance's header (ADR-0043) — focus mode only, threaded
 // down through AtBatCard as `focusHeader`.
@@ -12,16 +13,24 @@ import { PitcherPhoto } from './PitcherNotice.jsx'
 // identity outright: the name, the position, the pinch-runner chain, and the
 // RBI chip all move up into it, and AtBatCard renders no second copy.
 //
-// Deliberately asymmetric. The batter is who the reader is penciling, so he
-// takes the larger headshot rung (--shot-sm) and display-scale type; the
-// pitcher is context and takes the smallest rung (--shot-2xs) at label scale.
-// Sizing carries the hierarchy so the "vs" doesn't have to shout it.
+// Batter and pitcher read as equals here — same headshot rung (--shot-sm), same
+// full-name/jersey/position shape (EnteringReference.jsx's lineup-row
+// convention: jersey number before position, not after). The batter drops his
+// batting-side hand (RHB/LHB is a bio fact the box score already carries, and
+// crowded the card without pulling its weight); the pitcher keeps his — RHP/
+// LHP IS his position here, not a separate fact bolted onto it. Center glyph
+// is the loading skeleton's own rolling baseball (BoxScoreSkeleton.jsx),
+// frozen on one frame — the two men facing off, not a word between them.
 //
 // Every value arrives already resolved and already reveal-gated on the entry —
 // same discipline as the rest of this feed. Headshots use the shared
 // PitcherPhoto fallback chain (silo -> milb -> team logo -> monogram), so a
 // MiLB game with no portrait degrades to a mark rather than a hole.
-export function AtBatHero({ batter, pitcher, batSide, rbi, pinchRunners, battingTeamId, pitchingTeamId }) {
+function fullNameOf(p) {
+  return p.fullName || [p.first, p.last].filter(Boolean).join(' ')
+}
+
+export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, pitchingTeamId }) {
   const replaced = pinchRunners && pinchRunners.length > 0
   return (
     <div className="abhero">
@@ -30,11 +39,11 @@ export function AtBatHero({ batter, pitcher, batSide, rbi, pinchRunners, batting
       </div>
       <div className="abhero__who">
         <span className={`abhero__name ${replaced ? 'pbp__replaced' : ''}`}>
-          <PlayerLink id={batter.id}>{batter.last}</PlayerLink>
+          <PlayerLink id={batter.id}>{fullNameOf(batter)}</PlayerLink>
         </span>
         <span className="abhero__meta">
+          {batter.jersey ? <span className="abhero__jersey">{batter.jersey}</span> : null}
           {batter.pos && <span className="abhero__pos">{batter.pos}</span>}
-          {batSide && <span className="abhero__hand">{batSide}HB</span>}
           {rbi > 0 && <span className="pbp__rbi abhero__rbi">{rbi} RBI</span>}
         </span>
         {/* The pinch-runner chain, penciled in under the batter he took over
@@ -50,16 +59,17 @@ export function AtBatHero({ batter, pitcher, batSide, rbi, pinchRunners, batting
           </span>
         ))}
       </div>
-      <span className="abhero__vs" aria-hidden="true">
-        vs
-      </span>
+      <BallGlyph className="abhero__vs" />
       {pitcher && (
         <>
           <div className="abhero__arm">
             <span className="abhero__armname">
-              <PlayerLink id={pitcher.id}>{pitcher.last}</PlayerLink>
+              <PlayerLink id={pitcher.id}>{fullNameOf(pitcher)}</PlayerLink>
             </span>
-            {pitcher.hand && <span className="abhero__pos">{pitcher.hand}HP</span>}
+            <span className="abhero__meta abhero__meta--arm">
+              {pitcher.jersey ? <span className="abhero__jersey">{pitcher.jersey}</span> : null}
+              {pitcher.hand && <span className="abhero__pos">{pitcher.hand}HP</span>}
+            </span>
           </div>
           <div className="abhero__shot abhero__shot--arm">
             <PitcherPhoto personId={pitcher.id} name={pitcher.last} teamId={pitchingTeamId} />

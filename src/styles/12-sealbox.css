@@ -1504,15 +1504,45 @@
   gap: 12px;
 }
 
+/* Same navy-bar recipe as .halfdefense__title (12-sealbox.css) — a themed
+   club recolors it via .lineupteam.is-themed (09-team-info.css); untheme
+   falls back to this same navy/seal/white default every other masthead bar
+   already wears, not a lighter one-off look. */
 .lineupteam__name {
+  width: 100%;
   margin: 0 0 8px;
-  padding: 4px 8px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--navy);
+  border-bottom: 3px solid var(--seal);
   font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
-  color: var(--text-body);
+  color: var(--text-on-ink);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
+}
+
+/* Same bleed formula as .halfdefense__title's own copy above — see its
+   comment. */
+.lineupteam__name > .teamlogo-crop-bar {
+  height: calc(var(--fs-compact) * var(--lh-solid) + 16px);
+  margin-block: -8px;
+}
+
+/* Compact "R" pill in lineup rows only — every other roster surface
+   (RosterPanel.jsx) keeps the full "ROOKIE" word (see .rookiepill's own
+   header); a lineup row already carries a slot number, two names and a
+   position/jersey column, and the full word was the one thing left to trim. */
+.lineupcard__names .rookiepill__full {
+  display: none;
+}
+
+.lineupcard__names .rookiepill__short {
+  display: inline;
 }
 
 .lineupcard__list {
@@ -1651,6 +1681,17 @@
   cursor: pointer;
 }
 
+/* Same bleed formula as .metricbar > .teamlogo-crop-bar
+   (44-pre-game-cards.css) — height from the bar's own type + padding, a
+   matching negative margin so the mark's top/bottom crop clean to the bar's
+   edges instead of sitting inset like a normal inline icon (identity lab's
+   own "the mark may clip" convention). 8px padding here vs. that bar's 10px,
+   so its own numbers, not a shared rule. */
+.halfdefense__title > .teamlogo-crop-bar {
+  height: calc(var(--fs-caption) * var(--lh-solid) + 16px);
+  margin-block: -8px;
+}
+
 .halfdefense__chevron {
   margin-left: auto;
   color: var(--text-on-ink);
@@ -1705,6 +1746,17 @@
   box-shadow: none;
   background: none;
   padding: 12px var(--space-2) var(--space-4);
+}
+
+/* Focus mode's Field tab (ReferencePanel.jsx) still had the floating "ears"
+   look the comment above describes — its own .halfdefense wrapper card never
+   got the box-score's join fix. Same remedy: the diamond loses its own top
+   border and rounds only its bottom corners, so the title's square bottom
+   and the diamond's now-square top meet as one seam instead of two stacked
+   pills. */
+.refpanel__body .defdiamond {
+  border-top: none;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
 }
 
 .stat {

@@ -97,6 +97,7 @@
       "importers": [
         "api/dayHighlights.js",
         "components/game/GameResultFace.jsx",
+        "components/gamehud/DueUpConsole.jsx",
         "components/gamehud/StatBox.jsx",
         "components/inning/HalfInning.jsx",
         "screens/BoxScore.jsx",

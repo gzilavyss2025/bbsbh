@@ -50,16 +50,19 @@ function dueUpSlot(feed, battingSide, targetInning, targetHalf) {
 // (up to `count`, batting-order order, wrapping past 9 back to 1) or null —
 // either lineupEntering itself isn't safe to show yet, or the half's lineup
 // hasn't posted (MiLB gap, or the game just hasn't gotten there).
-function battersDueUp(feed, battingSide, targetInning, targetHalf, revealedThrough, count) {
+// `startSlot`, when passed, overrides the default pre-half dueUpSlot lookup —
+// selectDueUpDuring's own mid-half slot arithmetic uses this to reuse the
+// rest of the resolution (lineupEntering + the slot walk) unchanged.
+function battersDueUp(feed, battingSide, targetInning, targetHalf, revealedThrough, count, startSlot) {
   const slots = lineupEntering(feed, battingSide, targetInning, targetHalf, revealedThrough)
   if (!slots || slots.length === 0) return null
 
   const bySlot = new Map(slots.map((s) => [s.slot, s.entries[s.entries.length - 1]]))
-  const startSlot = dueUpSlot(feed, battingSide, targetInning, targetHalf)
+  const slot0 = startSlot ?? dueUpSlot(feed, battingSide, targetInning, targetHalf)
 
   const batters = []
   for (let i = 0; i < count && i < slots.length; i++) {
-    const slot = ((startSlot - 1 + i) % 9) + 1
+    const slot = ((slot0 - 1 + i) % 9) + 1
     const entry = bySlot.get(slot)
     if (entry) batters.push({ slot, ...entry })
   }
@@ -86,4 +89,56 @@ export function selectDueUpNext(feed, inning, half, revealedThrough = Infinity, 
 export function selectDueUpNow(feed, inning, half, revealedThrough = Infinity, count = 3) {
   const battingSide = half === 'top' ? 'away' : 'home'
   return battersDueUp(feed, battingSide, inning, half, revealedThrough, count)
+}
+
+// Same slot arithmetic as dueUpSlot, but scoped to the plays already stepped
+// into THIS half (up to `stepAtBatIndex`, the same game-wide `about.atBatIndex`
+// cap the pitcher/win-prob console readers use — ADR-0016) instead of the
+// side's previous half. Falls back to dueUpSlot itself once nothing in this
+// half has been stepped into yet, so a fresh half starts from the same figure
+// selectDueUpNow already would.
+function dueUpSlotDuring(feed, battingSide, inning, half, stepAtBatIndex) {
+  if (stepAtBatIndex == null) return dueUpSlot(feed, battingSide, inning, half)
+  const boxPlayers = feed?.liveData?.boxscore?.teams?.[battingSide]?.players ?? {}
+  let last = null
+  for (const play of feed?.liveData?.plays?.allPlays ?? []) {
+    const about = play?.about ?? {}
+    if (about.inning !== inning || about.halfInning !== half) continue
+    if ((about.atBatIndex ?? Infinity) > stepAtBatIndex) continue
+    const eventType = play.result?.eventType
+    if (play.result?.type !== 'atBat' || NON_PA_EVENT_TYPES.has(eventType) || eventType === GAME_ADVISORY_EVENT_TYPE) {
+      continue
+    }
+    const batterId = play.matchup?.batter?.id
+    if (batterId != null) last = batterId
+  }
+  if (last == null) return dueUpSlot(feed, battingSide, inning, half)
+  const bo = Number(boxPlayers[`ID${last}`]?.battingOrder)
+  if (!Number.isFinite(bo)) return dueUpSlot(feed, battingSide, inning, half)
+  const slot = Math.floor(bo / 100)
+  return slot >= 9 ? 1 : slot + 1
+}
+
+// Who's due up next AS OF the currently-stepped-through point in the batting
+// side's OWN half — the console's next-3 card, live during an at-bat rather
+// than only before the half opens (selectDueUpNow's own footing). Same
+// spoiler discipline as every other caller here: entirely inherited from
+// lineupEntering's gate, which only ever names who occupied a slot as the
+// half BEGAN, so a pinch-hitter subbed in mid-half never surfaces here ahead
+// of his own notice card in the feed — the slot keeps showing whoever
+// lineupEntering already says is in it. `stepAtBatIndex` is the same
+// `curStepInfo.lastAtBatIndex` the Pitchers table and win-probability chart
+// already consume (reported up from inside PlayByPlay's own SealBox render);
+// null reproduces selectDueUpNow's own pre-half behavior exactly.
+export function selectDueUpDuring(feed, inning, half, revealedThrough, stepAtBatIndex, count = 3) {
+  const battingSide = half === 'top' ? 'away' : 'home'
+  return battersDueUp(
+    feed,
+    battingSide,
+    inning,
+    half,
+    revealedThrough,
+    count,
+    dueUpSlotDuring(feed, battingSide, inning, half, stepAtBatIndex),
+  )
 }

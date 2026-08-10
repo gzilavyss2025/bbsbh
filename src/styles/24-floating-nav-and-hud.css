@@ -412,11 +412,16 @@
    The SAME scorebug, placed rather than floated — focus mode's masthead
    (ScorebugMount.jsx, ADR-0043). A shape change, not a second scorebug.
 
-   The dock above is a 246px portrait card because it has to survive floating
-   over a long scrolling page. Focus mode has no such page, so the card unrolls
-   into a full-width horizontal band and parks at the top of the stage:
-   teams+runs, inning, bases+outs, then the batter/pitcher lines — left to right
-   in the order a broadcast bug uses, which is the order the reader knows.
+   Stacked batter/pitcher lines above the strip, same reading order as the
+   floating dock (Scorebug.jsx's own source order — no `order` override here
+   any more): teams+runs+inning+bases sits UNDER who's up and who's on the
+   mound, not beside it. On a desktop-width stage that keeps the band close to
+   its old ~246px dock width instead of stretching it into a wide horizontal
+   strip — .consolebar (styles/focus/stage.css) is what gives the freed row
+   width to the due-up-next card beside it. On a phone the band still spans
+   the full stage (there is no sibling card to share the row with there), so
+   its own @media block below scales the card's content up to fill it, rather
+   than leaving 246px-card-sized text stranded in a full-width bar.
 
    Navy ground under a kraft rule, deliberately the masthead signature
    .half__title already carries, so the band and the half's own title bar read
@@ -424,66 +429,11 @@
 
    Lives here with the rest of the .gamehud rules rather than in
    styles/focus/*: nothing after this file styles .gamehud, so it needs no
-   help from cascade order. Focus mode's GRID PLACEMENT for the band does need
-   that help and stays in 61 with the grid it belongs to. */
+   help from cascade order. Focus mode's GRID PLACEMENT for .consolebar does
+   need that help and stays in 61 with the grid it belongs to. */
 .gamehud--console {
-  position: sticky;
-  top: 0;
-  z-index: 15;
-  width: auto;
-  height: var(--console-hud-h);
-  flex-direction: row;
-  align-items: stretch;
-  gap: 0;
-  padding: 0;
+  width: 100%;
   border-bottom: 3px solid var(--seal);
-}
-
-/* The strip leads. Source order puts the batter/pitcher lines first, which is
-   right for the stacked dock, so the band reorders rather than the component
-   branching on placement. The strip's own negative side margins and dark inset
-   are the dock's edge-to-edge treatment; here the strip is not a band within a
-   card, it IS the card. */
-.gamehud--console .gamehud__strip {
-  order: -1;
-  margin: 0;
-  min-height: 0;
-  flex: 0 0 auto;
-  background: none;
-}
-
-.gamehud--console .gamehud__marks {
-  flex: 0 0 auto;
-  width: 92px;
-  grid-template-columns: minmax(0, 1fr) 30px;
-}
-
-.gamehud--console .gamehud__runs {
-  font-size: var(--fs-small);
-}
-
-/* The batter/pitcher pair becomes the band's one flexible column. A HUD may
-   truncate a name — the at-bat card below prints it in full. */
-.gamehud--console .gamehud__lines {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 0 var(--space-3);
-}
-
-/* The dock's rows push a name and its figure to opposite ends of a 246px card.
-   Across a 1440px band that same rule stranded ".326" at the far right edge,
-   a foot of empty navy from the batter it belongs to. Grouped left instead. */
-.gamehud--console .gamehud__row {
-  justify-content: flex-start;
-  gap: var(--space-3);
-}
-
-.gamehud--console .gamehud__who {
-  flex: 0 1 auto;
 }
 
 /* Between innings nobody is up (Scorebug's `blank`). The band holds its height
@@ -491,5 +441,74 @@
    card up and down all game. */
 .gamehud--console.gamehud--blank {
   padding-top: 0;
+}
+
+@media (min-width: 740px) {
+  /* Narrow again, close to the floating dock's own 246px — the rest of
+     .gamehud--console's rules below this point are deliberately the SAME
+     ones the dock uses (marks/runs/lines/row sizing), inherited rather than
+     overridden, since a card this width fits them exactly as it always did. */
+  .gamehud--console {
+    width: 264px;
+    flex: 0 0 auto;
+  }
+}
+
+/* Below the wide breakpoint the band has no sibling card to share its row
+   with (DueUpConsole hides — see focus/stage.css), so it stays full width and
+   scales its own content up to use it, rather than stranding the dock's
+   compact type in a bar many times wider than the card it was sized for.
+   `.gamehud--console`'s own width stays the default 100% here (no override
+   needed). Icon-scale props (team marks, base diamond) are threaded in from
+   ScorebugMount's own width check instead of being fought over in CSS — see
+   its `markSize`/`baseSize`. */
+@media (max-width: 739.98px) {
+  .gamehud--console {
+    padding: 12px 14px 0;
+    gap: 8px;
+  }
+
+  .gamehud--console .gamehud__who {
+    font-size: var(--fs-body);
+  }
+
+  .gamehud--console .gamehud__row--pitcher .gamehud__who {
+    font-size: var(--fs-small);
+  }
+
+  .gamehud--console .gamehud__val {
+    font-size: var(--fs-body);
+  }
+
+  .gamehud--console .gamehud__strip {
+    min-height: 92px;
+    margin: 6px -14px 0;
+  }
+
+  .gamehud--console .gamehud__runs {
+    font-size: var(--fs-title-sm);
+  }
+
+  .gamehud--console .gamehud__innnum {
+    font-size: var(--fs-title);
+  }
+
+  .gamehud--console .gamehud__tri {
+    border-left-width: 7px;
+    border-right-width: 7px;
+  }
+
+  .gamehud--console .gamehud__tri--up {
+    border-bottom-width: 8px;
+  }
+
+  .gamehud--console .gamehud__tri--down {
+    border-top-width: 8px;
+  }
+
+  .gamehud--console .gamehud__outdot {
+    width: 10px;
+    height: 10px;
+  }
 }
 

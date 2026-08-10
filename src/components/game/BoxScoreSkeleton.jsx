@@ -333,6 +333,31 @@ const BALL_FRAMES = Array.from({ length: BALL_FRAME_COUNT }, (_, i) =>
   buildFrame((i / BALL_FRAME_COUNT) * Math.PI * 2),
 )
 
+// One frozen frame of the skeleton's own rolling ball (buildFrame(0), same
+// geometry, no spin/steps sprite) — a small "vs" glyph for AtBatHero.jsx.
+// Its own body+seam classes, not skel__ball*: this is a normal at-rest icon
+// wherever it renders, not a loading placeholder, and the two contexts
+// shouldn't share a token if one of them ever needs to change independently.
+export function BallGlyph({ className = '' }) {
+  const idPrefix = useId()
+  const frame = BALL_FRAMES[0]
+  return (
+    <svg className={`ballglyph ${className}`} viewBox="0 0 100 100" role="presentation" aria-hidden="true">
+      <defs>
+        <radialGradient id={`${idPrefix}shade`} cx="34%" cy="28%" r="80%">
+          <stop className="ballglyph__shadelight" offset="0%" />
+          <stop className="ballglyph__shadedark" offset="100%" />
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r={BALL_R} fill={`url(#${idPrefix}shade)`} />
+      <path className="ballglyph__seam" d={frame.seamD} />
+      {frame.stitchLines.map((s, i) => (
+        <line key={i} className="ballglyph__stitch" x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} />
+      ))}
+    </svg>
+  )
+}
+
 function SkelBall() {
   // A prefix, not a raw id: possibly several skeleton cards are on screen
   // at once (one per still-loading game after "Reveal all results"), and

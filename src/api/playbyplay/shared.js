@@ -32,6 +32,7 @@ function resolveBatter(feed, side, id, positionEntering) {
     fullName: (person.fullName ?? '').trim(),
     ...personNameParts(person),
     pos: positionEntering ?? startingPositionAbbr(box),
+    jersey: box.jerseyNumber ?? person.primaryNumber ?? '',
   }
 }
 

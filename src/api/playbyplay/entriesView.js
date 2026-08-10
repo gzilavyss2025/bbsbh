@@ -164,7 +164,13 @@ export function buildTrailItems(entries, bounds, revealedSteps, eventCodeFor) {
   return bounds.slice(0, revealedSteps).map((end, i) => {
     const windowEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], end)
     const atbat = windowEntries.find((e) => e.kind !== 'event' && e.kind !== 'placed')
-    if (atbat) return { name: atbat.batter.last, code: atbat.code || '', kind: atbat.codeKind }
+    // A called third strike (scorebookCode.js) carries no `.code` of its own —
+    // the main card draws its backward "K" as a dedicated glyph
+    // (.pbp__klooking), not plain code text. The trail chip has no room for
+    // that glyph, so it falls back to the same "K" a swinging strikeout's
+    // code already is, rather than the empty-code '···' placeholder a real
+    // strikeout should never show.
+    if (atbat) return { name: atbat.batter.last, code: atbat.code || (atbat.calledLooking ? 'K' : ''), kind: atbat.codeKind }
     return { name: noticeLabel(windowEntries[0], eventCodeFor), code: '', kind: 'note' }
   })
 }

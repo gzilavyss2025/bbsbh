@@ -9,9 +9,11 @@
    scorecard cells they are. WRAPS; never scrolls. The first pass was a
    snap-scrolling pill carousel, which put a scrollbar under the hero AND hid
    the earliest at-bats of a long inning off the left edge — the exact thing the
-   trail exists to prevent. Seven 48px cells fit a 390px phone column, so a
-   twelve-batter inning is two rows and ~100px. A hidden thirteenth cell costs
-   more than that. No overflow-x here, and none may be added. */
+   trail exists to prevent. A second pass fixed every cell at 48px square,
+   which squeezed a multi-character code (a double play) and clipped every
+   name down to 3 letters; cells now size to their own content instead — a
+   long inning simply wraps to more rows, same as before. No overflow-x here,
+   and none may be added. */
 .trailstrip {
   display: flex;
   flex-direction: column;
@@ -26,14 +28,14 @@
 
 .trailcell {
   flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1px;
-  padding: 0;
+  padding: var(--space-1) var(--space-2);
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-xs);
   background: var(--surface-card);
@@ -49,6 +51,7 @@
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   color: var(--text-body);
+  white-space: nowrap;
 }
 
 .trailcell__name {
@@ -59,6 +62,7 @@
   line-height: var(--lh-solid);
   text-transform: uppercase;
   color: var(--text-caption);
+  white-space: nowrap;
 }
 
 .trailcell--hit .trailcell__code {

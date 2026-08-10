@@ -43,6 +43,7 @@ export function HalfInning({
   revealedAtBatCount,
   focusOne,
   focusStep,
+  focusCursor,
   onFocusInfo,
   onStepInfo,
   onRunsSoFar,
@@ -79,6 +80,18 @@ export function HalfInning({
   // drops a PRE-pitch change from the feed (see its anyPitchInHalf guard) and
   // why PrePitchChanges drops one from the staged list; the live override was
   // the one piece pulling the other way.
+  //
+  // Focus mode narrows WHEN this persistent card shows, not what it names:
+  // the ordinary stacked page still pins it at the top of the half for the
+  // whole time the half is on screen (a normal section header). Focus mode
+  // shows one at-bat at a time, and re-announcing the same starter above
+  // every card the reader steps to reads as the banner "coming back" — so
+  // there it's gone the moment the reader has stepped past the half's first
+  // at-bat (focusCursor > 0). A mid-half change still gets its own
+  // announcement at the right moment either way, via the `pitching_substitution`
+  // card above, never this one — that's the "or the first at-bat for the new
+  // pitcher" half of the rule, and it needs no extra gate here.
+  const showNowPitching = !focusOne || focusCursor === 0
   const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
@@ -251,7 +264,7 @@ export function HalfInning({
         </h3>
 
         {/* Persistent Now Pitching card — see the comment above nowPitching. */}
-        {(revealed || isNextToReveal) && nowPitching && (
+        {(revealed || isNextToReveal) && nowPitching && showNowPitching && (
           <PitcherNotice
             pitcher={nowPitching}
             teamId={battingSide === 'away' ? homeId : awayId}

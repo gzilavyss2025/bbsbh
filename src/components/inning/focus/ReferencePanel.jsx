@@ -128,6 +128,7 @@ function Section({
   effInning,
   effHalf,
   meta,
+  treatment,
   prospectsData,
   rookiesData,
   isMlb,
@@ -142,6 +143,9 @@ function Section({
         half={effHalf}
         awayName={meta.away.clubName}
         homeName={meta.home.clubName}
+        awayId={meta.away.id}
+        homeId={meta.home.id}
+        treatment={treatment}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         isMlb={isMlb}
@@ -150,14 +154,16 @@ function Section({
     )
   }
   if (tab === 'field' && showEntering) {
+    const fieldingSide = effHalf === 'top' ? 'home' : 'away'
     return (
       <DefenseSection
         feed={feed}
         inning={effInning}
         half={effHalf}
-        fieldingSide={effHalf === 'top' ? 'home' : 'away'}
+        fieldingSide={fieldingSide}
         fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
         fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
+        fieldingTreatment={treatment?.[fieldingSide]}
         revealedThrough={revealedThrough}
       />
     )

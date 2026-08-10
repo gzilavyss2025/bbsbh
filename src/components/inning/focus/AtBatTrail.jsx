@@ -7,15 +7,16 @@
 // WRAPS, never scrolls (ADR-0043). The first pass made these pills in a
 // horizontally scrolling, snap-aligned strip, which put a real scrollbar under
 // the hero card and — worse — hid the earliest at-bats of a long inning off the
-// left edge, which is the exact complaint the trail exists to answer. A
-// 12-batter inning is 2 wrapped rows of fixed 48px cells at phone width and
-// costs ~100px; a hidden 13th cell costs the reader the thing they opened the
-// trail for. No `overflow-x` here, and none may be added.
+// left edge, which is the exact complaint the trail exists to answer. Cells
+// size to their own content rather than a fixed 48px square, so a long code
+// (a double play, a note) and a full last name both fit instead of being
+// squeezed toward illegibility — a long inning simply wraps to more rows. No
+// `overflow-x` here, and none may be added.
 //
 // The CODE is the recognition key, not the name: a scorer reading back their
 // own half looks for the K or the 6-3, the same way they would scanning the
-// paper sheet. The name is a 3-letter cue under it, with the full one on the
-// accessible label rather than truncated on screen.
+// paper sheet. The name is a full last-name cue under it — no longer a
+// 3-letter clip — with the same full name doubled onto the accessible label.
 //
 // `items` is a plain array built by PlayByPlay from entries already ≤
 // effectiveCap (see its own header comment) — this component only lays it out,
@@ -40,7 +41,7 @@ export function AtBatTrail({ items, cursor, following, onSelect, onFollowLatest,
           >
             <span className="trailcell__code">{item.code || '···'}</span>
             <span className="trailcell__name" aria-hidden="true">
-              {item.name.slice(0, 3)}
+              {item.name}
             </span>
           </button>
         ))}

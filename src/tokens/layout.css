@@ -38,8 +38,14 @@
      height, the sticky offset the reference rail parks below it, and the
      scroll-margin useFocusMode's scrollIntoView lands the at-bat card at.
      Held here rather than in the partial because it is a frame dimension the
-     grid reasons about, same footing as --app-width. */
-  --console-hud-h: 64px;
+     grid reasons about, same footing as --app-width.
+
+     Two values, not one: the band's batter/pitcher lines sit ABOVE the score
+     strip (24-floating-nav-and-hud.css's `.gamehud--console`), and below the
+     wide breakpoint that stack scales its own type up to fill the card's full
+     phone width, which makes it taller than the narrow (~264px) desktop card.
+     Redefined below at the same 740px cut both files already share. */
+  --console-hud-h: 152px;
 
   /* Focus mode's action bar — one solid row (refresh + the reveal pair), so
      unlike .pagenav's translucent fade there is a real, measurable height for
@@ -50,4 +56,13 @@
      .skel__ball) — its own component-scoped size rather than borrowing a
      --fs-* typography role for an unrelated icon dimension. */
   --skel-ball-size: 56px;
+}
+
+/* --console-hud-h's desktop half — see the mobile value above for why this is
+   two numbers, not one. Same 740px cut as 24-floating-nav-and-hud.css's own
+   `.gamehud--console` media block and stage.css's grid breakpoint. */
+@media (min-width: 740px) {
+  :root {
+    --console-hud-h: 118px;
+  }
 }

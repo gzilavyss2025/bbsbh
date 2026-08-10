@@ -10,6 +10,7 @@ import { DefenseDiamond } from '../scoring/DefenseDiamond.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 
 // The pre-scoring reference for a half: both teams' lineup cards + the fielding
 // side's alignment as they stand ENTERING it (subs through first pitch only).
@@ -17,7 +18,15 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 // phone (staged around the seal), and as a right-column card on the wide layout.
 // Spoiler-free: revealedThrough is threaded straight into defenseEntering/
 // lineupEntering below, which enforce the gate themselves (ADR-0010).
-export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, awayId, homeId, prospectsData, rookiesData, isMlb, revealedThrough }) {
+//
+// `treatment` (optional, `{away, home}` jersey-treatment keys — InningViewer's
+// own `winProbTreatment`, ADR-0030 footing) feeds each team's card the SAME
+// curated bar/accent/text triad TeamInfo.jsx and BoxScore.jsx's team cards
+// already wear (headerTheme.js) — identity-only, never anything reveal-
+// related. Absent treatment (an older caller, or a club with no curated
+// triad) falls back to the CSS defaults, same navy chrome as before.
+export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough }) {
+  const fieldingSide = battingSide === 'away' ? 'home' : 'away'
   return (
     <>
       <LineupSection
@@ -26,6 +35,9 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
         half={half}
         awayName={awayName}
         homeName={homeName}
+        awayId={awayId}
+        homeId={homeId}
+        treatment={treatment}
         prospectsData={prospectsData}
         rookiesData={rookiesData}
         isMlb={isMlb}
@@ -35,9 +47,10 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
         feed={feed}
         inning={inning}
         half={half}
-        fieldingSide={battingSide === 'away' ? 'home' : 'away'}
+        fieldingSide={fieldingSide}
         fieldingName={battingSide === 'away' ? homeName : awayName}
         fieldingTeamId={battingSide === 'away' ? homeId : awayId}
+        fieldingTreatment={treatment?.[fieldingSide]}
         revealedThrough={revealedThrough}
       />
     </>
@@ -51,24 +64,25 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // api/enteringHalf.js's safeToShowEntering), returning null past it, so this
 // is safe to call outside the seal regardless of caller diligence.
 //
-// The title names the MOMENT, not just the topic — "Defensive alignment
-// entering the Top 7th" rather than the bare word "Defense", which read as
-// current/live once this card moved below the play-by-play on reveal
-// (ADR-0010), sitting under a card that might already show a mid-inning
-// defensive change. "Defensive alignment" also reads less ambiguously than
-// "Defense" on its own, which doubles as this app's own runs-allowed sense
-// elsewhere (StatBox's R/H/E row) — see
+// "Defensive alignment" rather than the bare word "Defense", which doubles as
+// this app's own runs-allowed sense elsewhere (StatBox's R/H/E row) — see
 // .scratch/pbp-scoring-review/issues/05-substitution-surface-asymmetries.md.
 // Memoized (both sections): the caller-gated entering selectors below walk the
 // whole game's plays, and these two cards hang off InningViewer, which
 // re-renders on every live report during a live game. The reveal mark is a prop,
 // so the memo comparison covers the gate itself.
-export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, revealedThrough }) {
+export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, fieldingTreatment, revealedThrough }) {
   const [open, setOpen] = useState(true)
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
+  // The same curated bar/accent/text triad TeamInfo.jsx and BoxScore.jsx's own
+  // .bs__defensecard already wear (headerTheme.js, ADR-0030) — this card is
+  // the innings view's copy of that exact markup, so it reads for free off
+  // the same `.is-themed .halfdefense__title` rule 09-team-info.css already
+  // carries; no new CSS needed here.
+  const theme = headerThemeFor(fieldingTeamId, themeKeyFor(fieldingTeamId, fieldingSide, fieldingTreatment))
   return (
-    <section className="halfdefense">
+    <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       <button
         type="button"
         className="halfdefense__title"
@@ -80,9 +94,10 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
           name={fieldingName}
           size={22}
           variant="mono"
+          crop="bar"
           className="metricbar__logo"
         />
-        Defensive alignment entering the {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
+        Defensive alignment
         <span className="halfdefense__chevron" aria-hidden="true">
           {open ? '▾' : '▸'}
         </span>
@@ -117,7 +132,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
-export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, prospectsData, rookiesData, isMlb, revealedThrough }) {
+export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough }) {
   const [open, setOpen] = useState(true)
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
@@ -143,26 +158,33 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
       </button>
       {open && (
         <div className="lineupcard__teams">
-          <LineupTeam name={awayName || 'Away'} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
-          <LineupTeam name={homeName || 'Home'} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
+          <LineupTeam name={awayName || 'Away'} teamId={awayId} side="away" treatment={treatment?.away} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
+          <LineupTeam name={homeName || 'Home'} teamId={homeId} side="home" treatment={treatment?.home} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
         </div>
       )}
     </section>
   )
 })
 
-// One team's lineup column: the club name spelled out, then a numbered list of
-// its nine batting slots. Each row reads name(s) on the left and the standing
-// occupant's jersey number + fielding position right-aligned on a shared column.
-// An empty side (a thin MiLB feed that never posted a lineup) is dropped rather
-// than shown as a bare header. `upNextLabels`, when set, maps the up-to-three
-// slots leading off this team's own next half to their "Due up"/"On deck"/
-// "In the hole" label (see LineupSection above).
-function LineupTeam({ name, slots, prospectsData, rookiesData, isMlb, upNextLabels }) {
+// One team's lineup column: the club's own bar — the SAME curated bar/accent/
+// text triad TeamInfo.jsx and BoxScore.jsx's team cards already wear
+// (headerTheme.js, ADR-0030), not a one-off tint — captioned with the club
+// name, its knockout mark right-aligned against the bar's edge, then a
+// numbered list of its nine batting slots. Each row reads name(s) on the left
+// and the standing occupant's jersey number + fielding position right-aligned
+// on a shared column. An empty side (a thin MiLB feed that never posted a
+// lineup) is dropped rather than shown as a bare header. `upNextLabels`, when
+// set, maps the up-to-three slots leading off this team's own next half to
+// their "Due up"/"On deck"/"In the hole" label (see LineupSection above).
+function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels }) {
   if (slots.length === 0) return null
+  const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
-    <div className="lineupteam">
-      <h5 className="lineupteam__name">{name} Lineup</h5>
+    <div className={`lineupteam ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
+      <h5 className="lineupteam__name">
+        <span className="lineupteam__namelabel">{name} Lineup</span>
+        <TeamLogo teamId={teamId} name={name} size={20} variant="mono" crop="bar" className="metricbar__logo" />
+      </h5>
       <ol className="lineupcard__list">
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant

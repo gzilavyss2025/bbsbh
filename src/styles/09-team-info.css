@@ -102,6 +102,18 @@
   color: var(--bar-text, var(--text-on-ink));
 }
 
+/* The innings view's own lineup masthead (.lineupteam__name,
+   EnteringReference.jsx) — same triad, same fallback, one per team rather
+   than per half (each team's `.lineupteam` carries its OWN `is-themed`, since
+   the two clubs in a lineup card wear two different bars). It does carry a
+   club mark, so it gets the dark re-ink rule above for free by reusing
+   `.metricbar__logo`. */
+.lineupteam.is-themed .lineupteam__name {
+  background: var(--bar-fill, var(--navy));
+  border-bottom-color: var(--bar-accent, var(--seal));
+  color: var(--bar-text, var(--text-on-ink));
+}
+
 /* The player page's section headers — same club bar idiom as
    .teaminfo.is-themed above, but opt-in via `.section__title--bar` rather
    than blanket-applied to every `.section__title` on the page: the eight

@@ -26,6 +26,7 @@ import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
 import { ReferenceBand, RosterPanels } from '../components/inning/ReferenceBand.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ScorebugMount } from '../components/gamehud/ScorebugMount.jsx'
+import { DueUpConsole } from '../components/gamehud/DueUpConsole.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
@@ -384,6 +385,7 @@ export function InningViewer({
         atBatCountFor={atBatCountFor}
         focusOne={focus.focused}
         focusStep={focus.step}
+        focusCursor={focus.cursor}
         onFocusInfo={focus.reportSteps}
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
@@ -537,23 +539,6 @@ export function InningViewer({
     if (urlIdx !== curIdx) onInning(effInning, effHalf, { replace: true })
   }, [urlIdx, curIdx, effInning, effHalf]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Every pitcher who has appeared in a revealed half-inning, with running lines
-  // (see api/pitchers.js). Recomputed as the reveal mark advances.
-  const pitcherLines = useMemo(
-    () => computePitcherLines(feed, renderRevealedThrough),
-    [feed, renderRevealedThrough],
-  )
-
-  // PitchersSection's own prop, memoized rather than built inline: the section
-  // is memoized, and an array literal rebuilt each render would defeat that.
-  const pitcherTeams = useMemo(
-    () => [
-      { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
-      { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
-    ],
-    [rosters, pitcherLines],
-  )
-
   // The workload file describes "now" — its availability rules only apply to
   // a slate-current game (same freshness window TeamInfo's bullpen board
   // uses). Null on an archival game, which silently disables the
@@ -650,6 +635,30 @@ export function InningViewer({
     [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
 
+  // Every pitcher who has appeared in a revealed half-inning, with running
+  // lines (see api/pitchers.js) — plus, same adjacency rule as the win-prob
+  // pair above, the partial line for the ONE half currently being stepped
+  // through one at-bat at a time, so the table (and the Arms tab) update
+  // right along with "Next at-bat" instead of waiting for the half to commit.
+  const pitcherLines = useMemo(
+    () =>
+      computePitcherLines(feed, renderRevealedThrough, {
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [feed, renderRevealedThrough, stepFrontierIdx, curStepInfo],
+  )
+
+  // PitchersSection's own prop, memoized rather than built inline: the section
+  // is memoized, and an array literal rebuilt each render would defeat that.
+  const pitcherTeams = useMemo(
+    () => [
+      { name: rosters.away.name, side: 'away', rows: pitcherLines.away },
+      { name: rosters.home.name, side: 'home', rows: pitcherLines.home },
+    ],
+    [rosters, pitcherLines],
+  )
+
   if (!firstPitchThrown) {
     return (
       <div className="innings">
@@ -701,6 +710,7 @@ export function InningViewer({
     effInning,
     effHalf,
     meta,
+    treatment: winProbTreatment,
     prospectsData,
     rookiesData,
     isMlb,
@@ -773,19 +783,36 @@ export function InningViewer({
             screen's masthead rather than a dock floating over the at-bat card
             (ScorebugMount.jsx, ADR-0043); it spans both grid columns. The
             unfocused page mounts the same component further down instead,
-            where it renders the floating dock — never both at once. */}
+            where it renders the floating dock — never both at once.
+
+            .consolebar wraps it with DueUpConsole: the scorebug narrows back
+            to its old dock width at wide widths (24-floating-nav-and-hud.css),
+            and the width that frees up in this same row goes to a live
+            next-3-batters card rather than sitting empty — DueUpConsole hides
+            itself below the wide breakpoint, where the scorebug needs the
+            row's full width for its own bumped-up mobile sizing instead. */}
         {focus.focused && (
-          <ScorebugMount
-            started={started}
-            live={curLiveState}
-            feed={feed}
-            unlocked={renderUnlocked}
-            revealedThrough={renderRevealedThrough}
-            runsInProgress={runsInProgress}
-            meta={meta}
-            treatment={winProbTreatment}
-            focused
-          />
+          <div className="consolebar">
+            <ScorebugMount
+              started={started}
+              live={curLiveState}
+              feed={feed}
+              unlocked={renderUnlocked}
+              revealedThrough={renderRevealedThrough}
+              runsInProgress={runsInProgress}
+              meta={meta}
+              treatment={winProbTreatment}
+              focused
+            />
+            <DueUpConsole
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              revealedThrough={renderRevealedThrough}
+              stepAtBatIndex={stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null}
+              teamId={effHalf === 'top' ? meta.away.id : meta.home.id}
+            />
+          </div>
         )}
 
         {/* `.innings__stage` is `display: contents` outside the wide+focused

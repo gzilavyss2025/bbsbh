@@ -23,12 +23,14 @@ export function ReferenceBand({
   effInning,
   effHalf,
   meta,
+  treatment,
   prospectsData,
   rookiesData,
   isMlb,
   revealedThrough,
 }) {
   const showEntering = safeToShowEntering(revealedThrough, effInning, effHalf)
+  const fieldingSide = effHalf === 'top' ? 'home' : 'away'
   return (
     <div className="innings__ref">
       <div className="innings__ref-left">
@@ -40,9 +42,10 @@ export function ReferenceBand({
               feed={feed}
               inning={effInning}
               half={effHalf}
-              fieldingSide={effHalf === 'top' ? 'home' : 'away'}
+              fieldingSide={fieldingSide}
               fieldingName={effHalf === 'top' ? meta.home.clubName : meta.away.clubName}
               fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
+              fieldingTreatment={treatment?.[fieldingSide]}
               revealedThrough={revealedThrough}
             />
           </div>
@@ -56,6 +59,9 @@ export function ReferenceBand({
             half={effHalf}
             awayName={meta.away.clubName}
             homeName={meta.home.clubName}
+            awayId={meta.away.id}
+            homeId={meta.home.id}
+            treatment={treatment}
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             isMlb={isMlb}

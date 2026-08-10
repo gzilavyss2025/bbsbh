@@ -67,6 +67,126 @@
   gap: var(--space-3);
 }
 
+/* Wraps the scorebug + DueUpConsole (InningViewer.jsx) as one sticky unit —
+   the anchoring that used to live on `.gamehud--console` itself moved here
+   once the band stopped stretching to fill the row on its own
+   (24-floating-nav-and-hud.css). Below the wide breakpoint DueUpConsole
+   renders null, so this is a one-child row and the scorebug alone fills it,
+   same as before this wrapper existed. */
+.consolebar {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+/* ---------------------------------------------------------- due-up console */
+/* The next-3-batters card beside the narrowed scorebug (DueUpConsole.jsx) —
+   desktop only; a phone gives that row's whole width back to the scorebug's
+   own bumped-up sizing instead (24-floating-nav-and-hud.css). Same headshot-
+   fills-the-column, text-beside-it shape as ReferencePanel's other cards, laid
+   out as its own small grid rather than UpNextBatters/DueUpNextCard's
+   headshot-over-name column stack — those sit UNDER a lineup card with room to
+   spare; this one has to fit beside a 264px scorebug on a stage that can be as
+   narrow as ~478px (stage.css's own --refrail-w comment). */
+.dueupconsole {
+  display: none;
+}
+
+@media (min-width: 740px) {
+  .dueupconsole {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+  }
+
+  .dueupconsole__col {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: var(--space-2);
+    flex: 1 1 0;
+    min-width: 0;
+    background: var(--surface-card);
+    border: var(--bw-hair) solid var(--border-rule);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+
+  /* Height-driven, not a fixed rung width stretched to fit — the row's own
+     height varies with the scorebug beside it, and a shot forced to 100% of
+     THAT height at a fixed --shot-2xs-w width lost its 3:4 portrait crop and
+     stretched every face. `height: 100%` paired with `aspect-ratio` here is
+     circular, though, not just wrong-looking: the shot's grid row has no
+     definite height of its own to be 100% OF (nothing else in the row pins
+     one), so the browser falls back to sizing the box off the raw photo's own
+     large intrinsic dimensions instead — a badly cropped, oversized portrait
+     crowding the name/line out of the column entirely. `--console-hud-h` (the
+     scorebug band's own definite height, tokens/layout.css) is what the row
+     actually target-matches, so anchoring to it directly — not a percentage —
+     is what keeps the height real rather than an unresolvable percentage. */
+  .dueupconsole__shot {
+    width: auto;
+    height: calc(var(--console-hud-h) - 2 * var(--space-2));
+    aspect-ratio: 3 / 4;
+    border-radius: 0;
+  }
+
+  .dueupconsole__info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  }
+
+  .dueupconsole__order {
+    font-family: var(--font-mono);
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+
+  /* First name over last, last name the bigger of the two — the same weight
+     hierarchy a scorecard gives a surname over a given name. */
+  .dueupconsole__name {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .dueupconsole__first {
+    display: block;
+    font-size: var(--fs-caption);
+    font-weight: var(--w-regular);
+    color: var(--text-caption);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dueupconsole__last {
+    display: block;
+    font-size: var(--fs-small);
+    font-weight: var(--w-bold);
+    color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dueupconsole__line {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+  }
+}
+
 :root {
   /* Fixed, so opening a tab can never change the track and reflow the at-bat
      card beside it (ADR-0010). 300px rather than the first pass's 268, where
@@ -88,9 +208,9 @@
     align-items: start;
   }
 
-  /* The band spans both columns and stays put while the stage scrolls under
+  /* The bar spans both columns and stays put while the stage scrolls under
      it. */
-  .innings--focus .gamehud--console {
+  .innings--focus .consolebar {
     grid-column: 1 / -1;
     grid-row: 1;
   }

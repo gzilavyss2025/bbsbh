@@ -564,7 +564,6 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
         <AtBatHero
           batter={batter}
           pitcher={pitcher}
-          batSide={batSide}
           rbi={rbi}
           pinchRunners={pinchRunners}
           battingTeamId={battingTeamId}
