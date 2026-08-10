@@ -1,0 +1,30 @@
+/* ProspectTrendPill — /prospects' Trend column, a static Ledger cell (see
+   that component's header for why it's static, not a tap-to-reveal like
+   radarpill's note). Split out of 31-wild-card.css (already at its
+   check-file-size budget) rather than grown there — same "one new file, one
+   new number" rule src/index.css's ordered @import list runs on for every
+   other lettered sibling. Cascades right after it since it extends the same
+   .prospecttable rules. The percentile stays plain ink; only the movement
+   arrow takes --accent-positive/--accent-negative, the same restriction
+   radarpill's own up/down tag observes. The cell prints a spoken standing
+   ("Top 7%", "Middle", "Bottom 12%"), not the raw percentile — see
+   ProspectTrendPill.jsx. Mono, because the numbers inside those phrases still
+   want to line up down the column. */
+.prospecttrend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  white-space: nowrap;
+}
+.prospecttrend--unqualified {
+  font-family: var(--font-display);
+  color: var(--text-caption);
+}
+.prospecttrend__move--up {
+  color: var(--accent-positive);
+}
+.prospecttrend__move--down {
+  color: var(--accent-negative);
+}

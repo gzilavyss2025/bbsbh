@@ -379,8 +379,13 @@ for each generator; the reader modules:
 - `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
   slot the pitcher page fills with `workload.js`'s Recent workload): live
   `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
-  out in one `Promise.all`; `hitterFormView` is the pure facts-list shaping.
-  Current-day only (the card skips under a spoiler `asOf`), and NOT
+  out in one `Promise.all`; `hitterFormView` is the pure shaping. It returns a
+  small TIME SERIES, not a facts list: one row per window, a `season` anchor
+  row that is the baseline the windows are measured against, and per row a
+  signed OPS delta plus a `lean` on a FIXED ±.300 scale (a scale fitted to the
+  player would draw every hitter alive at full width). `RecentFormCard` renders
+  that as a ledger with diverging bars. Current-day only (the card skips under
+  a spoiler `asOf`), and NOT
   `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
   projection — the name differs on purpose so the two never collide.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`
@@ -453,6 +458,34 @@ for each generator; the reader modules:
   (`player_snapshots`); each exported row's `movement` is a self-join against
   the nearest prior snapshot bbsbh itself recorded, not Fever's own
   `/api/data/movers` feed.
+- `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
+  `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
+  `feverRadar.js` above: not a third party, not attributed, and not an MLE —
+  purely "how does his OPS/ERA compare to every other qualified player at his
+  level this season," computed straight from the same `fetchLevelSeasonStats`/
+  `combineToPool` (`statsLevels.js`) the combined minors leaderboard uses. A
+  `qualified: false` row means the prospect hasn't cleared the playing-time
+  floor (`MIN_PLATE_APPEARANCES`/`MIN_OUTS`,
+  `scripts/lib/prospectPercentile.mjs`) yet this season, not that he's off
+  the board. Surfaced via `ProspectTrendPill` on `/prospects` only — a static
+  Ledger cell, not a tap-to-reveal note like `RadarPill`, since Ledger's rows
+  are fixed-shape with no open/close state to lift. `movement` is the same
+  self-join-against-bbsbh's-own-history pattern as `feverRadar.js`, just a
+  wider window (stat percentiles move slower than a daily scouting rank); the
+  arrow only appears past a 5-point move, since a percentile wobbles a point
+  or two on one good night.
+
+  The column is headed **`vs. Level`** and sits LAST, after `Line`. It does not
+  print the raw percentile: `standingLabel` turns it into the phrase a
+  broadcast uses, with the stat attached — `Top 7% OPS`, `Middle OPS`,
+  `Bottom 12% ERA`. Three reasons, all learned the hard way. An ordinal
+  ("93rd") two cells from a real rank column reads as a second, competing rank;
+  nothing in it says which end is good; and the column ranks a DIFFERENT stat
+  depending on whether the row is a bat or an arm, so the stat has to ride in
+  every cell rather than be defined in a caption under the table. Percentile 41
+  through 59 is `Middle` rather than a printed near-50 figure, which would be
+  precision the sample cannot support. Higher is always better —
+  `percentileRank` inverts ERA — so `Top 2% ERA` means one of the level's best.
 
 - `gamePhotos.js` — the unsealed Game Photos page's (`/photos`) high-res photo
   finder, from the same `/api/v1/game/{gamePk}/content` endpoint `highlights.js`

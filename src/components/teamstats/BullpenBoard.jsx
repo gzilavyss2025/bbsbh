@@ -3,6 +3,7 @@ import { availabilityFor, bullpenStatusCounts, workloadFor } from '../../api/wor
 import { InfoPopover } from '../ui/InfoPopover.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
+import { headerThemeClass, headerThemeStyle } from '../../lib/headerTheme.js'
 
 // The bullpen availability board — who's rested, who's limited, who's likely
 // down tonight, from each reliever's recent completed appearances
@@ -13,6 +14,11 @@ import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 // Only rendered for a slate-current game (the workload file describes "now",
 // so on an archival box score the flags would be about the wrong day) — the
 // caller gates on the game date sitting within the file's freshness window.
+//
+// Nested under the OPPOSING starting pitcher card (TeamInfo.jsx), behind the
+// BullpenToggle below — this side's lineup is about to face THAT team's pen,
+// not its own, so `bullpen`/`theme`/`masthead` all belong to the other side
+// (same club OpposingStarterCard themes its own masthead to, see ADR-0030).
 const STATUS_LABEL = {
   fresh: 'Fresh',
   limited: 'Limited',
@@ -42,7 +48,37 @@ function detailFor(r) {
   return 'No recent appearances'
 }
 
-export function BullpenBoard({ workload, bullpen, gameDate }) {
+// Nests the board under the starting pitcher card, collapsible via the pill
+// below rather than a plain always-on section: local state, not a persisted
+// preference like useMatchupNotes — every visit starts expanded fresh rather
+// than remembering a prior collapse.
+export function useBullpenReveal() {
+  const [showBullpen, setShowBullpen] = useState(true)
+  return { showBullpen, setShowBullpen }
+}
+
+// The pill that shows/hides the board, in the starting pitcher masthead's
+// aside slot — same look as the batting order's MatchupNotesToggle
+// (.mastheadpill), guarded the same shallow way: on whether this team HAS
+// bullpen arms listed, not on whether the board's rows end up non-empty once
+// workload/gameDate are factored in (BullpenBoard itself still renders
+// nothing in that case).
+export function BullpenToggle({ hasArms, showBullpen, onToggle }) {
+  if (!hasArms) return null
+  return (
+    <button
+      type="button"
+      className="mastheadpill"
+      aria-pressed={showBullpen}
+      onClick={() => onToggle(!showBullpen)}
+    >
+      <span className="mastheadpill__dot" aria-hidden="true" />
+      Bullpen
+    </button>
+  )
+}
+
+export function BullpenBoard({ workload, bullpen, gameDate, theme, masthead }) {
   // The status a top summary pill is being hovered — matching board rows stay
   // lit, the rest dim. Pointer-only accent (nothing is hidden), so it needs no
   // keyboard/ARIA affordance.
@@ -83,7 +119,10 @@ export function BullpenBoard({ workload, bullpen, gameDate }) {
   if (rows.length === 0) return null
 
   return (
-    <section className="metriccard penboard">
+    <section
+      className={`metriccard penboard ${headerThemeClass(theme)}`.trim()}
+      style={headerThemeStyle(theme, masthead?.scale)}
+    >
       <SectionMasthead title="Bullpen health">
         <InfoPopover label="How bullpen availability is judged">
           Rested vs. worked from recent appearances — a workload signal, not a

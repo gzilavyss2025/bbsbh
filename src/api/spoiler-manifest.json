@@ -470,6 +470,10 @@
       "class": "spoiler-free",
       "why": "Static top-prospects reader. Rankings, not game state."
     },
+    "prospectTrend.js": {
+      "class": "spoiler-free",
+      "why": "Static prospect-trend reader — a level-relative OPS/ERA percentile computed from season stat splits. Season aggregate, not game state."
+    },
     "recentForm.js": {
       "class": "spoiler-free",
       "why": "The Team Page's Last-10 roster projection. Every game it reads is already Final, same footing as postseasonSeries.js. NOT hitterForm.js — the names differ on purpose."

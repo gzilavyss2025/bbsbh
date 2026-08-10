@@ -87,8 +87,9 @@ function sitSplit(code, stat) {
   return { split: { code }, stat }
 }
 const SIT_STAT = {
-  battersFaced: 100, avg: '.170', obp: '.242', ops: '.509',
+  battersFaced: 100, atBats: 90, hits: 15, totalBases: 22, avg: '.170', obp: '.242', slg: '.244', ops: '.509',
   homeRuns: 2, rbi: 11, doubles: 3, triples: 0, strikeOuts: 40, baseOnBalls: 6,
+  hitByPitch: 0, sacFlies: 1, plateAppearances: 100,
 }
 
 test('situationalSplitsView keeps the curated order and splitSide shape', () => {
@@ -99,13 +100,60 @@ test('situationalSplitsView keeps the curated order and splitSide shape', () => 
     'pitching',
   )
   assert.deepEqual(
-    view.map((r) => r.label),
-    ['Bases empty', 'Runners on', 'RISP', 'Ahead in count', 'Behind in count', 'Two strikes'],
+    view.rows.map((r) => r.label),
+    ['Empty', 'Runners on', 'RISP', 'Ahead', 'Behind', '2 strikes'],
   )
-  const risp = view.find((r) => r.label === 'RISP')
+  const risp = view.rows.find((r) => r.label === 'RISP')
   assert.equal(risp.side.count, 100)
-  assert.equal(risp.side.slash, '.170/.242/.509')
   assert.equal(risp.side.soPct, '40%')
+})
+
+test('the slash column is AVG/OBP/SLG — never OPS, which readers take for slugging', () => {
+  const view = situationalSplitsView(
+    ['2s', 'risp', 'r0', 'bc', 'ron', 'ac'].map((c) => sitSplit(c, SIT_STAT)),
+    'pitching',
+  )
+  const risp = view.rows.find((r) => r.label === 'RISP')
+  assert.equal(risp.side.slash, '.170/.242/.244')
+  // OPS keeps its own labelled figure — it is also the only one of the four
+  // that can run past 1.000, which a leading-dot slash has no room for.
+  assert.equal(risp.side.ops, '.509')
+})
+
+test('every row is tagged with its family, so the two can be ruled apart', () => {
+  const view = situationalSplitsView(
+    ['2s', 'risp', 'r0', 'bc', 'ron', 'ac'].map((c) => sitSplit(c, SIT_STAT)),
+    'pitching',
+  )
+  assert.deepEqual(
+    view.rows.map((r) => r.family),
+    ['base', 'base', 'base', 'count', 'count', 'count'],
+  )
+})
+
+test('the overall row sums bases-empty + runners-on only, and recomputes its rates', () => {
+  // The two base-state rows partition every plate appearance, so their sum is
+  // exact. RISP is a SUBSET of runners-on and the count rows overlap each
+  // other, so neither may join the sum.
+  const view = situationalSplitsView(
+    ['2s', 'risp', 'r0', 'bc', 'ron', 'ac'].map((c) => sitSplit(c, SIT_STAT)),
+    'pitching',
+  )
+  assert.equal(view.all.count, 200) // battersFaced 100 + 100
+  // RECOMPUTED from the summed counting stats, never copied or averaged off
+  // the rows' own rate strings: 30 H / 180 AB = .167, (30+12+0)/(180+12+0+2)
+  // = .216 OBP, 44 TB / 180 AB = .244 SLG. The fixture's own ".242" OBP does
+  // not survive that, which is the point — the sum is derived, not inherited.
+  assert.equal(view.all.slash, '.167/.216/.244')
+})
+
+test('no overall row when a base-state half is missing — a partial sum is a wrong sum', () => {
+  const view = situationalSplitsView(
+    ['risp', 'r0', 'bc', 'ac'].map((c) => sitSplit(c, SIT_STAT)),
+    'pitching',
+  )
+  assert.equal(view.rows.length, 4)
+  assert.equal(view.all, null)
 })
 
 test('situationalSplitsView needs most of the set — stray rows are noise', () => {
