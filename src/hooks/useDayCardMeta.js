@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { classifyGameCards } from '../api/dayHighlights.js'
 import { fetchCallouts } from '../api/callouts.js'
 import { apiDateToUrl } from '../lib/route.js'
 import { usePastGameSignals } from './usePastGameSignals.js'
@@ -56,7 +55,19 @@ export function useDayCardMeta(finals, dateStr, revealed) {
     if (!active) return undefined
     let cancelled = false
     ;(async () => {
-      const [entries, calloutsData] = await Promise.all([
+      // classifyGameCards is imported DYNAMICALLY — keep it that way. It pulls
+      // api/boxscore.js and the play-by-play selectors under it (halfInningFeed,
+      // scorebookCode, entriesView, advanceCode, notificationCards, gameNotes,
+      // pitchers), so a static import put the whole scoring data layer in the
+      // ENTRY chunk: GameSelect imports this hook at module scope, so every
+      // first paint of the slate paid for the innings viewer's data layer.
+      //
+      // It costs nothing here. The effect only runs once `revealed` (see the
+      // SPOILER RULE note above), and the import rides in the same Promise.all
+      // as the signals batch and the callouts fetch that already gate this
+      // work, so it resolves inside a wait the reveal already had.
+      const [{ classifyGameCards }, entries, calloutsData] = await Promise.all([
+        import('../api/dayHighlights.js'),
         mapPool(finals, SIGNALS_CONCURRENCY, (game) =>
           getSignals(game.gamePk)
             .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
