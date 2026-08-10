@@ -103,7 +103,7 @@ export function ProspectsPage() {
                 <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
                 p.position || DASH,
                 p.levelLabel || DASH,
-                <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo">
+                <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo" ariaLabel={p.team}>
                   <TeamLogo teamId={p.teamId} name={p.team} size={20} />
                 </TeamLink>,
                 p.statLine || DASH,

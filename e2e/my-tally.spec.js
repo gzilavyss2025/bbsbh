@@ -30,15 +30,21 @@ test('My Tally opens on this device, with every setting usable and no account ga
   // Three counts, and every one of them is a count of the reader's own things.
   await expect(page.locator('.mytally__ledgerrow')).toHaveCount(3)
 
-  // One row per CHANNEL (PRD §5.2's table is four rows), not one per claim.
-  // `reveal` backs two claims — "Reveal progress" and "Pick up your pencil" —
-  // and rendering the ledger directly produced two rows showing byte-identical
-  // state under two labels. Signed out, every row says where the thing is.
-  await expect(page.locator('.syncreceipt__row')).toHaveCount(4)
+  // One row per CHANNEL, not one per claim. `reveal` backs two claims —
+  // "Reveal progress" and "Pick up your pencil" — and rendering the ledger
+  // directly produced two rows showing byte-identical state under two labels.
+  // Signed out, every row says where the thing is.
+  //
+  // FIVE rows, not the four PRD §5.2 tabulated: the multi-book shelf
+  // (ADR-0041) added a `books` channel, and this assertion was never updated
+  // with it. Add the row here when a channel is added to SYNC_CHANNELS —
+  // that list and this list are the same list.
+  await expect(page.locator('.syncreceipt__row')).toHaveCount(5)
   await expect(page.locator('.syncreceipt__label')).toHaveText([
     'Reveal progress',
     'Days you unsealed',
     'Game Log',
+    'Book covers',
     'Club and settings',
   ])
   await expect(page.locator('.syncreceipt__row').first().locator('.syncreceipt__state')).toHaveText(

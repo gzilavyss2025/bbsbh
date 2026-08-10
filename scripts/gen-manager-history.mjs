@@ -18,10 +18,10 @@
 //     gen-milb-history.mjs's seed sweep. Rebuilds the WHOLE output from
 //     scratch (old seasons are immutable, so a clean rebuild is safe).
 //   node scripts/gen-manager-history.mjs --current-only  — only this year,
-//     all 30 teams (~30 calls). Meant for a nightly cron (NOT yet wired —
-//     see the comment above WOULD-GO-HERE at the bottom of this file and
-//     .github/workflows/update-nightly-data.yml). Merges into the existing
-//     file rather than rebuilding it, so backfilled history survives.
+//     all 30 teams (~30 calls). This is the mode the nightly cron runs
+//     (.github/workflows/update-nightly-data.yml, "Manager history (current
+//     season)"). Merges into the existing file rather than rebuilding it, so
+//     backfilled history survives.
 //
 // Per-stint win-loss record: a team-season with more than one Manager/
 // Interim Manager row (a mid-season managerial change) can't be split by
@@ -382,9 +382,9 @@ main().catch((err) => {
   process.exit(1)
 })
 
-// WOULD-GO-HERE (not wired yet, per plan.md §3): once this script is folded
-// into the nightly cron, .github/workflows/update-nightly-data.yml would gain
-// a step like:
-//   - name: Manager history (current season)
-//     run: node scripts/gen-manager-history.mjs --current-only
-// alongside its existing `node scripts/gen-umpires.mjs` etc. steps.
+// WIRED (2026-08-09). .github/workflows/update-nightly-data.yml runs
+// `node scripts/gen-manager-history.mjs --current-only` alongside its
+// `node scripts/gen-umpires.mjs` etc. steps, and its commit step adds
+// public/data/manager-history. Until then this file's --current-only mode
+// existed and nothing ever called it, so a mid-season managerial change never
+// reached /manager/{id}.

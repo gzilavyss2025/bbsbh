@@ -1,6 +1,6 @@
 import '../styles/32-milestone-watch.css'
 import { useState } from 'react'
-import { loadMilestoneWatch, formatMilestoneProjection } from '../api/milestones.js'
+import { loadMilestoneWatch, formatMilestoneProjection, groupMilestoneRows } from '../api/milestones.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
@@ -18,29 +18,6 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 function monthDay(iso) {
   const [, m, d] = (iso || '').split('-')
   return m ? `${MONTHS[Number(m) - 1]} ${Number(d)}` : ''
-}
-
-// Rows arrive one per (player, milestone) pair, already sorted rarest-club-
-// first then nearest-first (see gen-milestones.mjs). A player chasing more
-// than one milestone at once (e.g. both 3,000 hits and 500 doubles) would
-// otherwise get one row per chase, fighting for grid space with everyone
-// else — folded here into ONE card per player instead, its milestones nested
-// as a stack inside, in the order they already arrived (so a group's own
-// position — and the order of its milestones — stays rarity/nearest-ranked
-// with no re-sort).
-function groupMilestoneRows(rows) {
-  const groups = []
-  const byId = new Map()
-  for (const row of rows) {
-    let group = byId.get(row.playerId)
-    if (!group) {
-      group = { playerId: row.playerId, playerName: row.playerName, teamId: row.teamId, teamName: row.teamName, position: row.position, milestones: [] }
-      byId.set(row.playerId, group)
-      groups.push(group)
-    }
-    group.milestones.push(row)
-  }
-  return groups
 }
 
 // League-wide Milestone Watch: every debuted player in an MLB org (active, on
@@ -65,6 +42,10 @@ export function MilestoneWatchPage() {
   const allRows = data?.players ?? []
   const rows = filterByTeam(allRows, filterTeamId, (r) => r.teamId)
   const groups = groupMilestoneRows(rows)
+  // Counted off the grouped cards, not off `rows` — grouping is what drops a
+  // chase listed twice (see groupMilestoneRows), so counting the raw rows
+  // would report more milestones than the page actually draws.
+  const chaseCount = groups.reduce((n, g) => n + g.milestones.length, 0)
   const updated = monthDay(data?.generatedAt?.slice(0, 10))
 
   return (
@@ -133,7 +114,7 @@ export function MilestoneWatchPage() {
             )}
           </MasonryColumns>
           <p className="hint prospects__caption">
-            {rows.length} milestone{rows.length === 1 ? '' : 's'} in range across {groups.length} player{groups.length === 1 ? '' : 's'}
+            {chaseCount} milestone{chaseCount === 1 ? '' : 's'} in range across {groups.length} player{groups.length === 1 ? '' : 's'}
             {updated && ` · updated ${updated}`}.
           </p>
         </>

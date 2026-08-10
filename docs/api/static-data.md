@@ -8,7 +8,7 @@ hand-run. The driver is either an **unofficial/bulk source** (WAR) or **cost**
 
 This is tier-3 reference (root `CLAUDE.md`'s doc tiers) — it loads when you are
 pointed at it, not on every session. **`src/api/CLAUDE.md` carries the rule that
-governs these modules and is the file to read first.** `scripts/CLAUDE.md`
+governs these modules and is the file to read first.** `docs/scripts/generators.md`
 documents each GENERATOR; this file documents each READER. Every module's spoiler
 class is recorded machine-readably in `src/api/spoiler-manifest.json`.
 
@@ -26,7 +26,7 @@ Several modules read a static, same-origin `public/data/*.json` file that a
 `scripts/gen-*.mjs` generator precomputes (mostly on a nightly GitHub Actions
 cron, `.github/workflows/update-nightly-data.yml`; a couple are hand-run). The
 driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
-that would need dozens of statsapi calls per page load). See `scripts/CLAUDE.md`
+that would need dozens of statsapi calls per page load). See `docs/scripts/generators.md`
 for each generator; the reader modules:
 
 - `staticJson.js` — not a dataset: the memoized read every reader below is built
@@ -424,6 +424,22 @@ for each generator; the reader modules:
   `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
+- `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
+  probability + projected wins) from `public/data/postseason-odds.json`, the
+  Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and
+  `teamScore.js`: `postseasonOddsFor(data, teamId, season, cutoff)` picks the
+  latest snapshot at or before the page's as-of cutoff, so a dated Team Page
+  never renders odds computed with knowledge of games past that date. That
+  select-the-latest-eligible-snapshot shape is also how the file rots INVISIBLY
+  when its generator stops running — the reader answers with the newest thing
+  on disk and has no way to know it is three weeks old. `gen-postseason-odds.mjs`
+  was off the nightly cron until 2026-08-09 for exactly that reason; if this
+  card ever looks wrong, check the workflow before the math.
+- `managers.js` — a coach's full career, from the `personId % 100` shards in
+  `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
+  just the managerial ones. A club-season shared by two managers carries
+  `sharedSeason: true` and NO record rather than a split invented from data
+  that can't support one (see the generator).
 - `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
   prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
   opinion, deliberately NOT a callout family (see docs/callouts.md's

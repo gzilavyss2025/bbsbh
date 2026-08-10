@@ -83,7 +83,7 @@ export function initialSyncState(enabled = false) {
 // every focus must not re-render the receipt.
 //
 // An unknown channel or phase is ignored rather than stored. A reporter that
-// got it wrong should not be able to invent a fifth channel that the receipt
+// got it wrong should not be able to invent a channel beyond SYNC_CHANNELS that the receipt
 // would then have to render a label for.
 export function reduceSync(state, event) {
   const current = state && typeof state === 'object' ? state : {}

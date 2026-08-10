@@ -138,7 +138,16 @@
    .awardhistory__namebreak/-name--small/-tiny). */
 .awardhistory__cards--dense {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, 1fr), not 1fr. A bare `1fr` is minmax(AUTO, 1fr), so each track
+     refuses to go under its content's min-content width — and a card here is
+     a flex row whose min-content is the headshot plus the longest unbreakable
+     name. On a 390px phone that pushed the two tracks to ~336px inside a
+     316px column, so fifteen of this page's cards hung 20px past the right
+     edge and the whole document scrolled sideways. Nothing about the cards
+     needed to change; the tracks just had to be allowed to shrink, which is
+     what lets the name wrap the way .awardhistory__namebreak already
+     expects. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 .awardhistory__cards--dense .shot.playercard__shot {
   width: var(--shot-md-w);
@@ -251,7 +260,9 @@
    (even on a phone) — the compact card size above is sized for exactly that. */
 .awardhistory__allmlb {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Same shrink-to-fit reason as .awardhistory__cards--dense above — this one
+     holds the same cards, two columns of them, on the same phone. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 .awardhistory__allmlbcol {

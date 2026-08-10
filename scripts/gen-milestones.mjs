@@ -41,6 +41,7 @@ import {
 } from '../src/api/person.js'
 import { getJson } from './lib/statsapi.mjs'
 import { mapConcurrent } from './lib/concurrency.mjs'
+import { dedupeRosterEntries } from './lib/roster.mjs'
 import { writeJsonAtomic } from './lib/io.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -78,7 +79,7 @@ async function fetchTeamSeasonSchedule(teamId) {
 // anyway — same output, ~5× fewer per-player stat calls.
 async function fetchFullRoster(teamId) {
   const data = await getJson(
-    `/api/v1/teams/${teamId}/roster?rosterType=fullRoster&hydrate=person`,
+    `/api/v1/teams/${teamId}/roster?rosterType=fullRoster&hydrate=person(currentTeam)`,
   )
   return data.roster ?? []
 }
@@ -167,7 +168,12 @@ const rosterEntries = (
   // hydrated mlbDebutDate) skips his stats fetch entirely.
   .filter((r) => r.person?.mlbDebutDate)
 
-const perPlayerRows = await mapConcurrent(rosterEntries, 10, async (entry) => {
+// One row per PLAYER, not per (player, club he appears under) — see
+// dedupeRosterEntries. Runs before the stats fan-out, so a doubled listing
+// costs no extra fetch either.
+const uniqueEntries = dedupeRosterEntries(rosterEntries)
+
+const perPlayerRows = await mapConcurrent(uniqueEntries, 10, async (entry) => {
   const teamId = entry.teamId
   const schedule = schedules[teamId] ?? { played: 0, remainingDates: [] }
   const teamName = teamNames[teamId] || ''
@@ -192,4 +198,4 @@ const players = perPlayerRows.filter(Boolean).flat()
 players.sort((a, b) => a.rarity - b.rarity || a.remaining - b.remaining)
 
 await writeJsonAtomic(out, { generatedAt: new Date().toISOString(), season: SEASON, players })
-console.log(`wrote ${out} (${players.length} milestone-watch rows across ${rosterEntries.length} players)`)
+console.log(`wrote ${out} (${players.length} milestone-watch rows across ${uniqueEntries.length} players)`)

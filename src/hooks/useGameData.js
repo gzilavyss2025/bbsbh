@@ -376,15 +376,13 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   const gameCallouts = calloutsForGame(callouts.data, game.gamePk)
 
   // Which network the game airs on, for the lineup pages' Broadcast fact next
-  // to Attendance (see api/broadcast.js). MLB-only: ESPN's scoreboard has no
-  // MiLB coverage, so a MiLB gamePk just resolves to ''. Keyed on gamePk, like
-  // callouts — a broadcast assignment doesn't change mid-game, so a live
-  // Refresh never re-pulls it.
-  const broadcast = useAsyncOnFeed(
-    feed,
-    (f) => (game.sportId === SPORT_IDS.MLB ? fetchGameBroadcast(f) : Promise.resolve('')),
-    [game.gamePk],
-  )
+  // to Attendance (see api/broadcast.js). No longer MLB-only: the old ESPN
+  // scoreboard had no minor-league coverage, but statsapi lists a MiLB game's
+  // carriers the same way it lists an MLB one's, so an affiliate's lineup page
+  // now gets the fact too (and degrades to '' where the league lists nothing,
+  // like every other MiLB gap). Keyed on gamePk, like callouts — a broadcast
+  // assignment doesn't change mid-game, so a live Refresh never re-pulls it.
+  const broadcast = useAsyncOnFeed(feed, (f) => fetchGameBroadcast(f), [game.gamePk])
 
   // Former-teammate ties (or, when a matchup has none, the ORG TIES fallback —
   // see orgTiesFor) between the two clubs, for the lineup pages' card. One

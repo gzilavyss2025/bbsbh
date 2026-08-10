@@ -43,9 +43,6 @@ test('pregame Innings route renders and advances the manual countdown board', as
     if (message.type() === 'error') consoleErrors.push(message.text())
   })
 
-  await page.route('https://site.api.espn.com/**', async (route) => {
-    await route.fulfill({ json: { events: [] } })
-  })
   await page.route('**/api/v1/schedule?*', async (route) => {
     await route.fulfill({
       json: {
@@ -75,10 +72,18 @@ test('pregame Innings route renders and advances the manual countdown board', as
 
   const board = page.locator('.pregameboard')
   await expect(board).toBeVisible()
-  await expect(board).toContainText('PIT · MIL')
   await expect(board).toContainText('First pitch in')
-  await expect(board).toContainText('Warmups underway')
+  // While the clock is RUNNING the board deliberately shows neither the
+  // matchup line nor the "Warmups underway" tag — `pregameboard__teams`
+  // renders only under `!showClock`, so the countdown has the board to itself
+  // (see PregameScoreboard.jsx). This spec asserted both for months and simply
+  // went unrun: e2e is a verification harness, not a CI gate, so a stale
+  // expectation here fails nothing until someone looks. The warmup state is
+  // still asserted — through the accessible line, which is where it survives
+  // in this state.
+  await expect(board).toContainText('Warmups are underway.')
   await expect(board).toContainText('Top 1st is on deck')
+  await expect(board).toContainText('American Family Field')
   await expect(page.getByText('This game hasn’t started yet.')).toHaveCount(0)
 
   const countdown = board.locator('.pregameboard__countdown')

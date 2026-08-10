@@ -390,28 +390,30 @@ export default defineConfig({
       workbox: {
         // Offline app shell. API responses are network-first so we never
         // serve a stale (and possibly spoiler-revealing) score from cache.
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
-        // The SPLITS VS TEAM dataset (public/data/vs-team-splits/) is large
-        // (~3 MB all told — a career-vs-club line for every active-roster
-        // player, sharded one file per club) and refreshed nightly, so it's
-        // kept OUT of the app-shell precache to keep the PWA install lean; a
-        // game fetches the two clubs it needs on demand and they're
-        // runtime-cached instead (see the NetworkFirst rule below). Same for
-        // the per-umpire shards (public/data/umpires/ + umpire-accuracy/) — one
-        // file per umpire, each growing across the season (every game × 4
-        // officials), and a visitor reads the one umpire he tapped. Same for the
-        // per-club game-notes shards — an append-only archive of press-notes PDF
-        // links that grows every game day (see scripts/gen-game-notes.mjs).
-        // Same for the per-game callouts bundles — since they cover the MiLB
-        // levels too each day's slate runs ~0.5-1 MB across ~76 files, and the
-        // folder holds ~10 days of them; only the game being scored is ever
-        // read. Same for the
-        // rookie dataset — a debut/rookie-limit row for every player who's ever
-        // appeared in MLB (~1.3 MB and growing, see scripts/gen-rookies.mjs /
-        // gen-rookies-backfill.mjs). rookies.json there is the generator's
-        // MASTER record, never fetched by the app at all; public/data/rookies/
-        // holds what is (a compact status map plus id-sharded full records).
-        // Both stay out of the install.
+        // NOTE THE MISSING `json`. The app shell is code, type and art; a
+        // dataset is what one PAGE reads. Precaching `**/*.json` made that
+        // backwards — every generated file landed in the install by DEFAULT
+        // and stayed there until someone remembered to write it into
+        // globIgnores below, which is opt-out, per file, forever. It worked
+        // exactly as well as that sounds: the list grew to twenty-odd entries
+        // and still leaked, most recently 128 KB of umpire-accuracy aggregates
+        // that joined every install the day the file was added, unnoticed,
+        // with no line of code anywhere saying so.
+        //
+        // So the default is inverted. A data file is precached only by being
+        // named here, and `data/teams.json` is the only one that earns it: the
+        // club table is read by nearly every surface, including the one screen
+        // that must render with no statsapi request at all (/profile, see
+        // api/teams-static.js). Everything else is fetched on demand and kept
+        // offline by the NetworkFirst rule below — same availability after a
+        // visit, none of the cost before one. A new generator now costs the
+        // install nothing, silently, which is the right direction for a
+        // mistake to fall.
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}', 'data/teams.json'],
+        // What is left to exclude, now that `data/**.json` is opted OUT by
+        // default above: the ART. Two directories of images that a page
+        // reaches for a couple of files at a time, plus the pdfjs chunk and
+        // the link-preview card, each with its own reason below.
         globIgnores: [
           // The curated club marks (~2.5 MB even after compress-logos.mjs,
           // across ~10 treatment directories). One slate shows a handful and
@@ -420,62 +422,6 @@ export default defineConfig({
           // knockout SVGs below, 1.5x the bytes. The CacheFirst runtime rule
           // below keeps every mark actually seen available offline.
           '**/team-logos/**',
-          '**/data/vs-team-splits/*.json',
-          '**/data/umpires/*.json',
-          '**/data/game-notes/*.json',
-          '**/data/callouts/*/*.json',
-          // Same reasoning for the per-date condensed-game index: one small
-          // file per slate date, ~6 KB each but one per DAY OF THE SEASON
-          // (132 of them by August, and growing every night). A visitor reads
-          // the one date they're looking at; precaching the whole season added
-          // 133 entries and 782 KiB to the install for nothing.
-          '**/data/highlights/day/*.json',
-          '**/data/rookies.json',
-          '**/data/rookies/**/*.json',
-          // Route-specific snapshots are fetched on demand instead of adding
-          // hundreds of KB to every install. The runtime rule below keeps the
-          // last successful copy available for offline browsing.
-          '**/data/manager-history/*.json',
-          '**/data/umpire-accuracy/*.json',
-          '**/data/former-teammates/*.json',
-          '**/data/top-prospects.json',
-          '**/data/war-history/*.json',
-          '**/data/minors-leaders.json',
-          '**/data/career-matchups.json',
-          '**/data/postseason-odds.json',
-          '**/data/postseason-history.json',
-          '**/data/team-score.json',
-          '**/data/season-score.json',
-          '**/data/milestones.json',
-          '**/data/savant-percentiles.json',
-          // Every named All-Star since 1933 (~650 KB) — only read from the
-          // All-Star Rosters page, see scripts/gen-all-star-rosters.mjs.
-          '**/data/all-star-rosters.json',
-          // Team Transactions, one file per club per season (~55 KB each; the
-          // season's 30 add up past 1.5 MB — see
-          // scripts/gen-team-transactions.mjs). A team page reads its own club,
-          // one season at a time.
-          '**/data/team-transactions/*/*.json',
-          // Nightly foul-ball and pitcher-workload aggregates (~170 KB each,
-          // refreshed nightly — see scripts/gen-fouls.mjs / gen-workload.mjs);
-          // read on demand by the Foul Tracker page, player-page cards, and
-          // the lineup pages' bullpen board, so they stay off the install.
-          '**/data/fouls.json',
-          '**/data/fouls/*.json',
-          '**/data/workload.json',
-          // Season pitch-type mix per pitcher (~700 KB at a full season's
-          // coverage — see scripts/gen-pitch-arsenal.mjs), read on demand by the
-          // opposing-starter card's pitch-mix bar and by the player page's
-          // "Pitches like" card, which ranks the whole league-wide pool.
-          '**/data/pitch-arsenal/*.json',
-          '**/data/pitch-arsenal-pool/*.json',
-          // Per-team video-highlight archives (scripts/gen-highlights.mjs) —
-          // one file per club, each growing all season. A 3-day sample already
-          // runs 6-24 KB per team, so a full season lands well past the
-          // vs-team-splits threshold when summed across the league, and a
-          // user browsing one club's rail needs exactly one of the 30. Read on
-          // demand by the Team hub's Games tab and the player page.
-          '**/data/highlights/*.json',
           // The precomputed one-color club marks (~150 files, ~1.7 MB all
           // told — scripts/gen-mono-logos.mjs). One game shows exactly two of
           // them, so precaching the whole league's art on every install would
@@ -488,13 +434,6 @@ export default defineConfig({
           // the app-shell precache so it never lands on the install of a user
           // who never taps it; it's runtime-cached on first use instead (below).
           '**/assets/pdf*',
-          // One season-chunked Trade Deadline file per season (~535 KB across
-          // seven files — see scripts/gen-team-transactions.mjs's sibling
-          // gen-trade-deadline data), read one season at a time from the Trade
-          // Deadline page. Exactly the same shape and the same argument as the
-          // team-transactions seasons above; it was simply never added.
-          // Runtime-cached below.
-          '**/data/trade-deadline/*.json',
           // The 1200x630 link-preview card. It is referenced ONLY by absolute
           // URL from index.html's og:image/twitter:image tags, i.e. by social
           // crawlers, which never run a service worker — and no app surface
@@ -505,31 +444,29 @@ export default defineConfig({
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            // Page-specific static snapshots are too large for the app-shell
-            // precache. NetworkFirst keeps them fresh online and usable after
-            // a successful visit when the user is offline at the park.
-            urlPattern: ({ url }) =>
-              /^\/data\/(?:top-prospects|minors-leaders|all-star-rosters|fouls|workload|career-matchups|postseason-odds|postseason-history|team-score|season-score|milestones|savant-percentiles)\.json$/.test(
-                url.pathname,
-              ) ||
-              // Trade Deadline is season-chunked. The season list itself is the
-              // hardcoded SEASONS array in api/tradeDeadline.js, NOT the
-              // generated index.json — nothing in the app reads that file today
-              // (gen-trade-deadline.mjs still writes it, and its one reader,
-              // loadTradeDeadlineIndex, was dead and has been deleted). The
-              // `index` arm is kept so a future reader is covered rather than
-              // silently uncached; it simply never fires right now.
-              /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
+            // Every whole-file dataset. NetworkFirst keeps them fresh online
+            // and usable after a successful visit when the user is offline at
+            // the park — which is what makes leaving them out of the install
+            // (see globPatterns) a deferral rather than a loss.
+            //
+            // Matched by SHAPE, not by name. The old pattern listed twelve
+            // files by hand and had to be edited for each new one, so a
+            // dataset added without that edit was cached nowhere and reloaded
+            // on every visit — the same opt-out trap the precache had, one
+            // layer down. `/data/{anything}.json` is one path segment deep by
+            // construction: sharded sets live in a subdirectory, so they fall
+            // through to the uncounted rule below rather than being counted
+            // against this one's cap.
+            urlPattern: ({ url }) => /^\/data\/[^/]+\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: {
               cacheName: 'bbsbh-static-data',
               networkTimeoutSeconds: 3,
               expiration: {
-                // Room for one copy of every snapshot the pattern above can
-                // match (12 named + the seven trade-deadline files, index
-                // included) — an undersized cap here silently evicts one page's
-                // data to admit another's.
+                // Room for one copy of every whole-file dataset with headroom
+                // (27 exist today) — an undersized cap here silently evicts
+                // one page's data to admit another's.
                 //
                 // WHOLE-FILE SNAPSHOTS ONLY, and that is what makes the cap
                 // safe to state. The per-record shard sets (one file per
@@ -538,7 +475,7 @@ export default defineConfig({
                 // them at a counted cache means browsing a handful of player
                 // pages quietly evicts the standings' data — the exact failure
                 // this comment warns about, arriving through the back door.
-                maxEntries: 32,
+                maxEntries: 48,
                 maxAgeSeconds: 7 * 24 * 60 * 60,
               },
             },
@@ -564,7 +501,15 @@ export default defineConfig({
               // One video-highlight file per club.
               /^\/data\/highlights\/\d+\.json$/.test(url.pathname) ||
               // Team Transactions: one club, one season.
-              /^\/data\/team-transactions\/\d{4}\/(?:index|\d+)\.json$/.test(url.pathname),
+              /^\/data\/team-transactions\/\d{4}\/(?:index|\d+)\.json$/.test(url.pathname) ||
+              // Trade Deadline: one season per file. The season list itself is
+              // the hardcoded SEASONS array in api/tradeDeadline.js, NOT the
+              // generated index.json — nothing in the app reads that file today
+              // (gen-trade-deadline.mjs still writes it, and its one reader,
+              // loadTradeDeadlineIndex, was dead and has been deleted). The
+              // `index` arm is kept so a future reader is covered rather than
+              // silently uncached; it simply never fires right now.
+              /^\/data\/trade-deadline\/(?:index|\d{4})\.json$/.test(url.pathname),
             handler: 'NetworkFirst',
             method: 'GET',
             options: { cacheName: 'bbsbh-record-shards', networkTimeoutSeconds: 3 },

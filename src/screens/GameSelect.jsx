@@ -5,7 +5,6 @@ import { fetchDayVideos } from '../api/gamehighlights.js'
 import { fetchSchedule, fetchSlateScores, fetchAllStarInfo, fetchNextGameDate, fetchTeams } from '../api/schedule.js'
 import { fetchRosterIdsForTeams, fetchAffiliates } from '../api/team.js'
 import { fetchGameJerseys } from '../api/uniforms.js'
-import { fetchNationalBroadcasts } from '../api/broadcast.js'
 import { fetchTopProspects, countProspectsByTeam } from '../api/prospects.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -209,21 +208,18 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
     [isToday, gamePksKey],
   )
 
-  // Which of today's slate cards carry a national-TV assignment (FOX/ESPN/
-  // TBS/Apple TV+/…) — one batched ESPN scoreboard call per date, unlike
-  // liveJerseys above this isn't today-only: a past day's national broadcast
-  // is a fixed historical fact, not something a nightly cron needs to catch
-  // up on, so it's worth fetching whatever day is on screen. MLB only (ESPN
-  // has no MiLB scoreboard); fetchNationalBroadcasts degrades to {} for a
-  // MiLB games list anyway, but skipping the call outright avoids a wasted
-  // fetch every time a MiLB level is paged through.
-  const nationalBroadcasts = useAsync(
-    () =>
-      sportId === SPORT_IDS.MLB && sorted.length
-        ? fetchNationalBroadcasts(dateStr, sorted)
-        : Promise.resolve({}),
-    [sportId, dateStr, gamePksKey],
-  )
+  // Which of today's slate cards carry a national-TV assignment (FOX/FS1/
+  // ESPN/TBS/Apple TV/…). No fetch of its own: `normalizeGame` reads it off
+  // the schedule request the slate already makes (api/broadcast.js). It used
+  // to be a second, cross-origin call to ESPN's scoreboard, which meant the
+  // national-first ordering below could only settle after that call landed —
+  // and, since ESPN's edge began refusing browser requests outright, never
+  // settled at all.
+  const nationalBroadcasts = useMemo(() => {
+    const out = {}
+    for (const g of sorted) if (g.nationalBroadcast) out[g.gamePk] = g.nationalBroadcast
+    return out
+  }, [sorted])
 
   // Every active club at this level (see fetchTeams), independent of the
   // date — so it barely ever refetches as the user pages day to day.
@@ -421,9 +417,9 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const gamesForDisplay = useMemo(() => {
     const pinned = (g) => isPinned(g, favoriteTeamId, favoriteAffiliateIds)
     const liveFirst = reorderLiveGames(sorted, pinned)
-    const nationallyOrdered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts.data, pinned)
+    const nationallyOrdered = reorderNationalBroadcasts(liveFirst, nationalBroadcasts, pinned)
     return reorderGameOfTheNight(nationallyOrdered, cardMetaByGamePk, pinned)
-  }, [sorted, nationalBroadcasts.data, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
+  }, [sorted, nationalBroadcasts, cardMetaByGamePk, favoriteTeamId, favoriteAffiliateIds])
 
   // The filter bar's own selection — which category chip(s) (see FILTER_CHIPS
   // above) the user has toggled on. Reset on a new day/level, same as
@@ -790,7 +786,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
                     video={dayVideos.data?.games?.[g.gamePk] ?? null}
                     liveJerseys={liveJerseys.data}
-                    national={nationalBroadcasts.data?.[g.gamePk]}
+                    national={nationalBroadcasts[g.gamePk]}
                     eager={eager}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={() => onPick(g, dateStr, 'boxscore')}
@@ -802,7 +798,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     prospectCount={pCount}
                     liveLine={liveLineFor(g)}
                     liveJerseys={liveJerseys.data}
-                    national={nationalBroadcasts.data?.[g.gamePk]}
+                    national={nationalBroadcasts[g.gamePk]}
                     eager={eager}
                     stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? null}
                     onSelect={() => onPick(g, dateStr)}

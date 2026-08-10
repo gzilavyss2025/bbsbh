@@ -46,9 +46,12 @@ const NESTED_MAX = 250
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
-  // The generator catalog — one entry per gen-*.mjs, plus the lint-guard list.
-  // The natural split is docs/, the same move src/api/CLAUDE.md just made.
-  'scripts/CLAUDE.md': 667,
+  // scripts/CLAUDE.md is GONE from this table, and that is the outcome the
+  // entry was here to produce. It carried 667 lines, two thirds of them a
+  // per-generator catalog; that catalog is `docs/scripts/generators.md` now
+  // and the file sits at 196, under NESTED_MAX with room to spare. Re-adding
+  // an entry for it means the catalog started growing back into it.
+  //
   // Screens, routing, the design system, and the UI half of the spoiler rule.
   'src/CLAUDE.md': 451,
   // The club-identity data model and the dev-only lab that writes it.

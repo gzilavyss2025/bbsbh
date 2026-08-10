@@ -28,18 +28,27 @@ const INITIAL_CARDS = 12
 
 // Finds a team whose first INITIAL_CARDS stories include the widest rail on
 // file, so the spec exercises the worst real case rather than a lucky one.
+// The dataset is SHARDED — `{season}/index.json` naming the clubs, then one
+// `{season}/{teamId}.json` each (#642). It used to be one `{season}.json`
+// holding a `byTeamId` map, and this helper still asked for that: the request
+// fell through to the SPA's index.html and the spec died on
+// "Unexpected token '<'" rather than on anything about photo rails. e2e is a
+// verification harness rather than a CI gate, so it stayed broken silently.
 async function findWidestRailTeam(page) {
   return await page.evaluate(async (initialCards) => {
     const season = new Date().getUTCFullYear()
-    const res = await fetch(`/data/team-transactions/${season}.json`)
-    if (!res.ok) return null
-    const file = await res.json()
+    const indexRes = await fetch(`/data/team-transactions/${season}/index.json`)
+    if (!indexRes.ok) return null
+    const { teamIds = [] } = await indexRes.json()
     let best = null
-    for (const [teamId, entry] of Object.entries(file.byTeamId ?? {})) {
+    for (const teamId of teamIds) {
+      const res = await fetch(`/data/team-transactions/${season}/${teamId}.json`)
+      if (!res.ok) continue
+      const entry = await res.json()
       const visible = (entry.days ?? []).flatMap((d) => d.stories).slice(0, initialCards)
       for (const story of visible) {
         const n = story.rail?.length ?? 0
-        if (!best || n > best.slots) best = { teamId, slots: n }
+        if (!best || n > best.slots) best = { teamId: String(teamId), slots: n }
       }
     }
     return best
