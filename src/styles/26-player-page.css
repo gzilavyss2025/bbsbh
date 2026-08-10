@@ -312,11 +312,30 @@
   font-size: var(--fs-title-sm);
 }
 
-/* The header-less vs-LHP/RHP split ledger sitting directly under the stat
-   grid above (see PlayerPage.jsx) — neither card carries its own margin,
-   so without a SectionTitle between them they'd otherwise touch. */
+/* The vs-LHP/RHP split ledger sitting under the stat grid above (see
+   PlayerPage.jsx) — neither card carries its own margin, so the wrapper keeps
+   them off each other when the heading's own margin is the smaller of the two. */
 .player__seasonsplits {
   margin-top: 10px;
+}
+
+/* A situational family's label row ("Runners", "In the count"), spanning the
+   whole table. The six situational rows are two families that OVERLAP rather
+   than one list of alternatives — RISP and Two strikes describe the same plate
+   appearance all the time — so they are ruled apart instead of run together.
+   Recessed and captioned rather than inked: it is a divider carrying a name,
+   not a data row, and must never be mistaken for one. */
+.ledger tr.ledger__family td {
+  background: var(--surface-inset);
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+  text-align: left;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 .player__blocktitle {

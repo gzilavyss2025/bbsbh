@@ -154,28 +154,88 @@ export function pitcherTiles(stat, role, war) {
 // vs-L/R splits (full season — the UI labels them so, not "entering today")
 // ---------------------------------------------------------------------------
 
-// One side (vs L or vs R) as a full stat line: the AVG/OBP/OPS slash plus HR,
-// RBI, XBH, and the strikeout/walk RATES. The rates need a plate-appearance
-// denominator, which the API names differently by group — `plateAppearances`
-// on a hitter's line, `battersFaced` on a pitcher's opponent line (verified
-// live) — so the group picks the field. A side the player never saw (faced
-// only righties, say) has no stat and renders as all dashes.
+// One side (vs L or vs R) as a full stat line: the TRUE slash (AVG/OBP/SLG),
+// OPS as its own figure, plus HR, XBH, and the strikeout/walk RATES. The rates
+// need a plate-appearance denominator, which the API names differently by
+// group — `plateAppearances` on a hitter's line, `battersFaced` on a pitcher's
+// opponent line (verified live) — so the group picks the field. A side the
+// player never saw (faced only righties, say) has no stat and renders as all
+// dashes.
+//
+// `slash` prints SLG third, NOT OPS. It used to print OPS, which is the one
+// substitution a slash line cannot survive: every reader of a three-number
+// slash reads the third field as slugging by convention, so ".238/.315/.703"
+// silently claimed a .703 SLG. OPS keeps its own labelled column instead — and
+// unlike the other two it can exceed 1.000, which is also why it never sat
+// comfortably inside a leading-dot slash.
 function splitSide(stat, group) {
   if (!stat) {
-    return { count: DASH, slash: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH }
+    return { count: DASH, slash: DASH, ops: DASH, hr: DASH, rbi: DASH, xbh: DASH, soPct: DASH, bbPct: DASH, opsNum: null }
   }
   const pa = group === 'pitching' ? num(stat.battersFaced) : num(stat.plateAppearances)
   const pct = (x) => (pa ? `${Math.round((num(x) / pa) * 100)}%` : DASH)
-  const slash = [stat.avg, stat.obp, stat.ops].map((v) => v ?? DASH).join('/')
+  const slash = [stat.avg, stat.obp, stat.slg].map((v) => v ?? DASH).join('/')
+  const opsNum = Number.parseFloat(stat.ops)
   return {
     count: group === 'pitching' ? num(stat.battersFaced) : num(stat.atBats),
     slash,
+    ops: stat.ops ?? DASH,
+    opsNum: Number.isFinite(opsNum) ? opsNum : null,
     hr: num(stat.homeRuns),
     rbi: num(stat.rbi),
     xbh: num(stat.doubles) + num(stat.triples) + num(stat.homeRuns),
     soPct: pct(stat.strikeOuts),
     bbPct: pct(stat.baseOnBalls),
   }
+}
+
+// The OVERALL line a split table is read against, summed from the very rows it
+// sits under rather than taken from the season tile. A split is only legible as
+// a difference from a reference, and the reference has to share the split's own
+// scope exactly — the season tile can be a different LEVEL (a promoted big
+// leaguer's MLB line over a MiLB split set), which would print a baseline the
+// rows do not sum to. Both curated sets partition every plate appearance, so
+// summing them is exact: vL + vR is every PA, and bases-empty + runners-on is
+// every PA. Counting stats sum, rates are RECOMPUTED from those sums — never
+// averaged, which is the classic weighted-mean error (a .400 over 5 AB and a
+// .200 over 200 AB do not average to .300).
+function overallSide(stats, group) {
+  const rows = (stats ?? []).filter(Boolean)
+  if (rows.length === 0) return null
+  const sum = (k) => rows.reduce((t, s) => t + num(s[k]), 0)
+  const ab = sum('atBats')
+  const h = sum('hits')
+  const bb = sum('baseOnBalls')
+  const hbp = sum('hitByPitch')
+  const sf = sum('sacFlies')
+  const obpDen = ab + bb + hbp + sf
+  const obp = obpDen ? (h + bb + hbp) / obpDen : 0
+  const slg = ab ? sum('totalBases') / ab : 0
+  // OPS from the ROUNDED obp/slg, not from the full-precision pair. This row
+  // prints its own OBP and SLG one column to the left, and OPS is defined as
+  // their sum, so a reader can and will add them up: .3155 + .3694 rounds to
+  // .685 while the .315 and .369 on the page add to .684. The third decimal
+  // that buys is worth less than a table that fails its own arithmetic.
+  const obp3 = rate3(obp)
+  const slg3 = rate3(slg)
+  return splitSide(
+    {
+      atBats: ab,
+      battersFaced: sum('battersFaced'),
+      plateAppearances: sum('plateAppearances'),
+      doubles: sum('doubles'),
+      triples: sum('triples'),
+      homeRuns: sum('homeRuns'),
+      rbi: sum('rbi'),
+      strikeOuts: sum('strikeOuts'),
+      baseOnBalls: bb,
+      avg: ab ? rate3(h / ab) : DASH,
+      obp: obp3,
+      slg: slg3,
+      ops: rate3(Number.parseFloat(obp3) + Number.parseFloat(slg3)),
+    },
+    group,
+  )
 }
 
 export function splitsView(lrSplits, group) {
@@ -187,24 +247,39 @@ export function splitsView(lrSplits, group) {
   const l = byCode.vl
   const r = byCode.vr
   if (!l && !r) return null
-  return { left: splitSide(l, group), right: splitSide(r, group) }
+  return { left: splitSide(l, group), right: splitSide(r, group), all: overallSide([l, r], group) }
 }
 
 // ---------------------------------------------------------------------------
-// Situational splits (pitching) — a curated slice of the API's sitCodes menu
-// (base state, count leverage, two strikes), same splitSide shape and ledger
-// columns as the vs-L/R card so the two read as one family. Full-season
-// figures, same spoiler footing as splitsView. The base-state trio comes
-// first (empty → on → RISP mirrors escalating danger), then count leverage.
+// Situational splits — a curated slice of the API's sitCodes menu, same
+// splitSide shape and ledger columns as the vs-L/R card so the two read as one
+// family. Full-season figures, same spoiler footing as splitsView.
+//
+// The six rows are TWO families, not one list: where the runners are (a fact
+// about the inning) and who is ahead in the count (a fact about the at-bat).
+// They were a flat six-row table, which invited a reader to compare "RISP" with
+// "Two strikes" as though they were alternatives — they are not, they overlap
+// freely. `family` is carried on every row so the UI can rule them apart, and
+// the base-state trio still comes first (empty → on → RISP mirrors escalating
+// danger).
+//
+// Only the BASE-STATE pair partitions every plate appearance, so only it can
+// produce an exact overall line; the count rows overlap each other and are read
+// against that same overall. RISP is a subset of runners-on and is deliberately
+// left out of the sum.
 // ---------------------------------------------------------------------------
 
+// Labels are as short as they can be and still be read cold, because the label
+// is the widest cell in a seven-column table that has to fit a phone: the
+// family heading standing over each trio ("Base state", "Count") carries the
+// context the old "Ahead in count" / "Bases empty" spelled out per row.
 const SITUATIONAL_CODES = [
-  ['r0', 'Bases empty'],
-  ['ron', 'Runners on'],
-  ['risp', 'RISP'],
-  ['ac', 'Ahead in count'],
-  ['bc', 'Behind in count'],
-  ['2s', 'Two strikes'],
+  ['r0', 'Empty', 'base'],
+  ['ron', 'Runners on', 'base'],
+  ['risp', 'RISP', 'base'],
+  ['ac', 'Ahead', 'count'],
+  ['bc', 'Behind', 'count'],
+  ['2s', '2 strikes', 'count'],
 ]
 export const SITUATIONAL_SIT_CODES = SITUATIONAL_CODES.map(([code]) => code).join(',')
 
@@ -214,14 +289,17 @@ export function situationalSplitsView(splits, group) {
     const code = s.split?.code
     if (code) byCode[code] = s.stat
   }
-  const rows = SITUATIONAL_CODES.filter(([code]) => byCode[code]).map(([code, label]) => ({
+  const rows = SITUATIONAL_CODES.filter(([code]) => byCode[code]).map(([code, label, family]) => ({
     code,
     label,
+    family,
     side: splitSide(byCode[code], group),
   }))
   // A couple of stray rows (a September call-up who's barely pitched) read
   // as noise, not a table — require most of the set before rendering.
-  return rows.length >= 4 ? rows : null
+  if (rows.length < 4) return null
+  const all = byCode.r0 && byCode.ron ? overallSide([byCode.r0, byCode.ron], group) : null
+  return { rows, all }
 }
 
 // ---------------------------------------------------------------------------
