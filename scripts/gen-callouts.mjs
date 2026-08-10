@@ -1,4 +1,4 @@
-// Regenerates public/data/callouts/<MMDDYYYY>.json — the per-game "call-out"
+// Regenerates public/data/callouts/<MMDDYYYY>/<gamePk>.json — the per-game "call-out"
 // enrichment for ONE day's slate, MLB plus the four full-season MiLB levels
 // (AAA/AA/A+/A): the season context that makes a live play notable. The
 // families, all keyed so the app can look them up at render time with no live
@@ -13,7 +13,7 @@
 //      and stolen-base run, from his game log.
 //   3. Situational team records — extra-inning and one-run W-L (from standings
 //      splitRecords); "record when scoring first" / "when the opponent scores
-//      first" and record when leading after the 6th/7th/8th/9th (joined from
+//      first" and record when leading after the 6th/7th/8th (joined from
 //      each club's game-by-game linescore); PLUS, from that same linescore walk,
 //      record when scoring N+ runs, record when allowing 4+ runs by a given
 //      inning, and record in games trailed by 3+ runs at some point (comeback
@@ -121,13 +121,26 @@ import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
-import { writeJsonAtomic } from './lib/io.js'
+import { writeShards } from './lib/io.js'
 import {
   computeLeaders,
   HITTING_CATEGORIES,
   PITCHING_CATEGORIES,
 } from '../src/api/teamLeaders.js'
 import { HIT_CATEGORY_KEYS } from '../src/api/callout-notes.js'
+// The checkpoint innings and thresholds these records are tallied against come
+// FROM the note builders that read them (the "import the app's own shaper so
+// the two can't drift" rule this script already follows for computeLeaders): a
+// second copy would count one inning while the note spoke about another. The
+// show floors stay local — they gate what this writes, never what the app reads.
+import {
+  LEAD_CHECKPOINTS,
+  TIED_CHECKPOINTS,
+  RUN_SCORED_BUCKETS,
+  RUNS_ALLOWED_THRESHOLD,
+  RUNS_ALLOWED_CHECKPOINTS,
+  COMEBACK_DEFICIT,
+} from '../src/api/callout-notes/checkpoints.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -181,7 +194,10 @@ const targetApi = iso(target)
 const asOf = iso(new Date(target.getTime() - DAY_MS))
 const season = target.getUTCFullYear()
 const [ty, tm, td] = targetApi.split('-')
-const outFile = join(outDir, `${tm}${td}${ty}.json`)
+// One directory per slate date, one file per game inside it — the shape
+// api/callouts.js reads (a lineup page wants ONE game, never the slate).
+const urlDate = `${tm}${td}${ty}`
+const outDateDir = join(outDir, urlDate)
 
 // --- Foul spoilers + league foul rate (MLB only) -----------------------------
 //
@@ -237,23 +253,20 @@ const SB_FLOOR = 4
 const HOMER_MIN_GAMES = 5
 const HOMER_LOPSIDED = 0.7 // win% ≥ .700 or ≤ .300
 
-// Innings checked for the "leading after N" record (see leadAfterRecord),
-// and the same show floors as HOMER_MIN_GAMES/HOMER_LOPSIDED — a club needs a
-// real sample AND a genuinely lopsided record for it to be worth flagging
-// tonight's game as a reversal of it (see buildLeadReversalNote in
-// src/api/callout-notes.js, the only place this ever gets read).
-const LEAD_CHECKPOINTS = [6, 7, 8, 9]
+// The show floors for the "leading after N" record (see leadAfterRecord) — the
+// same shape as HOMER_MIN_GAMES/HOMER_LOPSIDED: a club needs a real sample AND
+// a genuinely lopsided record for it to be worth flagging tonight's game as a
+// reversal of it (see buildLeadReversalNote in
+// src/api/callout-notes/checkpoints.js, the only place this ever gets read).
+// The innings themselves are LEAD_CHECKPOINTS, imported from that same module.
 const LEAD_MIN_GAMES = 5
 const LEAD_LOPSIDED = 0.85 // win% ≥ .85 or ≤ .15
 
-// The companion to LEAD_CHECKPOINTS for games that were TIED (not led) after a
-// completed inning — "the Brewers are 12-9 this season when tied after the 7th".
-// A coin-flip situation, so no lopsidedness floor (leadAfterFull's shape, not
-// leadAfter's): the record itself is the point, however it reads. Ends at the
-// 8th — a tie after the 9th is the start of extra innings, which the app never
-// surfaces up front (ADR-0008). Read by buildTiedAfterNote /
-// buildTiedAfterHeldNotes in src/api/callout-notes.js.
-const TIED_CHECKPOINTS = [6, 7, 8]
+// The companion floor for games that were TIED (not led) after a completed
+// inning — "the Brewers are 12-9 this season when tied after the 7th". A
+// coin-flip situation, so no lopsidedness floor (leadAfterFull's shape, not
+// leadAfter's): the record itself is the point, however it reads. Read by
+// buildTiedAfterNote / buildTiedAfterHeldNotes.
 const TIED_MIN_GAMES = 5
 
 // "Record when scoreless through inning N" — the club's own offense hasn't
@@ -284,25 +297,20 @@ const DOW_OF = (dateApi) => new Date(`${dateApi}T12:00:00Z`).getUTCDay()
 // Run-total buckets for "win% when scoring N+ runs" — unlike LEAD_LOPSIDED
 // above, this isn't hunting for a reversal, so no lopsidedness floor: the
 // record itself ("38-3 when scoring 6+") is the whole point, win-heavy or not.
-// Only a sample-size floor applies. buildRunsScoredNote (callout-notes.js)
-// picks the highest bucket tonight's own final score actually clears.
-const RUN_SCORED_BUCKETS = [4, 6, 8]
+// Only a sample-size floor applies. buildRunsScoredNote (heldNotes.js) picks
+// the highest RUN_SCORED_BUCKETS bucket tonight's own final score clears.
 const RUN_SCORED_MIN_GAMES = 5
 
-// "Record when allowing N+ runs by inning M" — symmetric to LEAD_CHECKPOINTS/
-// LEAD_LOPSIDED but for runs ALLOWED rather than a lead, and a single run
-// threshold across every checkpoint inning (an early-game blowup and a late
-// one are both "4+ allowed", just at a different point in the game).
-const RUNS_ALLOWED_THRESHOLD = 4
-const RUNS_ALLOWED_CHECKPOINTS = [5, 6, 7, 8]
+// "Record when allowing N+ runs by inning M" — symmetric to the lead record but
+// for runs ALLOWED. Threshold and innings are imported; the floors are local.
 const RUNS_ALLOWED_MIN_GAMES = 5
 const RUNS_ALLOWED_LOPSIDED = 0.85 // win% ≤ .15 — allowing that many that early is normally a loss
 
 // "Comeback win%" — record in games the club trailed by DEFICIT+ runs at some
 // point (checked against the same cumulative-score walk as everything above),
 // regardless of who was leading when. No lopsidedness floor (a genuine ~50/50
-// comeback record is itself the interesting fact); just a sample floor.
-const COMEBACK_DEFICIT = 3
+// comeback record is itself the interesting fact); just a sample floor. The
+// deficit itself is COMEBACK_DEFICIT, imported with the rest.
 const COMEBACK_MIN_GAMES = 5
 
 // Per-inning run tallies ("outscored opponents 38-14 in the 7th") cover the
@@ -1423,6 +1431,10 @@ for (const g of games) {
   }
 
   outGames[g.gamePk] = {
+    // The shard's own name and date, so a file can be checked against where it
+    // was filed — a bundle under the wrong gamePk is a note on the wrong game.
+    gamePk: g.gamePk,
+    date: targetApi,
     sportId,
     // 'day' | 'night' | '' — the schedule endpoint's own copy of
     // gameData.datetime.dayNight, carried here so the callout note builders
@@ -1459,21 +1471,29 @@ for (const g of games) {
   }
 }
 
-await writeJsonAtomic(outFile, { date: targetApi, season, generatedAt: new Date().toISOString(), games: outGames })
+// A full rebuild of this one date, so writeShards' sweep is right: a game that
+// has fallen off the slate (postponed, rescheduled) loses its file rather than
+// outliving the schedule. An EMPTY sweep is refused — a run that found no games
+// is a failed run, and its sweep would wipe a good date on an outage.
+if (!Object.keys(outGames).length) {
+  console.error(`no games built for ${targetApi} — leaving ${outDateDir} alone`)
+  process.exit(1)
+}
+const { written, swept } = await writeShards(outDateDir, Object.entries(outGames))
 console.log(
-  `wrote ${outFile} (${Object.keys(outGames).length} games across MLB+MiLB, ${hitterList.length} hitters and ${pitcherList.length} pitchers swept, ${ttoById.size} TTO splits)`,
+  `wrote ${outDateDir} (${written} games across MLB+MiLB, ${swept} swept, ${hitterList.length} hitters and ${pitcherList.length} pitchers swept, ${ttoById.size} TTO splits)`,
 )
 
-// Prune old per-date files so the committed folder stays small — keep anything
-// from the last ~10 days onward (a game scored a few days late still finds its
-// file; older ones are unreachable slate history).
+// Prune old per-date directories so the committed folder stays small — keep
+// anything from the last ~10 days onward (a game scored a few days late still
+// finds its files; older ones are unreachable slate history).
 const keepFrom = iso(new Date(target.getTime() - 10 * DAY_MS)).replace(/-/g, '')
 try {
   for (const name of await readdir(outDir)) {
-    const m = name.match(/^(\d{2})(\d{2})(\d{4})\.json$/)
+    const m = name.match(/^(\d{2})(\d{2})(\d{4})$/)
     if (!m) continue
     const ymd = `${m[3]}${m[1]}${m[2]}` // YYYYMMDD
-    if (ymd < keepFrom) await rm(join(outDir, name))
+    if (ymd < keepFrom) await rm(join(outDir, name), { recursive: true })
   }
 } catch {
   /* pruning is best-effort */

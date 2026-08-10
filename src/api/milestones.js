@@ -16,20 +16,13 @@
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
-let cached = null
 
-export async function loadMilestoneWatch() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/milestones.json')
-    if (!res.ok) throw new Error(`milestones.json ${res.status}`)
-    const data = await res.json()
-    cached = { players: data.players ?? [], season: data.season ?? null, generatedAt: data.generatedAt ?? null }
-  } catch {
-    cached = { players: [], season: null, generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const loadMilestoneWatch = staticJson('/data/milestones.json', {
+  shape: (d) => ({ players: d.players ?? [], season: d.season ?? null, generatedAt: d.generatedAt ?? null }),
+  fallback: { players: [], season: null, generatedAt: null },
+})
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 

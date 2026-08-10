@@ -15,21 +15,14 @@
 // Degrades to an empty list before the file exists or on any failure — a
 // friendly empty state, not a broken page. Cached in-memory for the session
 // since the file only changes on a hand-run regenerate.
-let cached = null
 
-export async function loadAwardsHistory() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/awards-history.json')
-    if (!res.ok) throw new Error(`awards-history.json ${res.status}`)
-    const data = await res.json()
-    cached = {
-      seasons: data.seasons ?? [],
-      families: data.families ?? [],
-      generatedAt: data.generatedAt ?? null,
-    }
-  } catch {
-    cached = { seasons: [], families: [], generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const loadAwardsHistory = staticJson('/data/awards-history.json', {
+  shape: (d) => ({
+    seasons: d.seasons ?? [],
+    families: d.families ?? [],
+    generatedAt: d.generatedAt ?? null,
+  }),
+  fallback: { seasons: [], families: [], generatedAt: null },
+})

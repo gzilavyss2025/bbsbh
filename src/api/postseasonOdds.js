@@ -3,19 +3,12 @@
 // reader selects only the latest snapshot at or before a Team Page's
 // spoiler-safe cutoff, so a historical page never renders odds computed with
 // knowledge of games past that date.
-let cached = null
 
-export async function fetchPostseasonOdds() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/postseason-odds.json')
-    if (!res.ok) throw new Error(`postseason-odds.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { version: 1, generatedAt: null, seasons: {} }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const fetchPostseasonOdds = staticJson('/data/postseason-odds.json', {
+  fallback: { version: 1, generatedAt: null, seasons: {} },
+})
 
 export function postseasonOddsFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]

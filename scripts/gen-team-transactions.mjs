@@ -1,9 +1,20 @@
-// Regenerates public/data/team-transactions/{season}.json — the Team
-// Transactions card's per-org, day-grouped, fully-shaped story feed. Runs
-// nightly (update-nightly-data.yml) but only ever rebuilds the CURRENT
-// season's file from scratch; a completed season's file, once written with
-// final:true, is never touched again (the guard below refuses to overwrite
-// one without --force).
+// Regenerates public/data/team-transactions/{season}/{teamId}.json — the Team
+// Transactions card's per-org, day-grouped, fully-shaped story feed, ONE FILE
+// PER CLUB. Runs nightly (update-nightly-data.yml) but only ever rebuilds the
+// CURRENT season from scratch; a completed season, once written with
+// final:true, is never touched again (the guard below refuses to overwrite one
+// without --force).
+//
+// One file per club because the card shows one club: a season's league-wide
+// feed passes a megabyte by midsummer, and a team page was reading all of it
+// to show ~3% of it. EVERY org gets a file each season, including an org with
+// no storyworthy moves at all (`days: []`) — that is what lets the reader read
+// a 404 as "no such season" and stop paging, rather than as "quiet club" and
+// stop early (see loadMoreTeamTransactions).
+//
+// index.json alongside them carries the season's own metadata (`final`,
+// `seasonStart`, `generatedAt`). Its reader is THIS script — the freeze guard
+// below — not the app.
 //
 // ONE league-wide /api/v1/transactions fetch per run (like gen-rehab.mjs),
 // season-start-to-today — verified live that teamId= is club-scoped and
@@ -16,11 +27,10 @@
 // Full design: .scratch/team-transactions/data-layer-scope.md.
 //
 // Run by hand: node scripts/gen-team-transactions.mjs [season] [--force]
-import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getJson } from '../src/api/statsapi.js'
-import { writeJsonAtomic } from './lib/io.js'
+import { readJsonOr, writeShards } from './lib/io.js'
 import { dedupeTransactions, filterStoryworthy, groupIntoStories, bucketToOrg } from '../src/api/teamTransactions.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -75,18 +85,15 @@ const arg = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[
 const force = process.argv.includes('--force')
 const season = arg ? Number(arg) : new Date().getUTCFullYear()
 
-const outFile = join(outDir, `${season}.json`)
+const outSeasonDir = join(outDir, String(season))
 
-// A completed season's file is frozen once written — refuse to silently
-// re-run over it (see the `final` note in data-layer-scope.md §1).
-let existing = null
-try {
-  existing = JSON.parse(await readFile(outFile, 'utf8'))
-} catch {
-  existing = null
-}
+// A completed season is frozen once written — refuse to silently re-run over
+// it (see the `final` note in data-layer-scope.md §1). readJsonOr rethrows a
+// corrupt index rather than reading it as "no season yet", so a damaged file
+// stops the run instead of quietly unfreezing a finished season.
+const existing = await readJsonOr(join(outSeasonDir, 'index.json'), null)
 if (existing?.final && !force) {
-  console.log(`${outFile} is already final — skipping (pass --force to override)`)
+  console.log(`${outSeasonDir} is already final — skipping (pass --force to override)`)
   process.exit(0)
 }
 
@@ -103,23 +110,31 @@ const raw = (
 
 const { positions, debutedIds } = await fetchPositionsAndDebuts(raw.map((t) => t.person?.id))
 
-const byTeamId = {}
-for (const orgId of orgIds) {
-  const bucketed = bucketToOrg(raw, orgId, affilToOrg)
-  const deduped = dedupeTransactions(bucketed)
-  const kept = filterStoryworthy(deduped, { orgId, debutedIds })
-  const days = groupIntoStories(kept, { positions, orgId, debutedIds })
-  if (days.length) byTeamId[orgId] = { days }
-}
-
-const out = {
+const meta = {
   version: 1,
   season,
   generatedAt: new Date().toISOString(),
   seasonStart,
   final,
-  byTeamId,
 }
 
-await writeJsonAtomic(outFile, out)
-console.log(`wrote ${outFile} (${Object.keys(byTeamId).length} orgs, final=${final})`)
+// One shard per org, written even when the org has no storyworthy day — an
+// empty file and a missing file mean different things to the reader.
+const shards = orgIds.map((orgId) => {
+  const bucketed = bucketToOrg(raw, orgId, affilToOrg)
+  const deduped = dedupeTransactions(bucketed)
+  const kept = filterStoryworthy(deduped, { orgId, debutedIds })
+  const days = groupIntoStories(kept, { positions, orgId, debutedIds })
+  return [String(orgId), { ...meta, teamId: orgId, days }]
+})
+
+// A full rebuild of this season, so writeShards' sweep is right: a club that
+// no longer belongs to the league loses its file rather than outliving it.
+const { written } = await writeShards(outSeasonDir, [
+  ...shards,
+  ['index', { ...meta, teamIds: orgIds }],
+])
+const withMoves = shards.filter(([, s]) => s.days.length).length
+console.log(
+  `wrote ${outSeasonDir} (${written - 1} orgs, ${withMoves} with moves, final=${final})`,
+)

@@ -2,19 +2,12 @@
 // scripts/gen-season-score.mjs. The reader deliberately selects the latest
 // snapshot AT OR BEFORE the Team Page's standings cutoff, so a historical page
 // never renders a later season result. Missing data is a missing badge.
-let cached = null
 
-export async function fetchSeasonScores() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/season-score.json')
-    if (!res.ok) throw new Error(`season-score.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { version: 1, generatedAt: null, seasons: {} }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const fetchSeasonScores = staticJson('/data/season-score.json', {
+  fallback: { version: 1, generatedAt: null, seasons: {} },
+})
 
 export function seasonScoreFor(data, teamId, season, cutoff) {
   const snapshots = data?.seasons?.[season]?.byTeamId?.[teamId]

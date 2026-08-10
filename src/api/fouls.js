@@ -1,4 +1,5 @@
 import { shardKey100 } from '../lib/shardKey.js'
+import { staticJson } from './staticJson.js'
 
 // Season-long foul-ball aggregates, read from a static same-origin file
 // (public/data/fouls.json) precomputed nightly by scripts/gen-fouls.mjs (the
@@ -13,25 +14,13 @@ import { shardKey100 } from '../lib/shardKey.js'
 // PlayerPage. Degrades to null on any failure — a missing card, not a crash.
 //
 // Cached in-memory for the session (the files change once a day).
-let cached
-
 // The WHOLE season file — every batter, every pitcher, the league blocks, and
 // the top foul games. Only the Foul Tracker page (/fouls) wants this: it ranks
 // the league against itself, so it genuinely needs everyone.
 //
 // A player page does not. It shows one man's line, so it reads
 // fetchFoulsFor(personId) below and never touches this.
-export async function fetchFouls() {
-  if (cached !== undefined) return cached
-  try {
-    const res = await fetch('/data/fouls.json')
-    if (!res.ok) throw new Error(`fouls.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = null
-  }
-  return cached
-}
+export const fetchFouls = staticJson('/data/fouls.json')
 
 // One player's slice — his own batter and pitcher rows, from the bucket he
 // falls in (`personId % 100`, shardKey100, the same join the rookie records and

@@ -16,19 +16,10 @@
 // The W1 rolling buckets (workloadFor), the W5 ESPN-threshold availability board
 // (availabilityFor), and the W4 own-norm/role percentages (workloadVsBaseline)
 // from .scratch/metric-engines/pitch-workload.md live here.
-let cached = null
 
-export async function fetchWorkload() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/workload.json')
-    if (!res.ok) throw new Error(`workload.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = null
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const fetchWorkload = staticJson('/data/workload.json')
 
 // Whole-day index for a 'YYYY-MM-DD' date (UTC midnight / 86400s), so day
 // differences and "strictly before" comparisons are plain integer math.

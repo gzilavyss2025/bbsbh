@@ -1,42 +1,60 @@
-// Per-game "call-out" enrichment, read from a static same-origin file
-// (public/data/callouts/<MMDDYYYY>.json) rather than assembled live.
+// Per-game "call-out" enrichment, read from static same-origin files
+// (public/data/callouts/<MMDDYYYY>/<gamePk>.json) rather than assembled live.
 //
-// The file is precomputed the night before by scripts/gen-callouts.mjs (see
+// ONE FILE PER GAME, filed under its slate date. The set is precomputed the
+// night before by scripts/gen-callouts.mjs (see
 // .github/workflows/update-nightly-data.yml) for that day's slate — MLB plus
 // the four full-season MiLB levels — season leaders, streaks, and situational
-// team records for every club playing, joined per gamePk. Same
-// build-time-fetch pattern as war.js / minors-leaders.js; every value in it is
-// a SEASON AGGREGATE, so it's spoiler-free — the app's spoiler-safety comes
-// from WHERE each note renders (inside a revealed play card, or on an extras
-// page), never from this data. Since it covers MiLB it runs ~0.5-1 MB per
-// date, so it's kept OUT of the PWA precache and fetched at runtime (see
-// vite.config.js), like vs-team-splits.json.
+// team records for every club playing. Same build-time-fetch pattern as
+// war.js / minors-leaders.js; every value in it is a SEASON AGGREGATE, so it's
+// spoiler-free — the app's spoiler-safety comes from WHERE each note renders
+// (inside a revealed play card, or on an extras page), never from this data.
+// Kept OUT of the PWA precache and fetched at runtime (see vite.config.js),
+// like the vs-team-splits shards.
 //
-// Degrades to an empty games map before the file exists or on any failure — a
-// game with no bundle simply shows no notes (un-generated dates, MiLB games in
-// files predating the MiLB expansion, a failed nightly run). Cached in-memory
-// per date for the session, since a given day's file only changes once (the
+// Why per game: a whole slate covering MiLB runs ~0.5-1 MB per date, and the
+// surface reading it hardest — the lineup page — wants exactly ONE game out of
+// it. The shard name is the key that reader already holds (the gamePk it is
+// showing), so a game view costs ~10 KB. The slate's day-card pass wants
+// several at once and asks only for the finals it is classifying, still a
+// fraction of the day.
+//
+// Degrades to an empty games map before the files exist or on any failure — a
+// game with no bundle simply shows no notes (un-generated dates, MiLB games on
+// dates predating the MiLB expansion, a failed nightly run). Cached in-memory
+// per game for the session, since a date's files only change once (the
 // pre-dawn cron).
-const cache = new Map() // urlDate (MMDDYYYY) -> { games }
+const cache = new Map() // `${urlDate}:${gamePk}` -> bundle | null
 
-export async function fetchCallouts(urlDate) {
-  if (!urlDate) return { games: {} }
-  if (cache.has(urlDate)) return cache.get(urlDate)
-  let result = { games: {} }
+async function fetchOne(urlDate, gamePk) {
+  const key = `${urlDate}:${gamePk}`
+  if (cache.has(key)) return cache.get(key)
+  let bundle = null
   try {
-    const res = await fetch(`/data/callouts/${urlDate}.json`)
-    if (res.ok) {
-      const data = await res.json()
-      result = { games: data.games ?? {} }
-    }
+    const res = await fetch(`/data/callouts/${urlDate}/${gamePk}.json`)
+    if (res.ok) bundle = await res.json()
   } catch {
-    // leave the empty default — no notes rather than a broken view
+    // leave null — no notes rather than a broken view
   }
-  cache.set(urlDate, result)
-  return result
+  cache.set(key, bundle)
+  return bundle
 }
 
-// This game's bundle, or null when the file didn't cover it. Shape (all keys
+// The bundles for a set of games on one date, in the `{ games }` shape
+// `calloutsForGame` reads. Callers pass only the gamePks they will ask about,
+// so this never pulls the rest of the slate.
+export async function fetchCallouts(urlDate, gamePks) {
+  if (!urlDate || !gamePks?.length) return { games: {} }
+  const ids = [...new Set(gamePks.filter((pk) => pk != null).map(String))]
+  const bundles = await Promise.all(ids.map((pk) => fetchOne(urlDate, pk)))
+  const games = {}
+  ids.forEach((pk, i) => {
+    if (bundles[i]) games[pk] = bundles[i]
+  })
+  return { games }
+}
+
+// This game's bundle, or null when the date's set didn't cover it. Shape (all keys
 // present, values possibly empty) — see scripts/gen-callouts.mjs's header for
 // how each family is derived:
 //   { sportId (the game's level — 1 MLB, 11-14 MiLB),

@@ -62,7 +62,13 @@ export function useDayCardMeta(finals, dateStr, revealed) {
             .then(({ feed, winProb }) => ({ gamePk: game.gamePk, game, feed, winProb, dateStr }))
             .catch(() => null),
         ),
-        fetchCallouts(apiDateToUrl(dateStr)),
+        // Only the finals being classified — the callouts set is one file per
+        // game (api/callouts.js), so this asks for the handful of bundles
+        // classifyGameCards will actually read, not the whole day's slate.
+        fetchCallouts(
+          apiDateToUrl(dateStr),
+          finals.map((g) => g.gamePk),
+        ),
       ])
       if (cancelled) return
       const cards = classifyGameCards(entries, calloutsData)

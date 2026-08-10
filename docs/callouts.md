@@ -101,7 +101,8 @@ same precedent the pre-half strip sets):
 ## The families
 
 Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
-`public/data/callouts/<MMDDYYYY>.json` (bundle shape: `src/api/callouts.js`).
+`public/data/callouts/<MMDDYYYY>/<gamePk>.json`, one file per game (bundle
+shape: `src/api/callouts.js`).
 "Progress" means `computeCalloutProgress`'s per-play in-game counts.
 
 ### Player, on the play it happens
@@ -197,10 +198,12 @@ Data families are precomputed nightly by `scripts/gen-callouts.mjs` into
   and win% ≥ .66 or ≤ .34 (`DOW_MIN_GAMES`/`DOW_LOPSIDED` in callout-notes.js),
   or an ordinary weekday is noise. Roll-up (`buildDayOfWeekNotes`) folds tonight
   in once Final. MLB + MiLB (the linescore sweep covers every level).
-- **leadAfterLive** — top of inning N ≥ 7 (checkpoints 6–9): whoever leads
+- **leadAfterLive** — top of inning N ≥ 7 (checkpoints 6–8): whoever leads
   tonight after N−1 + their season record at that checkpoint
   (`leadAfterFull`, ≥ 5 games). Self-gates on `revealedThrough` covering
-  inning N−1 (ADR-0014).
+  inning N−1 (ADR-0014). **No 9th checkpoint anywhere in this family**: a club
+  leading after nine completed innings has won, so the record can only read
+  N-0 and the note says nothing. See `LEAD_CHECKPOINTS`.
 - **tiedAfterLive** — the tied-game sibling of `leadAfterLive`: entering top of
   inning N (checkpoints 6–8 only — a tie after the 9th is extra innings, never
   surfaced up front) when the game is level after N−1, BOTH clubs' season

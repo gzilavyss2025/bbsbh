@@ -16,17 +16,10 @@
 // baked in at generate time and the page only renders. Degrades to empty leaders
 // before the file exists or on any failure — a friendly empty state, not a broken
 // page. Cached in-memory for the session since the file only changes once a day.
-let cached = null
 
-export async function fetchMinorsLeaders() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/minors-leaders.json')
-    if (!res.ok) throw new Error(`minors-leaders.json ${res.status}`)
-    const data = await res.json()
-    cached = { leaders: data.leaders ?? {}, generatedAt: data.generatedAt ?? null }
-  } catch {
-    cached = { leaders: {}, generatedAt: null }
-  }
-  return cached
-}
+import { staticJson } from './staticJson.js'
+
+export const fetchMinorsLeaders = staticJson('/data/minors-leaders.json', {
+  shape: (d) => ({ leaders: d.leaders ?? {}, generatedAt: d.generatedAt ?? null }),
+  fallback: { leaders: {}, generatedAt: null },
+})

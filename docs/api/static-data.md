@@ -29,6 +29,16 @@ driver is either an **unofficial/bulk source** (WAR) or **cost** (everything
 that would need dozens of statsapi calls per page load). See `scripts/CLAUDE.md`
 for each generator; the reader modules:
 
+- `staticJson.js` — not a dataset: the memoized read every reader below is built
+  on. `staticJson(url, {shape, fallback})` returns a loader that fetches once per
+  session and hands the SAME in-flight promise to concurrent callers;
+  `staticJsonBy(urlFor, …)` does it per shard key. Written after a network trace
+  showed a player page fetching `teams.json` fourteen times and `milb-history.json`
+  eight: each reader used to hold a `let cached` assigned after its `await`, which
+  only short-circuits a call that starts once the first has resolved, and React
+  mounts a page's cards on one tick. A failure memoizes the `fallback` too, so a
+  missing file is not re-fetched on every render of the session. `jerseys.js` had
+  a private copy of this fix; it now uses the shared one.
 - `war.js` — season WAR per player, from `public/data/war.json`. FanGraphs'
   leaderboard API is CORS-open but bulk-only (~1MB) and unofficial, so
   `scripts/gen-war.mjs` trims it to `{personId: war}` on a nightly cron. Keyed by

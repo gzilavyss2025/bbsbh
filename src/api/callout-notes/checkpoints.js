@@ -40,15 +40,42 @@ export function cumulativeInnings(feed) {
   return rows
 }
 
+// ---------------------------------------------------------------------------
+// The checkpoint innings and thresholds every season-record note is built on.
+// ONE definition, imported by both halves: the note builders here and in
+// heldNotes.js, and scripts/gen-callouts.mjs, which tallies the records
+// against these exact numbers. Two copies that drift would leave a note
+// phrased against a checkpoint the precompute never counted — a record that
+// silently reads for the wrong inning.
+// ---------------------------------------------------------------------------
+
 // Checkpoints to look for a blown/held lead at, LATEST first — a team that led
 // after both the 7th and the 8th only gets the more dramatic (later) note, not
-// both. Mirrors gen-callouts.mjs's LEAD_CHECKPOINTS.
-export const LEAD_CHECKPOINTS = [9, 8, 7, 6]
-// The tied-game checkpoints (gen-callouts.mjs's TIED_CHECKPOINTS), latest first
-// for the same "most dramatic wins" rule — a game tied after both the 7th and
-// the 8th gets only the 8th's note. No 9th: a tie after the 9th is extra
-// innings, which never surfaces up front (ADR-0008).
+// both.
+//
+// NO 9TH, and this is a rule of baseball, not a display choice: a club that
+// leads after nine completed innings has won the game. The record can only
+// ever read N-0, no reversal of it can exist, and "moved to 22-0 when leading
+// after the 9th" states that a team that was ahead at the end won — which was
+// the note every road win got, since a home winner's ninth is never completed.
+// The 8th is the last inning at which leading is still a question.
+export const LEAD_CHECKPOINTS = [8, 7, 6]
+// The tied-game checkpoints, latest first for the same "most dramatic wins"
+// rule — a game tied after both the 7th and the 8th gets only the 8th's note.
+// No 9th here either: a tie after the 9th is extra innings, which never
+// surfaces up front (ADR-0008).
 export const TIED_CHECKPOINTS = [8, 7, 6]
+// Final-score buckets for the "when scoring N+ runs" record, highest first —
+// show the most impressive bucket the club actually cleared.
+export const RUN_SCORED_BUCKETS = [8, 6, 4]
+// "Allowed N+ runs by the end of inning M": one run threshold across every
+// checkpoint inning (an early blowup and a late one are both "4+ allowed",
+// just at a different point), checked latest first like the lead notes.
+export const RUNS_ALLOWED_THRESHOLD = 4
+export const RUNS_ALLOWED_CHECKPOINTS = [8, 7, 6, 5]
+// How far behind a club must have fallen for the game to count toward its
+// comeback record.
+export const COMEBACK_DEFICIT = 3
 
 // Which side led after each completed inning — 'away' | 'home' | null (tied),
 // keyed by inning number. Shared by the reversal + lead-held notes below.

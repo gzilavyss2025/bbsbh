@@ -1,4 +1,5 @@
 import { shardKey100 } from '../lib/shardKey.js'
+import { staticJson } from './staticJson.js'
 
 // Season WAR, read from a static same-origin file (public/data/war.json)
 // rather than fetched live from FanGraphs. That file is regenerated nightly
@@ -13,19 +14,9 @@ import { shardKey100 } from '../lib/shardKey.js'
 // Degrades to empty maps before the file exists or on any fetch failure — a
 // missing WAR badge, not a broken page. Cached in-memory for the session
 // since the file only changes once a day.
-let cached = null
-
-export async function fetchWarData() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/war.json')
-    if (!res.ok) throw new Error(`war.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { season: null, bat: {}, pit: {}, pa: {} }
-  }
-  return cached
-}
+export const fetchWarData = staticJson('/data/war.json', {
+  fallback: { season: null, bat: {}, pit: {}, pa: {} },
+})
 
 // Season WAR for COMPLETED seasons — the multi-year companion to war.json above,
 // keyed by PLAYER: { bat: { [personId]: {season: war} }, pit }.

@@ -1,20 +1,11 @@
 import { seasonGradeFor } from './seasonGradeFormula.js'
+import { staticJson } from './staticJson.js'
 
 // Daily MLB team-quality snapshots. Like seasonScoreFor, this reader selects
 // only the latest snapshot at or before a Team Page's spoiler-safe cutoff.
-let cached = null
-
-export async function fetchTeamScores() {
-  if (cached) return cached
-  try {
-    const res = await fetch('/data/team-score.json')
-    if (!res.ok) throw new Error(`team-score.json ${res.status}`)
-    cached = await res.json()
-  } catch {
-    cached = { version: 1, generatedAt: null, seasons: {} }
-  }
-  return cached
-}
+export const fetchTeamScores = staticJson('/data/team-score.json', {
+  fallback: { version: 1, generatedAt: null, seasons: {} },
+})
 
 function latestAt(snapshots, cutoff) {
   const eligible = Object.keys(snapshots).filter((date) => !cutoff || date <= cutoff).sort()

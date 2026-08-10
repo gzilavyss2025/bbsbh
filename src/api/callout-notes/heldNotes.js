@@ -11,6 +11,10 @@ import {
   leaderAfterInnings,
   LEAD_CHECKPOINTS,
   TIED_CHECKPOINTS,
+  RUN_SCORED_BUCKETS,
+  RUNS_ALLOWED_THRESHOLD,
+  RUNS_ALLOWED_CHECKPOINTS,
+  COMEBACK_DEFICIT,
   scorelessLopsided,
   scorelessWhen,
   bothScorelessWhen,
@@ -185,16 +189,6 @@ export function buildDayOfWeekNotes(feed, bundle, result) {
   }
   return notes
 }
-
-// These three thresholds/checkpoint lists must match gen-callouts.mjs's
-// RUN_SCORED_BUCKETS / RUNS_ALLOWED_THRESHOLD+RUNS_ALLOWED_CHECKPOINTS /
-// COMEBACK_DEFICIT — the record was precomputed against those exact numbers,
-// so tonight's check has to agree with them (same duplication as
-// LEAD_CHECKPOINTS above, which mirrors gen-callouts.mjs for the same reason).
-const RUN_SCORED_BUCKETS = [8, 6, 4] // highest first — show the most impressive bucket cleared
-const RUNS_ALLOWED_THRESHOLD = 4
-const RUNS_ALLOWED_CHECKPOINTS = [8, 7, 6, 5] // latest first, same "most dramatic" rule as LEAD_CHECKPOINTS
-const COMEBACK_DEFICIT = 3
 
 // "The Dodgers moved to 33-4 when scoring 8+ runs" — the highest bucket each
 // side's own final score actually clears, with tonight folded in when the

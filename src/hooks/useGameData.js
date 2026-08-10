@@ -357,18 +357,19 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   const prospectsData = game.sportId === SPORT_IDS.MLB ? null : prospects.data ?? null
 
   // Season-context call-outs for the play-by-play — the leader / streak /
-  // situational-record notes, precomputed nightly to a static per-date file (see
+  // situational-record notes, precomputed nightly to a static per-game file (see
   // api/callouts.js). Spoiler-free season aggregates (no seal), same feed-derived tier
   // as prospect badges. Covers MLB and the four full-season MiLB levels alike
-  // (the file carries every level's slate since the phase-3 generator; a MiLB
-  // gamePk in an older file simply resolves to no bundle). Keyed on gamePk,
+  // (the set carries every level's slate since the phase-3 generator; a MiLB
+  // gamePk on an older date simply resolves to no bundle). Keyed on gamePk,
   // like the other feed-derived static fetches — a live Refresh never
-  // re-pulls it.
+  // re-pulls it. THIS game only: the shards are named by gamePk, so a lineup
+  // page reads its own ~10 KB rather than the whole slate's.
   const callouts = useAsyncOnFeed(
     feed,
     async (f) => {
       const api = f.gameData?.datetime?.officialDate
-      return api ? fetchCallouts(apiDateToUrl(api)) : null
+      return api ? fetchCallouts(apiDateToUrl(api), [game.gamePk]) : null
     },
     [game.gamePk],
   )
