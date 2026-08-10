@@ -8,7 +8,6 @@ import { teamFullName } from '../lib/teams.js'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { Ledger } from '../components/player/Ledger.jsx'
 import { ProspectTrendPill } from '../components/badges/ProspectTrendPill.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
@@ -18,7 +17,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
-const PERFORMANCE_BANDS = ['All', 'Bottom', 'Below', 'In line', 'Above', 'Elite']
+const PERFORMANCE_BANDS = ['All', 'Bottom', 'Below', 'Middle', 'Above', 'Top']
 
 function generatedLabel(iso) {
   if (!iso) return ''
@@ -38,15 +37,79 @@ async function loadProspects() {
 // one group of levels, or (from resolveCurrentLevels) two prefixed strings —
 // "(MLB) …" and "(MiLB) …", the latter summed across every MiLB level he's
 // played this year — stacked in place rather than widening the cell.
-function LineCell({ lines }) {
+function LineCell({ lines, level }) {
   if (!lines?.length) return DASH
-  if (lines.length === 1) return lines[0]
+  const splitLine = (line) => {
+    const match = line.match(/^\((MLB|MiLB)\)\s*(.*)$/)
+    return match ? { scope: match[1], stats: match[2] } : { scope: level === 'MLB' ? 'MLB' : 'MiLB', stats: line }
+  }
   return (
-    <span className="prospecttable__lines">
-      {lines.map((l) => (
-        <span key={l} className="prospecttable__lineitem">{l}</span>
-      ))}
+    <span className={`prospecttable__lines${lines.length > 1 ? ' prospecttable__lines--split' : ''}`}>
+      {lines.map((line) => {
+        const { scope, stats } = splitLine(line)
+        return (
+          <span key={line} className={`prospecttable__lineitem prospecttable__lineitem--${scope === 'MLB' ? 'mlb' : 'milb'}`}>
+            <span className="prospecttable__linetag">{scope}</span>
+            <span className="prospecttable__linestats">{stats}</span>
+          </span>
+        )
+      })}
     </span>
+  )
+}
+
+function AssignmentCell({ player }) {
+  return (
+    <span className="prospectboard__assignment">
+      <span className="prospectboard__position">{player.position || DASH}</span>
+      <span className="prospectboard__level">{player.levelLabel || DASH}</span>
+      <TeamLink id={player.teamId} className="prospectboard__club" ariaLabel={player.team}>
+        <TeamLogo teamId={player.teamId} name={player.team} size={18} />
+        <span>{player.team}</span>
+      </TeamLink>
+    </span>
+  )
+}
+
+function ProspectBoard({ players, trend, selectedId, onSelect }) {
+  return (
+    <div className="prospectboard-wrap">
+      <table className="prospectboard">
+        <caption className="sr-only">MLB Pipeline Top 100 prospect ranking with current assignment, season line, and performance versus current level</caption>
+        <thead>
+          <tr>
+            <th scope="col">Pipeline rk</th>
+            <th scope="col">Player</th>
+            <th scope="col">Pos · level · club</th>
+            <th scope="col">2026 line</th>
+            <th scope="col">Vs current level</th>
+          </tr>
+        </thead>
+        <tbody>
+          {players.map((player) => {
+            const isSelected = player.playerId === selectedId
+            return (
+              <tr
+                key={player.playerId}
+                className={isSelected ? 'is-selected' : ''}
+                onPointerDown={() => onSelect(player.playerId)}
+                onFocusCapture={() => onSelect(player.playerId)}
+              >
+                <td className="prospectboard__rank" data-label="Pipeline rank"><span>{player.rank}</span></td>
+                <td className="prospectboard__identity" data-label="Player">
+                  <PlayerLink id={player.playerId} className="prospecttable__name">{player.name}</PlayerLink>
+                </td>
+                <td className="prospectboard__assignmentcell" data-label="Assignment"><AssignmentCell player={player} /></td>
+                <td className="prospectboard__linecell" data-label="2026 line"><LineCell lines={player.lines} level={player.levelLabel} /></td>
+                <td className="prospectboard__standingcell" data-label="Vs current level">
+                  <ProspectTrendPill entry={prospectTrendById(trend, player.playerId)} level={player.levelLabel} />
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -96,6 +159,7 @@ export function ProspectsPage() {
   const [filterTier, setFilterTier] = useState(null)
   const [filterGroup, setFilterGroup] = useState('all')
   const [secondaryOpen, setSecondaryOpen] = useState(false)
+  const [selectedPlayerId, setSelectedPlayerId] = useState(null)
   const allPlayers = data?.players ?? []
   const tierFor = (p) => {
     const entry = prospectTrendById(data?.trend, p.playerId)
@@ -110,6 +174,7 @@ export function ProspectsPage() {
     filterTier == null ? null : PERFORMANCE_BANDS[filterTier],
   ].filter(Boolean)
   const hasActiveFilters = activeFilters.length > 0
+  const selectedId = players.some((p) => p.playerId === selectedPlayerId) ? selectedPlayerId : players[0]?.playerId
   const resetFilters = () => {
     setFilterTeamId(null)
     setFilterTier(null)
@@ -207,43 +272,13 @@ export function ProspectsPage() {
 
       {players.length > 0 && (
         <>
-          {/* "vs. Level", not "Trend". The cell holds a STANDING against
-              everyone else qualified at this player's own level this season,
-              not a direction, and calling it Trend made a column of static
-              figures look like an arrow column that had broken. It also sits
-              LAST, after Line: dropped in at position five it pushed Team and
-              Line — including the very stat line it summarizes — off the right
-              edge of a 390px phone. */}
-          <div className="prospects__ledger-shell">
-            <p className="prospects__scrollcue" id="prospect-scroll-instruction">
-              <span aria-hidden="true">Swipe for stats →</span>
-              <span className="sr-only">Swipe horizontally to view prospect statistics.</span>
-            </p>
-            <Ledger
-              className="prospecttable"
-              ariaLabel="Top 100 prospect rankings"
-              ariaDescribedBy="prospect-scroll-instruction"
-              leftCols={2}
-              head={['Pipeline Rk', 'Player', 'Pos', 'Level', 'Team', '2026 Line', 'vs. Current Level']}
-              rows={players.map((p) => ({
-                key: p.playerId,
-                cells: [
-                  p.rank,
-                  <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
-                  p.position || DASH,
-                  p.levelLabel || DASH,
-                  <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo" ariaLabel={p.team}>
-                    <TeamLogo teamId={p.teamId} name={p.team} size={20} />
-                  </TeamLink>,
-                  <LineCell key="line" lines={p.lines} />,
-                  <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
-                ],
-              }))}
-            />
-          </div>
-          {data.generatedAt && (
-            <p className="hint prospects__caption">Rankings as of {generatedLabel(data.generatedAt)}.</p>
-          )}
+          <ProspectBoard
+            players={players}
+            trend={data.trend}
+            selectedId={selectedId}
+            onSelect={setSelectedPlayerId}
+          />
+          <p className="hint prospects__caption">Pipeline rank stays fixed when the board is filtered. Performance compares each player with qualified hitters or pitchers at his current level.</p>
         </>
       )}
 

@@ -1,4 +1,4 @@
-import { standingLabel, levelTier } from '../../api/prospectTrend.js'
+import { confidenceState, levelTier } from '../../api/prospectTrend.js'
 
 // A compact, always-visible /prospects Ledger cell for bbsbh's own
 // level-relative OPS/ERA percentile (src/api/prospectTrend.js,
@@ -60,6 +60,37 @@ function DirectionTriangle({ up }) {
 // stays off until the move is big enough to be about the player. Five points is
 // roughly one rung on the band scale above.
 const MOVE_FLOOR = 5
+const METRIC = { hitting: 'OPS', pitching: 'ERA' }
+const BAND_LABEL = {
+  1: 'Bottom band',
+  2: 'Below band',
+  3: 'Middle band',
+  4: 'Above band',
+  5: 'Top band',
+}
+
+function ordinal(value) {
+  const mod100 = value % 100
+  const suffix = mod100 >= 11 && mod100 <= 13
+    ? 'th'
+    : value % 10 === 1
+      ? 'st'
+      : value % 10 === 2
+        ? 'nd'
+        : value % 10 === 3
+          ? 'rd'
+          : 'th'
+  return `${value}${suffix}`
+}
+
+function outsToIp(outs) {
+  return `${Math.floor(outs / 3)}.${outs % 3}`
+}
+
+function sampleLabel(entry) {
+  if (!Number.isFinite(entry?.sampleSize)) return null
+  return entry.group === 'pitching' ? `${outsToIp(entry.sampleSize)} IP` : `${entry.sampleSize} PA`
+}
 
 // `entry` comes from prospectTrendById (prospectTrend.js). Two distinct
 // empty states, on purpose: `entry == null` is bbsbh's own data gap (no
@@ -70,23 +101,44 @@ const MOVE_FLOOR = 5
 // plainly rather than folding into the same silent dash.
 const DASH = '—'
 
-export function ProspectTrendPill({ entry }) {
-  if (!entry) return <span className="prospecttrend prospecttrend--unqualified">{DASH}</span>
-  const label = entry.qualified ? standingLabel(entry.percentile, entry.group) : null
-  if (!label) {
-    return <span className="prospecttrend prospecttrend--unqualified">Too early</span>
+export function ProspectTrendPill({ entry, level }) {
+  const metric = METRIC[entry?.group] ?? 'Performance'
+  const comparison = level ? `${metric} vs ${level}` : `${metric} vs level`
+  if (!entry) {
+    return (
+      <span className="prospecttrend prospecttrend--unqualified">
+        <span className="prospecttrend__headline">{comparison}</span>
+        <span className="prospecttrend__meta">{DASH} No standing yet</span>
+      </span>
+    )
+  }
+  if (!entry.qualified || !Number.isFinite(entry.percentile)) {
+    return (
+      <span className="prospecttrend prospecttrend--unqualified">
+        <span className="prospecttrend__headline">{comparison}</span>
+        <span className="prospecttrend__meta">Too early{sampleLabel(entry) ? ` · ${sampleLabel(entry)}` : ''}</span>
+      </span>
+    )
   }
   const tier = levelTier(entry.percentile)
   const delta = entry.movement?.delta
   const moving = Number.isFinite(delta) && Math.abs(delta) >= MOVE_FLOOR
+  const confidence = confidenceState(entry.sampleSize, entry.group)
+  const confidenceLabel = confidence === 'early' ? 'Early sample' : confidence === 'building' ? 'Building sample' : 'Established'
   return (
-    <span className="prospecttrend" role="img" aria-label={label}>
-      <LevelDots tier={tier} />
-      {moving && (
-        <span className={`prospecttrend__move prospecttrend__move--${delta > 0 ? 'up' : 'down'}`}>
-          <DirectionTriangle up={delta > 0} />
+    <span className="prospecttrend">
+      <span className="prospecttrend__headline">{comparison} · {ordinal(entry.percentile)} percentile</span>
+      <span className="prospecttrend__details">
+        <span className={`prospecttrend__band prospecttrend__band--${tier}`}>
+          <LevelDots tier={tier} />
+          <span>{BAND_LABEL[tier]}</span>
         </span>
-      )}
+        <span className="prospecttrend__sample">{confidenceLabel}{sampleLabel(entry) ? ` · ${sampleLabel(entry)}` : ''}</span>
+        <span className={`prospecttrend__move${moving ? ` prospecttrend__move--${delta > 0 ? 'up' : 'down'}` : ''}`}>
+          {moving ? <DirectionTriangle up={delta > 0} /> : <span className="prospecttrend__steady" aria-hidden="true" />}
+          {moving ? `${delta > 0 ? 'Up' : 'Down'} ${Math.abs(delta)} pt` : 'Steady'}
+        </span>
+      </span>
     </span>
   )
 }
