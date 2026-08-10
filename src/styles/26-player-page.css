@@ -325,6 +325,27 @@
    appearance all the time — so they are ruled apart instead of run together.
    Recessed and captioned rather than inked: it is a divider carrying a name,
    not a data row, and must never be mistaken for one. */
+/* The reference line a split table is read against — the FIRST body row, not a
+   footer. See referenceRow in SplitsSection.jsx: a tinted, rule-separated row
+   under the data claims to be the sum of it, and the situational rows overlap
+   so they do not sum. Inked and ruled off BELOW so the rows that follow read as
+   hanging from it. */
+.ledger tr.ledger__ref td {
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+  background: var(--bg-page);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.ledger tr.ledger__ref .yr {
+  font-family: var(--font-display);
+  letter-spacing: var(--ls-caps);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.splits__note {
+  margin-top: 6px;
+}
+
 .ledger tr.ledger__family td {
   background: var(--surface-inset);
   font-family: var(--font-display);

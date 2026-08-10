@@ -47,13 +47,35 @@ function signedOpsDelta(delta) {
   return `${sign}${Math.abs(delta).toFixed(3).replace(/^0(?=\.)/, '')}`
 }
 
-// How far off the season line a bar has to run to fill its half of the track.
+// How far off the season line a bar has to run to reach the end of the track.
 // A FIXED domain, not one scaled to this player's own worst window: a scaled
 // domain would draw every hitter alive at full width and make a 20-point wobble
 // look like a slump. 300 OPS points is roughly the gap between a league-average
-// bat and either an MVP or a pitcher's, so a full bar means "as far from himself
-// as one player is from another". Anything beyond clamps and is marked.
+// bat and either an MVP or a pitcher's. Anything beyond clamps and is marked.
 const DELTA_DOMAIN = 0.3
+
+// The standard error of an OPS measured over `pa` plate appearances, in OPS
+// points. Calibrated against the league: over the 60 highest-PA hitters, the
+// mean absolute 7/15/30-game deviation from a player's own season line runs
+// .191 / .134 / .080 — a ratio of 1 : 0.70 : 0.42 against the 1 : 0.68 : 0.48
+// that pure sampling noise predicts. In other words a short window's deviation
+// is almost entirely the denominator, not the hitter.
+//
+// That is the trap this whole card sits in: the narrowest window is the noisiest
+// one, so it always draws the longest bar, and three windows fanning out reads
+// as "he is cooling fast" when it is arithmetic. So every bar carries its OWN
+// noise band, sized from its OWN sample. A bar inside its band means nothing
+// happened, and the reader can see that without being told.
+const OPS_SE_PER_PA = 1.2
+
+// Below this the window is not a measurement. 25 PA is about a week for a
+// regular and roughly where one home run stops being able to move OPS by more
+// than the whole track: at 23 PA a single swing moves it .217, so a "full" bar
+// would be 1.4 homers. Such a row keeps its numbers and loses its bar.
+const MIN_PA_FOR_BAR = 25
+// Below this it is not even worth a row — a platoon bat with two at-bats in the
+// window would otherwise print a .500 average as though it were a fact.
+const MIN_PA_FOR_ROW = 10
 
 const clamp = (x) => Math.max(-1, Math.min(1, x))
 
@@ -82,19 +104,28 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
   // separate parse, used only to place a bar.
   const row = (key, label, s) => {
     if (!s || !(Number(s.gamesPlayed) > 0) || s.avg == null || s.ops == null) return null
+    const pa = Number(s.plateAppearances) > 0 ? Number(s.plateAppearances) : Number(s.atBats) || 0
+    if (key !== 'season' && pa < MIN_PA_FOR_ROW) return null
     const ops = Number.parseFloat(s.ops)
     const delta = base != null && Number.isFinite(ops) ? ops - base : null
+    // A window too short to measure keeps its numbers and loses its bar — the
+    // figures are still what he did, they just are not evidence of anything.
+    const thin = pa < MIN_PA_FOR_BAR
+    const drawable = delta != null && !thin
     return {
       key,
       label,
-      ab: Number(s.atBats) > 0 ? String(s.atBats) : '—',
+      pa: pa > 0 ? String(pa) : '—',
       avg: s.avg,
       ops: s.ops,
+      thin,
       delta,
       deltaText: delta == null ? '' : signedOpsDelta(delta),
       // −1…1 across the track; `clamped` marks a window that ran off the end.
-      lean: delta == null ? null : clamp(delta / DELTA_DOMAIN),
-      clamped: delta != null && Math.abs(delta) > DELTA_DOMAIN,
+      lean: drawable ? clamp(delta / DELTA_DOMAIN) : null,
+      clamped: drawable && Math.abs(delta) > DELTA_DOMAIN,
+      // Half-width of this row's own noise band, on the same −1…1 track.
+      band: drawable && pa > 0 ? clamp(OPS_SE_PER_PA / Math.sqrt(pa) / DELTA_DOMAIN) : null,
     }
   }
 
@@ -115,6 +146,8 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
     anchor.deltaText = ''
     anchor.lean = null
     anchor.clamped = false
+    anchor.band = null
+    anchor.thin = false
   }
 
   // One window's counting context, and it says WHICH window. The old card
@@ -123,10 +156,14 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
   // different window. The widest window is the one worth counting over: it is
   // the least noisy, and it is the one the bars are least able to say anything
   // about on their own.
-  const power =
-    last30?.homeRuns != null && last30?.rbi != null
-      ? `${last30.homeRuns} HR · ${last30.rbi} RBI`
-      : null
+  //
+  // No RBI here. The split tables on the same page drop it because it reports
+  // how often his team-mates were on base rather than anything about him, and
+  // that argument does not stop being true 400px further up. K% and BB% earn
+  // the room instead: they settle at roughly 60 and 120 PA, an order of
+  // magnitude sooner than OPS does, so they are the part of this card that a
+  // 30-game window can actually support.
+  const power = last30?.homeRuns != null ? `${last30.homeRuns} HR` : null
   const discipline =
     Number(last30?.plateAppearances) > 0 && last30?.strikeOuts != null && last30?.baseOnBalls != null
       ? `${Math.round((Number(last30.strikeOuts) / Number(last30.plateAppearances)) * 100)}% K · ` +

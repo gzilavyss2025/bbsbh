@@ -43,12 +43,22 @@ export function RecentFormCard({ playerId, asOf, season }) {
           <thead>
             <tr>
               <th className="lft">Window</th>
-              <th>AB</th>
+              <th>PA</th>
               <th>AVG</th>
               <th>OPS</th>
               {view.hasBars && (
                 <>
-                  <th className="formtrend__barhead">Colder / hotter</th>
+                  {/* Hidden from the accessibility tree: every cell under it is
+                      itself aria-hidden (the bar is decoration over the +/− OPS
+                      column beside it), so an announced column head would lead a
+                      screen-reader user into a column with nothing in it. */}
+                  <th className="formtrend__barhead" aria-hidden="true">
+                    <span className="formtrend__axis">
+                      <span>−.300</span>
+                      <span>0</span>
+                      <span>+.300</span>
+                    </span>
+                  </th>
                   <th className="formtrend__deltahead">+/− OPS</th>
                 </>
               )}
@@ -56,15 +66,20 @@ export function RecentFormCard({ playerId, asOf, season }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.key} className={r.isAnchor ? 'formtrend__anchor' : undefined}>
+              <tr
+                key={r.key}
+                className={[r.isAnchor && 'formtrend__anchor', r.thin && 'formtrend__thin']
+                  .filter(Boolean)
+                  .join(' ') || undefined}
+              >
                 <td className="lft yr">{r.label}</td>
-                <td>{r.ab}</td>
+                <td>{r.pa}</td>
                 <td>{r.avg}</td>
                 <td>{r.ops}</td>
                 {view.hasBars && (
                   <>
                     <td className="formtrend__bar">
-                      <DeviationBar lean={r.lean} clamped={r.clamped} anchor={r.isAnchor} />
+                      <DeviationBar row={r} />
                     </td>
                     <td className="formtrend__delta">
                       {r.isAnchor ? <span className="formtrend__zero">baseline</span> : r.deltaText}
@@ -84,27 +99,50 @@ export function RecentFormCard({ playerId, asOf, season }) {
         </p>
       )}
 
+      {/* Kept to two lines on a phone. Under the global caps invariant, long
+          prose is the worst-performing text in this system — all-caps kills
+          word-shape recognition, so the sentence carrying the caveat is exactly
+          the one a reader skips. The scale itself moved into the column head as
+          ticks so it no longer has to be described here. */}
       <p className="hint formtrend__note">
-        Windows overlap — the last 7 games sit inside the last 30. A full bar is 300
-        points of OPS.
+        Windows overlap. A bar inside its pale band is luck, not form.
       </p>
     </div>
   )
 }
 
-// One row's distance from the season line, drawn from a centre axis: right and
-// green for better than himself, left and clay for worse. A diverging bar is
-// the honest form here because the quantity really is signed and really does
-// have a meaningful zero — the season line — and that zero is printed as its
-// own row directly under the bars, so the axis is never an unlabelled claim.
+// One row's distance from the season line, drawn from a centre axis: kraft
+// amber to the hot side, navy to the cold side. A diverging bar is the honest
+// form here because the quantity really is signed and really does have a
+// meaningful zero — the season line — and that zero is printed as its own row
+// directly under the bars, so the axis is never an unlabelled claim.
+//
+// NOT --accent-positive/--accent-negative. Those mean good and bad, and neither
+// end of this scale is either: a .684 hitter having a .700 week is still a .684
+// hitter, and a .900 bat at .850 is still mashing. The umpire zone-lean ramp
+// (styles/53-umpire-tendencies.css) turned the same pair down for the same
+// reason and went to navy/kraft; this follows it. The red/green pair also fails
+// colour-blind separation outright (ΔE 4.4 under protanopia), where these two
+// differ in lightness as well as hue.
+//
+// Behind the bar sits that window's own NOISE BAND — ±1 standard error at its
+// own sample size, so it is wide on a 7-game window and narrow on a 30-game
+// one. That band is the whole reason this card can be trusted: without it, the
+// shortest window draws the longest bar for every hitter in the league, every
+// day, and a reader sees a slump in the arithmetic of small denominators.
+//
 // The anchor row draws the axis alone: it is the zero, so it has no length.
-function DeviationBar({ lean, clamped, anchor }) {
-  if (anchor || lean == null) return <span className="devbar devbar--axis" aria-hidden="true" />
-  const pct = Math.abs(lean) * 50
-  const side = lean < 0 ? 'is-down' : 'is-up'
+function DeviationBar({ row }) {
+  if (row.isAnchor || row.lean == null) {
+    return <span className="devbar devbar--axis" aria-hidden="true" />
+  }
+  const side = row.lean < 0 ? 'is-down' : 'is-up'
   return (
-    <span className={`devbar ${side}${clamped ? ' is-clamped' : ''}`} aria-hidden="true">
-      <span className="devbar__fill" style={{ width: `${pct}%` }} />
+    <span className={`devbar ${side}${row.clamped ? ' is-clamped' : ''}`} aria-hidden="true">
+      {row.band != null && (
+        <span className="devbar__band" style={{ width: `${row.band * 100}%` }} />
+      )}
+      <span className="devbar__fill" style={{ width: `${Math.abs(row.lean) * 50}%` }} />
     </span>
   )
 }

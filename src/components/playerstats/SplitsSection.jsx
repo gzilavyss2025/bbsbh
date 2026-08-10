@@ -39,26 +39,42 @@ import { spanCell } from '../../lib/ledger.js'
 // and already scrolled sideways, hiding SO%/BB% — the two most stable and most
 // predictive figures in it — off the right edge. XBH is what SLG already says,
 // and RBI within a split mostly reports how often his team-mates were on base.
-// HR then folds away below 740px (Ledger's `hideNarrow`), for the same reason
-// and in the same direction: SLG already carries his power, and a table whose
-// last column sits off the edge of the phone is a table with six columns and a
-// secret. It comes back at the wide breakpoint.
+//
+// The column that then folds away below 740px is OPS, not HR. OPS is literally
+// OBP + SLG, both of which are printed one column to its left and are rounded so
+// that they add up (see `overallSide`) — so it is the one figure on the row a
+// reader can reconstruct from the row itself. Home runs are not derivable from
+// anything here (SLG cannot tell 30 doubles from 15 homers) and this is an app
+// for people keeping score by hand, where the home run is the most-recorded
+// event there is. Hiding it was the wrong trade.
 // ---------------------------------------------------------------------------
 
-// Index into `splitHead`'s columns: HR. Kept next to the head it indexes so the
+// Index into `splitHead`'s columns: OPS. Kept next to the head it indexes so the
 // two cannot drift apart silently.
-const NARROW_HIDE = [4]
+const NARROW_HIDE = [3]
 
 function splitHead(group) {
-  return ['Split', group === 'pitching' ? 'BF' : 'AB', 'AVG/OBP/SLG', 'OPS', 'HR', 'SO%', 'BB%']
+  return ['Split', group === 'pitching' ? 'BF' : 'PA', 'AVG/OBP/SLG', 'OPS', 'HR', 'SO%', 'BB%']
 }
 
 function splitCells(side) {
   return [side.count, side.slash, side.ops, side.hr, side.soPct, side.bbPct]
 }
 
-function overallRow(all) {
-  return all ? [{ label: 'All', cells: splitCells(all) }] : null
+// The reference line, as the FIRST body row rather than a table footer.
+//
+// It began life in the tfoot, which was wrong for the situational table in a way
+// that took a review to see: a bold, tinted, rule-separated footer row makes
+// exactly one claim — "this is the total of the column above" — and the
+// situational rows do not sum to it. They read 170, 144, 90, 106, 94, 190
+// against a reference of 314, because only bases-empty + runners-on may join
+// the sum (the count rows overlap each other, RISP is inside runners-on). At
+// the top of the table it is plainly a baseline you read BEFORE the comparisons
+// rather than an arithmetic claim about them, which is also the better reading
+// order for a reference in any case. "Season", not "All", for the same reason:
+// "all" means all the rows here, and it isn't.
+function referenceRow(all) {
+  return all ? { key: 'all', className: 'ledger__ref', cells: ['Season', ...splitCells(all)] } : null
 }
 
 // The situational rows with a spanning label above each family. `family` comes
@@ -66,8 +82,8 @@ function overallRow(all) {
 // they are presentation, not data — nothing but this table needs them.
 const SITUATIONAL_FAMILY = { base: 'Base state', count: 'Count' }
 
-function situationalRows(rows) {
-  const out = []
+function situationalRows(rows, reference) {
+  const out = reference ? [reference] : []
   let family = null
   for (const r of rows ?? []) {
     if (r.family !== family) {
@@ -97,10 +113,12 @@ export function SplitsSection({ block, vsTeam, season, asOf }) {
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}
             rows={[
-              { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
-              { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
-            ].map(({ key, label, side }) => ({ key, cells: [label, ...splitCells(side)] }))}
-            totals={overallRow(block.splits.all)}
+              referenceRow(block.splits.all),
+              ...[
+                { key: 'l', label: block.group === 'pitching' ? 'vs LHB' : 'vs LHP', side: block.splits.left },
+                { key: 'r', label: block.group === 'pitching' ? 'vs RHB' : 'vs RHP', side: block.splits.right },
+              ].map(({ key, label, side }) => ({ key, cells: [label, ...splitCells(side)] })),
+            ].filter(Boolean)}
           />
         </div>
       )}
@@ -119,9 +137,12 @@ export function SplitsSection({ block, vsTeam, season, asOf }) {
             leftCols={1}
             head={splitHead(block.group)}
             hideNarrow={NARROW_HIDE}
-            rows={situationalRows(block.situational.rows)}
-            totals={overallRow(block.situational.all)}
+            rows={situationalRows(block.situational.rows, referenceRow(block.situational.all))}
           />
+          <p className="hint splits__note">
+            Only Empty and Runners on add up to Season — the rest overlap. RISP is part
+            of Runners on.
+          </p>
         </>
       )}
 

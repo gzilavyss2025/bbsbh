@@ -177,7 +177,13 @@ function splitSide(stat, group) {
   const slash = [stat.avg, stat.obp, stat.slg].map((v) => v ?? DASH).join('/')
   const opsNum = Number.parseFloat(stat.ops)
   return {
-    count: group === 'pitching' ? num(stat.battersFaced) : num(stat.atBats),
+    // PLATE APPEARANCES, not at-bats — and the column is labelled PA to match.
+    // SO% and BB% divide by PA (the correct convention), so a table printing an
+    // AB count beside them invited the reader to multiply 28% by 80 at-bats and
+    // land four strikeouts short: the denominator changed silently mid-row. PA
+    // is also the better sample-size signal, since it counts the walks. The
+    // pitching side already did this — `battersFaced` IS the PA equivalent.
+    count: group === 'pitching' ? num(stat.battersFaced) : num(stat.plateAppearances),
     slash,
     ops: stat.ops ?? DASH,
     opsNum: Number.isFinite(opsNum) ? opsNum : null,
