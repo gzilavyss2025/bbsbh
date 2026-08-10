@@ -61,8 +61,9 @@ export function useMatchupNotes() {
 // text. Both states are filled pills (paper when off, kraft when on) rather
 // than filled-vs-outline, because the bar is club-themed — a transparent pill
 // would sit on 30 different backdrops. The dot is a redundant, non-colour
-// state cue: hollow when off, filled when on. See .matchupswitch in
-// styles/10-lineup.css for the measured numbers before changing any of it.
+// state cue: hollow when off, filled when on. See .mastheadpill in
+// styles/10-lineup.css for the measured numbers before changing any of it —
+// shared with BullpenBoard's "Bullpen" toggle.
 //
 // No .toUpperCase() anywhere — the caps are CSS, per the ALL-CAPS invariant
 // (ADR-0017 / check-name-casing.mjs).
@@ -71,11 +72,11 @@ export function MatchupNotesToggle({ pitcherLast, showNotes, onToggle }) {
   return (
     <button
       type="button"
-      className="matchupswitch"
+      className="mastheadpill"
       aria-pressed={showNotes}
       onClick={() => onToggle(!showNotes)}
     >
-      <span className="matchupswitch__dot" aria-hidden="true" />
+      <span className="mastheadpill__dot" aria-hidden="true" />
       vs {pitcherLast}
     </button>
   )
