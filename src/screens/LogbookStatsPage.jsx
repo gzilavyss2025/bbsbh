@@ -8,7 +8,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
-import { bookPath, logbookPath } from '../lib/route.js'
+import { pathForBook } from '../lib/logbookNav.js'
+import { logbookPath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -133,12 +134,15 @@ export function LogbookStatsPage({ bookId = null }) {
     [stamps, facts.data],
   )
 
-  // Back to the book this page is scoped to — the default book's bare
-  // address when there is no `bookId`, or when the named book can no longer
-  // be found (removed since this link was opened; the bare route re-resolves
-  // to whatever remains, the same fallback LogbookPage.jsx's own dead-link
-  // handling uses).
-  const backPath = book && book.id !== DEFAULT_BOOK_ID ? bookPath(book.id) : logbookPath()
+  // Back to the book this page is scoped to. `pathForBook` owns the one rule
+  // for which of the default book's two addresses is the live one — reading it
+  // wrong sent the visitor to the SHELF rather than the book they had open,
+  // and this page used to read it wrong. The bare route is right only for the
+  // whole-collection page (no `bookId`), or when the named book can no longer
+  // be found (removed since this link was opened; the bare route re-resolves to
+  // whatever remains, the same fallback LogbookPage.jsx's dead-link handling
+  // uses).
+  const backPath = book ? pathForBook(book, { bookCount: books.length }) : logbookPath()
   const title = book ? `${book.title || 'Game Log'} Stats` : 'Stats'
 
   if (!stats.stamps) {

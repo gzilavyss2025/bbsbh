@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   STAMPS_KEY,
   addStamp,
@@ -69,16 +69,29 @@ function notifyLocalChange() {
 export function useStamps() {
   const [stamps, setStamps] = useState(readStamps)
 
+  // The latest collection this instance knows about, readable synchronously —
+  // what `commit` transforms. Every path that changes `stamps` moves it too.
+  const latest = useRef(stamps)
+
   // One writer for every mutation: apply a pure transform from src/lib/stamps.js,
   // persist, then echo so the other mounted instance picks it up. No caller
   // touches localStorage or the map shape directly.
+  //
+  // The write sits OUTSIDE the state updater on purpose — see useBooks.js's
+  // `commit` for the full account, which this hook shares exactly. In short: a
+  // write inside a reducer is a side effect React may run twice, once, or never,
+  // and "never" is what happens when the same handler that mutates also
+  // navigates away. Un-placing several stamps at once (removing a book that
+  // holds them) is this hook's own instance of it: only the first un-placement
+  // was ever applied, because React eagerly evaluates only the first update
+  // queued on a fiber and the rest were discarded with the unmount.
   const commit = useCallback((transform) => {
-    setStamps((prev) => {
-      const next = transform(prev)
-      if (next === prev) return prev
+    const next = transform(latest.current)
+    if (next !== latest.current) {
+      latest.current = next
       writeStamps(next)
-      return next
-    })
+      setStamps(next)
+    }
     notifyLocalChange()
   }, [])
 
@@ -116,17 +129,17 @@ export function useStamps() {
     function onStorage(e) {
       // `key === null` is a whole-storage clear, which is also our business.
       if (e.key !== STAMPS_KEY && e.key !== null) return
-      // `() => readStamps()`, NOT `readStamps()` — the difference is a bug, not
-      // a style point. `commit` above persists INSIDE its state updater, which
-      // React runs at render time, but it dispatches the same-tab echo
-      // synchronously right after QUEUEING that updater. An eager read here
-      // therefore runs before the write it is reacting to, and queues the
-      // pre-change collection behind the change: React applies the updater,
-      // then applies this, and the mutation is reverted in state while
-      // localStorage keeps the new value. On /logbook that looked like placing
-      // a stamp doing nothing at all until a reload. Reading from inside the
-      // updater puts the read after the write, where it belongs.
-      setStamps(() => readStamps())
+      // A plain eager read, safe only because `commit` above writes BEFORE it
+      // echoes. This had to be `setStamps(() => readStamps())` while the write
+      // lived inside another updater that had not run yet: an eager read then
+      // queued the pre-change collection behind the change, and on /logbook
+      // that looked like placing a stamp doing nothing at all until a reload.
+      // With the write hoisted out, storage already holds the new value here.
+      // The ref moves with the state so the next commit transforms what this
+      // device actually holds — including a change from another tab.
+      const next = readStamps()
+      latest.current = next
+      setStamps(next)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
@@ -163,10 +176,13 @@ export function useStamps() {
 
   // Every live stamp, oldest first — the passport book's reading order, and
   // the input the retrospective aggregates over.
+  //
+  // There is deliberately no `unplaced` list here any more. Which stamps are
+  // waiting in the tray is not answerable from a placement alone: one naming a
+  // book that is no longer on the shelf is waiting too, and this module has no
+  // business knowing which books exist (see the header). LogbookCollection.jsx
+  // owns that list, where both halves of the question are in scope.
   const all = useMemo(() => allStamps(stamps), [stamps])
-  // Stamps minted but not yet put on a page. They wait in the book's tray;
-  // nothing is ever lost by not finishing the placement step.
-  const unplaced = useMemo(() => all.filter((s) => !s.placement), [all])
 
   const counts = useMemo(() => seasonCounts(stamps), [stamps])
   // Newest season first — the Logbook's season nav, and the default season the
@@ -185,7 +201,6 @@ export function useStamps() {
     forSeason: useCallback((season) => stampsForSeason(stamps, season), [stamps]),
     seasonIsFull: useCallback((season) => seasonIsFull(stamps, season), [stamps]),
     all,
-    unplaced,
     stamp,
     unstamp,
     place,

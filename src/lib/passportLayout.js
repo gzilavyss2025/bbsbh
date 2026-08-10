@@ -342,6 +342,24 @@ export function pageCountFor(stamps, added = 1) {
   return clamp(Math.max(highest, Math.trunc(added) || 1), 1, MAX_PAGES)
 }
 
+// Which page a book should be showing when it is opened FOR one stamp — the
+// `?place=` hand-off from the box score, and picking a keepsake out of the
+// tray. A book normally opens on its cover, which is the right first sight of
+// a book you came to read and the wrong one when you have just been told to
+// tap a page: the instruction was on screen and the page it named was behind
+// a closed cover, so the flow stalled on a step nothing announced.
+//
+// A stamp already on a page opens at THAT page, because the only reason to be
+// placing one twice is to move it, and a move starts with the old spot in
+// view. Everything else opens at the first page with room, falling back to the
+// last page when the book is full — the caller adds one from the corner.
+export function openingPageFor(stamps, gamePk, added = 1) {
+  const already = (stamps ?? []).find((s) => s?.gamePk === gamePk)?.placement?.page
+  if (Number.isInteger(already)) return clamp(already, 1, MAX_PAGES)
+  const pages = pageCountFor(stamps, added)
+  return firstOpenPage(stamps, pages, gamePk) ?? pages
+}
+
 // A tidy fill for stamps the user hasn't placed by hand — the "place them all
 // for me" path, and what an upgrading collection needs so nobody is made to
 // re-place forty keepsakes one at a time.

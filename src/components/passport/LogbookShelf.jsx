@@ -25,10 +25,17 @@ import { BookManagementSheet } from './BookManagementSheet.jsx'
 //
 // `placing` — a gamePk hand-off from the box score's mint card via `?place=`
 // — puts the shelf into "choose a book for this stamp" mode: the lede
-// changes, and `onOpenBook` (owned by the caller, `LogbookPage.jsx`) is
-// responsible for carrying that gamePk into whichever book gets tapped so
-// placement mode continues there. This component never itself decides what
-// tapping a cover navigates to — that stays with the router-aware caller.
+// changes, the covers change what they say tapping them does, and
+// `onOpenBook` (owned by the caller, `LogbookPage.jsx`) is responsible for
+// carrying that gamePk into whichever book gets tapped so placement mode
+// continues there. This component never itself decides what tapping a cover
+// navigates to — that stays with the router-aware caller.
+//
+// `placingStamp` is that stamp's own record, when the caller could resolve
+// one, and it is here only so the lede can name the game rather than say
+// "this stamp" at a shelf you may have arrived at two taps later. Optional on
+// purpose: a stale `?place=` for a stamp since removed still puts the shelf in
+// picking mode, and saying less is better than naming nothing.
 //
 // `updateCover`/`removeBook`/`stamps`/`unplaceStamp` are passed straight
 // through to `BookManagementSheet` rather than fetched here via this
@@ -37,9 +44,19 @@ import { BookManagementSheet } from './BookManagementSheet.jsx'
 // race it. Creating a book is NOT among them: it is its own page now
 // (`onNewBook` navigates), because no other book may be on screen while a
 // cover is being chosen.
+const MONTH_DAY = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' })
+
+// The same date shape the open book's own placing lede uses, so one stamp
+// reads as one stamp across the two surfaces of the same flow.
+function monthDay(date) {
+  const [year, month, day] = String(date ?? '').split('-').map(Number)
+  return year ? MONTH_DAY.format(new Date(year, month - 1, day)) : ''
+}
+
 export function LogbookShelf({
   books,
   placing = null,
+  placingStamp = null,
   onOpenBook,
   onNewBook,
   updateCover,
@@ -49,19 +66,22 @@ export function LogbookShelf({
 }) {
   // Which book, if any, has its settings open.
   const [managing, setManaging] = useState(null)
+  const placingDate = placing ? monthDay(placingStamp?.date) : ''
 
   return (
     <div className="shelf">
       <p className="shelf__intro" aria-live="polite">
         {placing
-          ? 'Choose a book for this stamp.'
+          ? placingDate
+            ? `Choose a book for ${placingDate}.`
+            : 'Choose a book for this stamp.'
           : `${books.length} books on your shelf.`}
       </p>
 
       <ul className="shelf__grid">
         {books.map((book) => (
           <li className="shelf__slot" key={book.id}>
-            <PassportCover book={book} onOpen={() => onOpenBook(book)} />
+            <PassportCover book={book} placing={Boolean(placing)} onOpen={() => onOpenBook(book)} />
             <button
               type="button"
               className="shelf__edit"
@@ -71,21 +91,20 @@ export function LogbookShelf({
             </button>
           </li>
         ))}
-        {/* Not offered while choosing a book for a stamp — creating a book
-            you cannot yet place anything into would strand the hand-off from
-            the box score, and the flow already has a plain "cancel" (leaving
-            the stamp in the tray of whichever book gets opened) that covers
-            "I don't want any of these". */}
-        {!placing && (
-          <li className="shelf__slot shelf__slot--new">
-            <button type="button" className="shelf__newtile" onClick={onNewBook}>
-              <span className="shelf__newtileicon" aria-hidden="true">
-                +
-              </span>
-              New book
-            </button>
-          </li>
-        )}
+        {/* Offered while placing too. Starting a book used to be withheld
+            here, because a book you could not yet put anything into would
+            strand the hand-off from the box score — the create flow carries
+            the stamp now (`/logbook/new?place=`), so the new book opens ready
+            for it and "none of these" is a real answer to the question this
+            shelf is asking. */}
+        <li className="shelf__slot shelf__slot--new">
+          <button type="button" className="shelf__newtile" onClick={onNewBook}>
+            <span className="shelf__newtileicon" aria-hidden="true">
+              +
+            </span>
+            New book
+          </button>
+        </li>
       </ul>
 
       {managing && (

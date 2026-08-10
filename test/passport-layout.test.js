@@ -24,6 +24,7 @@ import {
   clampToPage,
   clampToSlot,
   firstOpenPage,
+  openingPageFor,
   layoutInDateOrder,
   orderByDate,
   nudgeFromCollisions,
@@ -444,6 +445,37 @@ test('a move is not refused by the page it is already on', () => {
   // A stamp that is NOT on the page gets the honest answer.
   assert.equal(pageIsFullFor(full, 1, 999), true)
   assert.equal(pageIsFullFor(full, 1), true)
+})
+
+// Which page the book is SHOWING when it opens for a stamp. The book normally
+// opens on its cover, so arriving from the box score's mint card used to put
+// "tap the page where you want May 18 to go" on screen above a closed book —
+// an instruction naming something that was not there.
+test('a book opened for a stamp opens at a page that stamp can go on', () => {
+  const fill = (page, base) => Array.from({ length: PAGE_CAPACITY }, (_, i) => owned(base + i, page))
+
+  // Nothing filed yet: page 1, the only page the book has.
+  assert.equal(openingPageFor([], 777), 1)
+  // Page 1 filled and page 2 already in the book: the first page with room.
+  assert.equal(openingPageFor([...fill(1, 100), owned(300, 2)], 777), 2)
+  // Blank pages the reader added count as somewhere to open, too.
+  assert.equal(openingPageFor(fill(1, 100), 777, 2), 2)
+  assert.equal(openingPageFor([], 777, 4), 1)
+  // Every page the book HAS is full: the last one, not null — turning to
+  // nothing is worse than turning to a full page, which says so and offers
+  // the corner that adds another.
+  assert.equal(openingPageFor(fill(1, 100), 777), 1)
+  assert.equal(openingPageFor([...fill(1, 100), ...fill(2, 200)], 777, 2), 2)
+})
+
+test('a stamp already on a page opens at THAT page, because placing it again is a move', () => {
+  const stamps = [owned(11, 3), owned(22, 1)]
+  assert.equal(openingPageFor(stamps, 11), 3)
+  assert.equal(openingPageFor(stamps, 22), 1)
+  // A full page it already lives on is still its own page — the same
+  // "not measured against its own spot" rule firstOpenPage follows.
+  const full = Array.from({ length: PAGE_CAPACITY }, (_, i) => owned(100 + i, 2))
+  assert.equal(openingPageFor(full, 104, 2), 2)
 })
 
 test('firstOpenPage hands a moving stamp its own full page back', () => {

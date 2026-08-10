@@ -6,7 +6,7 @@ import { useNav } from '../lib/nav.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
 import { pathForBook } from '../lib/logbookNav.js'
-import { logbookNewPath, logbookPath } from '../lib/route.js'
+import { logbookNewPath, logbookPath, logbookPlacePath } from '../lib/route.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { LogbookShelf } from '../components/passport/LogbookShelf.jsx'
@@ -49,11 +49,22 @@ const LogbookAccountGate = isClerkEnabled
 //     exactly one live book still opens directly (zero behavior change for
 //     the common case), but two or more surface `LogbookShelf` instead.
 //   - '/logbook/book/{bookId}[/{season}|/stats]' is the additive way to
-//     deep-link or bookmark a NON-default book.
+//     deep-link or bookmark a NON-default book — INCLUDING the default one
+//     once a shelf exists, which is the whole of `lib/logbookNav.js`'s job:
+//     while `/logbook` means the shelf, it is not an address the default book
+//     can also answer to, and treating it as one made that book unopenable.
 //
 // `LogbookRoot` below is the resolver; `LogbookCollection` (imported) takes
 // the resolved `book` record as a prop rather than ever guessing which one
 // it is drawing.
+//
+// ===========================================================================
+// The stamp stays in hand the whole way through
+// ===========================================================================
+// `placing` (the `?place={gamePk}` hand-off from the box score's mint card) is
+// carried by EVERY route this resolver can send you to: the shelf, a book, and
+// the new-book page. Picking a book for a stamp is one flow, and a step of it
+// that quietly drops the stamp back into the tray reads as the app losing it.
 
 export function LogbookPage(props) {
   useDocumentTitle('Game Log')
@@ -109,12 +120,17 @@ function LogbookRoot({
   // on the shelf is mounted while a cover is being chosen. `createBook` comes
   // from THIS hook instance rather than a second one nested inside the page —
   // see BookManagementSheet.jsx's header for what a second instance races.
+  //
+  // A stamp in hand rides through: the new book opens in placement mode, so
+  // "start a book for this one" is a real answer to which book it goes in, and
+  // cancelling puts the shelf back the way it was rather than dropping it.
   if (creating) {
     return (
       <NewBookPage
         createBook={createBook}
-        onCreated={(id) => navigate(pathForBook({ id }))}
-        onCancel={() => navigate(logbookPath())}
+        placing={placing}
+        onCreated={(id) => navigate(pathForBook({ id }, { placing }))}
+        onCancel={() => navigate(placing ? logbookPlacePath(placing) : logbookPath())}
       />
     )
   }
@@ -163,8 +179,14 @@ function LogbookRoot({
       <LogbookShelf
         books={books}
         placing={placing}
-        onOpenBook={(book) => navigate(pathForBook(book, { placing }))}
-        onNewBook={() => navigate(logbookNewPath())}
+        placingStamp={placing ? all.find((s) => s.gamePk === placing) ?? null : null}
+        // `bookCount` is what stops the default book's cover navigating to the
+        // shelf it was tapped from — see lib/logbookNav.js. This branch only
+        // runs at two or more books, so the fold never applies here; passing it
+        // anyway keeps the rule in one place rather than relying on where the
+        // call happens to sit.
+        onOpenBook={(book) => navigate(pathForBook(book, { placing, bookCount: books.length }))}
+        onNewBook={() => navigate(logbookNewPath(placing))}
         updateCover={updateCover}
         removeBook={removeBook}
         stamps={all}
