@@ -372,17 +372,24 @@ CREATE TABLE IF NOT EXISTS jerseys (
 -- gen-umpire-accuracy.mjs's season/seasonAAA). `velocity_sum`/`velocity_n`
 -- accumulate raw mph rather than a stored average, so the incremental upsert
 -- stays correct (a running mean can't be summed across games; a sum can).
+-- `century_pitches` sums the same way (a count of this type's pitches at
+-- CENTURY_MPH+, src/api/pitchArsenal.js); `max_velo` does NOT sum — it's the
+-- single fastest of this type on file, so the upsert takes MAX(existing,
+-- new) rather than adding. Both feed the veloVariety/centuryClub/veloPeak
+-- callout families (docs/callouts.md).
 CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
-  person_id    INTEGER NOT NULL,
-  level        TEXT NOT NULL,
-  code         TEXT NOT NULL,
-  season       INTEGER NOT NULL,
-  name         TEXT NOT NULL,
-  team_id      INTEGER,
-  description  TEXT NOT NULL,
-  pitches      INTEGER NOT NULL DEFAULT 0,
-  velocity_sum REAL NOT NULL DEFAULT 0,
-  velocity_n   INTEGER NOT NULL DEFAULT 0,
+  person_id       INTEGER NOT NULL,
+  level           TEXT NOT NULL,
+  code            TEXT NOT NULL,
+  season          INTEGER NOT NULL,
+  name            TEXT NOT NULL,
+  team_id         INTEGER,
+  description     TEXT NOT NULL,
+  pitches         INTEGER NOT NULL DEFAULT 0,
+  velocity_sum    REAL NOT NULL DEFAULT 0,
+  velocity_n      INTEGER NOT NULL DEFAULT 0,
+  century_pitches INTEGER NOT NULL DEFAULT 0,
+  max_velo        REAL,
   PRIMARY KEY (person_id, level, code)
 );
 

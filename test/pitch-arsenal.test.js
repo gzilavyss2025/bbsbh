@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { aggregateGamePitchTypes } from '../scripts/gen-pitch-arsenal.mjs'
-import { pitchArsenalFor, pitchFamily, MIN_ARSENAL_PITCHES } from '../src/api/pitchArsenal.js'
+import { pitchArsenalFor, pitchFamily, MIN_ARSENAL_PITCHES, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -45,6 +45,28 @@ test('aggregateGamePitchTypes tallies pitches and velocity per pitcher/pitch typ
   const sl = p.types.get('SL')
   assert.equal(sl.pitches, 1)
   assert.equal(sl.description, 'Slider')
+})
+
+test('aggregateGamePitchTypes tallies century_pitches and tracks max_velo per type', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([
+      play({
+        pitcher: 200,
+        events: [
+          pitch('SL', 'Slider', CENTURY_MPH + 1), // clears the bar
+          pitch('SL', 'Slider', 84),
+          pitch('FF', 'Four-Seam Fastball', CENTURY_MPH - 3), // never clears it
+        ],
+      }),
+    ]),
+  )
+  const p = agg.get(200)
+  const sl = p.types.get('SL')
+  assert.equal(sl.centuryPitches, 1)
+  assert.equal(sl.maxVelo, CENTURY_MPH + 1)
+  const ff = p.types.get('FF')
+  assert.equal(ff.centuryPitches, 0)
+  assert.equal(ff.maxVelo, CENTURY_MPH - 3, 'maxVelo tracks the fastest pitch regardless of the century floor')
 })
 
 test('aggregateGamePitchTypes tolerates a pitch with no recorded velocity', () => {

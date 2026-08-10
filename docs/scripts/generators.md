@@ -224,7 +224,17 @@ don't run these by hand.
   this one changes and re-fetching every ingested feed would change nothing in
   the database. App reads it via `src/api/pitchArsenal.js` (the opposing-starter
   card's pitch-mix bar `PitchArsenalMix.jsx`, and the player page's
-  `SimilarPitchers`).
+  `SimilarPitchers`). Each type row also tallies `century_pitches` (count at
+  `CENTURY_MPH`+, summed like `pitches`) and `max_velo` (that type's fastest
+  reading, `MAX`'d rather than summed) — `gen-callouts.mjs` joins these
+  straight from the SQLite table (`scripts/lib/century-club.mjs`, no extra
+  JSON read) into `starterRecords[id].centuryClub` for the
+  veloVariety/centuryClub/veloPeak callout families (`docs/callouts.md`).
+  Adding these columns did NOT retroactively backfill games already
+  ingested — `pitch_arsenal_ingested_games` blocks a re-sweep of anything on
+  file, so a schema change like this needs an explicit `--since=` backfill
+  covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
+  new level.
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile

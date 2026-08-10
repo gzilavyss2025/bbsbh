@@ -18,11 +18,13 @@
 //   - "Entering tonight" facts (home/away split, CG/shutout total, scoreless-
 //     outing streak, the bullpen-workload comparison against the level's
 //     average reliever, the back-to-back-days ERA split, the leverage split —
-//     opponents' line with his club ahead vs trailing) describe the season
-//     BEFORE tonight, so they're shown as soon as his row exists, regardless
-//     of how tonight's outing goes.
-//   - Live facts (the health notes below, plus the 6+ IP team record and the
-//     double-digit-strikeout count) only fire once his OWN revealed line
+//     opponents' line with his club ahead vs trailing, and the season "century
+//     club" pitch-velocity total) describe the season BEFORE tonight, so
+//     they're shown as soon as his row exists, regardless of how tonight's
+//     outing goes.
+//   - Live facts (the health notes below — laboring, fastball velo decay, and
+//     the pitch-type velocity variety check — plus the 6+ IP team record and
+//     the double-digit-strikeout count) only fire once his OWN revealed line
 //     tonight actually clears the threshold — computePitcherLines already
 //     keeps `ip`/`k`/`pitches` gated to `revealedThrough`, and pitcherHealth.js
 //     is on the same ADR-0009 footing, so nothing sealed is read here either.
@@ -30,7 +32,8 @@
 import { dayWordFor } from './select.js'
 import { workloadFor } from './workload.js'
 import { computePitcherLines } from './pitchers.js'
-import { laboringFor, computeVeloDecay } from './pitcherHealth.js'
+import { laboringFor, computeVeloDecay, computeVeloVariety } from './pitcherHealth.js'
+import { CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -42,11 +45,13 @@ import { laboringFor, computeVeloDecay } from './pitcherHealth.js'
 // every other family.
 const SCORE_BASE = {
   laboring: 48,
+  veloVariety: 47, // 2+ distinct pitch types at CENTURY_MPH+ tonight — as tonight-specific as laboring/veloDecay
   veloDecay: 46,
   penFatigue: 42, // 3rd+ consecutive day — the sharpest documented fatigue pattern
   workload: 38, // heavy recent pitch load vs the level's average reliever
   backToBack: 36, // ERA split pitching on no rest
   leverage: 34, // opponents' AVG with his club ahead vs trailing/tied
+  centuryClub: 34, // season count of CENTURY_MPH+ pitches — a season-aggregate fact, same tier as tenK
   tenK: 33,
   scorelessStreak: 32,
   sixIp: 28,
@@ -55,6 +60,10 @@ const SCORE_BASE = {
   recentAppearances: 20, // plain "Nth appearance in the last several days" fallback
 }
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
+
+// A one-off 100 mph touch is unremarkable for a real flamethrower — this
+// keeps the centuryClub note from firing every game for every hard thrower.
+const CENTURY_CLUB_MIN = 5
 
 // Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
 // linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,
@@ -194,6 +203,21 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
   if (rec.tenK > 0 && Number(row.k) >= TEN_K_THRESHOLD) {
     push('tenK', `The ${ordinal(rec.tenK + 1)} time this season he's reached double-digit strikeouts`)
   }
+
+  // Season "century club" total — how many CENTURY_MPH+ pitches he's thrown
+  // this year, from gen-callouts.mjs's join against gen-pitch-arsenal.mjs's
+  // own sweep. A non-fastball type in the mix is the genuinely rare case (a
+  // breaking ball or changeup at triple digits), so it leads the phrasing
+  // when present; his season-best reading rides along either way.
+  if (rec.centuryClub?.count >= CENTURY_CLUB_MIN) {
+    const cc = rec.centuryClub
+    const offSpeed = cc.types.filter((t) => pitchFamily(t.code) !== 'fastball')
+    const peak = cc.seasonMaxVelo != null ? ` — topping out at ${cc.seasonMaxVelo.toFixed(1)} mph` : ''
+    const text = offSpeed.length
+      ? `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season — including ${offSpeed[0].count} ${offSpeed[0].description.toLowerCase()}${offSpeed[0].count === 1 ? '' : 's'}, extraordinarily rare for a breaking or offspeed pitch${peak}`
+      : `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season${peak}`
+    push('centuryClub', text, Math.min(15, Math.round(cc.count / 10)) + (offSpeed.length ? 10 : 0))
+  }
   return notes
 }
 
@@ -229,6 +253,21 @@ function healthNotes(id, side, health) {
       score: clampScore(SCORE_BASE.veloDecay + Math.min(15, Math.round((velo.drop - 1.5) * 6))),
     })
   }
+  const variety = health?.variety?.[id]
+  if (variety?.count >= 2) {
+    const peak = variety.types[0].maxVelo
+    const listed = variety.types.map((t) => `${t.code} ${t.maxVelo.toFixed(1)}`).join(', ')
+    notes.push({
+      text: `${variety.count} pitch types have touched ${CENTURY_MPH}+ mph tonight — ${listed}.`,
+      personId: id,
+      side,
+      kind: 'veloVariety',
+      dedupeKey: `veloVariety-${id}`,
+      score: clampScore(
+        SCORE_BASE.veloVariety + Math.min(20, 5 * (variety.count - 2) + 3 * (peak - CENTURY_MPH)),
+      ),
+    })
+  }
   return notes
 }
 
@@ -243,6 +282,7 @@ export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extra
   if (!bundle) return []
   const lines = computePitcherLines(feed, revealedThrough)
   const velo = computeVeloDecay(feed, revealedThrough)
+  const variety = computeVeloVariety(feed, revealedThrough)
 
   // Dedupe by dedupeKey (falling back to the text itself), same contract
   // callout-notes.js's box-score roll-up defines: a later note with the same
@@ -278,7 +318,8 @@ export function buildMarginNotes(feed, revealedThrough, bundle, teamNames, extra
       const isStarter = i === 0
       for (const note of buildPitcherNotes(row, side, teamName, bundle, extras, isStarter)) add(note)
       const labor = laboringFor(row, extras.workload?.pitchers?.[row.id])
-      for (const note of healthNotes(row.id, side, { labor: labor ? { [row.id]: labor } : {}, velo })) add(note)
+      for (const note of healthNotes(row.id, side, { labor: labor ? { [row.id]: labor } : {}, velo, variety }))
+        add(note)
     }
   }
   return ordered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))

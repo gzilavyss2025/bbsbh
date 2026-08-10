@@ -267,7 +267,12 @@ const BUDGETS = {
   // record) could be unit-tested — a generator is a top-level script, so a
   // helper worth testing can't stay inline (see roster.mjs's own header,
   // already in this directory for the same reason).
-  'scripts/lib': 14,
+  // +1 for century-club.mjs: the SQLite query + row-shaping behind
+  // gen-callouts.mjs's veloVariety/centuryClub/veloPeak join (docs/callouts.md)
+  // against gen-pitch-arsenal.mjs's century-pitch sweep — pulled out for the
+  // same reason as pitcher-starts.mjs above (unit-testable row shaping,
+  // gen-callouts.mjs kept under its own line budget, ADR-0038).
+  'scripts/lib': 15,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

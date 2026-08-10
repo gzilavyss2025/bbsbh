@@ -22,6 +22,9 @@ import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, CS_EVENTS, ON_BASE_EVENTS } 
 //     reachedBefore / reachedHere — his on-base state (streak extension),
 //     pitcherK — the play's pitcher's strikeouts so far,
 //     sb: Map(runnerId -> { n, caughtBefore }) — steals credited on THIS play,
+//     newPeakVelo — { mph, type } when THIS play is where the play's pitcher
+//       set a new game-high velocity reading (any pitch type), else null —
+//       the veloPeak callout family's trigger (liveAtBat.js).
 //   }
 // `reached` is every batter who got aboard at any point (the roll-up's
 // streak-ended check); `sbGame`/`caught` are each runner's whole-game steal
@@ -41,6 +44,7 @@ export function computeCalloutProgress(feed) {
   const sbGame = new Map() // runnerId -> { n, firstInning, beforeCaught }
   const caught = new Map() // runnerId -> inning of his first CS tonight
   const foulsByBatter = new Map() // batterId -> fouls hit tonight (raw count)
+  const peakVeloByPitcher = new Map() // pitcherId -> { mph, type } his game-high so far
 
   for (const play of feed?.liveData?.plays?.allPlays ?? []) {
     const idx = play.about?.atBatIndex
@@ -65,6 +69,7 @@ export function computeCalloutProgress(feed) {
       kByPitcher.set(pitcherId, (kByPitcher.get(pitcherId) ?? 0) + 1)
     }
 
+    let newPeakVelo = null
     const sbHere = new Map()
     for (const e of play.playEvents ?? []) {
       if (e.isPitch) {
@@ -73,6 +78,19 @@ export function computeCalloutProgress(feed) {
         const code = pitchCallCode(e)
         if (batterId != null && code && FOUL_CODES.has(code)) {
           foulsByBatter.set(batterId, (foulsByBatter.get(batterId) ?? 0) + 1)
+        }
+        // The pitcher's running game-high velocity, ANY pitch type — the
+        // veloPeak family's trigger. Whichever pitch within this play set the
+        // new peak (if any) is what survives, since a later, harder pitch the
+        // same play can only push the peak further.
+        const velo = e.pitchData?.startSpeed
+        if (pitcherId != null && typeof velo === 'number') {
+          const prior = peakVeloByPitcher.get(pitcherId)
+          if (!prior || velo > prior.mph) {
+            const next = { mph: velo, type: e.details?.type?.description ?? '' }
+            peakVeloByPitcher.set(pitcherId, next)
+            newPeakVelo = next
+          }
         }
         continue
       }
@@ -101,6 +119,7 @@ export function computeCalloutProgress(feed) {
       reachedHere,
       pitcherK: pitcherId != null ? kByPitcher.get(pitcherId) ?? 0 : 0,
       sb: sbHere,
+      newPeakVelo,
     })
   }
   return { byPlay, reached, sbGame, caught, foulsByBatter }
