@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { resolveCurrentSeasonStat } from '../src/api/loadPlayer.js'
-import { careerRegisterView } from '../src/api/person.js'
+import { careerRegisterView, careerTimelineView } from '../src/api/person.js'
 import { SPORT_IDS } from '../src/lib/teams.js'
 
 // A pitching stint's raw stat line, shaped like a statsapi split's `.stat`.
@@ -214,6 +214,43 @@ test('careerRegisterView: a subtotal appears only when its side has more than on
   const milb = twoLevels.totals[0]
   assert.equal(milb.cells[0], 21)
   assert.equal(milb.cells[4], '31.1')
+})
+
+// Regression coverage for a real bug: a season with no qualifying stint
+// ANYWHERE (Casey Mize's 2023 Tommy John year) used to surface as
+// "2020–22, 2024–26" — a caption implying he'd left the org and come back,
+// when he was actually hurt and never left. The gap must fold into the SAME
+// badge with one straight-through span; only a rejoin at a genuinely
+// DIFFERENT club in between (a real departure) still splits into two stops.
+const HITTER_STAT = {
+  gamesPlayed: 120, atBats: 450, avg: '.280', homeRuns: 15, rbi: 60,
+}
+test('careerTimelineView: an injury gap at the same club folds into one badge with a straight-through span', () => {
+  const splits = [2020, 2021, 2022, 2024, 2025, 2026].map((season) => ({
+    season, sport: { id: SPORT_IDS.AAA }, team: { id: 5015, name: 'Iowa Cubs' }, stat: HITTER_STAT,
+  }))
+  const timeline = careerTimelineView(splits, 'hitting', null)
+
+  const stopsAtClub = timeline.entries.filter((e) => e.teamId === 5015)
+  assert.equal(stopsAtClub.length, 1, 'the 2023 gap must NOT split this into two stops — he never left')
+  assert.equal(stopsAtClub[0].yearText, '2020–26')
+})
+
+test('careerTimelineView: a rejoin at a DIFFERENT club in between still yields two separate stops', () => {
+  const splits = [
+    ...[2020, 2021, 2022].map((season) => ({
+      season, sport: { id: SPORT_IDS.AAA }, team: { id: 5015, name: 'Iowa Cubs' }, stat: HITTER_STAT,
+    })),
+    { season: 2023, sport: { id: SPORT_IDS.AAA }, team: { id: 5016, name: 'Nashville Sounds' }, stat: HITTER_STAT },
+    ...[2024, 2025, 2026].map((season) => ({
+      season, sport: { id: SPORT_IDS.AAA }, team: { id: 5015, name: 'Iowa Cubs' }, stat: HITTER_STAT,
+    })),
+  ]
+  const timeline = careerTimelineView(splits, 'hitting', null)
+
+  const stopsAtClub = timeline.entries.filter((e) => e.teamId === 5015)
+  assert.equal(stopsAtClub.length, 2, 'a real departure to another club must still split into two visits')
+  assert.deepEqual(stopsAtClub.map((e) => e.yearText), ['2020–22', '2024–26'])
 })
 
 test('careerRegisterView: the current season splits per club from the date-cut splits', () => {

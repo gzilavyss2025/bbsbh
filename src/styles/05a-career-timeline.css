@@ -1,0 +1,94 @@
+/* ------------------------------------------------------------ team history
+   The career map above the "Path to the Majors" card: a left-aligned grid of
+   stops, each the club's logo floated on a pale wash of its own colors (set
+   inline per team from the logo art — see fetchTeamLogoTint), with the
+   season(s) below. The wash is chosen to carry the mark on its own, so there is
+   deliberately NO border or drop shadow on the badge. A CSS grid, not
+   flex-wrap, so a column still sizes to its own widest stop (a multi-year
+   "2021–2023" caption) rather than clipping at a fixed width — `max-content`,
+   not `auto`, since an `auto`-sized track absorbs the grid's leftover space,
+   spreading the badges apart instead of packing them tight the way flex-wrap's
+   items naturally did. `repeat(auto-fill, …)`, not a fixed column count:
+   `.screen` widens from 440px to 960px at the tablet/desktop breakpoint
+   (25-wide-layout.css), so a count picked for the phone width stranded most of
+   a wide row empty; auto-fill asks the container how many 58px+ columns fit.
+   Split out of 05-masthead-nav.css once that file hit its size budget
+   (ADR-0038) — nothing here has any relation to a masthead. */
+.careertl__track {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, max-content));
+  gap: var(--space-2);
+  list-style: none;
+  /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
+     sits flush against the left edge — no browser list indent. */
+  margin: 0;
+  padding: 0;
+}
+
+.careertl__stop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.careertl__badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+}
+
+/* A stop with a resolved MLB affiliate (CareerTimeline.jsx) renders its badge
+   as a real <button> instead of a <span> so hover/click can swap it to that
+   org's own logo/tint — reset away the browser's own button chrome (border,
+   padding, font) so it stays visually identical to a plain badge. The
+   default focus outline is left alone on purpose: this is a real control. */
+button.careertl__badge {
+  appearance: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* MLB inked, MiLB penciled — the same official-vs-provisional metaphor the
+   career register uses (26-player-page.css's "MLB (inked) + MiLB (penciled)
+   rows"), carried over to the badges so a stop's level reads at a glance
+   without leaning on the tiny level pill alone. A MiLB badge also picks up a
+   hairline ring, penciled rather than inked solid like the majors. */
+.careertl__years {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.careertl__stop--milb .careertl__badge {
+  box-shadow: inset 0 0 0 var(--bw-hair) var(--border-rule);
+}
+
+.careertl__stop--milb .careertl__years {
+  color: var(--text-caption);
+  font-weight: var(--w-regular);
+}
+
+/* The level (AAA / AA / … / ROK), penciled beneath a MiLB stop's year as a
+   small bordered pill — same `.reg-pill` idiom the register uses for the same
+   reason (26-player-page.css). An MLB stop carries none: ink already reads as
+   "the majors" without repeating the word on every single stop. */
+.careertl__level {
+  margin-top: 1px;
+  padding: 1px 4px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}

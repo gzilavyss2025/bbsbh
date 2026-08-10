@@ -327,62 +327,6 @@
   background: var(--accent-primary);
 }
 
-/* ------------------------------------------------------------ team history
-   The career map above the "Path to the Majors" card: a left-aligned grid of
-   stops, each the club's logo floated on a pale wash of its own colors (set
-   inline per team from the logo art — see fetchTeamLogoTint), with the
-   season(s) below. The wash is chosen to carry the mark on its own, so there is
-   deliberately NO border or drop shadow on the badge. A CSS grid, not
-   flex-wrap — the column count (--careertl-cols, set inline by
-   CareerTimeline.jsx's balancedColumns) is chosen per career length so a
-   trailing row never strands just one or two stops under a full row above
-   it; each column still sizes to its own widest stop (a multi-year
-   "2021–2023" caption) rather than clipping at a fixed width. `max-content`,
-   not `auto` — an `auto`-sized track absorbs the grid container's leftover
-   space, which spread the badges out edge-to-edge instead of packing them
-   tight against each other the way flex-wrap's items naturally did. */
-.careertl__track {
-  display: grid;
-  grid-template-columns: repeat(var(--careertl-cols, 5), minmax(58px, max-content));
-  gap: var(--space-2);
-  list-style: none;
-  /* Zero BOTH margin and the <ol>'s default padding-inline-start so the strip
-     sits flush against the left edge — no browser list indent. */
-  margin: 0;
-  padding: 0;
-}
-
-.careertl__stop {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.careertl__badge {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: var(--radius-md);
-  background: var(--surface-inset);
-}
-
-.careertl__years {
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
-  text-align: center;
-  white-space: nowrap;
-}
-
-/* The level (MLB / AAA / … / ROK) sits directly under the year in the SAME mono
-   figure, nudged up against the flex gap so year + level read as one tight
-   two-line caption rather than three evenly spaced items. */
-.careertl__level {
-  margin-top: -2px;
-}
-
 /* ------------------------------------------------------- transaction timeline
    The career roster-move ledger at the foot of the player page (see
    TransactionTimeline.jsx). A vertical graphite rail runs down a fixed gutter;

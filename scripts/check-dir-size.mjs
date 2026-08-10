@@ -188,7 +188,11 @@ const BUDGETS = {
   // out of `31-wild-card.css` (already at its check-file-size budget) rather
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
-  'src/styles': 70,
+  //
+  // 70 -> 71 for `05a-career-timeline.css`: CareerTimeline's `.careertl__*`
+  // rules, split out of `05-masthead-nav.css` (already at its check-file-size
+  // budget) for the same reason as every lettered sibling above.
+  'src/styles': 71,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
