@@ -132,7 +132,15 @@ const CREST_BOX = 100
 // renderer is the one way this could ever show something the book itself does
 // not. A disabled button is not focusable, which is what makes `aria-hidden`
 // legitimate here — the picker names the choice around it.
-export function PassportCover({ book, onOpen, preview = false }) {
+//
+// `placing` says a stamp is in hand (the shelf as book picker,
+// LogbookShelf.jsx). It changes only what the foot of the board says and what
+// a screen reader hears, never the art: the tap still opens the book, it just
+// opens it around a keepsake, and "Open" is the wrong word for the moment you
+// are being asked to choose. The accessible name names the BOOK either way —
+// four covers all announcing "Open your Game Log" is four identical controls,
+// which is precisely the case a shelf exists for.
+export function PassportCover({ book, onOpen, preview = false, placing = false }) {
   // Called unconditionally (react-hooks/rules-of-hooks) even for a book with
   // its own cover pick — cheap (localStorage-backed, already memoized by
   // usePreferences), and the one branch below that needs it is itself
@@ -194,7 +202,7 @@ export function PassportCover({ book, onOpen, preview = false }) {
       aria-hidden={preview || undefined}
       // The accessible name says what the control DOES, and contains the word
       // the foot of the cover shows (ADR-0017's button-copy convention).
-      aria-label="Open your Game Log"
+      aria-label={`${placing ? 'Choose' : 'Open'} ${title}`}
     >
       {/* A league mark in place of the club crest. Same mask-over-currentColor
           recipe as the club mark below, on the mark's OWN viewBox — a square
@@ -290,7 +298,7 @@ export function PassportCover({ book, onOpen, preview = false }) {
       {subtitleContent && <span className="passcover__club">{subtitleContent}</span>}
 
       <span className="passcover__rule" aria-hidden="true" />
-      <span className="passcover__open">Open</span>
+      <span className="passcover__open">{placing ? 'Choose' : 'Open'}</span>
     </button>
   )
 }

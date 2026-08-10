@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   BOOKS_KEY,
   DEFAULT_BOOK_ID,
@@ -91,19 +91,45 @@ function readBooksMigrated() {
 export function useBooks() {
   const [books, setBooks] = useState(readBooksMigrated)
 
+  // The latest map this instance knows about, readable synchronously. It is
+  // what `commit` transforms, and every path that changes `books` keeps it in
+  // step — see the header note below for why the state alone cannot do that
+  // job.
+  const latest = useRef(books)
+
   // One writer for every void mutation: apply a pure transform from
   // src/lib/books.js, persist, then echo so the other mounted instance picks
-  // it up. No caller touches localStorage or the map shape directly. Used by
-  // every mutator EXCEPT createBook, which needs to hand its caller back the
-  // new id synchronously — see the note there for why that one is written
-  // against `books` directly instead of through this functional updater.
+  // it up. No caller touches localStorage or the map shape directly.
+  //
+  // ===========================================================================
+  // THE WRITE IS NOT INSIDE THE STATE UPDATER, AND THAT IS THE WHOLE POINT
+  // ===========================================================================
+  // This used to be `setBooks((prev) => { …; writeBooks(next); return next })`.
+  // That put a side effect inside a reducer, which React is entitled to run
+  // twice, once, or NEVER — and "never" is not theoretical. Removing a book
+  // from inside that book's own page (BookManagementSheet's `handleRemove`)
+  // un-placed its stamps, called `removeBook`, then navigated to the shelf, all
+  // in one event. React eagerly evaluates only the FIRST update queued on a
+  // fiber; by the time `removeBook` ran, that fiber already had pending work,
+  // so its transform was deferred to the render — and the navigation unmounted
+  // the component before that render reached it. The updater was discarded, the
+  // write never happened, and the book came back with its stamps scattered into
+  // the tray. The same discard silently dropped the 2nd..Nth un-placement when
+  // a removed book held several stamps.
+  //
+  // Transforming a ref and writing straight out has neither failure: the write
+  // and the echo happen once, synchronously, before anything can unmount, and
+  // repeated calls in one handler each compose on the previous result rather
+  // than all reading the same pre-batch state. `createBook` below already
+  // worked this way for its own reason (it must return the new id
+  // synchronously); this is the same shape for every other mutation.
   const commit = useCallback((transform) => {
-    setBooks((prev) => {
-      const next = transform(prev)
-      if (next === prev) return prev
+    const next = transform(latest.current)
+    if (next !== latest.current) {
+      latest.current = next
       writeBooks(next)
-      return next
-    })
+      setBooks(next)
+    }
     notifyLocalChange()
   }, [])
 
@@ -112,34 +138,27 @@ export function useBooks() {
   // agrees on where ids come from. Returns the new book's id, or null if the
   // pure layer refused (cap reached, or a once-in-a-lifetime id collision).
   //
-  // Written against the `books` state directly rather than through `commit`'s
-  // functional updater, on purpose: a caller needs the outcome back
-  // SYNCHRONOUSLY (there is no id to hand the placement flow otherwise), and
-  // the only way to know it synchronously is to run the pure transform
-  // against the state this render already has, rather than leaning on
-  // React's internal timing for when a functional setState updater happens to
-  // execute. A single tap of "new book" is not a rapid-fire path where the
-  // committed render's `books` could plausibly be stale by the time this runs.
-  const createBook = useCallback(
-    ({ title, subtitle, coverTeamId, coverMark, coverColor } = {}) => {
-      const id = genBookId()
-      const next = createBookRecord(books, {
-        id,
-        title,
-        subtitle,
-        coverTeamId,
-        coverMark,
-        coverColor,
-        now: Date.now(),
-      })
-      if (next === books) return null
-      setBooks(next)
-      writeBooks(next)
-      notifyLocalChange()
-      return id
-    },
-    [books],
-  )
+  // The only mutator that does not go through `commit`, because it needs to
+  // know the OUTCOME as well as apply it: there is no id to hand the placement
+  // flow otherwise. Same synchronous transform-write-set shape either way.
+  const createBook = useCallback(({ title, subtitle, coverTeamId, coverMark, coverColor } = {}) => {
+    const id = genBookId()
+    const next = createBookRecord(latest.current, {
+      id,
+      title,
+      subtitle,
+      coverTeamId,
+      coverMark,
+      coverColor,
+      now: Date.now(),
+    })
+    if (next === latest.current) return null
+    latest.current = next
+    writeBooks(next)
+    setBooks(next)
+    notifyLocalChange()
+    return id
+  }, [])
 
   // Patch a book's cover. `patch` only names the fields it wants changed —
   // updateBookCover in src/lib/books.js already treats an absent field as
@@ -178,17 +197,20 @@ export function useBooks() {
     function onStorage(e) {
       // `key === null` is a whole-storage clear, which is also our business.
       if (e.key !== BOOKS_KEY && e.key !== null) return
-      // `() => readBooks()`, NOT `readBooks()` — the difference is a bug, not
-      // a style point, and useStamps.js already paid for learning it once.
-      // `commit` persists INSIDE its state updater, which React runs at
-      // render time, but the same-tab echo above dispatches synchronously
-      // right after QUEUEING that updater. An eager read here would run
-      // before the write it is reacting to and queue the pre-change
-      // collection behind the change: React applies the updater, then
-      // applies this, and the mutation reverts in state while localStorage
-      // keeps the new value. Reading from inside the updater puts the read
-      // after the write, where it belongs.
-      setBooks(() => readBooks())
+      // A plain eager read, which is only safe because `commit` above writes
+      // BEFORE it echoes. This used to have to be `setBooks(() => readBooks())`
+      // — deferring the read into the updater — precisely because the write
+      // then happened inside another updater that had not run yet, so an eager
+      // read here re-queued the pre-change collection behind the change. With
+      // the write hoisted out, storage always already holds the new value by
+      // the time this fires, in this tab and in any other.
+      //
+      // The ref moves with the state, here and in every other setter, so the
+      // next commit transforms what this device actually holds — including a
+      // change that arrived from another tab.
+      const next = readBooks()
+      latest.current = next
+      setBooks(next)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)

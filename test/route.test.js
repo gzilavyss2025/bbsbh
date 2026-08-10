@@ -31,6 +31,7 @@ import {
   logbookPath,
   logbookStatsPath,
   logbookPlacePath,
+  logbookNewPath,
   bookPath,
   bookStatsPath,
   profilePath,
@@ -428,6 +429,27 @@ test('an unknown Logbook sub-segment still falls back to the bare page', () => {
   // 'stats' is matched by name, not by "non-numeric", so every other mangled
   // link keeps the old forgiving behavior instead of 404-ing.
   assert.deepEqual(parseRoute('/logbook/nope'), { name: 'logbook', season: null, placing: null })
+})
+
+// Starting a book is one of the answers to "which book does this stamp go
+// in", so `?place=` has to survive the trip through it. It used to be parsed
+// away to null here, which meant taking that route mid-placement dropped the
+// keepsake back into the tray with nothing said.
+test('/logbook/new is the create page, and it can be holding a stamp', () => {
+  assert.deepEqual(parseRoute('/logbook/new'), {
+    name: 'logbook',
+    creating: true,
+    season: null,
+    placing: null,
+  })
+  assert.equal(logbookNewPath(), '/logbook/new')
+  assert.equal(logbookNewPath(823035), '/logbook/new?place=823035')
+  assert.deepEqual(parseRoute(logbookNewPath(823035)), {
+    name: 'logbook',
+    creating: true,
+    season: null,
+    placing: 823035,
+  })
 })
 
 // --------------------------------------------------------------------------

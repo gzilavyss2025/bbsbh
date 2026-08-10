@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { useBooks } from '../../hooks/useBooks.js'
 import { useStamps } from '../../hooks/useStamps.js'
 import { useNav } from '../../lib/nav.js'
+import { pathForBook } from '../../lib/logbookNav.js'
 import { MAX_NOTE_LENGTH, STAMP_MODES, seasonFromDate } from '../../lib/stamps.js'
 import { logbookPath, logbookPlacePath } from '../../lib/route.js'
 import { GameStamp } from './GameStamp.jsx'
@@ -56,6 +58,12 @@ import { GameStamp } from './GameStamp.jsx'
 export function StampGameButton({ game }) {
   const navigate = useNav()
   const { stampFor, stamp, unstamp, seasonIsFull } = useStamps()
+  // Which books this user holds — a cover, never a collection, and never a
+  // score (src/lib/books.js), so it carries nothing this surface has to guard.
+  // It is here for two things a strip that says "your book" cannot get right on
+  // its own once there is more than one: WHICH book this keepsake went into,
+  // and where "Open Game Log" should land.
+  const { books } = useBooks()
   const [noteDraft, setNoteDraft] = useState(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
 
@@ -63,6 +71,13 @@ export function StampGameButton({ game }) {
 
   const existing = stampFor(game.gamePk)
   const season = seasonFromDate(game.date)
+  // The book this stamp actually sits in, or null while it waits in the tray.
+  // Null ALSO for a placement naming a book that has since been removed — the
+  // Game Log shows such a stamp in the tray (LogbookCollection.jsx), and this
+  // strip must not promise a page in a book that is gone.
+  const filedIn = existing?.placement
+    ? books.find((b) => b.id === existing.placement.bookId) ?? null
+    : null
   // A live game's score is still moving; a stamp is permanent. The server
   // refuses a non-Final mint outright (409), so the affordance says why rather
   // than offering a button that can only fail.
@@ -108,8 +123,12 @@ export function StampGameButton({ game }) {
               {!isFinal
                 ? 'A stamp is minted once the game is final — the score on it never changes.'
                 : existing
-                  ? existing.placement
-                    ? `Stamped, and on page ${existing.placement.page} of your book.`
+                  ? filedIn
+                    ? /* Named once there is a name to say — "your book" is
+                         true of one book and vague about five. An untitled
+                         book keeps the original line, which is what the
+                         default book is for almost everyone. */
+                      `Stamped, and on page ${existing.placement.page} of ${filedIn.title || 'your book'}.`
                     : 'Stamped. It’s waiting to be placed in your book.'
                   : 'You opened this one. Keep it — a stamp files this game in your Game Log.'}
               {/* Inside the sentence, not beside the action: everything behind
@@ -152,7 +171,7 @@ export function StampGameButton({ game }) {
                 className="btn btn--ink"
                 onClick={() => navigate(logbookPlacePath(game.gamePk))}
               >
-                {existing.placement ? 'Move it in your book' : 'Place it in your book'}
+                {filedIn ? 'Move it in your book' : 'Place it in your book'}
               </button>
             ) : (
               <button
@@ -205,10 +224,20 @@ export function StampGameButton({ game }) {
           </label>
 
           <div className="stampstrip__actions">
+            {/* Straight to the book this keepsake is in, rather than always to
+                the default one — a stamp filed in "Road trip" is not on the
+                page this used to open. A stamp still in the tray keeps the bare
+                season route: the tray is shared, so every book shows it. */}
             <button
               type="button"
               className="btn btn--ghost"
-              onClick={() => navigate(logbookPath(season))}
+              onClick={() =>
+                navigate(
+                  filedIn
+                    ? pathForBook(filedIn, { season, bookCount: books.length })
+                    : logbookPath(season),
+                )
+              }
             >
               Open Game Log
             </button>

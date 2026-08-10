@@ -24,7 +24,12 @@ import { BookCoverPicker } from '../../components/passport/BookCoverPicker.jsx'
 // draws the real `PassportCover` from it. So a character typed into either
 // field lands on the cover on the same render, with no preview code of this
 // page's own to drift.
-export function NewBookPage({ createBook, onCreated, onCancel }) {
+//
+// `placing` is the stamp waiting for a page, carried in from `?place=` — this
+// page does not place anything, it just knows the tap that leaves it is about
+// to. Starting a book is one of the answers to "which book does this go in",
+// so the lede says so rather than leaving the stamp unmentioned for a screen.
+export function NewBookPage({ createBook, placing = null, onCreated, onCancel }) {
   const [draft, setDraft] = useState({
     title: '',
     subtitle: '',
@@ -57,6 +62,7 @@ export function NewBookPage({ createBook, onCreated, onCancel }) {
       <p className="hint hint--prose">
         Name it and choose its cover — both keep changing as long as you hold the
         book.
+        {placing ? ' It opens ready for the stamp you’re placing.' : ''}
       </p>
 
       <label className="bookmgmt__field">

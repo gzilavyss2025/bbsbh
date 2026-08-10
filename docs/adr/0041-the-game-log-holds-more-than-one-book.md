@@ -194,3 +194,104 @@ own comment carries the updated arithmetic (cell size vs. stamp size, the
   device-agreed-upon-in-advance order until the next sync round-trips. This
   is the same class of eventual consistency every other multi-record sync
   channel in this app already accepts, not a new gap.
+
+## Amendment (2026-08-09) — the bare route is a resolver, so it is not also an address
+
+**The decision above shipped with a hole in it**, and the hole was in the one
+paragraph that looked safest: *"The bare route branches on book count; every
+other route is frozen."* Both halves are still right. What was missed is what
+follows from them.
+
+`/logbook` resolving to *the default book* while that is the only book, and to
+*the shelf* once a second exists, means `/logbook` is **not an address the
+default book can answer to.** It is a question the app answers differently at
+different times. `src/lib/logbookNav.js` — the module that decides which of a
+book's addresses to build — folded the default book onto it anyway, and
+unconditionally:
+
+```js
+const base = !book || book.id === DEFAULT_BOOK_ID ? logbookPath(season) : bookPath(book.id, season)
+```
+
+That is correct for exactly one book and wrong for every count above it, and
+what it produced was not an error, a 404, or anything that looks wrong in
+review. It produced a path that resolves to a **different screen**:
+
+- **The default book could not be opened.** Its cover on the shelf navigated
+  to `/logbook`, which is the shelf it was tapped from. The only way in was to
+  delete the other book, which is what the user reporting this did — and then
+  re-applied the deleted book's stamps by hand.
+- **No stamp could be filed into it.** The mint card's `?place=` hand-off goes
+  through the same builder, so "choose a book for this stamp" round-tripped to
+  itself for that one book.
+- **Its retrospective was the wrong retrospective.** `statsPathFor` folded the
+  same way, so "what it adds up to" inside the default book opened
+  `/logbook/stats` — every book's stamps added together, while every other
+  book's own link opened its own.
+
+### The rule
+
+The fold is legitimate exactly when the bare route currently resolves to this
+book: `book.id === DEFAULT_BOOK_ID && bookCount === 1`. `bookCount` is
+therefore an argument, and a caller that cannot supply one gets the explicit
+`/logbook/book/{id}` address rather than a guess — the explicit address always
+resolves to the book it names, so the safe default is the verbose one.
+
+`bookPath(DEFAULT_BOOK_ID)` is consequently **no longer forbidden**, which
+reverses a comment in `route.js`. The reasoning that comment carried (one book,
+one address) still holds; it simply stops being true of the default book the
+moment a shelf exists, and the shelf — not the book — is what the bare route
+then means. `test/logbook-nav.test.js` pins both directions.
+
+### The other half: a write React was entitled to discard
+
+Found while fixing the above, in the same feature and with the same shape — a
+failure that leaves no error behind. `useStamps.js` and `useBooks.js` both
+persisted **inside their state updater**:
+
+```js
+setBooks((prev) => { const next = transform(prev); writeBooks(next); return next })
+```
+
+A reducer is not a place for a side effect. React may run it twice, once, or
+never, and "never" is reachable through the ordinary UI: removing a book from
+inside that book's own page un-places its stamps, removes the book, and
+navigates to the shelf, all in one event. React eagerly evaluates only the
+FIRST update queued on a fiber, so the removal's transform was deferred to the
+render — and the navigation deleted the component before that render reached
+it. **The book was never removed.** Its stamps were un-placed anyway (that
+transform was the first one, so it ran eagerly), leaving the reporting user's
+collection scattered into the tray with the book they had just removed still on
+the shelf. The same discard dropped the 2nd..Nth un-placement whenever a
+removed book held more than one stamp.
+
+Both hooks now transform a ref, write, and then set state — the shape
+`createBook` already used for its own reason (it must return the new id
+synchronously). Three things fall out of it: the write happens exactly once and
+before anything can unmount; repeated calls in one handler compose on the
+previous result instead of all reading the same pre-batch state; and the
+same-tab echo can go back to an eager `readBooks()`, because storage now
+already holds the new value when the listener fires.
+
+`usePreferences.js` and `useScoresUnlocked.js` still carry the original shape.
+They are not touched here — neither has a mutate-then-navigate path today, and
+`usePreferences`'s own header records a coupling with `PreferencesCloudSync`'s
+re-run signal that has to be unpicked in the same change. **They are the same
+latent bug**, and worth doing next.
+
+### Three smaller things this pass fixed, all in the same flow
+
+- **A book opened FOR a stamp opens at a page.** Arriving from the mint card
+  put *"Tap the page where you want May 18 to go"* above a closed cover — the
+  instruction named something that was not on screen.
+  `passportLayout.openingPageFor` now picks the page, and a stamp already on
+  one opens at that page, because placing it twice is a move.
+- **Picking a book survives leaving the shelf.** `?place=` is carried by the
+  shelf's own back link and by `/logbook/new`, so the wrong-book mistake has a
+  way back that is not the box score, and "start a book for this one" is a real
+  answer to the question the shelf is asking. The new-book tile is no longer
+  withheld while placing.
+- **A stamp filed in a book that is gone waits in the tray.** It used to render
+  nowhere at all: no page holds it, and it is not unplaced either. Reachable
+  through sync — a removal made on another device arrives as a tombstone whose
+  un-placements may not have landed yet.

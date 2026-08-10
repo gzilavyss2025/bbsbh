@@ -8,12 +8,12 @@ import { useStamps } from '../hooks/useStamps.js'
 import { useNav } from '../lib/nav.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
 import { pathForBook, statsPathFor } from '../lib/logbookNav.js'
-import { gamePath, logbookNewPath, logbookPath } from '../lib/route.js'
+import { gamePath, logbookNewPath, logbookPath, logbookPlacePath } from '../lib/route.js'
 import {
   PAGE_CAPACITY,
   autoLayout,
-  firstOpenPage,
   layoutInDateOrder,
+  openingPageFor,
   otherPlacementsOn,
   pageCountFor,
   pageIsFullFor,
@@ -29,13 +29,12 @@ import { BookManagementSheet } from '../components/passport/BookManagementSheet.
 
 // One open Game Log book — the topbar, the tray, the passport book itself,
 // and the season grid below it (ADR-0035, ADR-0036). Split out of
-// LogbookPage.jsx when the multi-book shelf (ADR-0036's addendum) pushed
-// that file past check-file-size.mjs's 600-line ceiling; LogbookPage.jsx
-// keeps the route-facing shell — the Clerk gate and the shelf-vs-single-book
-// resolver (`LogbookRoot`) — and hands this component the `book` record it
-// resolved. That split is mechanical: read LogbookPage.jsx's own header for
-// the spoiler-containment argument and the two-step placement flow this
-// component implements, both unchanged by which file the code sits in.
+// LogbookPage.jsx when the multi-book shelf (ADR-0036's addendum) pushed that
+// file past check-file-size.mjs's 600-line ceiling; that file keeps the
+// route-facing shell — the Clerk gate and the shelf-vs-single-book resolver
+// (`LogbookRoot`) — and hands this component the `book` record it resolved.
+// Read its header for the spoiler-containment argument and the two-step
+// placement flow this component implements — the split changed neither.
 //
 // Every number the book is drawn with comes from src/lib/passportLayout.js.
 // Nothing in this file computes a position; if you find yourself typing a
@@ -51,18 +50,39 @@ function monthDay(date) {
 export function LogbookCollection({ book, season: requestedSeason = null, placing = null }) {
   const navigate = useNav()
   const { books, updateCover, removeBook } = useBooks()
-  const { counts, seasons, forSeason, all, unplaced, place, unplace, placeAll } = useStamps()
+  const { counts, seasons, forSeason, all, place, unplace, placeAll } = useStamps()
   const bookId = book.id
+
+  // Which books are still on the shelf. A stamp can name one that is not — a
+  // removal made on ANOTHER device arrives as a tombstone whose un-placements
+  // may not have landed yet — and such a stamp rendered NOWHERE: no page holds
+  // it, and it is not unplaced either. `isFiled` puts it back in the tray.
+  const liveBookIds = useMemo(() => new Set(books.map((b) => b.id)), [books])
+  const isFiled = useCallback(
+    (entry) => Boolean(entry.placement) && liveBookIds.has(entry.placement.bookId),
+    [liveBookIds],
+  )
 
   // Every LIVE, PLACED stamp filed in THIS book — the only filtering
   // passportLayout.js's own functions need, and entirely this caller's job
-  // (they stay book-agnostic themselves). A stamp not yet placed carries no
-  // `placement` at all, so it is never in here regardless of book — see the
-  // tray below, which is deliberately unfiltered.
+  // (they stay book-agnostic themselves).
   const bookStamps = useMemo(
     () => all.filter((s) => (s.placement?.bookId ?? DEFAULT_BOOK_ID) === bookId),
     [all, bookId],
   )
+
+  // The tray: minted, and not on a page of any book that still exists. Shared
+  // by every book — a stamp waiting for a page belongs to none of them yet,
+  // which is what lets you file it into whichever one you open.
+  const tray = useMemo(() => all.filter((entry) => !isFiled(entry)), [all, isFiled])
+
+  // This book's own two addresses, built once. `bookCount` decides whether the
+  // default book answers to the bare /logbook or needs its explicit address
+  // (lib/logbookNav.js) — getting it wrong lands you on the SHELF rather than
+  // the book you were reading, which is how that book became unopenable.
+  const bookCount = books.length
+  const thisBookPath = pathForBook(book, { season: requestedSeason, bookCount })
+  const thisStatsPath = statsPathFor(book, { bookCount })
 
   // The management sheet for THIS book — reachable without ever seeing the
   // shelf, which is what lets a single-book user discover "make a second
@@ -96,8 +116,11 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
   // this with a page number makes the sync inside PassportBook turn straight
   // to that page on mount, so the cover would exist and never once be seen.
   // It is set only when something actively wants a page: picking a stamp out
-  // of the tray, or adding a page.
-  const [openPage, setOpenPage] = useState(null)
+  // of the tray, adding a page — or arriving here WITH a stamp, which is a
+  // book opened to be written in rather than read (see `openingPageFor`).
+  const [openPage, setOpenPage] = useState(() =>
+    placing ? openingPageFor(bookStamps, placing) : null,
+  )
 
   // Re-seed from the prop when `?place=` CHANGES — React's documented
   // adjust-state-during-render pattern rather than an effect, which would
@@ -109,6 +132,10 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
     setPlacingPk(placing)
     setPending(null)
     setSelectedPk(null)
+    // Only ON the way in. Losing `?place=` is what confirming and cancelling
+    // both do, and neither should turn the book away from the page you were
+    // just looking at.
+    if (placing) setOpenPage(openingPageFor(bookStamps, placing))
   }
 
   // Facts for the WHOLE collection: the book spans every season, unlike the
@@ -123,7 +150,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
   // never be decided by another book's placements. `total` stays the WHOLE
   // collection's size on purpose: "No stamps yet" is about whether this user
   // has ever stamped a game at all, not about this one book, since the tray
-  // (unplaced stamps) is shared by every book (see `unplaced` below).
+  // is shared by every book (see `tray` above).
   const pageCount = pageCountFor(bookStamps, addedPages)
   const total = all.length
 
@@ -168,14 +195,14 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
     setLandedPk(placingPk)
     // Drop `?place=` so a refresh (or the back button) doesn't reopen the mode
     // for a stamp that is already on the page.
-    if (placing) navigate(pathForBook(book, { season: requestedSeason }), { replace: true })
-  }, [placingPk, pending, place, placing, navigate, requestedSeason, book])
+    if (placing) navigate(thisBookPath, { replace: true })
+  }, [placingPk, pending, place, placing, navigate, thisBookPath])
 
   const cancelPlacement = useCallback(() => {
     setPending(null)
     setPlacingPk(null)
-    if (placing) navigate(pathForBook(book, { season: requestedSeason }), { replace: true })
-  }, [placing, navigate, requestedSeason, book])
+    if (placing) navigate(thisBookPath, { replace: true })
+  }, [placing, navigate, thisBookPath])
 
   // The press is over; this is an ordinary stamp again. Driven by the
   // animation ending rather than by a timer, so the duration lives in the CSS
@@ -248,9 +275,18 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
           {/* Settings and Add + are always both here — rename, re-cover and
               remove belong to the book you have open, however many you keep.
               The way back to the shelf leads them, and only exists once there
-              is a shelf to go back to. */}
-          {books.length > 1 && (
-            <button type="button" className="topbar__back" onClick={() => navigate(logbookPath())}>
+              is a shelf to go back to.
+
+              Both routes out carry the stamp you are placing: the shelf
+              re-opens as the book picker it already is, and a book started here
+              opens ready for it. Wrong book is the ordinary mistake, and the
+              way back from it used to be the box score. */}
+          {bookCount > 1 && (
+            <button
+              type="button"
+              className="topbar__back"
+              onClick={() => navigate(placingPk ? logbookPlacePath(placingPk) : logbookPath())}
+            >
               ‹ Shelf
             </button>
           )}
@@ -260,7 +296,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
           <button
             type="button"
             className="topbar__back logbook__add"
-            onClick={() => navigate(logbookNewPath())}
+            onClick={() => navigate(logbookNewPath(placingPk))}
           >
             Add +
           </button>
@@ -271,7 +307,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
         <button
           type="button"
           className="topbar__back logbook__headstats"
-          onClick={() => navigate(statsPathFor(book))}
+          onClick={() => navigate(thisStatsPath)}
         >
           Stats ›
         </button>
@@ -303,16 +339,16 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
         </p>
       ) : (
         <>
-          {/* The tray: minted, not yet placed. Shown only when it has something
-              in it, so a fully-arranged book carries no chrome for it. */}
-          {unplaced.length > 0 && !placingPk && (
+          {/* Shown only when it holds something, so a fully-arranged book
+              carries no chrome for it. */}
+          {tray.length > 0 && !placingPk && (
             <section className="logbook__tray" aria-label="Stamps waiting to be placed">
               <p className="logbook__traylede">
-                {unplaced.length} {unplaced.length === 1 ? 'stamp is' : 'stamps are'} waiting
+                {tray.length} {tray.length === 1 ? 'stamp is' : 'stamps are'} waiting
                 for a page.
               </p>
               <ul className="logbook__traylist">
-                {unplaced.slice(0, 8).map((entry) => (
+                {tray.slice(0, 8).map((entry) => (
                   <li key={entry.gamePk}>
                     <button
                       type="button"
@@ -320,7 +356,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                       onClick={() => {
                         setPlacingPk(entry.gamePk)
                         setPending(null)
-                        setOpenPage(firstOpenPage(bookStamps, pageCount) ?? pageCount)
+                        setOpenPage(openingPageFor(bookStamps, entry.gamePk, addedPages))
                       }}
                     >
                       {byPk[entry.gamePk] ? (
@@ -344,7 +380,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                     // `autoLayout` doesn't know about books (passportLayout.js
                     // stays book-agnostic by design) — filing every stamp into
                     // the book currently open is entirely this call site's job.
-                    autoLayout(unplaced, { startPage: pageCount }).map((p) => ({
+                    autoLayout(tray, { startPage: pageCount }).map((p) => ({
                       ...p,
                       placement: { ...p.placement, bookId },
                     })),
@@ -476,7 +512,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                   key={year}
                   className={year === season ? 'is-active' : ''}
                   aria-current={year === season ? 'page' : undefined}
-                  onClick={() => navigate(pathForBook(book, { season: year }))}
+                  onClick={() => navigate(pathForBook(book, { season: year, bookCount }))}
                 >
                   {year}
                   <small>{counts[year]}</small>
@@ -491,7 +527,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             <button
               type="button"
               className="logbook__statslink"
-              onClick={() => navigate(statsPathFor(book))}
+              onClick={() => navigate(thisStatsPath)}
             >
               What it adds up to ›
             </button>
@@ -523,7 +559,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                   <p className="logbook__caption">
                     <span>{monthDay(entry.date)}</span>
                     <span className="logbook__mode">{entry.mode}</span>
-                    {entry.placement ? (
+                    {isFiled(entry) ? (
                       // Which page this keepsake sits on, and the way back to
                       // it. Deliberately no longer an un-place: a control
                       // labelled "p.3" that silently took the stamp off page 3
@@ -531,6 +567,8 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
                       // and it read as a page number. It now turns the book to
                       // that page and opens the stamp's options, where moving
                       // it and returning it to the tray are both named.
+                      // `isFiled`, not `entry.placement`: a placement naming a
+                      // book that is gone has no page to send anyone to.
                       <button
                         type="button"
                         className="logbook__unplace"

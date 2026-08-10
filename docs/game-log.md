@@ -172,14 +172,14 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Menu / footer label | `Game Log` |
 | Page title / `<h1>` | `Game Log` |
 | Signed-out pitch | *"A passport of the games you've scored."* → `Start your Game Log` / `I already have a book` |
-| Book cover | `Game Log`, the club name, `Open` |
+| Book cover | `Game Log`, the club name, `Open` — or `Choose` while the shelf is picking a book for a stamp, because "open" is the wrong word for the moment you are being asked to choose. Its accessible name names the BOOK either way (`Open Road trip` / `Choose Road trip`): four covers all announcing "Open your Game Log" is four identical controls, which is the case a shelf exists for |
 | OG card | eyebrow `GAME LOG` · title `Game Log` · sub *"A passport of the games you've scored — every stamp your own."* |
 | Empty collection | *"No stamps yet. Reveal a game's box score and stamp it — it lands here, and you choose where on the page it goes."* |
 | Empty retrospective | *"No stamps yet. Reveal a game's box score and stamp it — once a few are in the book, this is where it adds up."* |
 | Not final yet | *"A stamp is minted once the game is final — the score on it never changes."* |
 | Mintable | *"You opened this one. Keep it — a stamp files this game in your Game Log."* → `Stamp this game` |
 | Season full | *"Your {season} Game Log is full. Remove a stamp to make room."* |
-| Stamped, placed | *"Stamped, and on page {n} of your book."* |
+| Stamped, placed | *"Stamped, and on page {n} of your book."* — named once there is a name to say: *"…on page 3 of Road trip."* "Your book" is true of one book and vague about five, and an untitled book (the default one, for almost everyone) keeps the original line |
 | Stamped, unplaced | *"Stamped. It's waiting to be placed in your book."* |
 | Mint-strip eyebrow | `Game Log` — the strip's own label, since the copy beside it is one line and can't carry the name in every state |
 | Mint-strip row action | `Place it in your book` / `Move it in your book` — the row offers exactly one thing, and it is the way into the book |
@@ -195,7 +195,8 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Selected stamp | `Open game ›` / `Move it` |
 | Unplaced marker | `unplaced` |
 | Book settings | `Settings` (shelf and open book alike) · `Remove this book` → *"Remove “{title}”? Every stamp in it goes back to the tray, keeping its game, its note and its score — nothing is deleted, and you can press each one into another book."* · refused on the last book: *"This is the only book you hold, and the Game Log always keeps one. Start another and you can remove this one."* |
-| Starting a book | `Add +` → page heading `New book` · *"Name it and choose its cover — both keep changing as long as you hold the book."* → `Start this book` |
+| Choosing a book | shelf lede *"Choose a book for {date}."* (*"…for this stamp."* when the stamp cannot be resolved — a stale `?place=`), against *"{n} books on your shelf."* when nothing is in hand |
+| Starting a book | `Add +` → page heading `New book` · *"Name it and choose its cover — both keep changing as long as you hold the book."*, plus *"It opens ready for the stamp you're placing."* when one is in hand → `Start this book` |
 | Cover picker | wide: `Use a league logo` / `Use team colors` · phone: `Use team colors` / `Use MLB logo` / `Use MiLB logo`, then `Pick a level` / `Pick a color` / `Pick a club`, each behind `‹ Back` · boards `Kraft` / `Red` / `Blue` · `Match my favorite team` |
 
 ### 3.3 Rules for writing new copy here
@@ -324,6 +325,14 @@ stamp is not a lost one, and belongs to no book yet; it waits in the tray,
 book-agnostic, until a tap on a specific book's page both places it and
 assigns it there in one motion.
 
+**The tray is "not on a page of a book that still exists", not "has no
+placement"** — the two differ by one case, and that case used to make a
+keepsake invisible. A stamp naming a removed book is on no page and is not
+unplaced either, so it rendered nowhere at all. Removing a book un-places its
+stamps here, but a removal made on another device arrives as a tombstone whose
+un-placements may not have landed yet. `LogbookCollection.jsx` owns the list,
+because answering it needs both the stamps and the shelf.
+
 #### The cover — a club crest, or a league mark
 
 `PassportCover.jsx` is the ONE cover renderer, and the picker
@@ -356,7 +365,25 @@ three against the foil stamped on them.
 
 Placement mode is `?place={gamePk}`, a **query and not a route name**: it is a
 transient mode of the same page, not an address worth sharing, and a stale link
-degrades to the plain book.
+degrades to the plain book. **Every route that can be reached while picking a
+book carries it** — a cover on the shelf, the shelf's own back link out of an
+open book, and `/logbook/new` — so the wrong-book mistake has a way back that
+is not the box score, and starting a book is a real answer to "which book does
+this go in". A book opened *for* a stamp opens at a page rather than on its
+cover (`openingPageFor`, `passportLayout.js`): the lede tells you to tap a page,
+so a page has to be the thing on screen.
+
+#### The bare `/logbook` is a resolver, not the default book's address
+
+`/logbook` opens the default book while that is the only book, and shows the
+shelf as soon as a second exists. So it is **not** an address that book can also
+answer to, and `src/lib/logbookNav.js` folds onto it only while `bookCount ===
+1`; above that the default book uses `/logbook/book/default` like any other.
+Folding unconditionally is what made that book unopenable, unstampable, and the
+owner of the wrong retrospective — ADR-0041's amendment has the full account,
+and `test/logbook-nav.test.js` pins the rule. A caller that cannot say how many
+books there are gets the explicit address, because that one always resolves to
+the book it names.
 
 ### 4.4 Sync
 
@@ -403,8 +430,8 @@ collection, the moment the change ships.
 | `/logbook/{season}` | `LogbookCollection.jsx` | one season of the DEFAULT book, byte-for-byte unchanged parsing since before ADR-0041; out-of-range falls back to the bare book |
 | `/logbook?place={gamePk}` | same | placement mode for one stamp |
 | `/logbook/stats` | `LogbookStatsPage.jsx` | the retrospective over the WHOLE collection, every book — **this branch must stay above the season branch in `route.js`**, or `/logbook/stats` parses as season `NaN` and silently renders the bare book |
-| `/logbook/new` | `LogbookPage.jsx` → `screens/logbook/NewBookPage.jsx` | start a new book. A page and not a sheet, so no other book is on screen while you decide what one looks like. Same above-the-season-branch rule as `/logbook/stats` |
-| `/logbook/book/{bookId}` | `LogbookCollection.jsx` | a specific non-default book, newest season — additive since ADR-0041, the only way to deep-link one |
+| `/logbook/new[?place={gamePk}]` | `LogbookPage.jsx` → `screens/logbook/NewBookPage.jsx` | start a new book. A page and not a sheet, so no other book is on screen while you decide what one looks like. Same above-the-season-branch rule as `/logbook/stats`. Carries a stamp in hand, so the book it starts opens ready for it |
+| `/logbook/book/{bookId}` | `LogbookCollection.jsx` | one named book, newest season — additive since ADR-0041, and the only address the DEFAULT book has once a shelf exists (`bookId` may be `default`; see §4.3) |
 | `/logbook/book/{bookId}/{season}` | same | one season of that book |
 | `/logbook/book/{bookId}/stats` | `LogbookStatsPage.jsx` | that one book's retrospective — **must stay above the season branch above it, for the identical parsing reason** |
 

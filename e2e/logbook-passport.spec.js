@@ -116,7 +116,11 @@ test('a stamp lands on the page when you place it, and moves when you move it', 
   // draw.
   await page.reload()
   await page.locator('.passcover').click()
-  expect(await spots(page)).toEqual([moved])
+  // Polled, not read once. Opening the cover is a page TURN, and for its
+  // duration the spread is mid-flight — a bare read here caught an empty
+  // spread about one run in five. The assertion is the same one; it just waits
+  // for the leaf to land, the way every `expect(locator)` above already does.
+  await expect.poll(() => spots(page)).toEqual([moved])
 })
 
 test('a placed stamp can be sent back to the tray', async ({ page }) => {

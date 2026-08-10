@@ -239,9 +239,12 @@ export function parseRoute(url) {
   if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'stats')
     return { name: 'logbook-stats' }
   // Starting a new book. A named second segment, so it sits above the season
-  // branch below for the reason the block just above spells out.
+  // branch below for the reason the block just above spells out. It carries the
+  // same `?place=` hand-off as every other Logbook route: starting a book is one
+  // of the ways to answer "which book does this stamp go in", so the stamp has
+  // to still be in hand on the other side of it.
   if (parts.length === 2 && parts[0] === 'logbook' && parts[1] === 'new')
-    return { name: 'logbook', creating: true, season: null, placing: null }
+    return { name: 'logbook', creating: true, season: null, placing: toGamePkParam(q.get('place')) }
   // One season of the Logbook. A non-numeric or out-of-range segment falls back
   // to the bare page (same idea as the invalid-date fallback above) rather than
   // stranding it on a season that cannot exist.
@@ -430,14 +433,18 @@ export function logbookStatsPath() {
   return '/logbook/stats'
 }
 // Starting a new book — its own page, so no other book is on screen while you
-// decide what one looks like.
-export function logbookNewPath() {
-  return '/logbook/new'
+// decide what one looks like. Optionally carrying a stamp, for the same reason
+// every other Logbook path can: you may start a book in order to put THIS
+// keepsake in it, and the flow must not drop it on the way.
+export function logbookNewPath(gamePk = null) {
+  return gamePk ? `/logbook/new?place=${Number(gamePk)}` : '/logbook/new'
 }
 // A specific named book (ADR-0036's shelf), optionally paged to one season —
 // the additive counterpart to logbookPath() for a user with more than one
-// book. Never build bookPath(DEFAULT_BOOK_ID): the bare logbookPath() already
-// reaches that book, and building both would give one book two addresses.
+// book. `DEFAULT_BOOK_ID` is a legitimate argument here, but only through
+// lib/logbookNav.js, which owns the one rule for choosing between the two
+// addresses that book can have; read that file's header before building
+// either by hand.
 export function bookPath(bookId, season = null) {
   return season ? `/logbook/book/${bookId}/${season}` : `/logbook/book/${bookId}`
 }
