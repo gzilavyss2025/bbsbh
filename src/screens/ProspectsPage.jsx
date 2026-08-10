@@ -4,6 +4,7 @@ import { fetchProspectTrend, prospectTrendById, levelTier } from '../api/prospec
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { filterByTeam } from '../lib/teamFilter.js'
+import { teamFullName } from '../lib/teams.js'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -17,6 +18,7 @@ import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const DASH = '—'
+const PERFORMANCE_BANDS = ['All', 'Bottom', 'Below', 'In line', 'Above', 'Elite']
 
 function generatedLabel(iso) {
   if (!iso) return ''
@@ -93,6 +95,7 @@ export function ProspectsPage() {
   const [filterTeamId, setFilterTeamId] = useState(null)
   const [filterTier, setFilterTier] = useState(null)
   const [filterGroup, setFilterGroup] = useState('all')
+  const [secondaryOpen, setSecondaryOpen] = useState(false)
   const allPlayers = data?.players ?? []
   const tierFor = (p) => {
     const entry = prospectTrendById(data?.trend, p.playerId)
@@ -101,12 +104,34 @@ export function ProspectsPage() {
   const players = filterByTeam(allPlayers, filterTeamId, (p) => p.teamId)
     .filter((p) => filterTier == null || tierFor(p) === filterTier)
     .filter((p) => filterGroup === 'all' || isPitcher(p.position) === (filterGroup === 'pitching'))
+  const activeFilters = [
+    filterTeamId == null ? null : teamFullName(filterTeamId),
+    filterGroup === 'all' ? null : GROUPS.find((group) => group.key === filterGroup)?.label,
+    filterTier == null ? null : PERFORMANCE_BANDS[filterTier],
+  ].filter(Boolean)
+  const hasActiveFilters = activeFilters.length > 0
+  const resetFilters = () => {
+    setFilterTeamId(null)
+    setFilterTier(null)
+    setFilterGroup('all')
+  }
+  const filterSummary = hasActiveFilters ? activeFilters.join(' · ') : 'All prospects'
 
   return (
     <div className="screen">
       <SiteHeader />
-      <header className="topbar">
-        <h1 className="topbar__title">Top 100 Prospects</h1>
+      <header className="prospects__header">
+        <div>
+          <h1 className="topbar__title">Top 100 Prospects</h1>
+          <p className="prospects__dateline">
+            MLB Pipeline ranking{data?.generatedAt ? ` · ${generatedLabel(data.generatedAt)}` : ''}
+          </p>
+        </div>
+        {allPlayers.length > 0 && (
+          <p className="prospects__resultcount" aria-live="polite" aria-atomic="true">
+            {players.length} shown
+          </p>
+        )}
       </header>
 
       <AsyncStatus
@@ -119,21 +144,65 @@ export function ProspectsPage() {
       />
 
       {allPlayers.length > 0 && (
-        <>
-          <div className="prospects__filterrow">
-            <TeamFilterStrip
-              selectedTeamId={filterTeamId}
-              onSelect={setFilterTeamId}
-              ariaLabel="Filter Top 100 Prospects by team"
-            />
-            <VsLevelSlider value={filterTier} onChange={setFilterTier} ariaLabel="Filter Top 100 Prospects by vs. Level performance tier" />
+        <section className="prospects__filterdeck" aria-labelledby="prospect-filter-title">
+          <div className="prospects__filterhead">
+            <h2 id="prospect-filter-title">Filter prospects</h2>
+            {hasActiveFilters && (
+              <button type="button" className="prospects__reset" onClick={resetFilters}>
+                Clear all
+              </button>
+            )}
           </div>
-          <GroupPill group={filterGroup} onChange={setFilterGroup} />
-        </>
+
+          <div className="prospects__filterfield prospects__filterfield--role">
+            <p className="prospects__filterlabel">Role</p>
+            <GroupPill group={filterGroup} onChange={setFilterGroup} />
+          </div>
+
+          <button
+            type="button"
+            className="prospects__secondary-toggle"
+            aria-expanded={secondaryOpen}
+            aria-controls="prospect-secondary-filters"
+            onClick={() => setSecondaryOpen((open) => !open)}
+          >
+            <span>{secondaryOpen ? 'Hide team & performance' : 'Team & performance'}</span>
+            <span className="prospects__toggle-summary">{filterSummary}</span>
+          </button>
+
+          <div
+            id="prospect-secondary-filters"
+            className={`prospects__secondary${secondaryOpen ? ' is-open' : ''}`}
+          >
+            <div className="prospects__filterfield prospects__filterfield--team">
+              <p className="prospects__filterlabel">Team</p>
+              <TeamFilterStrip
+                selectedTeamId={filterTeamId}
+                onSelect={setFilterTeamId}
+                ariaLabel="Filter Top 100 Prospects by team"
+              />
+            </div>
+            <div className="prospects__filterfield prospects__filterfield--performance">
+              <p className="prospects__filterlabel">Performance vs. current level</p>
+              <VsLevelSlider
+                value={filterTier}
+                onChange={setFilterTier}
+                ariaLabel="Filter Top 100 Prospects by performance versus current level"
+              />
+            </div>
+          </div>
+
+          <p className="prospects__active-summary" aria-live="polite">
+            <span>{hasActiveFilters ? 'Active' : 'Showing'}</span> {filterSummary}
+          </p>
+        </section>
       )}
 
       {allPlayers.length > 0 && players.length === 0 && (
-        <p className="hint hint--prose">No Top 100 prospects match that filter right now.</p>
+        <div className="prospects__empty" role="status">
+          <p>No Top 100 prospects match those filters.</p>
+          <button type="button" className="prospects__reset" onClick={resetFilters}>Clear filters</button>
+        </div>
       )}
 
       {players.length > 0 && (
@@ -145,24 +214,33 @@ export function ProspectsPage() {
               LAST, after Line: dropped in at position five it pushed Team and
               Line — including the very stat line it summarizes — off the right
               edge of a 390px phone. */}
-          <Ledger
-            leftCols={2}
-            head={['Rk', 'Player', 'Pos', 'Level', 'Team', 'Line', 'vs. Level']}
-            rows={players.map((p) => ({
-              key: p.playerId,
-              cells: [
-                p.rank,
-                <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
-                p.position || DASH,
-                p.levelLabel || DASH,
-                <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo" ariaLabel={p.team}>
-                  <TeamLogo teamId={p.teamId} name={p.team} size={20} />
-                </TeamLink>,
-                <LineCell key="line" lines={p.lines} />,
-                <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
-              ],
-            }))}
-          />
+          <div className="prospects__ledger-shell">
+            <p className="prospects__scrollcue" id="prospect-scroll-instruction">
+              <span aria-hidden="true">Swipe for stats →</span>
+              <span className="sr-only">Swipe horizontally to view prospect statistics.</span>
+            </p>
+            <Ledger
+              className="prospecttable"
+              ariaLabel="Top 100 prospect rankings"
+              ariaDescribedBy="prospect-scroll-instruction"
+              leftCols={2}
+              head={['Pipeline Rk', 'Player', 'Pos', 'Level', 'Team', '2026 Line', 'vs. Current Level']}
+              rows={players.map((p) => ({
+                key: p.playerId,
+                cells: [
+                  p.rank,
+                  <PlayerLink key="player" id={p.playerId} className="prospecttable__name">{p.name}</PlayerLink>,
+                  p.position || DASH,
+                  p.levelLabel || DASH,
+                  <TeamLink key="team" id={p.teamId} className="prospecttable__teamlogo" ariaLabel={p.team}>
+                    <TeamLogo teamId={p.teamId} name={p.team} size={20} />
+                  </TeamLink>,
+                  <LineCell key="line" lines={p.lines} />,
+                  <ProspectTrendPill key="trend" entry={prospectTrendById(data.trend, p.playerId)} />,
+                ],
+              }))}
+            />
+          </div>
           {data.generatedAt && (
             <p className="hint prospects__caption">Rankings as of {generatedLabel(data.generatedAt)}.</p>
           )}

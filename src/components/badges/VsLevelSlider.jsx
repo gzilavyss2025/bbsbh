@@ -1,14 +1,14 @@
-// A discrete, labeled filter over the SAME 1-5 rating ProspectTrendPill's dot
+// A discrete, labeled filter over the SAME five bands ProspectTrendPill's dot
 // row draws (levelTier, api/prospectTrend.js) — not a level-of-play filter
 // (see TeamFilterStrip for the club pick, and /prospects' own level slider
 // question this replaced: filtering by WHERE he's playing is a different
 // question from filtering by HOW HE'S PERFORMING there). A real draggable
 // <input type="range"> (native touch/keyboard/click handling, not a row of
 // buttons standing in for one), snapped to 6 rungs — "All" plus tiers 1-5 —
-// with every rung's label always shown beneath the track, colored the same
+// with every band's plain-language label shown beneath the track, colored the same
 // red/kraft/green the dots themselves use, so the slider reads as the same
 // scale before it's ever touched.
-const RUNGS = ['All', '1', '2', '3', '4', '5']
+const RUNGS = ['All', 'Bottom', 'Below', 'In line', 'Above', 'Elite']
 
 // tier 1-2 => 'low' (red), 3 => 'mid' (kraft brown), 4-5 => 'high' (green) —
 // same bandFor as ProspectTrendPill's own dot row.
@@ -39,7 +39,7 @@ export function VsLevelSlider({ value, onChange, ariaLabel }) {
         }}
         style={{ '--vslevelslider-thumb': thumbColor }}
         aria-label={ariaLabel}
-        aria-valuetext={index === 0 ? 'All' : `Tier ${index}`}
+        aria-valuetext={RUNGS[index]}
       />
       <div className="vslevelslider__ticks" aria-hidden="true">
         {RUNGS.map((rung, i) => (
