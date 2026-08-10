@@ -68,7 +68,6 @@ which sets no default params and no caching.
 | Host | Where | Purpose | Score-revealing? |
 |---|---|---|---|
 | `api.open-meteo.com` / `archive-api.open-meteo.com` | `weather.js:199,205` | outdoor first-pitch weather | no |
-| `site.api.espn.com` (scoreboard) | `broadcast.js:63` | TV network names (not in feed) | response has scores; only network names read |
 | `api.bsky.app` (searchPosts) | `buzz.js:67` | Bluesky game buzz | **YES — reveal-only, SealBox-gated** |
 | `dapi.mlbinfra.com` | `gameNotes.js:62` | live Game Notes PDF links | link only in-app; PDF recaps results |
 | `img.mlbstatic.com` (PDF) | `whatsBrewing.js:337` | client-side pdfjs parse | PDF recaps results |

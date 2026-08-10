@@ -95,7 +95,9 @@ export function SyncReceipt({ status }) {
           // ("Reveal progress" and "Pick up your pencil"), and mapping the
           // ledger directly rendered them as two rows showing byte-identical
           // state — a receipt is one line per thing that syncs, and those two
-          // are one thing. PRD §5.2 specifies four rows.
+          // are one thing. PRD §5.2 tabulated four rows; the multi-book shelf
+          // (ADR-0041) made it five. The count is SYNC_CHANNELS' length, never
+          // a number written down here.
           return (
             <li key={channel} className="syncreceipt__row" data-tone={state.tone}>
               <span className="syncreceipt__mark" aria-hidden="true" />

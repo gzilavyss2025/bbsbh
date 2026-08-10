@@ -80,7 +80,7 @@ function RecipientRow({ r, effectiveTeamId, filtering }) {
   return (
     <li className={classes} style={favStyle}>
       {r.teamId ? (
-        <TeamLink id={r.teamId} className="allstarrosters__teamlink">
+        <TeamLink id={r.teamId} className="allstarrosters__teamlink" ariaLabel={r.teamName}>
           <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
         </TeamLink>
       ) : (

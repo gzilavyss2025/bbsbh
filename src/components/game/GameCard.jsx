@@ -33,10 +33,11 @@ export function GameCard({
   // cron writes it into jerseysData below. null for every other caller
   // (All-Star Rosters, a past day already covered by that cron).
   liveJerseys = null,
-  // National TV network name ("FOX", "ESPN", …) for this gamePk, from a
-  // same-day-or-any-day batched fetchNationalBroadcasts call (see
-  // GameSelect.jsx) — undefined/'' for the vast majority of games, which
-  // carry no national assignment.
+  // National TV network name ("FOX", "FS1", "ESPN", …) for this gamePk. It
+  // rides the slate's own schedule request now (normalizeGame's
+  // `nationalBroadcast`, see api/broadcast.js) rather than a second batched
+  // call — undefined/'' for the vast majority of games, which carry no
+  // national assignment.
   national = '',
   // True for the slate's first cards, whose marks are the page's largest
   // above-the-fold images — threaded to TeamLogo to skip lazy loading there.

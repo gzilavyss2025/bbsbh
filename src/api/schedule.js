@@ -4,6 +4,7 @@
 
 import { SEARCHABLE_SPORT_IDS, SPORT_LABEL, teamAbbr } from '../lib/teams.js'
 import { matchupSlug } from '../lib/route.js'
+import { BROADCAST_FIELDS, BROADCAST_HYDRATE, nationalName } from './broadcast.js'
 import { getJson } from './statsapi.js'
 import { fetchStaticTeams } from './teams-static.js'
 
@@ -70,6 +71,15 @@ export function normalizeGame(game, sportId) {
       tz: game.venue?.timeZone?.tz ?? '',
       tzId: game.venue?.timeZone?.id ?? '',
     },
+    // The national TV network carrying this game ('' for the great majority,
+    // which are regional-only) — the slate card's national-TV icon, and the
+    // input to reorderNationalBroadcasts. Spoiler-free, and it rides the
+    // slate's OWN schedule request (hydrate=broadcasts(all)) rather than a
+    // second fetch: a broadcast assignment belongs to the game, so arriving
+    // with it means the slate's national-first ordering is settled on the
+    // first render instead of re-shuffling when a separate call lands. See
+    // api/broadcast.js for the source and why it is no longer ESPN's.
+    nationalBroadcast: nationalName(game.broadcasts),
     // Scorebook-readiness flags (spoiler-free — none of these reveal a score),
     // hydrated onto the slate so a card can show at a glance whether the basics
     // you'd pencil in pre-game are posted yet. All degrade to `false` when the
@@ -87,13 +97,14 @@ export function normalizeGame(game, sportId) {
 // pulls the full team object into each side so we get abbreviation + teamName
 // (the bare schedule row only carries id/name) — needed for the level cards and
 // the deep-link matchup slug. `lineups,officials,probablePitcher` add the
-// scorebook-readiness signals the cards surface (see normalizeGame) in the same
-// request — all spoiler-free. Callers that only need to RESOLVE a game (see
-// resolveGame) pass a lighter hydrate to skip the readiness payload.
+// scorebook-readiness signals the cards surface (see normalizeGame), and
+// `broadcasts(all)` the national-TV assignment, in the same request — all
+// spoiler-free. Callers that only need to RESOLVE a game (see resolveGame)
+// pass a lighter hydrate to skip the readiness payload.
 export async function fetchSchedule(
   dateStr,
   sportId = 1,
-  hydrate = 'team,venue(timezone),lineups,officials,probablePitcher',
+  hydrate = `team,venue(timezone),lineups,officials,probablePitcher,${BROADCAST_HYDRATE}`,
 ) {
   const data = await getJson(
     `/api/v1/schedule?sportId=${sportId}&date=${dateStr}&hydrate=${hydrate}&fields=${SCHEDULE_FIELDS}`,
@@ -317,7 +328,7 @@ const GAME_CARDS_FIELDS =
 // (verified 2026-07-31 against a live MLB slate, value-for-value). Safe for
 // resolveGame's lighter `hydrate=team` calls too: `fields=` is an allowlist,
 // and names an un-hydrated response doesn't carry are simply absent.
-const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,officials,official,probablePitcher`
+const SCHEDULE_FIELDS = `${GAME_CARDS_FIELDS},lineups,awayPlayers,homePlayers,officials,official,probablePitcher,${BROADCAST_FIELDS}`
 const HEAD_TO_HEAD_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,status,abstractGameState,teams,away,home,team,id'
 const TEAM_SCHEDULE_FIELDS =

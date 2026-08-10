@@ -147,7 +147,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
         </div>
         <div className="playercard__team">
           {r.teamId ? (
-            <TeamLink id={r.teamId} className="awardhistory__teamlink">
+            <TeamLink id={r.teamId} className="awardhistory__teamlink" ariaLabel={r.teamName}>
               <TeamLogo teamId={r.teamId} name={r.teamName} size={18} />
             </TeamLink>
           ) : (

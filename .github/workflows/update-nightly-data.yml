@@ -156,6 +156,32 @@ jobs:
         id: team-transactions
         continue-on-error: true
         run: node scripts/gen-team-transactions.mjs
+      # MUST stay after "Team Scores": gen-postseason-odds.mjs reads
+      # public/data/team-score.json for each club's strength, so running it
+      # first would simulate the rest of the season off yesterday's teams.
+      #
+      # This step is new, and its absence was the bug. The generator was
+      # written for exactly this cadence — its header says "Normal nightly use
+      # appends yesterday's snapshot" — but it was never added here, so the
+      # Team hub's postseason-odds card was serving the last snapshot anyone
+      # happened to produce by hand: 2026-07-17, twenty-three days stale by the
+      # time it was noticed, in the middle of a pennant race, with nothing on
+      # screen to say so. A date-keyed file degrades quietly, which is why this
+      # kind of miss survives.
+      - name: Postseason odds
+        id: postseason-odds
+        continue-on-error: true
+        run: node scripts/gen-postseason-odds.mjs
+      # Also written for this cron and never wired to it: the generator's own
+      # header points at this file ("Meant for a nightly cron (NOT yet wired)")
+      # and even drafts the step. --current-only re-sweeps THIS season's 30
+      # coaching staffs (~30 calls) and merges, so the backfilled history the
+      # full run established survives. Without it a mid-season managerial
+      # change never reached /manager/{id}.
+      - name: Manager history (current season)
+        id: manager-history
+        continue-on-error: true
+        run: node scripts/gen-manager-history.mjs --current-only
       - name: Fever Baseball radar
         id: fever-radar
         continue-on-error: true
@@ -199,7 +225,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes public/data/war.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/highlights public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/game-notes public/data/war.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/highlights public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main
@@ -234,6 +260,8 @@ jobs:
           steps.season-score.outcome == 'failure' ||
           steps.team-score.outcome == 'failure' ||
           steps.team-transactions.outcome == 'failure' ||
+          steps.postseason-odds.outcome == 'failure' ||
+          steps.manager-history.outcome == 'failure' ||
           steps.fever-radar.outcome == 'failure' ||
           steps.comeback-wins.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||

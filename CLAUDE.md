@@ -71,7 +71,7 @@ holds that port, use the next numbered script: `npm run dev:2` through `dev:5`
 `vite.config.js` has the rationale and the tally-nfl band split.
 
 `scripts/gen-*.mjs` are the data generators (WAR, rehab, umpires, callouts, and more);
-`scripts/CLAUDE.md` documents them. The `npm test` unit suite (`test/*.test.js`,
+`docs/scripts/generators.md` catalogs them. The `npm test` unit suite (`test/*.test.js`,
 CI-gated) covers the pure data layer: reveal-only derivations, spoiler gates,
 routing, and run-expectancy/tiering math, including the spoiler invariant pinned on a
 captured real-game feed (`docs/testing.md`). This suite does not replace the
@@ -196,5 +196,5 @@ Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
 - **Callouts / Team Leaders** — catalog (families, triggers, surfaces, gates,
   worthiness) is `docs/callouts.md`; the tense rule is ADR-0014. They come from the
   nightly `gen-callouts.mjs` precompute — extend it, do not build a parallel path.
-  See `scripts/CLAUDE.md` + `docs/api/`.
+  See `docs/scripts/generators.md` + `docs/api/`.
 - **Writing style** — ASD-STE100 governs chat replies, authored docs, and commit/PR text here, always on. See `docs/agents/writing-style.md`.

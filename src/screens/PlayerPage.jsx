@@ -211,7 +211,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             </p>
           </div>
           {club && (
-            <TeamLink id={club.id} className="player__herologo">
+            <TeamLink id={club.id} className="player__herologo" ariaLabel={club.name}>
               <TeamLogo teamId={club.id} name={club.name} size={56} />
               {club.parentOrgId && (
                 <TeamLogo

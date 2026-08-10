@@ -49,3 +49,47 @@ export function milestonesForPlayer(watch, playerId) {
     .filter((p) => p.playerId === id)
     .sort((a, b) => a.remaining - b.remaining)
 }
+
+// Rows arrive one per (player, milestone) pair, already sorted rarest-club-
+// first then nearest-first (see gen-milestones.mjs). A player chasing more
+// than one milestone at once (e.g. both 3,000 hits and 500 doubles) would
+// otherwise get one row per chase, fighting for grid space with everyone
+// else — folded here into ONE card per player instead, its milestones nested
+// as a stack inside, in the order they already arrived (so a group's own
+// position — and the order of its milestones — stays rarity/nearest-ranked
+// with no re-sort).
+//
+// A repeated (stat, threshold) inside one player's group is dropped, and that
+// is not defensive tidiness: MLB lists a just-traded player on BOTH clubs'
+// rosters for a while, so the generator saw him twice and wrote the same chase
+// twice under two different clubs. gen-milestones.mjs now settles that at the
+// source (dedupeRosterEntries), but the club a player is filed under is
+// upstream data this app doesn't control, so the render keeps its own guard —
+// the alternative was two identical lines in one card under a duplicate React
+// key, which is unsupported reconciliation, not just an untidy list.
+export function groupMilestoneRows(rows) {
+  const groups = []
+  const byId = new Map()
+  for (const row of rows ?? []) {
+    let group = byId.get(row.playerId)
+    if (!group) {
+      group = {
+        playerId: row.playerId,
+        playerName: row.playerName,
+        teamId: row.teamId,
+        teamName: row.teamName,
+        position: row.position,
+        milestones: [],
+        seen: new Set(),
+      }
+      byId.set(row.playerId, group)
+      groups.push(group)
+    }
+    const key = `${row.stat}-${row.threshold}`
+    if (group.seen.has(key)) continue
+    group.seen.add(key)
+    group.milestones.push(row)
+  }
+  for (const group of groups) delete group.seen
+  return groups
+}

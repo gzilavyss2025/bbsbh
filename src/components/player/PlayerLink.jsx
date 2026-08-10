@@ -12,7 +12,16 @@ import { playerPath } from '../../lib/route.js'
 // renders the children as plain text in a same-class span, so the row keeps its
 // layout and there's never a dead link. The dotted underline appears only on
 // hover/focus (see .plink in index.css) — the scorebook never sprouts web-links.
-export function PlayerLink({ id, className = '', children }) {
+//
+// `ariaLabel` is REQUIRED of a caller whose children are art alone — a
+// Headshot and nothing else. `Headshot` carries `aria-hidden` and an empty
+// `alt` on purpose (it is decoration beside a name, and announcing the same
+// player twice is worse than announcing him once), so a portrait-only link
+// with no label announces as a bare "button" with no name at all. Same prop,
+// same reason, as TeamLink's — which had it from the start; this one didn't,
+// so its logo-only callers had no way to name themselves even if they tried.
+// e2e/invariants/accessible-names.spec.js is the guard.
+export function PlayerLink({ id, className = '', ariaLabel, children }) {
   const navigate = useNav()
   const { asOf, sportId } = useLinkScope()
   if (!id) {
@@ -22,6 +31,7 @@ export function PlayerLink({ id, className = '', children }) {
     <button
       type="button"
       className={`plink ${className}`}
+      aria-label={ariaLabel}
       onClick={() => navigate(playerPath(id, { d: asOf, s: sportId }))}
     >
       {children}

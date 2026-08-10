@@ -66,7 +66,7 @@ Several modules read a static, same-origin `public/data/*.json` file that a
 cron, `.github/workflows/update-nightly-data.yml`; a couple are hand-run). The
 driver is either an **unofficial/bulk source** (WAR) or **cost** (everything that
 would need dozens of statsapi calls per page load). `war.js` is the template.
-`scripts/CLAUDE.md` documents each GENERATOR; `docs/api/static-data.md` documents
+`docs/scripts/generators.md` documents each GENERATOR; `docs/api/static-data.md` documents
 each READER.
 
 Three rules that keep biting. A file that grows without bound (the rookie
@@ -112,7 +112,7 @@ existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per
   copy (`gen-minors-leaders.mjs` imports `combineToPool`/`computeLeaders`;
   `gen-milestones.mjs` imports the projection math from `person.js`). The
   deliberate exceptions are self-contained scripts that mirror a small helper —
-  see `scripts/CLAUDE.md`.
+  see `docs/scripts/generators.md`.
 
 ## Where the per-module notes live
 
