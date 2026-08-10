@@ -170,8 +170,12 @@ const BUDGETS = {
   // lettered-sibling shape as `21a-box-score-stars.css` beside it, and for the
   // same reason. Its position is load-bearing: it overrides `.bs__grid`'s cell
   // rules in `21-box-score.css`, so it has to cascade after them.
+  // +1 for 48a-logbook-stats.css — split out of 48-logbook.css (ADR-0038's
+  // file-size cap) once the Logbook retrospective's ported First Scorebook
+  // sections pushed that file past 600 lines; same lettered-sibling shape as
+  // 21a-box-score-stars.css.
   //
-  // 67 -> 68 for `26b-recent-form.css`: the hitter Recent form card, split out
+  // 68 -> 69 for `26b-recent-form.css`: the hitter Recent form card, split out
   // of `26-player-page.css` (at its check-file-size ceiling) when the card was
   // redesigned from a two-up fact grid into a four-row deviation ledger and
   // grew a diverging-bar scale of its own. Same lettered-sibling shape as
@@ -180,11 +184,11 @@ const BUDGETS = {
   // load-bearing: it extends `.ledger` rules that live in `26-player-page.css`,
   // so it has to cascade after them.
   //
-  // 68 -> 69 for `31a-prospect-trend.css`: ProspectTrendPill's rules, split
+  // 69 -> 70 for `31a-prospect-trend.css`: ProspectTrendPill's rules, split
   // out of `31-wild-card.css` (already at its check-file-size budget) rather
   // than grown there — same lettered-sibling shape as 21/21a, 26/26a, 17/17a,
   // 28/28a above, cascading right after the file it extends.
-  'src/styles': 69,
+  'src/styles': 70,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -195,10 +199,14 @@ const BUDGETS = {
   // reader in here now shares. It REMOVES the duplicated cache-after-await
   // block from ~18 of its neighbours (and the race in it), so this entry buys
   // one leaf file to delete a pattern copied eighteen times.
+  // +2 for logbookGameDetail.js and logbookRetrospective.js — the Logbook
+  // retrospective's ported First Scorebook sections, split from logbook.js/
+  // logbookStats.js the same "narrow reimplementation, own file" pattern
+  // those two already use rather than growing either past the file-size cap.
   // +1 for prospectTrend.js — the reader for gen-prospect-trend.mjs's
   // level-relative OPS/ERA percentile, sibling to prospects.js/feverRadar.js,
   // not folded into either (different data, different generator).
-  'src/api': 87,
+  'src/api': 89,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

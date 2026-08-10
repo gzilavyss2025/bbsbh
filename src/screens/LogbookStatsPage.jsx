@@ -1,7 +1,10 @@
-import '../styles/48-logbook.css'
-import { useMemo } from 'react'
+import '../styles/48a-logbook-stats.css'
+import { useMemo, useState } from 'react'
 import { fetchStampGames } from '../api/logbook.js'
 import { computeLogbookStats } from '../api/logbookStats.js'
+import { fetchStampBoxscores, fetchStampMoments } from '../api/logbookGameDetail.js'
+import { computeLogbookRetrospective } from '../api/logbookRetrospective.js'
+import { fetchHighlights } from '../api/highlights.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useBooks } from '../hooks/useBooks.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -10,9 +13,12 @@ import { useNav } from '../lib/nav.js'
 import { DEFAULT_BOOK_ID } from '../lib/books.js'
 import { pathForBook } from '../lib/logbookNav.js'
 import { logbookPath } from '../lib/route.js'
+import { LEVELS } from '../lib/teams.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { dateLabel, SectionHead } from './logbook/statsShared.jsx'
+import { RetrospectiveSections } from './logbook/RetrospectiveSections.jsx'
 
 // The Logbook retrospective — what your collection adds up to (ADR-0035, the
 // game-stamps PRD §6, Tier 1).
@@ -50,38 +56,20 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 // FirstScorebookPage.jsx, which derives its equivalent numbers inline in
 // `useMemo`s where nothing can reach them. This file is a rendering of a
 // computed object and should stay that way.
-
-const FULL_DATE = new Intl.DateTimeFormat('en-US', {
-  month: 'long',
-  day: 'numeric',
-  year: 'numeric',
-})
-
-function dateLabel(date) {
-  const [year, month, day] = String(date ?? '').split('-').map(Number)
-  return year ? FULL_DATE.format(new Date(year, month - 1, day)) : ''
-}
+//
+// ===========================================================================
+// The ported First Scorebook sections (performances/moments/leaders/
+// rotation/bullpen) are a SECOND computed object, from a SECOND pure module
+// ===========================================================================
+// src/api/logbookRetrospective.js, fed by src/api/logbookGameDetail.js's two
+// fetchers (per-game boxscores and win-probability "moments"). Same
+// containment argument as everything else on this page: only ever the games
+// in `levelStamps` below. The level filter narrows those BEFORE either
+// fetcher runs, so switching to a narrower level also shrinks the fetch, not
+// just what's displayed.
 
 function record(row) {
   return row.ties ? `${row.wins}–${row.losses}–${row.ties}` : `${row.wins}–${row.losses}`
-}
-
-// A one-game "run" is not one — the same rule the module applies to the two
-// headline streaks, so the table under them can't contradict them. The column
-// heading carries the word; the cell is a bare number so it sets in mono
-// tabular figures beside the record, like every other count on the page.
-function streakLabel(streak) {
-  return streak && streak.length >= 2 ? String(streak.length) : '—'
-}
-
-function SectionHead({ eyebrow, title, note }) {
-  return (
-    <header className="logbookstats__sectionhead">
-      <span>{eyebrow}</span>
-      <h2>{title}</h2>
-      {note && <p className="logbookstats__prose">{note}</p>}
-    </header>
-  )
 }
 
 function Tally({ items }) {
@@ -92,6 +80,39 @@ function Tally({ items }) {
           <strong>{value}</strong>
           <span>{label}</span>
         </div>
+      ))}
+    </div>
+  )
+}
+
+const LEVEL_ALL = 'all'
+
+// All / MLB / AAA / AA / A+ / A, applied once at the top of the page and
+// affecting every section below it — not the shared LevelNav (slate, logo
+// sheet), which has no "All" state of its own and shouldn't grow one just for
+// this page. Reuses the same LEVELS list (src/lib/teams.js) so the five real
+// levels can't drift from every other level switch in the app.
+function LevelFilterBar({ value, onChange }) {
+  return (
+    <div className="logbookstats__levels" aria-label="Filter by level">
+      <button
+        type="button"
+        aria-pressed={value === LEVEL_ALL}
+        className={value === LEVEL_ALL ? 'is-active' : ''}
+        onClick={() => onChange(LEVEL_ALL)}
+      >
+        All
+      </button>
+      {LEVELS.map((lvl) => (
+        <button
+          key={lvl.sportId}
+          type="button"
+          aria-pressed={value === lvl.sportId}
+          className={value === lvl.sportId ? 'is-active' : ''}
+          onClick={() => onChange(lvl.sportId)}
+        >
+          {lvl.label}
+        </button>
       ))}
     </div>
   )
@@ -127,12 +148,50 @@ export function LogbookStatsPage({ bookId = null }) {
 
   const facts = useAsync((signal) => fetchStampGames(gamePks, { signal }), [pkKey])
 
+  // The page-wide level filter. Narrows `stamps` before anything downstream
+  // runs — both the existing Tier 1 stats and the ported sections' own
+  // fetches. Before `facts` has resolved there's nothing to filter BY yet
+  // (sportId lives on the fact, not the stamp), so every level shows the
+  // unfiltered set until then rather than flashing empty.
+  const [level, setLevel] = useState(LEVEL_ALL)
+  const levelStamps = useMemo(() => {
+    if (!facts.data || level === LEVEL_ALL) return stamps
+    return stamps.filter((s) => facts.data[s.gamePk]?.sportId === level)
+  }, [stamps, facts.data, level])
+
   // Reveal-only by classification, called with the user's own stamps and
   // nothing else — see the header, and ADR-0001.
   const stats = useMemo(
-    () => computeLogbookStats(stamps, facts.data ?? {}),
-    [stamps, facts.data],
+    () => computeLogbookStats(levelStamps, facts.data ?? {}),
+    [levelStamps, facts.data],
   )
+
+  // The ported First Scorebook sections' own two fetches, gated to the
+  // level-filtered gamePks — see the header. Keyed the same way `facts` is,
+  // so a note edit (which rewrites stamp objects) doesn't refetch a whole
+  // book's worth of box scores.
+  const retroGamePks = useMemo(() => levelStamps.map((s) => s.gamePk), [levelStamps])
+  const retroPkKey = retroGamePks.join(',')
+  const boxscores = useAsync((signal) => fetchStampBoxscores(retroGamePks, { signal }), [retroPkKey])
+  const moments = useAsync((signal) => fetchStampMoments(retroGamePks, { signal }), [retroPkKey])
+
+  const retro = useMemo(
+    () => computeLogbookRetrospective(levelStamps, facts.data ?? {}, boxscores.data ?? {}, moments.data ?? {}),
+    [levelStamps, facts.data, boxscores.data, moments.data],
+  )
+  const retroLoading = boxscores.loading || moments.loading
+
+  // A highlight clip for a rendered moment, resolved only for the handful
+  // that actually make the cut (see api/highlights.js — a `content` fetch per
+  // game, so this stays cheap regardless of how many games are in the book).
+  const topMoments = retro.moments.slice(0, 7)
+  const momentGamePkKey = [...new Set(topMoments.map((m) => m.gamePk))].join(',')
+  const momentClips = useAsync(async () => {
+    const pks = momentGamePkKey ? momentGamePkKey.split(',').map(Number) : []
+    const entries = await Promise.all(pks.map(async (gamePk) => [gamePk, await fetchHighlights(gamePk)]))
+    return Object.fromEntries(entries)
+  }, [momentGamePkKey])
+  const [openClip, setOpenClip] = useState(null)
 
   // Back to the book this page is scoped to. `pathForBook` owns the one rule
   // for which of the default book's two addresses is the live one — reading it
@@ -177,6 +236,8 @@ export function LogbookStatsPage({ bookId = null }) {
         </button>
         <h1 className="topbar__title">{title}</h1>
       </header>
+
+      <LevelFilterBar value={level} onChange={setLevel} />
 
       {stats.dateRange && (
         <p className="logbookstats__dateline">
@@ -241,6 +302,16 @@ export function LogbookStatsPage({ bookId = null }) {
         </div>
       </section>
 
+      <RetrospectiveSections
+        retro={retro}
+        facts={facts.data}
+        loading={retroLoading}
+        momentClips={momentClips.data}
+        openClip={openClip}
+        onOpenClip={setOpenClip}
+        onCloseClip={() => setOpenClip(null)}
+      />
+
       {(stats.longestWinStreak || stats.longestLossStreak) && (
         <section className="logbookstats__section">
           <SectionHead
@@ -295,22 +366,15 @@ export function LogbookStatsPage({ bookId = null }) {
               : undefined
           }
         />
-        <div className="logbookstats__table logbookstats__table--clubs">
-          <div className="logbookstats__tablehead">
-            <span>Club</span>
-            <span>G</span>
-            <span>Record</span>
-            <span>Best run</span>
-          </div>
+        <div className="logbookstats__records">
           {stats.clubs.map((club) => (
-            <div className="logbookstats__row" key={club.id}>
+            <div key={club.id}>
+              <TeamLogo teamId={club.id} name={club.name} size={26} />
               <span>
-                <TeamLogo teamId={club.id} name={club.name} size={22} />
                 <b>{club.abbreviation || club.name}</b>
+                <small>{club.games} {club.games === 1 ? 'game' : 'games'}</small>
               </span>
-              <span>{club.games}</span>
-              <span>{record(club)}</span>
-              <span>{streakLabel(club.longestWin)}</span>
+              <strong>{record(club)}</strong>
             </div>
           ))}
         </div>
@@ -353,34 +417,6 @@ export function LogbookStatsPage({ bookId = null }) {
           </div>
         </div>
       </section>
-
-      {stats.pitchers.length > 0 && (
-        <section className="logbookstats__section">
-          <SectionHead
-            eyebrow="On the mound"
-            title="Pitchers of record you saw most"
-            note="Wins and losses charged in your games alone, plus the saves that closed them."
-          />
-          <div className="logbookstats__table">
-            <div className="logbookstats__tablehead">
-              <span>Pitcher</span>
-              <span>W</span>
-              <span>L</span>
-              <span>SV</span>
-            </div>
-            {stats.pitchers.slice(0, 10).map((pitcher) => (
-              <div className="logbookstats__row" key={pitcher.name}>
-                <span>
-                  <b>{pitcher.name}</b>
-                </span>
-                <span>{pitcher.wins}</span>
-                <span>{pitcher.losses}</span>
-                <span>{pitcher.saves}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       {stats.seasons.length > 1 && (
         <section className="logbookstats__section">

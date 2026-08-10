@@ -103,7 +103,10 @@
      47-trade-deadline        components/transactions/TradeCard.jsx,
                               screens/TradeDeadlineSeasonPage.jsx
      48-logbook               screens/LogbookPage.jsx,
-                              screens/LogbookStatsPage.jsx
+                              screens/LogbookCollection.jsx,
+                              components/logbook/GameStamp.jsx,
+                              screens/logbook/NewBookPage.jsx
+     48a-logbook-stats        screens/LogbookStatsPage.jsx
      49-passport-book         screens/LogbookPage.jsx,
                               components/passport/PassportBook.jsx,
                               components/passport/BookCoverPicker.jsx
