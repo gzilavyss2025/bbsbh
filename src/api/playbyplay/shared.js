@@ -61,6 +61,48 @@ function trimLeadingName(description, fullName) {
   return description
 }
 
+// Who a plate appearance is CHARGED to, which is not always who finished it.
+// `matchup.batter` names the man in the box when the play ended, but a batter
+// replaced mid-count can still own the result: a substitute who completes a
+// strikeout the original batter already had two strikes on is scored against
+// the ORIGINAL batter (Rule 9.15(b); every other ending is charged to the
+// substitute). MLB reports that split by leaving `matchup.batter` on the
+// substitute while `result.description` and the boxscore line both name the
+// man who left.
+//
+// So when this play announces a pinch-hitter and its own description leads
+// with the man he replaced, the description is the feed saying whose plate
+// appearance it is. Verified against gamePk 816170's top 1 (Jett Williams
+// takes an injury delay at 2-2, Eduardo Garcia finishes the at-bat, and both
+// "Jett Williams strikes out on a foul tip." and Williams' own boxscore line,
+// 0-1 | K, charge it to Williams), plus gamePk 816859's top 5 and gamePk
+// 816035's bottom 3 — the only three of eleven mid-at-bat batter substitutions
+// in an 854-game sweep whose description named the replaced man, and all three
+// strikeouts, exactly as the rule predicts. The other eight ended some other
+// way, are charged to the substitute, and are unaffected: this returns
+// `fallbackId` (the caller's `matchup.batter` id) unless it finds the shape
+// above, so an ordinary plate appearance never takes this path.
+//
+// The card is what moves; the bookkeeping does not. `runners[]` on such a play
+// still keys on the man who FINISHED it, so callers keep looking his leg up by
+// `matchup.batter` — safe because the rule fires on strikeouts only, where the
+// batter is out and has no trip to track.
+function creditedBatterId(feed, play, fallbackId) {
+  const desc = play?.result?.description ?? ''
+  if (!desc) return fallbackId
+  for (const e of play?.playEvents ?? []) {
+    if (e?.details?.eventType !== 'offensive_substitution') continue
+    // A pinch RUNNER replaces a man already aboard, never the man at the
+    // plate, so he can never be the one this plate appearance is charged to.
+    if (e?.position?.abbreviation === 'PR') continue
+    const replacedId = e?.replacedPlayer?.id
+    if (replacedId == null || replacedId === fallbackId) continue
+    const name = (feed?.gameData?.players?.[`ID${replacedId}`]?.fullName ?? '').trim()
+    if (name && desc.startsWith(name)) return replacedId
+  }
+  return fallbackId
+}
+
 // Every player in the game, name → id, longest name first so a longer name
 // wins over a shorter one it contains. Used to find player references inside
 // the templated prose descriptions / substitution notes.
@@ -99,4 +141,4 @@ function linkifyNames(text, index) {
   return segments
 }
 
-export { BASE_NUM, resolveBatter, trimLeadingName, buildNameIndex, linkifyNames }
+export { BASE_NUM, resolveBatter, creditedBatterId, trimLeadingName, buildNameIndex, linkifyNames }

@@ -257,6 +257,39 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   codes (`ADVANCE_CODES`) have a couple of rare, deliberately-unresolved
   fallback gaps — see `docs/unresolved-scoring-conventions.md`.
 
+  Three things about an at-bat card that the raw feed does NOT hand you
+  directly, each of which was getting the card wrong:
+
+  **Whose plate appearance it is** is `creditedBatterId` (`playbyplay/shared.js`),
+  not `matchup.batter`. A batter replaced mid-count can still own the result:
+  Rule 9.15(b) charges the strikeout and the time at bat to the man who LEFT
+  when a substitute finishes a strikeout he already had two strikes on (every
+  other ending goes to the substitute). MLB reports that split by leaving
+  `matchup.batter` on the substitute while `result.description` and the boxscore
+  line name the man who left, so the description's leading name is the feed
+  telling you who owns the card. Only the card identity follows it —
+  `runners[]`, `progress` and `legs` all keep speaking `matchup.batter`'s id,
+  which is safe because the rule fires on strikeouts only, where the credited
+  batter is out and has no trip to track. Three of eleven mid-at-bat batter
+  substitutions in an 854-game sweep took this path, all strikeouts
+  (`test/mid-at-bat-batter-change.test.js`).
+
+  **The order of the notes leading a card** is the order of the play's own
+  `playEvents`. Stoppage notes are pushed as the scan walks them, so a
+  baserunning event has to be pushed there too, not collected and flushed
+  afterwards — flushing sorted every steal, wild pitch and balk AFTER every
+  mound visit, ejection and substitution in the same play regardless of when
+  each happened (49 plays in the sweep, reading as cause and effect reversed).
+
+  **A `game_advisory` playEvent is two different things** — see
+  `isDelayAdvisory` (`playbyplay/eventTypes.js`). Most are the feed's own
+  lifecycle bookkeeping ("Status Change - Pre-Game/Warmup/In Progress") and
+  belong nowhere; the rest are the in-game stoppages ("Injury Delay.",
+  "On-field Delay.", the weather "Status Change - Delayed…" lines), which are
+  the account of why a half stopped and were being dropped with them. The
+  description is the only thing separating the two, which is why the predicate
+  reads it (`test/half-feed-note-order.test.js`).
+
 - `logbook.js` — the Logbook's game facts for a set of STAMPED gamePks
   (`fetchStampGames`, `stampGameFacts`), ADR-0035. The one fetcher here that
   deliberately asks statsapi FOR the score: every other schedule fetcher prunes

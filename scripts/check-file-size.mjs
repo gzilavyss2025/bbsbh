@@ -127,9 +127,9 @@ const BUDGETS = {
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
-  'src/api/playbyplay/halfInningFeed.js': 800, // 724
+  'src/api/playbyplay/halfInningFeed.js': 800, // 793
   'src/screens/PlayerPage.jsx': 800, // 772
-  'src/components/playbyplay/PlayByPlay.jsx': 700, // 687
+  'src/components/playbyplay/PlayByPlay.jsx': 700, // 681
   'src/api/loadPlayer.js': 700, // 682
   'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629

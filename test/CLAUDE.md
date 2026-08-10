@@ -39,6 +39,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | game-photos.test.js | 20 | src/api/gamePhotos.js | /photos page: photographer/broadcast/graphic classification + subject attribution (unsealed, non-spoiler) |
 | gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/loadScorecard.js | Full relay-chain double-play display |
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
+| half-feed-note-order.test.js | 6 | src/api/playbyplay.js (halfInningFeed, eventTypes) | Same-play notes render in the feed's own playEvents order, not stoppages-then-baserunning; delay advisories reach the feed while the lifecycle "Status Change" lines stay out |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
 | identity-lab-stores.test.js | 24 | tuningStore.js, teams.js, brandColors.js, saveStores.js, mlbColorRoles.js, dev-data-stores.mjs | /identity-lab data stores |
 | interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/loadScorecard.js | Interrupted at-bat handling |
@@ -57,6 +58,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
 | mound-visit-charging.test.js | 7 | src/api/playbyplay.js | Mound-visit pip row |
+| mid-at-bat-batter-change.test.js | 5 | src/api/playbyplay.js (halfInningFeed, shared) | A batter replaced mid-count still owns the strikeout (Rule 9.15(b)) — the card, its name/headshot and its trimmed description follow the CREDITED batter, not `matchup.batter` |
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
 | node-handler.test.js | 14 | api/_lib/nodeHandler.js | Vercel Node runtime request adapter |
 | page-turn-state.test.js | 13 | src/components/page-turn/pageTurnState.js | Forward page-turn transition (ADR-0024) |
