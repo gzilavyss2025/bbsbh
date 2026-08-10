@@ -48,6 +48,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { openDb, dumpGroup } from './lib/db.js'
 import {
   FOUL_CODES,
+  FOUL_ENDS_AB_CODES,
   WHIFF_CODES,
   NON_PA_EVENT_TYPES,
   pitchCallCode,
@@ -275,10 +276,11 @@ export function aggregateGameFouls(feed) {
       const code = pitchCallCode(e)
       const isFoul = !!code && FOUL_CODES.has(code)
       const isWhiff = !!code && WHIFF_CODES.has(code)
-      // A two-strike foul TIP ('T') is caught for strike three — it ENDS the
-      // at-bat, the opposite of the AB-extending spoil twoStrikeFouls
-      // measures — so tips count as plain fouls only (mirrors derive.js).
-      const twoStrike = isFoul && preStrikes === 2 && code !== 'T'
+      // A two-strike foul TIP is caught for strike three and a two-strike foul
+      // BUNT retires the batter by rule — both END the at-bat, the opposite of
+      // the AB-extending spoil twoStrikeFouls measures, so both count as plain
+      // fouls only (FOUL_ENDS_AB_CODES; mirrors derive.js).
+      const twoStrike = isFoul && preStrikes === 2 && !FOUL_ENDS_AB_CODES.has(code)
 
       if (b) b.pitchesSeen += 1
       if (p) p.pitches += 1

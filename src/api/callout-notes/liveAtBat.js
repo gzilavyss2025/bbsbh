@@ -4,26 +4,34 @@
 // through the play it's building for, never the game's outcome. See
 // ../callout-notes.js's header for the full two-tenses rule (ADR-0014).
 
-import { FOUL_CODES } from '../playbyplay.js'
+import { FOUL_CODES, FOUL_ENDS_AB_CODES, pitchDotCategory } from '../playbyplay.js'
 import { dayWordFor } from '../select.js'
 import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skew, SCORE_BASE, parseRecord } from './shared.js'
 import { buildVsTeamNote } from './vsTeamNote.js'
 
 // Fouls in one at-bat, from its ordered pitch call codes alone. The strike
-// count is re-simulated from the codes (called/whiff/foul all add a strike,
-// a foul never pushes past two), so a two-strike foul — the AB-extending
-// spoil — needs no play-event count fields. A two-strike foul TIP ('T') is
-// caught for strike three and excluded, same rule as derive.js/gen-fouls.mjs.
+// count is re-simulated from the codes (called/whiff/foul all add a strike, a
+// foul never pushes past two), so a two-strike foul — the AB-extending spoil —
+// needs no play-event count fields. The fouls that end the at-bat instead of
+// extending it are excluded, same rule as derive.js/gen-fouls.mjs.
+//
+// Every kind of strike has to add one here, which is why this reads
+// pitchDotCategory rather than naming codes: listing only C/S/W left a missed
+// bunt, an automatic strike and a swinging strike on a pitchout adding nothing,
+// so a foul that followed one of them was scored a strike short of the count it
+// was really taken at.
 export function foulCountsFromCodes(codes) {
   let strikes = 0
   let fouls = 0
   let twoStrikeFouls = 0
   for (const code of codes ?? []) {
-    if (code && FOUL_CODES.has(code)) {
+    if (!code) continue
+    const cat = pitchDotCategory(code)
+    if (FOUL_CODES.has(code)) {
       fouls += 1
-      if (strikes === 2 && code !== 'T') twoStrikeFouls += 1
+      if (strikes === 2 && !FOUL_ENDS_AB_CODES.has(code)) twoStrikeFouls += 1
       if (strikes < 2) strikes += 1
-    } else if (code === 'C' || code === 'S' || code === 'W') {
+    } else if (cat === 'called' || cat === 'whiff') {
       strikes += 1
     }
   }

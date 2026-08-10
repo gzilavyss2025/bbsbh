@@ -3,6 +3,8 @@
 // fouls, and balls in play, the last shown as X). Each lane lists its pitches'
 // 1-based numbers stacked from the TOP independently, so a strike on the 4th
 // pitch sits at the top of the strike lane even if the first three were balls.
+// An automatic ball or strike — awarded on a violation, with no pitch thrown
+// and so no pitch number to carry — takes an A instead of a number.
 // Filed here rather than in playbyplay/ because it is a drawn scorebook mark
 // like PlayDiamond and StrikeZone, not one of that bucket's notification cards.
 // `ladder` arrives already built by the caller (api/playbyplay.js's pitchLadder,
@@ -13,7 +15,11 @@ export function PitchLadder({ ladder }) {
   const balls = ladder.filter((p) => p.side === 'ball')
   const strikes = ladder.filter((p) => p.side === 'strike')
   const label = ladder
-    .map((p) => (p.side === 'ball' ? `ball ${p.label}` : p.label === 'X' ? 'in play' : `strike ${p.label}`))
+    .map((p) => {
+      if (p.label === 'X') return 'in play'
+      if (p.label === 'A') return `automatic ${p.side}`
+      return `${p.side} ${p.label}`
+    })
     .join(', ')
   return (
     <div className="pbp__ladder" role="img" aria-label={`Pitch sequence: ${label}`}>

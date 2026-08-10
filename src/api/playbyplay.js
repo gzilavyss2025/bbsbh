@@ -65,6 +65,8 @@ export {
 export {
   WHIFF_CODES,
   FOUL_CODES,
+  FOUL_ENDS_AB_CODES,
+  BALL_CODES,
   pitchCallCode,
   pitchDotCategory,
   pitchLadder,
