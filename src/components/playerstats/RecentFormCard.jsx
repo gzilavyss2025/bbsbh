@@ -98,7 +98,7 @@ export function RecentFormCard({ playerId, asOf, season }) {
           repeated a row label printed two lines above it. */}
       {view.footer && (
         <p className="formtrend__count">
-          <span className="formtrend__count-k">Last 30</span>
+          <span className="formtrend__count-k">Last 30 G</span>
           <span className="formtrend__count-v">{view.footer}</span>
         </p>
       )}

@@ -131,10 +131,17 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
     }
   }
 
+  // The unit is named ON EACH ROW, not left to the column head or the section
+  // note. "Last 7" beside a PA count is genuinely ambiguous — a reader has no
+  // way to tell seven GAMES from seven days, and both are ordinary ways to cut
+  // a recent-form window. `lastXGames` is games (see fetchHitterForm), so the
+  // rows say G, the scorebook's own abbreviation for it, already used in the
+  // vs-team card's column set. Spelled "games" it doubles the width of the
+  // widest column in a table that exactly fills a 390px phone.
   const rows = [
-    row('last7', 'Last 7', last7),
-    row('last15', 'Last 15', last15),
-    row('last30', 'Last 30', last30),
+    row('last7', 'Last 7 G', last7),
+    row('last15', 'Last 15 G', last15),
+    row('last30', 'Last 30 G', last30),
   ].filter(Boolean)
   if (rows.length === 0) return null
 

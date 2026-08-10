@@ -37,7 +37,10 @@ const rowFor = (view, key) => view.rows.find((r) => r.key === key)
 test('the three windows are rows in narrowing order, verbatim from the API strings', () => {
   const view = hitterFormView(FULL)
   assert.deepEqual(view.rows.map((r) => r.key), ['last7', 'last15', 'last30'])
-  assert.deepEqual(view.rows.map((r) => r.label), ['Last 7', 'Last 15', 'Last 30'])
+  // The label carries its UNIT: "Last 7" alone cannot be told from seven days,
+  // and lastXGames is games. G is the scorebook abbreviation the vs-team card
+  // already uses.
+  assert.deepEqual(view.rows.map((r) => r.label), ['Last 7 G', 'Last 15 G', 'Last 30 G'])
   assert.equal(rowFor(view, 'last7').avg, '.320')
   assert.equal(rowFor(view, 'last7').ops, '.960')
   assert.equal(rowFor(view, 'last30').ops, '.720')
