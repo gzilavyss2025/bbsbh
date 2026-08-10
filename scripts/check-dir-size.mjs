@@ -244,7 +244,13 @@ const BUDGETS = {
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
   // is the worked example), not a new subsystem.
-  'scripts/lib': 13,
+  // +1 for pitcher-starts.mjs: gen-callouts.mjs's per-pitcher-game-log tally
+  // (home/road split, 6+ IP record, all-starts record), pulled out so the
+  // mid-season-trade regression it fixes (a new club inheriting a rival's
+  // record) could be unit-tested — a generator is a top-level script, so a
+  // helper worth testing can't stay inline (see roster.mjs's own header,
+  // already in this directory for the same reason).
+  'scripts/lib': 14,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
