@@ -1,0 +1,583 @@
+/* ============================================================ logbook stats
+   LogbookStatsPage.jsx and its RetrospectiveSections.jsx — the Game Log
+   retrospective (ADR-0035, the game-stamps PRD §6). Split out of
+   48-logbook.css (ADR-0038's file-size cap): that file's `.gamestamp`/
+   `.logbook__*` rules are the passport-book collection page's own (LogbookPage.jsx,
+   LogbookCollection.jsx, GameStamp.jsx), unrelated to this page's retrospective
+   table. Deliberately its own `.logbookstats__*` class family rather than
+   reusing `.scorebookstory__*` (42-first-scorebook.css): My First Scorebook is
+   a fixed, hand-authored 39-game story with a magazine cover, and this is a
+   live table over whatever you have stamped. Sharing the classes would tie a
+   page that must degrade gracefully (one stamp, no stamps, facts still
+   resolving) to one that never has to.
+   ============================================================ */
+
+.logbookstats__dateline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbookstats__dateline i {
+  flex: 1 1 auto;
+  max-width: 80px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+
+/* The tally strip, used twice — the headline totals and the game-shape row. */
+.logbookstats__tally {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.logbookstats__tally div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  text-align: center;
+}
+
+.logbookstats__tally strong {
+  font-family: var(--font-mono);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.logbookstats__tally span {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbookstats__section {
+  margin-bottom: var(--space-6);
+}
+
+.logbookstats__sectionhead {
+  margin-bottom: var(--space-3);
+}
+
+.logbookstats__sectionhead span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--seal-cover-ink);
+}
+
+.logbookstats__sectionhead h2 {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-heading);
+}
+
+.logbookstats__prose {
+  margin: var(--space-2) 0 0;
+  max-width: 46ch;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+.logbookstats__splits {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.logbookstats__splits div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.logbookstats__splits span {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbookstats__splits strong {
+  font-family: var(--font-mono);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+.logbookstats__splits small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+.logbookstats__streaks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.logbookstats__streaks article {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  text-align: center;
+}
+
+.logbookstats__streaks strong {
+  font-family: var(--font-mono);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.logbookstats__streaks span {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbookstats__streaks small {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+/* One table treatment for clubs, matchups, ballparks and pitchers. The row
+   grid is set by the head's column count via the modifiers below, so a table
+   with two columns and one with four share every other rule. */
+.logbookstats__table {
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.logbookstats__tablehead,
+.logbookstats__row {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, 44px);
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.logbookstats__tablehead {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.logbookstats__tablehead span:not(:first-child),
+.logbookstats__row span:not(:first-child) {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--text-body);
+}
+
+.logbookstats__row span:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.logbookstats__row b {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+}
+
+.logbookstats__row--pair i {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-style: normal;
+  color: var(--text-caption);
+}
+
+/* Two-column tables (matchups, ballparks, seasons) sit in the same grid with
+   the numeric columns collapsed away. */
+.logbookstats__table--duo .logbookstats__tablehead,
+.logbookstats__table--duo .logbookstats__row,
+.logbookstats__pair .logbookstats__tablehead,
+.logbookstats__pair .logbookstats__row {
+  grid-template-columns: 1fr 44px;
+}
+
+.logbookstats__pair {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .logbookstats__pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---- the level filter (All / MLB / AAA / AA / A+ / A), page-wide ---- */
+/* Same visual family as .logbook__seasons (the collection page's season
+   toggle) rather than the shared .levelnav (slate, logo sheet) — this page's
+   own retrospective chrome, and .levelnav's five-only shape has no "All". */
+.logbookstats__levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.logbookstats__levels button {
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+.logbookstats__levels button.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* ---- best individual performances ---- */
+.logbookstats__performers {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.logbookstats__performer {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  text-align: left;
+}
+
+.logbookstats__performerRank {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.logbookstats__shot {
+  width: 56px;
+  height: 56px;
+}
+
+.logbookstats__performerText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.logbookstats__performerText strong {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-heading);
+}
+
+.logbookstats__performerText span {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.logbookstats__performerText b {
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--accent-positive);
+}
+
+@media (min-width: 640px) {
+  .logbookstats__performers {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---- most memorable moments ---- */
+.logbookstats__moments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.logbookstats__moments li {
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  padding: var(--space-3) 0;
+}
+
+.logbookstats__moment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.logbookstats__momentmeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.logbookstats__momentmeta b {
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  color: var(--seal-cover-ink);
+}
+
+.logbookstats__momentmeta span {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.logbookstats__moment p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+.logbookstats__moment > strong {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.logbookstats__watch {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--accent-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+}
+
+/* ---- combined leaders / rotation / bullpen: one leader-table treatment ---- */
+.logbookstats__leaderboards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .logbookstats__leaderboards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.logbookstats__leaders {
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.logbookstats__leaders h3 {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--text-heading);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+}
+
+.logbookstats__leaderhead,
+.logbookstats__leaderrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, 40px);
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: 0 var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.logbookstats__leaderhead {
+  min-height: 28px;
+  color: var(--text-caption);
+  font-weight: var(--w-semibold);
+}
+
+.logbookstats__leaderhead span:first-child {
+  text-align: left;
+}
+
+.logbookstats__leaders .logbookstats__leaderrow:last-child {
+  border-bottom: 0;
+}
+
+.logbookstats__leaderrow > span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  text-align: left;
+}
+
+.logbookstats__leaderrow b {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+}
+
+.logbookstats__leaderrow small {
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+}
+
+/* Rotation/bullpen rows carry a secondary stat line (H/R/ER/BB/SO, and — for
+   a starter — pitches/start) that would not fit alongside GS/Record/Team/ERA
+   on a phone-width row. Spans the full row as its own line underneath rather
+   than widening the table past phone width. */
+.logbookstats__leaderrow--wide {
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.logbookstats__leaderdetail {
+  grid-column: 1 / -1;
+  padding-top: var(--space-1);
+  text-align: left;
+  white-space: normal;
+  color: var(--text-caption);
+}
+
+/* ---- team records, flat rows (restyled from the old 4-column table) ---- */
+.logbookstats__records {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2);
+}
+
+.logbookstats__records > div {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 50px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.logbookstats__records span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.logbookstats__records b {
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-body);
+}
+
+.logbookstats__records small {
+  margin-top: 2px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.logbookstats__records strong {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+@media (min-width: 640px) {
+  .logbookstats__records {
+    grid-template-columns: 1fr 1fr;
+  }
+}

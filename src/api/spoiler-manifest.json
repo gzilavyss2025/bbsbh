@@ -246,7 +246,8 @@
         "components/highlights/GameVideoRow.jsx",
         "components/highlights/WatchCondensedButton.jsx",
         "components/inning/HalfInning.jsx",
-        "screens/boxscore/revealBoxScore.js"
+        "screens/boxscore/revealBoxScore.js",
+        "screens/logbook/RetrospectiveSections.jsx"
       ]
     },
     "hitterForm.js": {
@@ -297,6 +298,16 @@
       "why": "The ONE fetcher here that deliberately asks statsapi FOR the score (every other schedule fetcher prunes it with fields=). Safe only because its input is the user's own stamps, and a stamp cannot exist for a game they have not finished revealing. Do not call it with an arbitrary game list.",
       "importers": ["screens/LogbookCollection.jsx", "screens/LogbookStatsPage.jsx"]
     },
+    "logbookGameDetail.js": {
+      "class": "reveal-only",
+      "why": "Per-game boxscore and win-probability fetchers for the Logbook retrospective's ported First Scorebook sections. Same containment argument as logbook.js: safe only because its input is the user's own stamps.",
+      "importers": ["screens/LogbookStatsPage.jsx"]
+    },
+    "logbookRetrospective.js": {
+      "class": "reveal-only",
+      "why": "The ported First Scorebook sections (performances/moments/leaders/rotation/bullpen) for the Game Log retrospective. Pure, but it handles scores and pitching lines, so ADR-0001 applies; the discipline is the INPUT — only ever the user's own stamps and the facts/boxscores/moments resolved for those exact gamePks.",
+      "importers": ["screens/LogbookStatsPage.jsx"]
+    },
     "logbookStats.js": {
       "class": "reveal-only",
       "why": "The Game Log retrospective. Pure, but it handles scores, so ADR-0001 applies; with no seal to sit inside, the discipline is the INPUT — only ever the user's own stamps.",
@@ -321,7 +332,7 @@
     "performanceScore.js": {
       "class": "reveal-only",
       "why": "Pure math, but its inputs are a player's box-score game line. Every caller is a reveal-only module by construction — don't wire it into a spoiler-free surface.",
-      "importers": ["api/boxscore.js", "api/dayHighlights.js"]
+      "importers": ["api/boxscore.js", "api/dayHighlights.js", "api/logbookRetrospective.js"]
     },
     "person-fetch.js": {
       "class": "spoiler-free",

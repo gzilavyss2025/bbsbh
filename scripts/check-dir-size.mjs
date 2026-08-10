@@ -170,7 +170,11 @@ const BUDGETS = {
   // lettered-sibling shape as `21a-box-score-stars.css` beside it, and for the
   // same reason. Its position is load-bearing: it overrides `.bs__grid`'s cell
   // rules in `21-box-score.css`, so it has to cascade after them.
-  'src/styles': 67,
+  // +1 for 48a-logbook-stats.css — split out of 48-logbook.css (ADR-0038's
+  // file-size cap) once the Logbook retrospective's ported First Scorebook
+  // sections pushed that file past 600 lines; same lettered-sibling shape as
+  // 21a-box-score-stars.css.
+  'src/styles': 68,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -181,7 +185,11 @@ const BUDGETS = {
   // reader in here now shares. It REMOVES the duplicated cache-after-await
   // block from ~18 of its neighbours (and the race in it), so this entry buys
   // one leaf file to delete a pattern copied eighteen times.
-  'src/api': 86,
+  // +2 for logbookGameDetail.js and logbookRetrospective.js — the Logbook
+  // retrospective's ported First Scorebook sections, split from logbook.js/
+  // logbookStats.js the same "narrow reimplementation, own file" pattern
+  // those two already use rather than growing either past the file-size cap.
+  'src/api': 88,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
