@@ -235,7 +235,19 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches
-  DO count. `computeHalfInningFeed` emits three entry kinds — `atbat`, `event`,
+  DO count. The pitch CALL codes are a closed table (`playbyplay/pitchInfo.js`,
+  mirroring MLB's own `/api/v1/pitchCodes`), and everything that reads a code —
+  the ladder's lanes, Whiffs, fouls, first-pitch strikes — sorts it with that
+  one table rather than naming codes at the call site. Enumerate a new code
+  there: a code in none of the sets falls to `ball`, which is how a missed bunt
+  came to draw a strikeout on two strikes (`test/pitch-codes.test.js` pins the
+  table against MLB's own strike/ball flags). Two things the table says that
+  `isPitch` alone does not — an automatic ball or strike moves the count with no
+  pitch thrown, so it belongs to the COUNT (`card.pitches`, the ladder) but not
+  to the pitches (`card.pitchDetails`, the zone plot and pitch list); and a foul
+  TIP or foul BUNT at two strikes ENDS the at-bat instead of extending it
+  (`FOUL_ENDS_AB_CODES`, which every two-strike-foul counter excludes).
+  `computeHalfInningFeed` emits three entry kinds — `atbat`, `event`,
   and `placed`, the extra-innings automatic runner. His card exists so he can
   enter `originIndex` with `progress` seeded to the base he was given: that
   registration is what lets the shared advancement bookkeeping write his legs,

@@ -8,16 +8,24 @@
 
 // Pitch call codes and non-PA event types are shared with the play-by-play
 // module (both reveal-only) so the two can never drift on the feed shape.
-import { NON_PA_EVENT_TYPES, WHIFF_CODES, FOUL_CODES, pitchCallCode } from './playbyplay.js'
+import {
+  NON_PA_EVENT_TYPES,
+  WHIFF_CODES,
+  FOUL_CODES,
+  FOUL_ENDS_AB_CODES,
+  BALL_CODES,
+  pitchCallCode,
+} from './playbyplay.js'
 // Per-half LOB rides along from the linescore (also reveal-only).
 import { revealInning } from './linescore.js'
 
-// First-pitch-strike convention: the first pitch counts as a strike unless it
-// is a ball, ball in dirt, intentional ball, pitchout, or hit-by-pitch.
-// Called/swinging strikes, fouls, and balls put in play all count. ('*B' is
-// the API's "Ball - Ball In Dirt" — a genuine ball; missing it counted a
-// first-pitch 55-footer as a strike.)
-const NON_STRIKE_CODES = new Set(['B', '*B', 'I', 'P', 'H'])
+// First-pitch-strike convention: the first pitch counts as a strike unless the
+// feed calls it a ball — ball, ball in dirt, intentional, pitchout,
+// hit-by-pitch. Called/swinging strikes, fouls, and balls put in play all
+// count. The list is BALL_CODES itself rather than a second copy of it, which
+// is how it once came to be missing '*B' ("Ball - Ball In Dirt") and counted a
+// first-pitch 55-footer as a strike.
+const NON_STRIKE_CODES = BALL_CODES
 
 // Plate half-width + ball radius, in feet — the same zone-geometry constants
 // as api/umpireFavor.js's missEdge (deliberately duplicated rather than
@@ -132,10 +140,11 @@ export function computeDerivedByInning(feed) {
       if (code && WHIFF_CODES.has(code)) b.whiffs += 1
       if (code && FOUL_CODES.has(code)) {
         b.fouls += 1
-        // A two-strike foul TIP ('T') is caught for strike three — it ends
-        // the at-bat rather than extending it, so it stays out of the
-        // AB-extending counter (mirrors gen-fouls.mjs).
-        if (preStrikes === 2 && code !== 'T') b.twoStrikeFouls += 1
+        // A two-strike foul TIP is caught for strike three, and a two-strike
+        // foul BUNT retires the batter by rule — both END the at-bat rather
+        // than extending it, so they stay out of the AB-extending counter
+        // (FOUL_ENDS_AB_CODES; mirrors gen-fouls.mjs).
+        if (preStrikes === 2 && !FOUL_ENDS_AB_CODES.has(code)) b.twoStrikeFouls += 1
       }
 
       const missed = isMissedCall(e, preBalls, preStrikes)
