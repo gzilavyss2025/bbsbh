@@ -390,18 +390,16 @@ export function dropRehabStints(splits, debutYear) {
 // caller, since this stays a pure shaper.
 // ---------------------------------------------------------------------------
 
-// Consecutive seasons collapse to a range with a two-digit tail ("2018–21"),
-// gaps split into a comma list ("2018, 2020"). Input already sorted ascending.
-function formatSeasonRuns(seasons) {
-  const runs = []
-  for (const y of seasons) {
-    const last = runs[runs.length - 1]
-    if (last && y === last.end + 1) last.end = y
-    else runs.push({ start: y, end: y })
-  }
-  return runs
-    .map((r) => (r.start === r.end ? `${r.start}` : `${r.start}–${String(r.end).slice(2)}`))
-    .join(', ')
+// First year through last, with a two-digit tail ("2018–21"), or just the one
+// year for a single-season stint. Deliberately NOT a run-per-gap breakdown
+// ("2018, 2020"): a stint can have an internal gap year with no qualifying
+// stint anywhere (an injury) without the player having left the org, so the
+// span reads straight through — see the stint fold above. Input already
+// sorted ascending.
+function formatSeasonSpan(seasons) {
+  const start = seasons[0]
+  const end = seasons[seasons.length - 1]
+  return start === end ? `${start}` : `${start}–${String(end).slice(2)}`
 }
 
 export function careerTimelineView(splits, group, debutYear) {
@@ -455,7 +453,13 @@ export function careerTimelineView(splits, group, debutYear) {
   // stint. A club the player leaves and later rejoins (Gary Sánchez's Brewers
   // in 2024, then again in 2026 after a year with Baltimore) yields a separate
   // stint each time, so its logo repeats in its own chronological slot rather
-  // than collapsing the two visits into one badge.
+  // than collapsing the two visits into one badge. A season with no qualifying
+  // stint ANYWHERE (Casey Mize's 2023 Tommy John year) does NOT end a stint on
+  // its own, though — he never left the org, he was just hurt, so the club
+  // either side of that gap folds into the SAME badge (see formatSeasonSpan:
+  // its caption spans first-to-last year straight through, the gap silently
+  // absorbed, rather than surfacing "2020–22, 2024–26" and implying he'd
+  // actually left and come back).
   kept.sort(
     (a, b) =>
       a.season - b.season ||
@@ -473,9 +477,10 @@ export function careerTimelineView(splits, group, debutYear) {
       teamId: t.teamId,
       teamName: t.teamName,
       sportId: t.sportId,
+      tier: t.sportId === 1 ? 'mlb' : 'milb',
       level: SPORT_LABEL[t.sportId] ?? '',
       minSeason: seasons[0],
-      yearText: formatSeasonRuns(seasons),
+      yearText: formatSeasonSpan(seasons),
     }
   })
   return { entries }

@@ -397,32 +397,44 @@ export function fetchTeamLogoTint(teamId) {
   return p
 }
 
-// Enrich a careerTimelineView's entries IN PLACE with each stop's logo tint and
-// hover label — the shared treatment behind both the player page's "Team history"
-// and the manager page's "Playing career" timelines. Tint is resolved per
-// DISTINCT team (it doesn't depend on when he was there); the title is resolved
-// per STOP, because an affiliate can be reassigned to a different parent org
-// between two separate stints at the same club. MLB stops use the club name
-// alone; a farm club appends its parent org in parens ("Nashville Sounds
-// (Milwaukee Brewers)"), preferring the hand-curated historical org for that
-// season over the club's live parent. Returns the same `entries` for chaining.
+// Enrich a careerTimelineView's entries IN PLACE with each stop's logo tint,
+// hover label, and — for a MiLB stop — its MLB affiliate at the time (id,
+// name, tint) — the shared treatment behind both the player page's "Team
+// history" and the manager page's "Playing career" timelines. Tint is
+// resolved per DISTINCT team (it doesn't depend on when he was there); the
+// affiliate is resolved per STOP, because an affiliate can be reassigned to a
+// different parent org between two separate stints at the same club. MLB
+// stops use the club name alone and carry no affiliate (a club has no
+// affiliate of its own); a farm club's title appends its parent org in
+// parens ("Nashville Sounds (Milwaukee Brewers)"), preferring the
+// hand-curated historical org for that season over the club's live parent.
+// The affiliate fields feed CareerTimeline's hover/tap swap — see its own
+// header — and are absent (not merely null) whenever no parent org resolves,
+// so the component's `e.affiliateTeamId &&` guard stays a plain existence
+// check. Returns the same `entries` for chaining.
 export async function enrichTimelineEntries(entries) {
   const tintByTeam = new Map()
-  await Promise.all(
-    [...new Set((entries ?? []).map((e) => e.teamId))].map(async (teamId) => {
-      tintByTeam.set(teamId, await fetchTeamLogoTint(teamId))
-    }),
-  )
+  const teamTint = async (teamId) => {
+    if (!tintByTeam.has(teamId)) tintByTeam.set(teamId, fetchTeamLogoTint(teamId))
+    return tintByTeam.get(teamId)
+  }
+  await Promise.all([...new Set((entries ?? []).map((e) => e.teamId))].map(teamTint))
   await Promise.all(
     (entries ?? []).map(async (e) => {
-      e.tint = tintByTeam.get(e.teamId)
+      e.tint = await teamTint(e.teamId)
       if (e.sportId === 1) {
         e.title = e.teamName
         return
       }
-      const hist = await historicalParentOrg(e.teamId, e.minSeason)
-      const parentOrgName = hist?.name ?? (await fetchTeam(e.teamId))?.parentOrgName ?? ''
+      const [hist, team] = await Promise.all([historicalParentOrg(e.teamId, e.minSeason), fetchTeam(e.teamId)])
+      const parentOrgId = hist?.id ?? team?.parentOrgId ?? null
+      const parentOrgName = hist?.name ?? team?.parentOrgName ?? ''
       e.title = parentOrgName ? `${e.teamName} (${parentOrgName})` : e.teamName
+      if (parentOrgId) {
+        e.affiliateTeamId = parentOrgId
+        e.affiliateName = parentOrgName
+        e.affiliateTint = await teamTint(parentOrgId)
+      }
     }),
   )
   return entries
