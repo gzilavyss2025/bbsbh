@@ -53,8 +53,12 @@ import { spanCell } from '../../lib/ledger.js'
 // two cannot drift apart silently.
 const NARROW_HIDE = [3]
 
+// K%, not SO%, for the strikeout rate. The Analytics section further up THIS
+// SAME PAGE (api/person/advanced.js) already labels it K%, and Recent form's
+// counting line says K too — one player page should not name one rate three
+// ways. K% is also the form a baseball reader meets everywhere else.
 function splitHead(group) {
-  return ['Split', group === 'pitching' ? 'BF' : 'PA', 'AVG/OBP/SLG', 'OPS', 'HR', 'SO%', 'BB%']
+  return ['Split', group === 'pitching' ? 'BF' : 'PA', 'AVG/OBP/SLG', 'OPS', 'HR', 'K%', 'BB%']
 }
 
 function splitCells(side) {
@@ -93,7 +97,11 @@ function situationalRows(rows, reference) {
         out.push({ key: `fam-${family}`, className: 'ledger__family', cells: [spanCell(label)] })
       }
     }
-    out.push({ key: r.code, cells: [r.label, ...splitCells(r.side)] })
+    out.push({
+      key: r.code,
+      className: r.sub ? 'ledger__nested' : undefined,
+      cells: [r.label, ...splitCells(r.side)],
+    })
   }
   return out
 }
@@ -129,7 +137,13 @@ export function SplitsSection({ block, vsTeam, season, asOf }) {
           label row: run flat, they invited a reader to compare "RISP" against
           "Two strikes" as if those were alternatives, when in fact they overlap
           freely. The overall row is summed from bases-empty + runners-on only —
-          the count rows overlap each other, and RISP is a subset of runners-on. */}
+          the count rows overlap each other, and RISP is a subset of runners-on.
+          That last containment is drawn, not narrated: RISP is INDENTED under
+          Runners on. The card used to carry a two-line caps footnote spelling
+          the overlaps out, which on this page renders in all-caps chrome type
+          (26-player-page.css) — the worst possible setting for the one sentence
+          a reader was meant to actually read. A family rule and an indent say
+          it in the table's own grammar. */}
       {block.situational && (
         <>
           <SectionTitle title="Situational" note="full season" />
@@ -139,10 +153,6 @@ export function SplitsSection({ block, vsTeam, season, asOf }) {
             hideNarrow={NARROW_HIDE}
             rows={situationalRows(block.situational.rows, referenceRow(block.situational.all))}
           />
-          <p className="hint splits__note">
-            Only Empty and Runners on add up to Season — the rest overlap. RISP is part
-            of Runners on.
-          </p>
         </>
       )}
 

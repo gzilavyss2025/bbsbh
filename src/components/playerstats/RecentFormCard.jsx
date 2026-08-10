@@ -33,9 +33,12 @@ export function RecentFormCard({ playerId, asOf, season }) {
 
   return (
     <div className="formtrend">
+      {/* The note names what the card MEASURES AGAINST, not the windows — the
+          Window column below already lists those, and a subtitle that repeats
+          the first column teaches nobody anything. */}
       <h3 className="section__title section__title--bar">
         <span>Recent form</span>
-        <em>last 7 · 15 · 30 games</em>
+        <em>vs. his season line</em>
       </h3>
 
       <div className="ledger-wrap">
@@ -48,17 +51,15 @@ export function RecentFormCard({ playerId, asOf, season }) {
               <th>OPS</th>
               {view.hasBars && (
                 <>
-                  {/* Hidden from the accessibility tree: every cell under it is
-                      itself aria-hidden (the bar is decoration over the +/− OPS
-                      column beside it), so an announced column head would lead a
-                      screen-reader user into a column with nothing in it. */}
-                  <th className="formtrend__barhead" aria-hidden="true">
-                    <span className="formtrend__axis">
-                      <span>−.300</span>
-                      <span>0</span>
-                      <span>+.300</span>
-                    </span>
-                  </th>
+                  {/* Empty, and hidden from the accessibility tree: every cell
+                      under it is itself aria-hidden (the bar is decoration over
+                      the +/− OPS column beside it), so an announced column head
+                      would lead a screen-reader user into a column with nothing
+                      in it. It used to print −.300 / 0 / +.300 tick labels,
+                      which sat in the same row as PA and AVG and so read as a
+                      third set of figures — a second scale for a quantity the
+                      column beside it already prints in full. */}
+                  <th className="formtrend__barhead" aria-hidden="true" />
                   <th className="formtrend__deltahead">+/− OPS</th>
                 </>
               )}
@@ -66,12 +67,7 @@ export function RecentFormCard({ playerId, asOf, season }) {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr
-                key={r.key}
-                className={[r.isAnchor && 'formtrend__anchor', r.thin && 'formtrend__thin']
-                  .filter(Boolean)
-                  .join(' ') || undefined}
-              >
+              <tr key={r.key} className={r.isAnchor ? 'formtrend__anchor' : undefined}>
                 <td className="lft yr">{r.label}</td>
                 <td>{r.pa}</td>
                 <td>{r.avg}</td>
@@ -81,9 +77,13 @@ export function RecentFormCard({ playerId, asOf, season }) {
                     <td className="formtrend__bar">
                       <DeviationBar row={r} />
                     </td>
-                    <td className="formtrend__delta">
-                      {r.isAnchor ? <span className="formtrend__zero">baseline</span> : r.deltaText}
-                    </td>
+                    {/* The season row's delta cell stays EMPTY. It used to
+                        print the word "baseline", which is the one piece of
+                        vocabulary on the card a casual fan would have to be
+                        taught; the row is already tinted, ruled off and
+                        labelled Season, and a blank cell in a signed column is
+                        read as zero by anyone who has looked at a ledger. */}
+                    <td className="formtrend__delta">{r.isAnchor ? '' : r.deltaText}</td>
                   </>
                 )}
               </tr>
@@ -92,21 +92,16 @@ export function RecentFormCard({ playerId, asOf, season }) {
         </table>
       </div>
 
+      {/* The counting line for the widest window, as a caption under the table
+          rather than a bordered chip. A card inside a card made the page read
+          as four stacked containers where there is only one idea, and the chip
+          repeated a row label printed two lines above it. */}
       {view.footer && (
         <p className="formtrend__count">
           <span className="formtrend__count-k">Last 30</span>
           <span className="formtrend__count-v">{view.footer}</span>
         </p>
       )}
-
-      {/* Kept to two lines on a phone. Under the global caps invariant, long
-          prose is the worst-performing text in this system — all-caps kills
-          word-shape recognition, so the sentence carrying the caveat is exactly
-          the one a reader skips. The scale itself moved into the column head as
-          ticks so it no longer has to be described here. */}
-      <p className="hint formtrend__note">
-        Windows overlap. A bar inside its pale band is luck, not form.
-      </p>
     </div>
   )
 }
@@ -125,23 +120,29 @@ export function RecentFormCard({ playerId, asOf, season }) {
 // colour-blind separation outright (ΔE 4.4 under protanopia), where these two
 // differ in lightness as well as hue.
 //
-// Behind the bar sits that window's own NOISE BAND — ±1 standard error at its
-// own sample size, so it is wide on a 7-game window and narrow on a 30-game
-// one. That band is the whole reason this card can be trusted: without it, the
-// shortest window draws the longest bar for every hitter in the league, every
-// day, and a reader sees a slump in the arithmetic of small denominators.
+// A window that does not clear its own standard error draws an EMPTY TRACK —
+// the groove and the zero rule, and nothing in them. That is the whole guard
+// against the arithmetic this card sits in: the shortest window is the noisiest
+// one, so it would otherwise draw the longest bar for every hitter in the
+// league, every day, and three windows fanning out would read as "he is cooling
+// fast" when it is the denominator.
 //
-// The anchor row draws the axis alone: it is the zero, so it has no length.
+// This replaced a pale ±1 SE band painted BEHIND each bar. The band was honest
+// but unreadable — at phone width it read as a two-tone bar, and it needed a
+// line of prose under the card to say which tone meant what. Withholding the
+// bar says the same thing with no legend: the figures stay in the row, so
+// nothing is hidden, and only the claim is withheld. The anchor row is empty
+// for the plainer reason that it IS the zero, so it has no length.
 function DeviationBar({ row }) {
-  if (row.isAnchor || row.lean == null) {
-    return <span className="devbar devbar--axis" aria-hidden="true" />
-  }
+  // Two different empties. The anchor draws the zero rule alone (no groove: it
+  // is the baseline, not a window that came up short). A window inside its own
+  // noise keeps the groove, so the column plainly reads as a place where a bar
+  // can appear and did not, rather than as a missing cell.
+  if (row.isAnchor) return <span className="devbar devbar--axis" aria-hidden="true" />
+  if (row.lean == null) return <span className="devbar" aria-hidden="true" />
   const side = row.lean < 0 ? 'is-down' : 'is-up'
   return (
     <span className={`devbar ${side}${row.clamped ? ' is-clamped' : ''}`} aria-hidden="true">
-      {row.band != null && (
-        <span className="devbar__band" style={{ width: `${row.band * 100}%` }} />
-      )}
       <span className="devbar__fill" style={{ width: `${Math.abs(row.lean) * 50}%` }} />
     </span>
   )

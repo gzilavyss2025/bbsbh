@@ -342,8 +342,12 @@
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
-.splits__note {
-  margin-top: 6px;
+/* A row CONTAINED by the one above it — RISP inside Runners on. Indenting is
+   how a ledger has always said "part of the line above", and it replaced a
+   two-line all-caps footnote that said so in prose. */
+.ledger tr.ledger__nested .yr {
+  padding-left: 22px;
+  color: var(--text-caption);
 }
 
 .ledger tr.ledger__family td {

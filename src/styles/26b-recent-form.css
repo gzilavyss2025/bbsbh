@@ -26,15 +26,6 @@
   padding-left: 6px;
   padding-right: 6px;
 }
-/* The scale, stated once over the column it governs rather than described in
-   prose underneath it. */
-.formtrend__axis {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-num);
-  color: var(--graphite-soft);
-}
 .formtrend__deltahead,
 .formtrend .formtrend__delta {
   text-align: right;
@@ -48,29 +39,26 @@
   font-weight: var(--w-bold);
   color: var(--text-heading);
 }
-.formtrend .formtrend__anchor .yr,
-.formtrend__zero {
+.formtrend .formtrend__anchor .yr {
   font-family: var(--font-display);
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-caption);
 }
-/* The counting line under the table, and the one window it belongs to named on
-   its own chip. The old card printed HR/RBI for a FOURTH window (15) beside
-   rate lines covering 7/15/30, with nothing to warn the reader it had changed
-   the subject. */
+/* The counting line under the table, and the one window it belongs to named
+   beside it. The old card printed HR/RBI for a FOURTH window (15) beside rate
+   lines covering 7/15/30, with nothing to warn the reader it had changed the
+   subject. It is a CAPTION, not a chip: the bordered, shadowed card it used to
+   wear made the section read as two stacked containers and gave a single line
+   of counting stats the same weight as the ledger above it. */
 .formtrend__count {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px;
   margin: 8px 0 0;
-  padding: 7px 10px;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-card);
+  padding: 2px 2px 0;
 }
 .formtrend__count-k {
   font-family: var(--font-display);
@@ -85,18 +73,17 @@
   font-size: var(--fs-compact);
   color: var(--text-body);
 }
-.formtrend__note {
-  margin-top: 6px;
-}
 
 /* ---- the deviation bar ----
    One row's distance from the season line, diverging off a centred axis: right
-   and field-green for better than himself, left and clay for worse. A diverging
-   bar is the honest form here for two reasons — the quantity is signed, and its
-   zero is real and is printed as its own row directly beneath the track, so the
-   axis is never an unlabelled claim. The scale is FIXED at ±.300 OPS, never
-   fitted to the player's own worst window, which would draw every hitter alive
-   at full width. */
+   and kraft amber for better than himself, left and navy for worse — NOT the
+   positive/negative accent pair, which means good and bad, and neither end of
+   this scale is either. A diverging bar is the honest form here for two reasons
+   — the quantity is signed, and its zero is real and is printed as its own row
+   directly beneath the track, so the axis is never an unlabelled claim. The
+   scale is FIXED at ±.300 OPS, never fitted to the player's own worst window,
+   which would draw every hitter alive at full width. A window that does not
+   clear its own standard error draws no bar at all (see DeviationBar). */
 .devbar {
   position: relative;
   display: block;
@@ -117,24 +104,13 @@
   transform: translateX(-50%);
   background: var(--border-rule);
 }
-/* The anchor row IS the zero, so it has no length — axis alone. */
+/* The anchor row IS the zero, so it has no length — axis alone, no groove. A
+   window that came up inside its own noise keeps the plain `.devbar` groove
+   with nothing in it, which is a different statement: the bar could have been
+   drawn there and was not. */
 .devbar--axis {
   background: none;
   box-shadow: none;
-}
-/* This window's own +/-1 standard error, centred on the axis and sized from its
-   own sample — wide on a 7-game window, narrow on a 30-game one. Drawn UNDER
-   the bar and in paper rather than ink: it is the ground the bar is measured
-   against, not a second quantity competing with it. */
-.devbar__band {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--rule-grid);
-  border-left: var(--bw-hair) solid var(--border-hairline);
-  border-right: var(--bw-hair) solid var(--border-hairline);
 }
 .devbar__fill {
   position: absolute;
@@ -151,13 +127,6 @@
   background: var(--navy);
   border-radius: var(--radius-xs) 0 0 var(--radius-xs);
 }
-/* A window too short to measure (see MIN_PA_FOR_BAR) keeps its figures and
-   loses its bar, penciled rather than inked so the row still reads as his but
-   stops reading as evidence. */
-.formtrend .formtrend__thin td {
-  color: var(--text-caption);
-}
-
 /* A window past the ±.300 domain runs off the end of the track in an arrowhead,
    so a clamped bar can never be read as one that happens to land exactly on the
    limit. */

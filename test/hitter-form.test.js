@@ -75,10 +75,12 @@ test('lean places the bar on a FIXED ±.300 scale, not one fitted to this player
   const view = hitterFormView({
     ...FULL,
     // +.150 is exactly half the domain, so the bar must run exactly half way.
-    last7: stat({ gamesPlayed: 7, atBats: 23, plateAppearances: 27, avg: '.300', ops: '.910' }),
+    // Read off last30 (132 PA), because a 7-game window's standard error is
+    // .231 and a .150 swing inside it draws no bar at all — see below.
+    last30: { ...FULL.last30, ops: '.910' },
     season: stat({ gamesPlayed: 100, atBats: 314, plateAppearances: 355, avg: '.260', ops: '.760' }),
   })
-  const r = rowFor(view, 'last7')
+  const r = rowFor(view, 'last30')
   assert.ok(Math.abs(r.lean - 0.5) < 1e-9)
   assert.equal(r.clamped, false)
 })
@@ -113,44 +115,60 @@ test('a negative window clamps to −1, the other end of the same track', () => 
 // 1 : 0.70 : 0.42 against the 1 : 0.68 : 0.48 that pure sampling noise predicts.
 // Left alone, this card would draw its longest bar on its noisiest row for
 // every hitter alive, and a reader would see a slump in the arithmetic. These
-// cases pin the three defences: the noise band, the no-bar floor, and the
-// no-row floor.
+// cases pin the two defences: the noise gate on the bar, and the no-row floor.
+//
+// The gate is a plain comparison — a window draws a bar only when its deviation
+// beats its OWN standard error, 1.2/sqrt(PA) in OPS points. There is no separate
+// hand-set PA cutoff for the bar any more, and no pale band drawn behind it: the
+// arithmetic that used to size the band now decides whether a bar exists, which
+// says the same thing without needing a sentence of prose under the card.
 // ---------------------------------------------------------------------------
 
-test('every window carries its own noise band, wider the smaller the sample', () => {
-  const view = hitterFormView(FULL)
-  const b7 = rowFor(view, 'last7').band
-  const b15 = rowFor(view, 'last15').band
-  const b30 = rowFor(view, 'last30').band
-  assert.ok(b7 > b15 && b15 > b30, `expected a narrowing band, got ${b7}/${b15}/${b30}`)
-  // 1.2/sqrt(27) = .231 OPS points, over a .300 domain = 0.770 of the track.
-  assert.ok(Math.abs(b7 - 0.7698) < 1e-3, `last7 band was ${b7}`)
-})
-
-test("a bar inside its own band is the card's way of saying nothing happened", () => {
-  // −.060 over 132 PA. The band is 1.2/sqrt(132) = .104, so the bar sits well
-  // inside it — this hitter is not in a slump, he is in a sample.
+test('a window inside its own standard error draws NO bar, whatever it printed', () => {
+  // −.060 over 132 PA. The standard error is 1.2/sqrt(132) = .104, so this
+  // hitter is not in a slump, he is in a sample — and the card says nothing.
   const view = hitterFormView({
     ...FULL,
     last30: { ...FULL.last30, ops: '.700' },
     season: stat({ gamesPlayed: 100, atBats: 314, plateAppearances: 355, avg: '.260', ops: '.760' }),
   })
   const r = rowFor(view, 'last30')
-  assert.ok(Math.abs(r.lean) < r.band, `|lean| ${Math.abs(r.lean)} should sit inside band ${r.band}`)
+  assert.equal(r.lean, null)
+  // The figures are still what he did — only the CLAIM is withheld.
+  assert.equal(r.ops, '.700')
+  assert.equal(r.deltaText, '−.060')
 })
 
-test('under 25 PA a window keeps its figures and loses its bar', () => {
+test('the same swing draws a bar on a wide window and none on a narrow one', () => {
+  // +.150 against the season line, twice: over 132 PA it beats a .104 standard
+  // error and is drawn; over 27 PA it sits inside a .231 one and is not. This is
+  // the whole point of the gate — the narrowest window is the noisiest, so left
+  // ungated it would draw the longest bar for every hitter alive, every day.
+  const season = stat({ gamesPlayed: 100, atBats: 314, plateAppearances: 355, avg: '.260', ops: '.760' })
+  const view = hitterFormView({
+    ...FULL,
+    last7: stat({ gamesPlayed: 7, atBats: 23, plateAppearances: 27, avg: '.300', ops: '.910' }),
+    last30: { ...FULL.last30, ops: '.910' },
+    season,
+  })
+  assert.equal(rowFor(view, 'last7').lean, null)
+  assert.ok(rowFor(view, 'last30').lean > 0)
+  // Both rows still print the identical delta. Only the picture differs.
+  assert.equal(rowFor(view, 'last7').deltaText, '+.150')
+  assert.equal(rowFor(view, 'last30').deltaText, '+.150')
+})
+
+test('a thin window keeps its figures and loses its bar on the arithmetic alone', () => {
   // The live case this was written for: a bat whose "last 7 games" holds a
   // handful of trips, printing a 1.000 OPS as a near-full bar directly above a
-  // game log showing four hitless nights.
+  // game log showing four hitless nights. 18 PA carries a .283 standard error,
+  // which a +.240 swing does not beat — no hand-set 25-PA cutoff required.
   const view = hitterFormView({
     ...FULL,
     last7: stat({ gamesPlayed: 7, atBats: 16, plateAppearances: 18, avg: '.500', ops: '1.000' }),
   })
   const r = rowFor(view, 'last7')
-  assert.equal(r.thin, true)
   assert.equal(r.lean, null)
-  assert.equal(r.band, null)
   // The numbers are still what he did — they just stop being evidence.
   assert.equal(r.avg, '.500')
   assert.equal(r.deltaText, '+.240')

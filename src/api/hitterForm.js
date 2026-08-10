@@ -63,18 +63,22 @@ const DELTA_DOMAIN = 0.3
 //
 // That is the trap this whole card sits in: the narrowest window is the noisiest
 // one, so it always draws the longest bar, and three windows fanning out reads
-// as "he is cooling fast" when it is arithmetic. So every bar carries its OWN
-// noise band, sized from its OWN sample. A bar inside its band means nothing
-// happened, and the reader can see that without being told.
+// as "he is cooling fast" when it is arithmetic.
+//
+// So the noise sets WHETHER a bar is drawn at all, not a second shape drawn
+// behind it. The card used to paint the ±1 SE band as a pale rectangle under
+// each bar, which needed a sentence of caps prose to explain and, at phone
+// width, just read as a two-tone bar. Now a window whose deviation does not
+// clear its own standard error draws no bar: the track is there, and it is
+// empty, which is the honest picture and needs no legend. The figures stay in
+// the row either way, so nothing is hidden — only the CLAIM is withheld.
 const OPS_SE_PER_PA = 1.2
 
-// Below this the window is not a measurement. 25 PA is about a week for a
-// regular and roughly where one home run stops being able to move OPS by more
-// than the whole track: at 23 PA a single swing moves it .217, so a "full" bar
-// would be 1.4 homers. Such a row keeps its numbers and loses its bar.
-const MIN_PA_FOR_BAR = 25
 // Below this it is not even worth a row — a platoon bat with two at-bats in the
-// window would otherwise print a .500 average as though it were a fact.
+// window would otherwise print a .500 average as though it were a fact. There is
+// no separate minimum for the BAR any more: the standard error already grows as
+// the sample shrinks, so a thin window fails to clear its own noise on the
+// arithmetic rather than on a hand-set cutoff.
 const MIN_PA_FOR_ROW = 10
 
 const clamp = (x) => Math.max(-1, Math.min(1, x))
@@ -108,24 +112,22 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
     if (key !== 'season' && pa < MIN_PA_FOR_ROW) return null
     const ops = Number.parseFloat(s.ops)
     const delta = base != null && Number.isFinite(ops) ? ops - base : null
-    // A window too short to measure keeps its numbers and loses its bar — the
-    // figures are still what he did, they just are not evidence of anything.
-    const thin = pa < MIN_PA_FOR_BAR
-    const drawable = delta != null && !thin
+    // This window's own standard error, in OPS points. A window that does not
+    // beat it is not a measurement of anything, whatever its figures say.
+    const se = pa > 0 ? OPS_SE_PER_PA / Math.sqrt(pa) : Infinity
+    const drawable = delta != null && Math.abs(delta) > se
     return {
       key,
       label,
       pa: pa > 0 ? String(pa) : '—',
       avg: s.avg,
       ops: s.ops,
-      thin,
       delta,
       deltaText: delta == null ? '' : signedOpsDelta(delta),
-      // −1…1 across the track; `clamped` marks a window that ran off the end.
+      // −1…1 across the track, or null for a window inside its own noise —
+      // which draws an empty track, not a short bar.
       lean: drawable ? clamp(delta / DELTA_DOMAIN) : null,
       clamped: drawable && Math.abs(delta) > DELTA_DOMAIN,
-      // Half-width of this row's own noise band, on the same −1…1 track.
-      band: drawable && pa > 0 ? clamp(OPS_SE_PER_PA / Math.sqrt(pa) / DELTA_DOMAIN) : null,
     }
   }
 
@@ -146,8 +148,6 @@ export function hitterFormView({ last7, last15, last30, season } = {}) {
     anchor.deltaText = ''
     anchor.lean = null
     anchor.clamped = false
-    anchor.band = null
-    anchor.thin = false
   }
 
   // One window's counting context, and it says WHICH window. The old card

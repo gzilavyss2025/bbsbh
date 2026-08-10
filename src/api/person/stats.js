@@ -282,7 +282,12 @@ export function splitsView(lrSplits, group) {
 const SITUATIONAL_CODES = [
   ['r0', 'Empty', 'base'],
   ['ron', 'Runners on', 'base'],
-  ['risp', 'RISP', 'base'],
+  // RISP is a SUBSET of runners-on, not a third alternative beside it, and it
+  // is the one overlap in this table a reader is likely to get wrong. The UI
+  // indents it under its parent (`ledger__nested`) rather than explaining the
+  // containment in a footnote — the indent is the older and shorter way to say
+  // "part of the row above", and it needs no prose.
+  ['risp', 'RISP', 'base', true],
   ['ac', 'Ahead', 'count'],
   ['bc', 'Behind', 'count'],
   ['2s', '2 strikes', 'count'],
@@ -295,12 +300,16 @@ export function situationalSplitsView(splits, group) {
     const code = s.split?.code
     if (code) byCode[code] = s.stat
   }
-  const rows = SITUATIONAL_CODES.filter(([code]) => byCode[code]).map(([code, label, family]) => ({
-    code,
-    label,
-    family,
-    side: splitSide(byCode[code], group),
-  }))
+  const rows = SITUATIONAL_CODES.filter(([code]) => byCode[code]).map(
+    ([code, label, family, sub]) => ({
+      code,
+      label,
+      family,
+      // True for a row contained by the one above it (RISP inside Runners on).
+      sub: Boolean(sub),
+      side: splitSide(byCode[code], group),
+    }),
+  )
   // A couple of stray rows (a September call-up who's barely pitched) read
   // as noise, not a table — require most of the set before rendering.
   if (rows.length < 4) return null
