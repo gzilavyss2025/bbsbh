@@ -8,7 +8,18 @@
 // collapse on a phone via CSS — the secondary stat columns the career register
 // sheds on a small screen.
 
-export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = '', totals = null, hideNarrow = [] }) {
+export function Ledger({
+  head,
+  rows,
+  leftCols = 2,
+  total = null,
+  totalLabel = '',
+  totals = null,
+  hideNarrow = [],
+  className = '',
+  ariaLabel,
+  ariaDescribedBy,
+}) {
   const hide = new Set(hideNarrow)
   const narrow = (i) => (hide.has(i) ? 'col-narrow-hide' : '')
   const cellClass = (i) =>
@@ -16,7 +27,11 @@ export function Ledger({ head, rows, leftCols = 2, total = null, totalLabel = ''
   const footRows = totals ?? (total ? [{ label: totalLabel, cells: total }] : [])
   return (
     <div className="ledger-wrap">
-      <table className="ledger">
+      <table
+        className={`ledger ${className}`.trim()}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
+      >
         <thead>
           <tr>
             {head.map((h, i) => (

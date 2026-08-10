@@ -1,0 +1,19 @@
+/* The Top 100 Prospects page's "Line" cell — split out of 31-wild-card.css
+   (already at its check-file-size budget) rather than grown there, same
+   "one new file, one new number" rule 31a-prospect-trend.css's own header
+   documents; cascades right after it since both extend .prospecttable.
+   A cell splits into two of these — one MLB, one MiLB combined — for a
+   player with a stat line at both this season (see resolveCurrentLevels,
+   api/prospects.js). Stacked rather than sat side by side: the
+   "(MLB)"/"(MiLB)" tag plus a full three-figure line is already the width of
+   the single-line case, so a second column would widen the cell instead of
+   just growing its row. */
+.prospecttable__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.prospecttable__lineitem {
+  font-size: var(--fs-compact);
+  white-space: nowrap;
+}

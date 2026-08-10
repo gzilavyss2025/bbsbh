@@ -62,6 +62,9 @@
 @import './styles/29-team-transactions.css';
 @import './styles/31-wild-card.css';
 @import './styles/31a-prospect-trend.css';
+@import './styles/31b-prospect-lines.css';
+@import './styles/31c-prospect-filters.css';
+@import './styles/31e-prospect-board.css';
 @import './styles/33-awards-history.css';
 @import './styles/38-umpire-pages.css';
 @import './styles/39-manager-page.css';

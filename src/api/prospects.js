@@ -4,6 +4,10 @@
 // MLB Stats API (mlb.js's territory) or a shaping of a /people response
 // (person.js's territory), so it gets its own small file.
 
+import { fetchAffiliates, fetchComplexAffiliates, fetchRosterIdsForTeams } from './team.js'
+import { loadCombinedPoolForTeams, sumHitting, sumPitching } from './statsLevels.js'
+import { SPORT_LABEL } from '../lib/teams.js'
+
 const SNAPSHOT_URL = '/data/top-prospects.json'
 const EMPTY_SNAPSHOT = { generatedAt: null, source: null, count: 0, players: [], orgProspects: [] }
 
@@ -98,4 +102,149 @@ export function prospectAffiliateMap(affiliateRosterIds) {
     for (const id of ids) out.set(id, Number(teamId))
   }
   return out
+}
+
+// ---------------------------------------------------------------------------
+// /prospects "Level" column — the same live-roster resolution loadMinors.js
+// (screens/team/data/) runs for the team hub's own org-wide prospect table,
+// factored out here so both callers share one fix rather than drifting apart.
+// ---------------------------------------------------------------------------
+
+const MLB_SPORT_ID = 1
+
+// A rate stat the way a broadcast prints it: three decimals, no leading
+// zero (".302"). Same convention teamLeaders.js's own rate3 uses — this file
+// keeps its own copy rather than importing a pool-ranking module for one
+// formatter (see postseasonLeaders.js/savantPercentiles.js/tradeDeadline.js,
+// which each do the same).
+function rate3(v) {
+  return Number.isFinite(v) ? v.toFixed(3).replace(/^(-?)0(?=\.)/, '$1') : null
+}
+// "3.45" — two decimals (ERA).
+function num2(v) {
+  return Number.isFinite(v) ? v.toFixed(2) : null
+}
+
+// A position abbreviation ending in "P" (RHP/LHP/P) reads as pitching,
+// everything else as hitting — the same split fetch-top-prospects.mjs's own
+// scrape draws (battingStats vs. pitchingStats) and gen-prospect-trend.mjs's
+// primaryGroupFor mirrors server-side; this is the browser-side twin, kept
+// local rather than importing a scripts/lib module into the client bundle.
+// Exported: ProspectsPage's own Batters/Pitchers filter pill draws the same
+// line a two-way prospect's stat line already does, off one definition.
+export function isPitcher(position) {
+  return /P$/.test(position || '')
+}
+
+// One group's (hitting or pitching) splits, summed and printed in the same
+// "$avg, $hr HR, $rbi RBI" / "$ip IP, $era ERA, $so SO" shape
+// fetch-top-prospects.mjs's statLineFor already established for the scraped
+// weekly snapshot — a live-computed line reads identically to the static one
+// it stands beside or replaces. Null for an empty slice (no time at that
+// group of levels this season), which the caller reads as "no line here."
+function statLineFrom(splits, pitching) {
+  if (!splits.length) return null
+  if (pitching) {
+    const t = sumPitching(splits)
+    return [`${t.inningsPitched} IP`, `${num2(t.era)} ERA`, `${t.strikeOuts} SO`].join(', ')
+  }
+  const t = sumHitting(splits)
+  return [rate3(t.avg), `${t.homeRuns} HR`, `${t.rbi} RBI`].join(', ')
+}
+
+// ---------------------------------------------------------------------------
+// /prospects "Level" + "Line" columns — the same live-roster resolution
+// loadMinors.js (screens/team/data/) runs for the team hub's own org-wide
+// prospect table, factored out here so both callers share one fix rather
+// than drifting apart; plus a level-SPLIT stat line neither caller needed
+// before this.
+// ---------------------------------------------------------------------------
+
+// Resolves each ranked player's CURRENT level by live roster membership — the
+// scraped `levelRaw` string is sometimes ambiguous (e.g. "ALL (2)" for a
+// player who's played at multiple levels this season, which is most of the
+// board: a young prospect typically splits time between a complex/rookie
+// club and his first full-season affiliate) or stale (a recent call-up).
+// `p.teamId` in the snapshot is each player's MLB parent org, so this fans
+// out an affiliate tree — full-season AAA/AA/A+/A PLUS complex/rookie clubs,
+// since fetchAffiliates alone omits the latter (see prospectAffiliateMap's
+// own note above, and fetchComplexAffiliates in team.js) — plus a 40-man
+// roster lookup per distinct org, then falls back to this season's stats
+// across the same org's teams for anyone roster membership still misses
+// (released, a stint between assignments, a foreign-league loanee). A player
+// nothing resolves gets a plain null (the caller's own dash) rather than the
+// raw ambiguous string.
+//
+// Also attaches `lines` — 1 or 2 display strings for the "Line" column.
+// Every org's teams' season stats are fetched regardless of roster
+// resolution now (previously only a fallback for the unresolved), since a
+// level-split line needs each player's per-team splits either way; the level
+// fallback above reuses that same fetch rather than paying for it twice.
+// `loadCombinedPoolForTeams`'s pool entries carry each player's RAW
+// hitting/pitching splits (statsLevels.js), still tagged with `sport.id` per
+// split, so this partitions them into an MLB-only slice and a MiLB slice
+// summed ACROSS every level in the org's farm tree (AAA down through
+// complex/rookie) — "MiLB" here is one combined line, not one per level.
+// Two lines only when BOTH slices have a line AND he's currently rostered at
+// MLB; a player who was up this year but has since been optioned back down
+// gets only his MiLB line — showing a partial-season MLB line for someone no
+// longer up there reads as "he's in the majors," which he isn't right now.
+// Degrades to the original scraped `statLine`, unprefixed, if live stats
+// resolve to nothing at all (same "never show a blank" stance as the level
+// fallback above).
+export async function resolveCurrentLevels(players) {
+  const season = new Date().getFullYear()
+  const orgIds = [...new Set(players.map((p) => p.teamId).filter(Boolean))]
+  const [affiliatesByOrg, complexAffiliatesByOrg] = await Promise.all([
+    Promise.all(orgIds.map((id) => fetchAffiliates(id, season))),
+    Promise.all(orgIds.map((id) => fetchComplexAffiliates(id, season))),
+  ])
+
+  const teamById = new Map()
+  const teamIdsByOrg = new Map()
+  orgIds.forEach((orgId, i) => {
+    const farmTeams = [...affiliatesByOrg[i], ...complexAffiliatesByOrg[i]]
+    teamById.set(orgId, { id: orgId, sportId: 1 })
+    for (const aff of farmTeams) teamById.set(aff.id, aff)
+    teamIdsByOrg.set(orgId, [orgId, ...farmTeams.map((aff) => aff.id)])
+  })
+
+  // `40Man`, not the default `active` roster, so a prospect on the 7-/60-day
+  // IL still resolves to his real affiliate instead of falling through.
+  const [rosterIds, poolByOrg] = await Promise.all([
+    fetchRosterIdsForTeams([...teamById.keys()], '40Man'),
+    Promise.all(
+      orgIds.map((orgId) => loadCombinedPoolForTeams(teamIdsByOrg.get(orgId).map((id) => ({ id })), season)),
+    ),
+  ])
+  const teamByPlayer = prospectAffiliateMap(rosterIds)
+  const poolEntryByOrgAndPlayer = new Map(
+    orgIds.map((orgId, i) => [orgId, new Map(poolByOrg[i].map((row) => [row.id, row]))]),
+  )
+
+  return players.map((p) => {
+    const resolvedTeamId = teamByPlayer.get(p.playerId) ?? null
+    const resolvedTeam = resolvedTeamId ? teamById.get(resolvedTeamId) : null
+    const statRow = poolEntryByOrgAndPlayer.get(p.teamId)?.get(p.playerId)
+
+    const levelLabel = resolvedTeam
+      ? SPORT_LABEL[resolvedTeam.sportId] ?? p.levelRaw
+      : statRow?.teamId && statRow?.sportId
+        ? SPORT_LABEL[statRow.sportId] ?? p.levelRaw
+        : /^ALL\b/i.test(p.levelRaw ?? '') ? null : p.levelRaw
+
+    const pitching = isPitcher(p.position)
+    const splits = statRow ? (pitching ? statRow.pitchingSplits : statRow.hittingSplits) : []
+    const mlbSplits = splits.filter((s) => s.sport?.id === MLB_SPORT_ID)
+    const milbSplits = splits.filter((s) => s.sport?.id && s.sport.id !== MLB_SPORT_ID)
+    const mlbLine = levelLabel === 'MLB' ? statLineFrom(mlbSplits, pitching) : null
+    const milbLine = statLineFrom(milbSplits, pitching)
+
+    const lines =
+      mlbLine && milbLine
+        ? [`(MLB) ${mlbLine}`, `(MiLB) ${milbLine}`]
+        : [mlbLine ?? milbLine ?? p.statLine].filter(Boolean)
+
+    return { ...p, levelLabel, lines }
+  })
 }

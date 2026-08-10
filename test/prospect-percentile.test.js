@@ -8,12 +8,15 @@ import {
   MIN_OUTS,
   meetsPlayingTimeFloor,
   qualifiedMetrics,
+  qualifiedPlayerIds,
   percentileRank,
   primaryGroupFor,
+  buildPopulations,
+  populationKey,
 } from '../scripts/lib/prospectPercentile.mjs'
 
-const hitSplit = (ops, plateAppearances) => ({ stat: { ops, plateAppearances } })
-const pitSplit = (era, outs) => ({ stat: { era, outs } })
+const hitSplit = (ops, plateAppearances, id) => ({ stat: { ops, plateAppearances }, player: { id } })
+const pitSplit = (era, outs, id) => ({ stat: { era, outs }, player: { id } })
 
 // --------------------------------------------------------------------------
 // meetsPlayingTimeFloor — same check applies to a raw split's stat object
@@ -104,4 +107,51 @@ test('primaryGroupFor picks the group a player actually has a line in', () => {
 test('primaryGroupFor breaks a two-way player by position', () => {
   assert.equal(primaryGroupFor('LHP', true, true), 'pitching')
   assert.equal(primaryGroupFor('1B', true, true), 'hitting')
+})
+
+// --------------------------------------------------------------------------
+// qualifiedPlayerIds — same floor as qualifiedMetrics, but for the age
+// benchmark: who cleared it, not what their metric was.
+// --------------------------------------------------------------------------
+test('qualifiedPlayerIds keeps only ids that clear the floor', () => {
+  const splits = [
+    hitSplit(0.9, MIN_PLATE_APPEARANCES, 1),
+    hitSplit(0.7, MIN_PLATE_APPEARANCES - 1, 2),
+    hitSplit(1.1, 200, 3),
+  ]
+  assert.deepEqual(qualifiedPlayerIds(splits, 'hitting'), [1, 3])
+})
+
+test('qualifiedPlayerIds skips a split with no player id', () => {
+  const splits = [{ stat: { plateAppearances: 200 } }, hitSplit(0.8, 100, 4)]
+  assert.deepEqual(qualifiedPlayerIds(splits, 'hitting'), [4])
+})
+
+test('qualifiedPlayerIds returns [] for a missing/empty splits array', () => {
+  assert.deepEqual(qualifiedPlayerIds(null, 'hitting'), [])
+  assert.deepEqual(qualifiedPlayerIds([], 'pitching'), [])
+})
+
+// --------------------------------------------------------------------------
+// buildPopulations / populationKey — one qualified-metric population per
+// (sportId, group), shared by the nightly generator and its backfill.
+// --------------------------------------------------------------------------
+test('buildPopulations groups qualified metrics by sportId and group', () => {
+  const hit = [
+    { ...hitSplit(0.9, MIN_PLATE_APPEARANCES, 1), sport: { id: 11 } },
+    { ...hitSplit(0.5, MIN_PLATE_APPEARANCES - 1, 2), sport: { id: 11 } }, // dropped — under floor
+    { ...hitSplit(0.8, MIN_PLATE_APPEARANCES, 3), sport: { id: 12 } },
+  ]
+  const pit = [{ ...pitSplit(3.0, MIN_OUTS, 4), sport: { id: 11 } }]
+  const populations = buildPopulations(hit, pit)
+  assert.deepEqual(populations.get(populationKey(11, 'hitting')), [0.9])
+  assert.deepEqual(populations.get(populationKey(12, 'hitting')), [0.8])
+  assert.deepEqual(populations.get(populationKey(11, 'pitching')), [3.0])
+  assert.equal(populations.get(populationKey(14, 'hitting')), undefined)
+})
+
+test('buildPopulations skips a split with no sport.id', () => {
+  const hit = [{ ...hitSplit(0.9, MIN_PLATE_APPEARANCES, 1) }] // no sport field
+  const populations = buildPopulations(hit, [])
+  assert.equal(populations.size, 0)
 })

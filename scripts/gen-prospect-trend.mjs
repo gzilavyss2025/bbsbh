@@ -20,6 +20,17 @@
 // gen-fever-radar.mjs's 6 days: a stat percentile moves slower than a
 // third-party scouting radar's daily rank.
 //
+// Each row also carries `sampleSize` (PA or IP-outs — the same count the
+// qualification gate already computed) and `populationSize` (how many
+// players cleared the floor at his level), so a reader can weigh a 93rd
+// percentile on 41 PA differently from one on 400; `history` is every
+// snapshot this generator or scripts/gen-prospect-trend-backfill.mjs has ever
+// recorded for him, oldest first — the full season's-worth once the one-time
+// backfill has run — so a trend chart needs no separate fetch. `movement`
+// itself is just `history`'s own two endpoints restated as a delta; once the
+// backfill seeds real history, `movement` stops needing two live weeks to
+// populate, because a snapshot 14+ days back already exists.
+//
 // Depends on public/data/top-prospects.json already existing
 // (fetch-top-prospects.mjs, its own weekly GitHub Actions schedule) for the
 // playerId list; skips gracefully — not a failure — if that snapshot is
@@ -31,7 +42,14 @@ import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { fetchLevelSeasonStats, combineToPool } from '../src/api/statsLevels.js'
-import { meetsPlayingTimeFloor, qualifiedMetrics, percentileRank, primaryGroupFor } from './lib/prospectPercentile.mjs'
+import {
+  meetsPlayingTimeFloor,
+  percentileRank,
+  primaryGroupFor,
+  buildPopulations,
+  populationKey,
+} from './lib/prospectPercentile.mjs'
+import { fetchLevelAverageAges } from './lib/prospectAgeBenchmark.mjs'
 import { openDb, dumpGroup } from './lib/db.js'
 import { writeJsonAtomic } from './lib/io.js'
 
@@ -59,29 +77,6 @@ async function loadProspectIds() {
 }
 
 const settled = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-const populationKey = (sportId, group) => `${sportId}:${group}`
-
-// One percentile population per (sportId, group) — every qualified player
-// (prospect or not) who logged time at that level this season.
-function buildPopulations(hitSplits, pitSplits) {
-  const populations = new Map()
-  for (const [splits, group] of [
-    [hitSplits, 'hitting'],
-    [pitSplits, 'pitching'],
-  ]) {
-    const bySport = new Map()
-    for (const sp of splits) {
-      const sportId = sp.sport?.id
-      if (!sportId) continue
-      if (!bySport.has(sportId)) bySport.set(sportId, [])
-      bySport.get(sportId).push(sp)
-    }
-    for (const [sportId, sportSplits] of bySport) {
-      populations.set(populationKey(sportId, group), qualifiedMetrics(sportSplits, group))
-    }
-  }
-  return populations
-}
 
 const upsertSnapshot = (db) =>
   db.prepare(
@@ -93,8 +88,9 @@ const upsertSnapshot = (db) =>
 // Exports today's rows, each with a `movement` computed against the nearest
 // EARLIER snapshot at least MOVEMENT_WINDOW_DAYS back — a plain self-join
 // over the table this generator itself has been filling in, same pattern as
-// gen-fever-radar.mjs's exportJson.
-function exportJson(db, today) {
+// gen-fever-radar.mjs's exportJson — plus the player's FULL recorded history
+// (today's row included), oldest first, for the trend chart.
+function exportJson(db, today, levelAverageAge) {
   const rows = db
     .prepare(
       `SELECT player_id, board, payload_json FROM player_snapshots
@@ -102,6 +98,11 @@ function exportJson(db, today) {
        ORDER BY player_id`,
     )
     .all(today, SOURCE)
+  const historyStmt = db.prepare(
+    `SELECT date, payload_json FROM player_snapshots
+     WHERE player_id = ? AND board = ? AND source = ?
+     ORDER BY date ASC`,
+  )
   const players = rows.map((row) => {
     const payload = JSON.parse(row.payload_json)
     const prior = db
@@ -118,9 +119,13 @@ function exportJson(db, today) {
         movement = { delta: payload.percentile - priorPayload.percentile, sinceDate: prior.date }
       }
     }
-    return { playerId: row.player_id, group: row.board, ...payload, movement }
+    const history = historyStmt.all(row.player_id, row.board, SOURCE).map((h) => {
+      const p = JSON.parse(h.payload_json)
+      return { date: h.date, sportId: p.sportId, percentile: p.percentile, qualified: p.qualified }
+    })
+    return { playerId: row.player_id, group: row.board, ...payload, movement, history }
   })
-  return { generatedAt: new Date().toISOString(), dataThrough: today, players }
+  return { generatedAt: new Date().toISOString(), dataThrough: today, levelAverageAge, players }
 }
 
 async function main() {
@@ -137,6 +142,11 @@ async function main() {
   const hitSplits = settled(hit)
   const pitSplits = settled(pit)
   const populations = buildPopulations(hitSplits, pitSplits)
+
+  // Every qualified player's age, averaged per level — the Prospect Card's
+  // age-benchmark fact. A separate bulk call (birthDate isn't on a season
+  // split), so it runs once here rather than per prospect.
+  const levelAverageAge = await fetchLevelAverageAges(hitSplits, pitSplits, LEVEL_SPORT_IDS)
 
   // Each prospect attributed to his PRIMARY level (highest reached, multi-
   // level lines summed) — the same combineToPool the app's own minors
@@ -157,12 +167,13 @@ async function main() {
     const metric = Number(group === 'hitting' ? line.ops : line.era)
     const percentile = qualified ? percentileRank(metric, population, group === 'hitting') : null
     if (percentile != null) qualifiedCount++
-    const payload = { sportId: p.sportId, percentile, qualified }
+    const sampleSize = group === 'hitting' ? Number(line.plateAppearances) || 0 : Number(line.outs) || 0
+    const payload = { sportId: p.sportId, percentile, qualified, sampleSize, populationSize: population.length }
     insert.run(today, p.id, group, SOURCE, JSON.stringify(payload))
   }
   await dumpGroup(db, 'player-snapshots')
 
-  await writeJsonAtomic(out, exportJson(db, today))
+  await writeJsonAtomic(out, exportJson(db, today, levelAverageAge))
   db.close()
   console.log(`wrote ${out} (${pool.length} prospects with a current-level line, ${qualifiedCount} qualified)`)
 }
