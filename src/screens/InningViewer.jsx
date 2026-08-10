@@ -947,15 +947,27 @@ export function InningViewer({
       {/* Floating bar — the same fixed blue bar the lineup pages page forward
           with, and the same destination-named + trailing-› convention their
           nextLabel buttons use ("Home team ›", "Innings ›") — no "Next:"
-          prefix, no arrow glyph. On narrow viewports it carries a duplicate
-          Refresh stacked above the primary action (hidden again on the wide
-          layout, where the top toolbar stays reachable). Four states: a
-          sealed half offers two reveal choices (ADR-0016) — step one at-bat,
-          or the whole half at once; a half that just finished (or whose
-          Summary the reader is on, focus.postHalf) offers Summary/next-half
-          instead; otherwise it's the plain advance — "Box score ›" at the
-          furthest revealed inning (never "Top 10th ›", which would leak the
-          game going to extras) or the next-half label once one unlocks. */}
+          prefix, no arrow glyph.
+
+          IT CARRIES THE ONLY REFRESH, AT EVERY WIDTH. This used to read as a
+          "duplicate … hidden again on the wide layout, where the top toolbar
+          stays reachable", describing an arrangement where the toolbar and the
+          bar each held a copy and swapped by breakpoint. Neither half of that
+          is true any more: Refresh left `.inningchrome` entirely, and nothing
+          hides `.refreshbtn--float` at any width (the only other RefreshButton
+          on this screen is the pre-game scoreboard's, above). So the bar is
+          where you reach for it during a live game, phone and desktop alike —
+          which is also why `.pagenav--innings`'s hit-area rules measure around
+          a Refresh row that is always there, and why focus mode's one-row bar
+          has to shrink it to icon scale rather than drop it (styles/focus).
+
+          Four states: a sealed half offers two reveal choices (ADR-0016) —
+          step one at-bat, or the whole half at once; a half that just finished
+          (or whose Summary the reader is on, focus.postHalf) offers
+          Summary/next-half instead; otherwise it's the plain advance — "Box
+          score ›" at the furthest revealed inning (never "Top 10th ›", which
+          would leak the game going to extras) or the next-half label once one
+          unlocks. */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
         <RefreshButton
           onReload={onReload}
