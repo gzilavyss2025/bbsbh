@@ -63,10 +63,16 @@ export function SplitsVsTeam({ vsTeam, season, asOf }) {
   // strictly before the day being scored (spoiler defense — see header).
   const last = row?.last && (!asOf || row.last.date < asOf) ? row.last : null
 
+  // The hitter set speaks the same vocabulary as the two split TABLES above it
+  // in this section, which is the whole claim of putting them under one
+  // heading. PA rather than AB (every rate up there divides by PA, and PA
+  // counts the walks), and no RBI — those tables drop it for reporting how
+  // often his team-mates reached base, and a career line against one club is
+  // if anything more exposed to that than a season split is.
   const cells = car
     ? isPitcher
       ? [['G', car.g], ['IP', car.ip], ['ERA', car.era], ['K', car.k], ['BB', car.bb]]
-      : [['G', car.g], ['AB', car.ab], ['AVG', car.avg], ['HR', car.hr], ['RBI', car.rbi], ['OPS', car.ops]]
+      : [['G', car.g], ['PA', car.pa], ['AVG', car.avg], ['HR', car.hr], ['OPS', car.ops]]
     : null
 
   return (

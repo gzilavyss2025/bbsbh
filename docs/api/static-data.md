@@ -379,8 +379,13 @@ for each generator; the reader modules:
 - `hitterForm.js` — the PLAYER page's "Recent form" card for hitters (the
   slot the pitcher page fills with `workload.js`'s Recent workload): live
   `lastXGames` splits over 7/15/30-game windows plus the season line, fanned
-  out in one `Promise.all`; `hitterFormView` is the pure facts-list shaping.
-  Current-day only (the card skips under a spoiler `asOf`), and NOT
+  out in one `Promise.all`; `hitterFormView` is the pure shaping. It returns a
+  small TIME SERIES, not a facts list: one row per window, a `season` anchor
+  row that is the baseline the windows are measured against, and per row a
+  signed OPS delta plus a `lean` on a FIXED ±.300 scale (a scale fitted to the
+  player would draw every hitter alive at full width). `RecentFormCard` renders
+  that as a ledger with diverging bars. Current-day only (the card skips under
+  a spoiler `asOf`), and NOT
   `src/api/recentForm.js`, which is the TEAM page's unrelated Last-10 roster
   projection — the name differs on purpose so the two never collide.
 - `workload.js` — rolling pitcher workload, from `public/data/workload.json`

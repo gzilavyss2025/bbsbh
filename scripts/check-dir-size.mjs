@@ -170,7 +170,16 @@ const BUDGETS = {
   // lettered-sibling shape as `21a-box-score-stars.css` beside it, and for the
   // same reason. Its position is load-bearing: it overrides `.bs__grid`'s cell
   // rules in `21-box-score.css`, so it has to cascade after them.
-  'src/styles': 67,
+  //
+  // 67 -> 68 for `26b-recent-form.css`: the hitter Recent form card, split out
+  // of `26-player-page.css` (at its check-file-size ceiling) when the card was
+  // redesigned from a two-up fact grid into a four-row deviation ledger and
+  // grew a diverging-bar scale of its own. Same lettered-sibling shape as
+  // `26a-percentile-strip.css` beside it, and per-route for the same reason —
+  // it is imported by `RecentFormCard.jsx`, not by `index.css`. Its position is
+  // load-bearing: it extends `.ledger` rules that live in `26-player-page.css`,
+  // so it has to cascade after them.
+  'src/styles': 68,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
