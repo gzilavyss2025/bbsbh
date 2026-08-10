@@ -31,3 +31,13 @@ export function tallyStarterRecord(rows, teamId) {
   }
   return { homeW, homeL, awayW, awayL, sixIpW, sixIpL, tenK }
 }
+
+// Season CG/shutout total for the "N complete games/shutouts this season"
+// note. A shutout is always thrown as a complete game, so the hydrated
+// `shutouts` stat is a subset of `completeGames`, never additional to it —
+// summing the two double-counts every shutout start (regression: Jacob
+// Misiorowski's one CG, which was also a shutout, showed as "2").
+export function starterCgShutoutCount(pitchingStats) {
+  const n = Number(pitchingStats?.completeGames)
+  return Number.isFinite(n) ? n : 0
+}

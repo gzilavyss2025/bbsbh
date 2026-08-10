@@ -142,7 +142,7 @@ import {
   COMEBACK_DEFICIT,
 } from '../src/api/callout-notes/checkpoints.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
-import { tallyStarterRecord } from './lib/pitcher-starts.mjs'
+import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const outDir = join(here, '..', 'public', 'data', 'callouts')
@@ -1368,7 +1368,7 @@ for (const g of games) {
     const e = pitcherEnrichById.get(id)
     if (!e) continue
     const p = poolById.get(id)
-    const cgShutout = num(p?.pitching?.completeGames) + num(p?.pitching?.shutouts)
+    const cgShutout = starterCgShutoutCount(p?.pitching)
     const entry = {}
     if (e.homeAway) entry.homeAway = e.homeAway
     if (e.teamStarts) entry.teamStarts = e.teamStarts
