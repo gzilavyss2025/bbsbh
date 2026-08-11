@@ -563,6 +563,9 @@
 .roster__row.is-entered .roster__jersey,
 .roster__row.is-entered .roster__pos {
   color: var(--text-caption);
+  /* strike-link-exempt — .roster__name IS the .plink here (RosterPanel passes
+     the class to PlayerLink), so this rule already targets the button itself
+     and outranks .plink's own text-decoration: none. */
   text-decoration: line-through;
   text-decoration-color: var(--graphite-soft);
   text-decoration-thickness: 1.5px;

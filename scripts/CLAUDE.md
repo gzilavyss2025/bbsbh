@@ -139,6 +139,14 @@ process automatically.
   color; a ring-less focus style (reusing a `:hover` border/background change) is
   fine, and a deliberate one-off opts out with a `focus-ring-exempt` comment. See
   ADR-0023.
+- `check-strike-links.mjs` — every rule that draws a `line-through` must name
+  `.plink` in its selector list, because a player name is a `<button
+  class="plink">` and neither inherits an ancestor's decoration nor keeps its
+  own (`.plink` sets `text-decoration: none`). A rule whose struck text can hold
+  no name link opts out with a `strike-link-exempt` comment in the rule. The
+  defense diamond shipped a strike-through that never drew on a surname —
+  visible only over the un-linked " (6th)" tag beside a substitute — because the
+  fix two other rules already carried was never copied to it.
 - `check-contrast.mjs` — resolves the color tokens to hex and asserts WCAG AA
   (≥4.5:1 text, ≥3:1 large/UI) for the known text-on-background pairings (seal ink
   on the kraft stripes, white on the IL clay stripes, the core semantic text roles).

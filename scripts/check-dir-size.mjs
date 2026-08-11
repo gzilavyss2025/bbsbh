@@ -256,7 +256,11 @@ const BUDGETS = {
   // +1 for gen-prospect-trend-backfill.mjs — its one-time historical
   // backfill, the same pair-of-files shape as gen-rookies.mjs/gen-rookies-
   // backfill.mjs already noted above.
-  scripts: 73,
+  // +1 for check-strike-links.mjs — another flat lint guard over src/styles/,
+  // the same shape and directory as check-focus-ring.mjs and
+  // check-typography.mjs already here. A guards/ subdirectory would have to
+  // take all fourteen of them at once, which is a move, not this change.
+  scripts: 74,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
