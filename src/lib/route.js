@@ -51,6 +51,10 @@
 //   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
 //                                          (a club's played season, every result showing, one
 //                                           stamp per game you watched — ADR-0042. NOT a tab.)
+//   '/team/{id}/photos'                 -> { name: 'team-photos', id, asOf, sportId }
+//                                          (professional photos merged across the whole season's
+//                                           decided games, unsealed like '/photos'. NOT a tab —
+//                                           one entry point, the Photos rail's own door.)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }
@@ -298,6 +302,11 @@ export function parseRoute(url) {
   // branch below, which would otherwise read it as date='team'.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'stamp-in')
     return { name: 'team-stamp-in', id: parts[1], asOf, sportId }
+  // A club's professional photos, merged across its whole season — reached
+  // from exactly one place (the Photos rail's own "Full season" door), not a
+  // sixth tab, same reasoning and same placement as stamp-in just above.
+  if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'photos')
+    return { name: 'team-photos', id: parts[1], asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
     return { name: TEAM_TAB_ROUTES[parts[2]], id: parts[1], asOf, sportId }
   if (parts.length === 3) {
@@ -484,6 +493,13 @@ export function teamTabPath(id, tab, opts = {}) {
 // app is sealed by default.
 export function teamStampInPath(id, opts = {}) {
   return `/team/${id}/stamp-in${linkQuery(opts)}`
+}
+// A club's professional photos, merged across its whole season (unsealed,
+// same footing as gamePhotosPath). Built in exactly one place today — the
+// Photos rail's own "Full season" door — and carried through linkQuery like
+// every other team link.
+export function teamPhotosPath(id, opts = {}) {
+  return `/team/${id}/photos${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.

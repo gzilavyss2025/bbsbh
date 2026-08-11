@@ -311,6 +311,36 @@ export function onlyPhotographer(photos) {
   return (photos ?? []).filter((photo) => photo.kind === 'photographer')
 }
 
+// One batch step of a backward walk across a team's `games` (oldest ->
+// newest, same shape as `seasonGames`/`allDecidedGames`) — shared by every
+// surface that grows a professional-photo window game-by-game from the
+// newest played game backward (TeamPhotosRail's rail, TeamPhotosPage's
+// season grid). Slices `batchSize` games ending `consumed` games from the
+// end, fetches+filters each (photographer stills of `teamId` only) and
+// tags each photo with the game it came from, using `cache` (gamePk ->
+// filtered photos) so a game already walked is never re-fetched — callers
+// own the cache's lifetime (one per mount) so two rails on the same page
+// don't share one team's fetches by accident.
+export async function fetchTeamPhotoBatch(games, teamId, consumed, batchSize, cache) {
+  const end = games.length - consumed
+  const start = Math.max(0, end - batchSize)
+  const batch = games.slice(start, end)
+  const results = await Promise.all(
+    batch.map(async (game) => {
+      if (cache.has(game.gamePk)) return cache.get(game.gamePk)
+      const raw = await fetchGamePhotos(game.gamePk)
+      const filtered = onlyPhotographer(photosForTeam(raw, teamId)).map((photo) => ({
+        ...photo,
+        gamePk: game.gamePk,
+        apiDate: game.apiDate,
+      }))
+      cache.set(game.gamePk, filtered)
+      return filtered
+    }),
+  )
+  return { photos: results.flat(), consumed: batch.length }
+}
+
 // The single best still for a game, for scripts/gen-highlights.mjs's day
 // index — the home slate's revealed result cards use this as the condensed
 // game's poster instead of MLB's own "CONDENSED GAME" graphic card. Takes the

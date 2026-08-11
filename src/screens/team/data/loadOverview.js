@@ -1,6 +1,6 @@
 import { fetchTeam, fetchTeamRoster, fetchTeamIL, fetchStandings } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
-import { fetchTeamSchedule, recentDecidedGames } from '../../../api/schedule.js'
+import { fetchTeamSchedule, recentDecidedGames, allDecidedGames } from '../../../api/schedule.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../../../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
@@ -28,15 +28,25 @@ import {
 //   Standing       standings rows (three of them render)   -> Numbers
 //   Form           the precomputed team/season score files  -> Numbers
 //   Last 10        the season schedule, five stubs shown     -> Games
+//   Highlights     the club's static per-team clip file, capped -> Games
+//   Photos         one bounded photographer-photo batch     -> Games
 //   Lineup         the 40-man roster + IL: diamond, top 5 SP, the closer -> Roster
 //   Leaders        the club's season stat pool, 3 categories -> Numbers
 //   Latest moves   the first transactions page, 3 shown      -> Games
 //
-// What it deliberately does NOT fetch, and why the front door got fast: no
+// `seasonGames` is a pure `allDecidedGames(schedule)` derive off the SAME
+// schedule request `recentGames` already reads — no second fetch. It exists
+// so the Highlights preview can caption a clip against the right game and the
+// Photos preview has something to walk. The Photos preview still can't pay
+// for a full season walk-back the way the Games tab's rail does: it caps to
+// ONE bounded batch of live per-game fetches (TeamPhotosRail's own `limit`
+// prop), never the open-ended grow-on-scroll the tab affords.
+//
+// What it deliberately does NOT fetch, and why the front door stays fast: no
 // per-pitcher game-log fan-out and no recent-form boxscore window (Roster), no
-// photo walk-back or per-game uniform join (Games/Org), no league-wide team
-// stats or comeback file (Numbers), no affiliate tree, complex clubs, org
-// prospect roster fan-out or WAR/rookie badge files (Org/Roster).
+// per-game uniform join (Games/Org), no league-wide team stats or comeback
+// file (Numbers), no affiliate tree, complex clubs, org prospect roster
+// fan-out or WAR/rookie badge files (Org/Roster).
 //
 // Unlike the other four tabs this does NOT sit alongside loadTeamIdentity: the
 // Standing preview already needs the standings response, and re-fetching it just
@@ -139,6 +149,9 @@ export async function loadOverview(id, asOf) {
     // and the W-L its header carries. Every game older than those is the Games
     // tab's grid, so the Overview never needs the full decided-game list.
     recentGames: recentDecidedGames(schedule),
+    // Highlights + Photos previews' own game list — see the header comment
+    // above for why this costs no second fetch.
+    seasonGames: allDecidedGames(schedule),
     // Lineup preview.
     lineupDefense: lineupDefenseFrom(preferredLineupFrom(fullRoster, id), injuredIds),
     previewStartingPitchers,

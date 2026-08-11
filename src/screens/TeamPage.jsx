@@ -1,6 +1,7 @@
 import { useAsync } from '../hooks/useAsync.js'
 import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
+import { isMlbTeamId } from '../lib/teams.js'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
@@ -12,6 +13,8 @@ import { loadOverview } from './team/data/loadOverview.js'
 import { hiddenTeamTabs } from './team/data/shared.js'
 import { StandingsCard } from './team/modules/StandingsCard.jsx'
 import { LastTenGames } from './team/modules/TeamGames.jsx'
+import { TeamHighlightsRail } from './team/modules/media/TeamHighlightsRail.jsx'
+import { TeamPhotosRail } from './team/modules/media/TeamPhotosRail.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
 import { BallparkCard } from './team/modules/ballpark/BallparkCard.jsx'
 
@@ -20,6 +23,10 @@ import { BallparkCard } from './team/modules/ballpark/BallparkCard.jsx'
 // thing, and none of them is the last word on anything.
 const PREVIEW_LEADER_CATEGORIES = 3
 const PREVIEW_TRANSACTIONS = 3
+// Lighter than the Games tab's own rails on purpose — loadOverview.js's own
+// header explains why the front door can't pay for either module in full.
+const PREVIEW_HIGHLIGHTS = 6
+const PREVIEW_PHOTOS = 6
 
 // The door itself: one text link under a preview, built from the same shared
 // ChevronLink TeamLeaders' own built-in door uses (reused as-is below rather
@@ -71,6 +78,7 @@ export function TeamPage({ id, asOf, sportId }) {
     leagueSurpriseScores,
     leagueFormScores,
     recentGames,
+    seasonGames,
     lineupDefense,
     previewStartingPitchers,
     previewCloser,
@@ -129,10 +137,32 @@ export function TeamPage({ id, asOf, sportId }) {
       )}
 
       {/* Last 10 — the true last ten, newest last. Every game before them is
-          the Games tab's grid, and is the only thing this preview holds back. */}
+          the Games tab's grid, and is the only thing this preview holds back.
+          Highlights and Photos ride along under it, same "recent games"
+          subject and same door out — both capped lighter than the Games
+          tab's own rails (see loadOverview.js's header). Photos carries its
+          own "Full season" door inside its card head (same reasoning as the
+          Leaders preview's built-in "See all"), so only one shared door
+          closes this whole group. */}
       {recentGames.length > 0 && (
         <>
           <LastTenGames teamId={team.id} asOf={asOf} recentGames={recentGames} />
+          {seasonGames.length > 0 && isMlbTeamId(team.id) && (
+            <TeamHighlightsRail
+              key={`highlights-${team.id}`}
+              teamId={team.id}
+              games={seasonGames}
+              limit={PREVIEW_HIGHLIGHTS}
+            />
+          )}
+          {seasonGames.length > 0 && (
+            <TeamPhotosRail
+              key={`photos-${team.id}-${asOf ?? ''}`}
+              teamId={team.id}
+              games={seasonGames}
+              limit={PREVIEW_PHOTOS}
+            />
+          )}
           <PreviewDoor label="Season schedule" onClick={() => go('games')} />
         </>
       )}
