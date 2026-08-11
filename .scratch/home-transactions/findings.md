@@ -1,5 +1,14 @@
 # Home-page transaction log — data study
 
+> **Read `docs/transactions-wire.md` first.** Everything this session learned
+> about the endpoint, its vocabulary and the roster rules underneath was
+> consolidated there as the durable reference. This file is the working record of
+> how the first question was answered — whether the team-page pipeline could be
+> reused for a league-wide feed. **It could not**, and the session moved to a
+> clean slate built on the raw wire; the later scripts in this directory
+> (`type-census.mjs`, `last48.mjs`, `join-related.mjs`, `wire.mjs`) are that
+> second effort.
+
 **Status:** exploration only. No app code changed. This is the evidence a design
 decision should be made against, not a design.
 **Slug:** home-transactions

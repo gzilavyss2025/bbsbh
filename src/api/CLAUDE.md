@@ -136,4 +136,9 @@ Related research docs, worth reading before wiring a NEW source:
   enrichment endpoints, with per-endpoint spoiler risk.
 - `docs/uniforms-and-logos.md` — verified (July 2026) findings on statsapi's
   uniform endpoints and what logo art the mlbstatic CDNs do and don't serve.
+- `docs/transactions-wire.md` — verified (August 2026) dictionary of
+  `/api/v1/transactions`: every field, all 22 type codes and the thirteen
+  distinct events hiding inside two of them, how the wire repeats itself, and
+  the 40-man/26-man roster rules the sentences encode but never state. Read it
+  before touching `teamTransactions.js` or building anything league-wide.
 - `docs/MLB_STATS_API.md` — the endpoint reference.
