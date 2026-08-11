@@ -91,7 +91,7 @@
 // Both are absent (not zero) on rows swept before this schema — a pre-schema
 // row and a game with genuinely no challenges must stay distinguishable, so
 // aggregate() counts contributing games rather than summing blindly.
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, rm } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { readJsonOr, writeJsonAtomic } from './lib/io.js'
 import { fileURLToPath } from 'node:url'
@@ -101,6 +101,7 @@ import { estimateGameConsistency } from '../src/lib/euz.js'
 import { pitchFavor } from '../src/lib/runExpectancy.js'
 import { getJson } from './lib/statsapi.mjs'
 import { parseArgs, dateRange } from './lib/args.mjs'
+import { mergeAccuracyRows } from './lib/umpire-accuracy-merge.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 // TWO OUTPUTS, and between them they ARE the archive — split by who asks.
@@ -411,14 +412,6 @@ function aggregate(games) {
   return sum
 }
 
-// Merge one game row into a umpire's list, deduped by gamePk (a Final game is
-// immutable, so a re-run overwrites with identical numbers), newest first.
-function upsertGame(games, row) {
-  const byPk = new Map(games.map((g) => [g.gamePk, g]))
-  byPk.set(row.gamePk, row)
-  return [...byPk.values()].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
-}
-
 async function mapWithConcurrency(items, limit, fn) {
   const results = new Array(items.length)
   let cursor = 0
@@ -511,27 +504,13 @@ const rows = await mapWithConcurrency(targets, 6, async (t) => {
   return { ...t, acc }
 })
 
-// Merge every fresh row into the umpire it belongs to.
-const umpires = {}
-for (const [id, u] of Object.entries(prev.umpires ?? {})) {
-  umpires[id] = { id: u.id ?? Number(id), name: u.name, games: [...(u.games ?? [])] }
-}
-let added = 0
-for (const r of rows) {
-  if (!r) continue
-  const key = String(r.umpId)
-  if (!umpires[key]) umpires[key] = { id: r.umpId, name: r.umpName, games: [] }
-  else umpires[key].name = r.umpName // keep the freshest spelling
-  const before = umpires[key].games.length
-  umpires[key].games = upsertGame(umpires[key].games, {
-    gamePk: r.gamePk,
-    date: r.date,
-    level: r.level,
-    gameType: r.gameType,
-    ...r.acc,
-  })
-  if (umpires[key].games.length > before) added++
-}
+// Merge every fresh row into the umpire it belongs to (mergeAccuracyRows'
+// header explains the crew-reassignment case this guards against).
+const priorGamePks = new Set(
+  Object.values(prev.umpires ?? {}).flatMap((u) => (u.games ?? []).map((g) => g.gamePk)),
+)
+const umpires = mergeAccuracyRows(prev.umpires, rows)
+const added = rows.filter((r) => r && !priorGamePks.has(r.gamePk)).length
 
 // Recompute each umpire's aggregates from his (merged) rows, split two ways.
 //   • By LEVEL (MLB vs AAA) — the two run different regimes and rank against
@@ -576,8 +555,20 @@ await writeJsonAtomic(outSummary, {
 for (const [id, u] of Object.entries(result)) {
   await writeJsonAtomic(join(outRows, `${id}.json`), { id: u.id, name: u.name, games: u.games })
 }
+// A row shard this run's merge purged (a game reassigned away, see
+// mergeAccuracyRows) must not survive on disk — it's this job's own merge
+// base next run, so a stale file left behind would reseed the ghost umpire
+// right back into `prev.umpires` once the reassigned game ages out of the
+// trailing --since window and can no longer trigger a fresh purge.
+let swept = 0
+for (const f of await readdir(outRows).catch(() => [])) {
+  if (!f.endsWith('.json') || result[f.replace('.json', '')]) continue
+  await rm(join(outRows, f))
+  swept++
+}
 const gamesTotal = Object.values(result).reduce((n, u) => n + u.games.length, 0)
 console.log(
   `wrote ${outSummary} + ${Object.keys(result).length} row shards — ${gamesTotal} games on file ` +
-    `(+${added} new from ${startDate}..${endDate}, ${targets.length} finals swept)`,
+    `(+${added} new from ${startDate}..${endDate}, ${targets.length} finals swept)` +
+    (swept ? `, swept ${swept} stale row shard(s)` : ''),
 )

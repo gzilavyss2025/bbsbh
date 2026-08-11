@@ -58,7 +58,7 @@ loads IN FULL for every session that works in this directory, and per-generator
 detail is reference you look up, not a rule you must hold before touching
 anything here. Same split `src/api/CLAUDE.md` made into `docs/api/`.
 
-Three things about that catalog belong HERE, because they are rules rather than
+Four things about that catalog belong HERE, because they are rules rather than
 reference:
 
 - **Wire a new generator into the cron that runs it, in the same commit.** A
@@ -78,6 +78,15 @@ reference:
   `gen-callouts.mjs` imports the checkpoint constants from
   `src/api/callout-notes/checkpoints.js`). The deliberate exceptions are small
   self-contained mirrors, and each one says so at its own top.
+- **An append-only generator that merges fresh rows into a carried-forward
+  store, keyed on an upstream-asserted identity** (an official, a player, any
+  id the source itself assigns rather than one this repo mints) **must use
+  `scripts/lib/reassignable-merge.mjs`, or say in a comment why its key can't
+  be retroactively reassigned.** If the upstream source ever corrects that
+  key after the fact, a naive per-key merge leaves a permanent ghost row on
+  the old key — real incident: MLB corrected an AAA game's Home Plate umpire,
+  and the old umpire kept the game's accuracy stats forever
+  (`gen-umpire-accuracy.mjs`, fixed in `scripts/lib/umpire-accuracy-merge.mjs`).
 
 A generator file is a top-level script: importing one RUNS it. A helper inside
 one can therefore never be unit-tested, so a helper worth testing goes in
