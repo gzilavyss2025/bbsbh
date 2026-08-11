@@ -19,8 +19,9 @@ const PHOTO_GROW_STEP = 20
 // The destination behind the Photos rail's own "Full season" door
 // (TeamPhotosRail.jsx, TeamHighlightsRail's neighbor on both the Overview
 // and Games tab) — every photographer still MLB's content package carries
-// for this club's decided games this season, newest first, growing as you
-// scroll toward Opening Day. Same photographer-only filter as that rail
+// for this club's games this season (including one still in progress — see
+// loadTeamPhotos.js/allStartedGames), newest first, growing as you scroll
+// toward Opening Day. Same photographer-only filter as that rail
 // (`onlyPhotographer` inside `fetchTeamPhotoBatch`), same walk-back shape,
 // just a vertical page instead of a horizontal rail and with no `limit` —
 // there is no lighter version of "the whole season."
@@ -29,8 +30,11 @@ const PHOTO_GROW_STEP = 20
 // CLAUDE.md), for the same reason `/photos` (GamePhotosPage.jsx) and
 // gamePhotos.js itself aren't: a recap or celebration photo narrates the
 // outcome just by being visible, so this page carries the same "Unsealed"
-// notice rather than a SealBox — see loadTeamPhotos.js for why its schedule
-// fetch carries no cutoff either.
+// notice rather than a SealBox. It goes one step further than every other
+// gamePhotos.js consumer by including a LIVE game, not just decided ones —
+// a deliberate product call (there's no expectation of spoiler coverage on
+// a photo-browsing page reached by its own explicit door), not an oversight
+// of the usual `won != null` invariant the rest of the app holds to.
 export function TeamPhotosPage({ id, asOf, sportId: _sportId }) {
   const teamId = Number(id)
   const data = useAsync(() => loadTeamPhotos(teamId, asOf), [teamId, asOf])
@@ -158,7 +162,8 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
         <span className="gamephotos__noticetag">Unsealed</span>
         <p>
           Every professional photo MLB’s content package carries for the {season} season, newest
-          first. Personal use only — photos are copyrighted (AP/Getty/USA Today Sports via MLB).
+          first — including tonight’s game, if one’s in progress. Personal use only — photos are
+          copyrighted (AP/Getty/USA Today Sports via MLB).
         </p>
       </div>
 

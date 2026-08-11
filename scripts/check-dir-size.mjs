@@ -250,7 +250,12 @@ const BUDGETS = {
   // pulled out of loadRoster.js and recentForm.js, which had each grown their
   // own copy of the same cap-and-slice logic (independently, so a pitcher
   // could rank below both cutoffs and vanish from the roster page entirely).
-  'src/api': 91,
+  // +1 for scheduleGames.js — recentDecidedGames/allDecidedGames/
+  // allStartedGames split OUT of schedule.js when that file hit its own size
+  // budget. Sibling of schedule.js in every sense that matters (same rows in,
+  // no fetch of its own), so it belongs beside it rather than in a
+  // subdirectory invented just to hold one file.
+  'src/api': 92,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

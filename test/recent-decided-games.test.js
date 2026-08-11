@@ -3,10 +3,10 @@
 // null`, which fetchTeamSchedule already cutoff-gates against a mid-scoring
 // visitor's ?d= date, never from Final status directly (which would bypass
 // that cutoff and could surface the very game the visitor opened this page
-// from). See recentDecidedGames' own header comment in src/api/schedule.js.
+// from). See recentDecidedGames' own header comment in src/api/scheduleGames.js.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { recentDecidedGames } from '../src/api/schedule.js'
+import { recentDecidedGames } from '../src/api/scheduleGames.js'
 
 function game(apiDate, { won = null, final = false } = {}) {
   return {

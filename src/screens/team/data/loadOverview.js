@@ -1,6 +1,7 @@
 import { fetchTeam, fetchTeamRoster, fetchTeamIL, fetchStandings } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
-import { fetchTeamSchedule, recentDecidedGames, allDecidedGames } from '../../../api/schedule.js'
+import { fetchTeamSchedule } from '../../../api/schedule.js'
+import { recentDecidedGames, allDecidedGames } from '../../../api/scheduleGames.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../../../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'

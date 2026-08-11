@@ -12,6 +12,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 
 | File | Tests | Modules under test | Feature |
 |---|---|---|---|
+| all-started-games.test.js | 3 | src/api/schedule.js | TeamPhotosPage's game list — keys on `started`, not `won`, so a live game's photos are reachable before it's Final |
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
 | api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |
 | box-score-note-attribution.test.js | 13 | src/api/boxscore.js, src/api/boxscore/gameNotes.js | Which club each info-block row prints under (HBP/IBB follow the BATTER), and the three parse shapes that used to drop a row into the shared foot |
@@ -81,6 +82,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
+| recent-decided-games.test.js | 4 | src/api/scheduleGames.js | recentDecidedGames' `won != null` cutoff invariant (Last 10 Games) |
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
