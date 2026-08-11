@@ -146,3 +146,51 @@ Three things follow from the change:
 
 The registry keeps its closed-set guarantee unchanged: an unknown id still
 cannot be stored, and every value is still length-bounded server-side.
+
+## Amendment: the deserialization flag also disabled the hash pairing
+
+**2026-08-11.** The `automaticDeserialization: false` hardening above (first
+amendment) carried a cost nobody priced, and for seventeen days it made the
+entire copy store a no-op in production.
+
+The flag was chosen to stop `@upstash/redis` JSON-parsing a stored value like
+`"42"` into a number that `sanitizeOverrides` would then drop. It does that. It
+also does more: the client implements the flag by replacing its whole
+deserializer with the identity function, and for `HGETALL` that deserializer is
+what pairs Redis's flat `[field, value, field, value]` reply into an object.
+
+So `redis.hgetall()` returned an ARRAY. `sanitizeOverrides` walked it with
+`Object.entries`, saw the ids `"0"`/`"1"`/`"2"`, matched none against the
+registry, and returned `{}`. Every override — every consent string, every
+ballpark note, every uploaded park photo and wordmark — was invisible on every
+read from 2026-07-25 (#382) until this fix. Writes landed in Redis correctly the
+whole time; nothing was ever lost.
+
+Two quieter consequences shared the same root. `staleKeys` is computed from that
+same read, so it was always empty and **clearing a field never deleted it**; and
+every version-history entry snapshotted an empty `prev`, so **undo had nothing
+to restore**.
+
+What let it live that long is the part worth keeping:
+
+- **An empty override map is indistinguishable from a deploy with no copy
+  store**, which is a supported state (ADR-0022's degrade). The app renders
+  shipped defaults, the GET answers 200, and no client reports anything. This is
+  the same failure mode `api/_lib/nodeHandler.js`'s header was written about — a
+  graceful degrade hiding a hard failure indefinitely. Twice now.
+- **The endpoint had no request-level test**, and the fakes that exist could not
+  have caught it. `test/api-books-handlers.test.js` and
+  `test/api-account-prefs.test.js` fake `hgetall` as an object, which is correct
+  for endpoints on the client's default settings — and asserts a shape *this*
+  endpoint's client never produces. A fake that encodes the caller's assumption
+  cannot falsify it.
+
+The fix keeps the flag, whose reason still holds, and restores the pairing
+explicitly: `hashFromReply` in `api/copy.js`, used by both the public GET and
+the POST's `prev` snapshot. It accepts an object unchanged, so a future client
+version that pairs the hash up despite the flag widens what the endpoint reads
+rather than breaking it. `test/api-copy-handler.test.js` drives the real handler
+through a real client over a stubbed HTTP transport answering what the Upstash
+REST API actually answers — a base64-encoded flat array — and pins the string
+round-trip (`"42"` stays `"42"`) so a future fix cannot trade this bug back for
+the one the flag prevents.

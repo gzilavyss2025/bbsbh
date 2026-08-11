@@ -81,12 +81,27 @@
   color: var(--text-body);
   text-wrap: balance;
 }
-/* A park's own wordmark when one is on file (LOGO_KEYS in ballparkArt.js).
-   Bounded so a tall mark can't out-scale the photo beside it. */
+/* A park's own wordmark — one on file (LOGO_KEYS in ballparkArt.js) or the one
+   the owner uploaded from the card (`ballpark.{key}Wordmark`). Bounded so a
+   mark can't out-scale the photo beside it.
+
+   TWO CEILINGS, BINDING TWO DIFFERENT SHAPES. A WIDE wordmark — the shape this
+   slot was built for, a park's name set on one line — is bound by `max-width`,
+   and its height falls out far below any height cap. A SQUARE-ish mark (a
+   roundel, a crest, a stacked lockup) is bound by `max-height` instead, so that
+   number alone decides how large it renders.
+
+   Which is why the old 5rem read as a bug rather than a bound: it was picked
+   against the wide case, where it never binds at all, and it silently became
+   the ONLY limit on a square one — 80px in a column sized to a photograph, a
+   thumbnail where the park's name should be. Raising it is safe precisely
+   because of that asymmetry: a wide mark is already width-bound and does not
+   move. 9rem keeps a square mark comfortably shorter than the 1.85:1 photo it
+   sits beside at every width this card is laid out at, phone stack included. */
 .ballparkcard__logo {
   display: block;
   max-width: 100%;
-  max-height: 5rem;
+  max-height: 9rem;
   width: auto;
   object-fit: contain;
 }
