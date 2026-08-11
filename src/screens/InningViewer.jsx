@@ -814,23 +814,33 @@ export function InningViewer({
               treatment={winProbTreatment}
               focused
             />
-            {/* Three conditions, each shutting off a way this card can lie or
+            {/* Two conditions, each shutting off a way this card can lie or
                 loiter:
-                  • `focus.steps > 0` — not before the half's first at-bat is
-                    revealed. That moment is UpNextBatters' own (HalfInning).
                   • `!focus.postHalf` — not once the half is OVER. "Who's due
                     up" is meaningless after the 3rd out.
-                  • `stepFrontierIdx != null` — not on a half the reader jumped
-                    to out of order. The card's whole point is tracking the
-                    batting order as the reader steps, and it can only do that
-                    with `lastAtBatIndex`, which InningViewer only has for the
-                    half immediately after the reveal mark (see the win-prob
-                    clamp above). Reach a half via RollingLine's navigator and
-                    step it and the arithmetic silently falls back to the
-                    PRE-half leadoff slot — so the card would name the same
-                    three men no matter how far in the reader got. A card that
-                    quietly stops being true is worse than no card. */}
-            {focus.steps > 0 && !focus.postHalf && stepFrontierIdx != null && (
+                  • `focus.steps === 0 || stepFrontierIdx != null` — the card
+                    tracks the batting order as the reader steps, and it can
+                    only do that with `lastAtBatIndex`, which InningViewer has
+                    only for the half immediately after the reveal mark (see
+                    the win-prob clamp above). Reach a half via RollingLine's
+                    navigator and step it and the arithmetic silently falls
+                    back to the PRE-half leadoff slot — the card would name the
+                    same three men no matter how far in the reader got, and a
+                    card that quietly stops being true is worse than no card.
+                    BEFORE the first step, though, that fallback is not a
+                    fallback: the pre-half leadoff slot is the right answer for
+                    any half, which is the very figure UpNextBatters shows.
+
+                THE OPENING STATE IS THIS CARD'S TOO. It used to start only at
+                the first step, leaving the scorebug alone in the row — and
+                `.gamehud--console:only-child` then stretched it across the
+                whole stage, so a half OPENED on an outsized band with nothing
+                beside it, which is the state the reader lands in every half.
+                The half's first three batters fill that width instead, and the
+                band keeps its 264px dock width throughout. `.upnext` in the
+                stage below stands down while this card is up, so the same
+                three men are not named twice (styles/focus/stage.css). */}
+            {!focus.postHalf && (focus.steps === 0 || stepFrontierIdx != null) && (
               <DueUpConsole
                 feed={feed}
                 inning={effInning}

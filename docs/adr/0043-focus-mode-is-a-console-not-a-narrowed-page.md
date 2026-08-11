@@ -166,3 +166,32 @@ Three things come off, all on the band:
 `--console-hud-h`'s phone value follows the measurement down, 167px -> 126px.
 Both numbers are still measured, and the due-up cards beside the band still
 stand on them.
+
+## Amendment (2026-08-11): the held state is ONE at-bat too, and Summary is the whole half
+
+Issue #660 asked whether `held` — focus mode outliving the half it is scoring,
+until the reader taps Summary — should exist at all, and recorded that while it
+did, "Rest of half" and the final commit both rendered the WHOLE half in the
+one-at-bat hero layout. **`held` stays. The layout is what was wrong.**
+
+The tap that reveals a half's last at-bat is the tap that commits the half:
+`stepCap` goes null, `stepping` goes false, and the focus window — which was
+gated `focusOne && stepping` — went with it. So the play that ends an inning
+answered by dumping every at-bat of that inning onto the screen at once, at the
+exact moment the reader is writing that play down. A GIDP to end the top of the
+1st put four cards where one had been.
+
+The window is now gated on `focusOne` alone (`PlayByPlay.jsx`), with the step
+count measured against the full array once there is no cap left to measure
+against. Focus mode holds ONE at-bat — the one just revealed — for as long as it
+is focus mode, commit or no commit. That is what ADR-0043 already claimed the
+mode was.
+
+**Summary is the answer to the other half of the question.** "How did the half
+end up" is a real thing to want, and it is a different screen: the whole half's
+cards, the R/H/E/LOB stat card (`.innings__row2`, hidden until then — see
+`focus/stage.css`, whose comment used to justify itself with a claim `held`
+falsified), the ordinary page. One tap, on request, never automatically.
+
+`focus.postHalf` and the Summary/next-half bar are unchanged; this is the layout
+behind them, not the controls.

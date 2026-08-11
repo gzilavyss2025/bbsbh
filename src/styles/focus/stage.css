@@ -34,7 +34,17 @@
 /* The stat/WPA row, both inline copies of the entering lineups/defense, and the
    pre-half callout strip. All are end-of-half material or duplicated by the
    reference panel: the row2 stat card is the R/H/E/LOB summary you write when
-   the half CLOSES, at which point the half commits and focus mode ends anyway.
+   the half CLOSES.
+
+   That used to say "…at which point the half commits and focus mode ends
+   anyway", which `held` made untrue (issue #660) — focus mode outlives the
+   commit, holding the last at-bat on screen until the reader taps Summary.
+   Hiding row2 through that window is now the deliberate half of the same
+   arrangement, not an accident of it: the tap that ends a half is a play the
+   reader is still writing down, and Summary is the one surface that answers
+   "how did the half end up" — the whole half's cards, its totals, its stat
+   card. Every one of those arrives together, one tap away, rather than
+   arriving on top of the play being charted.
 
    The callout strip folds for a different reason — it MOVED rather than went
    away. "The Reds are 9-13 in his starts this season" is a margin note in the
@@ -135,6 +145,23 @@
     min-width: 0;
     gap: var(--space-2);
     padding: var(--space-2) 0;
+  }
+
+  /* One "due up" on screen at a time. Before the half's first at-bat both
+     would show it: this card in the console row and HalfInning's own `.upnext`
+     strip in the stage under it, naming the same three men from the same
+     selector. The console card is the one that stays as the reader steps, so
+     the strip is what stands down.
+
+     `:has()`, not a flag threaded down through HalfInning — the condition is
+     literally "did the console card render", which the DOM already answers,
+     and the card can decline on its own (no lineup posted, a MiLB gap) in
+     which case the strip is still the reader's only copy and must survive.
+     Scoped INSIDE this media block on purpose: below it `.dueupconsole` is
+     still in the DOM, only `display: none`, so an unscoped `:has()` would
+     match on a phone and hide the strip with nothing to replace it. */
+  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .upnext {
+    display: none;
   }
 
   .dueupconsole__col {
