@@ -3,7 +3,7 @@ import test from 'node:test'
 import {
   shapeStandings,
   shapeWildCard,
-  expectedPace,
+  expectedRecord,
   formatMagicNumber,
   attachTeamField,
   extractRanks,
@@ -12,27 +12,27 @@ import {
   DASH,
 } from '../src/api/standings.js'
 
-test('expectedPace prefers the feed\'s own xWinLoss expected record', () => {
+test('expectedRecord prefers the feed\'s own xWinLoss expected record', () => {
   const t = {
     wins: 53,
     losses: 47,
     records: { expectedRecords: [{ type: 'xWinLoss', wins: 53, losses: 47 }] },
   }
-  assert.equal(expectedPace(t), '53-47')
+  assert.equal(expectedRecord(t), '53-47')
 })
 
-test('expectedPace falls back to a Pythagorean split over games played so far when expectedRecords is absent', () => {
+test('expectedRecord falls back to a Pythagorean split over games played so far when expectedRecords is absent', () => {
   const t = { wins: 10, losses: 5, runsScored: 80, runsAllowed: 50 }
-  const pace = expectedPace(t)
+  const pace = expectedRecord(t)
   assert.match(pace, /^\d+-\d+$/)
   const [xWins, xLosses] = pace.split('-').map(Number)
   assert.equal(xWins + xLosses, 15) // games played
   assert.ok(xWins > xLosses) // more runs scored than allowed should favor the winning side
 })
 
-test('expectedPace is DASH with no games played or no runs data', () => {
-  assert.equal(expectedPace({}), DASH)
-  assert.equal(expectedPace({ wins: 0, losses: 0 }), DASH)
+test('expectedRecord is DASH with no games played or no runs data', () => {
+  assert.equal(expectedRecord({}), DASH)
+  assert.equal(expectedRecord({ wins: 0, losses: 0 }), DASH)
 })
 
 test('formatMagicNumber reads the division leader\'s magicNumber', () => {
@@ -100,17 +100,17 @@ function rawRecords() {
   ]
 }
 
-test('shapeStandings threads pace and magic onto the division leader', () => {
+test('shapeStandings threads the expected record and magic onto the division leader', () => {
   const [lg] = shapeStandings(rawRecords())
   const [leader, second] = lg.divisions[0].teams
-  assert.equal(leader.pace, '58-42')
+  assert.equal(leader.expWL, '58-42')
   assert.equal(leader.magic, '20')
   assert.equal(second.magic, DASH)
 })
 
-test('shapeWildCard threads pace but never a magic number (division-board-only feature)', () => {
+test('shapeWildCard threads the expected record but never a magic number (division-board-only feature)', () => {
   const [lg] = shapeWildCard(rawRecords())
-  assert.equal(lg.leaders[0].pace, '58-42')
+  assert.equal(lg.leaders[0].expWL, '58-42')
 })
 
 test('attachTeamField stamps a value by team id onto a Division-shaped tree', () => {

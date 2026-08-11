@@ -17,6 +17,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
+import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
@@ -49,6 +50,40 @@ function formatGrade(grade) {
 function GradePill({ grade, tier }) {
   const cls = tier === 'high' ? ' rankchip--good' : tier === 'low' ? ' rankchip--bad' : ''
   return <span className={`rankchip${cls}`}>{formatGrade(grade)}</span>
+}
+
+// The league mark that rides the right edge of a league's bar. The two league
+// logos are on the same CDN as every club mark, under the All-Star team ids the
+// All-Star pages already draw (159 American, 160 National) — see
+// components/allstar/AllStarGameResult.jsx. Both are precomputed as knockout
+// art by scripts/gen-mono-logos.mjs, since the bar is navy and both marks are
+// drawn largely in navy themselves (ADR-0031).
+const LEAGUE_MARK_ID = { 103: 159, 104: 160 }
+
+// One league's header: the same navy/gold bar a club wears everywhere else in
+// the app, title hard left and the league mark bleeding to the bar's full
+// height on the right (SectionMasthead.jsx explains why the mark renders last).
+// `as="h2"` keeps the heading a real heading for screen-reader navigation, the
+// plain <h2> this replaced already was.
+function LeagueBar({ league }) {
+  const markId = LEAGUE_MARK_ID[league.id]
+  return (
+    <SectionMasthead
+      title={league.name}
+      as="h2"
+      logo={
+        markId ? (
+          <TeamLogo
+            teamId={markId}
+            name={league.name}
+            variant="mono"
+            crop="bar"
+            className="metricbar__logo"
+          />
+        ) : null
+      }
+    />
+  )
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -106,7 +141,7 @@ function buildJumps(today) {
 }
 
 // Screen: league-wide standings, both leagues × three divisions, with home/away
-// splits, runs for/against, run differential, expected (Pythagorean) pace,
+// splits, runs for/against, run differential, expected (Pythagorean) W-L,
 // Season Grade, division magic number/clinch, streak, last-ten, and a
 // rank-movement trend glyph riding on GB. Spoiler-safe by default — the view
 // opens "entering today" (through yesterday) and today's live standings are an
@@ -349,7 +384,9 @@ export function StandingsPage() {
         {boardMode === 'wildcard'
           ? leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
-                <h2 className="lgstand__league">{lg.name}</h2>
+                <div className="lgstand__bar">
+                  <LeagueBar league={lg} />
+                </div>
                 <div className="ledger-wrap standings-wrap">
                   <table className={`standings standings--full standings--wc ${expandedCols ? 'is-expanded' : ''}`.trim()}>
                     <thead>
@@ -359,7 +396,7 @@ export function StandingsPage() {
                         <th>L</th>
                         <th>Pct</th>
                         <th>GB</th>
-                        <th className="st-ext">Pace</th>
+                        <th className="st-ext">Exp W-L</th>
                         <th className="st-ext">Grade</th>
                         <th className="st-ext">Strk</th>
                         <th className="st-ext">L10</th>
@@ -384,7 +421,7 @@ export function StandingsPage() {
                           <td>
                             {t.gb} <TrendGlyph trend={t.trend} />
                           </td>
-                          <td className="st-ext">{t.pace}</td>
+                          <td className="st-ext">{t.expWL}</td>
                           <td className="st-ext">
                             <GradePill grade={t.grade} tier={t.gradeTier} />
                           </td>
@@ -416,7 +453,7 @@ export function StandingsPage() {
                             <td>
                               {t.wcgb} <TrendGlyph trend={t.trend} />
                             </td>
-                            <td className="st-ext">{t.pace}</td>
+                            <td className="st-ext">{t.expWL}</td>
                             <td className="st-ext">
                               <GradePill grade={t.grade} tier={t.gradeTier} />
                             </td>
@@ -432,7 +469,9 @@ export function StandingsPage() {
             ))
           : leagues.map((lg) => (
               <section className="lgstand" key={lg.id}>
-                <h2 className="lgstand__league">{lg.name}</h2>
+                <div className="lgstand__bar">
+                  <LeagueBar league={lg} />
+                </div>
                 {lg.divisions.map((div) => (
                   <div className="lgstand__div" key={div.id}>
                     <h3 className="lgstand__divname">{div.name}</h3>
@@ -451,7 +490,7 @@ export function StandingsPage() {
                             <th className="st-ext">RS</th>
                             <th className="st-ext">RA</th>
                             <th>Diff</th>
-                            <th className="st-ext">Pace</th>
+                            <th className="st-ext">Exp W-L</th>
                             <th className="st-ext">Grade</th>
                             <th className="st-ext">Strk</th>
                             <th className="st-ext">L10</th>
@@ -480,7 +519,7 @@ export function StandingsPage() {
                               <td className="st-ext">{t.rs}</td>
                               <td className="st-ext">{t.ra}</td>
                               <td className={t.diffTone}>{t.diff}</td>
-                              <td className="st-ext">{t.pace}</td>
+                              <td className="st-ext">{t.expWL}</td>
                               <td className="st-ext">
                                 <GradePill grade={t.grade} tier={t.gradeTier} />
                               </td>
