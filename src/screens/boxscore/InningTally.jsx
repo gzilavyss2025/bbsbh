@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 
@@ -18,11 +19,16 @@ import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 //
 // So the cube is unfolded the other way: one row per measure per club, one
 // number per box, and the measure NAMED down the left edge instead of decoded
-// from a legend. The two clubs stay adjacent inside each measure, because the
-// question this card answers is "who was grinding in the 4th?" — which is a
-// comparison between the clubs in one inning, not across measures. Nine innings
-// of two-digit boxes fit a phone with no scroll at all, which the old layout
-// never did; extras still scroll, in .bs__scroll, as before.
+// from a legend. Nine innings of two-digit boxes fit a phone with no scroll at
+// all, which the old layout never did; extras still scroll, in .bs__scroll, as
+// before.
+//
+// ONE CLUB AT A TIME. Both clubs' rows stacked inside each measure made eight
+// rows of numbers, and a reader following one staff had to skip every other
+// line. The head's club pill picks the side, so the card shows four rows — one
+// per measure — and the measure rules read as four blocks, not eight. The
+// staffs stay comparable because the pill is one tap and the shading scale does
+// not move when you switch (see below).
 //
 // THE SHADING ADDS NO INFORMATION — every number is printed, in full, in its
 // own box. It is a redundant encoding of that same number: a pencil wash whose
@@ -42,6 +48,7 @@ const TALLY_MEASURES = [
 ]
 
 export function InningTally({ rows, away, home, treatments }) {
+  const [shownSide, setShownSide] = useState('away')
   if (!rows || rows.length === 0) return null
 
   const byInningAndSide = new Map()
@@ -52,9 +59,11 @@ export function InningTally({ rows, away, home, treatments }) {
   const innings = [...byInningAndSide.keys()].sort((a, b) => a - b)
 
   // The busiest half-inning in a measure, over BOTH clubs — one scale per
-  // measure, so the two rows under a label are directly comparable. Floored at
-  // 1 so a measure that never happened (a game with no whiffs) divides safely
-  // and washes nothing.
+  // measure, and deliberately not narrowed to the club on show: a wash that
+  // rescaled itself on every tap of the club pill would make the two staffs
+  // look alike no matter how far apart their nights were. Floored at 1 so a
+  // measure that never happened (a game with no whiffs) divides safely and
+  // washes nothing.
   const peaks = Object.fromEntries(
     TALLY_MEASURES.map(({ key }) => [key, Math.max(1, ...rows.map((r) => r[key] ?? 0))]),
   )
@@ -67,12 +76,28 @@ export function InningTally({ rows, away, home, treatments }) {
     { side: 'away', team: away },
     { side: 'home', team: home },
   ]
+  const shown = sides.filter((s) => s.side === shownSide)
 
   return (
     <div className="bs__tally">
       <div className="bs__tallyHead">
-        <span className="bs__insightsTitle">By inning</span>
-        <span className="bs__tallyLegend">Darker is busier</span>
+        <span className="bs__insightsTitle">Pitching stats</span>
+        {/* Which club's staff the four rows belong to. Labelled with the club
+            abbreviation where the feed carries one, and with the plain side
+            otherwise — a thin MiLB feed often has no abbreviation at all. */}
+        <div className="bs__tallyScope" role="group" aria-label="Club">
+          {sides.map(({ side, team }) => (
+            <button
+              key={side}
+              type="button"
+              aria-pressed={shownSide === side}
+              className={`bs__tallyScopebtn ${shownSide === side ? 'is-active' : ''}`}
+              onClick={() => setShownSide(side)}
+            >
+              {team.abbreviation || (side === 'away' ? 'Away' : 'Home')}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="bs__scroll bs__tallyBody">
         <table className="bs__grid bs__grid--tally">
@@ -96,10 +121,10 @@ export function InningTally({ rows, away, home, treatments }) {
           </thead>
           {TALLY_MEASURES.map(({ key, label }) => (
             <tbody className="bs__tallyGroup" key={key}>
-              {sides.map(({ side, team }, i) => (
+              {shown.map(({ side, team }, i) => (
                 <tr key={side}>
                   {i === 0 && (
-                    <th className="bs__tallyMeasure" scope="rowgroup" rowSpan={sides.length}>
+                    <th className="bs__tallyMeasure" scope="rowgroup" rowSpan={shown.length}>
                       {label}
                     </th>
                   )}

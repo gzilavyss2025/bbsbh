@@ -25,20 +25,51 @@
 }
 .bs__tallyHead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: 12px 14px;
+  padding: 8px 14px;
 }
-/* What the shading means, in three words. This used to spell out the order of
-   four slash-joined figures ("Pitches / Whiffs / Fouls / LOB") because the
-   cells gave no other way to tell them apart; the measures name themselves
-   down the left edge now, so the only thing left to say is how to read the
-   wash. */
-.bs__tallyLegend {
+/* The club pill — which staff the four measure rows are counting. Two
+   segments, always both present, the same shape as .posinn__scopebtn's scope
+   switch but sized to a card head rather than a section: shrink-to-fit instead
+   of flex:1, so it sits at the head's right edge where the wash legend used to.
+   The legend went because the wash reads as a wash without being named, and a
+   control earns that corner more than a caption does. */
+.bs__tallyScope {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.bs__tallyScopebtn {
+  min-width: 44px;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: var(--radius-sm);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  font-family: var(--font-display);
   font-size: var(--fs-compact);
-  color: var(--text-caption);
-  white-space: nowrap;
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--inset-cell);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.bs__tallyScopebtn:active {
+  transform: scale(0.96);
+}
+.bs__tallyScopebtn.is-active {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+  box-shadow: none;
+}
+.bs__tallyScopebtn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .bs__tallyBody {
   padding: 2px 14px 12px;
@@ -60,10 +91,13 @@
   padding-bottom: 4px;
   color: var(--text-caption);
 }
-/* One hairline under each measure, none under the last — the four measures
-   read as four blocks rather than eight loose rows. */
+/* One rule under each measure, none under the last, in the card's own navy
+   rather than the soft hairline — with one club on show the four measures are
+   four single rows, and a wash-weight hairline between them let Pitches and
+   Whiffs read as one block of eight numbers. The rule is what separates the
+   four things being counted, so it is drawn in ink. */
 .bs__tallyGroup:not(:last-child) tr:last-child > * {
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  border-bottom: var(--bw-hair) solid var(--accent-primary);
 }
 
 /* The measure's name, set once per pair and centred across both rows: the
@@ -84,8 +118,14 @@
 /* !important on both: ".bs__grid th, .bs__grid td" is element+class and beats
    a bare class on specificity, so its centred text-align and 5px 2px padding
    would otherwise win here and in the club column below. */
+/* `width: 1%`, not the logo's own 22px: a px width here is a column the table's
+   auto layout hands a share of the leftover width to, which opened a finger's
+   worth of empty paper between the club mark and the first inning on a desktop
+   sheet. A percentage under its own min-content collapses the column onto the
+   mark instead, and the inning boxes keep every pixel of the surplus. Same
+   trick .bs__tallyMeasure already used. */
 .bs__tallyClub {
-  width: 22px;
+  width: 1%;
   padding-right: 6px !important;
 }
 .bs__tallyLogo {
@@ -186,7 +226,6 @@
     font-size: var(--fs-compact);
   }
   .bs__tallyClub {
-    width: 26px;
     padding-right: 10px !important;
   }
   .bs__tallyLogo {
