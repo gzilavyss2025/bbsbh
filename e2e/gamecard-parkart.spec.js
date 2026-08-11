@@ -61,9 +61,12 @@ test('no ballpark photo is fetched until a card is hovered', async ({ page }) =>
   await expect
     .poll(() => fetched.length, { message: 'hovering one card fetches its park' })
     .toBe(1)
-  // Grayscale and faded well down, because the '@' and both club names are
-  // printed over it — see the CSS partial's header.
-  await expect(backdrop).toHaveCSS('filter', 'grayscale(1)')
+  // Grayscale and faded well down, because the '@', both club names and the
+  // whole meta row are printed over it — see the CSS partial's header. The
+  // filter is on the ::before that carries the image, not on the frame that
+  // clips it, so it has to be read from there.
+  const filter = await backdrop.evaluate((el) => getComputedStyle(el, '::before').filter)
+  expect(filter).toBe('grayscale(1)')
   const opacity = Number(await backdrop.evaluate((el) => getComputedStyle(el).opacity))
   expect(opacity).toBeGreaterThan(0)
   expect(opacity).toBeLessThan(0.4)
@@ -71,12 +74,15 @@ test('no ballpark photo is fetched until a card is hovered', async ({ page }) =>
 
 test('a card carries its photo credit, since there is no room for a caption', async ({ page }) => {
   await page.goto('/')
-  const backdrop = page.locator('.gamecard__parkart').first()
-  await expect(page.locator('.gamecard').first()).toBeVisible()
+  const card = page.locator('.gamecard').first()
+  await expect(card).toBeVisible()
+  const backdrop = card.locator('.gamecard__parkart')
   if ((await backdrop.count()) === 0) test.skip(true, 'no card on this slate has a park on file')
-  // CC BY / CC BY-SA attribution, in the one place this surface has for it.
-  await expect(backdrop).toHaveAttribute('title', /\S/)
-  // And it stays decorative: the card's accessible name is the two clubs and
-  // the game, never the photographer.
+  // CC BY / CC BY-SA attribution, in the one place this surface has for it —
+  // on the CARD, because the layer is under every hoverable thing on it and a
+  // title down there would never be read. "{park} — {credit}".
+  await expect(card).toHaveAttribute('title', /\S+ — \S/)
+  // And the picture itself stays decorative: the card's accessible name is the
+  // two clubs and the game, never the photographer.
   await expect(backdrop).toHaveAttribute('aria-hidden', 'true')
 })

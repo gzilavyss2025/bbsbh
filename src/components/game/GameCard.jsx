@@ -109,12 +109,23 @@ export function GameCard({
     ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
   }
   const card = (
+    // `title` is the backdrop's CC BY / CC BY-SA attribution, carried on the
+    // CARD rather than on the layer itself: the photograph is the whole card
+    // now, and the layer sits under everything hoverable, so a title down there
+    // would never be read. Child titles (the delay pill, the readiness pips)
+    // still win where they exist, which is right — they are about the game,
+    // this is about the picture behind it.
     <div
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
       style={Object.keys(style).length ? style : undefined}
       onPointerEnter={armPark}
       onFocus={armPark}
+      title={park?.title}
     >
+      {/* The ballpark, washed grayscale and faded in behind the WHOLE card on
+          hover. First child, painting under everything else: the card is a
+          scorebook entry and the park is the paper it is written on. */}
+      {park && <span className="gamecard__parkart" aria-hidden="true" />}
       {/* Full-width date strip for a cross-date list where each card needs
           its own day, unlike the slate (one date heads the whole page).
           Absent on every ordinary slate card. */}
@@ -137,15 +148,6 @@ export function GameCard({
         onClick={() => onSelect(game)}
       >
         <div className="gamecard__teams">
-          {/* The ballpark, washed grayscale and faded in behind the '@' on
-              hover. First child so DOM order paints it under the watermark at
-              their shared z-index: the '@' is the thing you read, the park is
-              the paper it is printed on. Decorative — the card already names
-              both clubs and the game already knows where it is — so it carries
-              nothing but its photo credit, in `title`. */}
-          {park && (
-            <span className="gamecard__parkart" aria-hidden="true" title={park.title} />
-          )}
           {/* A screen-print-style watermark behind both marks rather than a
               small glyph between them — two offset '@' layers (see
               .gamecard__atmark in index.css), decorative like the mark it

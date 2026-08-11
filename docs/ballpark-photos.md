@@ -12,11 +12,12 @@ once:
   proper, at full size, with its linked credit;
 - the slate's game cards (`src/lib/ballpark/parkBackdrop.js` +
   `src/styles/06a-gamecard-parkart.css`) — the same photo drained to grayscale
-  and faded to a wash behind the '@' when you hover a game, keyed off the venue
-  the GAME is at rather than the home club's own park, so a neutral site shows
-  nothing rather than the wrong ballpark. Hover-capable pointers only, and the
-  image is not fetched until the first hover; `e2e/gamecard-parkart.spec.js`
-  pins both.
+  and faded to a wash filling the whole card when you hover a game (cropped a
+  further 5% off each edge, past the dead margin most of these frames carry),
+  keyed off the venue the GAME is at rather than the home club's own park, so a
+  neutral site shows nothing rather than the wrong ballpark. Hover-capable
+  pointers only, and the image is not fetched until the first hover;
+  `e2e/gamecard-parkart.spec.js` pins both.
 
 ## The licence rule, which is not optional
 
@@ -40,7 +41,8 @@ costs one line and is the decent thing to do.
 
 The slate backdrop has nowhere to put a caption or a link — a credit line under
 every card on the slate would be louder than the effect it captions — so it
-carries `creditLine()` in the layer's `title` alone. That is a weaker showing
+carries `creditLine()` in the card's `title` alone (on the card, not on the
+layer: the layer sits under every control and would never be hovered). That is a weaker showing
 than the Ballpark card's, and it leans on the card being one tap away with the
 full linked credit. Keep it that way: if the backdrop ever becomes reachable
 somewhere the Ballpark card is not, the credit has to grow, not shrink.
