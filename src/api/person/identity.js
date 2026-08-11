@@ -2,7 +2,7 @@
 // `currentTeam` just have nowhere else to point? See ../person.js's header
 // for the module's overall spoiler footing.
 
-import { isMlbTeamId } from '../../lib/teams.js'
+import { isMlbTeamId, teamFullName } from '../../lib/teams.js'
 import { DASH, num } from './shared.js'
 
 // ---------------------------------------------------------------------------
@@ -165,21 +165,33 @@ export function rosterStatusView(person, onDate) {
   const newest = (rows) => rows.reduce((a, b) => (a && a.endDate >= b.endDate ? a : b), null)
   const last = newest(ended)
   const retired = person.active === false || last?.status?.code === 'RET'
-  // Which club to name as his last stop. Prefer his most recent CURRENT-MLB
-  // stint, because a former big leaguer's final row is often a winter-league or
+  // Which ORG to name as his last stop, not which literal row. A stint's org is
+  // itself when the row is already an MLB club, or its affiliate's parentOrgId
+  // when the row is a MiLB one — so an outright assignment to his own club's
+  // farm team still reads as that club, not as whichever MLB team he last wore
+  // a jersey for. Prefer the newest stint that resolves to an org at all,
+  // because a former big leaguer's final row is often a winter-league or
   // independent club he passed through afterward — Céspedes ends at Águilas
   // Cibaeñas, Abreu at the Senadores de San Juan, Kinsler at the Long Island
-  // Ducks — and naming one of those as "last team" is the same wrong answer in
-  // a different costume. Falls back to the most recent stint of any kind, which
-  // is also what a career minor leaguer (and a pre-expansion club, absent from
-  // the current-30 table) correctly gets.
-  const stop = newest(ended.filter((e) => isMlbTeamId(e.team?.id))) ?? last
+  // Ducks — none of those carry a parentOrgId, so this still falls through to
+  // the affiliated stint underneath. Falls back to the most recent stint of
+  // any kind, which is also what a career minor leaguer (and a pre-expansion
+  // club, absent from the current-30 table) correctly gets.
+  const stintOrg = (e) => {
+    const id = e.team?.id
+    if (isMlbTeamId(id)) return id
+    return isMlbTeamId(e.team?.parentOrgId) ? e.team.parentOrgId : null
+  }
+  const stop = newest(ended.filter((e) => stintOrg(e) != null)) ?? last
+  const stopOrg = stop ? stintOrg(stop) : null
   return {
     state: retired ? 'retired' : 'free-agent',
     label: retired ? 'Retired' : 'Free Agent',
-    lastTeam: stop?.team?.id
-      ? { id: stop.team.id, name: stop.team.name ?? '' }
-      : null,
+    lastTeam: stopOrg
+      ? { id: stopOrg, name: teamFullName(stopOrg) ?? '' }
+      : stop?.team?.id
+        ? { id: stop.team.id, name: stop.team.name ?? '' }
+        : null,
     through: stop?.endDate ?? null,
   }
 }
