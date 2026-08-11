@@ -8,6 +8,7 @@
 import { getJson } from './statsapi.js'
 import { startingPositionAbbr } from './select.js'
 import { isTwoWay } from './person.js'
+import { splitPitchingStaff } from './pitcherSplit.js'
 
 async function fetchGameBoxscore(gamePk) {
   try {
@@ -163,25 +164,19 @@ export function buildRecentForm(games, roster) {
     ...zeroGameHitterIds,
   ].slice(0, 6)
 
-  // Starting Pitchers — top 5 by starts in the window, ties broken by the
-  // more recent start.
-  const startingPitcherIds = [...pitchStats.entries()]
-    .filter(([, s]) => s.starts > 0)
-    .sort((a, b) => b[1].starts - a[1].starts || (b[1].lastStartDate > a[1].lastStartDate ? 1 : -1))
-    .slice(0, 5)
-    .map(([id]) => id)
-
-  // Bullpen — everyone else who's actually appeared in relief. The closer
-  // (most saves in the window, if anyone has one) leads; the rest rank by
-  // appearances then innings, same convention as the season card. Capped at 8.
-  const startingSet = new Set(startingPitcherIds)
-  const relievers = [...pitchStats.entries()].filter(([id, s]) => !startingSet.has(id) && s.appearances > 0)
-  const maxSaves = relievers.reduce((max, [, s]) => Math.max(max, s.saves), 0)
-  const closerEntry = maxSaves > 0 ? relievers.find(([, s]) => s.saves === maxSaves) : null
-  const setupCrew = relievers
-    .filter(([id]) => !closerEntry || id !== closerEntry[0])
-    .sort((a, b) => b[1].appearances - a[1].appearances || b[1].outs - a[1].outs)
-  const bullpenIds = (closerEntry ? [closerEntry[0], ...setupCrew.map(([id]) => id)] : setupCrew.map(([id]) => id)).slice(0, 8)
+  // Starting Pitchers / Bullpen — by role, not rank; see splitPitchingStaff
+  // for why neither section is capped. Ties broken by the more recent start
+  // (starters) or appearances then innings (relievers), same convention as
+  // the season card.
+  const { starters, bullpen } = splitPitchingStaff(
+    [...pitchStats.entries()].map(([id, s]) => ({ id, ...s })),
+    {
+      compareStarters: (a, b) => b.starts - a.starts || (b.lastStartDate > a.lastStartDate ? 1 : -1),
+      compareRelievers: (a, b) => b.appearances - a.appearances || b.outs - a.outs,
+    },
+  )
+  const startingPitcherIds = starters.map((s) => s.id)
+  const bullpenIds = bullpen.map((s) => s.id)
 
   // Every current-roster pitcher who threw not one pitch in the window (a
   // true zero, not just "didn't start") — the caller (TeamPage.jsx) infers a

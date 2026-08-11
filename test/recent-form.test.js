@@ -78,7 +78,10 @@ test('a roster hitter who appeared in NONE of the window games still lands in To
   assert.deepEqual(substituteIds, [1, 3])
 })
 
-test('starting pitchers rank by starts in the window, capped at 5', () => {
+test('starting pitchers rank by starts in the window — every starter shows, no top-N cutoff', () => {
+  // A 6-man rotation used to lose its 6th starter here: this list was capped
+  // at 5, and a demoted starter has no relief appearances in the window
+  // either, so he wasn't picked up by the Bullpen list (below) as a fallback.
   const roster = [pitcher(10), pitcher(11), pitcher(12), pitcher(13), pitcher(14), pitcher(15)]
   const games = [
     { apiDate: '2026-07-11', side: 'away', box: box('away', [pitchLine(10, { started: true, outs: 18 })]) },
@@ -89,13 +92,11 @@ test('starting pitchers rank by starts in the window, capped at 5', () => {
     { apiDate: '2026-07-16', side: 'away', box: box('away', [pitchLine(10, { started: true, outs: 18 })]) },
     { apiDate: '2026-07-17', side: 'away', box: box('away', [pitchLine(15, { started: true, outs: 18 })]) },
   ]
-  const { startingPitcherIds } = buildRecentForm(games, roster)
-  assert.equal(startingPitcherIds.length, 5)
+  const { startingPitcherIds, bullpenIds } = buildRecentForm(games, roster)
   assert.equal(startingPitcherIds[0], 10) // 2 starts, most of anyone
-  // 11-15 are tied at 1 start each; ties break on the more recent start, so
-  // 11 (the earliest of the five, 2026-07-12) is the one bumped by the cap.
-  assert.equal(startingPitcherIds.includes(11), false)
-  assert.equal(startingPitcherIds.includes(15), true)
+  // 11-15 are tied at 1 start each; ties break on the more recent start.
+  assert.deepEqual(startingPitcherIds.slice(1), [15, 14, 13, 12, 11])
+  assert.deepEqual(bullpenIds, []) // none of them relieved — they're SPs, not double-listed
 })
 
 test('bullpen leads with the closer (most saves in the window), then ranks by appearances', () => {

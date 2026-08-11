@@ -375,6 +375,10 @@
       "why": "The laboring index and velo-decay flag. Walks only plays in revealed half-innings; deliberately not sealed, because a still-active pitcher needs partial-outing granularity (ADR-0009).",
       "importers": ["api/pitcher-callouts.js"]
     },
+    "pitcherSplit.js": {
+      "class": "spoiler-free",
+      "why": "Pure Starting Pitchers/Bullpen partition shared by loadRoster.js and recentForm.js. Roster role, no score."
+    },
     "pitchers.js": {
       "class": "reveal-gated",
       "why": "Running pitching lines (IP/R/ER/H). Accumulated ONLY from plays in revealed half-innings, so nothing from a sealed inning reaches the DOM — the ADR-0009 pattern this class is named for.",
