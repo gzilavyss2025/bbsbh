@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mergeAccuracyRows, upsertGame } from '../scripts/lib/umpire-accuracy-merge.mjs'
+import { mergeAccuracyRows } from '../scripts/lib/umpire-accuracy-merge.mjs'
 
 // Regression for a real production incident (2026-08-11): MLB corrected the
 // AAA gamePk 814888 Home Plate assignment from "Glenn Ballangao" (832019) to
@@ -78,10 +78,11 @@ test('a fresh row for an unseen umpire is just added', () => {
   assert.equal(merged[555].games.length, 1)
 })
 
-test('upsertGame dedupes by gamePk, newest first', () => {
-  const games = upsertGame([{ gamePk: 1, date: '2026-08-01' }], { gamePk: 1, date: '2026-08-01', called: 5 })
-  assert.equal(games.length, 1)
-  assert.equal(games[0].called, 5)
-  const withNewer = upsertGame(games, { gamePk: 2, date: '2026-08-10' })
-  assert.equal(withNewer[0].gamePk, 2, 'newest game sorts first')
+test('a shard\'s games come back newest first regardless of merge order', () => {
+  const rows = [
+    { gamePk: 1, date: '2026-08-01', level: 'MLB', gameType: 'R', umpId: 555, umpName: 'Ump', acc: {} },
+    { gamePk: 2, date: '2026-08-10', level: 'MLB', gameType: 'R', umpId: 555, umpName: 'Ump', acc: {} },
+  ]
+  const merged = mergeAccuracyRows({}, rows)
+  assert.equal(merged[555].games[0].gamePk, 2, 'newest game sorts first')
 })

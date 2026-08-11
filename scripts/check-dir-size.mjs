@@ -309,7 +309,10 @@ const BUDGETS = {
   // +1 for umpire-accuracy-merge.mjs — gen-umpire-accuracy.mjs's crew-
   // reassignment merge logic, pulled out so it can be unit-tested (a
   // generator is a top-level script; importing one RUNS it).
-  'scripts/lib': 17,
+  // +1 for reassignable-merge.mjs — the generic version of that same fix,
+  // so any future append-only generator keyed on an upstream-asserted
+  // identity can adopt it instead of hand-rolling the same bug again.
+  'scripts/lib': 18,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
