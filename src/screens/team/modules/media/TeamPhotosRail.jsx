@@ -26,25 +26,25 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // Team Page's Photos rail — professional camera stills only
 // (`onlyPhotographer`, gamePhotos.js; drops both TV broadcast frame grabs and
 // rendered graphic cards like Statcast darkroom cards or ABS challenge result
-// cards) whose subject is this club (`photosForTeam`). Walks `games` (==
-// seasonGames, the same oldest -> newest, cutoff-filtered list the tab's
-// AllGames grid renders off) backward from the newest game. Unlike that
-// grid, the data isn't preloaded — each game's photos are a real fetch
-// (fetchGamePhotos), so "scroll back" here grows the window by fetching more
-// games on demand rather than slicing an array already in memory.
+// cards) whose subject is this club (`photosForTeam`). Walks `games`
+// backward from the newest game. Unlike the AllGames grid, the data isn't
+// preloaded — each game's photos are a real fetch (fetchGamePhotos), so
+// "scroll back" here grows the window by fetching more games on demand
+// rather than slicing an array already in memory.
 //
 // Spoiler footing: gamePhotos.js is deliberately NOT reveal-only (a
 // recap/celebration photo narrates the outcome just by looking at it, same
-// risk as a highlight clip's title — see that module's header) and today's
-// other two consumers get away with that because /photos is a standalone
-// unsealed tool and GamePhotosStrip only ever renders inside the box score's
-// SealBox. This rail leans on the same precedent the AllGames grid already
-// uses instead of either of those: `games` is `seasonGames`
-// (allDecidedGames(schedule)), which fetchTeamSchedule has already cut off at
-// the page's `asOf` (`won` is only ever non-null for a game at/before that
-// cutoff) — so a photo here can never come from a game the rest of this page
-// hasn't already revealed the result of. Never hand this component the raw
-// `schedule`, which still carries not-yet-decided/future games.
+// risk as a highlight clip's title — see that module's header). Every other
+// consumer gets away with that because it's scoped to decided games only —
+// but this rail is a DELIBERATE exception, same posture as TeamPhotosPage
+// (its own header has the full argument): its callers hand it `photoGames`
+// (`allStartedGames`, scheduleGames.js), not `seasonGames`, on the current
+// (undated) tab — so a photo here may come from a game still in progress,
+// by explicit product override, not by omission. A dated view (`asOf` set)
+// falls back to the decided-only list instead, so a `?d=` link still
+// freezes the page at that date — see loadGames.js/loadOverview.js's own
+// `photoGames` comments for why that split exists. Never hand this
+// component the raw `schedule`, which still carries not-yet-started games.
 //
 // Deliberately does NOT read a precomputed cross-game index. One was scoped
 // in .scratch/game-photos-by-subject/issues/01-cross-game-photo-index.md for

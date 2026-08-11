@@ -36,7 +36,7 @@ export function GamesTab({ id, asOf, sportId }) {
   if (gate) return gate
 
   const { team, record, manager } = identity.data
-  const { schedule, allStarGame, seasonGames, transactionsPage } = games.data
+  const { schedule, allStarGame, seasonGames, photoGames, transactionsPage } = games.data
 
   return (
     <TeamHubShell
@@ -69,10 +69,10 @@ export function GamesTab({ id, asOf, sportId }) {
         <TeamHighlightsRail key={`highlights-${team.id}`} teamId={team.id} games={seasonGames} />
       )}
 
-      {seasonGames.length > 0 && (
-        // `seasonGames` (not the raw schedule) keeps this spoiler-safe, see
-        // loadGames.js.
-        <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={seasonGames} />
+      {photoGames.length > 0 && (
+        // `photoGames`, not `seasonGames` — this rail may include a game
+        // still in progress (an explicit override; see loadGames.js).
+        <TeamPhotosRail key={`photos-${team.id}-${asOf ?? ''}`} teamId={team.id} games={photoGames} />
       )}
 
       {transactionsPage.days.length > 0 && (

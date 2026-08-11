@@ -111,9 +111,15 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
         )
         consumedRef.current += consumed
         if (!activeRef.current) break
-        // Newest-first grid, so a batch (already newest-of-what's-left) is
-        // appended at the end rather than prepended the way the rail does.
-        photosRef.current = [...photosRef.current, ...batchPhotos]
+        // fetchTeamPhotoBatch returns a batch oldest-of-that-batch-first (the
+        // order TeamPhotosRail wants, since it PREPENDS each older batch onto
+        // a rail already anchored newest-right). This grid instead APPENDS
+        // each successive (older) batch to build a newest-first feed, so it
+        // has to reverse each batch first — otherwise the newest game in the
+        // very first batch lands at the END of that batch's run instead of
+        // the top of the page, which read as "last week is missing" even
+        // though it was fetched, just buried mid-list.
+        photosRef.current = [...photosRef.current, ...[...batchPhotos].reverse()]
         setPhotos(photosRef.current)
       }
       if (activeRef.current) {
@@ -179,7 +185,7 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
             {photos.map((photo) => {
               const { playerName, teamId: subjectTeamId, teamName } = photo.focus
               return (
-                <li key={photo.id}>
+                <li key={photo.id} data-apidate={photo.apiDate}>
                   <a
                     className="gamephotos__tile"
                     href={photo.original}

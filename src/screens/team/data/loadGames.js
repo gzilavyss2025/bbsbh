@@ -1,6 +1,6 @@
 import { fetchTeam } from '../../../api/team.js'
 import { fetchTeamSchedule, fetchAllStarGame } from '../../../api/schedule.js'
-import { allDecidedGames } from '../../../api/scheduleGames.js'
+import { allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
 import { loadMoreTeamTransactions } from '../../../api/teamTransactions.js'
 import { seasonOf, cutoffFor } from './shared.js'
 
@@ -39,16 +39,24 @@ export async function loadGames(id, asOf) {
   // allDecidedGames'/recentDecidedGames' own headers for why this filters on
   // `won != null` rather than Final status. The whole season's decided games,
   // since this tab shows all of them rather than the Overview's last ten.
-  // `seasonGames` is also what the Photos shelf is handed — never the raw
-  // schedule, since `won` here is only ever non-null for a game at/before
-  // `asOf` (see TeamPhotosRail's own header comment for why that matters).
+  // Also what the Highlights rail is handed, for the same reason — a clip's
+  // title/description narrates a result.
   const seasonGames = allDecidedGames(schedule)
+  // The Photos rail's own list — an explicit, narrower override than the one
+  // above: on the CURRENT (undated) tab it includes a game still in progress
+  // (allStartedGames, keyed on game state, never on `won`), same posture as
+  // TeamPhotosPage. A dated view (`asOf` set) falls back to `seasonGames`
+  // instead — the whole point of a `?d=` link is to freeze the page at that
+  // date, and a live game newer than the cutoff but older than "now" would
+  // break that freeze for exactly the surface built to honor it.
+  const photoGames = asOf ? seasonGames : allStartedGames(schedule)
 
   return {
     team,
     schedule,
     allStarGame,
     seasonGames,
+    photoGames,
     transactionsPage,
   }
 }
