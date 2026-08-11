@@ -23,12 +23,20 @@ import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 // all, which the old layout never did; extras still scroll, in .bs__scroll, as
 // before.
 //
-// ONE CLUB AT A TIME. Both clubs' rows stacked inside each measure made eight
-// rows of numbers, and a reader following one staff had to skip every other
-// line. The head's club pill picks the side, so the card shows four rows — one
-// per measure — and the measure rules read as four blocks, not eight. The
-// staffs stay comparable because the pill is one tap and the shading scale does
-// not move when you switch (see below).
+// THE CLUB PILL FILTERS, IT DOES NOT REPLACE. Both clubs stay adjacent inside
+// each measure by default, because the question this card answers first is "who
+// was grinding in the 4th?" — a comparison between the clubs in one inning. But
+// eight rows of numbers is a lot to hold when you are following ONE staff, so
+// the pill drops the other club's four rows away.
+//
+// Three segments, the unfiltered one FIRST and default: the shape every other
+// filter in the app uses (LogbookStatsPage's level bar, VsLevelSlider's rung 0,
+// the Foul Tracker's All column). It says "Both" rather than "All" only because
+// the set here is exactly two — the same reason SplitsSection's reference row
+// says "Season": the word has to be true, and "all" of two things is "both".
+//
+// The two staffs stay comparable across a switch because the shading scale does
+// not move when you filter (see below).
 //
 // THE SHADING ADDS NO INFORMATION — every number is printed, in full, in its
 // own box. It is a redundant encoding of that same number: a pencil wash whose
@@ -47,8 +55,10 @@ const TALLY_MEASURES = [
   { key: 'lob', label: 'LOB' },
 ]
 
+const CLUB_ALL = 'both'
+
 export function InningTally({ rows, away, home, treatments }) {
-  const [shownSide, setShownSide] = useState('away')
+  const [shownSide, setShownSide] = useState(CLUB_ALL)
   if (!rows || rows.length === 0) return null
 
   const byInningAndSide = new Map()
@@ -76,16 +86,24 @@ export function InningTally({ rows, away, home, treatments }) {
     { side: 'away', team: away },
     { side: 'home', team: home },
   ]
-  const shown = sides.filter((s) => s.side === shownSide)
+  const shown = shownSide === CLUB_ALL ? sides : sides.filter((s) => s.side === shownSide)
 
   return (
     <div className="bs__tally">
       <div className="bs__tallyHead">
         <span className="bs__insightsTitle">Pitching stats</span>
-        {/* Which club's staff the four rows belong to. Labelled with the club
-            abbreviation where the feed carries one, and with the plain side
-            otherwise — a thin MiLB feed often has no abbreviation at all. */}
+        {/* Which club's staff the rows belong to. A club segment is labelled
+            with its abbreviation where the feed carries one, and with the plain
+            side otherwise — a thin MiLB feed often has no abbreviation at all. */}
         <div className="bs__tallyScope" role="group" aria-label="Club">
+          <button
+            type="button"
+            aria-pressed={shownSide === CLUB_ALL}
+            className={`bs__tallyScopebtn ${shownSide === CLUB_ALL ? 'is-active' : ''}`}
+            onClick={() => setShownSide(CLUB_ALL)}
+          >
+            Both
+          </button>
           {sides.map(({ side, team }) => (
             <button
               key={side}

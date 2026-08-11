@@ -23,17 +23,21 @@
   margin-top: var(--space-3);
   overflow: hidden;
 }
+/* Wraps rather than squeezes: three club segments plus the title do not fit a
+   320px card on one line, and a pill that shrinks its own hit target is worse
+   than one that takes a second row. */
 .bs__tallyHead {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   padding: 8px 14px;
 }
-/* The club pill — which staff the four measure rows are counting. Two
-   segments, always both present, the same shape as .posinn__scopebtn's scope
-   switch but sized to a card head rather than a section: shrink-to-fit instead
-   of flex:1, so it sits at the head's right edge where the wash legend used to.
+/* The club pill — which staff the measure rows are counting. Three segments
+   (Both, then each club), the same shape as .posinn__scopebtn's scope switch
+   but sized to a card head rather than a section: shrink-to-fit instead of
+   flex:1, so it sits at the head's right edge where the wash legend used to.
    The legend went because the wash reads as a wash without being named, and a
    control earns that corner more than a caption does. */
 .bs__tallyScope {
@@ -42,7 +46,7 @@
   flex: 0 0 auto;
 }
 .bs__tallyScopebtn {
-  min-width: 44px;
+  min-width: 42px;
   min-height: 26px;
   padding: 0 8px;
   border-radius: var(--radius-sm);
@@ -92,10 +96,9 @@
   color: var(--text-caption);
 }
 /* One rule under each measure, none under the last, in the card's own navy
-   rather than the soft hairline — with one club on show the four measures are
-   four single rows, and a wash-weight hairline between them let Pitches and
-   Whiffs read as one block of eight numbers. The rule is what separates the
-   four things being counted, so it is drawn in ink. */
+   rather than the soft hairline. A hairline at wash weight let Pitches and
+   Whiffs read as one block of numbers, in both club modes. The rule is what
+   separates the four things being counted, so it is drawn in ink. */
 .bs__tallyGroup:not(:last-child) tr:last-child > * {
   border-bottom: var(--bw-hair) solid var(--accent-primary);
 }
