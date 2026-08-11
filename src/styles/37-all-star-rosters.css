@@ -50,18 +50,27 @@
    section sitting side by side don't leave a visible block of blank card
    behind the shorter one. Scoped overrides (not touching the shared rule,
    which the Team Page also uses) let the three columns wrap to 2-then-1 at
-   an iPad-ish width instead of squeezing into three narrow slivers. */
+   an iPad-ish width instead of squeezing into three narrow slivers.
+   The section columns sit straight in .roster-super, NOT in
+   .roster-super__body, so they carry that body's padding themselves —
+   without it the section lists' own borders would sit right on the card's
+   border and read as one doubled rule down each side. */
 .allstarrosters__leagues .roster-super__row {
   flex-wrap: wrap;
+  padding: 0 12px 14px;
 }
 .allstarrosters__leagues .roster-super__col {
   flex: 1 1 220px;
 }
 /* Full-width, colored league header bled to the card's edges — red for the
    American League, the app's existing "All-Star blue" banner color (see
-   TrophyCase's All-Star medal) for the National League. */
+   TrophyCase's All-Star medal) for the National League. It is a direct child
+   of the unpadded .roster-super, so it already spans edge to edge: no
+   negative margin (that pushed the bar OUT of the card, where the card's
+   overflow:hidden clipped its top and shoved the label onto the left edge).
+   The card's own radius + overflow:hidden round the bar's top corners. */
 .allstarrosters__leaguehead {
-  margin: -14px -12px 12px;
+  margin: 0 0 12px;
   padding: 8px 14px;
   font-family: var(--font-display);
   font-size: var(--fs-small);
