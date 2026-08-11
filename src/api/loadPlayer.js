@@ -11,7 +11,6 @@ import {
   fetchMilbByDateRange,
   fetchAllStarRosterIds,
   fetchTeamAbbrevs,
-  enrichTimelineEntries,
   findFirstStart,
   findFirstStrikeoutBatter,
   findFirstPitcherFaced,
@@ -30,6 +29,7 @@ import {
   fetchPlayerAwards,
   fetchTradeCohort,
 } from './person-fetch.js'
+import { buildCareerTimeline } from './careerTimeline.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
@@ -54,7 +54,6 @@ import {
   pitcherRole,
   buildBlock,
   levelProgressionView,
-  careerTimelineView,
   dropRehabStints,
   detectRehabAssignment,
   detectInjuredList,
@@ -497,11 +496,11 @@ export async function loadPlayer(id, asOf) {
     ...(primaryResult?.mlbYbySplits ?? []),
     ...(primaryResult?.milbYbySplits ?? []),
   ]
-  const timeline = careerTimelineView(timelineSplits, primaryGroup, debutYear)
-  // Resolve each stop's logo tint + hover label (the club, farm clubs adding
-  // their parent org) — see enrichTimelineEntries, shared with the manager
+  // buildCareerTimeline resolves each farm club's parent org first (so a traded
+  // season's stops group by org, not by level), then shapes and enriches the
+  // stops — tint, hover label, the affiliate swap. Shared with the manager
   // page's playing-career timeline.
-  if (timeline) await enrichTimelineEntries(timeline.entries)
+  const timeline = await buildCareerTimeline(timelineSplits, primaryGroup, debutYear)
 
   // Position innings — the fielding diamond (position players) or the
   // starter/reliever IP pair (pitchers + two-way). Season scope is eager; the

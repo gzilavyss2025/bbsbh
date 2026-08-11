@@ -8,8 +8,8 @@ import {
   fetchPerson,
   fetchPlayerAwards,
   fetchManagerPlaying,
-  fetchPlayingTimeline,
 } from '../api/person-fetch.js'
+import { fetchPlayingTimeline } from '../api/careerTimeline.js'
 import { sumHitting, sumPitching } from '../api/statsLevels.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'

@@ -5,12 +5,8 @@
 // fetches its own date-cut stats rather than reading the live feed. See
 // docs/data-enrichment.md for the per-endpoint spoiler notes.
 
-import { MILB_LEVELS, teamAbbr, teamLogoUrl } from '../lib/teams.js'
-import { tintFromSvg } from '../lib/logoTint.js'
+import { MILB_LEVELS, teamAbbr } from '../lib/teams.js'
 import { getJson } from './statsapi.js'
-import { careerTimelineView } from './person.js'
-import { fetchTeam } from './team.js'
-import { historicalParentOrg } from './milbHistory.js'
 
 // Pruned feed views for the player-page "firsts" scans below. Each reads only a
 // tiny slice of a concluded game's feed, so a `fields=` allowlist fetches ~1 KB
@@ -367,96 +363,6 @@ export async function fetchTeamAbbrevs(teamIds) {
   }
 }
 
-// A soft background wash for a team, derived from its own logo colors so the
-// full-color mark reads cleanly on it with no border or drop shadow (see
-// lib/logoTint.js). The mlbstatic logo CDN serves its SVGs cross-origin, so we
-// read the actual fills out of the markup rather than keeping a per-club color
-// table — statsapi has no color field, and there are hundreds of MiLB clubs.
-// Tries the (clean, two-color) cap mark first, then the full primary. Memoized
-// per team id, since a career timeline re-requests the same clubs, and degrades
-// to null so a club whose logo is missing or colorless (a black/silver cap)
-// just gets a plain neutral cell.
-const logoTintCache = new Map()
-export function fetchTeamLogoTint(teamId) {
-  if (!teamId) return Promise.resolve(null)
-  if (logoTintCache.has(teamId)) return logoTintCache.get(teamId)
-  const p = (async () => {
-    for (const variant of ['cap', 'base']) {
-      try {
-        const res = await fetch(teamLogoUrl(teamId, variant))
-        if (!res.ok) continue
-        const tint = tintFromSvg(await res.text())
-        if (tint) return tint
-      } catch {
-        // try the next variant, else fall through to the neutral null below
-      }
-    }
-    return null
-  })()
-  logoTintCache.set(teamId, p)
-  return p
-}
-
-// Enrich a careerTimelineView's entries IN PLACE with each stop's logo tint,
-// hover label, and — for a MiLB stop — its MLB affiliate at the time (id,
-// name, tint) — the shared treatment behind both the player page's "Team
-// history" and the manager page's "Playing career" timelines. Tint is
-// resolved per DISTINCT team (it doesn't depend on when he was there); the
-// affiliate is resolved per STOP, because an affiliate can be reassigned to a
-// different parent org between two separate stints at the same club. MLB
-// stops use the club name alone and carry no affiliate (a club has no
-// affiliate of its own); a farm club's title appends its parent org in
-// parens ("Nashville Sounds (Milwaukee Brewers)"), preferring the
-// hand-curated historical org for that season over the club's live parent.
-// The affiliate fields feed CareerTimeline's hover/tap swap — see its own
-// header — and are absent (not merely null) whenever no parent org resolves,
-// so the component's `e.affiliateTeamId &&` guard stays a plain existence
-// check. Returns the same `entries` for chaining.
-export async function enrichTimelineEntries(entries) {
-  const tintByTeam = new Map()
-  const teamTint = async (teamId) => {
-    if (!tintByTeam.has(teamId)) tintByTeam.set(teamId, fetchTeamLogoTint(teamId))
-    return tintByTeam.get(teamId)
-  }
-  await Promise.all([...new Set((entries ?? []).map((e) => e.teamId))].map(teamTint))
-  await Promise.all(
-    (entries ?? []).map(async (e) => {
-      e.tint = await teamTint(e.teamId)
-      if (e.sportId === 1) {
-        e.title = e.teamName
-        return
-      }
-      const [hist, team] = await Promise.all([historicalParentOrg(e.teamId, e.minSeason), fetchTeam(e.teamId)])
-      const parentOrgId = hist?.id ?? team?.parentOrgId ?? null
-      const parentOrgName = hist?.name ?? team?.parentOrgName ?? ''
-      e.title = parentOrgName ? `${e.teamName} (${parentOrgName})` : e.teamName
-      if (parentOrgId) {
-        e.affiliateTeamId = parentOrgId
-        e.affiliateName = parentOrgName
-        e.affiliateTint = await teamTint(parentOrgId)
-      }
-    }),
-  )
-  return entries
-}
-
-// The clubs a manager/coach played for as a PLAYER — the same "Team history"
-// timeline the player page shows, sourced from his own year-by-year splits (MLB
-// + the MiLB level fan-out) and shaped by careerTimelineView. `group` is the
-// playing group fetchManagerPlaying already resolved; `debutYear` (from the
-// bio's mlbDebutDate) lets the shaper drop post-debut rehab/option-down MiLB
-// noise. Returns the enriched entries[] (for <CareerTimeline>) or null when he
-// has no qualifying playing history (most MiLB-only managers predate coverage).
-export async function fetchPlayingTimeline(personId, group, debutYear) {
-  if (!personId || !group) return null
-  const [mlbYby, milbYby] = await Promise.all([
-    fetchPersonStats(personId, { type: 'yearByYear', group, sportId: 1 }),
-    fetchMilbYearByYear(personId, group),
-  ])
-  const timeline = careerTimelineView([...mlbYby, ...milbYby], group, debutYear)
-  if (!timeline) return null
-  return enrichTimelineEntries(timeline.entries)
-}
 
 // ---------------------------------------------------------------------------
 // Firsts — first career instances of a handful of milestones, read off the

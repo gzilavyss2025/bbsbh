@@ -18,7 +18,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
-| career-register.test.js | 2 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels |
+| career-register.test.js | 11 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + the Team history rail's season order (a traded year groups by ORG, not by level) |
 | challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
