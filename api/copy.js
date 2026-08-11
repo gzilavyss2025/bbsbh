@@ -21,7 +21,7 @@
 // returns an empty override map (the app renders shipped defaults) and POST
 // returns 501. The app has never required a backend and still does not.
 
-import { sanitizeOverrides } from '../src/copy/registry.js'
+import { mergeOverrides, sanitizeOverrides } from '../src/copy/registry.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
@@ -101,6 +101,32 @@ export function hashFromReply(reply) {
 // one implementation — see that file for why an authorization check in
 // particular must not be copy-pasted.
 
+// Is this a body the POST can act on at all? A patch and a full map are both
+// valid; anything else is a 400 rather than a write that means nothing.
+export function acceptableBody(body) {
+  const patch = body?.patch
+  const copy = body?.copy
+  if (patch != null && typeof patch === 'object' && !Array.isArray(patch)) return true
+  return copy != null && typeof copy === 'object' && !Array.isArray(copy)
+}
+
+// What this save should actually write, given the authoritative map. Pure, and
+// exported, because it is the whole of the endpoint's write RULE and the one
+// part that cannot be exercised through the handler in CI — the POST needs a
+// live Clerk token. Same split as api/books.js's `bookRefusal`/`bookEntry`.
+//
+// `clean` is the desired final map; `staleKeys` are the fields to delete. For a
+// PATCH, staleKeys can only ever name a field the patch explicitly cleared,
+// because mergeOverrides carries every other key of `prev` forward — that is
+// the property that stops one editor's save erasing another's work, and
+// test/api-copy-write-plan.test.js pins it.
+export function writePlan(prev, body) {
+  const current = sanitizeOverrides(prev)
+  const isPatch = body?.patch != null && typeof body.patch === 'object' && !Array.isArray(body.patch)
+  const clean = isPatch ? mergeOverrides(current, body.patch) : sanitizeOverrides(body?.copy)
+  return { clean, staleKeys: Object.keys(current).filter((id) => !(id in clean)) }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return reply(res, { error: 'method not allowed' }, 405)
@@ -166,9 +192,34 @@ export default async function handler(req, res) {
     return reply(res, { error: 'invalid body' }, 400)
   }
 
-  // The client sends the FULL desired override map (only non-default fields).
-  // Sanitize to known ids + in-budget strings.
-  const clean = sanitizeOverrides(body?.copy)
+  // TWO BODIES, AND THE DIFFERENCE IS WHO READS THE CURRENT STATE.
+  //
+  //   { copy:  {...} }  the FULL desired override map. The /admin panel holds
+  //                     every field on screen, so it can legitimately say "this
+  //                     is the complete state"; omitted keys are deletions.
+  //   { patch: {...} }  a few fields. Everything not named is left alone, and
+  //                     an empty value clears one field (mergeOverrides).
+  //
+  // The patch form exists because the read-merge-write it replaces CANNOT be
+  // done safely from a browser. The inline editors used to GET /api/copy, merge
+  // their fields in, and POST the whole map back. That GET is CDN-cached
+  // (`s-maxage=60, stale-while-revalidate=600` below), and `cache: 'no-store'`
+  // on a fetch governs the BROWSER's cache, not the shared edge — a save could
+  // and did read a map minutes old, and every field missing from it was then
+  // deleted as a `staleKey`. Measured against production: `X-Vercel-Cache:
+  // STALE, Age: 238`. Two saves inside that window meant the second silently
+  // erased the first.
+  //
+  // Reading the current map HERE closes it: this read is Redis directly, never
+  // a cache, and it happens inside the same request that writes. See ADR-0025's
+  // amendment — a client cannot be given a coherent read of shared state
+  // through a cache it does not control, so it must stop needing one.
+  if (!acceptableBody(body)) return reply(res, { error: 'invalid body' }, 400)
+
+  // Declared out here because the response echoes the stored map back, and the
+  // catch below must stay scoped to the WRITE — a failure there is a 502, not a
+  // silently different answer.
+  let clean
   try {
     // Snapshot the current state for the history list BEFORE mutating. This read
     // needs hashFromReply as much as the GET does, and for two consequences
@@ -177,8 +228,9 @@ export default async function handler(req, res) {
     // it, and every history snapshot recorded an empty `prev`, so undo had
     // nothing to restore.
     const prev = sanitizeOverrides(hashFromReply(await redis.hgetall(COPY_KEY)))
-    // Keys being removed by this save (present before, absent now).
-    const staleKeys = Object.keys(prev).filter((id) => !(id in clean))
+    const plan = writePlan(prev, body)
+    const staleKeys = plan.staleKeys
+    clean = plan.clean
 
     // Apply as a transaction, and crucially WITHOUT a `del` first: we hset the
     // new values and hdel only the removed keys, so a mid-write crash leaves the

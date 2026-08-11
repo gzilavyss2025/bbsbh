@@ -219,11 +219,24 @@ function Editor({ onDirty }) {
     let cancelled = false
     ;(async () => {
       try {
-        // `no-store` is essential HERE (unlike the public CopyProvider fetch):
-        // the editor must read the TRUE current state, never the browser's
-        // 60s-cached public GET. Reading stale would make the next Save — which
-        // replaces the whole map — silently revert fields the admin never touched.
-        const res = await fetch('/api/copy', { cache: 'no-store' })
+        // This read must be the TRUE current state, not the cached public GET:
+        // Save replaces the whole map, so a stale read here silently reverts
+        // every field changed since that cached copy was taken.
+        //
+        // `cache: 'no-store'` alone does NOT achieve that, which is the trap
+        // this comment used to fall into. It governs the BROWSER's cache; the
+        // response is also held at Vercel's edge (`s-maxage=60,
+        // stale-while-revalidate=600`), which happily served this request
+        // `X-Vercel-Cache: STALE, Age: 238` in production. A shared cache does
+        // not care what one client asks of its own store.
+        //
+        // A unique URL is what actually bypasses it — the edge has nothing
+        // cached under this key. Cheap: one request each time the panel opens,
+        // by one person. The inline editors solved the same problem the other
+        // way, by no longer needing a client-side read at all (saveCopyPatch.js
+        // + api/copy.js's patch body); the panel genuinely does hold every
+        // field, so here it is the read that gets fixed rather than the write.
+        const res = await fetch(`/api/copy?fresh=${Date.now()}`, { cache: 'no-store' })
         const data = res.ok ? await res.json() : {}
         if (cancelled) return
         adoptStored(data?.copy)

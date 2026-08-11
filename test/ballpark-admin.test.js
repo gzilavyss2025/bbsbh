@@ -18,8 +18,7 @@
 //      own store.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { FIELD_IDS } from '../src/copy/registry.js'
-import { mergeOverrides } from '../src/lib/admin/saveCopyPatch.js'
+import { FIELD_IDS, mergeOverrides } from '../src/copy/registry.js'
 import { resolveParkName, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 import { fieldIds } from '../src/screens/team/modules/ballpark/useBallparkDraft.js'
 import { isOwnBlobUrl, sniffImage } from '../api/ballpark-photo.js'
