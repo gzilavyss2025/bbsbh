@@ -283,6 +283,27 @@ function RefSheet({ onClose, children }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // Scroll-lock the innings page behind the sheet — the same plain
+  // `overflow: hidden` (never the position-fixed body trick, which loses the
+  // reader's scroll offset) that SiteSearch.jsx uses, for the same reason
+  // ADR-0037 records it as load-bearing there. A drag inside a docked sheet
+  // that has nothing left to scroll otherwise chains into the document, and a
+  // page sliding under a dialog that stays put reads as a broken sheet rather
+  // than as a page. `.refpanel__body`'s `overscroll-behavior: contain` covers
+  // the same flick once the panel itself HAS scrolled; this covers the rest.
+  useEffect(() => {
+    const root = document.documentElement
+    const { body } = document
+    const prevRoot = root.style.overflow
+    const prevBody = body.style.overflow
+    root.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      root.style.overflow = prevRoot
+      body.style.overflow = prevBody
+    }
+  }, [])
+
   const closeRef = useRef(null)
   useEffect(() => {
     const trigger = document.activeElement

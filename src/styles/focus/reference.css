@@ -193,7 +193,14 @@
   box-shadow: var(--shadow-card);
 }
 
-.refpanel__tab:hover,
+/* `:not([aria-selected='true'])` is load-bearing, not tidiness. This rule and
+   `.refpanel__tab[aria-selected='true']` above are BOTH (0,2,0), so the later
+   one — this hover — used to win and repaint the chosen tab's ground back to
+   near-white paper while `--text-on-ink` kept its text paper-white. On a
+   pointer that is a flicker; on a phone it is the permanent state, because iOS
+   Safari leaves :hover stuck on the last element tapped until the reader taps
+   somewhere else. The reader's own tab was the one tab they could not read. */
+.refpanel__tab:not([aria-selected='true']):hover,
 .refbar__chip:hover,
 .trailstrip__followbtn:hover,
 .trailcell:hover {
@@ -232,6 +239,11 @@
   gap: var(--space-4);
   min-height: 0;
   overflow-y: auto;
+  /* A flick past the end of a long lineup stops here rather than chaining into
+     the page underneath — the same `contain` the site-search results list
+     carries (ADR-0037). Without it a drag inside the sheet scrolled the innings
+     page behind it, which reads as "the sheet is stuck". */
+  overscroll-behavior: contain;
   scrollbar-width: thin;
 }
 
@@ -250,6 +262,18 @@
   margin: 0;
   width: 100%;
   min-width: 0;
+  /* `flex: 0 0 auto` is what makes this panel scroll at all, and it is not
+     interchangeable with the default `0 1 auto`. The panel is a COLUMN flex
+     container with a bounded height, so every section is a flex ITEM free to
+     shrink; a flex item's automatic minimum size would normally stop that at
+     its content, but `.lineupcard` (and the roster cards) carry
+     `overflow: hidden`, which sets that minimum to zero. Both clubs' lineups —
+     523px of card — were therefore squeezed into the 302px the sheet had free
+     and CLIPPED there: `scrollHeight` equalled `clientHeight`, so `overflow-y:
+     auto` had nothing to scroll and the bottom half of the second lineup was
+     unreachable by any gesture. Refusing to shrink lets the content overflow,
+     which is the only thing a scroll container can act on. */
+  flex: 0 0 auto;
 }
 
 /* The Pitchers table, refitted for the rail. Widening the column alone did not
@@ -291,10 +315,36 @@
 /* The sheet — same .scrim/.sheet chrome as HighlightSheet/StrikeZone, portalled
    to <body> (ModalPortal) because .turnscene's `isolation: isolate` would
    otherwise trap it under the floating bar. */
+/* `dvh`, not `vh`: on iOS Safari `vh` is the LARGE viewport — the height the
+   page would have if the toolbars were hidden — so a sheet docked to the bottom
+   edge measured itself against a window taller than the one the reader can see,
+   and its foot sat behind the toolbar. `dvh` tracks browser chrome, which is
+   the half of ADR-0037's viewport lesson that applies here (there is no field
+   in this sheet, so the keyboard — the half `dvh` does NOT track — never
+   enters). */
 .focusrail__sheet {
   display: flex;
   flex-direction: column;
-  max-height: 80vh;
+  max-height: 80dvh;
+}
+
+/* The ALL-CAPS INVARIANT, re-stated for one subtree. `01-base.css` spells it
+   `#root *`, and ModalPortal renders this sheet into <body> — OUTSIDE #root —
+   so the invariant does not reach it. Nothing was overriding the casing; there
+   was simply no rule, which is why the phone sheet listed "Loftin, Nick" while
+   the wide rail and the ordinary innings page, both inside #root, shout the
+   same row. The same trap that keeps site search un-portalled (ADR-0037).
+   Scoped to this sheet on purpose: a blanket `body > .scrim *` would reach the
+   other two portalled dialogs and shout the natural-case prose they carry. */
+.focusrail__sheet * {
+  text-transform: uppercase;
+}
+
+/* …and the one exemption that lives inside it, re-stated for the same reason:
+   `20-charts.css` writes it as `#root .marginnotes__text`, which cannot match
+   out here. The ARMS tab's fun-fact line is a sentence and reads as one. */
+.focusrail__sheet .marginnotes__text {
+  text-transform: none; /* caps-exempt: margin notes' fun-fact line reads as a natural sentence, exactly as it does inside #root */
 }
 
 .focusrail__sheethead {
@@ -306,7 +356,15 @@
   flex: 0 0 auto;
 }
 
+/* The scrolling region is whatever the head and the tab strip leave over — one
+   height bound (the sheet's), not two. The old `max-height: 62vh` was a second,
+   independent guess at the same number: on a short window 62vh plus the head,
+   the strip and the sheet's own 40px of padding added up to MORE than the 80vh
+   the sheet is allowed, so the foot of the panel was laid out past the sheet's
+   bottom edge and off the screen. `min-height: 0` is required for a flex item
+   to be allowed to scroll rather than grow past its track. */
 .refpanel__body--sheet {
-  max-height: 62vh;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
