@@ -1,7 +1,9 @@
 import { test, expect } from './fixtures.js'
 
 // The innings bar's dead space belongs to its primary action
-// (`.pagenav--innings .btn::after` in index.css). `.pagenav` is click-through
+// (`.pagenav--innings .btn::after`, src/styles/24-floating-nav-and-hud.css,
+// with focus mode's own tighter set in src/styles/focus/stage.css — that is the
+// one in force on this anchor, which opens focused). `.pagenav` is click-through
 // by design, so a thumb that missed the reveal button used to punch through
 // the fade and open whichever player card sat underneath — you asked to
 // reveal an at-bat and got a page you didn't want. These specs pin the two
@@ -62,8 +64,10 @@ test('a click in the dead space above the buttons steps an at-bat', async ({ pag
   await page.mouse.click(at.firstX, at.deadY)
 
   await expect(page.locator('.pbp__entry')).toHaveCount(1)
-  // One at-bat, not the whole half: the split pair is still on the bar.
-  await expect(page.locator('.revealsplit')).toHaveCount(1)
+  // One at-bat, not the whole half: the SEALED pair is still on the bar. Both
+  // choices, by count — `.revealsplit` alone no longer says this, since the bar
+  // carries a second split once the half is done (see the next spec).
+  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(2)
 })
 
 test('the dead space below the buttons steps an at-bat too', async ({ page }) => {
@@ -79,11 +83,27 @@ test('the dead space splits between the two choices, seam included', async ({ pa
   await page.goto(`${GAME}/top1`)
   const at = await barSpots(page)
 
-  // Over the right-hand choice: the whole half, not one at-bat — so the split
-  // pair is replaced by the forward action.
+  // Over the right-hand choice: the whole half, not one at-bat — so the kraft
+  // seal leaves the bar entirely.
+  //
+  // WHAT THE SEAL GOING IS, AND WHY IT ISN'T `.revealsplit` GOING. This used to
+  // read `.revealsplit` count 0, on the arrangement where revealing a whole half
+  // put a single full-width `.btn--next` back on the bar. Focus mode's postHalf
+  // state (ADR-0043) ended that: a just-finished half now offers its own
+  // Summary/next-half pair, which is a `.revealsplit` too — so the count stayed
+  // 1 and this spec failed while the hit area was working perfectly. Measured on
+  // the anchor at all three projects: a click at (lastX, deadY) lands on the
+  // "Rest of half" button itself (document.elementFromPoint), commits
+  // `bbsbh:reveal:823035` = "0", and leaves the bar reading Summary / Bottom 1st
+  // › — byte-for-byte the state that pressing the real button produces.
+  //
+  // `.btn--reveal` is the kraft-seal skin, and ONLY the sealed pair wears it
+  // here. Gone means the half is open; the left-hand step above keeps both. That
+  // is the difference this spec is actually about, so assert it directly rather
+  // than through a container whose meaning moved.
   await page.mouse.click(at.lastX, at.deadY)
 
-  await expect(page.locator('.revealsplit')).toHaveCount(0)
+  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(0)
   await expect(page.locator('.pbp__entry').first()).toBeVisible()
 })
 
@@ -101,7 +121,7 @@ test('Refresh keeps its own taps', async ({ page }) => {
   await page.mouse.click(at.refreshX, at.refreshY)
 
   await expect(page.locator('.pbp__entry')).toHaveCount(0)
-  await expect(page.locator('.revealsplit')).toHaveCount(1)
+  await expect(page.locator('.revealsplit .btn--reveal')).toHaveCount(2)
 })
 
 test('the page above the bar keeps its own taps', async ({ page }) => {
