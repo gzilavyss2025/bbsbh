@@ -56,18 +56,47 @@ export function ScorebugMount({
   pastLine,
   cornerIdx,
   setCornerIdx,
+  viewIdx,
+  viewInning,
+  viewHalf,
 }) {
   const isWide = useMediaQuery(WIDE_QUERY)
   if (!started || !live) return null
 
-  // Runs AS OF the reader's own reveal progress: committed halves via
-  // revealRunsThrough, plus the currently-stepped half's own running count.
-  // The same figure RollingLine's totals column shows.
+  // THE HALF ON SCREEN CAPS THE SCORE, not the reader's game-wide reveal mark.
+  // The bug this fixes: page back to the bottom of the 1st in a game revealed
+  // all the way through and the dock read 5-6 — the FINAL score, on a page
+  // whose own linescore said 1-0. `revealedThrough` is a high-water mark for
+  // the whole game, and a reader reviewing an earlier half is not asking what
+  // the game came to; the dock captions the page it floats over. Clamped, it
+  // freezes at the end of the half being read.
+  //
+  // Never the other direction: `Math.min` can only show LESS than the reveal
+  // mark permits, so the spoiler footing is untouched (revealRunsThrough is
+  // still reveal-only, still reached under the same started/live gate).
+  //
+  // `runsInProgress` — the half currently being stepped — is reset per half by
+  // InningViewer, so it can only ever describe `viewIdx`. Past the clamp its
+  // own `> throughIdx` test simply stops matching on a reviewed half, whose
+  // runs revealRunsThrough already counted.
+  const throughIdx = Math.min(revealedThrough, viewIdx ?? revealedThrough)
   const runsFor = (side, parity) =>
-    revealRunsThrough(feed, unlocked, revealedThrough, side) +
-    (runsInProgress && runsInProgress.idx % 2 === parity && runsInProgress.idx > revealedThrough
+    revealRunsThrough(feed, unlocked, throughIdx, side) +
+    (runsInProgress && runsInProgress.idx % 2 === parity && runsInProgress.idx > throughIdx
       ? runsInProgress.runs
       : 0)
+
+  // The inning/half indicator freezes with the score. A half that ended points
+  // its indicator at what comes NEXT (HalfInning's composeLive), which is right
+  // where the reader is standing at the frontier — the 3rd out just landed and
+  // the next half is where they are going. It is wrong on a half they paged
+  // BACK to: bottom of the 1st captioned "top 2nd", beside a score frozen at
+  // the end of the 1st. `viewIdx < revealedThrough` is exactly "there are
+  // revealed halves after this one", i.e. the reader is reviewing rather than
+  // scoring.
+  const reviewing = viewIdx != null && viewIdx < revealedThrough
+  const shownInning = reviewing && viewInning != null ? viewInning : live.inning
+  const shownHalf = reviewing && viewHalf != null ? viewHalf : live.half
 
   const bug = (
     <Scorebug
@@ -79,8 +108,8 @@ export function ScorebugMount({
       homeTreatment={treatment?.home}
       awayRuns={runsFor('away', 0)}
       homeRuns={runsFor('home', 1)}
-      inning={live.inning}
-      half={live.half}
+      inning={shownInning}
+      half={shownHalf}
       batter={live.batter}
       pitcher={live.pitcher}
       bases={live.bases}

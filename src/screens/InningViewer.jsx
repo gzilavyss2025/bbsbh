@@ -812,6 +812,9 @@ export function InningViewer({
               runsInProgress={runsInProgress}
               meta={meta}
               treatment={winProbTreatment}
+              viewIdx={curIdx}
+              viewInning={effInning}
+              viewHalf={effHalf}
               focused
             />
             {/* Two conditions, each shutting off a way this card can lie or
@@ -948,6 +951,9 @@ export function InningViewer({
           runsInProgress={runsInProgress}
           meta={meta}
           treatment={winProbTreatment}
+          viewIdx={curIdx}
+          viewInning={effInning}
+          viewHalf={effHalf}
           pastLine={pastLine}
           cornerIdx={cornerIdx}
           setCornerIdx={setCornerIdx}
