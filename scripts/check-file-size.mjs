@@ -141,7 +141,6 @@ const BUDGETS = {
   // own headers.
   'src/components/playbyplay/PlayByPlay.jsx': 750, // 716
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
-  'src/api/person-fetch.js': 700, // 644
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612
 }

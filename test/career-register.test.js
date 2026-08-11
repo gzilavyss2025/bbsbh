@@ -253,6 +253,41 @@ test('careerTimelineView: a rejoin at a DIFFERENT club in between still yields t
   assert.deepEqual(stopsAtClub.map((e) => e.yearText), ['2020–22', '2024–26'])
 })
 
+// Regression coverage for a real bug (Joey Wiemer, 2024): he opened the year
+// with Milwaukee and Nashville, was traded to Cincinnati on July 30, went to
+// Louisville and was then called up. The rail printed the two farm clubs first
+// and the two big-league clubs after them — MIL, CIN, MIL, CIN to a reader —
+// because a season sorted by LEVEL alone. A season's stops must group by ORG,
+// each org's own climb still reading bottom-up inside it.
+test('careerTimelineView: a mid-season trade keeps each org together (farm club next to its parent)', () => {
+  const splits = [
+    // MLB first, in the order statsapi returns a traded season's stints.
+    { season: 2024, sport: { id: SPORT_IDS.MLB }, team: { id: 158, name: 'Milwaukee Brewers' }, stat: { gamesPlayed: 50 } },
+    { season: 2024, sport: { id: SPORT_IDS.MLB }, team: { id: 113, name: 'Cincinnati Reds' }, stat: { gamesPlayed: 12 } },
+    // then the AAA fan-out, which knows nothing of when he was where.
+    { season: 2024, sport: { id: SPORT_IDS.AAA }, team: { id: 5016, name: 'Nashville Sounds' }, stat: { gamesPlayed: 40 } },
+    { season: 2024, sport: { id: SPORT_IDS.AAA }, team: { id: 416, name: 'Louisville Bats' }, stat: { gamesPlayed: 25 } },
+  ]
+  const orgOf = (teamId) => ({ 5016: 158, 416: 113 })[teamId] ?? null
+  const timeline = careerTimelineView(splits, 'hitting', 2023, orgOf)
+
+  assert.deepEqual(
+    timeline.entries.map((e) => e.teamId),
+    [5016, 158, 416, 113],
+    'each org must read as one run: Nashville→Milwaukee, then Louisville→Cincinnati',
+  )
+})
+
+test('careerTimelineView: with no org resolver a split season still sorts by level', () => {
+  const splits = [
+    { season: 2024, sport: { id: SPORT_IDS.MLB }, team: { id: 158, name: 'Milwaukee Brewers' }, stat: { gamesPlayed: 50 } },
+    { season: 2024, sport: { id: SPORT_IDS.AAA }, team: { id: 5016, name: 'Nashville Sounds' }, stat: { gamesPlayed: 40 } },
+  ]
+  const timeline = careerTimelineView(splits, 'hitting', 2023)
+
+  assert.deepEqual(timeline.entries.map((e) => e.teamId), [5016, 158], 'a same-year climb still reads bottom-up')
+})
+
 test('careerRegisterView: the current season splits per club from the date-cut splits', () => {
   // What buildBlock hands in for a player traded this year: the raw, date-cut
   // per-club rows. The register must use THOSE (they can't move mid-game), not

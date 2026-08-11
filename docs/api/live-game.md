@@ -147,7 +147,19 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   object the generator wrote, not the raw MLB array of named sources
   `HighlightSheet.jsx`'s box-score caller passes, so the function now accepts
   either shape rather than a rail needing to re-derive playback URLs itself.
-- `person-fetch.js` — the player page's bio/stats/logo-tint/"firsts" fetchers
+- `careerTimeline.js` — the "Team history" rail's fetch side, split out of
+  `person-fetch.js`: `fetchTeamLogoTint` (per-club logo wash), the per-(club,
+  season) parent-org lookup, `buildCareerTimeline` (the ONE entry point — it
+  resolves orgs, shapes with `careerTimelineView`, then enriches the entries),
+  and the manager page's `fetchPlayingTimeline` over it. The org lookup exists
+  because a year-by-year split carries no dates: a season traded mid-year
+  (Joey Wiemer, 2024) sorted by LEVEL alone printed both farm clubs, then both
+  big-league clubs — reading as MIL → CIN → MIL → CIN. Grouping a season by org
+  restores the real run. Two limits are documented at the sort itself: an org
+  he spent the year with in the minors only sorts after every org he played
+  big-league games for, and a season with any unresolved farm club falls back
+  to the plain bottom-up climb.
+- `person-fetch.js` — the player page's bio/stats/"firsts" fetchers
   (see `person.js` for the pure shaping). Read by the player page only —
   never wired into a sealed game surface. **`currentTeam` is not a roster
   claim**: the API keeps aiming a released, unsigned, or long-retired player at

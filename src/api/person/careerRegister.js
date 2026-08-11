@@ -402,13 +402,17 @@ function formatSeasonSpan(seasons) {
   return start === end ? `${start}` : `${start}–${String(end).slice(2)}`
 }
 
-export function careerTimelineView(splits, group, debutYear) {
+export function careerTimelineView(splits, group, debutYear, orgOf = null) {
   // Sum the workload per team-season (a mid-season same-level trade can split
   // one club's year across rows; a team-less synthetic aggregate row carries no
   // team.id and is skipped by the guard, so it can't double-count). Also tally
   // MLB workload per season so the post-debut rehab test below can compare.
+  // `order` keeps the earliest position that team-season held in the input —
+  // the only chronological signal a year-by-year split carries (statsapi lists
+  // a traded season's stints in the order he played them, and the caller
+  // concatenates MLB before the MiLB fan-out). The org sort below reads it.
   const byKey = new Map()
-  for (const s of splits ?? []) {
+  for (const [i, s] of (splits ?? []).entries()) {
     const season = Number(s.season)
     const teamId = s.team?.id
     const sportId = s.sport?.id
@@ -417,7 +421,7 @@ export function careerTimelineView(splits, group, debutYear) {
     const outs = ipToOuts(s.stat?.inningsPitched)
     const key = `${season}|${teamId}`
     if (!byKey.has(key)) {
-      byKey.set(key, { season, teamId, sportId, teamName: s.team?.name ?? '', games: 0, outs: 0 })
+      byKey.set(key, { season, teamId, sportId, teamName: s.team?.name ?? '', games: 0, outs: 0, order: i })
     }
     const acc = byKey.get(key)
     acc.games += games
@@ -448,8 +452,8 @@ export function careerTimelineView(splits, group, debutYear) {
   if (!kept.length) return null
 
   // Walk the qualifying team-seasons in chronological order — earliest year
-  // first, and within a year lower level first so a same-year climb reads
-  // bottom-up — and fold each run of consecutive same-club seasons into ONE
+  // first, and within a year by org then bottom-up by level (see the sort
+  // below) so a same-year climb reads bottom-up — and fold each run of consecutive same-club seasons into ONE
   // stint. A club the player leaves and later rejoins (Gary Sánchez's Brewers
   // in 2024, then again in 2026 after a year with Baltimore) yields a separate
   // stint each time, so its logo repeats in its own chronological slot rather
@@ -460,9 +464,40 @@ export function careerTimelineView(splits, group, debutYear) {
   // its caption spans first-to-last year straight through, the gap silently
   // absorbed, rather than surfacing "2020–22, 2024–26" and implying he'd
   // actually left and come back).
+  //
+  // Level alone is NOT enough to order a season, which is the bug this sort
+  // was rewritten for: a player traded mid-year (Joey Wiemer, 2024 — Milwaukee
+  // and Nashville, then Cincinnati and Louisville) printed both farm clubs
+  // first and both big-league clubs after them, reading as MIL → CIN → MIL →
+  // CIN. So a season sorts by ORG first — a farm club counts as its parent org,
+  // per `orgOf(teamId, season)` — and only then bottom-up by level INSIDE that
+  // org. The orgs themselves take the input's own order (see `order` above),
+  // which for a traded season is the big-league stints' chronological order.
+  //
+  // Two deliberate limits. An org he spent the season with in the MINORS ONLY
+  // sorts after every org he played big-league games for that year, since the
+  // MiLB fan-out carries no date to say otherwise. And a season is org-sorted
+  // only when EVERY farm club in it resolved to a parent (`orgOf` is optional,
+  // and the hand-seeded history doesn't cover every club-season) — otherwise
+  // the season falls back to the plain bottom-up climb, which is right for the
+  // ordinary one-org year and no worse than before for the rest.
+  const seasonPlan = new Map()
+  for (const a of kept) {
+    const org = a.sportId === 1 ? a.teamId : orgOf?.(a.teamId, a.season) ?? null
+    a.org = org ?? a.teamId
+    const plan = seasonPlan.get(a.season) ?? { orgOrder: new Map(), resolved: true }
+    if (org == null) plan.resolved = false
+    plan.orgOrder.set(a.org, Math.min(plan.orgOrder.get(a.org) ?? Infinity, a.order))
+    seasonPlan.set(a.season, plan)
+  }
+  const orgRank = (a) => {
+    const plan = seasonPlan.get(a.season)
+    return plan.resolved && plan.orgOrder.size > 1 ? plan.orgOrder.get(a.org) : 0
+  }
   kept.sort(
     (a, b) =>
       a.season - b.season ||
+      orgRank(a) - orgRank(b) ||
       CAREER_ORDER.indexOf(a.sportId) - CAREER_ORDER.indexOf(b.sportId),
   )
   const stints = []

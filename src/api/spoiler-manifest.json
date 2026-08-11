@@ -162,6 +162,10 @@
       "class": "spoiler-free",
       "why": "Static career-matchups.json reader — batter-vs-probable-starter career lines. The generator's nightly timing is itself the spoiler guard (see scripts/CLAUDE.md)."
     },
+    "careerTimeline.js": {
+      "class": "spoiler-free",
+      "why": "The Team history rail's fetch side — per-club logo tints, each farm club's parent org for a given season, and the one entry point that shapes and enriches a rail. Player and manager pages only, never a sealed game surface."
+    },
     "challenges.js": {
       "class": "reveal-only",
       "why": "ABS challenge history for the R/H/E card's third row — an overturned call is a play outcome. Clamped to the reached half inside StatBox's seal.",

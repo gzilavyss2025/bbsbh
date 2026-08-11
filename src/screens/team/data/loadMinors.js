@@ -8,7 +8,7 @@ import {
 } from '../../../api/team.js'
 import { fetchTopProspects, orgProspectsForTeam, prospectAffiliateMap } from '../../../api/prospects.js'
 import { parentOrgHistory } from '../../../api/milbHistory.js'
-import { fetchTeamLogoTint } from '../../../api/person-fetch.js'
+import { fetchTeamLogoTint } from '../../../api/careerTimeline.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { SPORT_LABEL } from '../../../lib/teams.js'
 import { seasonOf } from './shared.js'
