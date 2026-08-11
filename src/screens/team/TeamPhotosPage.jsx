@@ -170,7 +170,7 @@ function TeamPhotosSeason({ team, season, games, onBack }) {
           emptyMessage={`No photos posted for the ${season} season yet.`}
         />
         {photos.length > 0 && (
-          <ul className="gamephotos__grid">
+          <ul className="gamephotos__grid gamephotos__grid--large">
             {photos.map((photo) => {
               const { playerName, teamId: subjectTeamId, teamName } = photo.focus
               return (

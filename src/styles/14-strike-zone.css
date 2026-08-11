@@ -828,6 +828,14 @@
   gap: 10px;
 }
 
+/* TeamPhotosPage's own grid, at double the tile width — a season-long
+   browse benefits from a bigger look at each still more than the /photos
+   finder's dense multi-game grid does, so this is scoped to that one page
+   rather than changing the shared .gamephotos__grid default. */
+.gamephotos__grid--large {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
 /* The tile geometry lives on the anchor rather than the li so the subject
    caption below it (.gamephotos__subject) sits outside the cropped frame. */
 .gamephotos__grid li {
