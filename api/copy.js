@@ -22,7 +22,7 @@
 // returns 501. The app has never required a backend and still does not.
 
 import { sanitizeOverrides } from '../src/copy/registry.js'
-import { authenticateUser } from './_lib/auth.js'
+import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
 import { getRedis } from './_lib/redis.js'
 
@@ -58,41 +58,10 @@ function copyRedis() {
   return getRedis({ automaticDeserialization: false })
 }
 
-// Parse COPY_ADMIN_USER_IDS ("user_abc,user_def") into a Set. An unset/empty
-// allowlist means NO ONE can write — fail closed, never open.
-function adminIds() {
-  return new Set(
-    (process.env.COPY_ADMIN_USER_IDS || '')
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean),
-  )
-}
-
-// Optional authorizedParties hardening: set CLERK_AUTHORIZED_PARTIES to the
-// app's own origin(s) (comma-separated) so a token minted for a different azp
-// can't be replayed here. Left unset, verifyToken skips the check — the
-// allowlist below still bounds writes to enumerated user ids.
-function authorizedParties() {
-  const raw = process.env.CLERK_AUTHORIZED_PARTIES || ''
-  const parties = raw
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  return parties.length ? parties : undefined
-}
-
-// Deliberately still null-or-userId, unlike the other three endpoints. They
-// distinguish "this deploy cannot verify" from "you sent no token" because that
-// distinction is what makes a broken sync deploy diagnosable. Here every failure
-// is one thing — you are not an admin — and saying which of the four reasons
-// applied would tell an anonymous caller about the deploy's admin setup for no
-// benefit to the one person who is allowed in.
-async function authenticateAdmin(req) {
-  const auth = await authenticateUser(req, { authorizedParties: authorizedParties() })
-  if (!auth.ok) return null
-  return adminIds().has(auth.userId) ? auth.userId : null
-}
+// The admin gate (Clerk token + COPY_ADMIN_USER_IDS allowlist) lives in
+// _lib/adminAuth.js now that api/ballpark-photo.js shares it. Same behaviour,
+// one implementation — see that file for why an authorization check in
+// particular must not be copy-pasted.
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {

@@ -1,0 +1,195 @@
+/* ------------------------------------------------------------
+   61-ballpark-admin
+   The site owner's in-place editor on the Overview's Ballpark card
+   (screens/team/modules/ballpark/BallparkAdminBar.jsx and
+   BallparkEditFields.jsx). Nobody else ever renders any of this — the
+   module that draws it is lazy and admin-gated — so none of these rules
+   can affect a visitor's page.
+
+   THE MASTHEAD HALF INHERITS THE CLUB'S COLOURS, it does not pick its own.
+   `.thub-card__head` is the themed bar: on a themed hub it is painted
+   `--bar-fill` with `--bar-text` on top, and on an unthemed one it is
+   plain caption text on the card. A gear or a Save button with a
+   hard-coded navy would be invisible on half the clubs in the league. So
+   everything up there is drawn in `currentColor`, held back with `opacity`
+   where it needs to recede, and inverted against `--bar-fill` where it needs
+   to stand out. See 09-team-info.css for where those bar variables come from.
+   ------------------------------------------------------------ */
+
+/* ---- the masthead: gear, Save, Cancel ---- */
+
+.bpadmin__gear,
+.bpadmin__actions .bpadmin__btn {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.bpadmin__gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  /* Held back from full strength so the gear reads as chrome rather than as
+     a second heading competing with the word "Ballpark". */
+  opacity: 0.7;
+}
+.bpadmin__gear:hover,
+.bpadmin__gear:focus-visible {
+  opacity: 1;
+}
+
+.bpadmin__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.bpadmin__actions .bpadmin__btn {
+  padding: 3px 10px;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-sm);
+  background: none;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* Save is the affirmative action, so it is the filled one — and the fill is the
+   bar's own TEXT colour with the label punched back out in the bar's own
+   BACKGROUND colour. That inversion is why it needs no palette of its own: the
+   theme already guarantees those two read against each other, for every club,
+   because that pairing is what the masthead itself is made of.
+   `-webkit-text-fill-color` rather than `color`, because `color` is what
+   `background: currentColor` is reading — setting it would repaint the fill
+   too. It is the one property that moves the text without moving the box. */
+.bpadmin__actions .bpadmin__btn--save {
+  background: currentColor;
+  -webkit-text-fill-color: var(--bar-fill, var(--surface-card));
+}
+.bpadmin__actions .bpadmin__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.bpadmin__flag {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ---- the form, in the card body ---- */
+
+/* Sits between the hero and the diagram row, marked off as a working surface
+   rather than published content — a dashed rule and a slightly recessed
+   ground, the scorebook equivalent of a pencilled note in the margin. */
+.bpadmin {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+
+.bpadmin__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.bpadmin__field {
+  display: grid;
+  gap: 4px;
+}
+
+.bpadmin__label {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.bpadmin__input {
+  width: 100%;
+  padding: 6px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+  /* --fs-field, not --fs-body: mobile Safari zooms the page in whenever a
+     focused input is under 16px, which mid-edit throws the card off screen.
+     The token exists for exactly this; see tokens/typography.css. */
+  font-size: var(--fs-field);
+}
+
+.bpadmin__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* The body's buttons are the plain outline pair — the masthead's currentColor
+   trick does not apply down here, where the ground is paper, not the club bar. */
+.bpadmin .bpadmin__btn {
+  padding: 5px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.bpadmin .bpadmin__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.bpadmin__hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+.bpadmin__error {
+  margin: 0;
+  padding: var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  border-left: 3px solid var(--seal-edge, var(--kraft-board));
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+/* While editing, the photo becomes the focal-point target. It is a real
+   <button> for the keyboard and for screen readers, so every button default
+   has to be undone to leave the photograph looking exactly as it does the rest
+   of the time — only the cursor and the dashed outline say it is now live. */
+.bpadmin__focusTarget {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: crosshair;
+  outline: var(--bw-hair) dashed var(--border-rule);
+  outline-offset: -3px;
+}

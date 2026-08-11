@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fillTokens, resolveCopy, sanitizeOverrides } from './registry.js'
 import { CopyContext } from './copyContext.js'
 
@@ -59,12 +59,29 @@ export function CopyProvider({ children }) {
     }
   }, [])
 
+  // Adopt a map the app itself just wrote — the admin saving an edit from the
+  // card, whose POST response IS the new authoritative override map. Without
+  // this the owner would save, see nothing change, and be looking at their own
+  // stale copy for up to a minute while the CDN cache aged out (`s-maxage=60`
+  // on the public GET). The write path already has the answer; this hands it
+  // straight back to the running app.
+  //
+  // Re-sanitized like every other source, even though it came from our own API:
+  // the contract of this state is "only ever a clean override map", and a
+  // caller that is trusted today is a caller that gets a second implementation
+  // tomorrow. It costs one pass over a small object.
+  const applyOverrides = useCallback((next) => {
+    const clean = sanitizeOverrides(next)
+    setOverrides(clean)
+    writeCachedOverrides(clean)
+  }, [])
+
   const value = useMemo(() => {
     const resolved = resolveCopy(overrides)
     const t = (id, tokens) =>
       Object.prototype.hasOwnProperty.call(resolved, id) ? fillTokens(resolved[id], tokens) : ''
-    return { t, resolved }
-  }, [overrides])
+    return { t, resolved, applyOverrides }
+  }, [overrides, applyOverrides])
 
   return <CopyContext.Provider value={value}>{children}</CopyContext.Provider>
 }
