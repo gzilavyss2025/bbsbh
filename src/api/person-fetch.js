@@ -192,7 +192,8 @@ export async function fetchMilbByDateRange(personId, group, season, startDate, e
 // Career totals across every MiLB level, fanned out one request per level (the
 // API takes a single sportId). Raw splits, each tagged with its level's sportId
 // so the caller can label/sum them; degrades per level. Used by
-// fetchManagerPlaying below for a manager who never reached the majors.
+// fetchManagerPlaying (careerTimeline.js) for the minor-league half of a
+// manager's own playing career.
 export async function fetchMilbCareer(personId, group) {
   const results = await Promise.allSettled(
     MILB_LEVELS.map((lvl) =>
@@ -202,41 +203,6 @@ export async function fetchMilbCareer(personId, group) {
     ),
   )
   return results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-}
-
-// A manager/coach's own PLAYING career, if statsapi has one. Most managers
-// reached MLB as a player, so their career line lives at sportId 1 (the default);
-// `primaryPosition` picks the group (a former pitcher's line is in `pitching`, a
-// position player's in `hitting`). We fetch BOTH groups at MLB in parallel rather
-// than trusting the position alone — cheap, and it makes the rare two-way / oddly-
-// labeled case just work — and prefer the position-implied group when both exist.
-// A manager who never reached the majors falls to the MiLB level fan-out. If
-// the primary group is absent at every level, the other group gets the same
-// fallback so a missing or misclassified position does not hide a real career.
-// Someone whose playing days predate statsapi's thin pre-~2005 MiLB coverage
-// simply has no data and returns null, so the page drops the card. Returns
-// `{ group, level: 'mlb' | 'milb', splits }` (raw splits — the caller sums via
-// statsLevels' sumHitting/sumPitching) or null.
-export async function fetchManagerPlaying(personId, primaryPosition) {
-  if (!personId) return null
-  const isPitcher = primaryPosition?.code === '1' || primaryPosition?.type === 'Pitcher'
-  const primary = isPitcher ? 'pitching' : 'hitting'
-  const other = isPitcher ? 'hitting' : 'pitching'
-  try {
-    const [primMlb, otherMlb] = await Promise.all([
-      fetchPersonStats(personId, { type: 'career', group: primary }),
-      fetchPersonStats(personId, { type: 'career', group: other }),
-    ])
-    if (primMlb.length) return { group: primary, level: 'mlb', splits: primMlb }
-    if (otherMlb.length) return { group: other, level: 'mlb', splits: otherMlb }
-    const primMilb = await fetchMilbCareer(personId, primary)
-    if (primMilb.length) return { group: primary, level: 'milb', splits: primMilb }
-    const otherMilb = await fetchMilbCareer(personId, other)
-    if (otherMilb.length) return { group: other, level: 'milb', splits: otherMilb }
-    return null
-  } catch {
-    return null
-  }
 }
 
 // Game-log rows across every MiLB level, fanned out one request per level (the
