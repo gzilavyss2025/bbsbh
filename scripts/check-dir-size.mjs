@@ -306,7 +306,10 @@ const BUDGETS = {
   // Prospect Card's age-vs-level fact, its own module since it's the first
   // caller either gen-prospect-trend.mjs or its backfill has needed for a
   // /people lookup, not a fit for prospectPercentile.mjs's pure math.
-  'scripts/lib': 16,
+  // +1 for umpire-accuracy-merge.mjs — gen-umpire-accuracy.mjs's crew-
+  // reassignment merge logic, pulled out so it can be unit-tested (a
+  // generator is a top-level script; importing one RUNS it).
+  'scripts/lib': 17,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
