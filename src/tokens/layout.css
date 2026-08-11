@@ -46,14 +46,15 @@
      targets — everything keyed to them lines up only while they are true. They
      were 152/118 through the focus-mode rebuild while the band actually stood
      at 167/130, which is why the due-up cards sat a visible step short of the
-     band they were meant to match.
+     band they were meant to match. The phone number went 167 -> 126 when the
+     band's phone-only scale-up came off (focus/stage.css) — a floor left above
+     the real height is not a floor, it is padding nothing can see.
 
      Two values, not one: the band's batter/pitcher lines sit ABOVE the score
-     strip, and below the wide breakpoint that stack scales its own type up to
-     fill the card's full phone width, which makes it taller than the narrow
-     (264px) desktop card. Redefined below at the same 740px cut both files
-     already share. */
-  --console-hud-h: 167px;
+     strip, and the wide breakpoint gives that stack a bigger type role, which
+     makes the narrow (264px) desktop card the taller of the two. Redefined
+     below at the same 740px cut both files already share. */
+  --console-hud-h: 126px;
 
   /* The slate's team-logo nav banner (GameSelect's TeamFilterStrip) — the
      height its wrapper holds open while the club list is still being fetched,

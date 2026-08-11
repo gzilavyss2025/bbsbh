@@ -136,3 +136,33 @@ pre-pitch selector (ADR-0010), no fetch is affected either way.
   behaviours that must survive it — a near miss still reveals, Refresh still
   keeps its own taps, and the page above the bar still keeps its own — and those
   assertions were carried over to the new geometry rather than relaxed.
+
+## Amendment (2026-08-11): the band is placed, not pinned, and wears the dock's own size
+
+Placed at the top of the stage was the decision. **Sticky** was not — it arrived
+with it and cost more than it paid.
+
+Three things come off, all on the band:
+
+- **The phone sticky is gone** (`.consolebar`). Desktop had already dropped the
+  pin for the reason that applies just as well to a phone: a bar that follows
+  the reader down the page spends the top of every scroll on a header. While a
+  half is being scored, the reference is the at-bat card directly under the
+  band, and it moves with it. The band is now `static` at every width, so
+  `position: static` in the wide block is a restatement of the grid placement,
+  not an override.
+- **The phone scale-up is gone** (`.gamehud--console`'s `max-width` block).
+  Bigger type, a 92px strip and larger pips answered "the band has the whole
+  width to itself down here". What they bought was ~40px of the smallest
+  viewport, spent ahead of the card being read. The band keeps the dock's own
+  sizing at every width now — full width on a phone, dock scale.
+- **The height floor comes off the BLANK band** (`.gamehud--console.gamehud--blank`).
+  The floor stops the band collapsing when the batter and pitcher rows unmount;
+  what it actually rendered was ~60px of bare navy under the strip, on every
+  landing, since a half is blank until its first at-bat opens. A dark slab reads
+  as a rendering fault, which is worse than the shift it prevents — and that
+  shift is now small, and lands as a half ends rather than mid-read.
+
+`--console-hud-h`'s phone value follows the measurement down, 167px -> 126px.
+Both numbers are still measured, and the due-up cards beside the band still
+stand on them.
