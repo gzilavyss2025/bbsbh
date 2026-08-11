@@ -242,7 +242,11 @@ const BUDGETS = {
   // +1 for careerTimeline.js — the Team history rail's fetch side, split OUT of
   // person-fetch.js when that file hit its own size budget. It cannot go in
   // src/api/person/, whose one convention is that nothing there fetches.
-  'src/api': 90,
+  // +1 for pitcherSplit.js — the shared Starting Pitchers/Bullpen partition
+  // pulled out of loadRoster.js and recentForm.js, which had each grown their
+  // own copy of the same cap-and-slice logic (independently, so a pitcher
+  // could rank below both cutoffs and vanish from the roster page entirely).
+  'src/api': 91,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

@@ -13,6 +13,7 @@ import { fetchAllStarRosterIds, fetchPersonStats } from '../../../api/person-fet
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchWarData } from '../../../api/war.js'
 import { fetchRecentFormGames, buildRecentForm, recentFormEligibleRoster } from '../../../api/recentForm.js'
+import { splitPitchingStaff } from '../../../api/pitcherSplit.js'
 import { rosterPitcherRole, firstLast, POS_ORDER, isTwoWay } from '../../../api/person.js'
 import { lastName } from '../../../api/select.js'
 import { fetchTopProspects, prospectBadge } from '../../../api/prospects.js'
@@ -163,21 +164,15 @@ export async function loadRoster(id, asOf) {
     if (recentStarterIds.has(p.id)) p.role = 'SP'
   }
   pitchers.sort(comparePitchers)
-  // Starting Pitchers — pure season projection, top 5 by games started,
-  // health status irrelevant.
-  const startingPitchers = [...fullPitchers]
-    .filter((p) => p.gs > 0)
-    .sort((a, b) => b.gs - a.gs || Number(a.jersey) - Number(b.jersey))
-    .slice(0, 5)
-  // Bullpen — everyone else who's actually pitched, closer first, capped at 8.
-  const startingIds = new Set(startingPitchers.map((p) => p.id))
-  const relievers = fullPitchers.filter((p) => !startingIds.has(p.id) && p.appearances > 0)
-  const maxSaves = relievers.reduce((max, p) => Math.max(max, p.saves), 0)
-  const closer = maxSaves > 0 ? relievers.find((p) => p.saves === maxSaves) : null
-  const setupCrew = relievers
-    .filter((p) => p !== closer)
-    .sort((a, b) => b.appearances - a.appearances || b.ipOuts - a.ipOuts)
-  const bullpen = (closer ? [closer, ...setupCrew] : setupCrew).slice(0, 8)
+  // Starting Pitchers / Bullpen — pure season projection, health status
+  // irrelevant. Neither section is capped — see splitPitchingStaff for why.
+  const { starters: startingPitchers, bullpen } = splitPitchingStaff(
+    fullPitchers.map((p) => ({ ...p, starts: p.gs })),
+    {
+      compareStarters: (a, b) => b.starts - a.starts || Number(a.jersey) - Number(b.jersey),
+      compareRelievers: (a, b) => b.appearances - a.appearances || b.ipOuts - a.ipOuts,
+    },
+  )
 
   // Preferred Lineup — one player per field position, off the 40Man
   // fullRoster. Shared with the Overview's lineup preview so both show the same
