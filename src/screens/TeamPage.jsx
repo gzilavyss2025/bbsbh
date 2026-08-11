@@ -13,7 +13,7 @@ import { hiddenTeamTabs } from './team/data/shared.js'
 import { StandingsCard } from './team/modules/StandingsCard.jsx'
 import { LastTenGames } from './team/modules/TeamGames.jsx'
 import { RosterProjection } from './team/modules/RosterProjection.jsx'
-import { BallparkCard } from './team/modules/BallparkCard.jsx'
+import { BallparkCard } from './team/modules/ballpark/BallparkCard.jsx'
 
 // How many rows each preview shows. A preview is a DOOR, not a smaller
 // duplicate — every one of these ends in a link to the tab that holds the whole

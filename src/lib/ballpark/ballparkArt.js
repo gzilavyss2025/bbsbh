@@ -30,6 +30,17 @@
 // public/ballparks/logos/{key}.svg (or .png) and add its key to LOGO_KEYS, and
 // the card swaps the typeset name for it. Anything not listed falls back to the
 // typeset wordmark, which is the deliberate default for all 30 parks today.
+//
+// There are now TWO ways to fill that slot, and BUNDLED IS NOT THE PRIMARY ONE.
+// LOGO_KEYS is the deploy-time route above. The other is `ballpark.{key}
+// Wordmark` in the copy store, which the owner can set from the card itself —
+// and because that route can be exercised in production by one person in a few
+// seconds, it is the one that will actually get used. The override WINS over a
+// bundled key (resolveParkName below): a file committed to the repo is the
+// shipped default, and the copy store is how a default gets overridden
+// everywhere else in this app. The trademark caution above applies to both
+// routes equally — the licence question does not care which door the image came
+// through.
 
 // Normalize a venue name to a stable lookup key (mirrors ballparkData.js).
 // "Oriole Park at Camden Yards" -> "orioleparkatcamdenyards". Exported because
@@ -147,6 +158,26 @@ export function resolvePhoto(parkName, overrides = {}) {
     creditHref: bundled.credit.source,
     isOverride: false,
   }
+}
+
+// How the park should be NAMED on the card: as an image if there is a wordmark,
+// otherwise as text. Returns both halves every time — `text` is never empty even
+// when a wordmark wins, because it is still the image's alt text and its title,
+// and a wordmark that fails to load must leave a readable name behind rather
+// than a blank space where the park's identity was.
+//
+// Precedence, widest to narrowest: the feed's canonical park name, then the
+// admin's typed `name`, then the admin's `wordmark` image. The two overrides are
+// independent on purpose — setting a wordmark for a renamed park should not
+// force the owner to also retype the name it is a picture OF, and typing a name
+// should not have to mean giving up an image they already uploaded.
+//
+// `overrides` is already sanitized by the copy registry (the wordmark matched an
+// https:// URL or was dropped), so this does not re-validate — the same
+// assumption resolvePhoto makes.
+export function resolveParkName(parkName, overrides = {}) {
+  const text = overrides.name || parkName || ''
+  return { text, wordmark: overrides.wordmark || ballparkLogoUrl(parkName) || null }
 }
 
 // "50 20" -> "50% 20%". The registry already guaranteed the shape; anything

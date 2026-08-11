@@ -1,5 +1,5 @@
 /* --------------------------------------------------- team hub: Ballpark card
-   The Overview's Ballpark card (src/screens/team/modules/BallparkCard.jsx).
+   The Overview's Ballpark card (src/screens/team/modules/ballpark/BallparkCard.jsx).
    Split out of 09-team-info.css when the photo hero pushed that file past its
    size budget — the card is a self-contained block with its own two-row
    layout, so it reads better alone than buried in the team-hub sheet.

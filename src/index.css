@@ -132,4 +132,6 @@
                               screens/logbook/NewBookPage.jsx
      59-stamp-in              screens/team/StampInPage.jsx
      60-book-cover-picker     components/passport/BookCoverPicker.jsx
+     61-ballpark-admin        screens/team/modules/ballpark/BallparkAdminBar.jsx,
+                              screens/team/modules/ballpark/BallparkEditFields.jsx
    ------------------------------------------------------------ */

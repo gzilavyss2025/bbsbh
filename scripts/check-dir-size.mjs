@@ -215,7 +215,13 @@ const BUDGETS = {
   // (ProspectCard.jsx) — same lettered-sibling shape as 31a/31b/31c above.
   // 74 -> 75 for `31e-prospect-board.css`: /prospects needs its own responsive
   // board without changing the shared Ledger behavior on unrelated pages.
-  'src/styles': 75,
+  // 75 -> 76 for `61-ballpark-admin.css`: the site owner's in-place editor on
+  // the Ballpark card. A NEW partial rather than rules appended to
+  // 57-ballpark-card.css, and the reason is code splitting, not file length —
+  // it is imported by the two lazily-loaded editor modules (the 58+ convention),
+  // so putting it in the card's own always-loaded stylesheet would ship an
+  // admin form's CSS to every visitor to make one person's page work.
+  'src/styles': 76,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

@@ -91,9 +91,17 @@ export const TOKENS = Object.freeze(['time', 'inning'])
 // `sanitizeOverrides` already treats '' as "no override", so clearing a box in
 // the panel is the same operation as never having filled it.
 //
-// FOUR fields per park, not one — the note plus the three that let the owner
-// replace the art without a deploy. `subgroup` keeps a park's four boxes
-// together under one heading in the panel instead of scattering 120 inputs.
+// SIX fields per park, not one — the note, the two that override how the park
+// is NAMED, and the three that replace its art, all without a deploy.
+// `subgroup` keeps a park's six boxes together under one heading in the panel
+// instead of scattering 180 inputs.
+//
+// The suffixed ids (`…Name`, `…Wordmark`, `…Photo`, `…Credit`, `…Focus`) cannot
+// collide with a bare park id, and that is structural rather than lucky:
+// venueKey() emits [a-z0-9] only, so no park's key can ever contain the capital
+// letter that starts every suffix. A park called "Fenway Park Name" would key
+// as `fenwayparkname`, which is not `fenwayparkName`. Keep suffixes capitalised
+// and this stays true by construction.
 //
 // A pattern-validated field is a NEW kind here, and it matters: `photo` and
 // `focus` are not prose, they are a URL that becomes an `<img src>` and a pair
@@ -119,6 +127,25 @@ function parkFields() {
           help: `A few sentences on ${name} — what the place is like, what makes it odd, what a visitor notices. Leave empty to show no note for this park.`,
           maxLength: 700,
           multiline: true,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Name`,
+          label: `${name} — name shown`,
+          help: `Replaces "${name}" as the name printed on the card. For a park whose sponsor name has changed, or a name the feed spells differently from how anyone says it. Leave empty to use the name from the schedule feed.`,
+          maxLength: 60,
+          multiline: false,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Wordmark`,
+          label: `${name} — name as an image`,
+          help: 'A full https:// link to a PNG of the park\'s name, shown INSTEAD of the typeset name. Leave empty to print the name as text. A park wordmark is usually a sponsor\'s registered trademark — using one is your call and your licence to hold.',
+          maxLength: 500,
+          multiline: false,
+          pattern: PHOTO_URL,
           default: '',
         },
         {

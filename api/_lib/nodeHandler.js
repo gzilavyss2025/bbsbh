@@ -77,6 +77,55 @@ export async function readJsonBody(req) {
   }
 }
 
+// The raw request body as a Uint8Array, or null. Used by the ONE endpoint that
+// takes bytes rather than JSON (api/ballpark-photo.js).
+//
+// `maxBytes` is enforced WHILE READING, not after. That ordering is the point:
+// checking a `content-length` header first would trust a number the caller
+// supplies, and checking the total after buffering would mean a 500 MB body had
+// already been held in a serverless function's memory before we objected. So we
+// count as chunks arrive and abandon the read the moment the running total goes
+// over — the caller gets null and answers 413, and nothing larger than the cap
+// is ever resident.
+//
+// Same three-shape tolerance as readJsonBody: Vercel's Node runtime hands a
+// Buffer on `req.body` for a content-type its parser does not own (which is
+// every image type), the edge shape exposes `arrayBuffer()`, and otherwise we
+// read the stream. Never throws — every failure is null.
+export async function readRawBody(req, maxBytes) {
+  const tooBig = (n) => Number.isFinite(maxBytes) && n > maxBytes
+  const body = req?.body
+  if (body instanceof Uint8Array) return tooBig(body.byteLength) ? null : body
+  if (typeof req?.arrayBuffer === 'function') {
+    try {
+      const buf = new Uint8Array(await req.arrayBuffer())
+      return tooBig(buf.byteLength) ? null : buf
+    } catch {
+      return null
+    }
+  }
+  try {
+    const chunks = []
+    let total = 0
+    for await (const chunk of req) {
+      const bytes = typeof chunk === 'string' ? new TextEncoder().encode(chunk) : new Uint8Array(chunk)
+      total += bytes.byteLength
+      if (tooBig(total)) return null
+      chunks.push(bytes)
+    }
+    if (total === 0) return null
+    const out = new Uint8Array(total)
+    let at = 0
+    for (const c of chunks) {
+      out.set(c, at)
+      at += c.byteLength
+    }
+    return out
+  } catch {
+    return null
+  }
+}
+
 // Send a JSON response through whichever channel exists. With Node's `res` we
 // write to it and return undefined; with no `res` (edge) we return a `Response`
 // for the platform to send. Handlers just `return jsonResponse(res, …)` and stay

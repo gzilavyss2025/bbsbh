@@ -15,5 +15,9 @@ export function useCopy() {
   const resolved = ctx ? ctx.resolved : defaultCopy()
   const t = (id, tokens) =>
     Object.prototype.hasOwnProperty.call(resolved, id) ? fillTokens(resolved[id], tokens) : ''
-  return ctx || { t, resolved }
+  // `applyOverrides` is a no-op in the provider-less fallback. Nothing is
+  // holding state to update, and a component that saves copy is by definition
+  // mounted inside the real app — so the alternative (omitting it) would only
+  // ever turn a stray render into a crash.
+  return ctx || { t, resolved, applyOverrides: () => {} }
 }

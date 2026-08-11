@@ -42,7 +42,7 @@ test('every unconditionally-rendered field has a non-empty default', () => {
 
 test('every ballpark field ships empty, so no park carries content nobody chose', () => {
   const fields = FIELDS.filter((f) => f.group === 'ballparks')
-  assert.ok(fields.length >= 120, 'every MLB park has its four fields')
+  assert.ok(fields.length >= 180, 'every MLB park has its six fields')
   for (const f of fields) {
     assert.equal(f.default, '', `${f.id} ships empty`)
     assert.ok(f.subgroup, `${f.id} names the park it belongs to`)
@@ -53,12 +53,19 @@ test('every ballpark field ships empty, so no park carries content nobody chose'
 // drifted — a park renamed, a key normalized differently — the paragraph an
 // admin wrote would silently detach from the park it describes and the card
 // would go blank with no error anywhere. Pin the derivation to its source.
-test('every ballpark has exactly its four fields, keyed off its canonical name', () => {
+test('every ballpark has exactly its six fields, keyed off its canonical name', () => {
   const parks = [...new Set(Object.values(BALLPARKS))]
   const expected = parks
     .flatMap((p) => {
       const k = venueKey(p.name)
-      return [`ballpark.${k}`, `ballpark.${k}Photo`, `ballpark.${k}Credit`, `ballpark.${k}Focus`]
+      return [
+        `ballpark.${k}`,
+        `ballpark.${k}Name`,
+        `ballpark.${k}Wordmark`,
+        `ballpark.${k}Photo`,
+        `ballpark.${k}Credit`,
+        `ballpark.${k}Focus`,
+      ]
     })
     .sort()
   const actual = FIELDS.filter((f) => f.group === 'ballparks')
@@ -67,7 +74,7 @@ test('every ballpark has exactly its four fields, keyed off its canonical name',
   assert.deepEqual(actual, expected)
   // 33 BALLPARKS keys collapse to 30 parks: the three alias names share a
   // record, and must therefore share ONE set of fields, not carry two.
-  assert.equal(actual.length, parks.length * 4)
+  assert.equal(actual.length, parks.length * 6)
   assert.ok(Object.keys(BALLPARKS).length > parks.length, 'alias keys exist to collapse')
 })
 
