@@ -1,7 +1,7 @@
 import { fetchTeam, fetchTeamRoster, fetchTeamIL, fetchStandings } from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
-import { recentDecidedGames, allDecidedGames } from '../../../api/scheduleGames.js'
+import { recentDecidedGames, allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../../../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
@@ -150,9 +150,15 @@ export async function loadOverview(id, asOf) {
     // and the W-L its header carries. Every game older than those is the Games
     // tab's grid, so the Overview never needs the full decided-game list.
     recentGames: recentDecidedGames(schedule),
-    // Highlights + Photos previews' own game list — see the header comment
-    // above for why this costs no second fetch.
+    // Highlights preview's own game list — see the header comment above for
+    // why this costs no second fetch. Decided games only, same as the Games
+    // tab's copy (a clip's title/description narrates a result).
     seasonGames: allDecidedGames(schedule),
+    // Photos preview's own list — a game still in progress is included too
+    // (allStartedGames), same explicit override as loadGames.js and the same
+    // dated-view exception: falls back to the decided-only list once `asOf`
+    // is set, so a `?d=` link still freezes the page at that date.
+    photoGames: asOf ? allDecidedGames(schedule) : allStartedGames(schedule),
     // Lineup preview.
     lineupDefense: lineupDefenseFrom(preferredLineupFrom(fullRoster, id), injuredIds),
     previewStartingPitchers,

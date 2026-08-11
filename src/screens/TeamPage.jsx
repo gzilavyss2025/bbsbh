@@ -79,6 +79,7 @@ export function TeamPage({ id, asOf, sportId }) {
     leagueFormScores,
     recentGames,
     seasonGames,
+    photoGames,
     lineupDefense,
     previewStartingPitchers,
     previewCloser,
@@ -155,11 +156,13 @@ export function TeamPage({ id, asOf, sportId }) {
               limit={PREVIEW_HIGHLIGHTS}
             />
           )}
-          {seasonGames.length > 0 && (
+          {photoGames.length > 0 && (
+            // `photoGames`, not `seasonGames` — this rail may include a game
+            // still in progress (an explicit override; see loadOverview.js).
             <TeamPhotosRail
               key={`photos-${team.id}-${asOf ?? ''}`}
               teamId={team.id}
-              games={seasonGames}
+              games={photoGames}
               limit={PREVIEW_PHOTOS}
             />
           )}
