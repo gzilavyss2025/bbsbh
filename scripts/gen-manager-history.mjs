@@ -176,10 +176,23 @@ async function sweepCoaches(teamIds, seasons) {
     }
     ok++
     const tsKey = `${teamId}:${season}`
+    // The endpoint lists one row PER JERSEY NUMBER a person wore that season,
+    // not one row per job — so a skipper who changed numbers, or simply wore
+    // #42 on Jackie Robinson Day, comes back two or three times with the same
+    // jobId (verified 2026-08-11: Brewers 2026 returned Pat Murphy at #00 and
+    // #49; Red Sox 2019 returned Alex Cora at #20, #42 and #20). We carry no
+    // jersey number here, so those rows are pure duplicates. Collapsing them
+    // on (teamId, season, jobId) is what keeps attachRecords from leaving a
+    // recordless twin behind — see groupManagerialRecord's own dedupe, which
+    // holds the same line for data already shipped.
+    const seenHere = new Set()
     for (const r of roster) {
       const personId = r.person?.id
       const job = r.job ?? ''
       if (!personId || !job) continue
+      const dupKey = `${personId}:${r.jobId ?? job}`
+      if (seenHere.has(dupKey)) continue
+      seenHere.add(dupKey)
       if (!byPersonId.has(personId)) byPersonId.set(personId, [])
       byPersonId.get(personId).push({ teamId, season, job, jobId: r.jobId ?? null })
       if (MANAGER_JOB_IDS.has(r.jobId)) {

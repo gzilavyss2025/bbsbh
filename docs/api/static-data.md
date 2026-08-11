@@ -444,7 +444,12 @@ for each generator; the reader modules:
   `public/data/manager-history/`, behind `/manager/{id}`. Every job row, not
   just the managerial ones. A club-season shared by two managers carries
   `sharedSeason: true` and NO record rather than a split invented from data
-  that can't support one (see the generator).
+  that can't support one (see the generator). `dedupeStints` runs on every
+  read: the coaches endpoint repeats a person once per jersey number, and only
+  one twin ever gets the record, so an undeduped shard printed the rest as
+  phantom shared seasons AND split continuous tenures in half. Same instinct as
+  `aggregateSplits` deduping statsapi's repeated stat rows — the feed repeats
+  itself, so the reader dedupes.
 - `feverRadar.js` — Fever Baseball's (feverbaseball.com) breakout/fade
   prospect radar, from `public/data/fever-radar.json`. An OUTSIDE scouting
   opinion, deliberately NOT a callout family (see docs/callouts.md's

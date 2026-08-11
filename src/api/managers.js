@@ -48,13 +48,44 @@ async function load(personId) {
 // 'Associate Manager' role (jobId 'ASSM') that isn't a second team manager.
 const MANAGER_JOB_IDS = new Set(['MNGR', 'NTRM'])
 
+// The /coaches endpoint the generator sweeps returns one row per JERSEY NUMBER
+// a person wore in a team-season, not one per job — so a skipper who changed
+// numbers, or who wore #42 on Jackie Robinson Day, arrives two or three times
+// under the same jobId. Nothing downstream carries a jersey number, so those
+// rows are indistinguishable duplicates, and attachRecords only ever pins the
+// win-loss record to ONE of them. Left alone they cost twice:
+// groupManagerialRecord printed each recordless twin as a "Shared season"
+// caveat for a season whose record is sitting on the very next row, AND the
+// flush that caveat forces split a legitimate multi-year run in half (Rob
+// Thomson's Phillies read 2023–24, then a phantom 2025, then 2025–26).
+//
+// gen-manager-history.mjs now collapses them at the source. This holds the
+// same line for data already shipped — the static shards only rebuild on the
+// nightly cron, and a reader that trusts its file is how the phantom rows
+// reached the page in the first place. Same instinct as aggregateSplits
+// deduping statsapi's repeated stat rows before it sums them
+// (src/api/person/stats.js): the feed repeats itself, so the reader dedupes.
+//
+// A row carrying a `record` wins over a bare twin; otherwise the first wins.
+// Order is preserved, so the caller's "as stored" chronology survives.
+export function dedupeStints(raw) {
+  const byKey = new Map()
+  for (const s of raw ?? []) {
+    const key = `${s.teamId}|${s.season}|${s.jobId ?? s.job}`
+    const kept = byKey.get(key)
+    if (!kept) byKey.set(key, s)
+    else if (!kept.record && s.record) byKey.set(key, s)
+  }
+  return [...byKey.values()]
+}
+
 // One person's whole coaching career, chronological (oldest first, as stored),
 // each stint carrying its resolved team name and an `isManager` flag. Empty
 // stints for a person with no coaching record on file (never held any MLB
 // staff job 2000-present, or the file hasn't loaded).
 export async function loadManagerHistory(personId) {
   const { byPersonId, generatedAt } = await load(personId)
-  const raw = byPersonId[personId] ?? []
+  const raw = dedupeStints(byPersonId[personId] ?? [])
   const stints = raw.map((s) => ({
     ...s,
     teamName: teamFullName(s.teamId) || '',
@@ -90,7 +121,11 @@ export function groupManagerialRecord(stints) {
     g = null
   }
   for (const s of mgr) {
-    const interim = s.job !== 'Manager'
+    // By jobId, never by the job NAME — the same rule MANAGER_JOB_IDS states
+    // above and fetchManager (game.js) follows. A name match reads as correct
+    // and silently isn't: it makes every title that is not exactly 'Manager'
+    // interim, which is the whole reason jobId is the key here.
+    const interim = s.jobId === 'NTRM'
     if (s.sharedSeason || !s.record) {
       flush()
       rows.push({
@@ -127,12 +162,29 @@ export function groupManagerialRecord(stints) {
   return rows
 }
 
-// The header's "current role" line: the most recent stint on file, if it's
-// this calendar year's — else null, so the page falls back to "last managed"
-// prose off the most recent MANAGERIAL stint instead.
+// The header's "current role" line: this calendar year's stint, if he holds
+// one — else null, so the page falls back to "last managed" prose off the most
+// recent MANAGERIAL stint instead.
+//
+// A person can hold more than one job in a season (192 such seasons on file):
+// a bench coach named interim manager in July keeps BOTH rows, exactly the way
+// the Mets' 2026 roster kept Carlos Mendoza's 'Manager' row beside Andy
+// Green's 'Interim Manager' one. So the pick is by ROLE, not by position in
+// the array — this used to take the last stored row, which handed the header
+// whatever order /coaches happened to return (Boston's 2026 interim bench
+// coach read as "First Base Coach"). Interim manager outranks manager for the
+// reason fetchManager (game.js) already encodes and test/manager.test.js
+// pins: an interim row means the permanent one beside it is stale. Any
+// manager job outranks an assistant one; among assistants the last row wins,
+// as before.
 export function currentStint(stints, season = new Date().getFullYear()) {
-  const last = (stints ?? [])[stints.length - 1]
-  return last && last.season === season ? last : null
+  const held = (stints ?? []).filter((s) => s?.season === season)
+  if (!held.length) return null
+  return (
+    held.find((s) => s.jobId === 'NTRM') ??
+    held.find((s) => MANAGER_JOB_IDS.has(s.jobId)) ??
+    held[held.length - 1]
+  )
 }
 
 // The most recent stint where this person actually managed (any season) —

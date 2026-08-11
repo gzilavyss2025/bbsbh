@@ -11,9 +11,10 @@
 import { teamLogoUrl } from '../lib/teams.js'
 import { tintFromSvg } from '../lib/logoTint.js'
 import { careerTimelineView } from './person.js'
-import { fetchPersonStats, fetchMilbYearByYear } from './person-fetch.js'
+import { fetchPersonStats, fetchMilbYearByYear, fetchMilbCareer } from './person-fetch.js'
 import { fetchTeam } from './team.js'
 import { historicalParentOrg } from './milbHistory.js'
+import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR } from './rehab-policy.js'
 
 // A soft background wash for a team, derived from its own logo colors so the
 // full-color mark reads cleanly on it with no border or drop shadow (see
@@ -129,6 +130,91 @@ export async function buildCareerTimeline(splits, group, debutYear) {
   if (!timeline) return null
   await enrichTimelineEntries(timeline.entries)
   return timeline
+}
+
+// A career total's workload, in the two units meetsWorkload takes. `games` is
+// the group's own appearance field (a pitcher's G is gamesPitched, not the
+// gamesPlayed a two-way line would inflate); `outs` comes off the IP string,
+// the same conversion careerTimelineView uses on a per-stint row.
+function careerWorkload(splits, group) {
+  let games = 0
+  let outs = 0
+  for (const s of splits ?? []) {
+    const stat = s.stat ?? {}
+    const g = Number(stat[group === 'pitching' ? 'gamesPitched' : 'gamesPlayed'])
+    if (Number.isFinite(g)) games += g
+    outs += ipToOuts(stat.inningsPitched)
+  }
+  return { games, outs }
+}
+
+// Which of a resolved group's two career lines are worth printing, in the
+// order the card stacks them (majors first). The tests are the SAME ones
+// careerTimelineView applies to a stop on the rail below the card, which is
+// the point: the two modules describe one playing career and used to disagree
+// about it. Any major-league appearance at all is real (a one-at-bat career is
+// still a career — Jeff Banister's single 1991 hit), while a minor-league line
+// must clear CUP_OF_COFFEE_FLOOR to count as presence rather than a cameo.
+//
+// That floor is why the card and the rail now agree on Rob Thomson: statsapi
+// holds two A+ games for him, the rail has always dropped them, and the card
+// used to print ".000/.000/.000" over seven at-bats as though it were the
+// record of a four-year professional. Neither shows now.
+//
+// The agreement is close, not exact, and the gap is deliberate: the rail tests
+// each team-season separately, so a career built from many sub-floor stints
+// can clear the floor in total and still put no MiLB club on the rail. A
+// career total is the honest number for a career total — we do not re-sum only
+// the qualifying stints to force a match.
+function qualifyingLines(mlbSplits, milbSplits, group) {
+  const lines = []
+  const mlb = careerWorkload(mlbSplits, group)
+  if (mlb.games >= 1 || mlb.outs >= 1) lines.push({ level: 'mlb', splits: mlbSplits })
+  const milb = careerWorkload(milbSplits, group)
+  if (meetsWorkload(milb.games, milb.outs, group, CUP_OF_COFFEE_FLOOR)) {
+    lines.push({ level: 'milb', splits: milbSplits })
+  }
+  return lines
+}
+
+// A manager/coach's own PLAYING career, if statsapi has one — BOTH sides of
+// it. `primaryPosition` picks the group (a former pitcher's line is in
+// `pitching`, a position player's in `hitting`); we try that group at MLB and
+// across the MiLB levels together, and only fall back to the OTHER group when
+// the position-implied one is empty everywhere, so a missing or misclassified
+// position can't hide a real career.
+//
+// It used to return the FIRST level that had anything and stop, which read as
+// a reasonable preference and was not: a manager who spent nine years in the
+// minors around four major-league games had those four games printed under the
+// heading "Playing career" while the clubs rail directly beneath him listed
+// all nine years (verified against Charlie Montoyo, 4 G / .400, and Jeff
+// Banister, 1 G / 1.000). The player page's career register settled this
+// question already — "Totals never blend levels: a separate MLB and MiLB
+// footer, each footing only its own side of the ledger" — and this is the same
+// answer in the same shape. The two lines are never summed together.
+//
+// Someone whose playing days predate statsapi's thin pre-~2005 MiLB coverage
+// simply has no data and returns null, so the page drops the card. Returns
+// `{ group, lines: [{ level: 'mlb' | 'milb', splits }] }` (raw splits — the
+// caller sums each line via statsLevels' sumHitting/sumPitching) or null.
+export async function fetchManagerPlaying(personId, primaryPosition) {
+  if (!personId) return null
+  const isPitcher = primaryPosition?.code === '1' || primaryPosition?.type === 'Pitcher'
+  const groups = isPitcher ? ['pitching', 'hitting'] : ['hitting', 'pitching']
+  try {
+    for (const group of groups) {
+      const [mlb, milb] = await Promise.all([
+        fetchPersonStats(personId, { type: 'career', group }),
+        fetchMilbCareer(personId, group),
+      ])
+      const lines = qualifyingLines(mlb, milb, group)
+      if (lines.length) return { group, lines }
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
 // The clubs a manager/coach played for as a PLAYER — the same "Team history"

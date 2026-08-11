@@ -372,7 +372,14 @@ don't run these by hand.
   `scripts/manager-transitions-seed.json` supplies the transition date and a
   season with no seed entry is appended to
   `scripts/manager-transitions-needs-research.json` and marked `sharedSeason`
-  with no record — never a guessed one. App reads it via `src/api/managers.js`.
+  with no record — never a guessed one. One undocumented trap in the source:
+  `/coaches` returns a person once per JERSEY NUMBER he wore that season, not
+  once per job, so a skipper who changed numbers — or simply wore #42 on
+  Jackie Robinson Day — arrives two or three times under one jobId. The sweep
+  collapses them on `(teamId, season, jobId)`; without that, only one twin gets
+  a record attached and the page prints the others as phantom "Shared season"
+  rows. `src/api/managers.js` dedupes again on read, for shards written before
+  the fix. App reads it via `src/api/managers.js`.
 - `gen-fever-radar.mjs` → `public/data/fever-radar.json` — a nightly snapshot of
   Fever Baseball's (feverbaseball.com) breakout/fade prospect radar. A THIRD-
   PARTY scouting opinion, displayed attributed and kept deliberately apart from
