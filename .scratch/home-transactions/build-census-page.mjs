@@ -192,7 +192,7 @@ pre { margin: 0; padding: 10px 12px; background: var(--paper-inset); border: 1px
         id: 'Not unique — every player in one trade shares an id, and repeats happen.',
         date: 'Filed date.',
         effectiveDate: 'When it takes effect. Differs from date on a small share of rows.',
-        resolutionDate: 'When it resolved. Nothing reads it today.',
+        resolutionDate: 'Carries no date information — it equals effectiveDate on all 29,526 rows that have one, with no exception all season. Its PRESENCE is the signal: a row that moves a player between two clubs has none, a row where one club changes the status of a player it already holds always does. See below.',
         typeCode: 'The code in the table above.',
         typeDesc: "MLB's own words for the code.",
         description: 'The wire sentence, led by the acting club when there is one.',
@@ -204,6 +204,20 @@ pre { margin: 0; padding: 10px 12px; background: var(--paper-inset); border: 1px
       <tr><td><b>team</b></td><td class="num"><span class="no">0</span></td><td class="num">0%</td><td class="wrap-cell muted">Never sent on this endpoint. Do not read it.</td></tr>
     </tbody>
   </table></div>
+
+  <h3>What <code>resolutionDate</code> actually marks</h3>
+  <p class="lede">Measured over the full season. The value itself is redundant, but which rows carry it is not random — it separates a player changing clubs from a club changing a player's status, and it does so without reading a word of the sentence.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th class="wrap-cell">Kind of row</th><th class="wrap-cell">Type codes</th><th class="num">Rows</th><th class="num">Carry it</th></tr></thead>
+    <tbody>
+      <tr><td class="wrap-cell"><b>One club, one player it already holds.</b> A status change, a release, a signing, a designation, a free-agency election, a retirement, a suspension, a number change.</td><td class="wrap-cell">SC, NUM, REL, SFA, SGN, DES, DFA, RET, SU</td><td class="num">17,077</td><td class="num"><span class="yes">17,045 — 99.8%</span></td></tr>
+      <tr><td class="wrap-cell"><b>A player moves between two clubs.</b> An option, a recall, a trade, a selection, an outright, a waiver claim, an acquisition, a return, a loan, a purchase.</td><td class="wrap-cell">OPT, CU, TR, SE, OUT, CLW, ACQ, RTN, OBT, LON, CP, PUR</td><td class="num">2,891</td><td class="num"><span class="no">0%</span></td></tr>
+      <tr><td class="wrap-cell"><b>An assignment</b> splits on exactly the same line: "assigned to Reading" with no origin club carries one; "assigned to Reading from Lehigh Valley" does not.</td><td class="wrap-cell">ASG, with an origin club</td><td class="num">6,653</td><td class="num"><span class="no">0.2%</span></td></tr>
+      <tr><td class="wrap-cell">The same assignment with no origin club named</td><td class="wrap-cell">ASG, no origin club</td><td class="num">10,311</td><td class="num"><span class="yes">99.9%</span></td></tr>
+      <tr><td class="wrap-cell"><b>A rehab assignment is the one deliberate exception.</b> It names both clubs, and still carries one — because the player never leaves the parent club's control, he is only playing somewhere else.</td><td class="wrap-cell">ASG, rehab</td><td class="num">2,164</td><td class="num"><span class="yes">99.9%</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="lede">Practical value for a league-wide feed: <b>a row with no <code>resolutionDate</code> is a row two clubs can both see</b>, which is the entire surface on which a feed can print the same move twice. <code>fromTeam</code> answers almost the same question — the one thing this field adds is telling a rehab assignment apart from a real transfer without parsing the description.</p>
 </section>
 
 <p class="footnote">Regenerate: <code>node .scratch/home-transactions/type-census.mjs</code> then <code>node .scratch/home-transactions/build-census-page.mjs</code>. Nothing here passes through <code>src/api/teamTransactions.js</code> — it is the API's own output, grouped only by its own fields. Pulled ${c.generatedAt.slice(0, 10)}.</p>
