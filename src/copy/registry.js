@@ -387,6 +387,28 @@ export function sanitizeOverrides(raw) {
   return out
 }
 
+// Layer `patch` over `current` — the partial-save merge, shared by the client
+// that composes a patch and the server that applies one.
+//
+// A patch value of '' means CLEAR THIS FIELD, so it is dropped rather than
+// stored, matching sanitizeOverrides, which already treats an empty string as
+// "no override, use the default". A key absent from the patch is left exactly
+// as it was; that is the whole point of a patch.
+//
+// IT LIVES HERE, beside sanitizeOverrides, because BOTH ends of the write need
+// the identical function and there must not be two of them. api/copy.js applies
+// a patch against the authoritative Redis map; the client composes one. A
+// second implementation that drifted would decide, silently, that a save means
+// two different things depending on which end ran it.
+export function mergeOverrides(current, patch) {
+  const merged = { ...sanitizeOverrides(current) }
+  for (const [id, value] of Object.entries(patch || {})) {
+    if (typeof value === 'string' && value.trim()) merged[id] = value.trim()
+    else delete merged[id]
+  }
+  return sanitizeOverrides(merged)
+}
+
 // Remove control and bidirectional-override characters before a value is
 // stored or rendered. This matters most in the consent modals, where the
 // decline vs. accept buttons must be visually unmistakable: a stray or

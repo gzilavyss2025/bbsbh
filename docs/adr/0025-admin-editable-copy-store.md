@@ -194,3 +194,55 @@ through a real client over a stubbed HTTP transport answering what the Upstash
 REST API actually answers — a base64-encoded flat array — and pins the string
 round-trip (`"42"` stays `"42"`) so a future fix cannot trade this bug back for
 the one the flag prevents.
+
+## Amendment: a partial save is applied by the server, not composed by the client
+
+**2026-08-11, hours after the amendment above.** Restoring the read path made a
+second bug live, and the pairing is worth recording: one of these defects had
+been *masking* the other.
+
+`POST /api/copy` deletes every key its body omits — correct for the /admin
+panel, which holds every field. The inline ballpark editor holds six, so
+`saveCopyPatch` did a read-merge-write: GET the current map, layer its fields
+on, POST the whole thing back. The correctness of that rests entirely on the GET
+being fresh, and it was not. The response is CDN-cached (`s-maxage=60,
+stale-while-revalidate=600`), and `cache: 'no-store'` on a fetch governs the
+BROWSER's cache, not a shared edge. Production answered that read
+`X-Vercel-Cache: STALE, Age: 238`.
+
+So a save merged into a map minutes old, and every field missing from it was
+deleted as a `staleKey`. Two saves inside the window meant the second erased the
+first.
+
+**Why nobody saw it until now.** `staleKeys` is computed from the server's own
+`prev` read — which, before the previous amendment, always sanitized to `{}`.
+An empty `prev` means an empty `staleKeys`, so *nothing was ever deleted*.
+Fields accumulated instead, and the store quietly did the right thing for the
+wrong reason. Fixing the read armed the delete, and the loss began the same
+afternoon: ballpark photos uploaded fine, stored fine, and vanished on the next
+park's save. Wordmarks saved days earlier survived, because they were present in
+every cached copy — which made it read as "photos don't sync, logos do."
+
+Two lessons, both about the shape rather than the specifics:
+
+- **A client cannot be given a coherent read of shared state through a cache it
+  does not control.** `cache: 'no-store'` looks like it settles this and does
+  not; it is a statement about one browser's store, not about an intermediary.
+  Any read-modify-write built on a cacheable GET is a race with a long fuse.
+- **Two bugs can cancel.** A broken read made a broken write harmless, so the
+  system passed every observation until one was fixed. Fixing a defect in a
+  system that has been quietly wrong is when to ask what was *depending* on the
+  defect — not after the next report.
+
+The fix moves the merge to the server. `POST /api/copy` now accepts
+`{ patch }` alongside `{ copy }`: a patch is resolved against the authoritative
+Redis map inside the same request that writes it, so a patch can only ever
+delete a field it explicitly cleared. `mergeOverrides` moved to
+`src/copy/registry.js` beside `sanitizeOverrides` so both ends share one
+implementation, and `writePlan` (`api/copy.js`) is the pure, exported write rule
+— the POST needs a live Clerk token, so the rule is tested where CI can reach
+it (`test/api-copy-write-plan.test.js`).
+
+`saveCopyPatch` no longer reads at all and is smaller for it. The panel keeps
+full-map semantics, since it genuinely holds every field, but its own load now
+bypasses the edge with a unique URL rather than trusting `cache: 'no-store'`.
