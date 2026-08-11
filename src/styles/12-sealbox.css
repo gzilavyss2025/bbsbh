@@ -414,7 +414,7 @@
 .wcall__pill--wrong {
   background: var(--clay-soft);
   color: var(--clay-deep);
-  text-decoration: line-through;
+  text-decoration: line-through; /* strike-link-exempt: a pill, not a name */
   text-decoration-thickness: 1.5px;
 }
 .wcall__pill--right {
@@ -459,7 +459,7 @@
 }
 .wcall__count-old {
   color: var(--graphite-soft);
-  text-decoration: line-through;
+  text-decoration: line-through; /* strike-link-exempt: a count, not a name */
   text-decoration-color: var(--graphite-soft);
   animation: wcall-count-old var(--dur-slow) var(--ease-out) 1;
 }
