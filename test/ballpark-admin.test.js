@@ -19,8 +19,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { FIELD_IDS, mergeOverrides } from '../src/copy/registry.js'
-import { resolveParkName, venueKey } from '../src/lib/ballpark/ballparkArt.js'
-import { fieldIds } from '../src/screens/team/modules/ballpark/useBallparkDraft.js'
+import { fieldIds, resolveParkName, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 import { isOwnBlobUrl, sniffImage } from '../api/ballpark-photo.js'
 
 const FENWAY = venueKey('Fenway Park')

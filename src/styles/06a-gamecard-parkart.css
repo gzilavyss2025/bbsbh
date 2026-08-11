@@ -1,0 +1,95 @@
+/* The ballpark behind the '@' — a slate card's hover state.
+   ---------------------------------------------------------------------------
+   Hover a game and the park it is being played in fades in behind the matchup:
+   the same photograph the team hub's Ballpark card shows, drained to grayscale,
+   held down to a wash, and masked so it is strongest under the '@' and gone by
+   the edges. The point is recognition, not decoration — you should be able to
+   tell Fenway from Wrigley at a glance and still read every word on the card.
+
+   Sits immediately after 06-loader-and-cards.css because it belongs to the
+   .gamecard rules there and must win at equal specificity; that file is over
+   its size budget (check-file-size.mjs), which is the other reason this is its
+   own partial rather than thirty more lines at the end of that one.
+
+   Renders NOTHING unless GameCard resolved a photo for this venue and set both
+   custom properties — an MiLB park, a neutral site, a lean feed row. The
+   var() fallbacks below are what make "no park" cost no rule.
+
+   HOVER ONLY, and that is the whole feature: `@media (hover: hover)` keeps it
+   off touch, where there is no hover to give and a tap means "open this game".
+   The app is phone-first, so this is a nicety for the desktop second screen,
+   never something a phone visit is missing. */
+
+.gamecard__parkart {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* Same flip-card guard as .gamecard__live and the '@' spans it sits under:
+     a past-day card's rotated back face leaked absolutely-positioned children
+     through mirrored on iOS without it. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Named only once GameCard has armed the card (first hover) — see the
+     comment there. `none` is the un-armed value, so nothing is requested. */
+  background-image: var(--park-art, none);
+  background-size: cover;
+  /* The focal point the owner picked on the Ballpark card's photo, in the same
+     "50% 20%" form object-position takes there — one crop, both surfaces. */
+  background-position: var(--park-focus, 50% 50%);
+  background-repeat: no-repeat;
+  /* Grayscale because the card's colour belongs to the two clubs. A photograph
+     in full colour behind their marks competes with the thing it is backing. */
+  filter: grayscale(1);
+  /* A soft vignette rather than a hard rectangle, so the park sits ON the card
+     instead of being a panel pasted over it. Deliberately wide: the two club
+     tiles are opaque and eat most of the middle, so a mask tight around the '@'
+     left only a letterbox slot of photograph and nothing you could recognise.
+     What is left to see is the strip above the tiles, the margins beside them,
+     and the whole names row — which is enough of a frame to tell Fenway's wall
+     from Petco's grandstand.
+     The vertical radius is the fiddly number: it has to be small enough that
+     the fade is well under way by the bottom of the block, or the photo ends on
+     a hard rule above the meta row, and large enough that the names row is
+     still inside the solid part. */
+  -webkit-mask-image: radial-gradient(ellipse 88% 66% at 50% 46%, #000 0%, #000 56%, transparent 100%);
+  mask-image: radial-gradient(ellipse 88% 66% at 50% 46%, #000 0%, #000 56%, transparent 100%);
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+@media (hover: hover) {
+  /* Keyed on the CARD, not the button, so the box-score row at the foot of a
+     past game's card counts as hovering the game too — the whole card is one
+     object. :focus-within covers the keyboard path to the same state. */
+  .gamecard:hover .gamecard__parkart,
+  .gamecard:focus-within .gamecard__parkart {
+    /* Low enough that navy ink on manila still reads over the busiest photo in
+       the set (a full crowd shot), high enough to recognise the place. Tuned
+       against Fenway and Chase Field, the two most cluttered frames. */
+    opacity: 0.24;
+  }
+
+  /* The '@' is printed very faint by design (7%/10%), which is right on bare
+     paper and disappears over a photograph. It comes up with the park so the
+     mark stays the thing in front. Still a watermark, just legible. */
+  .gamecard:hover .gamecard__atmark-ink,
+  .gamecard:focus-within .gamecard__atmark-ink {
+    opacity: 0.16;
+  }
+  .gamecard:hover .gamecard__atmark-ghost,
+  .gamecard:focus-within .gamecard__atmark-ghost {
+    opacity: 0.2;
+  }
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: opacity var(--dur-med) var(--ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gamecard__parkart,
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: none;
+  }
+}

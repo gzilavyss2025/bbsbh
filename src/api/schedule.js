@@ -66,7 +66,10 @@ export function normalizeGame(game, sportId) {
     // game reads "7:10 PDT" for everyone. `tz` is the abbreviation to append;
     // `tzId` is the IANA zone Intl formats in. Both degrade to '' on lean feeds
     // (the card then falls back to the viewer's local time, unlabeled).
+    // `name` is the park the game is actually AT, which a neutral site parts
+    // from the home club's own — see lib/ballpark/parkBackdrop.js.
     venue: {
+      name: game.venue?.name ?? '',
       id: game.venue?.id,
       tz: game.venue?.timeZone?.tz ?? '',
       tzId: game.venue?.timeZone?.id ?? '',
@@ -316,8 +319,8 @@ export async function fetchGameCardsByPk(gamePks) {
 const GAMES_BY_PK_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,teams,away,home,team,id,name,teamName,abbreviation'
 // fetchGameCardsByPk feeds normalizeGame, so its allowlist covers that full
-// read-set (status, reschedule dates, sport id, venue timezone) — omitting any
-// would blank a Top Games card's status/date/tz.
+// read-set (status, reschedule dates, sport id, venue name + timezone) —
+// omitting any would blank a Top Games card's status/date/tz.
 const GAME_CARDS_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,status,statusCode,detailedState,abstractGameState,reason,rescheduleDate,rescheduleGameDate,teams,away,home,team,id,name,teamName,abbreviation,sport,venue,timeZone,tz'
 // fetchSchedule is normalizeGame's read-set (GAME_CARDS_FIELDS) plus the

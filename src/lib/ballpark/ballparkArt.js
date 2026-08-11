@@ -55,6 +55,26 @@ export function venueKey(name) {
     .replace(/[^a-z0-9]/g, '')
 }
 
+// The five admin-editable copy fields one park owns, as dotted registry ids.
+//
+// Lives HERE, beside venueKey, because this file already owns the key scheme
+// those ids are built from — and because there are now two unrelated readers of
+// them: the Ballpark card's editor (screens/team/modules/ballpark/) and the
+// slate card's backdrop (./parkBackdrop.js). A copy of the naming scheme in
+// either one would be a copy that can drift, and these ids are Redis field
+// names: a park whose id moved would silently lose the photograph somebody
+// uploaded for it. The registry (src/copy/registry.js) derives the same names
+// from the same key; keep the two in step.
+export function fieldIds(key) {
+  return {
+    name: `ballpark.${key}Name`,
+    wordmark: `ballpark.${key}Wordmark`,
+    photo: `ballpark.${key}Photo`,
+    credit: `ballpark.${key}Credit`,
+    focus: `ballpark.${key}Focus`,
+  }
+}
+
 // artist / license / source for each bundled photo. `source` is the Commons
 // file page, which is where a reader goes to verify the licence.
 export const CREDITS = {

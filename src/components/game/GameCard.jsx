@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TeamTreatmentMark } from '../logo/TeamTreatmentMark.jsx'
 import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
@@ -9,6 +10,16 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
 import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
+import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
+import { useCopy } from '../../copy/copyContext.js'
+
+// Whether this device has a pointer that can hover — the SAME condition
+// 06a-gamecard-parkart.css gates the ballpark backdrop on, asked again in JS so
+// the two cannot disagree. Without it a tap on a phone fires pointerenter and
+// fetches a 1000px photograph the media query will never show: the app is
+// phone-first, and a desktop nicety must cost a phone nothing. Asked per event
+// rather than once at module load, so plugging in a mouse starts working.
+const canHover = () => window.matchMedia?.('(hover: hover)').matches ?? false
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -69,18 +80,40 @@ export function GameCard({
   const stacked = !!stackedGame
   const dhLabel = doubleHeaderLabel(game, stacked)
   const pinned = !!pinnedTeamId
-  // Sets --pin-accent for the pinned border/gradient + star (see index.css);
-  // left unset (undefined) when not pinned or the team has no known color, so
-  // the CSS var(--pin-accent, var(--field)) fallback takes over.
-  const style = pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : undefined
   // Static same-origin file (nightly-generated), same "fetch once, session
   // cache" shape as every other public/data/*.json reader — this is not one
   // network request per card, just a cache hit after the first card mounts.
   const { data: jerseysData } = useAsync(fetchJerseysData, [])
+  // The park this game is at, as a photo to wash in behind the '@' on hover —
+  // null for every venue we hold no art for, which is every MiLB park and every
+  // one-off neutral site (see lib/ballpark/parkBackdrop.js). Reading the copy
+  // store here is a context read, not a fetch.
+  const { t } = useCopy()
+  const park = parkBackdrop(game.venue?.name, t)
+  // The photo is fetched on FIRST HOVER, not on mount — a slate is fifteen cards
+  // and these are 1000px-wide photographs, so loading them up front would cost
+  // megabytes to decorate an interaction most visits never make. Naming the
+  // image only in a `:hover` rule would get the same laziness for free, but then
+  // it un-names on leave and the fade-OUT has nothing left to fade; arming it
+  // once in state keeps the image mounted so both directions animate. One
+  // flip per card, ever.
+  const [parkArmed, setParkArmed] = useState(false)
+  const armPark = park && !parkArmed ? () => canHover() && setParkArmed(true) : undefined
+  // --pin-accent drives the pinned border/gradient + star (see index.css) and is
+  // left unset when not pinned or the team has no known color, so the CSS
+  // var(--pin-accent, var(--field)) fallback takes over. Same idea for the two
+  // park properties: absent means the backdrop rule paints nothing.
+  const style = {
+    ...(pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : null),
+    ...(park ? { '--park-focus': park.focus } : null),
+    ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
+  }
   const card = (
     <div
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
-      style={style}
+      style={Object.keys(style).length ? style : undefined}
+      onPointerEnter={armPark}
+      onFocus={armPark}
     >
       {/* Full-width date strip for a cross-date list where each card needs
           its own day, unlike the slate (one date heads the whole page).
@@ -104,6 +137,15 @@ export function GameCard({
         onClick={() => onSelect(game)}
       >
         <div className="gamecard__teams">
+          {/* The ballpark, washed grayscale and faded in behind the '@' on
+              hover. First child so DOM order paints it under the watermark at
+              their shared z-index: the '@' is the thing you read, the park is
+              the paper it is printed on. Decorative — the card already names
+              both clubs and the game already knows where it is — so it carries
+              nothing but its photo credit, in `title`. */}
+          {park && (
+            <span className="gamecard__parkart" aria-hidden="true" title={park.title} />
+          )}
           {/* A screen-print-style watermark behind both marks rather than a
               small glyph between them — two offset '@' layers (see
               .gamecard__atmark in index.css), decorative like the mark it

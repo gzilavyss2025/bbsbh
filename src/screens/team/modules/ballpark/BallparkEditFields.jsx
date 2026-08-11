@@ -1,6 +1,6 @@
 import { useCallback, useId, useRef } from 'react'
 import { FIELDS } from '../../../../copy/registry.js'
-import { fieldIds } from './useBallparkDraft.js'
+import { fieldIds } from '../../../../lib/ballpark/ballparkArt.js'
 import '../../../../styles/61-ballpark-admin.css'
 
 // The owner's edit form, shown inside the Ballpark card body while the gear is
