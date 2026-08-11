@@ -47,9 +47,8 @@ function GameStubCard({ game: g }) {
   const hasScore = g.runs != null && g.oppRuns != null
   const winRuns = g.won ? g.runs : g.oppRuns
   const lossRuns = g.won ? g.oppRuns : g.runs
-  const extraInnings = g.innings && g.innings > 9 ? `${g.innings} inn` : null
+  const extraInnings = g.innings && g.innings > 9 ? g.innings : null
   const gmTag = g.doubleHeader !== 'N' ? `Gm ${g.gameNumber}` : null
-  const meta = extraInnings || gmTag
   const scoreWords = hasScore
     ? `${g.won ? 'won' : 'lost'} ${g.runs} to ${g.oppRuns}`
     : g.won
@@ -92,11 +91,12 @@ function GameStubCard({ game: g }) {
             {winRuns}
             <span className="last10__sep">&ndash;</span>
             {lossRuns}
+            {extraInnings && <span className="last10__meta last10__meta--inline">({extraInnings})</span>}
           </div>
         ) : (
           <div className="last10__score last10__score--final">Final</div>
         )}
-        {meta && <div className="last10__meta">{meta}</div>}
+        {gmTag && <div className="last10__meta">{gmTag}</div>}
       </div>
     </button>
   )
@@ -109,7 +109,13 @@ function GameStubCard({ game: g }) {
 // Games tab's grid, which is where scrolling back used to lead.
 function LastTenGamesStrip({ games }) {
   const trackRef = useRef(null)
-  const didInitialScroll = useRef(false)
+  // Stays pinned to the newest (rightmost) card across every resize/content
+  // change — a club logo swapping in from its placeholder, a font finishing
+  // its load — right up until the visitor actually touches the strip
+  // themselves. `el.scrollWidth` isn't stable at mount (those late layout
+  // shifts grow it after the first paint), so a one-shot jump used to leave
+  // the strip short of true right if it landed before they finished.
+  const pinnedToEnd = useRef(true)
   const [canScroll, setCanScroll] = useState(false)
   const [atStart, setAtStart] = useState(true)
   const [atEnd, setAtEnd] = useState(true)
@@ -117,24 +123,26 @@ function LastTenGamesStrip({ games }) {
   useLayoutEffect(() => {
     const el = trackRef.current
     if (!el) return
-    const check = () => setCanScroll(el.scrollWidth > el.clientWidth + 1)
+    const check = () => {
+      setCanScroll(el.scrollWidth > el.clientWidth + 1)
+      if (pinnedToEnd.current) jumpScrollLeft(el, el.scrollWidth - el.clientWidth)
+    }
     check()
     const ro = new ResizeObserver(check)
     ro.observe(el)
     window.addEventListener('resize', check)
+    const unpin = () => {
+      pinnedToEnd.current = false
+    }
+    el.addEventListener('pointerdown', unpin)
+    el.addEventListener('wheel', unpin, { passive: true })
     return () => {
       ro.disconnect()
       window.removeEventListener('resize', check)
+      el.removeEventListener('pointerdown', unpin)
+      el.removeEventListener('wheel', unpin)
     }
   }, [games.length])
-
-  // Opens pre-scrolled to the newest (rightmost) card — on mount only.
-  useLayoutEffect(() => {
-    const el = trackRef.current
-    if (!el || didInitialScroll.current) return
-    jumpScrollLeft(el, el.scrollWidth)
-    didInitialScroll.current = true
-  }, [canScroll])
 
   useEffect(() => {
     const el = trackRef.current
@@ -151,6 +159,7 @@ function LastTenGamesStrip({ games }) {
   const scroll = (dir) => {
     const el = trackRef.current
     if (!el) return
+    pinnedToEnd.current = false
     el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
   }
 

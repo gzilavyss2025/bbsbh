@@ -1,4 +1,5 @@
 import { lastName } from '../../../api/select.js'
+import { firstLast, isTwoWay } from '../../../api/person.js'
 
 // Pieces MORE THAN ONE team-hub loader genuinely needs, collapsed here once the
 // tabs had all landed (issue 07 of .scratch/team-page-ia — the tab loaders were
@@ -205,6 +206,49 @@ export function rosterHittingStat(r, teamId) {
 export function ipToOuts(ip) {
   const [whole, frac = '0'] = String(ip ?? '0').split('.')
   return (Number(whole) || 0) * 3 + (Number(frac[0]) || 0)
+}
+
+// ---------------------------------------------------------------------------
+// Pitching staff (season line)
+// ---------------------------------------------------------------------------
+
+// Every roster pitcher's season line — starts, saves, innings-as-outs — off
+// the 40Man roster so a hurt ace or closer still counts. Shared by the Roster
+// tab's own Starting Pitchers sort and the Overview's smaller preview, which
+// must rank the same way.
+export function fullPitchingLineFrom(fullRoster, teamId) {
+  return fullRoster
+    .filter((r) => r.position?.type === 'Pitcher' || isTwoWay(r.person))
+    .map((r) => {
+      const stat = rosterPitchingStat(r, teamId)
+      return {
+        id: r.person?.id,
+        name: firstLast(r.person),
+        jersey: r.jerseyNumber ?? '',
+        gs: Number(stat?.gamesStarted) || 0,
+        saves: Number(stat?.saves) || 0,
+        ipOuts: ipToOuts(stat?.inningsPitched),
+      }
+    })
+}
+
+// Top-N by games started; a tie goes to whoever logged more innings (more of
+// the season's workload behind the same start count), then jersey number for
+// a stable sort.
+export function topStartingPitchersFrom(fullPitchers, limit = 5) {
+  return [...fullPitchers]
+    .filter((p) => p.gs > 0)
+    .sort((a, b) => b.gs - a.gs || b.ipOuts - a.ipOuts || Number(a.jersey) - Number(b.jersey))
+    .slice(0, limit)
+}
+
+// The most saves among pitchers NOT already claiming a starter slot — a
+// swingman who picked up a save or two before moving into the rotation
+// shouldn't out-close the bullpen's actual closer.
+export function closerFrom(fullPitchers, startingIds) {
+  const relievers = fullPitchers.filter((p) => !startingIds.has(p.id))
+  const maxSaves = relievers.reduce((max, p) => Math.max(max, p.saves), 0)
+  return maxSaves > 0 ? relievers.find((p) => p.saves === maxSaves) : null
 }
 
 // ---------------------------------------------------------------------------

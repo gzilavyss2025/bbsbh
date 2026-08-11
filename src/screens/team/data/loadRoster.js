@@ -169,7 +169,7 @@ export async function loadRoster(id, asOf) {
   const { starters: startingPitchers, bullpen } = splitPitchingStaff(
     fullPitchers.map((p) => ({ ...p, starts: p.gs })),
     {
-      compareStarters: (a, b) => b.starts - a.starts || Number(a.jersey) - Number(b.jersey),
+      compareStarters: (a, b) => b.starts - a.starts || b.ipOuts - a.ipOuts || Number(a.jersey) - Number(b.jersey),
       compareRelievers: (a, b) => b.appearances - a.appearances || b.ipOuts - a.ipOuts,
     },
   )

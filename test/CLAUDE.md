@@ -55,6 +55,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | logo-tint.test.js | 8 | src/lib/logoTint.js | Logo tint wash |
 | logo-upload.test.js | 26 | src/lib/logoArt.js, scripts/lib/dev-logo-upload.mjs | Dev logo upload endpoint (ADR-0029) |
 | manager.test.js | 4 | src/api/game.js (fetchManager) | Interim-manager precedence |
+| manager-page.test.js | 19 | src/api/managers.js, src/api/careerTimeline.js (fetchManagerPlaying) | The manager detail page's data layer — the /coaches jersey-number duplicates that faked "Shared season" rows, the header's role precedence, and a playing career that agrees with the clubs rail under it |
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
 | mound-visit-charging.test.js | 7 | src/api/playbyplay.js | Mound-visit pip row |

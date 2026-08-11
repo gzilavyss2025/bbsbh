@@ -72,6 +72,8 @@ export function TeamPage({ id, asOf, sportId }) {
     leagueFormScores,
     recentGames,
     lineupDefense,
+    previewStartingPitchers,
+    previewCloser,
     leaderPool,
     injuredIds,
     transactionsPage,
@@ -135,11 +137,19 @@ export function TeamPage({ id, asOf, sportId }) {
         </>
       )}
 
-      {/* Lineup — the preferred-lineup diamond only. The bench, both pitching
-          staffs, the 40-man and the injured list are the Roster tab's. */}
+      {/* Lineup — the preferred-lineup diamond plus a taste of the pitching
+          staff (top 5 Starting Pitchers, the closer). The bench, the full
+          Bullpen, the 40-man and the injured list are the Roster tab's. */}
       {lineupDefense.length > 0 && (
         <>
-          <RosterProjection rosterLineup={lineupDefense} injuredIds={injuredIds} isMilb={isMilb} preview />
+          <RosterProjection
+            rosterLineup={lineupDefense}
+            previewStartingPitchers={previewStartingPitchers}
+            previewCloser={previewCloser}
+            injuredIds={injuredIds}
+            isMilb={isMilb}
+            preview
+          />
           <PreviewDoor label="Full roster" onClick={() => go('roster')} />
         </>
       )}

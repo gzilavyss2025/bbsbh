@@ -4,12 +4,8 @@ import {
   currentStint,
   lastManagerialStint,
 } from '../api/managers.js'
-import {
-  fetchPerson,
-  fetchPlayerAwards,
-  fetchManagerPlaying,
-} from '../api/person-fetch.js'
-import { fetchPlayingTimeline } from '../api/careerTimeline.js'
+import { fetchPerson, fetchPlayerAwards } from '../api/person-fetch.js'
+import { fetchPlayingTimeline, fetchManagerPlaying } from '../api/careerTimeline.js'
 import { sumHitting, sumPitching } from '../api/statsLevels.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -36,8 +32,9 @@ async function loadManager(id) {
   if (!bio && stints.length === 0) return null
   // His own playing career keys off primaryPosition (a former pitcher's stats
   // are in the pitching group), so it fetches after the bio resolves. Returns
-  // null when statsapi has no playing data (most MiLB-only managers), so the
-  // card simply drops.
+  // null when statsapi has nothing worth printing — no data at all (most
+  // pre-~2005 MiLB careers), or nothing above the cameo floor the clubs rail
+  // below applies — so the card simply drops, and drops in step with the rail.
   const playing = await fetchManagerPlaying(id, bio?.primaryPosition)
   // The clubs he played for, same "Team history" timeline as the player page —
   // only when he has a playing career, using the group we just resolved.
@@ -139,20 +136,14 @@ function int(x) {
   return Number.isFinite(n) ? String(n) : '—'
 }
 
-// The manager's OWN playing career, before he coached — the flip side of the
-// managerial record. `playing` is `{ group, level, splits }` from
-// fetchManagerPlaying; we sum the raw splits here (a single MLB career split is
-// a no-op sum, a MiLB career sums across levels) and lay the headline stats out
-// as a tile grid, hitting or pitching depending on what he was. `gamesPlayed`
-// isn't summed by sumHitting, so G is tallied straight off the splits.
-function PlayingCareer({ playing }) {
-  const { group, level, splits } = playing
-  const games = splits.reduce((t, s) => t + (Number(s.stat?.gamesPlayed) || 0), 0)
-  const title = level === 'mlb' ? 'Playing career · MLB' : 'Playing career · minors'
-  let tiles
+// One level's tiles, hitting or pitching depending on what he was.
+// `gamesPlayed` isn't summed by sumHitting, so G is tallied straight off the
+// splits (a single MLB career split is a no-op sum, a MiLB career sums across
+// levels).
+function playingTiles(splits, group) {
   if (group === 'pitching') {
     const st = sumPitching(splits)
-    tiles = [
+    return [
       { k: 'W', v: int(st.wins) },
       { k: 'L', v: int(st.losses) },
       { k: 'ERA', v: rate2(st.era) },
@@ -163,30 +154,52 @@ function PlayingCareer({ playing }) {
       { k: 'IP', v: st.inningsPitched ?? '—' },
       { k: 'SO', v: int(st.strikeOuts) },
     ]
-  } else {
-    const st = sumHitting(splits)
-    tiles = [
-      { k: 'G', v: int(games) },
-      { k: 'AVG', v: rate3(st.avg) },
-      { k: 'OBP', v: rate3(st.obp) },
-      { k: 'SLG', v: rate3(st.slg) },
-      { k: 'HR', v: int(st.homeRuns) },
-      { k: 'RBI', v: int(st.rbi) },
-      { k: 'H', v: int(st.hits) },
-      { k: 'SB', v: int(st.stolenBases) },
-    ]
   }
+  const st = sumHitting(splits)
+  const games = splits.reduce((t, s) => t + (Number(s.stat?.gamesPlayed) || 0), 0)
+  return [
+    { k: 'G', v: int(games) },
+    { k: 'AVG', v: rate3(st.avg) },
+    { k: 'OBP', v: rate3(st.obp) },
+    { k: 'SLG', v: rate3(st.slg) },
+    { k: 'HR', v: int(st.homeRuns) },
+    { k: 'RBI', v: int(st.rbi) },
+    { k: 'H', v: int(st.hits) },
+    { k: 'SB', v: int(st.stolenBases) },
+  ]
+}
+
+// The manager's OWN playing career, before he coached — the flip side of the
+// managerial record. `playing` is `{ group, lines }` from fetchManagerPlaying,
+// each line a level worth printing.
+//
+// **The two levels get one block each and are never summed together** — the
+// same rule the player page's career register states for its footers. A
+// manager with four major-league games around nine minor-league seasons has
+// both facts on the card, and both agree with the clubs rail below it. A
+// sub-line label only appears when he has BOTH: a career spent entirely in one
+// place needs no heading telling him which place.
+function PlayingCareer({ playing }) {
+  const { group, lines } = playing
+  const showLevels = lines.length > 1
   return (
     <section className="mgrpage__card">
-      <h2 className="mgrpage__cardtitle">{title}</h2>
-      <div className="mgrpage__statgrid">
-        {tiles.map((t) => (
-          <div key={t.k} className="stat">
-            <div className="stat__v">{t.v}</div>
-            <div className="stat__k">{t.k}</div>
+      <h2 className="mgrpage__cardtitle">Playing career</h2>
+      {lines.map((line) => (
+        <div key={line.level} className="mgrpage__playline">
+          {showLevels && (
+            <h3 className="mgrpage__playlevel">{line.level === 'mlb' ? 'Majors' : 'Minors'}</h3>
+          )}
+          <div className="mgrpage__statgrid">
+            {playingTiles(line.splits, group).map((t) => (
+              <div key={t.k} className="stat">
+                <div className="stat__v">{t.v}</div>
+                <div className="stat__k">{t.k}</div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </section>
   )
 }

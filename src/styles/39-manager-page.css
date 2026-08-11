@@ -92,6 +92,23 @@
   font-size: var(--fs-h3);
 }
 
+/* A manager who reached the majors AND put in real minor-league time gets one
+   grid per level, stacked and separately headed — never summed into one line
+   (see PlayingCareer). A single-level career shows no heading, so this spacing
+   only ever applies to the second block onward. */
+.mgrpage__playline + .mgrpage__playline {
+  margin-top: 14px;
+}
+.mgrpage__playlevel {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
 .mgrpage__recordlist {
   list-style: none;
   margin: 0;
