@@ -985,12 +985,26 @@ export function InningViewer({
           would leak the game going to extras) or the next-half label once one
           unlocks. */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
-        <RefreshButton
-          onReload={onReload}
-          loading={loading}
-          lastUpdated={lastUpdated}
-          className="refreshbtn--float"
-        />
+        {/* …EXCEPT once the game is over, when there is nothing left to fetch:
+            the feed is complete and a refetch returns the same bytes. Same
+            `selectIsFinal` test, for the same reason, that already drops the
+            box score's own Refresh (screens/BoxScore.jsx) — a control that
+            cannot change anything is a control that should not be on the one
+            row a thumb is working. Revealing is unaffected: it reads the feed
+            already in hand.
+
+            The dead-space hit areas answer for themselves. Their -76px reach
+            is already behind `:has(.refreshbtn--float)`, with the bare -20px
+            for exactly this case, so the area still stops inside a bar that
+            is one row shorter rather than overshooting into the page. */}
+        {!selectIsFinal(feed) && (
+          <RefreshButton
+            onReload={onReload}
+            loading={loading}
+            lastUpdated={lastUpdated}
+            className="refreshbtn--float"
+          />
+        )}
         {atLiveEdge ? (
           <div className="liveedge" role="status" aria-live="polite">
             <span className="liveedge__dot" aria-hidden="true" />
