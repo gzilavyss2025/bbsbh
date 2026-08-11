@@ -84,6 +84,20 @@ async function mapConcurrent(items, limit, fn) {
   return out
 }
 
+// The two LEAGUE marks, which are not clubs and so are not in teams.json — the
+// same CDN serves them under the All-Star team ids the All-Star pages already
+// draw (159 American League, 160 National League). They are here because the
+// standings page gives each league the same navy bar a club gets, and both
+// marks are drawn mostly in #008 navy: on that bar the full-color art all but
+// disappears, which is exactly the case this knockout art exists for
+// (ADR-0031). Listed here rather than dropped in the output directory by hand
+// because a full run rewrites that directory from scratch and would delete
+// anything it did not write.
+const LEAGUE_MARKS = [
+  { id: 159, name: 'American League' },
+  { id: 160, name: 'National League' },
+]
+
 async function teamList() {
   const { bySportId } = JSON.parse(await readFile(teamsPath, 'utf8'))
   const byId = new Map()
@@ -93,6 +107,10 @@ async function teamList() {
       if (onlyIds && !onlyIds.has(t.id)) continue
       if (!byId.has(t.id)) byId.set(t.id, t.name ?? String(t.id))
     }
+  }
+  for (const mark of LEAGUE_MARKS) {
+    if (onlyIds && !onlyIds.has(mark.id)) continue
+    if (!byId.has(mark.id)) byId.set(mark.id, mark.name)
   }
   return [...byId].map(([id, name]) => ({ id, name })).sort((a, b) => a.id - b.id)
 }

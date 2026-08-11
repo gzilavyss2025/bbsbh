@@ -206,16 +206,26 @@
 .lgstand {
   margin-bottom: 22px;
 }
-.lgstand__league {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-caps);
-  font-size: var(--fs-body);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
+/* A league's header is the same navy/gold bar a club wears on the lineup and
+   innings pages (.metricbar, via SectionMasthead) rather than a ruled text
+   heading, with the league mark riding the right edge exactly where a club mark
+   does. Every other .metricbar caps a card, so it rounds only its top corners;
+   this one stands alone above a stack of division tables, so it rounds all
+   four. The wrapper exists purely to own that spacing — the bar itself is
+   shared markup. */
+.lgstand__bar {
   margin: 0 0 10px;
-  padding-bottom: 5px;
-  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+.lgstand__bar .metricbar {
+  border-radius: var(--radius-md);
+}
+/* Column note under the boards — caption type, the same graphite the rest of
+   the page's secondary prose uses. */
+.standings-legend {
+  margin: 0 0 10px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
 }
 .lgstand__div {
   margin-bottom: 14px;

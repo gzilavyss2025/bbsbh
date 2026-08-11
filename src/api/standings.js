@@ -49,13 +49,18 @@ function diffTone(n) {
   return n > 0 ? 'is-positive' : 'is-negative'
 }
 
-// Expected W-L as of THIS cutoff (not a 162-game projection — contrast
+// Expected W-L as of THIS cutoff — the record a club's runs scored and allowed
+// say it "should" hold right now. The column was called "Pace" and this
+// function `expectedPace`, which read as a full-season projection (what a club
+// is on track to FINISH at) and is not what either one has ever computed; the
+// table says "Exp W-L" now and the standings legend spells the rest out.
+// (Not a 162-game projection — contrast
 // gen-season-score.mjs's pythagoreanPace, which scales to a full season for
 // its own pace-badge use case). Prefers MLB's own xWinLoss expected record
 // (nested at `records.expectedRecords`, NOT top-level — verified live against
 // a 2026 standings pull); falls back to the same Pythagorean-exponent formula
 // split over games played so far when the feed omits it (thin/early feeds).
-export function expectedPace(t) {
+export function expectedRecord(t) {
   const gamesPlayed = (t.wins ?? 0) + (t.losses ?? 0)
   const expected = (t.records?.expectedRecords ?? []).find((r) => r.type === 'xWinLoss')
   const xGames = (expected?.wins ?? 0) + (expected?.losses ?? 0)
@@ -100,7 +105,7 @@ function shapeTeam(t, pinnedTeamId) {
     diffTone: diffTone(diff),
     streak: t.streak?.streakCode ?? DASH,
     l10: splitWL(t, 'lastTen'),
-    pace: expectedPace(t),
+    expWL: expectedRecord(t),
     magic: formatMagicNumber(t),
     pinned: pinnedTeamId != null && t.team?.id === pinnedTeamId,
   }
