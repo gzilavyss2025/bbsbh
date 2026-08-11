@@ -296,16 +296,19 @@
   min-width: 0;
 }
 
-/* The run numbers, in their own column now. `flex: 1` — this is what the marks
-   giving up their old 80% share buys, and the numbers are the right place to
-   spend it: they are the one thing on this strip a scorer reads from across a
-   table. */
+/* The run numbers, in their own column now — SIZED TO THE NUMBER, not to the
+   leftover width. They briefly took `flex: 1`, which handed them every pixel
+   the marks and the inning block did not want and left each digit adrift in a
+   cream field twice as wide as it needed. 40px holds two 18px mono figures
+   with air either side (no half has ever needed three), and everything past
+   that goes to the base/out block, which is the part of this strip that reads
+   at a glance and the part that was actually short of room. */
 .gamehud__runscol {
   display: grid;
   grid-template-rows: 1fr 1fr;
   row-gap: 2px;
   background: var(--ink-1);
-  flex: 1 1 auto;
+  flex: 0 0 40px;
   min-width: 0;
 }
 
@@ -462,7 +465,7 @@
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 3px 12px;
+  padding: 3px 8px;
   flex: none;
 }
 
@@ -494,24 +497,33 @@
   line-height: var(--lh-solid);
 }
 
+/* The bases BESIDE the outs, not above them — and this block takes whatever
+   the rest of the strip leaves (`flex: 1`), which is the width the run numbers
+   gave back. Stacked, the two out dots sat under a diamond that had to stay
+   small enough for both to fit the row's fixed height; side by side, the
+   diamond gets the height to itself and the dots read as a column of outs the
+   way a scorer tallies them. The block is the last thing in the strip, so
+   spending the leftover here also means a wider phone strip grows the part
+   worth growing rather than padding the middle. */
 .gamehud__diamondwrap {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 3px 10px;
-  flex: none;
+  gap: 6px;
+  padding: 3px 8px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .gamehud__outs {
   display: flex;
-  gap: 4px;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .gamehud__outdot {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   border: var(--bw-hair) solid rgba(255, 255, 255, 0.28);
@@ -520,6 +532,24 @@
 .gamehud__outdot--filled {
   background: var(--clay);
   border-color: var(--clay);
+}
+
+/* A phone's band spans the whole stage, so the base/out block ends up with
+   ~145px where the 246px dock has ~78 — room the diamond should USE rather
+   than sit centred in. Sized in CSS against the row's own 67px (56 + the
+   block's padding), not by threading a second `size` prop down through
+   Scorebug for one breakpoint: the SVG carries a viewBox, so a width/height
+   override scales it whole. The dock keeps the 46px the component asks for. */
+@media (max-width: 739.98px) {
+  .gamehud--console .gamehud__diamond {
+    width: 56px;
+    height: 56px;
+  }
+
+  .gamehud--console .gamehud__outdot {
+    width: 13px;
+    height: 13px;
+  }
 }
 
 @media (min-width: 740px) {

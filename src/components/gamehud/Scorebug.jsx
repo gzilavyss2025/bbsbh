@@ -103,7 +103,7 @@ export function Scorebug({
         </div>
         <div className="gamehud__div" />
         <div className="gamehud__diamondwrap">
-          <BaseState bases={bases} size={40} />
+          <BaseState bases={bases} size={46} />
           <div className="gamehud__outs">
             {/* Only 2 dots: a half ends the instant the 3rd out happens, so
                 outs is always 0/1/2 by the time this renders — a 3rd dot
