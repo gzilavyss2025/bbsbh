@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 
@@ -18,11 +19,24 @@ import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 //
 // So the cube is unfolded the other way: one row per measure per club, one
 // number per box, and the measure NAMED down the left edge instead of decoded
-// from a legend. The two clubs stay adjacent inside each measure, because the
-// question this card answers is "who was grinding in the 4th?" — which is a
-// comparison between the clubs in one inning, not across measures. Nine innings
-// of two-digit boxes fit a phone with no scroll at all, which the old layout
-// never did; extras still scroll, in .bs__scroll, as before.
+// from a legend. Nine innings of two-digit boxes fit a phone with no scroll at
+// all, which the old layout never did; extras still scroll, in .bs__scroll, as
+// before.
+//
+// THE CLUB PILL FILTERS, IT DOES NOT REPLACE. Both clubs stay adjacent inside
+// each measure by default, because the question this card answers first is "who
+// was grinding in the 4th?" — a comparison between the clubs in one inning. But
+// eight rows of numbers is a lot to hold when you are following ONE staff, so
+// the pill drops the other club's four rows away.
+//
+// Three segments, the unfiltered one FIRST and default: the shape every other
+// filter in the app uses (LogbookStatsPage's level bar, VsLevelSlider's rung 0,
+// the Foul Tracker's All column). It says "Both" rather than "All" only because
+// the set here is exactly two — the same reason SplitsSection's reference row
+// says "Season": the word has to be true, and "all" of two things is "both".
+//
+// The two staffs stay comparable across a switch because the shading scale does
+// not move when you filter (see below).
 //
 // THE SHADING ADDS NO INFORMATION — every number is printed, in full, in its
 // own box. It is a redundant encoding of that same number: a pencil wash whose
@@ -41,7 +55,10 @@ const TALLY_MEASURES = [
   { key: 'lob', label: 'LOB' },
 ]
 
+const CLUB_ALL = 'both'
+
 export function InningTally({ rows, away, home, treatments }) {
+  const [shownSide, setShownSide] = useState(CLUB_ALL)
   if (!rows || rows.length === 0) return null
 
   const byInningAndSide = new Map()
@@ -52,9 +69,11 @@ export function InningTally({ rows, away, home, treatments }) {
   const innings = [...byInningAndSide.keys()].sort((a, b) => a - b)
 
   // The busiest half-inning in a measure, over BOTH clubs — one scale per
-  // measure, so the two rows under a label are directly comparable. Floored at
-  // 1 so a measure that never happened (a game with no whiffs) divides safely
-  // and washes nothing.
+  // measure, and deliberately not narrowed to the club on show: a wash that
+  // rescaled itself on every tap of the club pill would make the two staffs
+  // look alike no matter how far apart their nights were. Floored at 1 so a
+  // measure that never happened (a game with no whiffs) divides safely and
+  // washes nothing.
   const peaks = Object.fromEntries(
     TALLY_MEASURES.map(({ key }) => [key, Math.max(1, ...rows.map((r) => r[key] ?? 0))]),
   )
@@ -67,12 +86,36 @@ export function InningTally({ rows, away, home, treatments }) {
     { side: 'away', team: away },
     { side: 'home', team: home },
   ]
+  const shown = shownSide === CLUB_ALL ? sides : sides.filter((s) => s.side === shownSide)
 
   return (
     <div className="bs__tally">
       <div className="bs__tallyHead">
-        <span className="bs__insightsTitle">By inning</span>
-        <span className="bs__tallyLegend">Darker is busier</span>
+        <span className="bs__insightsTitle">Pitching stats</span>
+        {/* Which club's staff the rows belong to. A club segment is labelled
+            with its abbreviation where the feed carries one, and with the plain
+            side otherwise — a thin MiLB feed often has no abbreviation at all. */}
+        <div className="bs__tallyScope" role="group" aria-label="Club">
+          <button
+            type="button"
+            aria-pressed={shownSide === CLUB_ALL}
+            className={`bs__tallyScopebtn ${shownSide === CLUB_ALL ? 'is-active' : ''}`}
+            onClick={() => setShownSide(CLUB_ALL)}
+          >
+            Both
+          </button>
+          {sides.map(({ side, team }) => (
+            <button
+              key={side}
+              type="button"
+              aria-pressed={shownSide === side}
+              className={`bs__tallyScopebtn ${shownSide === side ? 'is-active' : ''}`}
+              onClick={() => setShownSide(side)}
+            >
+              {team.abbreviation || (side === 'away' ? 'Away' : 'Home')}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="bs__scroll bs__tallyBody">
         <table className="bs__grid bs__grid--tally">
@@ -96,10 +139,10 @@ export function InningTally({ rows, away, home, treatments }) {
           </thead>
           {TALLY_MEASURES.map(({ key, label }) => (
             <tbody className="bs__tallyGroup" key={key}>
-              {sides.map(({ side, team }, i) => (
+              {shown.map(({ side, team }, i) => (
                 <tr key={side}>
                   {i === 0 && (
-                    <th className="bs__tallyMeasure" scope="rowgroup" rowSpan={sides.length}>
+                    <th className="bs__tallyMeasure" scope="rowgroup" rowSpan={shown.length}>
                       {label}
                     </th>
                   )}
