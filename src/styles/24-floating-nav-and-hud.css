@@ -271,11 +271,41 @@
   background: rgba(0, 0, 0, 0.15);
 }
 
+/* The club marks: a FIXED 40% of the strip, away over home. It used to be an
+   80%/20% grid holding the run numbers too, taking whatever width the inning
+   and base/out blocks left over — so the marks had three quarters of the strip
+   and the score, the inning and the bases divided the last quarter between
+   them. The numbers are the reason the strip exists; the marks say whose they
+   are. 40/60 is that order of importance, and `.gamehud__runscol` below takes
+   the rest.
+
+   THE 2px ROW GAP IS THE RULE BETWEEN THE CLUBS. Both stacks carry it, so it
+   crosses the marks and the run numbers as one line — the same navy the card
+   itself is painted in, showing through the gap rather than being drawn as a
+   border on either row (a border would land on one club's side of the line;
+   this belongs to neither). It reads as a scorebook rule, and it is also what
+   answers the boosted marks touching each other: two clubs whose crests both
+   fill their tile no longer meet in the middle with nothing between them. The
+   marks' own clipping does the rest — see the boost blocks below. */
 .gamehud__marks {
   display: grid;
-  grid-template-columns: 80% 20%;
   grid-template-rows: 1fr 1fr;
-  flex: 1;
+  row-gap: 2px;
+  background: var(--ink-1);
+  flex: 0 0 40%;
+  min-width: 0;
+}
+
+/* The run numbers, in their own column now. `flex: 1` — this is what the marks
+   giving up their old 80% share buys, and the numbers are the right place to
+   spend it: they are the one thing on this strip a scorer reads from across a
+   table. */
+.gamehud__runscol {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  row-gap: 2px;
+  background: var(--ink-1);
+  flex: 1 1 auto;
   min-width: 0;
 }
 
@@ -343,32 +373,44 @@
    default scale, .gamehud__tile's hidden overflow is load-bearing (it's how
    a mark gets cropped into the tile's shape in the first place — see the
    component doc above), so leaving it on whenever nothing is boosting the
-   logo keeps every other caller of this same crop recipe unchanged. Bigger
-   on mobile (1.6x) than desktop (1.25x): the strip is the one persistent
-   piece of team identity on screen while stepping through a half, and a
-   phone's narrow width has that much more room to spare above/below the
-   fixed-height row than a desktop layout already showing team logos
-   elsewhere on screen. A literal 3x on mobile was tried first and rejected —
-   the two crests overlapped each other and swallowed the run numbers.
+   logo keeps every other caller of this same crop recipe unchanged.
 
-   The clip boundary itself moves from the tile to THIS row: `.gamehud__tile`
-   turns its own hidden overflow off (a boosted logo needs room past its own
-   80%/20% grid cell to bleed into its neighbor's), and `.gamehud__strip`
-   takes over clipping the mark to the row's own top/bottom edges only
-   (overflow-y hidden, overflow-x visible — the same "clip vertically, spill
-   horizontally" split the club-mark bar wears, .metricbar > .teamlogo-crop-bar
-   above) — the row's own height still never moves, it just becomes the crop
-   line instead of each tile's own bounds. `.gamehud`'s own hidden overflow
-   (its card corners) is still the backstop against a mark bleeding past the
-   card's sides entirely. */
+   MEASURED AGAINST THE ROW, not against the width beside it. Mobile ran at
+   1.6x on the argument that a phone's wider strip had room to spare above and
+   below the marks — it does not: the row is the same ~33px at both widths, and
+   1.6 put a crest half again taller than the row it sits in, which is why the
+   two clubs' marks overlapped each other in the middle of the strip. Now that
+   each tile clips itself (below), an oversized mark no longer bleeds — it gets
+   its top and bottom cut off instead, which is worse to look at and was
+   visible at 1.3. 1.15 is the largest that renders BOTH crests whole inside a
+   row at 390px; desktop keeps 1.25, verified the same way on a 106px tile. A
+   literal 3x on mobile was tried before either and rejected outright.
+
+   EACH TILE CLIPS ITSELF VERTICALLY, and only vertically. The first pass
+   handed the whole crop to `.gamehud__strip` (overflow-y hidden, overflow-x
+   visible) so a boosted mark could spill sideways out of its own cell — but
+   the strip's top and bottom edges are the OUTSIDE of both rows, so nothing
+   was left holding the line BETWEEN them: the away club's crest hung down into
+   the home club's row and the two marks overlapped in the middle of the strip,
+   which is what a reader on a phone actually sees.
+   `clip-path: inset(0 -100% 0 -100%)` puts the crop back on the tile in the
+   one axis that was doing the damage — flush at the tile's own top and bottom,
+   opened up a full width to either side — rather than reinstating
+   `overflow: hidden`, which would take the sideways spill with it.
+   `overflow-x: visible` + `overflow-y: hidden` is deliberately NOT used on the
+   tile: the spec computes that pair to `overflow-x: auto`, which would make
+   every tile a scroll container. `.gamehud`'s own hidden overflow (its card
+   corners) is still the backstop against a mark bleeding past the card's sides
+   entirely. */
 @media (max-width: 739.98px) {
   .gamehud__strip {
-    --logo-boost: 1.6;
+    --logo-boost: 1.15;
     overflow-x: visible;
     overflow-y: hidden;
   }
   .gamehud__tile {
     overflow: visible;
+    clip-path: inset(0 -100% 0 -100%);
   }
 }
 
@@ -380,9 +422,14 @@
   }
   .gamehud__tile {
     overflow: visible;
+    clip-path: inset(0 -100% 0 -100%);
   }
 }
 
+/* Sized UP with the column it now has to itself — the run number is the one
+   figure on this strip a scorer reads at a glance, and it was set at body
+   scale, a step under the inning number beside it. Both placements, as with
+   the mark boost above: the dock wears the same strip. */
 .gamehud__runs {
   display: flex;
   align-items: center;
@@ -391,7 +438,7 @@
   color: var(--ink-0);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-body);
+  font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
 }
@@ -403,29 +450,35 @@
   flex: none;
 }
 
+/* The inning block and the base/out block below both take more of the strip's
+   width than they used to, and their own contents step up with it — the width
+   the club marks gave up is spent here and on the run numbers, not left as
+   padding. Everything stays inside the strip's own min-height, which does not
+   move: this is a wider, more legible right-hand end of the same band, not a
+   taller one. */
 .gamehud__inninghalf {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 3px 8px;
+  padding: 3px 12px;
   flex: none;
 }
 
 .gamehud__tri {
   width: 0;
   height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
 }
 
 .gamehud__tri--up {
-  border-bottom: 6px solid var(--paper-3);
+  border-bottom: 7px solid var(--paper-3);
 }
 
 .gamehud__tri--down {
-  border-top: 6px solid var(--paper-3);
+  border-top: 7px solid var(--paper-3);
 }
 
 .gamehud__tri--dim {
@@ -436,7 +489,7 @@
 .gamehud__innnum {
   font-family: var(--font-mono);
   font-weight: var(--w-bold);
-  font-size: var(--fs-title-sm);
+  font-size: var(--fs-title-md);
   color: var(--paper-3);
   line-height: var(--lh-solid);
 }
@@ -447,18 +500,18 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 3px 6px;
+  padding: 3px 10px;
   flex: none;
 }
 
 .gamehud__outs {
   display: flex;
-  gap: 3px;
+  gap: 4px;
 }
 
 .gamehud__outdot {
-  width: 7.5px;
-  height: 7.5px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.18);
   border: var(--bw-hair) solid rgba(255, 255, 255, 0.28);
