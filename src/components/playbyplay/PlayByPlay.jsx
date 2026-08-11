@@ -103,10 +103,25 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
   // Focus mode: the boundaries `nextStepBoundary` walks one tap at a time,
-  // enumerated. Counting only those at or under effectiveCap is what keeps
-  // every window inside the cap.
-  const bounds = focusOne && stepping ? stepBounds(entries) : null
-  const revealedSteps = bounds ? bounds.filter((b) => b <= effectiveCap).length : 0
+  // enumerated. Counting only those at or under the cap is what keeps every
+  // window inside it.
+  //
+  // `focusOne` ALONE, not `focusOne && stepping`. The last at-bat of a half
+  // commits it, which drops `stepCap` to null and turned `stepping` off — and
+  // the window went with it, so the tap that revealed the 3rd out answered by
+  // dumping the entire half onto the screen at once. That is the one moment
+  // focus mode is meant to hold still: the reader has just charted a play and
+  // is writing it down. Focus mode itself outlives the commit on purpose
+  // (`held`, FocusControls.jsx) until the reader taps Summary, and Summary is
+  // exactly where the whole half belongs. The windowing now outlives it too.
+  // Once the commit lands there is no cap left to measure against, so the cap
+  // is the full array — every step is revealed by then, which is what makes
+  // the half a summary in the first place. Nothing here reveals: `stepCap` is
+  // still the single boundary, and past the commit the whole half is already
+  // past it.
+  const bounds = focusOne ? stepBounds(entries) : null
+  const stepCountCap = effectiveCap ?? entries.length
+  const revealedSteps = bounds ? bounds.filter((b) => b <= stepCountCap).length : 0
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.

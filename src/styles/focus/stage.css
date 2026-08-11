@@ -34,7 +34,17 @@
 /* The stat/WPA row, both inline copies of the entering lineups/defense, and the
    pre-half callout strip. All are end-of-half material or duplicated by the
    reference panel: the row2 stat card is the R/H/E/LOB summary you write when
-   the half CLOSES, at which point the half commits and focus mode ends anyway.
+   the half CLOSES.
+
+   That used to say "…at which point the half commits and focus mode ends
+   anyway", which `held` made untrue (issue #660) — focus mode outlives the
+   commit, holding the last at-bat on screen until the reader taps Summary.
+   Hiding row2 through that window is now the deliberate half of the same
+   arrangement, not an accident of it: the tap that ends a half is a play the
+   reader is still writing down, and Summary is the one surface that answers
+   "how did the half end up" — the whole half's cards, its totals, its stat
+   card. Every one of those arrives together, one tap away, rather than
+   arriving on top of the play being charted.
 
    The callout strip folds for a different reason — it MOVED rather than went
    away. "The Reds are 9-13 in his starts this season" is a margin note in the
@@ -67,8 +77,8 @@
    scroll was dropped in the rebuild (the stage mostly fits one viewport, so
    revealing an at-bat replaces the card in place rather than moving to it) and
    the margin outlived it as a rule nothing could reach. If a scroll ever comes
-   back, the offset it needs is --console-hud-h on a phone and nothing at wide,
-   where the band is not sticky. */
+   back it needs no offset at all now: the band is sticky at no width, so
+   nothing is parked over the top of the stage for a scrolled card to clear. */
 .innings--focus .pbp {
   margin-top: 0;
 }
@@ -93,13 +103,15 @@
    renders null, so this is a one-child row and the scorebug alone fills it,
    same as before this wrapper existed.
 
-   STICKY ON A PHONE ONLY. There the whole loop is one scrolling column and the
-   band is the only thing holding bases/outs/score in view while the reader
-   pages down to the trail. On desktop the reference column is already sticky
-   beside the stage and the stage itself barely scrolls, so pinning the band
-   bought nothing and cost the top ~120px of every scroll — it just followed
-   the reader down the page. It scrolls away with the rest of the console now;
-   see the wide block below for the offsets that come off with it. */
+   NEVER STICKY, at any width. The band was pinned to the top of a phone's
+   viewport so bases/outs/score stayed in view while the reader paged down to
+   the trail; in use it read as a bar following the reader down the page and
+   spending the top of every scroll, the same complaint that had already taken
+   the pin off desktop. It scrolls away with the rest of the console on a phone
+   too now — the reference for a half you are still scoring is the at-bat card
+   right under it, not a permanently parked strip. The wide block below keeps
+   its `position: static` as a plain no-op restatement of the grid placement it
+   belongs with. */
 /* align-items: flex-start, not stretch — the due-up cards have their own
    fixed-height photo (below) and must not be force-stretched to whatever
    height the scorebug's live content happens to need (its pitcher row and
@@ -108,9 +120,6 @@
    photo did not. flex-start instead leaves at most some open air beside a
    taller scorebug — never inside a card. */
 .consolebar {
-  position: sticky;
-  top: 0;
-  z-index: 15;
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
@@ -136,6 +145,23 @@
     min-width: 0;
     gap: var(--space-2);
     padding: var(--space-2) 0;
+  }
+
+  /* One "due up" on screen at a time. Before the half's first at-bat both
+     would show it: this card in the console row and HalfInning's own `.upnext`
+     strip in the stage under it, naming the same three men from the same
+     selector. The console card is the one that stays as the reader steps, so
+     the strip is what stands down.
+
+     `:has()`, not a flag threaded down through HalfInning — the condition is
+     literally "did the console card render", which the DOM already answers,
+     and the card can decline on its own (no lineup posted, a MiLB gap) in
+     which case the strip is still the reader's only copy and must survive.
+     Scoped INSIDE this media block on purpose: below it `.dueupconsole` is
+     still in the DOM, only `display: none`, so an unscoped `:has()` would
+     match on a phone and hide the strip with nothing to replace it. */
+  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .upnext {
+    display: none;
   }
 
   .dueupconsole__col {
@@ -251,8 +277,10 @@
     align-items: start;
   }
 
-  /* The band spans both columns and scrolls with the page — see .consolebar
-     above for why sticky is a phone-only behaviour. */
+  /* The band spans both columns and scrolls with the page. `position: static`
+     is a no-op restatement now that .consolebar above is sticky at no width —
+     kept because the grid placement and the flow behaviour of this cell are one
+     statement, and reading it here beats inferring it from another block. */
   .innings--focus .consolebar {
     grid-column: 1 / -1;
     grid-row: 1;
@@ -411,10 +439,18 @@
 }
 
 /* Between innings nobody is up (Scorebug's `blank`) — the rows are gone, so
-   the card's own top padding would just be dead space above the strip. The
-   min-height above keeps the box itself the same size. */
+   the card's own top padding would just be dead space above the strip.
+
+   The floor comes off WITH them. Holding the band at its full height with no
+   rows in it left ~60px of bare navy under the strip — a dark slab the reader
+   sees on every landing, since a half is blank until its first at-bat opens.
+   That reads as a rendering fault, which is worse than the shift the floor was
+   added to stop; the shift itself is now small (the mobile scale-up below came
+   off too), and it happens as the half ends rather than while an at-bat is
+   being read. */
 .gamehud--console.gamehud--blank {
   padding-top: 0;
+  min-height: 0;
 }
 
 @media (min-width: 740px) {
@@ -458,62 +494,17 @@
   }
 }
 
-/* Below the wide breakpoint the band has no sibling card to share its row
-   with (DueUpConsole hides — see focus/stage.css), so it stays full width and
-   scales its own content up to use it, rather than stranding the dock's
-   compact type in a bar many times wider than the card it was sized for.
-   `.gamehud--console`'s own width stays the default 100% here (no override
-   needed). The team marks and base diamond scale with the rest of it, in CSS —
-   an earlier draft threaded per-width size props down from ScorebugMount and
-   they were dropped; the component takes no such props, so don't go looking
-   for them. */
-@media (max-width: 739.98px) {
-  .gamehud--console {
-    padding: 12px 14px 0;
-    gap: 8px;
-  }
+/* NOTHING SCALES UP ON A PHONE. The band used to answer "it has the whole
+   width to itself down here" with bigger type, a 92px strip and larger
+   pips/marks, on the argument that the dock's compact card looked stranded in
+   a full-width bar. What that actually bought was ~50px of the one viewport
+   with the least to spare, spent on a header, before the at-bat card the
+   reader is working from. The band keeps the dock's own sizing at every width
+   now — full width, dock scale — so `.gamehud--console` needs no phone block
+   at all. The team marks still get their own boost from the bare
+   `.gamehud__strip` rule (24-floating-nav-and-hud.css), which both placements
+   share and which costs no height.
 
-  .gamehud--console .gamehud__who {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__row--pitcher .gamehud__who {
-    font-size: var(--fs-small);
-  }
-
-  .gamehud--console .gamehud__val {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__strip {
-    min-height: 92px;
-    margin: 6px -14px 0;
-  }
-
-  .gamehud--console .gamehud__runs {
-    font-size: var(--fs-title-sm);
-  }
-
-  .gamehud--console .gamehud__innnum {
-    font-size: var(--fs-title);
-  }
-
-  .gamehud--console .gamehud__tri {
-    border-left-width: 7px;
-    border-right-width: 7px;
-  }
-
-  .gamehud--console .gamehud__tri--up {
-    border-bottom-width: 8px;
-  }
-
-  .gamehud--console .gamehud__tri--down {
-    border-top-width: 8px;
-  }
-
-  .gamehud--console .gamehud__outdot {
-    width: 10px;
-    height: 10px;
-  }
-}
+   If a phone ever needs its own numbers again, measure them against the stage
+   below the band, not against the width beside it. */
 

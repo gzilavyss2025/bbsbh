@@ -63,6 +63,14 @@ export function Scorebug({
         )}
       </div>
       <div className="gamehud__strip">
+        {/* Two stacks, away over home, not one four-cell grid. They were one
+            grid — tile, runs, tile, runs across an 80%/20% split — which tied
+            the club marks and the run numbers to a single share of the strip:
+            widening the numbers narrowed the marks by exactly as much. As two
+            flex children the marks take a fixed 40% and the numbers take what
+            is left over, and each stack draws its own 2px rule between the
+            clubs (24-floating-nav-and-hud.css). Same reading order, same two
+            rows; the split is what makes the row proportions adjustable. */}
         <div className="gamehud__marks">
           <TeamTreatmentMark
             teamId={awayTeamId}
@@ -73,7 +81,6 @@ export function Scorebug({
             block="gamehud__tile"
             className="gamehud__tile--away"
           />
-          <span className="gamehud__runs">{awayRuns}</span>
           <TeamTreatmentMark
             teamId={homeTeamId}
             name={homeName}
@@ -83,6 +90,9 @@ export function Scorebug({
             block="gamehud__tile"
             className="gamehud__tile--home"
           />
+        </div>
+        <div className="gamehud__runscol">
+          <span className="gamehud__runs">{awayRuns}</span>
           <span className="gamehud__runs">{homeRuns}</span>
         </div>
         <div className="gamehud__div" />
@@ -93,7 +103,7 @@ export function Scorebug({
         </div>
         <div className="gamehud__div" />
         <div className="gamehud__diamondwrap">
-          <BaseState bases={bases} size={40} />
+          <BaseState bases={bases} size={46} />
           <div className="gamehud__outs">
             {/* Only 2 dots: a half ends the instant the 3rd out happens, so
                 outs is always 0/1/2 by the time this renders — a 3rd dot
