@@ -1,5 +1,8 @@
 import { useState, useRef, useLayoutEffect, useEffect, useCallback } from 'react'
-import { fetchGamePhotos, photosForTeam, onlyPhotographer } from '../../../../api/gamePhotos.js'
+import { fetchTeamPhotoBatch } from '../../../../api/gamePhotos.js'
+import { useNav } from '../../../../lib/nav.js'
+import { teamPhotosPath } from '../../../../lib/route.js'
+import { ChevronLink } from '../../../../components/ui/ChevronLink.jsx'
 
 // A setup jump, not a user-visible scroll gesture — bypasses the track's own
 // `scroll-behavior: smooth` (index.css) so it lands instantly. Without this,
@@ -17,6 +20,8 @@ const PHOTO_INITIAL_TARGET = 10
 const PHOTO_GROW_STEP = 10
 const PHOTO_BATCH_GAMES = 8
 const PHOTO_MAX_BATCHES_PER_CALL = 6
+// A `limit` (preview mode, see below) caps the walk to ONE batch — bounded,
+// predictable cost for a caller that wants a taste rather than the whole rail.
 
 // Team Page's Photos rail — professional camera stills only
 // (`onlyPhotographer`, gamePhotos.js; drops both TV broadcast frame grabs and
@@ -47,7 +52,18 @@ const PHOTO_MAX_BATCHES_PER_CALL = 6
 // already has the one team's full decided-game list in memory, so a bounded
 // live walk-back is enough; that index stays open for a future surface (a
 // player page, say) that has no such list already loaded.
-export function TeamPhotosRail({ teamId, games }) {
+//
+// `limit`, when passed (the Overview's preview copy), turns off scroll-
+// triggered growth entirely and caps the walk to a single batch — the
+// Overview loader deliberately does not pay for a full photo walk-back
+// (see loadOverview.js), so its preview must cost at most one bounded round
+// of game fetches, never the open-ended walk the Games tab's full rail does.
+// The card always carries a "Full season" door to `/team/{id}/photos`
+// (TeamPhotosPage.jsx) regardless of `limit` — that page is the one place a
+// reader can see every professional photo the club's season has, so it's the
+// rail's door everywhere it renders, not just in preview mode.
+export function TeamPhotosRail({ teamId, games, limit = null }) {
+  const navigate = useNav()
   const trackRef = useRef(null)
   const sentinelRef = useRef(null)
   // Flips true the first time the user actually scrolls back (the sentinel
@@ -84,7 +100,7 @@ export function TeamPhotosRail({ teamId, games }) {
   // met when the cap is hit, the sentinel (still in view, since nothing new
   // rendered to push it off) simply re-fires the next call.
   const growPhotos = useCallback(
-    async (targetCount) => {
+    async (targetCount, maxBatches = PHOTO_MAX_BATCHES_PER_CALL) => {
       if (inFlightRef.current || !activeRef.current) return
       inFlightRef.current = true
       setLoading(true)
@@ -93,28 +109,19 @@ export function TeamPhotosRail({ teamId, games }) {
         activeRef.current &&
         consumedRef.current < games.length &&
         photosRef.current.length < targetCount &&
-        rounds < PHOTO_MAX_BATCHES_PER_CALL
+        rounds < maxBatches
       ) {
         rounds++
-        const end = games.length - consumedRef.current
-        const start = Math.max(0, end - PHOTO_BATCH_GAMES)
-        const batch = games.slice(start, end)
-        consumedRef.current += batch.length
-        const results = await Promise.all(
-          batch.map(async (game) => {
-            if (cacheRef.current.has(game.gamePk)) return cacheRef.current.get(game.gamePk)
-            const raw = await fetchGamePhotos(game.gamePk)
-            const filtered = onlyPhotographer(photosForTeam(raw, teamId)).map((photo) => ({
-              ...photo,
-              gamePk: game.gamePk,
-              apiDate: game.apiDate,
-            }))
-            cacheRef.current.set(game.gamePk, filtered)
-            return filtered
-          }),
+        const { photos: batchPhotos, consumed } = await fetchTeamPhotoBatch(
+          games,
+          teamId,
+          consumedRef.current,
+          PHOTO_BATCH_GAMES,
+          cacheRef.current,
         )
+        consumedRef.current += consumed
         if (!activeRef.current) break
-        photosRef.current = [...results.flat(), ...photosRef.current]
+        photosRef.current = [...batchPhotos, ...photosRef.current]
         setPhotos(photosRef.current)
       }
       if (activeRef.current) {
@@ -127,8 +134,8 @@ export function TeamPhotosRail({ teamId, games }) {
   )
 
   useEffect(() => {
-    growPhotos(PHOTO_INITIAL_TARGET)
-  }, [growPhotos])
+    growPhotos(limit ?? PHOTO_INITIAL_TARGET, limit != null ? 1 : undefined)
+  }, [growPhotos, limit])
 
   useLayoutEffect(() => {
     const el = trackRef.current
@@ -186,11 +193,14 @@ export function TeamPhotosRail({ teamId, games }) {
   }, [photos.length, canScroll])
 
   // Scrolling (or paging via the < button) into the sentinel at the front of
-  // the track grows the window toward Opening Day.
+  // the track grows the window toward Opening Day. Preview mode (`limit`)
+  // never mounts the sentinel at all (see the render below), so this never
+  // fires there — the card's window is fixed to whatever the one bounded
+  // batch found.
   useEffect(() => {
     const el = trackRef.current
     const sentinel = sentinelRef.current
-    if (!el || !sentinel || exhausted || loading) return
+    if (limit != null || !el || !sentinel || exhausted || loading) return
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return
@@ -202,7 +212,7 @@ export function TeamPhotosRail({ teamId, games }) {
     )
     io.observe(sentinel)
     return () => io.disconnect()
-  }, [exhausted, loading, growPhotos])
+  }, [exhausted, loading, growPhotos, limit])
 
   const scroll = (dir) => {
     const el = trackRef.current
@@ -210,12 +220,16 @@ export function TeamPhotosRail({ teamId, games }) {
     el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
   }
 
-  if (exhausted && photos.length === 0 && !loading) return null
+  // Preview mode never grows past its one batch, so "nothing here" is settled
+  // the moment that batch's fetch finishes rather than waiting on `exhausted`
+  // (which would otherwise stay false for a club with more games left unwalked).
+  if (photos.length === 0 && !loading && (exhausted || limit != null)) return null
 
   return (
     <div className="thub-card">
       <div className="thub-card__head">
         <span>Photos</span>
+        <ChevronLink onClick={() => navigate(teamPhotosPath(teamId))}>Full season</ChevronLink>
       </div>
       <div className="thub-card__body">
         <div className="teamphotos">
@@ -231,7 +245,9 @@ export function TeamPhotosRail({ teamId, games }) {
             </button>
           )}
           <div className="teamphotos__track" ref={trackRef}>
-            {!exhausted && <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />}
+            {!exhausted && limit == null && (
+              <div ref={sentinelRef} className="teamphotos__sentinel" aria-hidden="true" />
+            )}
             {photos.length === 0 && loading && (
               <div className="teamphotos__loading" aria-hidden="true">
                 Loading&hellip;

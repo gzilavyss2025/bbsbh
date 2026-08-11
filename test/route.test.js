@@ -26,6 +26,7 @@ import {
   orgLeadersPath,
   teamLeadersPath,
   teamStampInPath,
+  teamPhotosPath,
   umpirePath,
   gamePhotosPath,
   logbookPath,
@@ -264,6 +265,48 @@ test('the stamp-in branch wins over the generic 3-segment game branch', () => {
   // matchup='158', section='stamp-in'.
   assert.equal(parseRoute('/team/158/stamp-in').name, 'team-stamp-in')
   assert.equal(parseRoute('/team/158/stamp-in').id, '158')
+})
+
+// --------------------------------------------------------------------------
+// teamPhotosPath / parseRoute — the season photos page
+// --------------------------------------------------------------------------
+test('teamPhotosPath builds the page path and carries the cutoff query', () => {
+  assert.equal(teamPhotosPath(158), '/team/158/photos')
+  assert.equal(
+    teamPhotosPath(158, { d: '2026-07-05', s: 11 }),
+    '/team/158/photos?d=2026-07-05&s=11',
+  )
+})
+
+test('parseRoute resolves the season photos page, cutoff query included', () => {
+  assert.deepEqual(parseRoute('/team/158/photos'), {
+    name: 'team-photos',
+    id: '158',
+    asOf: null,
+    sportId: null,
+  })
+  assert.deepEqual(parseRoute('/team/158/photos?d=2026-07-05&s=11'), {
+    name: 'team-photos',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+})
+
+test('the photos branch wins over the generic 3-segment game branch', () => {
+  // Same ordering trap as stamp-in above: '/team/158/photos' is three
+  // segments, so a generic parse would read it as date='team',
+  // matchup='158', section='photos'.
+  assert.equal(parseRoute('/team/158/photos').name, 'team-photos')
+  assert.equal(parseRoute('/team/158/photos').id, '158')
+})
+
+test('the single-segment /photos game-finder route still parses on its own', () => {
+  // Guards against the new 3-segment branch swallowing the pre-existing
+  // '/photos' and '/photos/{gamePk}' routes (different `parts[0]`, but worth
+  // pinning given how many near-miss branches sit in this parser).
+  assert.deepEqual(parseRoute('/photos'), { name: 'photos' })
+  assert.deepEqual(parseRoute('/photos/717404'), { name: 'photos', gamePk: 717404 })
 })
 
 // --------------------------------------------------------------------------

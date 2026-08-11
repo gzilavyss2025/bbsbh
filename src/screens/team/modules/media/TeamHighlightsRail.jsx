@@ -43,9 +43,17 @@ function gameCaption(clip, game) {
 // filter anything, so this stays a single static-file read with no live
 // per-game walk. A clip whose gamePk isn't in the window just shows its
 // bare date (see gameCaption).
-export function TeamHighlightsRail({ teamId, games }) {
+//
+// `limit`, when passed (the Overview's preview copy), keeps only the most
+// recent N clips — a display cap, not a fetch change: `fetchTeamHighlights`
+// always reads the same one small static file regardless, so a preview here
+// costs nothing extra the way TeamPhotosRail's preview mode has to guard for.
+export function TeamHighlightsRail({ teamId, games, limit = null }) {
   const { data, loading } = useAsync(() => fetchTeamHighlights(teamId), [teamId])
-  const clips = useMemo(() => flattenPositiveClips(data), [data])
+  const clips = useMemo(() => {
+    const all = flattenPositiveClips(data)
+    return limit != null ? all.slice(-limit) : all
+  }, [data, limit])
   const gamesByPk = useMemo(() => new Map(games.map((g) => [g.gamePk, g])), [games])
 
   const trackRef = useRef(null)

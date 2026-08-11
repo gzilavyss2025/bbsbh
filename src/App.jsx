@@ -138,6 +138,7 @@ const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'Minor
 // lazily loaded like every other screen so nobody who never opens it pays for
 // it (or for its own stylesheet).
 const StampInPage = lazyNamed(() => import('./screens/team/StampInPage.jsx'), 'StampInPage')
+const TeamPhotosPage = lazyNamed(() => import('./screens/team/TeamPhotosPage.jsx'), 'TeamPhotosPage')
 const LeadersPage = lazyNamed(() => import('./screens/LeadersPage.jsx'), 'LeadersPage')
 const UmpirePage = lazyNamed(() => import('./screens/UmpirePage.jsx'), 'UmpirePage')
 const UmpireRankingsPage = lazyNamed(
@@ -340,6 +341,8 @@ export default function App() {
     content = <MinorsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-stamp-in') {
     content = <StampInPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-photos') {
+    content = <TeamPhotosPage id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'leaders') {
     content = (
       <LeadersPage

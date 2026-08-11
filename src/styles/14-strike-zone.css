@@ -828,6 +828,14 @@
   gap: 10px;
 }
 
+/* TeamPhotosPage's own grid, at double the tile width — a season-long
+   browse benefits from a bigger look at each still more than the /photos
+   finder's dense multi-game grid does, so this is scoped to that one page
+   rather than changing the shared .gamephotos__grid default. */
+.gamephotos__grid--large {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
 /* The tile geometry lives on the anchor rather than the li so the subject
    caption below it (.gamephotos__subject) sits outside the cropped frame. */
 .gamephotos__grid li {
@@ -905,5 +913,14 @@
 .gamephotos__tile:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* TeamPhotosPage's bottom-of-grid growth trigger — the vertical-page
+   counterpart to TeamPhotosRail's left-edge .teamphotos__sentinel (that one
+   is a 1px-wide flex item inside a horizontal track; this is a bare block a
+   normal viewport IntersectionObserver can watch). No visible height beyond
+   1px: it exists purely to fire once it nears the bottom of the scrollport. */
+.gamephotos__loadmore {
+  height: 1px;
 }
 
