@@ -91,15 +91,18 @@
   }
 
   /* The '@' is printed very faint by design (7%/10%), which is right on bare
-     paper and disappears over a photograph. It comes up with the park so the
-     mark stays the thing in front. Still a watermark, just legible. */
+     paper and washes out over a photograph. It inks UP with the park so the
+     mark stays the thing in front — enough to hold its own against the busiest
+     frame in the set, still a watermark rather than a glyph. Nothing here is
+     persistent: these rules only exist while the card is hovered, so the
+     unhovered '@' is byte-for-byte the one 06-loader-and-cards.css prints. */
   .gamecard:hover .gamecard__atmark-ink,
   .gamecard:focus-within .gamecard__atmark-ink {
-    opacity: 0.16;
+    opacity: 0.28;
   }
   .gamecard:hover .gamecard__atmark-ghost,
   .gamecard:focus-within .gamecard__atmark-ghost {
-    opacity: 0.2;
+    opacity: 0.3;
   }
   .gamecard__atmark-ghost,
   .gamecard__atmark-ink {
