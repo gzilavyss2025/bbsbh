@@ -3,7 +3,7 @@ import { useAuth, useUser } from '@clerk/clerk-react'
 import { useCopy } from '../../../../copy/copyContext.js'
 import { saveCopyPatch } from '../../../../lib/admin/saveCopyPatch.js'
 import { uploadBallparkArt } from '../../../../lib/admin/uploadBallparkArt.js'
-import { fieldIds } from './useBallparkDraft.js'
+import { fieldIds } from '../../../../lib/ballpark/ballparkArt.js'
 import '../../../../styles/61-ballpark-admin.css'
 
 // The owner's controls in the Ballpark card's masthead: a gear when idle, Save

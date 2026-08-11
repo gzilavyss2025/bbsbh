@@ -17,8 +17,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 // it is why the endpoint deliberately does not touch the copy store itself.
 
 // The six copy fields one park owns, as short names. The dotted ids are built
-// from the park key at the edges (`fieldIds` below) so nothing in the UI has to
-// know the registry's naming scheme.
+// from the park key at the edges (`fieldIds`, in lib/ballpark/ballparkArt.js
+// beside the key scheme it uses) so nothing in the UI has to know the registry's
+// naming scheme.
 const SLOTS = ['name', 'wordmark', 'photo', 'credit', 'focus']
 
 // Click (or tap) the photo to say which part of it must survive the widescreen
@@ -44,16 +45,6 @@ export function useFocalPick(onChange) {
     },
     [onChange],
   )
-}
-
-export function fieldIds(key) {
-  return {
-    name: `ballpark.${key}Name`,
-    wordmark: `ballpark.${key}Wordmark`,
-    photo: `ballpark.${key}Photo`,
-    credit: `ballpark.${key}Credit`,
-    focus: `ballpark.${key}Focus`,
-  }
 }
 
 // Takes only the SAVED values, not the park key — the key is what turns a slot

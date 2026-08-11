@@ -1,0 +1,119 @@
+/* The ballpark behind the card — a slate card's hover state.
+   ---------------------------------------------------------------------------
+   Hover a game and the park it is being played in fades in behind the whole
+   card: the same photograph the team hub's Ballpark card shows, drained to
+   grayscale and held down to a wash. The point is recognition, not decoration —
+   you should be able to tell Fenway from Wrigley at a glance and still read
+   every word printed over it.
+
+   Sits immediately after 06-loader-and-cards.css because it belongs to the
+   .gamecard rules there and must win at equal specificity; that file is over
+   its size budget (check-file-size.mjs), which is the other reason this is its
+   own partial rather than sixty more lines at the end of that one.
+
+   Renders NOTHING unless GameCard resolved a photo for this venue and set both
+   custom properties — an MiLB park, a neutral site, a lean feed row. The
+   var() fallbacks below are what make "no park" cost no rule.
+
+   HOVER ONLY, and that is the whole feature: `@media (hover: hover)` keeps it
+   off touch, where there is no hover to give and a tap means "open this game".
+   The app is phone-first, so this is a nicety for the desktop second screen,
+   never something a phone visit is missing. GameCard asks the same question in
+   JS before it even names the image — see canHover() there. */
+
+/* The clipping frame: the card's own interior, corners and all. It holds no
+   image itself, only the ::before that carries one, because a background
+   cannot overflow the box it is painted in and the crop below needs it to. */
+.gamecard__parkart {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  /* .gamecard's --radius-md, so the photo turns the same corners the card does.
+     Positioned against the padding box, so this is a hair rounder than the
+     border it sits inside — invisible at this radius and this opacity. */
+  border-radius: inherit;
+  /* Nothing to hit: the credit rides in the CARD's title (see GameCard), and
+     this layer sits under every control on it. */
+  pointer-events: none;
+  /* Same flip-card guard as .gamecard__live: a past-day card's rotated back
+     face leaked absolutely-positioned children through mirrored on iOS. */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+
+/* The photograph, deliberately larger than the frame that clips it: 5% of the
+   picture is lost off each of the four edges. `cover` has already cropped to
+   the card's aspect ratio by then, so this is a second, smaller crop on top of
+   that — it pushes past the dead margin most of these frames carry (a car park,
+   a strip of sky) and lands more of the park itself inside the card. */
+.gamecard__parkart::before {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  /* Named only once GameCard has armed the card (first hover) — see the comment
+     there. `none` is the un-armed value, so nothing is requested. */
+  background-image: var(--park-art, none);
+  background-size: cover;
+  /* The focal point the owner picked on the Ballpark card's photo, in the same
+     "50% 20%" form object-position takes there — one crop, both surfaces. */
+  background-position: var(--park-focus, 50% 50%);
+  background-repeat: no-repeat;
+  /* Grayscale because the card's colour belongs to the two clubs. A photograph
+     in full colour behind their marks competes with the thing it is backing. */
+  filter: grayscale(1);
+}
+
+/* Everything else on the card is a plain flex item — unpositioned, so it would
+   paint UNDER the absolutely-positioned backdrop no matter how late it comes in
+   the markup. These three are the card's only such children; the pin badge and
+   the live/delay pills are already positioned with z-indexes of their own and
+   need no help. */
+.gamecard__datebanner,
+.gamecard__open,
+.gamecard__box {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) {
+  /* Keyed on the CARD, not the button, so the box-score row at the foot of a
+     past game's card counts as hovering the game too — the whole card is one
+     object. :focus-within covers the keyboard path to the same state. */
+  .gamecard:hover .gamecard__parkart,
+  .gamecard:focus-within .gamecard__parkart {
+    /* Low enough that navy ink on manila still reads over the busiest photo in
+       the set (a full crowd shot), high enough to recognise the place. Tuned
+       against Fenway and Chase Field, the two most cluttered frames. */
+    opacity: 0.24;
+  }
+
+  /* The '@' is printed very faint by design (7%/10%), which is right on bare
+     paper and washes out over a photograph. It inks UP with the park so the
+     mark stays the thing in front — enough to hold its own against the busiest
+     frame in the set, still a watermark rather than a glyph. Nothing here is
+     persistent: these rules only exist while the card is hovered, so the
+     unhovered '@' is byte-for-byte the one 06-loader-and-cards.css prints. */
+  .gamecard:hover .gamecard__atmark-ink,
+  .gamecard:focus-within .gamecard__atmark-ink {
+    opacity: 0.28;
+  }
+  .gamecard:hover .gamecard__atmark-ghost,
+  .gamecard:focus-within .gamecard__atmark-ghost {
+    opacity: 0.3;
+  }
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: opacity var(--dur-med) var(--ease-out);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gamecard__parkart,
+  .gamecard__atmark-ghost,
+  .gamecard__atmark-ink {
+    transition: none;
+  }
+}

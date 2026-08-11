@@ -221,7 +221,11 @@ const BUDGETS = {
   // it is imported by the two lazily-loaded editor modules (the 58+ convention),
   // so putting it in the card's own always-loaded stylesheet would ship an
   // admin form's CSS to every visitor to make one person's page work.
-  'src/styles': 76,
+  // 76 -> 77 for `06a-gamecard-parkart.css`: the slate card's hover ballpark
+  // backdrop. A lettered sibling of `06-loader-and-cards.css` for the same
+  // reason as 05a and the 31x family — that file sits 22 lines under its
+  // check-file-size budget and this feature is four times that.
+  'src/styles': 77,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

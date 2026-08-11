@@ -1,11 +1,11 @@
 import { Suspense, lazy, useCallback } from 'react'
 import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
-import { resolveParkName, resolvePhoto, venueKey } from '../../../../lib/ballpark/ballparkArt.js'
+import { fieldIds, resolveParkName, resolvePhoto, venueKey } from '../../../../lib/ballpark/ballparkArt.js'
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
 import { useCopy } from '../../../../copy/copyContext.js'
 import { BallparkDiagram } from '../../../../components/ballpark/BallparkDiagram.jsx'
 import { Facts, RankGroup } from '../../../../components/ballpark/BallparkFacts.jsx'
-import { fieldIds, useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
+import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 
 // The Overview's Ballpark card. Two stacked rows: a HERO (a photograph of the
 // place beside its name) over the DETAILS (the field diagram beside the facts,
