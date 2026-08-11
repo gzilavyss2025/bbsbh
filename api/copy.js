@@ -55,7 +55,45 @@ function copyRedis() {
   // stored. The history list (JSON we stringify ourselves) is parsed by hand
   // below for the same reason. It is why this one endpoint passes an option to
   // the shared factory instead of calling it bare.
+  //
+  // It also costs this endpoint the hash PAIRING, which is why every read below
+  // goes through hashFromReply. Read that function before changing this line —
+  // the two are a matched pair, and removing either one alone reintroduces a
+  // bug the other exists to prevent.
   return getRedis({ automaticDeserialization: false })
+}
+
+// Pair Upstash's HGETALL reply into a `{ field: value }` object.
+//
+// WHY THIS IS NEEDED — the failure it was written for. `automaticDeserialization
+// : false` (above) does not only disable the JSON.parse the copy store wanted
+// gone. In @upstash/redis it replaces the client's whole deserializer with the
+// identity function, and for HGETALL that deserializer is ALSO what pairs
+// Redis's flat [field, value, field, value] reply into an object.
+//
+// So `redis.hgetall()` here answers an ARRAY. sanitizeOverrides walked it with
+// Object.entries, saw the ids "0"/"1"/"2"/"3", matched none of them against the
+// registry, and returned {} — every override in the store, for every surface,
+// invisible on every read. Writes were landing in Redis the whole time.
+//
+// It shipped, and stayed shipped, because an empty override map is exactly what
+// a deploy with no copy store looks like: the app renders shipped defaults and
+// nothing anywhere reports a failure. Same lesson as _lib/nodeHandler.js's
+// header — a graceful degrade hides a hard failure indefinitely, so the read
+// path needs a test against the shape the real client produces, which is what
+// test/api-copy-handler.test.js now pins.
+//
+// An object is passed through rather than rejected: if a future client version
+// pairs the hash up despite the flag, that must WIDEN what this endpoint reads
+// instead of breaking it.
+export function hashFromReply(reply) {
+  if (!reply || typeof reply !== 'object') return {}
+  if (!Array.isArray(reply)) return reply
+  const out = {}
+  // Step by two. A trailing unpaired field can't come from Redis, but ignoring
+  // one is cheaper than storing a field whose value is undefined.
+  for (let i = 0; i + 1 < reply.length; i += 2) out[String(reply[i])] = reply[i + 1]
+  return out
 }
 
 // The admin gate (Clerk token + COPY_ADMIN_USER_IDS allowlist) lives in
@@ -102,7 +140,7 @@ export default async function handler(req, res) {
     let stored = {}
     if (redis) {
       try {
-        stored = (await redis.hgetall(COPY_KEY)) || {}
+        stored = hashFromReply(await redis.hgetall(COPY_KEY))
       } catch {
         stored = {}
       }
@@ -132,8 +170,13 @@ export default async function handler(req, res) {
   // Sanitize to known ids + in-budget strings.
   const clean = sanitizeOverrides(body?.copy)
   try {
-    // Snapshot the current state for the history list BEFORE mutating.
-    const prev = sanitizeOverrides((await redis.hgetall(COPY_KEY)) || {})
+    // Snapshot the current state for the history list BEFORE mutating. This read
+    // needs hashFromReply as much as the GET does, and for two consequences
+    // beyond the history entry: an unpaired reply sanitized to {} meant
+    // `staleKeys` was ALWAYS empty, so clearing a field never actually deleted
+    // it, and every history snapshot recorded an empty `prev`, so undo had
+    // nothing to restore.
+    const prev = sanitizeOverrides(hashFromReply(await redis.hgetall(COPY_KEY)))
     // Keys being removed by this save (present before, absent now).
     const staleKeys = Object.keys(prev).filter((id) => !(id in clean))
 
