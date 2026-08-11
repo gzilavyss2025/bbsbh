@@ -536,21 +536,6 @@ export function StandingsPage() {
             ))}
       </div>
 
-      {/* The one column whose name cannot carry its own meaning. "Exp W-L" is
-          the record this club's runs scored and allowed point to AS OF the
-          date shown — the header used to say "Pace", which reads as a
-          projection of the final record and never was one (see
-          api/standings.js's expectedRecord). Rendered next to the boards
-          rather than as a popover: it explains a column that is hidden on a
-          phone until you ask for the extra columns, so it must not be a tap
-          target buried in a table that is scrolling sideways. */}
-      {shown.length > 0 && (
-        <p className="standings-legend">
-          <b>Exp W-L</b> — the record the runs point to, through this date. Not a
-          final-record projection.
-        </p>
-      )}
-
       <nav className="standings-daynav" aria-label="Standings date stepper">
         <button
           type="button"

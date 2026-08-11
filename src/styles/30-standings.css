@@ -219,14 +219,6 @@
 .lgstand__bar .metricbar {
   border-radius: var(--radius-md);
 }
-/* Column note under the boards — caption type, the same graphite the rest of
-   the page's secondary prose uses. */
-.standings-legend {
-  margin: 0 0 10px;
-  font-size: var(--fs-caption);
-  line-height: var(--lh-body);
-  color: var(--text-caption);
-}
 .lgstand__div {
   margin-bottom: 14px;
 }

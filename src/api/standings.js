@@ -53,7 +53,7 @@ function diffTone(n) {
 // say it "should" hold right now. The column was called "Pace" and this
 // function `expectedPace`, which read as a full-season projection (what a club
 // is on track to FINISH at) and is not what either one has ever computed; the
-// table says "Exp W-L" now and the standings legend spells the rest out.
+// table says "Exp W-L" now.
 // (Not a 162-game projection — contrast
 // gen-season-score.mjs's pythagoreanPace, which scales to a full season for
 // its own pace-badge use case). Prefers MLB's own xWinLoss expected record
