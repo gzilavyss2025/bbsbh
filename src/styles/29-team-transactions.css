@@ -526,6 +526,13 @@
   color: var(--text-caption);
   margin-top: 2px;
 }
+/* Extra-innings count rides inline with the score itself (`.last10__score`'s
+   flex row) rather than on its own meta line below — same type treatment as
+   `.last10__meta`, just repositioned. */
+.last10__meta--inline {
+  margin-top: 0;
+  margin-left: 2px;
+}
 
 /* Every decided game, on the Games tab (AllGames in modules/TeamGames.jsx) —
    the same ticket stubs as the strip above, laid out IN the page instead of on

@@ -19,6 +19,8 @@ export function RosterProjection({
   rosterSubs = [],
   rosterSP = [],
   rosterBullpen = [],
+  previewStartingPitchers = [],
+  previewCloser = null,
   injuredIds,
   season,
   isMilb,
@@ -80,10 +82,30 @@ export function RosterProjection({
             </section>
           )}
         </div>
-        {/* Right column: the two pitching staffs, Starting Pitchers
-            over Bullpen. Omitted entirely in preview (not just left empty) so
-            the diamond gets the card's full width instead of half of it — the
-            two columns are `flex: 1` siblings above 740px. */}
+        {/* Right column: in preview, the top 5 Starting Pitchers by GS plus
+            the saves leader — a taste of the staff, not the whole thing (the
+            Bullpen stays Roster-tab-only). Full view gets both staffs,
+            Starting Pitchers over Bullpen. The two columns are `flex: 1`
+            siblings above 740px, splitting the card 50/50. */}
+        {preview && (previewStartingPitchers.length > 0 || previewCloser) && (
+        <div className="roster-super__col">
+          <section className="roster-sub">
+            <h4 className="roster-sub__title">Starting Pitchers</h4>
+            <RosterList
+              season={season}
+              rows={previewStartingPitchers.map((p) => ({ ...p, badge: 'SP', badgeClass: 'rolechip' }))}
+            />
+          </section>
+          {previewCloser && (
+            <section className="roster-sub">
+              <RosterList
+                season={season}
+                rows={[{ ...previewCloser, badge: 'CL', badgeClass: 'rolechip rolechip--cl' }]}
+              />
+            </section>
+          )}
+        </div>
+        )}
         {!preview && (
         <div className="roster-super__col">
           {rosterSP.length > 0 && (

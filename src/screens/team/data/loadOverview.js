@@ -15,6 +15,9 @@ import {
   injuredIdsFrom,
   preferredLineupFrom,
   lineupDefenseFrom,
+  fullPitchingLineFrom,
+  topStartingPitchersFrom,
+  closerFrom,
 } from './shared.js'
 
 // The Overview's own data — ONLY what its six previews need, and nothing a tab
@@ -25,7 +28,7 @@ import {
 //   Standing       standings rows (three of them render)   -> Numbers
 //   Form           the precomputed team/season score files  -> Numbers
 //   Last 10        the season schedule, five stubs shown     -> Games
-//   Lineup         the 40-man roster + IL, diamond only      -> Roster
+//   Lineup         the 40-man roster + IL: diamond, top 5 SP, the closer -> Roster
 //   Leaders        the club's season stat pool, 3 categories -> Numbers
 //   Latest moves   the first transactions page, 3 shown      -> Games
 //
@@ -106,6 +109,14 @@ export async function loadOverview(id, asOf) {
 
   const injuredIds = injuredIdsFrom(ilRoster)
 
+  // Starting Pitchers / Closer preview — the same season pitching line the
+  // Roster tab's full staff sections use (fullPitchingLineFrom off the same
+  // 40Man fullRoster already fetched above), just the top 5 by starts and the
+  // saves leader, no per-pitcher game-log fan-out.
+  const fullPitchers = fullPitchingLineFrom(fullRoster, id)
+  const previewStartingPitchers = topStartingPitchersFrom(fullPitchers)
+  const previewCloser = closerFrom(fullPitchers, new Set(previewStartingPitchers.map((p) => p.id)))
+
   return {
     team,
     season,
@@ -130,6 +141,8 @@ export async function loadOverview(id, asOf) {
     recentGames: recentDecidedGames(schedule),
     // Lineup preview.
     lineupDefense: lineupDefenseFrom(preferredLineupFrom(fullRoster, id), injuredIds),
+    previewStartingPitchers,
+    previewCloser,
     // Leaders preview.
     leaderPool,
     injuredIds,
