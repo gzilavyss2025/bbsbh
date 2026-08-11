@@ -167,7 +167,7 @@ export async function loadRoster(id, asOf) {
   // health status irrelevant.
   const startingPitchers = [...fullPitchers]
     .filter((p) => p.gs > 0)
-    .sort((a, b) => b.gs - a.gs || Number(a.jersey) - Number(b.jersey))
+    .sort((a, b) => b.gs - a.gs || b.ipOuts - a.ipOuts || Number(a.jersey) - Number(b.jersey))
     .slice(0, 5)
   // Bullpen — everyone else who's actually pitched, closer first, capped at 8.
   const startingIds = new Set(startingPitchers.map((p) => p.id))
