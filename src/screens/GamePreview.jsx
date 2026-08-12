@@ -49,13 +49,13 @@ const BLOCKS = [
   },
   {
     key: 'zone',
-    label: 'Behind the plate',
-    has: (m) => Boolean(m.plate),
-    waitingFor: 'Umpire crew not assigned yet',
+    label: 'Umpire & records',
+    has: (m) => Boolean(m.plate || m.records.away || m.records.home),
+    waitingFor: 'Crew not assigned and no season records on file',
   },
 ]
 
-export function GamePreview({ feed, starterLines, broadcast, treatments }) {
+export function GamePreview({ feed, starterLines, broadcast, callouts, treatments }) {
   const { t } = useCopy()
   const canvasRef = useRef(null)
   const [on, setOn] = useState({ arms: true, cards: true, zone: true })
@@ -67,8 +67,8 @@ export function GamePreview({ feed, starterLines, broadcast, treatments }) {
   const umpire = useAsync(() => (plateId ? loadUmpire(plateId) : Promise.resolve(null)), [plateId])
 
   const model = useMemo(
-    () => buildPreviewModel(feed, { starterLines, broadcast, umpire: umpire.data }),
-    [feed, starterLines, broadcast, umpire.data],
+    () => buildPreviewModel(feed, { starterLines, broadcast, callouts, umpire: umpire.data }),
+    [feed, starterLines, broadcast, callouts, umpire.data],
   )
 
   // Art and fonts both have to be in hand BEFORE the first paint — a canvas

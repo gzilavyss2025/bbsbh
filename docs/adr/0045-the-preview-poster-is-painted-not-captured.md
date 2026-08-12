@@ -81,7 +81,7 @@ no exemption marker; do not copy the call into a component.
 
 ## The head is the slate card's hover state, minus the checklist
 
-The poster's top 560px is `GameCard` as if permanently hovered: the ballpark
+The poster's top 570px (a floor) is `GameCard` as if permanently hovered: the ballpark
 photograph washed grayscale under the whole sheet, the two-layer '@' printed a
 few pixels out of register in kraft-amber and navy, and the park's name promoted
 from a hover reveal to the poster's dateline. The photo comes from the same
@@ -141,3 +141,48 @@ a started game's poster carries no record at all.
 - If a future surface needs the same treatment (a Game Log stamp sheet, a
   season card), the modules in `src/lib/preview/` generalise; the studio screen
   does not, and should not be made to.
+
+## Amendment, 2026-08-12 — two cards per row, and what fills the fourth slot
+
+Three changes settled after the first build, all pulling the same direction.
+
+**A row is two cards, not one card with two columns.** The original poster put
+both clubs inside one bordered panel per section. That panel could not be
+club-coloured — a card holding both clubs identifies neither, and ADR-0030 only
+licenses colour on a surface that identifies the club it colours — so every bar
+stayed default navy and the marks had nowhere to go. Splitting each row into two
+cards earns each half its own bar, its own knockout, and its own padding; the
+away half had been starting hard against the poster's outer edge.
+
+Two traps came with it. `headerThemeFor` answers null for a missing treatment,
+and a jersey is not posted until close to first pitch — which is exactly when a
+preview gets made — so passing the gap straight through left every bar navy for
+clubs that *do* have curated colours on file; `barFor` falls back to `main`. And
+no card prints its club's abbreviation beside its own mark: the knockout already
+says whose card it is.
+
+**The batting order carries faces, full names and a broadcast stat line.** Nine
+rows with a headshot each cost 162pt off the sheet and every other block gave
+some back. The line is `.278 · 17 HR · 48 RBI` — three terms, not four, because
+a fourth pushed it past the column at every font size worth printing, and a stat
+that ends in "…" is worse than a stat that isn't there. OPS, OBP and SLG are all
+on the model for a one-line swap.
+
+**The umpire card halved, and situational records took the other half.** A
+research pass over the site's pre-game modules ranked five candidates; the
+reasoning and the rejections are in `docs/preview-poster.md`. `teamRecords` from
+the nightly callouts bundle won on a property none of the others had:
+`gen-callouts.mjs` sets its `asOf` to the day BEFORE the slate and bounds the
+schedule pull to it, so a date's shard holds only games already played when that
+date began. That is a written proof of "entering tonight" — precisely what the
+feed's own `teams[side].record` lacks, and the reason this ADR withholds that
+number once a game starts. The row shows **leading after seven**, not eight: a
+record leading after eight is close to a fact about how saves work, where after
+seven there is still a game left to lose.
+
+**One bug worth recording**, because it did not look like one. Every `extras`
+key reaching `buildPreviewModel` arrives from a `useAsync`, which holds `null`
+while in flight — and a destructuring default only fires on `undefined`. So
+`extras.starterLines.away` threw on first paint and unmounted the screen until
+the fetch landed. It presented as an intermittently blank page, and cost more
+time than the fix (`??`) is worth reading.

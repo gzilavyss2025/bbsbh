@@ -132,3 +132,67 @@ test('a probable starter with no season line yet still prints his name and hand'
   assert.equal(model.starters.away.jersey, '54')
   assert.equal(model.starters.away.era, '')
 })
+
+// A `useAsync` holds **null** while it is in flight, and a default parameter
+// only fires on `undefined` — so `extras.starterLines.away` threw on the very
+// first paint and took the whole screen down until the fetch landed. It looked
+// like a flaky page rather than a bug, which is why it survived a while.
+test('a null extra reads as absent, not as a crash', () => {
+  const feed = finishedFeed()
+  for (const extras of [
+    {},
+    { starterLines: null, broadcast: null, umpire: null, callouts: null },
+    { starterLines: undefined, callouts: undefined },
+  ]) {
+    const model = buildPreviewModel(feed, extras)
+    assert.equal(model.starters.away.era, '')
+    assert.equal(model.broadcast, '')
+    assert.equal(model.records.away, null)
+  }
+})
+
+test('the situational records read entering-tonight families off the bundle', () => {
+  const callouts = {
+    teamRecords: {
+      away: {
+        scoringFirst: '45-17',
+        opponentScoringFirst: '28-26',
+        oneRun: '19-16',
+        leadAfterFull: { 6: { w: 50, l: 9 }, 7: { w: 54, l: 4 }, 8: { w: 56, l: 3 } },
+      },
+      home: { scoringFirst: '39-17', leadAfter: { 7: '48-1' } },
+    },
+  }
+  const model = buildPreviewModel(finishedFeed(), { callouts })
+  // The SEVENTH, and out of leadAfterFull — which always carries 6/7/8, where
+  // `leadAfter` keeps only the innings lopsided enough to be worth a note.
+  assert.equal(model.records.away.leadAfter7, '54-4')
+  assert.equal(model.records.away.scoringFirst, '45-17')
+  // The fallback path, for a shard that carries only the sparse map.
+  assert.equal(model.records.home.leadAfter7, '48-1')
+  // Rows are fixed and shared, so the two columns compare like for like.
+  assert.deepEqual(
+    model.recordRows.map((r) => r.key),
+    ['scoringFirst', 'opponentScoringFirst', 'leadAfter7', 'oneRun'],
+  )
+})
+
+test('a club with no records in the bundle yields null rather than empty rows', () => {
+  assert.equal(buildPreviewModel(finishedFeed(), { callouts: { teamRecords: {} } }).records.away, null)
+  assert.equal(buildPreviewModel(finishedFeed(), { callouts: {} }).records.home, null)
+})
+
+test('a hitter with no plate appearances carries no season line', () => {
+  const feed = finishedFeed()
+  feed.liveData.boxscore.teams.away.battingOrder = [100]
+  feed.liveData.boxscore.teams.away.players = {
+    ID100: {
+      person: { id: 100, fullName: 'Jackson Chourio' },
+      battingOrder: '100',
+      allPositions: [{ abbreviation: 'LF' }],
+      seasonStats: { batting: { avg: '.000', atBats: 0 } },
+    },
+  }
+  feed.gameData.players.ID100 = { id: 100, fullName: 'Jackson Chourio' }
+  assert.equal(buildPreviewModel(feed).lineups.away[0].batting, null)
+})

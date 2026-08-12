@@ -122,15 +122,44 @@ function starterFor(feed, side, line) {
   }
 }
 
+// A hitter's season slash — AVG/OBP/OPS, already formatted by the feed as
+// ".278" / ".341" / ".821", so nothing here rounds or divides.
+//
+// A SEASON aggregate, which is an open surface (ADR-0034): a stat line is not
+// a score, and gating one is the mistake that ADR undid. Unlike the club record
+// above, this one needs no started-game gate — a slash that moved by .003
+// because of the game you are previewing says nothing about it, and the same
+// numbers are already on the lineup pages, the player page, and the back of
+// every baseball card. Blank for a hitter with no plate appearances yet.
+function battingFor(feed, side, personId) {
+  const b = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${personId}`]?.seasonStats?.batting
+  if (!b || !b.avg || !b.atBats) return null
+  return {
+    avg: b.avg ?? '',
+    obp: b.obp ?? '',
+    slg: b.slg ?? '',
+    ops: b.ops ?? '',
+    homeRuns: b.homeRuns ?? null,
+    rbi: b.rbi ?? null,
+    stolenBases: b.stolenBases ?? null,
+  }
+}
+
 // A posted batting order, trimmed to what a poster row prints. Empty array
 // when the card hasn't posted — the painter draws the "posts close to first
 // pitch" notice instead of an empty grid, the same fallback TeamInfo uses.
 function lineupFor(feed, side) {
   return selectLineup(feed, side).map((p) => ({
     order: p.order,
-    name: p.last || p.nameLastFirst,
+    id: p.id,
+    // The full name in natural order. The scorebook's surname-only column is
+    // right on a page you read next to a game; a poster is read by people who
+    // do not have the roster in their head.
+    name: p.name || p.nameLastFirst,
+    last: p.last || '',
     position: p.position || '',
     jersey: p.jersey || '',
+    batting: battingFor(feed, side, p.id),
   }))
 }
 
@@ -140,33 +169,101 @@ function lineupFor(feed, side) {
 // plate assignment yet, a MiLB ump, or one the nightly sweep hasn't reached:
 // `umpire.accuracy.season.called` is loadUmpire's own "is there anything here"
 // test, asked the same way.
+// "How they win" — the four situational records the poster compares side by
+// side, off the nightly callouts bundle's `teamRecords` (docs/callouts.md).
+//
+// THESE ARE RECORDS ENTERING TONIGHT, by construction rather than by luck, and
+// that is why they are here when the club's own W-L is not. `gen-callouts.mjs`
+// sets `asOf` to the day BEFORE the slate and bounds its schedule pull to it,
+// so the shard written for a date holds only games already played when that
+// date began. The feed's `teams[side].record` has no such property — it moves
+// the moment the game ends — which is what recordFor above has to refuse.
+//
+// The four families are FIXED rather than picked per club: a row only means
+// something if it says the same thing on both sides, and choosing each club's
+// most lopsided line would make the two columns incomparable. Every one of them
+// is present for both clubs in every shard checked, MLB and MiLB alike.
+const RECORD_ROWS = [
+  { key: 'scoringFirst', label: 'Scoring first' },
+  { key: 'opponentScoringFirst', label: 'Opponent scores first' },
+  { key: 'leadAfter7', label: 'Leading after 7' },
+  { key: 'oneRun', label: 'One-run games' },
+]
+
+function recordsFor(bundle, side) {
+  const r = bundle?.teamRecords?.[side]
+  if (!r) return null
+  // Read from `leadAfterFull`, which always carries 6/7/8 — `leadAfter` keeps
+  // only the innings lopsided enough to be worth an in-game note, so it can be
+  // missing the very one this row wants.
+  //
+  // The SEVENTH, not the eighth. A club's record leading after eight is nearly
+  // a tautology at this point in a season (49-0 is a fact about how saves work);
+  // after seven there is still a game left to lose, so the number says something
+  // about the club rather than about the rulebook.
+  const lead7 = r.leadAfterFull?.['7']
+  const values = {
+    scoringFirst: r.scoringFirst || '',
+    opponentScoringFirst: r.opponentScoringFirst || '',
+    leadAfter7: lead7 ? `${lead7.w}-${lead7.l}` : r.leadAfter?.['7'] || '',
+    oneRun: r.oneRun || '',
+  }
+  return RECORD_ROWS.some((row) => values[row.key]) ? values : null
+}
+
+// The plate umpire, in the shape UmpireTendencies reads — the poster's block is
+// that card, so it takes the same fields rather than a flattened summary of
+// them. Null for a crew with no plate assignment yet; the bare `{ id, name }`
+// for a MiLB umpire or one the nightly sweep hasn't reached, which is
+// loadUmpire's own `accuracy.season.called` test asked the same way.
 function plateFor(officials, umpire) {
   const hp = officials.find((o) => o.role === 'HP') ?? null
   if (!hp) return null
   const season = umpire?.accuracy?.season
   const base = { id: hp.id, name: hp.name || '' }
   if (!season?.called) return base
+  const games = Array.isArray(umpire?.games) ? umpire.games : []
   return {
     ...base,
+    // The card's season year and its identity sub-line ("97 games · 21 behind
+    // the plate") — a tally of assignments, never of results.
+    year: umpire?.season ?? null,
+    gameCount: games.length,
+    plateCount: games.filter((g) => g.role === 'HP').length,
     accuracy: season.accuracy,
     consistency: season.consistency,
     favorPerGame: season.favorPerGame,
-    games: season.games,
+    called: season.called,
+    scoredGames: season.games,
     rank: umpire?.rank ? { rank: umpire.rank.rank, total: umpire.rank.total } : null,
-    // The 3×3 league-relative grid — each cell's `over` is its strike-call rate
-    // above (+) or below (−) the league's for that cell.
+    // The five-band zone-lean scale: which band, and where inside the
+    // continuum the caret falls. Null below the ranking floor, exactly as the
+    // card's own `{lean && <LeanScale/>}` handles it.
+    lean: umpire?.lean ? { tier: umpire.lean.tier, z: umpire.lean.z } : null,
+    // The 3×3 league-relative grid. A cell's `over` is how far its MISS share
+    // runs above the league's for that cell — not a strike-call rate. The map
+    // outlines the ones over the floor; it does not shade all nine.
     zoneCells: Array.isArray(umpire?.zoneCells) ? umpire.zoneCells : null,
-    watch: umpire?.watchArea?.phrase || '',
+    watch: umpire?.watchArea ? { phrase: umpire.watchArea.phrase, hand: umpire.watchArea.hand } : null,
   }
 }
 
 // `extras` carries what the screen already had in hand from useGameData —
 // nothing here fetches. `starterLines` is keyed by side the way GameView holds
 // it; `broadcast` is fetchGameBroadcast's already-summarised line; `umpire` is
-// loadUmpire()'s object for the plate umpire.
+// loadUmpire()'s object for the plate umpire; `callouts` is the per-game bundle
+// GameView already threads down as `gameCallouts`.
 export function buildPreviewModel(feed, extras = {}) {
   if (!feed) return null
-  const { starterLines = {}, broadcast = '', umpire = null } = extras
+  // Read with `?.` and `??` rather than destructuring defaults. Every one of
+  // these arrives from a `useAsync`, which holds **null** while it is in flight
+  // and again after a deps change — and a default parameter only fires on
+  // `undefined`, so `starterLines.away` threw on first paint and the whole
+  // screen unmounted until the fetch landed. It looked like a flaky page.
+  const starterLines = extras.starterLines ?? {}
+  const broadcast = extras.broadcast ?? ''
+  const umpire = extras.umpire ?? null
+  const callouts = extras.callouts ?? null
   const info = selectGameInfo(feed)
   const officials = selectOfficials(feed)
   const venue = feed?.gameData?.venue ?? {}
@@ -205,5 +302,7 @@ export function buildPreviewModel(feed, extras = {}) {
     lineups: { away: lineupFor(feed, 'away'), home: lineupFor(feed, 'home') },
     crew: officials,
     plate: plateFor(officials, umpire),
+    recordRows: RECORD_ROWS,
+    records: { away: recordsFor(callouts, 'away'), home: recordsFor(callouts, 'home') },
   }
 }

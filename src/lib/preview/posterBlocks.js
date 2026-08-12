@@ -1,79 +1,66 @@
-// The poster's three body blocks, each a navy/gold-mastheaded card in the same
-// grammar as the pre-game surfaces they come from (styles/44-pre-game-cards.css).
+// The poster's three body blocks, each modelled on the pre-game surface it
+// comes from rather than invented here.
 //
-//   STARTING PITCHERS  — the two probables, head to head. The single most
-//                        useful thing on a pre-game screen, which is why
-//                        TeamInfo leads with it too, so it leads here.
-//   BATTING ORDER      — both posted cards, away left / home right, in the
-//                        order/name/position shape a scorekeeper reads.
-//   BEHIND THE PLATE   — the plate umpire's season accuracy, the four tiles
-//                        and the league-relative zone grid off UmpireTendencies.
+//   STARTING PITCHERS — two cards, one per club, each wearing that club's own
+//                       bar and knockout mark. The single most useful thing on
+//                       a pre-game screen, which is why TeamInfo leads with it.
+//   BATTING ORDER     — two cards again: order, face, full name, position, and
+//                       the broadcast stat line.
+//   UMPIRE & RECORDS  — the UmpireTendencies card (posterUmpire.js) beside the
+//                       situational records both clubs carry into tonight.
+//
+// TWO CARDS, NOT ONE CARD WITH TWO COLUMNS. A club-coloured bar is only
+// legitimate on a surface that IDENTIFIES that club (ADR-0030), and a single
+// card holding both clubs identifies neither — there is nowhere honest to put
+// the colour. Splitting them is what earns each half its own bar and mark, and
+// it also gives each club's content its own padded box instead of one of them
+// starting hard against the outer border.
 //
 // Every block degrades the way the rest of the app does: no lineup posted, no
 // probable named, a MiLB umpire the nightly accuracy sweep never reaches — each
-// draws its own "not posted yet" line rather than an empty grid or a crash.
+// draws its own line rather than an empty grid or a crash.
 import { FONT } from './posterPaper.js'
-import { caps, clip, contain, line, masthead, panel, rect, rule, track } from './posterInk.js'
-import { columns, contentBox, LINEUP_ROW, POSTER } from './posterLayout.js'
-
-const NOT_POSTED = 'Not posted yet'
-
-// A block's card chrome: hairline panel on card paper, masthead across the top.
-function openBlock(ctx, box, { title, aside, mark, palette }) {
-  panel(ctx, box.x, box.y, box.width, box.height, {
-    radius: 12,
-    fill: palette.card,
-    stroke: palette.border,
-    thickness: 1.5,
-  })
-  ctx.save()
-  panel(ctx, box.x, box.y, box.width, box.height, { radius: 12 })
-  ctx.clip()
-  const barBottom = masthead(ctx, box.x, box.y, box.width, { title, aside, mark, palette })
-  ctx.restore()
-  return barBottom
-}
-
-function notPosted(ctx, x, y, width, palette, text = NOT_POSTED) {
-  track(ctx, caps(text), x + width / 2, y, {
-    font: FONT.display(24),
-    fill: palette.caption,
-    spacing: 2,
-    align: 'center',
-    maxWidth: width - 24,
-  })
-}
+import { caps, clip, contain, line, panel, rect, rule, track } from './posterInk.js'
+import { lineupShotKey } from './posterArt.js'
+import { notPosted, openCard, PAD } from './posterCard.js'
+import { drawUmpireCard } from './posterUmpire.js'
+import { columns, contentBox, LINEUP_ROW } from './posterLayout.js'
 
 // ─────────────────────────────────────────────────────── starting pitchers ──
-// One starter: headshot left, name and hand/number stacked right, the season
-// line under it, and his last outing on a dotted second line. The stats are
-// season aggregates and an already-final previous box line — never this game's
-// (see api/game.js's fetchPitcherSeasonLine / fetchPitcherLastGame).
-function drawStarter(ctx, col, top, starter, shot, palette) {
-  const shotSize = 104
+function drawStarterCard(ctx, box, starter, shot, bar, palette) {
+  // No club abbreviation beside the mark: the knockout already says whose card
+  // this is, and printing "MIL" next to the Brewers' own logo is the same fact
+  // twice — the naming rule the rest of the app keeps.
+  const barBottom = openCard(ctx, box, { title: 'Starting pitcher', bar, palette })
+  const top = barBottom + 16
+  const left = box.x + PAD
+
   if (!starter) {
-    notPosted(ctx, col.x, top + 70, col.width, palette, 'Starter not announced')
+    notPosted(ctx, box.x, top + 62, box.width, palette, 'Not announced')
     return
   }
+
+  const shotSize = 88
   if (shot) {
     ctx.save()
-    panel(ctx, col.x, top, shotSize, shotSize, { radius: 52, fill: palette.inset })
+    panel(ctx, left, top, shotSize, shotSize, { radius: 48, fill: palette.inset })
     ctx.clip()
-    contain(ctx, shot, col.x, top, shotSize, shotSize, { scale: 1.06 })
+    contain(ctx, shot, left, top, shotSize, shotSize, { scale: 1.06 })
     ctx.restore()
-    panel(ctx, col.x, top, shotSize, shotSize, { radius: 52, stroke: palette.border, thickness: 1.5 })
+    panel(ctx, left, top, shotSize, shotSize, { radius: 48, stroke: palette.border, thickness: 1.5 })
   }
-  const textX = col.x + shotSize + 18
-  const textWidth = col.width - shotSize - 18
-  track(ctx, caps(starter.name), textX, top + 34, {
-    font: FONT.display(34),
+  const textX = left + shotSize + 16
+  const textWidth = box.x + box.width - PAD - textX
+
+  track(ctx, caps(starter.name), textX, top + 28, {
+    font: FONT.display(29),
     fill: palette.heading,
     spacing: 1,
     maxWidth: textWidth,
   })
   const badges = [starter.jersey ? `#${starter.jersey}` : '', starter.hand].filter(Boolean).join('  ·  ')
-  track(ctx, caps(badges), textX, top + 64, {
-    font: FONT.display(22),
+  track(ctx, caps(badges), textX, top + 54, {
+    font: FONT.display(20),
     fill: palette.caption,
     spacing: 2,
     maxWidth: textWidth,
@@ -84,14 +71,12 @@ function drawStarter(ctx, col, top, starter, shot, palette) {
     starter.strikeOuts && `${starter.strikeOuts} K`,
     starter.innings && `${starter.innings} IP`,
   ].filter(Boolean)
-  line(ctx, stats.join(' · ') || 'Season line not posted', textX, top + 96, {
-    font: FONT.mono(18),
+  line(ctx, stats.join(' · ') || 'Season line not posted', textX, top + 82, {
+    font: FONT.mono(17),
     fill: palette.body,
     maxWidth: textWidth,
   })
 
-  // The dotted divider and last-outing line, the same "LAST: …" convention
-  // TeamInfo's starter card prints under its season line.
   const g = starter.lastGame
   if (!g) return
   ctx.save()
@@ -99,11 +84,18 @@ function drawStarter(ctx, col, top, starter, shot, palette) {
   ctx.strokeStyle = palette.border
   ctx.lineWidth = 1
   ctx.beginPath()
-  ctx.moveTo(col.x, top + 124)
-  ctx.lineTo(col.x + col.width, top + 124)
+  ctx.moveTo(left, top + 102)
+  ctx.lineTo(box.x + box.width - PAD, top + 102)
   ctx.stroke()
   ctx.restore()
+
   const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}` : ''
+  const labelWidth = track(ctx, caps(`Last ${where}`.trim()), left, top + 126, {
+    font: FONT.display(18),
+    fill: palette.caption,
+    spacing: 1.6,
+    maxWidth: box.width * 0.42,
+  })
   const last = [
     g.inningsPitched && `${g.inningsPitched} IP`,
     g.hits != null && `${g.hits} H`,
@@ -112,59 +104,87 @@ function drawStarter(ctx, col, top, starter, shot, palette) {
   ]
     .filter(Boolean)
     .join(' · ')
-  // Label and line share one row rather than stacking — the block's height is
-  // spoken for (BLOCK_HEIGHT.arms), and "LAST @ CIN" is short enough to sit
-  // beside its numbers.
-  const labelWidth = track(ctx, caps(`Last ${where}`.trim()), col.x, top + 152, {
-    font: FONT.display(19),
-    fill: palette.caption,
-    spacing: 1.6,
-    maxWidth: col.width * 0.5,
-  })
-  line(ctx, last, col.x + labelWidth + 14, top + 152, {
-    font: FONT.mono(18),
+  line(ctx, last, left + labelWidth + 12, top + 126, {
+    font: FONT.mono(17),
     fill: palette.muted,
-    maxWidth: col.width - labelWidth - 14,
+    maxWidth: box.x + box.width - PAD - (left + labelWidth + 12),
   })
 }
 
 export function drawArms(ctx, box, model, art, palette) {
-  const barBottom = openBlock(ctx, box, { title: 'Starting pitchers', palette })
-  const [left, right] = columns(40)
-  const top = barBottom + 26
-  // The gutter rule, so the two arms read as a matchup rather than a list.
-  rule(ctx, POSTER.width / 2, top - 6, 1, { fill: palette.hairline, thickness: 1 })
-  ctx.fillStyle = palette.hairline
-  ctx.fillRect(POSTER.width / 2, top - 6, 1, box.height - (top - box.y) - 24)
-  drawStarter(ctx, left, top, model.starters.away, art.awayShot, palette)
-  drawStarter(ctx, right, top, model.starters.home, art.homeShot, palette)
+  const [left, right] = columns(28)
+  const shape = (col) => ({ x: col.x, y: box.y, width: col.width, height: box.height })
+  drawStarterCard(ctx, shape(left), model.starters.away, art.awayShot, art.awayBar, palette)
+  drawStarterCard(ctx, shape(right), model.starters.home, art.homeShot, art.homeBar, palette)
 }
 
 // ────────────────────────────────────────────────────────────── the cards ──
-// A club's posted batting order: number, surname, position. Nine rows on a
-// ruled grid, alternating cell fill the way a scorebook page alternates — and
-// a per-column club heading, since at this size a mark alone is ambiguous.
-function drawOrder(ctx, col, top, club, lineup, mark, palette) {
-  track(ctx, caps(club.abbr || club.nick), col.x + 4, top, {
-    font: FONT.display(24),
-    fill: palette.heading,
-    spacing: 2.5,
-    maxWidth: col.width - 46,
-  })
-  // The club's FULL-COLOUR mark, not the one-colour knockout: this heading sits
-  // on card paper, and a white knockout on manila is an invisible mark rather
-  // than a subtle one. The knockouts are for the navy mastheads (ADR-0031).
-  if (mark) contain(ctx, mark, col.x + col.width - 36, top - 24, 32, 32)
-  rule(ctx, col.x, top + 12, col.width, { fill: palette.border, thickness: 1.5 })
+// A row is: order, face, full name, position, season line. Every column is
+// LEFT-ALIGNED off a fixed x — a card is read DOWN a column, and ragged-right
+// numbers make that a hunt.
+//
+// THE STAT LINE IS THE BROADCAST SET, not the raw slash: `.278 · 17 HR · 48
+// RBI`, which is what a lower-third shows when a hitter comes up. Three facts
+// anyone reads at a glance, and — the reason it is three and not four — they
+// fit next to a full name without either column truncating. OPS, OBP and SLG
+// are all on the model (`batting.ops`/`.obp`/`.slg`) for a one-line swap, but
+// adding a fourth term pushed the line past the column at every font size worth
+// printing, and a stat that ends in "…" is worse than a stat that isn't there.
+//
+// All of it is a SEASON aggregate, which is an open surface (ADR-0034) — a stat
+// line is not a score, and gating one is the mistake that ADR undid.
+const COL = { order: PAD - 6, shot: PAD + 14, name: PAD + 56, position: 286, stats: 330 }
+const SHOT = 30
+
+function battingLine(b) {
+  if (!b) return ''
+  return [
+    b.avg,
+    b.homeRuns != null ? `${b.homeRuns} HR` : '',
+    b.rbi != null ? `${b.rbi} RBI` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+// The face, cropped to a circle. A hitter with no photo on file gets his
+// initials on a paper disc rather than a hole in the column — the same
+// monogram-behind-a-fallback rule components/Headshot.jsx keeps.
+function drawFace(ctx, x, y, size, img, name, palette) {
+  ctx.save()
+  panel(ctx, x, y, size, size, { radius: size / 2, fill: palette.inset })
+  ctx.clip()
+  if (img) {
+    contain(ctx, img, x, y, size, size, { scale: 1.08 })
+  } else {
+    const initials = String(name || '')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+    line(ctx, caps(initials), x + size / 2, y + size * 0.68, {
+      font: FONT.display(Math.round(size * 0.5)),
+      fill: palette.caption,
+      align: 'center',
+    })
+  }
+  ctx.restore()
+  panel(ctx, x, y, size, size, { radius: size / 2, stroke: palette.border, thickness: 1 })
+}
+
+function drawOrderCard(ctx, box, side, lineup, bar, art, palette) {
+  const barBottom = openCard(ctx, box, { title: 'Batting order', bar, palette })
+  const top = barBottom + 10
 
   if (!lineup.length) {
-    notPosted(ctx, col.x, top + 66, col.width, palette)
-    track(ctx, caps('Posts close to first pitch'), col.x + col.width / 2, top + 96, {
-      font: FONT.display(19),
+    notPosted(ctx, box.x, top + 84, box.width, palette, 'Not posted yet')
+    track(ctx, caps('Posts close to first pitch'), box.x + box.width / 2, top + 114, {
+      font: FONT.display(18),
       fill: palette.caption,
       spacing: 1.4,
       align: 'center',
-      maxWidth: col.width - 24,
+      maxWidth: box.width - 24,
     })
     return
   }
@@ -173,164 +193,147 @@ function drawOrder(ctx, col, top, club, lineup, mark, palette) {
   // the two must not each work it out separately. They did once, disagreed by
   // one, and the ninth hitter silently vanished off every poster.
   lineup.slice(0, 9).forEach((p, i) => {
-    const y = top + 24 + i * LINEUP_ROW
-    if (i % 2 === 0) rect(ctx, col.x, y, col.width, LINEUP_ROW, palette.inset)
-    const baseline = y + LINEUP_ROW / 2 + 8
-    line(ctx, String(p.order), col.x + 20, baseline, {
-      font: FONT.mono(21),
+    const y = top + i * LINEUP_ROW
+    if (i % 2 === 0) rect(ctx, box.x + 1, y, box.width - 2, LINEUP_ROW, palette.inset)
+    const baseline = y + LINEUP_ROW / 2 + 7
+    line(ctx, String(p.order), box.x + COL.order, baseline, {
+      font: FONT.mono(16),
       fill: palette.caption,
-      align: 'center',
     })
-    ctx.font = FONT.display(27)
-    const nameMax = col.width - 46 - 54
-    line(ctx, caps(clip(ctx, p.name, nameMax)), col.x + 42, baseline, {
-      font: FONT.display(27),
+    drawFace(
+      ctx,
+      box.x + COL.shot,
+      y + (LINEUP_ROW - SHOT) / 2,
+      SHOT,
+      art[lineupShotKey(side, p.order)],
+      p.name,
+      palette,
+    )
+    ctx.font = FONT.display(21)
+    // The surname alone is the fallback for a name too long to print whole —
+    // better a real short name than "BRANDON CRONENWO…".
+    const room = COL.position - COL.name - 10
+    const whole = caps(p.name)
+    const shown = ctx.measureText(whole).width <= room ? whole : caps(p.last || p.name)
+    line(ctx, clip(ctx, shown, room), box.x + COL.name, baseline, {
+      font: FONT.display(21),
       fill: palette.body,
     })
-    line(ctx, caps(p.position), col.x + col.width - 14, baseline, {
-      font: FONT.mono(20),
+    line(ctx, caps(p.position), box.x + COL.position, baseline, {
+      font: FONT.mono(15),
       fill: palette.muted,
-      align: 'right',
+    })
+    line(ctx, battingLine(p.batting), box.x + COL.stats, baseline, {
+      font: FONT.mono(14),
+      fill: palette.caption,
+      maxWidth: box.width - COL.stats - PAD + 4,
     })
   })
 }
 
 export function drawCards(ctx, box, model, art, palette) {
-  const posted = model.lineups.away.length || model.lineups.home.length
-  const barBottom = openBlock(ctx, box, {
-    title: 'Batting order',
-    aside: posted ? '' : 'Not final',
-    palette,
-  })
-  const [left, right] = columns(36)
-  const top = barBottom + 44
-  drawOrder(ctx, left, top, model.away, model.lineups.away, art.away.mark, palette)
-  drawOrder(ctx, right, top, model.home, model.lineups.home, art.home.mark, palette)
+  const [left, right] = columns(28)
+  const shape = (col) => ({ x: col.x, y: box.y, width: col.width, height: box.height })
+  drawOrderCard(ctx, shape(left), 'away', model.lineups.away, art.awayBar, art, palette)
+  drawOrderCard(ctx, shape(right), 'home', model.lineups.home, art.homeBar, art, palette)
 }
 
-// ───────────────────────────────────────────────────────── behind the plate ──
-// The plate umpire's season, in the four numbers UmpireTendencies leads with,
-// plus its 3×3 league-relative zone grid. All of it is a Final-games aggregate
-// off the nightly accuracy sweep — a fact about the umpire, not about tonight.
-function drawTile(ctx, x, y, w, h, { label, value, sup = '' }, palette) {
-  panel(ctx, x, y, w, h, { radius: 8, fill: palette.inset, stroke: palette.hairline, thickness: 1 })
-  track(ctx, caps(label), x + w / 2, y + 26, {
-    font: FONT.display(18),
-    fill: palette.caption,
-    spacing: 1.6,
-    align: 'center',
-    maxWidth: w - 12,
-  })
-  // The value and its superscript are centred as one run, so "3/89" sits on
-  // the tile's axis rather than the "3" alone doing so.
-  ctx.font = FONT.mono(30)
-  const valueWidth = ctx.measureText(String(value)).width
-  let supWidth = 0
-  if (sup) {
-    ctx.font = FONT.mono(17)
-    supWidth = ctx.measureText(sup).width
+// ──────────────────────────────────────────────────────────── how they win ──
+// The situational records both clubs carry INTO tonight, side by side — off the
+// nightly callouts bundle (docs/callouts.md), whose shard for a date is written
+// the night before, so every figure here is genuinely "entering this game".
+//
+// This is the card that says what kind of team each of them is: a club that is
+// 49-0 when it leads after eight is a different problem from one that is 6-44
+// when it trails. Four fixed rows, the same four for both clubs — see
+// RECORD_ROWS in api/gamePreview.js for why they are fixed rather than picked.
+function drawRecordsCard(ctx, box, model, art, palette) {
+  const inner = { x: box.x + PAD, width: box.width - PAD * 2 }
+
+  // Two value columns on the right, the label taking whatever is left. Capped
+  // at a quarter of the card so a full-width row (no umpire card beside it) puts
+  // the numbers under the marks rather than out at the far edge.
+  const colWidth = Math.min(160, inner.width / 4)
+  const homeCx = inner.x + inner.width - colWidth / 2
+  const awayCx = homeCx - colWidth
+  const labelWidth = awayCx - colWidth / 2 - inner.x - 10
+
+  // The club marks ride IN the masthead, directly over the columns they head,
+  // rather than in a header row of their own — the row cost 44pt to say
+  // something the bar had room for, and the bar is where every other card on
+  // this poster already puts a mark. They are the one-colour knockouts, since
+  // this bar is navy (ADR-0031); the full-colour marks would sink into it.
+  const barBottom = openCard(ctx, box, { title: 'How they win', palette })
+  for (const [cx, bar] of [
+    [awayCx, art.awayBar],
+    [homeCx, art.homeBar],
+  ]) {
+    if (bar?.mark?.width) {
+      const h = 28
+      const w = (bar.mark.width / bar.mark.height) * h
+      ctx.drawImage(bar.mark, cx - w / 2, box.y + (barBottom - box.y - h) / 2, w, h)
+    }
   }
-  const startX = x + w / 2 - (valueWidth + supWidth) / 2
-  line(ctx, String(value), startX, y + 66, { font: FONT.mono(30), fill: palette.heading })
-  if (sup) line(ctx, sup, startX + valueWidth + 2, y + 66, { font: FONT.mono(17), fill: palette.caption })
-}
 
-// The 3×3 grid, each cell inked toward green where this umpire calls MORE
-// strikes than the league does there and toward clay where he calls fewer —
-// the same signed `over` UmpireZoneMap reads, and the same two accent tokens
-// ADR-0017 pairs for positive/negative.
-function drawZone(ctx, x, y, size, cells, palette) {
-  const cell = size / 3
-  for (let i = 0; i < 9; i += 1) {
-    const over = Number(cells?.[i]?.over ?? 0)
-    const cx = x + (i % 3) * cell
-    const cy = y + Math.floor(i / 3) * cell
-    const strength = Math.min(1, Math.abs(over) / 0.12)
-    ctx.globalAlpha = 0.14 + strength * 0.62
-    rect(ctx, cx, cy, cell, cell, over >= 0 ? palette.positive : palette.negative)
-    ctx.globalAlpha = 1
-    ctx.strokeStyle = palette.card
-    ctx.lineWidth = 2
-    ctx.strokeRect(cx, cy, cell, cell)
-  }
-  panel(ctx, x, y, size, size, { radius: 2, stroke: palette.body, thickness: 2 })
-}
-
-export function drawZoneBlock(ctx, box, model, art, palette) {
-  const plate = model.plate
-  const barBottom = openBlock(ctx, box, {
-    title: 'Behind the plate',
-    aside: plate?.games ? `${plate.games} scored games` : '',
-    palette,
-  })
-  const { x, width } = contentBox()
-  const top = barBottom + 26
-
-  if (!plate) {
-    notPosted(ctx, x, top + 58, width, palette, 'Crew not posted yet')
+  const top = barBottom + 10
+  const away = model.records.away
+  const home = model.records.home
+  if (!away && !home) {
+    notPosted(ctx, box.x, top + 70, box.width, palette, 'Season records not posted')
     return
   }
 
-  // The zone grid rides the right edge; everything textual is measured against
-  // the column that leaves, so a long crew line never runs under it.
-  const zoneSize = 104
-  const zoneX = x + width - zoneSize - 16
-  const textWidth = zoneX - x - 40
-
-  track(ctx, caps(plate.name), x + 20, top + 30, {
-    font: FONT.display(34),
-    fill: palette.heading,
-    spacing: 1.2,
-    maxWidth: textWidth,
+  const rowH = 52
+  model.recordRows.forEach((row, i) => {
+    const y = top + i * rowH
+    if (i % 2 === 0) rect(ctx, box.x + 1, y, box.width - 2, rowH, palette.inset)
+    const baseline = y + rowH / 2 + 7
+    track(ctx, caps(row.label), inner.x, baseline, {
+      font: FONT.display(18),
+      fill: palette.caption,
+      spacing: 1.4,
+      maxWidth: labelWidth,
+    })
+    for (const [cx, side] of [
+      [awayCx, away],
+      [homeCx, home],
+    ]) {
+      line(ctx, side?.[row.key] || '—', cx, baseline, {
+        font: FONT.mono(24),
+        fill: palette.heading,
+        align: 'center',
+      })
+    }
   })
-  const crew = [
-    ...model.crew.filter((o) => o.role !== 'HP').map((o) => `${o.role} ${o.name}`),
-    plate.watch ? `Watches ${plate.watch}` : '',
-  ]
-    .filter(Boolean)
-    .join('  ·  ')
-  line(ctx, crew, x + 20, top + 54, {
-    font: FONT.body(18),
-    fill: palette.caption,
-    maxWidth: textWidth,
-  })
-
-  if (plate.accuracy == null) {
-    notPosted(ctx, x, top + 104, width, palette, 'No scored games on file')
-    return
-  }
-
-  drawZone(ctx, zoneX, top + 2, zoneSize, plate.zoneCells, palette)
-  track(ctx, caps('Strikes vs league'), zoneX + zoneSize / 2, top + zoneSize + 22, {
-    font: FONT.display(15),
-    fill: palette.caption,
-    spacing: 1,
-    align: 'center',
-    maxWidth: zoneSize + 70,
-  })
-
-  // The same four UmpireTendencies leads with, in its order. Rank drops out
-  // below the ranking floor (loadUmpire returns none), and the tile row simply
-  // shortens rather than printing a placeholder rank nobody can act on.
-  const tiles = [
-    { label: 'Accuracy', value: pct(plate.accuracy) },
-    plate.rank ? { label: 'Rank', value: plate.rank.rank, sup: `/${plate.rank.total}` } : null,
-    { label: 'Consistency', value: pct(plate.consistency) },
-    { label: 'Run impact', value: runs(plate.favorPerGame) },
-  ].filter(Boolean)
-  const gap = 14
-  const tileW = Math.min(160, (textWidth - gap * (tiles.length - 1)) / tiles.length)
-  const tileH = 80
-  let tx = x + 20
-  const ty = top + 70
-  for (const t of tiles) {
-    drawTile(ctx, tx, ty, tileW, tileH, t, palette)
-    tx += tileW + gap
-  }
 }
 
-const pct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`)
-const runs = (v) => (v == null ? '—' : `${v > 0 ? '+' : ''}${v.toFixed(2)}`)
+// The third row: the umpire card on the left, the situational records beside
+// it. Two halves of the same question — what the conditions are tonight, and
+// what each club usually does with them.
+//
+// A card with nothing in it gives its width to the other one instead of sitting
+// there as an empty box — the same rule the studio applies to a whole block. It
+// happens for real: a crew is not assigned until close to first pitch, so a
+// poster made the day before is records-only, and the records card reads
+// perfectly well as a wide table.
+export function drawUmpireRow(ctx, box, model, art, palette) {
+  const hasUmpire = Boolean(model.plate)
+  const hasRecords = Boolean(model.records.away || model.records.home)
+  const full = contentBox()
+  const shape = (col) => ({ x: col.x, y: box.y, width: col.width, height: box.height })
+
+  if (hasUmpire && !hasRecords) {
+    drawUmpireCard(ctx, { ...shape(full), width: full.width }, model, palette)
+    return
+  }
+  if (hasRecords && !hasUmpire) {
+    drawRecordsCard(ctx, { x: full.x, y: box.y, width: full.width, height: box.height }, model, art, palette)
+    return
+  }
+  const [left, right] = columns(28)
+  drawUmpireCard(ctx, shape(left), model, palette)
+  drawRecordsCard(ctx, shape(right), model, art, palette)
+}
 
 // ────────────────────────────────────────────────────────────────── footer ──
 export function drawFooter(ctx, y, model, palette) {
@@ -341,8 +344,7 @@ export function drawFooter(ctx, y, model, palette) {
     fill: palette.caption,
     spacing: 2.4,
   })
-  const matchup = `${model.away.abbr} @ ${model.home.abbr}`
-  track(ctx, caps(matchup), x + width, y + 40, {
+  track(ctx, caps(`${model.away.abbr} @ ${model.home.abbr}`), x + width, y + 40, {
     font: FONT.display(21),
     fill: palette.caption,
     spacing: 2.4,

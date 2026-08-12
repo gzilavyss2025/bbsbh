@@ -361,6 +361,7 @@ export function GameView({ game, section, onSection }) {
           feed={feed}
           starterLines={starterLines.data}
           broadcast={broadcast.data}
+          callouts={gameCallouts}
           treatments={jerseyTreatments}
         />
         </Suspense>

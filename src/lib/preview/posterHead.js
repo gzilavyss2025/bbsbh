@@ -13,25 +13,25 @@
 // into an image that outlives that moment they would be stale the second the
 // card posts, and worse, wrong to whoever reads the image tomorrow.
 import { FONT } from './posterPaper.js'
-import { caps, contain, cover, line, panel, rect, rule, track } from './posterInk.js'
+import { caps, contain, cover, grid, line, panel, rect, rule, track } from './posterInk.js'
 import { POSTER } from './posterLayout.js'
 
 // The head's vertical rhythm, all measured from the top of the poster. Kept
 // as one table rather than scattered through the draw functions so the whole
 // composition can be re-tuned by reading a single block — and so it is obvious
-// at a glance that nothing here reaches past POSTER.headHeight (640).
+// at a glance that nothing here reaches past POSTER.headHeight.
 const HEAD = {
   barHeight: 58,
-  tileSize: 196,
-  tileTop: 88,
-  awayCx: 322,
-  homeCx: 878,
-  placeBaseline: 334,
-  nickBaseline: 382,
-  recordBaseline: 418,
-  ruleY: 444,
-  venueBaseline: 486,
-  factsBaseline: 520,
+  tileSize: 230,
+  tileTop: 68,
+  awayCx: 318,
+  homeCx: 882,
+  placeBaseline: 344,
+  nickBaseline: 392,
+  recordBaseline: 426,
+  ruleY: 452,
+  venueBaseline: 494,
+  factsBaseline: 528,
 }
 
 // The full-bleed ballpark photograph, grayscale, washed back under a sheet of
@@ -39,24 +39,41 @@ const HEAD = {
 // (photo first, everything else over it) and the same grayscale(1) treatment;
 // the wash is what replaces the card's 0.24 opacity, since a poster's photo has
 // to survive being looked at rather than glanced past.
-function drawBackdrop(ctx, park, palette, height, stretch) {
+function drawBackdrop(ctx, park, palette, height) {
   rect(ctx, 0, 0, POSTER.width, height, palette.canvas)
   if (!park?.image) return
   ctx.save()
   ctx.filter = 'grayscale(1)'
   cover(ctx, park.image, 0, 0, POSTER.width, height, { focus: park.focus })
   ctx.restore()
-  // The manila sheet over the photograph, in three stops. The middle stop is
-  // pinned to where the club marks START, not to a fraction of the head — on a
-  // stretched head that band moves down, and the photograph should stay open
-  // above it rather than being washed out at a fixed 50%.
-  const marksTop = (HEAD.tileTop + stretch) / height
+  // The manila sheet over the photograph.
+  //
+  // WHY THIS IS A CURVE AND NOT THREE STOPS. A linear gradient interpolates
+  // alpha in a straight line, so a photograph under it stays clearly visible
+  // almost all the way down and then meets flat paper at a hard edge — the
+  // "harsh flip into the background" the first version had. Two fixes, both
+  // needed: the ramp follows a smoothstep so it eases IN at the top and OUT at
+  // the bottom rather than arriving at full paper at a constant rate, and it
+  // reaches FULLY opaque paper at LAND_AT, short of the head's bottom edge, so
+  // the last stretch is already solid paper and there is no seam where the head
+  // ends. A gradient that only reaches 0.95 leaves 5% of photograph to butt up
+  // against the sheet below it, which is precisely the edge you can see.
+  const LAND_AT = 0.86
+  const TOP_ALPHA = 0.48
   const wash = ctx.createLinearGradient(0, 0, 0, height)
-  wash.addColorStop(0, hexAlpha(palette.paper1, 0.52))
-  wash.addColorStop(Math.min(0.95, marksTop), hexAlpha(palette.paper1, 0.66))
-  wash.addColorStop(1, hexAlpha(palette.paper0, 0.95))
+  const STOPS = 14
+  for (let i = 0; i <= STOPS; i += 1) {
+    const t = i / STOPS
+    const eased = t * t * (3 - 2 * t) // smoothstep
+    wash.addColorStop(t * LAND_AT, hexAlpha(palette.canvas, TOP_ALPHA + (1 - TOP_ALPHA) * eased))
+  }
+  wash.addColorStop(1, hexAlpha(palette.canvas, 1))
   ctx.fillStyle = wash
   ctx.fillRect(0, 0, POSTER.width, height)
+
+  // The wash lands on the sheet's own paper, so the ruling has to carry on
+  // through the strip it covered or the grid appears to stop at the photo.
+  grid(ctx, height * LAND_AT, height, palette)
 }
 
 // '#RRGGBB' + alpha -> 'rgba(r, g, b, a)'. The palette is read out of the
@@ -72,23 +89,55 @@ function hexAlpha(hex, alpha) {
 // and navy — the misregistration a real ballpark-program print run has. Drawn
 // at the card's HOVER opacities (0.30 ghost / 0.28 ink), not its resting ones.
 function drawAtMark(ctx, palette) {
-  const cx = POSTER.width / 2
-  const cy = HEAD.tileTop + HEAD.tileSize / 2
   ctx.save()
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.font = FONT.watermark(300)
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+
+  // FITTED TO ITS BAND BY MEASUREMENT, not placed at a size that happened to
+  // look right. The '@' lives between the brand bar and the bottom of the club
+  // tiles, and this face's glyph sits low and wide inside its em — so
+  // `textBaseline: middle` centres the LINE BOX and leaves the ink riding high,
+  // which pushed the top of the mark up under the navy bar and sheared it off.
+  //
+  // TextMetrics reports where the ink actually is, so the size is scaled down
+  // until the ink fits the band and is then centred inside it. Both steps are
+  // measured, which is what makes this hold if the size, the band or the face
+  // ever changes — a hand-tuned offset would only hold for one of the three.
+  const bandTop = HEAD.barHeight + 16
+  const bandBottom = HEAD.tileTop + HEAD.tileSize
+  const bandHeight = bandBottom - bandTop
+
+  let size = 340
+  ctx.font = FONT.watermark(size)
+  let m = ctx.measureText('@')
+  let inkH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+  const fit = (bandHeight * 0.9) / inkH
+  if (fit < 1) {
+    size = Math.floor(size * fit)
+    ctx.font = FONT.watermark(size)
+    m = ctx.measureText('@')
+    inkH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
+  }
+
+  const inkW = m.actualBoundingBoxLeft + m.actualBoundingBoxRight
+  const originX = -inkW / 2 + m.actualBoundingBoxLeft
+  const originY = inkH / 2 - m.actualBoundingBoxDescent
+  const cx = POSTER.width / 2
+  const cy = bandTop + bandHeight / 2
+
   ctx.translate(cx, cy)
-  // The card's own transform: skewX(-8deg) rotate(-2deg), and a lift because
-  // this face's '@' carries more descent than ascent.
+  // The card's own transform: skewX(-8deg) rotate(-2deg) — the misregistration
+  // of a real ballpark-program print run.
   ctx.rotate((-2 * Math.PI) / 180)
   ctx.transform(1, 0, Math.tan((-8 * Math.PI) / 180), 1, 0, 0)
+  // Two layers, a couple of pixels out of register, at the slate card's HOVER
+  // opacities (0.30 ghost / 0.28 ink) rather than its resting ones.
   ctx.globalAlpha = 0.3
   ctx.fillStyle = palette.seal
-  ctx.fillText('@', 2, -22)
+  ctx.fillText('@', originX + 3, originY - 3)
   ctx.globalAlpha = 0.28
   ctx.fillStyle = palette.navy
-  ctx.fillText('@', -2, -18)
+  ctx.fillText('@', originX - 3, originY + 1)
   ctx.restore()
 }
 
@@ -133,7 +182,7 @@ function drawTile(ctx, club, palette) {
 // prints (MILWAUKEE / BREWERS), with the club's record penciled under it.
 function drawClubName(ctx, club, palette) {
   const { x } = club
-  const width = 470
+  const width = 500
   track(ctx, caps(club.place), x, HEAD.placeBaseline, {
     font: FONT.display(30),
     fill: palette.caption,
@@ -223,7 +272,7 @@ function drawDateline(ctx, model, palette) {
 export function drawHead(ctx, model, art, palette, head) {
   const height = head?.height ?? POSTER.headHeight
   const stretch = head?.stretch ?? 0
-  drawBackdrop(ctx, art.park, palette, height, stretch)
+  drawBackdrop(ctx, art.park, palette, height)
 
   ctx.save()
   ctx.translate(0, stretch)

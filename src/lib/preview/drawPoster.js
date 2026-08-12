@@ -12,16 +12,16 @@
 // devicePixelRatio: the export is a fixed-size PNG for X (1200 × 1600), not a
 // screen surface, so its pixel dimensions are part of the deliverable rather
 // than a function of whose monitor painted it.
-import { drawArms, drawCards, drawFooter, drawZoneBlock } from './posterBlocks.js'
+import { drawArms, drawCards, drawFooter, drawUmpireRow } from './posterBlocks.js'
 import { drawHead } from './posterHead.js'
 import { contentBox, POSTER, posterLayout } from './posterLayout.js'
 import { posterPalette } from './posterPaper.js'
-import { rect } from './posterInk.js'
+import { grid, rect } from './posterInk.js'
 
 const PAINTERS = {
   arms: drawArms,
   cards: drawCards,
-  zone: drawZoneBlock,
+  zone: drawUmpireRow,
 }
 
 export function drawPoster(canvas, model, art = {}, options = {}) {
@@ -38,7 +38,7 @@ export function drawPoster(canvas, model, art = {}, options = {}) {
   // page the whole app is printed on. Drawn before the head, which paints its
   // photograph over the top of it.
   rect(ctx, 0, 0, POSTER.width, POSTER.height, palette.canvas)
-  drawGrid(ctx, palette)
+  grid(ctx, 0, POSTER.height, palette)
 
   // The layout is solved BEFORE the head is painted: how tall the head gets
   // depends on how many blocks are switched on (POSTER.headStretch).
@@ -52,19 +52,6 @@ export function drawPoster(canvas, model, art = {}, options = {}) {
   }
 
   drawFooter(ctx, layout.footerY, model, palette)
-}
-
-// Faint graph-paper ruling, the same 4px-scale grid the app's paper carries.
-// Low enough contrast to read as texture; it only ever shows in the gaps
-// between blocks, which is exactly where a blank sheet would otherwise look
-// like a printing error.
-function drawGrid(ctx, palette) {
-  ctx.save()
-  ctx.globalAlpha = 0.5
-  ctx.fillStyle = palette.ruleSoft
-  for (let y = 0; y < POSTER.height; y += 28) ctx.fillRect(0, y, POSTER.width, 1)
-  for (let x = 0; x < POSTER.width; x += 28) ctx.fillRect(x, 0, 1, POSTER.height)
-  ctx.restore()
 }
 
 // The finished canvas as a PNG File, ready for navigator.share() or an object

@@ -82,6 +82,29 @@ export function rect(ctx, x, y, w, h, fill) {
   ctx.fillRect(x, y, w, h)
 }
 
+// The faint graph-paper ruling the whole sheet is printed on, drawn over an
+// arbitrary horizontal band. It is a band rather than the whole poster because
+// the head paints a photograph over the top of it and then washes back to solid
+// paper before its bottom edge — without re-ruling that landed strip, the grid
+// would stop dead where the photo starts and resume under it, which reads as
+// the seam the wash exists to avoid.
+export function grid(ctx, top, bottom, palette, { step = 28, alpha = 0.5 } = {}) {
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.fillStyle = palette.ruleSoft
+  for (let y = Math.ceil(top / step) * step; y < bottom; y += step) {
+    ctx.fillRect(0, y, POSTER_WIDTH, 1)
+  }
+  for (let x = 0; x < POSTER_WIDTH; x += step) {
+    ctx.fillRect(x, top, 1, bottom - top)
+  }
+  ctx.restore()
+}
+
+// Kept local rather than imported from posterLayout.js so this module stays a
+// leaf — every other primitive here takes its geometry as arguments.
+const POSTER_WIDTH = 1200
+
 // A rounded rectangle path, stroked and/or filled — the card chrome.
 export function panel(ctx, x, y, w, h, { radius = 10, fill = null, stroke = null, thickness = 1 } = {}) {
   const r = Math.min(radius, w / 2, h / 2)
@@ -103,36 +126,57 @@ export function panel(ctx, x, y, w, h, { radius = 10, fill = null, stroke = null
   }
 }
 
-// The navy/gold section masthead — the poster's copy of .metricbar
-// (styles/44-pre-game-cards.css): navy fill, kraft-gold bottom edge, condensed
-// caps title left, an optional aside right. `mark` is an already-loaded mono
-// knockout image drawn at the bar's right edge, the same flourish
-// SectionMasthead's `logo` slot carries.
-export function masthead(ctx, x, y, w, { title, aside = '', palette, height = 46, mark = null }) {
-  rect(ctx, x, y, w, height, palette.navy)
-  rect(ctx, x, y + height - 4, w, 4, palette.seal)
-  const pad = 18
+// The section masthead — the poster's copy of `.metricbar`
+// (styles/44-pre-game-cards.css): a solid bar, a kraft-gold under-edge,
+// condensed caps title left, an optional aside right, and the club's mark at
+// the right edge (SectionMasthead's `logo` slot).
+//
+// `theme` is `headerThemeFor`'s triad or null. A themed bar wears the club's
+// own colours (ADR-0030: a card that IDENTIFIES a club may be coloured by it);
+// null keeps the default navy chrome, exactly as the CSS fallbacks do. Its
+// `onBarTone` decides whether the white knockout mark stays white or is
+// re-inked dark — the canvas equivalent of the `--mark-filter` custom property,
+// and the same `brightness(0)` that CSS applies.
+export function masthead(
+  ctx,
+  x,
+  y,
+  w,
+  { title, aside = '', palette, height = 46, mark = null, theme = null, reinkMark = true },
+) {
+  const fill = theme?.bar || palette.navy
+  const edge = theme?.accent || palette.seal
+  const ink = theme?.onBar || palette.onInk
+  rect(ctx, x, y, w, height, fill)
+  rect(ctx, x, y + height - 4, w, 4, edge)
+  const pad = 16
   let right = x + w - pad
-  if (mark) {
-    const markH = height - 18
+  if (mark?.width) {
+    const markH = height - 16
     const markW = (mark.width / mark.height) * markH
-    ctx.drawImage(mark, right - markW, y + 9, markW, markH)
-    right -= markW + 14
+    ctx.save()
+    // A flat white silhouette vanishes on a light bar. Only the mono knockout
+    // is re-inked — a club's own uploaded City Connect masthead is finished
+    // art, deliberately coloured for its bar, and `reinkMark: false` says so.
+    if (reinkMark && theme?.onBarTone === 'dark') ctx.filter = 'brightness(0)'
+    ctx.drawImage(mark, right - markW, y + 7, markW, markH)
+    ctx.restore()
+    right -= markW + 12
   }
   if (aside) {
     const asideWidth = track(ctx, caps(aside), right, y + height / 2 + 4, {
       font: FONT_MASTHEAD_ASIDE,
-      fill: palette.seal,
+      fill: theme ? ink : palette.seal,
       spacing: 1.5,
       align: 'right',
     })
-    right -= asideWidth + 28
+    right -= asideWidth + 24
   }
   track(ctx, caps(title), x + pad, y + height / 2 + 5, {
     font: FONT_MASTHEAD_TITLE,
-    fill: palette.onInk,
+    fill: ink,
     spacing: 1.8,
-    maxWidth: right - (x + pad),
+    maxWidth: Math.max(40, right - (x + pad)),
   })
   return y + height
 }
