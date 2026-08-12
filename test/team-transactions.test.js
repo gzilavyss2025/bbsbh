@@ -23,6 +23,30 @@ const NASHVILLE = { id: 556, name: 'Nashville Sounds' }
 const ACL = { id: 406, name: 'ACL Brewers' }
 const ASTROS = { id: 117, name: 'Houston Astros' }
 const ROYALS = { id: 118, name: 'Kansas City Royals' }
+const ATHLETICS = { id: 133, name: 'Athletics' }
+
+// 2026-08-11, verified live: the Brewers signed Bryse Wilson and designated
+// Lyon Richardson, and the ATHLETICS claimed Drew Rom off waivers FROM the
+// Brewers. `CLW` is the second of only two codes naming two different MLB
+// clubs (`TR` is the other — docs/transactions-wire.md §3), so this single row
+// buckets into both orgs' files and has to read in opposite directions there.
+const AUG11_ROM_CLAIM = [
+  {
+    id: 937019, typeCode: 'SFA', date: '2026-08-11', effectiveDate: '2026-08-11',
+    person: { id: 669060, fullName: 'Bryse Wilson' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers signed free agent RHP Bryse Wilson.',
+  },
+  {
+    id: 937020, typeCode: 'DES', date: '2026-08-11', effectiveDate: '2026-08-11',
+    person: { id: 680689, fullName: 'Lyon Richardson' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers designated RHP Lyon Richardson for assignment.',
+  },
+  {
+    id: 937021, typeCode: 'CLW', date: '2026-08-11', effectiveDate: '2026-08-11',
+    person: { id: 680723, fullName: 'Drew Rom' }, fromTeam: BREWERS, toTeam: ATHLETICS,
+    description: 'Athletics claimed LHP Drew Rom off waivers from Milwaukee Brewers.',
+  },
+]
 
 // 2026-06-24: a solo signing + a solo suspension (no corollary for either).
 const JUN24 = [
@@ -383,9 +407,9 @@ test('bucketToOrg keeps rows touching the org directly or via its own affiliate,
 // §3 Story grouping — the real Jul 12 / Jul 7 / Jun 24 / Jul 14 fixtures
 // ---------------------------------------------------------------------------
 
-function storiesFor(rawRows) {
-  const kept = filterStoryworthy(dedupeTransactions(rawRows), { orgId: 158 })
-  return groupIntoStories(kept, { positions: {}, orgId: 158 })
+function storiesFor(rawRows, orgId = 158) {
+  const kept = filterStoryworthy(dedupeTransactions(rawRows), { orgId })
+  return groupIntoStories(kept, { positions: {}, orgId })
 }
 
 test('Jul 12: trade+clear, same-player double-move, solo option, transfer with its own photo — in that order', () => {
@@ -624,6 +648,52 @@ test('Jul 15: a trade leg immediately optioned the same day still joins the trad
     role: 'out', banner: 'Down', playerId: 700502, name: 'Colton Gordon',
     surname: 'Gordon', pos: 'LHP', tintTeamId: 158, isMlb: false,
   }])
+})
+
+test('Aug 11: a waiver claim reads as a DEPARTURE on the club that lost the player', () => {
+  // Real bug, verified live 2026-08-11: `CLW` sat in IN_CODES, so a claim read
+  // as an arrival for BOTH clubs it names. The Brewers' own card announced
+  // "claimed LHP Drew Rom off waivers from Milwaukee Brewers" over an "Up"
+  // banner — the club that LOST him claiming it had gained him.
+  const days = storiesFor(AUG11_ROM_CLAIM)
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'shuffle')
+  assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'Up', 'Wilson'],
+    ['out', 'Down', 'Richardson'],
+    // "Out", not "Down": a claim crosses ORGS, so it is never a rung on this
+    // club's own ladder the way an option or an outright is.
+    ['out', 'Out', 'Rom'],
+  ])
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Signed free agent RHP Bryse Wilson; designated RHP Lyon Richardson for assignment;'
+      + ' lost LHP Drew Rom to the Athletics on a waiver claim.',
+  )
+  // Rom is the club's loss here, so he is never the headline name.
+  const romSeg = stories[0].cutline.find((s) => s.playerId === 680723)
+  assert.equal(romSeg.emphasis, 'secondary')
+  assert.equal(stories[0].cutline.find((s) => s.text === 'Athletics')?.teamId, 133)
+})
+
+test('Aug 11: the SAME waiver-claim row reads as an ARRIVAL on the claiming club', () => {
+  const days = storiesFor(AUG11_ROM_CLAIM, 133)
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].type, 'roster-move')
+  assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'In', 'Rom'],
+  ])
+  // The feed's own sentence already reads from the claiming club's side, so
+  // this half needs no rebuilt lead — just its acting club stripped.
+  assert.equal(
+    stories[0].cutline.map((s) => s.text).join(''),
+    'Claimed LHP Drew Rom off waivers from Milwaukee Brewers.',
+  )
+  assert.equal(stories[0].cutline.find((s) => s.playerId === 680723)?.emphasis, 'primary')
 })
 
 test('Jul 16: an outright assignment + same-day elected free agency merge into one departure card', () => {

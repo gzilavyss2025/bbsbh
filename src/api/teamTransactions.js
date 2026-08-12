@@ -294,10 +294,24 @@ function lowerFirstClause(s) {
 function stripPeriod(s) {
   return s.trim().replace(/\.$/, '')
 }
-// The raw feed's own clause for one row, capitalized for sentence-initial use
-// (team name stripped, trailing period kept as-is).
-function soloText(row) {
-  return upperFirst(stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name]))
+// One row's clause, acting club stripped, lower-case lead — for the caller to
+// capitalize or trail after a semicolon. A waiver claim is the one description
+// no stripping fixes for both sides: it is written from the CLAIMING club's
+// ("Athletics claimed LHP Drew Rom off waivers from Milwaukee Brewers"), so
+// stripping "Athletics " on the Brewers' card leaves it saying the Brewers
+// claimed him. The losing side gets a rebuilt lead, as cutlineTrade does.
+function rowClause(row, ctx = {}) {
+  if (row.typeCode === 'CLW' && ctx.orgId != null && row.fromTeam?.id === ctx.orgId) {
+    const player = `${posPrefix(resolvePosition(row, ctx))}${nameFor(row)}`
+    const claimant = row.toTeam?.name ? ` to the ${row.toTeam.name}` : ''
+    return `lost ${player}${claimant} on a waiver claim.`
+  }
+  return stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name])
+}
+
+// The same clause capitalized for sentence-initial use (trailing period kept).
+function soloText(row, ctx) {
+  return upperFirst(rowClause(row, ctx))
 }
 
 // Wraps the substring of `text` matching a player's name in an emphasis
@@ -340,11 +354,19 @@ function ilReason(description) {
 // neutral (no active-roster body), null (SU, or a TR with no orgId context)
 // doesn't participate in pairing at all.
 const SIGNING_CODES = new Set(['SFA', 'SGN', 'IFA'])
-const IN_CODES = new Set(['CU', 'SE', 'CLW', 'PUR', ...SIGNING_CODES])
+const IN_CODES = new Set(['CU', 'SE', 'PUR', ...SIGNING_CODES])
 const OUT_CODES = new Set(['OPT', 'DES', 'OUT', 'REL', 'URL', 'WA', 'RET', 'DFA'])
+// TR and CLW are the ONLY two codes naming two different MLB clubs
+// (docs/transactions-wire.md §3); every other names one club plus its own
+// affiliates, so direction follows from the code alone. For these two it
+// follows from WHICH SIDE this org is on — one row buckets into both clubs'
+// files. CLW used to sit in IN_CODES, so on 2026-08-11 the Brewers' own card
+// announced Drew Rom "claimed off waivers" over an "Up" banner, the day the
+// Athletics claimed him AWAY from them.
+const TWO_CLUB_CODES = new Set(['TR', 'CLW'])
 function rowDirection(t, orgId) {
   const code = t.typeCode
-  if (code === 'TR') {
+  if (TWO_CLUB_CODES.has(code)) {
     if (orgId != null && t.toTeam?.id === orgId) return 'in'
     if (orgId != null && t.fromTeam?.id === orgId) return 'out'
     return null
@@ -565,6 +587,9 @@ function bannerFor(storyType, role, row) {
   if (storyType === 'suspension') return 'Out'
   if (storyType === 'injured-list') return role === 'out' ? ilBanner(row) : 'Up'
   if (role === 'transfer') return ilBanner(row)
+  // A waiver claim crosses ORGS (see TWO_CLUB_CODES), so it reads In/Out like a
+  // trade — never the Up/Down of a move on this club's own ladder.
+  if (row.typeCode === 'CLW') return role === 'in' ? 'In' : 'Out'
   return role === 'in' ? 'Up' : 'Down'
 }
 
@@ -770,7 +795,7 @@ function cutlineDeparture(story) {
   return segs
 }
 
-function cutlineShuffle(story) {
+function cutlineShuffle(story, ctx) {
   const ordered = [
     ...story.rows.filter((r) => r.role === 'in'),
     ...story.rows.filter((r) => r.role === 'out'),
@@ -779,7 +804,7 @@ function cutlineShuffle(story) {
   ordered.forEach((r, i) => {
     if (i > 0) segs.push({ text: '; ' })
     const name = nameFor(r.row)
-    const raw = stripLeadingClub(r.row.description, [r.row.fromTeam?.name, r.row.toTeam?.name])
+    const raw = rowClause(r.row, ctx)
     const clause = stripPeriod(i === 0 ? upperFirst(raw) : lowerFirstClause(raw))
     segs.push(...emphasizeClause(clause, name, r.role === 'in' ? 'primary' : 'secondary', r.row.person?.id))
   })
@@ -790,7 +815,7 @@ function cutlineShuffle(story) {
 function cutlineSingle(story, ctx, emphasis) {
   const { row } = story.rows[0]
   const name = nameFor(row)
-  return emphasizeClause(soloText(row), name, emphasis, row.person?.id)
+  return emphasizeClause(soloText(row, ctx), name, emphasis, row.person?.id)
 }
 
 // Every distinct club named on any row in the story (a trade partner, an
@@ -850,7 +875,7 @@ export function buildCutline(story, ctx = {}) {
       segs = cutlineInjuredList(story, ctx)
       break
     case 'shuffle':
-      segs = cutlineShuffle(story)
+      segs = cutlineShuffle(story, ctx)
       break
     case 'roster-move':
       segs = story.subtype === 'double'
