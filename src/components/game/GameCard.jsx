@@ -109,18 +109,14 @@ export function GameCard({
     ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
   }
   const card = (
-    // `title` is the backdrop's CC BY / CC BY-SA attribution, carried on the
-    // CARD rather than on the layer itself: the photograph is the whole card
-    // now, and the layer sits under everything hoverable, so a title down there
-    // would never be read. Child titles (the delay pill, the readiness pips)
-    // still win where they exist, which is right — they are about the game,
-    // this is about the picture behind it.
+    // No native `title` tooltip on this card — the backdrop's park name prints
+    // instead, on the card itself, next to the start time (.gamecard__parkname
+    // below): a hover reveal you can actually see coming, not a browser tooltip.
     <div
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
       style={Object.keys(style).length ? style : undefined}
       onPointerEnter={armPark}
       onFocus={armPark}
-      title={park?.title}
     >
       {/* The ballpark, washed grayscale and faded in behind the WHOLE card on
           hover. First child, painting under everything else: the card is a
@@ -222,6 +218,15 @@ export function GameCard({
               {prospectCount} Prospect{prospectCount === 1 ? '' : 's'}
             </span>
           )}
+          {/* The ballpark's name, printed — not a title tooltip — left in this
+              row against the ready pips/start time riding right in
+              .gamecard__metaright below. Same font treatment as
+              .gamecard__status (the start time) so it reads as a peer fact on
+              the line, not a caption. Faded in only while the backdrop itself
+              is showing (see 06a-gamecard-parkart.css's hover rule for
+              .gamecard__parkart) — the name names the photo behind it, so the
+              two appear together. */}
+          {park && <span className="gamecard__parkname">{park.name}</span>}
           <span className="gamecard__metaright">
             {!postponed && game.abstractState !== 'Final' && !hasScoreLine && (
               <ReadyPill game={game} />
@@ -388,14 +393,17 @@ function ReadyPill({ game }) {
 function NationalTvIcon({ network }) {
   const logo = broadcastLogoFor(network)
   if (logo) {
+    // No title tooltip — the logo alone is the label (see the header comment),
+    // so `aria-label` on the wrapper is what gives a screen reader the network
+    // name; the image's own `alt` stays empty rather than doubling it up.
     return (
-      <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
+      <span className="gamecard__nationaltv" aria-label={`National broadcast: ${network}`}>
         <img className="gamecard__nationaltv-logo" src={logo} alt="" />
       </span>
     )
   }
   return (
-    <span className="gamecard__nationaltv" title={`National broadcast: ${network}`}>
+    <span className="gamecard__nationaltv">
       <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
         <rect x="1.5" y="3" width="13" height="9" rx="1.5" />
         <path d="M5 14.5h6" />

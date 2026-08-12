@@ -166,6 +166,30 @@
   color: var(--text-muted);
 }
 
+/* The ballpark's name — printed on the card, not carried in a hover title.
+   Sits in .gamecard__meta ahead of .gamecard__metaright, which is why it
+   stays LEFT while the ready pips and start time hold the row's right edge
+   (that wrapper's own margin-left: auto is what does the pushing — this
+   element needs none). Same font treatment as .gamecard__status (the start
+   time) so the two read as one line of facts. Collapsed to zero width at
+   rest so an unhovered card reserves no gap for it, beyond the ordinary flex
+   gap either side; 06a-gamecard-parkart.css expands and fades it in together
+   with the backdrop photo it names — see that file for the hover-only
+   reasoning. */
+.gamecard__parkname {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-heading);
+  opacity: 0;
+}
+
 /* "Scores Unlocked" score + inning row (ADR-0026). Rendered below the matchup
    only while the day pass is on. No pill, no fill — the earlier kraft-amber
    bar read as one more badge, and kraft is the SEAL's material, exactly wrong

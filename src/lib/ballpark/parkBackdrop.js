@@ -21,15 +21,10 @@
 //     of Dreams card would quietly wear Wrigley.
 //   - a lean feed row carries no venue name at all.
 //
-// ATTRIBUTION. CC BY / CC BY-SA photos need a visible credit, and this surface
-// has nowhere to put a caption — a credit line under every card on the slate
-// would be louder than the effect it is captioning. So the credit rides in the
-// layer's `title`, the same fallback the Ballpark card already leans on for its
-// own hover and screen-reader text; the full linked credit still lives on that
-// card, one tap away, which is where the licence's "a URI or hyperlink to a
-// resource that includes the required information" is satisfied in full. An
-// owner-supplied photo has no bundled credit to inherit and gets whatever they
-// typed, or just the park's name.
+// ATTRIBUTION. This surface deliberately carries none — no title tooltip, no
+// caption. The full linked credit still lives on the team hub's Ballpark card,
+// which is where the licence's "a URI or hyperlink to a resource that includes
+// the required information" is satisfied in full for CC BY / CC BY-SA photos.
 
 // The venue name itself rides in on the slate's existing schedule request —
 // `fields=` is a flat allowlist and `name` was already on it for the team
@@ -58,7 +53,7 @@ export function parkBackdrop(venueName, t) {
   // is what keeps an uncatalogued park addressable at all.
   const name = ballparkFor(venueName)?.name || venueName
   const ids = fieldIds(venueKey(name))
-  const photo = resolvePhoto(name, { photo: t(ids.photo), credit: t(ids.credit), focus: t(ids.focus) })
+  const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo || !SAFE_CSS_URL.test(photo.src)) return null
   return {
     // Pre-wrapped as a CSS value: the caller drops it straight into a custom
@@ -66,6 +61,8 @@ export function parkBackdrop(venueName, t) {
     // safe rather than at a call site three files away.
     cssUrl: `url("${photo.src}")`,
     focus: photo.focus,
-    title: photo.creditText ? `${name} — ${photo.creditText}` : name,
+    // The bare park name, printed on the card itself (GameCard's
+    // .gamecard__parkname) rather than riding in a hover title.
+    name,
   }
 }

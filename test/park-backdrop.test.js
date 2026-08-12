@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 
 import { parkBackdrop } from '../src/lib/ballpark/parkBackdrop.js'
-import { fieldIds, venueKey } from '../src/lib/ballpark/ballparkArt.js'
+import { fieldIds, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
 
 // The copy reader the real caller passes (useCopy().t), as a plain map lookup
 // that answers '' for anything unset — exactly what the provider does for an id
@@ -14,7 +14,7 @@ test('a bundled park resolves to its photo, centred by default', () => {
   const park = parkBackdrop('Fenway Park', none)
   assert.equal(park.cssUrl, 'url("/ballparks/fenwaypark.jpg")')
   assert.equal(park.focus, '50% 50%')
-  assert.match(park.title, /^Fenway Park — Photo: /)
+  assert.equal(park.name, 'Fenway Park')
 })
 
 test('an alias venue name resolves to the one shared photo', () => {
@@ -43,21 +43,21 @@ test('an owner override wins over the bundled photo, with their own crop', () =>
   const t = reader({
     [ids.photo]: 'https://blob.example.com/wrigley.jpg',
     [ids.focus]: '50 20',
-    [ids.credit]: 'Gary Z.',
   })
   const park = parkBackdrop('Wrigley Field', t)
   assert.equal(park.cssUrl, 'url("https://blob.example.com/wrigley.jpg")')
   assert.equal(park.focus, '50% 20%')
-  assert.equal(park.title, 'Wrigley Field — Gary Z.')
+  assert.equal(park.name, 'Wrigley Field')
 })
 
-test('an override drops the bundled credit rather than inheriting it', () => {
+test('resolvePhoto drops the bundled credit rather than inheriting it on an override', () => {
   // Somebody else's name under somebody else's photograph is a worse failure
-  // than no credit at all — resolvePhoto's rule, pinned here too because this
-  // surface is the one that shows the credit with no link beside it.
-  const ids = fieldIds(venueKey('Wrigley Field'))
-  const t = reader({ [ids.photo]: 'https://blob.example.com/wrigley.jpg' })
-  assert.equal(parkBackdrop('Wrigley Field', t).title, 'Wrigley Field')
+  // than no credit at all. parkBackdrop no longer surfaces credit at all (no
+  // hover title on the slate card), but resolvePhoto's own rule still backs
+  // the Ballpark card's real, linked attribution — pinned here since this
+  // file already holds the fixtures for it.
+  const photo = resolvePhoto('Wrigley Field', { photo: 'https://blob.example.com/wrigley.jpg' })
+  assert.equal(photo.creditText, '')
 })
 
 test('a src that would not be safe in a CSS url() yields no backdrop', () => {
