@@ -330,6 +330,9 @@ export function GameView({ game, section, onSection }) {
           highlights={highlightsData}
           runExpectancy={runExpectancyData}
           workload={workloadData}
+          managers={managers.data}
+          uniforms={uniformBrief}
+          scorebookWeather={weather.data}
           spoilersOff={spoilersOff}
           passActive={passActive}
         />

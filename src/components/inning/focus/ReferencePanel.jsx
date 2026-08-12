@@ -7,6 +7,7 @@ import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
 import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
 import { RosterPanel } from '../RosterPanel.jsx'
+import { ExtrasFacts } from './ExtrasFacts.jsx'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
 // tables, the benches (ADR-0043). This replaces ReferenceRail.jsx, which
@@ -17,7 +18,8 @@ import { RosterPanel } from '../RosterPanel.jsx'
 // A hand-scorer needs exactly ONE of these at a time, and which one is
 // predictable from what they are doing — penciling the next name (LINEUPS),
 // decoding a 6-3 (FIELD), logging a pitching change (ARMS), checking who's left
-// to hit (BENCH). So it is tabbed, and only the selected section renders.
+// to hit or filling in a card header (EXTRAS). So it is tabbed, and only the
+// selected section renders.
 //
 //  • WIDE (>= 740px, WIDE_QUERY): a real reserved column the focus grid always
 //    keeps at --refrail-w (styles/focus/stage.css), open permanently. There is no
@@ -43,7 +45,7 @@ const TABS = [
   { key: 'lineups', label: 'Lineups' },
   { key: 'field', label: 'Field' },
   { key: 'arms', label: 'Arms' },
-  { key: 'bench', label: 'Bench' },
+  { key: 'extras', label: 'Extras' },
 ]
 
 export function ReferencePanel(props) {
@@ -54,7 +56,7 @@ export function ReferencePanel(props) {
   // whether to offer the tab at all, so a further-out half doesn't get two tabs
   // that open onto nothing).
   const showEntering = safeToShowEntering(revealedThrough, effInning, effHalf)
-  const tabs = showEntering ? TABS : TABS.filter((t) => t.key === 'arms' || t.key === 'bench')
+  const tabs = showEntering ? TABS : TABS.filter((t) => t.key === 'arms' || t.key === 'extras')
   const [tab, setTab] = useState(tabs[0].key)
   // The chosen tab can stop existing when the reader pages to a half they
   // haven't reached. Resolved on read rather than reset in an effect: there is
@@ -232,6 +234,9 @@ function Section({
   workload,
   workloadGameDate,
   stepAtBatIndex,
+  managers,
+  uniforms,
+  scorebookWeather,
 }) {
   if (tab === 'lineups' && showEntering) {
     return (
@@ -270,10 +275,18 @@ function Section({
       />
     )
   }
-  if (tab === 'bench') {
+  if (tab === 'extras') {
+    // EVERYTHING THAT ISN'T ON THE FIELD. Two things a scorer reaches for from
+    // the same standing start — who is left on each club, and the card-header
+    // facts (managers, uniforms, crew, date, park, first pitch, weather) —
+    // which between them were the only reason to leave the half being scored.
+    // The facts used to live on the lineup pages alone, two taps away and a
+    // lost place on the way back; the tab that already held "the rest of the
+    // club" is where they belong.
+    //
     // ONE LIST PER CLUB, OPEN. This tab used to render both clubs' whole
     // roster cards at RosterPanel's own page default — collapsed — so tapping
-    // BENCH answered with two shut drawers and nothing else, and the bench a
+    // it answered with two shut drawers and nothing else, and the bench a
     // scorer came for was three taps deep. Each club now opens on the single
     // list that half is actually about: the batting side's BENCH (who is left
     // to hit for) and the fielding side's BULLPEN (which arm is next). The
@@ -284,6 +297,10 @@ function Section({
     // Batting club first, deliberately: it is the half being scored. The
     // ordinary stacked page still shows away-then-home, both collapsed, both
     // whole — nothing here changes it (see RosterPanel's two new props).
+    //
+    // The benches lead and the facts follow, not the other way round: the
+    // lists answer a question the current half is asking, the facts answer one
+    // asked once at the top of the game and then only occasionally.
     const battingSide = effHalf === 'top' ? 'away' : 'home'
     const sides = [
       { side: battingSide, groups: ['bench'] },
@@ -307,6 +324,13 @@ function Section({
             groups={groups}
           />
         ))}
+        <ExtrasFacts
+          feed={feed}
+          meta={meta}
+          managers={managers}
+          uniforms={uniforms}
+          scorebookWeather={scorebookWeather}
+        />
       </>
     )
   }

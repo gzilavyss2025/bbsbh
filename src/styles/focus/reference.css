@@ -350,6 +350,36 @@
   text-align: center;
 }
 
+/* ------------------------------------- the EXTRAS tab's fill-in facts */
+/* ExtrasFacts.jsx — the clubs, the crew, and the game, in the lineup page's own
+   .factgrid / .umps__list chrome so the two surfaces print the same fact the
+   same way. Only the geometry changes here. */
+
+/* Each block's heading rides the panel's own flex gap instead of the 18px top
+   margin .section__title carries on a full-width page, which stacked on top of
+   that gap and opened a hole between the benches and the facts under them. */
+.refextras .section__title {
+  margin: 0 0 var(--space-2);
+}
+
+/* ONE FACT PER ROW. The grid is two columns on a lineup page that is the width
+   of the phone; here it is inside a 328px rail (--refrail-w) minus the panel's
+   own padding, which leaves each of two cells about 150px. A value is set at
+   --fs-ui semibold — "SAT, AUGUST 9, 2026" and a full weather reading both wrap
+   to three lines in that, and a wrapped value in a hairline-ruled cell reads as
+   a broken card. Full-width rows cost vertical space the panel already scrolls
+   for and cost no legibility at all.
+
+   The UMPIRE list is deliberately left on its own two-column grid: a role code
+   and a surname fit a 150px cell with room over, which is the case this rule
+   exists to catch and that one isn't. */
+.refextras__grid {
+  grid-template-columns: 1fr;
+  /* .factgrid's own 18px bottom margin would land on top of the panel's flex
+     gap, same double-spacing as the heading above. */
+  margin: 0;
+}
+
 /* The sheet — same .scrim/.sheet chrome as HighlightSheet/StrikeZone, portalled
    to <body> (ModalPortal) because .turnscene's `isolation: isolate` would
    otherwise trap it under the floating bar. */

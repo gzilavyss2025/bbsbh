@@ -79,11 +79,16 @@ export function HalfInning({
   // why PrePitchChanges drops one from the staged list; the live override was
   // the one piece pulling the other way.
   //
-  // FOCUS MODE DOES NOT SHOW THIS CARD AT ALL. The ordinary stacked page still
-  // pins it at the top of the half for as long as the half is on screen (a
-  // normal section header, exactly as described above). Focus mode does not,
-  // and the reason is that up there the card is the THIRD naming of the same
-  // man in the same eyeful:
+  // IN FOCUS MODE IT IS AN ANNOUNCEMENT, NOT A HEADER. The ordinary stacked
+  // page pins it at the top of the half for as long as the half is on screen (a
+  // normal section header, exactly as described above). Focus mode shows it in
+  // ONE state — a half that opens with an arm that just took the mound
+  // (`isFreshPitcher`), before the reader has unveiled anything of it — and
+  // drops it the instant the first at-bat opens. Two things decide that, and
+  // they pull in opposite directions:
+  //
+  // WHY IT IS NOT THE HEADER HERE. Once an at-bat is up, the card is the THIRD
+  // naming of the same man in the same eyeful:
   //
   //   1. the console band's pitcher row — "DOBBINS  P: 0"
   //   2. this card — a full kraft panel, "NOW PITCHING FOR THE CARDINALS /
@@ -92,22 +97,37 @@ export function HalfInning({
   //      and owns the matchup identity outright — his portrait beside the
   //      batter's, both named (ADR-0043's "the header now owns the identity").
   //
-  // This used to narrow to `focusCursor === 0` on the argument that the banner
-  // should not "come back" above every card the reader steps to. That was the
+  // It used to narrow to `focusCursor === 0` on the argument that the banner
+  // should not come back above every card the reader steps to. That was the
   // right instinct applied one step short: cursor 0 IS the half's first at-bat,
-  // the frame where the hero has already taken the identity over, and it is
-  // also the landing frame the reader sees every single half. So the card was
-  // at its most redundant in the one state it still appeared in, and it is the
-  // single biggest block of height on a phone's landing frame.
+  // the frame where the hero has already taken the identity over. So the card
+  // was at its most redundant in the one state it appeared in — which is why
+  // `!startedRevealing` below, and not a cursor, is the gate. It is the exact
+  // gate `PrePitchChanges` two blocks down already carries, and for the same
+  // reason: both stage a half nothing has been unveiled of yet, and both step
+  // aside for the at-bat rather than sitting above it. This card is now simply
+  // the pitching-change member of that staged set, which is where the division
+  // of labour between the two already said it belonged.
   //
-  // WHAT PROTECTS THE READER INSTEAD IS THE RULE THIS HEADER WAS WRITTEN FROM.
-  // A mid-half change belongs in the feed, and already renders there as this
-  // same PitcherNotice at the moment it happens (PlayByPlay's
-  // `pitching_substitution` branch) — so the arm that CHANGES still announces
-  // itself, in focus mode as everywhere else. What is dropped here is only the
-  // restatement of an arm nothing has happened to. The header/feed division is
-  // intact; focus mode simply has two other places carrying the header half.
-  const showNowPitching = !focusOne
+  // WHY IT IS NOT DROPPED OUTRIGHT EITHER, which is where this landed first.
+  // The argument for dropping it was that a mid-half change belongs in the feed
+  // and already renders there as this same PitcherNotice (PlayByPlay's
+  // `pitching_substitution` branch), so the arm that CHANGES still announces
+  // itself. That is true of a change made MID-half and false of one made
+  // BETWEEN halves: `computeHalfInningFeed` drops a pre-pitch change from the
+  // feed (its `anyPitchInHalf` guard) and `PrePitchChanges` drops it from the
+  // staged list, both for the same reason — this card already names him. With
+  // this card gone in focus mode, all three were silent, and the most common
+  // pitching change in baseball, the one made between innings, announced itself
+  // NOWHERE. The reader met the new arm as a different face in the hero, after
+  // the pitch they were about to write down. The header/feed division is intact;
+  // this is the one thing that division makes THIS card solely responsible for.
+  //
+  // `isFreshPitcher` (not "was there a substitution") is the test on purpose: it
+  // is the app's existing answer to "did an arm just take the mound", already
+  // driving the label two blocks down, so the card and its own words cannot
+  // disagree. It is true of the game's first half for each club too — a starter
+  // taking the mound is exactly the moment "Now pitching for..." is for.
   const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
@@ -121,6 +141,10 @@ export function HalfInning({
   // something that flips as you step.
   const isFreshPitcher = selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitching?.id)
   const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
+  // Header on the stacked page, announcement in focus mode — see the long note
+  // above `nowPitching`. Both still sit behind the caller's own
+  // `revealed || isNextToReveal` gate at the render site.
+  const showNowPitching = !focusOne || (isFreshPitcher && !startedRevealing)
 
   // How many pitches he'd thrown in THIS GAME entering this half — clamped to
   // halfIndex(inning, half) - 1 (through the previous half only), which is
@@ -312,7 +336,10 @@ export function HalfInning({
           </h3>
         )}
 
-        {/* Persistent Now Pitching card — see the comment above nowPitching. */}
+        {/* The Now Pitching card: a persistent header on the stacked page, and
+            in focus mode a one-state announcement of an arm that just took the
+            mound, standing where the reader is about to unveil him. See the
+            comment above `nowPitching` for both halves of that. */}
         {(revealed || isNextToReveal) && nowPitching && showNowPitching && (
           <PitcherNotice
             pitcher={nowPitching}
