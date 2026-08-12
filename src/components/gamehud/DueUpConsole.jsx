@@ -8,8 +8,9 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // batters scheduled to come up in the half currently being scored, filling
 // the width `.consolebar` frees once the scorebug narrows back to its old
 // dock width (24-floating-nav-and-hud.css). Hidden below the wide breakpoint
-// itself (styles/focus/reference.css) — the scorebug needs the row's full
-// width there for its own bumped-up mobile sizing instead.
+// itself (styles/focus/console.css, beside the `.consolebar` placement it
+// shares a row with) — the scorebug needs the row's full width there for its
+// own bumped-up mobile sizing instead.
 //
 // SPOILER FOOTING: entirely selectDueUpDuring's (api/dueup.js) — a mid-half
 // pinch-hitter never surfaces here ahead of his own notice card in the feed,

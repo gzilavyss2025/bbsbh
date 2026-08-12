@@ -258,7 +258,7 @@
    any more): teams+runs+inning+bases sits UNDER who's up and who's on the
    mound, not beside it. On a desktop-width stage that keeps the band close to
    its old ~246px dock width instead of stretching it into a wide horizontal
-   strip — .consolebar (styles/focus/stage.css) is what gives the freed row
+   strip — .consolebar (at the top of THIS file) is what gives the freed row
    width to the due-up-next card beside it. On a phone the band still spans
    the full stage (there is no sibling card to share the row with there), so
    its own @media block below scales the card's content up to fill it, rather
@@ -341,17 +341,29 @@
   }
 }
 
-/* NOTHING SCALES UP ON A PHONE. The band used to answer "it has the whole
-   width to itself down here" with bigger type, a 92px strip and larger
+/* NOTHING ON A PHONE MAKES THE BAND TALLER. It used to answer "it has the
+   whole width to itself down here" with bigger type, a 92px strip and larger
    pips/marks, on the argument that the dock's compact card looked stranded in
    a full-width bar. What that actually bought was ~50px of the one viewport
    with the least to spare, spent on a header, before the at-bat card the
    reader is working from. The band keeps the dock's own sizing at every width
-   now — full width, dock scale — so `.gamehud--console` needs no phone block
-   at all. The team marks still get their own boost from the bare
-   `.gamehud__strip` rule (24-floating-nav-and-hud.css), which both placements
-   share and which costs no height.
+   now — full width, dock scale — and `--console-hud-h`'s phone value followed
+   the measurement down, 167px -> 126px.
 
-   If a phone ever needs its own numbers again, measure them against the stage
-   below the band, not against the width beside it. */
+   THAT IS A RULE ABOUT HEIGHT, NOT A CLAIM THAT NO PHONE BLOCK EXISTS. This
+   comment used to end "so `.gamehud--console` needs no phone block at all",
+   and the file it sends you to contradicts it outright:
+   24-floating-nav-and-hud.css carries one, taking the diamond to 56px and the
+   out dots to 13px below 740. The PROSE was the wrong half. That block is
+   correct and stays — a phone's band spans the whole stage, so its base/out
+   block ends up with roughly twice the width the 246px dock gives it, and
+   every pixel of that growth is spent INSIDE `.gamehud__strip`'s unchanged
+   67px min-height. It makes the part of the strip that reads at a glance
+   bigger without adding a pixel of band. The team marks are boosted the same
+   way and for the same reason, by the bare `.gamehud__strip` rule in that same
+   file, which both placements share and which also costs no height.
+
+   So the test for a new phone rule here is not "does one already exist" but
+   "does it move --console-hud-h". If a phone ever needs its own numbers again,
+   measure them against the stage below the band, not the width beside it. */
 

@@ -301,8 +301,18 @@ export function HalfInning({
             pre-pitch list, and it STAYS above the results once revealed (it
             reads as staging either way). Gated to a reached half, same contract
             as the entering cards below; the note that reads tonight's score
-            gates itself further on revealedThrough inside the builder. */}
-        {(revealed || isNextToReveal) && (
+            gates itself further on revealedThrough inside the builder.
+
+            NOT IN FOCUS MODE, where it MOVED rather than went away: it renders
+            in the Arms tab instead, merged into MarginNotes' ranked list
+            (ReferencePanel's Section). This used to be a `display: none` in
+            styles/focus/stage.css, which meant `buildPreHalfCallouts` ran
+            TWICE on every step — once here for a strip nobody could see, once
+            there for the tab that actually shows it. Same gate, moved to where
+            it costs nothing. Visibility only either way: the builder's own
+            revealedThrough gate is untouched and still the thing standing
+            between this and a score (see its header). */}
+        {(revealed || isNextToReveal) && !focusOne && (
           <PreHalfCallouts
             feed={feed}
             bundle={callouts}
@@ -341,8 +351,17 @@ export function HalfInning({
             revealed yet — the moment stepping starts (startedRevealing), it
             moves BELOW into its own standalone card instead (see the bottom
             of this component), matching the fully-revealed layout from the
-            first at-bat tap on, not just once the half is fully committed. */}
-        {!startedRevealing && isNextToReveal && (
+            first at-bat tap on, not just once the half is fully committed.
+
+            Neither placement exists in focus mode — the same lineups and
+            defense are the LINEUPS and FIELD tabs of the reference panel
+            there, one tap away and never both at once. Formerly a
+            `display: none` on `.half__entering`/`.halfentering`
+            (styles/focus/stage.css), which still paid for lineupEntering and
+            defenseEntering walking the whole game's plays, twice, on every
+            step. The selectors keep their own ADR-0010 reveal gate regardless
+            of who calls them; this only decides whether anyone does. */}
+        {!startedRevealing && isNextToReveal && !focusOne && (
           <div className="half__entering">{enteringReference}</div>
         )}
 
@@ -394,8 +413,11 @@ export function HalfInning({
           card rather than waiting for the half to be fully committed —
           hidden at the wide breakpoint, where the right-column reference band
           (.innings__ref-lineups / .innings__ref-defense) already covers this
-          same content. */}
-      {startedRevealing && <section className="half halfentering">{enteringReference}</section>}
+          same content — and absent outright in focus mode, where the reference
+          panel's own tabs cover it (see the staged copy above). */}
+      {startedRevealing && !focusOne && (
+        <section className="half halfentering">{enteringReference}</section>
+      )}
     </>
   )
 }

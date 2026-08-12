@@ -124,70 +124,90 @@ export const InningPage = memo(function InningPage({
       </div>
 
       {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
-          beside the win-probability chart. */}
-      <div className="innings__row2">
-        {/* Left column: the stat card, then a preview of who's due up when
-            the OTHER team's next half starts — dueup.js's own gate keeps
-            this null until that half is actually the user's next one to
-            reveal (see DueUpNextCard's header comment), so it appears right
-            as the "NEXT >" nav does. Same display:contents-on-phone trick
-            as .innings__row2-right below: this wrapper only exists as a
-            layout box at the wide breakpoint. */}
-        <div className="innings__row2-left">
-          <StatBox
-            className="innings__statbox"
-            placeholder
-            feed={feed}
-            inning={inning}
-            half={half}
-            battingSide={battingSide}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            awayFranchise={meta.away.franchiseName || meta.away.abbreviation}
-            homeFranchise={meta.home.franchiseName || meta.home.abbreviation}
-            getDerived={getDerived}
-            revealed={revealed}
-            runExpectancy={runExpectancy}
-          />
-          <DueUpNextCard
-            feed={feed}
-            inning={inning}
-            half={half}
-            revealedThrough={revealedThrough}
-            awayId={meta.away.id}
-            homeId={meta.home.id}
-            awayName={meta.away.clubName}
-            homeName={meta.home.clubName}
-          />
+          beside the win-probability chart.
+
+          NOT BUILT AT ALL IN FOCUS MODE. This whole row used to render on every
+          step and then be painted out by `.innings--focus .innings__row2 {
+          display: none }` (styles/focus/stage.css) — so StatBox (580+ lines),
+          AbsCard, DueUpNextCard and WinProbChart all rendered forty times a
+          half on the app's hottest screen to produce pixels nobody ever saw.
+          The gate is now this one, on the SAME value that puts `.innings--focus`
+          on the wrapper (InningViewer hands both `focusOne` and the class from
+          `focus.focused`), so it hides exactly what the CSS hid, at exactly the
+          same moments, including on the page-turn preview instance.
+
+          ADR-0043's "What this does NOT change" still holds and is worth
+          restating, because this is the rule it was written about: the row was
+          only ever hidden for VISIBILITY. It carries no seal, no caller-gated
+          pre-pitch selector (ADR-0010) and no fetch, so declining to render it
+          moves no spoiler boundary — the same values reach the same components
+          under the same `revealed` prop the moment focus mode ends. What
+          changes is only whether the work is done to no purpose. */}
+      {!focusOne && (
+        <div className="innings__row2">
+          {/* Left column: the stat card, then a preview of who's due up when
+              the OTHER team's next half starts — dueup.js's own gate keeps
+              this null until that half is actually the user's next one to
+              reveal (see DueUpNextCard's header comment), so it appears right
+              as the "NEXT >" nav does. Same display:contents-on-phone trick
+              as .innings__row2-right below: this wrapper only exists as a
+              layout box at the wide breakpoint. */}
+          <div className="innings__row2-left">
+            <StatBox
+              className="innings__statbox"
+              placeholder
+              feed={feed}
+              inning={inning}
+              half={half}
+              battingSide={battingSide}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+              awayFranchise={meta.away.franchiseName || meta.away.abbreviation}
+              homeFranchise={meta.home.franchiseName || meta.home.abbreviation}
+              getDerived={getDerived}
+              revealed={revealed}
+              runExpectancy={runExpectancy}
+            />
+            <DueUpNextCard
+              feed={feed}
+              inning={inning}
+              half={half}
+              revealedThrough={revealedThrough}
+              awayId={meta.away.id}
+              homeId={meta.home.id}
+              awayName={meta.away.clubName}
+              homeName={meta.home.clubName}
+            />
+          </div>
+          {/* Wide layout only: ABS Challenges moves here, above the chart,
+              instead of trailing the pitch-stat grid on the left — see
+              AbsCard's own header comment. On a phone this wrapper is
+              display:contents (index.css) so WinProbChart falls back into
+              the same single flex column as everything else, with the
+              phone's own ABS copy staying inline inside StatBox. */}
+          <div className="innings__row2-right">
+            <AbsCard
+              feed={feed}
+              inning={inning}
+              half={half}
+              revealed={revealed}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+            />
+            <WinProbChart
+              points={winProbPoints}
+              bigPlays={winProbBigPlays}
+              awayAbbr={meta.away.abbreviation}
+              homeAbbr={meta.home.abbreviation}
+              awayId={meta.away.id}
+              homeId={meta.home.id}
+              awayTreatment={winProbTreatment?.away}
+              homeTreatment={winProbTreatment?.home}
+              partial
+            />
+          </div>
         </div>
-        {/* Wide layout only: ABS Challenges moves here, above the chart,
-            instead of trailing the pitch-stat grid on the left — see
-            AbsCard's own header comment. On a phone this wrapper is
-            display:contents (index.css) so WinProbChart falls back into
-            the same single flex column as everything else, with the
-            phone's own ABS copy staying inline inside StatBox. */}
-        <div className="innings__row2-right">
-          <AbsCard
-            feed={feed}
-            inning={inning}
-            half={half}
-            revealed={revealed}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-          />
-          <WinProbChart
-            points={winProbPoints}
-            bigPlays={winProbBigPlays}
-            awayAbbr={meta.away.abbreviation}
-            homeAbbr={meta.home.abbreviation}
-            awayId={meta.away.id}
-            homeId={meta.home.id}
-            awayTreatment={winProbTreatment?.away}
-            homeTreatment={winProbTreatment?.home}
-            partial
-          />
-        </div>
-      </div>
+      )}
     </>
   )
 })

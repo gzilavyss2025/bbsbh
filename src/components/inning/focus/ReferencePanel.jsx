@@ -250,8 +250,11 @@ function Section({
   // legitimately has nothing — which as bare emptiness read as a broken panel
   // holding a reserved column open for no reason. Say so instead.
   //
-  // The pre-half strip's own notes land here too — focus mode folds the strip
-  // out of the reading pane (styles/focus/stage.css) and this is where they go.
+  // The pre-half strip's own notes land here too — HalfInning declines to
+  // render the strip in focus mode (its own `focusOne` gate, which used to be
+  // a `display: none` in styles/focus/stage.css) and this is where they go.
+  // That makes THIS the only `buildPreHalfCallouts` call on the screen while
+  // focus mode is on, rather than the second of two.
   // SPOILER FOOTING IS THE STRIP'S OWN, UNCHANGED. `buildPreHalfCallouts` gates
   // every score-reading family on `revealedThrough` INSIDE itself (see that
   // file's header — the gate lives there precisely so no caller can skip it),
