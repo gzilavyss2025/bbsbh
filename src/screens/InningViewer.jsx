@@ -127,6 +127,12 @@ export function InningViewer({
   highlights,
   runExpectancy,
   workload,
+  // Staging facts, resolved once by GameView and shared with the box score and
+  // both lineup pages. Used only by focus mode's EXTRAS tab (ExtrasFacts.jsx)
+  // — all three are spoiler-free, none is fetched on this screen's account.
+  managers,
+  uniforms,
+  scorebookWeather,
   spoilersOff = false,
   passActive = false,
 }) {
@@ -748,6 +754,9 @@ export function InningViewer({
     workload,
     workloadGameDate,
     stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
+    managers,
+    uniforms,
+    scorebookWeather,
   }
 
   return (
