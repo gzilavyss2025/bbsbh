@@ -395,7 +395,7 @@
 
 .bpfact__label {
   margin: 0;
-  font-family: var(--font-condensed, var(--font-mono));
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-wide);
   text-transform: uppercase;
@@ -452,7 +452,7 @@
 
 .rankpost__pos {
   display: block;
-  font-family: var(--font-condensed, var(--font-mono));
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-wide);
   color: var(--text-caption);

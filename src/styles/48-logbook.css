@@ -145,7 +145,7 @@
 .logbook__note {
   margin: 0;
   max-width: 22ch;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);
   color: var(--text-muted);

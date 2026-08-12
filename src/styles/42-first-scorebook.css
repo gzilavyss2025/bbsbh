@@ -277,7 +277,7 @@
   margin-top: var(--space-3);
   padding-top: var(--space-2);
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-title);
   color: var(--text-caption);
@@ -423,7 +423,7 @@
 }
 .scorebookstory__nuggetstat small {
   margin-top: 4px;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
@@ -485,7 +485,7 @@
   text-align: left;
 }
 .scorebookstory__ledgerrow:hover { background: var(--surface-card); }
-.scorebookstory__ledgerrow > span { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--text-caption); }
+.scorebookstory__ledgerrow > span { font-family: var(--font-body); font-size: var(--fs-caption); color: var(--text-caption); }
 .scorebookstory__ledgerrow > span:nth-child(3), .scorebookstory__ledgerrow > span:nth-child(5) { display: flex; align-items: center; gap: 6px; color: var(--text-body); font-weight: var(--w-semibold); }
 .scorebookstory__ledgerrow strong { text-align: center; font-family: var(--font-mono); font-size: var(--fs-title-sm); color: var(--text-heading); }
 .scorebookstory__ledgerrow > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }

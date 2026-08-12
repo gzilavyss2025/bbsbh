@@ -96,7 +96,7 @@
 .logbookstats__prose {
   margin: var(--space-2) 0 0;
   max-width: 46ch;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-prose);
   color: var(--text-muted);

@@ -1,20 +1,21 @@
 /* ============================================================
    TYPOGRAPHY — Scorekeeper
-   One cohesive family (IBM Plex) across three roles:
-   - Plex Sans Condensed → athletic stat/section headers (uppercase, tracked)
-   - Plex Sans           → UI + body
-   - Plex Mono           → numbers, the ledger/scorebook figures
-   Plus one outlier for legibility:
-   - Newsreader → sentence-like copy that must read at small sizes in all
-     caps (play-by-play descriptions). A serif gives the play descriptions a
-     "box-score notes" editorial feel, distinct from the sans/mono elsewhere.
+   Four roles, one family each (see tokens/fonts.css for the @font-face
+   rules and why each ships as a single static weight):
+   - Barlow Condensed → athletic stat/section headers (uppercase, tracked)
+   - Source Sans 3     → UI + body
+   - JetBrains Mono    → numbers, the ledger/scorebook figures
+   - Lora              → sentence-like copy that must read at small sizes in
+     all caps (play-by-play descriptions). A serif gives the play
+     descriptions a "box-score notes" editorial feel, distinct from the
+     sans/mono elsewhere.
    ============================================================ */
 
 :root {
-  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
-  --font-body:    "IBM Plex Sans", system-ui, sans-serif;
-  --font-mono:    "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
-  --font-read:    "Newsreader", Georgia, "Times New Roman", serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-body:    "Source Sans 3", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-read:    "Lora", Georgia, "Times New Roman", serif;
 
   /* Weights — three deliberate levels; 500 previously blurred the boundary
      between ordinary copy and emphasized UI. */

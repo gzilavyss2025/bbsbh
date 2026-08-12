@@ -286,7 +286,7 @@
   margin: 0;
   padding: 7px 13px 9px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);
@@ -295,7 +295,7 @@
 .umptend__prov {
   padding: 9px 13px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   letter-spacing: var(--ls-num);
   color: var(--text-caption);

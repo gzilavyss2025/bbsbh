@@ -39,7 +39,7 @@
   color: var(--text-heading);
 }
 .standings-ctrl__detail {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
   color: var(--text-caption);
@@ -190,7 +190,7 @@
 }
 
 .standings-daynav__label {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);

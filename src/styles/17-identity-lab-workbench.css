@@ -876,7 +876,7 @@
 .idlab__shelfworn {
   max-width: 72px;
   text-align: center;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   line-height: var(--lh-snug);
   color: var(--accent-positive);

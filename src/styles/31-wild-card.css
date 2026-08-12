@@ -516,7 +516,7 @@
   color: var(--accent-negative);
 }
 .radarpill__note-text {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-body);

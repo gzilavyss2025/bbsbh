@@ -111,7 +111,7 @@
 }
 .milestonewatch-page__stat {
   flex: 1 0 100%;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-weight: var(--w-bold);
   font-size: var(--fs-ui);
   color: var(--text-heading);

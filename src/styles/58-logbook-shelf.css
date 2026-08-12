@@ -47,7 +47,7 @@
 
 .shelf__intro {
   margin: 0 0 var(--space-4);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-prose);
   color: var(--text-muted);

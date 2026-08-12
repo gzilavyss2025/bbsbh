@@ -664,7 +664,7 @@
    is the only place his name still appears. */
 .sgh-sub {
   display: none;
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   color: var(--text-caption);
   margin-top: 2px;
