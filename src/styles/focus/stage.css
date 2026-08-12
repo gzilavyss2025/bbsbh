@@ -8,27 +8,23 @@
    forty times a half-hour, so everything here is arranged to keep the at-bat
    and the Next button in the same two places for three hours.
 
-   THIS FILE holds the page shell: what folds away, the grid, the console band
-   (placement AND appearance), and the action bar. Its two siblings are
+   THIS FILE holds the page SHELL: what folds away, the two-column grid, the
+   phone reading order, and the action bar. Its three siblings are
+   focus/console.css (the scorebug band and the one card beside it),
    focus/atbat.css (the hero card) and focus/reference.css (the trail and the
-   reference panel). Split three ways because one file outgrew the 600-line cap
-   and src/styles is a flat directory at its own ratchet, so subdividing —
-   ADR-0038's own answer — beat adding a fourth numbered sibling.
+   reference panel). Split because one file outgrew the 600-line cap and
+   src/styles is a flat directory at its own ratchet, so subdividing —
+   ADR-0038's own answer — beat adding numbered siblings. It happened twice:
+   three ways first, then console.css when the finished half's tally joined the
+   band. The grid rules stayed HERE, console.css's header says why.
 
-   All three import LAST in src/index.css, so their rules beat
+   All four import LAST in src/index.css, so their rules beat
    25-wide-layout.css's wide-breakpoint layout on cascade ORDER. That is why the
    overrides here can be plain single-class selectors instead of specificity
    ladders, and why any rule moved OUT of this directory must be checked against
-   what 25 declares.
-
-   The band's appearance briefly lived in 24-floating-nav-and-hud.css with the
-   rest of the .gamehud rules — legal, since nothing after 24 styles .gamehud —
-   and came back here when 24 crossed the 600-line cap. Importing last, this
-   file can hold it either way, and holding it beside the .consolebar placement
-   it depends on is the better of the two: the band's width, its min-height and
-   the grid cell it sits in are one decision, and they were being made in two
-   files. What stays in 24 is everything BOTH placements share — the dock, the
-   card itself, the strip, the marks. */
+   what 25 declares. What stays in 24-floating-nav-and-hud.css is everything
+   BOTH scorebug placements share — the dock, the card itself, the strip, the
+   marks. */
 
 /* ------------------------------------------------------------- what folds */
 /* The stat/WPA row, both inline copies of the entering lineups/defense, and the
@@ -37,14 +33,15 @@
    the half CLOSES.
 
    That used to say "…at which point the half commits and focus mode ends
-   anyway", which `held` made untrue (issue #660) — focus mode outlives the
-   commit, holding the last at-bat on screen until the reader taps Summary.
-   Hiding row2 through that window is now the deliberate half of the same
-   arrangement, not an accident of it: the tap that ends a half is a play the
-   reader is still writing down, and Summary is the one surface that answers
-   "how did the half end up" — the whole half's cards, its totals, its stat
-   card. Every one of those arrives together, one tap away, rather than
-   arriving on top of the play being charted.
+   anyway", which was untrue (issue #660) — focus mode outlives the commit,
+   holding the last at-bat on screen until the reader moves off the half. Hiding
+   row2 through that window is the deliberate half of the same arrangement, not
+   an accident of it: the tap that ends a half is a play the reader is still
+   writing down, and a full stat card arriving on top of it is not what they
+   asked for. What they DO want out of that card — the half's own line and its
+   pitch analysis — comes to them instead, in the console band's own tally
+   (.halftally, below), with nothing to tap. The rest of it (ABS, the Statcast
+   superlatives, the game-wide rolling totals) is in the box score.
 
    The callout strip folds for a different reason — it MOVED rather than went
    away. "The Reds are 9-13 in his starts this season" is a margin note in the
@@ -94,235 +91,6 @@
 
 .innings--focus .innings__grid {
   gap: var(--space-3);
-}
-
-/* Wraps the scorebug + DueUpConsole (InningViewer.jsx) as one unit — the
-   anchoring that used to live on `.gamehud--console` itself moved here once
-   the band stopped stretching to fill the row on its own
-   (24-floating-nav-and-hud.css). Below the wide breakpoint DueUpConsole
-   renders null, so this is a one-child row and the scorebug alone fills it,
-   same as before this wrapper existed.
-
-   NEVER STICKY, at any width. The band was pinned to the top of a phone's
-   viewport so bases/outs/score stayed in view while the reader paged down to
-   the trail; in use it read as a bar following the reader down the page and
-   spending the top of every scroll, the same complaint that had already taken
-   the pin off desktop. It scrolls away with the rest of the console on a phone
-   too now — the reference for a half you are still scoring is the at-bat card
-   right under it, not a permanently parked strip. The wide block below keeps
-   its `position: static` as a plain no-op restatement of the grid placement it
-   belongs with. */
-/* align-items: flex-start, not stretch — the due-up cards have their own
-   fixed-height photo (below) and must not be force-stretched to whatever
-   height the scorebug's live content happens to need (its pitcher row and
-   pitch count make that vary run to run). Stretching this far up was what
-   left a gap UNDER each photo: the card grew to match the scorebug, the
-   photo did not. flex-start instead leaves at most some open air beside a
-   taller scorebug — never inside a card. */
-.consolebar {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-3);
-}
-
-/* ------------------------------------------- the phone stage's reading order */
-/* ADR-0043 puts the reference chips "a chip row under the trail". On a phone
-   they were not: `.innings__stage` is `display: contents` here, so its children
-   (the at-bat, the trail, the running line) and ReferencePanel's own `.refbar`
-   all become items of the SAME .innings__grid flex column — and .refbar, a
-   later sibling of the stage in InningViewer's markup, therefore landed under
-   the running line, at the very bottom of the page.
-
-   Measured at 390x844, two at-bats in, scrolled to the top: the action bar
-   started at 780, the running line at 784 and the chip row at 910, against a
-   844 viewport. So BOTH of the two surfaces ADR-0043 kept deliberately — the
-   chips, and the running line whose cells are the only half-inning navigator
-   (`.inningnav` moves +-1 only) — sat under the bar or past the fold, and the
-   reader had to scroll to find either.
-
-   Two orders fix it without touching the markup, which is the same idiom
-   12-sealbox.css already uses to order this column on a phone. Everything else
-   here keeps the default 0, so the band and the at-bat stay where they are;
-   the chips move up under the trail, and the running line becomes the LAST
-   item — which is what puts it inside `.innings--focus`'s own bottom padding
-   and clear of the bar rather than behind it. */
-@media (max-width: 739.98px) {
-  .innings--focus .refbar {
-    order: 1;
-  }
-
-  .innings--focus .rolling {
-    order: 2;
-  }
-}
-
-/* ---------------------------------------------------------- due-up console */
-/* The next-3-batters card beside the narrowed scorebug (DueUpConsole.jsx) —
-   desktop only; a phone gives that row's whole width back to the scorebug's
-   own bumped-up sizing instead (24-floating-nav-and-hud.css). Same headshot-
-   fills-the-column, text-beside-it shape as ReferencePanel's other cards, laid
-   out as its own small grid rather than UpNextBatters/DueUpNextCard's
-   headshot-over-name column stack — those sit UNDER a lineup card with room to
-   spare; this one has to fit beside a 264px scorebug on a stage that can be as
-   narrow as ~478px (stage.css's own --refrail-w comment). */
-.dueupconsole {
-  display: none;
-}
-
-@media (min-width: 740px) {
-  .dueupconsole {
-    display: flex;
-    flex: 1 1 auto;
-    min-width: 0;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
-  }
-
-  /* One "due up" on screen at a time. Before the half's first at-bat both
-     would show it: this card in the console row and HalfInning's own `.upnext`
-     strip in the stage under it, naming the same three men from the same
-     selector. The console card is the one that stays as the reader steps, so
-     the strip is what stands down.
-
-     `:has()`, not a flag threaded down through HalfInning — the condition is
-     literally "did the console card render", which the DOM already answers,
-     and the card can decline on its own (no lineup posted, a MiLB gap) in
-     which case the strip is still the reader's only copy and must survive.
-     Scoped INSIDE this media block on purpose: below it `.dueupconsole` is
-     still in the DOM, only `display: none`, so an unscoped `:has()` would
-     match on a phone and hide the strip with nothing to replace it. */
-  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .upnext {
-    display: none;
-  }
-
-  .dueupconsole__col {
-    display: flex;
-    align-items: stretch;
-    gap: var(--space-2);
-    flex: 1 1 0;
-    min-width: 0;
-    background: var(--surface-card);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-  }
-
-  /* Fixed, not stretched to the row: `height: 100%`/`auto` paired with
-     `aspect-ratio` here is circular — with nothing else in the column
-     pinning a size, the browser falls back to sizing the box off the raw
-     photo's own large intrinsic dimensions instead of the frame it's meant
-     to fill, ballooning the whole card. `--console-hud-h` (the scorebug
-     band's own target height, tokens/layout.css) anchors it to a fixed
-     number instead — matched by `.consolebar`'s own `align-items: flex-start`
-     above, so THIS card's height, not the scorebug's live (and variable)
-     one, is what the column and the text beside it actually stand on. */
-  .dueupconsole__shot {
-    width: auto;
-    height: calc(var(--console-hud-h) - 2 * var(--space-2));
-    aspect-ratio: 3 / 4;
-    border-radius: 0;
-    border: none;
-  }
-
-  .dueupconsole__info {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0;
-    padding: var(--space-1) var(--space-2) var(--space-1) 0;
-  }
-
-  .dueupconsole__order {
-    font-family: var(--font-mono);
-    font-size: var(--fs-compact);
-    color: var(--text-muted);
-  }
-
-  /* First name over last, last name the bigger of the two — the same weight
-     hierarchy a scorecard gives a surname over a given name.
-
-     Every role here is one step up from where it started. The first pass sized
-     these against the dock's caption scale, which reads as a footnote: these
-     are the next three names the scorer is about to write down, on a card
-     ~130px wide once the portrait takes its share — there is room, and 11px
-     was not using it. The surname keeps its own ellipsis, so a long one still
-     clips rather than reflowing the row. */
-  .dueupconsole__name {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .dueupconsole__first {
-    display: block;
-    font-size: var(--fs-compact);
-    font-weight: var(--w-regular);
-    color: var(--text-caption);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dueupconsole__last {
-    display: block;
-    font-size: var(--fs-body);
-    font-weight: var(--w-bold);
-    color: var(--text-heading);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .dueupconsole__line {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-    font-size: var(--fs-small);
-    color: var(--text-muted);
-  }
-}
-
-/* ------------------------------------------------ the finished half's tally */
-/* HalfTally.jsx (via ConsoleBand.jsx) — what fills the console row once the
-   half is over, where DueUpConsole has nothing left to say. Same slot, same
-   rules as that card: desktop only, `flex: 1 1 auto` beside the band's
-   fixed 264px. A phone gives the row's whole width to the band and has the
-   least vertical room to spare, so it gets the numbers from Summary instead.
-
-   Eight cells in two rows of four, sized against the ~570px this slot has at
-   iPad-portrait width: the half's own line (R/H/E/LOB) over its pitch analysis
-   (pitches, whiffs, fouls, first-pitch strikes). The full card's own 4-column
-   .statline (12-sealbox.css) is already the right shape — only the type steps
-   down, because these cells are captioning a band rather than heading a card. */
-.halftally {
-  display: none;
-}
-
-@media (min-width: 740px) {
-  .halftally {
-    display: block;
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-  }
-
-  /* The title keeps .statbox__title's own navy-under-a-kraft-rule masthead
-     (12-sealbox.css) — deliberately, because that is the SAME signature the
-     band beside it and .half__title below it already wear (ADR-0043's own
-     argument for the band's ground). It names the half rather than the full
-     card's "Insights", so the two rows of numbers cannot be read as the
-     game's. Nothing here changes its colour: --text-on-ink on navy is the
-     documented pairing check-contrast.mjs already holds. */
-  .halftally .statbox__title {
-    margin-bottom: var(--space-2);
-  }
-
-  .statline--console .stat__v {
-    font-size: var(--fs-body);
-  }
-
-  .statline--console .stat__k {
-    font-size: var(--fs-caption);
-  }
 }
 
 :root {
@@ -375,6 +143,24 @@
     min-width: 0;
   }
 
+  /* THE COLUMN IS AS TALL AS ITS SECTION, AND THE PAGE IS WHAT SCROLLS.
+     It used to be a sticky, height-capped box (`position: sticky`, `top`,
+     `max-height: calc(100vh - var(--space-10))`) with `.refpanel__body`
+     scrolling inside it — so a long section, which is most of them, drew a
+     second scrollbar a few hundred pixels tall against the right edge of the
+     page. A scrollbar inside a scrollbar is the defect ADR-0043 set out to
+     remove from this column in the first place; capping the height and letting
+     the overflow scroll just moved it from the old stacked rail to the new
+     tabbed one. Nothing here is capped now: the column grows to its section,
+     the grid row grows with it, and one scroll — the page's — reaches
+     everything. `.refpanel__body` keeps its scrolling ONLY inside the phone
+     sheet, where a docked dialog really does have a fixed height to work in
+     (styles/focus/reference.css).
+
+     The tabs go with it rather than staying pinned. They are three lines from
+     the top of the column, and a strip that hangs over the rows beneath it is
+     the same "bar following the reader down the page" the console band's own
+     pin was taken off for (see .consolebar above). */
   .focusrail {
     grid-column: 2;
     grid-row: 2;
@@ -382,14 +168,34 @@
        lineup rows or the defense SVG force the item past the track and overflow
        into column 1, intercepting clicks meant for the at-bat card. */
     min-width: 0;
-    position: sticky;
-    /* Parked at the viewport edge. It used to sit --console-hud-h down, which
-       was the height of a band that no longer pins itself there. */
-    top: var(--space-4);
-    max-height: calc(100vh - var(--space-10));
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+  }
+}
+
+
+/* ------------------------------------------- the phone stage's reading order */
+/* ADR-0043 puts the reference chips "a chip row under the trail". On a phone
+   they were not: `.innings__stage` is `display: contents` here, so its children
+   and ReferencePanel's own `.refbar` all become items of the SAME
+   .innings__grid flex column — and .refbar, a later sibling of the stage in
+   InningViewer's markup, landed under the running line at the foot of the page.
+   Measured at 390x844, scrolled to the top: bar at 780, running line at 784,
+   chips at 910, against a 844 viewport. Both of the surfaces ADR-0043 kept
+   deliberately — the chips, and the running line whose cells are the only
+   half-inning navigator (`.inningnav` moves +-1 only) — sat under the bar or
+   past the fold.
+
+   Two orders fix it without touching the markup, the same idiom 12-sealbox.css
+   already uses to order this column on a phone. Everything else keeps the
+   default 0: the chips move up under the trail, and the running line becomes
+   LAST, which puts it inside `.innings--focus`'s own bottom padding rather than
+   behind the bar. */
+@media (max-width: 739.98px) {
+  .innings--focus .refbar {
+    order: 1;
+  }
+
+  .innings--focus .rolling {
+    order: 2;
   }
 }
 
@@ -474,110 +280,3 @@
     max-width: 640px;
   }
 }
-
-/* ------------------------------------------------ the anchored console band
-   The SAME scorebug, placed rather than floated — focus mode's masthead
-   (ScorebugMount.jsx, ADR-0043). A shape change, not a second scorebug.
-
-   Stacked batter/pitcher lines above the strip, same reading order as the
-   floating dock (Scorebug.jsx's own source order — no `order` override here
-   any more): teams+runs+inning+bases sits UNDER who's up and who's on the
-   mound, not beside it. On a desktop-width stage that keeps the band close to
-   its old ~246px dock width instead of stretching it into a wide horizontal
-   strip — .consolebar (styles/focus/stage.css) is what gives the freed row
-   width to the due-up-next card beside it. On a phone the band still spans
-   the full stage (there is no sibling card to share the row with there), so
-   its own @media block below scales the card's content up to fill it, rather
-   than leaving 246px-card-sized text stranded in a full-width bar.
-
-   Navy ground under a kraft rule, deliberately the masthead signature
-   .half__title already carries, so the band and the half's own title bar read
-   as siblings rather than as a floating chip from somewhere else.
-
-   Lives here, beside the .consolebar placement above, rather than with the
-   rest of the .gamehud rules in 24-floating-nav-and-hud.css. Either file can
-   hold it on cascade grounds (nothing after 24 styles .gamehud, and this file
-   imports later still); this one wins because the band's width, its
-   min-height and the grid cell it occupies are one decision. See this file's
-   header for the full note. */
-.gamehud--console {
-  width: 100%;
-  border-bottom: 3px solid var(--seal);
-  /* The band holds its height even when it has nothing to say. Once the half's
-     3rd out lands nobody is up, Scorebug drops both the batter and pitcher rows
-     (its `blank`), and without this floor the band collapsed by ~50px and
-     yanked the hero card up the page at the exact moment the reader was
-     reading it. The comment here used to CLAIM the height was held while
-     nothing held it; --console-hud-h is the measured resting height (see
-     tokens/layout.css) and this is what actually pins it. */
-  min-height: var(--console-hud-h);
-}
-
-/* Between innings nobody is up (Scorebug's `blank`) — the rows are gone, so
-   the card's own top padding would just be dead space above the strip.
-
-   The floor comes off WITH them. Holding the band at its full height with no
-   rows in it left ~60px of bare navy under the strip — a dark slab the reader
-   sees on every landing, since a half is blank until its first at-bat opens.
-   That reads as a rendering fault, which is worse than the shift the floor was
-   added to stop; the shift itself is now small (the mobile scale-up below came
-   off too), and it happens as the half ends rather than while an at-bat is
-   being read. */
-.gamehud--console.gamehud--blank {
-  padding-top: 0;
-  min-height: 0;
-}
-
-@media (min-width: 740px) {
-  /* Narrow again, close to the floating dock's own 246px — the rest of
-     .gamehud--console's rules below this point are deliberately the SAME
-     ones the dock uses (marks/runs/lines/row sizing), inherited rather than
-     overridden, since a card this width fits them exactly as it always did. */
-  .gamehud--console {
-    width: 264px;
-    flex: 0 0 auto;
-  }
-
-  /* THE BAND NEVER STRETCHES. It used to: `.gamehud--console:only-child`
-     took the whole row whenever nothing sat beside it, on the argument that a
-     264px stub with blank paper beside it was the dead reserved column
-     ADR-0043 set out to remove. What it actually drew was worse — at 1280 a
-     ~930px navy rectangle holding two 24px club marks, two zeros and an empty
-     diamond, with ~500px of bare navy in the middle of it. A slab reads as a
-     rendering fault; blank PAPER just reads as paper.
-     So the card keeps the dock's size at every width, and the row is filled
-     with something real instead: DueUpConsole while the half is being scored,
-     the half's own tally (`.halftally`, below) once it is over. The one
-     state left with nothing beside it is a half reached out of order and
-     stepped — rare, and it now ends in open paper rather than a slab. */
-
-  /* The two lines above the score strip step up a role each. The dock's own
-     13/12px was sized for a card floating in a page CORNER, read in passing;
-     here the same card is the console's masthead and its batter line is one of
-     the two names the reader is actually working from (the other being the
-     hero card's). Only the type changes — the 264px card and every icon-scale
-     rule below it stay exactly as the dock sets them. */
-  .gamehud--console .gamehud__who,
-  .gamehud--console .gamehud__val {
-    font-size: var(--fs-body);
-  }
-
-  .gamehud--console .gamehud__row--pitcher .gamehud__who {
-    font-size: var(--fs-small);
-  }
-}
-
-/* NOTHING SCALES UP ON A PHONE. The band used to answer "it has the whole
-   width to itself down here" with bigger type, a 92px strip and larger
-   pips/marks, on the argument that the dock's compact card looked stranded in
-   a full-width bar. What that actually bought was ~50px of the one viewport
-   with the least to spare, spent on a header, before the at-bat card the
-   reader is working from. The band keeps the dock's own sizing at every width
-   now — full width, dock scale — so `.gamehud--console` needs no phone block
-   at all. The team marks still get their own boost from the bare
-   `.gamehud__strip` rule (24-floating-nav-and-hud.css), which both placements
-   share and which costs no height.
-
-   If a phone ever needs its own numbers again, measure them against the stage
-   below the band, not against the width beside it. */
-

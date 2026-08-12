@@ -938,13 +938,18 @@ export function InningViewer({
           a Refresh row that is always there, and why focus mode's one-row bar
           has to shrink it to icon scale rather than drop it (styles/focus).
 
-          Four states: a sealed half offers two reveal choices (ADR-0016) —
-          step one at-bat, or the whole half at once; a half that just finished
-          (or whose Summary the reader is on, focus.postHalf) offers
-          Summary/next-half instead; otherwise it's the plain advance — "Box
-          score ›" at the furthest revealed inning (never "Top 10th ›", which
-          would leak the game going to extras) or the next-half label once one
-          unlocks. */}
+          Three states: a sealed half offers two reveal choices (ADR-0016) —
+          step one at-bat, or the whole half at once; otherwise it's the plain
+          advance — "Box score ›" at the furthest revealed inning (never "Top
+          10th ›", which would leak the game going to extras) or the next-half
+          label once one unlocks; and under the Scores Unlocked pass, at the
+          live frontier, a calm status instead of either.
+
+          A half that just finished used to be a FOURTH state, pairing the
+          advance with a "Summary" button that swapped the single at-bat for the
+          whole half. It is gone: the numbers a scorer wants when a half closes
+          now arrive on their own in the console band (HalfTally.jsx), so the
+          end of a half has exactly one thing to say and it is "carry on". */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
         {/* …EXCEPT once the game is over, when there is nothing left to fetch:
             the feed is complete and a refetch returns the same bytes. Same
@@ -970,40 +975,6 @@ export function InningViewer({
           <div className="liveedge" role="status" aria-live="polite">
             <span className="liveedge__dot" aria-hidden="true" />
             <span className="liveedge__label">{liveEdgeLabel}</span>
-          </div>
-        ) : focus.postHalf ? (
-          // The half just finished (or the reader's on its Summary,
-          // focus.summaryOpen) — plain .btn/.btn--next skins, not the
-          // kraft-seal .btn--reveal below: nothing here is sealed anymore.
-          <div className="revealsplit">
-            {/* A TOGGLE, and it says so. `aria-pressed`, not `aria-current`:
-                this button does not name a place you are at, it turns one view
-                of this half into another and back. It used to be a one-way
-                door wearing the filled-navy pressed skin — open Summary and
-                the single at-bat you were reading was gone with no route back
-                to it, while the button that took you there still looked and
-                announced itself as pressed. See useFocusMode's summaryOpen. */}
-            <button
-              type="button"
-              className={`btn revealsplit__btn ${focus.summaryOpen ? 'is-active' : ''}`}
-              onClick={focus.toggleSummary}
-              aria-pressed={focus.summaryOpen}
-            >
-              Summary
-            </button>
-            {nextIdx != null ? (
-              <button
-                className="btn btn--next revealsplit__btn"
-                onClick={() => requestForwardHalf(nextIdx)}
-                aria-disabled={turning || undefined}
-              >
-                {nextLabel} ›
-              </button>
-            ) : (
-              <button className="btn btn--next revealsplit__btn" onClick={onBoxScore}>
-                Box score ›
-              </button>
-            )}
           </div>
         ) : currentSealed ? (
           <div className="revealsplit">

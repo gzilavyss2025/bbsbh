@@ -83,10 +83,13 @@
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
    a partial that outgrew the 600-line file cap was to subdivide, which is what
-   ADR-0038 asks for in the first place. These three stay LAST, and in this
-   order — every rule in them wins on cascade order, not specificity. See
-   focus/stage.css's header. */
+   ADR-0038 asks for in the first place. It happened a second time when the
+   half's tally joined the console row: console.css came out of stage.css along
+   the same seam — the shell versus one band inside it. These four stay LAST,
+   and in this order — every rule in them wins on cascade order, not
+   specificity. See focus/stage.css's header. */
 @import './styles/focus/stage.css';
+@import './styles/focus/console.css';
 @import './styles/focus/atbat.css';
 @import './styles/focus/reference.css';
 
