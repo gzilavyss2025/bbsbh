@@ -1,3 +1,4 @@
+import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { DueUpConsole } from './DueUpConsole.jsx'
 import { HalfTally } from './HalfTally.jsx'
 import { ScorebugMount } from './ScorebugMount.jsx'
@@ -20,10 +21,17 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 //    holding two 24px club marks. The rule is retired (styles/focus/console.css);
 //    the band keeps its size at every width.
 //
-// Both companions are desktop-only in CSS. A phone gives the row's whole width
-// to the band and has the least vertical room to spare, so it reads the same
-// three names from `.upnext` in the stage below and the same numbers from
-// Summary.
+// The due-up card is wide-width only, and BELOW that width it is not mounted
+// at all — not merely hidden. `.dueupconsole` is `display: none` under 740
+// (styles/focus/console.css), and mounting it anyway meant three headshot
+// fetches plus a whole-feed computeBatterLine walk per batter, on every render,
+// on the primary device, for a card nobody could see — the exact
+// build-what-folds cost #686 removed from the stage's hidden surfaces. The
+// `wide` gate below is the same value the CSS breakpoint is (WIDE_QUERY), so
+// the DOM changes only where the card was already invisible; a phone reads the
+// same three names from `.upnext` in the stage below. The tally is different:
+// it renders at EVERY width (a phone stacks it under the band — see
+// console.css), so it takes no gate.
 //
 // Purely a placement component: every value arrives already resolved and
 // already reveal-gated by InningViewer, exactly as it did at the old call site.
@@ -45,8 +53,9 @@ export function ConsoleBand({
   stepFrontierIdx,
   stepAtBatIndex,
 }) {
+  const wide = useMediaQuery(WIDE_QUERY)
   // THE DUE-UP CARD'S TWO CONDITIONS, each shutting off a way it can lie or
-  // loiter:
+  // loiter (plus `wide` — see the header note on why a phone never mounts it):
   //   • `!postHalf` — not once the half is OVER. "Who's due up" is meaningless
   //     after the 3rd out.
   //   • `steps === 0 || stepFrontierIdx != null` — the card tracks the batting
@@ -65,7 +74,7 @@ export function ConsoleBand({
   // every half. The half's first three batters fill that width instead.
   // `.upnext` in the stage below stands down while this card is up, so the same
   // three men are not named twice (styles/focus/console.css).
-  const showDueUp = !postHalf && (steps === 0 || stepFrontierIdx != null)
+  const showDueUp = wide && !postHalf && (steps === 0 || stepFrontierIdx != null)
 
   // The tally takes the due-up card's slot once the half is done. `viewIdx <=
   // revealedThrough` is what `postHalf` already implies, stated because it is

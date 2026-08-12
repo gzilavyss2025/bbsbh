@@ -34,7 +34,24 @@ import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, CS_EVENTS, ON_BASE_EVENTS } 
 // leader note triggers on — so the two can't disagree; a steal logged as its
 // own top-level play (no playEvents entry) is simply not folded in, an
 // undercount never an overclaim.
+// Cached per feed OBJECT (WeakMap — same pattern as select.js's
+// entryIndexById and the finders in playbyplay/firsts.js): this is the
+// heaviest whole-game walk on the innings screen — every playEvent of every
+// play, pitches included — and PlayByPlay ran it at render top-level on every
+// re-render of the app's most re-rendered component. A Refresh mints a new
+// feed and rebuilds; a bare re-render reuses. Reveal-only footing unchanged
+// (caching changes WHO may call nothing); callers must not mutate the
+// returned Maps/Sets — they are shared across renders now.
+const progressCache = new WeakMap()
 export function computeCalloutProgress(feed) {
+  if (!feed || typeof feed !== 'object') return buildCalloutProgress(feed)
+  if (progressCache.has(feed)) return progressCache.get(feed)
+  const result = buildCalloutProgress(feed)
+  progressCache.set(feed, result)
+  return result
+}
+
+function buildCalloutProgress(feed) {
   const byPlay = new Map()
   const catByBatter = new Map() // batterId -> { [cat]: n }
   const reached = new Set()

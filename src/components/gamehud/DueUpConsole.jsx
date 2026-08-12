@@ -7,10 +7,10 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // Focus mode's desktop-only console card (ADR-0043 follow-up): the next few
 // batters scheduled to come up in the half currently being scored, filling
 // the width `.consolebar` frees once the scorebug narrows back to its old
-// dock width (24-floating-nav-and-hud.css). Hidden below the wide breakpoint
-// itself (styles/focus/console.css, beside the `.consolebar` placement it
-// shares a row with) — the scorebug needs the row's full width there for its
-// own bumped-up mobile sizing instead.
+// dock width (24-floating-nav-and-hud.css). Below the wide breakpoint the
+// caller does not mount it at all (ConsoleBand's `wide` gate — see its header
+// for why not-building beat display:none here); the `.dueupconsole` base rule
+// in styles/focus/console.css stays as the belt to that gate's suspenders.
 //
 // SPOILER FOOTING: entirely selectDueUpDuring's (api/dueup.js) — a mid-half
 // pinch-hitter never surfaces here ahead of his own notice card in the feed,
@@ -20,19 +20,24 @@ import { PlayerLink } from '../player/PlayerLink.jsx'
 // because each takes `revealedThrough` as its own hard boundary rather than
 // relying on a SealBox closure.
 export function DueUpConsole({ feed, inning, half, revealedThrough, stepAtBatIndex, teamId, count = 3 }) {
-  const info = useMemo(
-    () => selectDueUpDuring(feed, inning, half, revealedThrough, stepAtBatIndex, count),
-    [feed, inning, half, revealedThrough, stepAtBatIndex, count],
-  )
+  // One memo for the selector AND each batter's printed line: computeBatterLine
+  // walks the whole feed per batter, and this component re-renders with every
+  // console-band render (each live-state report while stepping) — the lines can
+  // only change when one of these same inputs does, so they belong inside the
+  // memo with the lookup that names the batters.
+  const info = useMemo(() => {
+    const due = selectDueUpDuring(feed, inning, half, revealedThrough, stepAtBatIndex, count)
+    if (!due) return null
+    const lineFor = (id) => {
+      const box = feed?.liveData?.boxscore?.teams?.[due.battingSide]?.players?.[`ID${id}`]
+      if (!box) return '—'
+      const { hits, atBats } = computeBatterLine(feed, id, revealedThrough)
+      if (atBats > 0 || hits > 0) return `${hits}-${atBats}`
+      return preGameAvg(box)
+    }
+    return { ...due, batters: due.batters.map((b) => ({ ...b, line: lineFor(b.id) })) }
+  }, [feed, inning, half, revealedThrough, stepAtBatIndex, count])
   if (!info) return null
-
-  const lineFor = (id) => {
-    const box = feed?.liveData?.boxscore?.teams?.[info.battingSide]?.players?.[`ID${id}`]
-    if (!box) return '—'
-    const { hits, atBats } = computeBatterLine(feed, id, revealedThrough)
-    if (atBats > 0 || hits > 0) return `${hits}-${atBats}`
-    return preGameAvg(box)
-  }
 
   return (
     <div className="dueupconsole">
@@ -45,7 +50,7 @@ export function DueUpConsole({ feed, inning, half, revealedThrough, stepAtBatInd
               {b.first && <span className="dueupconsole__first">{b.first}</span>}
               <span className="dueupconsole__last">{b.last}</span>
             </PlayerLink>
-            <span className="dueupconsole__line">{lineFor(b.id)}</span>
+            <span className="dueupconsole__line">{b.line}</span>
           </div>
         </div>
       ))}
