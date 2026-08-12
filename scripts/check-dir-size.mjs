@@ -225,7 +225,11 @@ const BUDGETS = {
   // backdrop. A lettered sibling of `06-loader-and-cards.css` for the same
   // reason as 05a and the 31x family — that file sits 22 lines under its
   // check-file-size budget and this feature is four times that.
-  'src/styles': 77,
+  // 77 -> 78 for `62-game-preview.css`: the chrome AROUND the preview poster
+  // (the studio frame and its controls). Deliberately tiny — the poster
+  // itself is a canvas and has no CSS at all — and imported by its own
+  // screen rather than index.css, so it costs no other route anything.
+  'src/styles': 78,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -255,7 +259,12 @@ const BUDGETS = {
   // budget. Sibling of schedule.js in every sense that matters (same rows in,
   // no fetch of its own), so it belongs beside it rather than in a
   // subdirectory invented just to hold one file.
-  'src/api': 92,
+  // +1 for gamePreview.js — the preview poster's data model, and the single
+  // file a spoiler audit of that poster has to read. It is a selector over
+  // the live feed like every other module here, and putting it in a
+  // subdirectory would take it out of the flat set check-spoiler-manifest
+  // classifies, which is exactly where it needs to stay.
+  'src/api': 93,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -347,7 +356,10 @@ const BUDGETS = {
   // one book. It is the reason GameStamp.jsx's containment allowlist
   // (scripts/check-stamp-surfaces.mjs) now names this file instead of
   // LogbookPage.jsx — a mechanical move, not a new spoiler-relevant surface.
-  'src/screens': 39,
+  // +1 for GamePreview.jsx — the preview-poster studio, a lazily-loaded
+  // game section (step 4) alongside TeamInfo/InningViewer/BoxScore. Same
+  // shape as its siblings: one route, one screen, in the flat set.
+  'src/screens': 40,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
