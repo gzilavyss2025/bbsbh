@@ -284,9 +284,18 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
             </>
           )}
           {/* Destination-named, per ADR-0017's button convention — it says the
-              club you land on, not "Swap". */}
+              club you land on, not "Swap". Full-color mark (TeamLogo's own
+              'base' variant default, not the mastheads' mono knockout) since
+              this sits on plain paper rather than a club-colored bar —
+              nothing to knock the mark out AGAINST. */}
           {canSwap && (
             <button type="button" className="lineupcard__swap" onClick={() => setShown(otherSide)}>
+              <TeamLogo
+                teamId={teamFor(otherSide).teamId}
+                name={teamFor(otherSide).name}
+                size={18}
+                className="lineupcard__swaplogo"
+              />
               {teamFor(otherSide).name} lineup ›
             </button>
           )}
