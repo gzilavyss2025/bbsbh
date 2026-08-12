@@ -186,18 +186,18 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   pure numeric stat grid — the season-context/health prose that used to stack under
   each row now lives in **Margin Notes** (`MarginNotes.jsx`, same reveal-clamp
   footing), a ranked digest spanning both teams' pitchers; see `docs/callouts.md`.
-- **The "Now Pitching" card** (`HalfInning.jsx`) is a persistent header naming
-  the arm the half OPENS with, shown for as long as the half is reachable
-  (`revealed || isNextToReveal`, same ADR-0010 gate as the lineup/defense
-  cards), from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
-  before reveal). It names that pitcher and keeps naming him — a **mid-half change
-  belongs in the feed**, where `PlayByPlay` renders it as this same `PitcherNotice`
-  in chronological place. The header used to be overridden by a live "who's on the
-  mound now" report, which put the reliever's card in two places at once and, on a
-  half revealed all at once, pinned the inning's LAST arm above at-bat cards the
-  starter had pitched. Same header-not-feed split as `computeHalfInningFeed`
-  dropping a *pre*-pitch change (its `anyPitchInHalf` guard) and `PrePitchChanges`
-  dropping one from the staged list.
+- **The "Now Pitching" card** (`HalfInning.jsx`) names the arm the half OPENS
+  with, from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
+  before reveal), gated `revealed || isNextToReveal` (ADR-0010). It names that
+  pitcher and keeps naming him — a **mid-half change belongs in the feed**, where
+  `PlayByPlay` renders it as this same `PitcherNotice` in chronological place. A
+  live "who's on the mound now" override used to put the reliever's card in two
+  places at once; same header-not-feed split as `computeHalfInningFeed` dropping
+  a *pre*-pitch change (`anyPitchInHalf`) and `PrePitchChanges` dropping one from
+  the staged list. **In focus mode it is an announcement, not a header** — only a
+  half opening with a fresh arm (`selectIsFreshPitcher`), only until the first
+  at-bat is unveiled. Those two omissions make it the ONLY announcement of a
+  between-innings change, so it may not be dropped there: ADR-0043's second.
 - **Extra innings never spoil** — `InningViewer` and `RollingLine` show only
   `regulation` innings up front, unlocking extras one at a time as `revealedThrough`
   advances (ADR-0008). `RollingLine`'s run cells double as the half-inning navigator

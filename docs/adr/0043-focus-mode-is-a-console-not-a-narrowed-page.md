@@ -224,3 +224,32 @@ resolved for the box score and both lineup pages, so the innings screen fetches
 nothing on this tab's account. A crew assignment, a jersey, a first-pitch time
 and a temperature describe the staging of a game, never its score — the same
 scope argument ADR-0034 makes.
+
+## Amendment (2026-08-12): a half that opens with a new arm announces it
+
+Decision 1 removed the Now Pitching card from focus mode outright, on the
+argument that a mid-half change belongs in the feed and already renders there as
+the same `PitcherNotice`, so only the restatement of an arm nothing had happened
+to was being dropped.
+
+That argument is true of a change made mid-half and **false of one made between
+halves**, which is the commonest pitching change in baseball. Two other places
+deliberately decline to announce a pre-pitch change *because this card already
+did*: `computeHalfInningFeed` drops it from the feed (its `anyPitchInHalf`
+guard), and `PrePitchChanges` drops it from the staged list. Remove the card and
+all three are silent — the reader meets the new arm as a different face in the
+hero, after the pitch they were about to write down.
+
+The card comes back in **one state**: the half opens with an arm that just took
+the mound (`selectIsFreshPitcher` — the app's existing answer to that question,
+already choosing between "Now pitching" and "Pitching" for the card's own
+label), and nothing of the half has been unveiled yet (`!startedRevealing`).
+That second gate is the one `PrePitchChanges` two blocks down already carries,
+and it makes this card the pitching-change member of the same staged set: it
+stands where the reader is about to unveil, and steps aside for the at-bat
+instead of sitting above it.
+
+The redundancy that motivated the removal is untouched. Once an at-bat is up,
+`AtBatHero` owns the matchup identity and the console band names the arm — and
+the card is gone by then. A half whose pitcher simply carries over still shows
+nothing at all.
