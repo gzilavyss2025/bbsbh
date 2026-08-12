@@ -7,8 +7,6 @@ import { showRookiePill } from '../../api/rookies.js'
 import { ordinal } from '../../lib/format.js'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { DefenseDiamond } from '../scoring/DefenseDiamond.jsx'
-import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
-import { rankedDimensions } from '../../lib/ballpark/ballparkData.js'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
@@ -115,16 +113,6 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
       className="metricbar__logo"
     />
   )
-  // The real park's shape behind the fielder spots — static geometry keyed on
-  // the GAME's venue (both halves play the same physical field, so this needs
-  // no fielding-side awareness), same source the Ballpark modal reads
-  // (lib/ballpark/ballparkData.js). Null for any park not in that hand-seeded
-  // set (MiLB, mostly) — DefenseDiamond falls back to its plain schematic
-  // diamond exactly as it did before this existed.
-  const park = rankedDimensions(feed?.gameData?.venue?.name ?? '')
-  const field = park ? (
-    <BallparkDiagram dist={park.dist} wall={park.wall} arc={park.arc} labels={false} className="defdiamond__bgfield" />
-  ) : null
   return (
     <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       {bare ? (
@@ -146,7 +134,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
           </span>
         </button>
       )}
-      {(bare || open) && <DefenseDiamond defense={defense} field={field} />}
+      {(bare || open) && <DefenseDiamond defense={defense} />}
     </section>
   )
 })
@@ -318,9 +306,9 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 // `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
 // BATTING club — a different concept from `upNextLabels` (which only ever
 // marks the FIELDING club's own next half), so it gets its own highlighted
-// row rather than folding into the same `duepill`/"On deck" wording, which
-// would read as this half's next batter and the other club's next-half
-// leadoff man sharing one label for two different moments.
+// row and its own "Up next" wording rather than folding into `upNextLabels`'s
+// "On deck", which would read as this half's next batter and the other
+// club's next-half leadoff man sharing one label for two different moments.
 function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
@@ -347,7 +335,7 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
                 ))}
                 <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                 <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
-                {onDeck && <span className="duepill lineupcard__ondeck">On deck</span>}
+                {onDeck && <span className="duepill lineupcard__ondeck">Up next</span>}
                 {upNextLabel && (
                   <span className="duepill">
                     {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}

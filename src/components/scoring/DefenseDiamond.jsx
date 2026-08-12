@@ -53,14 +53,7 @@ function toStacks(defense) {
   return byPos
 }
 
-// `field` (optional): a real-park backdrop to draw behind the fielder spots
-// instead of the plain schematic diamond below — see EnteringReference.jsx's
-// DefenseSection, the only caller that passes one (the ballpark modal's own
-// BallparkDiagram, labels off). Every other caller (box score, roster
-// projection, the scorecard sheet, player position history…) leaves this
-// unset and gets the exact schematic look this component always had — the
-// prop is additive, not a redesign of the shared diamond.
-export function DefenseDiamond({ defense, field = null }) {
+export function DefenseDiamond({ defense }) {
   const byPos = toStacks(defense)
   const hasFielder = Object.keys(SPOTS).some((pos) => byPos[pos])
   if (!hasFielder) return null
@@ -68,39 +61,36 @@ export function DefenseDiamond({ defense, field = null }) {
   return (
     <div className="defdiamond">
       <div className="defdiamond__field">
-        <div className="defdiamond__bg" aria-hidden="true">
-          {field ?? (
-            /* Infield square + a small mound ring, in pencil rule. The box is
-               4:3, and the SVG stretches to fill it, so viewBox y-units
-               compress to 75% of x — the polygon is drawn taller than wide
-               (and the mound ring is an ellipse) so both READ as a true
-               square-on-point diamond and a round mound, like a real infield. */
-            <svg
-              className="defdiamond__lines"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-            >
-              <polygon
-                points="50,89 76,54 50,19 24,54"
-                fill="none"
-                stroke="var(--rule)"
-                strokeWidth="0.8"
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-              />
-              <ellipse
-                cx="50"
-                cy="54"
-                rx="3.4"
-                ry="4.5"
-                fill="none"
-                stroke="var(--rule)"
-                strokeWidth="0.8"
-                vectorEffect="non-scaling-stroke"
-              />
-            </svg>
-          )}
-        </div>
+        {/* Infield square + a small mound ring, in pencil rule. The box is 4:3,
+            and the SVG stretches to fill it, so viewBox y-units compress to 75%
+            of x — the polygon is drawn taller than wide (and the mound ring is
+            an ellipse) so both READ as a true square-on-point diamond and a
+            round mound, like a real infield. */}
+        <svg
+          className="defdiamond__lines"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <polygon
+            points="50,89 76,54 50,19 24,54"
+            fill="none"
+            stroke="var(--rule)"
+            strokeWidth="0.8"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+          <ellipse
+            cx="50"
+            cy="54"
+            rx="3.4"
+            ry="4.5"
+            fill="none"
+            stroke="var(--rule)"
+            strokeWidth="0.8"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
 
         {Object.entries(SPOTS).map(([pos, spot]) => (
           <DefenseSpot key={pos} pos={pos} stack={byPos[pos]} spot={spot} />

@@ -116,16 +116,10 @@
   min-width: 0;
 }
 
-/* Bottom corners square, not rounded: .refpanel__body's own zeroed top
-   margin (below) now seats the first section's masthead flush against this
-   strip's bottom edge, and two independently-rounded corners meeting with no
-   gap between them left a lens-shaped sliver of bare paper showing through
-   at each seam — a "double rounded corner." The masthead's own top corners
-   read as this strip's corners continuing down instead. */
 .refpanel__tabs {
   display: flex;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface-card);
   flex: 0 0 auto;
@@ -244,19 +238,23 @@
    gone: the column grows to its section and the PAGE scrolls.
 
    The scroll survives where it is real — in the phone sheet, which genuinely
-   has a fixed height to fit content into. See .refpanel__body--sheet below.
-
-   NO TOP MARGIN: the first section's own masthead bar (.lineupteam__name,
-   .halfdefense__title, …) sits flush against the tab strip above rather than
-   leaving a stripe of bare paper between two already-rounded-corner shapes.
-   The masthead's own top corners read as the tab strip's corners continuing
-   downward — whichever club is on screen (a swap through .lineupcard__swap
-   included), its masthead is always this column's first child, so this holds
-   for every club and every tab, not just the one first painted. */
+   has a fixed height to fit content into. See .refpanel__body--sheet below. */
 .refpanel__body {
+  margin-top: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* The Lineups masthead (.lineupteam__name) sits one level deeper than the
+   Field/Bench mastheads (.halfdefense__title/.roster__toggle, both direct
+   children of their own bordered card) — it's nested inside
+   .lineupcard__teams, whose own 12px top padding left a stripe of bare paper
+   ABOVE the club's colored bar that those other two tabs never had. Canceled
+   here rather than in the base rule (12-sealbox.css), which still needs that
+   padding for the unfocused stacked page's own two-team layout. */
+.refpanel__body .lineupteam__name {
+  margin-top: -12px;
 }
 
 /* One size for every club bar across the four tabs — the Lineups masthead
