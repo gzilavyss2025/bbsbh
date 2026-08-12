@@ -30,28 +30,32 @@ export function useFocusMode(curIdx, currentSealed) {
   const [step, setStep] = useState(null)
   const [steps, setSteps] = useState(0)
   const [items, setItems] = useState([])
-  // THERE IS NO SUMMARY STATE ANY MORE, and the absence is the decision.
+  // SUMMARY IS BACK, AS A QUIET LINK — NOT AS THE BAR'S SECOND BUTTON.
   //
-  // A "Summary" button used to share the post-half bar with the next-half
-  // advance, swapping the single at-bat for the whole half's stacked cards. It
-  // was a one-directional `setSummaryOpen(true)` wearing a filled-navy pressed
-  // skin — pressed-looking, pressed-announcing, and dead on a second press,
-  // with no route back to the at-bat it had replaced. Made a real toggle, it
-  // then read as a second thing to decide at the end of every half, on the one
-  // bar that should only ever say "carry on".
+  // The original "Summary" shared the post-half bar with the next-half advance:
+  // a one-directional `setSummaryOpen(true)` wearing a filled-navy pressed
+  // skin, dead on a second press, and a second thing to decide on the one bar
+  // that should only ever say "carry on". #685 removed it and sent the half's
+  // NUMBERS to the console band instead (HalfTally.jsx), which was right — but
+  // it left "how did the half unfold" (the cards laid out, the full stat row)
+  // two navigations away: page off the half and come back. That is the wrong
+  // price for a question a scorer asks at the end of most halves.
   //
-  // So the half's numbers come to the reader instead of the reader going to
-  // them: HalfTally.jsx puts the line and the pitch analysis in the console
-  // band the moment the third out lands, at every width, with nothing to tap.
-  // The whole half's cards are still a tap away — leave the half and come back
-  // to it, or open the box score — and `postHalf` below is unchanged, so focus
-  // mode still holds the last at-bat on screen until the reader moves on.
+  // So the state returns with a different surface: a paper-pill link under the
+  // trail (FocusControls below), rendered only in the post-half hold, that
+  // drops THIS half out of the focus layout — the ordinary revealed page, which
+  // already exists, laid out exactly as paging away and back would show it.
+  // One-directional per visit on purpose (the link disappears with the layout
+  // it changed); navigating to any other half resets it, same as every other
+  // piece of state here. The action BAR is untouched — still exactly one
+  // forward action — which is the half of #685's decision that stands.
   // Whether THIS half (curIdx) has been seen sealed at all since the reader
   // arrived on it — the difference between "I was just stepping through this
   // and it completed" (held, below) and "I jumped straight to an old,
   // already-committed half" (never held). Starts at whatever currentSealed
   // already is, so arriving on a fresh sealed half still counts.
   const [sealedSeen, setSealedSeen] = useState(currentSealed)
+  const [summaryOpen, setSummaryOpen] = useState(false)
 
   // Reset computed during render (not in an effect) on a half change — the
   // same pattern InningViewer's `runsInProgress` reset and Headshot.jsx use. A
@@ -63,6 +67,7 @@ export function useFocusMode(curIdx, currentSealed) {
     setSteps(0)
     setItems([])
     setSealedSeen(currentSealed)
+    setSummaryOpen(false)
   } else if (currentSealed && !sealedSeen) {
     setSealedSeen(true)
   }
@@ -73,14 +78,14 @@ export function useFocusMode(curIdx, currentSealed) {
   // snapping to the unfocused page underneath the play still being written
   // down, for as long as this half stays the one on screen.
   //
-  // These two used to differ: a `held` flag additionally required Summary to be
-  // CLOSED, so opening Summary dropped out of focus mode while `postHalf` kept
-  // the bar's Summary/advance pair up. With Summary gone they are one
-  // condition, kept under two names because they answer two questions —
-  // `postHalf` is what ConsoleBand reads to swap the due-up card for the half's
-  // tally, and `focused` is what composes the screen.
+  // The two names answer two questions: `postHalf` is the STATE (the half
+  // finished under the reader's eyes and is still on screen) and `focused` is
+  // the LAYOUT. They part ways again exactly where the pre-#685 `held` flag
+  // did — opening the summary link leaves the focus layout while `postHalf`
+  // stays true, which is what keeps ConsoleBand's gate and the bar's own
+  // states reading the fact rather than the layout.
   const postHalf = sealedSeen && !currentSealed
-  const focused = currentSealed || postHalf
+  const focused = currentSealed || (postHalf && !summaryOpen)
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -101,6 +106,9 @@ export function useFocusMode(curIdx, currentSealed) {
   // Back to following the newest — what revealing a fresh at-bat should do
   // even if the reader had paged back to an earlier one.
   const followLatest = useCallback(() => setStep(null), [])
+  // The post-half link's one action (see the summary note above). Setting it
+  // outside the post-half hold is harmless — `focused` only consults it there.
+  const openSummary = useCallback(() => setSummaryOpen(true), [])
 
   return {
     focused,
@@ -114,6 +122,7 @@ export function useFocusMode(curIdx, currentSealed) {
     stepNext,
     goToStep,
     followLatest,
+    openSummary,
   }
 }
 
@@ -147,18 +156,40 @@ export function useFocusMode(curIdx, currentSealed) {
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
 export function FocusControls({ focus, turning }) {
-  const { focused, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
-  if (!focused || total <= 1) return null
+  const { focused, postHalf, openSummary, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
+  // The summary link renders even when the trail doesn't (a one-batter
+  // walk-off half has no trail to draw), so the gate is "nothing here at all"
+  // rather than the trail's own `total <= 1`.
+  if (!focused || (total <= 1 && !postHalf)) return null
   return (
-    <AtBatTrail
-      items={items}
-      cursor={cursor}
-      following={step == null}
-      onSelect={goToStep}
-      onStepBack={stepBack}
-      onStepNext={stepNext}
-      onFollowLatest={followLatest}
-      turning={turning}
-    />
+    <>
+      {total > 1 && (
+        <AtBatTrail
+          items={items}
+          cursor={cursor}
+          following={step == null}
+          onSelect={goToStep}
+          onStepBack={stepBack}
+          onStepNext={stepNext}
+          onFollowLatest={followLatest}
+          turning={turning}
+        />
+      )}
+      {/* Post-half only: drop this half out of the focus layout and show it
+          laid out whole — the ordinary revealed page, in place. A paper pill
+          in the trail's own control recipe, NOT a second button on the action
+          bar (see useFocusMode's summary note for the #685 history). It
+          disappears with the layout it changes; navigating resets. */}
+      {postHalf && (
+        <button
+          type="button"
+          className="trailstrip__summarybtn"
+          aria-disabled={turning || undefined}
+          onClick={openSummary}
+        >
+          See the whole half
+        </button>
+      )}
+    </>
   )
 }

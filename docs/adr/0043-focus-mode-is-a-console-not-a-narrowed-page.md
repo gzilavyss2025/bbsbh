@@ -253,3 +253,28 @@ The redundancy that motivated the removal is untouched. Once an at-bat is up,
 `AtBatHero` owns the matchup identity and the console band names the arm — and
 the card is gone by then. A half whose pitcher simply carries over still shows
 nothing at all.
+
+## Amendment (2026-08-12): the whole-half view returns as a quiet link, and the invisible chart stops being computed
+
+Two follow-ups from the owner's review of the week's focus-mode PRs.
+
+**"See the whole half" is back — under the trail, not on the bar.** The #685
+amendment removed the Summary button and sent the half's numbers to the console
+band (`HalfTally`), which answered "what do I write down" and left "how did the
+half unfold" two navigations away: page off the half and come back. That is the
+wrong price for a question a scorer asks at the end of most halves. The
+post-half hold now offers one quiet paper-pill link under the trail
+(`FocusControls.jsx`) that drops that one half out of the focus layout — the
+ordinary revealed page, in place. The half of #685 that stands is the bar: it
+still has exactly one forward action, and the link disappears with the layout
+it changes. `postHalf` (the fact) and `focused` (the layout) part ways again
+exactly where the old `held` flag did, and navigating to any other half resets
+it.
+
+**The win-probability pair is not computed while focus mode is on.** Both
+selectors re-walked the win-prob feed on every "Next at-bat" tap to grow a
+chart that focus mode never renders (`InningPage`'s `!focusOne` gate) — the
+same build-what-folds cost #686 removed from the stage's hidden surfaces,
+one layer up. Since the step clamp only ever activates on the next-to-reveal
+half, which is always sealed, which is always focus mode, the unfocused paths
+are byte-for-byte what they were; the chart fills in the moment focus ends.

@@ -49,6 +49,11 @@ const RevealCloudSync = isClerkEnabled
 // its own `noop` for the page-turn preview.
 const noopReveal = () => {}
 
+// The win-prob pair's stand-in while focus mode is on (see their comment) —
+// module-scope so the memoized InningPage sees one identity, not a fresh
+// empty array per render.
+const NO_WINPROB = []
+
 // Value-equality check for the scorebug's live snapshot (see `liveState`
 // below) — `entries` is rebuilt fresh every render in PlayByPlay.jsx, so a
 // composite object arrives with a new identity every render even when
@@ -642,33 +647,50 @@ export function InningViewer({
   // half is revealed/stepped into in order, and at MiLB parks with no
   // win-prob feed — the chart then renders nothing.
   const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
+  // A primitive for the two memos below — the React-Compiler dry-run lint
+  // can't see that a property of the per-render `focus` object is stable.
+  const inFocusLayout = focus.focused
+  // NOT COMPUTED WHILE FOCUS MODE IS ON. Both values feed only WinProbChart,
+  // and focus mode never builds its row (InningPage's `!focusOne` gate) — yet
+  // `curStepInfo` changes per "Next at-bat" tap, so both selectors re-walked
+  // the win-prob feed per tap for a chart nobody could see (#686's
+  // not-built-instead-of-hidden rule, one layer up). The step clamp only ever
+  // ACTIVATES while focused (`stepFrontierIdx` is non-null exactly on the
+  // next-to-reveal half, which is always sealed, hence focused), so outside
+  // focus these compute the plain committed-halves path exactly as before;
+  // the moment focus ends the memo re-runs and the chart fills in. Reveal
+  // footing untouched — that path reads only committed halves.
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbPoints = useMemo(
     () =>
-      selectWinProbPath(winProbability, {
-        throughHalf: renderRevealedThrough,
-        stepHalfIndex: stepFrontierIdx,
-        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-      }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
+      inFocusLayout
+        ? NO_WINPROB
+        : selectWinProbPath(winProbability, {
+            throughHalf: renderRevealedThrough,
+            stepHalfIndex: stepFrontierIdx,
+            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+          }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
   )
   // The biggest-swing ledger — same reveal-only selector, same clamp
   // (committed halves plus the in-progress step), so it only ever covers
   // plays already on screen and grows one entry at a time right along with
-  // the chart above (never hinting what's ahead).
+  // the chart above (never hinting what's ahead). Same focus-mode skip too.
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbBigPlays = useMemo(
     () =>
-      selectWinProbBigPlays(winProbability, {
-        throughHalf: renderRevealedThrough,
-        stepHalfIndex: stepFrontierIdx,
-        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-      }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
+      inFocusLayout
+        ? NO_WINPROB
+        : selectWinProbBigPlays(winProbability, {
+            throughHalf: renderRevealedThrough,
+            stepHalfIndex: stepFrontierIdx,
+            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+          }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
   )
 
   // Every pitcher who has appeared in a revealed half-inning, with running
@@ -979,9 +1001,13 @@ export function InningViewer({
 
           A half that just finished used to be a FOURTH state, pairing the
           advance with a "Summary" button that swapped the single at-bat for the
-          whole half. It is gone: the numbers a scorer wants when a half closes
-          now arrive on their own in the console band (HalfTally.jsx), so the
-          end of a half has exactly one thing to say and it is "carry on". */}
+          whole half. THE BAR's fourth state is still gone: the numbers a scorer
+          wants when a half closes arrive on their own in the console band
+          (HalfTally.jsx), so the end of a half has exactly one thing to say
+          here and it is "carry on". The whole-half view itself came back as a
+          quiet paper-pill link under the trail instead (FocusControls.jsx —
+          see useFocusMode's summary note for the history), which is a change
+          to the stage, not to this bar. */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
         {/* …EXCEPT once the game is over, when there is nothing left to fetch:
             the feed is complete and a refetch returns the same bytes. Same
