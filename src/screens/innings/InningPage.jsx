@@ -58,7 +58,6 @@ export const InningPage = memo(function InningPage({
   atBatCountFor,
   focusOne = false,
   focusStep = null,
-  focusCursor = null,
   onFocusInfo,
   onStepInfo,
   onRunsSoFar,
@@ -115,7 +114,6 @@ export const InningPage = memo(function InningPage({
           revealedAtBatCount={atBatCountFor(inning, half)}
           focusOne={focusOne}
           focusStep={focusStep}
-          focusCursor={focusCursor}
           onFocusInfo={presentationOnly ? undefined : onFocusInfo}
           onStepInfo={presentationOnly ? undefined : (info) => onStepInfo?.(idx, info)}
           onRunsSoFar={presentationOnly ? undefined : (runs, hits) => onRunsSoFar?.(idx, runs, hits)}
