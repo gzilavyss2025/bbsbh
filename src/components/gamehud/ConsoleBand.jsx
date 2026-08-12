@@ -17,7 +17,7 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 //  • NEITHER -> nothing, and that is now open paper rather than a slab.
 //    `.gamehud--console:only-child` used to stretch the band across the row
 //    whenever it stood alone, which at 1280 drew a ~930px navy rectangle
-//    holding two 24px club marks. The rule is retired (styles/focus/stage.css);
+//    holding two 24px club marks. The rule is retired (styles/focus/console.css);
 //    the band keeps its size at every width.
 //
 // Both companions are desktop-only in CSS. A phone gives the row's whole width
@@ -64,7 +64,7 @@ export function ConsoleBand({
   // step, leaving the band alone in the row on the state the reader lands in
   // every half. The half's first three batters fill that width instead.
   // `.upnext` in the stage below stands down while this card is up, so the same
-  // three men are not named twice (styles/focus/stage.css).
+  // three men are not named twice (styles/focus/console.css).
   const showDueUp = !postHalf && (steps === 0 || stepFrontierIdx != null)
   // …and the tally takes the same slot once the half is done. `viewIdx <=
   // revealedThrough` is what `postHalf` already implies, stated because it is

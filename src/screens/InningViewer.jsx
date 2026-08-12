@@ -311,17 +311,12 @@ export function InningViewer({
   // Desktop (>= 740px) ignores this entirely and stays always-visible via
   // CSS (index.css's `.gamehud-dock` media query), so the observer simply
   // runs harmlessly there too rather than branching on width in JS.
+  //
+  // The observer ITSELF is set up further down, next to `focus`, because the
+  // one thing it must branch on is whether focus mode is on — and that is not
+  // known this far up the component. See it there.
   const rollingRef = useRef(null)
   const [pastLine, setPastLine] = useState(false)
-  useEffect(() => {
-    const el = rollingRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const obs = new IntersectionObserver(([entry]) => setPastLine(!entry.isIntersecting), {
-      threshold: 0,
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
 
   // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
   // turning over for real — the game moving forward while you're actually
@@ -440,6 +435,34 @@ export function InningViewer({
   // Focus mode: a sealed half shows the linescore and ONE at-bat (useFocusMode
   // for the state, 11-innings.css for what folds away).
   const focus = useFocusMode(curIdx, currentSealed)
+
+  // The `pastLine` observer declared above, mounted HERE so it can read
+  // `focus.focused` — and skipped entirely while focus mode is on.
+  //
+  // `pastLine` has exactly one consumer: the floating scorebug dock, which
+  // fades in once RollingLine scrolls away. Focus mode does not mount that
+  // dock at all (the band up in the grid replaces it — see the `!focus.focused`
+  // guard on ScorebugMount below), so on the app's hottest screen this was an
+  // IntersectionObserver firing on every scroll to drive a piece of state
+  // nothing reads, re-rendering this whole tree each time it crossed the
+  // threshold. Observing is cheap; the render it triggers on a component this
+  // size is not.
+  //
+  // Keyed on `focus.focused` rather than torn down by hand: leaving focus mode
+  // re-runs this and re-observes, and `observe()` reports the current
+  // intersection immediately, so the dock's first frame after the half commits
+  // is correct rather than restored from a stale reading.
+  useEffect(() => {
+    if (focus.focused) return undefined
+    const el = rollingRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const obs = new IntersectionObserver(([entry]) => setPastLine(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [focus.focused])
+
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
   // the whole half at once. Keyed on the half actually being shown, not a

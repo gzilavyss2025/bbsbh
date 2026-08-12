@@ -38,13 +38,14 @@ export function Scorebug({
   const blank = !batter && !pitcher
   return (
     <div className={`gamehud ${blank ? 'gamehud--blank' : ''} ${className}`}>
-      {/* `display: contents` by default (24-floating-nav-and-hud.css), so the
-          docked card's own column stacking sees straight through this wrapper
-          to the same two rows it always had. It becomes a real box only in the
-          anchored console band (.gamehud--console), where the batter/pitcher
-          pair has to sit as ONE column BESIDE the strip rather than stacked
-          above it — two separate flex siblings can't be grouped by CSS alone.
-          Same idiom as .innings__stage. */}
+      {/* `display: contents` (24-floating-nav-and-hud.css), so the card's own
+          column stacking sees straight through this wrapper to the same two
+          rows it always had — in BOTH placements, the dock and the anchored
+          console band alike. This used to say the band made it a real box, to
+          sit the pair as one column BESIDE the strip; ADR-0043's 2026-08-11
+          amendment gave the band the dock's stacked reading order instead, and
+          that override went with it. The wrapper is a grouping with no layout
+          role today. Same idiom as .innings__stage, which does still use it. */}
       <div className="gamehud__lines">
         {batter && (
           <div className="gamehud__row gamehud__row--batter">

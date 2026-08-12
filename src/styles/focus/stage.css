@@ -27,39 +27,36 @@
    marks. */
 
 /* ------------------------------------------------------------- what folds */
-/* The stat/WPA row, both inline copies of the entering lineups/defense, and the
-   pre-half callout strip. All are end-of-half material or duplicated by the
-   reference panel: the row2 stat card is the R/H/E/LOB summary you write when
-   the half CLOSES.
+/* NOTHING FOLDS HERE ANY MORE — IT IS NEVER BUILT. This file used to open with
+   a `display: none` over four surfaces: the stat/WPA row (`.innings__row2`),
+   both inline copies of the entering lineups/defense (`.half__entering`,
+   `.halfentering`), and the pre-half callout strip (`.prehalf`). All four are
+   end-of-half material or duplicated by the reference panel, so hiding them was
+   right — but hiding is what it did. Every one still RENDERED on every tap:
+   StatBox (580+ lines), AbsCard, WinProbChart and DueUpNextCard painted out
+   forty times a half, `lineupEntering`/`defenseEntering` walking the whole
+   game's plays twice for cards nobody could see, and `buildPreHalfCallouts`
+   running a second time for a strip whose notes the Arms tab was already
+   showing. On the app's hottest screen that is the most expensive way to
+   display nothing.
 
-   That used to say "…at which point the half commits and focus mode ends
-   anyway", which was untrue (issue #660) — focus mode outlives the commit,
-   holding the last at-bat on screen until the reader moves off the half. Hiding
-   row2 through that window is the deliberate half of the same arrangement, not
-   an accident of it: the tap that ends a half is a play the reader is still
-   writing down, and a full stat card arriving on top of it is not what they
-   asked for. What they DO want out of that card — the half's own line and its
-   pitch analysis — comes to them instead, in the console band's own tally
-   (.halftally, below), with nothing to tap. The rest of it (ABS, the Statcast
-   superlatives, the game-wide rolling totals) is in the box score.
+   Each is now gated in JSX on `focusOne`, at the component that owns it —
+   `.innings__row2` in screens/innings/InningPage.jsx, the other three in
+   components/inning/HalfInning.jsx. Read those three comments for the WHY of
+   each surface; they are where the reasoning went, and each says where its
+   content lives in focus mode instead.
 
-   The callout strip folds for a different reason — it MOVED rather than went
-   away. "The Reds are 9-13 in his starts this season" is a margin note in the
-   literal sense: something you glance at beside the page, not something that
-   belongs between the reader and the at-bat they are penciling. It renders in
-   the Arms tab beside the rest of the pitcher digest instead (ReferencePanel's
-   Section, merged into MarginNotes' own ranked list). The unfocused page keeps
-   it staged above the seal exactly as before.
+   THE GATE IS THE SAME VALUE THIS SELECTOR WAS. InningViewer derives both
+   `focusOne` and the `.innings--focus` class from `focus.focused`, so the JSX
+   gate matches at every width, in every state, and on the page-turn preview
+   instance too. ADR-0043's "What this does NOT change" is undisturbed and is
+   exactly why the swap is safe: these surfaces were hidden for VISIBILITY
+   alone — no seal, no caller-gated pre-pitch selector (ADR-0010), no fetch —
+   so not building them moves no boundary. The selectors underneath keep their
+   own reveal gates for every other caller.
 
-   Unconditional now — it used to unhide with the old rail's flap
-   (.innings--railopen), which no longer exists. Visibility only: no seal, no
-   caller-gated pre-pitch selector (ADR-0010), no fetch is affected. */
-.innings--focus .innings__row2,
-.innings--focus .half__entering,
-.innings--focus .halfentering,
-.innings--focus .prehalf {
-  display: none;
-}
+   Do not bring the rule back to hide a fifth surface. Gate it where it is
+   built, next to the reason it exists. */
 
 /* Room under the last card for the action bar, which unlike .pagenav's
    translucent fade is one solid row of a known height. --space-6 of breath on
