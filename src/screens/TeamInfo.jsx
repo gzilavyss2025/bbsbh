@@ -654,7 +654,7 @@ function TeamSections({
           >
             <SectionMasthead
               as="h3"
-              title="Defense"
+              title="Defensive alignment"
               logo={
                 <TeamLogo
                   teamId={oppMeta.id}

@@ -115,10 +115,6 @@
   justify-content: flex-end;
 }
 
-.abhero__rbi {
-  margin: 0;
-}
-
 .abhero__pr {
   display: flex;
   align-items: baseline;

@@ -231,6 +231,7 @@ function Section({
   rosters,
   workload,
   workloadGameDate,
+  stepAtBatIndex,
 }) {
   if (tab === 'lineups' && showEntering) {
     return (
@@ -249,6 +250,7 @@ function Section({
         revealedThrough={revealedThrough}
         bare
         leadSide={effHalf === 'top' ? 'away' : 'home'}
+        stepAtBatIndex={stepAtBatIndex}
       />
     )
   }

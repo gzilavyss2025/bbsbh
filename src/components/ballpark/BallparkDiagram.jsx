@@ -10,7 +10,11 @@ import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballpar
 
 const f = (n) => Math.round(n * 100) / 100
 
-export function BallparkDiagram({ dist, wall, arc, className = '' }) {
+// `labels` (default on): the posted outfield distances + wall heights printed
+// on the diagram. Off for DefenseDiamond's backdrop use (EnteringReference.jsx)
+// — a fielder's own name/number already crowds that card, and the point there
+// is the park's SHAPE, not its numbers, which the Ballpark modal already owns.
+export function BallparkDiagram({ dist, wall, arc, labels = true, className = '' }) {
   const g = buildFieldGeometry(dist, wall, arc)
   return (
     <svg
@@ -74,19 +78,23 @@ export function BallparkDiagram({ dist, wall, arc, className = '' }) {
         <path key={i} d={s.d} className="bpdiagram__wall" style={{ strokeWidth: wallStroke(s.h) }} />
       ))}
 
-      {/* Distance labels outside the fence */}
-      {g.labels.map((l, i) => (
-        <text key={i} className="bpdiagram__dist" x={f(l.x)} y={f(l.y)}>
-          {l.t}′
-        </text>
-      ))}
+      {labels && (
+        <>
+          {/* Distance labels outside the fence */}
+          {g.labels.map((l, i) => (
+            <text key={i} className="bpdiagram__dist" x={f(l.x)} y={f(l.y)}>
+              {l.t}′
+            </text>
+          ))}
 
-      {/* Wall-height tags inside the fence */}
-      {g.wallTags.map((w, i) => (
-        <text key={i} className="bpdiagram__wallh" x={f(w.x)} y={f(w.y)}>
-          {w.h}′
-        </text>
-      ))}
+          {/* Wall-height tags inside the fence */}
+          {g.wallTags.map((w, i) => (
+            <text key={i} className="bpdiagram__wallh" x={f(w.x)} y={f(w.y)}>
+              {w.h}′
+            </text>
+          ))}
+        </>
+      )}
     </svg>
   )
 }

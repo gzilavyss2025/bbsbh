@@ -677,18 +677,26 @@
   padding: 12px 10px 8px;
 }
 
+/* aspect-ratio matches BallparkDiagram's viewBox (620×560) for DefenseDiamond's optional `field` backdrop; SPOTS % are unchanged either way. */
 .defdiamond__field {
   position: relative;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 620 / 560;
   max-width: 340px;
   margin: 0 auto;
 }
 
+.defdiamond__bg,
 .defdiamond__lines {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+.defdiamond__bgfield {
+  width: 100%;
+  height: 100%;
+  opacity: 0.82; /* fielder names on top stay the thing that reads first */
 }
 
 .defdiamond__spot {

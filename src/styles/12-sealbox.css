@@ -1562,6 +1562,25 @@
   gap: 8px;
 }
 
+/* The BATTING club's on-deck row (LineupSection's `onDeckSlot`, focus mode's
+   Lineups tab) — --marker, same highlighter-yellow as the at-bat card's
+   decisive-pitch row (14-strike-zone.css). Not .duepill's kraft-amber: that
+   pill answers a different question (the FIELDING club's next half). */
+.lineupcard__row--ondeck {
+  background: color-mix(in srgb, var(--marker) 18%, var(--paper-2));
+  border-radius: var(--radius-sm);
+  margin-inline: -6px;
+  padding: 3px 6px;
+}
+
+/* Reuses .duepill's shape (className="duepill lineupcard__ondeck"), just
+   recolored — see comment above. */
+.lineupcard__ondeck {
+  background: var(--marker);
+  color: var(--text-heading);
+  border-color: transparent;
+}
+
 .lineupcard__slot {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1688,10 +1707,14 @@
    matching negative margin so the mark's top/bottom crop clean to the bar's
    edges instead of sitting inset like a normal inline icon (identity lab's
    own "the mark may clip" convention). 8px padding here vs. that bar's 10px,
-   so its own numbers, not a shared rule. */
+   so its own numbers, not a shared rule. margin-left: auto right-aligns the
+   mark to match .lineupteam__name's own convention, and carries the chevron
+   along with it (rendered after the mark), so the two sit flush at the
+   bar's trailing edge. */
 .halfdefense__title > .teamlogo-crop-bar {
   height: calc(var(--fs-caption) * var(--lh-solid) + 16px);
   margin-block: -8px;
+  margin-left: auto;
 }
 
 .halfdefense__chevron {

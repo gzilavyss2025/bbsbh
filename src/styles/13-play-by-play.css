@@ -120,6 +120,19 @@
   color: var(--clay-deep);
 }
 
+/* The RBI count, focus mode only (PlayByPlay.jsx's `focusHeader` gate) — rides
+   inside the SAME play-notation pill as the result code (FC, 1B, …) rather
+   than a separate badge up in AtBatHero's name row (see that file's header
+   for why it moved). No font-size of its own: it inherits whichever pill it
+   landed in, top .pbp__code (--fs-small) or the center-diamond
+   .pbp__code--center (--fs-title-sm), so it always matches the code beside
+   it. Just recolored field-deep, the app's earned/on-base green, same as the
+   old .pbp__rbi badge used, so a run driven in still reads as a positive
+   result at a glance. */
+.pbp__code__rbi {
+  color: var(--field-deep);
+}
+
 /* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
    bases mid-count; the at-bat restarts next inning), penciled in the MIDDLE
    of the diamond (combined with .pbp__code--center) the way the scorer

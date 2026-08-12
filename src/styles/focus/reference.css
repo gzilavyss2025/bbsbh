@@ -238,12 +238,44 @@
    gone: the column grows to its section and the PAGE scrolls.
 
    The scroll survives where it is real — in the phone sheet, which genuinely
-   has a fixed height to fit content into. See .refpanel__body--sheet below. */
+   has a fixed height to fit content into. See .refpanel__body--sheet below.
+
+   NO TOP MARGIN: the first section's own masthead bar (.lineupteam__name,
+   .halfdefense__title, …) sits flush against the tab strip above rather than
+   leaving a stripe of bare paper between two already-rounded-corner shapes.
+   The masthead's own top corners read as the tab strip's corners continuing
+   downward — whichever club is on screen (a swap through .lineupcard__swap
+   included), its masthead is always this column's first child, so this holds
+   for every club and every tab, not just the one first painted. */
 .refpanel__body {
-  margin-top: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* One size for every club bar across the four tabs — the Lineups masthead
+   (.lineupteam__name, --fs-compact elsewhere) and the Field masthead
+   (.halfdefense__title, --fs-caption elsewhere) bumped up to match the Bench
+   tab's own club bar (.roster__toggle, --fs-ui), rather than the three tabs
+   each printing a club's name at a different size as the reader flips
+   through them. Scoped to .refpanel__body (covers both the wide rail and the
+   portalled phone sheet, which share this class) rather than touching the
+   base rules, which still serve their other, non-tabbed callers (the
+   unfocused wide-layout defense/lineup cards, the box score) at their own
+   established sizes. */
+.refpanel__body .halfdefense__title,
+.refpanel__body .lineupteam__name {
+  font-size: var(--fs-ui);
+}
+
+/* Each title's own knockout-mark bleed formula (12-sealbox.css) is keyed off
+   the SAME base font-size token the title rules above have just overridden
+   here — carried forward with it, or the mark's height stays sized for the
+   smaller base type while the text beside it grows, going visibly short
+   against its own bar. */
+.refpanel__body .halfdefense__title > .teamlogo-crop-bar,
+.refpanel__body .lineupteam__name > .teamlogo-crop-bar {
+  height: calc(var(--fs-ui) * var(--lh-solid) + 16px);
 }
 
 /* Sections render bare here rather than inside .innings__ref-* wrappers, so
@@ -396,11 +428,15 @@
    rather than a second masthead — the batting club's lineup is the answer, and
    this is the way to the other one, not an equal partner to it.
 
-   Full width and at the tap floor: it sits at the end of a nine-row list in a
-   328px column, and on a phone the same card is inside a docked sheet where a
-   thumb is doing the reaching. */
+   Sized to its own text + chevron rather than the card's full width — a
+   footer action reading edge to edge looked like a third masthead bar, not a
+   small "one more tap" link. align-self pulls it out of .lineupcard__teams'
+   stretched flex-column default; min-height still holds the tap floor even
+   though the box itself is now content-sized (a phone's docked sheet is where
+   the thumb is doing the reaching, same as before). */
 .lineupcard__swap {
-  width: 100%;
+  align-self: flex-start;
+  width: auto;
   min-height: var(--tap-min);
   padding: var(--space-2) var(--space-3);
   background: var(--surface-inset);

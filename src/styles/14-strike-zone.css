@@ -108,6 +108,28 @@
 .pitchlist__row {
   display: contents;
 }
+
+/* The at-bat's decisive pitch (StrikeZone.jsx's PitchList — always the final
+   row) in the app's own highlighter-yellow (--marker), same 16%-mix idiom
+   StatBox/foul-tracker/umpire-pages already use for "this one's the one to
+   look at". The row itself is display: contents (see above), so the tint has
+   to paint each of its grid cells rather than the <li> — the shared column
+   gap is tight enough that the cells still read as one highlighted band. The
+   pitch-number dot keeps its own call-color fill (.pitchlist__num--*, below,
+   wins the cascade on equal specificity by coming later) and gets an outline
+   ring instead, so the two color systems — call type on the dot, "look here"
+   on the row — stay legible side by side rather than the tint erasing the dot. */
+.pitchlist__row--decisive > .pitchlist__type,
+.pitchlist__row--decisive > .pitchlist__meta,
+.pitchlist__row--decisive > .pitchlist__challenge,
+.pitchlist__row--decisive > span:empty {
+  background: color-mix(in srgb, var(--marker) 16%, var(--paper-2));
+  padding-block: 1px;
+}
+.pitchlist__row--decisive > .pitchlist__num {
+  outline: 2px solid color-mix(in srgb, var(--marker) 70%, transparent);
+  outline-offset: 1px;
+}
 .pitchlist__num {
   width: 15px;
   height: 15px;

@@ -165,13 +165,23 @@ export function StrikeZone({ pitchDetails, batSide, className = '' }) {
 // on a challenge-free row would shift every LATER row's cells left by one
 // track. Shown on the desktop right cell and in the modal. Renders every
 // pitch, plottable or not.
+//
+// The at-bat's DECISIVE pitch — the one the result above the list actually
+// describes — is highlighted (--marker, the app's own highlighter-yellow,
+// same 16%-mix row-tint idiom StatBox/foul-tracker/umpire-pages already use
+// for "this one's the one to look at"). It's always the final row: the at-bat
+// ends on its last pitch by definition.
 export function PitchList({ pitchDetails }) {
   const pitches = pitchDetails ?? []
   if (pitches.length === 0) return null
+  const lastNo = pitches[pitches.length - 1].no
   return (
     <ol className="pitchlist">
       {pitches.map((p) => (
-        <li className="pitchlist__row" key={p.no}>
+        <li
+          className={`pitchlist__row ${p.no === lastNo ? 'pitchlist__row--decisive' : ''}`}
+          key={p.no}
+        >
           <span className={`pitchlist__num pitchlist__num--${p.cat}`}>{p.no}</span>
           <span className="pitchlist__type">{p.type || '—'}</span>
           <span className="pitchlist__meta">
