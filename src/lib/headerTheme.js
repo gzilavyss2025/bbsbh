@@ -38,8 +38,19 @@ import { contrastRatio } from './contrast.js'
 // A themed bar carries the section mastheads' club mark, which is the mono
 // knockout art — a flat single-ink silhouette, drawn white. On a light bar that
 // vanishes, so the tone of `onBar` decides whether the mark stays white or gets
-// re-inked dark (see .metricbar--themed-dark). Split at the midpoint of the
-// WCAG range against white: an `onBar` that reads as ink rather than paper.
+// re-inked dark, via the `--mark-filter` custom property `headerThemeStyle` sets
+// below (09-team-info.css's `.metricbar__logo` reads it). A custom property
+// rather than the `.is-themed--dark` class the bar/accent/text rules key off:
+// those three read `var(--bar-fill)` etc., which the cascade resolves from the
+// NEAREST ancestor that set it, so a light-themed section correctly ignores an
+// outer dark-themed page (TeamInfo.jsx nests the opposing club's own-themed
+// Defense/Starting-pitcher cards inside the page's own themed shell). A class-
+// based descendant selector has no such "nearest wins" — `.is-themed--dark
+// .metricbar__logo` used to match ANY themed mark anywhere under a dark page,
+// which is exactly how a light-themed opponent's knockout mark went black
+// while its own onBar-driven text correctly stayed white. Split at the
+// midpoint of the WCAG range against white: an `onBar` that reads as ink
+// rather than paper.
 const LIGHT_ON_BAR_MAX_CONTRAST_VS_WHITE = 2
 
 // 'light' | 'dark' — whether a bar with this ink leaves the white knockout mark
@@ -104,6 +115,7 @@ export function headerThemeStyle(theme, markScale = null) {
       '--bar-fill': theme.bar,
       '--bar-accent': theme.accent,
       '--bar-text': theme.onBar,
+      '--mark-filter': theme.onBarTone === 'dark' ? 'brightness(0)' : 'none',
     }),
     ...(markScale && { '--masthead-mark-scale': markScale }),
   }
