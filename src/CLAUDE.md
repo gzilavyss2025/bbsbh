@@ -69,8 +69,8 @@ is the away+home team abbreviations lowercased (`milaz`; game 2 of a doubleheade
 appends `-2`, game 1 stays bare so old links keep working) and `section` is
 `lineup1` / `lineup2` / `top{n}` / `bottom{n}` (the innings viewer shows one
 half-inning per page; legacy `inning{n}` links still parse as the top half) /
-`boxscore` (the sealed full box score; also reachable straight from a past game's
-slate card).
+`boxscore` (the sealed full box score, also reachable from a past game's slate
+card) / `preview` (the shareable poster studio — `docs/preview-poster.md`).
 
 `src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
 `pushState`s on navigation; the URL is the single source of truth for which game

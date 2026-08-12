@@ -60,6 +60,12 @@ export function parkBackdrop(venueName, t) {
     // property, and the quoting rule lives next to the pattern that makes it
     // safe rather than at a call site three files away.
     cssUrl: `url("${photo.src}")`,
+    // The same photograph as a bare src, for the one consumer that can't use a
+    // CSS value: the preview poster paints it onto a canvas (drawImage takes a
+    // URL, not a `url(…)`), and it must be loaded in CORS-anonymous mode or
+    // the finished poster can never be exported — see lib/preview/posterImages.js.
+    // Same value, already past SAFE_CSS_URL above.
+    src: photo.src,
     focus: photo.focus,
     // The bare park name, printed on the card itself (GameCard's
     // .gamecard__parkname) rather than riding in a hover title.

@@ -1,0 +1,191 @@
+/* ------------------------------------------------------- preview poster studio
+   The page around the poster, NOT the poster — every rule the printed sheet
+   itself obeys lives in src/lib/preview/poster*.js, because a canvas has no
+   CSS. So this file is small on purpose: a frame for the sheet, a control
+   panel beside it, and the save button. If a rule here ever seems to affect how
+   the poster LOOKS, it is affecting the wrong thing.
+
+   Imported by screens/GamePreview.jsx rather than by index.css — a per-route
+   chunk, the same split index.css documents for the other lazy screens. */
+
+.posterstudio {
+  max-width: var(--app-width);
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-3);
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* The sheet sits in a light frame with the page's paper behind it, so the
+   poster's own manila reads as a printed page rather than as the background. */
+.posterstudio__sheet {
+  position: relative;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-2);
+}
+
+/* The canvas carries its own 1200×1600 backing store; this only decides how
+   large it is shown. `height: auto` keeps the aspect exact at any width. */
+.posterstudio__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-xs);
+}
+
+.posterstudio__loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+  background: var(--surface-inset);
+  border-radius: var(--radius-xs);
+}
+
+.posterstudio__panel {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  padding: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.posterstudio__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.posterstudio__note,
+.posterstudio__hint {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}
+
+.posterstudio__blocks {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.posterstudio__legend {
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.posterstudio__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+/* A section whose data hasn't posted: the control stays listed and says what
+   it is waiting for, rather than disappearing and leaving the page looking
+   like the feature is missing. */
+.posterstudio__check--waiting {
+  flex-wrap: wrap;
+  color: var(--text-caption);
+  cursor: default;
+}
+
+.posterstudio__waiting {
+  flex-basis: 100%;
+  padding-left: calc(20px + var(--space-2));
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-style: normal;
+  color: var(--text-caption);
+}
+
+.posterstudio__check input {
+  inline-size: 20px;
+  block-size: 20px;
+  accent-color: var(--accent-primary);
+}
+
+.posterstudio__check input:focus-visible {
+  outline: var(--ring) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.posterstudio__warn {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--accent-negative);
+}
+
+.posterstudio__save {
+  justify-self: start;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.posterstudio__save:focus-visible {
+  outline: var(--ring) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.posterstudio__save:disabled {
+  background: var(--graphite-soft);
+  cursor: default;
+}
+
+.posterstudio__save--done {
+  background: var(--accent-positive);
+}
+
+.posterstudio__save--error {
+  background: var(--accent-negative);
+}
+
+/* Wide layout: the sheet keeps its portrait shape and the panel rides beside
+   it, rather than the poster growing to fill a desktop width it was never
+   composed for. */
+@media (min-width: 900px) {
+  .posterstudio {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    max-width: 1100px;
+  }
+}

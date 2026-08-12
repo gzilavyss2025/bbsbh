@@ -222,6 +222,10 @@
       "class": "spoiler-free",
       "why": "The raw feed/manager/win-probability FETCHERS. A raw fetch result produces no DOM on its own, so fetching is spoiler-safe — but the feed IS score-bearing, so every SELECTOR over it is classified separately and useGameData still defers the fetch until its consuming surface is opened."
     },
+    "gamePreview.js": {
+      "class": "spoiler-free",
+      "why": "The preview poster's data model — the ONE place every value that can be printed into a shareable image is assembled. Spoiler-free by construction: it composes select.js only (selectGameInfo/selectLineup/selectOfficials/selectTeamMeta), plus the season aggregates the caller already fetched and the nightly umpire-accuracy summary. It deliberately imports no reveal-only module and none of the caller-gated staging selectors — a poster has no half-inning to be 'entering', so the posted card is the only correct source. Auditing the poster is reading this one file: the canvas painter in src/lib/preview/ is handed this object and no feed."
+    },
     "gamehighlights.js": {
       "class": "spoiler-free",
       "why": "The static per-team highlight archive reader. Decided games only, every filter already ran in the generator, so the rails stay dumb. Not a scoring surface."

@@ -26,6 +26,12 @@ const InningViewer = lazy(() =>
   import('./InningViewer.jsx').then((m) => ({ default: m.InningViewer })),
 )
 const BoxScore = lazy(() => import('./BoxScore.jsx').then((m) => ({ default: m.BoxScore })))
+// The preview-image studio (step 4). Split the hardest of the four: it pulls in
+// the whole canvas painter and the umpire accuracy reader, and most visits to a
+// game never open it.
+const GamePreview = lazy(() =>
+  import('./GamePreview.jsx').then((m) => ({ default: m.GamePreview })),
+)
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -137,6 +143,10 @@ export function GameView({ game, section, onSection }) {
           section: lastInningSection,
         },
         { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
+        // Fifth stop, and the only one that isn't a page of the scorebook —
+        // it makes the shareable image of this matchup. Last so the four
+        // scoring sections keep the order the "next" buttons walk.
+        { key: 'preview', label: 'Card', active: step === 4, section: 'preview' },
       ].map((s) => (
         <button
           key={s.key}
@@ -342,6 +352,16 @@ export function GameView({ game, section, onSection }) {
           lastUpdated={feedState.lastUpdated}
           onSection={onSection}
           spoilersOff={spoilersOff}
+        />
+        </Suspense>
+      )}
+      {feed && step === 4 && (
+        <Suspense fallback={<Loader />}>
+        <GamePreview
+          feed={feed}
+          starterLines={starterLines.data}
+          broadcast={broadcast.data}
+          treatments={jerseyTreatments}
         />
         </Suspense>
       )}
