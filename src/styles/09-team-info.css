@@ -67,7 +67,15 @@
 
 /* A masthead's club mark is the MONO knockout art — a flat, single-ink white
    silhouette (ADR-0031, lib/logoMono.js). On a light bar that disappears, so a
-   theme whose ink is dark re-inks the mark to match.
+   theme whose ink is dark re-inks the mark to match — `--mark-filter`, set by
+   `headerThemeStyle` alongside `--bar-fill`/`--bar-accent`/`--bar-text`, not a
+   `.is-themed--dark` descendant selector: a class selector matches ANY themed
+   ancestor, so a light-themed section nested inside a dark-themed page (the
+   opposing club's own-themed Defense/Starting-pitcher cards, TeamInfo.jsx)
+   would inherit the outer page's dark re-ink even though its own onBar-driven
+   text correctly stayed light — the mark and the text it's supposed to match
+   disagreeing. A custom property cascades "nearest ancestor that set it wins",
+   the same correct scoping `--bar-fill` already relies on.
 
    This is NOT the `filter: brightness(0) invert(1)` whitening ADR-0031 exists
    to forbid. That failure mode is filtering FULL-COLOR art: a mark whose
@@ -75,16 +83,17 @@
    The mono asset has already been through that reduction — it is one opaque
    shape plus transparency — so darkening it is exact, losing nothing there was
    left to lose. Applied only here, only to art that is already a silhouette. */
-.is-themed--dark .metricbar__logo {
-  filter: brightness(0);
+.metricbar__logo {
+  filter: var(--mark-filter, none);
 }
 
 /* A club's own uploaded City Connect masthead override (teams.js's
    cityConnectMastheadUrl) is already finished art, deliberately colored for
    its own bar — not a flat silhouette the theme's ink re-inks, but the
-   club's actual pick. Higher specificity than the dark-re-ink rule above
-   (two classes, not one) rather than an !important. */
-.is-themed--dark .metricbar__logo.metricbar__logo--custom {
+   club's actual pick. Higher specificity than the rule above (two classes,
+   not one) rather than an !important; unconditional because custom art is
+   never re-inked, dark theme or not. */
+.metricbar__logo.metricbar__logo--custom {
   filter: none;
 }
 

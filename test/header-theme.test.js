@@ -101,6 +101,19 @@ test('onBarTone flags a dark ink so a themed masthead can re-ink its mono mark',
   assert.equal(headerThemeFor(114, 'alternate-2').onBarTone, 'light')
 })
 
+// A nested section (the opposing club's own-themed card, TeamInfo.jsx) sets
+// its OWN --mark-filter inline, which must win over an outer page's — a CSS
+// custom property resolves nearest-ancestor-wins, unlike the `.is-themed--dark
+// .metricbar__logo` descendant selector this replaced, which matched ANY
+// themed ancestor and re-inked a light-themed mark just because it sat inside
+// a dark-themed page.
+test('headerThemeStyle carries --mark-filter, keyed to this theme\'s own onBarTone', () => {
+  const lightTheme = headerThemeFor(144, 'alternate-3') // Braves Main, cream ink
+  const darkTheme = headerThemeFor(144, 'city-connect') // Braves CC, navy ink
+  assert.equal(headerThemeStyle(lightTheme)['--mark-filter'], 'none')
+  assert.equal(headerThemeStyle(darkTheme)['--mark-filter'], 'brightness(0)')
+})
+
 test('headerThemeStyle/headerThemeClass are inert without a theme', () => {
   assert.equal(headerThemeStyle(null), undefined)
   assert.equal(headerThemeClass(null), '')
@@ -109,6 +122,7 @@ test('headerThemeStyle/headerThemeClass are inert without a theme', () => {
     '--bar-fill': theme.bar,
     '--bar-accent': theme.accent,
     '--bar-text': theme.onBar,
+    '--mark-filter': theme.onBarTone === 'dark' ? 'brightness(0)' : 'none',
   })
   assert.equal(headerThemeClass(theme), 'is-themed')
   assert.equal(headerThemeClass(headerThemeFor(144, 'city-connect')), 'is-themed is-themed--dark')

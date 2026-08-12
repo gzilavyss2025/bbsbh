@@ -67,9 +67,9 @@
    (teamlogo-and-buttons.css) resolves to 'auto' inside a box whose own height is still
    auto-computing (CSS2 §10.5), starving the mark's width to 0; an explicit height
    sidesteps that. `.metricbar__logo` still names the img/wrapper for the dark-theme
-   re-ink rule below (`.is-themed--dark .metricbar__logo`, 09-team-info.css) — shared
-   with DueUpNextCard/EnteringReference's unstretched inline mark, why the bleed rule
-   lives on `.teamlogo-crop-bar`, not folded in here. */
+   re-ink rule below (`--mark-filter` read by `.metricbar__logo`, 09-team-info.css) —
+   shared with DueUpNextCard/EnteringReference's unstretched inline mark, why the
+   bleed rule lives on `.teamlogo-crop-bar`, not folded in here. */
 .metricbar__logo {
   flex: 0 0 auto;
 }
