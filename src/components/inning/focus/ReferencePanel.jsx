@@ -205,9 +205,27 @@ function Section({
     )
   }
   if (tab === 'bench') {
+    // ONE LIST PER CLUB, OPEN. This tab used to render both clubs' whole
+    // roster cards at RosterPanel's own page default — collapsed — so tapping
+    // BENCH answered with two shut drawers and nothing else, and the bench a
+    // scorer came for was three taps deep. Each club now opens on the single
+    // list that half is actually about: the batting side's BENCH (who is left
+    // to hit for) and the fielding side's BULLPEN (which arm is next). The
+    // rotation starters are dropped at both ends — they cannot enter once the
+    // game is under way, which is the reason RosterPanel splits them out in
+    // the first place (see splitBullpen in InningViewer.jsx).
+    //
+    // Batting club first, deliberately: it is the half being scored. The
+    // ordinary stacked page still shows away-then-home, both collapsed, both
+    // whole — nothing here changes it (see RosterPanel's two new props).
+    const battingSide = effHalf === 'top' ? 'away' : 'home'
+    const sides = [
+      { side: battingSide, groups: ['bench'] },
+      { side: battingSide === 'away' ? 'home' : 'away', groups: ['bullpen'] },
+    ]
     return (
       <>
-        {['away', 'home'].map((side) => (
+        {sides.map(({ side, groups }) => (
           <RosterPanel
             key={side}
             title={rosters[side].name}
@@ -219,6 +237,8 @@ function Section({
             prospectsData={prospectsData}
             rookiesData={rookiesData}
             isMlb={isMlb}
+            defaultOpen
+            groups={groups}
           />
         ))}
       </>

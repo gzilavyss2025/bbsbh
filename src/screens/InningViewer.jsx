@@ -26,7 +26,7 @@ import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
 import { ReferenceBand, RosterPanels } from '../components/inning/ReferenceBand.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ScorebugMount } from '../components/gamehud/ScorebugMount.jsx'
-import { DueUpConsole } from '../components/gamehud/DueUpConsole.jsx'
+import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
 import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
@@ -790,70 +790,31 @@ export function InningViewer({
           breakpoint up the stat card and WPA chart sit side by side. */}
       <div className="innings__grid">
         {/* The anchored console band — focus mode only. The scorebug as this
-            screen's masthead rather than a dock floating over the at-bat card
-            (ScorebugMount.jsx, ADR-0043); it spans both grid columns. The
-            unfocused page mounts the same component further down instead,
-            where it renders the floating dock — never both at once.
-
-            .consolebar wraps it with DueUpConsole: the scorebug narrows back
-            to its old dock width at wide widths (24-floating-nav-and-hud.css),
-            and the width that frees up in this same row goes to a live
-            next-3-batters card rather than sitting empty — DueUpConsole hides
-            itself below the wide breakpoint, where the scorebug needs the
-            row's full width for its own bumped-up mobile sizing instead. */}
+            screen's masthead rather than a dock floating over the at-bat card,
+            plus whichever companion card the half's state calls for; it spans
+            both grid columns. See ConsoleBand.jsx (ADR-0043) for the row's
+            three states and why the band no longer stretches to fill an empty
+            one. The unfocused page mounts ScorebugMount directly further down
+            instead, where it renders the floating dock — never both at once. */}
         {focus.focused && (
-          <div className="consolebar">
-            <ScorebugMount
-              started={started}
-              live={curLiveState}
-              feed={feed}
-              unlocked={renderUnlocked}
-              revealedThrough={renderRevealedThrough}
-              runsInProgress={runsInProgress}
-              meta={meta}
-              treatment={winProbTreatment}
-              viewIdx={curIdx}
-              viewInning={effInning}
-              viewHalf={effHalf}
-              focused
-            />
-            {/* Two conditions, each shutting off a way this card can lie or
-                loiter:
-                  • `!focus.postHalf` — not once the half is OVER. "Who's due
-                    up" is meaningless after the 3rd out.
-                  • `focus.steps === 0 || stepFrontierIdx != null` — the card
-                    tracks the batting order as the reader steps, and it can
-                    only do that with `lastAtBatIndex`, which InningViewer has
-                    only for the half immediately after the reveal mark (see
-                    the win-prob clamp above). Reach a half via RollingLine's
-                    navigator and step it and the arithmetic silently falls
-                    back to the PRE-half leadoff slot — the card would name the
-                    same three men no matter how far in the reader got, and a
-                    card that quietly stops being true is worse than no card.
-                    BEFORE the first step, though, that fallback is not a
-                    fallback: the pre-half leadoff slot is the right answer for
-                    any half, which is the very figure UpNextBatters shows.
-
-                THE OPENING STATE IS THIS CARD'S TOO. It used to start only at
-                the first step, leaving the scorebug alone in the row — and
-                `.gamehud--console:only-child` then stretched it across the
-                whole stage, so a half OPENED on an outsized band with nothing
-                beside it, which is the state the reader lands in every half.
-                The half's first three batters fill that width instead, and the
-                band keeps its 264px dock width throughout. `.upnext` in the
-                stage below stands down while this card is up, so the same
-                three men are not named twice (styles/focus/stage.css). */}
-            {!focus.postHalf && (focus.steps === 0 || stepFrontierIdx != null) && (
-              <DueUpConsole
-                feed={feed}
-                inning={effInning}
-                half={effHalf}
-                revealedThrough={renderRevealedThrough}
-                stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
-                teamId={effHalf === 'top' ? meta.away.id : meta.home.id}
-              />
-            )}
-          </div>
+          <ConsoleBand
+            started={started}
+            live={curLiveState}
+            feed={feed}
+            unlocked={renderUnlocked}
+            revealedThrough={renderRevealedThrough}
+            runsInProgress={runsInProgress}
+            meta={meta}
+            treatment={winProbTreatment}
+            viewIdx={curIdx}
+            viewInning={effInning}
+            viewHalf={effHalf}
+            getDerived={getDerived}
+            postHalf={focus.postHalf}
+            steps={focus.steps}
+            stepFrontierIdx={stepFrontierIdx}
+            stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
+          />
         )}
 
         {/* `.innings__stage` is `display: contents` outside the wide+focused
@@ -977,13 +938,18 @@ export function InningViewer({
           a Refresh row that is always there, and why focus mode's one-row bar
           has to shrink it to icon scale rather than drop it (styles/focus).
 
-          Four states: a sealed half offers two reveal choices (ADR-0016) —
-          step one at-bat, or the whole half at once; a half that just finished
-          (or whose Summary the reader is on, focus.postHalf) offers
-          Summary/next-half instead; otherwise it's the plain advance — "Box
-          score ›" at the furthest revealed inning (never "Top 10th ›", which
-          would leak the game going to extras) or the next-half label once one
-          unlocks. */}
+          Three states: a sealed half offers two reveal choices (ADR-0016) —
+          step one at-bat, or the whole half at once; otherwise it's the plain
+          advance — "Box score ›" at the furthest revealed inning (never "Top
+          10th ›", which would leak the game going to extras) or the next-half
+          label once one unlocks; and under the Scores Unlocked pass, at the
+          live frontier, a calm status instead of either.
+
+          A half that just finished used to be a FOURTH state, pairing the
+          advance with a "Summary" button that swapped the single at-bat for the
+          whole half. It is gone: the numbers a scorer wants when a half closes
+          now arrive on their own in the console band (HalfTally.jsx), so the
+          end of a half has exactly one thing to say and it is "carry on". */}
       <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
         {/* …EXCEPT once the game is over, when there is nothing left to fetch:
             the feed is complete and a refetch returns the same bytes. Same
@@ -1009,33 +975,6 @@ export function InningViewer({
           <div className="liveedge" role="status" aria-live="polite">
             <span className="liveedge__dot" aria-hidden="true" />
             <span className="liveedge__label">{liveEdgeLabel}</span>
-          </div>
-        ) : focus.postHalf ? (
-          // The half just finished (or the reader's on its Summary,
-          // focus.summaryOpen) — plain .btn/.btn--next skins, not the
-          // kraft-seal .btn--reveal below: nothing here is sealed anymore.
-          <div className="revealsplit">
-            <button
-              type="button"
-              className={`btn revealsplit__btn ${focus.summaryOpen ? 'is-active' : ''}`}
-              onClick={focus.openSummary}
-              aria-current={focus.summaryOpen || undefined}
-            >
-              Summary
-            </button>
-            {nextIdx != null ? (
-              <button
-                className="btn btn--next revealsplit__btn"
-                onClick={() => requestForwardHalf(nextIdx)}
-                aria-disabled={turning || undefined}
-              >
-                {nextLabel} ›
-              </button>
-            ) : (
-              <button className="btn btn--next revealsplit__btn" onClick={onBoxScore}>
-                Box score ›
-              </button>
-            )}
           </div>
         ) : currentSealed ? (
           <div className="revealsplit">

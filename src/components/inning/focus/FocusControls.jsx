@@ -30,10 +30,22 @@ export function useFocusMode(curIdx, currentSealed) {
   const [step, setStep] = useState(null)
   const [steps, setSteps] = useState(0)
   const [items, setItems] = useState([])
-  // Whether the reader tapped "Summary" for the half that just finished —
-  // see `held`/`postHalf` below. A deliberate choice, so it only ever moves
-  // forward on request, never automatically.
-  const [summaryOpen, setSummaryOpen] = useState(false)
+  // THERE IS NO SUMMARY STATE ANY MORE, and the absence is the decision.
+  //
+  // A "Summary" button used to share the post-half bar with the next-half
+  // advance, swapping the single at-bat for the whole half's stacked cards. It
+  // was a one-directional `setSummaryOpen(true)` wearing a filled-navy pressed
+  // skin — pressed-looking, pressed-announcing, and dead on a second press,
+  // with no route back to the at-bat it had replaced. Made a real toggle, it
+  // then read as a second thing to decide at the end of every half, on the one
+  // bar that should only ever say "carry on".
+  //
+  // So the half's numbers come to the reader instead of the reader going to
+  // them: HalfTally.jsx puts the line and the pitch analysis in the console
+  // band the moment the third out lands, at every width, with nothing to tap.
+  // The whole half's cards are still a tap away — leave the half and come back
+  // to it, or open the box score — and `postHalf` below is unchanged, so focus
+  // mode still holds the last at-bat on screen until the reader moves on.
   // Whether THIS half (curIdx) has been seen sealed at all since the reader
   // arrived on it — the difference between "I was just stepping through this
   // and it completed" (held, below) and "I jumped straight to an old,
@@ -50,24 +62,25 @@ export function useFocusMode(curIdx, currentSealed) {
     setStep(null)
     setSteps(0)
     setItems([])
-    setSummaryOpen(false)
     setSealedSeen(currentSealed)
   } else if (currentSealed && !sealedSeen) {
     setSealedSeen(true)
   }
 
   // The half just finished revealing while the reader was watching it (3rd
-  // out, curIdx unchanged) — `held` keeps focus mode's single-at-bat view on
-  // screen (cursor already lands on the final entry, see below) instead of
-  // snapping straight to the unfocused page, until they deliberately tap
-  // Summary (openSummary). `postHalf` covers both that moment and the
-  // summary screen it leads to — the ONE flag the bottom bar keys off to
-  // show Summary/next-half controls instead of the ordinary reveal/advance
-  // ones, for as long as this half stays the one on screen.
-  const held = sealedSeen && !currentSealed && !summaryOpen
+  // out, curIdx unchanged) — focus mode holds its single-at-bat view on screen
+  // (the cursor already lands on the final entry, see below) rather than
+  // snapping to the unfocused page underneath the play still being written
+  // down, for as long as this half stays the one on screen.
+  //
+  // These two used to differ: a `held` flag additionally required Summary to be
+  // CLOSED, so opening Summary dropped out of focus mode while `postHalf` kept
+  // the bar's Summary/advance pair up. With Summary gone they are one
+  // condition, kept under two names because they answer two questions —
+  // `postHalf` is what ConsoleBand reads to swap the due-up card for the half's
+  // tally, and `focused` is what composes the screen.
   const postHalf = sealedSeen && !currentSealed
-  const focused = currentSealed || held
-  const openSummary = useCallback(() => setSummaryOpen(true), [])
+  const focused = currentSealed || postHalf
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -91,10 +104,7 @@ export function useFocusMode(curIdx, currentSealed) {
 
   return {
     focused,
-    held,
     postHalf,
-    summaryOpen,
-    openSummary,
     step,
     steps,
     items,

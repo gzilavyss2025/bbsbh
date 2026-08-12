@@ -192,6 +192,7 @@
       "class": "reveal-only",
       "why": "The per-half derivations — runs, hits, errors, Statcast superlatives, foul counters. One of the two original reveal-only modules (ADR-0001).",
       "importers": [
+        "components/gamehud/HalfTally.jsx",
         "components/gamehud/StatBox.jsx",
         "hooks/useRevealProgress.js",
         "screens/boxscore/revealBoxScore.js"
@@ -273,12 +274,13 @@
     },
     "linescore.js": {
       "class": "reveal-only",
-      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot.",
+      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot. HalfTally.jsx joined it the same way: focus mode's console band shows a FINISHED half's line once that half sits at or under the reveal mark, read inside a SealBox render function exactly as StatBox reads it (ADR-0043).",
       "importers": [
         "api/boxscore.js",
         "api/derive.js",
         "api/loadScorecard.js",
         "components/gamehud/RollingLine.jsx",
+        "components/gamehud/HalfTally.jsx",
         "components/gamehud/ScorebugMount.jsx",
         "components/gamehud/StatBox.jsx",
         "screens/boxscore/revealBoxScore.js"

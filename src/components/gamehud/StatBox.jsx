@@ -49,6 +49,13 @@ function halfStatcastCards(feed, d) {
 // pinch-hitter) all stage together as cards at the TOP of the half now (see
 // HalfInning.jsx's PrePitchChanges), rather than the pitching change alone
 // being split off into this stat slot below the lineups.
+//
+// Focus mode's console band shows a FINISHED half's line and pitch analysis in
+// the same `.statline` cells, without the rolling game totals, the ABS block or
+// the Statcast cards. That is `HalfTally.jsx`, a sibling rather than a variant
+// flag here — this file is at its size budget, and the tally is its own idea.
+// It borrows this file's `Stat` cell (exported below) and repeats the same
+// SealBox-render-function shape for the same reveal-only reads (ADR-0001).
 export function StatBox({
   feed,
   inning,
@@ -565,7 +572,9 @@ function favorMeterLabel(net, awayFranchise, homeFranchise, totalMissedCalls) {
   return `Missed calls have added ${Math.abs(net).toFixed(1)} runs for ${net > 0 ? awayFranchise : homeFranchise} — ${tierLabel}${countSuffix}`
 }
 
-function Stat({ k, v, tone }) {
+// One stat cell. Exported because HalfTally.jsx draws the same cells in the
+// same `.statline` grid for focus mode's console band — one recipe, two hosts.
+export function Stat({ k, v, tone }) {
   return (
     <div className={`stat ${tone ? `stat--${tone}` : ''}`}>
       <span className="stat__v">{v}</span>

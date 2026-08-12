@@ -527,15 +527,11 @@
     padding: 8px 4px;
   }
 }
-/* Summary's own selected state (focus.summaryOpen) — the same filled-navy
-   look .btn--next wears, so picking it reads as "you are here" the same way
-   RollingLine's own .is-active pick does. */
-.revealsplit__btn.is-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: var(--text-on-ink);
-  font-weight: var(--w-bold);
-}
+/* (A `.revealsplit__btn.is-active` filled-navy state used to live here, for
+   focus mode's Summary button. That button is gone — the half's numbers arrive
+   in the console band on their own now, so the post-half bar carries the
+   next-half advance alone and nothing in this split is ever "selected". See
+   HalfTally.jsx and useFocusMode.) */
 
 .btn--ghost {
   background: transparent;

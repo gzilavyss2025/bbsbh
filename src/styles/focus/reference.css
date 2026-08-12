@@ -229,22 +229,21 @@
   pointer-events: none;
 }
 
-/* The one place in focus mode allowed to scroll, and only when a long section
-   (a 13-man bullpen) outruns the sticky column. Thin, so when it does appear it
-   reads as a rail rather than a browser chrome bar. */
+/* NO SCROLL OF ITS OWN IN THE COLUMN. This used to carry `overflow-y: auto`
+   unconditionally, against a `.focusrail` capped at `100vh - var(--space-10)`
+   (styles/focus/stage.css) — so a 13-man bullpen, or either club's lineup, drew
+   a second scrollbar a few hundred pixels tall against the right edge of the
+   page. That is the scrollbar-inside-a-scrollbar ADR-0043 removed from the old
+   stacked rail, reintroduced by the height cap on the tabbed one. Both are
+   gone: the column grows to its section and the PAGE scrolls.
+
+   The scroll survives where it is real — in the phone sheet, which genuinely
+   has a fixed height to fit content into. See .refpanel__body--sheet below. */
 .refpanel__body {
   margin-top: var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  min-height: 0;
-  overflow-y: auto;
-  /* A flick past the end of a long lineup stops here rather than chaining into
-     the page underneath — the same `contain` the site-search results list
-     carries (ADR-0037). Without it a drag inside the sheet scrolled the innings
-     page behind it, which reads as "the sheet is stuck". */
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
 }
 
 /* Sections render bare here rather than inside .innings__ref-* wrappers, so
@@ -262,17 +261,20 @@
   margin: 0;
   width: 100%;
   min-width: 0;
-  /* `flex: 0 0 auto` is what makes this panel scroll at all, and it is not
+  /* `flex: 0 0 auto` is what makes the SHEET scroll at all, and it is not
      interchangeable with the default `0 1 auto`. The panel is a COLUMN flex
-     container with a bounded height, so every section is a flex ITEM free to
-     shrink; a flex item's automatic minimum size would normally stop that at
-     its content, but `.lineupcard` (and the roster cards) carry
-     `overflow: hidden`, which sets that minimum to zero. Both clubs' lineups —
-     523px of card — were therefore squeezed into the 302px the sheet had free
-     and CLIPPED there: `scrollHeight` equalled `clientHeight`, so `overflow-y:
-     auto` had nothing to scroll and the bottom half of the second lineup was
-     unreachable by any gesture. Refusing to shrink lets the content overflow,
-     which is the only thing a scroll container can act on. */
+     container, and inside the sheet it has a bounded height — so every section
+     is a flex ITEM free to shrink; a flex item's automatic minimum size would
+     normally stop that at its content, but `.lineupcard` (and the roster cards)
+     carry `overflow: hidden`, which sets that minimum to zero. Both clubs'
+     lineups — 523px of card — were therefore squeezed into the 302px the sheet
+     had free and CLIPPED there: `scrollHeight` equalled `clientHeight`, so
+     `overflow-y: auto` had nothing to scroll and the bottom half of the second
+     lineup was unreachable by any gesture. Refusing to shrink lets the content
+     overflow, which is the only thing a scroll container can act on. Inert in
+     the wide column, which is no longer height-bounded and has nothing to
+     shrink against — kept on the shared selector because the two placements
+     render the same sections and only one of them may quietly squash them. */
   flex: 0 0 auto;
 }
 
@@ -362,9 +364,19 @@
    the strip and the sheet's own 40px of padding added up to MORE than the 80vh
    the sheet is allowed, so the foot of the panel was laid out past the sheet's
    bottom edge and off the screen. `min-height: 0` is required for a flex item
-   to be allowed to scroll rather than grow past its track. */
+   to be allowed to scroll rather than grow past its track.
+   THE SCROLL ITSELF LIVES HERE, not on the bare `.refpanel__body` above: a
+   docked sheet has a real height to fit content into, and the wide column does
+   not. A flick past the end of a long lineup stops here rather than chaining
+   into the innings page underneath — the same `contain` the site-search results
+   list carries (ADR-0037); without it a drag inside the sheet scrolled the page
+   behind it, which reads as "the sheet is stuck". Thin, so the bar reads as a
+   rail rather than browser chrome. */
 .refpanel__body--sheet {
   flex: 1 1 auto;
   min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
