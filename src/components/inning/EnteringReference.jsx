@@ -86,7 +86,14 @@ export function EnteringReference({ feed, inning, half, battingSide, awayName, h
 // whole game's plays, and these two cards hang off InningViewer, which
 // re-renders on every live report during a live game. The reveal mark is a prop,
 // so the memo comparison covers the gate itself.
-export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, fieldingTreatment, revealedThrough }) {
+// `bare` (focus mode's FIELD tab) drops the disclosure and keeps the masthead.
+// Inside a tab of the same name the chevron was a second collapse control on a
+// surface that is already one — the tab IS the disclosure, and a reader who
+// wants this section gone taps a different tab. The club masthead stays,
+// because "which club is fielding" is real information the tab label ("Field")
+// does not carry. Same shape RosterPanel took in PR #685: one prop, defaulting
+// to the stacked page's existing behaviour, so nothing outside focus mode moves.
+export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, fieldingTreatment, revealedThrough, bare = false }) {
   const [open, setOpen] = useState(true)
   const defense = defenseEntering(feed, fieldingSide, inning, half, revealedThrough)
   if (!defense || defense.length === 0) return null
@@ -96,28 +103,38 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
   // the same `.is-themed .halfdefense__title` rule 09-team-info.css already
   // carries; no new CSS needed here.
   const theme = headerThemeFor(fieldingTeamId, themeKeyFor(fieldingTeamId, fieldingSide, fieldingTreatment))
+  const mark = (
+    <TeamLogo
+      teamId={fieldingTeamId}
+      name={fieldingName}
+      size={22}
+      variant="mono"
+      crop="bar"
+      className="metricbar__logo"
+    />
+  )
   return (
     <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
-      <button
-        type="button"
-        className="halfdefense__title"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-      >
-        <TeamLogo
-          teamId={fieldingTeamId}
-          name={fieldingName}
-          size={22}
-          variant="mono"
-          crop="bar"
-          className="metricbar__logo"
-        />
-        Defensive alignment
-        <span className="halfdefense__chevron" aria-hidden="true">
-          {open ? '▾' : '▸'}
-        </span>
-      </button>
-      {open && <DefenseDiamond defense={defense} />}
+      {bare ? (
+        <h4 className="halfdefense__title halfdefense__title--bare">
+          {mark}
+          Defensive alignment
+        </h4>
+      ) : (
+        <button
+          type="button"
+          className="halfdefense__title"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+        >
+          {mark}
+          Defensive alignment
+          <span className="halfdefense__chevron" aria-hidden="true">
+            {open ? '▾' : '▸'}
+          </span>
+        </button>
+      )}
+      {(bare || open) && <DefenseDiamond defense={defense} />}
     </section>
   )
 })
@@ -147,8 +164,37 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 // the moment.
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
-export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough }) {
+// TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
+// existing behaviour — the same shape RosterPanel took in PR #685.
+//
+//  • `bare` — drop the "Lineups ▾" disclosure. Inside a tab already called
+//    LINEUPS it was a second collapse control on a surface that is one, and
+//    a header restating the tab's own label. The per-club mastheads stay:
+//    those name the two clubs, which the tab label does not.
+//
+//  • `leadSide` — show ONE club at a time, this one first, with the other
+//    behind a swap. A scorer is scoring ONE half; both clubs' nine slots in a
+//    328px column is a long scroll past the eighteen names to reach the nine
+//    that matter. Worse, the club that ISN'T batting carries the
+//    "← Due up / On deck / In the hole" pills, because selectDueUpNext
+//    correctly describes ITS next half — accurate, and misread on a screen
+//    devoted to the half in progress. Leading with the batting club puts those
+//    pills behind a deliberate tap, where "who leads off their next half" is
+//    the question the reader just asked. Null keeps both clubs stacked, which
+//    is right for the unfocused page, where the section is reference rather
+//    than the surface being worked.
+export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough, bare = false, leadSide = null }) {
   const [open, setOpen] = useState(true)
+  // Which club is on screen when `leadSide` is set. Keyed off the prop rather
+  // than reset in an effect: navigating to the other half changes `leadSide`,
+  // and the answer should follow the half the reader is now scoring rather
+  // than keep whichever club they last swapped to on a different half.
+  const [shown, setShown] = useState(leadSide)
+  const [prevLead, setPrevLead] = useState(leadSide)
+  if (leadSide !== prevLead) {
+    setPrevLead(leadSide)
+    setShown(leadSide)
+  }
   const away = lineupEntering(feed, 'away', inning, half, revealedThrough)
   const home = lineupEntering(feed, 'home', inning, half, revealedThrough)
   if ((!away || away.length === 0) && (!home || home.length === 0)) return null
@@ -158,23 +204,64 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
     const bySlot = new Map(dueUpNext.batters.map((b, i) => [b.slot, UP_NEXT_LABELS[i]]))
     return bySlot
   }
+  const teamFor = (side) =>
+    side === 'away'
+      ? { name: awayName || 'Away', teamId: awayId, slots: away ?? [] }
+      : { name: homeName || 'Home', teamId: homeId, slots: home ?? [] }
+  const renderTeam = (side) => {
+    const { name, teamId, slots } = teamFor(side)
+    return (
+      <LineupTeam
+        name={name}
+        teamId={teamId}
+        side={side}
+        treatment={treatment?.[side]}
+        slots={slots}
+        prospectsData={prospectsData}
+        rookiesData={rookiesData}
+        isMlb={isMlb}
+        upNextLabels={upNextLabels(side)}
+      />
+    )
+  }
+  // The club NOT on screen, and whether it has a lineup worth swapping to. A
+  // thin MiLB feed that posted only one side must not offer a swap onto an
+  // empty card (LineupTeam renders null on an empty side, so the swap would
+  // land on nothing).
+  const otherSide = shown === 'away' ? 'home' : 'away'
+  const canSwap = leadSide != null && teamFor(otherSide).slots.length > 0
   return (
     <section className="lineupcard">
-      <button
-        type="button"
-        className="lineupcard__title"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-      >
-        Lineups
-        <span className="lineupcard__chevron" aria-hidden="true">
-          {open ? '▾' : '▸'}
-        </span>
-      </button>
-      {open && (
+      {!bare && (
+        <button
+          type="button"
+          className="lineupcard__title"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+        >
+          Lineups
+          <span className="lineupcard__chevron" aria-hidden="true">
+            {open ? '▾' : '▸'}
+          </span>
+        </button>
+      )}
+      {(bare || open) && (
         <div className="lineupcard__teams">
-          <LineupTeam name={awayName || 'Away'} teamId={awayId} side="away" treatment={treatment?.away} slots={away ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('away')} />
-          <LineupTeam name={homeName || 'Home'} teamId={homeId} side="home" treatment={treatment?.home} slots={home ?? []} prospectsData={prospectsData} rookiesData={rookiesData} isMlb={isMlb} upNextLabels={upNextLabels('home')} />
+          {leadSide != null ? (
+            renderTeam(shown)
+          ) : (
+            <>
+              {renderTeam('away')}
+              {renderTeam('home')}
+            </>
+          )}
+          {/* Destination-named, per ADR-0017's button convention — it says the
+              club you land on, not "Swap". */}
+          {canSwap && (
+            <button type="button" className="lineupcard__swap" onClick={() => setShown(otherSide)}>
+              {teamFor(otherSide).name} lineup ›
+            </button>
+          )}
         </div>
       )}
     </section>

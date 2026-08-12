@@ -75,23 +75,16 @@ export function ReferencePanel(props) {
   // on the body pointing back. The ids are suffixed per placement because the
   // rail and the sheet can both exist in the DOM on a resize, and duplicate ids
   // would cross the wires between them.
+  //
+  // AND THE REST OF THE CONTRACT, which this used to declare and not keep.
+  // AtBatTrail.jsx's header argues at length that announcing a widget contract
+  // while honouring none of it is worse for a screen-reader user than an honest
+  // shape — and this file, next door, was doing exactly that: `role="tablist"`
+  // with every tab in the tab order and no arrow-key handling at all. A user
+  // who reaches a tablist is told to expect one stop and arrow keys; they got
+  // four stops and dead arrows. TabStrip below owns both halves now.
   const strip = (idFor) => (
-    <div className="refpanel__tabs" role="tablist" aria-label="Reference">
-      {tabs.map((t) => (
-        <button
-          key={t.key}
-          type="button"
-          role="tab"
-          id={idFor(`tab-${t.key}`)}
-          className="refpanel__tab"
-          aria-selected={t.key === active}
-          aria-controls={idFor('panel')}
-          onClick={() => setTab(t.key)}
-        >
-          {t.label}
-        </button>
-      ))}
-    </div>
+    <TabStrip tabs={tabs} active={active} onSelect={setTab} idFor={idFor} />
   )
 
   if (wide) {
@@ -149,6 +142,74 @@ export function ReferencePanel(props) {
   )
 }
 
+// The tab strip, with the two things `role="tablist"` actually promises:
+//
+//  • A ROVING TABINDEX. One stop in the page's tab order, not four. The
+//    selected tab is the stop; the rest are reachable only by arrow key. That
+//    is the whole point of the role — a keyboard user tabs PAST a tablist in
+//    one press and steps INTO it deliberately, rather than paying four presses
+//    to cross a reference shelf on the way to the reveal button they are
+//    pressing forty times a half-hour.
+//
+//  • ARROW KEYS, wrapping, plus Home/End. Selection follows focus, which is
+//    the right pattern here: showing a section is instant and side-effect-free
+//    (one memoized render, no fetch), so there is nothing to defer and no
+//    reason to make the reader press Enter as well.
+//
+// Focus moves imperatively in the handler, with no effect and no state of its
+// own. A key press lands on the tab that HAS focus, so moving selection is only
+// half the job — the new tab has to be focused too, or the next arrow press
+// arrives at the old one. Focusing it directly is legal even though it is still
+// `tabIndex={-1}` at that instant: -1 blocks the TAB key, never `.focus()`, and
+// the re-render that follows makes it the strip's 0 anyway. Doing it here also
+// keeps a plain click from ever stealing focus, which an effect keyed on
+// `active` would have done.
+function TabStrip({ tabs, active, onSelect, idFor }) {
+  const ref = useRef(null)
+
+  const onKeyDown = (e) => {
+    const i = tabs.findIndex((t) => t.key === active)
+    let next = null
+    if (e.key === 'ArrowRight') next = (i + 1) % tabs.length
+    else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length
+    else if (e.key === 'Home') next = 0
+    else if (e.key === 'End') next = tabs.length - 1
+    if (next == null) return
+    e.preventDefault()
+    onSelect(tabs[next].key)
+    // Indexed off the container rather than by id: the same strip renders twice
+    // (rail and sheet) with different id prefixes, and the node order here is
+    // `tabs` order by construction.
+    ref.current?.querySelectorAll('[role="tab"]')[next]?.focus()
+  }
+
+  return (
+    <div
+      ref={ref}
+      className="refpanel__tabs"
+      role="tablist"
+      aria-label="Reference"
+      onKeyDown={onKeyDown}
+    >
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          role="tab"
+          id={idFor(`tab-${t.key}`)}
+          className="refpanel__tab"
+          aria-selected={t.key === active}
+          aria-controls={idFor('panel')}
+          tabIndex={t.key === active ? 0 : -1}
+          onClick={() => onSelect(t.key)}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // One tab's content. Only the selected section is rendered at all — not hidden
 // with CSS — so the panel's height is the section's height and nothing the
 // reader isn't looking at is in the DOM competing for the scroll.
@@ -186,6 +247,8 @@ function Section({
         rookiesData={rookiesData}
         isMlb={isMlb}
         revealedThrough={revealedThrough}
+        bare
+        leadSide={effHalf === 'top' ? 'away' : 'home'}
       />
     )
   }
@@ -201,6 +264,7 @@ function Section({
         fieldingTeamId={effHalf === 'top' ? meta.home.id : meta.away.id}
         fieldingTreatment={treatment?.[fieldingSide]}
         revealedThrough={revealedThrough}
+        bare
       />
     )
   }
