@@ -108,12 +108,26 @@
   .gamecard__atmark-ink {
     transition: opacity var(--dur-med) var(--ease-out);
   }
+
+  /* The park's name (.gamecard__parkname, styled in
+     07-team-logo-and-buttons.css) grows in alongside the photo it names —
+     same trigger, same duration, so the two read as one reveal rather than
+     two separately-timed ones. */
+  .gamecard:hover .gamecard__parkname,
+  .gamecard:focus-within .gamecard__parkname {
+    max-width: 240px;
+    opacity: 1;
+  }
+  .gamecard__parkname {
+    transition: max-width var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gamecard__parkart,
   .gamecard__atmark-ghost,
-  .gamecard__atmark-ink {
+  .gamecard__atmark-ink,
+  .gamecard__parkname {
     transition: none;
   }
 }
