@@ -27,10 +27,30 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 // ink text, which read as two unlabeled drawers rather than two teams. Untuned
 // (club, treatment) pairs fall back to the app's default navy bar, same as
 // every other caller — never a synthesised triad (see headerTheme.js's header).
-export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = null, side, treatment, revealedThrough, prospectsData, rookiesData, isMlb }) {
-  const [open, setOpen] = useState(false)
+//
+// TWO PROPS EXIST FOR FOCUS MODE'S REFERENCE PANEL, and both default to
+// today's behaviour so the ordinary stacked page is untouched.
+//
+//  • `defaultOpen` — collapsed is right on a page that stacks two of these
+//    under everything else, and wrong inside a TAB, where the tab itself is
+//    already the disclosure. Opening the Bench tab used to answer with two
+//    shut drawers and nothing else: three taps to read a bench.
+//  • `groups` — which of the three lists to draw, as a subset of
+//    ['bullpen', 'bench', 'starters']. Null means all three, in the source
+//    order below. Focus mode asks each club for the ONE list that is useful
+//    while its half is being scored — the batting side's bench (who is left
+//    to hit for) and the fielding side's bullpen (which arm is next) — so a
+//    scorer reaches the name they want without paging past the two lists
+//    they do not. Names, not counts: a player who has already entered stays
+//    on the list, struck through, because "used" is a fact a scorer wants
+//    just as much as "available" (see `entered` below).
+export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = null, side, treatment, revealedThrough, prospectsData, rookiesData, isMlb, defaultOpen = false, groups = null }) {
+  const [open, setOpen] = useState(defaultOpen)
+  const shows = (g) => (groups ? groups.includes(g) : true)
   const empty =
-    roster.starters.length === 0 && roster.bullpen.length === 0 && roster.bench.length === 0
+    (!shows('starters') || roster.starters.length === 0) &&
+    (!shows('bullpen') || roster.bullpen.length === 0) &&
+    (!shows('bench') || roster.bench.length === 0)
   const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
@@ -53,7 +73,7 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
         <div className="roster__body">
           {empty && <p className="hint">Not posted yet.</p>}
 
-          {roster.bullpen.length > 0 && (
+          {shows('bullpen') && roster.bullpen.length > 0 && (
             <>
               <h4 className="roster__group">Bullpen</h4>
               <ul className="roster__list">
@@ -74,7 +94,7 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
             </>
           )}
 
-          {roster.bench.length > 0 && (
+          {shows('bench') && roster.bench.length > 0 && (
             <>
               <h4 className="roster__group">Bench</h4>
               <ul className="roster__list">
@@ -95,7 +115,7 @@ export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = n
             </>
           )}
 
-          {roster.starters.length > 0 && (
+          {shows('starters') && roster.starters.length > 0 && (
             <>
               <h4 className="roster__group">Starters</h4>
               <ul className="roster__list">

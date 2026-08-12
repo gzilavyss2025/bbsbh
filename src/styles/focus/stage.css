@@ -125,6 +125,37 @@
   gap: var(--space-3);
 }
 
+/* ------------------------------------------- the phone stage's reading order */
+/* ADR-0043 puts the reference chips "a chip row under the trail". On a phone
+   they were not: `.innings__stage` is `display: contents` here, so its children
+   (the at-bat, the trail, the running line) and ReferencePanel's own `.refbar`
+   all become items of the SAME .innings__grid flex column — and .refbar, a
+   later sibling of the stage in InningViewer's markup, therefore landed under
+   the running line, at the very bottom of the page.
+
+   Measured at 390x844, two at-bats in, scrolled to the top: the action bar
+   started at 780, the running line at 784 and the chip row at 910, against a
+   844 viewport. So BOTH of the two surfaces ADR-0043 kept deliberately — the
+   chips, and the running line whose cells are the only half-inning navigator
+   (`.inningnav` moves +-1 only) — sat under the bar or past the fold, and the
+   reader had to scroll to find either.
+
+   Two orders fix it without touching the markup, which is the same idiom
+   12-sealbox.css already uses to order this column on a phone. Everything else
+   here keeps the default 0, so the band and the at-bat stay where they are;
+   the chips move up under the trail, and the running line becomes the LAST
+   item — which is what puts it inside `.innings--focus`'s own bottom padding
+   and clear of the bar rather than behind it. */
+@media (max-width: 739.98px) {
+  .innings--focus .refbar {
+    order: 1;
+  }
+
+  .innings--focus .rolling {
+    order: 2;
+  }
+}
+
 /* ---------------------------------------------------------- due-up console */
 /* The next-3-batters card beside the narrowed scorebug (DueUpConsole.jsx) —
    desktop only; a phone gives that row's whole width back to the scorebug's
@@ -247,6 +278,50 @@
     font-variant-numeric: tabular-nums;
     font-size: var(--fs-small);
     color: var(--text-muted);
+  }
+}
+
+/* ------------------------------------------------ the finished half's tally */
+/* HalfTally.jsx (via ConsoleBand.jsx) — what fills the console row once the
+   half is over, where DueUpConsole has nothing left to say. Same slot, same
+   rules as that card: desktop only, `flex: 1 1 auto` beside the band's
+   fixed 264px. A phone gives the row's whole width to the band and has the
+   least vertical room to spare, so it gets the numbers from Summary instead.
+
+   Eight cells in two rows of four, sized against the ~570px this slot has at
+   iPad-portrait width: the half's own line (R/H/E/LOB) over its pitch analysis
+   (pitches, whiffs, fouls, first-pitch strikes). The full card's own 4-column
+   .statline (12-sealbox.css) is already the right shape — only the type steps
+   down, because these cells are captioning a band rather than heading a card. */
+.halftally {
+  display: none;
+}
+
+@media (min-width: 740px) {
+  .halftally {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  /* The title keeps .statbox__title's own navy-under-a-kraft-rule masthead
+     (12-sealbox.css) — deliberately, because that is the SAME signature the
+     band beside it and .half__title below it already wear (ADR-0043's own
+     argument for the band's ground). It names the half rather than the full
+     card's "Insights", so the two rows of numbers cannot be read as the
+     game's. Nothing here changes its colour: --text-on-ink on navy is the
+     documented pairing check-contrast.mjs already holds. */
+  .halftally .statbox__title {
+    margin-bottom: var(--space-2);
+  }
+
+  .statline--console .stat__v {
+    font-size: var(--fs-body);
+  }
+
+  .statline--console .stat__k {
+    font-size: var(--fs-caption);
   }
 }
 
@@ -463,20 +538,18 @@
     flex: 0 0 auto;
   }
 
-  /* …unless it has the row to itself, in which case it takes the row. The
-     264px width buys something only while DueUpConsole is beside it spending
-     the rest of the width (see .consolebar, styles/focus/stage.css). That card
-     is absent in three states — before the half's first at-bat is revealed,
-     once the half is over, and on a half reached out of order (InningViewer's
-     gate) — and in all three the band sat as a narrow stub with ~570px of
-     blank paper beside it at 834px: the dead reserved column ADR-0043 set out
-     to remove, reappearing in the state the reader lands in after every half.
-     `:only-child` because the condition is literally "is there a second card
-     in this row", which is a fact about the DOM and needs no second flag
-     threaded down from React to restate it. */
-  .gamehud--console:only-child {
-    width: 100%;
-  }
+  /* THE BAND NEVER STRETCHES. It used to: `.gamehud--console:only-child`
+     took the whole row whenever nothing sat beside it, on the argument that a
+     264px stub with blank paper beside it was the dead reserved column
+     ADR-0043 set out to remove. What it actually drew was worse — at 1280 a
+     ~930px navy rectangle holding two 24px club marks, two zeros and an empty
+     diamond, with ~500px of bare navy in the middle of it. A slab reads as a
+     rendering fault; blank PAPER just reads as paper.
+     So the card keeps the dock's size at every width, and the row is filled
+     with something real instead: DueUpConsole while the half is being scored,
+     the half's own tally (`.halftally`, below) once it is over. The one
+     state left with nothing beside it is a half reached out of order and
+     stepped — rare, and it now ends in open paper rather than a slab. */
 
   /* The two lines above the score strip step up a role each. The dock's own
      13/12px was sized for a card floating in a page CORNER, read in passing;

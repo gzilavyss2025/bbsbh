@@ -30,9 +30,17 @@ export function useFocusMode(curIdx, currentSealed) {
   const [step, setStep] = useState(null)
   const [steps, setSteps] = useState(0)
   const [items, setItems] = useState([])
-  // Whether the reader tapped "Summary" for the half that just finished —
-  // see `held`/`postHalf` below. A deliberate choice, so it only ever moves
-  // forward on request, never automatically.
+  // Whether the reader has "Summary" open for the half that just finished —
+  // see `held`/`postHalf` below. Never automatic: it moves on a tap alone.
+  //
+  // A TOGGLE, both ways. It used to be a one-directional `setSummaryOpen(true)`
+  // while the button that drove it wore a filled-navy selected state — so the
+  // control looked pressed, read as pressed to assistive tech, and then did
+  // nothing at all when pressed again, with no route back to the single at-bat
+  // it had just replaced. Summary is a VIEW of the half you are standing in,
+  // not a step forward out of it, so leaving it has to be as cheap as entering
+  // it. Nothing about the reveal mark moves either way; `postHalf` (below) is
+  // what keeps this bar on screen, and it does not read this flag.
   const [summaryOpen, setSummaryOpen] = useState(false)
   // Whether THIS half (curIdx) has been seen sealed at all since the reader
   // arrived on it — the difference between "I was just stepping through this
@@ -60,14 +68,17 @@ export function useFocusMode(curIdx, currentSealed) {
   // out, curIdx unchanged) — `held` keeps focus mode's single-at-bat view on
   // screen (cursor already lands on the final entry, see below) instead of
   // snapping straight to the unfocused page, until they deliberately tap
-  // Summary (openSummary). `postHalf` covers both that moment and the
+  // Summary (toggleSummary). `postHalf` covers both that moment and the
   // summary screen it leads to — the ONE flag the bottom bar keys off to
   // show Summary/next-half controls instead of the ordinary reveal/advance
   // ones, for as long as this half stays the one on screen.
+  //
+  // `held` is local. It used to be returned as well, and nothing outside this
+  // hook ever read it: it only means anything folded into `focused` below.
   const held = sealedSeen && !currentSealed && !summaryOpen
   const postHalf = sealedSeen && !currentSealed
   const focused = currentSealed || held
-  const openSummary = useCallback(() => setSummaryOpen(true), [])
+  const toggleSummary = useCallback(() => setSummaryOpen((s) => !s), [])
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -91,10 +102,9 @@ export function useFocusMode(curIdx, currentSealed) {
 
   return {
     focused,
-    held,
     postHalf,
     summaryOpen,
-    openSummary,
+    toggleSummary,
     step,
     steps,
     items,
