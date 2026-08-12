@@ -77,6 +77,20 @@ export function rule(ctx, x, y, width, { fill, thickness = 1 } = {}) {
   ctx.fillRect(x, y, width, thickness)
 }
 
+// A run of dots between two columns — the scorebook's own way of carrying the
+// eye across a gap. Used where a label and its value are far enough apart that
+// the row stops reading as one thing, which on a ruled sheet is the native
+// idiom rather than a decoration.
+export function leaders(ctx, x, y, width, { fill, gap = 7, radius = 1.1 } = {}) {
+  if (width < gap * 2) return
+  ctx.fillStyle = fill
+  for (let dx = gap; dx < width - gap / 2; dx += gap) {
+    ctx.beginPath()
+    ctx.arc(x + dx, y, radius, 0, Math.PI * 2)
+    ctx.fill()
+  }
+}
+
 export function rect(ctx, x, y, w, h, fill) {
   ctx.fillStyle = fill
   ctx.fillRect(x, y, w, h)

@@ -20,7 +20,7 @@
 // probable named, a MiLB umpire the nightly accuracy sweep never reaches — each
 // draws its own line rather than an empty grid or a crash.
 import { FONT } from './posterPaper.js'
-import { caps, clip, contain, line, panel, rect, rule, track } from './posterInk.js'
+import { caps, clip, contain, leaders, line, panel, rect, rule, track } from './posterInk.js'
 import { lineupShotKey } from './posterArt.js'
 import { notPosted, openCard, PAD } from './posterCard.js'
 import { drawUmpireCard } from './posterUmpire.js'
@@ -32,7 +32,7 @@ function drawStarterCard(ctx, box, starter, shot, bar, palette) {
   // this is, and printing "MIL" next to the Brewers' own logo is the same fact
   // twice — the naming rule the rest of the app keeps.
   const barBottom = openCard(ctx, box, { title: 'Starting pitcher', bar, palette })
-  const top = barBottom + 16
+  const top = barBottom + 18
   const left = box.x + PAD
 
   if (!starter) {
@@ -40,41 +40,75 @@ function drawStarterCard(ctx, box, starter, shot, bar, palette) {
     return
   }
 
-  const shotSize = 88
+  // ERA GETS ITS OWN BLOCK, but a modest one. It used to be buried mid-line at
+  // the same weight as innings pitched, which wasted the one number that
+  // actually frames a matchup; a design pass then swung it to 56pt, and at that
+  // size it stopped reading as a stat and started reading as a billboard on
+  // what is meant to be a scorebook page. 34pt in a labelled block is the
+  // settlement: promoted out of the line, emphasised, not shouting.
+  const shotSize = 100
   if (shot) {
     ctx.save()
-    panel(ctx, left, top, shotSize, shotSize, { radius: 48, fill: palette.inset })
+    panel(ctx, left, top, shotSize, shotSize, { radius: shotSize / 2, fill: palette.inset })
     ctx.clip()
     contain(ctx, shot, left, top, shotSize, shotSize, { scale: 1.06 })
     ctx.restore()
-    panel(ctx, left, top, shotSize, shotSize, { radius: 48, stroke: palette.border, thickness: 1.5 })
+    panel(ctx, left, top, shotSize, shotSize, {
+      radius: shotSize / 2,
+      stroke: palette.border,
+      thickness: 1.5,
+    })
   }
-  const textX = left + shotSize + 16
-  const textWidth = box.x + box.width - PAD - textX
 
-  track(ctx, caps(starter.name), textX, top + 28, {
-    font: FONT.display(29),
+  const cardRight = box.x + box.width - PAD
+  const textX = left + shotSize + 16
+
+  // The ERA block claims the card's right end first; the name gets what is
+  // left, so a long name shortens rather than colliding with the number.
+  let eraWidth = 0
+  if (starter.era) {
+    ctx.font = FONT.mono(34)
+    eraWidth = ctx.measureText(starter.era).width
+    track(ctx, caps('ERA'), cardRight, top + 22, {
+      font: FONT.display(16),
+      fill: palette.caption,
+      spacing: 2.4,
+      align: 'right',
+    })
+    line(ctx, starter.era, cardRight, top + 56, {
+      font: FONT.mono(34),
+      fill: palette.heading,
+      align: 'right',
+    })
+  }
+  const textWidth = cardRight - textX - (eraWidth ? eraWidth + 24 : 0)
+
+  track(ctx, caps(starter.name), textX, top + 32, {
+    font: FONT.display(31),
     fill: palette.heading,
     spacing: 1,
     maxWidth: textWidth,
   })
   const badges = [starter.jersey ? `#${starter.jersey}` : '', starter.hand].filter(Boolean).join('  ·  ')
-  track(ctx, caps(badges), textX, top + 54, {
+  track(ctx, caps(badges), textX, top + 58, {
     font: FONT.display(20),
     fill: palette.caption,
     spacing: 2,
     maxWidth: textWidth,
   })
+  // ERA has been promoted out of this line, so it carries the rest only — and
+  // it runs the card's FULL width rather than the name's column. It sits below
+  // the 56pt numeral's baseline, so there is nothing to collide with; keeping
+  // it inside `textWidth` was what had been truncating "115.0 IP" to "115.…".
   const stats = [
-    starter.era && `${starter.era} ERA`,
     starter.record,
     starter.strikeOuts && `${starter.strikeOuts} K`,
     starter.innings && `${starter.innings} IP`,
   ].filter(Boolean)
-  line(ctx, stats.join(' · ') || 'Season line not posted', textX, top + 82, {
-    font: FONT.mono(17),
+  line(ctx, stats.join(' · ') || 'Season line not posted', textX, top + 88, {
+    font: FONT.mono(18),
     fill: palette.body,
-    maxWidth: textWidth,
+    maxWidth: cardRight - textX,
   })
 
   const g = starter.lastGame
@@ -84,13 +118,13 @@ function drawStarterCard(ctx, box, starter, shot, bar, palette) {
   ctx.strokeStyle = palette.border
   ctx.lineWidth = 1
   ctx.beginPath()
-  ctx.moveTo(left, top + 102)
-  ctx.lineTo(box.x + box.width - PAD, top + 102)
+  ctx.moveTo(left, top + 110)
+  ctx.lineTo(cardRight, top + 110)
   ctx.stroke()
   ctx.restore()
 
   const where = g.opponent ? `${g.home ? 'vs' : '@'} ${g.opponent}` : ''
-  const labelWidth = track(ctx, caps(`Last ${where}`.trim()), left, top + 126, {
+  const labelWidth = track(ctx, caps(`Last ${where}`.trim()), left, top + 136, {
     font: FONT.display(18),
     fill: palette.caption,
     spacing: 1.6,
@@ -104,10 +138,10 @@ function drawStarterCard(ctx, box, starter, shot, bar, palette) {
   ]
     .filter(Boolean)
     .join(' · ')
-  line(ctx, last, left + labelWidth + 12, top + 126, {
+  line(ctx, last, left + labelWidth + 12, top + 136, {
     font: FONT.mono(17),
     fill: palette.muted,
-    maxWidth: box.x + box.width - PAD - (left + labelWidth + 12),
+    maxWidth: cardRight - (left + labelWidth + 12),
   })
 }
 
@@ -133,8 +167,11 @@ export function drawArms(ctx, box, model, art, palette) {
 //
 // All of it is a SEASON aggregate, which is an open surface (ADR-0034) — a stat
 // line is not a score, and gating one is the mistake that ADR undid.
-const COL = { order: PAD - 6, shot: PAD + 14, name: PAD + 56, position: 286, stats: 330 }
-const SHOT = 30
+const COL = { order: PAD - 6, shot: PAD + 14, name: PAD + 62, position: 290, stats: 336 }
+// 32, not 28. At the old size the faces were unrecognisable smudges — noise
+// rather than identity — and a headshot that cannot be recognised is worse
+// than no headshot, because it still costs the row its width.
+const SHOT = 32
 
 function battingLine(b) {
   if (!b) return ''
@@ -215,9 +252,16 @@ function drawOrderCard(ctx, box, side, lineup, bar, art, palette) {
     const room = COL.position - COL.name - 10
     const whole = caps(p.name)
     const shown = ctx.measureText(whole).width <= room ? whole : caps(p.last || p.name)
-    line(ctx, clip(ctx, shown, room), box.x + COL.name, baseline, {
+    const nameWidth = line(ctx, clip(ctx, shown, room), box.x + COL.name, baseline, {
       font: FONT.display(21),
       fill: palette.body,
+    })
+    // Leaders bridge the ragged right edge of the names to the position column
+    // — the one real gap in the row, and the gap a scorebook rules rather than
+    // leaves open.
+    const gapStart = box.x + COL.name + nameWidth + 10
+    leaders(ctx, gapStart, baseline - 5, box.x + COL.position - 8 - gapStart, {
+      fill: palette.border,
     })
     line(ctx, caps(p.position), box.x + COL.position, baseline, {
       font: FONT.mono(15),
@@ -288,11 +332,16 @@ function drawRecordsCard(ctx, box, model, art, palette) {
     const y = top + i * rowH
     if (i % 2 === 0) rect(ctx, box.x + 1, y, box.width - 2, rowH, palette.inset)
     const baseline = y + rowH / 2 + 7
-    track(ctx, caps(row.label), inner.x, baseline, {
+    const labelRun = track(ctx, caps(row.label), inner.x, baseline, {
       font: FONT.display(18),
       fill: palette.caption,
       spacing: 1.4,
       maxWidth: labelWidth,
+    })
+    // Full width (no umpire card beside it) leaves ~400pt of blank paper
+    // between the label and the numbers with nothing carrying the eye across.
+    leaders(ctx, inner.x + labelRun + 12, baseline - 5, awayCx - colWidth / 2 - inner.x - labelRun - 24, {
+      fill: palette.border,
     })
     for (const [cx, side] of [
       [awayCx, away],
@@ -339,15 +388,20 @@ export function drawUmpireRow(ctx, box, model, art, palette) {
 export function drawFooter(ctx, y, model, palette) {
   const { x, width } = contentBox()
   rule(ctx, x, y + 6, width, { fill: palette.border })
-  track(ctx, caps('Keep score by hand · tallybb.com'), x, y + 40, {
+  track(ctx, caps('Keep score by hand · tallybb.com'), x, y + 38, {
     font: FONT.display(21),
     fill: palette.caption,
     spacing: 2.4,
+    maxWidth: width * 0.45,
   })
-  track(ctx, caps(`${model.away.abbr} @ ${model.home.abbr}`), x + width, y + 40, {
+  // The broadcast moved down here off the dateline, where it had been given the
+  // same billing as first pitch. It is a footnote, and this is the footnotes.
+  const right = [model.broadcast, `${model.away.abbr} @ ${model.home.abbr}`].filter(Boolean)
+  track(ctx, caps(right.join('  ·  ')), x + width, y + 38, {
     font: FONT.display(21),
     fill: palette.caption,
     spacing: 2.4,
     align: 'right',
+    maxWidth: width * 0.52,
   })
 }

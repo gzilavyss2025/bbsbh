@@ -17,7 +17,8 @@ map — what each module does and what bites when you change it.
 | `src/components/preview/SavePosterButton.jsx` | `canvas.toBlob()` → share sheet on a phone, download on a computer. |
 | `src/lib/preview/posterLayout.js` | Pure arithmetic: the frame, the block stack, the head's stretch. Unit-tested. |
 | `src/lib/preview/posterPaper.js` | The palette read off `:root`, the four type roles, and the font preload. |
-| `src/lib/preview/posterInk.js` | Canvas primitives — `caps`, `line`, `clip`, `track`, `rule`, `panel`, `masthead`, `cover`, `contain`. |
+| `src/lib/preview/posterInk.js` | Canvas primitives — `caps`, `line`, `clip`, `track`, `rule`, `leaders`, `grid`, `panel`, `masthead`, `cover`, `contain`. |
+| `src/lib/preview/posterTone.js` | Auto-levels for the ballpark photo, so every park lands at one density. |
 | `src/lib/preview/posterHead.js` | The head: backdrop, '@' watermark, treatment tiles, club names, dateline. |
 | `src/lib/preview/posterCard.js` | The shared card chrome — `openCard`, `notPosted`, `PAD`. |
 | `src/lib/preview/posterBlocks.js` | The pitcher, batting-order and records cards, and the footer. |
@@ -58,7 +59,11 @@ the gap straight through left every bar the default navy. No card prints the
 club abbreviation beside its own mark.
 
 **Starting pitchers.** Two cards. Headshot, name in natural order, number and
-hand, the season line (ERA · W-L · K · IP), and the last outing.
+hand, and the last outing. **ERA is promoted out of the season line** into its
+own labelled block at the card's right edge, at 34pt — it is the number that
+frames a matchup and it used to sit mid-line at the same weight as innings
+pitched. A design pass proposed 56pt; that was tried and rejected on sight, at
+which size it stops reading as a stat and starts reading as a billboard.
 
 **Batting order.** Two cards, nine ruled rows each: order, face, full name,
 position, and the broadcast stat line (`.278 · 17 HR · 48 RBI`). Four
@@ -67,10 +72,14 @@ surname alone is the fallback for a name too long to print whole, and a hitter
 with no photo on file gets his initials on a paper disc.
 
 **Umpire & records.** Two cards. Left is the Umpire Tendencies card
-(`posterUmpire.js`) — identity, the 3×3 zone grid, the navy "area to watch"
-band, the five-band zone-lean scale and the four tiles. Right is **How they
-win**: four situational records both clubs carry INTO tonight, in two columns
-headed by the clubs' knockout marks in the masthead.
+(`posterUmpire.js`) — identity, the navy "area to watch" band **with the 3×3
+zone grid inside it**, the five-band zone-lean scale, and the four tiles. The
+grid moved into the band because an illustration and the sentence that reads it
+had been two rows apart. The five-band scale stays and the card grew to hold it:
+it is the one place on the sheet that draws a continuum instead of printing a
+number. Right is **How they win**: four situational records both clubs carry
+INTO tonight, in two columns headed by the clubs' knockout marks in the
+masthead, with dot leaders across the gap.
 
 **Footer.** The wordmark line and the matchup.
 
@@ -86,14 +95,22 @@ rather than drawing it. Verified open (2026-08-12, with an `Origin` header):
 same-origin. `e2e/poster-export.spec.js` exports for real, so a new source from
 a host with no CORS fails a check instead of shipping a dead button.
 
+**The photograph is measured, not just washed.** `posterTone.js` samples each
+ballpark photo, finds its 5th/95th percentile luminance and remaps that span
+onto one target band before the manila wash goes over it. Without it the wash
+is a fixed operation applied to wildly different exposures — Petco came out as
+faintly dirty paper while Yankee Stadium came out atmospheric, from the same
+code. It reads pixels, which is only possible because every image is loaded
+CORS-anonymous; a tainted one throws and falls back to the identity filter.
+
 **Fonts.** A canvas rasterises with whatever face is loaded at the moment
 `fillText` runs, and there is no reflow when a webfont arrives later — a poster
 painted early bakes the fallback metrics into the exported PNG.
 `ensurePosterFonts()` must resolve before the first paint; `font-display: swap`
 cannot help a bitmap.
 
-**The vertical budget is solved, not chosen.** Head 570 + footer 60 leaves 970,
-the three rows take 888, and the rest is the four gaps. Nine batting-order rows
+**The vertical budget is solved, not chosen.** Head 500 (a floor) + footer 56
+leaves 1044, the three rows take 958, and the rest is the four gaps. Nine batting-order rows
 carrying a headshot each is what makes it this tight. Two numbers must never be
 worked out twice: `cardsHeight()` sizes the batting-order block and
 `drawOrderCard()` draws its rows — they once computed the row count separately,

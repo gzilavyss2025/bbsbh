@@ -15,23 +15,39 @@
 // whatever height is left over is shared out as extra gap between them — so a
 // two-block poster breathes instead of leaving a third of the frame blank.
 //
-// THE VERTICAL BUDGET IS TIGHT, AND THAT IS THE DESIGN. All three blocks plus
+// THE VERTICAL BUDGET IS TIGHT, AND THAT IS THE DESIGN. All three rows plus
 // the head have to live inside 1600px, so the numbers below were solved
-// together rather than picked one at a time: head 570 + footer 60 leaves 970,
-// the three blocks take 888, and the remaining 82 is the four gaps. Change one
-// and test/poster-layout.test.js fails on the one that no longer fits — which
-// is the point of pinning it there rather than eyeballing a PNG.
+// together rather than picked one at a time: head 520 (a floor) + footer 56
+// leaves 1024, the three rows take 924, and the rest is the four gaps. Change
+// one and test/poster-layout.test.js fails on the one that no longer fits —
+// which is the point of pinning it there rather than eyeballing a PNG.
 //
-// Nine batting-order rows carrying a headshot each is what makes it this
-// tight: those rows went from 29pt to 38pt, which is 162pt off the sheet, and
-// every other block gave some of it back.
+// WHERE THE ROOM WENT. A design critique found the sheet had no focal point —
+// about 2:1 of scale contrast under the head where a broadcast matchup graphic
+// runs 5:1 — and proposed a 56pt ERA per starter plus gutting the umpire card
+// to pay for it. Half of that was right and half was not, which is why the
+// numbers below are neither the original nor the proposal:
+//
+//   - The 56pt ERA was tried and rejected on sight. A number that size stops
+//     being a stat and becomes a billboard, and the sheet is a scorebook page.
+//     ERA is still promoted out of the season line and set in its own labelled
+//     block, at 34pt — emphasis, not shouting.
+//   - The five-band zone-lean scale STAYS. It was the most distinctive thing
+//     on the poster; the critique read it as a form control, and it is instead
+//     the one place the sheet draws a continuum rather than printing a number.
+//     `zone` grew to hold it (300 -> 330).
+//
+// What the critique got right and is kept: the zone grid moved inside the band
+// it illustrates, the dateline broke into two lines, the '@' is printed at
+// poster strength, dot leaders carry the wide rows, and the photograph is
+// tonally normalised before the wash.
 export const POSTER = {
   width: 1200,
   height: 1600,
   margin: 56,
   // The head's photograph, full-bleed to the poster's edges. This is a FLOOR,
   // not a fixed height — see headStretch.
-  headHeight: 570,
+  headHeight: 500,
   // How much of the leftover room the head may take when blocks are switched
   // off. A poster with only the pitchers on it has ~700px spare, and spreading
   // all of that into gaps just makes a sheet of blank paper with a card
@@ -42,16 +58,16 @@ export const POSTER = {
   // Smallest gap between two stacked blocks; anything spare is added to this.
   gap: 20,
   maxGap: 96,
-  footerHeight: 60,
+  footerHeight: 56,
 }
 
 // Natural heights, in stack order. `arms` and `zone` are fixed; `cards` grows
 // with the longer of the two batting orders so a poster with no lineups posted
 // yet doesn't reserve nine empty rows.
 export const BLOCK_HEIGHT = {
-  arms: 198,
-  cards: 390,
-  zone: 300,
+  arms: 220,
+  cards: 408,
+  zone: 330,
 }
 
 export const BLOCK_ORDER = ['arms', 'cards', 'zone']
@@ -59,7 +75,7 @@ export const BLOCK_ORDER = ['arms', 'cards', 'zone']
 // The batting-order grid: masthead, then the rows. LINEUP_CHROME is measured
 // from drawOrderCard's own offsets (46 masthead + 12 to the first row), so the
 // two cannot drift.
-export const LINEUP_ROW = 36
+export const LINEUP_ROW = 38
 const LINEUP_CHROME = 46 + 10
 
 export function cardsHeight(rowCount) {

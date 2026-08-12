@@ -15,23 +15,30 @@
 import { FONT } from './posterPaper.js'
 import { caps, contain, cover, grid, line, panel, rect, rule, track } from './posterInk.js'
 import { POSTER } from './posterLayout.js'
+import { toneFilter } from './posterTone.js'
 
 // The head's vertical rhythm, all measured from the top of the poster. Kept
 // as one table rather than scattered through the draw functions so the whole
 // composition can be re-tuned by reading a single block — and so it is obvious
 // at a glance that nothing here reaches past POSTER.headHeight.
 const HEAD = {
-  barHeight: 58,
+  barHeight: 48,
   tileSize: 230,
-  tileTop: 68,
+  tileTop: 52,
   awayCx: 318,
   homeCx: 882,
-  placeBaseline: 344,
-  nickBaseline: 392,
-  recordBaseline: 426,
-  ruleY: 452,
-  venueBaseline: 494,
-  factsBaseline: 528,
+  placeBaseline: 324,
+  nickBaseline: 372,
+  recordBaseline: 406,
+  ruleY: 428,
+  // Two lines, not one. The dateline used to run seven dot-separated facts at
+  // one size across the full width — first pitch, the fact a preview exists to
+  // give you, had the same billing as a regional TV channel, and the city
+  // repeated the club stack printed 80pt above it. Now the park and the time
+  // lead in display type, the conditions follow quietly, the city is gone as
+  // redundant, and the broadcast moved to the footer.
+  venueBaseline: 466,
+  conditionsBaseline: 494,
 }
 
 // The full-bleed ballpark photograph, grayscale, washed back under a sheet of
@@ -43,7 +50,7 @@ function drawBackdrop(ctx, park, palette, height) {
   rect(ctx, 0, 0, POSTER.width, height, palette.canvas)
   if (!park?.image) return
   ctx.save()
-  ctx.filter = 'grayscale(1)'
+  ctx.filter = `grayscale(1) ${toneFilter(park.image)}`
   cover(ctx, park.image, 0, 0, POSTER.width, height, { focus: park.focus })
   ctx.restore()
   // The manila sheet over the photograph.
@@ -86,8 +93,14 @@ function hexAlpha(hex, alpha) {
 }
 
 // The two-layer '@', printed a couple of pixels out of register in kraft-amber
-// and navy — the misregistration a real ballpark-program print run has. Drawn
-// at the card's HOVER opacities (0.30 ghost / 0.28 ink), not its resting ones.
+// and navy — the misregistration a real ballpark-program print run has.
+//
+// PRINTED AT POSTER STRENGTH, not at the card's. The slate card's hover
+// opacities (0.30 / 0.28) are tuned for a 300pt card you are looking at from a
+// foot away; at timeline size on a 1200pt sheet the same values read as a
+// rendering smear rather than as a mark. It is the app's signature and the
+// only thing on the poster that is purely a piece of print craft, so it is
+// either committed to or cut.
 function drawAtMark(ctx, palette) {
   ctx.save()
   ctx.textAlign = 'left'
@@ -132,12 +145,12 @@ function drawAtMark(ctx, palette) {
   ctx.transform(1, 0, Math.tan((-8 * Math.PI) / 180), 1, 0, 0)
   // Two layers, a couple of pixels out of register, at the slate card's HOVER
   // opacities (0.30 ghost / 0.28 ink) rather than its resting ones.
-  ctx.globalAlpha = 0.3
+  ctx.globalAlpha = 0.58
   ctx.fillStyle = palette.seal
-  ctx.fillText('@', originX + 3, originY - 3)
-  ctx.globalAlpha = 0.28
+  ctx.fillText('@', originX + 4, originY - 4)
+  ctx.globalAlpha = 0.5
   ctx.fillStyle = palette.navy
-  ctx.fillText('@', originX - 3, originY + 1)
+  ctx.fillText('@', originX - 4, originY + 2)
   ctx.restore()
 }
 
@@ -198,8 +211,10 @@ function drawClubName(ctx, club, palette) {
     maxWidth: width,
   })
   if (club.record) {
+    // Up from 26 to 32: the best one-glance context on the sheet was set like
+    // a caption.
     line(ctx, club.record.line, x, HEAD.recordBaseline, {
-      font: FONT.mono(26),
+      font: FONT.mono(32),
       fill: palette.muted,
       align: 'center',
     })
@@ -227,35 +242,32 @@ function drawBrandBar(ctx, model, palette) {
   })
 }
 
-// The ballpark line — the card's hover-revealed park name, promoted to the
-// poster's dateline, over the facts you'd want before deciding to watch.
+// The ballpark and the first pitch, then the conditions under them.
 function drawDateline(ctx, model, palette) {
   const cx = POSTER.width / 2
-  rule(ctx, POSTER.margin, HEAD.ruleY, POSTER.width - POSTER.margin * 2, { fill: palette.border })
-  track(ctx, caps(model.venue.name || 'Ballpark not posted'), cx, HEAD.venueBaseline, {
-    font: FONT.display(36),
+  const width = POSTER.width - POSTER.margin * 2
+  rule(ctx, POSTER.margin, HEAD.ruleY, width, { fill: palette.border })
+
+  const lead = [model.venue.name || 'Ballpark not posted', model.startTime].filter(Boolean)
+  track(ctx, caps(lead.join('  ·  ')), cx, HEAD.venueBaseline, {
+    font: FONT.display(38),
     fill: palette.heading,
     spacing: 2.5,
     align: 'center',
-    maxWidth: POSTER.width - POSTER.margin * 2,
+    maxWidth: width,
   })
-  // Start time, then where, then what the sky is doing, then who is carrying
-  // it — one line rather than the chip this used to be, because the head's
-  // vertical budget is spent (see POSTER.headHeight) and a broadcast reads
-  // perfectly well as another fact about the evening.
-  const facts = [
-    model.startTime,
-    model.venue.place,
-    model.venue.roof && model.venue.roof !== 'Open' ? `${model.venue.roof} roof` : '',
+
+  const conditions = [
     model.weather,
-    model.broadcast,
+    model.venue.roof && model.venue.roof !== 'Open' ? `${model.venue.roof} roof` : '',
   ].filter(Boolean)
-  track(ctx, caps(facts.join('  ·  ')), cx, HEAD.factsBaseline, {
-    font: FONT.display(23),
+  if (!conditions.length) return
+  track(ctx, caps(conditions.join('  ·  ')), cx, HEAD.conditionsBaseline, {
+    font: FONT.display(21),
     fill: palette.muted,
     spacing: 1.6,
     align: 'center',
-    maxWidth: POSTER.width - POSTER.margin * 2,
+    maxWidth: width,
   })
 }
 

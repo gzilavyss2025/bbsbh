@@ -1,23 +1,28 @@
-// The umpire card — components/umpire/UmpireTendencies.jsx, painted into half
-// the poster's width.
+// The umpire card — half the poster's width, and the one block a design pass
+// took apart rather than tuned.
 //
-// Split out of posterBlocks.js when that file passed the 600-line cap
-// (ADR-0038): this is one self-contained card with five parts of its own (the
-// lean scale, the zone map, the watch band, the tiles, the identity), and it
-// shares nothing with the pitcher/batting-order cards but their chrome.
-import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../statTiers.js'
+// It is UmpireTendencies.jsx band for band — identity, the navy "area to
+// watch" strip, the five-row zone-lean scale, the 2×2 tiles — at half width.
+//
+// ONE THING CHANGED, AND ONE THING DELIBERATELY DID NOT. A design critique
+// found the 3×3 zone grid sitting in the identity row's spare corner while the
+// sentence that reads it ("up and inside to left-handers") sat in a navy band
+// two rows below: an illustration and its caption that never touched. The grid
+// now lives INSIDE that band, at its left end, which is plainly right.
+//
+// The same critique wanted the five-band lean scale and the tiles cut, reading
+// the boxed rows as radio buttons. They stay. The scale is the one place on the
+// whole poster that draws a CONTINUUM instead of printing a number, and it is
+// the most distinctive thing on the sheet — the card's height was raised to
+// hold it rather than the scale trimmed to fit the card.
+//
+// Every figure is a season aggregate over FINAL games of ball/strike judgments
+// — never a run, hit, or result.
 import { FONT } from './posterPaper.js'
+import { LEAN_TIERS, LEAN_TIER_LABELS, leanCaretFraction } from '../statTiers.js'
 import { caps, line, panel, rect, rule, track } from './posterInk.js'
-import { openCard, notPosted, PAD } from './posterCard.js'
+import { notPosted, openCard, PAD } from './posterCard.js'
 
-// The card from components/umpire/UmpireTendencies.jsx, painted into HALF the
-// poster's width — the same bands in the same order (identity, area to watch,
-// zone lean, tiles), folded so the row it used to own whole can carry a second
-// card beside it.
-//
-// The register is LABELS AND NUMBERS, which is that card's own rule: no
-// sentences, nothing that needs explaining. Every figure is a season aggregate
-// over FINAL games of ball/strike judgments — never a run, hit, or result.
 const HAND_WORD = { L: 'left-handers', R: 'right-handers' }
 
 // The five-band scale, poles first, with the umpire's own band boxed and the
@@ -30,7 +35,7 @@ function drawLeanScale(ctx, x, y, width, lean, palette) {
     fill: palette.caption,
     spacing: 1.6,
   })
-  const rowH = 18
+  const rowH = 17
   const top = y + 10
   const height = rowH * LEAN_TIERS.length
   const rampW = 10
@@ -83,7 +88,42 @@ function drawLeanScale(ctx, x, y, width, lean, palette) {
   })
 }
 
-// The 3x3 grid. A cell is OUTLINED in clay where this umpire's misses cluster
+// Ruled 2×2, label over figure — the card's own arrangement. Four across would
+// squeeze every label below anything in the type scale.
+function drawTiles(ctx, x, y, width, tiles, palette) {
+  const colW = width / 2
+  const rowH = 46
+  tiles.forEach((t, i) => {
+    const tx = x + (i % 2) * colW
+    const ty = y + Math.floor(i / 2) * rowH
+    rule(ctx, tx, ty, colW, { fill: palette.hairline })
+    if (i % 2 === 0) {
+      ctx.fillStyle = palette.hairline
+      ctx.fillRect(tx + colW - 1, ty, 1, rowH)
+    }
+    track(ctx, caps(t.label), tx + colW / 2, ty + 18, {
+      font: FONT.display(13),
+      fill: palette.caption,
+      spacing: 1.3,
+      align: 'center',
+      maxWidth: colW - 8,
+    })
+    ctx.font = FONT.mono(21)
+    const valueWidth = ctx.measureText(String(t.value)).width
+    let supWidth = 0
+    if (t.sup) {
+      ctx.font = FONT.mono(12)
+      supWidth = ctx.measureText(t.sup).width
+    }
+    const startX = tx + colW / 2 - (valueWidth + supWidth) / 2
+    line(ctx, String(t.value), startX, ty + 41, { font: FONT.mono(21), fill: palette.heading })
+    if (t.sup) {
+      line(ctx, t.sup, startX + valueWidth + 2, ty + 41, { font: FONT.mono(12), fill: palette.caption })
+    }
+  })
+}
+
+// The 3×3 grid. A cell is OUTLINED in clay where this umpire's misses cluster
 // above the league's for that cell, heavier the further above — the rest is
 // reference lines. It does not shade all nine; `over` is a miss share, not a
 // strike-call rate, and shading it as if it were says something untrue.
@@ -118,14 +158,20 @@ function drawZoneMap(ctx, x, y, w, h, cells, palette) {
   ctx.strokeRect(x, y, w, h)
 }
 
-// A solid navy panel: the card's one concrete "where" earns its second ink
-// anchor. Text only — the zone map moved up beside the identity, where the
-// card had empty width going spare, so the phrase gets the whole band instead
-// of competing with a grid for it.
+// The card's one ink anchor: a solid navy band carrying the grid at its left
+// end and the phrase that reads it immediately to the right. The map gets a
+// paper plate behind it or the navy swallows every low-contrast line in it.
 function drawWatchBand(ctx, x, y, width, height, plate, palette) {
   rect(ctx, x, y, width, height, palette.navy)
-  const bodyWidth = width - 26
-  track(ctx, caps('Area to watch'), x + 13, y + 20, {
+  let bodyX = x + 14
+  if (plate.zoneCells) {
+    const map = height - 22
+    rect(ctx, x + 12, y + 11, map + 8, map + 8, palette.inset)
+    drawZoneMap(ctx, x + 16, y + 15, map, map, plate.zoneCells, palette)
+    bodyX = x + 12 + map + 24
+  }
+  const bodyWidth = x + width - 14 - bodyX
+  track(ctx, caps('Area to watch'), bodyX, y + 26, {
     font: FONT.display(15),
     fill: palette.rule,
     spacing: 1.6,
@@ -133,48 +179,14 @@ function drawWatchBand(ctx, x, y, width, height, plate, palette) {
   })
   const hand = plate.watch?.hand ? ` to ${HAND_WORD[plate.watch.hand]}` : ''
   const text = plate.watch?.phrase ? `${plate.watch.phrase}${hand}` : 'No clear tendency'
-  track(ctx, caps(text), x + 13, y + 44, {
-    font: FONT.display(22),
+  track(ctx, caps(text), bodyX, y + 54, {
+    font: FONT.display(23),
     fill: plate.watch?.phrase ? palette.onInk : palette.rule,
     spacing: 0.8,
     maxWidth: bodyWidth,
   })
 }
 
-// Ruled 2x2, label over figure — the card's own arrangement. Four across would
-// squeeze every label below anything in the type scale.
-function drawTiles(ctx, x, y, width, tiles, palette) {
-  const colW = width / 2
-  const rowH = 52
-  tiles.forEach((t, i) => {
-    const tx = x + (i % 2) * colW
-    const ty = y + Math.floor(i / 2) * rowH
-    rule(ctx, tx, ty, colW, { fill: palette.hairline })
-    if (i % 2 === 0) {
-      ctx.fillStyle = palette.hairline
-      ctx.fillRect(tx + colW - 1, ty, 1, rowH)
-    }
-    track(ctx, caps(t.label), tx + colW / 2, ty + 20, {
-      font: FONT.display(14),
-      fill: palette.caption,
-      spacing: 1.3,
-      align: 'center',
-      maxWidth: colW - 8,
-    })
-    ctx.font = FONT.mono(23)
-    const valueWidth = ctx.measureText(String(t.value)).width
-    let supWidth = 0
-    if (t.sup) {
-      ctx.font = FONT.mono(13)
-      supWidth = ctx.measureText(t.sup).width
-    }
-    const startX = tx + colW / 2 - (valueWidth + supWidth) / 2
-    line(ctx, String(t.value), startX, ty + 46, { font: FONT.mono(23), fill: palette.heading })
-    if (t.sup) line(ctx, t.sup, startX + valueWidth + 2, ty + 46, { font: FONT.mono(13), fill: palette.caption })
-  })
-}
-
-// Half the poster's width — `box` is already the narrowed card.
 export function drawUmpireCard(ctx, box, model, palette) {
   const plate = model.plate
   const barBottom = openCard(ctx, box, {
@@ -182,7 +194,7 @@ export function drawUmpireCard(ctx, box, model, palette) {
     aside: plate?.year ? String(plate.year) : '',
     palette,
   })
-  const top = barBottom + 12
+  const top = barBottom + 14
   const inner = { x: box.x + PAD, width: box.width - PAD * 2 }
 
   if (!plate) {
@@ -196,30 +208,20 @@ export function drawUmpireCard(ctx, box, model, palette) {
   const s = plateSize / 20
   ctx.fillStyle = palette.navy
   ctx.beginPath()
-  ctx.moveTo(inner.x + 3 * s, top + 4 * s)
-  ctx.lineTo(inner.x + 17 * s, top + 4 * s)
-  ctx.lineTo(inner.x + 17 * s, top + 11 * s)
-  ctx.lineTo(inner.x + 10 * s, top + 17 * s)
-  ctx.lineTo(inner.x + 3 * s, top + 11 * s)
+  ctx.moveTo(inner.x + 3 * s, top + 2 * s)
+  ctx.lineTo(inner.x + 17 * s, top + 2 * s)
+  ctx.lineTo(inner.x + 17 * s, top + 9 * s)
+  ctx.lineTo(inner.x + 10 * s, top + 15 * s)
+  ctx.lineTo(inner.x + 3 * s, top + 9 * s)
   ctx.closePath()
   ctx.fill()
-
-  // The 3x3 grid rides the identity row's spare width rather than the navy
-  // band's, which it used to share with the phrase.
-  if (plate.zoneCells) {
-    const mapW = 54
-    const mapH = 58
-    const plateX = inner.x + inner.width - mapW - 8
-    rect(ctx, plateX - 4, top - 2, mapW + 8, mapH + 8, palette.inset)
-    drawZoneMap(ctx, plateX, top + 2, mapW, mapH, plate.zoneCells, palette)
-  }
 
   const [first, ...rest] = (plate.name || '').split(' ')
   const last = rest.join(' ')
   const whoX = inner.x + plateSize + 10
-  const whoWidth = inner.width - (whoX - inner.x) - (plate.zoneCells ? 74 : 0)
+  const whoWidth = inner.width - (whoX - inner.x)
   if (last) {
-    track(ctx, caps(first), whoX, top + 12, {
+    track(ctx, caps(first), whoX, top + 10, {
       font: FONT.display(15),
       fill: palette.caption,
       spacing: 1.6,
@@ -227,7 +229,7 @@ export function drawUmpireCard(ctx, box, model, palette) {
     })
   }
   track(ctx, caps(last || first), whoX, top + 38, {
-    font: FONT.display(30),
+    font: FONT.display(31),
     fill: palette.heading,
     spacing: 1.2,
     maxWidth: whoWidth,
@@ -239,23 +241,27 @@ export function drawUmpireCard(ctx, box, model, palette) {
   }
 
   const games = plate.gameCount
-  const sub = [
-    `${games} ${games === 1 ? 'game' : 'games'}`,
-    plate.plateCount > 0 ? `${plate.plateCount} behind the plate` : '',
-  ]
-    .filter(Boolean)
-    .join(' · ')
-  line(ctx, sub, whoX, top + 56, { font: FONT.mono(13), fill: palette.caption, maxWidth: whoWidth })
+  line(
+    ctx,
+    [
+      `${games} ${games === 1 ? 'game' : 'games'}`,
+      plate.plateCount > 0 ? `${plate.plateCount} behind the plate` : '',
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    whoX,
+    top + 56,
+    { font: FONT.mono(13), fill: palette.caption, maxWidth: whoWidth },
+  )
 
-  drawWatchBand(ctx, box.x + 1, top + 66, box.width - 2, 56, plate, palette)
+  drawWatchBand(ctx, box.x + 1, top + 68, box.width - 2, 74, plate, palette)
 
-  // Two sub-columns under the band: the five-band scale on the left, the
-  // quotable numbers on the right — the same pairing the card makes, at half
-  // the width.
+  // The scale on the left, the quotable numbers on the right — the pairing the
+  // real card makes, at half its width.
   const leanW = 208
   const tilesX = inner.x + leanW + 16
-  if (plate.lean) drawLeanScale(ctx, inner.x, top + 136, leanW, plate.lean, palette)
-  drawTiles(ctx, tilesX, top + 130, inner.x + inner.width - tilesX, umpireTiles(plate), palette)
+  if (plate.lean) drawLeanScale(ctx, inner.x, top + 162, leanW, plate.lean, palette)
+  drawTiles(ctx, tilesX, top + 156, inner.x + inner.width - tilesX, umpireTiles(plate), palette)
 }
 
 function umpireTiles(plate) {
