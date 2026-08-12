@@ -495,7 +495,7 @@
   border: none;
   background: none;
   cursor: pointer;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   color: var(--graphite);
   text-decoration: underline;

@@ -322,7 +322,7 @@
   padding-top: 8px;
   margin-top: 2px;
   border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-compact);
   color: var(--text-muted);
 }

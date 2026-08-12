@@ -236,7 +236,7 @@
 }
 .abs__detailhalf {
   flex: 0 0 auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   color: var(--text-caption);
   min-width: 5.5ch;

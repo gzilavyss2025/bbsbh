@@ -132,7 +132,7 @@
 }
 
 .prospectcard__percentile {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-num-lg);
   line-height: var(--lh-solid);
   color: var(--text-body);
@@ -221,7 +221,7 @@
 .prospectcard__fact + .prospectcard__fact { border-top: var(--bw-hair) solid var(--border-hairline); }
 
 .prospectcard__fact dd {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-ui);
   color: var(--text-body);

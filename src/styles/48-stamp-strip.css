@@ -90,7 +90,7 @@
   margin: 0;
   padding: 0;
   max-width: 64ch;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
   line-height: var(--lh-snug);
   color: var(--text-muted);
@@ -206,7 +206,7 @@
   border-radius: var(--radius-xs);
   background: var(--bg-canvas);
   color: var(--text-body);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-small);
 }
 

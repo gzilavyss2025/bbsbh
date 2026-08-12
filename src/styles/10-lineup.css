@@ -472,7 +472,7 @@
   border: var(--bw-hair) solid var(--border-rule);
   background: var(--surface-card);
   color: var(--text-body);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   line-height: var(--lh-ui);

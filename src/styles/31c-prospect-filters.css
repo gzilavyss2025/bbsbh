@@ -13,7 +13,7 @@
 .prospects__dateline,
 .prospects__resultcount {
   margin: var(--space-1) 0 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-caps);
@@ -118,7 +118,7 @@
   margin-left: auto;
   overflow: hidden;
   color: var(--text-caption);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-regular);
   letter-spacing: var(--ls-none);
@@ -138,7 +138,7 @@
 }
 .prospects__active-summary {
   margin: var(--space-2) 0 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }

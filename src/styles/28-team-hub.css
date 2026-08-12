@@ -437,7 +437,7 @@
 .team-score__meta {
   overflow: hidden;
   color: var(--graphite-soft);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: var(--fs-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -511,7 +511,7 @@
   padding: 3px 7px;
   background: var(--text-heading);
   color: var(--surface-card);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   white-space: nowrap;
   border-radius: 5px;

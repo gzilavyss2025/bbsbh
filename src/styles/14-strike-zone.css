@@ -132,7 +132,7 @@
   border: 2.4px solid var(--accent-positive);
   color: var(--accent-positive);
 }
-.pitchlist__type { color: var(--text-body); }
+.pitchlist__type { font-family: var(--font-display); color: var(--text-body); }
 
 /* ABS challenge marker (ChallengeMark, StrikeZone.jsx) — its own trailing
    grid column (.pitchlist's 4th track), so it sits at one fixed horizontal

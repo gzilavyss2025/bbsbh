@@ -181,7 +181,7 @@
 }
 .prospecttrend__headline {
   color: var(--text-heading);
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-compact);
   font-weight: var(--w-bold);
   white-space: normal;

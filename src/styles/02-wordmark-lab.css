@@ -263,7 +263,7 @@
 
 .wordmarklab__detail {
   margin-top: auto;
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
