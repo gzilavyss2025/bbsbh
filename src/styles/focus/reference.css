@@ -380,3 +380,42 @@
   scrollbar-width: thin;
 }
 
+
+/* ---------------------------------- one club at a time in the LINEUPS tab */
+/* THE SECTION MASTHEADS STAND DOWN INSIDE THEIR OWN TAB. `LineupSection` drops
+   its "Lineups ▾" bar outright (the tab is already called LINEUPS, and the tab
+   IS the disclosure — see the `bare` prop). `DefenseSection` keeps its bar,
+   because the club it names is information the "Field" label does not carry;
+   only the chevron and the toggle go, so the bar has no business looking
+   pressable. */
+.halfdefense__title--bare {
+  cursor: default;
+}
+
+/* The swap onto the other club's nine. Reads as a footer action on the card
+   rather than a second masthead — the batting club's lineup is the answer, and
+   this is the way to the other one, not an equal partner to it.
+
+   Full width and at the tap floor: it sits at the end of a nine-row list in a
+   328px column, and on a phone the same card is inside a docked sheet where a
+   thumb is doing the reaching. */
+.lineupcard__swap {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-align: left;
+  cursor: pointer;
+}
+
+.lineupcard__swap:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
