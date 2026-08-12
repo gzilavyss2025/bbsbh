@@ -194,13 +194,16 @@
    where the reader is already looking — under the scorebug, over the at-bat
    they just charted.
 
-   A REAL CARD, not a floating grid: hairline border, --radius-md and
-   `overflow: hidden`, so `.statbox__title`'s square navy masthead takes the
-   card's rounding and the stat grid sits flush under it — the attached
-   header-over-rows shape `.abs__title`/`.abs__rows` (12-sealbox.css) uses. The
-   two were separated by a margin with neither corner rounded, and read as loose
-   parts on paper. Eight cells in two rows of four: the half's line (R/H/E/LOB)
-   over its pitch analysis. */
+   THE GRID IS THE WHOLE CARD, edge to edge. It had a navy `.statbox__title`
+   masthead over an inset panel, and the two were separated by a margin with
+   neither corner rounded — a header floating above a box rather than one card.
+   Attaching them was the first fix and it was the wrong one: the title read
+   "Top 1st" beside a band that already names the half and directly under
+   `.half__title`, which names it a third time. So the title is gone
+   (HalfTally.jsx) and the two rules below take the padding out from under it,
+   leaving the frame — hairline border, --radius-md, `overflow: hidden` — sitting
+   directly against the outer cells. Eight of them, two rows of four: the half's
+   line (R/H/E/LOB) over its pitch analysis. */
 .halftally {
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
@@ -210,14 +213,20 @@
   min-width: 0;
 }
 
-.halftally .statbox__title {
-  margin: 0;
+/* SealBox's own revealed wrapper (12-sealbox.css) carries 14px of padding and
+   an inset ground, which is right for the stat CARD it was written for and is
+   exactly the gap between this card's border and its cells. Both come off; the
+   grid is the only thing in this box, so it may as well BE the box. */
+.halftally .statgrid {
+  padding: 0;
+  background: none;
 }
 
 /* The grid drops its own border, radius and shadow — inside the card those draw
    a second frame a hairline inside the first. The 1px `gap` over
    `background: var(--border-rule)` (12-sealbox.css) still rules the cells
-   apart; only the outer edge changes owner. */
+   apart; only the outer edge changes owner, and `overflow: hidden` above is
+   what rounds the corner cells to the frame now that they meet it. */
 .statline--console {
   border: none;
   border-radius: 0;

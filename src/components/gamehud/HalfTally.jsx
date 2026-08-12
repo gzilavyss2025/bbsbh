@@ -1,6 +1,5 @@
 import { revealInning } from '../../api/linescore.js'
 import { revealDerived } from '../../api/derive.js'
-import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
 import { Stat } from './StatBox.jsx'
 
@@ -33,16 +32,18 @@ import { Stat } from './StatBox.jsx'
 // `Stat` comes from StatBox rather than being redrawn here: these cells are the
 // same cells, and `.statline`'s grid (12-sealbox.css) is already the right
 // shape for eight of them.
+//
+// THE GRID IS THE WHOLE CARD. There is no title bar: it carried a navy
+// "Top 1st" masthead matching the band's own, and beside a band that already
+// names the half — and directly under `.half__title`, which names it again —
+// it was a third reading of the same three words, above eight cells that read
+// perfectly well without it. Its removal is also what lets the card's rounded
+// corners meet the outer cells (styles/focus/console.css strips the SealBox
+// wrapper's padding to match), so the tally reads as one ruled block of paper
+// rather than a header floating over an inset panel.
 export function HalfTally({ feed, inning, half, battingSide, getDerived, className = '' }) {
   return (
     <div className={`halftally ${className}`.trim()} key={`${inning}-${half}`}>
-      {/* Named for the half, not "Insights" — two rows of numbers beside a
-          scorebug that shows the GAME's runs must say which they are. It keeps
-          `.statbox__title`'s navy-under-a-kraft-rule masthead, the same
-          signature the band beside it and `.half__title` below it wear. */}
-      <h3 className="statbox__title">
-        {half === 'top' ? 'Top' : 'Bottom'} {ordinal(inning)}
-      </h3>
       <SealBox forceRevealed coverless>
         {() => {
           // R/H/LOB are the batting side's; E is a FIELDING stat and belongs to
