@@ -1,7 +1,7 @@
 import { memo, useState } from 'react'
 import { defenseEntering } from '../../api/defense.js'
 import { lineupEntering } from '../../api/battingorder.js'
-import { selectDueUpNext } from '../../api/dueup.js'
+import { selectDueUpNext, selectDueUpDuring } from '../../api/dueup.js'
 import { prospectBadge } from '../../api/prospects.js'
 import { showRookiePill } from '../../api/rookies.js'
 import { ordinal } from '../../lib/format.js'
@@ -117,8 +117,8 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
     <section className={`halfdefense ${headerThemeClass(theme)}`.trim()} style={headerThemeStyle(theme)}>
       {bare ? (
         <h4 className="halfdefense__title halfdefense__title--bare">
-          {mark}
           Defensive alignment
+          {mark}
         </h4>
       ) : (
         <button
@@ -127,8 +127,8 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
         >
-          {mark}
           Defensive alignment
+          {mark}
           <span className="halfdefense__chevron" aria-hidden="true">
             {open ? '▾' : '▸'}
           </span>
@@ -183,7 +183,17 @@ const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 //    the question the reader just asked. Null keeps both clubs stacked, which
 //    is right for the unfocused page, where the section is reference rather
 //    than the surface being worked.
-export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough, bare = false, leadSide = null }) {
+//
+// `stepAtBatIndex` (paired with `leadSide`, ignored without it): who's on deck
+// RIGHT NOW in the half being scored — one slot past the batter this half's
+// own at-bat trail is currently stepped to (selectDueUpDuring, the same
+// stepping-aware primitive the Pitchers table and win-probability chart key
+// off, ADR-0016). Deliberately narrower than the fielding side's "Due up/On
+// deck/In the hole" trio above: only the SINGLE next slot on the BATTING
+// club's own card is marked, because that's the only one of the three this
+// screen didn't already answer — the current batter has his own at-bat card,
+// and "in the hole" is two batters out, no longer "next."
+export const LineupSection = memo(function LineupSection({ feed, inning, half, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough, bare = false, leadSide = null, stepAtBatIndex = null }) {
   const [open, setOpen] = useState(true)
   // Which club is on screen when `leadSide` is set. Keyed off the prop rather
   // than reset in an effect: navigating to the other half changes `leadSide`,
@@ -204,6 +214,11 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
     const bySlot = new Map(dueUpNext.batters.map((b, i) => [b.slot, UP_NEXT_LABELS[i]]))
     return bySlot
   }
+  // On deck for the BATTING club only — leadSide-gated (see header above), so
+  // the unfocused stacked page (leadSide null) never computes or shows this.
+  const onDeck =
+    leadSide != null ? selectDueUpDuring(feed, inning, half, revealedThrough, stepAtBatIndex, 1) : null
+  const onDeckSlot = (side) => (onDeck?.battingSide === side ? onDeck.batters[0]?.slot : null)
   const teamFor = (side) =>
     side === 'away'
       ? { name: awayName || 'Away', teamId: awayId, slots: away ?? [] }
@@ -221,6 +236,7 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
         rookiesData={rookiesData}
         isMlb={isMlb}
         upNextLabels={upNextLabels(side)}
+        onDeckSlot={onDeckSlot(side)}
       />
     )
   }
@@ -256,9 +272,18 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
             </>
           )}
           {/* Destination-named, per ADR-0017's button convention — it says the
-              club you land on, not "Swap". */}
+              club you land on, not "Swap". Full-color mark (TeamLogo's own
+              'base' variant default, not the mastheads' mono knockout) since
+              this sits on plain paper rather than a club-colored bar —
+              nothing to knock the mark out AGAINST. */}
           {canSwap && (
             <button type="button" className="lineupcard__swap" onClick={() => setShown(otherSide)}>
+              <TeamLogo
+                teamId={teamFor(otherSide).teamId}
+                name={teamFor(otherSide).name}
+                size={18}
+                className="lineupcard__swaplogo"
+              />
               {teamFor(otherSide).name} lineup ›
             </button>
           )}
@@ -278,7 +303,13 @@ export const LineupSection = memo(function LineupSection({ feed, inning, half, a
 // lineup) is dropped rather than shown as a bare header. `upNextLabels`, when
 // set, maps the up-to-three slots leading off this team's own next half to
 // their "Due up"/"On deck"/"In the hole" label (see LineupSection above).
-function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels }) {
+// `onDeckSlot`, when set, is the ONE slot due up next in THIS half for a
+// BATTING club — a different concept from `upNextLabels` (which only ever
+// marks the FIELDING club's own next half), so it gets its own highlighted
+// row and its own "Up next" wording rather than folding into `upNextLabels`'s
+// "On deck", which would read as this half's next batter and the other
+// club's next-half leadoff man sharing one label for two different moments.
+function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rookiesData, isMlb, upNextLabels, onDeckSlot = null }) {
   if (slots.length === 0) return null
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (
@@ -291,8 +322,12 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
         {slots.map((s) => {
           const cur = s.entries[s.entries.length - 1] // standing occupant
           const upNextLabel = upNextLabels?.get(s.slot)
+          const onDeck = s.slot === onDeckSlot
           return (
-            <li className="lineupcard__row" key={s.slot}>
+            <li
+              className={`lineupcard__row ${onDeck ? 'lineupcard__row--ondeck' : ''}`}
+              key={s.slot}
+            >
               <span className="lineupcard__slot">{s.slot}</span>
               <span className="lineupcard__names">
                 {s.entries.map((e, i) => (
@@ -300,6 +335,7 @@ function LineupTeam({ name, teamId, side, treatment, slots, prospectsData, rooki
                 ))}
                 <ProspectPill {...prospectBadge(prospectsData, cur.id)} />
                 <RookiePill active={showRookiePill(rookiesData, cur.id, isMlb)} />
+                {onDeck && <span className="duepill lineupcard__ondeck">Up next</span>}
                 {upNextLabel && (
                   <span className="duepill">
                     {upNextLabel === 'Due up' && <span aria-hidden="true">&larr; </span>}

@@ -37,9 +37,17 @@
    align-items: flex-start, not stretch — the due-up cards have their own
    fixed-height photo (below) and must not be force-stretched to whatever height
    the scorebug's live content happens to need. Stretching was what left a gap
-   UNDER each photo: the card grew to match the scorebug, the photo did not. */
+   UNDER each photo: the card grew to match the scorebug, the photo did not.
+
+   row-reverse: the scorebug sits at the row's RIGHT edge, its companion card
+   (DueUpConsole/HalfTally) at the left — visual order only, so a screen
+   reader still meets the scorebug first, same as the DOM/markup order in
+   ConsoleBand.jsx. Reversed only here, not in the phone media block below:
+   "left vs right" is meaningless once that block stacks the row into a
+   column. */
 .consolebar {
   display: flex;
+  flex-direction: row-reverse;
   align-items: flex-start;
   gap: var(--space-3);
 }

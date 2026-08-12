@@ -572,7 +572,6 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
         <AtBatHero
           batter={batter}
           pitcher={pitcher}
-          rbi={rbi}
           pinchRunners={pinchRunners}
           battingTeamId={battingTeamId}
           pitchingTeamId={pitchingTeamId}
@@ -674,7 +673,10 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           <PitchLadder ladder={pitchLadder(pitches)} />
           <div className="pbp__play">
             {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
-              <span className={`pbp__code pbp__code--${codeKind}`}>{code}</span>
+              <span className={`pbp__code pbp__code--${codeKind}`}>
+                {code}
+                {focusHeader && rbi > 0 && <span className="pbp__code__rbi"> {rbi} RBI</span>}
+              </span>
             )}
             <PlayDiamond
               reached={reached}
@@ -692,7 +694,12 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
                   K
                 </span>
               ) : (
-                code && <span className="pbp__code pbp__code--center pbp__code--out">{code}</span>
+                code && (
+                  <span className="pbp__code pbp__code--center pbp__code--out">
+                    {code}
+                    {focusHeader && rbi > 0 && <span className="pbp__code__rbi"> {rbi} RBI</span>}
+                  </span>
+                )
               ))}
             {/* An interrupted at-bat's carry-over mark ("CS →") is penciled in
                 the MIDDLE of the diamond, where the scorer writes it — the

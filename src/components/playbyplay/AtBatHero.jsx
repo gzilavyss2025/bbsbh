@@ -10,8 +10,11 @@ import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
 // grew out of. That strip was additive, so the batter's name was printed twice
 // on the one card the whole screen is built around — the header said YELICH and
 // the line under it said Yelich, Christian LF. Here the header owns the
-// identity outright: the name, the position, the pinch-runner chain, and the
-// RBI chip all move up into it, and AtBatCard renders no second copy.
+// identity outright: the name, the position, and the pinch-runner chain all
+// move up into it, and AtBatCard renders no second copy. The RBI count does
+// NOT live here — it rides instead in PlayByPlay.jsx's own play-notation pill
+// beside the diamond, next to the result code it belongs to (FC, 1B, …)
+// rather than up here beside the batter's name.
 //
 // Batter and pitcher read as equals here — same headshot rung (--shot-sm), same
 // full-name/jersey/position shape (EnteringReference.jsx's lineup-row
@@ -39,7 +42,7 @@ function NameParts({ id, first, last }) {
   )
 }
 
-export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, pitchingTeamId }) {
+export function AtBatHero({ batter, pitcher, pinchRunners, battingTeamId, pitchingTeamId }) {
   const replaced = pinchRunners && pinchRunners.length > 0
   return (
     <div className="abhero">
@@ -53,7 +56,6 @@ export function AtBatHero({ batter, pitcher, rbi, pinchRunners, battingTeamId, p
         <span className="abhero__meta">
           {batter.jersey ? <span className="abhero__jersey">{batter.jersey}</span> : null}
           {batter.pos && <span className="abhero__pos">{batter.pos}</span>}
-          {rbi > 0 && <span className="pbp__rbi abhero__rbi">{rbi} RBI</span>}
         </span>
         {/* The pinch-runner chain, penciled in under the batter he took over
             for — the same crossed-out-and-replaced convention .pbp__top used,

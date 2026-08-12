@@ -747,6 +747,7 @@ export function InningViewer({
     revealedThrough: renderRevealedThrough,
     workload,
     workloadGameDate,
+    stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
   }
 
   return (

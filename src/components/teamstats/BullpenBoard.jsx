@@ -50,10 +50,10 @@ function detailFor(r) {
 
 // Nests the board under the starting pitcher card, collapsible via the pill
 // below rather than a plain always-on section: local state, not a persisted
-// preference like useMatchupNotes — every visit starts expanded fresh rather
-// than remembering a prior collapse.
+// preference like useMatchupNotes — every visit starts collapsed fresh rather
+// than remembering a prior expand.
 export function useBullpenReveal() {
-  const [showBullpen, setShowBullpen] = useState(true)
+  const [showBullpen, setShowBullpen] = useState(false)
   return { showBullpen, setShowBullpen }
 }
 
