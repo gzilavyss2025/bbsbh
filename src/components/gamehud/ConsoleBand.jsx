@@ -66,6 +66,33 @@ export function ConsoleBand({
   // `.upnext` in the stage below stands down while this card is up, so the same
   // three men are not named twice (styles/focus/console.css).
   const showDueUp = !postHalf && (steps === 0 || stepFrontierIdx != null)
+
+  // ONE NAMING OF THE LEADOFF MAN, NOT TWO. On landing — before a single
+  // at-bat is revealed — the band's batter row and the first due-up card were
+  // the same man about 20px apart: "1. YELICH  .247" over
+  // "1 CHRISTIAN YELICH .247". Both are correct and both come from
+  // selectDueUpNow; they simply answer the same question twice, at the one
+  // frame the reader sees every half.
+  //
+  // The band's row is the one that stands down, because it is the one with
+  // less to say: the card carries the portrait, the first name and the same
+  // line, and it is already the surface that keeps tracking the order as the
+  // reader steps.
+  //
+  // ONLY BEFORE THE FIRST STEP (`steps === 0`). From the first tap on, the
+  // band's row captions the hero card underneath it — the man who just batted,
+  // deliberately NOT advanced to the next hitter (see HalfInning's composeLive)
+  // — while the due-up card names who is coming. Different men, both wanted;
+  // there is nothing to drop.
+  //
+  // This is safe at every width even though DueUpConsole is desktop-only in
+  // CSS. A phone keeps HalfInning's own `.upnext` strip in the stage below
+  // (the `:has()` rule in focus/console.css hides that strip only at >=740,
+  // and only when this card really rendered), so the three names are on screen
+  // there too. And if no lineup was posted at all — a thin MiLB feed — the
+  // same selectDueUpNow that empties the card leaves `live.batter` null
+  // anyway, so this can never blank a row that was the reader's only copy.
+  const bandLive = showDueUp && steps === 0 && live?.batter ? { ...live, batter: null } : live
   // …and the tally takes the same slot once the half is done. `viewIdx <=
   // revealedThrough` is what `postHalf` already implies, stated because it is
   // the gate HalfTally's reveal-only reads actually stand on (ADR-0001).
@@ -74,7 +101,7 @@ export function ConsoleBand({
     <div className="consolebar">
       <ScorebugMount
         started={started}
-        live={live}
+        live={bandLive}
         feed={feed}
         unlocked={unlocked}
         revealedThrough={revealedThrough}

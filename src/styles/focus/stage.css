@@ -272,6 +272,30 @@
   bottom: calc(-1 * var(--space-2) - env(safe-area-inset-bottom));
 }
 
+/* THE SKIP IS QUIETER THAN THE PLAY BUTTON. "Next at-bat" and "Rest of half"
+   shared one skin — the kraft `.btn--reveal` seal, equal width, equal weight —
+   while doing opposite things. The left button advances the loop the whole
+   screen exists for; this one ends the half outright, and revealing is
+   one-directional (ADR-0002), so a mis-tap here cannot be taken back.
+
+   Only the fill changes. The kraft texture and the seal-ink lettering come off
+   for the paper the bar is already painted in, a hairline rule, and body ink at
+   regular weight — so it still reads as a real, tappable choice, just not as
+   the thing to tap. Width, height, padding, line-height and the 44px tap floor
+   are all inherited untouched from `.revealsplit__btn`, which is what keeps
+   24-floating-nav-and-hud.css's dead-space claims (and
+   e2e/reveal-hit-area.spec.js's assertions about them) measuring the same
+   geometry they always did.
+
+   --text-body on --bg-canvas is the 12.72:1 pairing check-contrast.mjs already
+   pins; nothing here introduces a new one. */
+.pagenav--focus .revealsplit__btn--quiet {
+  background: transparent;
+  border-color: var(--border-rule);
+  color: var(--text-body);
+  font-weight: var(--w-semibold);
+}
+
 @media (min-width: 740px) {
   .pagenav--focus .revealsplit {
     max-width: 640px;

@@ -388,7 +388,6 @@ export function InningViewer({
         atBatCountFor={atBatCountFor}
         focusOne={focus.focused}
         focusStep={focus.step}
-        focusCursor={focus.cursor}
         onFocusInfo={focus.reportSteps}
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
@@ -1009,9 +1008,22 @@ export function InningViewer({
             >
               Next at-bat
             </button>
+            {/* NOT THE SAME WEIGHT AS THE BUTTON BESIDE IT. These were two
+                identical kraft seals, equal width and equal pull, and they do
+                opposite things: the left one advances the loop the reader is
+                here for, one at-bat at a time, forty times a half-hour. This
+                one ENDS it — it is the skip. A skip button drawn as loud as
+                the play button is a thumb waiting to make a mistake it cannot
+                undo, since revealing is one-directional (ADR-0002).
+
+                Demoted, not moved and not shrunk: same row, same width, same
+                tap target — only the kraft texture comes off (see
+                `.revealsplit__btn--quiet`, styles/focus/stage.css). The hit
+                areas in 24-floating-nav-and-hud.css measure geometry, which is
+                untouched, so e2e/reveal-hit-area.spec.js holds. */}
             <button
               type="button"
-              className="btn btn--reveal revealsplit__btn"
+              className="btn btn--reveal revealsplit__btn revealsplit__btn--quiet"
               onClick={revealWholeHalf}
               aria-label={`Reveal the rest of half — the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
             >

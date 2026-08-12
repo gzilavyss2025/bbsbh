@@ -42,7 +42,6 @@ export function HalfInning({
   revealedAtBatCount,
   focusOne,
   focusStep,
-  focusCursor,
   onFocusInfo,
   onStepInfo,
   onRunsSoFar,
@@ -80,17 +79,35 @@ export function HalfInning({
   // why PrePitchChanges drops one from the staged list; the live override was
   // the one piece pulling the other way.
   //
-  // Focus mode narrows WHEN this persistent card shows, not what it names:
-  // the ordinary stacked page still pins it at the top of the half for the
-  // whole time the half is on screen (a normal section header). Focus mode
-  // shows one at-bat at a time, and re-announcing the same starter above
-  // every card the reader steps to reads as the banner "coming back" — so
-  // there it's gone the moment the reader has stepped past the half's first
-  // at-bat (focusCursor > 0). A mid-half change still gets its own
-  // announcement at the right moment either way, via the `pitching_substitution`
-  // card above, never this one — that's the "or the first at-bat for the new
-  // pitcher" half of the rule, and it needs no extra gate here.
-  const showNowPitching = !focusOne || focusCursor === 0
+  // FOCUS MODE DOES NOT SHOW THIS CARD AT ALL. The ordinary stacked page still
+  // pins it at the top of the half for as long as the half is on screen (a
+  // normal section header, exactly as described above). Focus mode does not,
+  // and the reason is that up there the card is the THIRD naming of the same
+  // man in the same eyeful:
+  //
+  //   1. the console band's pitcher row — "DOBBINS  P: 0"
+  //   2. this card — a full kraft panel, "NOW PITCHING FOR THE CARDINALS /
+  //      DOBBINS, HUNTER  40  RHP"
+  //   3. AtBatHero, which in focus mode REPLACES the at-bat card's own name row
+  //      and owns the matchup identity outright — his portrait beside the
+  //      batter's, both named (ADR-0043's "the header now owns the identity").
+  //
+  // This used to narrow to `focusCursor === 0` on the argument that the banner
+  // should not "come back" above every card the reader steps to. That was the
+  // right instinct applied one step short: cursor 0 IS the half's first at-bat,
+  // the frame where the hero has already taken the identity over, and it is
+  // also the landing frame the reader sees every single half. So the card was
+  // at its most redundant in the one state it still appeared in, and it is the
+  // single biggest block of height on a phone's landing frame.
+  //
+  // WHAT PROTECTS THE READER INSTEAD IS THE RULE THIS HEADER WAS WRITTEN FROM.
+  // A mid-half change belongs in the feed, and already renders there as this
+  // same PitcherNotice at the moment it happens (PlayByPlay's
+  // `pitching_substitution` branch) — so the arm that CHANGES still announces
+  // itself, in focus mode as everywhere else. What is dropped here is only the
+  // restatement of an arm nothing has happened to. The header/feed division is
+  // intact; focus mode simply has two other places carrying the header half.
+  const showNowPitching = !focusOne
   const nowPitching = selectHalfStartingPitcher(feed, inning, half, revealedThrough)
 
   // "Now pitching" only fits the moment an arm actually takes the mound: the
@@ -258,18 +275,42 @@ export function HalfInning({
   return (
     <>
       <section className="half">
-        <h3 className="half__title">
-          <span className="half__titlemain">
+        {/* THE MASTHEAD IS THE BAND IN FOCUS MODE, so this title stands down to
+            a heading nothing draws. Above it the half was already named by
+            `.inningnav__label` ("TOP 1ST") and by the console band's own
+            inning number and arrow; this made three, and its second line
+            ("MIL BATS • STL PITCHES") is restated a fourth time by the two
+            portraits on AtBatHero, which name the batter's club and the arm's.
+            ADR-0043 gives the band the masthead signature `.half__title` used
+            to carry, deliberately — so once the band is up, this is the copy
+            with nothing left to say.
+
+            KEPT AS A HEADING, not deleted. It is the half's <h3> in the
+            document outline, and dropping the element outright would leave the
+            stage's one region unlabelled for a screen reader while sighted
+            readers still have three visible namings. `.sr-only` (01-base.css)
+            keeps it announced and takes no space. Rendered as its own element
+            rather than by adding the class to `.half__title`, because the two
+            classes would fight over `position` on equal specificity and the
+            visual one loads later. */}
+        {focusOne ? (
+          <h3 className="sr-only">
             {label} {ordinal(inning)}
-          </span>
-          <span className="half__meta">
-            <span className="half__team">
-              {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
-              <span className="half__dot" aria-hidden="true">•</span>{' '}
-              {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+          </h3>
+        ) : (
+          <h3 className="half__title">
+            <span className="half__titlemain">
+              {label} {ordinal(inning)}
             </span>
-          </span>
-        </h3>
+            <span className="half__meta">
+              <span className="half__team">
+                {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
+                <span className="half__dot" aria-hidden="true">•</span>{' '}
+                {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
+              </span>
+            </span>
+          </h3>
+        )}
 
         {/* Persistent Now Pitching card — see the comment above nowPitching. */}
         {(revealed || isNextToReveal) && nowPitching && showNowPitching && (

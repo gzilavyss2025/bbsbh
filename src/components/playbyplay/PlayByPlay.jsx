@@ -660,7 +660,13 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
               onClick={() => setHighlightOpen(true)}
               aria-label={`Watch highlight for ${batter.last}`}
             >
-              <span className="pbp__hlicon" aria-hidden="true">▶</span> Watch
+              {/* The word is wrapped so focus mode can take it off and leave
+                  the glyph — an icon-scale control beside the zone button
+                  (styles/focus/atbat.css). A bare text node can't be selected.
+                  The button keeps its aria-label either way, so dropping the
+                  visible word costs a screen reader nothing. */}
+              <span className="pbp__hlicon" aria-hidden="true">▶</span>{' '}
+              <span className="pbp__hllabel">Watch</span>
             </button>
           )}
         </div>

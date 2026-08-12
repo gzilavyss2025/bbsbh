@@ -305,6 +305,66 @@
   display: none;
 }
 
+/* ------------------------------------------------------ WATCH, AT ICON SCALE
+   On the unfocused page this is a filled kraft button with a word on it, left
+   aligned under the description, and that is right there — it sits in a card
+   whose reading column has room and whose job is the account of the play.
+
+   In focus mode it was the loudest object on the hero: a filled seal, in the
+   same kraft the reveal button wears, directly under the prose — on a card
+   whose actual payload is the scorebook denotation to its right, the code the
+   reader is copying onto paper. It read as the at-bat's primary action. It is
+   not; it is an optional aside available on a small fraction of plays.
+
+   So it wears the zone control's shape instead — the same 32px square, the
+   same seal fill, sitting BESIDE it rather than under it. Two icon-scale
+   controls on one line is the scorebook reading: small instruments at the foot
+   of the card, with the denotation keeping the weight.
+
+   `inline-flex` on both is what puts them on one line. `.pbp__main` is plain
+   block flow and both buttons are deliberately `display: flex` there so each
+   holds its own line and stays flush left (see 14-strike-zone.css). Inside the
+   hero there are at most two of them and they belong together, so the pair
+   goes inline and the row is the thing that stays flush left.
+
+   The label is dropped, not shrunk. `.pbp__hlbtn` keeps its `aria-label`
+   ("Watch highlight for {batter}"), which was always the fuller of the two
+   strings, so the accessible name is unchanged — this only stops drawing a
+   word the glyph already carries. */
+.innings--focus .pbp__zonebtn,
+.innings--focus .pbp__hlbtn {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.innings--focus .pbp__hlbtn {
+  width: 32px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+  margin-left: var(--space-2);
+}
+
+/* A card with a clip but no zone button (the zone rides inline from the wide
+   breakpoint up) would otherwise start its row with a stray left margin. */
+.innings--focus .pbp__zonebtn + .pbp__hlbtn {
+  margin-left: var(--space-2);
+}
+
+.innings--focus .pbp__hlbtn:first-child {
+  margin-left: 0;
+}
+
+.innings--focus .pbp__hllabel {
+  display: none;
+}
+
+/* The glyph carried a caption-scale size because a word sat beside it. Alone in
+   a 32px square it is the whole control, so it takes the zone icon's scale. */
+.innings--focus .pbp__hlicon {
+  font-size: var(--fs-small);
+}
+
 /* The scorebook denotation IS what gets penciled, so it takes the typographic
    hero role: the out chain written across the diamond steps up two roles, the
    reach code above it one. Colours are untouched — a base hit in field green,
