@@ -318,13 +318,14 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
-  /* The innings view's stat card shares its row with the win-probability
-     column (see .innings__row2 above) rather than running the app's full
-     measure, so the worst-call diagram and favor meter don't have room for
-     a real two-up grid there even past this shared breakpoint — stay
-     stacked instead of squeezing both into half a narrow card. The box
-     score's own (unscoped) use of .umpfavor__row is unaffected — it runs
-     the full-width card the two-up grid was designed for. */
+  /* The innings view's stat card lives in the reference panel's narrow ARMS
+     tab (`.focusrail`, ~300px — see reference.css's own narrow-rail block)
+     rather than running the app's full measure, so the worst-call diagram
+     and favor meter don't have room for a real two-up grid there even past
+     this shared breakpoint — stay stacked instead of squeezing both into
+     half a narrow card. The box score's own (unscoped) use of
+     .umpfavor__row is unaffected — it runs the full-width card the two-up
+     grid was designed for. */
   .innings__statbox .umpfavor__row {
     display: flex;
     flex-direction: column;
@@ -676,87 +677,6 @@
    above the seal (see api/select.js's selectPrePitchChanges). Kept visually
    distinct from the sealed content below it: a plain rule and caption, no
    seal texture, since it isn't gated by the tap. */
-/* The pre-half callout strip (see PreHalfCallouts.jsx) — the "entering this
-   half" season-context cards above the seal: starter team record, the
-   leading-after checkpoint, an inning's run-differential story. Same card
-   anatomy as the box score's .bs__noteCard (avatar beside a star-marked
-   sentence), sat with the pre-pitch staging content. Horizontal margin (not
-   just margin-bottom): flush against .half's own border (which carries no
-   padding of its own) reads wider than the "now pitching"/"due up" cards
-   above it — same 14px inset those follow (see .pitchernotice--pbp/.upnext). */
-.prehalf {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 8px;
-  margin: 0 14px 12px;
-}
-.prehalf__card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: var(--paper-2);
-  border: var(--bw-hair) solid var(--border-hairline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--inset-cell);
-  min-width: 0;
-}
-.prehalf__avatar {
-  flex: none;
-  display: flex;
-  align-items: center;
-}
-/* Rectangular headshot, the same portrait frame every other card-mounted
-   photo uses (see .pitchernotice__shot — the pitching-change card these
-   callout cards sit beside), not the old circle avatar: consistent shape and
-   large enough to actually read a face. */
-.shot.prehalf__shot {
-  flex: none;
-  width: var(--shot-sm-w);
-  height: var(--shot-sm-h);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.shot.prehalf__shot.shot--fallback {
-  font-size: var(--fs-title-lg);
-}
-.prehalf__body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.prehalf__who {
-  font-family: var(--font-display);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-.prehalf__text {
-  display: flex;
-  gap: 6px;
-  font-family: var(--font-read);
-  font-size: var(--fs-compact);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-num);
-  line-height: var(--lh-prose);
-  color: var(--text-body);
-}
-.prehalf__mark {
-  flex: none;
-  color: var(--seal-deep);
-  font-size: var(--fs-caption);
-}
-
-/* The pre-half callout cards' fun-fact line reads as a natural-case sentence —
-   the same sanctioned exception as the play-by-play copy (see the ALL-CAPS
-   INVARIANT block) — but the name line above it is a structural label like any
-   other card heading, so it stays in the app's shouted convention. Opt out of
-   the global uppercase; the #root-scoped selector outranks `#root *`. */
-#root .prehalf__text {
-  text-transform: none; /* caps-exempt: pre-half callout cards' fun-fact line reads as a natural sentence */
-}
-
 /* UpNextBatters: who's due up to face the entering pitcher, before any of the
    half is revealed — three headshot columns. Horizontal margin (not just
    .prehalf's margin-bottom): a headshot flush against .half's own border
@@ -845,71 +765,6 @@
   color: var(--text-body);
 }
 
-/* Both teams' lineup cards for the half, rendered outside the seal as the
-   scorebook reference you copy onto the sheet before scoring (see
-   api/battingorder.js's lineupEntering — the lineup as it stands ENTERING the
-   half). Each row reads name(s) on the left, with the standing occupant's
-   jersey number │ fielding position right-aligned on a shared column; a
-   substituted starter is struck through, the seam-red incomer tagged with the
-   inning he entered (shared with the defense diamond's writing-line styling). */
-/* The lineups & defense reference, sealed half (staged inside the SAME card as
-   the play-by-play, ahead of tapping to reveal): this wrapper is a
-   transparent box so its cards stage around the seal exactly as before. Wide
-   layout hides this and shows the right-column card instead (see below). */
-.half__entering {
-  display: contents;
-}
-
-/* Same reference, once the half is revealed: below the play-by-play's card
-   (see HalfInning.jsx), so the just-scored at-bats read as their own distinct
-   unit. Lineups and Defense now read as two separate standalone cards here —
-   the same recipe the wide layout's .innings__ref-lineups/.innings__ref-defense
-   already use below (own border/radius/shadow, a flush masthead relying on
-   that card's own overflow:hidden to round its corners, no ambient parent
-   padding to fight) — rather than sharing one outer card, which used to leave
-   both titles floating as independently-rounded pills inset on all sides
-   instead of spanning their card's full width. This wrapper keeps the "half"
-   class only so other .half-scoped rules still reach in (.half .defdiamond
-   below); it supplies none of its own frame — .lineupcard/.halfdefense do
-   that directly. margin-top spaces it from the play-by-play card above;
-   margin-bottom does the same from the Insights card below — on a phone the
-   two sit back to back with no gap otherwise (they're not flex siblings of
-   the same .innings__grid instance here, so its own gap doesn't reach this
-   seam; a plain margin does regardless of that). */
-.halfentering {
-  margin-top: var(--space-4);
-  margin-bottom: var(--space-4);
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  overflow: visible;
-}
-/* Both cards already carry their own border/radius/shadow (base .lineupcard/
-   .halfdefense rules above) — this wrapper's own flex gap spaces them apart,
-   so just drop the base rule's 14px horizontal inset (there's no ambient
-   .half card here to inset from; each card already spans .halfentering's
-   full width). */
-.halfentering .lineupcard,
-.halfentering .halfdefense {
-  margin: 0;
-}
-
-.innings__reference {
-  display: none;
-}
-
-/* Wide-layout-only pieces, hidden on a phone (the lineups/defense render
-   inline instead, via .half__entering). */
-.innings__ref-defense,
-.innings__ref-lineups {
-  display: none;
-}
-
 /* The R/H/E/LOB + pitch-stat card, row 2 beside the win-probability chart —
    rounded, bordered, and shadowed like every other card in the view. */
 .statbox {
@@ -921,7 +776,7 @@
   min-width: 0;
 }
 
-/* Same flush masthead recipe as .half__title/.pitchers__title — no padding
+/* Same flush masthead recipe as .pitchers__title — no padding
    of its own on .statbox, so this caps the card directly; overflow:hidden
    above clips its square corners to the card's own rounded ones. */
 .statbox__title {
@@ -1031,9 +886,9 @@
    plays around it (rather than the old plain "Pitching Change: X replaces Y"
    note line). */
 .pitchernotice--pbp {
-  /* Horizontal margin, not just padding: .half has no padding of its own
-     (see .half__title's matching 14px inset comment), so without this the
-     card's own border sits flush against the card it's nested inside. */
+  /* Horizontal margin, not just padding: .half has no padding of its own,
+     so without this the card's own border sits flush against the card it's
+     nested inside. */
   margin: 4px 14px;
   padding: 10px 12px;
   border: var(--bw-hair) solid var(--seal-hatch);
@@ -1327,34 +1182,6 @@
   }
 }
 
-/* Row 2: the stat card beside the win-probability chart — stacked on a phone,
-   side by side from the wide breakpoint up (see media query below).
-   margin-top at every width: .innings__grid's own flex gap (see its
-   media-query rule) only reaches DIRECT children, and InningPageTurn.jsx
-   wraps .inning + this row together inside .turnscene, so they're siblings
-   INSIDE one grid child rather than two grid children themselves — the
-   margin here is what actually separates them from the card directly above
-   (.inning — either just the play-by-play, or that plus the standalone
-   .halfentering reference once a half starts revealing) at every width, not
-   just on a phone. */
-.innings__row2 {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-.innings__row2-right > .winprob {
-  margin-bottom: 0;
-}
-/* Below the wide breakpoint neither column wrapper exists as a layout box —
-   `.abscard` is hidden there anyway (ABS stays inline in StatBox, see
-   `.statbox__abs`) — so their children just fall back into the same single
-   flex column as everything else in `.innings__row2`. */
-.innings__row2-left,
-.innings__row2-right {
-  display: contents;
-}
 /* Mobile-first hidden: AbsCard's whole-card copy of ABS Challenges only
    exists for the wide layout's right column (unhidden in the min-width:740px
    block below) — on a phone the ABS block stays inline inside StatBox
@@ -1375,7 +1202,7 @@
   overflow: hidden;
 }
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .half__title/.pitchers__title) — overflow:hidden on .dueup clips the
+   as .pitchers__title) — overflow:hidden on .dueup clips the
    square corners here to the card's own rounded ones. */
 .dueup__title {
   display: flex;
@@ -1424,21 +1251,16 @@
   overflow-wrap: anywhere;
 }
 
-/* Phone-only: once a half starts revealing, promote row 2 (the R/H/E/LOB +
-   pitching + Statcast stat card, paired with the win-probability chart)
-   above the lineups/defense reference card (.halfentering) instead of
-   trailing it — the stat line reads as part of "what just happened," right
-   under the play-by-play, with the entering-lineups reference (staging for
-   the NEXT half) following it. .inning goes display:contents so its two
-   children (.half, and .halfentering once it exists) become direct items of
-   this flex column alongside .innings__row2/.innings__ref/.innings__rosters,
-   orderable independently of their source order. That makes .innings__grid
-   itself a flex container here too, which drops the block-flow margin
-   collapsing the phone layout was leaning on — so the items' own top/bottom
-   margins that used to supply inter-card spacing are reset to 0 and
-   .innings__grid's own gap takes over instead, same fix the wide-breakpoint
-   media query above already applies to .innings__row2/.pitchers for the
-   identical reason. */
+/* Phone-only. `.inning` goes display:contents so `.half` (its one child now —
+   the old row2/entering-reference siblings that used to share this ordering
+   scheme are gone with the unfocused page) becomes a direct item of this flex
+   column, orderable independently of source order. That makes
+   `.innings__grid` itself a flex container here too, which
+   `styles/focus/stage.css`'s own phone ordering (`.refbar`/`.rolling`) relies
+   on — `.innings--focus`'s own `.innings__grid` rule only goes `display:grid`
+   at wide width, so this plain (unscoped) rule is what makes `order` mean
+   anything on a phone at every reveal state. Do not remove it along with the
+   dead siblings that used to sit alongside `.half` here. */
 @media (max-width: 739.98px) {
   .innings__grid {
     display: flex;
@@ -1453,26 +1275,6 @@
   }
   .half {
     order: 1;
-  }
-  .innings__row2 {
-    order: 2;
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-  .halfentering {
-    order: 3;
-  }
-  .innings__ref {
-    order: 4;
-  }
-  .innings__ref-left .pitchers {
-    margin-top: 0;
-  }
-  .innings__rosters {
-    order: 5;
-  }
-  .innings__rosters > .roster:first-child {
-    margin-top: 0;
   }
 }
 
@@ -1785,24 +1587,6 @@
 .bs__defensecard .defdiamond {
   border-top: none;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-}
-
-/* On a phone, .halfdefense is itself now a card (see above) nested inside
-   .half's own bordered/shadowed card (the pre-reveal reference band staged
-   above the seal — see HalfInning.jsx) — the diamond's own card border would
-   double against .halfdefense's own, right at the bottom edge. The wide
-   layout's copy (.innings__ref-defense) drops the diamond's border for the
-   same reason against ITS OWN wrapper card instead (see below); only this
-   selector's own .half-nested copy needs the reset here. Horizontal inset
-   matches its siblings' own 8px (.lineupteam__name, .halfdefense__title); the
-   bottom keeps real padding since — unlike the removed border — this is the
-   LAST thing in the card, and the DH line needs room to breathe before
-   .halfdefense's own bottom edge. */
-.half .defdiamond {
-  border: none;
-  box-shadow: none;
-  background: none;
-  padding: 12px var(--space-2) var(--space-4);
 }
 
 /* Focus mode's Field tab: zeroing the OUTER .halfdefense like the box score

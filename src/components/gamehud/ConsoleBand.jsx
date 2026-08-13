@@ -9,8 +9,8 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 // rather than ninety lines inside InningViewer.jsx (which is at its own size
 // budget, and where the row's states read as unrelated conditionals).
 //
-// The band itself is `ScorebugMount focused`: the same scorebug, placed rather
-// than floated, at its own dock width — its one placement now, there is no
+// The band itself is `ScorebugMount`: the same scorebug, placed rather than
+// floated, at its own dock width — its one placement now, there is no
 // floating dock any more. Beside it, exactly one of two cards spends the
 // width the band does not use — and which one is a plain statement of
 // whether the half on screen is sealed or revealed, not of how the reader
@@ -108,7 +108,6 @@ export function ConsoleBand({
         viewIdx={viewIdx}
         viewInning={viewInning}
         viewHalf={viewHalf}
-        focused
       />
       {showDueUp && (
         <DueUpConsole

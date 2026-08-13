@@ -258,8 +258,10 @@
    children of their own bordered card) — it's nested inside
    .lineupcard__teams, whose own 12px top padding left a stripe of bare paper
    ABOVE the club's colored bar that those other two tabs never had. Canceled
-   here rather than in the base rule (12-sealbox.css), which still needs that
-   padding for the unfocused stacked page's own two-team layout. */
+   here rather than in the base rule (12-sealbox.css) even though
+   ReferencePanel's LINEUPS tab is `.lineupcard`'s only caller now — an
+   override kept local to where it's needed reads clearer than a base rule
+   whose one remaining consumer has to be discovered by grep. */
 .refpanel__body .lineupteam__name {
   margin-top: -12px;
 }
@@ -271,9 +273,11 @@
    each printing a club's name at a different size as the reader flips
    through them. Scoped to .refpanel__body (covers both the wide rail and the
    portalled phone sheet, which share this class) rather than touching the
-   base rules, which still serve their other, non-tabbed callers (the
-   unfocused wide-layout defense/lineup cards, the box score) at their own
-   established sizes. */
+   base rules directly: `.halfdefense__title`'s base size still serves the box
+   score's own defense card (BoxScore.jsx) at its own established size, and
+   `.lineupteam__name`'s base rule — `.lineupcard`'s only other caller retired
+   with the unfocused stacked page — is kept as the honest default for
+   whichever future caller reaches for it next. */
 .refpanel__body .halfdefense__title,
 .refpanel__body .lineupteam__name {
   font-size: var(--fs-ui);
