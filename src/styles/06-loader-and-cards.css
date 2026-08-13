@@ -185,17 +185,14 @@
   gap: var(--space-2);
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  /* --bw-heavy (2px) rather than the --bw-hair hairline every other bordered
-     surface uses, so the card reads as a frame the ballpark photo sits inside
-     rather than a photo loosely placed behind a hairline-bordered card. ONE
-     fixed color for every card, favorite or not — a 50/50 blend of the plain
-     rule tone and --text-muted lands roughly midway between the old two-tone
-     scheme's ends (the light --border-rule every other card wore, and the
-     darker per-team tint .gamecard--pinned used to mix in below), so it reads
-     as one deliberate frame color rather than a card-by-card variable. The
-     star badge + background tint below still say which card is pinned; the
-     frame no longer needs to. */
-  border: var(--bw-heavy) solid color-mix(in srgb, var(--border-rule) 50%, var(--text-muted) 50%);
+  /* Back to --bw-hair (1px), the hairline every other bordered surface uses —
+     the thickened --bw-heavy frame read heavier than the photo backdrop
+     needed. ONE fixed color for every card, favorite or not — a blend of the
+     plain rule tone and --text-muted, weighted toward --text-muted (was
+     50/50) so the hairline still reads as a deliberate frame rather than
+     fading out at 1px. The star badge + background tint below still say
+     which card is pinned; the frame no longer needs to. */
+  border: var(--bw-hair) solid color-mix(in srgb, var(--border-rule) 35%, var(--text-muted) 65%);
   background: var(--surface-card);
   color: var(--text-body);
   box-shadow: var(--shadow-card);
