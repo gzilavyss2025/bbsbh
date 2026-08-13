@@ -137,7 +137,11 @@ export function BoxScore({
           the revealed branch (ADR-0001/0002); the pass only flips WHICH branch
           renders. Nothing is persisted — this SealBox has no `onReveal`, and the
           pass never touches `revealedThrough`. */}
-      <SealBox label="Tap to reveal the box score" forceRevealed={spoilersOff}>
+      <SealBox
+        label="Tap to reveal the box score"
+        forceRevealed={spoilersOff}
+        gamePk={feed?.gamePk}
+      >
         {() => {
           const r = revealBoxScore(revealCacheRef, feed, winProbability, highlights, callouts, vsTeam)
           return (
