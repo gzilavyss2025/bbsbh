@@ -15,9 +15,15 @@ once:
   and faded to a wash filling the whole card when you hover a game (cropped a
   further 5% off each edge, past the dead margin most of these frames carry),
   keyed off the venue the GAME is at rather than the home club's own park, so a
-  neutral site shows nothing rather than the wrong ballpark. Hover-capable
-  pointers only, and the image is not fetched until the first hover;
-  `e2e/gamecard-parkart.spec.js` pins both.
+  neutral site shows nothing rather than the wrong ballpark. A hover-capable
+  pointer fetches and shows this on the first hover; a touch device has no
+  hover to give, so `GameCard.jsx`'s `IntersectionObserver` arms the SAME
+  reveal off the card's own on-screen state instead, and only ever with the
+  ~480px WebP thumbnail (`public/ballparks/thumb/{venueKey}.webp`,
+  `scripts/gen-ballpark-thumbs.mjs`) rather than the 1000px original — the wash
+  renders at 0.24 opacity either way, so full-size art buys a phone nothing but
+  bytes. Skipped outright under Data Saver (`navigator.connection.saveData`).
+  `e2e/gamecard-parkart.spec.js` pins all of it.
 
 ## The licence rule, which is not optional
 
@@ -84,6 +90,11 @@ the shipped default for all 30 parks got here.
    Rate/Rate) share one record, so they share one photo.
 4. Add or update the `CREDITS` entry in the same commit: `artist`, `license`,
    and the `source` file-page URL.
+5. Run `npm run gen:ballpark-thumbs` to (re)write the mobile-sized companion
+   the touch/scroll reveal uses, and commit the new
+   `public/ballparks/thumb/{venueKey}.webp` alongside the full photo — a park
+   with a `.jpg` but no matching `.webp` just falls back to serving the full
+   photo to phones too, which works but defeats the point.
 
 Aspect ratio does not need to match anything. The card crops to 16:9 with
 `object-fit: cover` (`src/styles/57-ballpark-card.css`), so a 4:3 phone snap and

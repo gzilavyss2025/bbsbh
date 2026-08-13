@@ -613,6 +613,13 @@ Re-run only to fold in a new season.
   nightly run from re-quantizing its own output and cumulatively degrading the art;
   don't remove it. Always regenerate `logo-art.json` after a run that changed anything
   (it pins exact byte sizes).
+- `gen-ballpark-thumbs.mjs` → `public/ballparks/thumb/{venueKey}.webp` — a
+  ~480px WebP companion to each bundled 1000px ballpark photo (source keys
+  read straight off `CREDITS` in `src/lib/ballpark/ballparkArt.js`, never a
+  directory glob), for the slate card's touch/scroll backdrop reveal to fetch
+  instead of the full photo — `docs/ballpark-photos.md`. Hand-run
+  (`npm run gen:ballpark-thumbs`) after adding or replacing a bundled photo,
+  same cadence as the photos themselves.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +

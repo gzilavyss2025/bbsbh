@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { TeamTreatmentMark } from '../logo/TeamTreatmentMark.jsx'
 import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
@@ -12,14 +12,21 @@ import { liveTreatmentFor } from '../../api/uniforms.js'
 import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { useCopy } from '../../copy/copyContext.js'
+import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 
 // Whether this device has a pointer that can hover — the SAME condition
-// 06a-gamecard-parkart.css gates the ballpark backdrop on, asked again in JS so
-// the two cannot disagree. Without it a tap on a phone fires pointerenter and
-// fetches a 1000px photograph the media query will never show: the app is
-// phone-first, and a desktop nicety must cost a phone nothing. Asked per event
-// rather than once at module load, so plugging in a mouse starts working.
-const canHover = () => window.matchMedia?.('(hover: hover)').matches ?? false
+// 06a-gamecard-parkart.css keys its `@media (hover: hover)` reveal on, asked
+// again in JS so the two cannot disagree. It decides which of two triggers
+// arms the ballpark backdrop (a pointer event vs. the IntersectionObserver
+// below) and which size photo gets named when it does (park.cssUrl, the full
+// 1000px hover art, vs. park.mobileCssUrl, the small scroll-triggered
+// thumbnail — see lib/ballpark/parkBackdrop.js). LIVE, via useMediaQuery's own
+// matchMedia change listener, not a one-off snapshot: a mount-time-only read
+// missed a device toolbar toggled AFTER the page had already loaded (no
+// reload in between), which left a touch session's IntersectionObserver never
+// attached — the exact "plugging in a mouse" case this query has always had
+// to answer for.
+const HOVER_QUERY = '(hover: hover)'
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -90,15 +97,50 @@ export function GameCard({
   // store here is a context read, not a fetch.
   const { t } = useCopy()
   const park = parkBackdrop(game.venue?.name, t)
-  // The photo is fetched on FIRST HOVER, not on mount — a slate is fifteen cards
-  // and these are 1000px-wide photographs, so loading them up front would cost
-  // megabytes to decorate an interaction most visits never make. Naming the
-  // image only in a `:hover` rule would get the same laziness for free, but then
-  // it un-names on leave and the fade-OUT has nothing left to fade; arming it
-  // once in state keeps the image mounted so both directions animate. One
-  // flip per card, ever.
+  // The photo is fetched on FIRST HOVER (or, on touch, first appearing on
+  // screen — see the effect below), not on mount — a slate is fifteen cards
+  // and even the mobile-sized companion isn't free, so loading them up front
+  // would cost bytes to decorate an interaction most visits never make. Naming
+  // the image only in a `:hover`/in-view rule would get the same laziness for
+  // free, but then it un-names on leave and the fade-OUT has nothing left to
+  // fade; arming it once in state keeps the image mounted so both directions
+  // animate. One flip per card, ever — parkInView (below) keeps toggling after
+  // that to drive the touch fade, but parkArmed never un-arms.
   const [parkArmed, setParkArmed] = useState(false)
-  const armPark = park && !parkArmed ? () => canHover() && setParkArmed(true) : undefined
+  // LIVE, not a one-off snapshot — see HOVER_QUERY's header above.
+  const hoverCapable = useMediaQuery(HOVER_QUERY)
+  const armPark = park && !parkArmed ? () => hoverCapable && setParkArmed(true) : undefined
+  // Touch's own trigger for the same reveal the hover pointer drives above —
+  // there is no hover event to key off, so 06a-gamecard-parkart.css's
+  // `@media (hover: none)` block instead fades .gamecard__parkart in and out
+  // on this class, kept in sync with the card's own on-screen state.
+  const [parkInView, setParkInView] = useState(false)
+  const cardRef = useRef(null)
+  // The touch analog of hover: no pointer to arm the backdrop with, so an
+  // IntersectionObserver arms it off the card's own on-screen state instead —
+  // and only ever with the mobile-sized thumbnail (park.mobileCssUrl in the
+  // style object below), never the 1000px hover art hoverCapable gates above.
+  // Skipped outright under Data Saver, a real signal the visitor already gave
+  // the browser about exactly this kind of decorative weight. `hoverCapable`
+  // rides the dependency array (not just the read inside the body) so a LIVE
+  // flip — a device toolbar toggled with no reload — tears down and, if now
+  // non-hoverable, re-attaches the observer, rather than freezing whatever was
+  // true the one time this effect first ran. `game.venue?.name`, not `park` —
+  // a fresh object every render — is the other dependency, because that's
+  // what park's identity actually depends on, and it stays stable for one
+  // game card's whole lifetime.
+  useEffect(() => {
+    if (!park || hoverCapable || navigator.connection?.saveData) return
+    const el = cardRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([entry]) => {
+      setParkInView(entry.isIntersecting)
+      if (entry.isIntersecting) setParkArmed(true)
+    })
+    io.observe(el)
+    return () => io.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.venue?.name, hoverCapable])
   // --pin-accent drives the pinned border/gradient + star (see index.css) and is
   // left unset when not pinned or the team has no known color, so the CSS
   // var(--pin-accent, var(--field)) fallback takes over. Same idea for the two
@@ -106,21 +148,24 @@ export function GameCard({
   const style = {
     ...(pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : null),
     ...(park ? { '--park-focus': park.focus } : null),
-    ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
+    ...(park && parkArmed ? { '--park-art': hoverCapable ? park.cssUrl : park.mobileCssUrl } : null),
   }
   const card = (
     // No native `title` tooltip on this card — the backdrop's park name prints
     // instead, on the card itself, next to the start time (.gamecard__parkname
     // below): a hover reveal you can actually see coming, not a browser tooltip.
     <div
-      className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''}`}
+      ref={cardRef}
+      className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''} ${parkInView ? 'gamecard--parkinview' : ''}`}
       style={Object.keys(style).length ? style : undefined}
       onPointerEnter={armPark}
       onFocus={armPark}
     >
       {/* The ballpark, washed grayscale and faded in behind the WHOLE card on
-          hover. First child, painting under everything else: the card is a
-          scorebook entry and the park is the paper it is written on. */}
+          hover — or, on a touch device, as the card crosses the screen (see
+          the IntersectionObserver above). First child, painting under
+          everything else: the card is a scorebook entry and the park is the
+          paper it is written on. */}
       {park && <span className="gamecard__parkart" aria-hidden="true" />}
       {/* Full-width date strip for a cross-date list where each card needs
           its own day, unlike the slate (one date heads the whole page).

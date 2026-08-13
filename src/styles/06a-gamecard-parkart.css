@@ -1,10 +1,11 @@
-/* The ballpark behind the card — a slate card's hover state.
+/* The ballpark behind the card — a slate card's hover/scroll state.
    ---------------------------------------------------------------------------
-   Hover a game and the park it is being played in fades in behind the whole
-   card: the same photograph the team hub's Ballpark card shows, drained to
-   grayscale and held down to a wash. The point is recognition, not decoration —
-   you should be able to tell Fenway from Wrigley at a glance and still read
-   every word printed over it.
+   Hover a game (or, on a touch device, scroll it onto screen) and the park
+   it is being played in fades in behind the whole card: the same photograph
+   the team hub's Ballpark card shows, drained to grayscale and held down to
+   a wash. The point is recognition, not decoration — you should be able to
+   tell Fenway from Wrigley at a glance and still read every word printed
+   over it.
 
    Sits immediately after 06-loader-and-cards.css because it belongs to the
    .gamecard rules there and must win at equal specificity; that file is over
@@ -15,11 +16,15 @@
    custom properties — an MiLB park, a neutral site, a lean feed row. The
    var() fallbacks below are what make "no park" cost no rule.
 
-   HOVER ONLY, and that is the whole feature: `@media (hover: hover)` keeps it
-   off touch, where there is no hover to give and a tap means "open this game".
-   The app is phone-first, so this is a nicety for the desktop second screen,
-   never something a phone visit is missing. GameCard asks the same question in
-   JS before it even names the image — see canHover() there. */
+   TWO TRIGGERS, one reveal. `@media (hover: hover)` below is the desktop
+   second-screen nicety this started as: a pointer arms the backdrop and
+   `:hover`/`:focus-within` shows it. A phone has no hover to give, so
+   `@media (hover: none)` drives the identical opacity/max-width values off
+   `.gamecard--parkinview` instead — a class GameCard's IntersectionObserver
+   toggles as the card crosses the screen, arming the (much smaller)
+   `--park-art` a touch device gets — see the useMediaQuery(HOVER_QUERY) read
+   and the effect below it in GameCard.jsx. A device only ever matches one of
+   the two blocks. */
 
 /* The clipping frame: the card's own interior, corners and all. It holds no
    image itself, only the ::before that carries one, because a background
@@ -78,6 +83,18 @@
   z-index: 1;
 }
 
+/* Shared by both the hover reveal below and its touch counterpart further
+   down — a device only ever matches one of the two `@media` blocks, but the
+   transition itself isn't conditional on which trigger is live, so it lives
+   outside both rather than being declared (identically) in each. */
+.gamecard__atmark-ghost,
+.gamecard__atmark-ink {
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+.gamecard__parkname {
+  transition: max-width var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out);
+}
+
 @media (hover: hover) {
   /* Keyed on the CARD, not the button, so the box-score row at the foot of a
      past game's card counts as hovering the game too — the whole card is one
@@ -104,10 +121,6 @@
   .gamecard:focus-within .gamecard__atmark-ghost {
     opacity: 0.3;
   }
-  .gamecard__atmark-ghost,
-  .gamecard__atmark-ink {
-    transition: opacity var(--dur-med) var(--ease-out);
-  }
 
   /* The park's name (.gamecard__parkname, styled in
      07-team-logo-and-buttons.css) grows in alongside the photo it names —
@@ -118,8 +131,27 @@
     max-width: 240px;
     opacity: 1;
   }
-  .gamecard__parkname {
-    transition: max-width var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out);
+}
+
+/* The touch counterpart: no hover event exists here, so GameCard's
+   IntersectionObserver toggles .gamecard--parkinview as the card crosses the
+   screen instead of a pointer arming it — same three reveals, same values,
+   the only difference is what's driving them. .gamecard--parkinview only
+   ever appears on a card carrying a park (see GameCard.jsx), so no var()
+   fallback is needed here the way the base rules above need one. */
+@media (hover: none) {
+  .gamecard--parkinview .gamecard__parkart {
+    opacity: 0.24;
+  }
+  .gamecard--parkinview .gamecard__atmark-ink {
+    opacity: 0.28;
+  }
+  .gamecard--parkinview .gamecard__atmark-ghost {
+    opacity: 0.3;
+  }
+  .gamecard--parkinview .gamecard__parkname {
+    max-width: 240px;
+    opacity: 1;
   }
 }
 
