@@ -180,12 +180,13 @@
    via an opt-in modifier (see `.player.is-themed .section__title--bar`
    above); team-leaders is the one surface still deliberately unthemed.
 
-   The hero (.team-hub__id) itself stays UNTHEMED — no bar, no club-colored
-   box — the club's identity already rides on the big Main-treatment mark
-   (see .team-hub__logobox below) instead. Every OTHER themed section is a
-   masthead BOLTED onto the table/list/grid it labels — the same
-   metricbar+metriccard idiom the lineup page uses, not
-   a label floating disconnected above its content. `.thub-card` is the
+   The hero (.team-hub__id) wears its own SEPARATE tile-color theming —
+   `--tint`/`--ink` from TeamHubShell.jsx's `headerTile`, not this `theme`/
+   `.is-themed` triad (28a-team-hub-hero.css has the reasoning). Every OTHER
+   themed section below reads THIS triad instead, each a masthead BOLTED onto
+   the table/list/grid it labels — the same metricbar+metriccard idiom the
+   lineup page uses, not a label floating disconnected above its content.
+   `.thub-card` is the
    shared shell for sections that had no card of their own (Standings,
    Schedule, Team Leaders, Current Roster, Injured List, Affiliates,
    Prospects, Logos & jerseys); `.tstats-card`, `.roster-super`, `.txcard`,

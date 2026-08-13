@@ -297,17 +297,21 @@
   text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
 }
 
+/* Colors mix FROM the hero's own `--ink` (28a-team-hub-hero.css) rather than
+   a fixed token pair, so "Manager:" stays legibly muted against the label
+   and the name stays full-strength against it, whichever way a given club's
+   own tile ink came out. */
 .team-hub__manager {
   margin: 4px 0 0;
   font-size: var(--fs-small);
-  color: var(--text-muted);
+  color: color-mix(in srgb, var(--ink, var(--text-muted)) 75%, transparent);
 }
 .team-hub__manager .plink {
-  color: var(--text-heading);
+  color: var(--ink, var(--text-heading));
   font-weight: var(--w-semibold);
 }
 .team-hub__manager-interim {
-  color: var(--graphite-soft);
+  color: color-mix(in srgb, var(--ink, var(--graphite-soft)) 65%, transparent);
   font-size: var(--fs-caption);
 }
 

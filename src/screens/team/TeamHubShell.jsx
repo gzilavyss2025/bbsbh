@@ -2,7 +2,9 @@ import { useMemo } from 'react'
 import { fetchTeams } from '../../api/schedule.js'
 import { resolveGameNotes } from '../../api/gameNotes.js'
 import { ordinal } from '../../api/person.js'
-import { SPORT_LABEL } from '../../lib/teams.js'
+import { SPORT_LABEL, treatmentTile, defaultHomeTreatmentFor } from '../../lib/teams.js'
+import { milbTreatmentTile } from '../../lib/milbColors.js'
+import { readableTextColor } from '../../lib/contrast.js'
 import { teamPath } from '../../lib/route.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -11,7 +13,6 @@ import { useNav } from '../../lib/nav.js'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
 import { humanDate } from '../../lib/dates.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
-import { TeamTreatmentMark } from '../../components/logo/TeamTreatmentMark.jsx'
 import { TeamFilterStrip } from '../../components/team/TeamFilterStrip.jsx'
 import { TeamLink } from '../../components/team/TeamLink.jsx'
 import { ManagerLink } from '../../components/team/ManagerLink.jsx'
@@ -21,6 +22,13 @@ import { BackBtn } from '../../components/chrome/BackBtn.jsx'
 import { TeamTabBar } from './TeamTabBar.jsx'
 
 const DASH = '—'
+
+// The two ink choices the hero picks between when it wears a club's own tint
+// — same pair, same reasoning, as JerseyCombos.jsx's identical "a tile's own
+// color IS the surface now" case: readableTextColor needs a real hex to run
+// WCAG math against, not a CSS var reference.
+const INK_DARK = '#16222F'
+const INK_LIGHT = '#FBF6E9'
 
 const TAB_TITLE = {
   overview: null,
@@ -89,6 +97,32 @@ export function TeamHubShell({
     () => headerThemeFor(team.id, themeKeyFor(team.id, 'home', 'main')),
     [team.id],
   )
+  // The hero row's own background: the club's curated DEFAULT HOME jersey
+  // tile — Identity Lab's "Default home" pick (MLB), or the Home side
+  // (MiLB, no treatment vocabulary to pick from). Deliberately a SEPARATE
+  // lookup from `theme` above: that triad is tuned for text on a themed BAR
+  // and covers a small, curated subset of clubs, while this is the same tile
+  // color the logo box already wore (broader coverage, no bar involved) —
+  // now sized to the whole row instead of a 128px box, so the ink has to be
+  // picked fresh rather than assumed. Same `readableTextColor` call
+  // JerseyCombos.jsx makes for the identical "tile color IS the surface" case.
+  const headerTile = useMemo(() => {
+    const tile = isMilb
+      ? milbTreatmentTile(team.id, 'home')
+      : treatmentTile(team.id, defaultHomeTreatmentFor(team.id) ?? 'main')
+    const ink = tile.pinstripeColor
+      ? INK_DARK
+      : tile.tint
+        ? readableTextColor(tile.tint, INK_LIGHT, INK_DARK)
+        : null
+    return { ...tile, ink }
+  }, [team.id, isMilb])
+  const headerStyle = {
+    '--tint': headerTile.tint || undefined,
+    '--pinstripe-color': headerTile.pinstripeColor || undefined,
+    '--pinstripe-bg': headerTile.pinstripeBg || undefined,
+    '--ink': headerTile.ink || undefined,
+  }
   // Same finger-scrollable nav strip GameSelect's slate header uses to jump
   // between clubs — sourced from this club's own level so it re-lists on every
   // level switch, same as there.
@@ -108,24 +142,19 @@ export function TeamHubShell({
         <SiteHeader />
         <BackBtn onClick={back} />
 
-        <header className="team-hub__id">
-          {/* The club's Main "logo card" — its mark on the curated tinted tile
-              (the same treatment tile the slate cards wear), rather than a bare
-              CDN logo. MLB reads it by `treatment`; MiLB has no treatment
-              vocabulary, so `side="home"` is what makes TeamTreatmentMark read
-              its curated tile from milbColors.js instead of falling back to
-              the plain paper mark — the same Home identity `theme` above
-              already resolves via themeKeyFor. Degrades to plain paper only
-              for a club neither table has been tuned for yet. */}
+        <header
+          className={`team-hub__id${headerTile.pinstripeColor ? ' team-hub__id--pinstripe' : ''}`}
+          style={headerStyle}
+        >
+          {/* The club's default home mark, full size and unpositioned — no
+              edge-bleed, no crop, no per-treatment x/y nudge. Those exist so a
+              small tile reads as a patch printed on a jersey; here the tile's
+              own color now fills the whole row (`--tint` above), so the mark
+              just sits on it at its own natural proportions, same idea as
+              JerseyCombos' deck cards (28-team-hub.css's
+              .jerseydeck__logobox .teamlogo, `transform: none`). */}
           <div className="team-hub__logo">
-            <TeamTreatmentMark
-              teamId={team.id}
-              name={team.name}
-              treatment="main"
-              side="home"
-              size={128}
-              block="team-hub__logobox"
-            />
+            <TeamLogo teamId={team.id} name={team.name} variant={headerTile.logoVariant} size={104} />
           </div>
           <div>
             <div className="team-hub__namerow">
@@ -151,8 +180,13 @@ export function TeamHubShell({
             )}
           </div>
           {isMilb && team.parentOrgId && (
-            <TeamLink id={team.parentOrgId} className="team-hub__parent">
-              <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={45} />
+            <TeamLink
+              id={team.parentOrgId}
+              className="team-hub__parent"
+              ariaLabel={`Affiliate of ${team.parentOrgName ?? 'its MLB club'}`}
+            >
+              <span className="team-hub__parent-label">Affiliate</span>
+              <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={34} />
             </TeamLink>
           )}
           {!isMilb && <GameNotesLink teamId={team.id} />}
