@@ -6,7 +6,7 @@ import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCard.jsx'
 import { CountBlink } from '../components/gamehud/StatBox.jsx'
 import { HalfCloseRule } from '../components/inning/focus/HalfCloseRule.jsx'
-import { INK_SET_MS } from '../components/inning/focus/beats.js'
+import { INK_SET_MS, INK_SET_OVERSHOOT } from '../components/inning/focus/beats.js'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -174,16 +174,16 @@ export function AnimationLab() {
         <p className="hint hint--prose">
           The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms
           (identical for a strikeout and a grand slam &mdash; see ADR-0046) and then lands
-          with a 3% scale overshoot over {INK_SET_MS}ms. Only the landing is shown here;
-          the hold is a JS timer in useDenotationBeat.js, not an animation this page can
-          scrub.
+          at {Math.round(INK_SET_OVERSHOOT * 100)}% and settles to rest over {INK_SET_MS}ms
+          &mdash; no colour change, no rebound. Only the landing is shown here; the hold is
+          a JS timer in useDenotationBeat.js, not an animation this page can scrub.
         </p>
         <div className="animlab__live">
           <InkSetDemo />
         </div>
         <span className="animlab__stagelabel">Ink-set, {INK_SET_MS}ms</span>
         <div className="animlab__frozen">
-          {[0, 10, 20, 30, 40].map((ms) => (
+          {[0, 55, 110, 165, 220].map((ms) => (
             <Frame key={`ink-${ms}`} label={`${ms}ms`} delayMs={ms}>
               <InkSetDemo />
             </Frame>
@@ -214,7 +214,7 @@ const CLOSE_FIGURES = [
 function InkSetDemo() {
   return (
     <span className="innings--focus">
-      <span className="pbp__play" style={{ '--ink-set': `${INK_SET_MS}ms` }}>
+      <span className="pbp__play" style={{ '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }}>
         <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
       </span>
     </span>

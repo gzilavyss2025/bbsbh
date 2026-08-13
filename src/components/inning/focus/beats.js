@@ -32,8 +32,9 @@
 // Every number here is meant to be felt and adjusted. They are the single
 // source of truth for BOTH halves of each beat: the JS timers read them
 // directly, and the CSS reads them through inline custom properties the
-// components set (`--ink-set`, `--close-draw`, `--close-step`), so there is no
-// second copy in a stylesheet to drift out of step with these.
+// components set (`--ink-set`, `--ink-overshoot`, `--close-draw`,
+// `--close-step`), so there is no second copy in a stylesheet to drift out of
+// step with these.
 
 // (1) THE BEAT — the hold between an at-bat card arriving and its scorebook
 // denotation printing. The pitch ladder and the batter's name are up for this
@@ -41,9 +42,21 @@
 // feel; nothing else depends on the exact value.
 export const DENOTATION_HOLD_MS = 180
 
-// The ink-set that lands the mark: a 3% scale overshoot settling to rest, no
-// colour change. Short enough to read as a press rather than a bounce.
-export const INK_SET_MS = 40
+// The ink-set that lands the mark: a scale overshoot settling to rest, no
+// colour change and no rebound — a mark pressed onto paper, not a bounce.
+//
+// IT SHIPPED AT 40ms / 1.03 AND WAS INVISIBLE, and the arithmetic is worth
+// keeping because it is easy to talk yourself back into: at 60Hz, 40ms is about
+// two and a half frames, and 3% of a 21px mark is 0.64px. Two frames of
+// two-thirds of a pixel is not a beat, it is a rounding error — the loop looked
+// exactly as unpunctuated as it did before. Both numbers were raised together
+// until the press reads at arm's length on a phone.
+//
+// Tune the two independently: OVERSHOOT is how hard the mark is pressed,
+// INK_SET_MS is how long it takes to settle. Nothing else needs editing —
+// PlayByPlay.jsx publishes both to the CSS as inline custom properties.
+export const INK_SET_MS = 220
+export const INK_SET_OVERSHOOT = 1.25
 
 // (2) THE RULE — the hairline drawing itself left to right across the stage
 // when the half commits.

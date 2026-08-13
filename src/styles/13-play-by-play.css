@@ -151,11 +151,17 @@
    the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
    its paper chip backing — this diamond's outline is sparse enough at the
    center that the bare code reads fine directly over it. */
+/* THE CENTRING IS THE INDIVIDUAL `translate` PROPERTY, NOT `transform`, so it
+   applies OUTSIDE any scale and cannot be multiplied by one — which is what
+   keeps focus mode's ink-set from dragging this mark off the diamond as it
+   settles (the argument is in styles/focus/atbat.css, ADR-0046). It also means
+   the backwards-K rule below no longer has to restate it to avoid clobbering
+   it: the two write different properties. */
 .pbp__code--center {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  translate: -50% -50%;
   width: max-content;
   font-size: var(--fs-title-sm);
   line-height: var(--lh-solid);
@@ -163,11 +169,13 @@
   white-space: pre-line;
 }
 
-/* The backwards-K still needs its mirror flip, combined with the centering
-   transform above (equal specificity would otherwise let whichever rule
-   comes later silently win and drop the other transform). */
+/* The backwards-K needs its mirror flip and nothing else: the centring above is
+   a `translate` now, so this no longer has to restate it to avoid clobbering it
+   (see that rule's note). Stated anyway rather than left to `.pbp__klooking`'s
+   own copy, because this pairing is the one that has to keep working when the
+   ink-set's `scale` is composing with it too. */
 .pbp__code--center.pbp__klooking {
-  transform: translate(-50%, -50%) scaleX(-1);
+  transform: scaleX(-1);
 }
 
 .pbp__outcircle {

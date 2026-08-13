@@ -291,8 +291,8 @@ Three beats, all of them timing rather than layout, so the stage's composition
 is untouched:
 
 - **THE BEAT.** A focused at-bat card arrives whole except for its denotation
-  cell, which holds blank for a constant 180ms and then lands with a 3% scale
-  overshoot. The batter's name and the pitch ladder are up for the whole hold —
+  cell, which holds blank for a constant 180ms and then lands oversized and
+  settles to rest. The batter's name and the pitch ladder are up for the whole hold —
   only the code the reader is about to pencil waits.
 - **THE RULE.** The half commits and the stage is closed: a hairline draws
   itself left to right under the at-bat card over 420ms, then the half's

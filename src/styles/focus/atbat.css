@@ -430,21 +430,36 @@
   opacity: 0;
 }
 
-/* The ink-set: a 3% overshoot settling to rest. NO COLOUR CHANGE — a base hit
-   is already field green and a reach-on-error already clay before the mark
-   appears (13-play-by-play.css), and animating toward those would make the
-   colour itself part of the reveal.
+/* The ink-set: the mark lands oversized and settles to rest. NO COLOUR CHANGE —
+   a base hit is already field green and a reach-on-error already clay before
+   the mark appears (13-play-by-play.css), and animating toward those would make
+   the colour itself part of the reveal. NO REBOUND either: it settles once and
+   stops, because this is a stamp being pressed, not a thing dropped.
 
-   The individual `scale` property, not `transform`. Two of the three cells
-   this lands on already own their `transform` — `.pbp__code--center` centres
-   itself over the diamond with translate(-50%, -50%), and `.pbp__klooking`
-   adds the backwards-K mirror on top of that — so a transform-based keyframe
-   would have to be written three times and would silently drop whichever
-   transform it forgot. `scale` composes with an existing `transform` instead
-   of replacing it, so one keyframe covers all three. */
+   Both numbers come from beats.js as inline custom properties. The fallbacks
+   are for a stray render with no properties set; this file must not become a
+   second source of truth for them.
+
+   The individual `scale` property, not `transform`. Two of the three cells this
+   lands on already own their `transform` — the backwards-K mirror, and
+   whichever rule centres the out chain over the diamond — so a transform-based
+   keyframe would have to be written three times and would silently drop
+   whichever transform it forgot. `scale` composes instead of replacing, so one
+   keyframe covers all three.
+
+   ITS PARTNER IS `.pbp__code--center` CENTRING WITH THE INDIVIDUAL `translate`
+   PROPERTY (13-play-by-play.css), and the pairing is load-bearing at this
+   overshoot. Individual transform properties apply in a fixed order —
+   translate, rotate, scale, then whatever `transform` says — so a `translate`
+   lands OUTSIDE the scale and resolves against the element's own layout box,
+   which a scale does not change. Written as `transform: translate(-50%, -50%)`
+   the scale multiplied the offset instead: at 1.25 a 30px out chain started
+   ~4px up and left of the diamond's centre and slid into place, which reads as
+   the mark being nudged rather than pressed. Nothing to notice at the original
+   3%; unmissable once the overshoot was worth seeing. */
 @keyframes focus-ink-set {
   from {
-    scale: 1.03;
+    scale: var(--ink-overshoot, 1.25);
   }
   to {
     scale: 1;
@@ -463,13 +478,18 @@
    `inline-block` rather than `block` so the class stays droppable anywhere; it
    is a no-op in every flex/absolute host this mark actually has.
 
-   LINEAR, NOT `--ease-out`. At 40ms the first frame lands at ~42% progress, and
-   `--ease-out` (cubic-bezier(0.16, 1, 0.3, 1)) is ~97% done by then — so the
-   overshoot was spent before a single frame could draw it. A press this short
-   has no room for a curve: linear puts the 3% across the frames that exist. */
+   LINEAR, NOT `--ease-out`, and this survived the retune for a better reason
+   than it was chosen for. At the original 40ms the first frame already landed
+   at ~42% progress and `--ease-out` (cubic-bezier(0.16, 1, 0.3, 1)) was ~97%
+   done by then, so the overshoot was spent before a frame could draw it. At
+   220ms there is room for a curve — but every ease in this file is a
+   decelerate, which front-loads the travel and spends most of the duration
+   within a percent of rest. That reads as a flinch. A press settles evenly, and
+   evenly is also what stays legible: the reader watches the mark come down
+   rather than catching one big frame and then nothing. */
 .pbp__code--ink {
   display: inline-block;
-  animation: focus-ink-set var(--ink-set, 40ms) linear;
+  animation: focus-ink-set var(--ink-set, 220ms) linear;
 }
 
 @media (prefers-reduced-motion: reduce) {

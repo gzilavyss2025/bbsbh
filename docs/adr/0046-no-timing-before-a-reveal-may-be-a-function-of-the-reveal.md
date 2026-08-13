@@ -139,6 +139,19 @@ figures are simply there, and the forward action is live at once.
   analysis. If it reads as a repetition rather than as two different questions,
   the answer is to drop the four cells from `HalfTally` and leave it the
   analysis card — not to remove the rule, which is the punctuation.
+- **The beat's two knobs shipped too small to see, and the arithmetic is worth
+  keeping.** The ink-set went out at 40ms / 1.03 — about two and a half frames
+  at 60Hz, moving a 21px mark by 0.64px. It was measurably running and visually
+  absent, which is the worst of both. It is 220ms / 1.25 now. A duration this
+  file argues must never vary with the play still has to be long enough to
+  perceive, or the rule is protecting a beat nobody gets.
+- **Scaling a mark centred with `transform: translate(-50%, -50%)` drags it.**
+  Individual transform properties apply translate → rotate → scale → transform,
+  so a `transform` offset sits INSIDE the scale and gets multiplied by it: at
+  1.25 the centred out chain started ~4px off the diamond and slid into place.
+  `.pbp__code--center` centres with the individual `translate` property instead,
+  which resolves against the unscaled layout box. Invisible at 3%; the whole
+  difference between a press and a nudge at 25%.
 - `beats.js`'s no-import assertion is a real constraint on future work, not
   boilerplate. Anything that genuinely needs feed data to decide a duration has
   to argue past this ADR first, and the honest version of that argument is

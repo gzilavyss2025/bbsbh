@@ -9,9 +9,9 @@ import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 // The card arrives whole except for one cell. The batter is named, the pitch
 // ladder is up, the prose account is readable — and the denotation, the code
 // the reader is about to pencil onto paper, is blank for DENOTATION_HOLD_MS.
-// Then it lands, with a 3% scale overshoot settling to rest (the `--ink`
-// class, styles/focus/atbat.css). The loop gets a downbeat instead of forty
-// identical instant swaps a half.
+// Then it lands oversized and settles to rest (the `--ink` class,
+// styles/focus/atbat.css). The loop gets a downbeat instead of forty identical
+// instant swaps a half.
 //
 // ===========================================================================
 // THE HOLD IS A CONSTANT AND MUST STAY ONE

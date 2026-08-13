@@ -20,7 +20,7 @@ import {
   buildTrailItems,
 } from '../../api/playbyplay.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
-import { INK_SET_MS } from '../inning/focus/beats.js'
+import { INK_SET_MS, INK_SET_OVERSHOOT } from '../inning/focus/beats.js'
 import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
@@ -399,9 +399,9 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 }
 
 
-// The ink-set duration published to the CSS from beats.js, so the number has
-// one home (see that file's TUNING note).
-const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms` }
+// The ink-set's two knobs, published to the CSS from beats.js so the numbers
+// have one home (see that file's TUNING note).
+const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
 function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, focusHeader = false, beatKey = null }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
