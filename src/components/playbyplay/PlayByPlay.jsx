@@ -327,6 +327,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // visit — the description sentence already carries every detail
           // (who, by which umpire), so there's nothing else to add to a card.
           node = <EjectionBar text={entry.text} />
+        } else if (entry.eventType === 'game_advisory') {
+          // A delay advisory (injury, on-field, weather) — same card family
+          // as an ejection, since neither has a person to put a headshot to.
+          node = <EjectionBar code="DELAY" text={entry.text} />
         } else if (entry.eventType === 'pinch_running') {
           // A pinch runner entering mid-flow gets the same headshot card as a
           // pitching/defensive change — on the BATTING team's side, since he's
@@ -404,7 +408,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
 function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, focusHeader = false, beatKey = null }) {
-  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes } = entry
+  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
   // THE BEAT (ADR-0046), focus mode only: the denotation cells below hold blank
@@ -477,15 +481,23 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
           </div>
           )}
           <div className="pbp__desc">
-            {descSegments.map((seg, i) =>
-              seg.id != null ? (
-                <span key={i} className="pbp__name">
-                  {seg.text}
-                </span>
-              ) : (
-                seg.text
-              ),
-            )}
+            {/* The currently live, still-in-progress plate appearance has no
+                result yet, so `descSegments` is empty — MLB's feed carries no
+                `result.description` until the play resolves (see `live` on
+                the card, halfInningFeed.js). A blank line under a batter
+                already up read as missing content; this is a plain caption,
+                not a result, so it costs the spoiler rule nothing. */}
+            {live
+              ? 'At the plate.'
+              : descSegments.map((seg, i) =>
+                  seg.id != null ? (
+                    <span key={i} className="pbp__name">
+                      {seg.text}
+                    </span>
+                  ) : (
+                    seg.text
+                  ),
+                )}
           </div>
           {/* A normal at-bat's own baserunning notes (a WP/PB/SB during the
               count) now get their own leading EventCard, hoisted out in

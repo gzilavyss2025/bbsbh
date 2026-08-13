@@ -218,6 +218,14 @@ export function buildTrailItems(entries, bounds, revealedSteps, eventCodeFor) {
   return bounds.slice(0, revealedSteps).map((end, i) => {
     const windowEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], end)
     const atbat = windowEntries.find((e) => e.kind !== 'event' && e.kind !== 'placed')
+    // The currently live, still-in-progress plate appearance (see `live` on
+    // the card, halfInningFeed.js) has no code to show yet at all — its own
+    // count so far reads truer than the empty-code '···' placeholder, which
+    // otherwise looked identical to a genuine notice step with nothing to
+    // report. `kind: 'pending'`, not `'live'` — reference.css's "live cell"
+    // already names the CURSOR's own position (`[aria-current]`), a different
+    // fact that can hold independently of this one.
+    if (atbat?.live) return { name: atbat.batter.last, code: `${atbat.live.balls}-${atbat.live.strikes}`, kind: 'pending' }
     // A called third strike (scorebookCode.js) carries no `.code` of its own —
     // the main card draws its backward "K" as a dedicated glyph
     // (.pbp__klooking), not plain code text. The trail chip has no room for

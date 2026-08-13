@@ -151,14 +151,16 @@ export function MoundVisitBar({ team, teamId, remaining, allowed }) {
   )
 }
 
-// An ejection: the same kraft-amber notification card, captioned "EJ" in the
+// An ejection (or a delay advisory — injury, on-field, weather — passing
+// `code="DELAY"`): the same kraft-amber notification card, captioned in the
 // negative accent instead of an icon — the description sentence already
-// carries every detail worth showing (who, by which umpire), so there's
-// nothing else to add.
-export function EjectionBar({ text }) {
+// carries every detail worth showing, so there's nothing else to add. A
+// delay has no one person to card the way a substitution does, so it shares
+// this shape rather than getting a bespoke one; may be worth its own later.
+export function EjectionBar({ text, code = 'EJ' }) {
   return (
     <div className="pitchernotice pitchernotice--pbp pitchernotice--event">
-      <span className="pitchernotice__code pitchernotice__code--alert">EJ</span>
+      <span className="pitchernotice__code pitchernotice__code--alert">{code}</span>
       <span className="pitchernotice__eventtext">{text}</span>
     </div>
   )

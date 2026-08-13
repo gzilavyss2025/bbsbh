@@ -268,11 +268,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  padding: 0 0 var(--space-3);
-  overflow: hidden;
 }
 
 /* The inner card sheds its own frame — inside the hero it would be a card
