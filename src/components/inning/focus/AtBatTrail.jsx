@@ -1,10 +1,17 @@
 // The at-bat trail: every step already revealed this half, drawn as the row of
 // scorecard cells you have already filled in — because that is literally what
-// it is. Tapping a cell reviews that step WITHOUT losing the live cursor —
-// useFocusMode's `step` is the same cursor a jump uses (`goToStep`), so "Back
-// to the live at-bat" is just `followLatest`, not a second mode.
+// it is. WINDOWED (`!stacked`): tapping a cell reviews that step WITHOUT
+// losing the live cursor — useFocusMode's `step` is the same cursor a jump
+// uses (`goToStep`), so "Back to the live at-bat" is just `followLatest`, not
+// a second mode. STACKED (commit 3, decision 4): there is no window to
+// switch — every step's card is already on screen — so a tap SCROLLS the
+// stage to that card instead (`onSelect` is a different function per state;
+// this component just calls it). `aria-current` and "Back to the live
+// at-bat" drop while stacked: nothing is "live" once every card is showing.
 //
-// WRAPS, never scrolls (ADR-0043). The first pass made these pills in a
+// THE TRAIL ITSELF WRAPS, never scrolls (ADR-0043) — that is about this
+// STRIP's own layout, unrelated to and unchanged by the stage-scroll a
+// stacked tap now triggers. The first pass made these pills in a
 // horizontally scrolling, snap-aligned strip, which put a real scrollbar under
 // the hero card and — worse — hid the earliest at-bats of a long inning off the
 // left edge, which is the exact complaint the trail exists to answer. Cells
@@ -36,7 +43,17 @@
 // The arrow keys live on the cell container now (`onKeyDown` here rather than
 // on a wrapper in FocusControls), which is the element the keys actually mean
 // something on — they fire when any cell has focus, and nowhere else.
-export function AtBatTrail({ items, cursor, following, onSelect, onStepBack, onStepNext, onFollowLatest, turning }) {
+export function AtBatTrail({
+  items,
+  cursor,
+  following,
+  onSelect,
+  onStepBack,
+  onStepNext,
+  onFollowLatest,
+  turning,
+  stacked = false,
+}) {
   if (items.length <= 1) return null
   const onKeyDown = (e) => {
     if (e.key === 'ArrowLeft') {
@@ -60,7 +77,7 @@ export function AtBatTrail({ items, cursor, following, onSelect, onStepBack, onS
             key={i}
             type="button"
             className={`trailcell trailcell--${item.kind || 'note'}`}
-            aria-current={i === cursor || undefined}
+            aria-current={(!stacked && i === cursor) || undefined}
             aria-disabled={turning || undefined}
             aria-label={`${item.name}${item.code ? ` — ${item.code}` : ''}`}
             title={`${item.name}${item.code ? ` — ${item.code}` : ''}`}
@@ -73,7 +90,7 @@ export function AtBatTrail({ items, cursor, following, onSelect, onStepBack, onS
           </button>
         ))}
       </div>
-      {!following && (
+      {!stacked && !following && (
         <button
           type="button"
           className="trailstrip__followbtn"

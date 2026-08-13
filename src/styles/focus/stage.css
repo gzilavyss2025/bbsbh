@@ -1,19 +1,29 @@
 /* ------------------------------------------------------------ focus mode */
-/* THE SCORER'S CONSOLE (ADR-0043).
+/* THE SCORER'S CONSOLE (ADR-0043 + the unify-the-innings-viewer amendment).
 
-   While the half on screen is still sealed this screen stops being a page and
-   becomes an instrument: an anchored game-state band on top, ONE at-bat as the
-   hero, a fixed action bar at the bottom, a tabbed reference column beside it.
-   The reader's loop is tap -> read -> pencil -> glance at bases/outs -> tap,
-   forty times a half-hour, so everything here is arranged to keep the at-bat
-   and the Next button in the same two places for three hours.
+   This is the innings viewer's only shell now — an anchored game-state band
+   on top, a tabbed reference column beside it, a fixed action bar at the
+   bottom. Every half gets it, live or historical; the ADR's original claim
+   (this instrument exists "while the half on screen is still sealed") is
+   amended by that later change, not superseded by it — the console itself is
+   unconditional, and the ONE thing that still depends on sealed-vs-not is
+   whether the play-by-play area WINDOWS to one at-bat at a time or shows the
+   whole half STACKED (`.innings--windowed` / `.innings--stacked`, set by
+   InningViewer alongside `.innings--focus`). The reader's windowed loop is
+   tap -> read -> pencil -> glance at bases/outs -> tap, forty times a
+   half-hour, so everything here is arranged to keep the at-bat and the Next
+   button in the same two places for three hours; the stacked case is the
+   same shell reading back a half already scored.
 
-   THIS FILE holds the page SHELL: what folds away, the two-column grid, the
-   phone reading order, and the action bar. Its three siblings are
-   focus/console.css (the scorebug band and the one card beside it),
-   focus/atbat.css (the hero card) and focus/reference.css (the trail and the
-   reference panel). Split because one file outgrew the 600-line cap and
-   src/styles is a flat directory at its own ratchet, so subdividing —
+   THIS FILE holds the page SHELL: the two-column grid, the phone reading
+   order, and the action bar. Its three siblings are focus/console.css (the
+   scorebug band and the one card beside it), focus/atbat.css (the hero card,
+   including the per-card entrance animation this file's stacked/windowed
+   split now gates) and focus/reference.css (the trail and the reference
+   panel — the ARMS tab of which permanently holds the stat/WPA content that
+   used to build only for a windowed half, back when there was an unfocused
+   page it could also render on). Split because one file outgrew the 600-line
+   cap and src/styles is a flat directory at its own ratchet, so subdividing —
    ADR-0038's own answer — beat adding numbered siblings. It happened twice:
    three ways first, then console.css when the finished half's tally joined the
    band. The grid rules stayed HERE, console.css's header says why.
@@ -23,40 +33,9 @@
    overrides here can be plain single-class selectors instead of specificity
    ladders, and why any rule moved OUT of this directory must be checked against
    what 25 declares. What stays in 24-floating-nav-and-hud.css is everything
-   BOTH scorebug placements share — the dock, the card itself, the strip, the
-   marks. */
-
-/* ------------------------------------------------------------- what folds */
-/* NOTHING FOLDS HERE ANY MORE — IT IS NEVER BUILT. This file used to open with
-   a `display: none` over four surfaces: the stat/WPA row (`.innings__row2`),
-   both inline copies of the entering lineups/defense (`.half__entering`,
-   `.halfentering`), and the pre-half callout strip (`.prehalf`). All four are
-   end-of-half material or duplicated by the reference panel, so hiding them was
-   right — but hiding is what it did. Every one still RENDERED on every tap:
-   StatBox (580+ lines), AbsCard, WinProbChart and DueUpNextCard painted out
-   forty times a half, `lineupEntering`/`defenseEntering` walking the whole
-   game's plays twice for cards nobody could see, and `buildPreHalfCallouts`
-   running a second time for a strip whose notes the Arms tab was already
-   showing. On the app's hottest screen that is the most expensive way to
-   display nothing.
-
-   Each is now gated in JSX on `focusOne`, at the component that owns it —
-   `.innings__row2` in screens/innings/InningPage.jsx, the other three in
-   components/inning/HalfInning.jsx. Read those three comments for the WHY of
-   each surface; they are where the reasoning went, and each says where its
-   content lives in focus mode instead.
-
-   THE GATE IS THE SAME VALUE THIS SELECTOR WAS. InningViewer derives both
-   `focusOne` and the `.innings--focus` class from `focus.focused`, so the JSX
-   gate matches at every width, in every state, and on the page-turn preview
-   instance too. ADR-0043's "What this does NOT change" is undisturbed and is
-   exactly why the swap is safe: these surfaces were hidden for VISIBILITY
-   alone — no seal, no caller-gated pre-pitch selector (ADR-0010), no fetch —
-   so not building them moves no boundary. The selectors underneath keep their
-   own reveal gates for every other caller.
-
-   Do not bring the rule back to hide a fifth surface. Gate it where it is
-   built, next to the reason it exists. */
+   the scorebug's placement needs regardless of reveal state — the card itself,
+   the strip, the marks. There is no floating dock or second placement any
+   more; that retired along with the unfocused stacked page it was built for. */
 
 /* Room under the last card for the action bar, which unlike .pagenav's
    translucent fade is one solid row of a known height. --space-6 of breath on

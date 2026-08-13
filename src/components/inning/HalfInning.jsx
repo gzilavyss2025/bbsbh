@@ -8,8 +8,6 @@ import { highlightsByPlayId } from '../../api/highlights.js'
 import { ordinal } from '../../lib/format.js'
 import { SealBox } from '../SealBox.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
-import { PreHalfCallouts } from './PreHalfCallouts.jsx'
-import { EnteringReference } from './EnteringReference.jsx'
 import { FielderNotice } from '../playbyplay/FielderNotice.jsx'
 import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
 import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
@@ -21,8 +19,6 @@ export function HalfInning({
   half,
   battingSide,
   label,
-  battingAbbr,
-  pitchingAbbr,
   awayName,
   homeName,
   awayId,
@@ -31,16 +27,11 @@ export function HalfInning({
   isNextToReveal,
   revealedThrough,
   onReveal,
-  prospectsData,
-  rookiesData,
-  isMlb,
   callouts,
-  workload,
-  workloadGameDate,
   vsTeam,
   highlights,
   revealedAtBatCount,
-  focusOne,
+  windowed,
   focusStep,
   onFocusInfo,
   onStepInfo,
@@ -79,23 +70,24 @@ export function HalfInning({
   // why PrePitchChanges drops one from the staged list; the live override was
   // the one piece pulling the other way.
   //
-  // IN FOCUS MODE IT IS AN ANNOUNCEMENT, NOT A HEADER. The ordinary stacked
-  // page pins it at the top of the half for as long as the half is on screen (a
-  // normal section header, exactly as described above). Focus mode shows it in
-  // ONE state — a half that opens with an arm that just took the mound
-  // (`isFreshPitcher`), before the reader has unveiled anything of it — and
-  // drops it the instant the first at-bat opens. Two things decide that, and
-  // they pull in opposite directions:
+  // WHILE WINDOWED IT IS AN ANNOUNCEMENT, NOT A HEADER. A stacked half pins it
+  // at the top for as long as the half is on screen (a normal section header,
+  // exactly as described above — every card there has `AtBatHero`, so the
+  // stacked reader meets the arm's name over and over regardless). Windowed,
+  // it shows in ONE state — a half that opens with an arm that just took the
+  // mound (`isFreshPitcher`), before the reader has unveiled anything of it —
+  // and drops it the instant the first at-bat opens. Two things decide that,
+  // and they pull in opposite directions:
   //
-  // WHY IT IS NOT THE HEADER HERE. Once an at-bat is up, the card is the THIRD
-  // naming of the same man in the same eyeful:
+  // WHY IT IS NOT THE HEADER WHILE WINDOWED. Once an at-bat is up, the card is
+  // the THIRD naming of the same man in the same eyeful:
   //
   //   1. the console band's pitcher row — "DOBBINS  P: 0"
   //   2. this card — a full kraft panel, "NOW PITCHING FOR THE CARDINALS /
   //      DOBBINS, HUNTER  40  RHP"
-  //   3. AtBatHero, which in focus mode REPLACES the at-bat card's own name row
-  //      and owns the matchup identity outright — his portrait beside the
-  //      batter's, both named (ADR-0043's "the header now owns the identity").
+  //   3. AtBatHero, which REPLACES the at-bat card's own name row and owns the
+  //      matchup identity outright — his portrait beside the batter's, both
+  //      named (ADR-0043's "the header now owns the identity").
   //
   // It used to narrow to `focusCursor === 0` on the argument that the banner
   // should not come back above every card the reader steps to. That was the
@@ -117,7 +109,7 @@ export function HalfInning({
   // BETWEEN halves: `computeHalfInningFeed` drops a pre-pitch change from the
   // feed (its `anyPitchInHalf` guard) and `PrePitchChanges` drops it from the
   // staged list, both for the same reason — this card already names him. With
-  // this card gone in focus mode, all three were silent, and the most common
+  // this card gone while windowed, all three were silent, and the most common
   // pitching change in baseball, the one made between innings, announced itself
   // NOWHERE. The reader met the new arm as a different face in the hero, after
   // the pitch they were about to write down. The header/feed division is intact;
@@ -141,10 +133,10 @@ export function HalfInning({
   // something that flips as you step.
   const isFreshPitcher = selectIsFreshPitcher(feed, inning, half, revealedThrough, nowPitching?.id)
   const nowPitchingLabel = isFreshPitcher ? 'Now pitching' : 'Pitching'
-  // Header on the stacked page, announcement in focus mode — see the long note
+  // Header while stacked, announcement while windowed — see the long note
   // above `nowPitching`. Both still sit behind the caller's own
   // `revealed || isNextToReveal` gate at the render site.
-  const showNowPitching = !focusOne || (isFreshPitcher && !startedRevealing)
+  const showNowPitching = !windowed || (isFreshPitcher && !startedRevealing)
 
   // How many pitches he'd thrown in THIS GAME entering this half — clamped to
   // halfIndex(inning, half) - 1 (through the previous half only), which is
@@ -203,15 +195,16 @@ export function HalfInning({
     // not the one who just finished (e.g. showing the batter who just
     // doubled forever instead of advancing to the next slot).
     //
-    // NOT IN FOCUS MODE, where that same advance is a contradiction. The whole
-    // screen is built around ONE at-bat card, and the band sits directly above
-    // it: the hero named ABRAMS while the band beside it said "2. ORTIZ", who
-    // has not batted. The scorebug's job there is to caption the card under it,
-    // and who's up next is already answered — in more detail, with three names
-    // — by DueUpConsole in the same row. The pitch count is untouched either
-    // way: it stays the tally AFTER the at-bat on screen finished, which is
-    // what a scorer writes down.
-    if (!focusOne && live?.batter && live.batterDone && outs < 3) {
+    // NOT WHILE WINDOWED, where that same advance is a contradiction. The
+    // whole screen is built around ONE at-bat card, and the band sits directly
+    // above it: the hero named ABRAMS while the band beside it said
+    // "2. ORTIZ", who has not batted. The scorebug's job there is to caption
+    // the card under it, and who's up next is already answered — in more
+    // detail, with three names — by DueUpConsole in the same row (which shows
+    // only while `currentSealed`, the windowed case). The pitch count is
+    // untouched either way: it stays the tally AFTER the at-bat on screen
+    // finished, which is what a scorer writes down.
+    if (!windowed && live?.batter && live.batterDone && outs < 3) {
       const finishedSlot = battingSlot(feed, battingSide, live.batter.id)
       const nextSlot = finishedSlot != null ? (finishedSlot >= 9 ? 1 : finishedSlot + 1) : null
       const upcoming =
@@ -264,82 +257,30 @@ export function HalfInning({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startedRevealing, hasContent, feed, inning, half, revealedThrough, nowPitching, enteringPitches, battingSide])
 
-  // The lineups + defense as they stand ENTERING this half — the pre-scoring
-  // reference (see EnteringReference). On a phone it's positioned by reveal
-  // state: ABOVE the seal (staged inside the SAME card as the play-by-play,
-  // ahead of tapping to reveal) while NOTHING in the half has been revealed
-  // yet, then in its OWN separate card BELOW the play-by-play's card from the
-  // first at-bat step onward (startedRevealing) — the just-scored at-bats
-  // read as their own distinct unit rather than sharing a card with the
-  // staging reference. Only for a half the user has reached; a half further
-  // out stays fully sealed — its "entering" state would leak the intervening
-  // subs, and defenseEntering/lineupEntering (called inside EnteringReference,
-  // given revealedThrough below) enforce that themselves now rather than
-  // relying solely on the isNextToReveal / startedRevealing checks below,
-  // which remain only to choose where it renders. On the wide layout both
-  // inline copies are hidden (.half__entering / .halfentering) and the same
-  // reference rides its own card in the right column instead.
-  const enteringReference = (
-    <EnteringReference
-      feed={feed}
-      revealedThrough={revealedThrough}
-      inning={inning}
-      half={half}
-      battingSide={battingSide}
-      awayName={awayName}
-      homeName={homeName}
-      awayId={awayId}
-      homeId={homeId}
-      prospectsData={prospectsData}
-      rookiesData={rookiesData}
-      isMlb={isMlb}
-    />
-  )
-
   return (
     <>
       <section className="half">
-        {/* THE MASTHEAD IS THE BAND IN FOCUS MODE, so this title stands down to
-            a heading nothing draws. Above it the half was already named by
+        {/* THE MASTHEAD IS THE BAND NOW, ALWAYS, so this title stands down to a
+            heading nothing draws — the half was already named by
             `.inningnav__label` ("TOP 1ST") and by the console band's own
-            inning number and arrow; this made three, and its second line
-            ("MIL BATS • STL PITCHES") is restated a fourth time by the two
-            portraits on AtBatHero, which name the batter's club and the arm's.
-            ADR-0043 gives the band the masthead signature `.half__title` used
-            to carry, deliberately — so once the band is up, this is the copy
-            with nothing left to say.
+            inning number and arrow, and the two portraits on AtBatHero (on
+            every card now) name the batter's club and the arm's. ADR-0043
+            gives the band the masthead signature `.half__title` used to
+            carry, deliberately — so this is the copy with nothing left to
+            say, for a stacked half as much as a windowed one.
 
             KEPT AS A HEADING, not deleted. It is the half's <h3> in the
             document outline, and dropping the element outright would leave the
             stage's one region unlabelled for a screen reader while sighted
-            readers still have three visible namings. `.sr-only` (01-base.css)
-            keeps it announced and takes no space. Rendered as its own element
-            rather than by adding the class to `.half__title`, because the two
-            classes would fight over `position` on equal specificity and the
-            visual one loads later. */}
-        {focusOne ? (
-          <h3 className="sr-only">
-            {label} {ordinal(inning)}
-          </h3>
-        ) : (
-          <h3 className="half__title">
-            <span className="half__titlemain">
-              {label} {ordinal(inning)}
-            </span>
-            <span className="half__meta">
-              <span className="half__team">
-                {battingAbbr || (battingSide === 'away' ? 'Away' : 'Home')} bats{' '}
-                <span className="half__dot" aria-hidden="true">•</span>{' '}
-                {pitchingAbbr || (battingSide === 'away' ? 'Home' : 'Away')} pitches
-              </span>
-            </span>
-          </h3>
-        )}
+            readers still have the other namings. `.sr-only` (01-base.css)
+            keeps it announced and takes no space. */}
+        <h3 className="sr-only">
+          {label} {ordinal(inning)}
+        </h3>
 
-        {/* The Now Pitching card: a persistent header on the stacked page, and
-            in focus mode a one-state announcement of an arm that just took the
-            mound, standing where the reader is about to unveil him. See the
-            comment above `nowPitching` for both halves of that. */}
+        {/* The Now Pitching card: a persistent header while stacked, and a
+            one-state announcement while windowed. See the comment above
+            `nowPitching` for both halves of that. */}
         {(revealed || isNextToReveal) && nowPitching && showNowPitching && (
           <PitcherNotice
             pitcher={nowPitching}
@@ -352,7 +293,7 @@ export function HalfInning({
         )}
 
         {/* Who's due up to face him — gone the moment reveal starts, same
-            gate as PrePitchChanges/the entering reference below. */}
+            gate as PrePitchChanges below. */}
         {!startedRevealing && isNextToReveal && (
           <UpNextBatters
             feed={feed}
@@ -363,45 +304,16 @@ export function HalfInning({
           />
         )}
 
-        {/* The pre-half callout strip — the "entering this half" season-context
-            cards (starter team record, leading-after checkpoint, inning run
-            differential; see api/prehalf-callouts.js). Above the seal like the
-            pre-pitch list, and it STAYS above the results once revealed (it
-            reads as staging either way). Gated to a reached half, same contract
-            as the entering cards below; the note that reads tonight's score
-            gates itself further on revealedThrough inside the builder.
-
-            NOT IN FOCUS MODE, where it MOVED rather than went away: it renders
-            in the Arms tab instead, merged into MarginNotes' ranked list
-            (ReferencePanel's Section). This used to be a `display: none` in
-            styles/focus/stage.css, which meant `buildPreHalfCallouts` ran
-            TWICE on every step — once here for a strip nobody could see, once
-            there for the tab that actually shows it. Same gate, moved to where
-            it costs nothing. Visibility only either way: the builder's own
-            revealedThrough gate is untouched and still the thing standing
-            between this and a score (see its header). */}
-        {(revealed || isNextToReveal) && !focusOne && (
-          <PreHalfCallouts
-            feed={feed}
-            bundle={callouts}
-            inning={inning}
-            half={half}
-            revealedThrough={revealedThrough}
-            workload={workload}
-            gameDate={workloadGameDate}
-          />
-        )}
-
         {/* Reached but nothing revealed yet: the sub-announced list stages the
             half before tapping to reveal the results. Same startedRevealing
-            gate as the entering reference just below — once stepping begins,
-            a defensive change in this list also starts showing up as its own
-            FielderNotice in the live feed (PlayByPlay.jsx), so leaving this
-            gated on bare `!revealed` (true for the whole stepping window, not
-            just before the first tap) duplicated it: the same "now playing"
-            card twice, once staged here and once for real in the feed. See
-            selectPrePitchChanges for why the pre-pitch list is spoiler-free,
-            and only for the immediate next half. */}
+            gate as the entering reference used to carry — once stepping
+            begins, a defensive change in this list also starts showing up as
+            its own FielderNotice in the live feed (PlayByPlay.jsx), so leaving
+            this gated on bare `!revealed` (true for the whole stepping
+            window, not just before the first tap) duplicated it: the same
+            "now playing" card twice, once staged here and once for real in
+            the feed. See selectPrePitchChanges for why the pre-pitch list is
+            spoiler-free, and only for the immediate next half. */}
         {!startedRevealing && isNextToReveal && (
           <PrePitchChanges
             feed={feed}
@@ -414,24 +326,14 @@ export function HalfInning({
           />
         )}
 
-        {/* The lineups/defense reference stays staged ABOVE the seal, inside
-            this same card, only for as long as NOTHING in the half has been
-            revealed yet — the moment stepping starts (startedRevealing), it
-            moves BELOW into its own standalone card instead (see the bottom
-            of this component), matching the fully-revealed layout from the
-            first at-bat tap on, not just once the half is fully committed.
-
-            Neither placement exists in focus mode — the same lineups and
-            defense are the LINEUPS and FIELD tabs of the reference panel
-            there, one tap away and never both at once. Formerly a
-            `display: none` on `.half__entering`/`.halfentering`
-            (styles/focus/stage.css), which still paid for lineupEntering and
-            defenseEntering walking the whole game's plays, twice, on every
-            step. The selectors keep their own ADR-0010 reveal gate regardless
-            of who calls them; this only decides whether anyone does. */}
-        {!startedRevealing && isNextToReveal && !focusOne && (
-          <div className="half__entering">{enteringReference}</div>
-        )}
+        {/* The pre-half callout strip and the entering lineups/defense
+            reference both used to stage inline here for a reached-but-
+            unrevealed half. Both are gone from this card now — the console
+            chrome is unconditional, so the ARMS tab (pre-half notes, merged
+            into MarginNotes) and the LINEUPS/FIELD tabs (the entering
+            reference) already cover every half, live or historical, one tap
+            away. Nothing here duplicated them for nothing to see; see
+            ReferencePanel.jsx's Section function. */}
 
         <SealBox
           forceRevealed={startedRevealing}
@@ -463,7 +365,7 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
-                focusOne={focusOne}
+                windowed={windowed}
                 focusStep={focusStep}
                 onFocusInfo={onFocusInfo}
                 onRunsSoFar={onRunsSoFar}
@@ -475,17 +377,6 @@ export function HalfInning({
           }}
         </SealBox>
       </section>
-
-      {/* From the first at-bat step onward (startedRevealing — see above), the
-          lineups/defense move into their OWN card below the play-by-play's
-          card rather than waiting for the half to be fully committed —
-          hidden at the wide breakpoint, where the right-column reference band
-          (.innings__ref-lineups / .innings__ref-defense) already covers this
-          same content — and absent outright in focus mode, where the reference
-          panel's own tabs cover it (see the staged copy above). */}
-      {startedRevealing && !focusOne && (
-        <section className="half halfentering">{enteringReference}</section>
-      )}
     </>
   )
 }

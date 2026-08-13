@@ -273,61 +273,23 @@
     margin: 0;
   }
 
-  /* The grid is a plain flex column — source order already matches the row
-     layout (linescore, play-by-play, stat card + win-prob, reference band,
-     rosters), so no reordering is needed here. */
-  .innings__grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  /* Row 2: the stat card and win-probability column side by side. The stat
-     card carries far more content here (R/H/E/LOB + pitch counts, the
-     umpire-favor/worst-call pair, and the three Statcast cards — ABS moves
-     OUT to the right column below) than the chart + ledger, so it gets the
-     larger share of the row rather than an even split. */
-  .innings__row2 {
-    flex-direction: row;
-    align-items: stretch;
-  }
-  /* Left column: the stat card, then the due-up-next preview beneath it
-     (see DueUpNextCard) — both share the row's larger 3/5 share. */
-  .innings__row2-left {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    flex: 3 1 0;
-    min-width: 0;
-  }
-  .innings__row2-left > .statbox {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-  /* ABS Challenges moves here from the stat card (see .statbox__abs below
-     and AbsCard's own header comment) — its own card stacked above the
-     chart, both sharing the right column's narrower share of the row. */
-  .innings__row2-right {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    flex: 2 1 0;
-    min-width: 0;
-  }
-  .innings__row2-right > .winprob {
-    flex: 1 1 auto;
-  }
+  /* ABS Challenges' whole-card copy (AbsCard) unhides at this breakpoint —
+     `.statbox__abs` below is StatBox's OWN inline copy, hidden here in favor
+     of it. Both render unconditionally now (ReferencePanel's ARMS tab,
+     `StatBox className="innings__statbox"` + a sibling `AbsCard`), so this
+     pairing is what keeps the ABS block from showing TWICE at wide width —
+     it isn't optional, don't drop the class off either component. */
   .innings__statbox .statbox__abs {
     display: none;
   }
   /* AbsCard's own card chrome — same recipe as .winprob/.marginnotes (border,
-     radius, background, shadow) since here it sits directly in the right
-     column rather than nested inside StatBox's card. No padding of its own —
+     radius, background, shadow) since it sits as its own sibling card in the
+     ARMS tab rather than nested inside StatBox's card. No padding of its own —
      SealBox's .statgrid wrapper already insets its content 14px, and the
      title bar below bleeds past exactly that inset to cap the card flush
-     (same masthead recipe as .half__title), so overflow:hidden here clips it
-     to the card's own rounded corners instead of stacking a second, smaller
-     rounded shape inside the card's padding. */
+     (same masthead recipe as .pitchers__title), so overflow:hidden here clips
+     it to the card's own rounded corners instead of stacking a second,
+     smaller rounded shape inside the card's padding. */
   .abscard {
     display: block;
     border: var(--bw-hair) solid var(--border-rule);
@@ -357,103 +319,6 @@
   .abscard .abs__rows {
     border-top: var(--bw-hair) solid var(--border-hairline);
     border-radius: var(--radius-sm);
-  }
-
-  /* Reference band: pitchers + fielding defense on the left, both lineups on
-     the right. Both inline entering copies (staged around the seal, and the
-     revealed half's own standalone card — see .halfentering) are hidden here
-     (see InningViewer / ADR-0010); the -defense / -lineups blocks — hidden on a
-     phone — carry it instead. */
-  .half__entering,
-  .halfentering {
-    display: none;
-  }
-  .innings__ref {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 var(--space-6);
-    align-items: start;
-  }
-  /* Reset to line the left column's own top edge up with the Lineups card's
-     on its right — .pitchers' margin-top is sized for the phone flow
-     (stacked below the running content above it), but here it's often the
-     left column's first element with nothing above it to space from
-     (.pitchers relies on a PRECEDING sibling's own margin-bottom for
-     spacing, same idiom .marginnotes/.innings__ref-defense use, so
-     unconditionally zeroing its top margin never loses a gap). Margin Notes
-     and Defense only sometimes land first — MarginNotes can be absent (no
-     notes that half) and Defense render nothing too (early in a game) —
-     hence the :first-child gate on those two instead of the same
-     unconditional reset. */
-  .innings__ref-left .pitchers,
-  .innings__ref-left > .marginnotes:first-child,
-  .innings__ref-left > .innings__ref-defense:first-child {
-    margin-top: 0;
-  }
-  /* One flush card, capped by the navy/gold masthead (same recipe as
-     .pitchers/.winprob/.abscard) — the diamond sheds its own border/shadow
-     below (like .opp .defdiamond's existing reset) rather than doubling up
-     as a second card nested inside this one. */
-  .innings__ref-defense {
-    display: block;
-    margin-top: var(--space-3);
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    background: var(--surface-card);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
-  }
-  .innings__ref-defense .halfdefense {
-    margin: 0;
-    border: none;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-  .innings__ref-defense .halfdefense__title {
-    border-radius: 0;
-  }
-  .innings__ref-defense .defdiamond {
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    background: none;
-    padding: 12px 10px;
-  }
-  /* Same recipe for the Lineups card. */
-  .innings__ref-lineups {
-    display: block;
-    border: var(--bw-hair) solid var(--border-rule);
-    border-radius: var(--radius-md);
-    background: var(--surface-card);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
-  }
-  /* Same flush-masthead recipe as .innings__ref-defense above: the outer card
-     supplies no padding of its own, so .lineupcard__title's own inset sits
-     flush against the card's edges (border-radius: 0 squares its corners off
-     against the card's), and .lineupcard__teams gets the inset instead —
-     mirrors .innings__ref-defense .defdiamond's own padding reset. */
-  .innings__ref-lineups .lineupcard {
-    margin: 0;
-    border: none;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-  .innings__ref-lineups .lineupcard__title {
-    border-radius: 0;
-  }
-  .innings__ref-lineups .lineupcard__teams {
-    padding: 12px 10px;
-  }
-
-  /* Rosters sit two-up beneath the reading pane. */
-  .innings__rosters {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0 var(--space-6);
-    align-items: start;
   }
 
   /* Play-by-play pairs each card with its strike zone: the card on the left,

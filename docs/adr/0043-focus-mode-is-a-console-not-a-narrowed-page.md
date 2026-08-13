@@ -348,3 +348,90 @@ band's tally card instead — read it for that half of the change. Between the
 two amendments, nothing draws between the card and the trail any more; the
 trail is the thing directly above the card now, exactly where the reader is
 about to look after reading it.
+
+## Amendment (2026-08-13): the console is the innings viewer, and the window is the only thing that varies
+
+Every amendment above still answered to the Decision's opening premise:
+this composition exists **while a half is being scored**. A half reached by
+direct navigation, or paged back to through history, got a different
+screen entirely — the original stacked layout, every card at once, no
+console band, no tabs. That split was deliberate (the Context section
+above is the record of why an *actively scoring* half needs an
+instrument), but nothing about it argued the same chrome was wrong for a
+half you're reading back. It just never got designed for that case.
+
+**The console is unconditional now.** Every half gets the anchored band
+and the tabbed reference panel, live or historical. What still varies —
+the one thing left — is whether the play-by-play area shows ONE at-bat at
+a time (**windowed**: `currentSealed || (postHalf && !summaryOpen)`,
+`useFocusMode`'s exact old `focused` formula, unchanged) or every card in
+the half at once (**stacked**, `!windowed`). `focusOne` is gone from every
+prop signature that carried it; `windowed` replaced it one-for-one.
+
+Four things follow, one per surface this touched:
+
+**1. Decision §2's "ONE at-bat as a full-width hero" is amended, not
+reversed.** `AtBatHero`/`AtBatCard`'s full-width identity treatment is
+chrome now — unconditional, on every card, stacked or not — but the
+hero's SINGULARITY (one card, full width) was always specifically a
+WINDOWED property, and stays one. A stacked half is many hero cards, each
+full width, each in the same reading order the original stacked page
+used. The inversion the original Decision argued for — "the mode called
+'focus' gave the thing you are focused on a narrower column than the mode
+that shows everything" — no longer has a narrower mode to invert against.
+
+**2. The 2026-08-12 amendment "the whole-half view returns as a quiet
+link, and the invisible chart stops being computed" is SUPERSEDED, not
+just amended, on its second half.** That amendment's chart skip
+(`InningViewer`'s `inFocusLayout ? NO_WINPROB : ...`) assumed the chart
+had nowhere to render while focused. It has one now — the reference
+panel's ARMS tab, permanently, for every half — so the skip is deleted
+and the step-clamped win-probability path computes on every "Next
+at-bat" tap for the first time since that amendment shipped. The first
+half of that amendment (the quiet "See the whole half" link) is
+untouched — `postHalf`/`summaryOpen` still work exactly as that amendment
+left them, and still decide `windowed`, not chrome.
+
+**3. The trail's click behavior forks on `windowed`, and the stacked half
+introduces a NEW, deliberate exception to this ADR's own "Nothing in
+focus mode calls `scrollIntoView` today" note.** Windowed, a chip click
+still switches the single-card window, unchanged. Stacked, there is no
+window to switch — every card is already showing — so a chip click
+scrolls the stage to that card instead (`FocusTrail`'s `scrollToStep`,
+`components/inning/focus/`). This is NOT the automatic per-reveal scroll
+that note was written to rule out; it fires only on a reader's own tap,
+on a half that's already fully revealed, and it writes the scroll offset
+directly (the same idiom `SeasonSeriesStrip.jsx`/`ClubPicker.jsx`/
+`SplitsVsTeam.jsx`/`TeamFilterStrip.jsx` already use) rather than calling
+`scrollIntoView`, for the same reason those four do: `scrollIntoView`
+drags every scrollable ancestor to satisfy its own `block` option, not
+just the one the caller means. `aria-current` and "Back to the live
+at-bat" drop while stacked — nothing is "live" once every card is on
+screen — and the beat (`useDenotationBeat`) simply doesn't fire on a
+stacked mount, since its `active` argument is `windowed` now: a batch of
+cards landing at once renders pre-inked, not the cascading flash a dozen
+simultaneous 180ms holds would otherwise produce.
+
+**4. What retired.** `ReferenceBand.jsx`/`RosterPanels` (the unfocused
+page's reference layout), the floating scorebug dock
+(`ScorebugMount.jsx`'s corner-stepping branch), `PreHalfCallouts.jsx`,
+and the inline entering-lineups/defense reference `HalfInning.jsx` used
+to stage above and below the seal are all deleted, not merely
+unreferenced — a future reader looking for "the ordinary page" should
+find this paragraph, not a grep. Their content didn't disappear: the
+reference panel's LINEUPS/FIELD/ARMS/EXTRAS tabs already covered every
+half chrome reaches, which after this amendment is every half, full
+stop.
+
+**What this does NOT change, restated once more because it's the rule
+every amendment here answers to:** nothing about the reveal mark moved.
+`stepCap` is still the single reveal boundary; `revealed || isNextToReveal`
+on the entering-reference and pre-pitch cards, `safeToShowEntering`,
+`buildPreHalfCallouts`'s own internal clamp, and every `SealBox` render-
+function gate are untouched. `stacked ⇒ revealed` is the invariant that
+makes the trail's stacked behavior safe — the three ways a half is
+stacked (`postHalf && summaryOpen`, or `!currentSealed && !postHalf`) all
+reduce to `idx <= revealedThrough`, so there is no stacked state
+describing a step the reader hasn't themselves revealed. What changed is
+only where already-gated content renders, and how many already-revealed
+cards are on screen when it does.

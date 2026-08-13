@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react'
+import { halfIndex } from '../../../api/select.js'
 import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
@@ -8,6 +9,9 @@ import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
 import { RosterPanel } from '../RosterPanel.jsx'
 import { ExtrasFacts } from './ExtrasFacts.jsx'
+import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
+import { WinProbChart } from '../../charts/WinProbChart.jsx'
+import { DueUpNextCard } from '../../playbyplay/DueUpNextCard.jsx'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
 // tables, the benches (ADR-0043). This replaces ReferenceRail.jsx, which
@@ -37,10 +41,11 @@ import { ExtrasFacts } from './ExtrasFacts.jsx'
 //    The sheet always starts closed — a modal that opens itself over the whole
 //    screen on load is a bug, not a reference surface.
 //
-// Purely a placement/visibility component. Every section below is the same
-// component the unfocused page renders inline, given the same already-gated
-// props; `safeToShowEntering` is the same caller-side gate ReferenceBand.jsx
-// applies (ADR-0010), not a second one.
+// Purely a placement/visibility component — the ONLY reference shelf now
+// (the old unfocused-page `ReferenceBand`/`RosterPanels` split is retired).
+// `safeToShowEntering` is the caller-side reached-half gate (ADR-0010), not a
+// second one — the selectors underneath (`defenseEntering`/`lineupEntering`)
+// keep their own reveal gate regardless of who calls them.
 const TABS = [
   { key: 'lineups', label: 'Lineups' },
   { key: 'field', label: 'Field' },
@@ -245,6 +250,10 @@ function Section({
   managers,
   uniforms,
   scorebookWeather,
+  getDerived,
+  runExpectancy,
+  winProbPoints,
+  winProbBigPlays,
 }) {
   if (tab === 'lineups' && showEntering) {
     return (
@@ -342,17 +351,21 @@ function Section({
       </>
     )
   }
-  // ARMS. Both halves of it are reveal-progress-driven: no pitcher has a line
-  // until a half has been scored, and Margin Notes are built from those same
-  // lines. Jump straight to a half ahead of the reveal mark and this section
-  // legitimately has nothing — which as bare emptiness read as a broken panel
-  // holding a reserved column open for no reason. Say so instead.
+  // ARMS. Notes + pitching lines are reveal-progress-driven: no pitcher has a
+  // line until a half has been scored, and Margin Notes are built from those
+  // same lines. Jump straight to a half ahead of the reveal mark and that
+  // half of the tab legitimately has nothing — which as bare emptiness read
+  // as a broken panel holding a reserved column open for no reason. Say so
+  // instead, scoped to just that pair (see `armsEmpty` below) — the stat/WPA
+  // content that follows has its own "nothing revealed yet" answer (a null
+  // render from StatBox's own `revealed` gate, an empty chart), so it isn't
+  // folded into this same empty state.
   //
   // The pre-half strip's own notes land here too — HalfInning declines to
-  // render the strip in focus mode (its own `focusOne` gate, which used to be
-  // a `display: none` in styles/focus/stage.css) and this is where they go.
-  // That makes THIS the only `buildPreHalfCallouts` call on the screen while
-  // focus mode is on, rather than the second of two.
+  // render the strip inline (its own `windowed` gate no longer applies here —
+  // this tab exists for every half now, live or historical) and this is
+  // where they go. That makes THIS the only `buildPreHalfCallouts` call on
+  // the screen, rather than the second of two.
   // SPOILER FOOTING IS THE STRIP'S OWN, UNCHANGED. `buildPreHalfCallouts` gates
   // every score-reading family on `revealedThrough` INSIDE itself (see that
   // file's header — the gate lives there precisely so no caller can skip it),
@@ -363,16 +376,72 @@ function Section({
     : []
   const notes = mergeNotes(preHalf, marginNotes)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)
-  // Deliberately a short label, not a sentence: the app uppercases every string
-  // by default (01-base.css's `#root *` invariant, guarded by check-caps.mjs),
-  // and a full sentence shouted in caps reads far worse than four words do.
-  if (armsEmpty) {
-    return <p className="refpanel__empty">No pitching lines yet</p>
-  }
+
+  // The stat/WPA content that used to be InningPage.jsx's `.innings__row2`,
+  // built only while NOT windowed (decision 5) — now it always builds, for
+  // every half, live or historical, moved permanently into this tab. Same
+  // already-gated values, same components, only the destination changed.
+  const idx = halfIndex(effInning, effHalf)
+  const revealed = idx <= revealedThrough
+  const battingSide = effHalf === 'top' ? 'away' : 'home'
   return (
     <>
-      <MarginNotes notes={notes} feed={feed} bundle={callouts} />
-      <PitchersSection teams={pitcherTeams} />
+      {/* Deliberately a short label, not a sentence: the app uppercases every
+          string by default (01-base.css's `#root *` invariant, guarded by
+          check-caps.mjs), and a full sentence shouted in caps reads far worse
+          than four words do. */}
+      {armsEmpty ? (
+        <p className="refpanel__empty">No pitching lines yet</p>
+      ) : (
+        <>
+          <MarginNotes notes={notes} feed={feed} bundle={callouts} />
+          <PitchersSection teams={pitcherTeams} />
+        </>
+      )}
+      <StatBox
+        className="innings__statbox"
+        placeholder
+        feed={feed}
+        inning={effInning}
+        half={effHalf}
+        battingSide={battingSide}
+        awayAbbr={meta.away.abbreviation}
+        homeAbbr={meta.home.abbreviation}
+        awayFranchise={meta.away.franchiseName || meta.away.abbreviation}
+        homeFranchise={meta.home.franchiseName || meta.home.abbreviation}
+        getDerived={getDerived}
+        revealed={revealed}
+        runExpectancy={runExpectancy}
+      />
+      <AbsCard
+        feed={feed}
+        inning={effInning}
+        half={effHalf}
+        revealed={revealed}
+        awayAbbr={meta.away.abbreviation}
+        homeAbbr={meta.home.abbreviation}
+      />
+      <WinProbChart
+        points={winProbPoints}
+        bigPlays={winProbBigPlays}
+        awayAbbr={meta.away.abbreviation}
+        homeAbbr={meta.home.abbreviation}
+        awayId={meta.away.id}
+        homeId={meta.home.id}
+        awayTreatment={treatment?.away}
+        homeTreatment={treatment?.home}
+        partial
+      />
+      <DueUpNextCard
+        feed={feed}
+        inning={effInning}
+        half={effHalf}
+        revealedThrough={revealedThrough}
+        awayId={meta.away.id}
+        homeId={meta.home.id}
+        awayName={meta.away.clubName}
+        homeName={meta.home.clubName}
+      />
     </>
   )
 }

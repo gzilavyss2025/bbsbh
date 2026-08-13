@@ -73,22 +73,6 @@
      the page to pad clear of. See .innings--focus's padding-bottom. */
   --focus-bar-h: 64px;
 
-  /* The ORDINARY innings bar's height — the two-row `.pagenav--innings` the
-     unfocused page keeps (a duplicate Refresh stacked over the primary action).
-     Its only job is keeping the floating scorebug dock off it: the dock parks
-     itself in a viewport corner, and both BOTTOM corners landed squarely on the
-     bar's buttons at every width the dock is visible at — it covered half of
-     "Bottom 1st ›" on an iPad and a desktop, and swallowed the tap, which is
-     the same collision ADR-0043 fixed inside focus mode by anchoring the band.
-     Outside focus mode the dock still floats, so it has to be told where the
-     floor is.
-
-     156px is the taller of the bar's two states, measured: 136px for a plain
-     advance, 156px when the split pair's labels wrap to two lines (the
-     Summary/next-half bar). One number for both, because a dock that shifted
-     when a label wrapped would be worse than one parked slightly high. */
-  --pagenav-innings-h: 156px;
-
   /* The box-score skeleton's rolling baseball icon (BoxScoreSkeleton.jsx,
      .skel__ball) — its own component-scoped size rather than borrowing a
      --fs-* typography role for an unrelated icon dimension. */

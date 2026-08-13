@@ -12,51 +12,6 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
 
-// The pre-scoring reference for a half: both teams' lineup cards + the fielding
-// side's alignment as they stand ENTERING it (subs through first pitch only).
-// Factored out because two layouts render it — inline in the half-inning on a
-// phone (staged around the seal), and as a right-column card on the wide layout.
-// Spoiler-free: revealedThrough is threaded straight into defenseEntering/
-// lineupEntering below, which enforce the gate themselves (ADR-0010).
-//
-// `treatment` (optional, `{away, home}` jersey-treatment keys — InningViewer's
-// own `winProbTreatment`, ADR-0030 footing) feeds each team's card the SAME
-// curated bar/accent/text triad TeamInfo.jsx and BoxScore.jsx's team cards
-// already wear (headerTheme.js) — identity-only, never anything reveal-
-// related. Absent treatment (an older caller, or a club with no curated
-// triad) falls back to the CSS defaults, same navy chrome as before.
-export function EnteringReference({ feed, inning, half, battingSide, awayName, homeName, awayId, homeId, treatment, prospectsData, rookiesData, isMlb, revealedThrough }) {
-  const fieldingSide = battingSide === 'away' ? 'home' : 'away'
-  return (
-    <>
-      <LineupSection
-        feed={feed}
-        inning={inning}
-        half={half}
-        awayName={awayName}
-        homeName={homeName}
-        awayId={awayId}
-        homeId={homeId}
-        treatment={treatment}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
-        isMlb={isMlb}
-        revealedThrough={revealedThrough}
-      />
-      <DefenseSection
-        feed={feed}
-        inning={inning}
-        half={half}
-        fieldingSide={fieldingSide}
-        fieldingName={battingSide === 'away' ? homeName : awayName}
-        fieldingTeamId={battingSide === 'away' ? homeId : awayId}
-        fieldingTreatment={treatment?.[fieldingSide]}
-        revealedThrough={revealedThrough}
-      />
-    </>
-  )
-}
-
 // The fielding team's defensive alignment ENTERING this half, drawn as the
 // scorebook diamond and captioned with the fielding side. Shows the state at
 // first pitch (defenseEntering) — a change made during the half stays sealed.

@@ -402,8 +402,24 @@
   animation: focus-deal var(--dur-med) var(--ease-out);
 }
 
+/* A STACKED mount is a batch — a dozen cards landing on the desk at once on
+   direct navigation to an old half, or on "See the whole half" — not one
+   card dealt at a time. Animating all of them together is the same
+   batch-mount defect the denotation beat's own `!active` short-circuit
+   avoids for the ink (useDenotationBeat.js); this is its CSS counterpart. */
+.innings--stacked .pbp__atbat {
+  animation: none;
+}
+
 .trailcell {
   animation: focus-fade var(--dur-fast) var(--ease-standard);
+}
+
+/* Same batch-mount argument as .pbp__atbat above. Not reachable yet — the
+   trail stays hidden while stacked until commit 3 gives it a scroll-to role
+   — but the rule belongs beside its sibling rather than arriving separately. */
+.innings--stacked .trailcell {
+  animation: none;
 }
 
 /* --------------------------------------------- THE BEAT (ADR-0046) */

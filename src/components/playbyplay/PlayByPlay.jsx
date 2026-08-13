@@ -25,7 +25,6 @@ import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
-import { PlayerLink } from '../player/PlayerLink.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
 import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
@@ -68,10 +67,12 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
 //
-// `focusOne` (focus mode) narrows that revealed PREFIX to ONE step's window.
-// `focusStep` picks which (null = newest); `onFocusInfo(count)` says how many
-// exist. Presentation only — `stepCap` stays the single reveal boundary.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, focusOne = false, focusStep = null, onFocusInfo }) {
+// `windowed` narrows that revealed PREFIX to ONE step's window; a stacked
+// half (`!windowed`) shows every entry. `focusStep` picks which step (null =
+// newest, windowed only); `onFocusInfo(count)` says how many exist.
+// Presentation only — `stepCap` stays the single reveal boundary regardless
+// of `windowed`.
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -111,26 +112,29 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
-  // Focus mode: the boundaries `nextStepBoundary` walks one tap at a time,
-  // enumerated. Counting only those at or under the cap is what keeps every
-  // window inside it.
+  // The boundaries `nextStepBoundary` walks one tap at a time, enumerated.
+  // Counting only those at or under the cap is what keeps every window
+  // inside it.
   //
-  // `focusOne` ALONE, not `focusOne && stepping`. The last at-bat of a half
-  // commits it, which drops `stepCap` to null and turned `stepping` off — and
-  // the window went with it, so the tap that revealed the 3rd out answered by
-  // dumping the entire half onto the screen at once. That is the one moment
-  // focus mode is meant to hold still: the reader has just charted a play and
-  // is writing it down. Focus mode itself outlives the commit on purpose
-  // (`held`, FocusControls.jsx) until the reader taps Summary, and Summary is
-  // exactly where the whole half belongs. The windowing now outlives it too.
-  // Once the commit lands there is no cap left to measure against, so the cap
-  // is the full array — every step is revealed by then, which is what makes
-  // the half a summary in the first place. Nothing here reveals: `stepCap` is
-  // still the single boundary, and past the commit the whole half is already
-  // past it.
-  const bounds = focusOne ? stepBounds(entries) : null
+  // `windowed` ALONE, not `windowed && stepping`. The last at-bat of a half
+  // commits it, which drops `stepCap` to null and turns `stepping` off — and
+  // the window must NOT go with it, or the tap that revealed the 3rd out
+  // would answer by dumping the entire half onto the screen at once. That is
+  // the one moment the windowed mode is meant to hold still: the reader has
+  // just charted a play and is writing it down. `windowed` itself outlives
+  // the commit on purpose (`postHalf`, useFocusMode) until the reader taps
+  // "See the whole half," and that link is exactly where the stacked half
+  // belongs. Once the commit lands there is no cap left to measure against,
+  // so the cap is the full array — every step is revealed by then, which is
+  // what makes a windowed post-half hold safe to keep windowed. Nothing here
+  // reveals: `stepCap` is still the single boundary, and past the commit the
+  // whole half is already past it.
+  // Unconditional now (commit 3): a stacked half's trail needs the same step
+  // boundaries to build its scroll targets, not just a windowed half's single
+  // card. Cheap either way — a pure walk over `entries`, not a fetch.
+  const bounds = stepBounds(entries)
   const stepCountCap = effectiveCap ?? entries.length
-  const revealedSteps = bounds ? bounds.filter((b) => b <= stepCountCap).length : 0
+  const revealedSteps = bounds.filter((b) => b <= stepCountCap).length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -151,10 +155,16 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // resolving, a scorer's correction), and the chips must follow. Same
   // inputs-not-identity discipline as the onLiveState effect below — `entries`
   // itself is a fresh array every render and would loop.
+  //
+  // Unconditional now (commit 3): the trail reports items for a stacked half
+  // too, so AtBatTrail has something to scroll to. Safe because `stacked ⇒
+  // revealed` — the three ways a half is stacked (`!currentSealed &&
+  // !postHalf`, or `postHalf && summaryOpen`) all reduce to `idx <=
+  // revealedThrough`, so there is no stacked state describing a step the
+  // reader hasn't themselves revealed.
   useEffect(() => {
-    if (!focusOne) return
     onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
-  }, [focusOne, revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
   // reported upward (InningViewer, via HalfInning) so the linescore grid's own
@@ -210,18 +220,32 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // One step's WINDOW. `focusStep` null is "the newest"; a number is clamped
   // rather than trusted, the count it was chosen against being a component away.
   let visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
-  // Which step the window landed on, or null outside focus mode — handed down
-  // as `beatKey` so the denotation hold (ADR-0046) replays on every fresh step.
+  // Which step the window landed on, or null while stacked (`!windowed`) —
+  // handed down as `beatKey` so the denotation hold (ADR-0046) replays on
+  // every fresh step.
   // NOT the card's React key: that is `${batterId}-${indexWithinTheWindow}`,
   // and a club batting around sends the same man up twice at the same index,
   // so React reconciles the second card onto the first and the mark prints
   // with no hold. A step index is unique for the life of a half.
   let beatKey = null
-  if (bounds && revealedSteps > 0) {
+  if (windowed && revealedSteps > 0) {
     const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
     beatKey = i
     visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
   }
+
+  // Step-scroll targets for a STACKED half's trail (commit 3, decision 4): a
+  // trail chip click scrolls the stage to that step's first card instead of
+  // switching a window (there is no window to switch while stacked). Built
+  // only when it can be used — `visibleEntries`' index only lines up with its
+  // TRUE index into `entries` (and hence with `bounds`) when nothing above
+  // narrowed it to a mid-array window, which is exactly `beatKey == null`:
+  // the un-windowed case slices from 0 (a prefix, index-aligned) or not at
+  // all, and only the windowed branch above slices from `bounds[i-1]`
+  // (a mid-array window, NOT index-aligned). Cheap either way — a Map built
+  // from an array already in hand, not a second walk of the feed.
+  const stepStartEntryIndex =
+    beatKey == null ? new Map(bounds.map((b, i) => [i === 0 ? 0 : bounds[i - 1], i])) : null
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
@@ -273,7 +297,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
               pitchingTeamId={pitchingTeamId}
               calloutCtx={{ bundle: callouts, firstRun, firstPA, firstRispPA, battingSide, vsTeam, progress }}
               highlight={entry.playId ? highlightsMap?.get(entry.playId) : null}
-              focusHeader={focusOne}
+              windowed={windowed}
               beatKey={beatKey}
             />
           )
@@ -385,9 +409,17 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = <EventNote entry={entry} />
         }
 
+        // Scroll target for a stacked half's trail (commit 3): the id names
+        // the STEP this entry starts, not the entry itself — only present on
+        // the entries `stepStartEntryIndex` actually marks as a step's first.
+        // Scoped by inning/half so the page-turn preview instance (a
+        // DIFFERENT half, mounted alongside the active one — InningPageTurn)
+        // can never collide with it.
+        const step = stepStartEntryIndex?.get(i)
         return (
           <div
             className="pbp__entry"
+            id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
             key={
               entry.kind === 'event'
                 ? `event-${i}`
@@ -407,15 +439,18 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 // have one home (see that file's TUNING note).
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
-function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, focusHeader = false, beatKey = null }) {
+function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, windowed = false, beatKey = null }) {
   const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
-  // THE BEAT (ADR-0046), focus mode only: the denotation cells below hold blank
-  // for a CONSTANT 180ms and then land. It takes no argument off `entry` and
-  // must never take one — a duration that varied with the play would announce
-  // the play. See useDenotationBeat.js.
-  const beat = useDenotationBeat(focusHeader, beatKey)
+  // THE BEAT (ADR-0046), windowed cards only: the denotation cells below hold
+  // blank for a CONSTANT 180ms and then land. It takes no argument off `entry`
+  // and must never take one — a duration that varied with the play would
+  // announce the play. See useDenotationBeat.js. `windowed` is what gates it
+  // — a stacked mount (a batch of cards landing at once) renders every card
+  // pre-inked, no flash; useDenotationBeat's own `!active` short-circuit is
+  // what makes that automatic.
+  const beat = useDenotationBeat(windowed, beatKey)
   const calloutNotes = buildCallouts(entry, calloutCtx)
   // The pitch-zone diagram only exists where the park tracked plate locations
   // (most MiLB parks don't). On a phone it opens in a modal from an icon button
@@ -432,18 +467,16 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
   const prJersey = replaced ? pinchRunners[pinchRunners.length - 1].jersey : null
   return (
     <div className={`pbp__atbat${hasZone ? '' : ' pbp__atbat--nozone'}`}>
-      {/* Focus mode only — see AtBatHero.jsx. It REPLACES .pbp__top below
-          (note the matching `!focusHeader` gate), rather than stacking a
-          second name row above it. */}
-      {focusHeader && (
-        <AtBatHero
-          batter={batter}
-          pitcher={pitcher}
-          pinchRunners={pinchRunners}
-          battingTeamId={battingTeamId}
-          pitchingTeamId={pitchingTeamId}
-        />
-      )}
+      {/* Unconditional now — see AtBatHero.jsx. It REPLACES the old .pbp__top
+          name row outright (that row and its gate are gone; card identity is
+          chrome now, not a mode). */}
+      <AtBatHero
+        batter={batter}
+        pitcher={pitcher}
+        pinchRunners={pinchRunners}
+        battingTeamId={battingTeamId}
+        pitchingTeamId={pitchingTeamId}
+      />
       {/* Fills the room the missing zone pane leaves, so it rides with
           --nozone. Decorative — the card's first line already names him — and
           desktop-only, .pbp__batshot being display:none below 740. */}
@@ -454,32 +487,6 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
       )}
       <div className="pbp__card">
         <div className="pbp__main">
-          {!focusHeader && (
-          <div className="pbp__top">
-            <span className="pbp__batter">
-              <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
-                <PlayerLink id={batter.id}>
-                  {batter.last}
-                  {batter.first ? `, ${batter.first}` : ''}
-                </PlayerLink>
-                {batter.pos && <span className="pbp__pos">{batter.pos}</span>}
-              </span>
-              {pinchRunners?.map((pr, i) => (
-                <span
-                  key={pr.id}
-                  className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
-                >
-                  <PlayerLink id={pr.id}>
-                    {pr.last}
-                    {pr.first ? `, ${pr.first}` : ''}
-                  </PlayerLink>
-                  <span className="pbp__pos">PR</span>
-                </span>
-              ))}
-            </span>
-            {rbi > 0 && <span className="pbp__rbi">{rbi} RBI</span>}
-          </div>
-          )}
           <div className="pbp__desc">
             {/* The currently live, still-in-progress plate appearance has no
                 result yet, so `descSegments` is empty — MLB's feed carries no
@@ -546,11 +553,11 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
         </div>
         <div className="pbp__side">
           <PitchLadder ladder={pitchLadder(pitches)} />
-          <div className="pbp__play" style={focusHeader ? INK_SET_STYLE : undefined}>
+          <div className="pbp__play" style={windowed ? INK_SET_STYLE : undefined}>
             {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
               <span className={`pbp__code pbp__code--${codeKind}${beat}`}>
                 {code}
-                {focusHeader && rbi > 0 && (
+                {rbi > 0 && (
                   <span className="pbp__code__rbi">
                     {rbi}
                     <span className="pbp__code__rbi-unit"> RBI</span>
@@ -577,12 +584,12 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
                 code && (
                   <span className={`pbp__code pbp__code--center pbp__code--out${beat}`}>
                     {code}
-                    {focusHeader && rbi > 0 && (
-                  <span className="pbp__code__rbi">
-                    {rbi}
-                    <span className="pbp__code__rbi-unit"> RBI</span>
-                  </span>
-                )}
+                    {rbi > 0 && (
+                      <span className="pbp__code__rbi">
+                        {rbi}
+                        <span className="pbp__code__rbi-unit"> RBI</span>
+                      </span>
+                    )}
                   </span>
                 )
               ))}
