@@ -49,8 +49,8 @@
      at --dur-tear while the panel's own --dur-slow fade, started --dur-tear-lead
      in, still has a moment to run. Widening that gap makes the panel look late;
      closing it makes the tear look like a wipe. */
-  --dur-tear:      320ms;
-  --dur-tear-lead: 130ms;
+  --dur-tear:      500ms;
+  --dur-tear-lead: 200ms;
 
   /* The card flip (src/components/FlipCard.jsx, .flipcard__inner) — a
      bidirectional turn, so it earns its own symmetric ease-in-out rather than
