@@ -86,8 +86,14 @@ function runDiffTone(rec) {
 
 // The club's own division out of a fetchStandings response. Undefined for a
 // thin feed with no division record, which every caller below degrades on.
+// A division-less league (the Northwest League's six clubs, e.g.) has no
+// `division` on either side: the static team file coalesces the missing id to
+// `null` (scripts/gen-teams.mjs), but statsapi's own standings record just
+// omits the field, reading `undefined`. Normalize both to `null` so that
+// still counts as a match instead of silently returning no row at all.
 export function divisionRecordFor(standings, team) {
-  return standings.find((r) => r.division?.id === team.division?.id)
+  const myDivId = team.division?.id ?? null
+  return standings.find((r) => (r.division?.id ?? null) === myDivId)
 }
 
 // The identity header's record line ("74–52 · 1st · NL Central"), or null when
