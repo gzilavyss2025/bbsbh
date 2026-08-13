@@ -15,7 +15,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | all-started-games.test.js | 3 | src/api/schedule.js | TeamPhotosPage's game list — keys on `started`, not `won`, so a live game's photos are reachable before it's Final |
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
 | api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |
-| between-innings.test.js | 7 | src/api/between-innings.js | Post-half card allowlist, CARD_MAX cap, one-liner dedupe, quiet-vs-loud spoiler invariant |
+| between-innings.test.js | 6 | src/api/between-innings.js | Post-half card allowlist, CARD_MAX cap, marginNotes[0] eligibility, quiet-vs-loud spoiler invariant |
 | box-score-note-attribution.test.js | 13 | src/api/boxscore.js, src/api/boxscore/gameNotes.js | Which club each info-block row prints under (HBP/IBB follow the BATTER), and the three parse shapes that used to drop a row into the shared foot |
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |

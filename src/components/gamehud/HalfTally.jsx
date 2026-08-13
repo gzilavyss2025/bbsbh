@@ -64,7 +64,6 @@ export function HalfTally({
   battingSide,
   getDerived,
   phase = 'done',
-  topNote,
   className = '',
 }) {
   const closing = phase === 'running'
@@ -99,9 +98,6 @@ export function HalfTally({
           )
         }}
       </SealBox>
-      {/* Outside the SealBox — topNote is marginNotes[0]?.text, already
-          reveal-gated by the caller. */}
-      {topNote && <p className="halftally__note">{topNote}</p>}
     </div>
   )
 }

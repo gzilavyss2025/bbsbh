@@ -71,7 +71,9 @@
        (the modal title stays uppercase)
      - the Trade Deadline card's cutline prose — `.tradecard__cutline` (the
        shape badge, team names, and player names above it stay uppercase) —
-       and its stats-to-date lines — `.tradecard__statline` */
+       and its stats-to-date lines — `.tradecard__statline`
+     - the between-innings card's fact line — `.betweeninnings__text` (the
+       name above it, `.betweeninnings__who`, stays uppercase) */
 #root * {
   text-transform: uppercase;
 }

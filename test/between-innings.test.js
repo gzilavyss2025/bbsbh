@@ -62,8 +62,7 @@ test('buildBetweenInnings caps a rich pool at exactly CARD_MAX', () => {
     feed, bundle: seasonContextBundle, marginNotes, gameDate: GAME_DATE, inning: 1, half: 'top', revealedThrough: 0,
   })
   // 4 season-context (2 starterRec + 2 dayOfWeek) + 3 marginNotes = 7
-  // candidates, minus the promoted one-liner (marginNotes[0]) = 6 — still
-  // more than CARD_MAX.
+  // candidates, still more than CARD_MAX.
   assert.equal(cards.length, CARD_MAX)
   for (let i = 1; i < cards.length; i++) assert.ok(cards[i - 1].score >= cards[i].score)
 })
@@ -81,17 +80,17 @@ test('buildBetweenInnings returns fewer than CARD_MAX on a sparse pool, never pa
   assert.equal(cards[0].kind, 'dayOfWeek')
 })
 
-test('buildBetweenInnings never repeats the promoted one-liner as a card', () => {
-  const feed = feedWithProbables()
+test('buildBetweenInnings does not treat marginNotes[0] as special — it is eligible like any other note', () => {
+  const feed = buildFeed() // no probablePitchers -> starterRec skipped
+  const sparse = { away: { teamId: 158, name: 'Away Club' } } // no teamRecords -> dayOfWeek skipped too
   const marginNotes = [
     { text: 'Laboring: 24.7 pitches per inning', kind: 'laboring', score: 48, dedupeKey: 'laboring-200' },
-    { text: 'Fastball down 2.3 mph', kind: 'veloDecay', score: 46, dedupeKey: 'veloDecay-200' },
-    { text: 'Working a 3rd straight day', kind: 'penFatigue', score: 42, dedupeKey: 'penFatigue-201' },
   ]
   const cards = buildBetweenInnings({
-    feed, bundle: seasonContextBundle, marginNotes, gameDate: GAME_DATE, inning: 1, half: 'top', revealedThrough: 0,
+    feed, bundle: sparse, marginNotes, gameDate: GAME_DATE, inning: 1, half: 'top', revealedThrough: 0,
   })
-  assert.ok(!cards.some((c) => c.dedupeKey === marginNotes[0].dedupeKey))
+  assert.equal(cards.length, 1)
+  assert.equal(cards[0].dedupeKey, marginNotes[0].dedupeKey)
 })
 
 // The spoiler invariant: a marginNotes-poor ("quiet") half and a
