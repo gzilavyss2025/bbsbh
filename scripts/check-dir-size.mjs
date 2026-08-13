@@ -298,7 +298,9 @@ const BUDGETS = {
   // the same shape and directory as check-focus-ring.mjs and
   // check-typography.mjs already here. A guards/ subdirectory would have to
   // take all fourteen of them at once, which is a move, not this change.
-  scripts: 74,
+  // +1 for gen-milb-ballparks.mjs — the MiLB venue-list generator, flat here
+  // like every other gen-*.mjs in this directory.
+  scripts: 75,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
