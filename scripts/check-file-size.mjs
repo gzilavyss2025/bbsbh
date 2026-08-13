@@ -131,7 +131,10 @@ const BUDGETS = {
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
-  'src/api/playbyplay/halfInningFeed.js': 800, // 793
+  // 800 -> 900: wiring uncoveredRunnerNotes (runnerNotes.js, a new file) into
+  // the per-play loop — a coveredRunnerEvents Set plus one call, the sentence
+  // building itself lives in the new module, not here.
+  'src/api/playbyplay/halfInningFeed.js': 900, // 807
   'src/screens/PlayerPage.jsx': 800, // 794 — Prospect Card remains, duplicate trendBySportId progression wiring removed
   // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
   // a focusHeader flag into AtBatCard, plus the buildTrailItems import for

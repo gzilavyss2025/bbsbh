@@ -444,12 +444,17 @@
     "playbyplay/notificationCards.js": {
       "class": "reveal-only",
       "why": "Mound-visit accounting and the mid-inning notification card builders. Substitution timing is spoiler-adjacent and these read mid-play. Barrel-internal.",
-      "importers": ["api/playbyplay.js", "api/playbyplay/halfInningFeed.js"]
+      "importers": ["api/playbyplay.js", "api/playbyplay/halfInningFeed.js", "api/playbyplay/runnerNotes.js"]
     },
     "playbyplay/pitchInfo.js": {
       "class": "reveal-only",
       "why": "Per-pitch classification and the pitch-card shaping built on it. Its WHIFF_CODES/FOUL_CODES/pitchCallCode constants are shared with derive.js and gen-fouls.mjs through the barrel. Barrel-internal.",
       "importers": ["api/playbyplay.js", "api/playbyplay/halfInningFeed.js"]
+    },
+    "playbyplay/runnerNotes.js": {
+      "class": "reveal-only",
+      "why": "Builds the leading notification card for a baserunning leg the playEvents scan never saw — reads runner identity, base and error-credit fields straight off runners[], a play outcome. Barrel-internal.",
+      "importers": ["api/playbyplay/halfInningFeed.js"]
     },
     "playbyplay/scorebookCode.js": {
       "class": "reveal-only",
