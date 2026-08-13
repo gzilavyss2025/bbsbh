@@ -37,10 +37,11 @@ import { ExtrasFacts } from './ExtrasFacts.jsx'
 //    The sheet always starts closed — a modal that opens itself over the whole
 //    screen on load is a bug, not a reference surface.
 //
-// Purely a placement/visibility component. Every section below is the same
-// component the unfocused page renders inline, given the same already-gated
-// props; `safeToShowEntering` is the same caller-side gate ReferenceBand.jsx
-// applies (ADR-0010), not a second one.
+// Purely a placement/visibility component — the ONLY reference shelf now
+// (the old unfocused-page `ReferenceBand`/`RosterPanels` split is retired).
+// `safeToShowEntering` is the caller-side reached-half gate (ADR-0010), not a
+// second one — the selectors underneath (`defenseEntering`/`lineupEntering`)
+// keep their own reveal gate regardless of who calls them.
 const TABS = [
   { key: 'lineups', label: 'Lineups' },
   { key: 'field', label: 'Field' },

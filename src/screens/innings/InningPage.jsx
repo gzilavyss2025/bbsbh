@@ -56,7 +56,7 @@ export const InningPage = memo(function InningPage({
   vsTeam,
   highlights,
   atBatCountFor,
-  focusOne = false,
+  windowed = false,
   focusStep = null,
   onFocusInfo,
   onStepInfo,
@@ -112,7 +112,7 @@ export const InningPage = memo(function InningPage({
           vsTeam={vsTeam}
           highlights={highlights}
           revealedAtBatCount={atBatCountFor(inning, half)}
-          focusOne={focusOne}
+          windowed={windowed}
           focusStep={focusStep}
           onFocusInfo={presentationOnly ? undefined : onFocusInfo}
           onStepInfo={presentationOnly ? undefined : (info) => onStepInfo?.(idx, info)}
@@ -124,24 +124,29 @@ export const InningPage = memo(function InningPage({
       {/* Row 3: the R/H/E/LOB + pitch-stat card for the half being viewed,
           beside the win-probability chart.
 
-          NOT BUILT AT ALL IN FOCUS MODE. This whole row used to render on every
-          step and then be painted out by `.innings--focus .innings__row2 {
-          display: none }` (styles/focus/stage.css) — so StatBox (580+ lines),
-          AbsCard, DueUpNextCard and WinProbChart all rendered forty times a
-          half on the app's hottest screen to produce pixels nobody ever saw.
-          The gate is now this one, on the SAME value that puts `.innings--focus`
-          on the wrapper (InningViewer hands both `focusOne` and the class from
-          `focus.focused`), so it hides exactly what the CSS hid, at exactly the
-          same moments, including on the page-turn preview instance.
+          TEMPORARY, PENDING COMMIT 2: still gated `!windowed` here (same
+          formula `!focusOne` used) rather than deleted — commit 2 moves this
+          whole block permanently into the reference panel's ARMS tab (for
+          every half, not just unwindowed ones) and removes it from here
+          entirely. Do not build on this gate; it is going away.
+
+          NOT BUILT AT ALL WHILE WINDOWED. This whole row used to render on
+          every step and then be painted out by `.innings--focus .innings__row2
+          { display: none }` (styles/focus/stage.css) — so StatBox (580+
+          lines), AbsCard, DueUpNextCard and WinProbChart all rendered forty
+          times a half on the app's hottest screen to produce pixels nobody
+          ever saw. The gate is now this one, so it hides exactly what the CSS
+          hid, at exactly the same moments, including on the page-turn preview
+          instance.
 
           ADR-0043's "What this does NOT change" still holds and is worth
           restating, because this is the rule it was written about: the row was
           only ever hidden for VISIBILITY. It carries no seal, no caller-gated
           pre-pitch selector (ADR-0010) and no fetch, so declining to render it
           moves no spoiler boundary — the same values reach the same components
-          under the same `revealed` prop the moment focus mode ends. What
+          under the same `revealed` prop the moment windowing ends. What
           changes is only whether the work is done to no purpose. */}
-      {!focusOne && (
+      {!windowed && (
         <div className="innings__row2">
           {/* Left column: the stat card, then a preview of who's due up when
               the OTHER team's next half starts — dueup.js's own gate keeps

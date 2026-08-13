@@ -113,7 +113,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
-  'src/screens/InningViewer.jsx': 1100, // 1022 — focus mode's post-half SUMMARY/next-half bottom bar (focus.postHalf) plus live runs/hits reporting
+  'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local

@@ -3,10 +3,13 @@ import { AtBatTrail } from './AtBatTrail.jsx'
 import { CLOSE_SEQUENCE_MS } from './beats.js'
 import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
-// Focus mode's state for the innings viewer (InningViewer.jsx): while the half
-// on screen is still sealed, the page shows the linescore and ONE at-bat — the
-// step the reader is on — with the reference band living in ReferencePanel.jsx
-// instead of the multi-card row layout.
+// The innings viewer's play-by-play mode state (InningViewer.jsx). The
+// console chrome (the anchored band, the tabbed ReferencePanel) is
+// unconditional now — every half gets it, live or historical. What this hook
+// decides is only WINDOWED vs. STACKED: while the half on screen is still
+// sealed (or just closed, see postHalf below), the play-by-play shows ONE
+// at-bat — the step the reader is on. Otherwise every card in the half shows
+// at once.
 //
 // Two pieces of state, no derivations anyone else can get wrong:
 //
@@ -82,19 +85,22 @@ export function useFocusMode(curIdx, currentSealed) {
   }
 
   // The half just finished revealing while the reader was watching it (3rd
-  // out, curIdx unchanged) — focus mode holds its single-at-bat view on screen
-  // (the cursor already lands on the final entry, see below) rather than
-  // snapping to the unfocused page underneath the play still being written
-  // down, for as long as this half stays the one on screen.
+  // out, curIdx unchanged) — the single-at-bat view holds on screen (the
+  // cursor already lands on the final entry, see below) rather than snapping
+  // straight to the stacked whole-half view underneath the play still being
+  // written down, for as long as this half stays the one on screen.
   //
-  // The two names answer two questions: `postHalf` is the STATE (the half
-  // finished under the reader's eyes and is still on screen) and `focused` is
-  // the LAYOUT. They part ways again exactly where the pre-#685 `held` flag
-  // did — opening the summary link leaves the focus layout while `postHalf`
-  // stays true, which is what keeps ConsoleBand's gate and the bar's own
-  // states reading the fact rather than the layout.
+  // FOCUS CHROME (the console band, the tabbed reference panel) IS
+  // UNCONDITIONAL NOW — it is no longer what this flag decides. `postHalf` is
+  // the STATE (the half finished under the reader's eyes and is still on
+  // screen) and `windowed` is which of the two PLAY-BY-PLAY MODES is showing:
+  // one at-bat at a time (windowed) or every card in the half at once
+  // (stacked, `!windowed`). They part ways again exactly where the pre-#685
+  // `held` flag did — opening the summary link drops out of the windowed mode
+  // while `postHalf` stays true, which is what keeps ConsoleBand's gate and
+  // the bar's own states reading the fact rather than the mode.
   const postHalf = sealedSeen && !currentSealed
-  const focused = currentSealed || (postHalf && !summaryOpen)
+  const windowed = currentSealed || (postHalf && !summaryOpen)
 
   // THE SEQUENCE STARTS AT THE COMMIT AND NOWHERE ELSE. `postHalf` IS the
   // commit — the half finished under the reader's eyes — so keying the start
@@ -162,7 +168,7 @@ export function useFocusMode(curIdx, currentSealed) {
   const openSummary = useCallback(() => setSummaryOpen(true), [])
 
   return {
-    focused,
+    windowed,
     postHalf,
     // The layout reads `closePhase`; the action bar reads `closing`. Two names
     // for one fact, same split as `postHalf`/`focused` above — one is the
@@ -221,8 +227,10 @@ export function useFocusMode(curIdx, currentSealed) {
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
 export function FocusTrail({ focus, turning }) {
-  const { focused, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
-  if (!focused || total <= 1) return null
+  const { windowed, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
+  // Stacked-half trail behavior (commit 3) is not implemented yet — this stays
+  // windowed-only for now.
+  if (!windowed || total <= 1) return null
   return (
     <AtBatTrail
       items={items}
@@ -250,8 +258,8 @@ export function FocusTrail({ focus, turning }) {
 // instead of below it — this component keeps the name because it is still
 // where InningViewer reaches for "the controls under the card."
 export function FocusControls({ focus, turning }) {
-  const { focused, postHalf, openSummary } = focus
-  if (!focused || !postHalf) return null
+  const { windowed, postHalf, openSummary } = focus
+  if (!windowed || !postHalf) return null
   return (
     <button
       type="button"
