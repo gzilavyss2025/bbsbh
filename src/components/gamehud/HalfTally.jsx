@@ -57,7 +57,16 @@ import { TALLY_STAGGER_MS } from '../inning/focus/beats.js'
 // the grid, read by `.statline--closing` in styles/focus/console.css so the
 // eight delays live in one number (beats.js's TALLY_STAGGER_MS) rather than
 // eight typed separately.
-export function HalfTally({ feed, inning, half, battingSide, getDerived, phase = 'done', className = '' }) {
+export function HalfTally({
+  feed,
+  inning,
+  half,
+  battingSide,
+  getDerived,
+  phase = 'done',
+  topNote,
+  className = '',
+}) {
   const closing = phase === 'running'
   return (
     <div className={`halftally ${className}`.trim()} key={`${inning}-${half}`}>
@@ -90,6 +99,9 @@ export function HalfTally({ feed, inning, half, battingSide, getDerived, phase =
           )
         }}
       </SealBox>
+      {/* Outside the SealBox — topNote is marginNotes[0]?.text, already
+          reveal-gated by the caller. */}
+      {topNote && <p className="halftally__note">{topNote}</p>}
     </div>
   )
 }

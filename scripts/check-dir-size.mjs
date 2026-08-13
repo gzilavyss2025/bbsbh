@@ -279,7 +279,9 @@ const BUDGETS = {
   // the live feed like every other module here, and putting it in a
   // subdirectory would take it out of the flat set check-spoiler-manifest
   // classifies, which is exactly where it needs to stay.
-  'src/api': 93,
+  // +1 for between-innings.js — the post-half hold's card builder, same
+  // caller-gated-selector shape as prehalf-callouts.js beside it.
+  'src/api': 94,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -384,7 +386,9 @@ const BUDGETS = {
   // +1 for GamePreview.jsx — the preview-poster studio, a lazily-loaded
   // game section (step 4) alongside TeamInfo/InningViewer/BoxScore. Same
   // shape as its siblings: one route, one screen, in the flat set.
-  'src/screens': 40,
+  // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
+  // AnimationLab.jsx beside it.
+  'src/screens': 41,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
