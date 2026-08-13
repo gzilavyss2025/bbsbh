@@ -8,13 +8,36 @@
 import { BASE_NUM } from './shared.js'
 import { NON_PA_EVENT_TYPES, GAME_ADVISORY_EVENT_TYPE } from './eventTypes.js'
 
+// All three finders are cached per feed OBJECT (WeakMap, `has` so a null
+// result caches too), the same pattern as select.js's entryIndexById: a
+// Refresh mints a new feed and rebuilds, a bare re-render reuses. They are
+// pure whole-game walks keyed on nothing but the feed, and PlayByPlay calls
+// every one at render top-level of the most re-rendered component in the app
+// — each "Next at-bat" tap re-walked the entire game several times over for
+// answers that cannot change without a refetch. Reveal-only footing is
+// untouched: caching a result changes WHO may call nothing (ADR-0007's
+// feed-keyed-cache rule, applied module-side). Callers must not mutate the
+// returned Maps — they are shared across renders now.
+function feedCached(cache, feed, build) {
+  if (!feed || typeof feed !== 'object') return build(feed)
+  if (cache.has(feed)) return cache.get(feed)
+  const result = build(feed)
+  cache.set(feed, result)
+  return result
+}
+
 // The play that scored the GAME's first run, for the "scoring first" call-out —
 // the earliest play (by feed order) whose cumulative score first goes above 0.
 // `result.awayScore`/`homeScore` are the running totals AFTER the play (verified
 // against a live game). Returns { atBatIndex, side } where side ('away' | 'home')
 // is the team that scored (the batting side of that half), or null before any
 // run. Reveal-only, like the rest of this module — reads scoring state.
+const firstRunCache = new WeakMap()
 export function firstRunPlay(feed) {
+  return feedCached(firstRunCache, feed, buildFirstRunPlay)
+}
+
+function buildFirstRunPlay(feed) {
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const r = p.result ?? {}
     if ((r.awayScore ?? 0) + (r.homeScore ?? 0) > 0) {
@@ -30,7 +53,12 @@ export function firstRunPlay(feed) {
 // atBatIndex of each batter's FIRST plate appearance in the whole game, so a
 // "coming into today" note (a streak) can render once — on his first card —
 // rather than every inning he bats. Reveal-only, like the rest of this module.
+const firstPACache = new WeakMap()
 export function firstPAIndexByBatter(feed) {
+  return feedCached(firstPACache, feed, buildFirstPAIndexByBatter)
+}
+
+function buildFirstPAIndexByBatter(feed) {
   const first = new Map()
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
     const bid = p.matchup?.batter?.id
@@ -54,7 +82,12 @@ export function firstPAIndexByBatter(feed) {
 // occupancy reset at each half-inning boundary — same idiom as
 // umpireFavor.js's `bases`/`BASE_NUM` walk, just at play (not pitch)
 // granularity. Reveal-only, like the rest of this module.
+const firstRispPACache = new WeakMap()
 export function firstRispPAIndexByBatter(feed) {
+  return feedCached(firstRispPACache, feed, buildFirstRispPAIndexByBatter)
+}
+
+function buildFirstRispPAIndexByBatter(feed) {
   const first = new Map()
   const bases = [null, null, null]
   let curHalfKey = null

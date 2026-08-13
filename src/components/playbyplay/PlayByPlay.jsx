@@ -137,10 +137,15 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Up to InningViewer (useFocusMode) — see buildTrailItems' own header.
+  // `feed` is a dependency alongside the count: a Refresh can rewrite an
+  // entry's content under an UNCHANGED step count (an interrupted at-bat
+  // resolving, a scorer's correction), and the chips must follow. Same
+  // inputs-not-identity discipline as the onLiveState effect below — `entries`
+  // itself is a fresh array every render and would loop.
   useEffect(() => {
     if (!focusOne) return
     onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
-  }, [focusOne, revealedSteps]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [focusOne, revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
   // reported upward (InningViewer, via HalfInning) so the linescore grid's own

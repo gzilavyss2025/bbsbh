@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
@@ -48,7 +48,15 @@ const TABS = [
   { key: 'extras', label: 'Extras' },
 ]
 
-export function ReferencePanel(props) {
+// Memoized for the same reason InningPage is (see its header): InningViewer
+// re-renders on every scorebug live-state report — several times per "Next
+// at-bat" tap — and this column's sections are not cheap to rebuild
+// (lineupEntering/defenseEntering each walk the whole game's plays;
+// buildPreHalfCallouts runs in the Arms branch). Every prop is a memoized
+// derivation, a primitive, or a stable handler, so the comparison only misses
+// when something the panel actually shows changed — `stepAtBatIndex` moving
+// each tap still re-renders it, as the Lineups tab's on-deck marker needs.
+export const ReferencePanel = memo(function ReferencePanel(props) {
   const { effInning, effHalf, revealedThrough } = props
   const wide = useMediaQuery(WIDE_QUERY)
   // A half the reader hasn't reached yet has no lineup or defense to show (the
@@ -142,7 +150,7 @@ export function ReferencePanel(props) {
       )}
     </>
   )
-}
+})
 
 // The tab strip, with the two things `role="tablist"` actually promises:
 //

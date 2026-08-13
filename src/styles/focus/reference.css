@@ -135,12 +135,13 @@
   gap: var(--space-2);
 }
 
-/* One condensed-uppercase control recipe, shared rather than spelled out three
-   times: the rail's tabs, the phone chips and the trail's return-to-live button
-   are the same object at three sizes. */
+/* One condensed-uppercase control recipe, shared rather than spelled out four
+   times: the rail's tabs, the phone chips, the trail's return-to-live button
+   and the post-half summary link are the same object at a few sizes. */
 .refpanel__tab,
 .refbar__chip,
-.trailstrip__followbtn {
+.trailstrip__followbtn,
+.trailstrip__summarybtn {
   min-width: 0;
   border: none;
   background: none;
@@ -181,8 +182,11 @@
 
 /* A paper-and-rule pill, not the first pass's underlined text link — nothing
    else in this app is an inline link, and a bare one read as web furniture
-   dropped into a scorebook. */
-.trailstrip__followbtn {
+   dropped into a scorebook. The post-half summary link (FocusControls.jsx)
+   wears the same pill: it is the same kind of quiet, secondary control, and a
+   second skin would read as a second system. */
+.trailstrip__followbtn,
+.trailstrip__summarybtn {
   align-self: flex-start;
   min-height: 34px;
   padding: 0 var(--space-3);
@@ -203,6 +207,7 @@
 .refpanel__tab:not([aria-selected='true']):hover,
 .refbar__chip:hover,
 .trailstrip__followbtn:hover,
+.trailstrip__summarybtn:hover,
 .trailcell:hover {
   background: var(--surface-inset);
 }
@@ -218,13 +223,15 @@
 .trailcell:focus-visible,
 .refpanel__tab:focus-visible,
 .refbar__chip:focus-visible,
-.trailstrip__followbtn:focus-visible {
+.trailstrip__followbtn:focus-visible,
+.trailstrip__summarybtn:focus-visible {
   outline: none;
   box-shadow: var(--ring);
 }
 
 .trailcell[aria-disabled='true'],
-.trailstrip__followbtn[aria-disabled='true'] {
+.trailstrip__followbtn[aria-disabled='true'],
+.trailstrip__summarybtn[aria-disabled='true'] {
   opacity: 0.6;
   pointer-events: none;
 }
