@@ -79,6 +79,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
+| print-sheet.test.js | 14 | src/screens/sheet/sheetModel.js | Tonight's printable scorecard: the pre-pitch model + its MiLB blank-line degradations, and the spoiler boundary — screens/sheet/ imports only select.js, and the printed at-bat grid stays EMPTY (docs/print-sheet.md) |
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |

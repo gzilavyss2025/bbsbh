@@ -32,6 +32,12 @@ const BoxScore = lazy(() => import('./BoxScore.jsx').then((m) => ({ default: m.B
 const GamePreview = lazy(() =>
   import('./GamePreview.jsx').then((m) => ({ default: m.GamePreview })),
 )
+// The printable pre-pitch scorecard (step 5). Split for the same reason as the
+// poster above it: it brings its own stylesheet, and a visit that never prints
+// tonight's sheet should never download either.
+const ScoreSheetPage = lazy(() =>
+  import('./sheet/ScoreSheetPage.jsx').then((m) => ({ default: m.ScoreSheetPage })),
+)
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -147,6 +153,13 @@ export function GameView({ game, section, onSection }) {
         // it makes the shareable image of this matchup. Last so the four
         // scoring sections keep the order the "next" buttons walk.
         { key: 'preview', label: 'Card', active: step === 4, section: 'preview' },
+        // The printable sheet (step 5) deliberately has NO tab here. Not an
+        // omission: `.stepnav__btn` is `flex: 1 1 0`, so a sixth stop divides a
+        // phone's row into ~52px cells and wraps "Innings" onto two lines. Its
+        // door is on the two lineup pages instead (TeamInfo's "Print tonight's
+        // sheet"), which is where a scorer is standing when they want one, and
+        // this row still rides the sheet page so every scoring section stays one
+        // tap away from it.
       ].map((s) => (
         <button
           key={s.key}
@@ -272,6 +285,7 @@ export function GameView({ game, section, onSection }) {
           callouts={gameCallouts}
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
+          onPrintSheet={() => onSection('sheet')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -301,6 +315,7 @@ export function GameView({ game, section, onSection }) {
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
+          onPrintSheet={() => onSection('sheet')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -366,6 +381,20 @@ export function GameView({ game, section, onSection }) {
           broadcast={broadcast.data}
           callouts={gameCallouts}
           treatments={jerseyTreatments}
+        />
+        </Suspense>
+      )}
+      {feed && step === 5 && (
+        <Suspense fallback={<Loader />}>
+        {/* Every value on this sheet comes from api/select.js, the spoiler-free
+            module — the feed, the managers and the outdoor weather reading are
+            the same three inputs the lineup pages above already take. Nothing
+            reveal-only is threaded in, and nothing may be: see
+            screens/sheet/sheetModel.js. */}
+        <ScoreSheetPage
+          feed={feed}
+          managers={managers.data}
+          scorebookWeather={weather.data}
         />
         </Suspense>
       )}
@@ -504,6 +533,7 @@ function gameTitle(game, step, inning, half) {
   if (step === 0) return `${matchup} · ${away} Lineup`
   if (step === 1) return `${matchup} · ${home} Lineup`
   if (step === 3) return `${matchup} · Box score`
+  if (step === 5) return `${matchup} · Scorecard`
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 

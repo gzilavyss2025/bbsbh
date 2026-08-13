@@ -418,7 +418,12 @@ List every file you expect to touch.
   (`fetchHeadToHead` exists, currently used only by GameFinder) but
   overlaps the nightly callouts' team-record territory; if wanted, it
   belongs in `gen-callouts.mjs`, not a new surface.
-- **Printable pre-filled scorecard sheet** (LogoSheet-style page with
-  tonight's lineups/umpires/weather laid out for pencil) — attractive and
-  free, but it's a print-layout project more than a data feature; worth its
-  own survey if the maintainer wants a sixth.
+- ~~**Printable pre-filled scorecard sheet**~~ — **shipped**, as
+  `/{date}/{matchup}/sheet` (`src/screens/sheet/`, `docs/print-sheet.md`). The
+  reservation above was right about what it is: it turned out to be almost
+  entirely a print-layout project, and the interesting constraint was paper
+  rather than data (A4 landscape is 6mm SHORTER than Letter, so it, not Letter,
+  is what one page has to be designed against). The data half was three hours of
+  nothing new — every value on the sheet comes from `api/select.js`, read exactly
+  as the lineup pages already read it. Its door is on both lineup pages; on a
+  phone it routes through the share sheet, reusing `SavePosterButton`'s pattern.

@@ -1,0 +1,391 @@
+/* ============================================================
+   PRINT SHEET — tonight's scorecard, on paper
+   `/{date}/{matchup}/sheet` (screens/sheet/). Two stylesheets in one file:
+   the on-screen preview, and the @media print block that is the actual
+   deliverable.
+
+   NOT imported by src/index.css. Only this one lazily-loaded route needs it,
+   so the route imports it itself and it never render-blocks anything else —
+   the same rule 62-game-preview.css follows (see src/index.css's header).
+
+   GEOMETRY IS IN MILLIMETRES on purpose. The unit the deliverable is measured
+   in is paper, so the sheet is authored in paper units and the on-screen
+   preview is then literally life-size (1mm = 3.7795 CSS px).
+
+   A4 LANDSCAPE IS THE BINDING CONSTRAINT, not Letter — it is 6mm shorter
+   (210 vs 216) even though it is 18mm wider, and the sheet is one design that
+   has to fit both. Measured heights at the 8mm @page margin:
+
+     A4 landscape   297 x 210mm  ->  194mm usable   (the tight one)
+     Letter         279 x 216mm  ->  200mm
+
+     header band            19.9mm  (matchup 5.2 + facts 4.5 + crew 4.5 + rules)
+     two club blocks    2 x 75.2mm  (club line 4.5 + head 4.5 + 10 rows x 6.5)
+     block/foot margins      6.0mm
+     decision line           5.2mm
+     -------------------------------
+     total                 181.5mm  -> 12.5mm of slack on A4, 18.5mm on Letter
+
+   That slack is the margin for a font that falls back to a taller face, not
+   spare room to spend. --ps-row is where it goes: every 0.5mm added to a row
+   costs 9mm of page, because there are eighteen of them. e2e/print-sheet.spec.js
+   prints both papers for real and fails if either runs to a second page.
+
+   NOTHING HERE MAY DEPEND ON A BACKGROUND FILL. A browser's print dialog has
+   "background graphics" switched off by default, so a background is simply
+   absent from the paper. Every rule, box and diamond on the sheet is drawn
+   with a BORDER, and every value is text.
+   ============================================================ */
+
+.printsheet-screen {
+  margin-top: var(--space-4);
+}
+
+.printsheet-screen__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.printsheet-screen__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.printsheet-screen__note,
+.printsheet-screen__hint {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+
+/* The action inherits .btn wholesale (focus ring included) and only says what
+   it is doing while it is doing it. */
+.printsheet-screen__go--error {
+  border-color: var(--accent-negative);
+  color: var(--accent-negative);
+}
+
+/* The sheet at its printed width, swiped sideways on a phone the way the
+   Scorecard Lab's grid is (.sc-sheet__scroll) — a landscape page does not fit a
+   portrait phone, and shrinking it to would make the names unreadable in the one
+   place you need to check them. */
+.printsheet-screen__paper {
+  margin-top: var(--space-4);
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* On a screen wide enough to actually hold a landscape page, show the whole
+   thing rather than scrolling it. `.screen` caps the app's column at 960px
+   (padding leaves 928); the sheet is 258mm = 975px, so without this the reader
+   is swiping for the sake of forty-seven pixels — on the one page whose whole
+   question is "does it all fit". The same widening the poster studio takes past
+   the app frame (.posterstudio's 1100px cap), gated on a viewport that can hold
+   the breakout plus its gutters. */
+@media (min-width: 1040px) {
+  .printsheet-screen {
+    --ps-breakout: 1008px;
+    width: var(--ps-breakout);
+    margin-inline: calc((var(--ps-breakout) - 100%) / -2);
+  }
+}
+
+/* ---- The sheet ---- */
+.printsheet {
+  /* One page of Letter landscape at an 8mm margin is 263mm wide; the preview
+     sits just inside that so nothing on screen is wider than the paper. */
+  --ps-page-w: 258mm;
+  --ps-row: 6.5mm;
+  --ps-rule: var(--border-rule);
+  --ps-faint: var(--rule-grid);
+  box-sizing: border-box;
+  width: var(--ps-page-w);
+  padding: 4mm;
+  border: var(--bw-hair) solid var(--ps-rule);
+  background: var(--surface-card);
+  color: var(--text-body);
+}
+
+/* ---- Header band ---- */
+.printsheet__head {
+  padding-bottom: 2mm;
+  border-bottom: var(--bw-rule) solid var(--ps-rule);
+}
+.printsheet__matchup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 3mm;
+  margin: 0 0 2mm;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.printsheet__at {
+  color: var(--accent-primary);
+}
+
+.printsheet__facts,
+.printsheet__crew {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 1.5mm 4mm;
+}
+.printsheet__crew {
+  margin-top: 1.5mm;
+}
+.printsheet__crewhead {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* A caption over a writing line — the sheet's one repeated primitive. A field
+   with a value inks the line; a blank one is somewhere to write, which is what
+   an unposted MiLB crew, an unannounced starter and the scorer's own name all
+   render as. --1/--2/--3 are how much of the row the field claims. */
+.ps-writein {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+  flex: 1 1 0;
+  min-width: 28mm;
+}
+.ps-writein--2 {
+  flex-grow: 2;
+}
+.ps-writein--3 {
+  flex-grow: 3;
+}
+.ps-writein__label,
+.ps-ump__role,
+.ps-clubfact__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  white-space: nowrap;
+}
+.ps-writein__line,
+.ps-ump__name,
+.ps-clubfact__line {
+  flex: 1;
+  min-width: 16mm;
+  border-bottom: var(--bw-hair) solid var(--ps-rule);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-ump {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+  flex: 1 1 0;
+  min-width: 32mm;
+}
+
+/* ---- One club: name line + grid ---- */
+.printsheet__block {
+  margin-top: 2mm;
+  /* A club's order and its grid are one object; never let a page break land
+     between them, or between two of its rows. */
+  break-inside: avoid;
+}
+.printsheet__clubline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 3mm;
+  margin: 0 0 1mm;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-title);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.printsheet__clubname {
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.ps-clubfact {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+  flex: 1 1 0;
+  min-width: 40mm;
+}
+
+.printsheet__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.printsheet__grid th,
+.printsheet__grid td {
+  border: var(--bw-hair) solid var(--ps-rule);
+}
+.printsheet__grid thead th {
+  height: 4.5mm;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.printsheet__grid tbody td {
+  height: var(--ps-row);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-title);
+  color: var(--text-body);
+}
+
+/* Column widths sum to 100 — 3 + 4.5 + 17 + (11 x 5.77) + (4 x 3). Fixed
+   percentages rather than millimetres so the same grid fills the wider A4 page
+   and the narrower Letter one without either clipping. */
+.ps-col-slot {
+  width: 3%;
+  text-align: center;
+}
+.ps-col-pos {
+  width: 4.5%;
+  text-align: center;
+}
+.ps-col-name {
+  width: 17%;
+  padding-left: 1mm;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ps-col-inning {
+  width: 5.77%;
+}
+.ps-col-sum {
+  width: 3%;
+}
+/* The jersey number, set small and quiet ahead of the surname — the number on
+   the back, not a column of its own, so the name keeps the width. */
+.ps-jersey {
+  margin-right: 1mm;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--text-caption);
+}
+
+/* One at-bat box: empty, with the diamond a scorer runs the batter around. */
+.ps-cell {
+  position: relative;
+  padding: 0;
+}
+.ps-cell__diamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3.4mm;
+  height: 3.4mm;
+  margin: -1.7mm 0 0 -1.7mm;
+  border: var(--bw-hair) solid var(--ps-faint);
+  transform: rotate(45deg);
+}
+
+.printsheet__totals .ps-col-name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* ---- Decisions ---- */
+.printsheet__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 1.5mm 4mm;
+  margin-top: 2mm;
+  padding-top: 1.5mm;
+  border-top: var(--bw-rule) solid var(--ps-rule);
+}
+.printsheet__mark {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* ============================================================
+   PAPER
+   ============================================================ */
+@media print {
+  /* No paper NAME, only an orientation: the reader's own Letter or A4 stands,
+     and the sheet is built to fit either (see the budget in this file's
+     header). */
+  @page {
+    size: landscape;
+    margin: 8mm;
+  }
+
+  /* Peel the app down to the sheet alone. The chain mirrors the real DOM —
+     #root > .app (App.jsx) > .screen (GameView) > .printsheet-screen >
+     __paper > .printsheet — hiding every child at each level and then
+     re-opening the one branch the sheet sits on. Deliberately an explicit
+     chain rather than a clever :has() sweep: when GameView's structure
+     changes, this shows up as chrome in the print preview and as a second
+     page in e2e/print-sheet.spec.js, both of which are findable. */
+  body[data-print-sheet='on'] .app > *,
+  body[data-print-sheet='on'] .screen > *,
+  body[data-print-sheet='on'] .printsheet-screen > * {
+    display: none;
+  }
+  body[data-print-sheet='on'] #root,
+  body[data-print-sheet='on'] .app,
+  body[data-print-sheet='on'] .screen,
+  body[data-print-sheet='on'] .printsheet-screen,
+  body[data-print-sheet='on'] .printsheet-screen__paper {
+    display: block;
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    background: none;
+  }
+
+  .printsheet {
+    /* The screen's faded-pencil rule is invisible on paper; step both weights
+       up one. */
+    --ps-rule: var(--text-caption);
+    --ps-faint: var(--border-rule);
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+}

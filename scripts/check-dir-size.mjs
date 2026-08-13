@@ -236,7 +236,15 @@ const BUDGETS = {
   // for rather than a second front door. The letter is load-bearing — the tear
   // re-times an animation 12-sealbox.css declares, so it has to cascade after
   // it.
-  'src/styles': 79,
+  // 79 -> 80 for `63-print-sheet.css`: the printable pre-pitch scorecard
+  // (`/{date}/{matchup}/sheet`). Its own partial for the same two reasons
+  // `62-game-preview.css` earned one — it belongs to a single lazily-loaded
+  // screen and is imported BY that screen rather than by index.css, so no
+  // other route pays for it — plus a third that is specific to it: it is the
+  // only file in this directory holding an `@media print` block and an
+  // `@page` rule, and burying a paper-geometry budget inside a screen
+  // stylesheet is exactly how the next person fails to find it.
+  'src/styles': 80,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
