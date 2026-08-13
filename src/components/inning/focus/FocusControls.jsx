@@ -221,13 +221,20 @@ export function useFocusMode(curIdx, currentSealed) {
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
 export function FocusTrail({ focus, turning }) {
-  const { focused, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
+  const { focused, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
   if (!focused || total <= 1) return null
   return (
     <AtBatTrail
       items={items}
       cursor={cursor}
-      following={step == null}
+      // NOT `step == null` alone — `goToStep`/`stepNext` pin a real number,
+      // and paging (or tapping a chip) forward until it lands back on the
+      // newest at-bat left `step` a definite index equal to `cursor`'s own
+      // value, so the "Back to the live at-bat" button never went away even
+      // though the reader WAS caught up. `cursor` is already resolved
+      // against `last` (useFocusMode), so comparing it directly is the same
+      // "am I on the newest step" question `step == null` was trying to ask.
+      following={cursor === total - 1}
       onSelect={goToStep}
       onStepBack={stepBack}
       onStepNext={stepNext}
