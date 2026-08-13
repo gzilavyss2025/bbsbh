@@ -139,7 +139,14 @@ const BUDGETS = {
   // item-building logic and the stepped-so-far R/H tally (both entriesView.js)
   // were all pulled out to keep this growth to wiring only — see those files'
   // own headers.
-  'src/components/playbyplay/PlayByPlay.jsx': 750, // 716
+  // 750 -> 700 as the ratchet asks: the notification-card family (EventNote,
+  // MoundVisitBar, EjectionBar, EventCard, BaserunningNote and the two
+  // shorthand lookups they are captioned from) moved to EventCards.jsx when
+  // the scoring loop's beat (ADR-0046) pushed this file past its budget. Those
+  // five were the part of this file with no reveal reasoning in them at all,
+  // which is what made them the right thing to lift out; the markup, classes
+  // and comments moved verbatim.
+  'src/components/playbyplay/PlayByPlay.jsx': 700, // 607
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612

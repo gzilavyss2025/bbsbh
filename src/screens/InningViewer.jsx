@@ -22,6 +22,9 @@ import { RefreshButton } from './TeamInfo.jsx'
 import { RollingLine } from '../components/gamehud/RollingLine.jsx'
 import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
 import { FocusControls, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
+import { HalfClose } from '../components/inning/focus/HalfClose.jsx'
+import { InningActionBar } from '../components/inning/InningActionBar.jsx'
+import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
 import { ReferenceBand, RosterPanels } from '../components/inning/ReferenceBand.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
@@ -183,6 +186,11 @@ export function InningViewer({
   // last half actually played (selectFinalHalfIndex) — what lets the server
   // know a card has nothing left to pick up once revealedThrough reaches it,
   // and drop it from the index instead of adding it back.
+  // The half-index of the last half actually played, null until the game ends.
+  // Two consumers, one call: the cloud scorebook index below, and focus mode's
+  // double rule (`bookClosed`, further down).
+  const finalHalfIndex = useMemo(() => selectFinalHalfIndex(feed), [feed])
+
   const gameSnapshot = useMemo(() => {
     const gd = feed?.gameData
     if (!gd) return null
@@ -194,9 +202,9 @@ export function InningViewer({
       homeName: gd.teams?.home?.clubName ?? gd.teams?.home?.teamName ?? '',
       gameNumber: gd.game?.gameNumber ?? 1,
       regulation,
-      finalHalfIndex: selectFinalHalfIndex(feed),
+      finalHalfIndex,
     }
-  }, [feed, regulation])
+  }, [feed, regulation, finalHalfIndex])
 
   // Only mounted when multi-device sync is configured (see clerkConfig.js) —
   // a conditionally-rendered component rather than a conditionally-called
@@ -445,6 +453,14 @@ export function InningViewer({
   // Focus mode: a sealed half shows the linescore and ONE at-bat (useFocusMode
   // for the state, 11-innings.css for what folds away).
   const focus = useFocusMode(curIdx, currentSealed)
+
+  // THE BOOK IS CLOSED (ADR-0046): the reader has revealed every half actually
+  // played. Two consequences below — the closing rule draws DOUBLE, and the
+  // bar's last action is named as an act rather than a destination. Keyed on
+  // the reveal mark against `finalHalfIndex` and NEVER on `selectIsFinal`;
+  // bookIsClosed's header has the argument. `renderRevealedThrough`, same as
+  // every other render consumer here.
+  const bookClosed = bookIsClosed(renderRevealedThrough, finalHalfIndex)
 
   // The `pastLine` observer declared above, mounted HERE so it can read
   // `focus.focused` — and skipped entirely while focus mode is on.
@@ -906,6 +922,27 @@ export function InningViewer({
             onStatusChange={setTurnStatus}
           />
 
+          {/* THE RULE (ADR-0046) — the half closed, so the stage gets closed:
+              a hairline drawn across the full width with the half's R/H/E/LOB
+              inking in behind it. Under the at-bat card, where a scorer draws
+              the line on paper, and above the trail, which is untouched.
+
+              MOUNTED ON `postHalf`, WHICH IS THE COMMIT — so it can never
+              appear on a half still being stepped. `curIdx <=
+              renderRevealedThrough` is what postHalf already implies, stated
+              because it is the gate HalfClose's reveal-only read stands on
+              (ADR-0001), same as ConsoleBand states it for HalfTally. */}
+          {focus.postHalf && curIdx <= renderRevealedThrough && (
+            <HalfClose
+              feed={feed}
+              inning={effInning}
+              half={effHalf}
+              battingSide={effHalf === 'top' ? 'away' : 'home'}
+              phase={focus.closePhase}
+              doubleRule={bookClosed}
+            />
+          )}
+
           <FocusControls focus={focus} turning={turning} />
 
           {/* Focus mode's slot for it — under the trail, so the at-bat and the
@@ -975,111 +1012,43 @@ export function InningViewer({
         />
       )}
 
-      {/* Floating bar — the same fixed blue bar the lineup pages page forward
-          with, and the same destination-named + trailing-› convention their
-          nextLabel buttons use ("Home team ›", "Innings ›") — no "Next:"
-          prefix, no arrow glyph.
-
-          IT CARRIES THE ONLY REFRESH, AT EVERY WIDTH. This used to read as a
-          "duplicate … hidden again on the wide layout, where the top toolbar
-          stays reachable", describing an arrangement where the toolbar and the
-          bar each held a copy and swapped by breakpoint. Neither half of that
-          is true any more: Refresh left `.inningchrome` entirely, and nothing
-          hides `.refreshbtn--float` at any width (the only other RefreshButton
-          on this screen is the pre-game scoreboard's, above). So the bar is
-          where you reach for it during a live game, phone and desktop alike —
-          which is also why `.pagenav--innings`'s hit-area rules measure around
-          a Refresh row that is always there, and why focus mode's one-row bar
-          has to shrink it to icon scale rather than drop it (styles/focus).
-
-          Three states: a sealed half offers two reveal choices (ADR-0016) —
-          step one at-bat, or the whole half at once; otherwise it's the plain
-          advance — "Box score ›" at the furthest revealed inning (never "Top
-          10th ›", which would leak the game going to extras) or the next-half
-          label once one unlocks; and under the Scores Unlocked pass, at the
-          live frontier, a calm status instead of either.
-
-          A half that just finished used to be a FOURTH state, pairing the
-          advance with a "Summary" button that swapped the single at-bat for the
-          whole half. THE BAR's fourth state is still gone: the numbers a scorer
-          wants when a half closes arrive on their own in the console band
-          (HalfTally.jsx), so the end of a half has exactly one thing to say
-          here and it is "carry on". The whole-half view itself came back as a
-          quiet paper-pill link under the trail instead (FocusControls.jsx —
-          see useFocusMode's summary note for the history), which is a change
-          to the stage, not to this bar. */}
-      <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
-        {/* …EXCEPT once the game is over, when there is nothing left to fetch:
-            the feed is complete and a refetch returns the same bytes. Same
-            `selectIsFinal` test, for the same reason, that already drops the
-            box score's own Refresh (screens/BoxScore.jsx) — a control that
-            cannot change anything is a control that should not be on the one
-            row a thumb is working. Revealing is unaffected: it reads the feed
-            already in hand.
-
-            The dead-space hit areas answer for themselves. Their -76px reach
-            is already behind `:has(.refreshbtn--float)`, with the bare -20px
-            for exactly this case, so the area still stops inside a bar that
-            is one row shorter rather than overshooting into the page. */}
-        {!selectIsFinal(feed) && (
-          <RefreshButton
-            onReload={onReload}
-            loading={loading}
-            lastUpdated={lastUpdated}
-            className="refreshbtn--float"
-          />
-        )}
-        {atLiveEdge ? (
-          <div className="liveedge" role="status" aria-live="polite">
-            <span className="liveedge__dot" aria-hidden="true" />
-            <span className="liveedge__label">{liveEdgeLabel}</span>
-          </div>
-        ) : currentSealed ? (
-          <div className="revealsplit">
-            <button
-              type="button"
-              className="btn btn--reveal revealsplit__btn"
-              onClick={revealNextAtBat}
-              aria-label={`Reveal the next at-bat in the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
-            >
-              Next at-bat
-            </button>
-            {/* NOT THE SAME WEIGHT AS THE BUTTON BESIDE IT. These were two
-                identical kraft seals, equal width and equal pull, and they do
-                opposite things: the left one advances the loop the reader is
-                here for, one at-bat at a time, forty times a half-hour. This
-                one ENDS it — it is the skip. A skip button drawn as loud as
-                the play button is a thumb waiting to make a mistake it cannot
-                undo, since revealing is one-directional (ADR-0002).
-
-                Demoted, not moved and not shrunk: same row, same width, same
-                tap target — only the kraft texture comes off (see
-                `.revealsplit__btn--quiet`, styles/focus/stage.css). The hit
-                areas in 24-floating-nav-and-hud.css measure geometry, which is
-                untouched, so e2e/reveal-hit-area.spec.js holds. */}
-            <button
-              type="button"
-              className="btn btn--reveal revealsplit__btn revealsplit__btn--quiet"
-              onClick={revealWholeHalf}
-              aria-label={`Reveal the rest of half — the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
-            >
-              Rest of half
-            </button>
-          </div>
-        ) : nextIdx != null ? (
-          <button
-            className="btn btn--next"
-            onClick={() => requestForwardHalf(nextIdx)}
-            aria-disabled={turning || undefined}
-          >
-            {nextLabel} ›
-          </button>
-        ) : (
-          <button className="btn btn--next" onClick={onBoxScore}>
-            Box score ›
-          </button>
-        )}
-      </div>
+      {/* The floating bar (components/inning/InningActionBar.jsx) — the three
+          states it renders, the Refresh it always carries, and the hold the
+          closing rule puts on its forward action all live in that file's
+          header. Everything it needs is resolved here and handed down; it
+          decides nothing about the reveal mark itself. */}
+      <InningActionBar
+        focused={focus.focused}
+        closing={focus.closing}
+        turning={turning}
+        refresh={
+          /* Dropped once the game is over — the feed is complete and a refetch
+             returns the same bytes. Same `selectIsFinal` test, for the same
+             reason, that already drops the box score's own Refresh
+             (screens/BoxScore.jsx). Revealing is unaffected: it reads the feed
+             already in hand. */
+          selectIsFinal(feed) ? null : (
+            <RefreshButton
+              onReload={onReload}
+              loading={loading}
+              lastUpdated={lastUpdated}
+              className="refreshbtn--float"
+            />
+          )
+        }
+        atLiveEdge={atLiveEdge}
+        liveEdgeLabel={liveEdgeLabel}
+        currentSealed={currentSealed}
+        effInning={effInning}
+        effHalf={effHalf}
+        onRevealNextAtBat={revealNextAtBat}
+        onRevealWholeHalf={revealWholeHalf}
+        nextIdx={nextIdx}
+        nextLabel={nextLabel}
+        onForward={requestForwardHalf}
+        bookClosed={bookClosed}
+        onBoxScore={onBoxScore}
+      />
     </div>
   )
 }

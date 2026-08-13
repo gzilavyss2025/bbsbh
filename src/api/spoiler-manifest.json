@@ -278,13 +278,14 @@
     },
     "linescore.js": {
       "class": "reveal-only",
-      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot. HalfTally.jsx joined it the same way: focus mode's console band shows a FINISHED half's line once that half sits at or under the reveal mark, read inside a SealBox render function exactly as StatBox reads it (ADR-0043).",
+      "why": "The per-inning and total runs themselves. The canonical reveal-only module (ADR-0001). Also holds revealStampFacts, whose one caller is StampGameButton inside the box score's seal (ADR-0035). ScorebugMount.jsx replaced screens/InningViewer.jsx on this list in ADR-0043: revealRunsThrough moved down one component with the scorebug's placement logic, and it is reached under exactly the gate it always was — the component returns null before touching it unless the game has started AND the half on screen has a reveal-safe live snapshot. HalfTally.jsx joined it the same way: focus mode's console band shows a FINISHED half's line once that half sits at or under the reveal mark, read inside a SealBox render function exactly as StatBox reads it (ADR-0043). HalfClose.jsx is on the list for the third time by the same argument (ADR-0046): focus mode's closing rule shows the same finished half's R/H/E/LOB, mounted only in the post-half hold and only for a half at or under the reveal mark, read inside a SealBox render function. Note what it is NOT allowed to read — nothing in that component may reach a linescore value BEFORE the mark it prints is on screen, because the sequence's own timing would then be a function of the reveal.",
       "importers": [
         "api/boxscore.js",
         "api/derive.js",
         "api/loadScorecard.js",
         "components/gamehud/RollingLine.jsx",
         "components/gamehud/HalfTally.jsx",
+        "components/inning/focus/HalfClose.jsx",
         "components/gamehud/ScorebugMount.jsx",
         "components/gamehud/StatBox.jsx",
         "screens/boxscore/revealBoxScore.js"

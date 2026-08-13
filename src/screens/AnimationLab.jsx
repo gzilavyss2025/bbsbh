@@ -5,6 +5,8 @@ import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCard.jsx'
 import { CountBlink } from '../components/gamehud/StatBox.jsx'
+import { HalfCloseRule } from '../components/inning/focus/HalfCloseRule.jsx'
+import { INK_SET_MS } from '../components/inning/focus/beats.js'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -135,7 +137,80 @@ export function AnimationLab() {
           ))}
         </div>
       </section>
+
+      <section className="animlab__entry">
+        <h2 className="animlab__title">Focus mode — the half-close rule</h2>
+        <p className="hint hint--prose">
+          Focus mode&rsquo;s punctuation for a half that has just committed
+          (src/components/inning/focus/HalfCloseRule.jsx, ADR-0046) &mdash; a hairline draws
+          itself left to right over 420ms, then the half&rsquo;s R / H / E / LOB ink in behind
+          it, 90ms apart. Made-up figures; this page never reads a game.
+        </p>
+        <div className="animlab__live">
+          <HalfCloseRule phase="running" figures={CLOSE_FIGURES} />
+        </div>
+        <span className="animlab__stagelabel">Single rule, the whole ~700ms sequence</span>
+        <div className="animlab__frozen">
+          {[0, 210, 420, 510, 600, 690].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <HalfCloseRule phase="running" figures={CLOSE_FIGURES} />
+            </Frame>
+          ))}
+        </div>
+        <span className="animlab__stagelabel">
+          Double rule &mdash; the book is closed (the reader&rsquo;s mark reached the last half played)
+        </span>
+        <div className="animlab__frozen">
+          {[0, 210, 420, 690].map((ms) => (
+            <Frame key={`d-${ms}`} label={`${ms}ms`} delayMs={ms}>
+              <HalfCloseRule phase="running" doubleRule figures={CLOSE_FIGURES} />
+            </Frame>
+          ))}
+        </div>
+      </section>
+
+      <section className="animlab__entry">
+        <h2 className="animlab__title">Focus mode — the denotation ink-set</h2>
+        <p className="hint hint--prose">
+          The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms
+          (identical for a strikeout and a grand slam &mdash; see ADR-0046) and then lands
+          with a 3% scale overshoot over {INK_SET_MS}ms. Only the landing is shown here;
+          the hold is a JS timer in useDenotationBeat.js, not an animation this page can
+          scrub.
+        </p>
+        <div className="animlab__live">
+          <InkSetDemo />
+        </div>
+        <span className="animlab__stagelabel">Ink-set, {INK_SET_MS}ms</span>
+        <div className="animlab__frozen">
+          {[0, 10, 20, 30, 40].map((ms) => (
+            <Frame key={`ink-${ms}`} label={`${ms}ms`} delayMs={ms}>
+              <InkSetDemo />
+            </Frame>
+          ))}
+        </div>
+      </section>
     </div>
+  )
+}
+
+// A plausible half's line, invented. Same four keys HalfClose.jsx passes.
+const CLOSE_FIGURES = [
+  { k: 'R', v: 2 },
+  { k: 'H', v: 3 },
+  { k: 'E', v: 0 },
+  { k: 'LOB', v: 1 },
+]
+
+// The real `.pbp__code` mark wearing the real `--ink` class, at the hero size
+// focus mode gives it — not a copy of the keyframe. `--ink-set` is set here the
+// same way PlayByPlay.jsx sets it on `.pbp__play`, off beats.js, so this page
+// can never quietly demo a different duration than the app runs.
+function InkSetDemo() {
+  return (
+    <span className="innings--focus" style={{ '--ink-set': `${INK_SET_MS}ms` }}>
+      <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
+    </span>
   )
 }
 

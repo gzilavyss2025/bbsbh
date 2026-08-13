@@ -1,5 +1,7 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AtBatTrail } from './AtBatTrail.jsx'
+import { CLOSE_SEQUENCE_MS } from './beats.js'
+import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
 // Focus mode's state for the innings viewer (InningViewer.jsx): while the half
 // on screen is still sealed, the page shows the linescore and ONE at-bat — the
@@ -56,6 +58,12 @@ export function useFocusMode(curIdx, currentSealed) {
   // already is, so arriving on a fresh sealed half still counts.
   const [sealedSeen, setSealedSeen] = useState(currentSealed)
   const [summaryOpen, setSummaryOpen] = useState(false)
+  // THE CLOSING SEQUENCE (ADR-0046): 'idle' -> 'running' -> 'done', one way,
+  // once per visit to a half. 'running' is the ~700ms in which the rule draws
+  // and the four figures ink in (HalfClose.jsx) and the bar's forward action
+  // is held; 'done' is everything after, which is the ordinary page as it
+  // behaves today.
+  const [closePhase, setClosePhase] = useState('idle')
 
   // Reset computed during render (not in an effect) on a half change — the
   // same pattern InningViewer's `runsInProgress` reset and Headshot.jsx use. A
@@ -68,6 +76,7 @@ export function useFocusMode(curIdx, currentSealed) {
     setItems([])
     setSealedSeen(currentSealed)
     setSummaryOpen(false)
+    setClosePhase('idle')
   } else if (currentSealed && !sealedSeen) {
     setSealedSeen(true)
   }
@@ -86,6 +95,48 @@ export function useFocusMode(curIdx, currentSealed) {
   // states reading the fact rather than the layout.
   const postHalf = sealedSeen && !currentSealed
   const focused = currentSealed || (postHalf && !summaryOpen)
+
+  // THE SEQUENCE STARTS AT THE COMMIT AND NOWHERE ELSE. `postHalf` IS the
+  // commit — the half finished under the reader's eyes — so keying the start
+  // on it is what keeps the rule from beginning to draw a beat before the 3rd
+  // out is the reader's to know (ADR-0046). Not on `steps`, not on the feed,
+  // not on anything read out of the play that ended the half.
+  //
+  // Computed during render like the resets above, not in an effect, so the
+  // first frame the rule exists on is already the first frame it is drawing
+  // on. Under reduced motion it opens at 'done': the rule and its four figures
+  // are simply there, and the forward action is live at once — skipped, never
+  // slowed, which is the same choice SealBox's tear makes.
+  if (postHalf && closePhase === 'idle') {
+    setClosePhase(motionIsReduced() ? 'done' : 'running')
+  }
+
+  // The sequence's own clock, plus its interrupt: any tap or key ends it early
+  // and the forward action goes live.
+  //
+  // THE LISTENERS GO ON THE NEXT TASK, NOT THIS ONE, and that is load-bearing.
+  // The tap that commits the half ("Next at-bat", or "Rest of half") is still
+  // propagating toward `window` when this effect runs — React flushes a
+  // discrete event's re-render before the native event finishes bubbling — so
+  // a listener attached synchronously here would be fired by the very tap that
+  // started the sequence, and the rule would be cut off on its first frame
+  // every single time.
+  useEffect(() => {
+    if (closePhase !== 'running') return undefined
+    const finish = () => setClosePhase('done')
+    const ran = setTimeout(finish, CLOSE_SEQUENCE_MS)
+    const attach = setTimeout(() => {
+      window.addEventListener('click', finish)
+      window.addEventListener('keydown', finish)
+    }, 0)
+    return () => {
+      clearTimeout(ran)
+      clearTimeout(attach)
+      window.removeEventListener('click', finish)
+      window.removeEventListener('keydown', finish)
+    }
+  }, [closePhase])
+
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -113,6 +164,11 @@ export function useFocusMode(curIdx, currentSealed) {
   return {
     focused,
     postHalf,
+    // The layout reads `closePhase`; the action bar reads `closing`. Two names
+    // for one fact, same split as `postHalf`/`focused` above — one is the
+    // state of the animation, the other is whether a control is held.
+    closePhase,
+    closing: closePhase === 'running',
     step,
     steps,
     items,

@@ -278,3 +278,42 @@ same build-what-folds cost #686 removed from the stage's hidden surfaces,
 one layer up. Since the step clamp only ever activates on the next-to-reveal
 half, which is always sealed, which is always focus mode, the unfocused paths
 are byte-for-byte what they were; the chart fills in the moment focus ends.
+
+## Amendment (2026-08-13): the loop gets punctuation
+
+Decision 2 above gave the at-bat the stage and the scorebook denotation the
+typographic hero role. It left the loop itself unmarked: the mark replaced the
+previous mark in the frame it was asked for, the half committed silently, and
+the last half of a game ended like any other. This mode is composed for one
+repeated act, and the act had no beginning, middle or end.
+
+Three beats, all of them timing rather than layout, so the stage's composition
+is untouched:
+
+- **THE BEAT.** A focused at-bat card arrives whole except for its denotation
+  cell, which holds blank for a constant 180ms and then lands with a 3% scale
+  overshoot. The batter's name and the pitch ladder are up for the whole hold —
+  only the code the reader is about to pencil waits.
+- **THE RULE.** The half commits and the stage is closed: a hairline draws
+  itself left to right under the at-bat card over 420ms, then the half's
+  R/H/E/LOB ink in behind it, 90ms apart. ~700ms, interruptible by any tap,
+  with the bar's forward action held until it ends. The trail and the quiet
+  "See the whole half" pill (the previous amendment) are exactly where they
+  were; this sits between them and the card.
+- **THE DOUBLE RULE.** The reader's mark reaches the last half actually played
+  and the same rule draws as a double one, with the bar's last action named as
+  an act — "Close the book ›" rather than "Box score ›".
+
+**ADR-0046 is the rule these obey and is the one to read first**: no timing
+before a reveal may be a function of the reveal. It is why the hold is a
+constant rather than scaled to the play, why the rule may not start before the
+commit, and why the double rule keys on `revealedThrough` against
+`finalHalfIndex` instead of `selectIsFinal` — which would have let the bottom of
+the 9th tell you whether there is a 10th.
+
+Two files were split on the way in, both moved verbatim and neither changing a
+class: `PlayByPlay.jsx`'s notification-card family to `EventCards.jsx`, and this
+screen's floating bar to `components/inning/InningActionBar.jsx`. The bar's
+three states, its always-present Refresh and the hit-area reasoning
+(`e2e/reveal-hit-area.spec.js`) all moved with it and now live in that file's
+header rather than in a 40-line comment inside `InningViewer.jsx`.

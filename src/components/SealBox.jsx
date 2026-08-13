@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { ModalPortal } from './ui/ModalPortal.jsx'
 import { sealTearPolygons, sealTearSeed } from '../lib/sealTear.js'
+import { motionIsReduced } from '../hooks/preferences/motionIsReduced.js'
 
 // The core spoiler mechanism (see brief §7b — this behavior must not drift).
 //
@@ -51,7 +52,10 @@ import { sealTearPolygons, sealTearSeed } from '../lib/sealTear.js'
 //     and Scores Unlocked (ADR-0026) would otherwise flap a torn seal over
 //     every half at once.
 //   • Under reduced motion nothing tears at all; the panel arrives exactly as
-//     it does today. See `wantsReducedMotion`.
+//     it does today. See `motionIsReduced` (hooks/preferences/), which used to
+//     be a private copy in this file and is now shared with focus mode's own
+//     JS-timed beats (components/inning/focus/beats.js, ADR-0046) — three
+//     gestures, one reading of the contract.
 export function SealBox({
   children,
   forceRevealed = false,
@@ -112,7 +116,7 @@ export function SealBox({
           // underneath is a different height, so the torn halves have to
           // remember the tape's own box rather than inherit the panel's.
           const box = e.currentTarget.getBoundingClientRect()
-          if (box.height > 0 && !wantsReducedMotion()) {
+          if (box.height > 0 && !motionIsReduced()) {
             setTorn(true)
             setTear({ box, paths: sealTearPolygons(sealTearSeed(gamePk, halfIndex)) })
           }
@@ -213,17 +217,6 @@ function SealTear({ tear, onDone }) {
   )
 }
 
-// Both halves of the app's motion contract, read at the moment of the tap.
-//
-// `data-motion="reduced"` is the in-app preference (My Tally → Motion, applied
-// by useMotionPreference.js); the media query is the OS setting the app has
-// always followed. styles/01-base.css enforces the first as a blanket duration
-// kill, which is enough for an animation that only has to finish faster — but
-// this one also delays the panel's own fade, and a delay is not a duration. So
-// the tear is skipped outright here rather than sped up, and the panel arrives
-// exactly as it did before any of this existed.
-function wantsReducedMotion() {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return false
-  if (document.documentElement.dataset.motion === 'reduced') return true
-  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
-}
+// (`wantsReducedMotion` lived here. It is `motionIsReduced` in
+// hooks/preferences/ now — same two reads, same reason, shared with focus
+// mode's JS-timed beats so one gesture's answer cannot drift from another's.)
