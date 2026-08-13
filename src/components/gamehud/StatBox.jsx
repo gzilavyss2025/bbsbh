@@ -574,9 +574,13 @@ function favorMeterLabel(net, awayFranchise, homeFranchise, totalMissedCalls) {
 
 // One stat cell. Exported because HalfTally.jsx draws the same cells in the
 // same `.statline` grid for focus mode's console band — one recipe, two hosts.
-export function Stat({ k, v, tone }) {
+// `style` is optional and forwarded as-is: HalfTally is the only caller that
+// passes one, an inline `--tally-i` custom property (ADR-0046) that times this
+// cell's ink-in against its neighbors — StatBox's own cells pass nothing and
+// render exactly as they did before.
+export function Stat({ k, v, tone, style }) {
   return (
-    <div className={`stat ${tone ? `stat--${tone}` : ''}`}>
+    <div className={`stat ${tone ? `stat--${tone}` : ''}`} style={style}>
       <span className="stat__v">{v}</span>
       <span className="stat__k">{k}</span>
     </div>

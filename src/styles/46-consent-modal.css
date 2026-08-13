@@ -175,9 +175,30 @@
 .animlab__frame .postponed,
 .animlab__frame .postponed__stamp,
 .animlab__frame .wcall__count-old,
-.animlab__frame .wcall__count-new {
+.animlab__frame .wcall__count-new,
+.animlab__frame .pbp__code--ink {
   animation-play-state: paused;
   animation-delay: var(--animlab-delay, 0s);
+}
+
+/* Focus mode's half-close tally ink-in (ADR-0046) needs a longer selector than
+   its siblings above, for the same two reasons its retired predecessor
+   (`.halfclose`, the separate hairline-and-figures display this replaced) did:
+
+   SPECIFICITY. Its own rule lives in styles/focus/console.css, which
+   src/index.css imports LAST, so a plain `.animlab__frame .stat` (0,2,0) would
+   tie `.statline--closing .stat` (0,2,0) and lose on order. Matching the
+   closing class here breaks the tie on specificity instead of hoping about
+   order.
+
+   THE CELLS SCRUB ADDITIVELY. Each already carries its own staggered
+   `animation-delay`, so overwriting it with the bare frame offset would freeze
+   all eight at the same point and the strip would show a stagger that does not
+   exist. The frame offset is added to the cell's own delay instead, which is
+   what makes each frozen frame a truthful reading of the real sequence. */
+.animlab__frame .statline--closing .stat {
+  animation-play-state: paused;
+  animation-delay: calc(var(--tally-i, 0) * var(--tally-step, 90ms) + var(--animlab-delay, 0s));
 }
 
 

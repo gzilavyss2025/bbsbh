@@ -1,5 +1,7 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AtBatTrail } from './AtBatTrail.jsx'
+import { CLOSE_SEQUENCE_MS } from './beats.js'
+import { motionIsReduced } from '../../../hooks/preferences/motionIsReduced.js'
 
 // Focus mode's state for the innings viewer (InningViewer.jsx): while the half
 // on screen is still sealed, the page shows the linescore and ONE at-bat — the
@@ -56,6 +58,12 @@ export function useFocusMode(curIdx, currentSealed) {
   // already is, so arriving on a fresh sealed half still counts.
   const [sealedSeen, setSealedSeen] = useState(currentSealed)
   const [summaryOpen, setSummaryOpen] = useState(false)
+  // THE CLOSING SEQUENCE (ADR-0046): 'idle' -> 'running' -> 'done', one way,
+  // once per visit to a half. 'running' is the ~700ms in which the rule draws
+  // and the four figures ink in (HalfClose.jsx) and the bar's forward action
+  // is held; 'done' is everything after, which is the ordinary page as it
+  // behaves today.
+  const [closePhase, setClosePhase] = useState('idle')
 
   // Reset computed during render (not in an effect) on a half change — the
   // same pattern InningViewer's `runsInProgress` reset and Headshot.jsx use. A
@@ -68,6 +76,7 @@ export function useFocusMode(curIdx, currentSealed) {
     setItems([])
     setSealedSeen(currentSealed)
     setSummaryOpen(false)
+    setClosePhase('idle')
   } else if (currentSealed && !sealedSeen) {
     setSealedSeen(true)
   }
@@ -86,6 +95,48 @@ export function useFocusMode(curIdx, currentSealed) {
   // states reading the fact rather than the layout.
   const postHalf = sealedSeen && !currentSealed
   const focused = currentSealed || (postHalf && !summaryOpen)
+
+  // THE SEQUENCE STARTS AT THE COMMIT AND NOWHERE ELSE. `postHalf` IS the
+  // commit — the half finished under the reader's eyes — so keying the start
+  // on it is what keeps the rule from beginning to draw a beat before the 3rd
+  // out is the reader's to know (ADR-0046). Not on `steps`, not on the feed,
+  // not on anything read out of the play that ended the half.
+  //
+  // Computed during render like the resets above, not in an effect, so the
+  // first frame the rule exists on is already the first frame it is drawing
+  // on. Under reduced motion it opens at 'done': the rule and its four figures
+  // are simply there, and the forward action is live at once — skipped, never
+  // slowed, which is the same choice SealBox's tear makes.
+  if (postHalf && closePhase === 'idle') {
+    setClosePhase(motionIsReduced() ? 'done' : 'running')
+  }
+
+  // The sequence's own clock, plus its interrupt: any tap or key ends it early
+  // and the forward action goes live.
+  //
+  // THE LISTENERS GO ON THE NEXT TASK, NOT THIS ONE, and that is load-bearing.
+  // The tap that commits the half ("Next at-bat", or "Rest of half") is still
+  // propagating toward `window` when this effect runs — React flushes a
+  // discrete event's re-render before the native event finishes bubbling — so
+  // a listener attached synchronously here would be fired by the very tap that
+  // started the sequence, and the rule would be cut off on its first frame
+  // every single time.
+  useEffect(() => {
+    if (closePhase !== 'running') return undefined
+    const finish = () => setClosePhase('done')
+    const ran = setTimeout(finish, CLOSE_SEQUENCE_MS)
+    const attach = setTimeout(() => {
+      window.addEventListener('click', finish)
+      window.addEventListener('keydown', finish)
+    }, 0)
+    return () => {
+      clearTimeout(ran)
+      clearTimeout(attach)
+      window.removeEventListener('click', finish)
+      window.removeEventListener('keydown', finish)
+    }
+  }, [closePhase])
+
   const last = Math.max(0, steps - 1)
   // What the feed should actually show: the cursor resolved against a count
   // that can shrink under it (a live poll can rebuild a half with fewer
@@ -113,6 +164,11 @@ export function useFocusMode(curIdx, currentSealed) {
   return {
     focused,
     postHalf,
+    // The layout reads `closePhase`; the action bar reads `closing`. Two names
+    // for one fact, same split as `postHalf`/`focused` above — one is the
+    // state of the animation, the other is whether a control is held.
+    closePhase,
+    closing: closePhase === 'running',
     step,
     steps,
     items,
@@ -148,6 +204,15 @@ export function useFocusMode(curIdx, currentSealed) {
 // note on `items`). Takes the aria-disabled mid-turn guard every other
 // control on this page uses — paging resizes .turnscene, which
 // InningPageTurn answers by snapping a turn in flight.
+// Split from `FocusControls` below (which now holds only the post-half
+// summary link) because the trail moved to the TOP of the stage, above the
+// hero card — amending ADR-0043's "a wrapping trail directly beneath it" — so
+// the reader watches the half's cards accumulate right next to the one
+// they're reading, rather than scrolling past the hero to see them (see
+// InningViewer.jsx's call site for the full argument). The summary link stays
+// where ADR-0043's later amendment put it, under the card, so only this half
+// of the old combined component needed a new home.
+//
 // Renders AtBatTrail directly, with no wrapper element of its own. There used
 // to be a bare <div onKeyDown> here holding the arrow-key handling; it had no
 // role, no tabIndex and no class, it could only ever receive those keys by
@@ -155,41 +220,46 @@ export function useFocusMode(curIdx, currentSealed) {
 // `display: contents` on a phone — it landed in .innings__grid as an
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
-export function FocusControls({ focus, turning }) {
-  const { focused, postHalf, openSummary, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
-  // The summary link renders even when the trail doesn't (a one-batter
-  // walk-off half has no trail to draw), so the gate is "nothing here at all"
-  // rather than the trail's own `total <= 1`.
-  if (!focused || (total <= 1 && !postHalf)) return null
+export function FocusTrail({ focus, turning }) {
+  const { focused, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
+  if (!focused || total <= 1) return null
   return (
-    <>
-      {total > 1 && (
-        <AtBatTrail
-          items={items}
-          cursor={cursor}
-          following={step == null}
-          onSelect={goToStep}
-          onStepBack={stepBack}
-          onStepNext={stepNext}
-          onFollowLatest={followLatest}
-          turning={turning}
-        />
-      )}
-      {/* Post-half only: drop this half out of the focus layout and show it
-          laid out whole — the ordinary revealed page, in place. A paper pill
-          in the trail's own control recipe, NOT a second button on the action
-          bar (see useFocusMode's summary note for the #685 history). It
-          disappears with the layout it changes; navigating resets. */}
-      {postHalf && (
-        <button
-          type="button"
-          className="trailstrip__summarybtn"
-          aria-disabled={turning || undefined}
-          onClick={openSummary}
-        >
-          See the whole half
-        </button>
-      )}
-    </>
+    <AtBatTrail
+      items={items}
+      cursor={cursor}
+      // NOT `step == null` alone — `goToStep`/`stepNext` pin a real number,
+      // and paging (or tapping a chip) forward until it lands back on the
+      // newest at-bat left `step` a definite index equal to `cursor`'s own
+      // value, so the "Back to the live at-bat" button never went away even
+      // though the reader WAS caught up. `cursor` is already resolved
+      // against `last` (useFocusMode), so comparing it directly is the same
+      // "am I on the newest step" question `step == null` was trying to ask.
+      following={cursor === total - 1}
+      onSelect={goToStep}
+      onStepBack={stepBack}
+      onStepNext={stepNext}
+      onFollowLatest={followLatest}
+      turning={turning}
+    />
+  )
+}
+
+// The post-half-only "See the whole half" link (see useFocusMode's summary
+// note for the #685/ADR-0043 history it answers). The trail that used to sit
+// beside it here is `FocusTrail` above now, rendered above the hero card
+// instead of below it — this component keeps the name because it is still
+// where InningViewer reaches for "the controls under the card."
+export function FocusControls({ focus, turning }) {
+  const { focused, postHalf, openSummary } = focus
+  if (!focused || !postHalf) return null
+  return (
+    <button
+      type="button"
+      className="trailstrip__summarybtn"
+      aria-disabled={turning || undefined}
+      onClick={openSummary}
+    >
+      See the whole half
+    </button>
   )
 }

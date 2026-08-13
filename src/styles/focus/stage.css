@@ -196,6 +196,13 @@
   }
 }
 
+/* THE CLOSING PUNCTUATION (ADR-0046) used to live HERE — a hairline drawn
+   under the at-bat card with the half's R/H/E/LOB inking in behind it
+   (`.halfclose`/`.halfclose__fig`, HalfClose.jsx/HalfCloseRule.jsx). It was
+   retired for an ink-in on the console band's own tally card instead of a
+   second, smaller printing of four of its numbers in a different spot — see
+   `.statline--closing` in focus/console.css and HalfTally.jsx's header. */
+
 /* ---------------------------------------------------------- the action bar */
 /* One solid row: refresh, then the two reveal choices. The unfocused page keeps
    .pagenav--innings' stacked two-row bar untouched — this is an extra class,

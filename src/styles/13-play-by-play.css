@@ -120,21 +120,23 @@
   color: var(--clay-deep);
 }
 
-/* The RBI count, focus mode only (PlayByPlay.jsx's `focusHeader` gate) — rides
-   inside the SAME play-notation pill as the result code (FC, 1B, …) rather
-   than a separate badge up in AtBatHero's name row (see that file's header
-   for why it moved). No font-size of its own: it inherits whichever pill it
-   landed in, top .pbp__code (--fs-small) or the center-diamond
-   .pbp__code--center (--fs-title-sm), so it always matches the code beside
-   it. Keeps the old .pbp__rbi badge's own green chip look (field-deep on
-   field-soft, pill radius) so it still reads as its own small pill INSIDE
-   the code's pill, not just a color change on plain text. */
+/* The RBI count, focus mode only. `margin-left` is the ONLY gap from the code
+   — no leading space in the text, which used to stack into a visibly wide gap.
+   "RBI" downsizes below as the count's unit (`.favormeter__unit` convention). */
 .pbp__code__rbi {
   color: var(--field-deep);
   background: var(--field-soft);
   border-radius: var(--radius-pill);
   padding: 1px 6px;
   margin-left: 3px;
+}
+
+.pbp__code__rbi-unit {
+  font-family: var(--font-display);
+  font-size: 0.65em;
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  opacity: 0.75;
 }
 
 /* An interrupted at-bat's carry-over mark ("CS →" — the half ended on the
@@ -151,11 +153,17 @@
    the card. Mirrors .sc-ab__center's placement on the scorecard sheet, minus
    its paper chip backing — this diamond's outline is sparse enough at the
    center that the bare code reads fine directly over it. */
+/* THE CENTRING IS THE INDIVIDUAL `translate` PROPERTY, NOT `transform`, so it
+   applies OUTSIDE any scale and cannot be multiplied by one — which is what
+   keeps focus mode's ink-set from dragging this mark off the diamond as it
+   settles (the argument is in styles/focus/atbat.css, ADR-0046). It also means
+   the backwards-K rule below no longer has to restate it to avoid clobbering
+   it: the two write different properties. */
 .pbp__code--center {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  translate: -50% -50%;
   width: max-content;
   font-size: var(--fs-title-sm);
   line-height: var(--lh-solid);
@@ -163,11 +171,13 @@
   white-space: pre-line;
 }
 
-/* The backwards-K still needs its mirror flip, combined with the centering
-   transform above (equal specificity would otherwise let whichever rule
-   comes later silently win and drop the other transform). */
+/* The backwards-K needs its mirror flip and nothing else: the centring above is
+   a `translate` now, so this no longer has to restate it to avoid clobbering it
+   (see that rule's note). Stated anyway rather than left to `.pbp__klooking`'s
+   own copy, because this pairing is the one that has to keep working when the
+   ink-set's `scale` is composing with it too. */
 .pbp__code--center.pbp__klooking {
-  transform: translate(-50%, -50%) scaleX(-1);
+  transform: scaleX(-1);
 }
 
 .pbp__outcircle {

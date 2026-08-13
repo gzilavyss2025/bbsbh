@@ -492,6 +492,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         reached: 0,
         scored: false,
         earned: true,
+        // The live, still-in-progress PA: no result yet, so `code` above is
+        // empty. `about.isComplete: false` is the feed's own signal (verified
+        // live, gamePk 824238). A count in progress is not a spoiler.
+        live: play.about?.isComplete === false ? { balls: play.count?.balls ?? 0, strikes: play.count?.strikes ?? 0 } : null,
       }
       entries.push(card)
       // A repeat plate appearance — the lineup batting around — bumps out

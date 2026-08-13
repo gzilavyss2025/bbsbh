@@ -104,6 +104,22 @@
     display: none;
   }
 
+  /* With the strip above stood down, a staged notice (Now Pitching, a
+     defensive sub, a pinch hitter — every shape shares `.pitchernotice--pbp`)
+     can be the ONLY thing left inside `.half` before the reader has revealed
+     anything of it — `.half__title` is `sr-only` in focus mode, and SealBox
+     (coverless) mounts no `.statgrid` until shown. `.half`'s own card chrome
+     then reads as a plain white box drawn around the kraft-amber card, a card
+     wrapping a card. Drop it so the notice sits directly on the page — same
+     `:has()`/media scoping as the strip's own rule above, since this is the
+     same "is the strip actually hidden" question. `:not(:has(.statgrid))`
+     is what lets `.half`'s chrome back the moment real content is shown. */
+  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .half:has(.pitchernotice--pbp):not(:has(.statgrid)) {
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
   .dueupconsole__col {
     display: flex;
     align-items: stretch;
@@ -247,6 +263,47 @@
 
 .statline--console .stat__k {
   font-size: var(--fs-caption);
+}
+
+/* THE INK-IN (ADR-0046) — the half committed, so this card is what marks it:
+   its eight cells ink in one at a time instead of just appearing, in place of
+   the separate hairline-and-figures display (`.halfclose`, retired) that used
+   to draw under the at-bat card and repeat four of these same numbers a beat
+   earlier. `--tally-step` arrives as an inline custom property from beats.js
+   (HalfTally.jsx sets it), so the interval has one home; the fallback below is
+   only for a stray render with no property set — the lab page and this
+   stylesheet must never become a second source of truth for it.
+   `.statline--closing` is only ever present for the ~630ms right after the
+   half commits (`useFocusMode`'s `closePhase`) — HalfTally.jsx drops the class
+   once it does, the same idiom the retired `.halfclose--running` used. */
+@keyframes tally-ink {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Each cell's own delay, computed from its place in the grid (`--tally-i`, set
+   per cell in HalfTally.jsx) rather than typed eight times — the interval is
+   one number and the eight cannot drift apart. `both` so a cell is absent,
+   not merely transparent-looking, until its own beat arrives. */
+.statline--closing .stat {
+  animation: tally-ink var(--tally-step, 90ms) var(--ease-out) both;
+  animation-delay: calc(var(--tally-i, 0) * var(--tally-step, 90ms));
+}
+
+/* Skipped, not slowed. The CSS-wide reduced-motion kill would collapse the
+   duration to ~0.01ms on its own, but `animation-delay` is a DELAY, not a
+   duration, and that rule does not touch it — the eight would still arrive
+   over the better part of a second, just invisibly. So the animation comes
+   off outright here, and useFocusMode opens `closePhase` at 'done' under
+   reduced motion so this class is never even applied. */
+@media (prefers-reduced-motion: reduce) {
+  .statline--closing .stat {
+    animation: none;
+  }
 }
 
 @media (min-width: 740px) {

@@ -2,6 +2,7 @@ import { revealInning } from '../../api/linescore.js'
 import { revealDerived } from '../../api/derive.js'
 import { SealBox } from '../SealBox.jsx'
 import { Stat } from './StatBox.jsx'
+import { TALLY_STAGGER_MS } from '../inning/focus/beats.js'
 
 // The finished half's tally, for focus mode's console band (ADR-0043,
 // ConsoleBand.jsx). What a scorer writes down when a half CLOSES — the half's
@@ -41,7 +42,23 @@ import { Stat } from './StatBox.jsx'
 // corners meet the outer cells (styles/focus/console.css strips the SealBox
 // wrapper's padding to match), so the tally reads as one ruled block of paper
 // rather than a header floating over an inset panel.
-export function HalfTally({ feed, inning, half, battingSide, getDerived, className = '' }) {
+//
+// THE INK-IN (ADR-0046). This card mounts fresh — `key={inning-half}` above —
+// the moment the half it captions closes, which used to be marked by a
+// separate hairline-and-four-figures display drawn under the at-bat card
+// (HalfClose.jsx/HalfCloseRule.jsx). That display was retired for THIS one:
+// the punctuation now lands directly on the numbers the reader is going to
+// read anyway, rather than a second, smaller printing of four of them a beat
+// earlier in a different spot. `phase` is `useFocusMode`'s `closePhase`,
+// handed down through ConsoleBand exactly as it was handed to HalfClose —
+// 'running' for the ~700ms right after the half commits, 'done' (or under
+// reduced motion, immediately) once the reader is expected to be reading the
+// card rather than watching it arrive. `--tally-i` is each cell's place in
+// the grid, read by `.statline--closing` in styles/focus/console.css so the
+// eight delays live in one number (beats.js's TALLY_STAGGER_MS) rather than
+// eight typed separately.
+export function HalfTally({ feed, inning, half, battingSide, getDerived, phase = 'done', className = '' }) {
+  const closing = phase === 'running'
   return (
     <div className={`halftally ${className}`.trim()} key={`${inning}-${half}`}>
       <SealBox forceRevealed coverless>
@@ -53,15 +70,22 @@ export function HalfTally({ feed, inning, half, battingSide, getDerived, classNa
           const fieldLine = revealInning(feed, inning, battingSide === 'away' ? 'home' : 'away')
           const d = revealDerived(getDerived(), inning, half)
           return (
-            <div className="statline statline--console">
-              <Stat k="R" v={line?.runs ?? 0} tone="run" />
-              <Stat k="H" v={line?.hits ?? 0} />
-              <Stat k="E" v={fieldLine?.errors ?? 0} />
-              <Stat k="LOB" v={line?.leftOnBase ?? 0} />
-              <Stat k="Pitches" v={d.pitches} />
-              <Stat k="Whiffs" v={d.whiffs} />
-              <Stat k="Fouls" v={d.fouls} />
-              <Stat k="1st-pitch strikes" v={`${d.firstPitchStrikes}/${d.plateAppearances}`} />
+            <div
+              className={`statline statline--console${closing ? ' statline--closing' : ''}`}
+              style={closing ? { '--tally-step': `${TALLY_STAGGER_MS}ms` } : undefined}
+            >
+              <Stat k="R" v={line?.runs ?? 0} tone="run" style={{ '--tally-i': 0 }} />
+              <Stat k="H" v={line?.hits ?? 0} style={{ '--tally-i': 1 }} />
+              <Stat k="E" v={fieldLine?.errors ?? 0} style={{ '--tally-i': 2 }} />
+              <Stat k="LOB" v={line?.leftOnBase ?? 0} style={{ '--tally-i': 3 }} />
+              <Stat k="Pitches" v={d.pitches} style={{ '--tally-i': 4 }} />
+              <Stat k="Whiffs" v={d.whiffs} style={{ '--tally-i': 5 }} />
+              <Stat k="Fouls" v={d.fouls} style={{ '--tally-i': 6 }} />
+              <Stat
+                k="1st-pitch strikes"
+                v={`${d.firstPitchStrikes}/${d.plateAppearances}`}
+                style={{ '--tally-i': 7 }}
+              />
             </div>
           )
         }}
