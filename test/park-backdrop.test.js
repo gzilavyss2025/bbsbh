@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import { parkBackdrop } from '../src/lib/ballpark/parkBackdrop.js'
 import { fieldIds, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
+import { FIELD_IDS } from '../src/copy/registry.js'
 
 // The copy reader the real caller passes (useCopy().t), as a plain map lookup
 // that answers '' for anything unset — exactly what the provider does for an id
@@ -70,4 +71,17 @@ test('a src that would not be safe in a CSS url() yields no backdrop', () => {
 test('no venue name at all is not an error', () => {
   assert.equal(parkBackdrop('', none), null)
   assert.equal(parkBackdrop(undefined, none), null)
+})
+
+// The registry connection, pinned. The test above ("picks the art up the day
+// it lands") proves parkBackdrop's OWN plumbing; this proves the id it looks
+// up is actually one an admin's save can reach — milbParkFields() in
+// registry.js derives the exact same venueKey(rawFeedName) scheme this module
+// falls back to for an uncatalogued park, and the two are free to drift apart
+// silently (neither imports the other). If they ever did, a MiLB owner's
+// upload would keep "succeeding" while the slate card quietly never showed it.
+test('a real MiLB park (off the generated list) has a registry id for the backdrop to find', () => {
+  const ids = fieldIds(venueKey('Louisville Slugger Field'))
+  assert.ok(FIELD_IDS.includes(ids.photo), `${ids.photo} is a real registry field`)
+  assert.ok(FIELD_IDS.includes(ids.focus), `${ids.focus} is a real registry field`)
 })
