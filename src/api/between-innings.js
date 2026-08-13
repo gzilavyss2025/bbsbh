@@ -8,6 +8,14 @@
 // leadAfterLive/tiedAfterLive/bothScoreless/scorelessThrough are excluded on
 // purpose — they restate tonight's already-revealed score, and this surface
 // holds a stricter bar than ADR-0014's general pre-half clearance.
+//
+// marginNotes flows in whole, index 0 included — this is the same pool
+// MarginNotes.jsx digests in full under the Arms tab, where every note past
+// index 0 already appears twice (Arms tab + this card set). Index 0 used to
+// be dropped here so it would not repeat inside the console band, which also
+// promoted it as a standalone one-liner under HalfTally's grid; now that the
+// grid IS the card's resting state and the one-liner is gone
+// (BetweenInnings.jsx), index 0 is no longer a special case.
 
 import { halfIndex } from './select.js'
 import {
@@ -44,8 +52,6 @@ export function buildBetweenInnings({
 }) {
   if (!bundle) return []
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
-  // Excluded below so the ConsoleBand one-liner (marginNotes[0]) never repeats as card 1.
-  const topNoteKey = marginNotes[0]?.dedupeKey ?? marginNotes[0]?.text ?? null
   const pool = [...marginNotes]
 
   const away = feed?.gameData?.probablePitchers?.away?.id
@@ -66,9 +72,7 @@ export function buildBetweenInnings({
   }
 
   // The hard allowlist — a structural filter, not implicit trust in the callers above.
-  const allowed = pool.filter(
-    (n) => n && BETWEEN_INNINGS_ALLOWED_KINDS.has(n.kind) && (n.dedupeKey ?? n.text) !== topNoteKey,
-  )
+  const allowed = pool.filter((n) => n && BETWEEN_INNINGS_ALLOWED_KINDS.has(n.kind))
 
   const byKey = new Map()
   const ordered = []

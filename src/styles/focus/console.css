@@ -309,24 +309,33 @@
   }
 }
 
-/* The one always-there sentence under the half's numbers — the highest-
-   scoring Margin Note, already reveal-gated by the caller. No card of its
-   own, matching the serif-italic idiom used elsewhere (e.g.
-   .logbooklanding__preview figcaption, 50-logbook-landing.css). */
-.halftally__note {
-  margin: 0;
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-read);
-  font-style: italic;
-  font-size: var(--fs-small);
-  line-height: var(--lh-prose);
-  color: var(--text-muted);
+/* BetweenInnings.jsx's grid state — HalfTally wrapped in a button, tappable
+   only once there is at least one fact to cycle to (an empty card set
+   returns the grid unwrapped, same as before this card existed at all). An
+   unstyled button: .halftally supplies the whole card's frame, this only
+   carries the tap affordance, same idiom as .betweeninnings below. */
+.halftally-tap {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.halftally-tap:active {
+  transform: scale(0.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .halftally-tap:active {
+    transform: none;
+  }
 }
 
-/* HalfTally + BetweenInnings stacked in one column — still one flex item on
-   .consolebar's row. The flex: 1 1 auto that used to sit on .halftally
-   directly moves here. */
+/* BetweenInnings.jsx's whole card — still one flex item on .consolebar's
+   row. The flex: 1 1 auto that used to sit on .halftally directly moves
+   here; the column shape stays even though the card is a single child now,
+   so its width/gap rules need no change if a sibling ever joins it again. */
 .consolebar__tallygroup {
   display: flex;
   flex-direction: column;
@@ -340,7 +349,8 @@
 }
 
 /* BetweenInnings.jsx — up to 5 tap-through facts, one at a time. Tapping past
-   the last one wraps to the first. */
+   the last one returns to HalfTally's grid (.halftally-tap above), not to
+   fact 1 — the grid is the card's resting state. */
 .betweeninnings {
   display: block;
   width: 100%;
@@ -415,6 +425,13 @@
   font-size: var(--fs-title-sm);
   line-height: var(--lh-snug);
   color: var(--text-heading);
+}
+/* `#root` prefix to beat `#root *`'s own specificity (01-base.css) — the
+   name line above (.betweeninnings__who) stays a structural label like any
+   other card heading and keeps the app's shouted convention, same split as
+   .marginnotes__text's own exemption (20-charts.css). */
+#root .betweeninnings__text {
+  text-transform: none; /* caps-exempt: a between-innings fact is a sentence, same idiom as .marginnotes__text */
 }
 
 /* ------------------------------------------------ the anchored console band

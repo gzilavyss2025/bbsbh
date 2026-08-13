@@ -1,6 +1,5 @@
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { DueUpConsole } from './DueUpConsole.jsx'
-import { HalfTally } from './HalfTally.jsx'
 import { BetweenInnings } from './BetweenInnings.jsx'
 import { ScorebugMount } from './ScorebugMount.jsx'
 
@@ -17,10 +16,10 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 // got there:
 //
 //  • STILL SCORING IT (sealed) -> `DueUpConsole`, the next three batters.
-//  • REVEALED -> `HalfTally` + `BetweenInnings` stacked in one
-//    `.consolebar__tallygroup` column — two cards, still one flex slot. Shows
-//    for ANY revealed half now, not only the one just watched close — see
-//    `showTally` below.
+//  • REVEALED -> `BetweenInnings`, one card in `.consolebar__tallygroup`
+//    that cycles on tap between the half's tally grid (its resting state)
+//    and its score-free facts. Shows for ANY revealed half now, not only
+//    the one just watched close — see `showTally` below.
 //  • NEITHER -> nothing, and that is now open paper rather than a slab.
 //    `.gamehud--console:only-child` used to stretch the band across the row
 //    whenever it stood alone, which at 1280 drew a ~930px navy rectangle
@@ -85,9 +84,6 @@ export function ConsoleBand({
   // stand on (ADR-0001); it no longer needs `postHalf` to imply it.
   const showTally = viewIdx <= revealedThrough
 
-  // Highest-scoring Margin Note (buildMarginNotes is pre-sorted).
-  const topNote = marginNotes?.[0]?.text ?? null
-
   return (
     <div className="consolebar">
       <ScorebugMount
@@ -121,23 +117,14 @@ export function ConsoleBand({
       )}
       {showTally && (
         <div className="consolebar__tallygroup">
-          <HalfTally
-            feed={feed}
-            inning={viewInning}
-            half={viewHalf}
-            battingSide={viewHalf === 'top' ? 'away' : 'home'}
-            getDerived={getDerived}
-            phase={closePhase}
-            topNote={topNote}
-          />
-          {/* Half-keyed so its tap-through `idx` resets to 0 on every half
-              change. Harmless when `showTally` was only ever true for one
-              transient postHalf window (this component would unmount between
-              halves anyway) — but showTally now stays true across every
-              revealed half paged through via RollingLine, and ConsoleBand
-              itself never remounts on half change, so without this key a
-              browsed half would inherit whatever card index the reader left
-              the PREVIOUS revealed half showing. */}
+          {/* Half-keyed so the card's own idx (grid vs. which fact) resets to
+              0 on every half change. Harmless when `showTally` was only ever
+              true for one transient postHalf window (this component would
+              unmount between halves anyway) — but showTally now stays true
+              across every revealed half paged through via RollingLine, and
+              ConsoleBand itself never remounts on half change, so without
+              this key a browsed half would inherit whatever state the reader
+              left the PREVIOUS revealed half showing. */}
           <BetweenInnings
             key={`${viewInning}-${viewHalf}`}
             feed={feed}
@@ -148,6 +135,9 @@ export function ConsoleBand({
             revealedThrough={revealedThrough}
             workload={workload}
             gameDate={gameDate}
+            battingSide={viewHalf === 'top' ? 'away' : 'home'}
+            getDerived={getDerived}
+            phase={closePhase}
           />
         </div>
       )}
