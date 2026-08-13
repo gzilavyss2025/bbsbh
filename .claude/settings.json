@@ -41,6 +41,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-large-generated-read.mjs\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/spoiler-review-reminder.mjs\""
+          }
+        ]
       }
     ],
     "PostToolUse": [
