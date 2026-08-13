@@ -1,7 +1,10 @@
 /* ----------------------------------------------- focus mode: the console row */
 /* The top of the scorer's console (ADR-0043): the placed scorebug band, and the
-   ONE companion card that spends the width beside it — DueUpConsole while the
-   half is being scored, HalfTally once it is over (ConsoleBand.jsx picks).
+   ONE companion slot that spends the width beside it — DueUpConsole while the
+   half is being scored, or (once it is over) `.consolebar__tallygroup`, a
+   column stacking HalfTally with BetweenInnings (ConsoleBand.jsx picks). Two
+   cards, still one flex item on this row — see `.consolebar__tallygroup`
+   below `.halftally`.
 
    The fourth focus-mode partial, split out of focus/stage.css when the tally
    pushed that file past the 600-line cap. The seam is real rather than
@@ -306,12 +309,112 @@
   }
 }
 
+/* The one always-there sentence under the half's numbers — the highest-
+   scoring Margin Note, already reveal-gated by the caller. No card of its
+   own, matching the serif-italic idiom used elsewhere (e.g.
+   .logbooklanding__preview figcaption, 50-logbook-landing.css). */
+.halftally__note {
+  margin: 0;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+/* HalfTally + BetweenInnings stacked in one column — still one flex item on
+   .consolebar's row. The flex: 1 1 auto that used to sit on .halftally
+   directly moves here. */
+.consolebar__tallygroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
 @media (min-width: 740px) {
-  /* Beside the band rather than under it — it takes the width the 264px
-     scorebug leaves, the same slot DueUpConsole fills while the half is live. */
-  .halftally {
+  .consolebar__tallygroup {
     flex: 1 1 auto;
   }
+}
+
+/* BetweenInnings.jsx — up to 5 tap-through facts, one at a time. Tapping past
+   the last one wraps to the first. */
+.betweeninnings {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  padding: var(--space-3);
+  cursor: pointer;
+}
+.betweeninnings:active {
+  transform: scale(0.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .betweeninnings:active {
+    transform: none;
+  }
+}
+
+.betweeninnings__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+.betweeninnings__eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+.betweeninnings__progress {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* Avatar + text, same anatomy as MarginNotes.jsx's .marginnotes__card, one
+   rung up (--shot-md, tokens/layout.css) since this card holds one lone fact. */
+.betweeninnings__body {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.betweeninnings__avatar {
+  flex: none;
+  display: flex;
+}
+.shot.betweeninnings__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.betweeninnings__col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.betweeninnings__who {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.betweeninnings__text {
+  font-family: var(--font-read);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-snug);
+  color: var(--text-heading);
 }
 
 /* ------------------------------------------------ the anchored console band

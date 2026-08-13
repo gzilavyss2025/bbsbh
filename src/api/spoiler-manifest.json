@@ -84,6 +84,10 @@
       "class": "caller-gated",
       "why": "`lineupEntering` reports the batting order as a half begins, walking pre-pitch substitution events. Safe only for the half the user has reached (ADR-0003/0010)."
     },
+    "between-innings.js": {
+      "class": "caller-gated",
+      "why": "Focus mode's post-half card set (ConsoleBand.jsx/BetweenInnings.jsx) — up to 5 score-free facts, filtered through a hard kind allowlist that excludes every score-reading checkpoint family. Reads the batting side's previous halves' plays via the SAME caller-gated builders prehalf-callouts.js uses (foulVolume/pitchPace/tto/ttoPitches), computed for the half about to be entered next. This module owns that gate (halfIndex(next) <= revealedThrough + 1), same contract as prehalf-callouts.js."
+    },
     "boxscore/gameNotes.js": {
       "class": "reveal-only",
       "why": "The info block under the tables — HBP, WP, Balk, Pitches-strikes — and the rule filing each row under a club. Split out of boxscore.js; same footing, because these rows are read off a FINAL box score and several of them state an outcome outright. Runs only from inside `selectBoxscore`.",

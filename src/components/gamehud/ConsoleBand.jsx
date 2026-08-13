@@ -1,6 +1,7 @@
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { DueUpConsole } from './DueUpConsole.jsx'
 import { HalfTally } from './HalfTally.jsx'
+import { BetweenInnings } from './BetweenInnings.jsx'
 import { ScorebugMount } from './ScorebugMount.jsx'
 
 // Focus mode's console row (ADR-0043) — the whole top of the scorer's console,
@@ -14,7 +15,8 @@ import { ScorebugMount } from './ScorebugMount.jsx'
 // of where the reader is in the half:
 //
 //  • STILL SCORING IT -> `DueUpConsole`, the next three batters.
-//  • THE HALF IS OVER -> `HalfTally`, its line and pitch analysis.
+//  • THE HALF IS OVER -> `HalfTally` + `BetweenInnings` stacked in one
+//    `.consolebar__tallygroup` column — two cards, still one flex slot.
 //  • NEITHER -> nothing, and that is now open paper rather than a slab.
 //    `.gamehud--console:only-child` used to stretch the band across the row
 //    whenever it stood alone, which at 1280 drew a ~930px navy rectangle
@@ -53,6 +55,10 @@ export function ConsoleBand({
   steps,
   stepFrontierIdx,
   stepAtBatIndex,
+  bundle,
+  marginNotes,
+  workload,
+  gameDate,
 }) {
   const wide = useMediaQuery(WIDE_QUERY)
   // THE DUE-UP CARD'S TWO CONDITIONS, each shutting off a way it can lie or
@@ -81,6 +87,10 @@ export function ConsoleBand({
   // revealedThrough` is what `postHalf` already implies, stated because it is
   // the gate HalfTally's reveal-only reads actually stand on (ADR-0001).
   const showTally = postHalf && viewIdx <= revealedThrough
+
+  // Highest-scoring Margin Note (buildMarginNotes is pre-sorted).
+  const topNote = marginNotes?.[0]?.text ?? null
+
   return (
     <div className="consolebar">
       <ScorebugMount
@@ -114,14 +124,27 @@ export function ConsoleBand({
         />
       )}
       {showTally && (
-        <HalfTally
-          feed={feed}
-          inning={viewInning}
-          half={viewHalf}
-          battingSide={viewHalf === 'top' ? 'away' : 'home'}
-          getDerived={getDerived}
-          phase={closePhase}
-        />
+        <div className="consolebar__tallygroup">
+          <HalfTally
+            feed={feed}
+            inning={viewInning}
+            half={viewHalf}
+            battingSide={viewHalf === 'top' ? 'away' : 'home'}
+            getDerived={getDerived}
+            phase={closePhase}
+            topNote={topNote}
+          />
+          <BetweenInnings
+            feed={feed}
+            bundle={bundle}
+            marginNotes={marginNotes}
+            inning={viewInning}
+            half={viewHalf}
+            revealedThrough={revealedThrough}
+            workload={workload}
+            gameDate={gameDate}
+          />
+        </div>
       )}
     </div>
   )

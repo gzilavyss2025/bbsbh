@@ -884,6 +884,10 @@ export function InningViewer({
             steps={focus.steps}
             stepFrontierIdx={stepFrontierIdx}
             stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
+            bundle={callouts}
+            marginNotes={marginNotes}
+            workload={workload}
+            gameDate={workloadGameDate}
           />
         )}
 

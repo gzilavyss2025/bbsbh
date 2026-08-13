@@ -201,6 +201,30 @@
   animation-delay: calc(var(--tally-i, 0) * var(--tally-step, 90ms) + var(--animlab-delay, 0s));
 }
 
+/* BETWEEN INNINGS LAB (src/screens/BetweenInningsLab.jsx) — same section
+   shape as Animation Lab above, catalog rather than animation review. */
+.bilab__entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 16px 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+.bilab__entry:first-of-type {
+  border-top: none;
+}
+.bilab__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.bilab__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 320px;
+}
 
 /* ==== TEAM HUB: SHELL + TAB BAR ==== */
 /* The only new chrome the team-page IA rebuild introduces: the tab bar under
