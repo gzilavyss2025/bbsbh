@@ -49,11 +49,6 @@ const RevealCloudSync = isClerkEnabled
 // its own `noop` for the page-turn preview.
 const noopReveal = () => {}
 
-// The win-prob pair's stand-in while focus mode is on (see their comment) —
-// module-scope so the memoized InningPage sees one identity, not a fresh
-// empty array per render.
-const NO_WINPROB = []
-
 // Value-equality check for the scorebug's live snapshot (see `liveState`
 // below) — `entries` is rebuilt fresh every render in PlayByPlay.jsx, so a
 // composite object arrives with a new identity every render even when
@@ -367,14 +362,9 @@ export function InningViewer({
         inning={pageInning}
         half={pageHalf}
         meta={meta}
-        isMlb={isMlb}
         revealedThrough={renderRevealedThrough}
         onReveal={commitReveal}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
         callouts={callouts}
-        workload={workload}
-        workloadGameDate={workloadGameDate}
         vsTeam={vsTeam}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
@@ -384,11 +374,6 @@ export function InningViewer({
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
         onLiveState={reportLiveState}
-        getDerived={getDerived}
-        runExpectancy={runExpectancy}
-        winProbPoints={winProbPoints}
-        winProbBigPlays={winProbBigPlays}
-        winProbTreatment={winProbTreatment}
         presentationOnly={presentationOnly}
       />
     )
@@ -610,46 +595,45 @@ export function InningViewer({
   // half is revealed/stepped into in order, and at MiLB parks with no
   // win-prob feed — the chart then renders nothing.
   const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
-  // A primitive for the two memos below — the React-Compiler dry-run lint
-  // can't see that a property of the per-render `focus` object is stable.
+  // BUILT FOR EVERY HALF NOW — the reference panel's ARMS tab renders
+  // WinProbChart unconditionally (it used to be skipped entirely while
+  // focused, InningPage's old `!focusOne` gate, since the chart was never
+  // built at all — #686's "don't build what folds" argument). That argument
+  // no longer applies: the chart is always on screen somewhere now, so
+  // there's nothing left to build for nobody to see. The step-clamped path
+  // below (`stepFrontierIdx` non-null) is consequently exercised on every
+  // "Next at-bat" tap for the first time since that gate shipped — see this
+  // refactor's spoiler-safety verification notes on `api/winprob.js`'s own
+  // independent `stepHalfIndex === throughHalf + 1` enforcement, the second
+  // layer this doesn't rely on alone.
   //
-  // TEMPORARY, PENDING COMMIT 2: this still skips computing the win-prob pair
-  // whenever `windowed`, same as the old `focused`-keyed skip. Commit 2 moves
-  // the chart into the reference panel's ARMS tab for every half and removes
-  // this skip entirely — see that commit's spoiler-safety verification
-  // section before touching this.
-  const inFocusLayout = focus.windowed
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbPoints = useMemo(
     () =>
-      inFocusLayout
-        ? NO_WINPROB
-        : selectWinProbPath(winProbability, {
-            throughHalf: renderRevealedThrough,
-            stepHalfIndex: stepFrontierIdx,
-            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-          }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
+      selectWinProbPath(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
   // The biggest-swing ledger — same reveal-only selector, same clamp
   // (committed halves plus the in-progress step), so it only ever covers
   // plays already on screen and grows one entry at a time right along with
-  // the chart above (never hinting what's ahead). Same focus-mode skip too.
+  // the chart above (never hinting what's ahead).
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbBigPlays = useMemo(
     () =>
-      inFocusLayout
-        ? NO_WINPROB
-        : selectWinProbBigPlays(winProbability, {
-            throughHalf: renderRevealedThrough,
-            stepHalfIndex: stepFrontierIdx,
-            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-          }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
+      selectWinProbBigPlays(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
 
   // Every pitcher who has appeared in a revealed half-inning, with running
@@ -733,6 +717,10 @@ export function InningViewer({
     managers,
     uniforms,
     scorebookWeather,
+    getDerived,
+    runExpectancy,
+    winProbPoints,
+    winProbBigPlays,
   }
 
   return (

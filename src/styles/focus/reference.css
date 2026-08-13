@@ -340,6 +340,43 @@
   font-size: var(--fs-caption);
 }
 
+/* The stat/WPA row that used to be InningPage.jsx's `.innings__row2`, moved
+   into the ARMS tab so it renders for every half instead of being skipped
+   entirely while windowed. Same narrow-rail treatment as the Pitchers table
+   above: the components themselves are unchanged, only their track is
+   narrower than the ~380px column they were built for.
+
+   StatBox's own `.statline` is a fixed 4-across grid sized for that wider
+   column — eight cells (R H E LOB + four pitch counts) at 74px each in a
+   300px rail is half what even a phone gives them, so the rail goes 2-across
+   instead. The worst-call diagram (`.wcall__body`) is a 124px + 1fr grid
+   that leaves ~150px for prose at 300px — workable but not worth the risk of
+   mid-word wrapping a scorer is reading at a glance, so it stacks instead,
+   the same single-column cancellation `.innings__statbox`'s own wide-layout
+   override already applies to the umpire-favor row for the identical reason
+   (12-sealbox.css: "the innings view's stat card shares its row with the
+   win-probability column"). The Statcast superlatives row
+   (`.halfcast`, three-across from 740px up in 12-sealbox.css) reverts to a
+   column with a horizontal divider in place of the wide layout's vertical
+   one, for the same reason. */
+.focusrail .statline {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.focusrail .wcall__body {
+  grid-template-columns: 1fr;
+}
+
+.focusrail .halfcast {
+  display: flex;
+  flex-direction: column;
+}
+
+.focusrail .halfcast__row + .halfcast__row {
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-left: none;
+}
+
 /* A section with genuinely nothing in it yet (ReferencePanel's `armsEmpty`) — a
    caption on paper, so the column reads as "nothing here yet" rather than as a
    panel that failed to load. */
