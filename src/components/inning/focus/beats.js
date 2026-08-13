@@ -1,6 +1,7 @@
 // FOCUS MODE'S BEATS — every timing the scoring loop's punctuation runs on, as
 // literal numbers in one file, plus the one predicate that decides whether the
-// game's last rule is a double one.
+// bar's last action is named as an act ("Close the book") or a destination
+// ("Box score").
 //
 // ===========================================================================
 // THE RULE THIS FILE EXISTS TO ENFORCE (ADR-0046)
@@ -32,9 +33,8 @@
 // Every number here is meant to be felt and adjusted. They are the single
 // source of truth for BOTH halves of each beat: the JS timers read them
 // directly, and the CSS reads them through inline custom properties the
-// components set (`--ink-set`, `--ink-overshoot`, `--close-draw`,
-// `--close-step`), so there is no second copy in a stylesheet to drift out of
-// step with these.
+// components set (`--ink-set`, `--ink-overshoot`, `--tally-step`), so there is
+// no second copy in a stylesheet to drift out of step with these.
 
 // (1) THE BEAT — the hold between an at-bat card arriving and its scorebook
 // denotation printing. The pitch ladder and the batter's name are up for this
@@ -58,41 +58,46 @@ export const DENOTATION_HOLD_MS = 180
 export const INK_SET_MS = 220
 export const INK_SET_OVERSHOOT = 1.25
 
-// (2) THE RULE — the hairline drawing itself left to right across the stage
-// when the half commits.
-export const RULE_DRAW_MS = 420
-
-// …then the half's R / H / E / LOB inking in behind it, one figure at a time.
+// (2) THE TALLY — the half commits, and its console-band card (HalfTally.jsx)
+// is what marks it: the card's eight cells ink in one at a time instead of
+// just appearing. This USED to be a separate hairline-plus-four-figures
+// display of its own (HalfClose.jsx/HalfCloseRule.jsx, ADR-0046) drawn under
+// the at-bat card — retired because it repeated four of the eight numbers the
+// console band already prints a beat later, in a second place, in a second
+// type treatment. The ink now lands on the numbers that were already going to
+// be there.
 export const TALLY_STAGGER_MS = 90
 
-// Four figures: R, H, E, LOB. Named rather than typed as a bare 4 below,
-// because CLOSE_SEQUENCE_MS and HalfCloseRule's own list have to agree about
-// it or the sequence ends before its last figure is in.
-export const TALLY_FIGURE_COUNT = 4
+// Eight cells: R, H, E, LOB, Pitches, Whiffs, Fouls, 1st-pitch strikes — the
+// grid HalfTally.jsx draws. Named rather than typed as a bare 8 below, because
+// CLOSE_SEQUENCE_MS and HalfTally's own cell count have to agree about it or
+// the sequence ends before its last cell is in.
+export const TALLY_CELL_COUNT = 8
 
-// The whole close, end to end: the rule draws, then the last figure starts one
-// stagger after the second-to-last. The forward action on the bar is held for
-// exactly this long (or until any tap cuts it short) and no longer.
-export const CLOSE_SEQUENCE_MS = RULE_DRAW_MS + (TALLY_FIGURE_COUNT - 1) * TALLY_STAGGER_MS
+// The whole close, end to end: the last cell starts one stagger after the
+// second-to-last. The forward action on the bar is held for exactly this long
+// (or until any tap cuts it short) and no longer.
+export const CLOSE_SEQUENCE_MS = (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS
 
-// (3) THE DOUBLE RULE — whether the book is closed: the reader has revealed
+// (3) THE BOOK CLOSING — whether the book is closed: the reader has revealed
 // every half that was actually played.
 //
-// THE ARGUMENT KEYS ON THE READER'S OWN MARK, NEVER ON `selectIsFinal`. A rule
-// that thickened because the FEED says the game is over would, at the bottom
-// of the 9th, be answering the one question the reader has not asked yet — is
-// there a 10th? `finalHalfIndex` is null until the game ends and is the index
-// of the last half actually played once it does (selectFinalHalfIndex), so
-// this can only return true after the reader has themselves revealed that
-// half. A game headed for extras keeps drawing the ordinary single rule at the
-// bottom of the 9th, exactly as a game headed for a 10th-inning walk-off does,
-// because at that moment `revealedThrough` (17) has not reached
-// `finalHalfIndex` (19 or 21) and the two are indistinguishable from here.
+// THE ARGUMENT KEYS ON THE READER'S OWN MARK, NEVER ON `selectIsFinal`. A
+// label that changed because the FEED says the game is over would, at the
+// bottom of the 9th, be answering the one question the reader has not asked
+// yet — is there a 10th? `finalHalfIndex` is null until the game ends and is
+// the index of the last half actually played once it does
+// (selectFinalHalfIndex), so this can only return true after the reader has
+// themselves revealed that half. A game headed for extras keeps naming the
+// action "Box score" at the bottom of the 9th, exactly as a game headed for a
+// 10th-inning walk-off does, because at that moment `revealedThrough` (17)
+// has not reached `finalHalfIndex` (19 or 21) and the two are
+// indistinguishable from here.
 //
 // Pure and unit-tested (`test/scoring-beats.test.js`) rather than inlined at
 // the call site, because the inequality is the whole spoiler argument and a
-// `>` typed as `===` would quietly stop drawing the double rule on every game
-// that ended on a skipped bottom half.
+// `>` typed as `===` would quietly relabel the button on every game that
+// ended on a skipped bottom half.
 export function bookIsClosed(revealedThrough, finalHalfIndex) {
   if (!Number.isInteger(finalHalfIndex)) return false
   if (!Number.isInteger(revealedThrough)) return false

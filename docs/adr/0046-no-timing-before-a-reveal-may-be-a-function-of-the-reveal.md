@@ -156,3 +156,39 @@ figures are simply there, and the forward action is live at once.
   boilerplate. Anything that genuinely needs feed data to decide a duration has
   to argue past this ADR first, and the honest version of that argument is
   almost always "and it runs after the mark is up."
+
+## Amendment (2026-08-13): the rule is gone; the tally is what inks in
+
+The repetition flagged above in Consequences was real on real hardware, and it
+resolved the other way from the fallback that paragraph named. Dropping R/H/E/LOB
+from `HalfTally` would have kept a rule punctuating a card the reader's eye
+wasn't on yet — the console band, not the stage, is where a scorer's eye lands
+once a half ends, because it's where the numbers that answer "what do I write
+down" already live (ADR-0043). A hairline drawn a beat earlier, under a card
+about to be replaced by the trail's next cell, was punctuating the wrong
+sentence.
+
+**`HalfClose.jsx`/`HalfCloseRule.jsx` are deleted.** In their place, `HalfTally`
+itself inks in: its eight cells — not just the four the rule drew — arrive one
+at a time, 90ms apart (`TALLY_STAGGER_MS`, unchanged), the moment the card
+mounts on `postHalf`. No hairline; the card's own appearance (replacing
+`DueUpConsole` in the console band, ADR-0043) is already the boundary marker a
+drawn rule existed to add. `CLOSE_SEQUENCE_MS` drops its `RULE_DRAW_MS` term —
+there is no draw to lead with — and now covers eight cells instead of four:
+`(TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS`, 630ms.
+
+Sections 1 and 3 above (the hold, the book-closing predicate) are unchanged —
+this amends section 2 alone, and every argument in it still applies to the
+replacement: the ink-in is mounted on `postHalf`, the commit itself, and reads
+nothing from the half before printing it (`HalfTally`'s reveal-only footing,
+unchanged from before this amendment). `bookIsClosed` still decides the bar's
+"Close the book" vs "Box score" label; only the **drawn** double rule that used
+to ride alongside it is gone, and the label alone carries that signal now — it
+already did, independently, before this amendment (Decision 3 above).
+
+`Stat` (`StatBox.jsx`) gained an optional `style` prop so `HalfTally` can set
+each cell's `--tally-i`; `StatBox`'s own cells pass nothing and are unaffected.
+The reduced-motion argument in "Reduced motion" above is unchanged in kind: the
+ink-in's `animation-delay` still needs its own kill (`--tally-step` in place of
+`--close-step`), for the same reason a blanket duration-collapse doesn't touch
+a delay.

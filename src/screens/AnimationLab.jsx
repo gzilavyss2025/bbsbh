@@ -4,9 +4,8 @@ import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { PostponedBanner } from '../components/game/GameCard.jsx'
-import { CountBlink } from '../components/gamehud/StatBox.jsx'
-import { HalfCloseRule } from '../components/inning/focus/HalfCloseRule.jsx'
-import { INK_SET_MS, INK_SET_OVERSHOOT } from '../components/inning/focus/beats.js'
+import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
+import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -139,31 +138,24 @@ export function AnimationLab() {
       </section>
 
       <section className="animlab__entry">
-        <h2 className="animlab__title">Focus mode — the half-close rule</h2>
+        <h2 className="animlab__title">Focus mode — the half-close tally</h2>
         <p className="hint hint--prose">
-          Focus mode&rsquo;s punctuation for a half that has just committed
-          (src/components/inning/focus/HalfCloseRule.jsx, ADR-0046) &mdash; a hairline draws
-          itself left to right over 420ms, then the half&rsquo;s R / H / E / LOB ink in behind
-          it, 90ms apart. Made-up figures; this page never reads a game.
+          The console band&rsquo;s finished-half tally
+          (src/components/gamehud/HalfTally.jsx, ADR-0046) &mdash; the half committed, so
+          its eight cells ink in one at a time, 90ms apart, instead of a separate
+          hairline-and-figures display drawn under the at-bat card (this entry&rsquo;s
+          old demo). Made-up figures; this page never reads a game.
         </p>
         <div className="animlab__live">
-          <HalfCloseRule phase="running" figures={CLOSE_FIGURES} />
-        </div>
-        <span className="animlab__stagelabel">Single rule, the whole ~700ms sequence</span>
-        <div className="animlab__frozen">
-          {[0, 210, 420, 510, 600, 690].map((ms) => (
-            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
-              <HalfCloseRule phase="running" figures={CLOSE_FIGURES} />
-            </Frame>
-          ))}
+          <TallyCloseDemo />
         </div>
         <span className="animlab__stagelabel">
-          Double rule &mdash; the book is closed (the reader&rsquo;s mark reached the last half played)
+          The whole ~{CLOSE_SEQUENCE_MS}ms sequence
         </span>
         <div className="animlab__frozen">
-          {[0, 210, 420, 690].map((ms) => (
-            <Frame key={`d-${ms}`} label={`${ms}ms`} delayMs={ms}>
-              <HalfCloseRule phase="running" doubleRule figures={CLOSE_FIGURES} />
+          {[0, 90, 270, 450, 630, 720].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <TallyCloseDemo />
             </Frame>
           ))}
         </div>
@@ -194,13 +186,36 @@ export function AnimationLab() {
   )
 }
 
-// A plausible half's line, invented. Same four keys HalfClose.jsx passes.
-const CLOSE_FIGURES = [
-  { k: 'R', v: 2 },
+// A plausible half's line, invented. Same eight cells HalfTally.jsx draws.
+const TALLY_CELLS = [
+  { k: 'R', v: 2, tone: 'run' },
   { k: 'H', v: 3 },
   { k: 'E', v: 0 },
   { k: 'LOB', v: 1 },
+  { k: 'Pitches', v: 18 },
+  { k: 'Whiffs', v: 4 },
+  { k: 'Fouls', v: 3 },
+  { k: '1st-pitch strikes', v: '3/5' },
 ]
+
+// The real `.statline--console` grid wearing the real `.statline--closing`
+// class and `--tally-i`/`--tally-step` custom properties HalfTally.jsx sets,
+// at the made-up line above — not a copy of the keyframe, the same recipe
+// that file uses, minus the feed read (`Stat` itself never touches one).
+function TallyCloseDemo() {
+  return (
+    <div className="halftally">
+      <div
+        className="statline statline--console statline--closing"
+        style={{ '--tally-step': `${TALLY_STAGGER_MS}ms` }}
+      >
+        {TALLY_CELLS.map((c, i) => (
+          <Stat key={c.k} k={c.k} v={c.v} tone={c.tone} style={{ '--tally-i': i }} />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 // The real `.pbp__code` mark wearing the real `--ink` class, at the hero size
 // focus mode gives it — not a copy of the keyframe. `--ink-set` is set on

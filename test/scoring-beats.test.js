@@ -12,7 +12,7 @@
 // which means no value in it can be derived from one, which means every
 // duration in the app's scoring loop is a literal a human typed. The rest of
 // the tests pin the arithmetic those literals feed and the one predicate that
-// decides whether the game's last rule is a double one.
+// decides whether the bar's last action is named as an act or a destination.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -20,8 +20,7 @@ import {
   CLOSE_SEQUENCE_MS,
   DENOTATION_HOLD_MS,
   INK_SET_MS,
-  RULE_DRAW_MS,
-  TALLY_FIGURE_COUNT,
+  TALLY_CELL_COUNT,
   TALLY_STAGGER_MS,
   bookIsClosed,
 } from '../src/components/inning/focus/beats.js'
@@ -48,7 +47,6 @@ test('every beat is a plain positive number', () => {
   for (const [name, value] of Object.entries({
     DENOTATION_HOLD_MS,
     INK_SET_MS,
-    RULE_DRAW_MS,
     TALLY_STAGGER_MS,
     CLOSE_SEQUENCE_MS,
   })) {
@@ -57,12 +55,16 @@ test('every beat is a plain positive number', () => {
   }
 })
 
-test('the close sequence lasts exactly as long as the rule plus its stagger', () => {
+test('the close sequence lasts exactly as long as the tally cells take to ink in', () => {
   // The bar's forward action is held for CLOSE_SEQUENCE_MS. If this drifts
-  // shorter than the animation it is covering, the last figure inks in after
+  // shorter than the animation it is covering, the last cell inks in after
   // the reader can already page away from it.
-  assert.equal(CLOSE_SEQUENCE_MS, RULE_DRAW_MS + (TALLY_FIGURE_COUNT - 1) * TALLY_STAGGER_MS)
-  assert.equal(TALLY_FIGURE_COUNT, 4, 'R / H / E / LOB — HalfClose.jsx renders exactly four')
+  assert.equal(CLOSE_SEQUENCE_MS, (TALLY_CELL_COUNT - 1) * TALLY_STAGGER_MS)
+  assert.equal(
+    TALLY_CELL_COUNT,
+    8,
+    'R, H, E, LOB, Pitches, Whiffs, Fouls, 1st-pitch strikes — HalfTally.jsx draws exactly eight',
+  )
 })
 
 test('the book is closed once the reveal mark reaches the last half played', () => {
@@ -81,11 +83,11 @@ test('a game whose bottom half was never played still closes the book', () => {
   assert.equal(bookIsClosed(17, 16), true)
 })
 
-test('a game still headed for extras draws no double rule at the bottom of the 9th', () => {
+test('a game still headed for extras keeps the ordinary "Box score" label at the bottom of the 9th', () => {
   // THE SPOILER CASE. The reader has just revealed the bottom of the 9th (17)
-  // of a game that in fact ran to the bottom of the 10th (19). If the rule
-  // thickened here, its thickness would answer "is there a 10th?" — the exact
-  // question the reader has not asked yet.
+  // of a game that in fact ran to the bottom of the 10th (19). If the label
+  // changed here, it would answer "is there a 10th?" — the exact question the
+  // reader has not asked yet.
   assert.equal(bookIsClosed(17, 19), false)
   // And a game that went to the 11th is indistinguishable from it at 17.
   assert.equal(bookIsClosed(17, 21), false)
@@ -93,7 +95,7 @@ test('a game still headed for extras draws no double rule at the bottom of the 9
 
 test('a live game never closes the book, at any reveal mark', () => {
   // selectFinalHalfIndex returns null until the game is over, so this is the
-  // whole of a live game's behaviour: single rule, always.
+  // whole of a live game's behaviour: "Box score", always.
   assert.equal(bookIsClosed(0, null), false)
   assert.equal(bookIsClosed(17, null), false)
   assert.equal(bookIsClosed(999, undefined), false)

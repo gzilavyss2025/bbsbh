@@ -21,8 +21,7 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
 import { RollingLine } from '../components/gamehud/RollingLine.jsx'
 import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
-import { FocusControls, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
-import { HalfClose } from '../components/inning/focus/HalfClose.jsx'
+import { FocusControls, FocusTrail, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
 import { InningActionBar } from '../components/inning/InningActionBar.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
@@ -188,7 +187,7 @@ export function InningViewer({
   // and drop it from the index instead of adding it back.
   // The half-index of the last half actually played, null until the game ends.
   // Two consumers, one call: the cloud scorebook index below, and focus mode's
-  // double rule (`bookClosed`, further down).
+  // action-bar label (`bookClosed`, further down).
   const finalHalfIndex = useMemo(() => selectFinalHalfIndex(feed), [feed])
 
   const gameSnapshot = useMemo(() => {
@@ -881,6 +880,7 @@ export function InningViewer({
             viewHalf={effHalf}
             getDerived={getDerived}
             postHalf={focus.postHalf}
+            closePhase={focus.closePhase}
             steps={focus.steps}
             stepFrontierIdx={stepFrontierIdx}
             stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
@@ -907,6 +907,19 @@ export function InningViewer({
               reading order changes. */}
           {!focus.focused && rollingLine}
 
+          {/* THE TRAIL, ABOVE THE HERO NOW (amends ADR-0043's "a wrapping
+              trail directly beneath it"). Every at-bat already revealed this
+              half is what shows the half BUILDING — the point of watching it
+              live rather than reading it after — and under the card, a fresh
+              cell landed below the fold the reader's eyes were already on.
+              Above it, the newest cell lands right next to the card it
+              describes, in the reader's normal top-to-bottom scan, the same
+              motion that already carries the ink-in below (see HalfTally.jsx,
+              ADR-0046). The post-half "See the whole half" link stays where it
+              was — under the card, by the bar it hands off to — so only the
+              trail itself moved; `FocusControls` below still owns that link. */}
+          <FocusTrail focus={focus} turning={turning} />
+
           {/* The half's play-by-play (paired with its strike zone on the wide
               layout) plus the R/H/E/LOB + pitch-stat/WPA row beneath it — see
               InningPage.jsx. InningPageTurn owns the active render (key on
@@ -921,27 +934,6 @@ export function InningViewer({
             onCommit={goTo}
             onStatusChange={setTurnStatus}
           />
-
-          {/* THE RULE (ADR-0046) — the half closed, so the stage gets closed:
-              a hairline drawn across the full width with the half's R/H/E/LOB
-              inking in behind it. Under the at-bat card, where a scorer draws
-              the line on paper, and above the trail, which is untouched.
-
-              MOUNTED ON `postHalf`, WHICH IS THE COMMIT — so it can never
-              appear on a half still being stepped. `curIdx <=
-              renderRevealedThrough` is what postHalf already implies, stated
-              because it is the gate HalfClose's reveal-only read stands on
-              (ADR-0001), same as ConsoleBand states it for HalfTally. */}
-          {focus.postHalf && curIdx <= renderRevealedThrough && (
-            <HalfClose
-              feed={feed}
-              inning={effInning}
-              half={effHalf}
-              battingSide={effHalf === 'top' ? 'away' : 'home'}
-              phase={focus.closePhase}
-              doubleRule={bookClosed}
-            />
-          )}
 
           <FocusControls focus={focus} turning={turning} />
 

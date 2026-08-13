@@ -204,6 +204,15 @@ export function useFocusMode(curIdx, currentSealed) {
 // note on `items`). Takes the aria-disabled mid-turn guard every other
 // control on this page uses — paging resizes .turnscene, which
 // InningPageTurn answers by snapping a turn in flight.
+// Split from `FocusControls` below (which now holds only the post-half
+// summary link) because the trail moved to the TOP of the stage, above the
+// hero card — amending ADR-0043's "a wrapping trail directly beneath it" — so
+// the reader watches the half's cards accumulate right next to the one
+// they're reading, rather than scrolling past the hero to see them (see
+// InningViewer.jsx's call site for the full argument). The summary link stays
+// where ADR-0043's later amendment put it, under the card, so only this half
+// of the old combined component needed a new home.
+//
 // Renders AtBatTrail directly, with no wrapper element of its own. There used
 // to be a bare <div onKeyDown> here holding the arrow-key handling; it had no
 // role, no tabIndex and no class, it could only ever receive those keys by
@@ -211,41 +220,39 @@ export function useFocusMode(curIdx, currentSealed) {
 // `display: contents` on a phone — it landed in .innings__grid as an
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
-export function FocusControls({ focus, turning }) {
-  const { focused, postHalf, openSummary, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
-  // The summary link renders even when the trail doesn't (a one-batter
-  // walk-off half has no trail to draw), so the gate is "nothing here at all"
-  // rather than the trail's own `total <= 1`.
-  if (!focused || (total <= 1 && !postHalf)) return null
+export function FocusTrail({ focus, turning }) {
+  const { focused, cursor, steps: total, items, step, stepBack, stepNext, goToStep, followLatest } = focus
+  if (!focused || total <= 1) return null
   return (
-    <>
-      {total > 1 && (
-        <AtBatTrail
-          items={items}
-          cursor={cursor}
-          following={step == null}
-          onSelect={goToStep}
-          onStepBack={stepBack}
-          onStepNext={stepNext}
-          onFollowLatest={followLatest}
-          turning={turning}
-        />
-      )}
-      {/* Post-half only: drop this half out of the focus layout and show it
-          laid out whole — the ordinary revealed page, in place. A paper pill
-          in the trail's own control recipe, NOT a second button on the action
-          bar (see useFocusMode's summary note for the #685 history). It
-          disappears with the layout it changes; navigating resets. */}
-      {postHalf && (
-        <button
-          type="button"
-          className="trailstrip__summarybtn"
-          aria-disabled={turning || undefined}
-          onClick={openSummary}
-        >
-          See the whole half
-        </button>
-      )}
-    </>
+    <AtBatTrail
+      items={items}
+      cursor={cursor}
+      following={step == null}
+      onSelect={goToStep}
+      onStepBack={stepBack}
+      onStepNext={stepNext}
+      onFollowLatest={followLatest}
+      turning={turning}
+    />
+  )
+}
+
+// The post-half-only "See the whole half" link (see useFocusMode's summary
+// note for the #685/ADR-0043 history it answers). The trail that used to sit
+// beside it here is `FocusTrail` above now, rendered above the hero card
+// instead of below it — this component keeps the name because it is still
+// where InningViewer reaches for "the controls under the card."
+export function FocusControls({ focus, turning }) {
+  const { focused, postHalf, openSummary } = focus
+  if (!focused || !postHalf) return null
+  return (
+    <button
+      type="button"
+      className="trailstrip__summarybtn"
+      aria-disabled={turning || undefined}
+      onClick={openSummary}
+    >
+      See the whole half
+    </button>
   )
 }

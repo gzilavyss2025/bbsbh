@@ -538,7 +538,12 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
             {codeKind !== 'out' && codeKind !== 'interrupted' && code && (
               <span className={`pbp__code pbp__code--${codeKind}${beat}`}>
                 {code}
-                {focusHeader && rbi > 0 && <span className="pbp__code__rbi"> {rbi} RBI</span>}
+                {focusHeader && rbi > 0 && (
+                  <span className="pbp__code__rbi">
+                    {rbi}
+                    <span className="pbp__code__rbi-unit"> RBI</span>
+                  </span>
+                )}
               </span>
             )}
             <PlayDiamond
@@ -560,7 +565,12 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
                 code && (
                   <span className={`pbp__code pbp__code--center pbp__code--out${beat}`}>
                     {code}
-                    {focusHeader && rbi > 0 && <span className="pbp__code__rbi"> {rbi} RBI</span>}
+                    {focusHeader && rbi > 0 && (
+                  <span className="pbp__code__rbi">
+                    {rbi}
+                    <span className="pbp__code__rbi-unit"> RBI</span>
+                  </span>
+                )}
                   </span>
                 )
               ))}

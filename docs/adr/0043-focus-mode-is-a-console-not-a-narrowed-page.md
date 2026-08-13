@@ -317,3 +317,34 @@ screen's floating bar to `components/inning/InningActionBar.jsx`. The bar's
 three states, its always-present Refresh and the hit-area reasoning
 (`e2e/reveal-hit-area.spec.js`) all moved with it and now live in that file's
 header rather than in a 40-line comment inside `InningViewer.jsx`.
+
+## Amendment (2026-08-13): the trail moves above the hero, and the rule it used to sit under is gone
+
+Decision's opening line called for "a **wrapping** trail directly beneath" the
+hero card. That placement read the trail as a navigator for the card above
+it — reach a past at-bat, return to the live one — which is what it was built
+for. It is also, every time a half is being scored, the thing that SHOWS the
+half accumulating: a new cell lands in it on every step. Beneath the card, that
+growth happened below the fold the reader's eyes were already on, an inning at
+a time, for the one surface in the app built to be watched live rather than
+read after. Above the card, the newest cell lands where the reader's eyes are
+about to go next, in the ordinary top-to-bottom reading order the rest of the
+stage already uses.
+
+`FocusControls.jsx` split in two on the move: `FocusTrail` renders the trail
+alone, now called ahead of `InningPageTurn` in `InningViewer.jsx`'s stage;
+`FocusControls` keeps only the post-half "See the whole half" link (the
+previous amendment), which stays under the card, by the bar it hands off to.
+Nothing about EITHER control's own behavior changed — this moved one component
+in the JSX tree, not the state behind it, and the arrow-key handling, the
+wrap-never-scroll rule and the trail cells' own styling (`reference.css`) are
+all untouched.
+
+This also removes the one thing that used to sit between the card and the
+trail: the closing rule (`HalfClose.jsx`, ADR-0046) drew a hairline directly
+under the card, "above the trail, which is untouched" in that ADR's own words.
+ADR-0046's own amendment retires that rule in favor of an ink-in on the console
+band's tally card instead — read it for that half of the change. Between the
+two amendments, nothing draws between the card and the trail any more; the
+trail is the thing directly above the card now, exactly where the reader is
+about to look after reading it.

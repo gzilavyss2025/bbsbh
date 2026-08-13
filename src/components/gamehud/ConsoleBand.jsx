@@ -49,6 +49,7 @@ export function ConsoleBand({
   viewHalf,
   getDerived,
   postHalf,
+  closePhase,
   steps,
   stepFrontierIdx,
   stepAtBatIndex,
@@ -119,6 +120,7 @@ export function ConsoleBand({
           half={viewHalf}
           battingSide={viewHalf === 'top' ? 'away' : 'home'}
           getDerived={getDerived}
+          phase={closePhase}
         />
       )}
     </div>
