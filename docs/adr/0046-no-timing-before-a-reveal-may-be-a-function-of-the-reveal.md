@@ -192,3 +192,38 @@ The reduced-motion argument in "Reduced motion" above is unchanged in kind: the
 ink-in's `animation-delay` still needs its own kill (`--tally-step` in place of
 `--close-step`), for the same reason a blanket duration-collapse doesn't touch
 a delay.
+
+## Amendment (2026-08-13): the beat's `active` means "windowed" now; a batch mount is silent, not a violation
+
+The unify-the-innings-viewer change (ADR-0043's own amendment of the same date)
+gives every half console chrome, live or historical, and splits what used to
+be one flag (`focusOne`) into card identity (unconditional now) and
+**windowed** — whether the play-by-play shows one step or the whole half
+stacked. Two things here that follow from it, both restatements of Section 1's
+own rule rather than exceptions to it:
+
+**The hold's `active` argument is `windowed`, not "focus mode is on."**
+`useDenotationBeat(windowed, beatKey)` — a stacked mount (a batch of already-
+revealed cards landing at once, from a direct navigation or "See the whole
+half") renders every card pre-inked, no hold, no flash. This is not a new
+rule: `active` always meant "is there a reveal boundary this hold is timed
+against," and a stacked half has none — every card on it is already past its
+own reveal, by however long the reader took to get there. The rule this
+section states — no timing before a reveal may be a function of the reveal —
+has nothing to say about a mount with no reveal happening at all.
+
+**`HalfTally`'s own mount condition no longer keys on `postHalf`, and the
+ink-in follows it correctly with no further change needed.** Section 2 above
+described the ink-in firing "the moment the card mounts on `postHalf`" — still
+true for the half you're actively closing, but `showTally` widened to
+`idx <= revealedThrough` (ConsoleBand.jsx), so the SAME card also mounts for a
+half reached by direct navigation or the half-inning navigator. `HalfTally`'s
+`phase` prop is still `useFocusMode`'s `closePhase`, which only ever leaves
+`'idle'` via the `postHalf && closePhase === 'idle'` transition — a half that
+was never `postHalf` this visit never sets `closing` (`phase === 'running'`),
+so `.statline--closing` and its stagger never apply and the card renders
+fully inked on its first frame, the same way reduced motion already renders
+the `postHalf` case. No code changed to produce this; the existing gate
+already answered the new case correctly, because a page load was never a
+reveal for it to time in the first place. `bookIsClosed`/the bar's label
+(Section 3) are unaffected either way — that predicate was never about timing.
