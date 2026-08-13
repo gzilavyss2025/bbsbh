@@ -25,8 +25,15 @@ test('pinned game (2026-07-07 MIL@STL g2, gamePk 823035) box score stays sealed 
   await expect(cover).not.toBeVisible()
 })
 
+// The heading is "Defensive alignment", not "Defense" — renamed in #694 so the
+// lineup page matches focus mode's Field tab (TeamInfo.jsx's SectionMasthead
+// `title`). This assertion was left behind by that rename and the spec has been
+// red on `main` ever since; it is display copy, so if the wording moves again it
+// has to move here too. Playwright matches an accessible name in FULL, so
+// "Defense" does not match "Defensive alignment" — a substring would have
+// survived, which is exactly why it didn't.
 test('pinned game lineup1 renders the defense diamond', async ({ page }) => {
   await page.goto('/07072026/milstl-2/lineup1')
-  await expect(page.getByRole('heading', { name: 'Defense' }).first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Defensive alignment' }).first()).toBeVisible()
   await expect(page.locator('.defdiamond').first()).toBeVisible()
 })
