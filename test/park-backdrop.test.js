@@ -14,6 +14,9 @@ const none = reader()
 test('a bundled park resolves to its photo, centred by default', () => {
   const park = parkBackdrop('Fenway Park', none)
   assert.equal(park.cssUrl, 'url("/ballparks/fenwaypark.jpg")')
+  // The mobile-sized companion (scripts/gen-ballpark-thumbs.mjs) a touch
+  // device's scroll reveal arms instead of the full photo above.
+  assert.equal(park.mobileCssUrl, 'url("/ballparks/thumb/fenwaypark.webp")')
   assert.equal(park.focus, '50% 50%')
   assert.equal(park.name, 'Fenway Park')
 })
@@ -47,6 +50,9 @@ test('an owner override wins over the bundled photo, with their own crop', () =>
   })
   const park = parkBackdrop('Wrigley Field', t)
   assert.equal(park.cssUrl, 'url("https://blob.example.com/wrigley.jpg")')
+  // No build step makes a thumbnail for an admin's own upload, so mobile
+  // falls back to the same full photo rather than a smaller companion.
+  assert.equal(park.mobileCssUrl, 'url("https://blob.example.com/wrigley.jpg")')
   assert.equal(park.focus, '50% 20%')
   assert.equal(park.name, 'Wrigley Field')
 })

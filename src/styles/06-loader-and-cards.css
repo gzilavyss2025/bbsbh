@@ -169,7 +169,12 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* Doubled from the original 10px — mobile only. This is the single-column
+     phone layout's own gap; 25-wide-layout.css's `@media (min-width: 740px)`
+     block redeclares .gamelist as a 2-up grid with its own independent 12px
+     gap, so raising this value only ever reaches the narrow, one-card-wide
+     list a phone actually shows. */
+  gap: 20px;
 }
 
 .gamecard {
@@ -180,7 +185,17 @@
   gap: var(--space-2);
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  border: var(--bw-hair) solid var(--border-rule);
+  /* --bw-heavy (2px) rather than the --bw-hair hairline every other bordered
+     surface uses, so the card reads as a frame the ballpark photo sits inside
+     rather than a photo loosely placed behind a hairline-bordered card. ONE
+     fixed color for every card, favorite or not — a 50/50 blend of the plain
+     rule tone and --text-muted lands roughly midway between the old two-tone
+     scheme's ends (the light --border-rule every other card wore, and the
+     darker per-team tint .gamecard--pinned used to mix in below), so it reads
+     as one deliberate frame color rather than a card-by-card variable. The
+     star badge + background tint below still say which card is pinned; the
+     frame no longer needs to. */
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--border-rule) 50%, var(--text-muted) 50%);
   background: var(--surface-card);
   color: var(--text-body);
   box-shadow: var(--shadow-card);
@@ -524,14 +539,16 @@
   }
 }
 
-/* The pinned favorite's border/gradient tint to that club's own accent color
+/* The pinned favorite's gradient tint to that club's own accent color
    (--pin-accent, a per-team hex set inline by GameCard from
    favoriteAccentColor() — see lib/teams.js) rather than a fixed green, so an
    Orioles fan's pin reads orange, a Reds fan's reads red, and so on. Falls
    back to the original --field green for the rare pinned team with no known
-   accent (MiLB affiliates aren't in that color map). */
+   accent (MiLB affiliates aren't in that color map). The BORDER no longer
+   joins this tint — every .gamecard now shares one fixed frame color (see
+   above) — so the star badge and this background wash are what carry the
+   "this is your team" signal now. */
 .gamecard--pinned {
-  border-color: color-mix(in srgb, var(--pin-accent, var(--field)) 45%, var(--border-rule));
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--pin-accent, var(--field)) 16%, var(--surface-card)),

@@ -131,6 +131,19 @@ export function ballparkLogoUrl(parkName) {
   return ext ? `/ballparks/logos/${key}.${ext}` : null
 }
 
+// The mobile-sized companion to a bundled photo — a ~480px WebP the slate
+// card's touch/scroll reveal uses instead of the 1000px JPEG a hover pointer
+// arms (parkBackdrop.js, 06a-gamecard-parkart.css). Built by
+// scripts/gen-ballpark-thumbs.mjs from the same CREDITS set this function
+// reads, so every bundled park has one the moment that script has run; an
+// admin's own photo (ADR-0044) never does, since that upload has no build
+// step to make one in — resolvePhoto falls back to the full URL for those.
+export function ballparkPhotoThumb(parkName) {
+  const key = venueKey(parkName)
+  if (!CREDITS[key]) return null
+  return { src: `/ballparks/thumb/${key}.webp` }
+}
+
 // One line of attribution, worded so it satisfies CC BY / CC BY-SA without
 // reading like legal boilerplate on a scorebook page. Public-domain and CC0
 // photos need no credit at all, but naming the photographer anyway costs one
@@ -162,17 +175,23 @@ const CENTRE = '50% 50%'
 // typed a credit, so an override deliberately DROPS the bundled attribution
 // rather than inheriting it — leaving Carol H. Highsmith's name under somebody
 // else's photograph would be a worse failure than showing no credit at all.
+// `thumbSrc` always carries a value — a bundled park's real thumbnail, or the
+// full `src` again for anything that has no smaller companion (an admin
+// override, or a bundled park whose thumbnail hasn't been generated yet), so
+// every caller can read `photo.thumbSrc` with no null check.
 export function resolvePhoto(parkName, overrides = {}) {
   const bundled = ballparkPhoto(parkName)
   const focus = overrides.focus ? toObjectPosition(overrides.focus) : CENTRE
 
   if (overrides.photo) {
     const text = overrides.credit || ''
-    return { src: overrides.photo, focus, creditText: text, creditHref: null, isOverride: true }
+    return { src: overrides.photo, thumbSrc: overrides.photo, focus, creditText: text, creditHref: null, isOverride: true }
   }
   if (!bundled) return null
+  const thumb = ballparkPhotoThumb(parkName)
   return {
     src: bundled.src,
+    thumbSrc: thumb?.src || bundled.src,
     focus,
     creditText: creditLine(bundled.credit),
     creditHref: bundled.credit.source,

@@ -26,6 +26,15 @@
 // which is where the licence's "a URI or hyperlink to a resource that includes
 // the required information" is satisfied in full for CC BY / CC BY-SA photos.
 
+// TWO SIZES ride out of here. `cssUrl` is the full 1000px photo a hover
+// pointer arms; `mobileCssUrl` is the ~480px WebP companion a touch device's
+// on-screen state arms instead (GameCard's IntersectionObserver,
+// 06a-gamecard-parkart.css's `@media (hover: none)` block) — the wash renders
+// at 0.24 opacity either way, so a phone gets the same reveal for a fraction
+// of the bytes. `mobileCssUrl` falls back to the full photo wherever no
+// smaller companion exists (see resolvePhoto's `thumbSrc`), so a caller never
+// has to choose between the two — it just reads whichever field its device is.
+//
 // The venue name itself rides in on the slate's existing schedule request —
 // `fields=` is a flat allowlist and `name` was already on it for the team
 // blocks, so api/schedule.js's normalizeGame reads venue.name at no extra cost
@@ -55,16 +64,23 @@ export function parkBackdrop(venueName, t) {
   const ids = fieldIds(venueKey(name))
   const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo || !SAFE_CSS_URL.test(photo.src)) return null
+  // thumbSrc is a second, independently-built path (scripts/gen-ballpark-
+  // thumbs.mjs) for a bundled park, so it earns the same scrutiny rather than
+  // inheriting the check above — falls back to the full photo (already safe)
+  // if it somehow isn't.
+  const mobileOk = SAFE_CSS_URL.test(photo.thumbSrc)
   return {
     // Pre-wrapped as a CSS value: the caller drops it straight into a custom
     // property, and the quoting rule lives next to the pattern that makes it
     // safe rather than at a call site three files away.
     cssUrl: `url("${photo.src}")`,
+    mobileCssUrl: mobileOk ? `url("${photo.thumbSrc}")` : `url("${photo.src}")`,
     // The same photograph as a bare src, for the one consumer that can't use a
     // CSS value: the preview poster paints it onto a canvas (drawImage takes a
     // URL, not a `url(…)`), and it must be loaded in CORS-anonymous mode or
     // the finished poster can never be exported — see lib/preview/posterImages.js.
-    // Same value, already past SAFE_CSS_URL above.
+    // Same value, already past SAFE_CSS_URL above. Always the FULL photo, even
+    // on mobile — a shared, exportable poster is not the place to economize.
     src: photo.src,
     focus: photo.focus,
     // The bare park name, printed on the card itself (GameCard's
