@@ -103,6 +103,7 @@ export function TeamInfo({
   callouts,
   onNext,
   nextLabel,
+  onPrintSheet,
   onReload,
   loading,
   lastUpdated,
@@ -171,6 +172,18 @@ export function TeamInfo({
       </dl>
 
       <Umpires officials={officials} />
+
+      {/* The door to tonight's printable sheet. It sits here, directly under the
+          facts and the crew, because those are exactly what the sheet carries
+          over — and because the lineup pages ARE the pre-first-pitch surfaces,
+          which is when a scorer wants a sheet in hand. Both clubs' pages show it
+          (the sheet holds both orders either way), so it is one tap from wherever
+          you opened the game. */}
+      {onPrintSheet && (
+        <div className="thub-door">
+          <ChevronLink onClick={onPrintSheet}>Print tonight’s sheet</ChevronLink>
+        </div>
+      )}
 
       <SeasonSeriesStrip
         viewingTeamId={meta.id}

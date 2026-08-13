@@ -330,6 +330,11 @@ test('sectionToStep maps each section form to its step/inning/half', () => {
   assert.deepEqual(sectionToStep('boxscore'), { step: 3, inning: 1, half: 'top' })
   assert.deepEqual(sectionToStep('top4'), { step: 2, inning: 4, half: 'top' })
   assert.deepEqual(sectionToStep('bottom7'), { step: 2, inning: 7, half: 'bottom' })
+  // The two sections that aren't pages of the scorebook — the shareable poster
+  // studio and the printable pre-pitch sheet. Both are real, deep-linkable
+  // addresses; the sheet's URL is what a phone's share sheet actually hands off.
+  assert.deepEqual(sectionToStep('preview'), { step: 4, inning: 1, half: 'top' })
+  assert.deepEqual(sectionToStep('sheet'), { step: 5, inning: 1, half: 'top' })
 })
 
 test('a legacy inning{n} link still parses as the top half', () => {
@@ -342,7 +347,7 @@ test('an unknown section is treated as lineup1', () => {
 })
 
 test('sectionToStep and stepToSection round-trip for the innings viewer', () => {
-  for (const section of ['top1', 'bottom3', 'top10', 'lineup1', 'lineup2', 'boxscore']) {
+  for (const section of ['top1', 'bottom3', 'top10', 'lineup1', 'lineup2', 'boxscore', 'preview', 'sheet']) {
     const { step, inning, half } = sectionToStep(section)
     assert.equal(stepToSection(step, inning, half), section, section)
   }
