@@ -229,7 +229,14 @@ const BUDGETS = {
   // (the studio frame and its controls). Deliberately tiny — the poster
   // itself is a canvas and has no CSS at all — and imported by its own
   // screen rather than index.css, so it costs no other route anything.
-  'src/styles': 78,
+  // 78 -> 79 for `12a-seal-tear.css`: the kraft cover coming off. A lettered
+  // sibling of `12-sealbox.css` for the same reason as 05a/06a and the 31x
+  // family, with one extra: that file is already on a shrinking check-file-size
+  // budget, so this is the "put new code elsewhere" the file-size guard asks
+  // for rather than a second front door. The letter is load-bearing — the tear
+  // re-times an animation 12-sealbox.css declares, so it has to cascade after
+  // it.
+  'src/styles': 79,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -321,7 +328,15 @@ const BUDGETS = {
   // files a record under a name the reader recomputes from an id, so a drift of
   // one player is a record that exists and can never be found. Four lines and no
   // imports — a leaf constant, not a new subsystem.
-  'src/lib': 53,
+  // +1 for sealTear.js — where the kraft seal's cover splits when it is torn
+  // off, as pure math (the two clip-path polygons; the motion is CSS). It sits
+  // here for the reason passportLayout.js and stampArt.js do: a component that
+  // types its own coordinates has put them somewhere nothing can check, and the
+  // promise this one makes — the same seal tears identically forever — is only
+  // testable if the path is a function. It seeds off stampArt.js's own
+  // `stampSeed` rather than adding a second answer to that question. A leaf
+  // module, not a new subsystem.
+  'src/lib': 54,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs

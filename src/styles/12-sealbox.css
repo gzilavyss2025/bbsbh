@@ -1,22 +1,54 @@
 /* ---------------------------------------------------------------- sealbox */
-/* The signature spoiler cover: kraft tape hatch over the inning totals. */
-.sealbox.cover {
-  width: 100%;
-  min-height: 132px;
+/* The signature spoiler cover: kraft tape hatch over the inning totals. The
+   cover coming OFF is the next partial along, 12a-seal-tear.css. */
+
+/* The cover's FACE — kraft tape, the drawn seal mark, the invitation to tap.
+   Shared with .sealtear__face, the copy each torn half is cut from (SealBox.jsx's
+   CoverFace), so a tear splits the cover the user was looking at rather than a
+   plain amber rectangle standing in for it. Only the button carries the
+   interactive half of this; a torn half is inert. */
+.sealbox.cover,
+.sealtear__face {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: none;
-  cursor: pointer;
   color: var(--seal-ink);
   background: var(--seal-texture);
+}
+
+.sealbox.cover {
+  width: 100%;
+  min-height: 132px;
+  border: none;
+  cursor: pointer;
 }
 
 .cover__lock {
   font-size: var(--fs-title-lg);
   line-height: var(--lh-solid);
+}
+
+/* The seal mark (SealBox.jsx's LockMark) — a padlock drawn in the scorebook's
+   own ink line, in place of the system padlock emoji this used to print. An
+   emoji renders as a different typeface on every device — colour on one, a flat
+   glyph on another — so it was the one thing on this cover that could never
+   match the paper around it.
+
+   Sized at 1em off .cover__lock's own type token, so it lands at the optical
+   weight the glyph had. STROKED, not filled: a filled lock body needs its
+   keyhole knocked out in a flat colour, and there is no flat colour here to
+   knock it out to — the tape is a two-tone diagonal hatch (--seal-texture). */
+.cover__mark {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .cover__main {

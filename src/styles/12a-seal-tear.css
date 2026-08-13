@@ -1,0 +1,116 @@
+/* -------------------------------------------------------------- seal tear */
+/* The kraft cover coming OFF (SealBox.jsx's SealTear + lib/sealTear.js).
+   Its own partial rather than more of 12-sealbox.css, which is already on a
+   shrinking budget (ADR-0038) — and the split reads better anyway: everything
+   here is the exit, and everything there is the seal at rest.
+
+   Ordering matters and is the reason for the `12a` prefix, not tidiness: the
+   `.statgrid--tearing` rule below re-times the `reveal` animation that
+   12-sealbox.css declares, so this file has to land after it. */
+
+/* A panel that was TORN open rather than switched on. Same fade it always had;
+   it just holds off until the two halves are already moving, so the two
+   gestures overlap instead of queueing. `backwards` is what makes the hold
+   real — without it the panel paints at full opacity for --dur-tear-lead and
+   only then starts fading in from nothing, which is worse than no delay at all.
+   Set for the life of the box, not the life of the animation: re-timing a
+   running fade when the halves finish would pop the panel forward mid-fade. */
+.statgrid--tearing {
+  animation-delay: var(--dur-tear-lead);
+  animation-fill-mode: backwards;
+}
+
+/* The torn cover in flight. Portalled to <body> and pinned to the screen
+   rectangle the cover held at the moment of the tap, so it answers to the
+   viewport and not to whatever it was torn off — a seal inside a half-inning
+   page sits under `.turnscene`, whose `isolation: isolate` and mid-turn
+   `will-change` would trap or re-root it (the same reason ModalPortal exists;
+   see its header).
+
+   Inert in every sense that matters: aria-hidden, no pointer events, and
+   nothing inside it but a duplicate of the cover's own constant face. It holds
+   no data because the cover holds no data — ADR-0002, and SealBox.jsx's header
+   for why that is the whole argument for animating this and not the panel. */
+.sealtear {
+  position: fixed;
+  /* Above the fixed page chrome (.pagenav, 20) on the way out, below the
+     dialog layer (.scrim, 100) — a half flying past should never cross a
+     sheet that is already open. */
+  z-index: 90;
+  pointer-events: none;
+}
+
+/* Each half carries a FULL-size copy of the face (.sealtear__face, styled with
+   the live cover in 12-sealbox.css) and cuts it with its own clip-path, set
+   inline from lib/sealTear.js. Both polygons are cut from one shared edge, so
+   the two ragged lines are the same line — the cover comes apart, rather than
+   being swapped for two shapes that nearly meet. */
+.sealtear__half {
+  position: absolute;
+  inset: 0;
+  animation-duration: var(--dur-tear);
+  animation-timing-function: var(--ease-press);
+  animation-fill-mode: forwards;
+}
+
+.sealtear__face {
+  position: absolute;
+  inset: 0;
+}
+
+.sealtear__half--top {
+  animation-name: seal-tear-top;
+}
+
+.sealtear__half--bottom {
+  animation-name: seal-tear-bottom;
+}
+
+/* Up and left, down and right, accelerating the whole way (--ease-press, the
+   system's one ease-in — a torn seal is thrown, not placed). Each half clears
+   its own height before it fades, so the pair reads as leaving the frame rather
+   than dissolving on the spot; the fade only starts at 65% to stop a rotating
+   corner sweeping back across the page it just uncovered. */
+@keyframes seal-tear-top {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-38%, -145%) rotate(-19deg);
+    opacity: 0;
+  }
+}
+
+@keyframes seal-tear-bottom {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(38%, 145%) rotate(19deg);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion cuts straight to the revealed panel. SealBox never mounts the
+   tear in the first place (wantsReducedMotion, which reads BOTH this query and
+   the in-app `data-motion` preference), because 01-base.css's blanket kill
+   shortens durations and not delays — the panel would sit at opacity 0 for
+   --dur-tear-lead with nothing on top of it. This block is the stylesheet-only
+   belt to that braces: if the query flips after a box has already torn, the
+   halves go and the panel's hold goes with them. */
+@media (prefers-reduced-motion: reduce) {
+  .sealtear {
+    display: none;
+  }
+  .statgrid--tearing {
+    animation-delay: 0s;
+  }
+}
