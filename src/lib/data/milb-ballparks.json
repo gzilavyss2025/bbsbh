@@ -1,0 +1,717 @@
+{
+  "717creditunionpark": {
+    "venue": "7 17 Credit Union Park",
+    "teams": [
+      "Akron RubberDucks"
+    ]
+  },
+  "abcsupplystadium": {
+    "venue": "ABC Supply Stadium",
+    "teams": [
+      "Beloit Sky Carp"
+    ]
+  },
+  "adventhealthstadium": {
+    "venue": "AdventHealth Stadium",
+    "teams": [
+      "Rome Emperors"
+    ]
+  },
+  "arthurwperduestadium": {
+    "venue": "Arthur W. Perdue Stadium",
+    "teams": [
+      "Delmarva Shorebirds"
+    ]
+  },
+  "arvestballpark": {
+    "venue": "Arvest Ballpark",
+    "teams": [
+      "Northwest Arkansas Naturals"
+    ]
+  },
+  "atriumhealthballpark": {
+    "venue": "Atrium Health Ballpark",
+    "teams": [
+      "Kannapolis Cannon Ballers"
+    ]
+  },
+  "autozonepark": {
+    "venue": "AutoZone Park",
+    "teams": [
+      "Memphis Redbirds"
+    ]
+  },
+  "avistastadium": {
+    "venue": "Avista Stadium",
+    "teams": [
+      "Spokane Indians"
+    ]
+  },
+  "bannerislandballpark": {
+    "venue": "Banner Island Ballpark",
+    "teams": [
+      "Stockton Ports"
+    ]
+  },
+  "baycareballpark": {
+    "venue": "BayCare Ballpark",
+    "teams": [
+      "Clearwater Threshers"
+    ]
+  },
+  "bluewahoosstadium": {
+    "venue": "Blue Wahoos Stadium",
+    "teams": [
+      "Pensacola Blue Wahoos"
+    ]
+  },
+  "bowlinggreenballpark": {
+    "venue": "Bowling Green Ballpark",
+    "teams": [
+      "Bowling Green Hot Rods"
+    ]
+  },
+  "carilionclinicfield": {
+    "venue": "Carilion Clinic Field",
+    "teams": [
+      "Salem RidgeYaks"
+    ]
+  },
+  "carmaxpark": {
+    "venue": "CarMax Park",
+    "teams": [
+      "Richmond Flying Squirrels"
+    ]
+  },
+  "cheneystadium": {
+    "venue": "Cheney Stadium",
+    "teams": [
+      "Tacoma Rainiers"
+    ]
+  },
+  "chickasawbricktownballpark": {
+    "venue": "Chickasaw Bricktown Ballpark",
+    "teams": [
+      "Oklahoma City Comets"
+    ]
+  },
+  "chsfield": {
+    "venue": "CHS Field",
+    "teams": [
+      "St. Paul Saints"
+    ]
+  },
+  "chukchansipark": {
+    "venue": "Chukchansi Park",
+    "teams": [
+      "Fresno Grizzlies"
+    ]
+  },
+  "citystadium": {
+    "venue": "City Stadium",
+    "teams": [
+      "Hill City Howlers"
+    ]
+  },
+  "classicautogrouppark": {
+    "venue": "Classic Auto Group Park",
+    "teams": [
+      "Lake County Captains"
+    ]
+  },
+  "cloverpark": {
+    "venue": "Clover Park",
+    "teams": [
+      "St. Lucie Mets"
+    ]
+  },
+  "cocacolapark": {
+    "venue": "Coca-Cola Park",
+    "teams": [
+      "Lehigh Valley IronPigs"
+    ]
+  },
+  "constellationfield": {
+    "venue": "Constellation Field",
+    "teams": [
+      "Sugar Land Space Cowboys"
+    ]
+  },
+  "covenanthealthpark": {
+    "venue": "Covenant Health Park",
+    "teams": [
+      "Knoxville Smokies"
+    ]
+  },
+  "dabospark": {
+    "venue": "DABOS Park",
+    "teams": [
+      "Montgomery Biscuits"
+    ]
+  },
+  "dayairballpark": {
+    "venue": "Day Air Ballpark",
+    "teams": [
+      "Dayton Dragons"
+    ]
+  },
+  "delldiamond": {
+    "venue": "Dell Diamond",
+    "teams": [
+      "Round Rock Express"
+    ]
+  },
+  "deltadentalpark": {
+    "venue": "Delta Dental Park",
+    "teams": [
+      "Portland Sea Dogs"
+    ]
+  },
+  "deltadentalstadium": {
+    "venue": "Delta Dental Stadium",
+    "teams": [
+      "New Hampshire Fisher Cats"
+    ]
+  },
+  "dickeystephenspark": {
+    "venue": "Dickey-Stephens Park",
+    "teams": [
+      "Arkansas Travelers"
+    ]
+  },
+  "dowdiamond": {
+    "venue": "Dow Diamond",
+    "teams": [
+      "Great Lakes Loons"
+    ]
+  },
+  "dozerpark": {
+    "venue": "Dozer Park",
+    "teams": [
+      "Peoria Chiefs"
+    ]
+  },
+  "dunkinpark": {
+    "venue": "Dunkin' Park",
+    "teams": [
+      "Hartford Yard Goats"
+    ]
+  },
+  "durhambullsathleticpark": {
+    "venue": "Durham Bulls Athletic Park",
+    "teams": [
+      "Durham Bulls"
+    ]
+  },
+  "equitybankpark": {
+    "venue": "Equity Bank Park",
+    "teams": [
+      "Wichita Wind Surge"
+    ]
+  },
+  "erlangerpark": {
+    "venue": "Erlanger Park",
+    "teams": [
+      "Chattanooga Lookouts"
+    ]
+  },
+  "eslballpark": {
+    "venue": "ESL Ballpark",
+    "teams": [
+      "Rochester Red Wings"
+    ]
+  },
+  "everettmemorialstadium": {
+    "venue": "Everett Memorial Stadium",
+    "teams": [
+      "Everett AquaSox"
+    ]
+  },
+  "exciteballpark": {
+    "venue": "Excite Ballpark",
+    "teams": [
+      "San Jose Giants"
+    ]
+  },
+  "fifththirdfield": {
+    "venue": "Fifth Third Field",
+    "teams": [
+      "Toledo Mud Hens"
+    ]
+  },
+  "fifththirdpark": {
+    "venue": "Fifth Third Park",
+    "teams": [
+      "Hub City Spartanburgers"
+    ]
+  },
+  "firsthorizonpark": {
+    "venue": "First Horizon Park",
+    "teams": [
+      "Nashville Sounds"
+    ]
+  },
+  "firstnationalbankfield": {
+    "venue": "First National Bank Field",
+    "teams": [
+      "Greensboro Grasshoppers"
+    ]
+  },
+  "firstenergystadium": {
+    "venue": "FirstEnergy Stadium",
+    "teams": [
+      "Reading Fightin Phils"
+    ]
+  },
+  "fluorfieldatthewestend": {
+    "venue": "Fluor Field at the West End",
+    "teams": [
+      "Greenville Drive"
+    ]
+  },
+  "fnbfield": {
+    "venue": "FNB Field",
+    "teams": [
+      "Harrisburg Senators"
+    ]
+  },
+  "fourwindsfield": {
+    "venue": "Four Winds Field",
+    "teams": [
+      "South Bend Cubs"
+    ]
+  },
+  "frawleystadium": {
+    "venue": "Frawley Stadium",
+    "teams": [
+      "Wilmington Blue Rocks"
+    ]
+  },
+  "georgemsteinbrennerfield": {
+    "venue": "George M. Steinbrenner Field",
+    "teams": [
+      "Tampa Tarpons"
+    ]
+  },
+  "gesastadium": {
+    "venue": "Gesa Stadium",
+    "teams": [
+      "Tri-City Dust Devils"
+    ]
+  },
+  "greaternevadafield": {
+    "venue": "Greater Nevada Field",
+    "teams": [
+      "Reno Aces"
+    ]
+  },
+  "gwinnettfield": {
+    "venue": "Gwinnett Field",
+    "teams": [
+      "Gwinnett Stripers"
+    ]
+  },
+  "harborpark": {
+    "venue": "Harbor Park",
+    "teams": [
+      "Norfolk Tides"
+    ]
+  },
+  "heritagefinancialpark": {
+    "venue": "Heritage Financial Park",
+    "teams": [
+      "Hudson Valley Renegades"
+    ]
+  },
+  "hodgetown": {
+    "venue": "Hodgetown",
+    "teams": [
+      "Amarillo Sod Poodles"
+    ]
+  },
+  "hometrustpark": {
+    "venue": "HomeTrust Park",
+    "teams": [
+      "Asheville Tourists"
+    ]
+  },
+  "hopsballpark": {
+    "venue": "Hops Ballpark",
+    "teams": [
+      "Hillsboro Hops"
+    ]
+  },
+  "huntingtonpark": {
+    "venue": "Huntington Park",
+    "teams": [
+      "Columbus Clippers"
+    ]
+  },
+  "isotopespark": {
+    "venue": "Isotopes Park",
+    "teams": [
+      "Albuquerque Isotopes"
+    ]
+  },
+  "jackierobinsonballpark": {
+    "venue": "Jackie Robinson Ballpark",
+    "teams": [
+      "Daytona Tortugas"
+    ]
+  },
+  "jacksonfield": {
+    "venue": "Jackson Field",
+    "teams": [
+      "Lansing Lugnuts"
+    ]
+  },
+  "josephprileyjrballpark": {
+    "venue": "Joseph P. Riley, Jr. Ballpark",
+    "teams": [
+      "Charleston RiverDogs"
+    ]
+  },
+  "keeslerfederalpark": {
+    "venue": "Keesler Federal Park",
+    "teams": [
+      "Biloxi Shuckers"
+    ]
+  },
+  "lpfransstadium": {
+    "venue": "L.P. Frans Stadium",
+    "teams": [
+      "Hickory Crawdads"
+    ]
+  },
+  "lasvegasballpark": {
+    "venue": "Las Vegas Ballpark",
+    "teams": [
+      "Las Vegas Aviators"
+    ]
+  },
+  "lecompark": {
+    "venue": "LECOM Park",
+    "teams": [
+      "Bradenton Marauders"
+    ]
+  },
+  "leehealthsportscomplex": {
+    "venue": "Lee Health Sports Complex",
+    "teams": [
+      "Fort Myers Mighty Mussels"
+    ]
+  },
+  "lmcuballpark": {
+    "venue": "LMCU Ballpark",
+    "teams": [
+      "West Michigan Whitecaps"
+    ]
+  },
+  "louisvillesluggerfield": {
+    "venue": "Louisville Slugger Field",
+    "teams": [
+      "Louisville Bats"
+    ]
+  },
+  "maimonidespark": {
+    "venue": "Maimonides Park",
+    "teams": [
+      "Brooklyn Cyclones"
+    ]
+  },
+  "mirabitostadium": {
+    "venue": "Mirabito Stadium",
+    "teams": [
+      "Binghamton Rumble Ponies"
+    ]
+  },
+  "modernwoodmenpark": {
+    "venue": "Modern Woodmen Park",
+    "teams": [
+      "Quad Cities River Bandits"
+    ]
+  },
+  "momentumbankballpark": {
+    "venue": "Momentum Bank Ballpark",
+    "teams": [
+      "Midland RockHounds"
+    ]
+  },
+  "morongofield": {
+    "venue": "Morongo Field",
+    "teams": [
+      "Rancho Cucamonga Quakes"
+    ]
+  },
+  "nbtbankstadium": {
+    "venue": "NBT Bank Stadium",
+    "teams": [
+      "Syracuse Mets"
+    ]
+  },
+  "nelsonwolffstadium": {
+    "venue": "Nelson Wolff Stadium",
+    "teams": [
+      "San Antonio Missions"
+    ]
+  },
+  "neurosciencegroupfield": {
+    "venue": "Neuroscience Group Field",
+    "teams": [
+      "Wisconsin Timber Rattlers"
+    ]
+  },
+  "nymeofield": {
+    "venue": "Nymeo Field",
+    "teams": [
+      "Frederick Keys"
+    ]
+  },
+  "oneokfield": {
+    "venue": "ONEOK Field",
+    "teams": [
+      "Tulsa Drillers"
+    ]
+  },
+  "ontfield": {
+    "venue": "ONT Field",
+    "teams": [
+      "Ontario Tower Buzzers"
+    ]
+  },
+  "parkviewfield": {
+    "venue": "Parkview Field",
+    "teams": [
+      "Fort Wayne TinCaps"
+    ]
+  },
+  "pelicansballpark": {
+    "venue": "Pelicans Ballpark",
+    "teams": [
+      "Myrtle Beach Pelicans"
+    ]
+  },
+  "peoplesnaturalgasfield": {
+    "venue": "Peoples Natural Gas Field",
+    "teams": [
+      "Altoona Curve"
+    ]
+  },
+  "pkpark": {
+    "venue": "PK Park",
+    "teams": [
+      "Eugene Emeralds"
+    ]
+  },
+  "pncfield": {
+    "venue": "PNC Field",
+    "teams": [
+      "Scranton/Wilkes-Barre RailRiders"
+    ]
+  },
+  "polarpark": {
+    "venue": "Polar Park",
+    "teams": [
+      "Worcester Red Sox"
+    ]
+  },
+  "princegeorgesstadium": {
+    "venue": "Prince George's Stadium",
+    "teams": [
+      "Chesapeake Baysox"
+    ]
+  },
+  "principalpark": {
+    "venue": "Principal Park",
+    "teams": [
+      "Iowa Cubs"
+    ]
+  },
+  "publixfieldatjokermarchantstadium": {
+    "venue": "Publix Field at Joker Marchant Stadium",
+    "teams": [
+      "Lakeland Flying Tigers"
+    ]
+  },
+  "regionsfield": {
+    "venue": "Regions Field",
+    "teams": [
+      "Birmingham Barons"
+    ]
+  },
+  "ridersfield": {
+    "venue": "Riders Field",
+    "teams": [
+      "Frisco RoughRiders"
+    ]
+  },
+  "rogerdeanchevroletstadium": {
+    "venue": "Roger Dean Chevrolet Stadium",
+    "teams": [
+      "Palm Beach Cardinals",
+      "Jupiter Hammerheads"
+    ]
+  },
+  "rogersfieldatnatbaileystadium": {
+    "venue": "Rogers Field at Nat Bailey Stadium",
+    "teams": [
+      "Vancouver Canadians"
+    ]
+  },
+  "route66stadium": {
+    "venue": "Route 66 Stadium",
+    "teams": [
+      "Springfield Cardinals"
+    ]
+  },
+  "sahlenfield": {
+    "venue": "Sahlen Field",
+    "teams": [
+      "Buffalo Bisons"
+    ]
+  },
+  "sanmanuelstadium": {
+    "venue": "San Manuel Stadium",
+    "teams": [
+      "Inland Empire 66ers"
+    ]
+  },
+  "segrapark": {
+    "venue": "Segra Park",
+    "teams": [
+      "Columbia Fireflies"
+    ]
+  },
+  "segrastadium": {
+    "venue": "SEGRA Stadium",
+    "teams": [
+      "Fayetteville Woodpeckers"
+    ]
+  },
+  "shoretownballpark": {
+    "venue": "ShoreTown Ballpark",
+    "teams": [
+      "Jersey Shore BlueClaws"
+    ]
+  },
+  "southwestuniversitypark": {
+    "venue": "Southwest University Park",
+    "teams": [
+      "El Paso Chihuahuas"
+    ]
+  },
+  "srppark": {
+    "venue": "SRP Park",
+    "teams": [
+      "Augusta GreenJackets"
+    ]
+  },
+  "sutterhealthpark": {
+    "venue": "Sutter Health Park",
+    "teams": [
+      "Sacramento River Cats"
+    ]
+  },
+  "synovuspark": {
+    "venue": "Synovus Park",
+    "teams": [
+      "Columbus Clingstones"
+    ]
+  },
+  "tdballpark": {
+    "venue": "TD Ballpark",
+    "teams": [
+      "Dunedin Blue Jays"
+    ]
+  },
+  "tdbankballpark": {
+    "venue": "TD Bank Ballpark",
+    "teams": [
+      "Somerset Patriots"
+    ]
+  },
+  "theballparkatamericafirstsquare": {
+    "venue": "The Ballpark at America First Square",
+    "teams": [
+      "Salt Lake Bees"
+    ]
+  },
+  "thediamond": {
+    "venue": "The Diamond",
+    "teams": [
+      "Lake Elsinore Storm"
+    ]
+  },
+  "toyotafield": {
+    "venue": "Toyota Field",
+    "teams": [
+      "Rocket City Trash Pandas"
+    ]
+  },
+  "truistfield": {
+    "venue": "Truist Field",
+    "teams": [
+      "Charlotte Knights"
+    ]
+  },
+  "truiststadium": {
+    "venue": "Truist Stadium",
+    "teams": [
+      "Winston-Salem Dash"
+    ]
+  },
+  "upmcpark": {
+    "venue": "UPMC Park",
+    "teams": [
+      "Erie SeaWolves"
+    ]
+  },
+  "valleystrongballpark": {
+    "venue": "Valley Strong Ballpark",
+    "teams": [
+      "Visalia Rawhide"
+    ]
+  },
+  "veteransmemorialstadium": {
+    "venue": "Veterans Memorial Stadium",
+    "teams": [
+      "Cedar Rapids Kernels"
+    ]
+  },
+  "victoryfield": {
+    "venue": "Victory Field",
+    "teams": [
+      "Indianapolis Indians"
+    ]
+  },
+  "virginiacreditunionstadium": {
+    "venue": "Virginia Credit Union Stadium",
+    "teams": [
+      "Fredericksburg Nationals"
+    ]
+  },
+  "vystarballpark": {
+    "venue": "Vystar Ballpark",
+    "teams": [
+      "Jacksonville Jumbo Shrimp"
+    ]
+  },
+  "wernerpark": {
+    "venue": "Werner Park",
+    "teams": [
+      "Omaha Storm Chasers"
+    ]
+  },
+  "whataburgerfield": {
+    "venue": "Whataburger Field",
+    "teams": [
+      "Corpus Christi Hooks"
+    ]
+  },
+  "wilsonballpark": {
+    "venue": "Wilson Ballpark",
+    "teams": [
+      "Wilson Warbirds"
+    ]
+  }
+}

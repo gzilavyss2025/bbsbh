@@ -1,7 +1,8 @@
 // The copy registry — the single source of truth for every piece of
 // admin-editable UI text in the app. It is a plain, side-effect-free module —
-// its one import is the static ballpark table, which it reads to derive one
-// note field per park — so three very different consumers can share ONE
+// its only imports are the two static ballpark tables (MLB's hand-authored
+// measurements, MiLB's generated venue list), which it reads to derive the
+// per-park fields below — so three very different consumers can share ONE
 // definition of what a copy key is, what it defaults to, and what a valid value
 // looks like:
 //
@@ -28,6 +29,7 @@
 
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
 import { venueKey } from '../lib/ballpark/ballparkArt.js'
+import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
 
 // Groups order the admin panel and let it render section headers. Keep ids
 // stable — they are the Redis field names and the localStorage cache keys.
@@ -40,6 +42,7 @@ export const GROUPS = [
   { id: 'scoresUnlocked', label: 'Scores Unlocked (the spoilers-off switch)', preview: 'consentModal' },
   { id: 'stampIn', label: 'Stamp In (a club’s played season)', preview: 'consentModal' },
   { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
+  { id: 'ballparksMilb', label: 'Ballparks — Minor League (team hub → Overview)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -171,6 +174,95 @@ function parkFields() {
           ...base,
           id: `ballpark.${key}Focus`,
           label: `${name} — focal point`,
+          help: 'Which part of the photo to keep when it is cropped to the widescreen box. Two numbers 0–100, across then down — "50 50" is centre, "50 20" favours the top, "50 80" the bottom. Leave empty for centre.',
+          maxLength: 7,
+          multiline: false,
+          pattern: FOCAL_POINT,
+          default: '',
+        },
+      ]
+    })
+}
+
+// The MiLB counterpart to parkFields() above — a photo/name/logo editor for
+// every current minor-league park, minus the note and minus the measurements.
+//
+// NO NOTE, NO DIAGRAM. A MiLB park carries no BALLPARKS record (ballparkData.js
+// covers the 30 MLB parks only — nobody has hand-verified a MiLB outfield or
+// digitized its wall polygon), so BallparkCard renders no diagram/dimensions
+// section for one at all; a note field with nothing beside it would be a
+// paragraph floating under a bare stadium name. FIVE fields per park, not six.
+//
+// SAME KEY SCHEME AS parkFields(): venueKey(name), not a team id. That is what
+// lets a MiLB park's fields "just work" everywhere a key is already derived
+// from the live venue name with no BALLPARKS hit — parkBackdrop.js's MiLB
+// fallback (see its header) starts rendering a slate-card backdrop for a park
+// the moment this makes it a known registry field, with no code change there.
+//
+// Source list is GENERATED (scripts/gen-milb-ballparks.mjs → milb-ballparks
+// .json), not hand-listed like BALLPARKS — a MiLB park's identity is just its
+// name off the schedule feed, nothing here needs verifying by eye the way a
+// wall height does. One venue can host two clubs (Roger Dean Chevrolet
+// Stadium, Jupiter/Palm Beach), already deduped by the generator; `teams`
+// joins every hosted club into the admin panel's subgroup heading.
+//
+// ONE MORE DEDUPE, AGAINST THE OTHER TABLE: Sutter Health Park is both the
+// Athletics' temporary MLB home (BALLPARKS, estimated dimensions) and the
+// Sacramento River Cats' Triple-A park, so it comes back from statsapi under
+// sportId 11 too. A key BALLPARKS already claims skips here — one set of six
+// fields for it, the MLB one with its diagram, not a colliding second set of
+// five with no diagram.
+const MLB_PARK_KEYS = new Set(Object.keys(BALLPARKS))
+
+function milbParkFields() {
+  return Object.entries(MILB_BALLPARKS)
+    .filter(([key]) => !MLB_PARK_KEYS.has(key))
+    .sort(([, a], [, b]) => a.venue.localeCompare(b.venue))
+    .flatMap(([key, { venue, teams }]) => {
+      const base = { group: 'ballparksMilb', subgroup: `${venue} — ${teams.join(' / ')}` }
+      return [
+        {
+          ...base,
+          id: `ballpark.${key}Name`,
+          label: `${venue} — name shown`,
+          help: `Replaces "${venue}" as the name printed on the card. Leave empty to use the name from the schedule feed.`,
+          maxLength: 60,
+          multiline: false,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Wordmark`,
+          label: `${venue} — name as an image`,
+          help: 'A full https:// link to a PNG of the park\'s name, shown INSTEAD of the typeset name. Leave empty to print the name as text. A park wordmark is usually a sponsor\'s registered trademark — using one is your call and your licence to hold.',
+          maxLength: 500,
+          multiline: false,
+          pattern: PHOTO_URL,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Photo`,
+          label: `${venue} — photo URL`,
+          help: 'This park ships with no bundled photo. Must be a full https:// link to an image file. You are responsible for having the right to use whatever you point at here.',
+          maxLength: 500,
+          multiline: false,
+          pattern: PHOTO_URL,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Credit`,
+          label: `${venue} — photo credit`,
+          help: 'Only used with a photo URL above. Names the photographer and licence. Leave empty for a photo that needs no credit.',
+          maxLength: 160,
+          multiline: false,
+          default: '',
+        },
+        {
+          ...base,
+          id: `ballpark.${key}Focus`,
+          label: `${venue} — focal point`,
           help: 'Which part of the photo to keep when it is cropped to the widescreen box. Two numbers 0–100, across then down — "50 50" is centre, "50 20" favours the top, "50 80" the bottom. Leave empty for centre.',
           maxLength: 7,
           multiline: false,
@@ -345,6 +437,7 @@ export const FIELDS = [
     default: 'Back to the schedule',
   },
   ...parkFields(),
+  ...milbParkFields(),
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.

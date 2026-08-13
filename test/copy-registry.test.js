@@ -17,7 +17,8 @@ import {
   sanitizeOverrides,
 } from '../src/copy/registry.js'
 import { BALLPARKS } from '../src/lib/ballpark/ballparkData.js'
-import { CREDITS, creditLine, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
+import { CREDITS, creditLine, fieldIds, resolvePhoto, venueKey } from '../src/lib/ballpark/ballparkArt.js'
+import MILB_BALLPARKS from '../src/lib/data/milb-ballparks.json' with { type: 'json' }
 
 test('every field has a string default within its own maxLength', () => {
   for (const f of FIELDS) {
@@ -31,11 +32,13 @@ test('every field has a string default within its own maxLength', () => {
 // is a broken, unusable consent moment, so those defaults may never be empty.
 // The ballpark notes are the deliberate other case — BallparkCard renders the
 // paragraph only `&& note`, so an empty default means "no note yet", which is
-// the correct shipped state for a park nobody has written about. Splitting the
-// assertion keeps the strong guarantee exactly where it protects something.
+// the correct shipped state for a park nobody has written about. Same story
+// for every MiLB park field (`ballparksMilb`) — BallparkCard renders each of
+// them only when the owner has set one. Splitting the assertion keeps the
+// strong guarantee exactly where it protects something.
 test('every unconditionally-rendered field has a non-empty default', () => {
   for (const f of FIELDS) {
-    if (f.group === 'ballparks') continue
+    if (f.group === 'ballparks' || f.group === 'ballparksMilb') continue
     assert.ok(f.default.length > 0, `${f.id} default is non-empty`)
   }
 })
@@ -76,6 +79,44 @@ test('every ballpark has exactly its six fields, keyed off its canonical name', 
   // record, and must therefore share ONE set of fields, not carry two.
   assert.equal(actual.length, parks.length * 6)
   assert.ok(Object.keys(BALLPARKS).length > parks.length, 'alias keys exist to collapse')
+})
+
+// The MiLB counterpart — same photo/name/logo editor, minus the note (no
+// diagram sits beside it to introduce, see milbParkFields()'s header) and
+// minus any park a key collision hands to the MLB table instead (Sutter
+// Health Park: both the Athletics' temporary MLB home and the Sacramento
+// River Cats' Triple-A park).
+test('every MiLB ballpark ships its five fields, empty, with no note', () => {
+  const fields = FIELDS.filter((f) => f.group === 'ballparksMilb')
+  const parkCount = Object.keys(MILB_BALLPARKS).filter((k) => !(k in BALLPARKS)).length
+  assert.ok(parkCount > 100, 'the generated list carries a real MiLB-sized set')
+  assert.equal(fields.length, parkCount * 5)
+  for (const f of fields) {
+    assert.equal(f.default, '', `${f.id} ships empty`)
+    assert.ok(f.subgroup, `${f.id} names the park it belongs to`)
+    assert.match(f.id, /^ballpark\.[a-z0-9]+(Name|Wordmark|Photo|Credit|Focus)$/, `${f.id} is a slot id, not a bare note`)
+  }
+})
+
+test('a MiLB park already claimed by BALLPARKS (Sutter Health Park) keeps one set of fields, not two', () => {
+  const key = venueKey('Sutter Health Park')
+  assert.ok(key in BALLPARKS, 'sanity: this park really is in the MLB table')
+  assert.ok(key in MILB_BALLPARKS, 'sanity: statsapi really does list it under a MiLB sportId too')
+  const matches = FIELD_IDS.filter((id) => id.startsWith(`ballpark.${key}`))
+  // Six MLB-shaped fields (note + five slots), zero from the MiLB group.
+  assert.equal(matches.length, 6)
+  assert.equal(FIELDS.find((f) => f.id === `ballpark.${key}Name`).group, 'ballparks')
+})
+
+test('fieldIds for a MiLB venue resolves to ids the registry actually knows', () => {
+  const known = new Set(FIELD_IDS)
+  const key = venueKey('Fifth Third Field')
+  assert.ok(key in MILB_BALLPARKS, 'sanity: a real MiLB park from the generated list')
+  for (const id of Object.values(fieldIds(key))) {
+    assert.ok(known.has(id), `${id} is a real registry field`)
+  }
+  // No note field exists for a MiLB park.
+  assert.ok(!known.has(`ballpark.${key}`))
 })
 
 // The photo URL becomes an `<img src>` and the focal point becomes a CSS
@@ -230,7 +271,9 @@ test('field ids are unique and dotted group.slot', () => {
   for (const id of FIELD_IDS) {
     assert.ok(!seen.has(id), `${id} is unique`)
     seen.add(id)
-    assert.match(id, /^[a-zA-Z]+\.[a-zA-Z]+$/, `${id} is group.slot`)
+    // The slot half allows digits — venueKey() emits [a-z0-9], and a real MiLB
+    // venue name can carry one ("7 17 Credit Union Park" -> "717creditunion...").
+    assert.match(id, /^[a-zA-Z]+\.[a-zA-Z0-9]+$/, `${id} is group.slot`)
   }
 })
 

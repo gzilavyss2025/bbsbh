@@ -423,6 +423,17 @@ don't run these by hand.
   farm system changes at most once a year (the PDC realignment). Its sibling
   `gen-teams.mjs` + `gen-mono-logos.mjs` run on `update-teams.yml` for the same
   reason. App reads it via `src/api/team.js`.
+- `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
+  MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
+  e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
+  same workflow just wrote rather than a second statsapi fetch. This is the
+  MiLB counterpart to `src/lib/ballpark/ballparkData.js`'s hand-authored MLB
+  table, minus the measurements — a MiLB park carries no diagram, only a
+  copy-editable name/photo/logo, since nobody has hand-verified its dimensions.
+  `src/copy/registry.js`'s `milbParkFields()` derives one park's worth of
+  registry fields per entry, the same shape `parkFields()` derives from
+  `BALLPARKS`. Runs on `update-teams.yml` right after `gen-teams.mjs`, same
+  reasoning as `gen-mono-logos.mjs` above.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 

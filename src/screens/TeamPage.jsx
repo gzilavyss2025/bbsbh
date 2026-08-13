@@ -113,9 +113,11 @@ export function TeamPage({ id, asOf, sportId }) {
 
       {/* Ballpark — the diagram alongside its built/roof/capacity + ranked
           dimensions, in full (same content the lineup page's BallparkModal
-          shows). No door to another tab: this IS the full detail view. MLB
-          only in practice — renders nothing for a park not on file (every
-          MiLB park). */}
+          shows). No door to another tab: this IS the full detail view. The
+          diagram/dimensions half is MLB only (nobody has hand-verified a
+          MiLB park's outfield); a MiLB park still gets the photo/name/logo
+          half and the owner's gear, minus that section. Renders nothing at
+          all when the feed carries no venue name. */}
       <BallparkCard team={team} />
 
       {/* Form — the season grade and form rails, in full. This is the page's

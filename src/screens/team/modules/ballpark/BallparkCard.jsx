@@ -19,8 +19,20 @@ import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 // photo is a building, and the note is admin-typed prose about that building —
 // nothing here is derived from a game. `team.venue.name` comes from the weekly
 // static snapshot (gen-teams.mjs), so there is no live fetch either. Renders
-// nothing for a park not on file, the same graceful-degrade convention as
-// ballparkFor — which is every MiLB park.
+// nothing when there is no venue name at all — a lean feed row, same graceful
+// degrade every MiLB selector uses.
+//
+// MEASUREMENTS ARE MLB-ONLY; THE PHOTO/NAME HALF IS NOT. `ballparkData.js`'s
+// BALLPARKS table is a hand-verified diagram nobody has built for a MiLB
+// park, so `rankedDimensions` finds nothing for one and the diagram/dimensions
+// half of the card (`ballparkcard__layout`) simply does not render — the same
+// graceful-degrade convention `ballparkFor` documents. The hero (photo + name)
+// and the owner's gear are NOT gated on that lookup: they key off the venue's
+// own name either way (its canonical, alias-resolved name for an MLB park,
+// the raw feed name for anything else — MiLB has no alias table to resolve
+// through), so every park on file in `milb-ballparks.json`
+// (`scripts/gen-milb-ballparks.mjs`) gets the same photo/name/logo editor with
+// no diagram beside it.
 //
 // EDITING IN PLACE. The site owner gets a gear in the masthead that turns the
 // card into a form for its own copy fields — the park's name, its art, the
@@ -68,10 +80,8 @@ const BallparkEditFields = lazy(() =>
 // the wrapper becomes the focal-point target instead. A tap has to mean one
 // thing: leaving the Commons link live would send the owner off to Wikimedia
 // mid-edit, which is both the wrong action and one that loses the draft.
-function ParkPhoto({ park, photo, onPickFocus }) {
-  const alt = photo.creditText
-    ? `${park.name}. ${photo.creditText}`
-    : `${park.name}, seen from the stands`
+function ParkPhoto({ name, photo, onPickFocus }) {
+  const alt = photo.creditText ? `${name}. ${photo.creditText}` : `${name}, seen from the stands`
   const img = (
     <img
       className="ballparkcard__photo"
@@ -113,11 +123,17 @@ export function BallparkCard({ team }) {
   const venueName = team.venue?.name
   const park = venueName ? rankedDimensions(venueName) : null
 
-  // Art is looked up by the park's CANONICAL name, never the raw feed string,
-  // so a renamed venue resolves through its alias to the one shared record.
+  // The park's CANONICAL name, never the raw feed string, when we have one —
+  // so a renamed MLB venue resolves through its alias to the one shared
+  // record. A MiLB park has no alias table to resolve through, so the raw
+  // feed name IS canonical for it; that is also exactly what parkBackdrop.js
+  // already assumes for the same fallback (see its header). Either way `name`
+  // is what keys the copy fields (`milb-ballparks.json`'s entries are keyed
+  // the identical way) and what a bare-text card falls back to.
+  const name = park ? park.name : venueName
   // Computed before the early return below so the hooks under it always run —
-  // an MiLB park with no record still has to call them, in the same order.
-  const key = park ? venueKey(park.name) : ''
+  // a park with no venue name at all still has to call them, in the same order.
+  const key = name ? venueKey(name) : ''
   // No useMemo on either of these. React Compiler memoizes them, and a manual
   // useMemo keyed on `key` made it bail out of optimizing this component
   // entirely ("existing memoization could not be preserved") — which is a worse
@@ -134,19 +150,18 @@ export function BallparkCard({ team }) {
   const { setValue } = draft
   const pickFocus = useFocalPick(useCallback((focus) => setValue('focus', focus), [setValue]))
 
-  if (!park) return null
-
-  const distRows = park.rows.filter((r) => r.group === 'dist')
-  const wallRows = park.rows.filter((r) => r.group === 'wall')
+  if (!name) return null
 
   // Empty until the owner writes one in /admin — most parks have no note, and a
-  // card with an empty paragraph in it looks broken rather than unwritten.
-  const note = t(`ballpark.${key}`)
+  // card with an empty paragraph in it looks broken rather than unwritten. Only
+  // an MLB park (park != null) has a note field at all — see milbParkFields()'s
+  // header in registry.js for why a MiLB park skips it along with the diagram.
+  const note = park ? t(`ballpark.${key}`) : ''
   // What to paint: the saved values normally, the draft while editing (with a
   // local object URL standing in for an image not yet uploaded). One render
   // path either way, so there is no second layout only the owner ever sees.
   const shown = draft.shown
-  const name = resolveParkName(park.name, { name: shown.name, wordmark: shown.wordmark })
+  const title = resolveParkName(name, { name: shown.name, wordmark: shown.wordmark })
   // The bundled photo, or the owner's replacement, with the crop and credit
   // that belong to whichever won. All of these come from the copy store already
   // pattern-validated (registry.js), so nothing here needs re-checking — except
@@ -154,7 +169,7 @@ export function BallparkCard({ team }) {
   // safe for the same reason a controlled input is: the value came from this
   // browser's own file picker as an object URL, and the moment it is SAVED it
   // goes through the registry's choke point like everything else.
-  const photo = resolvePhoto(park.name, {
+  const photo = resolvePhoto(name, {
     photo: shown.photo,
     credit: shown.credit,
     focus: shown.focus,
@@ -173,43 +188,52 @@ export function BallparkCard({ team }) {
       <div className="thub-card__body">
         <div className="ballparkcard__hero">
           {photo && (
-            <ParkPhoto park={park} photo={photo} onPickFocus={draft.editing ? pickFocus : null} />
+            <ParkPhoto name={name} photo={photo} onPickFocus={draft.editing ? pickFocus : null} />
           )}
           <div className="ballparkcard__title">
-            {name.wordmark ? (
-              <img className="ballparkcard__logo" src={name.wordmark} alt={name.text} loading="lazy" />
+            {title.wordmark ? (
+              <img className="ballparkcard__logo" src={title.wordmark} alt={title.text} loading="lazy" />
             ) : (
-              <p className="ballparkcard__name">{name.text}</p>
+              <p className="ballparkcard__name">{title.text}</p>
             )}
           </div>
         </div>
 
         {draft.editing && (
           <Suspense fallback={null}>
-            <BallparkEditFields draft={draft} defaultName={park.name} />
+            <BallparkEditFields draft={draft} defaultName={name} />
           </Suspense>
         )}
 
-        <div className="ballparkcard__layout">
-          <BallparkDiagram
-            className="ballparkcard__diagram"
-            dist={park.dist}
-            wall={park.wall}
-            arc={park.arc}
-          />
-          <div className="ballparkcard__details">
-            <dl className="bpsheet__facts">
-              <Facts label="Opened" value={park.built} />
-              <Facts label="Roof" value={park.roof} />
-              <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
-            </dl>
-            {note && <p className="ballparkcard__note">{note}</p>}
-            <div className="bpsheet__ranks">
-              <RankGroup title="Outfield distances" rows={distRows} />
-              <RankGroup title="Wall heights" rows={wallRows} />
+        {/* The diagram/dimensions half — MLB only. A MiLB park has no
+            BALLPARKS record (no hand-verified distances, no digitized wall
+            polygon), so there is nothing here to draw or rank; the card ends
+            at the hero + gear above rather than showing a broken diagram. */}
+        {park && (
+          <div className="ballparkcard__layout">
+            <BallparkDiagram
+              className="ballparkcard__diagram"
+              dist={park.dist}
+              wall={park.wall}
+              arc={park.arc}
+            />
+            <div className="ballparkcard__details">
+              <dl className="bpsheet__facts">
+                <Facts label="Opened" value={park.built} />
+                <Facts label="Roof" value={park.roof} />
+                <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
+              </dl>
+              {note && <p className="ballparkcard__note">{note}</p>}
+              <div className="bpsheet__ranks">
+                <RankGroup
+                  title="Outfield distances"
+                  rows={park.rows.filter((r) => r.group === 'dist')}
+                />
+                <RankGroup title="Wall heights" rows={park.rows.filter((r) => r.group === 'wall')} />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
