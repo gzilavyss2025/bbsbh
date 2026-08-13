@@ -129,9 +129,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // what makes a windowed post-half hold safe to keep windowed. Nothing here
   // reveals: `stepCap` is still the single boundary, and past the commit the
   // whole half is already past it.
-  const bounds = windowed ? stepBounds(entries) : null
+  // Unconditional now (commit 3): a stacked half's trail needs the same step
+  // boundaries to build its scroll targets, not just a windowed half's single
+  // card. Cheap either way — a pure walk over `entries`, not a fetch.
+  const bounds = stepBounds(entries)
   const stepCountCap = effectiveCap ?? entries.length
-  const revealedSteps = bounds ? bounds.filter((b) => b <= stepCountCap).length : 0
+  const revealedSteps = bounds.filter((b) => b <= stepCountCap).length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -153,14 +156,15 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // inputs-not-identity discipline as the onLiveState effect below — `entries`
   // itself is a fresh array every render and would loop.
   //
-  // TEMPORARY, PENDING COMMIT 3: still gated `!windowed` here, same as
-  // `!focusOne` before it — the trail doesn't report/render for a stacked
-  // half yet. Commit 3 drops this gate so the trail builds items for stacked
-  // halves too (stacked ⇒ revealed is the invariant that makes that safe).
+  // Unconditional now (commit 3): the trail reports items for a stacked half
+  // too, so AtBatTrail has something to scroll to. Safe because `stacked ⇒
+  // revealed` — the three ways a half is stacked (`!currentSealed &&
+  // !postHalf`, or `postHalf && summaryOpen`) all reduce to `idx <=
+  // revealedThrough`, so there is no stacked state describing a step the
+  // reader hasn't themselves revealed.
   useEffect(() => {
-    if (!windowed) return
     onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
-  }, [windowed, revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
   // reported upward (InningViewer, via HalfInning) so the linescore grid's own
@@ -224,11 +228,24 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // so React reconciles the second card onto the first and the mark prints
   // with no hold. A step index is unique for the life of a half.
   let beatKey = null
-  if (bounds && revealedSteps > 0) {
+  if (windowed && revealedSteps > 0) {
     const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
     beatKey = i
     visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
   }
+
+  // Step-scroll targets for a STACKED half's trail (commit 3, decision 4): a
+  // trail chip click scrolls the stage to that step's first card instead of
+  // switching a window (there is no window to switch while stacked). Built
+  // only when it can be used — `visibleEntries`' index only lines up with its
+  // TRUE index into `entries` (and hence with `bounds`) when nothing above
+  // narrowed it to a mid-array window, which is exactly `beatKey == null`:
+  // the un-windowed case slices from 0 (a prefix, index-aligned) or not at
+  // all, and only the windowed branch above slices from `bounds[i-1]`
+  // (a mid-array window, NOT index-aligned). Cheap either way — a Map built
+  // from an array already in hand, not a second walk of the feed.
+  const stepStartEntryIndex =
+    beatKey == null ? new Map(bounds.map((b, i) => [i === 0 ? 0 : bounds[i - 1], i])) : null
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
@@ -392,9 +409,17 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           node = <EventNote entry={entry} />
         }
 
+        // Scroll target for a stacked half's trail (commit 3): the id names
+        // the STEP this entry starts, not the entry itself — only present on
+        // the entries `stepStartEntryIndex` actually marks as a step's first.
+        // Scoped by inning/half so the page-turn preview instance (a
+        // DIFFERENT half, mounted alongside the active one — InningPageTurn)
+        // can never collide with it.
+        const step = stepStartEntryIndex?.get(i)
         return (
           <div
             className="pbp__entry"
+            id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
             key={
               entry.kind === 'event'
                 ? `event-${i}`

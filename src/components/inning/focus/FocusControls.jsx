@@ -188,17 +188,19 @@ export function useFocusMode(curIdx, currentSealed) {
   }
 }
 
-// Focus mode's at-bat navigator, kept in its own component because it is one
-// idea: while a half is still being scored the innings viewer shows the
-// linescore and ONE at-bat (InningViewer's `focused`), and this is how the
-// reader moves within it. AtBatTrail (below) pages through the steps ALREADY
-// revealed — an at-bat plus the announcements bundled with it (ADR-0016's
-// stepping) — as a row of chips rather than the old bare ‹ Back / label /
-// Next › pager: with several at-bats already scored this half, "everything
-// but the current one is hidden" was the actual complaint the pager left
-// unaddressed (the trail keeps them all one tap away, not off screen).
-// `stepBack`/`stepNext` survive as arrow-key handling on the strip rather
-// than being deleted — a keyboard/swipe affordance, not a second UI.
+// The at-bat navigator, kept in its own component because it is one idea:
+// every step already revealed this half, as a row of chips rather than the
+// old bare ‹ Back / label / Next › pager. WINDOWED (a half still being
+// scored, or just closed and not yet paged away — `useFocusMode`'s
+// `windowed`), it's how the reader moves within the single-card window.
+// STACKED (every card already showing — a revealed half reached directly, or
+// "See the whole half"), it's a jump-to-card index instead (commit 3,
+// decision 4; see `scrollToStep` below). Either way it answers the same
+// complaint the old pager left unaddressed: with several at-bats already
+// scored, "everything but the current one is hidden/scrolled-past" is not
+// how a scorer reads back their own half — the trail keeps every card one
+// tap away. `stepBack`/`stepNext` survive as arrow-key handling on the strip
+// rather than being deleted — a keyboard/swipe affordance, not a second UI.
 //
 // The rest of what used to live here — the fold button that brought back the
 // reference band — is ReferencePanel.jsx now: a permanently open, tabbed
@@ -226,11 +228,41 @@ export function useFocusMode(curIdx, currentSealed) {
 // `display: contents` on a phone — it landed in .innings__grid as an
 // unstyleable flex item in its own right. The handler moved onto the cell
 // container in AtBatTrail, which is the element the keys actually belong to.
-export function FocusTrail({ focus, turning }) {
+// Scrolls the stage to a STACKED half's step (commit 3, decision 4) — the
+// trail's click behavior once there's no window left to switch. Reads the id
+// PlayByPlay.jsx publishes on that step's first card, scoped by inning/half
+// so it can never collide with the page-turn preview's (a different half,
+// mounted alongside the active one — InningPageTurn).
+//
+// Deliberately NOT `scrollIntoView`. ADR-0043 records that nothing in focus
+// mode called it, and the repo's own idiom for a deliberate scroll —
+// SeasonSeriesStrip.jsx, ClubPicker.jsx, SplitsVsTeam.jsx, TeamFilterStrip.jsx
+// — writes the offset directly rather than reaching for that DOM API, since
+// scrollIntoView drags every scrollable ancestor to satisfy its own `block`
+// option, not just the one the caller means. This is a distinguishable, new
+// exception to that ADR's note: a click-triggered jump, not an automatic one
+// — see this refactor's own ADR-0043 amendment. The band is sticky at no
+// width (styles/focus/stage.css), so a small fixed offset is enough; do not
+// reintroduce a `--console-hud-h`-style scroll-margin, which stage.css
+// records as a rule that outlived what it was for.
+function scrollToStep(inning, half, step) {
+  const el = document.getElementById(`pbp-${inning}-${half}-step-${step}`)
+  if (!el) return
+  const top = el.getBoundingClientRect().top + window.scrollY - 16 // --space-4
+  window.scrollTo({ top, behavior: motionIsReduced() ? 'auto' : 'smooth' })
+}
+
+export function FocusTrail({ focus, turning, inning, half }) {
   const { windowed, cursor, steps: total, items, stepBack, stepNext, goToStep, followLatest } = focus
-  // Stacked-half trail behavior (commit 3) is not implemented yet — this stays
-  // windowed-only for now.
-  if (!windowed || total <= 1) return null
+  if (total <= 1) return null
+  const stacked = !windowed
+  // WINDOWED: `goToStep`/`stepBack`/`stepNext` switch the single-card window,
+  // same as always. STACKED: the same three verbs scroll instead — there is
+  // no window, so a chip click or an arrow key moves the READER's eye, not
+  // the DOM's content.
+  const onSelect = stacked ? (i) => scrollToStep(inning, half, i) : goToStep
+  const onStepBack = stacked ? () => scrollToStep(inning, half, Math.max(0, cursor - 1)) : stepBack
+  const onStepNext = stacked ? () => scrollToStep(inning, half, Math.min(total - 1, cursor + 1)) : stepNext
   return (
     <AtBatTrail
       items={items}
@@ -242,12 +274,15 @@ export function FocusTrail({ focus, turning }) {
       // though the reader WAS caught up. `cursor` is already resolved
       // against `last` (useFocusMode), so comparing it directly is the same
       // "am I on the newest step" question `step == null` was trying to ask.
+      // Unused while stacked (AtBatTrail hides the button then) but still
+      // correct to compute — `cursor` stays meaningful either way.
       following={cursor === total - 1}
-      onSelect={goToStep}
-      onStepBack={stepBack}
-      onStepNext={stepNext}
+      onSelect={onSelect}
+      onStepBack={onStepBack}
+      onStepNext={onStepNext}
       onFollowLatest={followLatest}
       turning={turning}
+      stacked={stacked}
     />
   )
 }

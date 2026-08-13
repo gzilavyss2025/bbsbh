@@ -828,7 +828,7 @@ export function InningViewer({
               top-to-bottom scan. The post-half "See the whole half" link
               stays under the card, by the bar it hands off to —
               `FocusControls` below still owns that link. */}
-          <FocusTrail focus={focus} turning={turning} />
+          <FocusTrail focus={focus} turning={turning} inning={effInning} half={effHalf} />
 
           {/* The half's play-by-play (paired with its strike zone on the wide
               layout) plus the R/H/E/LOB + pitch-stat/WPA row beneath it — see
