@@ -203,13 +203,20 @@ const CLOSE_FIGURES = [
 ]
 
 // The real `.pbp__code` mark wearing the real `--ink` class, at the hero size
-// focus mode gives it — not a copy of the keyframe. `--ink-set` is set here the
-// same way PlayByPlay.jsx sets it on `.pbp__play`, off beats.js, so this page
-// can never quietly demo a different duration than the app runs.
+// focus mode gives it — not a copy of the keyframe. `--ink-set` is set on
+// `.pbp__play` exactly as PlayByPlay.jsx sets it, off beats.js, so this page can
+// never quietly demo a different duration than the app runs.
+//
+// THE `.pbp__play` WRAPPER IS NOT DECORATION. It is a flex container, which
+// blockifies the mark inside it — and a bare inline <span> takes no transform at
+// all, so the first version of this demo animated a `scale` that could never
+// paint. Stand the mark in the box it actually lives in.
 function InkSetDemo() {
   return (
-    <span className="innings--focus" style={{ '--ink-set': `${INK_SET_MS}ms` }}>
-      <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
+    <span className="innings--focus">
+      <span className="pbp__play" style={{ '--ink-set': `${INK_SET_MS}ms` }}>
+        <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
+      </span>
     </span>
   )
 }

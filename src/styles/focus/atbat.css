@@ -451,8 +451,25 @@
   }
 }
 
+/* `display` IS LOAD-BEARING, and its absence is what made this rule do nothing
+   the first time it shipped. `.pbp__code` is a <span>, and neither `transform`
+   nor the individual transform properties apply to a non-replaced INLINE box —
+   the animation runs, `getComputedStyle().scale` reports 1.03, and the painted
+   box never changes size. On the card itself the point is moot (`.pbp__play` is
+   a flex container, so its children are blockified anyway), which is exactly why
+   it went unnoticed: the app was fine and /animation-lab, where the mark stood
+   on its own, was silently showing a still.
+
+   `inline-block` rather than `block` so the class stays droppable anywhere; it
+   is a no-op in every flex/absolute host this mark actually has.
+
+   LINEAR, NOT `--ease-out`. At 40ms the first frame lands at ~42% progress, and
+   `--ease-out` (cubic-bezier(0.16, 1, 0.3, 1)) is ~97% done by then — so the
+   overshoot was spent before a single frame could draw it. A press this short
+   has no room for a curve: linear puts the 3% across the frames that exist. */
 .pbp__code--ink {
-  animation: focus-ink-set var(--ink-set, 40ms) var(--ease-out);
+  display: inline-block;
+  animation: focus-ink-set var(--ink-set, 40ms) linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
