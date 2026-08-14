@@ -37,7 +37,14 @@ const PITCHER_COLS = ['R/L', 'IP', 'P', 'BF', 'H', 'R', 'ER', 'BB', 'K']
 const PITCHER_ROWS = 8
 const SCOREBOARD_INNINGS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-export function Scorecard({ side = 'top', view = null, notes = null, onCellTap = null }) {
+export function Scorecard({
+  side = 'top',
+  view = null,
+  notes = null,
+  onCellTap = null,
+  onFrontierTap = null,
+  fresh = null,
+}) {
   return (
     <div className="scorecard">
       <ScorecardHeader side={side} view={view} />
@@ -46,6 +53,8 @@ export function Scorecard({ side = 'top', view = null, notes = null, onCellTap =
         grid={view?.grid ?? null}
         notes={notes}
         onCellTap={onCellTap}
+        onFrontierTap={onFrontierTap}
+        fresh={fresh}
       />
       <ScorecardFooter view={view} />
     </div>

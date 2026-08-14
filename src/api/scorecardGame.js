@@ -40,7 +40,7 @@ import {
   halfIndex,
 } from './select.js'
 import { scorecardView } from './loadScorecard.js'
-import { computeHalfInningFeed, battingSlot, pitchLadder } from './playbyplay.js'
+import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary } from './playbyplay.js'
 import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
 import { computePitcherLines } from './pitchers.js'
@@ -109,6 +109,52 @@ function lastPlayedHalfIndex(feed) {
   return halfIndex(last.about.inning, last.about.halfInning)
 }
 
+// halfIndex's inverse: the (inning, half, batting side-of-sheet) a half-index
+// names. Structural, same footing as halfIndex itself.
+function halfAt(idx) {
+  const inning = Math.floor(idx / 2) + 1
+  const half = idx % 2 === 1 ? 'bottom' : 'top'
+  return { inning, half, side: half === 'top' ? 'top' : 'bottom' }
+}
+
+// The sheet's own reveal step — the state the live scorecard's face-down
+// frontier card plays against. The half AFTER `through` is the one being
+// stepped; `count` is how many of its feed entries are already revealed (the
+// same entry-count cursor the innings viewer's at-bat stepping persists,
+// ADR-0016, so the two surfaces share one mark and can never double-reveal).
+// Returns null when there is nothing to step: the game hasn't reached that
+// half, or the sheet is fully caught up to a finished game.
+//
+//   total     — entries in the stepped half so far (grows live via Refresh)
+//   nextCount — the cursor after one more step (one plate appearance plus
+//               the notes trailing it — nextStepBoundary's bundling)
+//   halfOver  — the half has actually ENDED (the game moved past it, or is
+//               Final): stepping past `total` may then commit the whole half
+//               (revealTo); a still-live half instead waits for new entries.
+export function scorecardStep(feed, through, countFor = () => 0) {
+  if (!feed) return null
+  const idx = through + 1
+  const last = lastPlayedHalfIndex(feed)
+  if (last < 0 || idx > last) return null
+  const { inning, half, side } = halfAt(idx)
+  const battingSide = half === 'top' ? 'away' : 'home'
+  const entries = computeHalfInningFeed(feed, inning, half, battingSide)
+  if (entries.length === 0) return null
+  // The persisted cursor for THIS half (0 for any other half — the caller
+  // hands in useRevealProgress's own atBatCountFor, so the sheet and the
+  // innings viewer read one mark).
+  const count = countFor(inning, half)
+  return {
+    inning,
+    half,
+    side,
+    count,
+    total: entries.length,
+    nextCount: nextStepBoundary(entries, count),
+    halfOver: idx < last || selectIsFinal(feed),
+  }
+}
+
 // How many inning columns the sheet shows for a given clamp: regulation, plus
 // one extra at a time as each extra's bottom half clears `through` — the same
 // walk as revealProgressCore's unlockedInnings (extras never spoil, ADR-0008).
@@ -143,7 +189,18 @@ function visibleInnings(feed, through) {
 // (`endCells`): for each finished half, the next-due batter's unused box in
 // that inning's column, where the scorer slashes "the inning ended before
 // this slot; he leads off the next."
-export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = Infinity } = {}) {
+//
+// `step` is the live sheet's play-in-place layer (see scorecardStep): the
+// half at `step.halfIdx` — always through+1, the reveal frontier — shows its
+// first `step.count` entries' cards even though the half isn't committed,
+// exactly the cards the innings viewer's own stepping would show for the
+// same persisted cursor. The stepped half deliberately contributes NOTHING
+// else: no P/TP/LOB line, no inning-end diagonal, no scoreboard cell — those
+// are whole-half facts, and they ink on commit (ADR-0016's collapse), never
+// mid-step. When there is a next plate appearance to reveal on THIS side's
+// sheet, the grid also carries `frontier` — the { slot, colIndex } cell that
+// card will occupy, where the page renders its face-down seal.
+export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = Infinity, step = null } = {}) {
   if (!feed) return null
   const battingSide = side === 'bottom' ? 'home' : 'away'
   const half = side === 'bottom' ? 'bottom' : 'top'
@@ -151,6 +208,14 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   const innings = Array.from({ length: maxInning }, (_, i) => i + 1)
   const lastHalf = lastPlayedHalfIndex(feed)
   const isFinal = selectIsFinal(feed)
+  // The stepped half, when it belongs to this side's sheet and its inning
+  // column is on the sheet (it always is — through+1 can only reach an extra
+  // inning once the previous bottom committed, which is exactly when
+  // visibleInnings grows).
+  const stepHere =
+    step != null && halfAt(step.halfIdx).side === side && halfAt(step.halfIdx).inning <= maxInning
+      ? { inning: halfAt(step.halfIdx).inning, count: step.count }
+      : null
 
   const descByAtBat = new Map()
   for (const p of feed?.liveData?.plays?.allPlays ?? []) {
@@ -177,9 +242,19 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   // decides whose empty box gets the inning-end diagonal below.
   const lastCardByInning = {}
 
+  // The frontier's target cell, filled in below once the columns exist.
+  let frontier = null
+  let frontierSub = null
+
   for (const inning of innings) {
-    if (halfIndex(inning, half) > through) continue
-    for (const card of computeHalfInningFeed(feed, inning, half, battingSide)) {
+    const idx = halfIndex(inning, half)
+    const stepped = stepHere != null && stepHere.inning === inning && idx === through + 1
+    if (idx > through && !stepped) continue
+    const entries = computeHalfInningFeed(feed, inning, half, battingSide)
+    // A stepped half shows only the entries the cursor has revealed; a
+    // committed half shows them all.
+    const visibleEntries = stepped ? entries.slice(0, stepHere.count) : entries
+    for (const card of visibleEntries) {
       // The extra-innings automatic runner (`kind: 'placed'`) took no plate
       // appearance, but he has a real battingOrder — he's by rule the
       // previous half's last batter — so `battingSlot` resolves him a row
@@ -245,15 +320,41 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     }
   }
 
+  // Where the NEXT plate appearance of the stepped half will land: the first
+  // at-bat entry at or past the cursor names the batter, his slot names the
+  // row, and the cards he already has in this inning name the sub-column.
+  // Resolved before the columns are built so a bat-around frontier can widen
+  // its inning by the one extra column its face-down card needs.
+  if (stepHere != null) {
+    const entries = computeHalfInningFeed(feed, stepHere.inning, half, battingSide)
+    const next = entries.slice(stepHere.count).find((e) => e.kind === 'atbat')
+    if (next) {
+      const slot = battingSlot(feed, battingSide, next.batterId)
+      if (slot >= 1 && slot <= 9) {
+        frontierSub = slotData[slot - 1].byInning[stepHere.inning]?.length ?? 0
+        frontier = { slot }
+      }
+    }
+  }
+
   // How many sub-columns each inning needs (>=1 so an un-batted inning still
-  // shows a blank column), then the flattened column list every row shares.
+  // shows a blank column, and the frontier's inning always has room for its
+  // face-down card), then the flattened column list every row shares.
   const columns = []
   for (const inning of innings) {
     let width = 1
     for (const s of slotData) width = Math.max(width, s.byInning[inning]?.length ?? 0)
+    if (frontier != null && stepHere?.inning === inning) {
+      width = Math.max(width, frontierSub + 1)
+    }
     for (let sub = 0; sub < width; sub += 1) {
       columns.push({ inning, sub, inningStart: sub === 0 })
     }
+  }
+  if (frontier != null) {
+    frontier.colIndex = columns.findIndex(
+      (c) => c.inning === stepHere.inning && c.sub === frontierSub,
+    )
   }
 
   // The inning-end diagonal, drawn where the #22's scorer draws it: when a
@@ -271,6 +372,10 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   for (const inning of innings) {
     const last = lastCardByInning[inning]
     if (!last || last.interrupted) continue
+    // A stepped (uncommitted) half never takes the slash mid-step, even on a
+    // Final game being replayed — the diagonal is a whole-half fact and inks
+    // on commit, like the P/TP/LOB line below.
+    if (halfIndex(inning, half) > through) continue
     if (!(halfIndex(inning, half) < lastHalf || isFinal)) continue
     const nextSlot = (last.slot % 9) + 1
     const sub = slotData[nextSlot - 1].byInning[inning]?.length ?? 0
@@ -345,7 +450,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     { ab: 0, h: 0, r: 0, rbi: 0 },
   )
 
-  return { columns, innings, slots, endMarks, perInning, totals }
+  return { columns, innings, slots, endMarks, perInning, totals, frontier }
 }
 
 // The sheet's scoreboard block, #22 shape: runs per inning for BOTH clubs over
@@ -441,12 +546,14 @@ export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through =
 // above, for a given half. `loaded` is loadScorecardGame's shape, or any
 // `{ feed, managers, uniformBrief }` a screen assembled from useGameData's
 // own fetches (see scorecardView's header for the accepted shapes).
-export function scorecardFull(loaded, side, { through = Infinity } = {}) {
+export function scorecardFull(loaded, side, { through = Infinity, step = null } = {}) {
   const view = scorecardView(loaded, side)
   if (!view) return null
   return {
     ...view,
-    grid: scorecardPlays(loaded.feed, side, { through }),
+    // Only the GRID takes the step: the scoreboard and the pitcher table are
+    // whole-half readings on this sheet and ink on commit, mid-step never.
+    grid: scorecardPlays(loaded.feed, side, { through, step }),
     scoreboard: scorecardScoreboard(loaded.feed, { through }),
     pitchers: scorecardPitchers(loaded.feed, side, { through }),
   }

@@ -33,6 +33,30 @@
   margin-top: var(--space-4);
 }
 
+/* The turn handoff: the next at-bat belongs to the OTHER club's page of the
+   book, and this chip both says so and does the flip. Kraft, like the seal
+   it stands in for. */
+.scflip {
+  display: block;
+  width: 100%;
+  margin: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: var(--seal-cover);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-align: left;
+  color: var(--text-on-seal);
+}
+.scflip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* Dev-only "load a gamePk" row on the Scorecard Lab (not a product surface). */
 .sc-labload {
   display: flex;
