@@ -20,13 +20,20 @@ import { cellNote } from '../../lib/scorecardNotes.js'
 //    widens into extra columns (the inning number only labels its first). Each
 //    slot renders one row per player who occupied it — the starter, then a
 //    sub-line for each substitute — so a pinch-hitter gets his own name and
-//    line instead of sharing the starter's. Inning-end diagonals land on the
-//    slot's first row (`endCells`), and the foot row carries that inning's
-//    P/TP/LOB once its half is revealed.
+//    line instead of sharing the starter's. Leads-off-next diagonals land on
+//    the slot's first row (`endCells`, valued by the inning that ended), and
+//    the foot row carries that inning's P/TP/LOB once its half is revealed.
 //
 // `notes` + `onCellTap` are the override layer (lib/scorecardNotes.js): each
 // cell renders its own note over the derived marks, and on an editable
 // surface tapping a filled cell hands its card up to the notation editor.
+//
+// `flip` is the TURN HANDOFF, and it rides the sheet rather than a banner
+// above it: `{ inning, label, onFlip }` turns that one inning's diagonal —
+// the half that just ended, never an older one — into the button that flips
+// to the other club's page. The mark stays exactly where the scorer put it;
+// it just becomes the thing you press to keep going. Every older diagonal
+// stays plain notation.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
 const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -77,6 +84,7 @@ export function ScorecardSheet({
   onCellTap = null,
   onFrontierTap = null,
   fresh = null,
+  flip = null,
 }) {
   // Normalize both modes to a flat column list: each column knows its header
   // label (an inning number on its first sub-column, else blank), whether it
@@ -150,6 +158,11 @@ export function ScorecardSheet({
                     grid?.frontier != null &&
                     grid.frontier.slot === slot &&
                     grid.frontier.colIndex === col.colIndex
+                  // The inning this box's leads-off-next diagonal belongs to,
+                  // if it carries one — and whether that's the ONE diagonal
+                  // the turn handoff hangs on this render.
+                  const endInning = col.colIndex != null ? row.endCells?.[col.colIndex] ?? null : null
+                  const isFlip = flip != null && endInning != null && endInning === flip.inning
                   return (
                     <td
                       key={col.key}
@@ -164,11 +177,22 @@ export function ScorecardSheet({
                         >
                           <span className="sc-ab__sealtext">Tap</span>
                         </button>
+                      ) : isFlip ? (
+                        <button
+                          type="button"
+                          className="sc-ab sc-ab--end sc-ab__flip"
+                          onClick={flip.onFlip}
+                          aria-label={`${flip.label} — flip the sheet`}
+                        >
+                          <span className="sc-ab__fliptext">
+                            {flip.label} <span aria-hidden="true">›</span>
+                          </span>
+                        </button>
                       ) : (
                         <AtBatBox
                           atbat={card}
                           note={cellNote(notes, card?.atBatIndex)}
-                          endMark={Boolean(col.colIndex != null && row.endCells?.[col.colIndex])}
+                          endMark={endInning != null}
                           onEdit={onCellTap && card ? () => onCellTap(card) : null}
                           fresh={Boolean(card && fresh?.has(card.atBatIndex))}
                         />

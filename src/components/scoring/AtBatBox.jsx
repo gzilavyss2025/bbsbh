@@ -28,7 +28,11 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    value when one is set, and the box wears a small amber corner so a
 //    hand-edited cell is tellable from a derived one at a glance. An override
 //    restyles THIS BOX only — every tally keeps reading the feed.
-//  • `endMark` — the inning-end diagonal, slashed through the next-due
+//  • `endsHalf` (on the card) — the inning-end rule, ruled into the
+//    bottom-right corner of the box of the plate appearance that CLOSED the
+//    half. The scorer's "the inning ended here", drawn on the last box of
+//    the half itself rather than on a later batter's.
+//  • `endMark` — the leads-off-next diagonal, slashed through the next-due
 //    batter's unused box when a half ends (scorecardPlays' endCells).
 //  • `onEdit` — on an editable surface, the whole box becomes the tap target
 //    that opens the notation editor for this plate appearance.
@@ -113,7 +117,7 @@ export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = 
     <div
       className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''} ${note ? 'sc-ab--noted' : ''} ${
         endMark ? 'sc-ab--end' : ''
-      } ${fresh ? 'sc-ab--fresh' : ''}`}
+      } ${atbat?.endsHalf ? 'sc-ab--halfend' : ''} ${fresh ? 'sc-ab--fresh' : ''}`}
     >
       <div className="sc-ab__main">
         <div className="sc-ab__head">

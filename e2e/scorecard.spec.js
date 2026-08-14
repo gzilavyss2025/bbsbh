@@ -61,6 +61,7 @@ test('sealed game: the sheet renders staged but inkless — nothing score-shaped
   await expect(page.locator('.sc-sheet')).toBeVisible()
   await expect(page.locator('.sc-ab__center')).toHaveCount(0)
   await expect(page.locator('.sc-ab--end')).toHaveCount(0)
+  await expect(page.locator('.sc-ab--halfend')).toHaveCount(0)
   const outs = await page.locator('.sc-ab__out').allTextContents()
   expect(outs.join('')).toBe('')
   const types = await page.locator('.sc-ab__type').allTextContents()
@@ -100,9 +101,14 @@ test('full reveal: the completed sheet, its totals, decisions, marks and PR case
   await expect(page.locator('.sc-final tbody tr').first()).toContainText('10')
   await expect(page.locator('.sc-decisions')).toContainText('Robert Gasser')
   await expect(page.locator('.sc-decisions')).toContainText('Hunter Dobbins')
-  // Inning-end diagonals drawn on the unused next-batter boxes.
+  // Leads-off-next diagonals drawn on the unused next-batter boxes…
   const endMarks = await page.locator('.sc-ab--end').count()
   expect(endMarks).toBeGreaterThanOrEqual(7)
+  // …and the inning-end rule closing each half's own last box: nine halves,
+  // nine ruled boxes, on a fully revealed 9-inning sheet.
+  await expect(page.locator('.sc-ab--halfend')).toHaveCount(9)
+  // Nothing left to step, so no diagonal is a door.
+  await expect(page.locator('.sc-ab__flip')).toHaveCount(0)
   // The pinch-runner case: Bauers' 7th-inning diamond is filled (his run came
   // around under Mitchell's legs) with the red PR mark penciled by the base.
   await expect(page.locator('.sc-sheet').getByText('Bauers, Jake')).toBeVisible()
@@ -157,11 +163,16 @@ test('the lineup page carries the door to the preview card, not the scorecard', 
   await expect(page.locator('.posterstudio')).toBeVisible({ timeout: 20000 })
 })
 
-test('the sheet plays: flip chip, frontier seal, one PA per tap, commit inks the half', async ({ page }) => {
+test('the sheet plays: flip mark, frontier seal, one PA per tap, commit inks the half', async ({ page }) => {
   await openWithMark(page, THROUGH_TOP3) // frontier = bottom 3, the other sheet
-  // The turn handoff chip names the half and flips to it.
-  const chip = page.locator('.scflip')
-  await expect(chip).toContainText(/bottom 3 is next/i)
+  // The turn handoff rides the sheet's own leads-off-next diagonal — the one
+  // for the half that just ended (top 3) — not a banner over the page.
+  await expect(page.locator('.scflip')).toHaveCount(0)
+  const chip = page.locator('.sc-ab__flip')
+  await expect(chip).toHaveCount(1)
+  await expect(chip).toContainText(/bottom 3/i)
+  // Every OLDER diagonal stays plain notation: innings 1 and 2 slashed too.
+  expect(await page.locator('.sc-ab--end').count()).toBeGreaterThanOrEqual(3)
   await chip.click()
   // The face-down frontier card sits on the sheet; tapping reveals ONE plate
   // appearance, and nothing whole-half inks mid-step.
@@ -181,5 +192,8 @@ test('the sheet plays: flip chip, frontier seal, one PA per tap, commit inks the
     .poll(async () => page.evaluate(() => window.localStorage.getItem('bbsbh:reveal:823035')))
     .toBe('5')
   await expect(bottom3Cell).toHaveText('0')
-  await expect(page.locator('.scflip')).toContainText(/top 4 is next/i)
+  // The turn hands back to the top sheet, on the bottom sheet's own newest
+  // diagonal — and the half it just closed now wears the inning-end rule.
+  await expect(page.locator('.sc-ab__flip')).toContainText(/top 4/i)
+  expect(await page.locator('.sc-ab--halfend').count()).toBe(3)
 })

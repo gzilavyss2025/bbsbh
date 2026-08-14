@@ -76,9 +76,9 @@ score on paper; this is the margin note in your copy of the book.
   batter's diamond once the fixture was trimmed past the substitution
   playEvents (the fixture now keeps them; the Bauers/Mitchell case is
   pinned).
-- The inning-end diagonal is derived, not stored: the next-due batter's
-  unused box in a FINISHED half. A revealed half still being played draws no
-  premature slash.
+- The end-of-half marks are derived, not stored, and only for a FINISHED
+  half. A revealed half still being played draws neither prematurely. (The
+  third amendment below splits them in two.)
 - An override exists only for a cell the user has revealed — a sealed cell is
   never rendered, so there is nothing to tap. If overrides ever grow a cloud
   mirror, they are consented user annotations, never a reveal source.
@@ -97,9 +97,9 @@ disagree about where you are.
 Three rules keep the game honest:
 
 - **Mid-step, only cards.** A stepped half contributes its revealed cards
-  and nothing else — no P/TP/LOB line, no scoreboard cell, no inning-end
-  diagonal. Those are whole-half facts and they ink on commit, which is the
-  turn-end beat.
+  and nothing else — no P/TP/LOB line, no scoreboard cell, neither
+  end-of-half mark. Those are whole-half facts and they ink on commit, which
+  is the turn-end beat.
 - **The frontier is derived, never stored.** It is always the half after
   `revealedThrough`; under the Scores Unlocked pass the render mark covers
   the whole game, so the seal simply never renders and nothing on the page
@@ -144,3 +144,44 @@ here.
 `src/api/spoiler-manifest.json`'s `scorecardGame.js` entry drops
 `screens/boxscore/BoxScorecard.jsx` from its importer list — one caller now,
 the live page, plus the DEV-only Lab.
+
+## Amendment (2026-08-14): two marks close a half, and one of them is the door
+
+A finished half used to leave ONE mark: the corner-to-corner diagonal through
+the next-due batter's unused box. That mark was carrying two jobs at once —
+"the inning ended" and "this slot leads off the next" — and it was drawing
+the first of them in the wrong place, a row or more below the box where the
+half actually ended. A scorer closing a frame rules the LAST box of it.
+
+So the two are split:
+
+- **The inning-end rule** (`endsHalf` on the card, `.sc-ab--halfend`) — a
+  short horizontal rule in the bottom-right corner of the box of the plate
+  appearance that CLOSED the half. It is set even when that last card is
+  `interrupted` (the half died on the bases mid-count): the half ended at
+  that box either way, which is the only thing this mark claims.
+- **The leads-off-next diagonal** (`endMarks`/`endCells`, `.sc-ab--end`) —
+  unchanged in where it lands and what it means, and still absent after an
+  interrupted last card, since that batter bats again next inning and his box
+  in the ended inning is already spoken for.
+
+Both take the same gate as before: committed AND actually ended.
+
+The diagonal then takes on the TURN HANDOFF, which used to be a kraft banner
+above the sheet (`.scflip`, "Bottom 3 is next — flip the sheet ›"). When the
+next at-bat belongs to the other club's page, the diagonal of the half that
+JUST ended becomes the button that flips to it — the mark stays exactly where
+the scorer put it and simply becomes pressable, wearing the destination in
+kraft. The banner is gone.
+
+Only that one diagonal is a door. `endCells` is therefore valued by the
+INNING that ended rather than a bare `true`, and `ScorecardPage` names the
+inning it wants (`stepInfo`'s half, minus one when the next half is a top) so
+every older diagonal stays plain pencil. Under the Scores Unlocked pass
+`stepInfo` is null, so no diagonal is pressable — the same construction that
+already keeps the frontier seal from rendering.
+
+A half whose last card was interrupted leaves no diagonal, so it offers no
+flip button. That is not a dead end: the Top/Bottom control above the sheet
+has always been the general way across, and the banner it replaced was a
+prompt, never the only path.

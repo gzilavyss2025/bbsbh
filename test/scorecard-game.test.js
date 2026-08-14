@@ -186,13 +186,16 @@ test('visible innings match unlockedInnings at every mark (the two walks never d
   }
 })
 
-test('the inning-end diagonal lands on the next-due batter’s unused box', () => {
+test('the leads-off-next diagonal lands on the next-due batter’s unused box', () => {
   const grid = scorecardPlays(FEED, 'top')
   assert.ok(grid.endMarks.length >= 7, `only ${grid.endMarks.length} end marks on a 9-inning sheet`)
   for (const mark of grid.endMarks) {
     const slot = grid.slots[mark.slot - 1]
     assert.equal(slot.cells[mark.colIndex], undefined, 'the slashed box must be empty')
-    assert.equal(slot.endCells[mark.colIndex], true)
+    // Valued by the inning that ended, never a bare `true` — the live page's
+    // turn handoff names ONE inning's diagonal and leaves the rest plain.
+    assert.equal(slot.endCells[mark.colIndex], mark.inning)
+    assert.equal(grid.columns[mark.colIndex].inning, mark.inning)
   }
   // Pin inning 1 exactly: the slot after the half's last plate appearance.
   const top1 = computeHalfInningFeed(FEED, 1, 'top', 'away').filter((c) => c.kind === 'atbat')
@@ -286,6 +289,53 @@ test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
     scorecardScoreboard(feed, { through: halfIndex(9, 'top') }).innings.length,
     9,
   )
+})
+
+test('the inning-end rule marks the box the half actually ENDED on', () => {
+  const grid = scorecardPlays(FEED, 'top')
+  const marked = placedCards(grid).filter(({ card }) => card.endsHalf)
+  // One per played half of a 9-inning sheet.
+  assert.equal(marked.length, 9)
+  for (let n = 1; n <= 9; n++) {
+    const forInning = marked.filter((m) => m.inning === n)
+    assert.equal(forInning.length, 1, `inning ${n} has exactly one inning-end rule`)
+    // It is the LAST plate appearance of that half, by feed order.
+    const half = computeHalfInningFeed(FEED, n, 'top', 'away').filter((c) => c.kind === 'atbat')
+    assert.equal(forInning[0].card.atBatIndex, half[half.length - 1].atBatIndex)
+  }
+  // The rule and the diagonal are different boxes: the rule closes the half's
+  // own last box, the diagonal slashes the NEXT-due batter's unused one.
+  for (const mark of grid.endMarks) {
+    const ruled = marked.find((m) => m.inning === mark.inning)
+    assert.notEqual(
+      `${ruled.slot}:${ruled.card.atBatIndex}`,
+      `${mark.slot}:${grid.slots[mark.slot - 1].cells[mark.colIndex]?.atBatIndex}`,
+    )
+  }
+})
+
+test('the inning-end rule is a whole-half fact: it inks on commit, never mid-step', () => {
+  // Walk top 1 to its last cursor. The half is not committed at any of them,
+  // so no card may carry the rule — same hold as the P/TP/LOB line.
+  let count = 0
+  for (;;) {
+    const s = scorecardStep(FEED, -1, () => count)
+    const grid = scorecardPlays(FEED, 'top', { through: -1, step: { halfIdx: 0, count } })
+    for (const { card } of placedCards(grid)) {
+      assert.ok(!card.endsHalf, `cursor ${count} ruled a box before the half committed`)
+    }
+    if (s.nextCount >= s.total) break
+    count = s.nextCount
+  }
+  // Committed: now it inks.
+  const done = scorecardPlays(FEED, 'top', { through: halfIndex(1, 'top') })
+  assert.equal(placedCards(done).filter(({ card }) => card.endsHalf).length, 1)
+  // And a half the game has REACHED but not finished takes neither mark: the
+  // top of 9 is revealed here, but nothing past it has been played yet.
+  const live = { ...FEED, gameData: { ...FEED.gameData, status: { abstractGameState: 'Live' } } }
+  const open = scorecardPlays(live, 'bottom', { through: halfIndex(9, 'bottom') })
+  assert.equal(placedCards(open).filter(({ card }) => card.endsHalf).length, 8)
+  assert.ok(!open.endMarks.some((m) => m.inning === 9))
 })
 
 // ---------------------------------------------------------------------------
