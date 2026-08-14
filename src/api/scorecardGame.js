@@ -249,7 +249,25 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     const idx = halfIndex(inning, half)
     const stepped = stepHere != null && stepHere.inning === inning && idx === through + 1
     if (idx > through && !stepped) continue
-    const entries = computeHalfInningFeed(feed, inning, half, battingSide)
+    // The cursor is passed as computeHalfInningFeed's own `stepCap`, not just
+    // used to slice below — the two do DIFFERENT jobs and the sheet needs
+    // both. Slicing drops the cards past the cursor; the cap is what stops a
+    // later play from being folded BACK onto an earlier card that is already
+    // inked (entriesView.js's "THE TRAP EVERY READER HERE MUST CLEAR"). Built
+    // uncapped, the half's whole advancement bookkeeping — outNumber, outAt,
+    // outCode, reached, scored — landed on cards the reader had already
+    // turned over: a runner wearing the double play that erased him a tap
+    // before that batter's own box existed, and a run filled in before the
+    // at-bat that drove it in. The innings viewer passes the same cursor for
+    // the same reason, so the two surfaces read one mark identically
+    // (ADR-0016).
+    const entries = computeHalfInningFeed(
+      feed,
+      inning,
+      half,
+      battingSide,
+      stepped ? stepHere.count : null,
+    )
     // A stepped half shows only the entries the cursor has revealed; a
     // committed half shows them all.
     const visibleEntries = stepped ? entries.slice(0, stepHere.count) : entries

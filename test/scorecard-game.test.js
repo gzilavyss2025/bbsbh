@@ -29,7 +29,7 @@ import {
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, revealDerived } from '../src/api/derive.js'
 import { computePitcherLines } from '../src/api/pitchers.js'
-import { computeHalfInningFeed } from '../src/api/playbyplay.js'
+import { computeHalfInningFeed, nextStepBoundary } from '../src/api/playbyplay.js'
 import { halfIndex, selectInningCount, selectRegulationInnings } from '../src/api/select.js'
 import { unlockedInnings } from '../src/hooks/revealProgressCore.js'
 
@@ -362,6 +362,94 @@ test('stepping a whole half never over-reveals, and commit is what inks the half
   const done = scorecardPlays(FEED, 'top', { through: halfIndex(1, 'top') })
   assert.ok(done.perInning[1])
   assert.ok(done.endMarks.some((m) => done.columns[m.colIndex].inning === 1))
+})
+
+// The advancement fields a later play writes BACK onto an earlier card — the
+// ones computeHalfInningFeed gates behind its own `stepCap` (see
+// entriesView.js's "THE TRAP EVERY READER HERE MUST CLEAR"). Read off an
+// uncapped feed they describe plays the cursor has not reached.
+const FOLDED_BACK = ['outNumber', 'outAt', 'outCode', 'scored', 'reached']
+
+test('a stepped half never folds a LATER play back onto an already-revealed card', () => {
+  // The bug this pins: the grid built its stepped half with no `stepCap`, so
+  // the half's whole advancement bookkeeping landed on cards the cursor had
+  // already inked. On a real sheet that read as the next batter's play,
+  // penciled a tap early — a runner erased on a double play he hadn't seen
+  // yet, and (22 times in this one fixture) a run scored before the at-bat
+  // that drove it in.
+  let leaks = 0
+  for (let inning = 1; inning <= 9; inning++) {
+    for (const [side, half, battingSide] of [
+      ['top', 'top', 'away'],
+      ['bottom', 'bottom', 'home'],
+    ]) {
+      const idx = halfIndex(inning, half)
+      const through = idx - 1
+      const full = computeHalfInningFeed(FEED, inning, half, battingSide)
+      let count = 0
+      for (;;) {
+        const next = nextStepBoundary(full, count)
+        if (next <= count) break
+        const grid = scorecardPlays(FEED, side, { through, step: { halfIdx: idx, count: next } })
+        // What the innings viewer shows for the SAME cursor — the one shared
+        // mark (ADR-0016), so the two surfaces can never disagree about what
+        // this tap has revealed.
+        const capped = computeHalfInningFeed(FEED, inning, half, battingSide, next)
+        const byAtBat = new Map()
+        for (let i = 0; i < next; i++) {
+          if (capped[i].atBatIndex != null) byAtBat.set(capped[i].atBatIndex, capped[i])
+        }
+        for (const slot of grid.slots) {
+          for (const card of Object.values(slot.cells)) {
+            const ref = byAtBat.get(card.atBatIndex)
+            if (!ref) continue
+            for (const f of FOLDED_BACK) {
+              if (JSON.stringify(card[f]) !== JSON.stringify(ref[f])) leaks += 1
+              assert.deepEqual(
+                card[f] ?? null,
+                ref[f] ?? null,
+                `${half} ${inning} cursor ${next}: ${card.batter?.last}'s card leaked ${f}`,
+              )
+            }
+          }
+        }
+        count = next
+      }
+    }
+  }
+  assert.equal(leaks, 0)
+})
+
+test('the pinned leaks: an out on the bases, and a run, one tap early', () => {
+  // Bottom 2 of the captured game: Fermín reaches, and the NEXT batter's
+  // fielder's choice cuts him down at second (out 3, "FC 6-4") — exactly the
+  // shape reported on LAD's sheet as a double play penciled on Hernández.
+  // With the cursor at 3 entries his card must still read a clean reach.
+  const b2 = scorecardPlays(FEED, 'bottom', {
+    through: halfIndex(2, 'top'),
+    step: { halfIdx: halfIndex(2, 'bottom'), count: 3 },
+  })
+  const fermin = b2.slots
+    .flatMap((s) => Object.values(s.cells))
+    .find((c) => c.batter?.last === 'Fermín')
+  assert.ok(fermin, 'Fermín has a bottom-2 card at this cursor')
+  assert.equal(fermin.outNumber ?? null, null)
+  assert.equal(fermin.outAt ?? null, null)
+  assert.equal(fermin.outCode ?? '', '')
+
+  // Top 3: Pratt leads off and comes around to score later in the half. One
+  // tap in, his diamond must be unfilled — a scored run is the plainest
+  // spoiler the sheet can carry.
+  const t3 = scorecardPlays(FEED, 'top', {
+    through: halfIndex(2, 'bottom'),
+    step: { halfIdx: halfIndex(3, 'top'), count: 1 },
+  })
+  const pratt = t3.slots
+    .flatMap((s) => Object.values(s.cells))
+    .find((c) => c.batter?.last === 'Pratt')
+  assert.ok(pratt, 'Pratt has a top-3 card at this cursor')
+  assert.equal(pratt.scored, false)
+  assert.ok(pratt.reached < 4, `Pratt reached ${pratt.reached} one tap in`)
 })
 
 test('a bat-around frontier widens its inning by the column its card needs', () => {
