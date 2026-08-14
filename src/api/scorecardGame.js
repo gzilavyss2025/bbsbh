@@ -1,5 +1,5 @@
 // The scorecard's inked grid — every plate appearance laid onto the Numbers
-// Game "22" sheet, plus the sheet's own footer numbers (P/TP/LOB per inning,
+// Game "22" sheet, plus the sheet's own footer numbers (P/WH/FO per inning,
 // the two-row scoreboard with its FINAL block, the pitcher table, the
 // decisions).
 //
@@ -43,61 +43,11 @@ import { computeHalfInningFeed, battingSlot, pitchLadder, nextStepBoundary } fro
 import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
 import { computePitcherLines } from './pitchers.js'
+import { NON_AB_EVENTS, classifyOut, scorecardCenterCode } from './scorecard/notation.js'
 
-// Event types that are a plate appearance but NOT an official at-bat, so the
-// per-row AB tally excludes them (a walk, HBP, sacrifice, catcher's interference).
-const NON_AB_EVENTS = new Set([
-  'walk',
-  'intent_walk',
-  'hit_by_pitch',
-  'sac_fly',
-  // A sac fly that also turns a double play (a second runner retired on the
-  // same play) is still excluded from at-bats by rule (9.02(a)(1)/9.08(d)) —
-  // classifyOut and playbyplay.js's SAC_FLY_EVENTS already mark the batter's
-  // own trip as the sacrifice, so this must agree or he's charged both a
-  // sacrifice AND an at-bat for one plate appearance.
-  'sac_fly_double_play',
-  'sac_bunt',
-  // sac_bunt_double_play is deliberately NOT listed here — unlike the fly
-  // ball case, a sacrifice bunt is not credited at all when a runner is
-  // retired advancing on it, so whether this is an at-bat depends on how MLB
-  // actually scored it, which this eventType name doesn't say on its own.
-  // See docs/unresolved-scoring-conventions.md.
-  'catcher_interf',
-])
-
-// The KIND of out for the box's top-left corner (GO groundout, FO flyout, LO
-// lineout, PO popout, SO strikeout, DP double play, FC fielder's choice, SAC
-// sacrifice) — read off the result description the same way scorebookCode reads
-// the fielder chain, so the two agree. '' when it's an out we can't classify;
-// the fielder chain still shows in the diamond center. Only meaningful for outs.
-function classifyOut(eventType, desc = '') {
-  if (eventType === 'strikeout' || eventType === 'strikeout_double_play') return 'SO'
-  // Sacrifices first, so a sac fly/bunt that also turned a double play is still
-  // marked as the sacrifice it was for the batter (matches scorebookCode's SF/SAC).
-  if (eventType === 'sac_fly' || eventType === 'sac_fly_double_play' || /sacrifice fly/i.test(desc)) return 'SF'
-  if (eventType === 'sac_bunt' || eventType === 'sac_bunt_double_play' || /sacrifice (bunt|hit)/i.test(desc)) return 'SAC'
-  if (/double play|grounded into/i.test(desc)) return 'DP'
-  if (/lines? (out|into)/i.test(desc)) return 'LO'
-  if (/pops? (out|into)/i.test(desc)) return 'PO'
-  if (/flies? (out|into)/i.test(desc)) return 'FO'
-  if (/grounds? (out|into)|grounded/i.test(desc)) return 'GO'
-  if (/force(d)? out|fielder'?s choice/i.test(desc)) return 'FC'
-  if (/sac(rifice)? bunt|bunt/i.test(desc)) return 'SAC'
-  return ''
-}
-
-// What the scorecard sheet pencils in the DIAMOND CENTER, given a card's
-// scorebook `code`. The play-by-play surface can break a code across lines —
-// a GIDP reads "GIDP" over its relay chain (see scorebookCode) — but the
-// sheet's center is a single-line chip (.sc-ab__center is `white-space:
-// nowrap`) inside a 90px box, so a multi-line code arrives there as one
-// unwrapped run that overhangs the box. Take the fielding chain alone: the
-// box's top-left corner already carries the play KIND ("DP", via classifyOut),
-// which is exactly how the paper sheet splits the two.
-export function scorecardCenterCode(code) {
-  return (code ?? '').split('\n').pop()
-}
+// The sheet's pure notation rules live a file away (scorecard/notation.js) and
+// are re-exported here, so a caller still reaches them through this module.
+export { scorecardCenterCode }
 
 // Half-index of the game's last recorded play — the frontier every "did this
 // half actually END?" question below is answered against. -1 with no plays.
@@ -178,13 +128,13 @@ function visibleInnings(feed, through) {
 // stay aligned). Reuses the game view's own per-half feed builder
 // (computeHalfInningFeed) so each cell is a real `atbat` card in exactly the
 // shape AtBatBox renders — diamond, scorebook code, RBIs, outs all free.
-// Each card is enriched with `outType` (top-left corner) and, where the batter
-// changed from the slot's previous trip, `subBefore` (the substitution rule).
+// Each card is enriched with `outType` (top-left corner); a slot's handover is
+// recorded on the OUTGOING man's row instead (`subMarks`, see below).
 //
 // Alongside the cards, the grid carries the #22 sheet's own footer row —
-// per-inning P (pitches this side's batters saw), TP (the running total), and
-// LOB (runners this side stranded), from the same derive/linescore readers
-// the innings viewer's tally reads — and the leadoff boxes
+// per-inning P (pitches this side's batters saw), WH (swings and misses) and
+// FO (balls fouled off), from the same derive readers the innings viewer's
+// tally reads — and the leadoff boxes
 // (`leadoffCells`): for each finished half, the next-due batter's unused box
 // in that inning's column. Nothing is DRAWN there; it is the location the
 // live page's turn handoff puts its flip button in.
@@ -194,7 +144,7 @@ function visibleInnings(feed, through) {
 // first `step.count` entries' cards even though the half isn't committed,
 // exactly the cards the innings viewer's own stepping would show for the
 // same persisted cursor. The stepped half deliberately contributes NOTHING
-// else: no P/TP/LOB line, no inning-end diagonal, no scoreboard cell — those
+// else: no P/WH/FO line, no inning-end diagonal, no scoreboard cell — those
 // are whole-half facts, and they ink on commit (ADR-0016's collapse), never
 // mid-step. When there is a next plate appearance to reveal on THIS side's
 // sheet, the grid also carries `frontier` — the { slot, colIndex } cell that
@@ -313,6 +263,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
           id: card.batterId,
           name: b.last ? `${b.last}${b.first ? `, ${b.first}` : ''}` : b.fullName ?? '',
           pos: b.pos ?? '',
+          jersey: b.jersey ?? '',
           index: s.occupants.length,
           ab: 0,
           h: 0,
@@ -379,7 +330,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   //
   // Both take the same gate — the half must be COMMITTED (at or under
   // `through`; a stepped half takes neither mid-step, even on a Final game
-  // being replayed, like the P/TP/LOB line below) and must have actually
+  // being replayed, like the P/WH/FO line below) and must have actually
   // ENDED (the game has moved past it, or is over), so a revealed half still
   // being scored gets neither prematurely.
   //
@@ -391,18 +342,24 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   //    APPEARANCE, not on the cell that recorded the third out — the two
   //    differ whenever the out was a runner cut down during a later batter's
   //    trip, and a half can also end with no third out at all (a walk-off).
-  //  • `leadoffMarks` — the NEXT-due batter's unused box in the column of the
-  //    inning that just ended. NOT a mark: nothing is drawn there. It is a
-  //    LOCATION, and its one consumer is the live page's turn handoff, which
-  //    puts its flip button in that box (ScorecardSheet's `flip`). The
-  //    corner-to-corner diagonal that used to be slashed here is retired —
-  //    it was a second, competing end-of-inning notation, and the slash
-  //    above is the one the scorer actually draws.
-  //    An interrupted last card yields no location — that batter bats AGAIN
-  //    next inning, so his box in the ended inning is already used by the
-  //    carry-over cell and there is no unused box to point at. (In the
-  //    bat-around case the next-due slot may have already batted this inning;
-  //    his unused box is then the widened sub-column's.)
+  //  • `leadoffMarks` — the unused box on the row BELOW the one that closed
+  //    the half, in the column of the inning that just ended. NOT a mark:
+  //    nothing is drawn there. It is a LOCATION, and its one consumer is the
+  //    live page's turn handoff, which puts its flip button in that box
+  //    (ScorecardSheet's `flip`). The corner-to-corner diagonal that used to
+  //    be slashed here is retired — it was a second, competing end-of-inning
+  //    notation, and the slash above is the one the scorer actually draws.
+  //    The row below is USUALLY the next-due batter's, and for an ordinary
+  //    half it exactly is. It is not when the half died mid-count on the
+  //    bases (an inning-ending caught stealing): that batter bats AGAIN next
+  //    inning, so the next-due row is his own and his box is already spent on
+  //    the carry-over card. The handoff still belongs on the sheet, so it
+  //    takes the empty box directly under the "CS →" — where the eye lands
+  //    when the half closes — rather than vanishing and leaving the reader
+  //    with only the Top/Bottom control to find. (In the bat-around case the
+  //    row below may have already batted this inning; its unused box is then
+  //    the widened sub-column's, and if the inning was never widened that far
+  //    there is no box and no handoff.)
   //
   // Each location carries its own `inning` so a caller can single one out —
   // the handoff belongs to the half that JUST ended and must be tellable
@@ -414,7 +371,6 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     if (halfIndex(inning, half) > through) continue
     if (!(halfIndex(inning, half) < lastHalf || isFinal)) continue
     last.card.endsHalf = true
-    if (last.interrupted) continue
     const nextSlot = (last.slot % 9) + 1
     const sub = slotData[nextSlot - 1].byInning[inning]?.length ?? 0
     const colIndex = columns.findIndex((c) => c.inning === inning && c.sub === sub)
@@ -427,14 +383,26 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
       const card = s.byInning[col.inning]?.[col.sub]
       if (card) cells[ci] = card
     })
-    // Mark the substitution boundary: a card whose batter differs from this
-    // slot's previous plate appearance gets a rule drawn before it.
-    let prevBatter = null
+    // The SUBSTITUTION MARK, and whose row it belongs on. A scorer draws the
+    // change on the line of the man LEAVING — a rule down the column where he
+    // stopped batting, with the incoming man's uniform number beside it — not
+    // on the line of the man coming in. So the boundary is detected on the
+    // arriving card (its batter differs from the slot's previous trip) but
+    // recorded against the OUTGOING occupant, keyed by the column the new man
+    // first bats in. That box is always empty on the outgoing row (a column
+    // holds one card for the whole slot, and the newcomer owns this one), so
+    // the mark never competes with notation.
+    let prevOcc = null
+    const subMarksByOcc = new Map() // occupant index -> { colIndex: jersey }
     columns.forEach((_, ci) => {
       const card = cells[ci]
       if (!card) return
-      if (prevBatter != null && card.batterId !== prevBatter) card.subBefore = true
-      prevBatter = card.batterId
+      if (prevOcc != null && card.occIndex !== prevOcc) {
+        const marks = subMarksByOcc.get(prevOcc) ?? {}
+        marks[ci] = card.batter?.jersey ?? ''
+        subMarksByOcc.set(prevOcc, marks)
+      }
+      prevOcc = card.occIndex
     })
     // The leadoff boxes that land on this slot's row, keyed by the shared
     // column index and valued by the INNING that ended (never a bare `true` —
@@ -453,14 +421,29 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
       for (const ci in cells) {
         if (cells[ci].occIndex === occ.index) occCells[ci] = cells[ci]
       }
-      return { id: occ.id, name: occ.name, pos: occ.pos, cells: occCells, ab: occ.ab, h: occ.h, r: occ.r, rbi: occ.rbi }
+      return {
+        id: occ.id,
+        name: occ.name,
+        pos: occ.pos,
+        jersey: occ.jersey,
+        cells: occCells,
+        // Where THIS man handed the slot over, and to whose number.
+        subMarks: subMarksByOcc.get(occ.index) ?? null,
+        ab: occ.ab,
+        h: occ.h,
+        r: occ.r,
+        rbi: occ.rbi,
+      }
     })
     return { slot: s.slot, cells, rows, leadoffCells, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
   })
 
   // The #22's own row under the grid: P (pitches this side's batters saw that
-  // inning), TP (the running total), LOB (runners this side stranded), from
-  // the same per-half readers the innings viewer's tally reads
+  // inning), WH (swings and misses) and FO (balls fouled off) — what the half
+  // COST the pitcher, which is what a scorer keeps a foot row for. It read
+  // P/TP/LOB until PR #725: the running pitch total repeated P's own sum a
+  // column later, and LOB is already on the sheet in the FINAL block. All
+  // three come from the per-half readers the innings viewer's tally reads
   // (computeDerivedByInning / revealInning) — never a second walk that could
   // disagree with it. A half past the clamp, or one the game never reached,
   // is null and the sheet leaves its boxes blank to write on.
@@ -475,10 +458,16 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
       perInning[inning] = null
       continue
     }
-    const p = revealDerived(derived, inning, half).pitches
-    tp += p
+    const d = revealDerived(derived, inning, half)
+    tp += d.pitches
     perInning[inning] = {
-      p,
+      p: d.pitches,
+      // What the batting side DID with those pitches — swings and misses, and
+      // balls fouled off. The sheet's foot row shows P / WH / FO; `tp` (the
+      // running pitch total) and `lob` stay on the line because the scoreboard
+      // block and the tests read them, even though no cell prints them now.
+      whiffs: d.whiffs,
+      fouls: d.fouls,
       tp,
       lob: line?.leftOnBase ?? 0,
       runs: line?.runs ?? 0,
@@ -565,9 +554,11 @@ export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through =
   const lines = computePitcherLines(feed, through)[fieldingSide] ?? []
   return lines.map((p) => ({
     id: p.id,
-    // "E. Lauer" — the first-initial style the #22's pitcher column is sized
-    // for; a name-parts miss degrades to whichever half survives.
-    name: [p.first ? `${p.first[0]}.` : '', p.last].filter(Boolean).join(' '),
+    // "Lauer, Eric" — surname first, the way a scorer writes a pitcher onto
+    // the sheet and the way every other name column here reads. A name-parts
+    // miss degrades to whichever half survives.
+    name: p.last ? `${p.last}${p.first ? `, ${p.first}` : ''}` : p.first ?? '',
+    jersey: p.jersey ?? '',
     hand: p.hand,
     ip: p.ip,
     p: p.pitches,

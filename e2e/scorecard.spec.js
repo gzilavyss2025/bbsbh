@@ -78,11 +78,11 @@ test('partial reveal (through top 3): exactly that much ink, and no more', async
   await openWithMark(page, THROUGH_TOP3)
   // The away sheet shows innings 1–3's plate appearances…
   await expect(page.locator('.sc-ab__out').filter({ hasText: /\d/ }).first()).toBeVisible()
-  // …and the P/TP/LOB row carries exactly three filled inning columns.
+  // …and the P/WH/FO row carries exactly three filled inning columns.
   const filled = page.locator('.sc-sheet__totcell .sc-sheet__ptl')
   await expect(filled).toHaveCount(3)
-  // Inning 1: 24 pitches seen, 24 running, 1 LOB (pinned in the unit suite).
-  await expect(filled.nth(0)).toHaveText('24241')
+  // Inning 1: 24 pitches seen, 1 swing and miss, 6 balls fouled off.
+  await expect(filled.nth(0)).toHaveText('2416')
   // FINAL block still blank; winner still unnamed.
   await expect(page.locator('.sc-final td.sc-scoreboard__rhe').first()).toHaveText('')
   await expect(page.locator('body')).not.toContainText('Gasser')
@@ -110,8 +110,10 @@ test('full reveal: the completed sheet, its totals, decisions, marks and PR case
   // around under Mitchell's legs) with the red PR mark penciled by the base.
   await expect(page.locator('.sc-sheet').getByText('Bauers, Jake')).toBeVisible()
   await expect(page.locator('.pbp__pr').first()).toBeVisible()
-  // The pitcher table lists the Cardinals arms that faced this order.
-  await expect(page.locator('.sc-pitchers')).toContainText('H. Dobbins')
+  // The pitcher table lists the Cardinals arms that faced this order,
+  // surname-first with the uniform number pinned to the column's right edge.
+  await expect(page.locator('.sc-pitchers')).toContainText('Dobbins, Hunter')
+  await expect(page.locator('.sc-pitchers__jersey').first()).toHaveText('40')
 })
 
 test('a tapped box takes a penciled override, persists it, and gives it back', async ({ page }) => {

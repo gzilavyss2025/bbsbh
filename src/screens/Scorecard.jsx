@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { ScorecardSheet } from '../components/scoring/ScorecardSheet.jsx'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -6,7 +7,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 // and laid out the way the paper sheet is: the header band (TOP/BOTTOM, the
 // club's logo, team over manager, uniforms, the crew in the #22's two stacked
 // pairs — HP over 2B, 1B over 3B — the KEEPING SCORE BY options, FIRST PITCH
-// with its AM/PM dots), the nine-slot at-bat grid with its P/TP/LOB foot row,
+// with its AM/PM dots), the nine-slot at-bat grid with its P/WH/FO foot row,
 // and the footer trio: the fielding club's defense diamond, its pitcher
 // table, and the scoreboard block (both clubs' innings, the FINAL R/H/E/LOB
 // line, the WP/LP/SV decisions).
@@ -17,7 +18,7 @@ import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 //    the batting club's lineup + header, the fielding club's defense +
 //    probable starter. Everything score-shaped stays blank.
 //  • Filled (a `view` from api/scorecardGame.js's scorecardFull) — the grid,
-//    the P/TP/LOB row, the pitcher lines and the scoreboard inked exactly as
+//    the P/WH/FO row, the pitcher lines and the scoreboard inked exactly as
 //    far as the caller's reveal clamp allows, and no further.
 //
 // `side` picks which half the sheet scores: 'top' = the visiting team bats,
@@ -60,6 +61,48 @@ export function Scorecard({
       />
       <ScorecardFooter view={view} />
     </div>
+  )
+}
+
+// A club name written to FIT its box, never clipped. The scoreboard's team
+// column is a fixed share of a fixed-layout table, and the clubs whose names
+// run long (DIAMONDBACKS, ATHLETICS) are exactly the ones an ellipsis makes
+// unreadable — "Diamondb…" names no team. So the name is measured against the
+// space it actually got and its type size is pulled down until it fits, the
+// way you'd write smaller to reach the edge of a printed box. Remeasured on
+// every resize, since the box's width is a percentage of the page.
+// The size is written straight onto the node rather than held in state: the
+// measurement has to happen at full size, and a state round-trip would leave
+// the name un-shrunk on any resize that lands on the same ratio it already had.
+function FitText({ children }) {
+  const boxRef = useRef(null)
+  const fit = useCallback(() => {
+    const box = boxRef.current
+    if (!box) return
+    box.style.fontSize = ''
+    // The node's OWN content box, not the cell's: the cell's clientWidth
+    // includes its padding, which overstated the room by a few pixels and
+    // left "Cardinals" still shaving its last letter off.
+    const room = box.clientWidth
+    const needed = box.scrollWidth
+    if (room > 0 && needed > room) {
+      box.style.fontSize = `${Math.max(room / needed, 0.55)}em`
+    }
+  }, [])
+  // No dependency list on purpose — re-fit after every render, since a new
+  // club name is the other thing that changes what fits.
+  useLayoutEffect(fit)
+  useEffect(() => {
+    const parent = boxRef.current?.parentElement
+    if (typeof ResizeObserver !== 'function' || !parent) return undefined
+    const ro = new ResizeObserver(fit)
+    ro.observe(parent)
+    return () => ro.disconnect()
+  }, [fit])
+  return (
+    <span ref={boxRef} className="sc-fit">
+      {children}
+    </span>
   )
 }
 
@@ -198,7 +241,15 @@ function ScorecardFooter({ view }) {
           <tbody>
             {pitchers.map((p) => (
               <tr key={p.id}>
-                <td className="pitchers__pitcher">{p.name}</td>
+                {/* Surname first, uniform number pinned to the column's right
+                    edge — the same name/number pairing the batting rail and
+                    the box score's own pitcher table use. */}
+                <td className="pitchers__pitcher">
+                  <span className="pitchers__cell">
+                    <span className="sc-pitchers__name">{p.name}</span>
+                    <span className="sc-pitchers__jersey">{p.jersey}</span>
+                  </span>
+                </td>
                 <td>{p.hand}</td>
                 <td>{p.ip}</td>
                 <td>{p.p}</td>
@@ -271,7 +322,9 @@ function Scoreboard({ board }) {
       <tbody>
         {rows.map((row) => (
           <tr key={row.key}>
-            <td className="sc-scoreboard__team">{row.label}</td>
+            <td className="sc-scoreboard__team">
+              {row.label ? <FitText>{row.label}</FitText> : ''}
+            </td>
             {innings.map((n) => (
               <td key={n}>{runAt(n, row.side) ?? ''}</td>
             ))}

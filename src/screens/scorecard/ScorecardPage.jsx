@@ -25,13 +25,13 @@ import { RefreshButton } from '../TeamInfo.jsx'
 //    to the `through` half-index this page passes — the same persisted
 //    `revealedThrough` high-water mark the innings viewer ratchets
 //    (useRevealProgress). A half you haven't revealed has no cards, no
-//    P/TP/LOB line and no scoreboard cell in the DOM; the FINAL block and
+//    P/WH/FO line and no scoreboard cell in the DOM; the FINAL block and
 //    decisions wait for a fully-revealed Final game. ADR-0009's pattern,
 //    same as the Pitchers table.
 //  • The frontier tap advances the SAME marks the innings viewer's stepping
 //    persists (revealAtBat's entry-count cursor, ADR-0016; revealTo's commit
 //    when the half is done) — one ratchet, two surfaces, never a
-//    double-reveal. Whole-half facts (P/TP/LOB, the scoreboard cell, the
+//    double-reveal. Whole-half facts (P/WH/FO, the scoreboard cell, the
 //    inning-end rule and its leads-off-next diagonal) ink on commit only,
 //    exactly as the innings viewer holds its tally until a half commits.
 //  • Under the Scores Unlocked pass / a consented day (ADR-0026), GameView
@@ -120,7 +120,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // One tap = one plate appearance (plus its trailing notes), through the
   // same cursor the innings viewer steps; the last step of a FINISHED half
   // collapses into the ordinary whole-half commit, which is when the half's
-  // P/TP/LOB, scoreboard cell and inning-end slash ink in — the turn-end
+  // P/WH/FO, scoreboard cell and inning-end slash ink in — the turn-end
   // beat. A still-live half just parks the cursor at the feed's edge and
   // waits for Refresh to bring the next batter.
   const onFrontierTap = () => {
@@ -144,9 +144,12 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // top 1 has closed) matches no end mark, so nothing renders — and neither
   // does anything under the Scores Unlocked pass, where `stepInfo` is null.
   //
-  // A half whose last card was INTERRUPTED leaves no diagonal at all (see
-  // scorecardPlays), so it gets no flip button either; the Top/Bottom
-  // control above the sheet is the way over, same as always.
+  // A half that died mid-count on the bases (an inning-ending caught
+  // stealing) hands off too: its location is the empty box directly under the
+  // carry-over "CS →" rather than the next-due batter's own, which that card
+  // has already spent (see scorecardPlays' leadoffMarks). The button is on
+  // the sheet either way; the Top/Bottom control above stays the manual way
+  // over.
   const needsFlip = stepInfo != null && stepInfo.side !== side
   const flip = needsFlip
     ? {
