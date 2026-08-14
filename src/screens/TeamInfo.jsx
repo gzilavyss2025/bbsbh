@@ -104,7 +104,7 @@ export function TeamInfo({
   onNext,
   nextLabel,
   onPrintSheet,
-  onScorecard,
+  onPreview,
   onReload,
   loading,
   lastUpdated,
@@ -174,20 +174,20 @@ export function TeamInfo({
 
       <Umpires officials={officials} />
 
-      {/* The door to tonight's printable sheet. It sits here, directly under the
-          facts and the crew, because those are exactly what the sheet carries
-          over — and because the lineup pages ARE the pre-first-pitch surfaces,
-          which is when a scorer wants a sheet in hand. Both clubs' pages show it
-          (the sheet holds both orders either way), so it is one tap from wherever
-          you opened the game. */}
+      {/* The preview card's door — moved here from its old "Card" tab-bar stop
+          once that tab started opening the live scorecard (ADR-0047's second
+          amendment). Full-width, not a quiet chevron: a scorer on a lineup
+          page is usually here to post the matchup. */}
+      {onPreview && (
+        <button type="button" className="btn btn--next" onClick={onPreview}>
+          View preview card
+        </button>
+      )}
+      {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
+          what this used to promise; the destination awaits a rebuild. */}
       {onPrintSheet && (
         <div className="thub-door">
-          <ChevronLink onClick={onPrintSheet}>Print tonight’s sheet</ChevronLink>
-        </div>
-      )}
-      {onScorecard && (
-        <div className="thub-door">
-          <ChevronLink onClick={onScorecard}>Open the live scorecard</ChevronLink>
+          <ChevronLink onClick={onPrintSheet}>Print blank scorecard</ChevronLink>
         </div>
       )}
 

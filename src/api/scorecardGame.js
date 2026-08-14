@@ -6,16 +6,15 @@
 // SPOILER CLASSIFICATION: reveal-gated (ADR-0009's pattern, same as
 // pitchers.js). Every builder here takes a `through` half-index and
 // accumulates ONLY from half-innings at or under it, so nothing from a sealed
-// half ever reaches the DOM. The product callers each hold the gate their own
-// way:
-//   • the live scorecard page passes the user's own `revealedThrough`
-//     high-water mark (render-substituted under the Scores Unlocked pass,
-//     ADR-0026, exactly as the innings viewer substitutes it);
-//   • the box score's embedded sheet passes Infinity from INSIDE its one
-//     SealBox reveal render — the whole game is already behind that seal
-//     (ADR-0002), so there is nothing left for a clamp to hold back.
-// The DEV-only Scorecard Lab passes Infinity too; it exists to see the whole
-// game laid out and is dropped from the production module graph by App.jsx.
+// half ever reaches the DOM. The live scorecard page (its one product caller)
+// passes the user's own `revealedThrough` high-water mark, render-substituted
+// under the Scores Unlocked pass exactly as the innings viewer substitutes it
+// (ADR-0026). The DEV-only Scorecard Lab passes Infinity instead; it exists
+// to see the whole game laid out and is dropped from the production module
+// graph by App.jsx. A second product caller, the box score's own embedded
+// copy of this sheet, was retired once the game's top nav pointed at this
+// live page directly instead (ADR-0047's second amendment) — do not re-add
+// it without reading that amendment first.
 //
 // Extra innings never spoil (ADR-0008): the visible inning columns are
 // regulation plus one extra at a time as `through` crosses each extra's

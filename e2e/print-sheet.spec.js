@@ -97,7 +97,7 @@ for (const paper of PAPERS) {
     // The app's chrome did NOT. These are the section-tab labels and the site
     // bar's own words; if the peel-down chain in the print stylesheet stops
     // matching GameView's DOM, they come back and this fails.
-    for (const chrome of ['INNINGS', 'BOX', 'CARD', 'REFRESH']) {
+    for (const chrome of ['INNINGS', 'BOX', 'SCORECARD', 'REFRESH']) {
       expect(text, `"${chrome}" reached the paper — the print stylesheet is no longer stripping the app chrome`).not.toContain(chrome)
     }
   })

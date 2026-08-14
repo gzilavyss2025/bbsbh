@@ -87,8 +87,10 @@ Two other rules that are load-bearing rather than stylistic:
 ## The door, and the phone
 
 The entry point is on **both lineup pages**, under the facts and the umpire card:
-"Print tonight's sheet" (`screens/TeamInfo.jsx`). Those are the pre-first-pitch
-surfaces, which is when a scorer wants a sheet.
+"Print blank scorecard" (`screens/TeamInfo.jsx`, renamed from "Print tonight's
+sheet" once the live #22 sheet took over what this page used to promise — a
+rebuild of the destination itself is still open work). Those are the
+pre-first-pitch surfaces, which is when a scorer wants a sheet.
 
 It is deliberately **not** a sixth `.stepnav` tab: those buttons are `flex: 1 1 0`,
 so a sixth stop divides a phone's row into ~52px cells and wraps "Innings" onto two

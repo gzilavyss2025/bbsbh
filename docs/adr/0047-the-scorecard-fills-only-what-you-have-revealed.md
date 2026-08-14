@@ -114,3 +114,33 @@ Three rules keep the game honest:
 Deliberately NOT built: points, streaks, or any meta-economy. The app's
 fantasy is being the scorer; the game is the ritual (press, ink, count outs,
 flip the sheet), and the gamification stops where the paper does.
+
+## Amendment (2026-08-14): one live sheet, not two copies of it
+
+The box score's embedded copy (`BoxScorecard.jsx`, `through: Infinity`) is
+retired. It existed because the game's tab bar had no stop of its own for the
+live sheet — the fifth tab was "Card", the shareable preview poster — so the
+only way in was through the box score. That tab now opens the live scorecard
+directly (`GameView.jsx`'s `sectionTabs`, `key: 'scorecard'`, `section:
+'scorecard'`), which by the time a Final game's box score is open already
+renders the whole sheet inked (its `revealedThrough` clamp has nothing left to
+hold back) — the exact same output the box score's copy existed to show, on
+its own page instead of at the box score's foot. A completed game's sheet is
+now one page, not two.
+
+The poster studio the "Card" tab used to open (`screens/GamePreview.jsx`,
+route `preview`) didn't lose its door — it moved to both lineup pages
+(`TeamInfo.jsx`), as a full-width primary button ("View preview card") rather
+than the tab bar, since that's the pre-first-pitch page a scorer is on to post
+the matchup. The lineup pages' other door, "Open the live scorecard", is
+retired outright: the tab bar covers that trip now, and a second door to the
+same page read as an unnecessary second promise about what's safe to open
+mid-game. Its sibling door, "Print tonight's sheet", stays as a quiet
+chevron link but under a new name, "Print blank scorecard" — the live sheet
+above replaced what it used to advertise, and the destination itself
+(`screens/sheet/ScoreSheetPage.jsx`) is due its own rebuild to match, not done
+here.
+
+`src/api/spoiler-manifest.json`'s `scorecardGame.js` entry drops
+`screens/boxscore/BoxScorecard.jsx` from its importer list — one caller now,
+the live page, plus the DEV-only Lab.

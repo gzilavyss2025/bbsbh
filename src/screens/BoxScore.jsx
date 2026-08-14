@@ -3,7 +3,6 @@ import { resolveCardPlayer } from '../api/boxscore.js'
 import { highlightPoster } from '../api/highlights.js'
 import { revealBoxScore } from './boxscore/revealBoxScore.js'
 import { InningTally } from './boxscore/InningTally.jsx'
-import { BoxScorecard } from './boxscore/BoxScorecard.jsx'
 import { managerLabel } from '../api/game.js'
 import { defenseEntering } from '../api/defense.js'
 import { selectOfficials, selectIsFinal } from '../api/select.js'
@@ -410,11 +409,6 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, stars, potg, potgHi
         </div>
         <GameInfo rows={box.footNotes} />
       </section>
-
-      {/* The completed #22 sheet, last on the page — the whole game's
-          notations, safe here (and only here) because everything above sits
-          inside this page's one SealBox reveal render. See BoxScorecard. */}
-      <BoxScorecard feed={feed} managers={managers} uniforms={uniforms} />
 
       {modalId != null && <UmpireAccuracyModal id={modalId} onClose={() => setModalId(null)} />}
     </div>

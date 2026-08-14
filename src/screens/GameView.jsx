@@ -155,17 +155,17 @@ export function GameView({ game, section, onSection }) {
           section: lastInningSection,
         },
         { key: 'box', label: 'Box', active: step === 3, section: 'boxscore' },
-        // Fifth stop, and the only one that isn't a page of the scorebook —
-        // it makes the shareable image of this matchup. Last so the four
-        // scoring sections keep the order the "next" buttons walk.
-        { key: 'preview', label: 'Card', active: step === 4, section: 'preview' },
-        // The printable sheet (step 5) deliberately has NO tab here. Not an
-        // omission: `.stepnav__btn` is `flex: 1 1 0`, so a sixth stop divides a
-        // phone's row into ~52px cells and wraps "Innings" onto two lines. Its
-        // door is on the two lineup pages instead (TeamInfo's "Print tonight's
-        // sheet"), which is where a scorer is standing when they want one, and
-        // this row still rides the sheet page so every scoring section stays one
-        // tap away from it.
+        // Fifth stop: the live #22 sheet, filled through the reveal mark —
+        // last so the four scoring sections keep the order the "next" buttons
+        // walk, same as before this tab pointed here.
+        { key: 'scorecard', label: 'Scorecard', active: step === 6, section: 'scorecard' },
+        // The preview poster (step 4) and the printable sheet (step 5)
+        // deliberately have NO tab here. Not an omission: `.stepnav__btn` is
+        // `flex: 1 1 0`, so a sixth or seventh stop divides a phone's row into
+        // ever-narrower cells and wraps "Innings" onto two lines. Both doors
+        // live on the two lineup pages instead (TeamInfo), which is where a
+        // scorer is standing pre-first-pitch — the moment either one is worth
+        // a tap.
       ].map((s) => (
         <button
           key={s.key}
@@ -292,7 +292,7 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onPrintSheet={() => onSection('sheet')}
-          onScorecard={() => onSection('scorecard')}
+          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -323,7 +323,7 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onPrintSheet={() => onSection('sheet')}
-          onScorecard={() => onSection('scorecard')}
+          onPreview={() => onSection('preview')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -559,6 +559,7 @@ function gameTitle(game, step, inning, half) {
   if (step === 0) return `${matchup} · ${away} Lineup`
   if (step === 1) return `${matchup} · ${home} Lineup`
   if (step === 3) return `${matchup} · Box score`
+  if (step === 4) return `${matchup} · Preview card`
   if (step === 5) return `${matchup} · Print sheet`
   if (step === 6) return `${matchup} · Scorecard`
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
