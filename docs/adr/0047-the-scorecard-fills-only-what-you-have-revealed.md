@@ -82,3 +82,35 @@ score on paper; this is the margin note in your copy of the book.
 - An override exists only for a cell the user has revealed — a sealed cell is
   never rendered, so there is nothing to tap. If overrides ever grow a cloud
   mirror, they are consented user annotations, never a reveal source.
+
+## Amendment (2026-08-14): the sheet plays
+
+The live scorecard gained the reveal VERB, not just the reveal's output. The
+next plate appearance renders as a face-down kraft seal in the grid cell it
+will ink into (`scorecardPlays`' `frontier` + `scorecardStep`); tapping it
+advances the SAME persisted cursor the innings viewer's at-bat stepping
+walks (`revealAtBat`'s entry-count mark, ADR-0016), and the last step of a
+finished half collapses into the ordinary `revealTo` commit. One ratchet,
+two surfaces — the sheet and the innings viewer can never double-reveal or
+disagree about where you are.
+
+Three rules keep the game honest:
+
+- **Mid-step, only cards.** A stepped half contributes its revealed cards
+  and nothing else — no P/TP/LOB line, no scoreboard cell, no inning-end
+  diagonal. Those are whole-half facts and they ink on commit, which is the
+  turn-end beat.
+- **The frontier is derived, never stored.** It is always the half after
+  `revealedThrough`; under the Scores Unlocked pass the render mark covers
+  the whole game, so the seal simply never renders and nothing on the page
+  can commit (ADR-0026's commitReveals contract, honored by construction).
+- **Juice follows the tap.** Newly revealed marks ink in (outcome, then
+  diamond, then the out circle pressed with `--ease-press` — the stamp's own
+  ease); the ink-in set is diffed per side and armed only after the reader's
+  first tap, so a cold load or a sheet flip renders settled ink. Skipped
+  under reduced motion. ADR-0046 is respected: every duration is a fixed
+  token, never a function of what was revealed.
+
+Deliberately NOT built: points, streaks, or any meta-economy. The app's
+fantasy is being the scorer; the game is the ritual (press, ink, count outs,
+flip the sheet), and the gamification stops where the paper does.

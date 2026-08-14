@@ -6,20 +6,43 @@
    horizontally so the sheet keeps its landscape proportions on a phone.
    ============================================================ */
 .scorecard {
-  /* Cell + column geometry, shared by the grid and its sticky frame. */
-  --sc-cell-w: 92px;
+  /* Cell + column geometry, shared by the grid and its sticky frame.
+     Mobile-first: the frozen Player+Pos rail used to take 150px of a
+     phone's ~356px content width — 42% of the pane spent before the first
+     inning column — so the phone gets a tighter rail and slightly tighter
+     cells, and the wide breakpoint below restores the paper sheet's own
+     proportions. */
+  --sc-cell-w: 86px;
   --sc-cell-h: 90px;
-  --sc-pos-w: 34px;
-  --sc-name-w: 116px;
+  --sc-pos-w: 26px;
+  --sc-name-w: 96px;
   --sc-sum-w: 34px;
   --sc-strike-fill: color-mix(in srgb, var(--graphite) 15%, var(--surface-card));
   margin-top: var(--space-4);
 }
+@media (min-width: 740px) {
+  .scorecard {
+    --sc-cell-w: 92px;
+    --sc-pos-w: 34px;
+    --sc-name-w: 116px;
+  }
+}
 
-/* ---- Main grid: sticky Pos/Player column + inning header, horizontal scroll ---- */
+/* ---- Main grid: a pannable window onto the sheet ---- */
+/* The grid is wider AND taller than a phone, so the scroll container is
+   bounded on BOTH axes and the frame pins on three sides while you pan:
+   the PLAYER/Pos rail on the left (sticky left), the inning numbers on top
+   (sticky top), and the P/TP/LOB + TOTALS row on the bottom (sticky
+   bottom). Without the vertical bound the inning header was sticky against
+   a container that never scrolled vertically — mid-grid on a phone the
+   numbers sat 400px off-screen and you lost which inning you were reading.
+   The dvh line wins where supported (tracks mobile browser chrome); the vh
+   line above it is the fallback. */
 .sc-sheet__scroll {
   margin-top: var(--space-3);
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 120px);
   -webkit-overflow-scrolling: touch;
   border: var(--bw-hair) solid var(--border-rule);
 }
@@ -64,6 +87,7 @@
   z-index: 1;
   width: var(--sc-name-w);
   min-width: var(--sc-name-w);
+  max-width: var(--sc-name-w);
   padding-left: var(--space-2);
   background: var(--surface-card);
   text-align: left;
@@ -71,6 +95,19 @@
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
+  /* On the phone's narrow rail a full "Yelich, Christian" wraps to two
+     lines and jitters row heights — clip instead; the surname leads, so
+     the part a scorer scans by always survives the ellipsis. The wide
+     rail lets names wrap whole again. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (min-width: 740px) {
+  .sc-sheet__name {
+    white-space: normal;
+    overflow: visible;
+  }
 }
 .sc-sheet__pos {
   position: sticky;
@@ -127,12 +164,19 @@
 }
 
 /* The foot row across the grid: P / TP / LOB per inning (the #22's own
-   bottom line), the AB/H/R/RBI sums under the amber TOTALS bar. */
+   bottom line), the AB/H/R/RBI sums under the amber TOTALS bar. Pinned to
+   the pane's bottom edge (see .sc-sheet__scroll) so the running pitch
+   count and TOTALS stay in view while you pan the grid above them. */
 .sc-sheet__totals td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   height: 26px;
   background: var(--bg-page);
+  border-top: var(--bw-rule) solid var(--rule-grid);
 }
 .sc-sheet__totals .sc-sheet__name {
+  z-index: 3;
   background: var(--bg-page);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -141,6 +185,7 @@
   color: var(--text-caption);
 }
 .sc-sheet__totals .sc-sheet__pos {
+  z-index: 3;
   background: var(--bg-page);
 }
 /* The P/TP/LOB trio — three equal slots side by side, in the label cell and
@@ -231,6 +276,97 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
+/* The reveal frontier: the next plate appearance's own box, face-down under
+   the same kraft-tape look as every seal in the app, sized to the cell it
+   will ink into. Tapping it is the live sheet's play verb (ScorecardPage).
+   The hatch is the seal texture's diagonal stripe, drawn with the two seal
+   tokens so it reads as the same tape. */
+.sc-ab__seal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--seal-cover) 0 10px,
+    var(--seal-hatch) 10px 12px
+  );
+  animation: sc-seal-breathe 2.4s var(--ease-standard) infinite alternate;
+}
+.sc-ab__seal:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.sc-ab__sealtext {
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--seal-cover);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-on-seal);
+}
+/* A slow breath so the one playable box on the sheet reads as waiting for
+   you — the only idle motion on the page, and none at all under reduced
+   motion. */
+@keyframes sc-seal-breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.82;
+  }
+}
+
+/* The ink-in: a JUST-revealed box's marks settle onto the paper — outcome
+   box first, then the diamond, then the out circle pressed like a stamp
+   (the passport's press, --ease-press, is the one ease-in in the system and
+   a stamp is exactly what it exists for). Only cells the reader's own tap
+   revealed wear .sc-ab--fresh (ScorecardPage's diff), so a cold load or a
+   sheet flip renders settled ink. Skipped, not slowed, under reduced
+   motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .sc-ab--fresh .sc-ab__type,
+  .sc-ab--fresh .sc-ab__rbi {
+    animation: sc-ink var(--dur-med) var(--ease-out) backwards;
+  }
+  .sc-ab--fresh .sc-ab__diamond,
+  .sc-ab--fresh .sc-ab__strip {
+    animation: sc-ink var(--dur-med) var(--ease-out) 60ms backwards;
+  }
+  .sc-ab--fresh .sc-ab__out {
+    animation: sc-stamp var(--dur-slow) var(--ease-press) 140ms backwards;
+  }
+}
+@keyframes sc-ink {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sc-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 .sc-ab__main {
   position: relative;
   display: flex;
@@ -304,13 +440,15 @@
 .sc-ab__center--interrupted {
   color: var(--text-caption);
 }
-/* The out circle rides the divider between the diamond and the pitch strip,
-   ringed in pencil with the 1/2/3 sequence number inside. */
+/* The out circle sits at the BOTTOM-RIGHT of the box, level with the
+   diamond's bottom vertex — where the #22 prints its faint ring and where
+   its scorers ink the ①②③ (re-checked against the template photos; an
+   earlier draft floated it at mid-height on the strip divider, which is
+   not where the paper puts it). */
 .sc-ab__out {
   position: absolute;
-  top: 50%;
+  bottom: 6px;
   right: -8px;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;

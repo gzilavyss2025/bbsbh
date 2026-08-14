@@ -49,6 +49,9 @@ function slotRows(grid, lineup, slotIndex) {
       r: occ.r,
       rbi: occ.rbi,
       isSub: oi > 0,
+      // The frontier seal rides the slot's LAST display row — the current
+      // occupant is the one due up.
+      isLast: oi === slot.rows.length - 1,
       hasStats: true,
     }))
   }
@@ -60,6 +63,7 @@ function slotRows(grid, lineup, slotIndex) {
       cells: null,
       endCells: grid?.slots?.[slotIndex]?.endCells ?? null,
       isSub: false,
+      isLast: true,
       hasStats: false,
     },
   ]
@@ -71,6 +75,8 @@ export function ScorecardSheet({
   templateInnings = 11,
   notes = null,
   onCellTap = null,
+  onFrontierTap = null,
+  fresh = null,
 }) {
   // Normalize both modes to a flat column list: each column knows its header
   // label (an inning number on its first sub-column, else blank), whether it
@@ -134,17 +140,39 @@ export function ScorecardSheet({
                 <td className="sc-sheet__pos">{row.pos}</td>
                 {columns.map((col) => {
                   const card = col.colIndex != null ? row.cells?.[col.colIndex] ?? null : null
+                  // The reveal frontier: the next plate appearance's own box,
+                  // face-down. Tapping it is the sheet's play verb — one step
+                  // of the same reveal cursor the innings viewer walks.
+                  const isFrontier =
+                    onFrontierTap != null &&
+                    card == null &&
+                    row.isLast &&
+                    grid?.frontier != null &&
+                    grid.frontier.slot === slot &&
+                    grid.frontier.colIndex === col.colIndex
                   return (
                     <td
                       key={col.key}
                       className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
                     >
-                      <AtBatBox
-                        atbat={card}
-                        note={cellNote(notes, card?.atBatIndex)}
-                        endMark={Boolean(col.colIndex != null && row.endCells?.[col.colIndex])}
-                        onEdit={onCellTap && card ? () => onCellTap(card) : null}
-                      />
+                      {isFrontier ? (
+                        <button
+                          type="button"
+                          className="sc-ab__seal"
+                          onClick={onFrontierTap}
+                          aria-label="Reveal the next at-bat"
+                        >
+                          <span className="sc-ab__sealtext">Tap</span>
+                        </button>
+                      ) : (
+                        <AtBatBox
+                          atbat={card}
+                          note={cellNote(notes, card?.atBatIndex)}
+                          endMark={Boolean(col.colIndex != null && row.endCells?.[col.colIndex])}
+                          onEdit={onCellTap && card ? () => onCellTap(card) : null}
+                          fresh={Boolean(card && fresh?.has(card.atBatIndex))}
+                        />
+                      )}
                     </td>
                   )
                 })}

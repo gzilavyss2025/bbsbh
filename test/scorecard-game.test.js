@@ -24,6 +24,7 @@ import {
   scorecardPlays,
   scorecardScoreboard,
   scorecardPitchers,
+  scorecardStep,
 } from '../src/api/scorecardGame.js'
 import { revealInning, revealTotals } from '../src/api/linescore.js'
 import { computeDerivedByInning, revealDerived } from '../src/api/derive.js'
@@ -285,4 +286,102 @@ test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
     scorecardScoreboard(feed, { through: halfIndex(9, 'top') }).innings.length,
     9,
   )
+})
+
+// ---------------------------------------------------------------------------
+// The play-in-place layer (scorecardStep + scorecardPlays' `step`): the live
+// sheet's face-down frontier card. What must hold, in order of importance:
+// the step can never leak past its own cursor; whole-half facts (P/TP/LOB,
+// scoreboard cells, the inning-end slash) never ink mid-step; and the
+// frontier always names a real, empty cell — including the bat-around case,
+// where its column doesn't exist until the frontier widens it.
+// ---------------------------------------------------------------------------
+
+test('scorecardStep walks the frontier half on the shared cursor', () => {
+  const s0 = scorecardStep(FEED, -1, () => 0)
+  assert.equal(s0.inning, 1)
+  assert.equal(s0.half, 'top')
+  assert.equal(s0.side, 'top')
+  assert.equal(s0.count, 0)
+  assert.ok(s0.nextCount >= 1)
+  assert.ok(s0.nextCount < s0.total)
+  assert.equal(s0.halfOver, true) // the captured game is Final
+  // A fully caught-up sheet has nothing to step.
+  assert.equal(scorecardStep(FEED, halfIndex(9, 'bottom'), () => 0), null)
+})
+
+test('a stepped half shows exactly the cursor’s cards and nothing whole-half', () => {
+  const s0 = scorecardStep(FEED, -1, () => 0)
+  const grid = scorecardPlays(FEED, 'top', {
+    through: -1,
+    step: { halfIdx: 0, count: s0.nextCount },
+  })
+  const placed = []
+  for (const slot of grid.slots) placed.push(...Object.values(slot.cells))
+  assert.equal(placed.length, 1, 'one tap reveals one plate appearance')
+  // Whole-half facts stay blank mid-step: no P/TP/LOB, no inning-end slash.
+  assert.equal(grid.perInning[1], null)
+  assert.equal(grid.endMarks.length, 0)
+  // The frontier moved to the NEXT batter's empty box in inning 1.
+  assert.ok(grid.frontier)
+  assert.equal(grid.columns[grid.frontier.colIndex].inning, 1)
+  const slot = grid.slots[grid.frontier.slot - 1]
+  assert.equal(slot.cells[grid.frontier.colIndex], undefined)
+})
+
+test('the frontier never renders on the other club’s sheet', () => {
+  const grid = scorecardPlays(FEED, 'bottom', {
+    through: -1,
+    step: { halfIdx: 0, count: 5 },
+  })
+  assert.equal(grid.frontier, null)
+  const placed = []
+  for (const slot of grid.slots) placed.push(...Object.values(slot.cells))
+  assert.equal(placed.length, 0)
+})
+
+test('stepping a whole half never over-reveals, and commit is what inks the half', () => {
+  // Walk top 1 boundary by boundary, checking the clamp at every cursor.
+  let count = 0
+  let steps = 0
+  for (;;) {
+    const s = scorecardStep(FEED, -1, () => count)
+    assert.ok(s, 'the frontier half exists until committed')
+    const grid = scorecardPlays(FEED, 'top', { through: -1, step: { halfIdx: 0, count } })
+    const placed = []
+    for (const slot of grid.slots) placed.push(...Object.values(slot.cells))
+    assert.ok(placed.length <= steps, `cursor ${count}: ${placed.length} cards after ${steps} steps`)
+    if (grid.frontier != null) {
+      assert.ok(grid.frontier.colIndex >= 0)
+    }
+    if (s.nextCount >= s.total) break
+    count = s.nextCount
+    steps += 1
+  }
+  // Committed (revealTo's collapse): the half's whole-half facts ink now.
+  const done = scorecardPlays(FEED, 'top', { through: halfIndex(1, 'top') })
+  assert.ok(done.perInning[1])
+  assert.ok(done.endMarks.some((m) => done.columns[m.colIndex].inning === 1))
+})
+
+test('a bat-around frontier widens its inning by the column its card needs', () => {
+  // Top 7 (halfIdx 12) is the bat-around: walk its boundaries; at every
+  // cursor the frontier must name a real, EMPTY cell — which past the ninth
+  // batter requires the inning to have widened for the face-down card.
+  const through = halfIndex(6, 'bottom')
+  let count = 0
+  let sawSecondColumn = false
+  for (;;) {
+    const s = scorecardStep(FEED, through, () => count)
+    const grid = scorecardPlays(FEED, 'top', { through, step: { halfIdx: 12, count } })
+    if (grid.frontier) {
+      const col = grid.columns[grid.frontier.colIndex]
+      assert.equal(col.inning, 7)
+      if (col.sub > 0) sawSecondColumn = true
+      assert.equal(grid.slots[grid.frontier.slot - 1].cells[grid.frontier.colIndex], undefined)
+    }
+    if (s.nextCount >= s.total) break
+    count = s.nextCount
+  }
+  assert.ok(sawSecondColumn, 'the 7th batted around, so a frontier card must have opened its second column')
 })

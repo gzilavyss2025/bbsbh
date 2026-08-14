@@ -80,7 +80,7 @@ export function atBatMarks(atbat) {
   return { isPlaced, kind, outcome, center, rbi }
 }
 
-export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = null }) {
+export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = null, fresh = false }) {
   const marks = atBatMarks(atbat)
   const { isPlaced, kind } = marks
   // The pitch ladder split into its three columns: balls (white), then two
@@ -113,7 +113,7 @@ export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = 
     <div
       className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''} ${note ? 'sc-ab--noted' : ''} ${
         endMark ? 'sc-ab--end' : ''
-      }`}
+      } ${fresh ? 'sc-ab--fresh' : ''}`}
     >
       <div className="sc-ab__main">
         <div className="sc-ab__head">

@@ -60,8 +60,8 @@ export function BoxScorecard({ feed, managers, uniforms }) {
         </div>
       </div>
       <p className="hint">
-        The whole game’s notations on the #22 sheet. Tap any box to pencil
-        your own call over it — your marks stay on this device.
+        The whole game on the #22 sheet. Tap a box to pencil over its
+        notation — your marks stay on this device.
       </p>
       <Scorecard
         side={side}

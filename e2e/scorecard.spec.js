@@ -161,3 +161,30 @@ test('the lineup page carries the door to the live scorecard', async ({ page }) 
   await expect(page).toHaveURL(/\/scorecard/)
   await expect(page.locator('.scorecard')).toBeVisible({ timeout: 20000 })
 })
+
+test('the sheet plays: flip chip, frontier seal, one PA per tap, commit inks the half', async ({ page }) => {
+  await openWithMark(page, THROUGH_TOP3) // frontier = bottom 3, the other sheet
+  // The turn handoff chip names the half and flips to it.
+  const chip = page.locator('.scflip')
+  await expect(chip).toContainText(/bottom 3 is next/i)
+  await chip.click()
+  // The face-down frontier card sits on the sheet; tapping reveals ONE plate
+  // appearance, and nothing whole-half inks mid-step.
+  const seal = page.locator('.sc-ab__seal')
+  await expect(seal).toHaveCount(1)
+  await seal.click()
+  await expect(page.locator('.sc-ab--fresh')).toHaveCount(1)
+  const bottom3Cell = page.locator('.sc-scoreboard tbody tr').nth(1).locator('td').nth(3)
+  await expect(bottom3Cell).toHaveText('')
+  // The cursor is the innings viewer's own persisted at-bat mark (ADR-0016).
+  const mark = await page.evaluate(() => window.localStorage.getItem('bbsbh:reveal-atbat:823035'))
+  expect(mark).toMatch(/^5:/)
+  // Tap through the rest of the half: the last step collapses into a commit,
+  // the scoreboard cell inks, and the turn hands back to the top sheet.
+  for (let i = 0; i < 12 && (await seal.count()) > 0; i++) await seal.click()
+  await expect
+    .poll(async () => page.evaluate(() => window.localStorage.getItem('bbsbh:reveal:823035')))
+    .toBe('5')
+  await expect(bottom3Cell).toHaveText('0')
+  await expect(page.locator('.scflip')).toContainText(/top 4 is next/i)
+})
