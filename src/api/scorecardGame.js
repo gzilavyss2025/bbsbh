@@ -441,7 +441,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   // The #22's own row under the grid: P (pitches this side's batters saw that
   // inning), WH (swings and misses) and FO (balls fouled off) — what the half
   // COST the pitcher, which is what a scorer keeps a foot row for. It read
-  // P/TP/LOB until PR #722: the running pitch total repeated P's own sum a
+  // P/TP/LOB until PR #725: the running pitch total repeated P's own sum a
   // column later, and LOB is already on the sheet in the FINAL block. All
   // three come from the per-half readers the innings viewer's tally reads
   // (computeDerivedByInning / revealInning) — never a second walk that could
