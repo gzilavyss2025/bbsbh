@@ -49,6 +49,17 @@ export function normalizeGame(game, sportId) {
     // until the league sets a make-up (a fresh postponement shows no date yet).
     rescheduleDate: game.rescheduleDate,
     rescheduleGameDate: game.rescheduleGameDate,
+    // Same idea for a SUSPENDED game once the league has set when it
+    // continues: resumeGameDate 'YYYY-MM-DD' + the full resumeDateTime ISO,
+    // carried on the ORIGINAL (suspended) date's row. Spoiler-free — a
+    // continuation date, never a score. Absent until the league sets one (a
+    // just-suspended game carries no resume date yet). MLB's own schedule
+    // bucketing already lists this gamePk again on the resumeGameDate itself
+    // (same gamePk, unlike a postponed game's makeup), so the slate needs no
+    // extra fetch to have it "move" there — this field is only for telling
+    // the ORIGINAL day's card when that will happen.
+    resumeDate: game.resumeDate,
+    resumeGameDate: game.resumeGameDate,
     away: {
       id: away?.team?.id,
       name: away?.team?.name,
@@ -319,10 +330,10 @@ export async function fetchGameCardsByPk(gamePks) {
 const GAMES_BY_PK_FIELDS =
   'dates,games,gamePk,officialDate,gameDate,gameNumber,teams,away,home,team,id,name,teamName,abbreviation'
 // fetchGameCardsByPk feeds normalizeGame, so its allowlist covers that full
-// read-set (status, reschedule dates, sport id, venue name + timezone) —
-// omitting any would blank a Top Games card's status/date/tz.
+// read-set (status, reschedule/resume dates, sport id, venue name + timezone)
+// — omitting any would blank a Top Games card's status/date/tz.
 const GAME_CARDS_FIELDS =
-  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,status,statusCode,detailedState,abstractGameState,reason,rescheduleDate,rescheduleGameDate,teams,away,home,team,id,name,teamName,abbreviation,sport,venue,timeZone,tz'
+  'dates,games,gamePk,officialDate,gameDate,gameNumber,doubleHeader,status,statusCode,detailedState,abstractGameState,reason,rescheduleDate,rescheduleGameDate,resumeDate,resumeGameDate,teams,away,home,team,id,name,teamName,abbreviation,sport,venue,timeZone,tz'
 // fetchSchedule is normalizeGame's read-set (GAME_CARDS_FIELDS) plus the
 // readiness hydrations it counts: the lineup player lists, the officials
 // crew, and each side's probablePitcher (its `id` is already in the shared

@@ -371,6 +371,14 @@ function rescheduleLabel(game) {
   return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
+// Same idea for a suspended game's set continuation date (resumeGameDate),
+// or '' when the league hasn't set one yet — a game just suspended tonight
+// carries no resume date until the league schedules it.
+function resumeLabel(game) {
+  const d = game.resumeGameDate
+  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
+}
+
 // Scorebook-readiness pill: four small checkbox pips, in a fixed order (each
 // team's batting order, the umpire crew, both starting pitchers), telling you
 // at a glance whether the basics you'd pencil in pre-game are posted yet. The
@@ -531,6 +539,16 @@ function TeamName({ team, side }) {
 // the park's zone) — no redundant "(7:10 CDT)".
 function StatusText({ game, hasScoreLine = false }) {
   const status = selectGameStatus(game)
+  if (status.isSuspended) {
+    // The corner pill alone just says SUSPENDED; once the league has set a
+    // continuation date this slot — otherwise empty for a suspended game,
+    // since the pill already ate the ready-pips/start-time job — carries it.
+    // Same idea as PostponedBanner's makeup line, just in the ordinary
+    // corner-text slot rather than a stamp, since a suspended game keeps its
+    // normal matchup card.
+    const resume = resumeLabel(game)
+    return resume ? <span className="gamecard__status">Resumes {resume}</span> : null
+  }
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
   if (s === 'Final') {

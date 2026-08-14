@@ -792,6 +792,12 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               showPastDayTreatment &&
               g.abstractState === 'Final' &&
               !selectGameStatus(g).isPostponed
+            // A suspended game is a paused checkpoint, not a moving target —
+            // its box score won't change again until play resumes, same as a
+            // Final's. Unlike Final, it still gets the ordinary GameCard (not
+            // the flip card: there's no result to reveal yet), so it needs
+            // its own onBoxScore rather than inheriting isPastFinal's.
+            const isSuspended = selectGameStatus(g).isSuspended
             return (
               <li key={`${g.sportId}-${g.gamePk}`}>
                 {isPastFinal ? (
@@ -820,7 +826,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     eager={eager}
                     stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? null}
                     onSelect={() => onPick(g, dateStr)}
-                    onBoxScore={null}
+                    onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
                   />
                 )}
               </li>
