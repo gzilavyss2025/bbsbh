@@ -113,7 +113,7 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   return (
     <section className="metriccard seasonseries">
       <SectionMasthead title="Season series" as="h3">
-        {leadLabel}
+        {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
       </SectionMasthead>
       <div className="metriccard__body seasonseries__body">
         {canScroll && (

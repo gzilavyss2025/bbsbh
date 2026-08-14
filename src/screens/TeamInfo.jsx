@@ -160,18 +160,14 @@ export function TeamInfo({
         </div>
       </div>
 
-      {/* The page-top zone: the fill-in facts and the crew on the left, the
-          plate ump's full Tendencies card as the WHOLE right side from the
-          wide breakpoint (see .teaminfo__topzone). A phone keeps the single
-          column — facts, crew, card, then the preview door. The card fetch
+      {/* The page-top zone: the fill-in facts, the crew, the preview door,
+          the print-sheet link, and the season series carousel all stack in
+          the left column; the plate ump's full Tendencies card is the WHOLE
+          right side from the wide breakpoint (see .teaminfo__topzone). A
+          phone keeps this same order as a single column. The card fetch
           reads the same memoized static nightly files the accuracy modal
           does, and the card renders nothing (single-column zone) for MiLB or
-          an unswept umpire. The preview door is this zone's third child
-          rather than a sibling below it: on the wide grid that's what lets
-          CSS park it under the facts/crew column, below the umpires, beside
-          Tendencies (see .teaminfo__previewdoor); on a phone it stays plain
-          flow, so nothing about that "facts, crew, card, then door" order
-          changes there. */}
+          an unswept umpire. */}
       <div className="teaminfo__topzone">
         <div className="teaminfo__topmain">
           <dl className="factgrid">
@@ -194,38 +190,40 @@ export function TeamInfo({
           </dl>
 
           <UmpiresCard officials={officials} />
+
+          {/* The preview card's door — moved here from its old "Card"
+              tab-bar stop once that tab started opening the live scorecard
+              (ADR-0047's second amendment). Full-width, not a quiet chevron:
+              a scorer on a lineup page is usually here to post the matchup.
+              Nested directly under the crew rather than trailing the whole
+              zone, so it reads as this column's next step. */}
+          {onPreview && (
+            <button
+              type="button"
+              className="btn btn--next teaminfo__previewdoor"
+              onClick={onPreview}
+            >
+              View preview card
+            </button>
+          )}
+          {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
+              what this used to promise; the destination awaits a rebuild. */}
+          {onPrintSheet && (
+            <div className="thub-door">
+              <ChevronLink onClick={onPrintSheet}>Print blank scorecard</ChevronLink>
+            </div>
+          )}
+
+          <SeasonSeriesStrip
+            viewingTeamId={meta.id}
+            opponentId={oppMeta.id}
+            officialDate={info.officialDate}
+            sportId={meta.sportId}
+            currentGamePk={feed?.gamePk}
+          />
         </div>
         {hpUmpire && <UmpireTendencies umpire={hpUmpire} />}
-        {/* The preview card's door — moved here from its old "Card" tab-bar
-            stop once that tab started opening the live scorecard (ADR-0047's
-            second amendment). Full-width, not a quiet chevron: a scorer on a
-            lineup page is usually here to post the matchup. */}
-        {onPreview && (
-          <button
-            type="button"
-            className="btn btn--next teaminfo__previewdoor"
-            onClick={onPreview}
-          >
-            View preview card
-          </button>
-        )}
       </div>
-
-      {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
-          what this used to promise; the destination awaits a rebuild. */}
-      {onPrintSheet && (
-        <div className="thub-door">
-          <ChevronLink onClick={onPrintSheet}>Print blank scorecard</ChevronLink>
-        </div>
-      )}
-
-      <SeasonSeriesStrip
-        viewingTeamId={meta.id}
-        opponentId={oppMeta.id}
-        officialDate={info.officialDate}
-        sportId={meta.sportId}
-        currentGamePk={feed?.gamePk}
-      />
 
       <TeamSections
         feed={feed}
