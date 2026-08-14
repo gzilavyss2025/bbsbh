@@ -520,11 +520,10 @@
     },
     "scorecardGame.js": {
       "class": "reveal-gated",
-      "why": "The scorecard's inked grid, P/TP/LOB row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the box score's embedded sheet and the DEV-only Lab pass Infinity from inside the box score's SealBox reveal / the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
+      "why": "The scorecard's inked grid, P/TP/LOB row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the DEV-only Lab passes Infinity from behind the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
       "importers": [
         "screens/ScorecardLab.jsx",
-        "screens/scorecard/ScorecardPage.jsx",
-        "screens/boxscore/BoxScorecard.jsx"
+        "screens/scorecard/ScorecardPage.jsx"
       ]
     },
     "schedule.js": {

@@ -15,8 +15,8 @@
   margin: var(--space-3) 0;
 }
 
-/* The live scorecard page's control bar (and the box score embed's): the
-   Top/Bottom half toggle, with Refresh riding the far end on the live page. */
+/* The live scorecard page's control bar: the Top/Bottom half toggle, with
+   Refresh riding the far end. */
 .scpage__bar {
   display: flex;
   align-items: center;
@@ -27,10 +27,6 @@
 .scpage__ctl {
   display: flex;
   gap: var(--space-2);
-}
-/* The embedded sheet keeps its own head clear of the box score's cards. */
-.bs__scorecard {
-  margin-top: var(--space-4);
 }
 
 /* The turn handoff: the next at-bat belongs to the OTHER club's page of the

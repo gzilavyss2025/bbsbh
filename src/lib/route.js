@@ -348,8 +348,11 @@ export function sectionToStep(section) {
   if (section === 'sheet') return { step: 5, inning: 1, half: 'top' }
   // The live scorecard (screens/scorecard/ScorecardPage.jsx): the #22 sheet
   // filled exactly as far as the user's own reveal mark. A real, shareable
-  // address like the two stops above it, and like them deliberately not one
-  // of the four steps the "next" buttons walk.
+  // address like the two stops above it, and like them not one of the four
+  // steps the "next" buttons walk — but unlike them, it also owns the fifth
+  // stop on the game's tab bar (GameView.jsx's sectionTabs), since it's a
+  // page you keep coming back to during the game rather than a thing you
+  // make once and share.
   if (section === 'scorecard') return { step: 6, inning: 1, half: 'top' }
   const m = /^(top|bottom)(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }

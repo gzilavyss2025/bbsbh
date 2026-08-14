@@ -1,10 +1,11 @@
-// The live scorecard (`/{date}/{matchup}/scorecard`) and the box score's
-// embedded completed sheet, pinned on the anchor game 823035 (2026-07-07
-// MIL@STL g2, final MIL 10–2) — the same game test/scorecard-game.test.js
-// pins offline, so every number asserted here was verified there first.
-// What this layer adds over the unit suite: the DOM truth of the clamp (a
-// sealed half's marks literally absent), the override flow end to end, the
-// box score's seal boundary, and the lineup-page door.
+// The live scorecard (`/{date}/{matchup}/scorecard`), pinned on the anchor
+// game 823035 (2026-07-07 MIL@STL g2, final MIL 10–2) — the same game
+// test/scorecard-game.test.js pins offline, so every number asserted here
+// was verified there first. What this layer adds over the unit suite: the
+// DOM truth of the clamp (a sealed half's marks literally absent), the
+// override flow end to end, and the game's two doors onto this page (the
+// tab bar, and the lineup page's door to the preview card that replaced it
+// there — ADR-0047's second amendment).
 import { test, expect } from './fixtures.js'
 
 // Some sandboxes' Chromium cannot reach statsapi directly (CONNECTs reset by
@@ -29,7 +30,6 @@ test.beforeEach(async ({ page }) => {
 })
 
 const ROUTE = '/07072026/milstl-2/scorecard'
-const BOX = '/07072026/milstl-2/boxscore'
 const REVEAL_KEY = 'bbsbh:reveal:823035'
 const NOTES_KEY = 'bbsbh:scorecard-notes:823035'
 
@@ -134,32 +134,27 @@ test('a tapped box takes a penciled override, persists it, and gives it back', a
   expect(stored).toBeNull()
 })
 
-test('box score: no scorecard DOM before the seal, the completed sheet after it', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.clear())
-  await page.goto(BOX)
-  // Sealed: the reveal cover is up and NOTHING of the sheet exists in the DOM.
-  await expect(page.locator('.sealbox').first()).toBeVisible({ timeout: 20000 })
-  await expect(page.locator('.sc-ab')).toHaveCount(0)
-  await expect(page.locator('body')).not.toContainText('Gasser')
-  // Reveal the box score.
-  await page.getByRole('button', { name: /reveal the box score/i }).click()
-  // The embedded completed sheet is there, inked, at the foot of the page.
-  await expect(page.locator('.bs__scorecard .scorecard')).toBeVisible({ timeout: 20000 })
-  await expect(page.locator('.bs__scorecard .sc-sheet__totbar')).toHaveText(['38', '11', '10', '10'])
-  await expect(page.locator('.bs__scorecard .sc-decisions')).toContainText('Robert Gasser')
-  // The Top/Bottom toggle flips to the home club's half of the book.
-  await page.locator('.bs__scorecard').getByRole('button', { name: 'Bottom', exact: true }).click()
-  await expect(page.locator('.bs__scorecard .sc-sheet__totbar')).toHaveText(['31', '4', '2', '2'])
-})
-
-test('the lineup page carries the door to the live scorecard', async ({ page }) => {
+test('the game tab bar carries the door to the live scorecard', async ({ page }) => {
   await page.addInitScript(() => window.localStorage.clear())
   await page.goto('/07072026/milstl-2/lineup1')
-  const door = page.getByRole('button', { name: /open the live scorecard/i })
-  await expect(door).toBeVisible({ timeout: 20000 })
-  await door.click()
+  const tab = page.getByRole('button', { name: 'Scorecard', exact: true })
+  await expect(tab).toBeVisible({ timeout: 20000 })
+  await tab.click()
   await expect(page).toHaveURL(/\/scorecard/)
   await expect(page.locator('.scorecard')).toBeVisible({ timeout: 20000 })
+})
+
+test('the lineup page carries the door to the preview card, not the scorecard', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.clear())
+  await page.goto('/07072026/milstl-2/lineup1')
+  // The preview card's door moved here once the tab bar's "Card" stop became
+  // "Scorecard" — see ADR-0047's second amendment.
+  const door = page.getByRole('button', { name: /view preview card/i })
+  await expect(door).toBeVisible({ timeout: 20000 })
+  await expect(page.getByRole('button', { name: /open the live scorecard/i })).toHaveCount(0)
+  await door.click()
+  await expect(page).toHaveURL(/\/preview/)
+  await expect(page.locator('.posterstudio')).toBeVisible({ timeout: 20000 })
 })
 
 test('the sheet plays: flip chip, frontier seal, one PA per tap, commit inks the half', async ({ page }) => {
