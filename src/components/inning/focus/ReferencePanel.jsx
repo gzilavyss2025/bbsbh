@@ -10,6 +10,7 @@ import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
 import { RosterPanel } from '../RosterPanel.jsx'
 import { ExtrasFacts } from './ExtrasFacts.jsx'
+import { UmpireTendenciesFold } from '../../umpire/UmpireTendenciesFold.jsx'
 import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
 import { WinProbChart } from '../../charts/WinProbChart.jsx'
 import { DueUpNextCard } from '../../playbyplay/DueUpNextCard.jsx'
@@ -343,6 +344,11 @@ function Section({
             groups={groups}
           />
         ))}
+        {/* The plate ump's Tendencies card as a collapsed drawer, between the
+            benches and the fill-in facts: it reads like the crew line below
+            (a once-a-game reference), so it sits with the drawers rather
+            than among the facts. Renders nothing for MiLB / unswept crews. */}
+        <UmpireTendenciesFold feed={feed} />
         <ExtrasFacts
           feed={feed}
           meta={meta}

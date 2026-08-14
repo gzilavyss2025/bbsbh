@@ -2,7 +2,8 @@
 // took apart rather than tuned.
 //
 // It is UmpireTendencies.jsx band for band — identity, the navy "area to
-// watch" strip, the five-row zone-lean scale, the 2×2 tiles — at half width.
+// watch" strip, the five-row zone-lean scale, the 2×2 tiles, the ABS
+// challenge figures — at half width.
 //
 // ONE THING CHANGED, AND ONE THING DELIBERATELY DID NOT. A design critique
 // found the 3×3 zone grid sitting in the identity row's spare corner while the
@@ -171,7 +172,7 @@ function drawWatchBand(ctx, x, y, width, height, plate, palette) {
     bodyX = x + 12 + map + 24
   }
   const bodyWidth = x + width - 14 - bodyX
-  track(ctx, caps('Area to watch'), bodyX, y + 26, {
+  track(ctx, caps('Area to watch'), bodyX, y + 24, {
     font: FONT.display(15),
     fill: palette.rule,
     spacing: 1.6,
@@ -179,11 +180,36 @@ function drawWatchBand(ctx, x, y, width, height, plate, palette) {
   })
   const hand = plate.watch?.hand ? ` to ${HAND_WORD[plate.watch.hand]}` : ''
   const text = plate.watch?.phrase ? `${plate.watch.phrase}${hand}` : 'No clear tendency'
-  track(ctx, caps(text), bodyX, y + 54, {
+  track(ctx, caps(text), bodyX, y + 50, {
     font: FONT.display(23),
     fill: plate.watch?.phrase ? palette.onInk : palette.rule,
     spacing: 0.8,
     maxWidth: bodyWidth,
+  })
+}
+
+// The card's ABS band, compressed to one ruled line: label left, the umpire's
+// pair and the league baseline right — the same three figures the real card
+// spends a sub-table and a footnote on, which the poster has no room for.
+// Challenge counts are ball/strike JUDGMENT challenges and their outcomes,
+// never a run or result. Skipped entirely on a row set swept before the
+// challenge schema shipped, same as the card.
+function drawChallengeLine(ctx, x, y, width, plate, palette) {
+  if (plate.challenges?.perGame == null) return
+  rule(ctx, x, y, width, { fill: palette.hairline })
+  track(ctx, caps('ABS challenges'), x, y + 17, {
+    font: FONT.display(13),
+    fill: palette.caption,
+    spacing: 1.3,
+  })
+  const parts = [`${plate.challenges.perGame.toFixed(1)}/GM`]
+  if (plate.challenges.overturnRate != null) parts.push(`${pct(plate.challenges.overturnRate)} OVERTURNED`)
+  if (plate.leagueChallenges?.overturnRate != null) parts.push(`LG ${pct(plate.leagueChallenges.overturnRate)}`)
+  line(ctx, parts.join(' · '), x + width, y + 17, {
+    font: FONT.mono(14),
+    fill: palette.heading,
+    align: 'right',
+    maxWidth: width - 150,
   })
 }
 
@@ -254,14 +280,19 @@ export function drawUmpireCard(ctx, box, model, palette) {
     { font: FONT.mono(13), fill: palette.caption, maxWidth: whoWidth },
   )
 
-  drawWatchBand(ctx, box.x + 1, top + 68, box.width - 2, 74, plate, palette)
+  // The band and the lean/tiles pairing sit a few px higher than they once
+  // did, and the band lost 6px of height: the room this buys at the foot is
+  // where the ABS challenge line lives, inside the same fixed block height.
+  drawWatchBand(ctx, box.x + 1, top + 64, box.width - 2, 68, plate, palette)
 
   // The scale on the left, the quotable numbers on the right — the pairing the
   // real card makes, at half its width.
   const leanW = 208
   const tilesX = inner.x + leanW + 16
-  if (plate.lean) drawLeanScale(ctx, inner.x, top + 162, leanW, plate.lean, palette)
-  drawTiles(ctx, tilesX, top + 156, inner.x + inner.width - tilesX, umpireTiles(plate), palette)
+  if (plate.lean) drawLeanScale(ctx, inner.x, top + 148, leanW, plate.lean, palette)
+  drawTiles(ctx, tilesX, top + 142, inner.x + inner.width - tilesX, umpireTiles(plate), palette)
+
+  drawChallengeLine(ctx, inner.x, top + 246, inner.width, plate, palette)
 }
 
 function umpireTiles(plate) {

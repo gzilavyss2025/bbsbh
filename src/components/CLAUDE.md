@@ -39,7 +39,7 @@ about what it is. Do not tidy it into a folder.
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |
 | `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal`, `StarterMatchups` | Team-level statistical cards |
 | `transactions/` | `TeamTransactionsCard`, `TradeCard`, `TransactionTimeline` | Roster-move surfaces |
-| `umpire/` | `UmpireAccuracyModal`, `UmpireLink` | Umpire-specific surfaces (the tier pill/glyph live in `badges/` — shared with Game Score rankings) |
+| `umpire/` | `UmpireAccuracyModal`, `UmpireLink`, `UmpireTendencies`, `UmpireZoneMap`, `UmpiresCard`, `UmpireTendenciesFold` | Umpire-specific surfaces: the Tendencies card and its three hosts — the modal, the lineup page's crew section (`UmpiresCard`), and focus mode's EXTRAS-tab drawer (`UmpireTendenciesFold`). The tier pill/glyph live in `badges/` — shared with Game Score rankings |
 
 Three untouched subdirectories predate this bucketing and follow their own
 internal convention rather than the domain-bucket one above: `page-turn/` (the

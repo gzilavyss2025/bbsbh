@@ -324,3 +324,46 @@
   border: 0;
   border-radius: 0;
 }
+
+/* ------------------------------------------------- the lineup page's zone
+   TeamInfo's Umpires section: the crew list and the plate ump's Tendencies
+   card share one zone under the section title. A phone stacks them (crew,
+   then card, then the preview door); from the wide breakpoint the crew
+   stacks into ONE column so the card can sit beside it. Both switches key
+   on the card actually being there (`:has`) — an MiLB crew with no card
+   keeps the plain two-column list at every width. */
+.umps__zone {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 740px) {
+  .umps__zone:has(> .umptend) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .umps__zone:has(> .umptend) .umps__list {
+    grid-template-columns: 1fr;
+  }
+  /* The base sheet stretches a lone last item across both columns so an odd
+     crew leaves no gap (09-team-info.css) — meaningless in one column, and
+     it would pin the row to the full grid line. */
+  .umps__zone:has(> .umptend) .umps__list li:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+}
+
+/* ------------------------------------------------ the EXTRAS-tab drawer
+   UmpireTendenciesFold.jsx — the same card behind a collapsed .roster-style
+   drawer in focus mode's EXTRAS tab. The drawer's own chrome frames it, so
+   the card sheds its frame (the .umpmodal rule's reasoning), and the toggle
+   already says "Umpire tendencies", so the card's own masthead would print
+   the title twice — dropped. */
+.umptendfold .umptend {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.umptendfold .umptend__bar {
+  display: none;
+}
