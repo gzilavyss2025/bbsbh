@@ -4,8 +4,7 @@ import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../../lib/teams.js'
 import { selectGameStatus } from '../../api/select.js'
-import { humanDate } from '../../lib/dates.js'
-import { doubleHeaderLabel } from '../../lib/resultCards.js'
+import { doubleHeaderLabel, rescheduleLabel, resumeLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
@@ -78,14 +77,21 @@ export function GameCard({
   // positioned corner pill leak through mirrored on iOS. There's also no result
   // to reveal: the game didn't happen.
   const postponed = status.isPostponed
-  // One flag for everything the Scores Unlocked line displaces while it's
-  // showing: the corner Final text (relocated into its center slot) and the
-  // readiness pips (a pre-game checklist — once runs and an inning are on the
-  // card, "is the scorebook ready" is answered). Pre-game cards keep both:
-  // no line renders before first pitch.
+  // One flag for what the Scores Unlocked line displaces while it's showing:
+  // the corner Final text, relocated into its center slot. Pre-game cards
+  // keep the corner text: no line renders before first pitch. (The readiness
+  // pips are a separate, Preview-only gate below — a game that has gone Live,
+  // suspended or not, already answered "is the scorebook ready".)
   const hasScoreLine = !!liveLine && !postponed
   const stacked = !!stackedGame
   const dhLabel = doubleHeaderLabel(game, stacked)
+  // A suspended game's card may carry today's independently-scheduled game
+  // riding behind it (stackSuspendedContinuation, GameSelect) rather than a
+  // true doubleheader's game 2 — MLB's feed marks neither row as part of a
+  // doubleheader (both carry doubleHeader 'N'), so dhLabel above is null for
+  // this pairing. This pill fills that gap; mutually exclusive with dhLabel
+  // since a game can't be both.
+  const suspendedPairLabel = !dhLabel && stacked && status.isSuspended ? 'Two Games Today' : null
   const pinned = !!pinnedTeamId
   // Static same-origin file (nightly-generated), same "fetch once, session
   // cache" shape as every other public/data/*.json reader — this is not one
@@ -257,6 +263,16 @@ export function GameCard({
               {stacked && <span className="sr-only"> — this card opens game 1</span>}
             </span>
           )}
+          {suspendedPairLabel && (
+            <span className="gamecard__dh">
+              {suspendedPairLabel}
+              <span className="sr-only">
+                {' '}
+                — this card opens the suspended game; a separate game follows
+                once it&rsquo;s done
+              </span>
+            </span>
+          )}
           {prospectCount > 0 && (
             <span className="gamecard__prospects">
               <img src={leagueLogoUrl()} alt="" className="gamecard__prospects-logo" />
@@ -273,7 +289,7 @@ export function GameCard({
               two appear together. */}
           {park && <span className="gamecard__parkname">{park.name}</span>}
           <span className="gamecard__metaright">
-            {!postponed && game.abstractState !== 'Final' && !hasScoreLine && (
+            {!postponed && game.abstractState === 'Preview' && (
               <ReadyPill game={game} />
             )}
             {!postponed && national && <NationalTvIcon network={national} />}
@@ -360,15 +376,6 @@ export function PostponedBanner({ game, status }) {
       )}
     </div>
   )
-}
-
-// "Sat, Jul 11" for a rescheduled game, or '' when no make-up date is set yet
-// (a fresh postponement carries no rescheduleGameDate — the banner then just
-// reads POSTPONED). Parsed as a plain calendar date (humanDate), never shifted
-// by the viewer's zone.
-function rescheduleLabel(game) {
-  const d = game.rescheduleGameDate
-  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
 // Scorebook-readiness pill: four small checkbox pips, in a fixed order (each
@@ -531,6 +538,16 @@ function TeamName({ team, side }) {
 // the park's zone) — no redundant "(7:10 CDT)".
 function StatusText({ game, hasScoreLine = false }) {
   const status = selectGameStatus(game)
+  if (status.isSuspended) {
+    // The corner pill alone just says SUSPENDED; once the league has set a
+    // continuation date this slot — otherwise empty for a suspended game,
+    // since the pill already ate the ready-pips/start-time job — carries it.
+    // Same idea as PostponedBanner's makeup line, just in the ordinary
+    // corner-text slot rather than a stamp, since a suspended game keeps its
+    // normal matchup card.
+    const resume = resumeLabel(game)
+    return resume ? <span className="gamecard__status">Resumes {resume}</span> : null
+  }
   if (status.label) return null // the delay pill carries it; no redundant text
   const s = game.abstractState
   if (s === 'Final') {
