@@ -324,3 +324,44 @@
   border: 0;
   border-radius: 0;
 }
+
+/* ------------------------------------------------- the lineup page's zone
+   TeamInfo's page-top zone: the fill-in factgrid (date / ballpark / first
+   pitch / weather / manager / uniform) and the Umpires crew stack on the
+   left, and the plate ump's Tendencies card is the WHOLE right side beside
+   them from the wide breakpoint. A phone keeps the single column — facts,
+   crew, card, then the preview door. The split keys on the card actually
+   being there (`:has`) — an MiLB crew with no card leaves the zone as plain
+   single-column flow at every width. */
+.teaminfo__topzone > .umptend {
+  margin-top: 14px;
+}
+
+@media (min-width: 740px) {
+  .teaminfo__topzone:has(> .umptend) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 var(--space-6);
+    align-items: start;
+  }
+  /* Top-aligned with the factgrid across the gutter, not hanging 14px below
+     the row the phone flow needed. */
+  .teaminfo__topzone:has(> .umptend) > .umptend {
+    margin-top: 0;
+  }
+}
+
+/* ------------------------------------------------ the EXTRAS-tab drawer
+   UmpireTendenciesFold.jsx — the same card behind a collapsed .roster-style
+   drawer in focus mode's EXTRAS tab. The drawer's own chrome frames it, so
+   the card sheds its frame (the .umpmodal rule's reasoning), and the toggle
+   already says "Umpire tendencies", so the card's own masthead would print
+   the title twice — dropped. */
+.umptendfold .umptend {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.umptendfold .umptend__bar {
+  display: none;
+}

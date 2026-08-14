@@ -54,29 +54,23 @@ export function leanTierForZ(z) {
   return 'veryHitter'
 }
 
-// The band edges, in z, that leanTierForZ cuts at — the outer two clamped, so
-// an extreme umpire sits at the very end of the scale rather than off it.
-const LEAN_BOUNDS = [-2, -LEAN_STRONG, -LEAN_SLIGHT, LEAN_SLIGHT, LEAN_STRONG, 2]
-
 // Where the scale's caret sits, as a 0..1 fraction down five EQUAL-height
-// bands. The card draws equal rows (the reference graphic's own geometry), so
-// the continuous reading has to live inside a row rather than in row widths:
-// this locates z within its own band, then places it that far into that band's
-// row. Piecewise-linear across the scale as a whole, which is the trade equal
-// rows force — but every claim the card makes is true under it, and the caret
-// can never point at a row other than the one the label highlights.
+// bands: the CENTRE of the band z falls in. Five settings, five spots.
 //
-// That last property is why this derives its band from leanTierForZ instead of
-// re-deriving one from LEAN_BOUNDS: a caret disagreeing with its own highlighted
-// band is the one bug this geometry could have, and asking the same function
-// twice makes it unreachable.
+// It used to place z continuously WITHIN its band, but the outer bands clamp
+// (an extreme umpire's z runs past any fixed edge), so a strong-leaning
+// umpire's caret sat on the scale's very edge — half the triangle above the
+// first row, or cut off below the last — visibly misaligned with the boxed
+// label beside it. Centring on the band keeps the caret and the highlight in
+// exact register at every one of the five settings.
+//
+// Derives its band from leanTierForZ rather than from the bound values: a
+// caret disagreeing with its own highlighted band is the one bug this
+// geometry could have, and asking the same function twice makes it
+// unreachable.
 export function leanCaretFraction(z) {
   const i = LEAN_TIERS.indexOf(leanTierForZ(z))
-  const lo = LEAN_BOUNDS[i]
-  const hi = LEAN_BOUNDS[i + 1]
-  const clamped = Math.max(lo, Math.min(hi, z))
-  const within = hi > lo ? (clamped - lo) / (hi - lo) : 0.5
-  return (i + within) / LEAN_TIERS.length
+  return (i + 0.5) / LEAN_TIERS.length
 }
 
 // Population mean + standard deviation of a numeric array (n, not n-1 — the

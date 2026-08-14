@@ -125,6 +125,32 @@ test('a crew with no accuracy on file still names the plate umpire', () => {
   assert.equal(model.crew.length, 2)
 })
 
+// The ABS challenge figures ride the plate block the same way the tiles do:
+// present when the sweep has counted them, null — never zero — when the row
+// set predates the challenge schema.
+test('the plate block carries the ABS challenge pair and the league baseline', () => {
+  const umpire = {
+    season: 2026,
+    games: [{ role: 'HP' }],
+    accuracy: { season: { called: 3000, accuracy: 0.94, consistency: 0.92, favorPerGame: 1.1, games: 20 } },
+    rank: { rank: 5, total: 90 },
+    lean: { tier: 'neutral', z: 0.1 },
+    zoneCells: null,
+    watchArea: null,
+    challenges: { perGame: 3.5, overturnRate: 0.5, total: 80, overturned: 40, games: 23 },
+    leagueChallenges: { perGame: 3.1, overturnRate: 0.47 },
+  }
+  const model = buildPreviewModel(finishedFeed(), { umpire })
+  assert.deepEqual(model.plate.challenges, { perGame: 3.5, overturnRate: 0.5 })
+  assert.deepEqual(model.plate.leagueChallenges, { overturnRate: 0.47 })
+
+  const swept = buildPreviewModel(finishedFeed(), {
+    umpire: { ...umpire, challenges: null, leagueChallenges: null },
+  })
+  assert.equal(swept.plate.challenges, null)
+  assert.equal(swept.plate.leagueChallenges, null)
+})
+
 test('a probable starter with no season line yet still prints his name and hand', () => {
   const model = buildPreviewModel(finishedFeed())
   assert.equal(model.starters.away.name, 'Robert Gasser')
