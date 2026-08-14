@@ -16,8 +16,9 @@ import { RefreshButton } from '../TeamInfo.jsx'
 // And not just filled: PLAYED. The next plate appearance sits face-down in
 // its own grid cell (the kraft frontier seal); tapping it reveals one at-bat
 // in place — the sheet's marks ink in, the out circle stamps — and when the
-// half ends the turn hands to the other club's page of the book (the flip
-// chip). Fog of war, uncovered box by box, in reading order.
+// half ends the turn hands to the other club's page of the book, on the
+// sheet's own leads-off-next diagonal rather than a banner over it. Fog of
+// war, uncovered box by box, in reading order.
 //
 // SPOILER FOOTING (the whole design):
 //  • Every inked value comes from api/scorecardGame.js, whose builders clamp
@@ -31,8 +32,8 @@ import { RefreshButton } from '../TeamInfo.jsx'
 //    persists (revealAtBat's entry-count cursor, ADR-0016; revealTo's commit
 //    when the half is done) — one ratchet, two surfaces, never a
 //    double-reveal. Whole-half facts (P/TP/LOB, the scoreboard cell, the
-//    inning-end diagonal) ink on commit only, exactly as the innings viewer
-//    holds its tally until a half commits.
+//    inning-end rule and its leads-off-next diagonal) ink on commit only,
+//    exactly as the innings viewer holds its tally until a half commits.
 //  • Under the Scores Unlocked pass / a consented day (ADR-0026), GameView
 //    hands down `spoilersOff` and the RENDER clamp substitutes the game's
 //    last half; there is nothing left to step, so the frontier seal
@@ -131,10 +132,28 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   }
 
   // The turn handoff: the next at-bat belongs to the OTHER club's page of
-  // the book. Say so, and make the chip the flip.
+  // the book. It rides the sheet, not a banner over it — the leads-off-next
+  // diagonal of the half that JUST ended becomes the button that flips.
+  // That's the mark your eye is already on when a half closes, so the "keep
+  // going" affordance sits where the scoring does.
+  //
+  // Which diagonal: the half before `stepInfo`'s, which is on THIS side by
+  // construction (halves alternate, and `needsFlip` says the next one isn't
+  // ours). Naming the inning rather than "the newest" is what keeps every
+  // OLDER diagonal plain notation. An inning of 0 (the bottom sheet before
+  // top 1 has closed) matches no end mark, so nothing renders — and neither
+  // does anything under the Scores Unlocked pass, where `stepInfo` is null.
+  //
+  // A half whose last card was INTERRUPTED leaves no diagonal at all (see
+  // scorecardPlays), so it gets no flip button either; the Top/Bottom
+  // control above the sheet is the way over, same as always.
   const needsFlip = stepInfo != null && stepInfo.side !== side
-  const flipLabel = needsFlip
-    ? `${stepInfo.half === 'top' ? 'Top' : 'Bottom'} ${stepInfo.inning} is next — flip the sheet`
+  const flip = needsFlip
+    ? {
+        inning: stepInfo.half === 'bottom' ? stepInfo.inning : stepInfo.inning - 1,
+        label: `${stepInfo.half === 'top' ? 'Top' : 'Bottom'} ${stepInfo.inning}`,
+        onFlip: () => setSide(stepInfo.side),
+      }
     : null
 
   return (
@@ -166,12 +185,6 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         notation.
       </p>
 
-      {needsFlip && (
-        <button type="button" className="scflip" onClick={() => setSide(stepInfo.side)}>
-          {flipLabel} <span aria-hidden="true">›</span>
-        </button>
-      )}
-
       <Scorecard
         side={side}
         view={view}
@@ -179,6 +192,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         onCellTap={(card) => setEditing(card)}
         onFrontierTap={onFrontierTap}
         fresh={fresh}
+        flip={flip}
       />
 
       {editing && (

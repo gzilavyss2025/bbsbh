@@ -14,9 +14,10 @@
 //      sheet's visible-innings walk matches revealProgressCore's
 //      unlockedInnings exactly (extras never spoil, ADR-0008), since the two
 //      are deliberately parallel implementations.
-//   3. THE MARKS — the inning-end diagonal lands on the next-due batter's
-//      UNUSED box, and a skipped final bottom half reads 'X' on the finished
-//      scoreboard.
+//   3. THE MARKS — the end-of-inning slash lands on the box of the plate
+//      appearance that CLOSED the half, the leadoff box names the next-due
+//      batter's UNUSED cell, and a skipped final bottom half reads 'X' on
+//      the finished scoreboard.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync } from 'node:fs'
@@ -54,7 +55,7 @@ test('nothing on the sheet before the first reveal', () => {
   assert.equal(grid.innings.length, selectRegulationInnings(FEED)) // 9 blank columns
   for (let n = 1; n <= 9; n++) assert.equal(grid.perInning[n], null)
   assert.deepEqual(grid.totals, { ab: 0, h: 0, r: 0, rbi: 0 })
-  assert.equal(grid.endMarks.length, 0)
+  assert.equal(grid.leadoffMarks.length, 0)
   assert.deepEqual(scorecardPitchers(FEED, 'top', { through: -1 }), [])
 
   const sb = scorecardScoreboard(FEED, { through: -1 })
@@ -186,13 +187,21 @@ test('visible innings match unlockedInnings at every mark (the two walks never d
   }
 })
 
-test('the inning-end diagonal lands on the next-due batter’s unused box', () => {
+test('the leadoff box names the next-due batter’s unused cell', () => {
   const grid = scorecardPlays(FEED, 'top')
-  assert.ok(grid.endMarks.length >= 7, `only ${grid.endMarks.length} end marks on a 9-inning sheet`)
-  for (const mark of grid.endMarks) {
+  assert.ok(
+    grid.leadoffMarks.length >= 7,
+    `only ${grid.leadoffMarks.length} leadoff boxes on a 9-inning sheet`,
+  )
+  for (const mark of grid.leadoffMarks) {
     const slot = grid.slots[mark.slot - 1]
-    assert.equal(slot.cells[mark.colIndex], undefined, 'the slashed box must be empty')
-    assert.equal(slot.endCells[mark.colIndex], true)
+    // Empty by definition — which is what lets the turn handoff sit there
+    // without displacing a card or drawing any notation of its own.
+    assert.equal(slot.cells[mark.colIndex], undefined, 'the leadoff box must be empty')
+    // Valued by the inning that ended, never a bare `true` — the handoff
+    // names ONE inning's box and leaves every older one blank.
+    assert.equal(slot.leadoffCells[mark.colIndex], mark.inning)
+    assert.equal(grid.columns[mark.colIndex].inning, mark.inning)
   }
   // Pin inning 1 exactly: the slot after the half's last plate appearance.
   const top1 = computeHalfInningFeed(FEED, 1, 'top', 'away').filter((c) => c.kind === 'atbat')
@@ -201,7 +210,7 @@ test('the inning-end diagonal lands on the next-due batter’s unused box', () =
     Object.values(s.cells).some((c) => c.atBatIndex === last.atBatIndex),
   )
   const expected = (lastSlot.slot % 9) + 1
-  const inning1Mark = grid.endMarks.find((m) => grid.columns[m.colIndex].inning === 1)
+  const inning1Mark = grid.leadoffMarks.find((m) => grid.columns[m.colIndex].inning === 1)
   assert.ok(inning1Mark, 'inning 1 has an end mark')
   assert.equal(inning1Mark.slot, expected)
 })
@@ -288,11 +297,56 @@ test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
   )
 })
 
+test('the end-of-inning slash marks the box the half actually ENDED on', () => {
+  const grid = scorecardPlays(FEED, 'top')
+  const marked = placedCards(grid).filter(({ card }) => card.endsHalf)
+  // One per played half of a 9-inning sheet.
+  assert.equal(marked.length, 9)
+  for (let n = 1; n <= 9; n++) {
+    const forInning = marked.filter((m) => m.inning === n)
+    assert.equal(forInning.length, 1, `inning ${n} has exactly one end-of-inning slash`)
+    // It is the LAST plate appearance of that half, by feed order — NOT the
+    // cell that recorded the third out, which can belong to an earlier
+    // runner cut down during a later batter's trip.
+    const half = computeHalfInningFeed(FEED, n, 'top', 'away').filter((c) => c.kind === 'atbat')
+    assert.equal(forInning[0].card.atBatIndex, half[half.length - 1].atBatIndex)
+  }
+  // The slash and the leadoff box are never the same cell: the slash closes
+  // the half's own last box, which is a card; the leadoff box is empty.
+  for (const mark of grid.leadoffMarks) {
+    assert.equal(grid.slots[mark.slot - 1].cells[mark.colIndex], undefined)
+  }
+})
+
+test('the end-of-inning slash is a whole-half fact: it inks on commit, never mid-step', () => {
+  // Walk top 1 to its last cursor. The half is not committed at any of them,
+  // so no card may carry the rule — same hold as the P/TP/LOB line.
+  let count = 0
+  for (;;) {
+    const s = scorecardStep(FEED, -1, () => count)
+    const grid = scorecardPlays(FEED, 'top', { through: -1, step: { halfIdx: 0, count } })
+    for (const { card } of placedCards(grid)) {
+      assert.ok(!card.endsHalf, `cursor ${count} slashed a box before the half committed`)
+    }
+    if (s.nextCount >= s.total) break
+    count = s.nextCount
+  }
+  // Committed: now it inks.
+  const done = scorecardPlays(FEED, 'top', { through: halfIndex(1, 'top') })
+  assert.equal(placedCards(done).filter(({ card }) => card.endsHalf).length, 1)
+  // And a half the game has REACHED but not finished takes neither mark: the
+  // top of 9 is revealed here, but nothing past it has been played yet.
+  const live = { ...FEED, gameData: { ...FEED.gameData, status: { abstractGameState: 'Live' } } }
+  const open = scorecardPlays(live, 'bottom', { through: halfIndex(9, 'bottom') })
+  assert.equal(placedCards(open).filter(({ card }) => card.endsHalf).length, 8)
+  assert.ok(!open.leadoffMarks.some((m) => m.inning === 9))
+})
+
 // ---------------------------------------------------------------------------
 // The play-in-place layer (scorecardStep + scorecardPlays' `step`): the live
 // sheet's face-down frontier card. What must hold, in order of importance:
 // the step can never leak past its own cursor; whole-half facts (P/TP/LOB,
-// scoreboard cells, the inning-end slash) never ink mid-step; and the
+// scoreboard cells, the end-of-inning slash) never ink mid-step; and the
 // frontier always names a real, empty cell — including the bat-around case,
 // where its column doesn't exist until the frontier widens it.
 // ---------------------------------------------------------------------------
@@ -319,9 +373,9 @@ test('a stepped half shows exactly the cursor’s cards and nothing whole-half',
   const placed = []
   for (const slot of grid.slots) placed.push(...Object.values(slot.cells))
   assert.equal(placed.length, 1, 'one tap reveals one plate appearance')
-  // Whole-half facts stay blank mid-step: no P/TP/LOB, no inning-end slash.
+  // Whole-half facts stay blank mid-step: no P/TP/LOB, no end-of-inning slash.
   assert.equal(grid.perInning[1], null)
-  assert.equal(grid.endMarks.length, 0)
+  assert.equal(grid.leadoffMarks.length, 0)
   // The frontier moved to the NEXT batter's empty box in inning 1.
   assert.ok(grid.frontier)
   assert.equal(grid.columns[grid.frontier.colIndex].inning, 1)
@@ -361,7 +415,7 @@ test('stepping a whole half never over-reveals, and commit is what inks the half
   // Committed (revealTo's collapse): the half's whole-half facts ink now.
   const done = scorecardPlays(FEED, 'top', { through: halfIndex(1, 'top') })
   assert.ok(done.perInning[1])
-  assert.ok(done.endMarks.some((m) => done.columns[m.colIndex].inning === 1))
+  assert.ok(done.leadoffMarks.some((m) => done.columns[m.colIndex].inning === 1))
 })
 
 // The advancement fields a later play writes BACK onto an earlier card — the

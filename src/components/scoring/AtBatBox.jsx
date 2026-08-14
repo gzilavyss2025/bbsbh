@@ -28,8 +28,11 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    value when one is set, and the box wears a small amber corner so a
 //    hand-edited cell is tellable from a derived one at a glance. An override
 //    restyles THIS BOX only — every tally keeps reading the feed.
-//  • `endMark` — the inning-end diagonal, slashed through the next-due
-//    batter's unused box when a half ends (scorecardPlays' endCells).
+//  • `endsHalf` (on the card) — the end-of-inning slash, drawn diagonally
+//    across the LOWER-RIGHT CORNER of the box of the plate appearance that
+//    closed the half. This is the scorer's standard mark for "the inning
+//    ended here" and it is the sheet's only one: it goes on the last box of
+//    the half itself, never on a later batter's.
 //  • `onEdit` — on an editable surface, the whole box becomes the tap target
 //    that opens the notation editor for this plate appearance.
 //
@@ -80,7 +83,7 @@ export function atBatMarks(atbat) {
   return { isPlaced, kind, outcome, center, rbi }
 }
 
-export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = null, fresh = false }) {
+export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = false }) {
   const marks = atBatMarks(atbat)
   const { isPlaced, kind } = marks
   // The pitch ladder split into its three columns: balls (white), then two
@@ -112,7 +115,7 @@ export function AtBatBox({ atbat = null, note = null, endMark = false, onEdit = 
   return (
     <div
       className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''} ${note ? 'sc-ab--noted' : ''} ${
-        endMark ? 'sc-ab--end' : ''
+        atbat?.endsHalf ? 'sc-ab--halfend' : ''
       } ${fresh ? 'sc-ab--fresh' : ''}`}
     >
       <div className="sc-ab__main">

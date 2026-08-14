@@ -44,6 +44,7 @@ export function Scorecard({
   onCellTap = null,
   onFrontierTap = null,
   fresh = null,
+  flip = null,
 }) {
   return (
     <div className="scorecard">
@@ -55,6 +56,7 @@ export function Scorecard({
         onCellTap={onCellTap}
         onFrontierTap={onFrontierTap}
         fresh={fresh}
+        flip={flip}
       />
       <ScorecardFooter view={view} />
     </div>

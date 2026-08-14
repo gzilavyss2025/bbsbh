@@ -76,9 +76,9 @@ score on paper; this is the margin note in your copy of the book.
   batter's diamond once the fixture was trimmed past the substitution
   playEvents (the fixture now keeps them; the Bauers/Mitchell case is
   pinned).
-- The inning-end diagonal is derived, not stored: the next-due batter's
-  unused box in a FINISHED half. A revealed half still being played draws no
-  premature slash.
+- The end-of-inning mark is derived, not stored, and only for a FINISHED
+  half. A revealed half still being played draws none prematurely. (The
+  third amendment below moves it and cuts the second one.)
 - An override exists only for a cell the user has revealed — a sealed cell is
   never rendered, so there is nothing to tap. If overrides ever grow a cloud
   mirror, they are consented user annotations, never a reveal source.
@@ -97,9 +97,9 @@ disagree about where you are.
 Three rules keep the game honest:
 
 - **Mid-step, only cards.** A stepped half contributes its revealed cards
-  and nothing else — no P/TP/LOB line, no scoreboard cell, no inning-end
-  diagonal. Those are whole-half facts and they ink on commit, which is the
-  turn-end beat.
+  and nothing else — no P/TP/LOB line, no scoreboard cell, neither
+  end-of-half mark. Those are whole-half facts and they ink on commit, which
+  is the turn-end beat.
 - **The frontier is derived, never stored.** It is always the half after
   `revealedThrough`; under the Scores Unlocked pass the render mark covers
   the whole game, so the seal simply never renders and nothing on the page
@@ -144,3 +144,63 @@ here.
 `src/api/spoiler-manifest.json`'s `scorecardGame.js` entry drops
 `screens/boxscore/BoxScorecard.jsx` from its importer list — one caller now,
 the live page, plus the DEV-only Lab.
+
+
+## Amendment (2026-08-14): the end-of-inning slash, where a scorer draws it
+
+A finished half used to leave ONE mark, in the WRONG PLACE: a corner-to-corner
+diagonal through the next-due batter's unused box. That mark carried two
+claims at once — "the inning ended" and "this slot leads off the next" — and
+it made the first of them a row or more below the box where the half actually
+ended.
+
+The convention is not ambiguous. Wikipedia's baseball-scorekeeping article:
+"a slash is drawn diagonally across the lower right corner" of the cell.
+Every beginner guide surveyed agrees on the shape and the corner, differing
+only on which box (the third out's, or the half's last plate appearance) and
+offering a horizontal rule under the box as a minority variant.
+
+So:
+
+- **The end-of-inning slash** (`endsHalf` on the card, `.sc-ab--halfend`) —
+  a short "/" across the LOWER-RIGHT CORNER of the box of the plate
+  appearance that CLOSED the half. It is the sheet's only end-of-half mark.
+  Anchored on the last PLATE APPEARANCE, not on the cell that recorded the
+  third out: the two differ whenever the out was a runner cut down during a
+  later batter's trip, and a half can end with no third out at all (a
+  walk-off). Set even when that last card is `interrupted` — the half ended
+  at that box either way, which is all the mark claims.
+- **The leads-off-next diagonal is retired.** It was a second, competing
+  end-of-inning notation, and the slash is the one a scorer actually draws.
+  What survives is `leadoffMarks`/`leadoffCells`: the same next-due batter's
+  unused box, as a LOCATION with nothing drawn in it.
+
+An intermediate version of this ADR described the mark as a horizontal rule
+under the box. That was the minority variant, it read as an underline rather
+than a closing mark, and it is not what shipped.
+
+The turn handoff — formerly a kraft banner above the sheet (`.scflip`,
+"Bottom 3 is next — flip the sheet ›"), now deleted — lives in that leadoff
+box. When the next at-bat belongs to the other club's page, the leadoff box
+of the half that JUST ended carries the button that flips to it. That box is
+where the reader's eye lands as a half closes and it is empty by definition,
+so the handoff costs the sheet no notation of its own. Only that one box is a
+door: `leadoffCells` is valued by the INNING that ended rather than a bare
+`true`, and `ScorecardPage` names the inning it wants (`stepInfo`'s half,
+minus one when the next half is a top), so every older leadoff box stays
+blank. Under the Scores Unlocked pass `stepInfo` is null and no box is
+pressable — the construction that already withholds the frontier seal.
+
+A half whose last card was interrupted yields no leadoff box, so it offers no
+flip button. Not a dead end: the Top/Bottom control above the sheet has
+always been the general way across, and the banner it replaced was a prompt,
+never the only path.
+
+**A CSS trap worth keeping.** The slash cannot be a `background-image` on
+`.sc-ab`. The corner a scorer cuts is the cell's own, which on this box falls
+inside the pitch strip, and `.sc-ab__strike` paints an opaque
+`--sc-strike-fill` over it — the mark renders as a perfectly valid computed
+style that is simply invisible. It is an absolutely-positioned pseudo
+instead. Its host `.sc-ab__strip` must stay `position: static`: making the
+strip positioned lifts the whole strip into the positioned paint layer, where
+its fill covers the out circle's `right: -8px` overhang and clips the ①②③.
