@@ -184,10 +184,10 @@ function visibleInnings(feed, through) {
 // Alongside the cards, the grid carries the #22 sheet's own footer row —
 // per-inning P (pitches this side's batters saw), TP (the running total), and
 // LOB (runners this side stranded), from the same derive/linescore readers
-// the innings viewer's tally reads — and the inning-end diagonals
-// (`endCells`): for each finished half, the next-due batter's unused box in
-// that inning's column, where the scorer slashes "the inning ended before
-// this slot; he leads off the next."
+// the innings viewer's tally reads — and the leadoff boxes
+// (`leadoffCells`): for each finished half, the next-due batter's unused box
+// in that inning's column. Nothing is DRAWN there; it is the location the
+// live page's turn handoff puts its flip button in.
 //
 // `step` is the live sheet's play-in-place layer (see scorecardStep): the
 // half at `step.halfIdx` — always through+1, the reveal frontier — shows its
@@ -375,32 +375,39 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     )
   }
 
-  // The two marks a finished half leaves on the sheet. Both are whole-half
-  // facts, so both take the same gate: the half must be COMMITTED (at or
-  // under `through` — a stepped half never takes either mid-step, even on a
-  // Final game being replayed, like the P/TP/LOB line below) and must have
-  // actually ENDED (the game has moved past it, or is over), so a revealed
-  // half still being scored gets neither prematurely.
+  // What a FINISHED half leaves behind: one mark, and one location.
   //
-  //  • `endsHalf` on the LAST plate appearance's own card — the rule ruled
-  //    into that box's bottom-right corner, "the inning ended here." Set
-  //    even when that card is `interrupted` (the half died on the bases
-  //    mid-count): the half ended at that box either way, which is the only
-  //    thing this mark claims.
-  //  • the leads-off-next DIAGONAL, drawn where the #22's scorer draws it:
-  //    slash the NEXT-due batter's unused box in the column of the inning
-  //    that just ended — "the inning ended before this slot; he leads off
-  //    the next." An interrupted last card gets none — that batter bats
-  //    AGAIN next inning with a fresh count, and his box in the ended inning
-  //    is already used by the carry-over cell, so there is nothing to slash.
-  //    (In the bat-around case the next-due slot may have already batted this
-  //    inning; his unused box is then the widened sub-column's, which is
-  //    exactly where the paper sheet's slash lands too.)
+  // Both take the same gate — the half must be COMMITTED (at or under
+  // `through`; a stepped half takes neither mid-step, even on a Final game
+  // being replayed, like the P/TP/LOB line below) and must have actually
+  // ENDED (the game has moved past it, or is over), so a revealed half still
+  // being scored gets neither prematurely.
   //
-  // Each mark carries its own `inning` so a caller can single one out — the
-  // live page hangs the turn handoff on the diagonal of the half that just
-  // ended, and needs to tell it from every older half's (ScorecardPage).
-  const endMarks = []
+  //  • `endsHalf` on the LAST plate appearance's own card — the scorer's
+  //    end-of-inning slash, drawn diagonally across that box's lower-right
+  //    corner. Set even when that card is `interrupted` (the half died on
+  //    the bases mid-count): the half ended at that box either way, which is
+  //    the only thing the mark claims. Anchored on the last PLATE
+  //    APPEARANCE, not on the cell that recorded the third out — the two
+  //    differ whenever the out was a runner cut down during a later batter's
+  //    trip, and a half can also end with no third out at all (a walk-off).
+  //  • `leadoffMarks` — the NEXT-due batter's unused box in the column of the
+  //    inning that just ended. NOT a mark: nothing is drawn there. It is a
+  //    LOCATION, and its one consumer is the live page's turn handoff, which
+  //    puts its flip button in that box (ScorecardSheet's `flip`). The
+  //    corner-to-corner diagonal that used to be slashed here is retired —
+  //    it was a second, competing end-of-inning notation, and the slash
+  //    above is the one the scorer actually draws.
+  //    An interrupted last card yields no location — that batter bats AGAIN
+  //    next inning, so his box in the ended inning is already used by the
+  //    carry-over cell and there is no unused box to point at. (In the
+  //    bat-around case the next-due slot may have already batted this inning;
+  //    his unused box is then the widened sub-column's.)
+  //
+  // Each location carries its own `inning` so a caller can single one out —
+  // the handoff belongs to the half that JUST ended and must be tellable
+  // from every older half's (ScorecardPage).
+  const leadoffMarks = []
   for (const inning of innings) {
     const last = lastCardByInning[inning]
     if (!last) continue
@@ -411,7 +418,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     const nextSlot = (last.slot % 9) + 1
     const sub = slotData[nextSlot - 1].byInning[inning]?.length ?? 0
     const colIndex = columns.findIndex((c) => c.inning === inning && c.sub === sub)
-    if (colIndex >= 0) endMarks.push({ slot: nextSlot, colIndex, inning })
+    if (colIndex >= 0) leadoffMarks.push({ slot: nextSlot, colIndex, inning })
   }
 
   const slots = slotData.map((s) => {
@@ -429,14 +436,14 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
       if (prevBatter != null && card.batterId !== prevBatter) card.subBefore = true
       prevBatter = card.batterId
     })
-    // The leads-off-next diagonals that land on this slot's row, keyed by the
-    // shared column index and valued by the INNING that ended (never a bare
-    // `true` — the live page's turn handoff has to tell the newest diagonal
-    // from every older one). They ride the slot's FIRST display row: the mark
-    // means "this slot's box sat unused", so no occupant's card competes.
-    const endCells = {}
-    for (const m of endMarks) {
-      if (m.slot === s.slot) endCells[m.colIndex] = m.inning
+    // The leadoff boxes that land on this slot's row, keyed by the shared
+    // column index and valued by the INNING that ended (never a bare `true` —
+    // the turn handoff has to tell the newest from every older one). They
+    // ride the slot's FIRST display row: the box sat unused, so no occupant's
+    // card competes for it.
+    const leadoffCells = {}
+    for (const m of leadoffMarks) {
+      if (m.slot === s.slot) leadoffCells[m.colIndex] = m.inning
     }
     // One display row per occupant (starter first), each with only his own
     // cards under the shared columns and his own line — so a pinch-hitter gets
@@ -448,7 +455,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
       }
       return { id: occ.id, name: occ.name, pos: occ.pos, cells: occCells, ab: occ.ab, h: occ.h, r: occ.r, rbi: occ.rbi }
     })
-    return { slot: s.slot, cells, rows, endCells, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
+    return { slot: s.slot, cells, rows, leadoffCells, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
   })
 
   // The #22's own row under the grid: P (pitches this side's batters saw that
@@ -483,7 +490,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
     { ab: 0, h: 0, r: 0, rbi: 0 },
   )
 
-  return { columns, innings, slots, endMarks, perInning, totals, frontier }
+  return { columns, innings, slots, leadoffMarks, perInning, totals, frontier }
 }
 
 // The sheet's scoreboard block, #22 shape: runs per inning for BOTH clubs over

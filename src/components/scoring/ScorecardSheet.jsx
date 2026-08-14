@@ -20,28 +20,28 @@ import { cellNote } from '../../lib/scorecardNotes.js'
 //    widens into extra columns (the inning number only labels its first). Each
 //    slot renders one row per player who occupied it — the starter, then a
 //    sub-line for each substitute — so a pinch-hitter gets his own name and
-//    line instead of sharing the starter's. Leads-off-next diagonals land on
-//    the slot's first row (`endCells`, valued by the inning that ended), and
-//    the foot row carries that inning's P/TP/LOB once its half is revealed.
+//    line instead of sharing the starter's. The foot row carries that
+//    inning's P/TP/LOB once its half is revealed.
 //
 // `notes` + `onCellTap` are the override layer (lib/scorecardNotes.js): each
 // cell renders its own note over the derived marks, and on an editable
 // surface tapping a filled cell hands its card up to the notation editor.
 //
 // `flip` is the TURN HANDOFF, and it rides the sheet rather than a banner
-// above it: `{ inning, label, onFlip }` turns that one inning's diagonal —
-// the half that just ended, never an older one — into the button that flips
-// to the other club's page. The mark stays exactly where the scorer put it;
-// it just becomes the thing you press to keep going. Every older diagonal
-// stays plain notation.
+// above it: `{ inning, label, onFlip }` puts a button in that one inning's
+// LEADOFF box — the next-due batter's unused cell for the half that just
+// ended, never an older one (`leadoffCells`, valued by inning). That box is
+// where the reader's eye lands when a half closes and it is empty by
+// definition, so the handoff costs the sheet no notation. Every older
+// leadoff box stays blank.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
 const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 // The display rows for one batting-order slot: one per occupant in a loaded
 // game (starter first, then each sub as its own sub-line), or a single blank
 // row from the pre-pitch lineup for the empty template / a slot nobody batted.
-// The slot's inning-end diagonals ride the FIRST row — they mark an unused
-// box, which no occupant's card competes with.
+// The slot's leadoff boxes ride the FIRST row — they name an unused box,
+// which no occupant's card competes with.
 function slotRows(grid, lineup, slotIndex) {
   const slot = grid?.slots?.[slotIndex]
   if (slot?.rows?.length) {
@@ -50,7 +50,7 @@ function slotRows(grid, lineup, slotIndex) {
       pos: occ.pos,
       name: occ.name,
       cells: occ.cells,
-      endCells: oi === 0 ? slot.endCells : null,
+      leadoffCells: oi === 0 ? slot.leadoffCells : null,
       ab: occ.ab,
       h: occ.h,
       r: occ.r,
@@ -68,7 +68,7 @@ function slotRows(grid, lineup, slotIndex) {
       pos: lineup[slotIndex]?.pos ?? '',
       name: lineup[slotIndex]?.name ?? '',
       cells: null,
-      endCells: grid?.slots?.[slotIndex]?.endCells ?? null,
+      leadoffCells: grid?.slots?.[slotIndex]?.leadoffCells ?? null,
       isSub: false,
       isLast: true,
       hasStats: false,
@@ -158,11 +158,12 @@ export function ScorecardSheet({
                     grid?.frontier != null &&
                     grid.frontier.slot === slot &&
                     grid.frontier.colIndex === col.colIndex
-                  // The inning this box's leads-off-next diagonal belongs to,
-                  // if it carries one — and whether that's the ONE diagonal
-                  // the turn handoff hangs on this render.
-                  const endInning = col.colIndex != null ? row.endCells?.[col.colIndex] ?? null : null
-                  const isFlip = flip != null && endInning != null && endInning === flip.inning
+                  // The inning this box is the LEADOFF box for, if it is one
+                  // — and whether it's the one the turn handoff hangs on this
+                  // render.
+                  const leadoffInning =
+                    col.colIndex != null ? row.leadoffCells?.[col.colIndex] ?? null : null
+                  const isFlip = flip != null && leadoffInning != null && leadoffInning === flip.inning
                   return (
                     <td
                       key={col.key}
@@ -180,7 +181,7 @@ export function ScorecardSheet({
                       ) : isFlip ? (
                         <button
                           type="button"
-                          className="sc-ab sc-ab--end sc-ab__flip"
+                          className="sc-ab sc-ab__flip"
                           onClick={flip.onFlip}
                           aria-label={`${flip.label} — flip the sheet`}
                         >
@@ -192,7 +193,6 @@ export function ScorecardSheet({
                         <AtBatBox
                           atbat={card}
                           note={cellNote(notes, card?.atBatIndex)}
-                          endMark={endInning != null}
                           onEdit={onCellTap && card ? () => onCellTap(card) : null}
                           fresh={Boolean(card && fresh?.has(card.atBatIndex))}
                         />
