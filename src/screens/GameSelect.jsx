@@ -37,6 +37,7 @@ import {
   reorderLiveGames,
   reorderNationalBroadcasts,
   stackDoubleHeaders,
+  stackSuspendedContinuation,
 } from '../lib/resultCards.js'
 import { useScoresUnlocked } from '../hooks/useScoresUnlocked.js'
 import { ConsentModal } from '../components/seal/ConsentModal.jsx'
@@ -197,9 +198,13 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   // batching, the filter bar's "showing N of M", the reorder passes) so the
   // whole screen agrees on how many cards this day has.
   const stackedDh = useMemo(() => stackDoubleHeaders(data ?? []), [data])
+  // A second stacking pass for a suspended game's same-day continuation
+  // (see stackSuspendedContinuation's header) — runs on stackedDh's output
+  // so the two passes never fight over the same gamePk.
+  const stackedSuspended = useMemo(() => stackSuspendedContinuation(stackedDh.games), [stackedDh])
   const sorted = useMemo(
-    () => sortGames(stackedDh.games, favoriteTeamId, favoriteAffiliateIds),
-    [stackedDh, favoriteTeamId, favoriteAffiliateIds],
+    () => sortGames(stackedSuspended.games, favoriteTeamId, favoriteAffiliateIds),
+    [stackedSuspended, favoriteTeamId, favoriteAffiliateIds],
   )
 
   // A same-day alternate/City Connect posting doesn't reach jerseysData
@@ -792,11 +797,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
               showPastDayTreatment &&
               g.abstractState === 'Final' &&
               !selectGameStatus(g).isPostponed
-            // A suspended game is a paused checkpoint, not a moving target —
-            // its box score won't change again until play resumes, same as a
-            // Final's. Unlike Final, it still gets the ordinary GameCard (not
-            // the flip card: there's no result to reveal yet), so it needs
-            // its own onBoxScore rather than inheriting isPastFinal's.
+            // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
             const isSuspended = selectGameStatus(g).isSuspended
             return (
               <li key={`${g.sportId}-${g.gamePk}`}>
@@ -824,7 +825,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
                     liveJerseys={liveJerseys.data}
                     national={nationalBroadcasts[g.gamePk]}
                     eager={eager}
-                    stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? null}
+                    stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
                     onSelect={() => onPick(g, dateStr)}
                     onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
                   />

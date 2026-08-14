@@ -16,6 +16,8 @@
 // identity, clock, and coarse abstract state — never a run, an inning, or a
 // linescore.
 
+import { humanDate } from './dates.js'
+
 // "Game 1" / "Game 2" for a card that's part of a doubleheader (regular or
 // split), so the two same-matchup rows on the slate are told apart at a
 // glance. A lone game (doubleHeader 'N') gets nothing. Shared by the card's
@@ -30,6 +32,23 @@ export function doubleHeaderLabel(game, stacked = false) {
   if (!game.doubleHeader || game.doubleHeader === 'N') return null
   if (stacked) return 'Doubleheader'
   return `Game ${game.gameNumber ?? 1}`
+}
+
+// "Sat, Jul 11" for a rescheduled game, or '' when no make-up date is set yet
+// (a fresh postponement carries no rescheduleGameDate — PostponedBanner then
+// just reads POSTPONED). Parsed as a plain calendar date (humanDate), never
+// shifted by the viewer's zone.
+export function rescheduleLabel(game) {
+  const d = game.rescheduleGameDate
+  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
+}
+
+// Same idea for a suspended game's set continuation date (resumeGameDate),
+// or '' when the league hasn't set one yet — a game just suspended tonight
+// carries no resume date until the league schedules it.
+export function resumeLabel(game) {
+  const d = game.resumeGameDate
+  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
 // Pill category label per scenario, in the fixed order the chips and pills
@@ -202,6 +221,55 @@ export function stackDoubleHeaders(games) {
     const second = rows.find((g) => g.gameNumber === 2)
     if (!first || !second) continue
     if (!isStackablePair(first, second)) continue
+    stackedBehind.set(first.gamePk, second)
+    hidden.add(second.gamePk)
+  }
+  if (hidden.size === 0) return { games, stackedBehind }
+  return { games: games.filter((g) => !hidden.has(g.gamePk)), stackedBehind }
+}
+
+// Mirrors selectGameStatus's isSuspended substring test (api/select.js)
+// without importing it — src/lib/ deliberately stays a layer BELOW src/api/,
+// which itself imports from here, and this is the one field the pairing
+// below needs from that check.
+function isSuspendedRow(game) {
+  return (game.detailedState ?? '').toLowerCase().includes('suspended')
+}
+
+// A suspended game whose continuation lands on the same day as an ALREADY-
+// scheduled game between the same two teams — MLB's own schedule bucketing
+// re-lists the suspended gamePk again under its resumeGameDate (verified
+// 2026-08-14 against a live game), so both rows land in the same day's slate
+// fetch on their own, with no fetch of ours involved. To a fan this plays out
+// just like a twin bill (the suspended game finishes, then the other begins),
+// but MLB's feed does NOT flag it as one: both rows carry doubleHeader 'N'
+// and gameNumber 1, since the second game is genuinely separate and
+// independently scheduled rather than "game 2" of a pair — stackDoubleHeaders
+// above, gated on that flag, correctly leaves this pairing alone.
+//
+// Front card is always the suspended game: it resumes before the park can
+// host the other one. Dissolves the moment the suspended game stops being
+// suspended (it resumed and is actually being played, or finished) — at that
+// point the two are distinguishable on their own status alone, same
+// reasoning stackDoubleHeaders uses once game 1 goes live.
+export function stackSuspendedContinuation(games) {
+  if (!Array.isArray(games) || games.length < 2) {
+    return { games: games ?? [], stackedBehind: new Map() }
+  }
+  const suspended = games.filter(isSuspendedRow)
+  if (suspended.length === 0) return { games, stackedBehind: new Map() }
+  const stackedBehind = new Map()
+  const hidden = new Set()
+  for (const first of suspended) {
+    const second = games.find(
+      (g) =>
+        g.gamePk !== first.gamePk &&
+        !hidden.has(g.gamePk) &&
+        g.abstractState === 'Preview' &&
+        g.away?.id === first.away?.id &&
+        g.home?.id === first.home?.id,
+    )
+    if (!second) continue
     stackedBehind.set(first.gamePk, second)
     hidden.add(second.gamePk)
   }

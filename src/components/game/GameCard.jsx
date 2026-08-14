@@ -4,8 +4,7 @@ import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
 import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../../lib/teams.js'
 import { selectGameStatus } from '../../api/select.js'
-import { humanDate } from '../../lib/dates.js'
-import { doubleHeaderLabel } from '../../lib/resultCards.js'
+import { doubleHeaderLabel, rescheduleLabel, resumeLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { fetchJerseysData, jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
@@ -86,6 +85,13 @@ export function GameCard({
   const hasScoreLine = !!liveLine && !postponed
   const stacked = !!stackedGame
   const dhLabel = doubleHeaderLabel(game, stacked)
+  // A suspended game's card may carry today's independently-scheduled game
+  // riding behind it (stackSuspendedContinuation, GameSelect) rather than a
+  // true doubleheader's game 2 — MLB's feed marks neither row as part of a
+  // doubleheader (both carry doubleHeader 'N'), so dhLabel above is null for
+  // this pairing. This pill fills that gap; mutually exclusive with dhLabel
+  // since a game can't be both.
+  const suspendedPairLabel = !dhLabel && stacked && status.isSuspended ? 'Two Games Today' : null
   const pinned = !!pinnedTeamId
   // Static same-origin file (nightly-generated), same "fetch once, session
   // cache" shape as every other public/data/*.json reader — this is not one
@@ -257,6 +263,16 @@ export function GameCard({
               {stacked && <span className="sr-only"> — this card opens game 1</span>}
             </span>
           )}
+          {suspendedPairLabel && (
+            <span className="gamecard__dh">
+              {suspendedPairLabel}
+              <span className="sr-only">
+                {' '}
+                — this card opens the suspended game; a separate game follows
+                once it&rsquo;s done
+              </span>
+            </span>
+          )}
           {prospectCount > 0 && (
             <span className="gamecard__prospects">
               <img src={leagueLogoUrl()} alt="" className="gamecard__prospects-logo" />
@@ -360,23 +376,6 @@ export function PostponedBanner({ game, status }) {
       )}
     </div>
   )
-}
-
-// "Sat, Jul 11" for a rescheduled game, or '' when no make-up date is set yet
-// (a fresh postponement carries no rescheduleGameDate — the banner then just
-// reads POSTPONED). Parsed as a plain calendar date (humanDate), never shifted
-// by the viewer's zone.
-function rescheduleLabel(game) {
-  const d = game.rescheduleGameDate
-  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
-}
-
-// Same idea for a suspended game's set continuation date (resumeGameDate),
-// or '' when the league hasn't set one yet — a game just suspended tonight
-// carries no resume date until the league schedules it.
-function resumeLabel(game) {
-  const d = game.resumeGameDate
-  return d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? humanDate(d) : ''
 }
 
 // Scorebook-readiness pill: four small checkbox pips, in a fixed order (each
