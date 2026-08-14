@@ -12,12 +12,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  parseScorecardNotes,
-  serializeScorecardNotes,
+  parseSheetNotes,
+  serializeSheetNotes,
   cellNote,
   withCellNote,
   withoutCellNote,
-  EMPTY_SCORECARD_NOTES,
+  EMPTY_SHEET_NOTES,
 } from '../src/lib/scorecardNotes.js'
 
 test('malformed storage collapses to the empty store', () => {
@@ -35,13 +35,13 @@ test('malformed storage collapses to the empty store', () => {
     '{"v":1,"cells":{"1":{"outcome":42}}}', // non-string field
     '{"v":1,"cells":{"1":{"unknown":"x"}}}', // no known field survives
   ]) {
-    const parsed = parseScorecardNotes(raw)
+    const parsed = parseSheetNotes(raw)
     assert.deepEqual(parsed, { cells: {} }, `raw: ${raw}`)
   }
 })
 
 test('a good value round-trips, trimmed and capped', () => {
-  const notes = withCellNote(EMPTY_SCORECARD_NOTES, 12, {
+  const notes = withCellNote(EMPTY_SHEET_NOTES, 12, {
     outcome: '  6U  ',
     center: 'a-very-long-chain-that-overflows',
     rbi: '234',
@@ -51,29 +51,29 @@ test('a good value round-trips, trimmed and capped', () => {
     center: 'a-very-lon', // capped at 10
     rbi: '23', // capped at 2
   })
-  const raw = serializeScorecardNotes(notes)
-  assert.deepEqual(parseScorecardNotes(raw), notes)
+  const raw = serializeSheetNotes(notes)
+  assert.deepEqual(parseSheetNotes(raw), notes)
 })
 
 test('blanking a field drops it; blanking the last field drops the cell', () => {
-  let notes = withCellNote(EMPTY_SCORECARD_NOTES, 3, { outcome: 'E5', rbi: '1' })
+  let notes = withCellNote(EMPTY_SHEET_NOTES, 3, { outcome: 'E5', rbi: '1' })
   notes = withCellNote(notes, 3, { rbi: '   ' })
   assert.deepEqual(cellNote(notes, 3), { outcome: 'E5' })
   notes = withCellNote(notes, 3, { outcome: '' })
   assert.equal(cellNote(notes, 3), null)
-  assert.equal(serializeScorecardNotes(notes), null)
+  assert.equal(serializeSheetNotes(notes), null)
 })
 
 test('a no-op write returns the same object', () => {
-  const notes = withCellNote(EMPTY_SCORECARD_NOTES, 7, { outcome: 'FO' })
+  const notes = withCellNote(EMPTY_SHEET_NOTES, 7, { outcome: 'FO' })
   assert.equal(withCellNote(notes, 7, { outcome: ' FO ' }), notes)
   assert.equal(withCellNote(notes, null, { outcome: 'HR' }), notes)
   assert.equal(withoutCellNote(notes, 99), notes)
-  assert.equal(withoutCellNote(EMPTY_SCORECARD_NOTES, 7), EMPTY_SCORECARD_NOTES)
+  assert.equal(withoutCellNote(EMPTY_SHEET_NOTES, 7), EMPTY_SHEET_NOTES)
 })
 
 test('clearing one cell leaves the others alone', () => {
-  let notes = withCellNote(EMPTY_SCORECARD_NOTES, 1, { outcome: 'HR' })
+  let notes = withCellNote(EMPTY_SHEET_NOTES, 1, { outcome: 'HR' })
   notes = withCellNote(notes, 2, { center: '5-3' })
   notes = withoutCellNote(notes, 1)
   assert.equal(cellNote(notes, 1), null)
@@ -81,7 +81,7 @@ test('clearing one cell leaves the others alone', () => {
 })
 
 test('cells survive independently and only overridden fields are stored', () => {
-  const notes = withCellNote(EMPTY_SCORECARD_NOTES, 40, { center: '6-4-3' })
+  const notes = withCellNote(EMPTY_SHEET_NOTES, 40, { center: '6-4-3' })
   assert.deepEqual(cellNote(notes, 40), { center: '6-4-3' })
   assert.equal(cellNote(notes, 40).outcome, undefined)
   // Keyed by string internally, reachable by number or string.

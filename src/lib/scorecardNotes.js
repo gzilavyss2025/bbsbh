@@ -18,7 +18,7 @@
 // so a hand-mangled value can never crash the sheet — same posture as
 // parseRevealMark.
 
-export const SCORECARD_NOTES_KEY = 'bbsbh:scorecard-notes:'
+export const SHEET_NOTES_KEY = 'bbsbh:scorecard-notes:'
 
 // What a scorer can write in each zone of the box. Generous enough for the
 // longest real chains ("CS 2-4", "6-4-3", a ringed "1B"), tight enough that a
@@ -39,7 +39,7 @@ function cleanField(field, value) {
 // Parse a raw localStorage value into the notes store. Anything that isn't
 // the expected shape — null, bad JSON, a wrong version, non-object cells,
 // non-numeric keys — collapses to the empty store rather than throwing.
-export function parseScorecardNotes(raw) {
+export function parseSheetNotes(raw) {
   if (raw == null) return EMPTY
   let data
   try {
@@ -64,7 +64,7 @@ export function parseScorecardNotes(raw) {
 // Serialize for storage. The empty store serializes to null — the caller
 // removes the key instead of writing an empty shell that would sit in
 // localStorage forever for every game ever glanced at.
-export function serializeScorecardNotes(notes) {
+export function serializeSheetNotes(notes) {
   if (!notes || Object.keys(notes.cells).length === 0) return null
   return JSON.stringify({ v: 1, cells: notes.cells })
 }
@@ -108,4 +108,4 @@ export function withoutCellNote(notes, atBatIndex) {
   return Object.keys(cells).length > 0 ? { cells } : EMPTY
 }
 
-export { EMPTY as EMPTY_SCORECARD_NOTES }
+export { EMPTY as EMPTY_SHEET_NOTES }

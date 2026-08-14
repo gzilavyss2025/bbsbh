@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  SCORECARD_NOTES_KEY,
-  EMPTY_SCORECARD_NOTES,
-  parseScorecardNotes,
-  serializeScorecardNotes,
+  SHEET_NOTES_KEY,
+  EMPTY_SHEET_NOTES,
+  parseSheetNotes,
+  serializeSheetNotes,
   withCellNote,
   withoutCellNote,
 } from '../lib/scorecardNotes.js'
@@ -15,20 +15,20 @@ import {
 // mirrors the reveal mark — the whole store is replaced (overrides carry no
 // ratchet; last write wins, which for a margin note is the right answer).
 export function useScorecardNotes(gamePk) {
-  const storageKey = gamePk ? `${SCORECARD_NOTES_KEY}${gamePk}` : null
+  const storageKey = gamePk ? `${SHEET_NOTES_KEY}${gamePk}` : null
   const [notes, setNotes] = useState(() => {
-    if (!storageKey) return EMPTY_SCORECARD_NOTES
+    if (!storageKey) return EMPTY_SHEET_NOTES
     try {
-      return parseScorecardNotes(window.localStorage.getItem(storageKey))
+      return parseSheetNotes(window.localStorage.getItem(storageKey))
     } catch {
-      return EMPTY_SCORECARD_NOTES
+      return EMPTY_SHEET_NOTES
     }
   })
 
   useEffect(() => {
     if (!storageKey) return
     try {
-      const raw = serializeScorecardNotes(notes)
+      const raw = serializeSheetNotes(notes)
       if (raw == null) window.localStorage.removeItem(storageKey)
       else window.localStorage.setItem(storageKey, raw)
     } catch {
@@ -40,7 +40,7 @@ export function useScorecardNotes(gamePk) {
     if (!storageKey) return
     function onStorage(e) {
       if (e.key !== storageKey) return
-      setNotes(parseScorecardNotes(e.newValue))
+      setNotes(parseSheetNotes(e.newValue))
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
