@@ -1,21 +1,24 @@
 /* ============================================================
    SCORECARD — Numbers Game "22" sheet
-   A by-hand baseball scorecard rendered in the paper-scorebook system.
-   Milestone 1 is the empty template; reached in isolation at /scorecard-lab
-   (see ScorecardLab.jsx), not yet wired into a game. Fixed-width cells scroll
-   horizontally so the sheet keeps its landscape proportions on a phone.
+   A by-hand baseball scorecard rendered in the paper-scorebook system. The
+   grid and its at-bat boxes live here; the page chrome around them (header
+   band, footer trio, zoom control, editor) is 41a-scorecard-page.css.
    ============================================================ */
 .scorecard {
-  /* Cell + column geometry, shared by the grid and its sticky frame.
-     Mobile-first: the frozen Player+Pos rail used to take 150px of a
-     phone's ~356px content width — 42% of the pane spent before the first
-     inning column — so the phone gets a tighter rail and slightly tighter
-     cells, and the wide breakpoint below restores the paper sheet's own
-     proportions. */
+  /* Cell + column geometry, shared by the grid and its sticky frame. These
+     four widths are also what the zoom control measures the sheet by (see
+     ScorecardSheet's naturalWidth) — change one and the fit-the-pane zoom
+     floor follows on its own.
+
+     The rail is sized for the NAME now, not for the phone. It used to be
+     squeezed to 96px so a phone kept room for inning columns, which cost
+     every long surname an ellipsis; the pane zooms instead of scrolling, so
+     the rail can be as wide as a written name needs and the reader pulls
+     back to see more innings. */
   --sc-cell-w: 86px;
   --sc-cell-h: 90px;
-  --sc-pos-w: 26px;
-  --sc-name-w: 96px;
+  --sc-pos-w: 28px;
+  --sc-name-w: 144px;
   --sc-sum-w: 34px;
   --sc-strike-fill: color-mix(in srgb, var(--graphite) 15%, var(--surface-card));
   margin-top: var(--space-4);
@@ -24,27 +27,34 @@
   .scorecard {
     --sc-cell-w: 92px;
     --sc-pos-w: 34px;
-    --sc-name-w: 116px;
+    --sc-name-w: 168px;
   }
 }
 
 /* ---- Main grid: a pannable window onto the sheet ---- */
-/* The grid is wider AND taller than a phone, so the scroll container is
-   bounded on BOTH axes and the frame pins on three sides while you pan:
-   the PLAYER/Pos rail on the left (sticky left), the inning numbers on top
-   (sticky top), and the P/TP/LOB + TOTALS row on the bottom (sticky
-   bottom). Without the vertical bound the inning header was sticky against
-   a container that never scrolled vertically — mid-grid on a phone the
-   numbers sat 400px off-screen and you lost which inning you were reading.
-   The dvh line wins where supported (tracks mobile browser chrome); the vh
-   line above it is the fallback. */
-.sc-sheet__scroll {
+/* The pane is bounded on BOTH axes so the frame pins on three sides while
+   you pan: the Player/Pos rail (sticky left), the inning numbers (sticky
+   top), and the P/WH/FO + TOTALS row (sticky bottom). Without the vertical
+   bound the inning header was sticky against a container that never scrolled
+   vertically — mid-grid on a phone the numbers sat 400px off-screen and you
+   lost which inning you were reading. The dvh line wins where supported
+   (tracks mobile browser chrome); the vh line above it is the fallback. */
+.sc-sheet__frame {
   margin-top: var(--space-3);
+}
+.sc-sheet__scroll {
   overflow: auto;
   max-height: calc(100vh - 120px);
   max-height: calc(100dvh - 120px);
   -webkit-overflow-scrolling: touch;
   border: var(--bw-hair) solid var(--border-rule);
+  /* No bars. The sheet is paper you slide, and the zoom control above is
+     what tells you there is more of it — a scroll bar on a scorebook page
+     read as a broken layout. Panning by drag/swipe is unchanged. */
+  scrollbar-width: none;
+}
+.sc-sheet__scroll::-webkit-scrollbar {
+  display: none;
 }
 .sc-sheet {
   border-collapse: separate;
@@ -79,42 +89,62 @@
   min-width: var(--sc-sum-w);
 }
 
-/* The two left columns stay put as the innings scroll sideways — PLAYER
-   first, then Pos., the #22's own order. */
+/* The two left columns stay put as the innings pan sideways — PLAYER first,
+   then Pos, the #22's own order. One written line of the rail: the
+   batting-order number, the name, and the uniform number pinned to the right
+   edge, starter and substitute alike.
+
+   A NAME NEVER WRAPS. Two-line names jittered the row heights and broke the
+   grid's alignment with the inning columns beside it, so the rail is sized
+   for a written name (--sc-name-w) and the name is set small and nowrap.
+   Anything past even that clips at the rule, surname-first. */
 .sc-sheet__name {
   position: sticky;
   left: 0;
   z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
   width: var(--sc-name-w);
   min-width: var(--sc-name-w);
   max-width: var(--sc-name-w);
-  padding-left: var(--space-2);
+  padding: 3px var(--space-1) 0 var(--space-2);
   background: var(--surface-card);
   text-align: left;
   font-family: var(--font-body);
-  font-size: var(--fs-compact);
+  font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
-  /* On the phone's narrow rail a full "Yelich, Christian" wraps to two
-     lines and jitters row heights — clip instead; the surname leads, so
-     the part a scorer scans by always survives the ellipsis. The wide
-     rail lets names wrap whole again. */
+}
+.sc-sheet__who {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-@media (min-width: 740px) {
-  .sc-sheet__name {
-    white-space: normal;
-    overflow: visible;
-  }
+/* The uniform number, inked green the way a scorer writes a number beside a
+   name — the one value on the rail that is not the name, so it takes its own
+   colour rather than another weight of the same ink. */
+.sc-sheet__jersey {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--accent-positive);
 }
+/* The position sits on the SAME written line as the name beside it, not
+   floated to the middle of a 90px-tall row — the two are one entry on the
+   rail, read across. Both cells hang their text off the row's top edge. */
 .sc-sheet__pos {
   position: sticky;
   left: var(--sc-name-w);
   z-index: 1;
   width: var(--sc-pos-w);
   min-width: var(--sc-pos-w);
+  padding-top: 3px;
+  vertical-align: top;
   background: var(--surface-card);
   text-align: center;
   font-family: var(--font-display);
@@ -132,10 +162,11 @@
   color: var(--text-caption);
 }
 /* A substitute's sub-line beneath the slot's starter: the name inset and set
-   in the lighter caption ink so the starter still reads as the row's head. */
+   in the lighter caption ink so the starter still reads as the row's head.
+   His position and uniform number repeat on his own line — he is a different
+   player at a possibly different spot, and the sheet says so. */
 .sc-sheet__name--sub {
   padding-left: var(--space-4);
-  font-size: var(--fs-caption);
   font-weight: var(--w-regular);
   color: var(--text-caption);
 }
@@ -163,10 +194,10 @@
   border-left: var(--bw-rule) solid var(--rule-grid);
 }
 
-/* The foot row across the grid: P / TP / LOB per inning (the #22's own
-   bottom line), the AB/H/R/RBI sums under the amber TOTALS bar. Pinned to
-   the pane's bottom edge (see .sc-sheet__scroll) so the running pitch
-   count and TOTALS stay in view while you pan the grid above them. */
+/* The foot row across the grid: P / WH / FO per inning — pitches seen,
+   swings and misses, balls fouled off — then the AB/H/R/RBI sums under the
+   amber TOTALS bar. Pinned to the pane's bottom edge (see .sc-sheet__scroll)
+   so the line stays in view while you pan the grid above it. */
 .sc-sheet__totals td {
   position: sticky;
   bottom: 0;
@@ -188,7 +219,7 @@
   z-index: 3;
   background: var(--bg-page);
 }
-/* The P/TP/LOB trio — three equal slots side by side, in the label cell and
+/* The P/WH/FO trio — three equal slots side by side, in the label cell and
    in each inning's first column alike, so the numbers sit under their
    captions the way the printed gutter lines them up. */
 .sc-sheet__ptl {
@@ -227,16 +258,33 @@
   height: 100%;
   box-sizing: border-box;
 }
-/* A substitution took over this slot at this at-bat: a heavier pencil rule down
-   the box's leading edge, the way a scorer draws the line between two hitters. */
-.sc-ab--sub::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--graphite);
+/* ---- The substitution mark ---- */
+/* A scorer records a change on the line of the man LEAVING, not the man
+   arriving: a rule closing his line off at the column where he stopped
+   batting, with the incoming man's uniform number written beside it. It is
+   inked seam-red, the app's own "this changed mid-game" colour (the defense
+   diamond's entering fielder and the pinch-runner mark wear the same red),
+   so a handover is tellable from notation at arm's length.
+
+   It occupies the outgoing row's box in that column, which is empty by
+   construction — the newcomer owns that box on his own line — so the mark
+   never displaces a plate appearance. */
+.sc-sub {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding-left: 4px;
+  box-sizing: border-box;
+  border-left: 2px solid var(--accent-negative);
+}
+.sc-sub__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--accent-negative);
 }
 /* The END-OF-INNING SLASH: the half ENDED on this plate appearance, so its
    box takes the scorer's mark for it — a short "/" drawn ACROSS THE
@@ -246,20 +294,17 @@
    first and read as an underline rather than a closing mark.
 
    Drawn as an ABSOLUTE mark, never a background on .sc-ab — the corner a
-   scorer cuts is the CELL's own, which on this box falls inside the pitch
-   strip, and .sc-ab__strike paints an opaque --sc-strike-fill there. A
-   background-image on .sc-ab is drawn under that fill and is simply
-   invisible; this comment exists to stop that being redrawn. Positioned, it
-   paints in the layer above the fill.
+   scorer cuts falls inside the pitch strip, where .sc-ab__strike paints an
+   opaque --sc-strike-fill. A background-image on .sc-ab is drawn under that
+   fill and is simply invisible; this comment exists to stop that being
+   redrawn. Positioned, it paints in the layer above the fill.
 
    Hosted on .sc-ab__strip's ::after but ANCHORED TO .sc-ab (the strip is
-   static on purpose — see its rule), which is both the corner we want and
-   the only free pseudo left: .sc-ab's own ::before and ::after are already
-   spoken for by the substitution rule and the hand-edited corner fold.
+   static on purpose — see its rule); .sc-ab's own ::after is spoken for by
+   the hand-edited corner fold.
 
    Direction: color bands run PERPENDICULAR to a gradient's axis, so
    `to bottom right` is what yields a bottom-left → top-right "/" stroke.
-   (The retired leads-off-next diagonal used `to top right` and drew "\".)
    Kept clear of the out circle (16px at bottom 6px, over in .sc-ab__main),
    so a half that ended on the third out shows the ring AND the slash. */
 .sc-ab--halfend .sc-ab__strip::after {
@@ -349,12 +394,11 @@
   }
 }
 
-/* The turn handoff, sitting in the sheet's own LEADOFF box (see
-   ScorecardSheet's `flip`): the unused cell of the batter who leads off the
-   next inning is where the reader's eye lands when a half closes, and it is
-   empty by definition — so the press to turn to the other club's page costs
-   the sheet no notation at all. Kraft on paper, the same tape as the
-   frontier seal. Every older leadoff box stays blank. */
+/* The turn handoff, in the sheet's own LEADOFF box (see ScorecardSheet's
+   `flip`): the unused cell under the mark that closed the half is where the
+   eye lands, so the press to turn to the other club's page costs the sheet
+   no notation. Kraft on paper, the same tape as the frontier seal. Every
+   older leadoff box stays blank. */
 .sc-ab__flip {
   display: flex;
   align-items: center;
@@ -383,11 +427,10 @@
 
 /* The ink-in: a JUST-revealed box's marks settle onto the paper — outcome
    box first, then the diamond, then the out circle pressed like a stamp
-   (the passport's press, --ease-press, is the one ease-in in the system and
-   a stamp is exactly what it exists for). Only cells the reader's own tap
-   revealed wear .sc-ab--fresh (ScorecardPage's diff), so a cold load or a
-   sheet flip renders settled ink. Skipped, not slowed, under reduced
-   motion. */
+   (--ease-press, the system's one ease-in, exists for exactly that). Only
+   cells the reader's own tap revealed wear .sc-ab--fresh (ScorecardPage's
+   diff), so a cold load or a sheet flip renders settled ink. Skipped, not
+   slowed, under reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   .sc-ab--fresh .sc-ab__type,
   .sc-ab--fresh .sc-ab__rbi {

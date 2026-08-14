@@ -20,7 +20,10 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    only): `code` with any play-by-play line break flattened away, since
 //    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
-//  • subBefore — a rule down the box's leading edge where a sub took over
+//
+// A substitution leaves NO mark on this box. The scorer draws the change on
+// the line of the man LEAVING, not the man arriving, so the sheet paints it
+// on the outgoing row instead (ScorecardSheet's `subMarks`).
 //
 // Three marks the paper sheet carries that this box also draws:
 //  • `note` — the scorer's own override (lib/scorecardNotes.js): the outcome
@@ -114,7 +117,7 @@ export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = fal
 
   return (
     <div
-      className={`sc-ab ${atbat?.subBefore ? 'sc-ab--sub' : ''} ${note ? 'sc-ab--noted' : ''} ${
+      className={`sc-ab ${note ? 'sc-ab--noted' : ''} ${
         atbat?.endsHalf ? 'sc-ab--halfend' : ''
       } ${fresh ? 'sc-ab--fresh' : ''}`}
     >

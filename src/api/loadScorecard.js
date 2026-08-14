@@ -87,6 +87,7 @@ export function scorecardView(loaded, side /* 'top' | 'bottom' */) {
     lineup: selectLineup(feed, battingSide).map((r) => ({
       pos: r.position,
       name: r.nameLastFirst,
+      jersey: r.jersey,
     })),
     // The fielding team's name titles the diamond ("Brewers Defense"); its
     // starting nine (minus the pitcher, plus the DH) is the alignment this

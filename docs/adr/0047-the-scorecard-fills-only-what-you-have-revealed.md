@@ -29,7 +29,7 @@ loader was the manifest's motivating false-header case.
 ## Decision
 
 **One grid builder, one clamp.** `src/api/scorecardGame.js` (reveal-gated,
-ADR-0009's pattern) owns the inked grid, the per-inning P/TP/LOB row, the
+ADR-0009's pattern) owns the inked grid, the per-inning P/WH/FO row, the
 scoreboard with its FINAL block and decisions, and the pitcher table. Every
 builder takes a `through` half-index and accumulates only from halves at or
 under it. The visible inning columns come off the same clamp with
@@ -59,7 +59,7 @@ the diamond-center chain, the RBI count. An override lives in
 `localStorage` per game (`lib/scorecardNotes.js` + `useScorecardNotes`),
 keyed by the feed's own `atBatIndex`, wins at render time only, and is
 flagged with an amber corner. Nothing derived is modified: the AB/H/R/RBI
-tallies, the P/TP/LOB row and the scoreboard keep reading the feed, an
+tallies, the P/WH/FO row and the scoreboard keep reading the feed, an
 override never syncs, and clearing one returns the feed's call. The root
 `CLAUDE.md` line "this app is not a data-entry tool" stands — you still keep
 score on paper; this is the margin note in your copy of the book.
@@ -97,7 +97,7 @@ disagree about where you are.
 Three rules keep the game honest:
 
 - **Mid-step, only cards.** A stepped half contributes its revealed cards
-  and nothing else — no P/TP/LOB line, no scoreboard cell, neither
+  and nothing else — no P/WH/FO line, no scoreboard cell, neither
   end-of-half mark. Those are whole-half facts and they ink on commit, which
   is the turn-end beat.
 - **The frontier is derived, never stored.** It is always the half after
