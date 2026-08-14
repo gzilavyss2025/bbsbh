@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { TeamTreatmentMark } from '../logo/TeamTreatmentMark.jsx'
 import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
-import { leagueLogoUrl, favoriteAccentColor, defaultTreatmentFor } from '../../lib/teams.js'
+import {
+  leagueLogoUrl,
+  favoriteAccentColor,
+  defaultTreatmentFor,
+  treatmentTile,
+  isMlbTeamId,
+} from '../../lib/teams.js'
+import { milbTreatmentTile } from '../../lib/milbColors.js'
 import { selectGameStatus } from '../../api/select.js'
 import { doubleHeaderLabel, rescheduleLabel, resumeLabel } from '../../lib/resultCards.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -11,21 +18,37 @@ import { liveTreatmentFor } from '../../api/uniforms.js'
 import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
 import { parkBackdrop } from '../../lib/ballpark/parkBackdrop.js'
 import { useCopy } from '../../copy/copyContext.js'
-import { useMediaQuery } from '../../hooks/useMediaQuery.js'
 
-// Whether this device has a pointer that can hover — the SAME condition
-// 06a-gamecard-parkart.css keys its `@media (hover: hover)` reveal on, asked
-// again in JS so the two cannot disagree. It decides which of two triggers
-// arms the ballpark backdrop (a pointer event vs. the IntersectionObserver
-// below) and which size photo gets named when it does (park.cssUrl, the full
-// 1000px hover art, vs. park.mobileCssUrl, the small scroll-triggered
-// thumbnail — see lib/ballpark/parkBackdrop.js). LIVE, via useMediaQuery's own
-// matchMedia change listener, not a one-off snapshot: a mount-time-only read
-// missed a device toolbar toggled AFTER the page had already loaded (no
-// reload in between), which left a touch session's IntersectionObserver never
-// attached — the exact "plugging in a mouse" case this query has always had
-// to answer for.
-const HOVER_QUERY = '(hover: hover)'
+// Which uniform a team is wearing this game — the same three-source
+// precedence TeamMark's tile reads, pulled up here so the home side's colour
+// can also feed the ballpark backdrop's hover tint (see GameCard's `parkTint`
+// below). Preferred order: (1) `liveJerseys`, a same-day batched live fetch
+// (GameSelect.jsx), classified via the exact same classifyUniformAsset the
+// nightly cron uses — closes the gap where a same-day posting didn't show on
+// the slate until tomorrow's cron run; (2) jerseyTreatmentFor's nightly
+// precompute (scripts/gen-jerseys.mjs); (3) defaultTreatmentFor's guess for a
+// game outside both sources' coverage: away grey/road by default, City
+// Connect for a Friday home game if the club has one.
+function resolveTreatment(team, side, gamePk, officialDate, jerseysData, liveJerseys) {
+  return (
+    liveTreatmentFor(liveJerseys, gamePk, team.id, team.teamName) ??
+    jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
+    defaultTreatmentFor(team.id, side, officialDate)
+  )
+}
+
+// The one solid colour a team's tile actually wears — the same MLB/MiLB
+// branch TeamTreatmentMark resolves its tile from, collapsed to a single
+// value. A pinstriped club's `tint` is null (its tile is mostly paper-white
+// with thin colored lines), so `pinstripeColor` — the stripe's own ink — is
+// the meaningful "team color" for that club instead; the two are already
+// mutually exclusive in both treatmentTile and milbTreatmentTile, so reading
+// either in either order is safe. Null for a team with no curated colour on
+// file (see teams.js/milbColors.js's own graceful degrade).
+function tileColorFor(teamId, treatment, side) {
+  const tile = isMlbTeamId(teamId) ? treatmentTile(teamId, treatment) : milbTreatmentTile(teamId, side)
+  return tile.tint || tile.pinstripeColor || null
+}
 
 // A single game on the slate. Deliberately spoiler-free: shows matchup, level,
 // and coarse status only — never the score, even for finals.
@@ -97,46 +120,44 @@ export function GameCard({
   // cache" shape as every other public/data/*.json reader — this is not one
   // network request per card, just a cache hit after the first card mounts.
   const { data: jerseysData } = useAsync(fetchJerseysData, [])
-  // The park this game is at, as a photo to wash in behind the '@' on hover —
-  // null for every venue we hold no art for, which is every MiLB park and every
-  // one-off neutral site (see lib/ballpark/parkBackdrop.js). Reading the copy
-  // store here is a context read, not a fetch.
+  // The park this game is at, as a photo to wash in behind the '@' once the
+  // card is on screen — null for every venue we hold no art for, which is
+  // every MiLB park and every one-off neutral site (see
+  // lib/ballpark/parkBackdrop.js). Reading the copy store here is a context
+  // read, not a fetch.
   const { t } = useCopy()
   const park = parkBackdrop(game.venue?.name, t)
-  // The photo is fetched on FIRST HOVER (or, on touch, first appearing on
-  // screen — see the effect below), not on mount — a slate is fifteen cards
-  // and even the mobile-sized companion isn't free, so loading them up front
-  // would cost bytes to decorate an interaction most visits never make. Naming
-  // the image only in a `:hover`/in-view rule would get the same laziness for
-  // free, but then it un-names on leave and the fade-OUT has nothing left to
-  // fade; arming it once in state keeps the image mounted so both directions
-  // animate. One flip per card, ever — parkInView (below) keeps toggling after
-  // that to drive the touch fade, but parkArmed never un-arms.
+  // The photo is fetched the moment the card first appears on screen (see the
+  // effect below), not on mount — a slate is fifteen cards and even the small
+  // companion image isn't free, so loading them all up front would cost bytes
+  // decorating cards a visit never scrolls to. Naming the image only in an
+  // in-view CSS rule would get the same laziness for free, but then it
+  // un-names on leaving view and the fade-OUT has nothing left to fade; arming
+  // it once in state keeps the image mounted so both directions animate. One
+  // flip per card, ever — parkInView (below) keeps toggling after that to
+  // drive the fade, but parkArmed never un-arms.
   const [parkArmed, setParkArmed] = useState(false)
-  // LIVE, not a one-off snapshot — see HOVER_QUERY's header above.
-  const hoverCapable = useMediaQuery(HOVER_QUERY)
-  const armPark = park && !parkArmed ? () => hoverCapable && setParkArmed(true) : undefined
-  // Touch's own trigger for the same reveal the hover pointer drives above —
-  // there is no hover event to key off, so 06a-gamecard-parkart.css's
-  // `@media (hover: none)` block instead fades .gamecard__parkart in and out
-  // on this class, kept in sync with the card's own on-screen state.
+  // Fades .gamecard__parkart in and out on this class as the card crosses the
+  // screen (06a-gamecard-parkart.css), kept in sync with the IntersectionObserver
+  // below — the SAME trigger and the SAME small photo (park.cssUrl) on every
+  // device now. A hover pointer used to be a second, separate trigger that
+  // fetched the full 1000px photo instead; that bought nothing (the wash
+  // renders grayscale at 0.24 opacity either way) and meant a mouse user saw
+  // no backdrop at all until they happened to hover a card, so it was dropped
+  // in favor of one mechanism that shows the same recognizable photo to
+  // everyone, phone or desktop, as soon as their card is in view. Hover is
+  // still a desktop-only extra, just a cheaper one now: no second fetch, only
+  // the `--park-tint` colour recolouring an already-loaded photo — see
+  // 06a-gamecard-parkart.css's `@media (hover: hover)` block.
   const [parkInView, setParkInView] = useState(false)
   const cardRef = useRef(null)
-  // The touch analog of hover: no pointer to arm the backdrop with, so an
-  // IntersectionObserver arms it off the card's own on-screen state instead —
-  // and only ever with the mobile-sized thumbnail (park.mobileCssUrl in the
-  // style object below), never the 1000px hover art hoverCapable gates above.
   // Skipped outright under Data Saver, a real signal the visitor already gave
-  // the browser about exactly this kind of decorative weight. `hoverCapable`
-  // rides the dependency array (not just the read inside the body) so a LIVE
-  // flip — a device toolbar toggled with no reload — tears down and, if now
-  // non-hoverable, re-attaches the observer, rather than freezing whatever was
-  // true the one time this effect first ran. `game.venue?.name`, not `park` —
-  // a fresh object every render — is the other dependency, because that's
-  // what park's identity actually depends on, and it stays stable for one
-  // game card's whole lifetime.
+  // the browser about exactly this kind of decorative weight. `game.venue?.name`,
+  // not `park` — a fresh object every render — is the dependency, because
+  // that's what park's identity actually depends on, and it stays stable for
+  // one game card's whole lifetime.
   useEffect(() => {
-    if (!park || hoverCapable || navigator.connection?.saveData) return
+    if (!park || navigator.connection?.saveData) return
     const el = cardRef.current
     if (!el) return
     const io = new IntersectionObserver(([entry]) => {
@@ -146,30 +167,42 @@ export function GameCard({
     io.observe(el)
     return () => io.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.venue?.name, hoverCapable])
+  }, [game.venue?.name])
+  // The home club's own tile colour, so a hover on desktop recolours the
+  // grayscale wash toward the club actually playing there instead of a
+  // neutral wash — the AWAY club's colour would tint a park in someone else's
+  // livery, which reads wrong for a stadium. Uses the SAME treatment jerseysData/
+  // liveJerseys already resolve for the home TeamMark below (resolveTreatment),
+  // so a same-day City Connect posting tints the same colour its tile wears.
+  // null for a team with no curated colour on file — the CSS var() fallback
+  // then shows the same untinted wash a hover always has.
+  const homeTreatment = park
+    ? resolveTreatment(game.home, 'home', game.gamePk, game.officialDate, jerseysData, liveJerseys)
+    : null
+  const parkTint = park ? tileColorFor(game.home.id, homeTreatment, 'home') : null
   // --pin-accent drives the pinned border/gradient + star (see index.css) and is
   // left unset when not pinned or the team has no known color, so the CSS
-  // var(--pin-accent, var(--field)) fallback takes over. Same idea for the two
-  // park properties: absent means the backdrop rule paints nothing.
+  // var(--pin-accent, var(--field)) fallback takes over. Same idea for the park
+  // properties: absent means the backdrop rule paints nothing (or, for
+  // --park-tint, paints the plain untinted wash).
   const style = {
     ...(pinned ? { '--pin-accent': favoriteAccentColor(pinnedTeamId) } : null),
     ...(park ? { '--park-focus': park.focus } : null),
-    ...(park && parkArmed ? { '--park-art': hoverCapable ? park.cssUrl : park.mobileCssUrl } : null),
+    ...(park && parkArmed ? { '--park-art': park.cssUrl } : null),
+    ...(parkTint ? { '--park-tint': parkTint } : null),
   }
   const card = (
     // No native `title` tooltip on this card — the backdrop's park name prints
     // instead, on the card itself, next to the start time (.gamecard__parkname
-    // below): a hover reveal you can actually see coming, not a browser tooltip.
+    // below): a reveal you can actually see coming, not a browser tooltip.
     <div
       ref={cardRef}
       className={`gamecard ${pinned ? 'gamecard--pinned' : ''} ${postponed ? 'gamecard--postponed' : ''} ${parkInView ? 'gamecard--parkinview' : ''}`}
       style={Object.keys(style).length ? style : undefined}
-      onPointerEnter={armPark}
-      onFocus={armPark}
     >
-      {/* The ballpark, washed grayscale and faded in behind the WHOLE card on
-          hover — or, on a touch device, as the card crosses the screen (see
-          the IntersectionObserver above). First child, painting under
+      {/* The ballpark, washed grayscale and faded in behind the WHOLE card as
+          it crosses the screen (see the IntersectionObserver above). First
+          child, painting under
           everything else: the card is a scorebook entry and the park is the
           paper it is written on. */}
       {park && <span className="gamecard__parkart" aria-hidden="true" />}
@@ -486,22 +519,12 @@ function NationalTvIcon({ network }) {
 // mark always reads legibly against its own fill.
 function TeamMark({ team, side, gamePk, officialDate, jerseysData, liveJerseys = null, eager = false }) {
   // Swaps to a team's curated Alternate/City Connect mark when that's what
-  // it's actually wearing this game. Preferred order: (1) `liveJerseys`, a
-  // same-day batched live fetch (GameSelect.jsx), classified via the exact
-  // same classifyUniformAsset the nightly cron uses — closes the gap where a
-  // same-day posting didn't show on the slate until tomorrow's cron run (see
-  // useGameData.js's liveJerseyTreatment, the same fix for the in-game
-  // masthead); (2) jerseyTreatmentFor's nightly precompute
-  // (scripts/gen-jerseys.mjs); (3) defaultTreatmentFor's guess for a game
-  // outside both sources' coverage: away grey/road by default, City Connect
-  // for a Friday home game if the club has one. Coverage is partial by
-  // design — TeamLogo's own fallback chain quietly drops back to the base
-  // logo for any team without curated art. The tile itself is the shared
-  // TeamTreatmentMark, the same square the in-game masthead shows.
-  const treatment =
-    liveTreatmentFor(liveJerseys, gamePk, team.id, team.teamName) ??
-    jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
-    defaultTreatmentFor(team.id, side, officialDate)
+  // it's actually wearing this game — see resolveTreatment above for the
+  // three-source precedence. Coverage is partial by design — TeamLogo's own
+  // fallback chain quietly drops back to the base logo for any team without
+  // curated art. The tile itself is the shared TeamTreatmentMark, the same
+  // square the in-game masthead shows.
+  const treatment = resolveTreatment(team, side, gamePk, officialDate, jerseysData, liveJerseys)
   return (
     <TeamTreatmentMark
       teamId={team.id}
