@@ -244,7 +244,10 @@ const BUDGETS = {
   // only file in this directory holding an `@media print` block and an
   // `@page` rule, and burying a paper-geometry budget inside a screen
   // stylesheet is exactly how the next person fails to find it.
-  'src/styles': 80,
+  // +1 for 41a-scorecard-page.css — 41-scorecard.css crossed the 600-line
+  // file cap when the sheet grew its #22 header/footer/editor chrome, and
+  // this is that partial's page-chrome half, imported directly after it.
+  'src/styles': 81,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -281,7 +284,11 @@ const BUDGETS = {
   // classifies, which is exactly where it needs to stay.
   // +1 for between-innings.js — the post-half hold's card builder, same
   // caller-gated-selector shape as prehalf-callouts.js beside it.
-  'src/api': 94,
+  // +1 for scorecardGame.js — the scorecard grid's reveal-gated builders,
+  // split out of loadScorecard.js so each half of that old mixed module
+  // carries one honest classification. Both belong in the flat set
+  // check-spoiler-manifest classifies, same argument as gamePreview.js.
+  'src/api': 95,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -351,7 +358,9 @@ const BUDGETS = {
   // testable if the path is a function. It seeds off stampArt.js's own
   // `stampSeed` rather than adding a second answer to that question. A leaf
   // module, not a new subsystem.
-  'src/lib': 54,
+  // +1 for scorecardNotes.js — the scorecard's per-cell override store, the
+  // same React-free-core-under-a-hook shape as stamps.js/books.js beside it.
+  'src/lib': 55,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
@@ -398,7 +407,9 @@ const BUDGETS = {
   // 19 -> 20 for useBooks.js — useStamps.js's sibling for the new multi-book
   // store (src/lib/books.js), same React-wiring-over-a-pure-core shape as the
   // hook it sits beside.
-  'src/hooks': 20,
+  // 20 -> 21 for useScorecardNotes.js — the storage wiring over
+  // lib/scorecardNotes.js, the same shape one more time.
+  'src/hooks': 21,
   'src/screens/identity-lab': 15,
 }
 

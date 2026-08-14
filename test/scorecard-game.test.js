@@ -1,0 +1,288 @@
+// The live scorecard's data layer (src/api/scorecardGame.js), pinned on the
+// captured real game (gamePk 823035, 2026-07-07 MIL@STL g2, final 10–2 —
+// the same fixture invariant-real-game.test.js reads).
+//
+// Three promises are pinned, in order of importance:
+//
+//   1. THE CLAMP — nothing from a half-inning past `through` reaches the
+//      grid, the P/TP/LOB row, or the scoreboard; the FINAL block and the
+//      decisions wait for a fully revealed Final game. This is the ADR-0009
+//      pattern the module's manifest class (reveal-gated) names.
+//   2. AGREEMENT — the sheet's numbers are the SAME numbers the innings
+//      viewer's own readers produce (revealInning / revealTotals /
+//      computeDerivedByInning), never a second walk that can drift; and the
+//      sheet's visible-innings walk matches revealProgressCore's
+//      unlockedInnings exactly (extras never spoil, ADR-0008), since the two
+//      are deliberately parallel implementations.
+//   3. THE MARKS — the inning-end diagonal lands on the next-due batter's
+//      UNUSED box, and a skipped final bottom half reads 'X' on the finished
+//      scoreboard.
+import assert from 'node:assert/strict'
+import test from 'node:test'
+import { readFileSync } from 'node:fs'
+import {
+  scorecardPlays,
+  scorecardScoreboard,
+  scorecardPitchers,
+} from '../src/api/scorecardGame.js'
+import { revealInning, revealTotals } from '../src/api/linescore.js'
+import { computeDerivedByInning, revealDerived } from '../src/api/derive.js'
+import { computePitcherLines } from '../src/api/pitchers.js'
+import { computeHalfInningFeed } from '../src/api/playbyplay.js'
+import { halfIndex, selectInningCount, selectRegulationInnings } from '../src/api/select.js'
+import { unlockedInnings } from '../src/hooks/revealProgressCore.js'
+
+const FEED = JSON.parse(
+  readFileSync(new URL('./fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'),
+)
+
+// Every card actually placed on a grid, with the inning its column belongs to.
+function placedCards(grid) {
+  const out = []
+  for (const slot of grid.slots) {
+    for (const [ci, card] of Object.entries(slot.cells)) {
+      out.push({ card, inning: grid.columns[Number(ci)].inning, slot: slot.slot })
+    }
+  }
+  return out
+}
+
+test('nothing on the sheet before the first reveal', () => {
+  const grid = scorecardPlays(FEED, 'top', { through: -1 })
+  assert.equal(placedCards(grid).length, 0)
+  assert.equal(grid.innings.length, selectRegulationInnings(FEED)) // 9 blank columns
+  for (let n = 1; n <= 9; n++) assert.equal(grid.perInning[n], null)
+  assert.deepEqual(grid.totals, { ab: 0, h: 0, r: 0, rbi: 0 })
+  assert.equal(grid.endMarks.length, 0)
+  assert.deepEqual(scorecardPitchers(FEED, 'top', { through: -1 }), [])
+
+  const sb = scorecardScoreboard(FEED, { through: -1 })
+  assert.equal(sb.done, false)
+  assert.equal(sb.away.final, null)
+  assert.deepEqual(sb.decisions, { wp: '', lp: '', sv: '' })
+  for (const i of sb.innings) {
+    assert.equal(i.away, '')
+    assert.equal(i.home, '')
+  }
+})
+
+test('the clamp holds: no card, no P/TP/LOB line, no scoreboard cell past `through`', () => {
+  const through = halfIndex(3, 'top') // top 3 revealed; bottom 3 still sealed
+  for (const side of ['top', 'bottom']) {
+    const grid = scorecardPlays(FEED, side, { through })
+    const half = side === 'bottom' ? 'bottom' : 'top'
+    for (const { inning } of placedCards(grid)) {
+      assert.ok(
+        halfIndex(inning, half) <= through,
+        `${side} sheet placed a card from ${half} ${inning}, past the mark`,
+      )
+    }
+    for (let n = 1; n <= 9; n++) {
+      if (halfIndex(n, half) > through) assert.equal(grid.perInning[n], null)
+    }
+  }
+  // The away sheet is three innings in; the home sheet two. Both partial.
+  const away = scorecardPlays(FEED, 'top', { through })
+  const awayFull = scorecardPlays(FEED, 'top')
+  assert.ok(placedCards(away).length > 0)
+  assert.ok(away.totals.ab < awayFull.totals.ab)
+
+  const sb = scorecardScoreboard(FEED, { through })
+  assert.notEqual(sb.innings[2].away, '') // top 3 is revealed…
+  assert.equal(sb.innings[2].home, '') // …its bottom is not
+  assert.equal(sb.innings[3].away, '') // top 4 is not
+  assert.equal(sb.done, false)
+  assert.equal(sb.away.final, null)
+  assert.equal(sb.decisions.wp, '')
+  // The pitcher table carries only arms that have appeared within the clamp,
+  // with the exact lines computePitcherLines produces for the same mark.
+  const arms = scorecardPitchers(FEED, 'top', { through })
+  const lines = computePitcherLines(FEED, through).home
+  assert.equal(arms.length, lines.length)
+  assert.ok(arms.length >= 1)
+  assert.equal(arms[0].ip, lines[0].ip)
+})
+
+test('the sheet agrees with the innings viewer’s own readers, inning by inning', () => {
+  const derived = computeDerivedByInning(FEED)
+  for (const [side, teamSide, half] of [
+    ['top', 'away', 'top'],
+    ['bottom', 'home', 'bottom'],
+  ]) {
+    const grid = scorecardPlays(FEED, side)
+    let tp = 0
+    for (let n = 1; n <= 9; n++) {
+      const line = grid.perInning[n]
+      const ref = revealInning(FEED, n, teamSide)
+      const pitches = revealDerived(derived, n, half).pitches
+      tp += pitches
+      assert.ok(line, `${teamSide} inning ${n} has no P/TP/LOB line`)
+      assert.equal(line.p, pitches, `${teamSide} inning ${n} pitches`)
+      assert.equal(line.tp, tp, `${teamSide} inning ${n} running total`)
+      assert.equal(line.lob, ref?.leftOnBase ?? 0, `${teamSide} inning ${n} LOB`)
+      assert.equal(line.runs, ref?.runs ?? 0, `${teamSide} inning ${n} runs`)
+    }
+    // The grid's own tallies land on the official totals: the cards' runs and
+    // hits sum to the linescore's R and H, and the per-inning runs row does
+    // too. R here is the assertion that found a real bug: a pinch runner's
+    // run used to vanish from the grid (see the test below).
+    const totals = revealTotals(FEED, teamSide)
+    assert.equal(grid.totals.r, totals.runs)
+    assert.equal(grid.totals.h, totals.hits)
+    const runSum = Object.values(grid.perInning).reduce((a, l) => a + (l?.runs ?? 0), 0)
+    assert.equal(runSum, totals.runs)
+  }
+})
+
+test('a pinch runner’s run fills the ORIGIN batter’s diamond, with the PR penciled in', () => {
+  // Top 7: Jake Bauers walks, Garrett Mitchell pinch-runs and comes around to
+  // score on Chourio's single. The scorebook convention — and the fixture
+  // case that once read 9 of MIL's 10 runs off the grid: the substitution
+  // playEvent's `position`/`replacedPlayer` fields are what let the feed
+  // builder alias Mitchell's baserunning back onto Bauers' card, so a
+  // re-trimmed fixture that drops them regresses this exact test.
+  const grid = scorecardPlays(FEED, 'top')
+  const bauers = Object.entries(grid.slots[4].cells) // slot 5
+    .map(([ci, card]) => ({ card, inning: grid.columns[Number(ci)].inning }))
+    .find(({ card, inning }) => inning === 7 && card.batter?.last === 'Bauers')
+  assert.ok(bauers, 'Bauers has a 7th-inning card in slot 5')
+  assert.equal(bauers.card.scored, true)
+  assert.equal(bauers.card.reached, 4)
+  assert.equal(bauers.card.pinchRunners?.[0]?.last, 'Mitchell')
+})
+
+test('the finished scoreboard fills the FINAL block from the linescore totals', () => {
+  const sb = scorecardScoreboard(FEED)
+  assert.equal(sb.done, true)
+  const away = revealTotals(FEED, 'away')
+  const home = revealTotals(FEED, 'home')
+  assert.deepEqual(sb.away.final, {
+    r: away.runs,
+    h: away.hits,
+    e: away.errors,
+    lob: away.leftOnBase,
+  })
+  assert.equal(sb.away.final.r, 10) // the pinned final: MIL 10, STL 2
+  assert.equal(sb.home.final.r, 2)
+  assert.equal(home.runs, 2)
+  // The real decisions, by name; a 10–2 final has no save, and the label
+  // degrades blank rather than inventing one.
+  assert.deepEqual(sb.decisions, { wp: 'Robert Gasser', lp: 'Hunter Dobbins', sv: '' })
+})
+
+test('visible innings match unlockedInnings at every mark (the two walks never drift)', () => {
+  const regulation = selectRegulationInnings(FEED)
+  const actual = selectInningCount(FEED)
+  for (const through of [-1, 0, 1, 3, 4, 8, 15, 16, 17, 999]) {
+    const grid = scorecardPlays(FEED, 'top', { through })
+    assert.equal(
+      grid.innings.length,
+      unlockedInnings(regulation, actual, through),
+      `through=${through}`,
+    )
+    const sb = scorecardScoreboard(FEED, { through })
+    assert.equal(sb.innings.length, unlockedInnings(regulation, actual, through))
+  }
+})
+
+test('the inning-end diagonal lands on the next-due batter’s unused box', () => {
+  const grid = scorecardPlays(FEED, 'top')
+  assert.ok(grid.endMarks.length >= 7, `only ${grid.endMarks.length} end marks on a 9-inning sheet`)
+  for (const mark of grid.endMarks) {
+    const slot = grid.slots[mark.slot - 1]
+    assert.equal(slot.cells[mark.colIndex], undefined, 'the slashed box must be empty')
+    assert.equal(slot.endCells[mark.colIndex], true)
+  }
+  // Pin inning 1 exactly: the slot after the half's last plate appearance.
+  const top1 = computeHalfInningFeed(FEED, 1, 'top', 'away').filter((c) => c.kind === 'atbat')
+  const last = top1[top1.length - 1]
+  const lastSlot = grid.slots.find((s) =>
+    Object.values(s.cells).some((c) => c.atBatIndex === last.atBatIndex),
+  )
+  const expected = (lastSlot.slot % 9) + 1
+  const inning1Mark = grid.endMarks.find((m) => grid.columns[m.colIndex].inning === 1)
+  assert.ok(inning1Mark, 'inning 1 has an end mark')
+  assert.equal(inning1Mark.slot, expected)
+})
+
+// A minimal Final feed where the home club never needed its last at-bat: the
+// linescore has no bottom-9 entry and the last play is in the top. The
+// finished scoreboard writes the linescore's own 'X' there — but only once
+// the game is done; mid-reveal it stays a plain blank like any sealed half.
+function skippedBottomFeed() {
+  // The real linescore shape for a skipped half: the last inning's entry has
+  // NO `home` key at all (revealInning then reads null), not an empty object.
+  const innings = Array.from({ length: 9 }, (_, i) => {
+    const entry = { num: i + 1, away: { runs: 0, hits: 0, errors: 0, leftOnBase: 0 } }
+    if (i < 8) entry.home = { runs: i === 0 ? 2 : 0, hits: 0, errors: 0, leftOnBase: 0 }
+    return entry
+  })
+  return {
+    gamePk: 1,
+    gameData: {
+      status: { abstractGameState: 'Final' },
+      teams: {
+        away: { id: 1, name: 'Away Club', teamName: 'Aways', abbreviation: 'AWY' },
+        home: { id: 2, name: 'Home Club', teamName: 'Homes', abbreviation: 'HOM' },
+      },
+    },
+    liveData: {
+      linescore: {
+        scheduledInnings: 9,
+        innings,
+        teams: {
+          away: { runs: 0, hits: 4, errors: 1, leftOnBase: 6 },
+          home: { runs: 2, hits: 5, errors: 0, leftOnBase: 3 },
+        },
+      },
+      boxscore: { teams: {} },
+      plays: {
+        allPlays: [{ about: { inning: 9, halfInning: 'top', atBatIndex: 65 }, result: {} }],
+      },
+      decisions: {
+        winner: { id: 10, fullName: 'Winnie Winner' },
+        loser: { id: 11, fullName: 'Louie Loser' },
+      },
+    },
+  }
+}
+
+test('a skipped final bottom reads X once the game is done — and not before', () => {
+  const feed = skippedBottomFeed()
+  const done = scorecardScoreboard(feed)
+  assert.equal(done.done, true)
+  assert.equal(done.innings[8].home, 'X')
+  assert.equal(done.innings[8].away, 0)
+  assert.deepEqual(done.decisions, { wp: 'Winnie Winner', lp: 'Louie Loser', sv: '' })
+  assert.deepEqual(done.home.final, { r: 2, h: 5, e: 0, lob: 3 })
+
+  // Revealed only through the 8th: the top 9 cell AND the skipped bottom stay
+  // blank, and nothing FINAL-shaped fills.
+  const partial = scorecardScoreboard(feed, { through: halfIndex(8, 'bottom') })
+  assert.equal(partial.done, false)
+  assert.equal(partial.innings[8].away, '')
+  assert.equal(partial.innings[8].home, '')
+  assert.equal(partial.away.final, null)
+  assert.equal(partial.decisions.wp, '')
+})
+
+test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
+  const feed = skippedBottomFeed()
+  feed.liveData.linescore.innings.push({
+    num: 10,
+    away: { runs: 1, hits: 1, errors: 0, leftOnBase: 0 },
+    home: {},
+  })
+  feed.gameData.status.abstractGameState = 'Live'
+  // Through the bottom of the 9th: the 10th's column exists (its predecessor
+  // is fully revealed) — one inning past regulation, no further.
+  assert.equal(
+    scorecardScoreboard(feed, { through: halfIndex(9, 'bottom') }).innings.length,
+    10,
+  )
+  // One half earlier, the sheet still shows only regulation.
+  assert.equal(
+    scorecardScoreboard(feed, { through: halfIndex(9, 'top') }).innings.length,
+    9,
+  )
+})

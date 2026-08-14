@@ -1,0 +1,365 @@
+/* ============================================================
+   SCORECARD PAGE CHROME — the sheet's frame around the grid.
+   41-scorecard.css draws the grid and its at-bat boxes; this partial is
+   everything around them on the #22 sheet: the header band (logo, team over
+   manager, the crew pairs, KEEPING SCORE BY, FIRST PITCH), the footer trio
+   (defense diamond, pitcher table, scoreboard + FINAL block + decisions),
+   the notation editor's bottom sheet, the Top/Bottom control bar, and the
+   Lab's own load row. Split out of 41-scorecard.css at the 600-line file cap
+   (ADR-0038); imported by index.css immediately after it, so the cascade
+   order is exactly what one file's top-to-bottom order was.
+   ============================================================ */
+.sc-labctl {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+/* The live scorecard page's control bar (and the box score embed's): the
+   Top/Bottom half toggle, with Refresh riding the far end on the live page. */
+.scpage__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-2);
+}
+.scpage__ctl {
+  display: flex;
+  gap: var(--space-2);
+}
+/* The embedded sheet keeps its own head clear of the box score's cards. */
+.bs__scorecard {
+  margin-top: var(--space-4);
+}
+
+/* Dev-only "load a gamePk" row on the Scorecard Lab (not a product surface). */
+.sc-labload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.sc-labload__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-labload__input {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+}
+
+/* ---- Header band: write-in fields over pencil lines ---- */
+.sc-header {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.sc-header__half {
+  align-self: center;
+  padding-right: var(--space-3);
+  border-right: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+.sc-header__fields {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  gap: var(--space-2) var(--space-4);
+}
+.sc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 84px;
+}
+.sc-field--wide {
+  flex: 1;
+  min-width: 150px;
+}
+.sc-field__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-field__line {
+  min-height: 16px;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Two fields stacked in one header column — team over manager, HP over 2B —
+   the #22's own pairings. */
+.sc-header__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 84px;
+}
+.sc-header__stack--wide {
+  flex: 1;
+  min-width: 150px;
+}
+.sc-header__stack .sc-field {
+  min-width: 0;
+}
+
+/* The LOGO box: a bordered square holding the batting club's mark, or empty
+   space to sketch one in on the bare template. */
+.sc-logo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-logo__box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+
+/* KEEPING SCORE BY — the sheet's three pencil-ring options, write-in
+   surfaces the app itself never marks. */
+.sc-scoreby {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-scoreby__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+.sc-scoreby__ring {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--graphite);
+  background: var(--surface-inset);
+}
+.sc-scoreby__ring--inked {
+  background: var(--graphite);
+}
+.sc-scoreby__optline {
+  flex: 1;
+  min-width: 64px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  min-height: 12px;
+}
+
+/* FIRST PITCH: the time on its line, the AM/PM rings beside it — the one the
+   posted time names is inked solid. */
+.sc-firstpitch {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-firstpitch__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+.sc-firstpitch__time {
+  min-width: 48px;
+}
+.sc-firstpitch__ampm {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.sc-firstpitch__mlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* ---- Footer: defense diamond, pitcher table, scoreboard ---- */
+.sc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+.sc-footer__block {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.sc-footer__defense {
+  flex: 0 0 auto;
+}
+.sc-footer__defense .defdiamond {
+  width: 160px;
+}
+.sc-footer__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+/* The pitcher table reuses .pitchers__grid; the sheet only sets its blank-row
+   height so an empty template keeps writing room. */
+.sc-pitchers tbody td {
+  height: 22px;
+}
+
+/* Scoreboard: two team lines across the innings, then the R/H/E/LOB final. */
+.sc-scoreboard {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sc-scoreboard th,
+.sc-scoreboard td {
+  height: 22px;
+  text-align: center;
+  border: var(--bw-hair) solid var(--rule-grid);
+}
+.sc-scoreboard thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+.sc-scoreboard__team {
+  width: 22%;
+  /* `table-layout: fixed` gives this cell its 22% no matter the club — a
+     long name (CARDINALS, DIAMONDBACKS) must clip at the rule rather than
+     paint over the first inning's runs. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding-left: var(--space-1);
+}
+/* R/H/E totals ride the right edge, emphasized over the per-inning run cells. */
+.sc-scoreboard__rhe {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  background: var(--surface-inset);
+}
+/* The FINAL block under the innings grid: R/H/E/LOB beside the decisions,
+   filled only once the game is over and fully revealed (see
+   scorecardScoreboard's `done`). */
+.sc-finalblock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.sc-final {
+  flex: 1 1 180px;
+  width: auto;
+}
+.sc-final .sc-scoreboard__team {
+  width: 34%;
+}
+.sc-decisions {
+  flex: 1 1 140px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---- The notation editor: a small bottom sheet over the tapped cell ---- */
+.sc-editsheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.sc-editsheet__who {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.sc-editsheet__hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+.sc-editsheet__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-2);
+}
+.sc-editsheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-editsheet__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-editsheet__input {
+  width: 100%;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+}
+.sc-editsheet__input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -1px;
+}
+.sc-editsheet__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}

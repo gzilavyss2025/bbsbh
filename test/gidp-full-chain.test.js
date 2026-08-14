@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computeHalfInningFeed } from '../src/api/playbyplay.js'
-import { scorecardPlays, scorecardCenterCode } from '../src/api/loadScorecard.js'
+import { scorecardPlays, scorecardCenterCode } from '../src/api/scorecardGame.js'
 
 function person(id, last, first) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(id) }

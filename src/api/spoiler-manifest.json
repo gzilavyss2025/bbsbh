@@ -196,6 +196,7 @@
       "class": "reveal-only",
       "why": "The per-half derivations — runs, hits, errors, Statcast superlatives, foul counters. One of the two original reveal-only modules (ADR-0001).",
       "importers": [
+        "api/scorecardGame.js",
         "components/gamehud/HalfTally.jsx",
         "components/gamehud/StatBox.jsx",
         "hooks/useRevealProgress.js",
@@ -286,7 +287,7 @@
       "importers": [
         "api/boxscore.js",
         "api/derive.js",
-        "api/loadScorecard.js",
+        "api/scorecardGame.js",
         "components/gamehud/RollingLine.jsx",
         "components/gamehud/HalfTally.jsx",
         "components/gamehud/ScorebugMount.jsx",
@@ -303,10 +304,8 @@
       "why": "The player page's loader. An open surface; its one score-revealing element (SplitsVsTeam's last-meeting line) is gated against the page's own asOf in the component."
     },
     "loadScorecard.js": {
-      "class": "mixed",
-      "why": "The Scorecard Lab loader. Pre-pitch staging is spoiler-free; the inked play grid and the scoreboard are not. Its header once claimed the whole module was safe while it imported revealInning two lines below — the false-header case that motivated this manifest.",
-      "revealOnlyExports": ["scorecardPlays", "scorecardScoreboard", "scorecardFull"],
-      "importers": ["screens/ScorecardLab.jsx"]
+      "class": "spoiler-free",
+      "why": "The scorecard loader + pre-pitch staging view — select.js reads plus the manager/uniform side fetches, the same staging the lineup pages show. Long the manifest's motivating 'mixed' case (its header claimed safe while importing revealInning); the inked grid moved to scorecardGame.js and this half is finally what the header always said."
     },
     "logbook.js": {
       "class": "reveal-only",
@@ -395,6 +394,7 @@
       "importers": [
         "api/boxscore.js",
         "api/pitcher-callouts.js",
+        "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
         "screens/InningViewer.jsx"
       ]
@@ -411,8 +411,8 @@
         "api/callout-notes/tto.js",
         "api/derive.js",
         "api/dueup.js",
-        "api/loadScorecard.js",
         "api/pitchers.js",
+        "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
         "components/playbyplay/PlayByPlay.jsx"
       ]
@@ -517,6 +517,15 @@
     "savantPercentiles.js": {
       "class": "spoiler-free",
       "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
+    },
+    "scorecardGame.js": {
+      "class": "reveal-gated",
+      "why": "The scorecard's inked grid, P/TP/LOB row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the box score's embedded sheet and the DEV-only Lab pass Infinity from inside the box score's SealBox reveal / the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
+      "importers": [
+        "screens/ScorecardLab.jsx",
+        "screens/scorecard/ScorecardPage.jsx",
+        "screens/boxscore/BoxScorecard.jsx"
+      ]
     },
     "schedule.js": {
       "class": "spoiler-free",

@@ -39,10 +39,16 @@ that as the floor when touching them.
 `test/fixtures/game-823035.trimmed.json` is a field-trimmed snapshot of
 statsapi's `/api/v1.1/game/823035/feed/live` — the pinned 2026-07-07 MIL@STL g2
 (final 10–2), the same game the e2e specs use. It's trimmed to only the feed
-paths the reveal-only selectors read (players, plays, linescore, boxscore),
-which drops it from ~800 KB to ~150 KB. `invariant-real-game.test.js` loads it
-to assert the reveal gating holds on real data — offline and identically every
-run, unlike the e2e specs which fetch the live feed.
+paths the reveal-only and reveal-gated selectors read (players, plays,
+linescore, boxscore, decisions), which drops it from ~800 KB to ~220 KB.
+`invariant-real-game.test.js` loads it to assert the reveal gating holds on
+real data — offline and identically every run, unlike the e2e specs which
+fetch the live feed. `scorecard-game.test.js` reads the same fixture, and is
+why the per-play trim grew: the scorecard grid also needs `about.atBatIndex`,
+`result.{event,description,rbi,isOut}`, each runner's full `movement` +
+`details` + `credits`, and — the one that bit — the substitution playEvents'
+`player`/`position`/`replacedPlayer`/`base` fields, without which a pinch
+runner's run silently vanishes from the grid (that test pins the exact case).
 
 To refresh or capture another game, fetch the live feed and keep only the read
 paths:
@@ -50,9 +56,9 @@ paths:
 ```bash
 curl -s "https://statsapi.mlb.com/api/v1.1/game/<gamePk>/feed/live" -o feed.json
 # then trim gameData.{datetime,status,teams,players,probablePitchers} and
-# liveData.{linescore,boxscore.teams/officials,plays.allPlays} — see the shape
-# of the existing fixture; drop per-player bios and per-pitch fields the
-# selectors don't read.
+# liveData.{linescore,boxscore.teams/officials,plays.allPlays,decisions} — see
+# the shape of the existing fixture (including the per-play fields named
+# above); drop per-player bios and per-pitch fields the selectors don't read.
 ```
 
 Prefer a hand-built minimal fixture (`test/fixtures/mini-game.js`) for

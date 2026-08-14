@@ -38,6 +38,12 @@ const GamePreview = lazy(() =>
 const ScoreSheetPage = lazy(() =>
   import('./sheet/ScoreSheetPage.jsx').then((m) => ({ default: m.ScoreSheetPage })),
 )
+// The live scorecard (step 6): the #22 sheet inked as far as the user's own
+// reveal mark, editable cell by cell. Split like the sheet above it — most
+// visits to a game never open it, and it pulls the whole grid builder in.
+const ScorecardPage = lazy(() =>
+  import('./scorecard/ScorecardPage.jsx').then((m) => ({ default: m.ScorecardPage })),
+)
 
 // Container for a selected game. Fetches the feed (and both managers) once, then
 // shows the section named by the URL: away info → home info → inning viewer.
@@ -286,6 +292,7 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection('lineup2')}
           nextLabel="Home team ›"
           onPrintSheet={() => onSection('sheet')}
+          onScorecard={() => onSection('scorecard')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -316,6 +323,7 @@ export function GameView({ game, section, onSection }) {
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
           onPrintSheet={() => onSection('sheet')}
+          onScorecard={() => onSection('scorecard')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -332,6 +340,7 @@ export function GameView({ game, section, onSection }) {
           half={half}
           onInning={(n, h, opts) => onSection(stepToSection(2, n, h), opts)}
           onBoxScore={() => onSection('boxscore')}
+          onScorecard={() => onSection('scorecard')}
           onReload={feedState.reload}
           loading={feedState.loading}
           lastUpdated={feedState.lastUpdated}
@@ -395,6 +404,23 @@ export function GameView({ game, section, onSection }) {
           feed={feed}
           managers={managers.data}
           scorebookWeather={weather.data}
+        />
+        </Suspense>
+      )}
+      {feed && step === 6 && (
+        <Suspense fallback={<Loader />}>
+        {/* The live scorecard fills only through the user's own reveal mark
+            (api/scorecardGame.js's clamp — ADR-0009's pattern); `spoilersOff`
+            substitutes the render mark under the Scores Unlocked pass exactly
+            as the innings viewer does, persisting nothing (ADR-0026). */}
+        <ScorecardPage
+          feed={feed}
+          managers={managers.data}
+          uniformBrief={uniformBrief}
+          spoilersOff={spoilersOff}
+          onReload={feedState.reload}
+          loading={feedState.loading}
+          lastUpdated={feedState.lastUpdated}
         />
         </Suspense>
       )}
@@ -533,7 +559,8 @@ function gameTitle(game, step, inning, half) {
   if (step === 0) return `${matchup} · ${away} Lineup`
   if (step === 1) return `${matchup} · ${home} Lineup`
   if (step === 3) return `${matchup} · Box score`
-  if (step === 5) return `${matchup} · Scorecard`
+  if (step === 5) return `${matchup} · Print sheet`
+  if (step === 6) return `${matchup} · Scorecard`
   return `${matchup} · ${half === 'bottom' ? 'Bot' : 'Top'} ${ordinal(inning)}`
 }
 

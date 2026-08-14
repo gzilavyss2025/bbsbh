@@ -4,7 +4,7 @@
 // 9.02(a)(1) excludes a sacrifice fly from at-bats, and 9.08(d) still credits
 // one even when another runner is doubled off on the same play.
 //
-// scorecardPlays' NON_AB_EVENTS (src/api/loadScorecard.js) used to list
+// scorecardPlays' NON_AB_EVENTS (src/api/scorecardGame.js) used to list
 // 'sac_fly' but not 'sac_fly_double_play', even though playbyplay.js's own
 // SAC_FLY_EVENTS/classifyOut already mark the batter's own trip as the
 // sacrifice — so the grid charged him BOTH a sacrifice notation and an
@@ -12,7 +12,7 @@
 // .scratch/pbp-scoring-review/issues/04-sacrifice-double-play-charges-an-at-bat.md.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { scorecardPlays } from '../src/api/loadScorecard.js'
+import { scorecardPlays } from '../src/api/scorecardGame.js'
 
 function person(id, last, first) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(id) }

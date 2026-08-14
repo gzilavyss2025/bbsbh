@@ -1,5 +1,5 @@
 // The Scorecard Lab printable grid used to skip the extra-innings automatic
-// runner entirely — scorecardPlays (src/api/loadScorecard.js) only kept
+// runner entirely — scorecardPlays (src/api/scorecardGame.js) only kept
 // computeHalfInningFeed entries with kind === 'atbat', so the placed
 // runner's `kind: 'placed'` card never reached the grid. His run still
 // showed in perInning/the bottom scoreboard (both read the real linescore),
@@ -14,7 +14,7 @@
 // walk-off grand slam — four runs, one of them the placed runner's own.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { scorecardPlays } from '../src/api/loadScorecard.js'
+import { scorecardPlays } from '../src/api/scorecardGame.js'
 
 function person(id, last, first) {
   return { id, fullName: `${first} ${last}`, lastName: last, firstName: first, useName: first, primaryNumber: String(id) }
