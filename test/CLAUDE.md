@@ -39,12 +39,12 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | game-feed-diff.test.js | 6 | src/api/game.js | mergeFeedDiff |
 | game-notes-regressions.test.js | 3 | src/api/whatsBrewing.js | "What's Brewing" / Game Notes extraction |
 | game-photos.test.js | 20 | src/api/gamePhotos.js | /photos page: photographer/broadcast/graphic classification + subject attribution (unsealed, non-spoiler) |
-| gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/loadScorecard.js | Full relay-chain double-play display |
+| gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/scorecardGame.js | Full relay-chain double-play display |
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
 | half-feed-note-order.test.js | 6 | src/api/playbyplay.js (halfInningFeed, eventTypes) | Same-play notes render in the feed's own playEvents order, not stoppages-then-baserunning; delay advisories reach the feed while the lifecycle "Status Change" lines stay out |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
 | identity-lab-stores.test.js | 24 | tuningStore.js, teams.js, brandColors.js, saveStores.js, mlbColorRoles.js, dev-data-stores.mjs | /identity-lab data stores |
-| interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/loadScorecard.js | Interrupted at-bat handling |
+| interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/scorecardGame.js | Interrupted at-bat handling |
 | invariant-real-game.test.js | 6 | linescore.js, derive.js, pitchers.js, select.js | Spoiler invariant pinned on captured real feed |
 | jerseys.test.js | 10 | scripts/gen-jerseys.mjs, src/api/jerseys.js | Nightly jerseys export |
 | json-patch.test.js | 8 | src/lib/jsonPatch.js | JSON patch utility |
@@ -91,8 +91,10 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | route.test.js | 36 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
-| scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
-| scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |
+| scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
+| scorecard-notes.test.js | 6 | src/lib/scorecardNotes.js | Per-cell notation override store: malformed-storage tolerance, trim/cap hygiene, same-reference no-op writes |
+| scorecard-placed-runner.test.js | 3 | src/api/scorecardGame.js | Extra-innings placed runner in the inked grid (regression) |
+| scorecard-sac-double-play.test.js | 1 | src/api/scorecardGame.js | sac_fly_double_play AB-charging bug (regression) |
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |

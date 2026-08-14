@@ -67,7 +67,8 @@
 // `matchup` is the away + home team abbreviations concatenated and lowercased
 // (MIL @ ARI -> 'milari'); `section` is 'lineup1' (away info), 'lineup2' (home
 // info), 'boxscore', 'preview' (the shareable preview-image studio), 'sheet'
-// (the printable pre-pitch scorecard), or 'top{n}' / 'bottom{n}' (innings
+// (the printable pre-pitch scorecard), 'scorecard' (the live #22 sheet,
+// inked as far as the reveal mark), or 'top{n}' / 'bottom{n}' (innings
 // viewer, one page per half-inning). Legacy 'inning{n}' links still parse (as
 // the top half).
 // Example: /07052026/milari/bottom3
@@ -329,8 +330,8 @@ export function parseRoute(url) {
 }
 
 // section string -> { step, inning, half }. step: 0 away info, 1 home info,
-// 2 innings, 3 box score, 4 preview poster, 5 printable sheet. `half` only
-// matters for step 2.
+// 2 innings, 3 box score, 4 preview poster, 5 printable sheet, 6 live
+// scorecard. `half` only matters for step 2.
 export function sectionToStep(section) {
   if (section === 'lineup2') return { step: 1, inning: 1, half: 'top' }
   if (section === 'boxscore') return { step: 3, inning: 1, half: 'top' }
@@ -345,6 +346,11 @@ export function sectionToStep(section) {
   // IS how it reaches a printer — but a thing you make, not a page you score, so
   // it stays out of the four the "next" buttons walk.
   if (section === 'sheet') return { step: 5, inning: 1, half: 'top' }
+  // The live scorecard (screens/scorecard/ScorecardPage.jsx): the #22 sheet
+  // filled exactly as far as the user's own reveal mark. A real, shareable
+  // address like the two stops above it, and like them deliberately not one
+  // of the four steps the "next" buttons walk.
+  if (section === 'scorecard') return { step: 6, inning: 1, half: 'top' }
   const m = /^(top|bottom)(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }
   const legacy = /^inning(\d+)$/.exec(section || '')
@@ -359,6 +365,7 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 3) return 'boxscore'
   if (step === 4) return 'preview'
   if (step === 5) return 'sheet'
+  if (step === 6) return 'scorecard'
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }
 

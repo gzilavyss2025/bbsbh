@@ -4,6 +4,7 @@ import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
+import { ChevronLink } from '../../ui/ChevronLink.jsx'
 import { DefenseSection, LineupSection } from '../EnteringReference.jsx'
 import { MarginNotes } from '../MarginNotes.jsx'
 import { PitchersSection } from '../PitchersSection.jsx'
@@ -254,6 +255,7 @@ function Section({
   runExpectancy,
   winProbPoints,
   winProbBigPlays,
+  onScorecard,
 }) {
   if (tab === 'lineups' && showEntering) {
     return (
@@ -348,6 +350,15 @@ function Section({
           uniforms={uniforms}
           scorebookWeather={scorebookWeather}
         />
+        {/* The door to the live scorecard — the #22 sheet inked as far as
+            this same reveal mark. It sits at the tab's foot with the other
+            once-a-game reaches: mid-half you're scoring, not reading the
+            whole sheet. Structural (a route), never a score. */}
+        {onScorecard && (
+          <div className="thub-door">
+            <ChevronLink onClick={onScorecard}>Open the live scorecard</ChevronLink>
+          </div>
+        )}
       </>
     )
   }

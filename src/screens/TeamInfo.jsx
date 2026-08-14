@@ -104,6 +104,7 @@ export function TeamInfo({
   onNext,
   nextLabel,
   onPrintSheet,
+  onScorecard,
   onReload,
   loading,
   lastUpdated,
@@ -182,6 +183,11 @@ export function TeamInfo({
       {onPrintSheet && (
         <div className="thub-door">
           <ChevronLink onClick={onPrintSheet}>Print tonight’s sheet</ChevronLink>
+        </div>
+      )}
+      {onScorecard && (
+        <div className="thub-door">
+          <ChevronLink onClick={onScorecard}>Open the live scorecard</ChevronLink>
         </div>
       )}
 

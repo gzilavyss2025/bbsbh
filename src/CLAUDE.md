@@ -70,7 +70,7 @@ appends `-2`, game 1 stays bare so old links keep working) and `section` is
 `lineup1` / `lineup2` / `top{n}` / `bottom{n}` (one half-inning per page; legacy
 `inning{n}` parses as the top half) / `boxscore` (sealed, also reachable from a past
 game's slate card) / `preview` (the poster studio, `docs/preview-poster.md`) /
-`sheet` (the printable pre-pitch scorecard — grid EMPTY by design, `docs/print-sheet.md`).
+`sheet` (printable, grid EMPTY — `docs/print-sheet.md`) / `scorecard` (live #22 sheet, ADR-0047).
 
 `src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
 `pushState`s on navigation; the URL is the single source of truth for which game

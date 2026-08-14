@@ -114,6 +114,7 @@ export function InningViewer({
   half,
   onInning,
   onBoxScore,
+  onScorecard,
   onReload,
   loading,
   lastUpdated,
@@ -721,6 +722,7 @@ export function InningViewer({
     runExpectancy,
     winProbPoints,
     winProbBigPlays,
+    onScorecard,
   }
 
   return (

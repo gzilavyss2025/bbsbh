@@ -6,16 +6,17 @@
 //      (no lineup, no crew, no weather, no probables) that must render as blank
 //      write-in lines rather than a crash or a row of em dashes.
 //   2. THE SPOILER BOUNDARY — that the whole `screens/sheet/` directory imports
-//      nothing reveal-only and nothing from the mixed Scorecard Lab loader, and
-//      that the sheet ships an EMPTY at-bat grid. That is the product decision
-//      the feature exists to hold ("this app is not a scoring tool"), and prose
-//      cannot hold it: `api/loadScorecard.js`'s own header claimed for months
-//      to be spoiler-free while importing `revealInning` two lines below it.
+//      nothing reveal-only or reveal-gated, and that the PRINTED sheet ships an
+//      EMPTY at-bat grid. That is the product decision the feature exists to
+//      hold: the paper you print is the one you score on by hand. The LIVE
+//      scorecard (`/{date}/{matchup}/scorecard`, api/scorecardGame.js) fills
+//      itself on screen under its own reveal clamp — this sheet still never
+//      does.
 //
 // (2) overlaps `scripts/check-spoiler-manifest.mjs`, deliberately. That guard
-// stops a reveal-only IMPORT; this one also stops the softer failure — reaching
-// for `loadScorecard.js`'s spoiler-free half, which the manifest permits and
-// which would drag the full-reveal half back into the production bundle.
+// stops a gated IMPORT; this one also stops the softer failure — reaching for
+// the scorecard loader's staging half here, which the manifest permits but
+// which would blur the one boundary that keeps the printed grid empty.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFileSync, readdirSync } from 'node:fs'
@@ -202,9 +203,13 @@ const FORBIDDEN = [
   ['pitchers.js', 'reveal-gated: a pitcher’s IP/ER line'],
   ['boxscore.js', 'the finished box score'],
   [
+    'scorecardGame.js',
+    'reveal-gated: the inked at-bat grid, the P/TP/LOB row, the finished scoreboard and the decisions',
+  ],
+  [
     'loadScorecard.js',
-    'mixed — its spoiler-free half sits two lines above an import of revealInning, ' +
-      'and importing any of it drags the DEV-only full-reveal grid into the production bundle',
+    'the live scorecard’s own loader/staging view — this sheet has sheetModel.js on purpose, ' +
+      'so the printed page can never grow a fill-in path by sharing the filled sheet’s plumbing',
   ],
 ]
 

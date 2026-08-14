@@ -16,7 +16,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computeHalfInningFeed, nextStepBoundary, interruptedCode } from '../src/api/playbyplay.js'
-import { scorecardPlays } from '../src/api/loadScorecard.js'
+import { scorecardPlays } from '../src/api/scorecardGame.js'
 
 // ---- fixture --------------------------------------------------------------
 

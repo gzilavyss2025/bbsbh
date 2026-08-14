@@ -1,0 +1,163 @@
+// The live scorecard (`/{date}/{matchup}/scorecard`) and the box score's
+// embedded completed sheet, pinned on the anchor game 823035 (2026-07-07
+// MIL@STL g2, final MIL 10–2) — the same game test/scorecard-game.test.js
+// pins offline, so every number asserted here was verified there first.
+// What this layer adds over the unit suite: the DOM truth of the clamp (a
+// sealed half's marks literally absent), the override flow end to end, the
+// box score's seal boundary, and the lineup-page door.
+import { test, expect } from './fixtures.js'
+
+// Some sandboxes' Chromium cannot reach statsapi directly (CONNECTs reset by
+// an egress proxy) while Node's fetch goes through fine — so the browser's
+// statsapi traffic is relayed through the test runner (the page.route
+// technique the PR template itself suggests). Real live data, no mocks; with
+// direct network the relay is a transparent pass-through.
+test.beforeEach(async ({ page }) => {
+  await page.route('https://statsapi.mlb.com/**', async (route) => {
+    try {
+      const res = await fetch(route.request().url())
+      const body = Buffer.from(await res.arrayBuffer())
+      await route.fulfill({
+        status: res.status,
+        contentType: res.headers.get('content-type') ?? 'application/json',
+        body,
+      })
+    } catch {
+      await route.abort()
+    }
+  })
+})
+
+const ROUTE = '/07072026/milstl-2/scorecard'
+const BOX = '/07072026/milstl-2/boxscore'
+const REVEAL_KEY = 'bbsbh:reveal:823035'
+const NOTES_KEY = 'bbsbh:scorecard-notes:823035'
+
+// halfIndex(3,'top') = 4; halfIndex(9,'bottom') = 17.
+const THROUGH_TOP3 = '4'
+const FULL = '17'
+
+async function openWithMark(page, mark) {
+  // Seed once per tab (the init script re-runs on every navigation, and an
+  // unguarded clear() would wipe the override the persistence test reloads
+  // to find).
+  await page.addInitScript(
+    ([key, value]) => {
+      if (window.sessionStorage.getItem('e2e-seeded')) return
+      window.sessionStorage.setItem('e2e-seeded', '1')
+      window.localStorage.clear()
+      if (value != null) window.localStorage.setItem(key, value)
+    },
+    [REVEAL_KEY, mark],
+  )
+  await page.goto(ROUTE)
+  await expect(page.locator('.scorecard')).toBeVisible({ timeout: 20000 })
+}
+
+test('sealed game: the sheet renders staged but inkless — nothing score-shaped in the DOM', async ({ page }) => {
+  await openWithMark(page, null)
+  // Header staging is fine (lineup names, crew) — but no at-bat marks, no
+  // out circles, no P/TP/LOB values, no FINAL block, no decisions.
+  await expect(page.locator('.sc-sheet')).toBeVisible()
+  await expect(page.locator('.sc-ab__center')).toHaveCount(0)
+  await expect(page.locator('.sc-ab--end')).toHaveCount(0)
+  const outs = await page.locator('.sc-ab__out').allTextContents()
+  expect(outs.join('')).toBe('')
+  const types = await page.locator('.sc-ab__type').allTextContents()
+  expect(types.join('')).toBe('')
+  const ptl = await page.locator('.sc-sheet__totals .sc-sheet__totcell').allTextContents()
+  expect(ptl.join('')).toBe('')
+  // The decisions are the loudest spoiler: the winner's name must not exist.
+  await expect(page.locator('body')).not.toContainText('Gasser')
+  // Scoreboard cells all blank.
+  const cells = await page.locator('.sc-scoreboard td:not(.sc-scoreboard__team)').allTextContents()
+  expect(cells.join('')).toBe('')
+})
+
+test('partial reveal (through top 3): exactly that much ink, and no more', async ({ page }) => {
+  await openWithMark(page, THROUGH_TOP3)
+  // The away sheet shows innings 1–3's plate appearances…
+  await expect(page.locator('.sc-ab__out').filter({ hasText: /\d/ }).first()).toBeVisible()
+  // …and the P/TP/LOB row carries exactly three filled inning columns.
+  const filled = page.locator('.sc-sheet__totcell .sc-sheet__ptl')
+  await expect(filled).toHaveCount(3)
+  // Inning 1: 24 pitches seen, 24 running, 1 LOB (pinned in the unit suite).
+  await expect(filled.nth(0)).toHaveText('24241')
+  // FINAL block still blank; winner still unnamed.
+  await expect(page.locator('.sc-final td.sc-scoreboard__rhe').first()).toHaveText('')
+  await expect(page.locator('body')).not.toContainText('Gasser')
+  // Bottom sheet: the home club has only innings 1–2 revealed — switch and
+  // count its P/TP/LOB columns.
+  await page.getByRole('button', { name: 'Bottom', exact: true }).click()
+  await expect(page.locator('.sc-sheet__totcell .sc-sheet__ptl')).toHaveCount(2)
+})
+
+test('full reveal: the completed sheet, its totals, decisions, marks and PR case', async ({ page }) => {
+  await openWithMark(page, FULL)
+  // The away grid's summary foot: AB 38, H 11, R 10, RBI 10 (pinned).
+  await expect(page.locator('.sc-sheet__totbar')).toHaveText(['38', '11', '10', '10'])
+  // FINAL: MIL 10, STL 2, with LOB 8/4; decisions named.
+  await expect(page.locator('.sc-final tbody tr').first()).toContainText('10')
+  await expect(page.locator('.sc-decisions')).toContainText('Robert Gasser')
+  await expect(page.locator('.sc-decisions')).toContainText('Hunter Dobbins')
+  // Inning-end diagonals drawn on the unused next-batter boxes.
+  const endMarks = await page.locator('.sc-ab--end').count()
+  expect(endMarks).toBeGreaterThanOrEqual(7)
+  // The pinch-runner case: Bauers' 7th-inning diamond is filled (his run came
+  // around under Mitchell's legs) with the red PR mark penciled by the base.
+  await expect(page.locator('.sc-sheet').getByText('Bauers, Jake')).toBeVisible()
+  await expect(page.locator('.pbp__pr').first()).toBeVisible()
+  // The pitcher table lists the Cardinals arms that faced this order.
+  await expect(page.locator('.sc-pitchers')).toContainText('H. Dobbins')
+})
+
+test('a tapped box takes a penciled override, persists it, and gives it back', async ({ page }) => {
+  await openWithMark(page, FULL)
+  const firstBox = page.locator('.sc-ab__edit').first()
+  await firstBox.click()
+  const editor = page.locator('.sc-editsheet')
+  await expect(editor).toBeVisible()
+  await editor.getByLabel('Outcome').fill('E6')
+  await editor.getByRole('button', { name: 'Pencil it in' }).click()
+  await expect(editor).toHaveCount(0)
+  // The box shows the override and wears the edited-corner flag.
+  await expect(page.locator('.sc-ab--noted').first()).toBeVisible()
+  await expect(page.locator('.sc-ab--noted .sc-ab__type').first()).toHaveText('E6')
+  // Persisted: reload keeps it.
+  await page.reload()
+  await expect(page.locator('.sc-ab--noted .sc-ab__type').first()).toHaveText('E6', { timeout: 20000 })
+  // And "Use the feed's call" clears it.
+  await page.locator('.sc-ab--noted .sc-ab__edit').first().click()
+  await editor.getByRole('button', { name: 'Use the feed’s call' }).click()
+  await expect(page.locator('.sc-ab--noted')).toHaveCount(0)
+  const stored = await page.evaluate((k) => window.localStorage.getItem(k), NOTES_KEY)
+  expect(stored).toBeNull()
+})
+
+test('box score: no scorecard DOM before the seal, the completed sheet after it', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.clear())
+  await page.goto(BOX)
+  // Sealed: the reveal cover is up and NOTHING of the sheet exists in the DOM.
+  await expect(page.locator('.sealbox').first()).toBeVisible({ timeout: 20000 })
+  await expect(page.locator('.sc-ab')).toHaveCount(0)
+  await expect(page.locator('body')).not.toContainText('Gasser')
+  // Reveal the box score.
+  await page.getByRole('button', { name: /reveal the box score/i }).click()
+  // The embedded completed sheet is there, inked, at the foot of the page.
+  await expect(page.locator('.bs__scorecard .scorecard')).toBeVisible({ timeout: 20000 })
+  await expect(page.locator('.bs__scorecard .sc-sheet__totbar')).toHaveText(['38', '11', '10', '10'])
+  await expect(page.locator('.bs__scorecard .sc-decisions')).toContainText('Robert Gasser')
+  // The Top/Bottom toggle flips to the home club's half of the book.
+  await page.locator('.bs__scorecard').getByRole('button', { name: 'Bottom', exact: true }).click()
+  await expect(page.locator('.bs__scorecard .sc-sheet__totbar')).toHaveText(['31', '4', '2', '2'])
+})
+
+test('the lineup page carries the door to the live scorecard', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.clear())
+  await page.goto('/07072026/milstl-2/lineup1')
+  const door = page.getByRole('button', { name: /open the live scorecard/i })
+  await expect(door).toBeVisible({ timeout: 20000 })
+  await door.click()
+  await expect(page).toHaveURL(/\/scorecard/)
+  await expect(page.locator('.scorecard')).toBeVisible({ timeout: 20000 })
+})
