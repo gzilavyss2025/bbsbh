@@ -78,11 +78,11 @@ export function GameCard({
   // positioned corner pill leak through mirrored on iOS. There's also no result
   // to reveal: the game didn't happen.
   const postponed = status.isPostponed
-  // One flag for everything the Scores Unlocked line displaces while it's
-  // showing: the corner Final text (relocated into its center slot) and the
-  // readiness pips (a pre-game checklist — once runs and an inning are on the
-  // card, "is the scorebook ready" is answered). Pre-game cards keep both:
-  // no line renders before first pitch.
+  // One flag for what the Scores Unlocked line displaces while it's showing:
+  // the corner Final text, relocated into its center slot. Pre-game cards
+  // keep the corner text: no line renders before first pitch. (The readiness
+  // pips are a separate, Preview-only gate below — a game that has gone Live,
+  // suspended or not, already answered "is the scorebook ready".)
   const hasScoreLine = !!liveLine && !postponed
   const stacked = !!stackedGame
   const dhLabel = doubleHeaderLabel(game, stacked)
@@ -273,7 +273,7 @@ export function GameCard({
               two appear together. */}
           {park && <span className="gamecard__parkname">{park.name}</span>}
           <span className="gamecard__metaright">
-            {!postponed && game.abstractState !== 'Final' && !hasScoreLine && (
+            {!postponed && game.abstractState === 'Preview' && (
               <ReadyPill game={game} />
             )}
             {!postponed && national && <NationalTvIcon network={national} />}
