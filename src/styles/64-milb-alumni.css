@@ -1,66 +1,87 @@
 /* Made The Show — components/teamstats/MilbAlumni.jsx.
    A farm club's big-league alumni, career-WAR ranked, at the foot of a MiLB
-   team's Overview. Portrait-led on purpose: this card's subject is the face,
-   so the shot runs at the `lg` rung, a step up from the Team Leaders card
-   directly above it (`md`). See the component's own header. */
+   team's Overview. Shaped like a baseball card: the portrait framed on the
+   left, the type stack left-aligned beside it. The shot runs at the `lg` rung,
+   a step up from the Team Leaders card directly above it (`md`) — see the
+   component's own header. */
 .alum__grid {
   display: grid;
-  /* Three across on a phone would shrink the portrait below the size that
-     makes it worth leading with; two keeps it readable, and the card's six
-     names land as a tidy 2x3. */
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  /* ONE column on a phone. The portrait is 88px before its frame, and a
+     left-aligned name stack beside it needs the rest of the width — two of
+     these side by side at 390px would truncate every surname. The card only
+     doubles up once there is room for two whole ones. */
+  grid-template-columns: 1fr;
+  gap: 10px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-@media (min-width: 560px) {
+@media (min-width: 600px) {
   .alum__grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
+/* The card itself. The double rule — hairline border plus an inset ring in the
+   canvas color — is the printed card's white border inside its cut edge, drawn
+   in this app's paper tokens rather than literal white. */
 .alum__card {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 8px;
-  text-align: center;
+  gap: 12px;
+  padding: 10px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-md);
   background: var(--surface-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 3px var(--bg-canvas), var(--shadow-card);
 }
 /* The portrait IS the link here (unlike the Team Leaders card, where it is
-   decoration beside a linked name), so the button needs to shed the plain
-   .plink box and carry the frame itself. */
+   decoration beside a linked name), so the button has to shed the plain .plink
+   box and carry the card's photo frame itself. */
 .alum__portrait {
   display: block;
+  flex: none;
   padding: 0;
   border: 0;
   background: none;
 }
 /* Compound with .shot/.shot--fallback, both always set by Headshot, so this
-   outranks the base .shot sizing — same reason as .tlead__shot. */
+   outranks the base .shot sizing — same reason as .tlead__shot. The hairline
+   sits on the photo rather than the card edge: on a real card the image is a
+   window cut into the stock, not the stock's own outline. */
 .shot.alum__shot {
   flex: none;
   width: var(--shot-lg-w);
   height: var(--shot-lg-h);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   overflow: hidden;
 }
+/* The type half. `min-width: 0` is load-bearing — without it this flex child
+   refuses to shrink below its longest word, and the club name's ellipsis never
+   engages on a narrow phone. */
+.alum__who {
+  display: flex;
+  /* `flex: 1` so the type half FILLS the card rather than shrink-wrapping its
+     longest line. Without it the stint rule below stops wherever the club name
+     happens to end, at a different width on every card. */
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  text-align: left;
+}
 .alum__name {
-  margin-top: 2px;
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
   line-height: var(--lh-snug);
   color: var(--text-heading);
+  text-align: left;
 }
 .alum__ident {
   display: flex;
   align-items: baseline;
-  justify-content: center;
   gap: 4px;
   font-size: var(--fs-caption);
   color: var(--text-caption);
@@ -77,13 +98,29 @@
 .alum__club {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 5px;
-  margin-top: 2px;
   min-width: 0;
+  max-width: 100%;
 }
 .alum__clublogo {
   flex: none;
+}
+/* The credential line — his record with THIS club. Ruled off from the identity
+   above it, the way a card's stat panel is ruled off from its nameplate. */
+.alum__stint {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 3px;
+  padding-top: 4px;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  width: 100%;
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+.alum__stintg,
+.alum__stintyrs {
+  font-variant-numeric: tabular-nums;
 }
 .alum__clubname {
   font-size: var(--fs-compact);
