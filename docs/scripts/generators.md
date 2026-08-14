@@ -35,6 +35,27 @@ don't run these by hand.
   extra request, and `.scratch/lineup-strength/` records why the WAR total
   can't be decomposed after the fact. The template for the build-time-fetch
   pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
+- `gen-milb-alumni.mjs` → `public/data/milb-alumni/{teamId}.json` — for each of the
+  ~120 current farm clubs, the six big-league players who came through it, ranked
+  by career WAR ("Made The Show", the last card on a MiLB team's Overview).
+  **Runs directly after `gen-war.mjs` and depends on it**: the ranking is summed
+  from `war.json` + the committed `war-history/` shards, so this generator makes
+  no WAR request of its own and a FanGraphs outage can't break it (it does mean
+  career WAR is 2010-on, understating a pre-2010 debut). Stints come from the
+  PLAYER side — `/people/{id}/stats?stats=yearByYear&sportId={11,12,13,14,16}`,
+  one call per sport because a comma list silently returns zero stat groups — and
+  are filtered to current affiliates via `affiliates.json`.
+  **Two traps.** A stint under `MIN_GAMES` (20) is dropped, because a rehab
+  assignment is a minor-league stint: unfiltered, Nashville's top three alumni
+  are three-game cameos by Yelich, Sonny Gray and Semien, above the Chapman and
+  Olson who actually played there. And the `/people` enrichment call needs
+  `hydrate=currentTeam` — without it the endpoint answers 200 with name, number
+  and position present and the club silently blank, which is what the first run
+  shipped. Incremental: `scripts/data/milb-alumni-scan.json` carries each
+  player's scanned stints, and only a new player, a stale season, or someone
+  whose bus-league career could still be moving is re-scanned. Shards carry no
+  `generatedAt` on purpose — 120 committed files on a nightly cron must not all
+  churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his
   game log + club's schedule to drop ended stints. Keeps its own self-contained copy

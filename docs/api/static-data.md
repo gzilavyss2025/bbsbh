@@ -54,6 +54,17 @@ for each generator; the reader modules:
   union the two into a player's `{season: war}` map (live season from war.json wins its own
   year), which `loadPlayer.js` threads into the player page. MLB-only at source,
   so MiLB rows fall back to a dash.
+- `team.js`'s `fetchMilbAlumni(teamId)` — one farm club's big-league alumni, from
+  `public/data/milb-alumni/{teamId}.json` (`scripts/gen-milb-alumni.mjs`, nightly).
+  Not its own module: this reader sits beside `fetchAffiliates`, which already
+  owns the static farm-system snapshot it is keyed against. Sharded by the club's
+  OWN team id rather than its parent org's, because the page that opens it always
+  knows its own id and never wants a sibling's list — a farm-team page pulls
+  ~900 bytes instead of the system's ~100 KB. Read through `staticJsonBy`, so
+  concurrent card mounts share one request. Degrades to `{minGames: null,
+  players: []}` — no card, not a broken page. Spoiler-free: career WAR and a
+  jersey number are stat lines, not a score (ADR-0034), and nothing here touches
+  a game feed.
 - `jerseys.js` — what a team actually wore in a given game, from
   `public/data/jerseys.json` (`scripts/gen-jerseys.mjs`, nightly). Keyed
   `${gamePk}:${teamId}` → `'alternate' | 'city-connect'`; a standard jersey or

@@ -81,6 +81,7 @@
 @import './styles/55-my-tally-account.css';
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
+@import './styles/64-milb-alumni.css';
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split

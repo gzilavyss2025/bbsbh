@@ -4,6 +4,7 @@ import { teamTabPath } from '../lib/route.js'
 import { isMlbTeamId } from '../lib/teams.js'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
+import { MilbAlumni } from '../components/teamstats/MilbAlumni.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/transactions/TeamTransactionsCard.jsx'
 import { ChevronLink } from '../components/ui/ChevronLink.jsx'
@@ -86,6 +87,7 @@ export function TeamPage({ id, asOf, sportId }) {
     leaderPool,
     injuredIds,
     transactionsPage,
+    milbAlumni,
   } = data
 
   return (
@@ -217,6 +219,13 @@ export function TeamPage({ id, asOf, sportId }) {
           <PreviewDoor label="All transactions" onClick={() => go('games')} />
         </>
       )}
+
+      {/* Made The Show — a farm club's big-league alumni, career-WAR ranked.
+          The one card here that is NOT a preview of a tab: nothing else in the
+          app holds this, so there is no door to put under it. MiLB only, and
+          last on purpose — it is the club's history, under everything about its
+          season. */}
+      <MilbAlumni players={milbAlumni?.players} minGames={milbAlumni?.minGames} />
     </TeamHubShell>
   )
 }

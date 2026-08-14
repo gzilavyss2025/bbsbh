@@ -1,0 +1,95 @@
+/* Made The Show — components/teamstats/MilbAlumni.jsx.
+   A farm club's big-league alumni, career-WAR ranked, at the foot of a MiLB
+   team's Overview. Portrait-led on purpose: this card's subject is the face,
+   so the shot runs at the `lg` rung, a step up from the Team Leaders card
+   directly above it (`md`). See the component's own header. */
+.alum__grid {
+  display: grid;
+  /* Three across on a phone would shrink the portrait below the size that
+     makes it worth leading with; two keeps it readable, and the card's six
+     names land as a tidy 2x3. */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+@media (min-width: 560px) {
+  .alum__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.alum__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  text-align: center;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+/* The portrait IS the link here (unlike the Team Leaders card, where it is
+   decoration beside a linked name), so the button needs to shed the plain
+   .plink box and carry the frame itself. */
+.alum__portrait {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+/* Compound with .shot/.shot--fallback, both always set by Headshot, so this
+   outranks the base .shot sizing — same reason as .tlead__shot. */
+.shot.alum__shot {
+  flex: none;
+  width: var(--shot-lg-w);
+  height: var(--shot-lg-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.alum__name {
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-snug);
+  color: var(--text-heading);
+}
+.alum__ident {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.alum__num {
+  font-variant-numeric: tabular-nums;
+}
+.alum__dot {
+  opacity: 0.55;
+}
+/* Current club — the "where he is now" line. A player between clubs has no
+   currentTeam and the whole row is dropped by the component, so this never
+   renders a logo with no name beside it. */
+.alum__club {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 2px;
+  min-width: 0;
+}
+.alum__clublogo {
+  flex: none;
+}
+.alum__clubname {
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+  line-height: var(--lh-snug);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
