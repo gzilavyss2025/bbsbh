@@ -11,12 +11,12 @@ import { FIELD_IDS } from '../src/copy/registry.js'
 const reader = (overrides = {}) => (id) => overrides[id] ?? ''
 const none = reader()
 
-test('a bundled park resolves to its photo, centred by default', () => {
+test('a bundled park resolves to its thumbnail, centred by default', () => {
   const park = parkBackdrop('Fenway Park', none)
-  assert.equal(park.cssUrl, 'url("/ballparks/fenwaypark.jpg")')
-  // The mobile-sized companion (scripts/gen-ballpark-thumbs.mjs) a touch
-  // device's scroll reveal arms instead of the full photo above.
-  assert.equal(park.mobileCssUrl, 'url("/ballparks/thumb/fenwaypark.webp")')
+  // The mobile-sized companion (scripts/gen-ballpark-thumbs.mjs) every
+  // device's on-screen reveal arms — the wash never needs the full photo.
+  assert.equal(park.cssUrl, 'url("/ballparks/thumb/fenwaypark.webp")')
+  assert.equal(park.src, '/ballparks/fenwaypark.jpg')
   assert.equal(park.focus, '50% 50%')
   assert.equal(park.name, 'Fenway Park')
 })
@@ -37,6 +37,8 @@ test('an MiLB park degrades to nothing, and picks the art up the day it lands', 
   assert.equal(parkBackdrop('Fifth Third Field', none), null)
   // The whole degradation story: nothing about this module knows about levels,
   // so a minor-league park works the moment its photo exists in the copy store.
+  // No build step makes a thumbnail for an admin's own upload, so this falls
+  // back to the full photo rather than a smaller companion.
   const ids = fieldIds(venueKey('Fifth Third Field'))
   const withArt = reader({ [ids.photo]: 'https://example.com/fifththird.jpg' })
   assert.equal(parkBackdrop('Fifth Third Field', withArt).cssUrl, 'url("https://example.com/fifththird.jpg")')
@@ -49,10 +51,9 @@ test('an owner override wins over the bundled photo, with their own crop', () =>
     [ids.focus]: '50 20',
   })
   const park = parkBackdrop('Wrigley Field', t)
+  // No build step makes a thumbnail for an admin's own upload, so this falls
+  // back to the same full photo rather than a smaller companion.
   assert.equal(park.cssUrl, 'url("https://blob.example.com/wrigley.jpg")')
-  // No build step makes a thumbnail for an admin's own upload, so mobile
-  // falls back to the same full photo rather than a smaller companion.
-  assert.equal(park.mobileCssUrl, 'url("https://blob.example.com/wrigley.jpg")')
   assert.equal(park.focus, '50% 20%')
   assert.equal(park.name, 'Wrigley Field')
 })

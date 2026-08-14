@@ -3,7 +3,7 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
-import { PostponedBanner } from '../components/game/GameCard.jsx'
+import { PostponedBanner } from '../components/game/GameCardParts.jsx'
 import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
 import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
 
@@ -93,7 +93,7 @@ export function AnimationLab() {
       <section className="animlab__entry">
         <h2 className="animlab__title">Postponed rubber stamp</h2>
         <p className="hint hint--prose">
-          A postponed game&rsquo;s banner (src/components/GameCard.jsx) — the kraft-tape strip rises in,
+          A postponed game&rsquo;s banner (src/components/game/GameCardParts.jsx) — the kraft-tape strip rises in,
           then the stamp presses down onto the paper.
         </p>
         <div className="animlab__live">
