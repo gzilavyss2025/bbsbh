@@ -55,3 +55,19 @@ export function seasonSeriesCells(games, viewingTeamId, currentGamePk) {
     }
   })
 }
+
+// The two clubs' head-to-head record so far this season, tallied from the
+// same cells the strip already built — every decided leg but never the
+// game `currentGamePk` masks (seasonSeriesCells already stripped its score,
+// so it never counts either way). `{ aWins: 0, bWins: 0 }` before anything's
+// been decided.
+export function seasonSeriesRecord(cells, teamAId, teamBId) {
+  let aWins = 0
+  let bWins = 0
+  for (const c of cells) {
+    if (!c.hasScore) continue
+    if (c.winnerId === teamAId) aWins++
+    else if (c.winnerId === teamBId) bWins++
+  }
+  return { aWins, bWins }
+}

@@ -327,10 +327,11 @@
 
 /* ------------------------------------------------- the lineup page's zone
    TeamInfo's page-top zone: the fill-in factgrid (date / ballpark / first
-   pitch / weather / manager / uniform) and the Umpires crew stack on the
-   left, and the plate ump's Tendencies card is the WHOLE right side beside
-   them from the wide breakpoint. A phone keeps the single column — facts,
-   crew, card, then the preview door. The split keys on the card actually
+   pitch / weather / manager / uniform), the Umpires crew, the preview door,
+   the print-sheet link, and the season series carousel all stack as ONE
+   left column (.teaminfo__topmain); the plate ump's Tendencies card is the
+   WHOLE right side beside that column from the wide breakpoint. A phone
+   keeps the single column, same order. The split keys on the card actually
    being there (`:has`) — an MiLB crew with no card leaves the zone as plain
    single-column flow at every width. */
 .teaminfo__topzone > .umptend {
@@ -349,6 +350,22 @@
   .teaminfo__topzone:has(> .umptend) > .umptend {
     margin-top: 0;
   }
+}
+
+/* "Series tied at 2-2" / "Cardinals lead series, 4-2" — the Season series
+   card's masthead aside (SeasonSeriesStrip.jsx), deliberately matched to
+   .metricbar__title's own face (44-pre-game-cards.css) rather than
+   .metricbar__aside's plain-body default — that class is shared with every
+   other card's info-popover aside, which has no reason to shout like a
+   heading. Same font, size, weight, tracking, and ink as "SEASON SERIES" to
+   its left — two halves of one statement, not a title plus a footnote. */
+.seasonseries__lead {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  line-height: var(--lh-solid);
+  color: var(--text-on-ink);
 }
 
 /* ------------------------------------------------ the EXTRAS-tab drawer

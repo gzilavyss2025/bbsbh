@@ -1,12 +1,27 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { fetchSeasonSeries } from '../../api/schedule.js'
-import { seasonSeriesCells } from '../../api/seasonSeries.js'
+import { seasonSeriesCells, seasonSeriesRecord } from '../../api/seasonSeries.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useNav } from '../../lib/nav.js'
 import { gamePath } from '../../lib/route.js'
 import { monthDayYear } from '../../lib/dates.js'
+import { teamClubName } from '../../lib/teams.js'
 import { SectionMasthead } from '../ui/SectionMasthead.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
+
+// "Cardinals lead series, 4-2" / "Series tied at 2-2" — the masthead's
+// right-aligned aside. MLB club nicknames only (teamClubName is null for a
+// MiLB id); nothing renders before either club has actually won a game, same
+// as the strip itself staying silent on a one-off interleague matchup.
+function seriesLeadLabel(record, teamAId, teamBId) {
+  const { aWins, bWins } = record
+  if (aWins === 0 && bWins === 0) return null
+  if (aWins === bWins) return `Series tied at ${aWins}-${bWins}`
+  const leaderId = aWins > bWins ? teamAId : teamBId
+  const leaderName = teamClubName(leaderId)
+  if (!leaderName) return null
+  return `${leaderName} lead series, ${Math.max(aWins, bWins)}-${Math.min(aWins, bWins)}`
+}
 
 // This season's other meetings between the two clubs, as a scrollable strip
 // of cards — every OTHER game's result is fair to show up front (they already
@@ -30,6 +45,11 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
   )
 
   const cells = seasonSeriesCells(games ?? [], viewingTeamId, currentGamePk)
+  const leadLabel = seriesLeadLabel(
+    seasonSeriesRecord(cells, viewingTeamId, opponentId),
+    viewingTeamId,
+    opponentId,
+  )
   const [canScroll, setCanScroll] = useState(false)
   // Which park the CURRENT game is at — every other cell whose game was
   // hosted somewhere else gets a light tint, so a multi-leg series reads at a
@@ -92,7 +112,9 @@ export function SeasonSeriesStrip({ viewingTeamId, opponentId, officialDate, spo
 
   return (
     <section className="metriccard seasonseries">
-      <SectionMasthead title="Season series" as="h3" />
+      <SectionMasthead title="Season series" as="h3">
+        {leadLabel && <span className="seasonseries__lead">{leadLabel}</span>}
+      </SectionMasthead>
       <div className="metriccard__body seasonseries__body">
         {canScroll && (
           <button
