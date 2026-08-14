@@ -73,12 +73,22 @@
    (`--pinstripe-color`/`--pinstripe-bg`) and the same reasoning as
    JerseyCombos' `.jerseydeck__card--pinstripe`, just filling the row instead
    of one deck card. `--ink` is always the dark pick for this case (see
-   TeamHubShell.jsx), since the fill under the stripes defaults to white. */
+   TeamHubShell.jsx), since the fill under the stripes defaults to white.
+   The lines run under the club name/record text here, unlike the small
+   logo-box copies of this pattern elsewhere — so this one rule (only)
+   mixes `--pinstripe-color` toward transparent before drawing it, at
+   whatever strength that team's own line color already is (Yankees' navy
+   included), rather than lightening the shared token itself. */
 .team-hub__id.team-hub__id--pinstripe {
+  --hero-pinstripe-line: color-mix(
+    in srgb,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 28%,
+    transparent
+  );
   background: repeating-linear-gradient(
     to right,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--hero-pinstripe-line) 0,
+    var(--hero-pinstripe-line) 1px,
     var(--pinstripe-bg, #fff) 1px,
     var(--pinstripe-bg, #fff) 7px
   );
