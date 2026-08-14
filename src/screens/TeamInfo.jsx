@@ -37,6 +37,8 @@ import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
 import { ManagerLink } from '../components/team/ManagerLink.jsx'
 import { UmpiresCard } from '../components/umpire/UmpiresCard.jsx'
+import { UmpireTendencies } from '../components/umpire/UmpireTendencies.jsx'
+import { loadUmpire } from '../api/umpires.js'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
 import { Headshot } from '../components/player/Headshot.jsx'
@@ -110,6 +112,14 @@ export function TeamInfo({
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const oppMeta = useMemo(() => selectTeamMeta(feed, oppSide), [feed, oppSide])
   const officials = useMemo(() => selectOfficials(feed), [feed])
+  // Tonight's plate umpire's full record, for the Tendencies card in the
+  // page-top zone below. Static nightly files, memoized in api/umpires.js —
+  // the accuracy modal and the EXTRAS-tab drawer read the same load.
+  const hpId = useMemo(() => officials.find((o) => o.role === 'HP')?.id ?? null, [officials])
+  const { data: hpUmpire } = useAsync(
+    () => (hpId != null ? loadUmpire(hpId) : Promise.resolve(null)),
+    [hpId],
+  )
   const info = useMemo(() => selectGameInfo(feed), [feed])
   // Null for a club with no curated triad, which leaves every bar below on the
   // app's default navy chrome — coverage is partial by design (ADR-0030).
@@ -150,26 +160,38 @@ export function TeamInfo({
         </div>
       </div>
 
-      <dl className="factgrid">
-        <GameFacts
-          info={info}
-          scorebookWeather={scorebookWeather}
-          scorebookWeatherLoading={scorebookWeatherLoading}
-        />
-        <Fact label="Manager" value={managerFact(manager)} />
-        {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
-            Navy Blue") — spoiler-free, but the assignment isn't posted until
-            around first pitch, so pregame this reads "—" until a Refresh picks
-            it up. Never posted for MiLB. */}
-        <Fact label="Uniform" value={uniform} />
-        {/* Broadcast rides on the away page only, filling the cell that
-            otherwise sits empty next to Uniform (an odd fact count leaves it
-            alone at the end of the grid — see the ESPN-sourced fetch in
-            GameView). The home page's grid is already even without it. */}
-        {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
-      </dl>
+      {/* The page-top zone: the fill-in facts and the crew on the left, the
+          plate ump's full Tendencies card as the WHOLE right side from the
+          wide breakpoint (see .teaminfo__topzone). A phone keeps the single
+          column — facts, crew, card, then the preview door. The card fetch
+          reads the same memoized static nightly files the accuracy modal
+          does, and the card renders nothing (single-column zone) for MiLB or
+          an unswept umpire. */}
+      <div className="teaminfo__topzone">
+        <div className="teaminfo__topmain">
+          <dl className="factgrid">
+            <GameFacts
+              info={info}
+              scorebookWeather={scorebookWeather}
+              scorebookWeatherLoading={scorebookWeatherLoading}
+            />
+            <Fact label="Manager" value={managerFact(manager)} />
+            {/* Tonight's uniform, synthesized to a tight summary ("Away Alternate
+                Navy Blue") — spoiler-free, but the assignment isn't posted until
+                around first pitch, so pregame this reads "—" until a Refresh picks
+                it up. Never posted for MiLB. */}
+            <Fact label="Uniform" value={uniform} />
+            {/* Broadcast rides on the away page only, filling the cell that
+                otherwise sits empty next to Uniform (an odd fact count leaves it
+                alone at the end of the grid — see the ESPN-sourced fetch in
+                GameView). The home page's grid is already even without it. */}
+            {side === 'away' && <Fact label="Broadcast" value={broadcast} />}
+          </dl>
 
-      <UmpiresCard officials={officials} />
+          <UmpiresCard officials={officials} />
+        </div>
+        {hpUmpire && <UmpireTendencies umpire={hpUmpire} />}
+      </div>
 
       {/* The preview card's door — moved here from its old "Card" tab-bar stop
           once that tab started opening the live scorecard (ADR-0047's second

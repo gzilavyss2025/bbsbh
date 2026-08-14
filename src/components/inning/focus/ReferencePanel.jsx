@@ -344,10 +344,11 @@ function Section({
             groups={groups}
           />
         ))}
-        {/* The plate ump's Tendencies card as a collapsed drawer, between the
-            benches and the fill-in facts: it reads like the crew line below
-            (a once-a-game reference), so it sits with the drawers rather
-            than among the facts. Renders nothing for MiLB / unswept crews. */}
+        {/* The plate ump's Tendencies card as a drawer (open by default,
+            foldable), between the benches and the fill-in facts: it reads
+            like the crew line below (a once-a-game reference), so it sits
+            with the drawers rather than among the facts. Renders nothing
+            for MiLB / unswept crews. */}
         <UmpireTendenciesFold feed={feed} />
         <ExtrasFacts
           feed={feed}

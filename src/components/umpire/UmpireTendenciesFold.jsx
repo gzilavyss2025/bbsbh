@@ -9,11 +9,10 @@ import { UmpireTendencies } from './UmpireTendencies.jsx'
 // Same toggle chrome as the RosterPanel drawers above it (.roster/.roster__
 // toggle), so the tab reads as one set of drawers rather than two idioms.
 //
-// COLLAPSED BY DEFAULT, unlike those drawers' `defaultOpen` in this tab: they
-// answer the question the current half is asking (who is left), while this
-// card answers one asked at most once a game — the drawer is the right
-// disclosure for it, and it must not shove the benches apart when the tab
-// opens.
+// OPEN BY DEFAULT, the same footing as the bench/bullpen drawers above it —
+// the tab is the disclosure, and a drawer that opens shut answers a tap with
+// nothing (the lesson those drawers' `defaultOpen` records). The toggle stays,
+// so a scorer who doesn't want the card mid-game can fold it away.
 //
 // SPOILER FOOTING: identical to the lineup page's own card (UmpireTendencies'
 // header) — season aggregates over FINAL games of ball/strike judgments, read
@@ -28,7 +27,7 @@ export function UmpireTendenciesFold({ feed }) {
     () => (plateId != null ? loadUmpire(plateId) : Promise.resolve(null)),
     [plateId],
   )
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
 
   // The same "is there anything here" test the card itself applies — asked
   // before the drawer renders, so the tab never offers an empty one.
