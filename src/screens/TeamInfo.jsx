@@ -166,7 +166,12 @@ export function TeamInfo({
           column — facts, crew, card, then the preview door. The card fetch
           reads the same memoized static nightly files the accuracy modal
           does, and the card renders nothing (single-column zone) for MiLB or
-          an unswept umpire. */}
+          an unswept umpire. The preview door is this zone's third child
+          rather than a sibling below it: on the wide grid that's what lets
+          CSS park it under the facts/crew column, below the umpires, beside
+          Tendencies (see .teaminfo__previewdoor); on a phone it stays plain
+          flow, so nothing about that "facts, crew, card, then door" order
+          changes there. */}
       <div className="teaminfo__topzone">
         <div className="teaminfo__topmain">
           <dl className="factgrid">
@@ -191,17 +196,21 @@ export function TeamInfo({
           <UmpiresCard officials={officials} />
         </div>
         {hpUmpire && <UmpireTendencies umpire={hpUmpire} />}
+        {/* The preview card's door — moved here from its old "Card" tab-bar
+            stop once that tab started opening the live scorecard (ADR-0047's
+            second amendment). Full-width, not a quiet chevron: a scorer on a
+            lineup page is usually here to post the matchup. */}
+        {onPreview && (
+          <button
+            type="button"
+            className="btn btn--next teaminfo__previewdoor"
+            onClick={onPreview}
+          >
+            View preview card
+          </button>
+        )}
       </div>
 
-      {/* The preview card's door — moved here from its old "Card" tab-bar stop
-          once that tab started opening the live scorecard (ADR-0047's second
-          amendment). Full-width, not a quiet chevron: a scorer on a lineup
-          page is usually here to post the matchup. */}
-      {onPreview && (
-        <button type="button" className="btn btn--next" onClick={onPreview}>
-          View preview card
-        </button>
-      )}
       {/* Renamed from "Print tonight's sheet" — the live #22 sheet covers
           what this used to promise; the destination awaits a rebuild. */}
       {onPrintSheet && (

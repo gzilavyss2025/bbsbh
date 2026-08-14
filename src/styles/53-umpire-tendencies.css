@@ -332,22 +332,38 @@
    them from the wide breakpoint. A phone keeps the single column — facts,
    crew, card, then the preview door. The split keys on the card actually
    being there (`:has`) — an MiLB crew with no card leaves the zone as plain
-   single-column flow at every width. */
+   single-column flow at every width (the preview door included, still
+   trailing the umpires in that flow). */
 .teaminfo__topzone > .umptend {
+  margin-top: 14px;
+}
+.teaminfo__topzone > .teaminfo__previewdoor {
   margin-top: 14px;
 }
 
 @media (min-width: 740px) {
+  /* Two columns: the facts/crew stack plus the preview door underneath it on
+     the left, Tendencies spanning both rows on the right — "below the
+     umpires, next to Tendencies" per the desktop layout call. */
   .teaminfo__topzone:has(> .umptend) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: 'main umptend' 'door umptend';
     gap: 0 var(--space-6);
     align-items: start;
+  }
+  .teaminfo__topzone:has(> .umptend) > .teaminfo__topmain {
+    grid-area: main;
   }
   /* Top-aligned with the factgrid across the gutter, not hanging 14px below
      the row the phone flow needed. */
   .teaminfo__topzone:has(> .umptend) > .umptend {
+    grid-area: umptend;
     margin-top: 0;
+  }
+  .teaminfo__topzone:has(> .umptend) > .teaminfo__previewdoor {
+    grid-area: door;
+    align-self: end;
   }
 }
 
