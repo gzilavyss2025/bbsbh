@@ -13,7 +13,10 @@ import { atBatMarks } from './AtBatBox.jsx'
 // Same dialog contract as BallparkModal/WhatsBrewingModal: backdrop tap,
 // close button, or Escape dismisses; focus moves into the sheet on open and
 // back to the trigger on close. Portalled (ModalPortal) so it stays above the
-// page chrome from either scorecard surface.
+// page chrome from either scorecard surface. Docked to the TOP of the screen
+// (`.scrim--top`), unlike every other sheet in the app — this one is typed
+// into, and a bottom-docked sheet sits exactly where the phone's keyboard
+// lands (the ADR-0037 failure mode; see 41a-scorecard-page.css).
 export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
   const b = card?.batter ?? {}
   const who = b.last ? `${b.last}${b.first ? `, ${b.first}` : ''}` : b.fullName ?? 'This at-bat'
@@ -50,7 +53,7 @@ export function ScorecardCellEditor({ card, note, onSave, onClear, onClose }) {
   return (
     <ModalPortal>
       <div
-        className="scrim"
+        className="scrim scrim--top"
         onClick={(e) => e.target.classList.contains('scrim') && onClose()}
       >
         <form

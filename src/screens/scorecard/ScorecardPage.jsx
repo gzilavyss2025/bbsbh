@@ -81,9 +81,8 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
         <RefreshButton onReload={onReload} loading={loading} lastUpdated={lastUpdated} />
       </div>
       <p className="hint">
-        The sheet inks itself only as far as you have revealed in the innings
-        view — a half you haven’t opened stays blank here too. Tap any filled
-        box to pencil your own notation over it.
+        The sheet inks only what you’ve revealed in the innings view. Tap a
+        filled box to pencil over its notation.
       </p>
 
       <Scorecard

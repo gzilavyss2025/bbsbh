@@ -6,20 +6,43 @@
    horizontally so the sheet keeps its landscape proportions on a phone.
    ============================================================ */
 .scorecard {
-  /* Cell + column geometry, shared by the grid and its sticky frame. */
-  --sc-cell-w: 92px;
+  /* Cell + column geometry, shared by the grid and its sticky frame.
+     Mobile-first: the frozen Player+Pos rail used to take 150px of a
+     phone's ~356px content width — 42% of the pane spent before the first
+     inning column — so the phone gets a tighter rail and slightly tighter
+     cells, and the wide breakpoint below restores the paper sheet's own
+     proportions. */
+  --sc-cell-w: 86px;
   --sc-cell-h: 90px;
-  --sc-pos-w: 34px;
-  --sc-name-w: 116px;
+  --sc-pos-w: 26px;
+  --sc-name-w: 96px;
   --sc-sum-w: 34px;
   --sc-strike-fill: color-mix(in srgb, var(--graphite) 15%, var(--surface-card));
   margin-top: var(--space-4);
 }
+@media (min-width: 740px) {
+  .scorecard {
+    --sc-cell-w: 92px;
+    --sc-pos-w: 34px;
+    --sc-name-w: 116px;
+  }
+}
 
-/* ---- Main grid: sticky Pos/Player column + inning header, horizontal scroll ---- */
+/* ---- Main grid: a pannable window onto the sheet ---- */
+/* The grid is wider AND taller than a phone, so the scroll container is
+   bounded on BOTH axes and the frame pins on three sides while you pan:
+   the PLAYER/Pos rail on the left (sticky left), the inning numbers on top
+   (sticky top), and the P/TP/LOB + TOTALS row on the bottom (sticky
+   bottom). Without the vertical bound the inning header was sticky against
+   a container that never scrolled vertically — mid-grid on a phone the
+   numbers sat 400px off-screen and you lost which inning you were reading.
+   The dvh line wins where supported (tracks mobile browser chrome); the vh
+   line above it is the fallback. */
 .sc-sheet__scroll {
   margin-top: var(--space-3);
-  overflow-x: auto;
+  overflow: auto;
+  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 120px);
   -webkit-overflow-scrolling: touch;
   border: var(--bw-hair) solid var(--border-rule);
 }
@@ -64,6 +87,7 @@
   z-index: 1;
   width: var(--sc-name-w);
   min-width: var(--sc-name-w);
+  max-width: var(--sc-name-w);
   padding-left: var(--space-2);
   background: var(--surface-card);
   text-align: left;
@@ -71,6 +95,19 @@
   font-size: var(--fs-compact);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
+  /* On the phone's narrow rail a full "Yelich, Christian" wraps to two
+     lines and jitters row heights — clip instead; the surname leads, so
+     the part a scorer scans by always survives the ellipsis. The wide
+     rail lets names wrap whole again. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (min-width: 740px) {
+  .sc-sheet__name {
+    white-space: normal;
+    overflow: visible;
+  }
 }
 .sc-sheet__pos {
   position: sticky;
@@ -127,12 +164,19 @@
 }
 
 /* The foot row across the grid: P / TP / LOB per inning (the #22's own
-   bottom line), the AB/H/R/RBI sums under the amber TOTALS bar. */
+   bottom line), the AB/H/R/RBI sums under the amber TOTALS bar. Pinned to
+   the pane's bottom edge (see .sc-sheet__scroll) so the running pitch
+   count and TOTALS stay in view while you pan the grid above them. */
 .sc-sheet__totals td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   height: 26px;
   background: var(--bg-page);
+  border-top: var(--bw-rule) solid var(--rule-grid);
 }
 .sc-sheet__totals .sc-sheet__name {
+  z-index: 3;
   background: var(--bg-page);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -141,6 +185,7 @@
   color: var(--text-caption);
 }
 .sc-sheet__totals .sc-sheet__pos {
+  z-index: 3;
   background: var(--bg-page);
 }
 /* The P/TP/LOB trio — three equal slots side by side, in the label cell and
