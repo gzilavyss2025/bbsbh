@@ -247,7 +247,12 @@ const BUDGETS = {
   // +1 for 41a-scorecard-page.css — 41-scorecard.css crossed the 600-line
   // file cap when the sheet grew its #22 header/footer/editor chrome, and
   // this is that partial's page-chrome half, imported directly after it.
-  'src/styles': 81,
+  // +1 for 64-milb-alumni.css — the "Made The Show" card at the foot of a MiLB
+  // team's Overview (components/teamstats/MilbAlumni.jsx). A new component
+  // earns a partial, the same reasoning as the entries above; it has no
+  // existing partial to join, since no other file styles a farm club's
+  // big-league alumni.
+  'src/styles': 82,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -320,7 +325,12 @@ const BUDGETS = {
   // +1 for gen-ballpark-thumbs.mjs — the mobile-sized ballpark-photo
   // thumbnail generator, flat here like every other gen-*.mjs in this
   // directory.
-  scripts: 76,
+  // +1 for gen-milb-alumni.mjs — the nightly precompute behind the "Made The
+  // Show" card. A generator belongs beside its siblings here: the nightly
+  // workflow runs this directory as a flat list, and scripts/lib/ is for
+  // testable helpers, not top-level scripts (a generator file RUNS on import,
+  // so it cannot live there).
+  scripts: 77,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -386,7 +396,11 @@ const BUDGETS = {
   // +1 for reassignable-merge.mjs — the generic version of that same fix,
   // so any future append-only generator keyed on an upstream-asserted
   // identity can adopt it instead of hand-rolling the same bug again.
-  'scripts/lib': 18,
+  // +1 for milb-alumni.mjs — the ranking, the incremental-scan decision and the
+  // games floor behind gen-milb-alumni.mjs. This directory exists precisely for
+  // this: a generator file RUNS on import, so a helper worth a unit test has to
+  // live here to be testable at all (test/milb-alumni.test.js).
+  'scripts/lib': 19,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
