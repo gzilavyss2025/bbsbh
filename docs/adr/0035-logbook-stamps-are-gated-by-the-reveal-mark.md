@@ -395,3 +395,21 @@ control in the row has re-created the card in a worse position.
   a duplicate `48` (precedent: the two `11-` partials); the cascade contract is
   order, not unique numbers, and this one has to land after `48-logbook.css`,
   which sizes and inks the `.gamestamp` it frames.
+
+### Amendment (2026-08-16) — the host `SealBox` now records the tap
+
+This ADR's diagnosis above rests on a fact that has since changed shape, though
+not in the direction that would revive the retired gate. The box score's `SealBox`
+**does** carry an `onReveal` now, added by **ADR-0049** so that a box score the
+reader opened stays open on their next visit and on their other devices.
+
+What it writes is not the mark this gate looked for. It writes
+`bbsbh:boxreveal:{gamePk}` — one bit, meaning "this reader opened this page" — and
+it is withheld whenever the Scores Unlocked pass or a stamp is doing the opening
+rather than a tap. `bbsbh:reveal:{gamePk}` gains no new writer, so stamping from a
+box score still leaves the reveal mark absent, and the reason this gate had to go
+is untouched.
+
+The invariant that survives is the containment rule, exactly as this amendment's
+predecessor left it: a stamp is reachable only from inside a revealed box score,
+and renderable only where `check-stamp-surfaces` allows.

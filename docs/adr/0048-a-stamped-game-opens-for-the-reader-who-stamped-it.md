@@ -145,3 +145,24 @@ auth would re-seal a game for the reader who stamped it on that very device.
 - Verified by `e2e/invariants/stamped-unlock.spec.js`, which asserts both halves:
   the game opens, and `bbsbh:reveal:{gamePk}` stays unwritten across the visit.
   The unit cases live in `test/reveal-progress-core.test.js`.
+
+## Amendment (2026-08-16) — the tap is now remembered too
+
+**ADR-0049** gives the box score a memory of its own: a tap on its seal is
+recorded per game (`bbsbh:boxreveal:{gamePk}`) and mirrored across the reader's
+devices, so the page they opened stays open whether or not they stamped it.
+
+Two things in this ADR read differently afterwards, and neither weakens it.
+
+The claim that this decision "would need a new persisted per-game key — the one
+thing this decision is built to avoid" was about a *consent prompt for the stamp*,
+and it stands. ADR-0049's key records something else entirely: not "yes, show my
+stamped games unsealed" but "I lifted this seal." It asks nothing and it is scoped
+to the one page whose seal was lifted.
+
+The stamp override itself is unchanged and still persists nothing, which is why
+`onReveal` is deliberately withheld when a stamp is the thing opening the box
+score. Its reversibility is now pinned on the innings viewer rather than the box
+score: un-stamping a game the reader also opened by hand re-seals the halves, and
+leaves the box score open on its own account. `e2e/invariants/logbook-stamp.spec.js`
+asserts that pair.

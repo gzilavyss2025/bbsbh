@@ -18,6 +18,16 @@ export function parseRevealMark(raw) {
   return Number.isInteger(n) && n >= 0 ? n : -1
 }
 
+// Parse the box score's own mark (ADR-0049) — the one bit that says "this
+// reader has already opened this game's box score by hand". Stored as the
+// string "1" and NOTHING else, so it can hold no half-index, no count, and
+// nothing that could be mistaken for one. Any other value — null (unset), "0",
+// "true", a number, a mangled blob — reads as false, which leaves the seal
+// exactly where it was: the same fail-closed posture parseRevealMark has.
+export function parseBoxRevealMark(raw) {
+  return raw === '1'
+}
+
 // Parse the at-bat stepping cursor, stored as "{halfIdx}:{count}" (ADR-0016).
 // Either field being absent/negative/non-integer collapses the whole cursor to
 // the inert { halfIdx: -1, count: 0 } — a stale or garbled value is ignored

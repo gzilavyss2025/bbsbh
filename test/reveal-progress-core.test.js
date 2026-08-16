@@ -9,6 +9,7 @@ import test from 'node:test'
 import {
   parseRevealMark,
   parseAtBatMark,
+  parseBoxRevealMark,
   mergeMark,
   unlockedInnings,
   effectiveReveal,
@@ -279,4 +280,23 @@ test('effectiveReveal never walks a stamped game backward past real progress', (
     actualCount: 9,
   })
   assert.equal(renderRevealedThrough, 40)
+})
+
+// --------------------------------------------------------------------------
+// parseBoxRevealMark — the box score's own bit (ADR-0049)
+//
+// One bit per game, stored as the string "1" and nothing else. It says only
+// THAT the reader lifted the box score's seal by hand — no half-index, no
+// count, nothing a score could be read out of. Everything else reads false,
+// which leaves the seal on: the same fail-closed direction parseRevealMark
+// collapses to -1 for.
+// --------------------------------------------------------------------------
+test('parseBoxRevealMark accepts exactly the value it writes', () => {
+  assert.equal(parseBoxRevealMark('1'), true)
+})
+
+test('parseBoxRevealMark reads anything else as sealed', () => {
+  for (const raw of [null, undefined, '', '0', '2', 'true', 'yes', '1 ', ' 1', '01', '{}', 1, true]) {
+    assert.equal(parseBoxRevealMark(raw), false, `${JSON.stringify(raw)} must not lift a seal`)
+  }
 })

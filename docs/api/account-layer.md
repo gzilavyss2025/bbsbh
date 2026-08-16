@@ -78,7 +78,12 @@ Siblings: `docs/api/live-game.md`, `docs/api/static-data.md`.
 `api/account.js` is the erase counterpart — it deletes every per-user key from
 the verified `sub`, resolving the reveal family through `reveal:index:{userId}`
 (a set of gamePks `api/reveal.js` maintains alongside each ratchet, so the erase
-is complete rather than best-effort). It never deletes `game:final:{gamePk}`,
+is complete rather than best-effort). That family is **two keys per game** since
+**ADR-0049**: `reveal:{u}:{gamePk}`, the half-index mark, and
+`revealbox:{u}:{gamePk}`, the one bit saying the reader opened that game's box
+score. Both come off the same gamePk set, so the bit cannot be the one thing an
+erase forgets — leaving it behind would re-open a box score on the next visit to
+a device the user had just wiped. It never deletes `game:final:{gamePk}`,
 which is a shared, immutable cache of public facts belonging to no user.
 
 **`api/` now holds nine functions of the Hobby plan's twelve.** That is not a

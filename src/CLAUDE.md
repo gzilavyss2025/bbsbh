@@ -233,10 +233,10 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat) vs.
   **stacked** (the whole half); rules in `styles/focus/*`.
-- **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
-  `InningViewer` without touching its guarantees. `GameView` resolves
-  `spoilersOffFor(officialDate)` — the pass is running, or this day was consented
-  to — and hands it down; `effectiveReveal` substitutes a render-only
+- **Two opt-in departures** ride through `InningViewer` without touching its guarantees.
+  `GameView` resolves `spoilersOffFor(officialDate)` — the Scores Unlocked pass is running, or
+  this day was consented to (ADR-0026) — and hands it down; the reader's own **stamp** on this
+  game (ADR-0048, from `useStamps`) opens it too. `effectiveReveal` takes both, substituting a render-only
   `renderRevealedThrough`/`renderUnlocked` for every render consumer while the
   persisted `revealedThrough` (what feeds `useRevealProgress`, `RevealCloudSync`,
   and localStorage) stays untouched. Its `commitReveals` is the other half of that
@@ -266,10 +266,10 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   Its two positions are CSS, not two renders: first child of the Highlights
   section, with `48-stamp-strip.css` floating that section's title and the
   R/H/E/LOB totals above it below the wide breakpoint. That
-  host `SealBox` still has **no
-  `onReveal` and persists nothing**, and must stay that way: give it one and a
-  box score opened under the Scores Unlocked pass would silently ratchet the
-  whole game's `revealedThrough`. `GameStamp.jsx` (the art) and
+  host `SealBox` has an `onReveal` since ADR-0049, but only for a real TAP: it writes
+  `bbsbh:boxreveal:{gamePk}`, one bit that re-opens this page and nothing else, withheld under
+  the pass and under a stamp — either would record a permanent mark for a seal nobody touched,
+  and neither may ever reach `revealedThrough`. `GameStamp.jsx` (the art) and
   `StampGameButton.jsx` may be imported only from their allowlists —
   `scripts/check-stamp-surfaces.mjs` fails `npm run lint` otherwise, and
   `e2e/invariants/logbook-stamp.spec.js` is its runtime half. The collection

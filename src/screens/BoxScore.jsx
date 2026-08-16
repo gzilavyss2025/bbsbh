@@ -35,6 +35,8 @@ import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
+import { useBoxScoreReveal } from '../hooks/useRevealProgress.js'
+import { BoxRevealSyncMount } from '../components/sync/BoxRevealSyncMount.jsx'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -118,9 +120,16 @@ export function BoxScore({
   // mints a fresh feed, a fresh feed is a cache miss, and the sheet recomputes.
   const revealCacheRef = useRef({ key: null, value: null })
   const stamped = useStampUnseal(feed?.gamePk)
+  // THIS BOX SCORE'S OWN MARK (ADR-0049): the reader already lifted this seal,
+  // here or on another of their devices. Alone among the three openers below, it
+  // persists — one bit per gamePk, written only on a real tap.
+  const { boxOpened, markBoxOpened } = useBoxScoreReveal(feed?.gamePk)
 
   return (
     <div className="boxscore">
+      {/* That mark's cross-device wire: signed-in only, inert with no Clerk, and
+          able only to OPEN a box score its owner opened elsewhere. */}
+      <BoxRevealSyncMount gamePk={feed?.gamePk} opened={boxOpened} mergeOpened={markBoxOpened} />
       <div className="boxscore__head">
         <h2 className="boxscore__title" id="bs__title">Box score</h2>
         {!isFinal && (
@@ -130,29 +139,24 @@ export function BoxScore({
         )}
       </div>
 
-      {/* The reader's own stamp on this game opens it too (ADR-0048) — read
-          here rather than passed in, same as the innings viewer, because a
-          stamp is a property of this gamePk and not of the day. */}
-      {/* The spoilers-off pass (ADR-0026, resolved for this game's date by
-          GameView) lifts this seal too. The consent copy promises "no seals, no
-          tapping" — the box score is a score surface inside a game, so leaving it
-          sealed would make that promise false. Rides SealBox's existing
-          `forceRevealed` input (the same one StatBox/HalfInning use), so the
-          render-function gate is untouched: children are still only invoked in
-          the revealed branch (ADR-0001/0002); the pass only flips WHICH branch
-          renders. Nothing is persisted — this SealBox has no `onReveal`, and the
-          pass never touches `revealedThrough`.
-
-          A STAMP ON THIS GAME LIFTS IT THE SAME WAY (ADR-0048), and this is the
-          surface the rule matters most on: the stamp is minted from inside this
-          very seal, so without this the reader would tap it open, stamp the
-          game, come back tomorrow and be asked to tap it open again — to see a
-          result they recorded themselves. Same `forceRevealed` input, same
-          untouched render-function gate, and persisting nothing for the same
-          reason: this SealBox still has no `onReveal`. */}
+      {/* THREE OPENERS, ONE INPUT. The day pass for a day the reader agreed to
+          spoil (`spoilersOff`, ADR-0026, resolved from the date by GameView);
+          their own stamp on this game (ADR-0048); and their own record of having
+          already lifted THIS seal (ADR-0049). All three ride SealBox's existing
+          `forceRevealed`, so the render-function gate is untouched: children are
+          invoked only in the revealed branch (ADR-0001/0002); the flags choose
+          WHICH branch renders, never what it computes.
+          ONLY THE THIRD WRITES ANYTHING, and the `onReveal` gate is the
+          load-bearing line: SealBox fires it whenever the box becomes shown, by
+          tap OR by flag (SealBox.jsx). Handing it over unconditionally would let
+          the pass and the stamp record a permanent mark for a seal nobody
+          touched — what ADR-0026 promises the pass can never do, and what keeps
+          ADR-0048's override as reversible as the stamp behind it. Under either
+          flag there is no seal, so there is no tap to record. */}
       <SealBox
         label="Tap to reveal the box score"
-        forceRevealed={spoilersOff || stamped}
+        forceRevealed={spoilersOff || stamped || boxOpened}
+        onReveal={spoilersOff || stamped ? undefined : markBoxOpened}
         gamePk={feed?.gamePk}
       >
         {() => {
