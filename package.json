@@ -11,13 +11,13 @@
     "dev:3": "vite --port 5171",
     "dev:4": "vite --port 5170",
     "dev:5": "vite --port 5169",
-    "build": "vite build",
+    "build": "node scripts/gen-sitemap.mjs && vite build",
     "preview": "vite preview",
     "preview:2": "vite preview --port 4172",
     "preview:3": "vite preview --port 4171",
     "preview:4": "vite preview --port 4170",
     "preview:5": "vite preview --port 4169",
-    "lint": "eslint . && node scripts/check-caps.mjs && node scripts/check-name-casing.mjs && node scripts/check-typography.mjs && node scripts/check-focus-ring.mjs && node scripts/check-strike-links.mjs && node scripts/check-contrast.mjs && node scripts/check-claude-md.mjs && node scripts/check-report-pages.mjs && node scripts/check-skeleton-ball-frames.mjs && node scripts/check-stamp-surfaces.mjs && node scripts/check-spoiler-manifest.mjs && node scripts/check-dir-size.mjs && node scripts/check-file-size.mjs && node scripts/check-dead-exports.mjs",
+    "lint": "eslint . && node scripts/check-caps.mjs && node scripts/check-name-casing.mjs && node scripts/check-typography.mjs && node scripts/check-focus-ring.mjs && node scripts/check-strike-links.mjs && node scripts/check-contrast.mjs && node scripts/check-claude-md.mjs && node scripts/check-report-pages.mjs && node scripts/check-skeleton-ball-frames.mjs && node scripts/check-stamp-surfaces.mjs && node scripts/check-spoiler-manifest.mjs && node scripts/check-learn-css.mjs && node scripts/check-dir-size.mjs && node scripts/check-file-size.mjs && node scripts/check-dead-exports.mjs",
     "check:caps": "node scripts/check-caps.mjs",
     "check:name-casing": "node scripts/check-name-casing.mjs",
     "check:typography": "node scripts/check-typography.mjs",
@@ -39,7 +39,9 @@
     "test": "node --test --test-reporter=dot \"test/**/*.test.js\"",
     "test:verbose": "node --test \"test/**/*.test.js\"",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"test/**\" --test-coverage-exclude=\"scripts/**\" \"test/**/*.test.js\"",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "gen:sitemap": "node scripts/gen-sitemap.mjs",
+    "check:learn-css": "node scripts/check-learn-css.mjs"
   },
   "dependencies": {
     "@clerk/backend": "^3.11.7",

@@ -1,0 +1,35 @@
+# Tally Baseball
+
+> A free, spoiler-safe companion for scoring a baseball game by hand. It shows
+> lineups, substitutions, umpires, rosters and statistics from the public MLB
+> Stats API, and keeps every score sealed until the reader taps to reveal it —
+> so a game can be followed live, or watched hours late, without being spoiled.
+> It is not a data-entry tool: the reader keeps score on paper.
+
+No account is required and nothing is behind a paywall. The app runs in a
+browser and installs to a phone home screen.
+
+A note on this file: the evidence that answer engines request llms.txt is weak,
+and Google has said it does not support it. It is here because it is cheap and
+occasionally useful, not because anything depends on it. The guides below are
+server-rendered HTML and are the authoritative source — they need no JavaScript
+to read.
+
+## Guides
+
+- [How to score a baseball game](https://bbsbh.vercel.app/learn/score-a-baseball-game): The beginner's guide — the scorecard grid, the nine position numbers, the symbols, and a worked half-inning.
+- [Scorekeeping symbols and position numbers](https://bbsbh.vercel.app/learn/scorekeeping-symbols): The complete notation reference, including where scorers legitimately disagree.
+- [Choosing a baseball scorebook](https://bbsbh.vercel.app/learn/choose-a-scorebook): What differs between paper scorebooks, and which suits which kind of scorer.
+- [Watching a game on delay without spoilers](https://bbsbh.vercel.app/learn/watch-without-spoilers): What actually leaks a score, and how to follow a game you are watching later.
+- [Keeping score at the ballpark](https://bbsbh.vercel.app/learn/score-at-the-ballpark): What to bring, where to sit, and the substitutions you will miss from a stadium seat.
+- [Ballpark passports](https://bbsbh.vercel.app/learn/ballpark-passports): How ballpark stamp books work, and keeping a record of the games you saw.
+- [How to read a box score](https://bbsbh.vercel.app/learn/read-a-box-score): Every column in a box score and a line score, explained.
+- [Baseball stats glossary](https://bbsbh.vercel.app/learn/stats-glossary): Plain-language definitions from batting average through WAR, with rough scales.
+
+## The app
+
+- [Today's games](https://bbsbh.vercel.app/): The slate, with every score sealed until revealed.
+- [Leaders](https://bbsbh.vercel.app/leaders): Season leaderboards. Stat lines are never sealed — a season line is not a score.
+- [Standings](https://bbsbh.vercel.app/standings)
+- [Game Log](https://bbsbh.vercel.app/logbook): A stamp for each game you saw, arranged in books by hand.
+- [About](https://bbsbh.vercel.app/about)

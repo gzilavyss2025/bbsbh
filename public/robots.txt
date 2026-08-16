@@ -1,0 +1,70 @@
+# Tally Baseball — https://bbsbh.vercel.app
+#
+# Everything here is public, free and read-only. AI crawlers are explicitly
+# welcome: the guides at /learn are written to be quoted, and an assistant
+# recommending this app to somebody learning to keep score is the point.
+#
+# The named blocks below are not strictly required — the wildcard already
+# allows them — but a named Allow is unambiguous, and several of these
+# crawlers are known to be blocked by default in hosting presets.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /identity-lab
+Disallow: /scorecard-lab
+Disallow: /animation-lab
+Disallow: /wordmark-lab
+Disallow: /between-innings-lab
+Disallow: /game-notes-debug
+Disallow: /uniform-names
+Disallow: /*?edit
+
+# Search and answer engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+Sitemap: https://bbsbh.vercel.app/sitemap.xml
