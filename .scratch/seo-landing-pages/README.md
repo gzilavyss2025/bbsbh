@@ -237,3 +237,50 @@ A. A few times a year → prerendered markdown.
    asking the assistants what they recommend.
 
 Drafts: `drafts.md`.
+
+---
+
+## 6. What actually shipped (2026-08-16)
+
+Status: `ready-for-human` — implemented on `claude/seo-landing-pages`.
+
+**Option A, as recommended.** Structured copy slots, server-rendered, no WYSIWYG,
+no new dependency. ADR-0048 records the decision and its consequences.
+
+**Eight guides, not six.** Two were added after the plan, on the owner's steer
+toward paper scorers:
+
+- **Choosing a baseball scorebook** — Numbers Game, Bob Carpenter, Eephus
+  League, THIRTY81, 7-2 Double Play, each with a named trade-off and no
+  affiliate position. This is the page that reaches the paper-scoring audience
+  most directly, and it did not exist in the original plan.
+- **Ballpark passports** — the MLB BallPark Pass-Port (Tim Parks) and how
+  stamping works, tied to the Game Log. Complementary, never competitive: the
+  page links out generously and states three times that Tally has no connection
+  to the program and that its stamps are not official.
+
+**Three professional passes ran over the copy**, as asked: a journalist drafted
+each page, a marketing SEO editor revised for answer-block quality and query
+match, and a baseball editor fact-checked. The fact-check earned its place — it
+caught a reversed outfield orientation on two pages, a wrong OBP denominator, an
+at-bat definition that excluded reaching on an error, and a WHIP claim that said
+home runs are ignored.
+
+**Foundations shipped too**: `robots.txt` (the site had none), `sitemap.xml` via
+a generator, `llms.txt`, per-page canonical tags, and JSON-LD.
+
+**Open items for the owner:**
+
+1. `api/` is now at **12 functions**. Confirm the current Vercel Hobby ceiling
+   before merging.
+2. The rough stat scales in the glossary are editorial, not sourced. They read
+   as bands rather than precision, which is the honest framing, but they are a
+   judgement call.
+3. `ballpark-passports` says the book is sold through the Baseball Hall of Fame
+   shop. That is true of baseballhall.org, but the Pass-Port site names no
+   retailer. Keep or cut.
+4. The `?edit` gear could not be exercised end to end locally — Clerk is not
+   configured on this machine, so the editor correctly renders its "needs
+   sign-in" notice instead. The route, the focus filter (52 slots for the pillar
+   page, 365 across all eight) and the save path are verified; the signed-in
+   round trip is not.

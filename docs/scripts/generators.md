@@ -652,3 +652,11 @@ Re-run only to fold in a new season.
   auth) always, plus the Reddit game thread when `REDDIT_CLIENT_ID/SECRET` are set.
   Deliberately a terminal script, NOT part of the app (game-night posts are spoilers).
   Source scoping/queries: `docs/game-buzz.md`.
+- `gen-sitemap.mjs` → `public/sitemap.xml` — runs as part of `npm run build`. Lists
+  the `/learn` guides plus the stable, public, non-scoring app routes, and
+  deliberately lists NO game, date, player or team URL: a sitemap is a standing
+  invitation to crawl, and inviting a crawler onto a scoring surface is the one
+  thing these pages exist to avoid (ADR-0048). `lastmod` for a guide comes from
+  that page's own `updated` field, not from the clock, so the file does not
+  churn on every build. Exports `buildSitemap()` for `test/landing-pages.test.js`
+  and only writes when run as a script.

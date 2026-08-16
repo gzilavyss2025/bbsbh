@@ -138,6 +138,20 @@ export function parseRoute(url) {
   // production visit renders the (locked) panel rather than falling through to
   // the generic game route.
   if (parts.length === 1 && parts[0] === 'admin') return { name: 'admin' }
+  // The guides at /learn are NOT React routes — they are standalone documents
+  // rendered by api/page.js, because the crawlers this app wants to reach do not
+  // execute JavaScript (see src/copy/landing/render.js). The SPA only ever sees
+  // one of these URLs in its EDIT form: the gear on a guide links to
+  // '/learn/{slug}?edit', and api/page.js answers that with the app shell so the
+  // copy editor can take over at the same address. That is what makes ADR-0044's
+  // "edit where it is rendered" work for a page with no bundle on it.
+  //
+  // Without the ?edit flag this never matches, and it must not: a bare
+  // '/learn/{slug}' that reached the client router would render the SPA over a
+  // document the server had already produced correctly.
+  if (parts.length === 2 && parts[0] === 'learn' && q.has('edit')) {
+    return { name: 'admin', focus: `learn.${parts[1]}`, returnTo: `/learn/${parts[1]}` }
+  }
   // My Tally — the page that reports on YOU rather than on baseball: the club
   // you follow, how this device behaves, what an account carries between them.
   // Deliberately ONE address with sections on it, not '/profile/{sub}': a

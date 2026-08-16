@@ -273,7 +273,22 @@ test('field ids are unique and dotted group.slot', () => {
     seen.add(id)
     // The slot half allows digits — venueKey() emits [a-z0-9], and a real MiLB
     // venue name can carry one ("7 17 Credit Union Park" -> "717creditunion...").
-    assert.match(id, /^[a-zA-Z]+\.[a-zA-Z0-9]+$/, `${id} is group.slot`)
+    //
+    // Landing-page slots are DEEPER: `learn.{slug}.{sectionId}.{slot}`, because a
+    // guide's text is addressed by which page and which section it belongs to
+    // (see src/copy/landing/schema.js). Their slug and section ids are kebab-case,
+    // so hyphens are legal in those segments and nowhere else.
+    //
+    // What this assertion is actually protecting is unchanged, and it is the part
+    // worth stating: an id BEGINS with its group and every segment is a safe Redis
+    // field name. That is what keeps `sanitizeOverrides` able to bound the key
+    // space, and what keeps two different slots from colliding on one stored
+    // field — a collision whose failure mode is silent, because the losing slot
+    // just renders its shipped default forever.
+    const shape = id.startsWith('learn.')
+      ? /^learn(\.[a-z0-9-]+){2}\.[a-zA-Z0-9]+$/
+      : /^[a-zA-Z]+\.[a-zA-Z0-9]+$/
+    assert.match(id, shape, `${id} is a well-formed group-prefixed slot id`)
   }
 })
 

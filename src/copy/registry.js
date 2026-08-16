@@ -27,6 +27,7 @@
 // one place a user trades away the spoiler protection the whole app exists to
 // provide, so the trade must be stated plainly even while having fun with it.
 
+import { landingFields } from './landing/fields.js'
 import { BALLPARKS } from '../lib/ballpark/ballparkData.js'
 import { venueKey } from '../lib/ballpark/ballparkArt.js'
 import MILB_BALLPARKS from '../lib/data/milb-ballparks.json' with { type: 'json' }
@@ -43,6 +44,7 @@ export const GROUPS = [
   { id: 'stampIn', label: 'Stamp In (a club’s played season)', preview: 'consentModal' },
   { id: 'ballparks', label: 'Ballparks (team hub → Overview)' },
   { id: 'ballparksMilb', label: 'Ballparks — Minor League (team hub → Overview)' },
+  { id: 'learn', label: 'Guides (/learn — the server-rendered landing pages)' },
 ]
 
 // Each field: a dotted id (`group.slot`), the group it renders under, a short
@@ -438,6 +440,7 @@ export const FIELDS = [
   },
   ...parkFields(),
   ...milbParkFields(),
+  ...landingFields(),
 ]
 
 // Fast id -> field lookup, and the set of valid ids the API validates against.

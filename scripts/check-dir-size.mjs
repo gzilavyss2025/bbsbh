@@ -330,7 +330,13 @@ const BUDGETS = {
   // workflow runs this directory as a flat list, and scripts/lib/ is for
   // testable helpers, not top-level scripts (a generator file RUNS on import,
   // so it cannot live there).
-  scripts: 77,
+  // 77 -> 79 for the /learn landing pages: gen-sitemap.mjs (the site had no
+  // sitemap at all, which is a real gap for an app whose routes only exist once
+  // React has run) and check-learn-css.mjs (guards public/learn.css against
+  // palette drift, since a page served outside the bundle cannot import the
+  // token sheet). Both are top-level by the rule stated below — a generator runs
+  // on import, and scripts/lib is for helpers that do not.
+  scripts: 79,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
