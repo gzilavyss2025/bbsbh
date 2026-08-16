@@ -7,6 +7,7 @@ import { isClerkEnabled } from './lib/clerkConfig.js'
 import { Loader } from './components/ui/Loader.jsx'
 import { SyncStatusProvider } from './components/sync/SyncStatusProvider.jsx'
 import { useMotionPreference } from './hooks/preferences/useMotionPreference.js'
+import { useIdentityVersion } from './lib/identity/useIdentityVersion.js'
 import {
   parseRoute,
   gamePath,
@@ -214,6 +215,14 @@ function currentUrl() {
 export default function App() {
   // Applies the saved motion preference to <html>. One mount, app-wide.
   useMotionPreference()
+  // Repaint when a club's identity overrides change — the hydrating fetch, or a
+  // save from the team hub's gear. Subscribed HERE rather than on the team hub
+  // because tuned identity paints everywhere (the slate's cards, the in-game
+  // masthead, a Logbook stamp), and a narrower subscription would leave the rest
+  // of an already-rendered app showing untuned art. It is an integer snapshot,
+  // so React bails out unless the overlay actually moved — twice in a normal
+  // session. See src/lib/identity/useIdentityVersion.js.
+  useIdentityVersion()
   const [route, setRoute] = useState(() => parseRoute(currentUrl()))
   // The game object from the slate, carried into the game route so a same-session
   // open needs no resolve fetch. Cold loads / shared links resolve from the URL.

@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import App from './App.jsx'
 import { CopyProvider } from './copy/CopyProvider.jsx'
+import { hydrateIdentityFromCache, refreshIdentityOverrides } from './lib/identity/hydrate.js'
 import { CLERK_PUBLISHABLE_KEY, isClerkEnabled } from './lib/clerkConfig.js'
 import './index.css'
 
@@ -32,6 +33,16 @@ window.addEventListener('load', () => {
 // the main bundle's size is exactly what docs/api-audit.md worries about for
 // a ballpark connection). AccountButton.jsx and RevealCloudSync.jsx follow
 // the same lazy pattern at their own call sites.
+// Club-identity overrides, applied to the module-level stores BEFORE the first
+// render. Not a provider, because the identity layer is pure synchronous
+// resolvers rather than React context (src/lib/identity/overlay.js), and not
+// deferred to an effect, because the flash it would cause is a club's mark
+// visibly rescaling rather than a sentence changing. The cached map paints on
+// the first frame; the fetch revalidates it a moment later, and App subscribes
+// to the difference through useIdentityVersion.
+hydrateIdentityFromCache()
+refreshIdentityOverrides()
+
 async function mount() {
   const root = createRoot(document.getElementById('root'))
   let content = (

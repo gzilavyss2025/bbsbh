@@ -6,17 +6,27 @@
 // builders, deliberately kept out of the chart's .jsx so it's unit-testable
 // (test/wpa-logo.test.js).
 import { teamLogoUrl } from '../teams.js'
-import { byTreatment } from '../tuningStore.js'
+import { byTreatment, liveStore } from '../tuningStore.js'
+import { registerIdentityStore } from '../identity/overlay.js'
 import { wpaArtUrl } from '../logoArt.js'
 import { WPA_LOGO_DEFAULTS } from './wpaDefaults.js'
-import WPA_TUNING from '../data/wpa-tuning.json' with { type: 'json' }
+import WPA_TUNING_JSON from '../data/wpa-tuning.json' with { type: 'json' }
+
+// Registered so a club's band colour can be retuned at runtime from that club's
+// own team page (src/lib/identity/overlay.js) — the derived tables here and in
+// wpaBandColors.js are built from THIS object, and refill in place when a save
+// lands. Registration stays beside the import, never in a module that gathers
+// every store: one such module would pull this file back onto the eager
+// first-paint path, which wpaDefaults.js exists to stop.
+export const WPA_TUNING_STORE = registerIdentityStore('wpa-tuning', WPA_TUNING_JSON)
 
 // The WPA band's own hand-tuned store (src/lib/data/wpa-tuning.json), shared
 // with wpaBandColors.js — one file per dimension, so a club's band color and
 // its tile layout are edited side by side in the Team Identity Lab and land in
-// one diff. Re-exported raw for that lab; everything here reads the derived
-// table below. See src/lib/CLAUDE.md.
-export { WPA_TUNING }
+// one diff. Re-exported for that lab (as the overlaid view, so the lab and the
+// app agree on what is landed); everything here reads the derived table below.
+// See src/lib/CLAUDE.md.
+export const WPA_TUNING = liveStore(WPA_TUNING_STORE)
 
 // A handful of clubs' base logo mark is itself (near-)solid in the same hex
 // as their own primary brand color — verified against the actual CDN SVGs,
@@ -122,7 +132,7 @@ export const WPA_MARK_SOURCE_OVERRIDES = {
 // same store as this file's other per-treatment reads (one dimension, one
 // file — see the WPA_TUNING doc above). Absent/false is the default: tile
 // whatever wpaLogoFor already resolved before this feature existed.
-export const WPA_OWN_ART = byTreatment(WPA_TUNING, (f) => f.ownArt)
+export const WPA_OWN_ART = byTreatment(WPA_TUNING_STORE, (f) => f.ownArt)
 
 // Which (team, treatment)s tile the club's wordmark instead of their usual
 // mark — the MLB counterpart to MiLB's MILB_WPA_WORDMARK_OVERRIDES
@@ -130,7 +140,7 @@ export const WPA_OWN_ART = byTreatment(WPA_TUNING, (f) => f.ownArt)
 // WPA_OWN_ART above; every club's CDN wordmark already resolves via
 // teamLogoUrl(teamId, 'wordmark') (teams.js's LOGO_VARIANTS), so this needs
 // no separate art-procurement step the way ownArt does.
-export const WPA_WORDMARK_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.wpaWordmark)
+export const WPA_WORDMARK_OVERRIDES = byTreatment(WPA_TUNING_STORE, (f) => f.wpaWordmark)
 
 export function wpaWordmarkOn(teamId, treatment) {
   return Boolean(WPA_WORDMARK_OVERRIDES[teamId]?.[treatment])
@@ -235,7 +245,7 @@ export { WPA_LOGO_DEFAULTS }
 // straight in. NOTE: a per-team rotate/offset override breaks the away/home
 // tile grid's shared alignment across the plot seam for THAT team's band
 // only — an accepted tradeoff, not a bug.
-export const WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.layout)
+export const WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(WPA_TUNING_STORE, (f) => f.layout)
 
 export function wpaLogoLayout(teamId, treatment) {
   const o = WPA_LOGO_LAYOUT_OVERRIDES[teamId]?.[treatment]

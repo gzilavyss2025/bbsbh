@@ -1,0 +1,264 @@
+/* ------------------------------------------------------------
+   62-identity-admin
+   The site owner's in-place club-identity editor on the team hub
+   (screens/team/modules/identity/IdentityAdminBar.jsx and
+   IdentityDrawer.jsx). Nobody else ever renders any of this — the modules
+   that draw it are lazy and admin-gated — so none of these rules can affect
+   a visitor's page. Imported by those components rather than by index.css,
+   so the stylesheet is code-split with them.
+
+   THE GEAR INHERITS THE CLUB'S COLOURS, it does not pick its own. It sits in
+   `.team-hub__id`, the identity hero, which is painted with whatever tile
+   colour that club wears — `--ink` is the readable ink the shell already
+   picked for that fill (TeamHubShell.jsx's `headerTile.ink`, via
+   readableTextColor). A gear with a hard-coded navy would be invisible on
+   half the league. Same argument, same solution, as the ballpark gear one
+   partial up: draw in `currentColor`, hold it back with opacity, and invert
+   against the ground where it must stand out.
+
+   THE DRAWER DOES NOT. It sits on paper below the hero, so it is the app's
+   ordinary working surface — the dashed rule and recessed ground the
+   ballpark form already uses for "a pencilled note in the margin".
+   ------------------------------------------------------------ */
+
+/* ---- the header cluster: gear, Save, Cancel ---- */
+
+.idadmin__gear,
+.idadmin__actions .idadmin__btn {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.idadmin__gear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* A real 30px tap target on a phone, matching the Game Notes pill it sits
+     beside, without a chip's border drawing a second box around a gear. */
+  min-width: 30px;
+  min-height: 30px;
+  padding: 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--ink, var(--text-body));
+  /* Held back so the gear reads as chrome rather than as a control competing
+     with the club's own name. */
+  opacity: 0.7;
+}
+.idadmin__gear:hover,
+.idadmin__gear:focus-visible {
+  opacity: 1;
+}
+.idadmin__gear:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.idadmin__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink, var(--text-body));
+}
+
+.idadmin__actions .idadmin__btn {
+  padding: 4px 11px;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+/* Save is the affirmative action, so it is the filled one — the hero's own ink
+   as the fill, with the label punched back out in the hero's own tile colour.
+   That inversion needs no palette of its own: the shell already picked those
+   two to read against each other for this club. `-webkit-text-fill-color`
+   rather than `color`, because `color` is what `background: currentColor` is
+   reading — setting it would repaint the fill too. */
+.idadmin__actions .idadmin__btn--save {
+  background: currentColor;
+  -webkit-text-fill-color: var(--tint, var(--surface-card));
+}
+.idadmin__actions .idadmin__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.idadmin__actions .idadmin__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.idadmin__flag {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+/* ---- the drawer, under the hero ---- */
+
+.iddrawer {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) var(--space-3) 0;
+  padding: var(--space-3);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+
+/* The jersey strip. One row, finger-scrollable on a phone, same as every other
+   horizontal picker here. */
+.iddrawer__strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.iddrawer__tile {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.iddrawer__tile.is-selected {
+  background: var(--text-body);
+  color: var(--bg-canvas);
+}
+.iddrawer__tile:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.iddrawer__group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.iddrawer__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.iddrawer__fields {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.iddrawer__field {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.iddrawer__label {
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.iddrawer__inputrow {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.iddrawer__input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+  /* --fs-field, not --fs-body: mobile Safari zooms the page in whenever a
+     focused input is under 16px, which mid-edit throws the drawer off screen.
+     The token exists for exactly this; see tokens/typography.css. */
+  font-size: var(--fs-field);
+}
+
+/* The native picker beside a hex box. Deliberately small and square — it is a
+   shortcut to the text field's value, not the control itself, which is why the
+   text stays authoritative for the `rgba(...)` values these stores also hold. */
+.iddrawer__swatch {
+  flex: 0 0 auto;
+  width: 34px;
+  padding: 2px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  cursor: pointer;
+}
+
+.iddrawer__hint {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+.iddrawer__note,
+.iddrawer__warn,
+.iddrawer__foot {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+/* The live contrast readout, and the one state where it is a refusal rather
+   than a reading. */
+.iddrawer__note--bad {
+  color: var(--accent-negative);
+  font-weight: var(--w-semibold);
+}
+
+/* The stamp group's retroactive warning (ADR-0035's amendment). Kraft-taped
+   like every other "read this before you act" strip in the app, because it is
+   the one control here whose effect reaches something a person already keeps. */
+.iddrawer__warn {
+  padding: var(--space-2);
+  border-left: 3px solid var(--seal-edge, var(--kraft-board));
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+}
+
+.iddrawer__error {
+  margin: 0;
+  padding: var(--space-2);
+  border-left: 3px solid var(--accent-negative);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+.iddrawer__foot {
+  border-top: var(--bw-hair) dashed var(--border-rule);
+  padding-top: var(--space-2);
+}

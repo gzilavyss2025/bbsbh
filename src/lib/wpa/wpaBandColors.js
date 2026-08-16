@@ -12,7 +12,7 @@ import {
   treatmentPinstripeBg,
 } from '../teams.js'
 import { byTeam, byTreatment } from '../tuningStore.js'
-import { WPA_TUNING } from './wpaLogo.js'
+import { WPA_TUNING_STORE } from './wpaLogo.js'
 import { DEFAULT_PINSTRIPE_COLOR } from './wpaDefaults.js'
 
 // The real chart's own band area, in the SAME px units as its desktop
@@ -35,7 +35,7 @@ export const WPA_PLOT_SIZE = { width: W - PAD_R - PAD_L, height: H - PAD_B - PAD
 // primary for every other team. A MiLB affiliate's own id (not its parent
 // org's) also works here — e.g. Nashville Sounds below — since a farmhand's
 // club identity/logo can differ entirely from its parent org's.
-export const BAND_COLOR_OVERRIDES = byTeam(WPA_TUNING, (e) => e.bandColor)
+export const BAND_COLOR_OVERRIDES = byTeam(WPA_TUNING_STORE, (e) => e.bandColor)
 
 // A (team, treatment)-specific band override, for the rare club whose
 // Alternate/City Connect mark reads better on its OWN brand color than its
@@ -47,7 +47,7 @@ export const BAND_COLOR_OVERRIDES = byTeam(WPA_TUNING, (e) => e.bandColor)
 // pattern — see PinstripePattern in components/WinProbChart.jsx — `color`
 // is the line color, white background implied, same convention as
 // teams.js's MAIN_OVERRIDES).
-export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = byTreatment(WPA_TUNING, (f) => f.band)
+export const WPA_TREATMENT_BAND_COLOR_OVERRIDES = byTreatment(WPA_TUNING_STORE, (f) => f.band)
 
 // Re-exported so this stays the module you import band colors from — the
 // literal lives in the dependency-free lib/wpa/wpaDefaults.js leaf, so a caller who

@@ -51,6 +51,18 @@ const MAX_FILES = 12
 // DOWNWARD as work lands; never upward. A new entry here is a deliberate
 // decision that belongs in a PR description, not a reflex to make lint green.
 const BUDGETS = {
+  // A FILE IN `api/` IS A URL, which is what makes this directory different
+  // from every other entry in this table. `api/copy.js` IS `/api/copy`;
+  // subdividing it into `api/admin/copy.js` renames a live endpoint, and the
+  // rename is silent — the old path 404s and every client falls back to its
+  // "not configured" degrade, which is the exact class of outage the KV_*
+  // episode was (api/_lib/redis.js). So the twelve endpoints here stay flat,
+  // and this budget is the deliberate exception the guard's own header asks
+  // for rather than a directory awaiting subdivision.
+  //
+  // 12 -> 13 for `identity.js`: the club-identity override store (ADR-0050),
+  // the sibling of `copy.js` that /team/{id}'s admin gear writes through.
+  api: 13,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is
@@ -252,7 +264,14 @@ const BUDGETS = {
   // earns a partial, the same reasoning as the entries above; it has no
   // existing partial to join, since no other file styles a farm club's
   // big-league alumni.
-  'src/styles': 82,
+  //
+  // 82 -> 83 for `62-identity-admin.css`: the team hub's admin-only club
+  // identity editor (ADR-0050), appended after `61-ballpark-admin.css` because
+  // it is the same idea one card over and inherits that partial's argument
+  // about drawing chrome in the club's own colours. Neither is @imported by
+  // index.css — the lazy component that draws it imports it — so the growth
+  // here costs a visitor nothing.
+  'src/styles': 83,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

@@ -93,25 +93,40 @@
     var(--pinstripe-bg, #fff) 7px
   );
 }
-/* Whichever aside this club has — Game Notes (MLB) or the parent club's chip
-   (MiLB); never both, and TeamLeadersPage's header has neither — takes its own
-   row below rather than a column beside the name. justify-self keeps it at its
-   natural size: grid blockifies its items, so the pill would otherwise stretch
-   the whole row. Both render as their own opaque `--surface-card` chip rather
-   than text sitting directly in the tint, same idiom 09-team-info.css's
-   .teaminfo__head note documents for Game Notes — a chip's legibility can't
-   depend on guessing right against every club's own color. */
-.team-hub__id > .notesbtn,
-.team-hub__id > .team-hub__parent {
+/* The header's right-hand SLOT, which holds whichever aside this club has —
+   Game Notes (MLB) or the parent club's chip (MiLB); never both, and
+   TeamLeadersPage's header has neither — plus, for the site owner only, the
+   identity gear (62-identity-admin.css). It was those two controls directly
+   until the gear needed somewhere to sit; a cluster is what lets a second
+   control join without either one moving.
+
+   It takes its own row below rather than a column beside the name, and
+   justify-self keeps it at its natural size: grid blockifies its items, so the
+   pill would otherwise stretch the whole row. The chips inside render on their
+   own opaque `--surface-card` rather than as text sitting directly in the tint,
+   same idiom 09-team-info.css's .teaminfo__head note documents for Game Notes —
+   a chip's legibility can't depend on guessing right against every club's own
+   color. */
+.team-hub__id > .team-hub__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   grid-column: 1 / -1;
   justify-self: start;
+}
+/* A club with neither aside — and no gear, which is everyone but the site
+   owner — must not pay a grid row for an empty cluster. Before the cluster
+   existed there was simply no element in this slot; `:empty` is what keeps that
+   true, and it stops applying on its own the moment the lazily-loaded gear
+   arrives for the one person who has one. */
+.team-hub__id > .team-hub__actions:empty {
+  display: none;
 }
 @media (min-width: 740px) {
   .team-hub__id {
     grid-template-columns: 128px 1fr auto;
   }
-  .team-hub__id > .notesbtn,
-  .team-hub__id > .team-hub__parent {
+  .team-hub__id > .team-hub__actions {
     grid-column: auto; /* back onto the identity row, in that third column */
   }
 }
