@@ -1,5 +1,5 @@
-// The ballpark that washes in behind a slate card's '@' on hover — which
-// photograph, how it is cropped, and who took it.
+// The ballpark that washes in behind a slate card's '@' once the card is on
+// screen — which photograph, how it is cropped, and who took it.
 //
 // Pure, and deliberately thin: it resolves nothing of its own. The photo comes
 // out of the SAME resolvePhoto the team hub's Ballpark card uses, so a park the
@@ -26,6 +26,18 @@
 // which is where the licence's "a URI or hyperlink to a resource that includes
 // the required information" is satisfied in full for CC BY / CC BY-SA photos.
 
+// ONE SIZE rides out of here for the wash: `cssUrl` is the ~480px WebP
+// companion (see resolvePhoto's `thumbSrc`), the same smaller photo every
+// device's IntersectionObserver arms as its card crosses the screen
+// (GameCard.jsx, 06a-gamecard-parkart.css). A hover pointer used to arm the
+// full 1000px photo instead, on the theory that a desktop visit could afford
+// it — dropped because it bought nothing: the wash renders grayscale at 0.24
+// opacity either way, so the extra detail never showed, and it meant no photo
+// autoloaded at all for a mouse user who never happened to hover a card.
+// `cssUrl` falls back to the full photo wherever no smaller companion exists
+// (an admin's own upload has no build step to make one in), so a caller never
+// has to think about which size it's getting.
+//
 // The venue name itself rides in on the slate's existing schedule request —
 // `fields=` is a flat allowlist and `name` was already on it for the team
 // blocks, so api/schedule.js's normalizeGame reads venue.name at no extra cost
@@ -55,16 +67,22 @@ export function parkBackdrop(venueName, t) {
   const ids = fieldIds(venueKey(name))
   const photo = resolvePhoto(name, { photo: t(ids.photo), focus: t(ids.focus) })
   if (!photo || !SAFE_CSS_URL.test(photo.src)) return null
+  // thumbSrc is a second, independently-built path (scripts/gen-ballpark-
+  // thumbs.mjs) for a bundled park, so it earns the same scrutiny rather than
+  // inheriting the check above — falls back to the full photo (already safe)
+  // if it somehow isn't.
+  const thumbOk = SAFE_CSS_URL.test(photo.thumbSrc)
   return {
     // Pre-wrapped as a CSS value: the caller drops it straight into a custom
     // property, and the quoting rule lives next to the pattern that makes it
     // safe rather than at a call site three files away.
-    cssUrl: `url("${photo.src}")`,
+    cssUrl: thumbOk ? `url("${photo.thumbSrc}")` : `url("${photo.src}")`,
     // The same photograph as a bare src, for the one consumer that can't use a
     // CSS value: the preview poster paints it onto a canvas (drawImage takes a
     // URL, not a `url(…)`), and it must be loaded in CORS-anonymous mode or
     // the finished poster can never be exported — see lib/preview/posterImages.js.
-    // Same value, already past SAFE_CSS_URL above.
+    // Same value, already past SAFE_CSS_URL above. Always the FULL photo, even
+    // on mobile — a shared, exportable poster is not the place to economize.
     src: photo.src,
     focus: photo.focus,
     // The bare park name, printed on the card itself (GameCard's

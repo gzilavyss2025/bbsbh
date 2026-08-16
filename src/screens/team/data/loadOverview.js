@@ -1,4 +1,10 @@
-import { fetchTeam, fetchTeamRoster, fetchTeamIL, fetchStandings } from '../../../api/team.js'
+import {
+  fetchTeam,
+  fetchTeamRoster,
+  fetchTeamIL,
+  fetchStandings,
+  fetchMilbAlumni,
+} from '../../../api/team.js'
 import { fetchManager } from '../../../api/game.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { recentDecidedGames, allDecidedGames, allStartedGames } from '../../../api/scheduleGames.js'
@@ -79,6 +85,7 @@ export async function loadOverview(id, asOf) {
     teamScores,
     postseasonOddsData,
     transactionsPage,
+    milbAlumni,
   ] = await Promise.all([
     team.league?.id ? fetchStandings(team.league.id, season, cutoff) : Promise.resolve([]),
     // Degrades to null on a thin MiLB feed (see fetchManager's own try/catch) —
@@ -105,6 +112,12 @@ export async function loadOverview(id, asOf) {
     isMilb
       ? Promise.resolve({ days: [], cursor: null, hasMore: false })
       : loadMoreTeamTransactions(id, null, asOf).catch(() => ({ days: [], cursor: null, hasMore: false })),
+    // The mirror image of every line above it: MiLB only. A farm club's
+    // big-league alumni are the one thing about it no other tab records; a
+    // big-league club's are just its own roster history. One ~900-byte static
+    // shard, so it costs the MLB pages nothing to skip and the MiLB pages
+    // nothing to take.
+    isMilb ? fetchMilbAlumni(id) : Promise.resolve({ minGames: null, players: [] }),
   ])
 
   const standingsRows = standingsRowsFor(standings, team, id)
@@ -168,5 +181,7 @@ export async function loadOverview(id, asOf) {
     injuredIds,
     // Latest moves preview.
     transactionsPage,
+    // Made The Show — MiLB only, and the page's last card.
+    milbAlumni,
   }
 }

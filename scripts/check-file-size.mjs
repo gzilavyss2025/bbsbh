@@ -77,7 +77,7 @@ const BUDGETS = {
   'src/styles/08-site-shell.css': 1100, // 1016
   'src/styles/09-team-info.css': 800, // 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 797
-  'src/styles/12-sealbox.css': 1900, // 1823 — the batting club's lineup card picked up an on-deck row
+  'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
   'src/styles/14-strike-zone.css': 1000, // 909 — both pitch-colour keys left (PitchColorsKey's button/modal and StrikeZoneLegend's swatch row); the pitch list names each dot beside it
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
@@ -113,7 +113,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
-  'src/screens/InningViewer.jsx': 1100, // 1022 — focus mode's post-half SUMMARY/next-half bottom bar (focus.postHalf) plus live runs/hits reporting
+  'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local
@@ -131,7 +131,10 @@ const BUDGETS = {
   // per-batter trip tracking, the visible-step gate) is tightly coupled and
   // deliberately not decomposed further when playbyplay.js was split
   // (ADR-0038) — see src/api/playbyplay/halfInningFeed.js's header.
-  'src/api/playbyplay/halfInningFeed.js': 800, // 793
+  // 800 -> 900: wiring uncoveredRunnerNotes (runnerNotes.js, a new file) into
+  // the per-play loop — a coveredRunnerEvents Set plus one call, the sentence
+  // building itself lives in the new module, not here.
+  'src/api/playbyplay/halfInningFeed.js': 900, // 807
   'src/screens/PlayerPage.jsx': 800, // 794 — Prospect Card remains, duplicate trendBySportId progression wiring removed
   // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
   // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
@@ -139,7 +142,14 @@ const BUDGETS = {
   // item-building logic and the stepped-so-far R/H tally (both entriesView.js)
   // were all pulled out to keep this growth to wiring only — see those files'
   // own headers.
-  'src/components/playbyplay/PlayByPlay.jsx': 750, // 716
+  // 750 -> 700 as the ratchet asks: the notification-card family (EventNote,
+  // MoundVisitBar, EjectionBar, EventCard, BaserunningNote and the two
+  // shorthand lookups they are captioned from) moved to EventCards.jsx when
+  // the scoring loop's beat (ADR-0046) pushed this file past its budget. Those
+  // five were the part of this file with no reveal reasoning in them at all,
+  // which is what made them the right thing to lift out; the markup, classes
+  // and comments moved verbatim.
+  'src/components/playbyplay/PlayByPlay.jsx': 700, // 607
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612

@@ -160,7 +160,7 @@
 }
 
 /* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .half__title) rather than floating as a smaller rounded shape inside
+   as .pitchers__title) rather than floating as a smaller rounded shape inside
    the card's padding — overflow:hidden on .winprob clips the square corners
    here to the card's own rounded ones. */
 .winprob__head {
@@ -573,9 +573,8 @@
   overflow: hidden;
 }
 
-/* Bleeds past the card's own padding to cap it flush (same masthead recipe
-   as .half__title) — overflow:hidden on .pitchers clips the square corners
-   here to the card's own rounded ones. */
+/* Bleeds past the card's own padding to cap it flush — overflow:hidden on
+   .pitchers clips the square corners here to the card's own rounded ones. */
 .pitchers__title {
   margin: -12px -14px 8px;
   padding: 8px 10px;

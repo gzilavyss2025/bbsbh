@@ -268,11 +268,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-  padding: 0 0 var(--space-3);
-  overflow: hidden;
 }
 
 /* The inner card sheds its own frame — inside the hero it would be a card
@@ -407,13 +402,111 @@
   animation: focus-deal var(--dur-med) var(--ease-out);
 }
 
+/* A STACKED mount is a batch — a dozen cards landing on the desk at once on
+   direct navigation to an old half, or on "See the whole half" — not one
+   card dealt at a time. Animating all of them together is the same
+   batch-mount defect the denotation beat's own `!active` short-circuit
+   avoids for the ink (useDenotationBeat.js); this is its CSS counterpart. */
+.innings--stacked .pbp__atbat {
+  animation: none;
+}
+
 .trailcell {
   animation: focus-fade var(--dur-fast) var(--ease-standard);
 }
 
+/* Same batch-mount argument as .pbp__atbat above. Not reachable yet — the
+   trail stays hidden while stacked until commit 3 gives it a scroll-to role
+   — but the rule belongs beside its sibling rather than arriving separately. */
+.innings--stacked .trailcell {
+  animation: none;
+}
+
+/* --------------------------------------------- THE BEAT (ADR-0046) */
+/* The card arrives whole except for the scorebook denotation, which holds
+   blank for DENOTATION_HOLD_MS and then lands. PlayByPlay.jsx owns the timer
+   and swaps these two classes; `--ink-set` arrives from beats.js as an inline
+   custom property on `.pbp__play`, so the duration has exactly one home.
+
+   OPACITY, NOT `display`. The top reach code (1B / BB / F8) is a real flex
+   item above the diamond — take it out of flow for 180ms and the diamond
+   jumps up a line and back down as the mark arrives, which is the opposite of
+   a mark being pressed onto paper. It also keeps the code in the
+   accessibility tree throughout, so a screen reader never waits on the hold.
+
+   THE HOLD IS DELIBERATELY NOT A FADE. It is blank, then inked — a pencil
+   touching paper, not an image resolving. So there is no opacity transition
+   here, only the swap. */
+.pbp__code--held {
+  opacity: 0;
+}
+
+/* The ink-set: the mark lands oversized and settles to rest. NO COLOUR CHANGE —
+   a base hit is already field green and a reach-on-error already clay before
+   the mark appears (13-play-by-play.css), and animating toward those would make
+   the colour itself part of the reveal. NO REBOUND either: it settles once and
+   stops, because this is a stamp being pressed, not a thing dropped.
+
+   Both numbers come from beats.js as inline custom properties. The fallbacks
+   are for a stray render with no properties set; this file must not become a
+   second source of truth for them.
+
+   The individual `scale` property, not `transform`. Two of the three cells this
+   lands on already own their `transform` — the backwards-K mirror, and
+   whichever rule centres the out chain over the diamond — so a transform-based
+   keyframe would have to be written three times and would silently drop
+   whichever transform it forgot. `scale` composes instead of replacing, so one
+   keyframe covers all three.
+
+   ITS PARTNER IS `.pbp__code--center` CENTRING WITH THE INDIVIDUAL `translate`
+   PROPERTY (13-play-by-play.css), and the pairing is load-bearing at this
+   overshoot. Individual transform properties apply in a fixed order —
+   translate, rotate, scale, then whatever `transform` says — so a `translate`
+   lands OUTSIDE the scale and resolves against the element's own layout box,
+   which a scale does not change. Written as `transform: translate(-50%, -50%)`
+   the scale multiplied the offset instead: at 1.25 a 30px out chain started
+   ~4px up and left of the diamond's centre and slid into place, which reads as
+   the mark being nudged rather than pressed. Nothing to notice at the original
+   3%; unmissable once the overshoot was worth seeing. */
+@keyframes focus-ink-set {
+  from {
+    scale: var(--ink-overshoot, 1.25);
+  }
+  to {
+    scale: 1;
+  }
+}
+
+/* `display` IS LOAD-BEARING, and its absence is what made this rule do nothing
+   the first time it shipped. `.pbp__code` is a <span>, and neither `transform`
+   nor the individual transform properties apply to a non-replaced INLINE box —
+   the animation runs, `getComputedStyle().scale` reports 1.03, and the painted
+   box never changes size. On the card itself the point is moot (`.pbp__play` is
+   a flex container, so its children are blockified anyway), which is exactly why
+   it went unnoticed: the app was fine and /animation-lab, where the mark stood
+   on its own, was silently showing a still.
+
+   `inline-block` rather than `block` so the class stays droppable anywhere; it
+   is a no-op in every flex/absolute host this mark actually has.
+
+   LINEAR, NOT `--ease-out`, and this survived the retune for a better reason
+   than it was chosen for. At the original 40ms the first frame already landed
+   at ~42% progress and `--ease-out` (cubic-bezier(0.16, 1, 0.3, 1)) was ~97%
+   done by then, so the overshoot was spent before a frame could draw it. At
+   220ms there is room for a curve — but every ease in this file is a
+   decelerate, which front-loads the travel and spends most of the duration
+   within a percent of rest. That reads as a flinch. A press settles evenly, and
+   evenly is also what stays legible: the reader watches the mark come down
+   rather than catching one big frame and then nothing. */
+.pbp__code--ink {
+  display: inline-block;
+  animation: focus-ink-set var(--ink-set, 220ms) linear;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .innings--focus .pbp__atbat,
-  .trailcell {
+  .trailcell,
+  .pbp__code--ink {
     animation: none;
     transition: none;
   }

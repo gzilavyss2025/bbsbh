@@ -1,0 +1,206 @@
+# ADR-0047 — The scorecard fills only what you have revealed
+
+Status: accepted (2026-08-14)
+
+## Context
+
+The Numbers Game "22" sheet has been in the codebase three times over, each
+copy holding a different piece of the product:
+
+- the **DEV-only Scorecard Lab** (`/scorecard-lab`), which could ink a whole
+  game onto the sheet via `loadScorecard.js`'s full-reveal half — deliberately
+  kept out of the production module graph, because nothing clamped it;
+- the **printable sheet** (`/{date}/{matchup}/sheet`, PR #705), which ships
+  the grid EMPTY by design — the paper you print is the paper you score on;
+- the **box score**, which already transcribes the #22's batting and pitching
+  column orders but never drew the sheet itself.
+
+What no surface offered: seeing the sheet **filled in** — the notation the
+app already derives per plate appearance (the diamond, the fielding chain,
+the pitch ladder, the out numbers) laid out in batting-order rows × innings,
+during the game or after it. And nothing let a scorer disagree with a derived
+notation: the official scorer's E5 that was a hit all day, a fielding chain
+you'd write differently.
+
+The obstacle was never drawing — the Lab drew it. It was the spoiler rule: a
+filled scorecard is nothing BUT score-revealing state, and the Lab's own
+loader was the manifest's motivating false-header case.
+
+## Decision
+
+**One grid builder, one clamp.** `src/api/scorecardGame.js` (reveal-gated,
+ADR-0009's pattern) owns the inked grid, the per-inning P/WH/FO row, the
+scoreboard with its FINAL block and decisions, and the pitcher table. Every
+builder takes a `through` half-index and accumulates only from halves at or
+under it. The visible inning columns come off the same clamp with
+`unlockedInnings`' walk, so extras never spoil (ADR-0008) — a marathon grows
+its columns one revealed inning at a time. `loadScorecard.js` keeps only the
+loader and the pre-pitch staging view, finally the spoiler-free module its
+header always claimed; the Lab now passes `through: Infinity` explicitly.
+
+**Three surfaces, each holding the gate its own way:**
+
+- `/{date}/{matchup}/scorecard` (`screens/scorecard/ScorecardPage.jsx`) — the
+  live sheet, viewable at ANY point. It passes the user's own persisted
+  `revealedThrough` mark, reads it and never advances it (no SealBox, no
+  `revealTo`). Under Scores Unlocked / a consented day it substitutes the
+  render-only mark exactly as the innings viewer does (ADR-0026).
+- The **box score** embeds the completed sheet (`BoxScorecard.jsx`) at the
+  page's foot, `through: Infinity` — safe because it mounts inside the box
+  score's single SealBox reveal render (ADR-0002), behind which the whole
+  game is already open.
+- The **print sheet is untouched**: its grid stays empty, and
+  `test/print-sheet.test.js` now forbids `screens/sheet/` from importing
+  `scorecardGame.js` by name.
+
+**Overrides are a pencil layer, not data entry.** Tapping a filled box opens
+a small editor for the three marks a scorer argues with — the outcome box,
+the diamond-center chain, the RBI count. An override lives in
+`localStorage` per game (`lib/scorecardNotes.js` + `useScorecardNotes`),
+keyed by the feed's own `atBatIndex`, wins at render time only, and is
+flagged with an amber corner. Nothing derived is modified: the AB/H/R/RBI
+tallies, the P/WH/FO row and the scoreboard keep reading the feed, an
+override never syncs, and clearing one returns the feed's call. The root
+`CLAUDE.md` line "this app is not a data-entry tool" stands — you still keep
+score on paper; this is the margin note in your copy of the book.
+
+## Consequences
+
+- A spoiler audit of the filled sheet is one file (`scorecardGame.js`) plus
+  the manifest's importer allowlist — three names, each named above.
+- The sheet's numbers can never disagree with the innings viewer's: P and
+  LOB come from `computeDerivedByInning`/`revealInning`, the pitcher table
+  from `computePitcherLines`, all pinned by `test/scorecard-game.test.js` on
+  the captured real game — which is also what caught the one real bug this
+  work surfaced: a pinch runner's run never folded back into the origin
+  batter's diamond once the fixture was trimmed past the substitution
+  playEvents (the fixture now keeps them; the Bauers/Mitchell case is
+  pinned).
+- The end-of-inning mark is derived, not stored, and only for a FINISHED
+  half. A revealed half still being played draws none prematurely. (The
+  third amendment below moves it and cuts the second one.)
+- An override exists only for a cell the user has revealed — a sealed cell is
+  never rendered, so there is nothing to tap. If overrides ever grow a cloud
+  mirror, they are consented user annotations, never a reveal source.
+
+## Amendment (2026-08-14): the sheet plays
+
+The live scorecard gained the reveal VERB, not just the reveal's output. The
+next plate appearance renders as a face-down kraft seal in the grid cell it
+will ink into (`scorecardPlays`' `frontier` + `scorecardStep`); tapping it
+advances the SAME persisted cursor the innings viewer's at-bat stepping
+walks (`revealAtBat`'s entry-count mark, ADR-0016), and the last step of a
+finished half collapses into the ordinary `revealTo` commit. One ratchet,
+two surfaces — the sheet and the innings viewer can never double-reveal or
+disagree about where you are.
+
+Three rules keep the game honest:
+
+- **Mid-step, only cards.** A stepped half contributes its revealed cards
+  and nothing else — no P/WH/FO line, no scoreboard cell, neither
+  end-of-half mark. Those are whole-half facts and they ink on commit, which
+  is the turn-end beat.
+- **The frontier is derived, never stored.** It is always the half after
+  `revealedThrough`; under the Scores Unlocked pass the render mark covers
+  the whole game, so the seal simply never renders and nothing on the page
+  can commit (ADR-0026's commitReveals contract, honored by construction).
+- **Juice follows the tap.** Newly revealed marks ink in (outcome, then
+  diamond, then the out circle pressed with `--ease-press` — the stamp's own
+  ease); the ink-in set is diffed per side and armed only after the reader's
+  first tap, so a cold load or a sheet flip renders settled ink. Skipped
+  under reduced motion. ADR-0046 is respected: every duration is a fixed
+  token, never a function of what was revealed.
+
+Deliberately NOT built: points, streaks, or any meta-economy. The app's
+fantasy is being the scorer; the game is the ritual (press, ink, count outs,
+flip the sheet), and the gamification stops where the paper does.
+
+## Amendment (2026-08-14): one live sheet, not two copies of it
+
+The box score's embedded copy (`BoxScorecard.jsx`, `through: Infinity`) is
+retired. It existed because the game's tab bar had no stop of its own for the
+live sheet — the fifth tab was "Card", the shareable preview poster — so the
+only way in was through the box score. That tab now opens the live scorecard
+directly (`GameView.jsx`'s `sectionTabs`, `key: 'scorecard'`, `section:
+'scorecard'`), which by the time a Final game's box score is open already
+renders the whole sheet inked (its `revealedThrough` clamp has nothing left to
+hold back) — the exact same output the box score's copy existed to show, on
+its own page instead of at the box score's foot. A completed game's sheet is
+now one page, not two.
+
+The poster studio the "Card" tab used to open (`screens/GamePreview.jsx`,
+route `preview`) didn't lose its door — it moved to both lineup pages
+(`TeamInfo.jsx`), as a full-width primary button ("View preview card") rather
+than the tab bar, since that's the pre-first-pitch page a scorer is on to post
+the matchup. The lineup pages' other door, "Open the live scorecard", is
+retired outright: the tab bar covers that trip now, and a second door to the
+same page read as an unnecessary second promise about what's safe to open
+mid-game. Its sibling door, "Print tonight's sheet", stays as a quiet
+chevron link but under a new name, "Print blank scorecard" — the live sheet
+above replaced what it used to advertise, and the destination itself
+(`screens/sheet/ScoreSheetPage.jsx`) is due its own rebuild to match, not done
+here.
+
+`src/api/spoiler-manifest.json`'s `scorecardGame.js` entry drops
+`screens/boxscore/BoxScorecard.jsx` from its importer list — one caller now,
+the live page, plus the DEV-only Lab.
+
+
+## Amendment (2026-08-14): the end-of-inning slash, where a scorer draws it
+
+A finished half used to leave ONE mark, in the WRONG PLACE: a corner-to-corner
+diagonal through the next-due batter's unused box. That mark carried two
+claims at once — "the inning ended" and "this slot leads off the next" — and
+it made the first of them a row or more below the box where the half actually
+ended.
+
+The convention is not ambiguous. Wikipedia's baseball-scorekeeping article:
+"a slash is drawn diagonally across the lower right corner" of the cell.
+Every beginner guide surveyed agrees on the shape and the corner, differing
+only on which box (the third out's, or the half's last plate appearance) and
+offering a horizontal rule under the box as a minority variant.
+
+So:
+
+- **The end-of-inning slash** (`endsHalf` on the card, `.sc-ab--halfend`) —
+  a short "/" across the LOWER-RIGHT CORNER of the box of the plate
+  appearance that CLOSED the half. It is the sheet's only end-of-half mark.
+  Anchored on the last PLATE APPEARANCE, not on the cell that recorded the
+  third out: the two differ whenever the out was a runner cut down during a
+  later batter's trip, and a half can end with no third out at all (a
+  walk-off). Set even when that last card is `interrupted` — the half ended
+  at that box either way, which is all the mark claims.
+- **The leads-off-next diagonal is retired.** It was a second, competing
+  end-of-inning notation, and the slash is the one a scorer actually draws.
+  What survives is `leadoffMarks`/`leadoffCells`: the same next-due batter's
+  unused box, as a LOCATION with nothing drawn in it.
+
+An intermediate version of this ADR described the mark as a horizontal rule
+under the box. That was the minority variant, it read as an underline rather
+than a closing mark, and it is not what shipped.
+
+The turn handoff — formerly a kraft banner above the sheet (`.scflip`,
+"Bottom 3 is next — flip the sheet ›"), now deleted — lives in that leadoff
+box. When the next at-bat belongs to the other club's page, the leadoff box
+of the half that JUST ended carries the button that flips to it. That box is
+where the reader's eye lands as a half closes and it is empty by definition,
+so the handoff costs the sheet no notation of its own. Only that one box is a
+door: `leadoffCells` is valued by the INNING that ended rather than a bare
+`true`, and `ScorecardPage` names the inning it wants (`stepInfo`'s half,
+minus one when the next half is a top), so every older leadoff box stays
+blank. Under the Scores Unlocked pass `stepInfo` is null and no box is
+pressable — the construction that already withholds the frontier seal.
+
+A half whose last card was interrupted yields no leadoff box, so it offers no
+flip button. Not a dead end: the Top/Bottom control above the sheet has
+always been the general way across, and the banner it replaced was a prompt,
+never the only path.
+
+**A CSS trap worth keeping.** The slash cannot be a `background-image` on
+`.sc-ab`. The corner a scorer cuts is the cell's own, which on this box falls
+inside the pitch strip, and `.sc-ab__strike` paints an opaque
+`--sc-strike-fill` over it — the mark renders as a perfectly valid computed
+style that is simply invisible. It is an absolutely-positioned pseudo
+instead. Its host `.sc-ab__strip` must stay `position: static`: making the
+strip positioned lifts the whole strip into the positioned paint layer, where
+its fill covers the out circle's `right: -8px` overhang and clips the ①②③.

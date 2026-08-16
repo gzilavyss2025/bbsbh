@@ -1,7 +1,10 @@
 /* ----------------------------------------------- focus mode: the console row */
 /* The top of the scorer's console (ADR-0043): the placed scorebug band, and the
-   ONE companion card that spends the width beside it — DueUpConsole while the
-   half is being scored, HalfTally once it is over (ConsoleBand.jsx picks).
+   ONE companion slot that spends the width beside it — DueUpConsole while the
+   half is being scored, or (once it is over) `.consolebar__tallygroup`, a
+   column stacking HalfTally with BetweenInnings (ConsoleBand.jsx picks). Two
+   cards, still one flex item on this row — see `.consolebar__tallygroup`
+   below `.halftally`.
 
    The fourth focus-mode partial, split out of focus/stage.css when the tally
    pushed that file past the 600-line cap. The seam is real rather than
@@ -102,6 +105,22 @@
      match on a phone and hide the strip with nothing to replace it. */
   .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .upnext {
     display: none;
+  }
+
+  /* With the strip above stood down, a staged notice (Now Pitching, a
+     defensive sub, a pinch hitter — every shape shares `.pitchernotice--pbp`)
+     can be the ONLY thing left inside `.half` before the reader has revealed
+     anything of it — `.half__title` is `sr-only` in focus mode, and SealBox
+     (coverless) mounts no `.statgrid` until shown. `.half`'s own card chrome
+     then reads as a plain white box drawn around the kraft-amber card, a card
+     wrapping a card. Drop it so the notice sits directly on the page — same
+     `:has()`/media scoping as the strip's own rule above, since this is the
+     same "is the strip actually hidden" question. `:not(:has(.statgrid))`
+     is what lets `.half`'s chrome back the moment real content is shown. */
+  .innings--focus .consolebar:has(.dueupconsole) ~ .innings__stage .half:has(.pitchernotice--pbp):not(:has(.statgrid)) {
+    background: none;
+    border: none;
+    box-shadow: none;
   }
 
   .dueupconsole__col {
@@ -249,12 +268,170 @@
   font-size: var(--fs-caption);
 }
 
+/* THE INK-IN (ADR-0046) — the half committed, so this card is what marks it:
+   its eight cells ink in one at a time instead of just appearing, in place of
+   the separate hairline-and-figures display (`.halfclose`, retired) that used
+   to draw under the at-bat card and repeat four of these same numbers a beat
+   earlier. `--tally-step` arrives as an inline custom property from beats.js
+   (HalfTally.jsx sets it), so the interval has one home; the fallback below is
+   only for a stray render with no property set — the lab page and this
+   stylesheet must never become a second source of truth for it.
+   `.statline--closing` is only ever present for the ~630ms right after the
+   half commits (`useFocusMode`'s `closePhase`) — HalfTally.jsx drops the class
+   once it does, the same idiom the retired `.halfclose--running` used. */
+@keyframes tally-ink {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Each cell's own delay, computed from its place in the grid (`--tally-i`, set
+   per cell in HalfTally.jsx) rather than typed eight times — the interval is
+   one number and the eight cannot drift apart. `both` so a cell is absent,
+   not merely transparent-looking, until its own beat arrives. */
+.statline--closing .stat {
+  animation: tally-ink var(--tally-step, 90ms) var(--ease-out) both;
+  animation-delay: calc(var(--tally-i, 0) * var(--tally-step, 90ms));
+}
+
+/* Skipped, not slowed. The CSS-wide reduced-motion kill would collapse the
+   duration to ~0.01ms on its own, but `animation-delay` is a DELAY, not a
+   duration, and that rule does not touch it — the eight would still arrive
+   over the better part of a second, just invisibly. So the animation comes
+   off outright here, and useFocusMode opens `closePhase` at 'done' under
+   reduced motion so this class is never even applied. */
+@media (prefers-reduced-motion: reduce) {
+  .statline--closing .stat {
+    animation: none;
+  }
+}
+
+/* BetweenInnings.jsx's grid state — HalfTally wrapped in a button, tappable
+   only once there is at least one fact to cycle to (an empty card set
+   returns the grid unwrapped, same as before this card existed at all). An
+   unstyled button: .halftally supplies the whole card's frame, this only
+   carries the tap affordance, same idiom as .betweeninnings below. */
+.halftally-tap {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.halftally-tap:active {
+  transform: scale(0.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .halftally-tap:active {
+    transform: none;
+  }
+}
+
+/* BetweenInnings.jsx's whole card — still one flex item on .consolebar's
+   row. The flex: 1 1 auto that used to sit on .halftally directly moves
+   here; the column shape stays even though the card is a single child now,
+   so its width/gap rules need no change if a sibling ever joins it again. */
+.consolebar__tallygroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
 @media (min-width: 740px) {
-  /* Beside the band rather than under it — it takes the width the 264px
-     scorebug leaves, the same slot DueUpConsole fills while the half is live. */
-  .halftally {
+  .consolebar__tallygroup {
     flex: 1 1 auto;
   }
+}
+
+/* BetweenInnings.jsx — up to 5 tap-through facts, one at a time. Tapping past
+   the last one returns to HalfTally's grid (.halftally-tap above), not to
+   fact 1 — the grid is the card's resting state. */
+.betweeninnings {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  padding: var(--space-3);
+  cursor: pointer;
+}
+.betweeninnings:active {
+  transform: scale(0.99);
+}
+@media (prefers-reduced-motion: reduce) {
+  .betweeninnings:active {
+    transform: none;
+  }
+}
+
+.betweeninnings__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+.betweeninnings__eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+.betweeninnings__progress {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* Avatar + text, same anatomy as MarginNotes.jsx's .marginnotes__card, one
+   rung up (--shot-md, tokens/layout.css) since this card holds one lone fact. */
+.betweeninnings__body {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+.betweeninnings__avatar {
+  flex: none;
+  display: flex;
+}
+.shot.betweeninnings__shot {
+  width: var(--shot-md-w);
+  height: var(--shot-md-h);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.betweeninnings__col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.betweeninnings__who {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.betweeninnings__text {
+  font-family: var(--font-read);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-snug);
+  color: var(--text-heading);
+}
+/* `#root` prefix to beat `#root *`'s own specificity (01-base.css) — the
+   name line above (.betweeninnings__who) stays a structural label like any
+   other card heading and keeps the app's shouted convention, same split as
+   .marginnotes__text's own exemption (20-charts.css). */
+#root .betweeninnings__text {
+  text-transform: none; /* caps-exempt: a between-innings fact is a sentence, same idiom as .marginnotes__text */
 }
 
 /* ------------------------------------------------ the anchored console band

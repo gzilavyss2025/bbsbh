@@ -229,7 +229,30 @@ const BUDGETS = {
   // (the studio frame and its controls). Deliberately tiny — the poster
   // itself is a canvas and has no CSS at all — and imported by its own
   // screen rather than index.css, so it costs no other route anything.
-  'src/styles': 78,
+  // 78 -> 79 for `12a-seal-tear.css`: the kraft cover coming off. A lettered
+  // sibling of `12-sealbox.css` for the same reason as 05a/06a and the 31x
+  // family, with one extra: that file is already on a shrinking check-file-size
+  // budget, so this is the "put new code elsewhere" the file-size guard asks
+  // for rather than a second front door. The letter is load-bearing — the tear
+  // re-times an animation 12-sealbox.css declares, so it has to cascade after
+  // it.
+  // 79 -> 80 for `63-print-sheet.css`: the printable pre-pitch scorecard
+  // (`/{date}/{matchup}/sheet`). Its own partial for the same two reasons
+  // `62-game-preview.css` earned one — it belongs to a single lazily-loaded
+  // screen and is imported BY that screen rather than by index.css, so no
+  // other route pays for it — plus a third that is specific to it: it is the
+  // only file in this directory holding an `@media print` block and an
+  // `@page` rule, and burying a paper-geometry budget inside a screen
+  // stylesheet is exactly how the next person fails to find it.
+  // +1 for 41a-scorecard-page.css — 41-scorecard.css crossed the 600-line
+  // file cap when the sheet grew its #22 header/footer/editor chrome, and
+  // this is that partial's page-chrome half, imported directly after it.
+  // +1 for 64-milb-alumni.css — the "Made The Show" card at the foot of a MiLB
+  // team's Overview (components/teamstats/MilbAlumni.jsx). A new component
+  // earns a partial, the same reasoning as the entries above; it has no
+  // existing partial to join, since no other file styles a farm club's
+  // big-league alumni.
+  'src/styles': 82,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -264,7 +287,13 @@ const BUDGETS = {
   // the live feed like every other module here, and putting it in a
   // subdirectory would take it out of the flat set check-spoiler-manifest
   // classifies, which is exactly where it needs to stay.
-  'src/api': 93,
+  // +1 for between-innings.js — the post-half hold's card builder, same
+  // caller-gated-selector shape as prehalf-callouts.js beside it.
+  // +1 for scorecardGame.js — the scorecard grid's reveal-gated builders,
+  // split out of loadScorecard.js so each half of that old mixed module
+  // carries one honest classification. Both belong in the flat set
+  // check-spoiler-manifest classifies, same argument as gamePreview.js.
+  'src/api': 95,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -291,7 +320,17 @@ const BUDGETS = {
   // the same shape and directory as check-focus-ring.mjs and
   // check-typography.mjs already here. A guards/ subdirectory would have to
   // take all fourteen of them at once, which is a move, not this change.
-  scripts: 74,
+  // +1 for gen-milb-ballparks.mjs — the MiLB venue-list generator, flat here
+  // like every other gen-*.mjs in this directory.
+  // +1 for gen-ballpark-thumbs.mjs — the mobile-sized ballpark-photo
+  // thumbnail generator, flat here like every other gen-*.mjs in this
+  // directory.
+  // +1 for gen-milb-alumni.mjs — the nightly precompute behind the "Made The
+  // Show" card. A generator belongs beside its siblings here: the nightly
+  // workflow runs this directory as a flat list, and scripts/lib/ is for
+  // testable helpers, not top-level scripts (a generator file RUNS on import,
+  // so it cannot live there).
+  scripts: 77,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -321,7 +360,17 @@ const BUDGETS = {
   // files a record under a name the reader recomputes from an id, so a drift of
   // one player is a record that exists and can never be found. Four lines and no
   // imports — a leaf constant, not a new subsystem.
-  'src/lib': 53,
+  // +1 for sealTear.js — where the kraft seal's cover splits when it is torn
+  // off, as pure math (the two clip-path polygons; the motion is CSS). It sits
+  // here for the reason passportLayout.js and stampArt.js do: a component that
+  // types its own coordinates has put them somewhere nothing can check, and the
+  // promise this one makes — the same seal tears identically forever — is only
+  // testable if the path is a function. It seeds off stampArt.js's own
+  // `stampSeed` rather than adding a second answer to that question. A leaf
+  // module, not a new subsystem.
+  // +1 for scorecardNotes.js — the scorecard's per-cell override store, the
+  // same React-free-core-under-a-hook shape as stamps.js/books.js beside it.
+  'src/lib': 55,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
@@ -347,7 +396,11 @@ const BUDGETS = {
   // +1 for reassignable-merge.mjs — the generic version of that same fix,
   // so any future append-only generator keyed on an upstream-asserted
   // identity can adopt it instead of hand-rolling the same bug again.
-  'scripts/lib': 18,
+  // +1 for milb-alumni.mjs — the ranking, the incremental-scan decision and the
+  // games floor behind gen-milb-alumni.mjs. This directory exists precisely for
+  // this: a generator file RUNS on import, so a helper worth a unit test has to
+  // live here to be testable at all (test/milb-alumni.test.js).
+  'scripts/lib': 19,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -359,14 +412,18 @@ const BUDGETS = {
   // +1 for GamePreview.jsx — the preview-poster studio, a lazily-loaded
   // game section (step 4) alongside TeamInfo/InningViewer/BoxScore. Same
   // shape as its siblings: one route, one screen, in the flat set.
-  'src/screens': 40,
+  // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
+  // AnimationLab.jsx beside it.
+  'src/screens': 41,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.
   // 19 -> 20 for useBooks.js — useStamps.js's sibling for the new multi-book
   // store (src/lib/books.js), same React-wiring-over-a-pure-core shape as the
   // hook it sits beside.
-  'src/hooks': 20,
+  // 20 -> 21 for useScorecardNotes.js — the storage wiring over
+  // lib/scorecardNotes.js, the same shape one more time.
+  'src/hooks': 21,
   'src/screens/identity-lab': 15,
 }
 

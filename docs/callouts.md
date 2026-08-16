@@ -13,13 +13,14 @@ birthday career lines) and the standings splits (one-run / extra-inning
 records) stay MLB-only — a MiLB bundle simply lacks those keys and the notes
 never fire.
 
-## The four surfaces
+## The five surfaces
 
 | Surface | Module | Tense |
 | --- | --- | --- |
 | Innings-view play cards | `buildCallouts` (`src/api/callout-notes.js`) via `PlayByPlay` | Entering + revealed plays only ("that's No. 16 this season") |
-| Pre-half strip (above each half's seal) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`) via `PreHalfCallouts` | Entering; the leading-after + times-through notes restate already-revealed material |
+| Pre-half strip (the reference panel's ARMS tab, merged into Margin Notes) | `buildPreHalfCallouts` (`src/api/prehalf-callouts.js`) via `ReferencePanel` | Entering; the leading-after + times-through notes restate already-revealed material |
 | Margin Notes (always open, spans both teams' pitchers) | `buildMarginNotes` (`src/api/pitcher-callouts.js`) via `MarginNotes` | Entering-tonight season aggregates + live health reads (laboring, velo decay), never result-aware — same footing as the pre-half strip |
+| Between Innings (the console band, any revealed half) | `buildBetweenInnings` (`src/api/between-innings.js`) via `BetweenInnings` | Same entering-tonight families as Margin Notes/the pre-half strip, through a stricter hard allowlist that drops every checkpoint family that reads tonight's score |
 | Box score Insights roll-up | `computeGameCalloutNotes` (`src/api/callout-notes.js`) via `BoxScore` | Result-aware once Final, narrated with tonight's own events ("Struck out 7 tonight and leads…", "Went 0-for-3 tonight, snapping…") |
 
 Margin Notes replaced the old Pitchers-table note list, which used to sit

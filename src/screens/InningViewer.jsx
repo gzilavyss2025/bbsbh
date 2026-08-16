@@ -21,11 +21,11 @@ import { ordinal } from '../lib/format.js'
 import { RefreshButton } from './TeamInfo.jsx'
 import { RollingLine } from '../components/gamehud/RollingLine.jsx'
 import { ExtrasBanner } from '../components/inning/ExtrasBanner.jsx'
-import { FocusControls, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
+import { FocusControls, FocusTrail, useFocusMode } from '../components/inning/focus/FocusControls.jsx'
+import { InningActionBar } from '../components/inning/InningActionBar.jsx'
+import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
-import { ReferenceBand, RosterPanels } from '../components/inning/ReferenceBand.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
-import { ScorebugMount } from '../components/gamehud/ScorebugMount.jsx'
 import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
 import { InningPage } from './innings/InningPage.jsx'
 import { InningPageTurn } from '../components/page-turn/InningPageTurn.jsx'
@@ -48,11 +48,6 @@ const RevealCloudSync = isClerkEnabled
 // calls onReveal directly, not via `?.()` — the same reason InningPage.jsx keeps
 // its own `noop` for the page-turn preview.
 const noopReveal = () => {}
-
-// The win-prob pair's stand-in while focus mode is on (see their comment) —
-// module-scope so the memoized InningPage sees one identity, not a fresh
-// empty array per render.
-const NO_WINPROB = []
 
 // Value-equality check for the scorebug's live snapshot (see `liveState`
 // below) — `entries` is rebuilt fresh every render in PlayByPlay.jsx, so a
@@ -119,6 +114,7 @@ export function InningViewer({
   half,
   onInning,
   onBoxScore,
+  onScorecard,
   onReload,
   loading,
   lastUpdated,
@@ -183,6 +179,11 @@ export function InningViewer({
   // last half actually played (selectFinalHalfIndex) — what lets the server
   // know a card has nothing left to pick up once revealedThrough reaches it,
   // and drop it from the index instead of adding it back.
+  // The half-index of the last half actually played, null until the game ends.
+  // Two consumers, one call: the cloud scorebook index below, and focus mode's
+  // action-bar label (`bookClosed`, further down).
+  const finalHalfIndex = useMemo(() => selectFinalHalfIndex(feed), [feed])
+
   const gameSnapshot = useMemo(() => {
     const gd = feed?.gameData
     if (!gd) return null
@@ -194,9 +195,9 @@ export function InningViewer({
       homeName: gd.teams?.home?.clubName ?? gd.teams?.home?.teamName ?? '',
       gameNumber: gd.game?.gameNumber ?? 1,
       regulation,
-      finalHalfIndex: selectFinalHalfIndex(feed),
+      finalHalfIndex,
     }
-  }, [feed, regulation])
+  }, [feed, regulation, finalHalfIndex])
 
   // Only mounted when multi-device sync is configured (see clerkConfig.js) —
   // a conditionally-rendered component rather than a conditionally-called
@@ -277,16 +278,6 @@ export function InningViewer({
   // so E still only moves once revealedThrough advances. Reset on every half
   // change — RollingLine only trusts this for the exact half-index it's
   // keyed to anyway, but there's no reason to hold it a moment longer.
-  // Which corner the scorebug dock parks in, once the reader has moved it.
-  // Null means "whatever the layout defaults to", so the dock doesn't jump on
-  // mount; ScorebugMount owns both the default and the stepping arithmetic.
-  // The STATE lives up here because that component is unmounted and remounted
-  // every time the reader crosses between a sealed half (focus mode's anchored
-  // band) and a revealed one (the floating dock) — its own state would be
-  // discarded on each crossing, which is what used to throw the chosen corner
-  // away. See ScorebugMount's header.
-  const [cornerIdx, setCornerIdx] = useState(null)
-
   const [runsInProgress, setRunsInProgress] = useState(null)
   // Reset computed during render (not in an effect) on a half change — see
   // Headshot.jsx for the same pattern.
@@ -314,20 +305,6 @@ export function InningViewer({
   // "nothing to show yet" rather than rendering the half just left behind.
   const [liveState, setLiveState] = useState(null)
   const curLiveState = liveState?.forIdx === curIdx ? liveState.data : null
-
-  // Mobile placement (< 740px, WIDE_QUERY): the scorebug is fixed top-right
-  // but stays invisible until the real linescore (RollingLine) has scrolled
-  // out of view — an IntersectionObserver on RollingLine's own <section>
-  // (forwarded via `sectionRef`, no wrapping div — see RollingLine.jsx).
-  // Desktop (>= 740px) ignores this entirely and stays always-visible via
-  // CSS (index.css's `.gamehud-dock` media query), so the observer simply
-  // runs harmlessly there too rather than branching on width in JS.
-  //
-  // The observer ITSELF is set up further down, next to `focus`, because the
-  // one thing it must branch on is whether focus mode is on — and that is not
-  // known this far up the component. See it there.
-  const rollingRef = useRef(null)
-  const [pastLine, setPastLine] = useState(false)
 
   // KEEPING UP WITH A LIVE GAME (ADR-0026). While the pass is running, a half
   // turning over for real — the game moving forward while you're actually
@@ -386,28 +363,18 @@ export function InningViewer({
         inning={pageInning}
         half={pageHalf}
         meta={meta}
-        isMlb={isMlb}
         revealedThrough={renderRevealedThrough}
         onReveal={commitReveal}
-        prospectsData={prospectsData}
-        rookiesData={rookiesData}
         callouts={callouts}
-        workload={workload}
-        workloadGameDate={workloadGameDate}
         vsTeam={vsTeam}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
-        focusOne={focus.focused}
+        windowed={focus.windowed}
         focusStep={focus.step}
         onFocusInfo={focus.reportSteps}
         onStepInfo={reportStepInfo}
         onRunsSoFar={reportRunsSoFar}
         onLiveState={reportLiveState}
-        getDerived={getDerived}
-        runExpectancy={runExpectancy}
-        winProbPoints={winProbPoints}
-        winProbBigPlays={winProbBigPlays}
-        winProbTreatment={winProbTreatment}
         presentationOnly={presentationOnly}
       />
     )
@@ -442,36 +409,18 @@ export function InningViewer({
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
   const currentSealed = curIdx > renderRevealedThrough
-  // Focus mode: a sealed half shows the linescore and ONE at-bat (useFocusMode
-  // for the state, 11-innings.css for what folds away).
+  // The console chrome is unconditional now (every half gets the anchored
+  // band + tabbed reference panel); useFocusMode only decides whether the
+  // play-by-play windows to one at-bat or shows the whole half stacked.
   const focus = useFocusMode(curIdx, currentSealed)
 
-  // The `pastLine` observer declared above, mounted HERE so it can read
-  // `focus.focused` — and skipped entirely while focus mode is on.
-  //
-  // `pastLine` has exactly one consumer: the floating scorebug dock, which
-  // fades in once RollingLine scrolls away. Focus mode does not mount that
-  // dock at all (the band up in the grid replaces it — see the `!focus.focused`
-  // guard on ScorebugMount below), so on the app's hottest screen this was an
-  // IntersectionObserver firing on every scroll to drive a piece of state
-  // nothing reads, re-rendering this whole tree each time it crossed the
-  // threshold. Observing is cheap; the render it triggers on a component this
-  // size is not.
-  //
-  // Keyed on `focus.focused` rather than torn down by hand: leaving focus mode
-  // re-runs this and re-observes, and `observe()` reports the current
-  // intersection immediately, so the dock's first frame after the half commits
-  // is correct rather than restored from a stale reading.
-  useEffect(() => {
-    if (focus.focused) return undefined
-    const el = rollingRef.current
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined
-    const obs = new IntersectionObserver(([entry]) => setPastLine(!entry.isIntersecting), {
-      threshold: 0,
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [focus.focused])
+  // THE BOOK IS CLOSED (ADR-0046): the reader has revealed every half actually
+  // played. Two consequences below — the closing rule draws DOUBLE, and the
+  // bar's last action is named as an act rather than a destination. Keyed on
+  // the reveal mark against `finalHalfIndex` and NEVER on `selectIsFinal`;
+  // bookIsClosed's header has the argument. `renderRevealedThrough`, same as
+  // every other render consumer here.
+  const bookClosed = bookIsClosed(renderRevealedThrough, finalHalfIndex)
 
   // At-bat stepping (ADR-0016): the floating bar always offers a sealed half
   // as two side-by-side choices — reveal just the next plate appearance, or
@@ -647,50 +596,45 @@ export function InningViewer({
   // half is revealed/stepped into in order, and at MiLB parks with no
   // win-prob feed — the chart then renders nothing.
   const stepFrontierIdx = curIdx === renderRevealedThrough + 1 ? curIdx : null
-  // A primitive for the two memos below — the React-Compiler dry-run lint
-  // can't see that a property of the per-render `focus` object is stable.
-  const inFocusLayout = focus.focused
-  // NOT COMPUTED WHILE FOCUS MODE IS ON. Both values feed only WinProbChart,
-  // and focus mode never builds its row (InningPage's `!focusOne` gate) — yet
-  // `curStepInfo` changes per "Next at-bat" tap, so both selectors re-walked
-  // the win-prob feed per tap for a chart nobody could see (#686's
-  // not-built-instead-of-hidden rule, one layer up). The step clamp only ever
-  // ACTIVATES while focused (`stepFrontierIdx` is non-null exactly on the
-  // next-to-reveal half, which is always sealed, hence focused), so outside
-  // focus these compute the plain committed-halves path exactly as before;
-  // the moment focus ends the memo re-runs and the chart fills in. Reveal
-  // footing untouched — that path reads only committed halves.
+  // BUILT FOR EVERY HALF NOW — the reference panel's ARMS tab renders
+  // WinProbChart unconditionally (it used to be skipped entirely while
+  // focused, InningPage's old `!focusOne` gate, since the chart was never
+  // built at all — #686's "don't build what folds" argument). That argument
+  // no longer applies: the chart is always on screen somewhere now, so
+  // there's nothing left to build for nobody to see. The step-clamped path
+  // below (`stepFrontierIdx` non-null) is consequently exercised on every
+  // "Next at-bat" tap for the first time since that gate shipped — see this
+  // refactor's spoiler-safety verification notes on `api/winprob.js`'s own
+  // independent `stepHalfIndex === throughHalf + 1` enforcement, the second
+  // layer this doesn't rely on alone.
+  //
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbPoints = useMemo(
     () =>
-      inFocusLayout
-        ? NO_WINPROB
-        : selectWinProbPath(winProbability, {
-            throughHalf: renderRevealedThrough,
-            stepHalfIndex: stepFrontierIdx,
-            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-          }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
+      selectWinProbPath(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
   // The biggest-swing ledger — same reveal-only selector, same clamp
   // (committed halves plus the in-progress step), so it only ever covers
   // plays already on screen and grows one entry at a time right along with
-  // the chart above (never hinting what's ahead). Same focus-mode skip too.
+  // the chart above (never hinting what's ahead).
   // Same React-Compiler dry-run diagnostic as workloadGameDate above (no
   // babel-plugin-react-compiler in this build — see that comment).
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const winProbBigPlays = useMemo(
     () =>
-      inFocusLayout
-        ? NO_WINPROB
-        : selectWinProbBigPlays(winProbability, {
-            throughHalf: renderRevealedThrough,
-            stepHalfIndex: stepFrontierIdx,
-            throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
-          }),
-    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo, inFocusLayout],
+      selectWinProbBigPlays(winProbability, {
+        throughHalf: renderRevealedThrough,
+        stepHalfIndex: stepFrontierIdx,
+        throughAtBatIndex: stepFrontierIdx != null ? (curStepInfo?.lastAtBatIndex ?? null) : null,
+      }),
+    [winProbability, renderRevealedThrough, stepFrontierIdx, curStepInfo],
   )
 
   // Every pitcher who has appeared in a revealed half-inning, with running
@@ -735,13 +679,9 @@ export function InningViewer({
     )
   }
 
-  // One prop bag, two consumers: the plain inline band below the reading pane
-  // (unfocused), and ReferencePanel's tabbed column/sheet (focused). Same
-  // components, same already-gated values either way — only WHERE they render
-  // changes. Hoisted rather than spelled out at each call site so the two can
-  // never drift apart.
-  // Built once, rendered in one of two slots (see .innings__stage below) —
-  // above the at-bat on the ordinary page, below the trail in focus mode.
+  // Rendered once, below the trail, in .innings__stage (see below) — its run
+  // cells double as the half-inning navigator (the only way to reach a half
+  // that isn't ±1 away), so it stays on screen at every reveal state.
   const rollingLine = (
     <RollingLine
       feed={feed}
@@ -756,7 +696,6 @@ export function InningViewer({
       curIdx={curIdx}
       onSelect={(idx) => (idx > curIdx ? requestForwardHalf(idx) : goTo(idx))}
       disabled={turning}
-      sectionRef={rollingRef}
     />
   )
 
@@ -779,10 +718,15 @@ export function InningViewer({
     managers,
     uniforms,
     scorebookWeather,
+    getDerived,
+    runExpectancy,
+    winProbPoints,
+    winProbBigPlays,
+    onScorecard,
   }
 
   return (
-    <div className={`innings${focus.focused ? ' innings--focus' : ''}`}>
+    <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
       {cloudSync}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
           and the half-inning navigator share one chrome row on the wide layout,
@@ -843,53 +787,50 @@ export function InningViewer({
           lineups / defense reference band, then rosters. From the wide
           breakpoint up the stat card and WPA chart sit side by side. */}
       <div className="innings__grid">
-        {/* The anchored console band — focus mode only. The scorebug as this
-            screen's masthead rather than a dock floating over the at-bat card,
-            plus whichever companion card the half's state calls for; it spans
-            both grid columns. See ConsoleBand.jsx (ADR-0043) for the row's
-            three states and why the band no longer stretches to fill an empty
-            one. The unfocused page mounts ScorebugMount directly further down
-            instead, where it renders the floating dock — never both at once. */}
-        {focus.focused && (
-          <ConsoleBand
-            started={started}
-            live={curLiveState}
-            feed={feed}
-            unlocked={renderUnlocked}
-            revealedThrough={renderRevealedThrough}
-            runsInProgress={runsInProgress}
-            meta={meta}
-            treatment={winProbTreatment}
-            viewIdx={curIdx}
-            viewInning={effInning}
-            viewHalf={effHalf}
-            getDerived={getDerived}
-            postHalf={focus.postHalf}
-            steps={focus.steps}
-            stepFrontierIdx={stepFrontierIdx}
-            stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
-          />
-        )}
+        {/* The anchored console band — unconditional now. The scorebug as
+            this screen's masthead rather than a dock floating over the at-bat
+            card, plus whichever companion card the half's state calls for; it
+            spans both grid columns. See ConsoleBand.jsx (ADR-0043) for the
+            row's states. There is no floating dock any more — this is the
+            scorebug's one placement. */}
+        <ConsoleBand
+          started={started}
+          live={curLiveState}
+          feed={feed}
+          unlocked={renderUnlocked}
+          revealedThrough={renderRevealedThrough}
+          runsInProgress={runsInProgress}
+          meta={meta}
+          treatment={winProbTreatment}
+          viewIdx={curIdx}
+          viewInning={effInning}
+          viewHalf={effHalf}
+          getDerived={getDerived}
+          currentSealed={currentSealed}
+          closePhase={focus.closePhase}
+          stepAtBatIndex={curStepInfo?.lastAtBatIndex ?? null}
+          bundle={callouts}
+          marginNotes={marginNotes}
+          workload={workload}
+          gameDate={workloadGameDate}
+        />
 
-        {/* `.innings__stage` is `display: contents` outside the wide+focused
-            grid case (styles/focus/stage.css), so its children flow straight
-            into .innings__grid's ordinary flex layout, unchanged. Only under
-            `.innings--focus` at wide width does it become a real box in the
-            grid's first column — CSS Grid auto-placement cannot otherwise tell
-            these children apart from the reference column, which explicitly
-            claims column 2, and an item auto-placed after an explicitly
-            positioned one can resolve into that same column. One explicit item
-            per column removes the ambiguity instead of relying on span math. */}
+        {/* `.innings__stage` is a real box in the grid's first column at wide
+            width (styles/focus/stage.css) — CSS Grid auto-placement cannot
+            otherwise tell these children apart from the reference column,
+            which explicitly claims column 2, and an item auto-placed after an
+            explicitly positioned one can resolve into that same column. One
+            explicit item per column removes the ambiguity instead of relying
+            on span math. */}
         <div className="innings__stage">
-          {/* Focus mode MOVES the running line below the at-bat rather than
-              dropping it (ADR-0043). Demoting it is right — mid-half it
-              duplicates the console band's score, and writing R/H/E is a
-              between-halves act — but removing it is not: its run cells double
-              as the half-inning navigator (see RollingLine.jsx), the only way
-              to jump to a half that isn't ±1 away, and e2e/innings-page-turn
-              pins that. So it renders either way; only its place in the
-              reading order changes. */}
-          {!focus.focused && rollingLine}
+          {/* THE TRAIL, ABOVE THE HERO (ADR-0043's amendment). Every at-bat
+              already revealed this half is what shows the half BUILDING — the
+              point of watching it live rather than reading it after — landing
+              right next to the card it describes, in the reader's normal
+              top-to-bottom scan. The post-half "See the whole half" link
+              stays under the card, by the bar it hands off to —
+              `FocusControls` below still owns that link. */}
+          <FocusTrail focus={focus} turning={turning} inning={effInning} half={effHalf} />
 
           {/* The half's play-by-play (paired with its strike zone on the wide
               layout) plus the R/H/E/LOB + pitch-stat/WPA row beneath it — see
@@ -908,178 +849,60 @@ export function InningViewer({
 
           <FocusControls focus={focus} turning={turning} />
 
-          {/* Focus mode's slot for it — under the trail, so the at-bat and the
-              control that pages it stay adjacent and the linescore reads as the
-              reference it is here. */}
-          {focus.focused && rollingLine}
+          {/* Under the trail, so the at-bat and the control that pages it stay
+              adjacent and the linescore reads as the reference it is here —
+              its run cells double as the half-inning navigator, the only way
+              to jump to a half that isn't ±1 away (e2e/innings-page-turn pins
+              this). */}
+          {rollingLine}
         </div>
 
-        {/* Reference band. On the wide layout: pitchers + the fielding defense
-            on the left, both lineups on the right. On a phone only Pitchers
-            shows here — the lineups & defense render inline in the half instead
-            (the -lineups / -defense blocks are hidden <740; the inline copies,
-            .half__entering, are hidden ≥740). Gated to a reached half — the
-            gate itself now lives in defenseEntering/lineupEntering (passed
-            revealedThrough below), not re-derived here; this outer check only
-            decides whether to print the wrapper/title around them, so a
-            further-out half doesn't leave a title-only empty card.
+        {/* The reference shelf — pitchers, lineups, fielding defense, benches —
+            through ReferencePanel: a tabbed, permanently-open reserved column
+            at wide widths, or a chip row opening a sheet on a phone
+            (ReferencePanel.jsx, ADR-0043). One section at a time, so the
+            reader reaches the one they want without scrolling past four they
+            don't. Unconditional now — every half gets it, live or historical. */}
+        <ReferencePanel {...refProps} rosters={rosters} />
+      </div>
 
-            Focused: the same sections render through ReferencePanel instead —
-            a tabbed, permanently-open reserved column at wide widths, or a chip
-            row opening a sheet on a phone (ReferencePanel.jsx, ADR-0043). One
-            section at a time, so the reader reaches the one they want without
-            scrolling past four they don't. */}
-        {focus.focused ? (
-          <ReferencePanel {...refProps} rosters={rosters} />
-        ) : (
-          <>
-            <ReferenceBand {...refProps} />
-            <RosterPanels
-              rosters={rosters}
-              meta={meta}
-              treatment={winProbTreatment}
-              revealedThrough={renderRevealedThrough}
-              prospectsData={prospectsData}
-              rookiesData={rookiesData}
-              isMlb={isMlb}
+      {/* The floating bar (components/inning/InningActionBar.jsx) — the three
+          states it renders, the Refresh it always carries, and the hold the
+          closing rule puts on its forward action all live in that file's
+          header. Everything it needs is resolved here and handed down; it
+          decides nothing about the reveal mark itself. */}
+      <InningActionBar
+        focused={focus.windowed}
+        closing={focus.closing}
+        turning={turning}
+        refresh={
+          /* Dropped once the game is over — the feed is complete and a refetch
+             returns the same bytes. Same `selectIsFinal` test, for the same
+             reason, that already drops the box score's own Refresh
+             (screens/BoxScore.jsx). Revealing is unaffected: it reads the feed
+             already in hand. */
+          selectIsFinal(feed) ? null : (
+            <RefreshButton
+              onReload={onReload}
+              loading={loading}
+              lastUpdated={lastUpdated}
+              className="refreshbtn--float"
             />
-          </>
-        )}
-      </div>
-
-      {/* The floating scorebug dock, for the ordinary stacked page — desktop
-          bottom-right always, mobile top-right once RollingLine has scrolled
-          out of view (`pastLine`). Focus mode renders the SAME component
-          up in the grid instead, anchored (see the `focus.focused` copy
-          above); this one is mounted only when it isn't, so the two can never
-          both be on screen. Everything else about it — the pre-game/`live`
-          gate, the jersey-reactive marks, the reveal-progress runs arithmetic,
-          and the tap-to-step-corners affordance — moved intact into
-          ScorebugMount.jsx; see its header. */}
-      {!focus.focused && (
-        <ScorebugMount
-          started={started}
-          live={curLiveState}
-          feed={feed}
-          unlocked={renderUnlocked}
-          revealedThrough={renderRevealedThrough}
-          runsInProgress={runsInProgress}
-          meta={meta}
-          treatment={winProbTreatment}
-          viewIdx={curIdx}
-          viewInning={effInning}
-          viewHalf={effHalf}
-          pastLine={pastLine}
-          cornerIdx={cornerIdx}
-          setCornerIdx={setCornerIdx}
-        />
-      )}
-
-      {/* Floating bar — the same fixed blue bar the lineup pages page forward
-          with, and the same destination-named + trailing-› convention their
-          nextLabel buttons use ("Home team ›", "Innings ›") — no "Next:"
-          prefix, no arrow glyph.
-
-          IT CARRIES THE ONLY REFRESH, AT EVERY WIDTH. This used to read as a
-          "duplicate … hidden again on the wide layout, where the top toolbar
-          stays reachable", describing an arrangement where the toolbar and the
-          bar each held a copy and swapped by breakpoint. Neither half of that
-          is true any more: Refresh left `.inningchrome` entirely, and nothing
-          hides `.refreshbtn--float` at any width (the only other RefreshButton
-          on this screen is the pre-game scoreboard's, above). So the bar is
-          where you reach for it during a live game, phone and desktop alike —
-          which is also why `.pagenav--innings`'s hit-area rules measure around
-          a Refresh row that is always there, and why focus mode's one-row bar
-          has to shrink it to icon scale rather than drop it (styles/focus).
-
-          Three states: a sealed half offers two reveal choices (ADR-0016) —
-          step one at-bat, or the whole half at once; otherwise it's the plain
-          advance — "Box score ›" at the furthest revealed inning (never "Top
-          10th ›", which would leak the game going to extras) or the next-half
-          label once one unlocks; and under the Scores Unlocked pass, at the
-          live frontier, a calm status instead of either.
-
-          A half that just finished used to be a FOURTH state, pairing the
-          advance with a "Summary" button that swapped the single at-bat for the
-          whole half. THE BAR's fourth state is still gone: the numbers a scorer
-          wants when a half closes arrive on their own in the console band
-          (HalfTally.jsx), so the end of a half has exactly one thing to say
-          here and it is "carry on". The whole-half view itself came back as a
-          quiet paper-pill link under the trail instead (FocusControls.jsx —
-          see useFocusMode's summary note for the history), which is a change
-          to the stage, not to this bar. */}
-      <div className={`pagenav pagenav--innings${focus.focused ? ' pagenav--focus' : ''}`}>
-        {/* …EXCEPT once the game is over, when there is nothing left to fetch:
-            the feed is complete and a refetch returns the same bytes. Same
-            `selectIsFinal` test, for the same reason, that already drops the
-            box score's own Refresh (screens/BoxScore.jsx) — a control that
-            cannot change anything is a control that should not be on the one
-            row a thumb is working. Revealing is unaffected: it reads the feed
-            already in hand.
-
-            The dead-space hit areas answer for themselves. Their -76px reach
-            is already behind `:has(.refreshbtn--float)`, with the bare -20px
-            for exactly this case, so the area still stops inside a bar that
-            is one row shorter rather than overshooting into the page. */}
-        {!selectIsFinal(feed) && (
-          <RefreshButton
-            onReload={onReload}
-            loading={loading}
-            lastUpdated={lastUpdated}
-            className="refreshbtn--float"
-          />
-        )}
-        {atLiveEdge ? (
-          <div className="liveedge" role="status" aria-live="polite">
-            <span className="liveedge__dot" aria-hidden="true" />
-            <span className="liveedge__label">{liveEdgeLabel}</span>
-          </div>
-        ) : currentSealed ? (
-          <div className="revealsplit">
-            <button
-              type="button"
-              className="btn btn--reveal revealsplit__btn"
-              onClick={revealNextAtBat}
-              aria-label={`Reveal the next at-bat in the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
-            >
-              Next at-bat
-            </button>
-            {/* NOT THE SAME WEIGHT AS THE BUTTON BESIDE IT. These were two
-                identical kraft seals, equal width and equal pull, and they do
-                opposite things: the left one advances the loop the reader is
-                here for, one at-bat at a time, forty times a half-hour. This
-                one ENDS it — it is the skip. A skip button drawn as loud as
-                the play button is a thumb waiting to make a mistake it cannot
-                undo, since revealing is one-directional (ADR-0002).
-
-                Demoted, not moved and not shrunk: same row, same width, same
-                tap target — only the kraft texture comes off (see
-                `.revealsplit__btn--quiet`, styles/focus/stage.css). The hit
-                areas in 24-floating-nav-and-hud.css measure geometry, which is
-                untouched, so e2e/reveal-hit-area.spec.js holds. */}
-            <button
-              type="button"
-              className="btn btn--reveal revealsplit__btn revealsplit__btn--quiet"
-              onClick={revealWholeHalf}
-              aria-label={`Reveal the rest of half — the ${effHalf === 'top' ? 'top' : 'bottom'} of the ${ordinal(effInning)} inning`}
-            >
-              Rest of half
-            </button>
-          </div>
-        ) : nextIdx != null ? (
-          <button
-            className="btn btn--next"
-            onClick={() => requestForwardHalf(nextIdx)}
-            aria-disabled={turning || undefined}
-          >
-            {nextLabel} ›
-          </button>
-        ) : (
-          <button className="btn btn--next" onClick={onBoxScore}>
-            Box score ›
-          </button>
-        )}
-      </div>
+          )
+        }
+        atLiveEdge={atLiveEdge}
+        liveEdgeLabel={liveEdgeLabel}
+        currentSealed={currentSealed}
+        effInning={effInning}
+        effHalf={effHalf}
+        onRevealNextAtBat={revealNextAtBat}
+        onRevealWholeHalf={revealWholeHalf}
+        nextIdx={nextIdx}
+        nextLabel={nextLabel}
+        onForward={requestForwardHalf}
+        bookClosed={bookClosed}
+        onBoxScore={onBoxScore}
+      />
     </div>
   )
 }

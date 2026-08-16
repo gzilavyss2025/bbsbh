@@ -33,6 +33,7 @@
     "check:dead-exports": "node scripts/check-dead-exports.mjs",
     "check:dist-dev": "node scripts/check-dist-dev-routes.mjs",
     "compress-logos": "node scripts/compress-logos.mjs && node scripts/gen-logo-art.mjs",
+    "gen:ballpark-thumbs": "node scripts/gen-ballpark-thumbs.mjs",
     "lint:fix": "eslint . --fix",
     "prepare": "git config core.hooksPath .githooks || true",
     "test": "node --test --test-reporter=dot \"test/**/*.test.js\"",

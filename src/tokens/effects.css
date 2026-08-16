@@ -32,14 +32,25 @@
      feedback" spec) for controls a touch heavier than the plain --dur-fast tap. */
   --dur-snappy: 160ms;
 
-  /* The one ease-IN in the system, for the Logbook stamp coming down onto its
-     passport page (.passportpage__stamp--landed). Everything else in this app
+  /* The one ease-IN in the system: the Logbook stamp coming down onto its
+     passport page (.passportpage__stamp--landed), and the kraft seal's two
+     halves tearing off it (.sealtear__half). Everything else in this app
      decelerates, because everything else is a UI surface arriving; a stamp is
-     PUSHED, so it has to gather speed on the way to the paper and stop on it.
+     PUSHED and a torn seal is THROWN, so both gather speed instead of settling.
      Penner's easeInCubic, which is the curve that era of interface used for
      exactly this. Do not reach for it to bring something on screen — an ease-in
-     entrance reads as sluggish, which is why there is only one caller. */
+     entrance reads as sluggish, which is why both callers are things LEAVING
+     (or arriving under their own weight), never something appearing. */
   --ease-press: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+
+  /* The seal tear (src/components/SealBox.jsx, .sealtear). Its own duration
+     rather than --dur-slow, because this is the one gesture in the app that has
+     to finish BEFORE the thing behind it finishes arriving: the halves are gone
+     at --dur-tear while the panel's own --dur-slow fade, started --dur-tear-lead
+     in, still has a moment to run. Widening that gap makes the panel look late;
+     closing it makes the tear look like a wipe. */
+  --dur-tear:      500ms;
+  --dur-tear-lead: 200ms;
 
   /* The card flip (src/components/FlipCard.jsx, .flipcard__inner) — a
      bidirectional turn, so it earns its own symmetric ease-in-out rather than

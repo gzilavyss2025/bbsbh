@@ -44,6 +44,7 @@
 @import './styles/11-innings.css';
 @import './styles/11-pregame-scoreboard.css';
 @import './styles/12-sealbox.css';
+@import './styles/12a-seal-tear.css';
 @import './styles/13-play-by-play.css';
 @import './styles/14-strike-zone.css';
 @import './styles/18-uniforms-and-jerseys.css';
@@ -71,6 +72,7 @@
 @import './styles/39-manager-page.css';
 @import './styles/40-game-modals.css';
 @import './styles/41-scorecard.css';
+@import './styles/41a-scorecard-page.css';
 @import './styles/44-pre-game-cards.css';
 @import './styles/46-consent-modal.css';
 @import './styles/48-stamp-strip.css';
@@ -79,6 +81,7 @@
 @import './styles/55-my-tally-account.css';
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
+@import './styles/64-milb-alumni.css';
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split

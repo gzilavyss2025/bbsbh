@@ -245,6 +245,18 @@ function plateFor(officials, umpire) {
     // outlines the ones over the floor; it does not shade all nine.
     zoneCells: Array.isArray(umpire?.zoneCells) ? umpire.zoneCells : null,
     watch: umpire?.watchArea ? { phrase: umpire.watchArea.phrase, hand: umpire.watchArea.hand } : null,
+    // The ABS challenge pair plus the league baseline — counts of ball/strike
+    // JUDGMENT challenges and their outcomes, never a run or result, the same
+    // footing as every other figure here. Null on a row set swept before the
+    // challenge schema shipped, exactly as the card's own guard handles it.
+    challenges:
+      umpire?.challenges?.perGame != null
+        ? { perGame: umpire.challenges.perGame, overturnRate: umpire.challenges.overturnRate }
+        : null,
+    leagueChallenges:
+      umpire?.leagueChallenges?.overturnRate != null
+        ? { overturnRate: umpire.leagueChallenges.overturnRate }
+        : null,
   }
 }
 

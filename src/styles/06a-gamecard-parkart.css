@@ -1,10 +1,10 @@
-/* The ballpark behind the card — a slate card's hover state.
+/* The ballpark behind the card — a slate card's on-screen state.
    ---------------------------------------------------------------------------
-   Hover a game and the park it is being played in fades in behind the whole
-   card: the same photograph the team hub's Ballpark card shows, drained to
-   grayscale and held down to a wash. The point is recognition, not decoration —
-   you should be able to tell Fenway from Wrigley at a glance and still read
-   every word printed over it.
+   Scroll a game card onto screen and the park it is being played in fades in
+   behind the whole card: the same photograph the team hub's Ballpark card
+   shows, drained to grayscale and held down to a wash. The point is
+   recognition, not decoration — you should be able to tell Fenway from
+   Wrigley at a glance and still read every word printed over it.
 
    Sits immediately after 06-loader-and-cards.css because it belongs to the
    .gamecard rules there and must win at equal specificity; that file is over
@@ -15,11 +15,24 @@
    custom properties — an MiLB park, a neutral site, a lean feed row. The
    var() fallbacks below are what make "no park" cost no rule.
 
-   HOVER ONLY, and that is the whole feature: `@media (hover: hover)` keeps it
-   off touch, where there is no hover to give and a tap means "open this game".
-   The app is phone-first, so this is a nicety for the desktop second screen,
-   never something a phone visit is missing. GameCard asks the same question in
-   JS before it even names the image — see canHover() there. */
+   ONE TRIGGER for the reveal, every device. `.gamecard--parkinview` is a
+   class GameCard's IntersectionObserver toggles as the card crosses the
+   screen, arming `--park-art` — see the effect in GameCard.jsx. A desktop
+   hover pointer used to be a second trigger here, gated behind
+   `@media (hover: hover)` and arming a bigger photo; dropped because the wash
+   renders grayscale at 0.24 opacity either way, so the bigger photo never
+   showed anything the smaller one didn't, and a mouse user saw no backdrop at
+   all until they happened to hover a card. Phone and desktop now share the
+   one reveal rule below.
+
+   Hover still does ONE thing, further down: it recolours the already-loaded
+   wash toward the HOME club's own tile colour (`--park-tint`, GameCard.jsx's
+   `parkTint`) via `mix-blend-mode: color` on a second layer stacked over the
+   photo. That mode keeps the photo's luminance (so navy ink still reads the
+   same over it) and only shifts hue/saturation, which is why it can afford to
+   apply on top of an already-tuned opacity rather than needing its own
+   contrast pass. No second fetch either way — the colour is a value already
+   resolved client-side, not an image. */
 
 /* The clipping frame: the card's own interior, corners and all. It holds no
    image itself, only the ::before that carries one, because a background
@@ -53,8 +66,8 @@
   content: '';
   position: absolute;
   inset: -5%;
-  /* Named only once GameCard has armed the card (first hover) — see the comment
-     there. `none` is the un-armed value, so nothing is requested. */
+  /* Named only once GameCard has armed the card (first on screen) — see the
+     comment there. `none` is the un-armed value, so nothing is requested. */
   background-image: var(--park-art, none);
   background-size: cover;
   /* The focal point the owner picked on the Ballpark card's photo, in the same
@@ -64,6 +77,23 @@
   /* Grayscale because the card's colour belongs to the two clubs. A photograph
      in full colour behind their marks competes with the thing it is backing. */
   filter: grayscale(1);
+}
+
+/* The hover tint: a second layer, same crop as the photo it sits over, that
+   stays invisible (opacity 0) until a hover pointer reveals it further down.
+   `mix-blend-mode: color` takes hue/saturation from THIS layer's flat
+   `--park-tint` fill and luminance from what's already painted underneath (the
+   grayscale photo), which is what recolours the wash toward the home club
+   without flattening it into a solid swatch — the photo's own light and dark
+   areas stay readable underneath the tint. */
+.gamecard__parkart::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background: var(--park-tint, none);
+  mix-blend-mode: color;
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease-out);
 }
 
 /* Everything else on the card is a plain flex item — unpositioned, so it would
@@ -78,53 +108,64 @@
   z-index: 1;
 }
 
+.gamecard__atmark-ghost,
+.gamecard__atmark-ink {
+  transition: opacity var(--dur-med) var(--ease-out);
+}
+.gamecard__parkname {
+  transition: max-width var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out);
+}
+
+/* `.gamecard--parkinview` only ever appears on a card carrying a park (see
+   GameCard.jsx), so no var() fallback is needed here the way the base rules
+   above need one. */
+.gamecard--parkinview .gamecard__parkart {
+  /* Low enough that navy ink on manila still reads over the busiest photo in
+     the set (a full crowd shot), high enough to recognise the place. Tuned
+     against Fenway and Chase Field, the two most cluttered frames. */
+  opacity: 0.24;
+}
+
+/* The '@' is printed very faint by design (7%/10%), which is right on bare
+   paper and washes out over a photograph. It inks UP with the park so the
+   mark stays the thing in front — enough to hold its own against the busiest
+   frame in the set, still a watermark rather than a glyph. Nothing here is
+   persistent: these rules only apply while the card is in view, so a card
+   scrolled past is byte-for-byte the one 06-loader-and-cards.css prints. */
+.gamecard--parkinview .gamecard__atmark-ink {
+  opacity: 0.28;
+}
+.gamecard--parkinview .gamecard__atmark-ghost {
+  opacity: 0.3;
+}
+
+/* The park's name (.gamecard__parkname, styled in
+   07-team-logo-and-buttons.css) grows in alongside the photo it names —
+   same trigger, same duration, so the two read as one reveal rather than
+   two separately-timed ones. */
+.gamecard--parkinview .gamecard__parkname {
+  max-width: 240px;
+  opacity: 1;
+}
+
+/* The hover-only tint (see .gamecard__parkart::after above). Keyed on the
+   CARD, not the button, so the box-score row at the foot of a past game's
+   card counts as hovering the game too — the whole card is one object.
+   `:focus-within` covers the keyboard path to the same state. `--park-tint`
+   is absent for a team with no curated colour, so `background: none` above
+   just leaves the plain untinted wash — no separate fallback needed here. */
 @media (hover: hover) {
-  /* Keyed on the CARD, not the button, so the box-score row at the foot of a
-     past game's card counts as hovering the game too — the whole card is one
-     object. :focus-within covers the keyboard path to the same state. */
-  .gamecard:hover .gamecard__parkart,
-  .gamecard:focus-within .gamecard__parkart {
-    /* Low enough that navy ink on manila still reads over the busiest photo in
-       the set (a full crowd shot), high enough to recognise the place. Tuned
-       against Fenway and Chase Field, the two most cluttered frames. */
-    opacity: 0.24;
-  }
-
-  /* The '@' is printed very faint by design (7%/10%), which is right on bare
-     paper and washes out over a photograph. It inks UP with the park so the
-     mark stays the thing in front — enough to hold its own against the busiest
-     frame in the set, still a watermark rather than a glyph. Nothing here is
-     persistent: these rules only exist while the card is hovered, so the
-     unhovered '@' is byte-for-byte the one 06-loader-and-cards.css prints. */
-  .gamecard:hover .gamecard__atmark-ink,
-  .gamecard:focus-within .gamecard__atmark-ink {
-    opacity: 0.28;
-  }
-  .gamecard:hover .gamecard__atmark-ghost,
-  .gamecard:focus-within .gamecard__atmark-ghost {
-    opacity: 0.3;
-  }
-  .gamecard__atmark-ghost,
-  .gamecard__atmark-ink {
-    transition: opacity var(--dur-med) var(--ease-out);
-  }
-
-  /* The park's name (.gamecard__parkname, styled in
-     07-team-logo-and-buttons.css) grows in alongside the photo it names —
-     same trigger, same duration, so the two read as one reveal rather than
-     two separately-timed ones. */
-  .gamecard:hover .gamecard__parkname,
-  .gamecard:focus-within .gamecard__parkname {
-    max-width: 240px;
-    opacity: 1;
-  }
-  .gamecard__parkname {
-    transition: max-width var(--dur-med) var(--ease-out), opacity var(--dur-med) var(--ease-out);
+  .gamecard:hover .gamecard__parkart::after,
+  .gamecard:focus-within .gamecard__parkart::after {
+    /* Strong enough to read as "this club's colour," restrained enough that
+       the photo underneath (and the ink over it) stays the thing you see. */
+    opacity: 0.55;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .gamecard__parkart,
+  .gamecard__parkart::after,
   .gamecard__atmark-ghost,
   .gamecard__atmark-ink,
   .gamecard__parkname {

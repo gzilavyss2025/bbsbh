@@ -57,10 +57,22 @@ test('the caret always lands inside its own highlighted band', () => {
   }
 })
 
-test('the caret clamps into the scale at the extremes', () => {
-  assert.ok(leanCaretFraction(-99) >= 0)
-  assert.ok(leanCaretFraction(99) <= 1)
-  assert.equal(leanCaretFraction(0), 0.5) // dead average sits dead centre
+// The caret takes one of five positions — the CENTRE of its band's row. It
+// used to sit at z's continuous position inside the band, which put an
+// extreme umpire's caret on the scale's very edge: half the triangle above
+// the first row (or cut off below the last), visibly misaligned with the
+// boxed label beside it. Five settings, five spots.
+test('the caret sits at the centre of its own band, extremes included', () => {
+  const centre = (band) => (band + 0.5) / LEAN_TIERS.length
+  assert.equal(leanCaretFraction(-99), centre(0))
+  assert.equal(leanCaretFraction(-2.6), centre(0))
+  assert.equal(leanCaretFraction(-1.5), centre(0))
+  assert.equal(leanCaretFraction(-0.675), centre(1))
+  assert.equal(leanCaretFraction(0), centre(2)) // dead average sits dead centre
+  assert.equal(leanCaretFraction(0.675), centre(3))
+  assert.equal(leanCaretFraction(1.5), centre(4))
+  assert.equal(leanCaretFraction(2.6), centre(4))
+  assert.equal(leanCaretFraction(99), centre(4))
 })
 
 // --- the lean figure itself ---------------------------------------------------

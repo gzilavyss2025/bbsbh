@@ -35,6 +35,27 @@ don't run these by hand.
   extra request, and `.scratch/lineup-strength/` records why the WAR total
   can't be decomposed after the fact. The template for the build-time-fetch
   pattern; see `docs/data-enrichment.md` §5. App reads it via `src/api/war.js`.
+- `gen-milb-alumni.mjs` → `public/data/milb-alumni/{teamId}.json` — for each of the
+  ~120 current farm clubs, the six big-league players who came through it, ranked
+  by career WAR ("Made The Show", the last card on a MiLB team's Overview).
+  **Runs directly after `gen-war.mjs` and depends on it**: the ranking is summed
+  from `war.json` + the committed `war-history/` shards, so this generator makes
+  no WAR request of its own and a FanGraphs outage can't break it (it does mean
+  career WAR is 2010-on, understating a pre-2010 debut). Stints come from the
+  PLAYER side — `/people/{id}/stats?stats=yearByYear&sportId={11,12,13,14,16}`,
+  one call per sport because a comma list silently returns zero stat groups — and
+  are filtered to current affiliates via `affiliates.json`.
+  **Two traps.** A stint under `MIN_GAMES` (20) is dropped, because a rehab
+  assignment is a minor-league stint: unfiltered, Nashville's top three alumni
+  are three-game cameos by Yelich, Sonny Gray and Semien, above the Chapman and
+  Olson who actually played there. And the `/people` enrichment call needs
+  `hydrate=currentTeam` — without it the endpoint answers 200 with name, number
+  and position present and the club silently blank, which is what the first run
+  shipped. Incremental: `scripts/data/milb-alumni-scan.json` carries each
+  player's scanned stints, and only a new player, a stale season, or someone
+  whose bus-league career could still be moving is re-scanned. Shards carry no
+  `generatedAt` on purpose — 120 committed files on a nightly cron must not all
+  churn on a timestamp. App reads it via `fetchMilbAlumni` in `src/api/team.js`.
 - `gen-rehab.mjs` → `public/data/rehab.json` — the league-wide Rehab Assignments
   list. Starts from a transaction scan, then verifies each candidate against his
   game log + club's schedule to drop ended stints. Keeps its own self-contained copy
@@ -423,6 +444,17 @@ don't run these by hand.
   farm system changes at most once a year (the PDC realignment). Its sibling
   `gen-teams.mjs` + `gen-mono-logos.mjs` run on `update-teams.yml` for the same
   reason. App reads it via `src/api/team.js`.
+- `gen-milb-ballparks.mjs` → `src/lib/data/milb-ballparks.json` — every current
+  MiLB team's venue name, deduped by `venueKey` (one venue can host two clubs,
+  e.g. Roger Dean Chevrolet Stadium). Read straight from the `teams.json` this
+  same workflow just wrote rather than a second statsapi fetch. This is the
+  MiLB counterpart to `src/lib/ballpark/ballparkData.js`'s hand-authored MLB
+  table, minus the measurements — a MiLB park carries no diagram, only a
+  copy-editable name/photo/logo, since nobody has hand-verified its dimensions.
+  `src/copy/registry.js`'s `milbParkFields()` derives one park's worth of
+  registry fields per entry, the same shape `parkFields()` derives from
+  `BALLPARKS`. Runs on `update-teams.yml` right after `gen-teams.mjs`, same
+  reasoning as `gen-mono-logos.mjs` above.
 
 ## Hand-run generators (immutable data — NOT on a cron)
 
@@ -602,6 +634,13 @@ Re-run only to fold in a new season.
   nightly run from re-quantizing its own output and cumulatively degrading the art;
   don't remove it. Always regenerate `logo-art.json` after a run that changed anything
   (it pins exact byte sizes).
+- `gen-ballpark-thumbs.mjs` → `public/ballparks/thumb/{venueKey}.webp` — a
+  ~480px WebP companion to each bundled 1000px ballpark photo (source keys
+  read straight off `CREDITS` in `src/lib/ballpark/ballparkArt.js`, never a
+  directory glob), for the slate card's touch/scroll backdrop reveal to fetch
+  instead of the full photo — `docs/ballpark-photos.md`. Hand-run
+  (`npm run gen:ballpark-thumbs`) after adding or replacing a bundled photo,
+  same cadence as the photos themselves.
 - `gen-icons.mjs` — regenerate PWA PNG icons from `public/icons/icon.svg`.
 - `gen-og-image.mjs` — NOT currently used. `public/og-image.jpg` (1200×630
   link-preview card) is a hand-provided phone-mockup asset instead. This script +

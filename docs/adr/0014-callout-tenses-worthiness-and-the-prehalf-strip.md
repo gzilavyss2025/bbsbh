@@ -27,12 +27,17 @@ the spoiler question, so the rule is now explicit and structural:
   in-progress box-score view stays in entering-tense, and a suspended tie
   folds nothing.
 
-**The pre-half strip** (`prehalf-callouts.js`, rendered by `PreHalfCallouts`
-above each half's seal) is a third surface with the ADR-0003/0010 contract: it
-stages the half like the pre-pitch change list, rendered outside the seal and
-caller-gated to a reached half (`revealed || isNextToReveal`). Two of its
-families are pure season aggregates (the club's record in tonight's starter's
-starts, an inning's season run differential) and lean only on that outer gate.
+**The pre-half strip** (`buildPreHalfCallouts`, `prehalf-callouts.js`) is a
+third surface with the ADR-0003/0010 contract: it stages the half like the
+pre-pitch change list, rendered outside the seal and caller-gated to a
+reached half (`safeToShowEntering`/`revealed || isNextToReveal`). It used to
+render as its own `PreHalfCallouts` component, staged inline above each
+half's seal; ADR-0043's unify amendment retired that component along with
+the rest of the unfocused page's inline staging — the builder is now called
+once, from `ReferencePanel.jsx`'s ARMS tab, merged into Margin Notes'
+ranked list (`mergeNotes`). Two of its families are pure season aggregates
+(the club's record in tonight's starter's starts, an inning's season run
+differential) and lean only on that outer gate.
 The third — "the Brewers are 17-2 this season when leading after the 8th",
 shown entering the top of the 9th — must read *tonight's* score to know who
 leads, so it additionally gates itself, inside the builder, on every inning

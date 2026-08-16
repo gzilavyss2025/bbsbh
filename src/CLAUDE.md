@@ -67,10 +67,10 @@ player/team/umpire/manager, postseason, …) — `route.js`'s `parseRoute` heade
 the authoritative, order-sensitive list of every route name. For a game section `matchup`
 is the away+home team abbreviations lowercased (`milaz`; game 2 of a doubleheader
 appends `-2`, game 1 stays bare so old links keep working) and `section` is
-`lineup1` / `lineup2` / `top{n}` / `bottom{n}` (the innings viewer shows one
-half-inning per page; legacy `inning{n}` links still parse as the top half) /
-`boxscore` (the sealed full box score, also reachable from a past game's slate
-card) / `preview` (the shareable poster studio — `docs/preview-poster.md`).
+`lineup1` / `lineup2` / `top{n}` / `bottom{n}` (one half-inning per page; legacy
+`inning{n}` parses as the top half) / `boxscore` (sealed, also reachable from a past
+game's slate card) / `preview` (the poster studio, `docs/preview-poster.md`) /
+`sheet` (printable, grid EMPTY — `docs/print-sheet.md`) / `scorecard` (live #22 sheet, ADR-0047).
 
 `src/App.jsx` parses `location.pathname` into a route, listens on `popstate`, and
 `pushState`s on navigation; the URL is the single source of truth for which game
@@ -194,7 +194,7 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   live "who's on the mound now" override used to put the reliever's card in two
   places at once; same header-not-feed split as `computeHalfInningFeed` dropping
   a *pre*-pitch change (`anyPitchInHalf`) and `PrePitchChanges` dropping one from
-  the staged list. **In focus mode it is an announcement, not a header** — only a
+  the staged list. **Windowed, it is an announcement, not a header** — only a
   half opening with a fresh arm (`selectIsFreshPitcher`), only until the first
   at-bat is unveiled. Those two omissions make it the ONLY announcement of a
   between-innings change, so it may not be dropped there: ADR-0043's second.
@@ -229,10 +229,10 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   purpose; anchoring them to the bar re-collapses the area mid-tap under
   `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins that, and what must
   stay click-through, at BOTH bar layouts.
-- **Focus mode** — a sealed half being scored is its own COMPOSED screen, not the
-  page narrowed (ADR-0043): anchored scorebug band, full-width at-bat, wrapping
-  trail, tabbed reference, `RollingLine` demoted but NEVER removed (its cells are
-  the navigator). Presentation only; rules in `styles/focus/*`, imported last.
+- **The console** (ADR-0043): anchored scorebug band, wrapping trail, tabbed
+  reference, `RollingLine` demoted but NEVER removed — every half, live or
+  historical. Only the play-by-play varies: **windowed** (one at-bat) vs.
+  **stacked** (the whole half); rules in `styles/focus/*`.
 - **The one opt-in departure**, Scores Unlocked (ADR-0026), rides through
   `InningViewer` without touching its guarantees. `GameView` resolves
   `spoilersOffFor(officialDate)` — the pass is running, or this day was consented

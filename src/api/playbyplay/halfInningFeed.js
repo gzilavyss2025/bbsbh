@@ -28,6 +28,7 @@ import {
   isDelayAdvisory,
 } from './eventTypes.js'
 import { sentenceCaseEventText, runnerLastName } from './notificationCards.js'
+import { uncoveredRunnerNotes } from './runnerNotes.js'
 import { pitchCardInfo, matchupPitcher } from './pitchInfo.js'
 import { scorebookCode } from './scorebookCode.js'
 import {
@@ -163,6 +164,8 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
     // (they live inside that PA's playEvents), so the feed explains the out /
     // advance instead of leaving a bare mark on the diamond.
     const baserunningNotes = []
+    // `${runnerId}:${eventType}` pairs already hoisted below, so uncoveredRunnerNotes doesn't double-card them.
+    const coveredRunnerEvents = new Set()
     // A pinch runner's strike-through-and-pencil-in on the ORIGIN card (the
     // batter he's running for) is a retroactive annotation, so it must not
     // appear on that earlier, already-revealed card until the pinch-running
@@ -367,6 +370,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // call-out about the runner has to name him or it reads as the
         // batter's (see api/callout-notes.js's steal families).
         const rid = e.player?.id ?? null
+        if (rid != null) coveredRunnerEvents.add(`${rid}:${et}`)
         const note = {
           eventType: et,
           runnerId: rid,
@@ -400,6 +404,12 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
           })
         }
       }
+    }
+
+    // A steal/WP/balk that broke on the play's LAST pitch carries no playEvent
+    // of its own (runnerNotes.js's header, gamePk 816025) — recover it here.
+    if (isRealPA) {
+      entries.push(...uncoveredRunnerNotes(feed, play, batterId, coveredRunnerEvents, pitchInPlay))
     }
 
     // Whose plate appearance this CARD is — normally `matchup.batter`, but a
@@ -495,6 +505,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         reached: 0,
         scored: false,
         earned: true,
+        // The live, still-in-progress PA: no result yet, so `code` above is
+        // empty. `about.isComplete: false` is the feed's own signal (verified
+        // live, gamePk 824238). A count in progress is not a spoiler.
+        live: play.about?.isComplete === false ? { balls: play.count?.balls ?? 0, strikes: play.count?.strikes ?? 0 } : null,
       }
       entries.push(card)
       // A repeat plate appearance — the lineup batting around — bumps out

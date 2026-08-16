@@ -4,7 +4,10 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { Loader } from '../components/ui/Loader.jsx'
 import { Scorecard } from './Scorecard.jsx'
-import { loadScorecardGame, scorecardFull } from '../api/loadScorecard.js'
+import { loadScorecardGame } from '../api/loadScorecard.js'
+// Full reveal on purpose — the Lab exists to see the WHOLE game on the sheet,
+// and App.jsx drops it from the production module graph (import.meta.env.DEV).
+import { scorecardFull } from '../api/scorecardGame.js'
 
 // Hidden dev harness for building the Numbers Game "22" scorecard in isolation —
 // reached at /scorecard-lab, linked from nowhere in the app. It renders two ways:

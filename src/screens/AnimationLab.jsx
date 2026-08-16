@@ -3,8 +3,9 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { BoxScoreSkeleton } from '../components/game/BoxScoreSkeleton.jsx'
 import { Loader } from '../components/ui/Loader.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
-import { PostponedBanner } from '../components/game/GameCard.jsx'
-import { CountBlink } from '../components/gamehud/StatBox.jsx'
+import { PostponedBanner } from '../components/game/GameCardParts.jsx'
+import { CountBlink, Stat } from '../components/gamehud/StatBox.jsx'
+import { CLOSE_SEQUENCE_MS, INK_SET_MS, INK_SET_OVERSHOOT, TALLY_STAGGER_MS } from '../components/inning/focus/beats.js'
 
 // Unlisted QA page (see route.js), reachable only by direct URL
 // (/animation-lab). Every decorative animation in the app gets its own entry:
@@ -92,7 +93,7 @@ export function AnimationLab() {
       <section className="animlab__entry">
         <h2 className="animlab__title">Postponed rubber stamp</h2>
         <p className="hint hint--prose">
-          A postponed game&rsquo;s banner (src/components/GameCard.jsx) — the kraft-tape strip rises in,
+          A postponed game&rsquo;s banner (src/components/game/GameCardParts.jsx) — the kraft-tape strip rises in,
           then the stamp presses down onto the paper.
         </p>
         <div className="animlab__live">
@@ -135,7 +136,103 @@ export function AnimationLab() {
           ))}
         </div>
       </section>
+
+      <section className="animlab__entry">
+        <h2 className="animlab__title">Focus mode — the half-close tally</h2>
+        <p className="hint hint--prose">
+          The console band&rsquo;s finished-half tally
+          (src/components/gamehud/HalfTally.jsx, ADR-0046) &mdash; the half committed, so
+          its eight cells ink in one at a time, 90ms apart, instead of a separate
+          hairline-and-figures display drawn under the at-bat card (this entry&rsquo;s
+          old demo). Made-up figures; this page never reads a game.
+        </p>
+        <div className="animlab__live">
+          <TallyCloseDemo />
+        </div>
+        <span className="animlab__stagelabel">
+          The whole ~{CLOSE_SEQUENCE_MS}ms sequence
+        </span>
+        <div className="animlab__frozen">
+          {[0, 90, 270, 450, 630, 720].map((ms) => (
+            <Frame key={ms} label={`${ms}ms`} delayMs={ms}>
+              <TallyCloseDemo />
+            </Frame>
+          ))}
+        </div>
+      </section>
+
+      <section className="animlab__entry">
+        <h2 className="animlab__title">Focus mode — the denotation ink-set</h2>
+        <p className="hint hint--prose">
+          The at-bat card&rsquo;s scorebook denotation holds blank for a CONSTANT 180ms
+          (identical for a strikeout and a grand slam &mdash; see ADR-0046) and then lands
+          at {Math.round(INK_SET_OVERSHOOT * 100)}% and settles to rest over {INK_SET_MS}ms
+          &mdash; no colour change, no rebound. Only the landing is shown here; the hold is
+          a JS timer in useDenotationBeat.js, not an animation this page can scrub.
+        </p>
+        <div className="animlab__live">
+          <InkSetDemo />
+        </div>
+        <span className="animlab__stagelabel">Ink-set, {INK_SET_MS}ms</span>
+        <div className="animlab__frozen">
+          {[0, 55, 110, 165, 220].map((ms) => (
+            <Frame key={`ink-${ms}`} label={`${ms}ms`} delayMs={ms}>
+              <InkSetDemo />
+            </Frame>
+          ))}
+        </div>
+      </section>
     </div>
+  )
+}
+
+// A plausible half's line, invented. Same eight cells HalfTally.jsx draws.
+const TALLY_CELLS = [
+  { k: 'R', v: 2, tone: 'run' },
+  { k: 'H', v: 3 },
+  { k: 'E', v: 0 },
+  { k: 'LOB', v: 1 },
+  { k: 'Pitches', v: 18 },
+  { k: 'Whiffs', v: 4 },
+  { k: 'Fouls', v: 3 },
+  { k: '1st-pitch strikes', v: '3/5' },
+]
+
+// The real `.statline--console` grid wearing the real `.statline--closing`
+// class and `--tally-i`/`--tally-step` custom properties HalfTally.jsx sets,
+// at the made-up line above — not a copy of the keyframe, the same recipe
+// that file uses, minus the feed read (`Stat` itself never touches one).
+function TallyCloseDemo() {
+  return (
+    <div className="halftally">
+      <div
+        className="statline statline--console statline--closing"
+        style={{ '--tally-step': `${TALLY_STAGGER_MS}ms` }}
+      >
+        {TALLY_CELLS.map((c, i) => (
+          <Stat key={c.k} k={c.k} v={c.v} tone={c.tone} style={{ '--tally-i': i }} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// The real `.pbp__code` mark wearing the real `--ink` class, at the hero size
+// focus mode gives it — not a copy of the keyframe. `--ink-set` is set on
+// `.pbp__play` exactly as PlayByPlay.jsx sets it, off beats.js, so this page can
+// never quietly demo a different duration than the app runs.
+//
+// THE `.pbp__play` WRAPPER IS NOT DECORATION. It is a flex container, which
+// blockifies the mark inside it — and a bare inline <span> takes no transform at
+// all, so the first version of this demo animated a `scale` that could never
+// paint. Stand the mark in the box it actually lives in.
+function InkSetDemo() {
+  return (
+    <span className="innings--focus">
+      <span className="pbp__play" style={{ '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }}>
+        <span className="pbp__code pbp__code--hit pbp__code--ink">2B</span>
+      </span>
+    </span>
   )
 }
 

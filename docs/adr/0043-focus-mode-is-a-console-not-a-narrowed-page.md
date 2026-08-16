@@ -278,3 +278,160 @@ same build-what-folds cost #686 removed from the stage's hidden surfaces,
 one layer up. Since the step clamp only ever activates on the next-to-reveal
 half, which is always sealed, which is always focus mode, the unfocused paths
 are byte-for-byte what they were; the chart fills in the moment focus ends.
+
+## Amendment (2026-08-13): the loop gets punctuation
+
+Decision 2 above gave the at-bat the stage and the scorebook denotation the
+typographic hero role. It left the loop itself unmarked: the mark replaced the
+previous mark in the frame it was asked for, the half committed silently, and
+the last half of a game ended like any other. This mode is composed for one
+repeated act, and the act had no beginning, middle or end.
+
+Three beats, all of them timing rather than layout, so the stage's composition
+is untouched:
+
+- **THE BEAT.** A focused at-bat card arrives whole except for its denotation
+  cell, which holds blank for a constant 180ms and then lands oversized and
+  settles to rest. The batter's name and the pitch ladder are up for the whole hold —
+  only the code the reader is about to pencil waits.
+- **THE RULE.** The half commits and the stage is closed: a hairline draws
+  itself left to right under the at-bat card over 420ms, then the half's
+  R/H/E/LOB ink in behind it, 90ms apart. ~700ms, interruptible by any tap,
+  with the bar's forward action held until it ends. The trail and the quiet
+  "See the whole half" pill (the previous amendment) are exactly where they
+  were; this sits between them and the card.
+- **THE DOUBLE RULE.** The reader's mark reaches the last half actually played
+  and the same rule draws as a double one, with the bar's last action named as
+  an act — "Close the book ›" rather than "Box score ›".
+
+**ADR-0046 is the rule these obey and is the one to read first**: no timing
+before a reveal may be a function of the reveal. It is why the hold is a
+constant rather than scaled to the play, why the rule may not start before the
+commit, and why the double rule keys on `revealedThrough` against
+`finalHalfIndex` instead of `selectIsFinal` — which would have let the bottom of
+the 9th tell you whether there is a 10th.
+
+Two files were split on the way in, both moved verbatim and neither changing a
+class: `PlayByPlay.jsx`'s notification-card family to `EventCards.jsx`, and this
+screen's floating bar to `components/inning/InningActionBar.jsx`. The bar's
+three states, its always-present Refresh and the hit-area reasoning
+(`e2e/reveal-hit-area.spec.js`) all moved with it and now live in that file's
+header rather than in a 40-line comment inside `InningViewer.jsx`.
+
+## Amendment (2026-08-13): the trail moves above the hero, and the rule it used to sit under is gone
+
+Decision's opening line called for "a **wrapping** trail directly beneath" the
+hero card. That placement read the trail as a navigator for the card above
+it — reach a past at-bat, return to the live one — which is what it was built
+for. It is also, every time a half is being scored, the thing that SHOWS the
+half accumulating: a new cell lands in it on every step. Beneath the card, that
+growth happened below the fold the reader's eyes were already on, an inning at
+a time, for the one surface in the app built to be watched live rather than
+read after. Above the card, the newest cell lands where the reader's eyes are
+about to go next, in the ordinary top-to-bottom reading order the rest of the
+stage already uses.
+
+`FocusControls.jsx` split in two on the move: `FocusTrail` renders the trail
+alone, now called ahead of `InningPageTurn` in `InningViewer.jsx`'s stage;
+`FocusControls` keeps only the post-half "See the whole half" link (the
+previous amendment), which stays under the card, by the bar it hands off to.
+Nothing about EITHER control's own behavior changed — this moved one component
+in the JSX tree, not the state behind it, and the arrow-key handling, the
+wrap-never-scroll rule and the trail cells' own styling (`reference.css`) are
+all untouched.
+
+This also removes the one thing that used to sit between the card and the
+trail: the closing rule (`HalfClose.jsx`, ADR-0046) drew a hairline directly
+under the card, "above the trail, which is untouched" in that ADR's own words.
+ADR-0046's own amendment retires that rule in favor of an ink-in on the console
+band's tally card instead — read it for that half of the change. Between the
+two amendments, nothing draws between the card and the trail any more; the
+trail is the thing directly above the card now, exactly where the reader is
+about to look after reading it.
+
+## Amendment (2026-08-13): the console is the innings viewer, and the window is the only thing that varies
+
+Every amendment above still answered to the Decision's opening premise:
+this composition exists **while a half is being scored**. A half reached by
+direct navigation, or paged back to through history, got a different
+screen entirely — the original stacked layout, every card at once, no
+console band, no tabs. That split was deliberate (the Context section
+above is the record of why an *actively scoring* half needs an
+instrument), but nothing about it argued the same chrome was wrong for a
+half you're reading back. It just never got designed for that case.
+
+**The console is unconditional now.** Every half gets the anchored band
+and the tabbed reference panel, live or historical. What still varies —
+the one thing left — is whether the play-by-play area shows ONE at-bat at
+a time (**windowed**: `currentSealed || (postHalf && !summaryOpen)`,
+`useFocusMode`'s exact old `focused` formula, unchanged) or every card in
+the half at once (**stacked**, `!windowed`). `focusOne` is gone from every
+prop signature that carried it; `windowed` replaced it one-for-one.
+
+Four things follow, one per surface this touched:
+
+**1. Decision §2's "ONE at-bat as a full-width hero" is amended, not
+reversed.** `AtBatHero`/`AtBatCard`'s full-width identity treatment is
+chrome now — unconditional, on every card, stacked or not — but the
+hero's SINGULARITY (one card, full width) was always specifically a
+WINDOWED property, and stays one. A stacked half is many hero cards, each
+full width, each in the same reading order the original stacked page
+used. The inversion the original Decision argued for — "the mode called
+'focus' gave the thing you are focused on a narrower column than the mode
+that shows everything" — no longer has a narrower mode to invert against.
+
+**2. The 2026-08-12 amendment "the whole-half view returns as a quiet
+link, and the invisible chart stops being computed" is SUPERSEDED, not
+just amended, on its second half.** That amendment's chart skip
+(`InningViewer`'s `inFocusLayout ? NO_WINPROB : ...`) assumed the chart
+had nowhere to render while focused. It has one now — the reference
+panel's ARMS tab, permanently, for every half — so the skip is deleted
+and the step-clamped win-probability path computes on every "Next
+at-bat" tap for the first time since that amendment shipped. The first
+half of that amendment (the quiet "See the whole half" link) is
+untouched — `postHalf`/`summaryOpen` still work exactly as that amendment
+left them, and still decide `windowed`, not chrome.
+
+**3. The trail's click behavior forks on `windowed`, and the stacked half
+introduces a NEW, deliberate exception to this ADR's own "Nothing in
+focus mode calls `scrollIntoView` today" note.** Windowed, a chip click
+still switches the single-card window, unchanged. Stacked, there is no
+window to switch — every card is already showing — so a chip click
+scrolls the stage to that card instead (`FocusTrail`'s `scrollToStep`,
+`components/inning/focus/`). This is NOT the automatic per-reveal scroll
+that note was written to rule out; it fires only on a reader's own tap,
+on a half that's already fully revealed, and it writes the scroll offset
+directly (the same idiom `SeasonSeriesStrip.jsx`/`ClubPicker.jsx`/
+`SplitsVsTeam.jsx`/`TeamFilterStrip.jsx` already use) rather than calling
+`scrollIntoView`, for the same reason those four do: `scrollIntoView`
+drags every scrollable ancestor to satisfy its own `block` option, not
+just the one the caller means. `aria-current` and "Back to the live
+at-bat" drop while stacked — nothing is "live" once every card is on
+screen — and the beat (`useDenotationBeat`) simply doesn't fire on a
+stacked mount, since its `active` argument is `windowed` now: a batch of
+cards landing at once renders pre-inked, not the cascading flash a dozen
+simultaneous 180ms holds would otherwise produce.
+
+**4. What retired.** `ReferenceBand.jsx`/`RosterPanels` (the unfocused
+page's reference layout), the floating scorebug dock
+(`ScorebugMount.jsx`'s corner-stepping branch), `PreHalfCallouts.jsx`,
+and the inline entering-lineups/defense reference `HalfInning.jsx` used
+to stage above and below the seal are all deleted, not merely
+unreferenced — a future reader looking for "the ordinary page" should
+find this paragraph, not a grep. Their content didn't disappear: the
+reference panel's LINEUPS/FIELD/ARMS/EXTRAS tabs already covered every
+half chrome reaches, which after this amendment is every half, full
+stop.
+
+**What this does NOT change, restated once more because it's the rule
+every amendment here answers to:** nothing about the reveal mark moved.
+`stepCap` is still the single reveal boundary; `revealed || isNextToReveal`
+on the entering-reference and pre-pitch cards, `safeToShowEntering`,
+`buildPreHalfCallouts`'s own internal clamp, and every `SealBox` render-
+function gate are untouched. `stacked ⇒ revealed` is the invariant that
+makes the trail's stacked behavior safe — the three ways a half is
+stacked (`postHalf && summaryOpen`, or `!currentSealed && !postHalf`) all
+reduce to `idx <= revealedThrough`, so there is no stacked state
+describing a step the reader hasn't themselves revealed. What changed is
+only where already-gated content renders, and how many already-revealed
+cards are on screen when it does.

@@ -33,6 +33,7 @@
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
 //   '/game-notes-debug'                 -> { name: 'game-notes-debug' }  (unlisted QA page)
 //   '/animation-lab'                    -> { name: 'animation-lab' }  (unlisted QA page)
+//   '/between-innings-lab'              -> { name: 'between-innings-lab' }  (unlisted QA page)
 //   '/wordmark-lab'                     -> { name: 'wordmark-lab' }  (unlisted design study)
 //   '/first-scorebook'                   -> { name: 'first-scorebook' }   (personal retrospective)
 //   '/logbook'                           -> { name: 'logbook', season: null }  (your game stamps, newest season)
@@ -65,9 +66,11 @@
 //
 // `matchup` is the away + home team abbreviations concatenated and lowercased
 // (MIL @ ARI -> 'milari'); `section` is 'lineup1' (away info), 'lineup2' (home
-// info), 'boxscore', 'preview' (the shareable preview-image studio), or
-// 'top{n}' / 'bottom{n}' (innings viewer, one page per
-// half-inning). Legacy 'inning{n}' links still parse (as the top half).
+// info), 'boxscore', 'preview' (the shareable preview-image studio), 'sheet'
+// (the printable pre-pitch scorecard), 'scorecard' (the live #22 sheet,
+// inked as far as the reveal mark), or 'top{n}' / 'bottom{n}' (innings
+// viewer, one page per half-inning). Legacy 'inning{n}' links still parse (as
+// the top half).
 // Example: /07052026/milari/bottom3
 //
 // Player/team pages are game-independent (resolvable by id on a cold link) and
@@ -170,6 +173,10 @@ export function parseRoute(url) {
   // frozen stage-by-stage — linked from nowhere, reachable only by direct URL.
   if (parts.length === 1 && parts[0] === 'animation-lab')
     return { name: 'animation-lab' }
+  // Unlisted QA page cataloging the post-half hold's card set against
+  // synthetic fixtures — no score/reveal content, safe to ship.
+  if (parts.length === 1 && parts[0] === 'between-innings-lab')
+    return { name: 'between-innings-lab' }
   // Unlisted Tally brand study — no score/reveal content, safe to ship.
   if (parts.length === 1 && parts[0] === 'wordmark-lab')
     return { name: 'wordmark-lab' }
@@ -323,7 +330,8 @@ export function parseRoute(url) {
 }
 
 // section string -> { step, inning, half }. step: 0 away info, 1 home info,
-// 2 innings, 3 box score, 4 preview poster. `half` only matters for step 2.
+// 2 innings, 3 box score, 4 preview poster, 5 printable sheet, 6 live
+// scorecard. `half` only matters for step 2.
 export function sectionToStep(section) {
   if (section === 'lineup2') return { step: 1, inning: 1, half: 'top' }
   if (section === 'boxscore') return { step: 3, inning: 1, half: 'top' }
@@ -332,6 +340,20 @@ export function sectionToStep(section) {
   // four stops the "next" buttons walk — it is a thing you make, not a page in
   // the scorebook.
   if (section === 'preview') return { step: 4, inning: 1, half: 'top' }
+  // The printable pre-pitch scorecard (screens/sheet/ScoreSheetPage.jsx), and
+  // the same kind of stop as 'preview' above for the same reason: a real,
+  // shareable address, because handing the sheet's URL to a phone's share sheet
+  // IS how it reaches a printer — but a thing you make, not a page you score, so
+  // it stays out of the four the "next" buttons walk.
+  if (section === 'sheet') return { step: 5, inning: 1, half: 'top' }
+  // The live scorecard (screens/scorecard/ScorecardPage.jsx): the #22 sheet
+  // filled exactly as far as the user's own reveal mark. A real, shareable
+  // address like the two stops above it, and like them not one of the four
+  // steps the "next" buttons walk — but unlike them, it also owns the fifth
+  // stop on the game's tab bar (GameView.jsx's sectionTabs), since it's a
+  // page you keep coming back to during the game rather than a thing you
+  // make once and share.
+  if (section === 'scorecard') return { step: 6, inning: 1, half: 'top' }
   const m = /^(top|bottom)(\d+)$/.exec(section || '')
   if (m) return { step: 2, inning: Math.max(1, Number(m[2])), half: m[1] }
   const legacy = /^inning(\d+)$/.exec(section || '')
@@ -345,6 +367,8 @@ export function stepToSection(step, inning = 1, half = 'top') {
   if (step === 1) return 'lineup2'
   if (step === 3) return 'boxscore'
   if (step === 4) return 'preview'
+  if (step === 5) return 'sheet'
+  if (step === 6) return 'scorecard'
   return `${half === 'bottom' ? 'bottom' : 'top'}${inning}`
 }
 

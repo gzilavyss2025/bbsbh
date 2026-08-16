@@ -2,8 +2,9 @@
    TEAM HUB — IDENTITY HERO
    The club header every team-hub tab renders above the tab bar
    (TeamHubShell.jsx), plus TeamLeadersPage.jsx's own cut of it:
-   the Main "logo card", the club name and level pill, the record
-   and division line, and whichever aside the club has.
+   the club's default-home mark and tile color, the club name and
+   level pill, the record and division line, and whichever aside
+   the club has.
 
    Split out of 28-team-hub.css, which was at its check-file-size
    budget and still covers four unrelated surfaces below this one
@@ -11,30 +12,95 @@
    rail, the carousel). Same reasoning and same NNa- shape as
    21a-box-score-stars / 26a-percentile-strip / 17a-identity-lab-
    mark-panels. Nothing left in 28-team-hub.css names a
-   .team-hub__id/__logo/__parent/__namerow/__level/__rec/__div/
-   __logobox selector, so the two files never compete and the
-   cascade does not care which @import comes first.
+   .team-hub__id/__logo/__parent/__namerow/__level/__rec/__div
+   selector, so the two files never compete and the cascade does
+   not care which @import comes first.
    ============================================================ */
 
-/* Logo card + identity block. Two columns on a phone, three at 740px — which
-   is where .screen stops being capped at --app-width, so it is also the first
-   width a third column has room in. This ran `128px 1fr auto` at EVERY width,
-   which left the identity column 95px of a 402px phone's 370px: "New York
-   Mets" set one word per line, the manager credit took three. */
+/* The whole row wears the club's own default-home tile color (`--tint`,
+   TeamHubShell.jsx's `headerTile` — same treatmentTile()/milbTreatmentTile()
+   resolver the slate card and Identity Lab read, just applied to the row
+   instead of a small boxed swatch), with `--ink` the readable-on-that-tint
+   text color TeamHubShell computes alongside it (JerseyCombos.jsx makes the
+   identical call for its own "tile color IS the card" surface). A club with
+   no curated tile yet — `--tint`/`--ink` both unset — falls back to the
+   plain paper card exactly as before this row was themed.
+
+   Two columns on a phone, three at 740px — which is where .screen stops
+   being capped at --app-width, so it is also the first width a third column
+   has room in. This ran `128px 1fr auto` at EVERY width, which left the
+   identity column 95px of a 402px phone's 370px: "New York Mets" set one
+   word per line, the manager credit took three. */
 .team-hub__id {
+  position: relative;
   display: grid;
   grid-template-columns: 128px 1fr;
   gap: var(--space-4);
   align-items: center;
   margin-top: 4px;
-  padding-bottom: var(--space-4);
-  border-bottom: var(--bw-rule) solid var(--border-rule);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--tint, var(--surface-card));
+  color: var(--ink, var(--text-heading));
+  box-shadow: var(--shadow-card);
 }
-/* Whichever aside this club has — Game Notes (MLB) or the parent club's mark
+/* Every direct child rides above the gloss sheen below (its own generated
+   ::after) — grid items take z-index without needing `position` of their
+   own. */
+.team-hub__id > * {
+  position: relative;
+  z-index: 1;
+}
+/* Same diagonal gloss the tinted tile wore at its old (128px-box) size —
+   JerseyCombos' identical treatment, now over the row's full tint. */
+.team-hub__id::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(
+    155deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(0, 0, 0, 0) 60%,
+    rgba(0, 0, 0, 0.16) 100%
+  );
+  pointer-events: none;
+}
+/* A pinstriped default-home tile (Yankees' navy-on-white, Rockies' black-on-
+   white) is a hand-styled pattern, not a flat swatch — same fields
+   (`--pinstripe-color`/`--pinstripe-bg`) and the same reasoning as
+   JerseyCombos' `.jerseydeck__card--pinstripe`, just filling the row instead
+   of one deck card. `--ink` is always the dark pick for this case (see
+   TeamHubShell.jsx), since the fill under the stripes defaults to white.
+   The lines run under the club name/record text here, unlike the small
+   logo-box copies of this pattern elsewhere — so this one rule (only)
+   mixes `--pinstripe-color` toward transparent before drawing it, at
+   whatever strength that team's own line color already is (Yankees' navy
+   included), rather than lightening the shared token itself. */
+.team-hub__id.team-hub__id--pinstripe {
+  --hero-pinstripe-line: color-mix(
+    in srgb,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 28%,
+    transparent
+  );
+  background: repeating-linear-gradient(
+    to right,
+    var(--hero-pinstripe-line) 0,
+    var(--hero-pinstripe-line) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+/* Whichever aside this club has — Game Notes (MLB) or the parent club's chip
    (MiLB); never both, and TeamLeadersPage's header has neither — takes its own
    row below rather than a column beside the name. justify-self keeps it at its
    natural size: grid blockifies its items, so the pill would otherwise stretch
-   the whole row. */
+   the whole row. Both render as their own opaque `--surface-card` chip rather
+   than text sitting directly in the tint, same idiom 09-team-info.css's
+   .teaminfo__head note documents for Game Notes — a chip's legibility can't
+   depend on guessing right against every club's own color. */
 .team-hub__id > .notesbtn,
 .team-hub__id > .team-hub__parent {
   grid-column: 1 / -1;
@@ -49,19 +115,42 @@
     grid-column: auto; /* back onto the identity row, in that third column */
   }
 }
+/* The club's default-home mark — full size, no crop, no edge-bleed, no
+   per-treatment x/y nudge. Those exist so a small boxed tile reads as a
+   patch printed on a jersey; here the tile's own color already fills the
+   whole row, so the mark just sits on it at its own natural proportions,
+   same as JerseyCombos' deck cards (28-team-hub.css's
+   .jerseydeck__logobox .teamlogo, `transform: none`). */
 .team-hub__logo {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
 }
-/* The parent MLB club's primary mark, drawn right-aligned at 70% of the
-   affiliate's own logo — only on a MiLB team page (see TeamPage.jsx). Links
-   through to that club's page. */
+.team-hub__logo .teamlogo {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.22));
+}
+/* The parent MLB club's mark plus an "Affiliate" caption, both riding in
+   their own small opaque chip — only on a MiLB team page (see TeamPage.jsx).
+   Links through to that club's page. Bare logo + 0.9 opacity used to be
+   enough sitting on plain paper; against an arbitrary club tint it needs a
+   surface of its own AND a label, since a bare mark alone doesn't say what
+   it's doing there. */
 .team-hub__parent {
   display: flex;
   align-items: center;
-  opacity: 0.9;
+  gap: 7px;
+  padding: 5px 10px 5px 6px;
+  border-radius: var(--radius-pill);
+  border: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+.team-hub__parent-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-muted);
 }
 /* Team name + its level pill (AAA/AA/… — MiLB pages only) on one baseline. */
 .team-hub__namerow {
@@ -70,15 +159,20 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+/* An opaque token background reads fine on any one club's tint, but not on
+   every club's — instead the pill's own fill/border are mixed FROM `--ink`
+   at low strength, so it stays legible whether the row's ink came out light
+   or dark, with no per-club exception to hand-tune. Same `color-mix` idiom
+   31-wild-card.css already uses for the radar-team dot. */
 .team-hub__level {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--text-muted);
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-hairline);
+  color: var(--ink, var(--text-muted));
+  background: color-mix(in srgb, var(--ink, var(--text-muted)) 14%, transparent);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--ink, var(--text-muted)) 30%, transparent);
   border-radius: var(--radius-pill);
   padding: 2px 8px;
 }
@@ -88,86 +182,35 @@
   text-transform: uppercase;
   font-weight: var(--w-bold);
   font-size: var(--fs-num-lg);
-  color: var(--text-heading);
+  color: var(--ink, var(--text-heading));
   line-height: var(--lh-tight);
 }
 .team-hub__rec {
   margin: 5px 0 0;
   font-size: var(--fs-small);
-  color: var(--text-muted);
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px;
 }
 .team-hub__rec .mono {
-  color: var(--text-heading);
+  color: var(--ink, var(--text-heading));
   font-weight: var(--w-bold);
 }
+/* Same color-mix reasoning as .team-hub__level: full ink for the bold
+   win-loss figure, a lighter mix of the same ink for the secondary line
+   beside it — one hue per club instead of a second hand-picked token that
+   might not read on it. */
 .team-hub__div {
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   font-size: var(--fs-caption);
-  color: var(--field-deep);
+  color: color-mix(in srgb, var(--ink, var(--field-deep)) 85%, transparent);
   font-weight: var(--w-bold);
 }
 .team-hub__rec em {
   font-style: normal;
-  color: var(--graphite-soft);
+  color: color-mix(in srgb, var(--ink, var(--graphite-soft)) 65%, transparent);
   font-size: var(--fs-caption);
-}
-
-/* The club's Main "logo card" in the team-page hero — its mark on the curated
-   tinted tile (TeamTreatmentMark treatment="main"), same framed/overscaled/
-   glossy recipe as the slate card's .gamecard__logobox and the off-day tile.
-   Fills the header grid's 64px logo column. */
-.team-hub__logobox {
-  position: relative;
-  width: 128px;
-  height: 128px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 2px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--tint, var(--paper-1));
-  box-shadow: var(--inset-cell);
-}
-.team-hub__logobox.team-hub__logobox--pinstripe {
-  background: repeating-linear-gradient(
-    to right,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
-    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
-    var(--pinstripe-bg, #fff) 1px,
-    var(--pinstripe-bg, #fff) 7px
-  );
-}
-.team-hub__logobox::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    155deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(0, 0, 0, 0) 60%,
-    rgba(0, 0, 0, 0.35) 100%
-  );
-  pointer-events: none;
-}
-.team-hub__logobox .teamlogo {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
-  border-radius: 0;
-  transform: scale(var(--scale, 1.32));
-}
-.team-hub__logobox .teamlogo--fallback {
-  border: none;
-  background: none;
-  transform: none;
-  font-size: var(--fs-display-lg);
 }

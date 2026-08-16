@@ -1,20 +1,25 @@
 import { useMediaQuery, WIDE_QUERY } from '../../hooks/useMediaQuery.js'
 import { DueUpConsole } from './DueUpConsole.jsx'
-import { HalfTally } from './HalfTally.jsx'
+import { BetweenInnings } from './BetweenInnings.jsx'
 import { ScorebugMount } from './ScorebugMount.jsx'
 
-// Focus mode's console row (ADR-0043) — the whole top of the scorer's console,
-// as one component rather than ninety lines inside InningViewer.jsx (which is
-// at its own size budget, and where the row's three states read as three
-// unrelated conditionals).
+// The innings viewer's console row (ADR-0043) — the whole top of the scorer's
+// console, mounted for every half now, live or historical, as one component
+// rather than ninety lines inside InningViewer.jsx (which is at its own size
+// budget, and where the row's states read as unrelated conditionals).
 //
-// The band itself is `ScorebugMount focused`: the same scorebug, placed rather
-// than floated, at its own dock width. Beside it, exactly one of two cards
-// spends the width the band does not use — and which one is a plain statement
-// of where the reader is in the half:
+// The band itself is `ScorebugMount`: the same scorebug, placed rather than
+// floated, at its own dock width — its one placement now, there is no
+// floating dock any more. Beside it, exactly one of two cards spends the
+// width the band does not use — and which one is a plain statement of
+// whether the half on screen is sealed or revealed, not of how the reader
+// got there:
 //
-//  • STILL SCORING IT -> `DueUpConsole`, the next three batters.
-//  • THE HALF IS OVER -> `HalfTally`, its line and pitch analysis.
+//  • STILL SCORING IT (sealed) -> `DueUpConsole`, the next three batters.
+//  • REVEALED -> `BetweenInnings`, one card in `.consolebar__tallygroup`
+//    that cycles on tap between the half's tally grid (its resting state)
+//    and its score-free facts. Shows for ANY revealed half now, not only
+//    the one just watched close — see `showTally` below.
 //  • NEITHER -> nothing, and that is now open paper rather than a slab.
 //    `.gamehud--console:only-child` used to stretch the band across the row
 //    whenever it stood alone, which at 1280 drew a ~930px navy rectangle
@@ -48,38 +53,37 @@ export function ConsoleBand({
   viewInning,
   viewHalf,
   getDerived,
-  postHalf,
-  steps,
-  stepFrontierIdx,
+  currentSealed,
+  closePhase,
   stepAtBatIndex,
+  bundle,
+  marginNotes,
+  workload,
+  gameDate,
 }) {
   const wide = useMediaQuery(WIDE_QUERY)
-  // THE DUE-UP CARD'S TWO CONDITIONS, each shutting off a way it can lie or
-  // loiter (plus `wide` — see the header note on why a phone never mounts it):
-  //   • `!postHalf` — not once the half is OVER. "Who's due up" is meaningless
-  //     after the 3rd out.
-  //   • `steps === 0 || stepFrontierIdx != null` — the card tracks the batting
-  //     order as the reader steps, and it can only do that with
-  //     `lastAtBatIndex`, which InningViewer has only for the half immediately
-  //     after the reveal mark (see its win-prob clamp). Reach a half via
-  //     RollingLine's navigator and step it and the arithmetic silently falls
-  //     back to the PRE-half leadoff slot — the card would name the same three
-  //     men no matter how far in the reader got, and a card that quietly stops
-  //     being true is worse than no card. BEFORE the first step, though, that
-  //     fallback is not a fallback: the pre-half leadoff slot is the right
-  //     answer for any half, which is the very figure UpNextBatters shows.
+  // THE DUE-UP CARD IS FOR A HALF STILL BEING SCORED, PERIOD — not for a half
+  // merely just finished. "Who's due up" is meaningless once the half is
+  // over, so this keys on `currentSealed` (still being actively scored)
+  // rather than `!postHalf` (which also covers "revealed, however reached" —
+  // that's `showTally`'s territory now, below). `wide` is orthogonal: a
+  // phone never mounts this card at all — see the header note.
   //
-  // THE OPENING STATE IS THIS CARD'S TOO. It used to start only at the first
-  // step, leaving the band alone in the row on the state the reader lands in
-  // every half. The half's first three batters fill that width instead.
-  // `.upnext` in the stage below stands down while this card is up, so the same
-  // three men are not named twice (styles/focus/console.css).
-  const showDueUp = wide && !postHalf && (steps === 0 || stepFrontierIdx != null)
+  // THE OPENING STATE IS THIS CARD'S TOO. It starts the half open (before any
+  // step), so the band isn't alone in the row on the state the reader lands
+  // in every half. The half's first three batters fill that width instead.
+  // `.upnext` in the stage below stands down while this card is up, so the
+  // same three men are not named twice (styles/focus/console.css).
+  const showDueUp = wide && currentSealed
 
-  // The tally takes the due-up card's slot once the half is done. `viewIdx <=
-  // revealedThrough` is what `postHalf` already implies, stated because it is
-  // the gate HalfTally's reveal-only reads actually stand on (ADR-0001).
-  const showTally = postHalf && viewIdx <= revealedThrough
+  // THE TALLY (+ BETWEEN INNINGS) NOW SHOWS FOR ANY REVEALED HALF, not only
+  // the one just watched close — a half reached via RollingLine's navigator,
+  // or returned to after "See the whole half", gets exactly the same
+  // console-band content as one you just finished scoring. `viewIdx <=
+  // revealedThrough` is the literal gate `HalfTally`'s reveal-only reads
+  // stand on (ADR-0001); it no longer needs `postHalf` to imply it.
+  const showTally = viewIdx <= revealedThrough
+
   return (
     <div className="consolebar">
       <ScorebugMount
@@ -100,7 +104,6 @@ export function ConsoleBand({
         viewIdx={viewIdx}
         viewInning={viewInning}
         viewHalf={viewHalf}
-        focused
       />
       {showDueUp && (
         <DueUpConsole
@@ -113,13 +116,30 @@ export function ConsoleBand({
         />
       )}
       {showTally && (
-        <HalfTally
-          feed={feed}
-          inning={viewInning}
-          half={viewHalf}
-          battingSide={viewHalf === 'top' ? 'away' : 'home'}
-          getDerived={getDerived}
-        />
+        <div className="consolebar__tallygroup">
+          {/* Half-keyed so the card's own idx (grid vs. which fact) resets to
+              0 on every half change. Harmless when `showTally` was only ever
+              true for one transient postHalf window (this component would
+              unmount between halves anyway) — but showTally now stays true
+              across every revealed half paged through via RollingLine, and
+              ConsoleBand itself never remounts on half change, so without
+              this key a browsed half would inherit whatever state the reader
+              left the PREVIOUS revealed half showing. */}
+          <BetweenInnings
+            key={`${viewInning}-${viewHalf}`}
+            feed={feed}
+            bundle={bundle}
+            marginNotes={marginNotes}
+            inning={viewInning}
+            half={viewHalf}
+            revealedThrough={revealedThrough}
+            workload={workload}
+            gameDate={gameDate}
+            battingSide={viewHalf === 'top' ? 'away' : 'home'}
+            getDerived={getDerived}
+            phase={closePhase}
+          />
+        </div>
       )}
     </div>
   )

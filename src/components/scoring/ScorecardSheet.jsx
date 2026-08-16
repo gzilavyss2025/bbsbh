@@ -1,29 +1,65 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AtBatBox } from './AtBatBox.jsx'
+import { cellNote } from '../../lib/scorecardNotes.js'
 
-// The main scorecard grid: batting rows across the game's columns, a sticky
-// Pos/Player column on the left and a sticky inning-header row on top, all inside
-// one horizontal scroll (the sheet is wider than a phone by design — you swipe it
-// the way you'd slide a paper scorebook across the table). Summary columns
-// (AB H R RBI) and a TOTALS row close it out.
+// The main scorecard grid, in the #22 sheet's own column order: a sticky
+// PLAYER column (each row led by its batting-order number, closed by the
+// player's uniform number), the Pos column beside it, the innings, and the
+// AB/H/R/RBI summary columns on the right. The foot row is the #22's own:
+// P · WH · FO per inning — pitches this side saw, swings and misses, balls
+// fouled off. Runs-per-inning live in the sheet's scoreboard block
+// (Scorecard.jsx), where the paper sheet keeps them.
+//
+// ZOOM, NOT SCROLL BARS. The sheet is wider than a phone by design, and the
+// pane used to say so with two scroll bars. It reads as paper now: the pane
+// hides its bars and carries a −/+ zoom control instead. You open at full
+// size on one region of the sheet and pull BACK to take the whole thing in,
+// down to the fit-the-pane zoom, which is the floor. Drawn with CSS `zoom`
+// rather than `transform: scale()` on purpose — `zoom` scales LAYOUT, so the
+// three sticky edges (the Player/Pos rail, the inning header, the totals
+// row) keep sticking to the real pane, which a transform would break.
 //
 // Two modes:
 //  • Empty template (no `grid`) — nine blank rows over `templateInnings` innings
-//    (default 11, but a caller can ask for more so a long extra-inning game
-//    still fits the blank sheet); `lineup` (optional, [{ pos, name }]) fills
-//    only the left column.
-//  • Loaded game (`grid` from api/loadScorecard.js) — one plate appearance per
+//    (default 11, the paper sheet's own count); `lineup` (optional,
+//    [{ pos, name, jersey }]) fills only the left column.
+//  • Loaded game (`grid` from api/scorecardGame.js) — one plate appearance per
 //    cell. Most innings are one column; an inning where a slot batted around
 //    widens into extra columns (the inning number only labels its first). Each
 //    slot renders one row per player who occupied it — the starter, then a
-//    sub-line for each substitute — so a pinch-hitter gets his own name and
-//    line instead of sharing the starter's. The totals row carries the batting
-//    team's runs under each inning's first column.
+//    sub-line for each substitute — so a pinch-hitter gets his own name, his
+//    own position and his own number instead of sharing the starter's.
+//
+// `notes` + `onCellTap` are the override layer (lib/scorecardNotes.js): each
+// cell renders its own note over the derived marks, and on an editable
+// surface tapping a filled cell hands its card up to the notation editor.
+//
+// `flip` is the TURN HANDOFF, and it rides the sheet rather than a banner
+// above it: `{ inning, label, onFlip }` puts a button in that one inning's
+// LEADOFF box — the next-due batter's unused cell for the half that just
+// ended, never an older one (`leadoffCells`, valued by inning). That box is
+// where the reader's eye lands when a half closes and it is empty by
+// definition, so the handoff costs the sheet no notation. Every older
+// leadoff box stays blank.
 const SUMMARY = ['AB', 'H', 'R', 'RBI']
 const SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+// The foot row's three readings, in the order the sheet prints them.
+const FOOT_LABELS = ['P', 'WH', 'FO']
+// How far the zoom control can pull past full size, and the factor one press
+// of −/+ moves. The floor is never fixed: it is whatever fits the pane.
+const ZOOM_MAX = 1.5
+const ZOOM_STEP = 1.25
+// Pane pixels the fit-the-pane floor leaves spare. The at-bat box's out
+// circle hangs 8px past its own cell by design (.sc-ab__out, right: -8px), so
+// the sheet paints a little wider than the table it is measured from; without
+// this the floor still left the last summary column half over the edge.
+const FIT_SLACK = 12
 
 // The display rows for one batting-order slot: one per occupant in a loaded
 // game (starter first, then each sub as its own sub-line), or a single blank
 // row from the pre-pitch lineup for the empty template / a slot nobody batted.
+// The slot's leadoff boxes ride the FIRST row — they name an unused box,
+// which no occupant's card competes with.
 function slotRows(grid, lineup, slotIndex) {
   const slot = grid?.slots?.[slotIndex]
   if (slot?.rows?.length) {
@@ -31,12 +67,18 @@ function slotRows(grid, lineup, slotIndex) {
       key: occ.id ?? oi,
       pos: occ.pos,
       name: occ.name,
+      jersey: occ.jersey,
       cells: occ.cells,
+      subMarks: occ.subMarks,
+      leadoffCells: oi === 0 ? slot.leadoffCells : null,
       ab: occ.ab,
       h: occ.h,
       r: occ.r,
       rbi: occ.rbi,
       isSub: oi > 0,
+      // The frontier seal rides the slot's LAST display row — the current
+      // occupant is the one due up.
+      isLast: oi === slot.rows.length - 1,
       hasStats: true,
     }))
   }
@@ -45,14 +87,27 @@ function slotRows(grid, lineup, slotIndex) {
       key: 'starter',
       pos: lineup[slotIndex]?.pos ?? '',
       name: lineup[slotIndex]?.name ?? '',
+      jersey: lineup[slotIndex]?.jersey ?? '',
       cells: null,
+      subMarks: null,
+      leadoffCells: grid?.slots?.[slotIndex]?.leadoffCells ?? null,
       isSub: false,
+      isLast: true,
       hasStats: false,
     },
   ]
 }
 
-export function ScorecardSheet({ lineup = [], grid = null, templateInnings = 11 }) {
+export function ScorecardSheet({
+  lineup = [],
+  grid = null,
+  templateInnings = 11,
+  notes = null,
+  onCellTap = null,
+  onFrontierTap = null,
+  fresh = null,
+  flip = null,
+}) {
   // Normalize both modes to a flat column list: each column knows its header
   // label (an inning number on its first sub-column, else blank), whether it
   // starts an inning (for the divider rule), and its source inning.
@@ -72,79 +127,221 @@ export function ScorecardSheet({ lineup = [], grid = null, templateInnings = 11 
         inning: n,
       }))
 
+  // The zoom floor — the zoom at which the WHOLE sheet fits the pane — is
+  // measured, not calculated: the table's own laid-out width divided by the
+  // zoom it was laid out at, which is a constant no matter which zoom is
+  // showing. (A calculation off the --sc-* width tokens was tried and came up
+  // short by the grid's per-column hairline borders, so the floor still cut
+  // three summary columns off the right edge.) The division is what keeps
+  // this from feeding itself; the epsilon below stops a sub-pixel rounding
+  // difference from ping-ponging setState. `pick` is the reader's own choice,
+  // clamped to the live floor so a rotation can never strand the sheet at a
+  // zoom that no longer fits.
+  const paneRef = useRef(null)
+  const tableRef = useRef(null)
+  const [floor, setFloor] = useState(1)
+  const [pick, setPick] = useState(null)
+
+  // Full size is the opening view — one region of the sheet, read at the size
+  // it was drawn — unless the whole sheet already fits, in which case there is
+  // nothing to zoom out of.
+  const zoom = Math.min(Math.max(pick ?? 1, floor), ZOOM_MAX)
+  const step = (factor) => setPick(Math.min(Math.max(zoom * factor, floor), ZOOM_MAX))
+
+  const measure = useCallback(() => {
+    const pane = paneRef.current
+    const table = tableRef.current
+    if (!pane || !table) return
+    const natural = table.getBoundingClientRect().width / zoom
+    if (!natural || !pane.clientWidth) return
+    const next = Math.min(1, Math.max(pane.clientWidth - FIT_SLACK, 1) / natural)
+    setFloor((was) => (Math.abs(was - next) > 0.005 ? next : was))
+  }, [zoom])
+  // No dependency list: the sheet's width also changes when an inning widens
+  // or a reveal adds a column, neither of which resizes the pane.
+  useLayoutEffect(measure)
+  useEffect(() => {
+    if (typeof ResizeObserver !== 'function' || !paneRef.current) return undefined
+    const ro = new ResizeObserver(measure)
+    ro.observe(paneRef.current)
+    return () => ro.disconnect()
+  }, [measure])
+
   return (
-    <div className="sc-sheet__scroll">
-      <table className="sc-sheet">
-        <thead>
-          <tr>
-            <th className="sc-sheet__pos sc-sheet__corner" scope="col">
-              Pos
-            </th>
-            <th className="sc-sheet__name sc-sheet__corner" scope="col">
-              Player
-            </th>
-            {columns.map((col) => (
-              <th
-                key={col.key}
-                className={`sc-sheet__inning-h ${col.inningStart ? 'sc-sheet__inning-h--start' : ''}`}
-                scope="col"
-              >
-                {col.label}
+    <div className="sc-sheet__frame">
+      <div className="sc-zoom" role="group" aria-label="Sheet zoom">
+        <button
+          type="button"
+          className="sc-zoom__btn"
+          onClick={() => step(1 / ZOOM_STEP)}
+          disabled={zoom <= floor + 0.001}
+          aria-label="Zoom out"
+        >
+          −
+        </button>
+        <span className="sc-zoom__pct">{Math.round(zoom * 100)}%</span>
+        <button
+          type="button"
+          className="sc-zoom__btn"
+          onClick={() => step(ZOOM_STEP)}
+          disabled={zoom >= ZOOM_MAX - 0.001}
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+      </div>
+      <div className="sc-sheet__scroll" ref={paneRef}>
+        <table className="sc-sheet" ref={tableRef} style={{ zoom }}>
+          <thead>
+            <tr>
+              <th className="sc-sheet__name sc-sheet__corner" scope="col">
+                Player
               </th>
-            ))}
-            {SUMMARY.map((s) => (
-              <th key={s} className="sc-sheet__sum-h" scope="col">
-                {s}
+              <th className="sc-sheet__pos sc-sheet__corner" scope="col">
+                Pos
               </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {SLOTS.map((slot, i) =>
-            slotRows(grid, lineup, i).map((row) => (
-              <tr
-                key={`${slot}-${row.key}`}
-                className={`${row.isSub ? 'sc-sheet__row--sub' : 'sc-sheet__row--slot'}`}
-              >
-                <td className="sc-sheet__pos">{row.pos}</td>
-                <td className={`sc-sheet__name ${row.isSub ? 'sc-sheet__name--sub' : ''}`}>
-                  {row.name}
-                </td>
-                {columns.map((col) => (
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  className={`sc-sheet__inning-h ${col.inningStart ? 'sc-sheet__inning-h--start' : ''}`}
+                  scope="col"
+                >
+                  {col.label}
+                </th>
+              ))}
+              {SUMMARY.map((s) => (
+                <th key={s} className="sc-sheet__sum-h" scope="col">
+                  {s}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {SLOTS.map((slot, i) =>
+              slotRows(grid, lineup, i).map((row, ri) => (
+                <tr
+                  key={`${slot}-${row.key}`}
+                  className={`${row.isSub ? 'sc-sheet__row--sub' : 'sc-sheet__row--slot'}`}
+                >
+                  <td className={`sc-sheet__name ${row.isSub ? 'sc-sheet__name--sub' : ''}`}>
+                    {/* The batting-order number leads the starter's name the way
+                        the paper sheet preprints it; a sub-line drops it. The
+                        uniform number closes every line, starter and sub
+                        alike, pinned to the rail's right edge. */}
+                    {ri === 0 && !row.isSub && <span className="sc-sheet__slotnum">{slot}</span>}
+                    <span className="sc-sheet__who">{row.name}</span>
+                    <span className="sc-sheet__jersey">{row.jersey}</span>
+                  </td>
+                  <td className="sc-sheet__pos">{row.pos}</td>
+                  {columns.map((col) => {
+                    const card = col.colIndex != null ? row.cells?.[col.colIndex] ?? null : null
+                    // The reveal frontier: the next plate appearance's own box,
+                    // face-down. Tapping it is the sheet's play verb — one step
+                    // of the same reveal cursor the innings viewer walks.
+                    const isFrontier =
+                      onFrontierTap != null &&
+                      card == null &&
+                      row.isLast &&
+                      grid?.frontier != null &&
+                      grid.frontier.slot === slot &&
+                      grid.frontier.colIndex === col.colIndex
+                    // The inning this box is the LEADOFF box for, if it is one
+                    // — and whether it's the one the turn handoff hangs on this
+                    // render.
+                    const leadoffInning =
+                      col.colIndex != null ? row.leadoffCells?.[col.colIndex] ?? null : null
+                    const isFlip = flip != null && leadoffInning != null && leadoffInning === flip.inning
+                    // The handover mark, on the line of the man LEAVING: the
+                    // column his replacement first bats in (api/scorecardGame.js).
+                    const subJersey =
+                      col.colIndex != null && card == null
+                        ? row.subMarks?.[col.colIndex] ?? null
+                        : null
+                    return (
+                      <td
+                        key={col.key}
+                        className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
+                      >
+                        {isFrontier ? (
+                          <button
+                            type="button"
+                            className="sc-ab__seal"
+                            onClick={onFrontierTap}
+                            aria-label="Reveal the next at-bat"
+                          >
+                            <span className="sc-ab__sealtext">Tap</span>
+                          </button>
+                        ) : isFlip ? (
+                          <button
+                            type="button"
+                            className="sc-ab sc-ab__flip"
+                            onClick={flip.onFlip}
+                            aria-label={`${flip.label} — flip the sheet`}
+                          >
+                            <span className="sc-ab__fliptext">
+                              {flip.label} <span aria-hidden="true">›</span>
+                            </span>
+                          </button>
+                        ) : subJersey != null ? (
+                          <span className="sc-sub">
+                            <span className="sc-sub__num">{subJersey}</span>
+                          </span>
+                        ) : (
+                          <AtBatBox
+                            atbat={card}
+                            note={cellNote(notes, card?.atBatIndex)}
+                            onEdit={onCellTap && card ? () => onCellTap(card) : null}
+                            fresh={Boolean(card && fresh?.has(card.atBatIndex))}
+                          />
+                        )}
+                      </td>
+                    )
+                  })}
+                  <td className="sc-sheet__sum">{row.hasStats ? row.ab : ''}</td>
+                  <td className="sc-sheet__sum">{row.hasStats ? row.h : ''}</td>
+                  <td className="sc-sheet__sum">{row.hasStats ? row.r : ''}</td>
+                  <td className="sc-sheet__sum">{row.hasStats ? row.rbi : ''}</td>
+                </tr>
+              )),
+            )}
+            {/* The #22's foot row: P / WH / FO under each inning's first
+                column (a widened inning's extra columns stay blank, same as
+                the header number), the AB/H/R/RBI sums under the amber TOTALS
+                bar at the right. Blank until a half is revealed. */}
+            <tr className="sc-sheet__totals">
+              <td className="sc-sheet__name sc-sheet__ptl">
+                {FOOT_LABELS.map((l) => (
+                  <span key={l} className="sc-sheet__ptlLabel">
+                    {l}
+                  </span>
+                ))}
+              </td>
+              <td className="sc-sheet__pos" />
+              {columns.map((col) => {
+                const line = grid && col.inningStart ? grid.perInning?.[col.inning] : null
+                return (
                   <td
                     key={col.key}
-                    className={`sc-sheet__cell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
+                    className={`sc-sheet__totcell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
                   >
-                    <AtBatBox
-                      atbat={col.colIndex != null ? row.cells?.[col.colIndex] ?? null : null}
-                    />
+                    {line && (
+                      <span className="sc-sheet__ptl">
+                        <span>{line.p}</span>
+                        <span>{line.whiffs}</span>
+                        <span>{line.fouls}</span>
+                      </span>
+                    )}
                   </td>
-                ))}
-                <td className="sc-sheet__sum">{row.hasStats ? row.ab : ''}</td>
-                <td className="sc-sheet__sum">{row.hasStats ? row.h : ''}</td>
-                <td className="sc-sheet__sum">{row.hasStats ? row.r : ''}</td>
-                <td className="sc-sheet__sum">{row.hasStats ? row.rbi : ''}</td>
-              </tr>
-            )),
-          )}
-          <tr className="sc-sheet__totals">
-            <td className="sc-sheet__pos" />
-            <td className="sc-sheet__name">Totals</td>
-            {columns.map((col) => (
-              <td
-                key={col.key}
-                className={`sc-sheet__totcell ${col.inningStart ? 'sc-sheet__cell--start' : ''}`}
-              >
-                {grid && col.inningStart ? grid.perInning?.[col.inning] ?? '' : ''}
-              </td>
-            ))}
-            <td className="sc-sheet__sum">{grid ? grid.totals.ab : ''}</td>
-            <td className="sc-sheet__sum">{grid ? grid.totals.h : ''}</td>
-            <td className="sc-sheet__sum">{grid ? grid.totals.r : ''}</td>
-            <td className="sc-sheet__sum">{grid ? grid.totals.rbi : ''}</td>
-          </tr>
-        </tbody>
-      </table>
+                )
+              })}
+              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.ab : ''}</td>
+              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.h : ''}</td>
+              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.r : ''}</td>
+              <td className="sc-sheet__sum sc-sheet__totbar">{grid ? grid.totals.rbi : ''}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

@@ -1,10 +1,11 @@
 name: Update teams data
 
 # Weekly refresh of public/data/teams.json from statsapi (see scripts/gen-teams.mjs),
-# plus the one-color club marks derived from it (scripts/gen-mono-logos.mjs).
-# Team/org structure — realignment, expansion, affiliate shuffles — is a
-# roughly once-a-decade event, so weekly (vs war.json's nightly) is plenty.
-# Pushing to main triggers Vercel's normal auto-deploy.
+# plus the one-color club marks derived from it (scripts/gen-mono-logos.mjs) and
+# the MiLB ballpark venue list the copy registry offers a photo/name editor for
+# (scripts/gen-milb-ballparks.mjs). Team/org structure — realignment, expansion,
+# affiliate shuffles — is a roughly once-a-decade event, so weekly (vs war.json's
+# nightly) is plenty. Pushing to main triggers Vercel's normal auto-deploy.
 on:
   schedule:
     - cron: '0 9 * * 1' # Monday ~4-5am US Eastern
@@ -32,10 +33,14 @@ jobs:
       # a rebrand or a new affiliate lands in both at once, and until it does
       # that club simply wears its full-color mark on the navy bar.
       - run: node scripts/gen-mono-logos.mjs
+      # The MiLB ballpark venue list is also derived from the teams.json just
+      # written — a new affiliate or a renamed venue gets a copy-editable
+      # photo/name slot on the same schedule its team record lands.
+      - run: node scripts/gen-milb-ballparks.mjs
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/teams.json public/data/logos/mono src/lib/data/mono-logo-manifest.json
+          git add public/data/teams.json public/data/logos/mono src/lib/data/mono-logo-manifest.json src/lib/data/milb-ballparks.json
           git diff --cached --quiet || git commit -m "Update teams data"
           git push

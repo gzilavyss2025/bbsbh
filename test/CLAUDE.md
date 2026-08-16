@@ -15,6 +15,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | all-started-games.test.js | 3 | src/api/schedule.js | TeamPhotosPage's game list — keys on `started`, not `won`, so a live game's photos are reachable before it's Final |
 | analytics.test.js | 5 | src/lib/analytics.js | Toggle-consent telemetry allowlist (ADR-0028) |
 | api-handlers.test.js | 51 | api/copy.js, api/reveal.js, api/spoiled-days.js, api/stamps.js | Node-runtime request shapes, the Logbook's tombstone read side (ADR-0035), the "pick up your pencil" scorebook index's auto-drop rule |
+| between-innings.test.js | 6 | src/api/between-innings.js | Post-half card allowlist, CARD_MAX cap, marginNotes[0] eligibility, quiet-vs-loud spoiler invariant |
 | box-score-note-attribution.test.js | 13 | src/api/boxscore.js, src/api/boxscore/gameNotes.js | Which club each info-block row prints under (HBP/IBB follow the BATTER), and the three parse shapes that used to drop a row into the shared foot |
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
@@ -24,7 +25,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | comeback-wins.test.js | 13 | scripts/gen-comeback-wins.mjs, src/api/comebackWins.js | Comeback-wins card |
 | compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
-| copy-registry.test.js | 22 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026) |
+| copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
 | day-highlights.test.js | 46 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) + the slate's four display tiers (favorite → live → national scheduled → rest) |
 | derive-live-state.test.js | 9 | src/api/playbyplay.js | Core spoiler-safe HUD state (cap, bases, batterDone) |
@@ -38,12 +39,12 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | game-feed-diff.test.js | 6 | src/api/game.js | mergeFeedDiff |
 | game-notes-regressions.test.js | 3 | src/api/whatsBrewing.js | "What's Brewing" / Game Notes extraction |
 | game-photos.test.js | 20 | src/api/gamePhotos.js | /photos page: photographer/broadcast/graphic classification + subject attribution (unsealed, non-spoiler) |
-| gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/loadScorecard.js | Full relay-chain double-play display |
+| gidp-full-chain.test.js | 4 | src/api/playbyplay.js, src/api/scorecardGame.js | Full relay-chain double-play display |
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
 | half-feed-note-order.test.js | 6 | src/api/playbyplay.js (halfInningFeed, eventTypes) | Same-play notes render in the feed's own playEvents order, not stoppages-then-baserunning; delay advisories reach the feed while the lifecycle "Status Change" lines stay out |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
 | identity-lab-stores.test.js | 24 | tuningStore.js, teams.js, brandColors.js, saveStores.js, mlbColorRoles.js, dev-data-stores.mjs | /identity-lab data stores |
-| interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/loadScorecard.js | Interrupted at-bat handling |
+| interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/scorecardGame.js | Interrupted at-bat handling |
 | invariant-real-game.test.js | 6 | linescore.js, derive.js, pitchers.js, select.js | Spoiler invariant pinned on captured real feed |
 | jerseys.test.js | 10 | scripts/gen-jerseys.mjs, src/api/jerseys.js | Nightly jerseys export |
 | json-patch.test.js | 8 | src/lib/jsonPatch.js | JSON patch utility |
@@ -79,6 +80,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | playbyplay-pitching-change.test.js | 7 | src/api/playbyplay.js | Now Pitching card step-boundary logic |
 | pre-pitch-selectors.test.js | 12 | src/api/select.js | Caller-gated pre-pitch selectors (ADR-0010) |
 | pregame-avg.test.js | 3 | src/api/boxscore.js | preGameAvg |
+| print-sheet.test.js | 14 | src/screens/sheet/sheetModel.js | Tonight's printable scorecard: the pre-pitch model + its MiLB blank-line degradations, and the spoiler boundary — screens/sheet/ imports only select.js, and the printed at-bat grid stays EMPTY (docs/print-sheet.md) |
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
@@ -89,8 +91,10 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
 | route.test.js | 36 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
-| scorecard-placed-runner.test.js | 3 | src/api/loadScorecard.js | Extra-innings placed runner in printable grid (regression) |
-| scorecard-sac-double-play.test.js | 1 | src/api/loadScorecard.js | sac_fly_double_play AB-charging bug (regression) |
+| scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
+| scorecard-notes.test.js | 6 | src/lib/scorecardNotes.js | Per-cell notation override store: malformed-storage tolerance, trim/cap hygiene, same-reference no-op writes |
+| scorecard-placed-runner.test.js | 3 | src/api/scorecardGame.js | Extra-innings placed runner in the inked grid (regression) |
+| scorecard-sac-double-play.test.js | 1 | src/api/scorecardGame.js | sac_fly_double_play AB-charging bug (regression) |
 | scoreless-dow-callouts.test.js | 21 | src/api/callout-notes.js | Scoreless/day-of-week/pitch-pace callouts |
 | scores-unlocked.test.js | 20 | src/lib/scoresUnlocked.js | Scores Unlocked unlock timer + the 8am-anchored game day a consent records (ADR-0026) |
 | season-score.test.js | 14 | scripts/gen-season-score.mjs, src/api/seasonScore.js, seasonScoreFormula.js | Season score / Marcel baseline / team-specific home-field factor |
@@ -105,6 +109,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | standings.test.js | 15 | src/api/standings.js | Standings shaping/ranks |
 | stats-levels.test.js | 5 | src/api/statsLevels.js | sumHitting/sumPitching recomputed rates + combineToPool's raw split passthrough |
 | statsapi.test.js | 4 | src/api/statsapi.js | Shared getJson fetch wrapper |
+| steal-throwing-error-note.test.js | 3 | src/api/playbyplay.js (halfInningFeed, runnerNotes) | A steal/WP/balk that breaks on a plate appearance's last pitch carries no playEvent of its own — recovered from runners[] into its own leading card, with a same-play throwing-error leg folded in |
 | team-franchise-name.test.js | 3 | src/api/select.js (selectTeamMeta) | franchiseName vs locationName bug fix |
 | team-score.test.js | 19 | scripts/gen-team-score.mjs, src/api/teamScore.js, seasonGradeFormula.js, teamScoreFormula.js | Quality/Current Form readers, strength-of-schedule adjustment, per-game park adjustment |
 | team-transactions.test.js | 31 | src/api/teamTransactions.js | Team transactions dedupe/story grouping |

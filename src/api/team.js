@@ -1,6 +1,7 @@
 // Team pages — identity, roster, standings, ranked team stats.
 
 import { getJson } from './statsapi.js'
+import { staticJsonBy } from './staticJson.js'
 import { fetchStaticTeams } from './teams-static.js'
 import { SPORT_IDS } from '../lib/teams.js'
 
@@ -272,6 +273,28 @@ export async function fetchComplexAffiliates(teamId, season) {
   } catch {
     return []
   }
+}
+
+// One farm club's big-league alumni — the players who spent real time HERE and
+// went on to the majors, ranked by career WAR, for the "Made The Show" card at
+// the foot of a MiLB team's Overview. Written nightly by
+// scripts/gen-milb-alumni.mjs, whose header carries the whole method: where the
+// WAR comes from (files already on disk), and why a stint under twenty games
+// doesn't count (a rehab assignment is a minor-league stint, and unfiltered it
+// puts three-game cameos above the players who actually came up there).
+//
+// Sharded one file per club, keyed by the club's OWN team id rather than its
+// parent org's, because the page that opens it always knows its own id and
+// never needs a sibling's list — so a farm-team page pulls its ~700 bytes
+// instead of the whole system's. Degrades to an empty list: no card, not a
+// broken page.
+const EMPTY_ALUMNI = { minGames: null, players: [] }
+const loadMilbAlumni = staticJsonBy((teamId) => `/data/milb-alumni/${teamId}.json`, {
+  fallback: EMPTY_ALUMNI,
+})
+export async function fetchMilbAlumni(teamId) {
+  if (!teamId) return EMPTY_ALUMNI
+  return (await loadMilbAlumni(teamId)) ?? EMPTY_ALUMNI
 }
 
 // Division standings AS OF a date. The `date` param is honored by the API

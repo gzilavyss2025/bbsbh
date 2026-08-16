@@ -1,0 +1,514 @@
+/* ============================================================
+   SCORECARD PAGE CHROME — the sheet's frame around the grid.
+   41-scorecard.css draws the grid and its at-bat boxes; this partial is
+   everything around them on the #22 sheet: the header band (logo, team over
+   manager, the crew pairs, KEEPING SCORE BY, FIRST PITCH), the footer trio
+   (defense diamond, pitcher table, scoreboard + FINAL block + decisions),
+   the notation editor's bottom sheet, the Top/Bottom control bar, and the
+   Lab's own load row. Split out of 41-scorecard.css at the 600-line file cap
+   (ADR-0038); imported by index.css immediately after it, so the cascade
+   order is exactly what one file's top-to-bottom order was.
+   ============================================================ */
+.sc-labctl {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+/* The live scorecard page's control bar: the Top/Bottom half toggle, with
+   Refresh riding the far end. */
+.scpage__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-2);
+}
+.scpage__ctl {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ---- The zoom control ---- */
+/* The grid's own reading control, sitting on the sheet's top edge: pull back
+   to take the whole sheet in, press in to read one region at written size.
+   It replaced two scroll bars — a scorebook page you slide should not
+   announce itself as a scrolling div — so it is small and quiet, a lens
+   rather than a toolbar. The floor it stops at is whatever fits the pane,
+   measured in ScorecardSheet.jsx. */
+.sc-zoom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-bottom: 2px;
+}
+.sc-zoom__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+  cursor: pointer;
+}
+.sc-zoom__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sc-zoom__btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.sc-zoom__pct {
+  min-width: 38px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* The turn handoff used to be a banner chip here (.scflip). It lives on the
+   sheet now — the leads-off-next diagonal of the half that just ended IS the
+   button (.sc-ab__flip in 41-scorecard.css), so the affordance sits where
+   the reader's eye already is instead of over the page. */
+
+/* Dev-only "load a gamePk" row on the Scorecard Lab (not a product surface). */
+.sc-labload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+.sc-labload__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-labload__input {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+}
+
+/* ---- Header band: write-in fields over pencil lines ---- */
+/* Mobile-first: the half label leads its own row and the fields settle
+   into a two-column grid (the paper band's own free-flowing wrap turned
+   into a ragged stack at 390px — a fixed two-up reads like a form). The
+   wide breakpoint restores the #22's one-band flow, TOP standing at the
+   left of the whole row. */
+.sc-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+  border-bottom: var(--bw-rule) solid var(--border-rule);
+}
+.sc-header__half {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-h2);
+  letter-spacing: var(--ls-label);
+  color: var(--accent-primary);
+}
+.sc-header__fields {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: var(--space-2) var(--space-4);
+}
+.sc-header__stack--wide {
+  grid-column: 1 / -1;
+}
+@media (min-width: 740px) {
+  .sc-header {
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  .sc-header__half {
+    align-self: center;
+    padding-right: var(--space-3);
+    border-right: var(--bw-hair) solid var(--border-rule);
+  }
+  .sc-header__fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+  }
+}
+.sc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 84px;
+}
+.sc-field--wide {
+  flex: 1;
+  min-width: 150px;
+}
+.sc-field__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-field__line {
+  min-height: 16px;
+  display: flex;
+  align-items: flex-end;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Two fields stacked in one header column — team over manager, HP over 2B —
+   the #22's own pairings. */
+.sc-header__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 84px;
+}
+.sc-header__stack--wide {
+  flex: 1;
+  min-width: 150px;
+}
+.sc-header__stack .sc-field {
+  min-width: 0;
+}
+
+/* The LOGO box: a bordered square holding the batting club's mark, or empty
+   space to sketch one in on the bare template. */
+.sc-logo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-logo__box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+
+/* KEEPING SCORE BY — the sheet's three pencil-ring options, write-in
+   surfaces the app itself never marks. */
+.sc-scoreby {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-scoreby__opt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-body);
+}
+.sc-scoreby__ring {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: var(--bw-hair) solid var(--graphite);
+  background: var(--surface-inset);
+}
+.sc-scoreby__ring--inked {
+  background: var(--graphite);
+}
+.sc-scoreby__optline {
+  flex: 1;
+  min-width: 64px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  min-height: 12px;
+}
+
+/* FIRST PITCH: the time on its line, the AM/PM rings beside it — the one the
+   posted time names is inked solid. */
+.sc-firstpitch {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-firstpitch__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+.sc-firstpitch__time {
+  min-width: 48px;
+}
+.sc-firstpitch__ampm {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.sc-firstpitch__mlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+/* ---- Footer: defense diamond, pitcher table, scoreboard ---- */
+.sc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+/* The three blocks are NOT interchangeable widths. The pitcher table is the
+   hungry one — a written surname-first name, a uniform number, and nine
+   numeric columns — so it gets the largest basis and the biggest share of
+   the slack; squeezed to an even third it ran its IP into its pitch count.
+   The footer wraps rather than squeezes when all three can't be served. */
+.sc-footer__block {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.sc-footer__pitcher {
+  flex: 2 1 380px;
+}
+/* Capped so that when the footer wraps and this block lands on a line of its
+   own, the two team rows keep a scoreboard's proportions instead of stretching
+   a 26% name column across the whole page. */
+.sc-footer__scoreboard {
+  max-width: 520px;
+}
+/* The defense diamond used to be pinned to 160px here, which is narrower
+   than the graphic was drawn for: eight surnames, each on its own writing
+   line with a position number under it, collided into one unreadable knot.
+   Give it the room the diamond needs (it draws at up to 340px elsewhere in
+   the app) and let it take a full column of the footer. */
+.sc-footer__defense {
+  flex: 0 1 300px;
+  max-width: 340px;
+}
+.sc-footer__defense .defdiamond {
+  width: 100%;
+}
+.sc-footer__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+
+/* The pitcher table reuses .pitchers__grid; the sheet only sets its blank-row
+   height so an empty template keeps writing room. */
+.sc-pitchers tbody td {
+  height: 22px;
+}
+/* A wider name column than the shared table's 36%: this one writes the
+   pitcher surname-first with his first name AND his uniform number, where
+   the box score's copy writes an initial. The nine numeric columns split
+   what's left, and they hold single digits. */
+.sc-pitchers .pitchers__pitcher {
+  width: 44%;
+}
+/* A hair of side padding on the numeric columns so IP does not run into P. */
+.sc-pitchers th,
+.sc-pitchers td {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+/* Surname-first name on the left, uniform number pinned right — the name
+   clips rather than wraps, since a wrapped line here would push the nine
+   numeric columns beside it out of alignment. */
+.sc-pitchers__name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sc-pitchers__jersey {
+  flex: 0 0 auto;
+  font-weight: var(--w-semibold);
+  color: var(--accent-positive);
+}
+
+/* Scoreboard: two team lines across the innings, then the R/H/E/LOB final. */
+.sc-scoreboard {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sc-scoreboard th,
+.sc-scoreboard td {
+  height: 22px;
+  text-align: center;
+  border: var(--bw-hair) solid var(--rule-grid);
+}
+.sc-scoreboard thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-title);
+  color: var(--text-caption);
+}
+.sc-scoreboard__team {
+  width: 26%;
+  /* `table-layout: fixed` gives this cell its share no matter the club, so a
+     long name has to be made to fit rather than allowed to paint over the
+     first inning's runs. It is WRITTEN SMALLER, not clipped — see FitText in
+     Scorecard.jsx; "Diamondb…" names no team. The hidden overflow here is
+     the floor under FitText's 0.55em limit, not the usual answer. */
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: left;
+  padding-left: var(--space-1);
+}
+/* FitText's measured node: a block so its scrollWidth reports the name's
+   true width against the cell it has to fit inside. */
+.sc-fit {
+  display: block;
+  white-space: nowrap;
+  text-align: left;
+}
+/* R/H/E totals ride the right edge, emphasized over the per-inning run cells. */
+.sc-scoreboard__rhe {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  background: var(--surface-inset);
+}
+/* The FINAL block under the innings grid: R/H/E/LOB beside the decisions,
+   filled only once the game is over and fully revealed (see
+   scorecardScoreboard's `done`). */
+.sc-finalblock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.sc-final {
+  flex: 1 1 180px;
+  width: auto;
+}
+.sc-final .sc-scoreboard__team {
+  width: 34%;
+}
+.sc-decisions {
+  flex: 1 1 140px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ---- The notation editor ---- */
+/* Docked to the TOP of the screen, not the bottom like every other sheet
+   here, for the ADR-0037 reason: this dialog is typed into, and a
+   bottom-docked sheet is positioned against the layout viewport — which an
+   on-screen keyboard does not shrink — so the moment the Outcome field
+   focused, the phone's keyboard covered every input and both buttons. The
+   top edge is the one place a keyboard can never reach. */
+.scrim--top {
+  align-items: flex-start;
+}
+.scrim--top .sheet {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding-top: calc(20px + env(safe-area-inset-top));
+  padding-bottom: 20px;
+  animation-name: sheetdrop;
+}
+@keyframes sheetdrop {
+  from {
+    transform: translateY(-24px);
+  }
+  to {
+    transform: none;
+  }
+}
+.sc-editsheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.sc-editsheet__who {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.sc-editsheet__hint {
+  margin: 0;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-ui);
+  color: var(--text-caption);
+}
+.sc-editsheet__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-2);
+}
+.sc-editsheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sc-editsheet__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+.sc-editsheet__input {
+  width: 100%;
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-field);
+}
+.sc-editsheet__input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -1px;
+}
+.sc-editsheet__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}

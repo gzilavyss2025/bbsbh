@@ -4,6 +4,7 @@ import { teamTabPath } from '../lib/route.js'
 import { isMlbTeamId } from '../lib/teams.js'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
 import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
+import { MilbAlumni } from '../components/teamstats/MilbAlumni.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/transactions/TeamTransactionsCard.jsx'
 import { ChevronLink } from '../components/ui/ChevronLink.jsx'
@@ -86,6 +87,7 @@ export function TeamPage({ id, asOf, sportId }) {
     leaderPool,
     injuredIds,
     transactionsPage,
+    milbAlumni,
   } = data
 
   return (
@@ -113,9 +115,11 @@ export function TeamPage({ id, asOf, sportId }) {
 
       {/* Ballpark — the diagram alongside its built/roof/capacity + ranked
           dimensions, in full (same content the lineup page's BallparkModal
-          shows). No door to another tab: this IS the full detail view. MLB
-          only in practice — renders nothing for a park not on file (every
-          MiLB park). */}
+          shows). No door to another tab: this IS the full detail view. The
+          diagram/dimensions half is MLB only (nobody has hand-verified a
+          MiLB park's outfield); a MiLB park still gets the photo/name/logo
+          half and the owner's gear, minus that section. Renders nothing at
+          all when the feed carries no venue name. */}
       <BallparkCard team={team} />
 
       {/* Form — the season grade and form rails, in full. This is the page's
@@ -215,6 +219,13 @@ export function TeamPage({ id, asOf, sportId }) {
           <PreviewDoor label="All transactions" onClick={() => go('games')} />
         </>
       )}
+
+      {/* Made The Show — a farm club's big-league alumni, career-WAR ranked.
+          The one card here that is NOT a preview of a tab: nothing else in the
+          app holds this, so there is no door to put under it. MiLB only, and
+          last on purpose — it is the club's history, under everything about its
+          season. */}
+      <MilbAlumni players={milbAlumni?.players} minGames={milbAlumni?.minGames} />
     </TeamHubShell>
   )
 }
