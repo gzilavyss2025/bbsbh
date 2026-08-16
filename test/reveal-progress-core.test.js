@@ -9,6 +9,7 @@ import test from 'node:test'
 import {
   parseRevealMark,
   parseAtBatMark,
+  parseBoxRevealMark,
   mergeMark,
   unlockedInnings,
   effectiveReveal,
@@ -208,4 +209,94 @@ test('the day-pass override can NEVER advance the persisted ratchet', () => {
   const ifLeaked = mergeMark(3, renderRevealedThrough)
   assert.equal(ifLeaked, 17)
   assert.notEqual(persisted, ifLeaked)
+})
+
+// --------------------------------------------------------------------------
+// effectiveReveal — the stamped-game render override (ADR-0048)
+//
+// The THIRD departure inside the spoiler rule's scope, and it rides the same
+// seam as the day pass for the same reason: a stamp says the user was there
+// and already knows how it ended, so re-sealing a game they stamped protects
+// them from nothing. Same contract as ADR-0026's pass — RENDER only, never a
+// byte into the ratchet.
+// --------------------------------------------------------------------------
+test('effectiveReveal opens a stamped game with the day pass off', () => {
+  // The whole point: no pass, no consented day, a game the user never revealed
+  // by hand — and it still renders open, because they stamped it.
+  const out = effectiveReveal({
+    scoresUnlocked: false,
+    stamped: true,
+    revealedThrough: -1,
+    unlocked: 9,
+    actualCount: 11,
+  })
+  assert.equal(out.renderRevealedThrough, halfIndex(11, 'bottom')) // extras included
+  assert.equal(out.renderUnlocked, 11)
+})
+
+// The ADR-0026 trap, inherited. A stamp unlock is a new force-reveal source,
+// so it owes the same answer: a half that renders revealed mounts its SealBox
+// force-revealed, SealBox fires onReveal on any transition to shown, and a
+// caller still wired to `revealTo` would ratchet the REAL mark for every half
+// the reader merely looked at — written to localStorage and cloud-synced to
+// every device. Opening a stamped game must persist nothing.
+test('effectiveReveal stops committing reveals for a stamped game', () => {
+  assert.equal(
+    effectiveReveal({ scoresUnlocked: false, stamped: true, revealedThrough: -1, unlocked: 9, actualCount: 9 })
+      .commitReveals,
+    false,
+  )
+})
+
+// An unstamped game is the default path, and it must be byte-identical to what
+// it was before this override existed — `stamped` absent and `stamped: false`
+// alike. This is the regression guard: the overwhelming majority of games the
+// user opens are unstamped, and they must still seal.
+test('effectiveReveal is untouched for an unstamped game', () => {
+  const base = { scoresUnlocked: false, revealedThrough: 3, unlocked: 9, actualCount: 11 }
+  const expected = { renderRevealedThrough: 3, renderUnlocked: 9, commitReveals: true }
+  assert.deepEqual(effectiveReveal(base), expected)
+  assert.deepEqual(effectiveReveal({ ...base, stamped: false }), expected)
+})
+
+// The two overrides are independent inputs to one branch: either alone opens
+// the game, and neither cancels the other.
+test('effectiveReveal treats the pass and the stamp as independent openers', () => {
+  const base = { revealedThrough: -1, unlocked: 9, actualCount: 9 }
+  const open = { renderRevealedThrough: halfIndex(9, 'bottom'), renderUnlocked: 9, commitReveals: false }
+  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: true, stamped: false }), open)
+  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: false, stamped: true }), open)
+  assert.deepEqual(effectiveReveal({ ...base, scoresUnlocked: true, stamped: true }), open)
+})
+
+// The stamp override never walks the render mark BACKWARD. A user who revealed
+// further by hand than the override's floor keeps every half they reached.
+test('effectiveReveal never walks a stamped game backward past real progress', () => {
+  const { renderRevealedThrough } = effectiveReveal({
+    scoresUnlocked: false,
+    stamped: true,
+    revealedThrough: 40, // absurdly far — a suspended game resumed, say
+    unlocked: 9,
+    actualCount: 9,
+  })
+  assert.equal(renderRevealedThrough, 40)
+})
+
+// --------------------------------------------------------------------------
+// parseBoxRevealMark — the box score's own bit (ADR-0049)
+//
+// One bit per game, stored as the string "1" and nothing else. It says only
+// THAT the reader lifted the box score's seal by hand — no half-index, no
+// count, nothing a score could be read out of. Everything else reads false,
+// which leaves the seal on: the same fail-closed direction parseRevealMark
+// collapses to -1 for.
+// --------------------------------------------------------------------------
+test('parseBoxRevealMark accepts exactly the value it writes', () => {
+  assert.equal(parseBoxRevealMark('1'), true)
+})
+
+test('parseBoxRevealMark reads anything else as sealed', () => {
+  for (const raw of [null, undefined, '', '0', '2', 'true', 'yes', '1 ', ' 1', '01', '{}', 1, true]) {
+    assert.equal(parseBoxRevealMark(raw), false, `${JSON.stringify(raw)} must not lift a seal`)
+  }
 })

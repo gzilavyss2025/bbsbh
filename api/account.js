@@ -26,6 +26,7 @@
 //   scorebook:{u}             the "pick up your pencil" index
 //   stamps:{u}:{season}       every season shard, then stamps:{u}:seasons
 //   reveal:{u}:{gamePk}       every reveal mark, via reveal:index:{u}
+//   revealbox:{u}:{gamePk}    every opened box score (ADR-0049), same index
 //
 // `game:final:{gamePk}` is deliberately NOT deleted. It is a SHARED, immutable
 // cache of public facts, keyed by game and belonging to no user; erasing it
@@ -111,7 +112,16 @@ export async function keysForUser(redis, userId) {
     // key is already on the delete list either way, so a failure here costs
     // completeness for pre-index games only. Not worth refusing the erase over.
   }
-  for (const gamePk of gamePks) keys.push(`reveal:${userId}:${gamePk}`)
+  // Both members of the family, per game: the half-index mark and the box
+  // score's own bit (ADR-0049). The bit is addressed off the SAME gamePk set, so
+  // it can never be the one thing an erase forgets — and forgetting it would
+  // re-open a box score on the next visit to a device the user had just wiped.
+  // A key that was never written deletes to a no-op, so listing it for every
+  // indexed game costs nothing.
+  for (const gamePk of gamePks) {
+    keys.push(`reveal:${userId}:${gamePk}`)
+    keys.push(`revealbox:${userId}:${gamePk}`)
+  }
 
   return { keys, seasons: seasons.length, reveals: gamePks.size, partial }
 }

@@ -348,17 +348,35 @@ test('erase resolves every per-user key from the two indexes', async () => {
   const { keys, seasons, reveals } = await keysForUser(redis, 'u1')
   assert.equal(seasons, 2)
   assert.equal(reveals, 2)
+  // Two keys per indexed game since ADR-0049: the half-index mark and the box
+  // score's own bit. The bit rides the same gamePk set precisely so it cannot be
+  // the one thing an erase forgets — leaving it behind would re-open a box score
+  // on the next visit to a device the user had just wiped.
   assert.deepEqual(keys.sort(), [
     'prefs:u1',
     'reveal:index:u1',
     'reveal:u1:777',
     'reveal:u1:778',
+    'revealbox:u1:777',
+    'revealbox:u1:778',
     'scorebook:u1',
     'spoiled:u1',
     'stamps:u1:2025',
     'stamps:u1:2026',
     'stamps:u1:seasons',
   ])
+})
+
+test('a box-score bit found only through the scorebook index is erased too', async () => {
+  // Same argument as the reveal mark's own pre-index case below: a gamePk
+  // discovered from the older `scorebook:{u}` hash must carry BOTH keys, or the
+  // erase is complete for the mark and future-only for the bit.
+  const redis = fakeRedis({
+    hashes: { 'scorebook:u1': { 777004: { updatedAt: 1 } } },
+  })
+  const out = await callErase(redis, 'u1')
+  assert.equal(out.status, 200)
+  assert.ok(redis.deleted.includes('revealbox:u1:777004'))
 })
 
 test('erase never touches the shared game-facts cache', async () => {

@@ -95,6 +95,17 @@ test('the tear leaves, and the panel it uncovered stays', async ({ page }) => {
 test('the same seal tears the same way on a fresh load', async ({ page }) => {
   const tearOnce = async () => {
     await page.goto(`${GAME}/boxscore`)
+    // A box score keeps itself open once opened (ADR-0049), so the seed question
+    // has to be asked in the state it is actually asked in: a reader who has not
+    // opened this one. Clearing that one bit is what makes the second load
+    // genuinely fresh — the same condition this spec always ran under, now
+    // stated rather than assumed.
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage)) {
+        if (k.startsWith('bbsbh:boxreveal:')) localStorage.removeItem(k)
+      }
+    })
+    await page.reload()
     await watchForTear(page)
     await page.getByRole('button', SEAL).click()
     await expect.poll(() => page.evaluate(() => window.__tears.length)).toBe(1)

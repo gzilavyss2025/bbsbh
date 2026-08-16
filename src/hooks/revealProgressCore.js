@@ -18,6 +18,16 @@ export function parseRevealMark(raw) {
   return Number.isInteger(n) && n >= 0 ? n : -1
 }
 
+// Parse the box score's own mark (ADR-0049) — the one bit that says "this
+// reader has already opened this game's box score by hand". Stored as the
+// string "1" and NOTHING else, so it can hold no half-index, no count, and
+// nothing that could be mistaken for one. Any other value — null (unset), "0",
+// "true", a number, a mangled blob — reads as false, which leaves the seal
+// exactly where it was: the same fail-closed posture parseRevealMark has.
+export function parseBoxRevealMark(raw) {
+  return raw === '1'
+}
+
 // Parse the at-bat stepping cursor, stored as "{halfIdx}:{count}" (ADR-0016).
 // Either field being absent/negative/non-integer collapses the whole cursor to
 // the inert { halfIdx: -1, count: 0 } — a stale or garbled value is ignored
@@ -47,8 +57,24 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
   return u
 }
 
-// Render-time reveal override for the site-wide "Scores Unlocked" day pass
-// (useScoresUnlocked.js / ADR-0026). When the pass is OFF this is the identity:
+// Render-time reveal override, from either of TWO independent openers:
+//
+//   • `scoresUnlocked` — the site-wide "Scores Unlocked" day pass
+//     (useScoresUnlocked.js / ADR-0026), scoped to a day the user agreed to
+//     spoil.
+//   • `stamped` — this one game carries the user's own stamp (ADR-0048). A
+//     stamp is minted only from inside a revealed box score of a FINAL game
+//     and means "I was there / I watched this," so a seal on a game they
+//     stamped protects them from nothing: they already know how it ended.
+//     Scoped to that one gamePk, and derived from a record they created
+//     rather than from a consent tap — which is why it needs its own ADR
+//     rather than riding the pass's `spoilersOff` flag. It must NOT: the
+//     pass's flag also drives the day-pass chrome ("scores are unlocked
+//     today"), and a stamped game on an ordinary sealed day would make that
+//     copy a lie.
+//
+// Either alone opens the game and neither cancels the other, so they share one
+// branch. When BOTH are off this is the identity:
 // the real high-water mark and the real extras-unlock count pass straight
 // through. When it's ON, every real half renders as revealed — the RENDER mark
 // advances to the game's final half and every inning the game actually has is
@@ -81,8 +107,16 @@ export function unlockedInnings(regulation, actualCount, revealedThrough) {
 // happen, and what the consent copy means by "it does not track or advance your
 // by-hand scoring". So it is false while unlocked. Nothing is lost: under the
 // pass there are no seals to tap, so there is no genuine reveal to record.
-export function effectiveReveal({ scoresUnlocked, revealedThrough, unlocked, actualCount }) {
-  if (!scoresUnlocked) {
+//
+// THE SAME ANSWER, FOR THE SAME REASON, FOR `stamped`. ADR-0026 asks every
+// future force-reveal source whether it must also stop the commit, and this one
+// must — more urgently, even. The pass expires; a stamp does not. Were a
+// stamped game to commit, merely REVISITING one would ratchet a mark the reader
+// never earned by hand, write it to localStorage, and push it through
+// RevealCloudSync to every device they own — permanently, and for a game whose
+// seal they might well want back if they ever unstamp it.
+export function effectiveReveal({ scoresUnlocked, stamped, revealedThrough, unlocked, actualCount }) {
+  if (!scoresUnlocked && !stamped) {
     return {
       renderRevealedThrough: revealedThrough,
       renderUnlocked: unlocked,

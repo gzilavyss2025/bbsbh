@@ -9,6 +9,15 @@
 // Ratcheted server-side too, not just client-side: a write can only raise
 // the stored value, never lower it, so a stale or malformed client can't
 // regress another device's already-synced progress.
+//
+// A SECOND, SMALLER FACT rides the same (userId, gamePk) address: whether the
+// reader has opened this game's BOX SCORE (ADR-0049), at
+// `revealbox:{userId}:{gamePk}`. One bit, and less than the mark beside it — it
+// carries no position at all, only that one seal on one page was lifted. It is
+// here rather than on an endpoint of its own because it is the same family
+// answering to the same key: same auth, same erase index (`reveal:index:{u}`,
+// which api/account.js reads to find both), and one round trip for the client
+// that wants both. Its ratchet is set-only: 1, never back to 0.
 
 import { authenticateUser } from './_lib/auth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
@@ -113,6 +122,34 @@ export function recentGamesView(all) {
   return { games, done }
 }
 
+// What a POST body actually asks to store, or the refusal — pure, so the one
+// piece of this endpoint that decides what a request may write is unit-tested
+// directly rather than through a fake Redis (same reason `sanitizeSnapshot` and
+// `isFullyWrappedUp` are exported).
+//
+// Two writes, either one on its own. `revealedThrough` was mandatory before
+// ADR-0049 and the box bit came along, and a box-only POST is the ORDINARY case
+// now, not an edge one: opening a box score is exactly the thing a reader does
+// on a game they have never hand-revealed a half of, so `revealedThrough` is
+// genuinely absent then rather than 0. An out-of-range mark is still a 400
+// whether or not the box bit rode along — a malformed field is refused, never
+// silently dropped while the rest of the request succeeds.
+export function plannedWrites(body) {
+  const raw = body?.revealedThrough
+  const wantsMark = raw !== undefined && raw !== null
+  if (
+    wantsMark &&
+    (!Number.isInteger(raw) || raw < 0 || raw > MAX_REVEALED_THROUGH)
+  ) {
+    return { error: 'revealedThrough out of range' }
+  }
+  // Strictly `true`. A truthy string or 1 from some future client is a shape we
+  // did not agree to, and this bit lifts a seal — so it must be spelled.
+  const box = body?.boxRevealed === true
+  if (!wantsMark && !box) return { error: 'nothing to store' }
+  return { mark: wantsMark ? raw : null, box }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST' && req.method !== 'DELETE') {
     return reply(res, { error: 'method not allowed' }, 405)
@@ -165,10 +202,17 @@ export default async function handler(req, res) {
   }
 
   const key = `reveal:${userId}:${gamePk}`
+  const boxKey = `revealbox:${userId}:${gamePk}`
 
   if (req.method === 'GET') {
-    const current = await redis.get(key)
+    // Both facts in one trip, in parallel: the client that asks for one of them
+    // (BoxScore) and the client that asks for the other (InningViewer) send the
+    // same request, and a second round trip would buy nothing.
+    const [current, box] = await Promise.all([redis.get(key), redis.get(boxKey)])
     const revealedThrough = Number.isInteger(current) ? current : -1
+    // Anything stored is a 1 this endpoint wrote; an absent key is the answer
+    // that leaves the seal on, which is the direction to fail in.
+    const boxRevealed = Boolean(box)
     // Backfill the erase index for a mark this user made before the index
     // existed. Without this, `reveal:index:{u}` is populated FORWARD ONLY, so
     // every pre-index mark survives "erase my Tally data everywhere" — and is
@@ -176,7 +220,11 @@ export default async function handler(req, res) {
     // that game is opened, which is a reveal resurrecting itself after the user
     // asked for it to be gone. Opening a game is the one moment we can name a
     // gamePk that is certainly this user's, so the repair belongs here.
-    if (revealedThrough >= 0) {
+    //
+    // The box bit is indexed the same way and for the same reason: an erase
+    // that left it behind would re-open a box score on the next visit to a
+    // freshly-wiped device, which is the same resurrection in a smaller size.
+    if (revealedThrough >= 0 || boxRevealed) {
       try {
         await redis.sadd(`reveal:index:${userId}`, gamePk)
       } catch {
@@ -184,7 +232,7 @@ export default async function handler(req, res) {
         // costs completeness on a future erase, never a mark.
       }
     }
-    return reply(res, { revealedThrough })
+    return reply(res, { revealedThrough, boxRevealed })
   }
 
   // POST — ratchet: the stored value can only ever increase.
@@ -192,11 +240,18 @@ export default async function handler(req, res) {
   if (body == null) {
     return reply(res, { error: 'invalid body' }, 400)
   }
-  const incoming = body?.revealedThrough
-  if (!Number.isInteger(incoming) || incoming < 0 || incoming > MAX_REVEALED_THROUGH) {
-    return reply(res, { error: 'revealedThrough out of range' }, 400)
+  const plan = plannedWrites(body)
+  if (plan.error) {
+    return reply(res, { error: plan.error }, 400)
   }
-  const next = Number(await redis.eval(RATCHET_SCRIPT, [key], [incoming]))
+  // The mark, when one was sent. `null` (a box-only POST) leaves the stored
+  // integer exactly as it is — a reader who opened a box score has not scored a
+  // half by hand, and writing a 0 would claim they had.
+  const next =
+    plan.mark === null ? null : Number(await redis.eval(RATCHET_SCRIPT, [key], [plan.mark]))
+  // Set-only, no ratchet script needed: the value is always 1, so a concurrent
+  // second write cannot disagree with the first.
+  if (plan.box) await redis.set(boxKey, 1)
 
   // Remember that this user has a mark for this game. `reveal:{u}:{gamePk}` is
   // the only per-user key family with no natural index, so without this set
@@ -225,7 +280,11 @@ export default async function handler(req, res) {
   // "go away once you've unlocked every half inning and the game is over":
   // rather than writing an entry back in only to have the next GET prune it,
   // drop it here on the very reveal that completes it.
-  const snapshot = sanitizeSnapshot(body?.game)
+  //
+  // A box-only POST never lands here even if a client sent a snapshot with it:
+  // the scorebook strip is "pick up your pencil where you left off", and it
+  // reads `revealedThrough`. Opening a box score is not picking up a pencil.
+  const snapshot = next === null ? null : sanitizeSnapshot(body?.game)
   if (snapshot) {
     const bookKey = `scorebook:${userId}`
     const entry = { ...snapshot, revealedThrough: next, updatedAt: Date.now() }
@@ -247,5 +306,9 @@ export default async function handler(req, res) {
     }
   }
 
-  return reply(res, { revealedThrough: next })
+  // `revealedThrough` is the ratcheted value the caller should adopt, or null
+  // when this POST carried no mark — a box-only write reports on what it wrote
+  // and stays quiet about what it did not touch, rather than inventing a -1 the
+  // client might merge.
+  return reply(res, { revealedThrough: next, boxRevealed: plan.box })
 }
