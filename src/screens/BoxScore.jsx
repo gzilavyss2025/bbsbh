@@ -34,6 +34,7 @@ import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { RefreshButton, InfoIcon } from './TeamInfo.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../lib/headerTheme.js'
+import { useStampUnseal } from '../hooks/useStamps.js'
 
 // Manager fill-in value, surname-first with the uniform number riding along —
 // "MURPHY, PAT · 21" — matching how every staged name is penciled in. The
@@ -116,6 +117,7 @@ export function BoxScore({
   // the input objects THEMSELVES rather than a gamePk or a timestamp: a poll
   // mints a fresh feed, a fresh feed is a cache miss, and the sheet recomputes.
   const revealCacheRef = useRef({ key: null, value: null })
+  const stamped = useStampUnseal(feed?.gamePk)
 
   return (
     <div className="boxscore">
@@ -128,6 +130,9 @@ export function BoxScore({
         )}
       </div>
 
+      {/* The reader's own stamp on this game opens it too (ADR-0048) — read
+          here rather than passed in, same as the innings viewer, because a
+          stamp is a property of this gamePk and not of the day. */}
       {/* The spoilers-off pass (ADR-0026, resolved for this game's date by
           GameView) lifts this seal too. The consent copy promises "no seals, no
           tapping" — the box score is a score surface inside a game, so leaving it
@@ -136,10 +141,18 @@ export function BoxScore({
           render-function gate is untouched: children are still only invoked in
           the revealed branch (ADR-0001/0002); the pass only flips WHICH branch
           renders. Nothing is persisted — this SealBox has no `onReveal`, and the
-          pass never touches `revealedThrough`. */}
+          pass never touches `revealedThrough`.
+
+          A STAMP ON THIS GAME LIFTS IT THE SAME WAY (ADR-0048), and this is the
+          surface the rule matters most on: the stamp is minted from inside this
+          very seal, so without this the reader would tap it open, stamp the
+          game, come back tomorrow and be asked to tap it open again — to see a
+          result they recorded themselves. Same `forceRevealed` input, same
+          untouched render-function gate, and persisting nothing for the same
+          reason: this SealBox still has no `onReveal`. */}
       <SealBox
         label="Tap to reveal the box score"
-        forceRevealed={spoilersOff}
+        forceRevealed={spoilersOff || stamped}
         gamePk={feed?.gamePk}
       >
         {() => {

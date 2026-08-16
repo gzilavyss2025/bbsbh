@@ -96,12 +96,12 @@ is never fetched-then-hidden, and never computed early. Everything else about ba
 opens live: season and career stats, player and team pages, leader boards, standings,
 and the standalone pages outside the scoring flow. A stat line is not a score, and
 gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is opt-in
-now"). Two **opt-in, consented** departures lift the seal inside the scope, both *render*
+now"). Three **opt-in, consented** departures lift the seal inside the scope, all *render*
 overrides that never write the persisted reveal mark: the site-wide **Scores Unlocked**
-switch, unsealing a day you agree to spoil (ADR-0026); and **Stamp In**
-(`/team/{id}/stamp-in`), one club's played season with every result showing so you can
-stamp what you watched, gated on the PAGE so nothing renders or is fetched until you
-agree (ADR-0042). A third is a spoiler-rule call. `docs/adr/` has the *why* — read it.
+switch, unsealing a day you agree to spoil (ADR-0026); **Stamp In** (`/team/{id}/stamp-in`),
+one club's played season with every result showing, gated on the PAGE so nothing renders or
+is fetched until you agree (ADR-0042); and a game carrying your own **stamp**, which opens
+for the reader who was there (ADR-0048). A fourth is a call. `docs/adr/` has the *why*.
 
 Inside that scope, two conventions enforce it structurally:
 

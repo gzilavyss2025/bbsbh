@@ -63,14 +63,31 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
 
   // Un-stamp from the box score and the Logbook empties again — a stamp is a
   // keepsake, deliberately NOT ratcheted the way revealedThrough is.
+  //
+  // NO SEAL TO TAP ON THE WAY BACK IN (ADR-0048). Returning to a game you have
+  // stamped opens it: that is the whole point of the decision, and this line
+  // used to be a second `Tap to reveal the box score` click. Its removal is the
+  // assertion — the seal is asserted absent below, so this cannot quietly rot
+  // into "the button moved and we stopped looking for it".
   await page.goto(`${GAME}/boxscore`)
-  await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
+  await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Details' }).click()
   await page.getByRole('button', { name: 'Remove stamp' }).click()
+  // The page does NOT slam shut underneath the tap that un-stamped it: the
+  // unlock is latched for the life of the visit (useStampUnseal), so the mint
+  // strip is still right there, now offering to stamp again.
   await expect(page.getByRole('button', { name: 'Stamp this game' })).toBeVisible()
 
   await page.goto('/logbook')
   await expect(page.locator('.logbook__cell')).toHaveCount(0)
+
+  // …and on the NEXT visit the seal is back, because the unlock was only ever a
+  // render override keyed on a stamp that no longer exists (ADR-0048). This is
+  // the reversibility half of that decision, and the reason it persists
+  // nothing: had opening the stamped game ratcheted `revealedThrough`, this
+  // game would now stay open forever, on every device the reader owns.
+  await page.goto(`${GAME}/boxscore`)
+  await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toBeVisible()
 })
 
 // The retrospective (/logbook/stats) renders final scores plainly, on the same
