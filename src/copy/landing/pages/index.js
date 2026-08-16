@@ -18,9 +18,12 @@
 
 import ballparkPassports from './ballparkPassports.js'
 import chooseAScorebook from './chooseAScorebook.js'
+import missedPlayScorekeeping from './missedPlayScorekeeping.js'
+import penOrPencil from './penOrPencil.js'
 import readABoxScore from './readABoxScore.js'
 import scoreABaseballGame from './scoreABaseballGame.js'
 import scoreAtTheBallpark from './scoreAtTheBallpark.js'
+import scoreSubstitutions from './scoreSubstitutions.js'
 import scorekeepingSymbols from './scorekeepingSymbols.js'
 import statsGlossary from './statsGlossary.js'
 import watchWithoutSpoilers from './watchWithoutSpoilers.js'
@@ -28,7 +31,10 @@ import watchWithoutSpoilers from './watchWithoutSpoilers.js'
 export const LANDING_PAGES = Object.freeze([
   scoreABaseballGame,
   scorekeepingSymbols,
+  scoreSubstitutions,
+  missedPlayScorekeeping,
   chooseAScorebook,
+  penOrPencil,
   scoreAtTheBallpark,
   watchWithoutSpoilers,
   ballparkPassports,
