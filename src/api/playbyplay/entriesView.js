@@ -53,56 +53,73 @@ export function nextStepBoundary(entries, fromCount) {
   return entries.length
 }
 
-// Focus mode's display windows — one per scorecard CELL (an `atbat` or
-// `placed` entry), NOT one per reveal tap. The two used to be the same walk
-// (this function iterated nextStepBoundary), and that identity is what made
-// extras and live scoring miserable, three ways at once:
+// Focus mode's display windows — one per revealed AT-BAT, NOT one per reveal
+// tap. The two used to be the same walk (this function iterated
+// nextStepBoundary and the caller counted the boundaries at or under the cap),
+// and that identity snapped the reader's view backwards all game long.
 //
-//  • The extra-innings placement rode inside the leadoff batter's window, so
-//    the first tap of the 10th buried the hero card under the placed-runner
-//    card (and any caught-stealing note) — the one thing focus mode promises
-//    not to do.
-//  • A trailing notice (a pitching change announced after the 3rd ball of an
-//    at-bat was penciled) belonged to the PREVIOUS at-bat's window. When a
-//    Refresh delivered "change + next at-bat" together, the tap landed the
-//    cursor on the new hero and the change was filed into a window the reader
-//    had already left — a tier-1 notification (ADR-0017) that never crossed
-//    the screen.
-//  • Because a window's END grew when a Refresh appended a trailing notice
-//    past the cap, the ≤-cap window count could DROP, snapping the reader's
-//    view back one at-bat on every mid-half Refresh at the live edge.
+// THE DEFECT, WHICH WAS NOT RARE. A stoppage is nested at the head of the play
+// that FOLLOWS it (nextStepBoundary's own header has the count: 655 of 678),
+// so a mound visit or a pitching change announced after an out reaches the
+// feed the moment the NEXT batter steps in — after the tap that revealed the
+// out, and with the cap already stored. Under the old walk that entry grew the
+// last boundary past the stored cap, the `bounds.filter(b => b <= cap)` count
+// dropped by one, and the reader — following the newest window — was moved
+// back an at-bat while a card they had already charted reappeared. Replayed
+// against a real feed (gamePk 823263, MIL @ SD, 11 innings) that fired on 14 of
+// 89 taps; on one of them the count fell to zero and the windowed view dropped
+// out from under the reader entirely. The same disqualified window is why a
+// tier-1 notice (ADR-0017) could never cross the screen: it was filed into a
+// window the count had just discarded.
 //
-// So: window i covers (anchor[i-1], anchor[i]] — the leading notices plus the
-// cell they stage (a pitching change reads ABOVE the batter the new arm
-// faces, which is the paper order: finish the batter, pencil the change, see
-// the next batter). Only the LAST revealed window absorbs the trailing
-// notices under the cap, since no revealed cell follows to own them; the
-// moment the next cell is revealed they re-home to its head. Every window is
-// clamped to `cap`, so nothing past the reveal boundary ever renders and an
-// entry appended past the cap changes no window the reader can see.
+// So the anchor is the at-bat, and the count of windows is the count of
+// at-bats at or under the cap — which only ever grows, because an at-bat's own
+// index cannot move. Window i covers (anchor[i-1], anchor[i]]: the leading
+// notices plus the plate appearance they stage. A notice arriving after the
+// tap that revealed the previous at-bat is simply not revealed yet, and lands
+// at the head of the next window when it is.
+//
+// WHY THE LAST WINDOW DOES NOT SWALLOW WHAT TRAILS IT. An earlier draft of
+// this ran the last window out to the cap, so a notice already inside the cap
+// showed at once. It also showed AGAIN at the head of the next window as soon
+// as that at-bat was revealed — the same mound visit drawn twice in
+// consecutive taps, 25 times in the game above. A card belongs to exactly one
+// window. The one exception is a note NO at-bat will ever follow (a closing
+// ejection, a walk-off's aftermath): `entries` holds the whole half, so a look
+// past the cap can tell "not revealed yet" from "nobody left to bat" without
+// reading anything the cap does not already permit — the count of at-bats
+// ahead is not a score.
 //
 // The reveal CAP is untouched: nextStepBoundary above still bundles a tap as
-// "the next cell plus what the managers did after it" (see its own doc, and
-// halfInningFeed's placed-entry note) — this is only WHERE the revealed
-// entries display, never how many are revealed.
+// "the next at-bat plus what the managers did after it" (see its own doc) —
+// this is only WHERE the revealed entries display, never how many are
+// revealed.
 //
-// Returns { start, end } pairs (entries[start..end)), one per revealed cell,
-// oldest first. A cap that reveals only leading notices (the live edge of a
-// half whose first cell hasn't resolved yet) yields one window holding them.
+// Returns { start, end } pairs (entries[start..end)), one per revealed at-bat,
+// oldest first. A cap holding only leading notices (the live edge of a half
+// whose first plate appearance hasn't resolved, where an extras placement is
+// often the only card there is) yields one window holding them, since the
+// alternative is a tap that answers with a blank stage.
 export function focusWindows(entries, cap) {
   const limit = cap == null ? entries.length : Math.min(Math.max(0, cap), entries.length)
   const wins = []
   let start = 0
-  for (let i = 0; i < limit; i++) {
-    const k = entries[i].kind
-    if (k !== 'atbat' && k !== 'placed') continue
+  let more = false
+  for (let i = 0; i < entries.length; i++) {
+    if (entries[i].kind !== 'atbat') continue
+    if (i >= limit) {
+      // An at-bat past the cap: it will own the trailing notices when it is
+      // revealed, so they must not be drawn twice by showing them now.
+      more = true
+      break
+    }
     wins.push({ start, end: i + 1 })
     start = i + 1
   }
-  if (wins.length === 0) {
-    return limit > 0 ? [{ start: 0, end: limit }] : []
-  }
-  wins[wins.length - 1].end = Math.max(wins[wins.length - 1].end, limit)
+  if (wins.length === 0) return limit > 0 ? [{ start: 0, end: limit }] : []
+  // Nobody left to bat — the notes after the last at-bat have no other window
+  // to go to, so the last one runs out to the cap.
+  if (!more) wins[wins.length - 1].end = Math.max(wins[wins.length - 1].end, limit)
   return wins
 }
 
@@ -273,16 +290,25 @@ export function buildTrailItems(entries, wins, eventCodeFor) {
     if (atbat) {
       return { name: atbat.batter.last, code: atbat.code || (atbat.calledLooking ? 'K' : ''), kind: atbat.codeKind, notices }
     }
-    // The extra-innings automatic runner — his own cell now (focusWindows
-    // anchors on `placed` too), named after whoever currently occupies it:
-    // the last pinch runner in the chain when a manager swapped him out
-    // before the first pitch, else the placed man himself.
+    // The extra-innings automatic runner, when he is ALONE in his window. He
+    // normally isn't — focusWindows anchors on at-bats, so a placement rides
+    // at the head of the leadoff plate appearance's window and the branch
+    // above claims the chip and names the batter. The exception is the live
+    // edge of an extra half, where the placement is posted before the leadoff
+    // PA has resolved and is genuinely the only card there is; without this it
+    // fell through to the notice branch, which reads no `eventType` off a
+    // placed card and printed a chip labelled "···  •".
+    //
+    // Named after whoever currently occupies the base: the last pinch runner
+    // in the chain when a manager swapped him out before the first pitch (a
+    // real case — gamePk 823263 top 11, Bae for the placed Contreras), else
+    // the placed man himself. He has a mark of his own (`AR`) either way.
     const placed = windowEntries.find((e) => e.kind === 'placed')
     if (placed) {
       const pr = placed.pinchRunners?.[placed.pinchRunners.length - 1]
       return { name: pr?.last ?? placed.runner?.last ?? '', code: placed.code || 'AR', kind: 'placed', notices }
     }
-    // Notices with no cell of their own yet — the live edge of a half whose
+    // Notices with no at-bat of their own yet — the live edge of a half whose
     // first plate appearance hasn't resolved.
     return { name: noticeLabel(windowEntries[0], eventCodeFor), code: '', kind: 'note', notices: [] }
   })

@@ -112,15 +112,14 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
-  // Focus mode: one window per revealed scorecard CELL (focusWindows — an
-  // at-bat or the extras placement), leading notices at each window's head,
-  // every window clamped to the cap. NOT one window per reveal tap: see
-  // focusWindows' own header for the three live-scoring defects the tap-shaped
-  // windows caused (the buried extras hero, tier-1 notices filed into
-  // already-left windows, and the view snapping back an at-bat when a Refresh
-  // appended a trailing notice).
+  // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
+  // staging it at its head, every window clamped to the cap. NOT one window
+  // per reveal tap — see focusWindows' own header for the defect the
+  // tap-shaped windows caused (a notice reaching the feed after the tap that
+  // revealed the previous at-bat disqualified the last window and moved the
+  // reader BACK an at-bat; 14 of 89 taps on a replayed real game).
   //
-  // Built for a STACKED half too (commit 3): its trail needs the same cell
+  // Built for a STACKED half too (commit 3): its trail needs the same
   // boundaries to build its scroll targets, not just a windowed half's single
   // card. Cheap either way — a pure walk over `entries`, not a fetch.
   //
