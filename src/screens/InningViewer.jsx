@@ -33,6 +33,7 @@ import { PregameScoreboard } from '../components/inning/PregameScoreboard.jsx'
 import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
+import { useStampUnseal } from '../hooks/useStamps.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -163,8 +164,23 @@ export function InningViewer({
   // straight down would therefore ratchet the REAL mark for every half viewed
   // under the pass (and cloud-sync it). While unlocked we hand down a no-op
   // instead; there are no seals to tap, so there is no reveal to record.
+  // THE THIRD OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
+  // minted only from inside a revealed box score of a FINAL game and records "I
+  // was there", so re-sealing a game they stamped protects them from nothing.
+  //
+  // Read HERE rather than handed down beside `spoilersOff`, because the two are
+  // different KINDS of fact. `spoilersOff` is a property of the DAY and needs
+  // GameView's `officialDate` to resolve; a stamp is a property of this one
+  // gamePk, which this screen already holds. Keeping them apart also keeps the
+  // day-pass chrome honest — a stamped game must never make the banner announce
+  // an unlocked day (see effectiveReveal, which takes them as two inputs).
+  //
+  // Why a latch rather than `isStamped` straight: useStampUnseal's own header.
+  const stamped = useStampUnseal(feed?.gamePk)
+
   const { renderRevealedThrough, renderUnlocked, commitReveals } = effectiveReveal({
     scoresUnlocked: spoilersOff,
+    stamped,
     revealedThrough,
     unlocked,
     actualCount,

@@ -246,10 +246,14 @@ asserts a stamp is *absent from the DOM*, not merely hidden, before the box scor
 is tapped. Read ADR-0035 before touching either.
 
 The reach half is that `StampGameButton.jsx` renders **inside** the box score's
-`SealBox` reveal render function. That host `SealBox` has **no `onReveal` and
-persists nothing**, and must stay that way — give it one and a box score opened
-under the Scores Unlocked pass would silently ratchet the whole game's
-`revealedThrough`.
+`SealBox` reveal render function. That host `SealBox` carries an `onReveal` since
+**ADR-0049** — but only on a real TAP, and it writes only
+`bbsbh:boxreveal:{gamePk}`, the one bit that re-opens that page. It is withheld
+whenever the pass or a stamp is the thing doing the opening, and it never touches
+`revealedThrough`. Both halves of that are load-bearing: an unconditional
+`onReveal` would let a box score opened under the Scores Unlocked pass record a
+mark for a seal nobody touched, and reaching `revealedThrough` would ratchet the
+whole game's by-hand frontier from one tap on a different page.
 
 #### The retired mint gate
 
@@ -462,7 +466,9 @@ unknown to us.
 
 1. **Containment is the whole spoiler argument** — a stamp is reachable only from
    inside a revealed box score, and renderable only where the guard allows. §4.1.
-2. **The box score's stamp `SealBox` gets no `onReveal` and persists nothing.**
+2. **The box score's stamp `SealBox` records a TAP and nothing else** — one bit,
+   `bbsbh:boxreveal:{gamePk}` (ADR-0049), never under the pass or a stamp, and
+   never `revealedThrough`. §4.1.
 3. **`GameStamp.jsx` and `StampGameButton.jsx` stay inside their import
    allowlists** — `scripts/check-stamp-surfaces.mjs` is not advisory. A surface
    that mints without drawing (Stamp In) joins `FORBIDDEN_ART_FILES` instead of

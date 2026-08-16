@@ -23,7 +23,12 @@ import {
 } from '../api/_lib/auth.js'
 import { redisConfigFromEnv } from '../api/_lib/redis.js'
 import copyHandler from '../api/copy.js'
-import revealHandler, { isFullyWrappedUp, recentGamesView, sanitizeSnapshot } from '../api/reveal.js'
+import revealHandler, {
+  isFullyWrappedUp,
+  plannedWrites,
+  recentGamesView,
+  sanitizeSnapshot,
+} from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
 import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
@@ -115,6 +120,57 @@ test('sanitizeSnapshot drops a malformed or missing finalHalfIndex to null', () 
     finalHalfIndex: -3,
   })
   assert.equal(hostile.finalHalfIndex, null)
+})
+
+// --------------------------------------------------------------------------
+// plannedWrites — what a POST /api/reveal body is allowed to store (ADR-0049)
+//
+// Two writes over one address: the half-index mark, and the box score's own
+// bit. Either may arrive alone. The validation is pure so the one decision that
+// says what a request may write is pinned here rather than only reachable
+// through a live Redis and a Clerk token.
+// --------------------------------------------------------------------------
+test('plannedWrites takes a mark on its own — the shape every older client sends', () => {
+  assert.deepEqual(plannedWrites({ revealedThrough: 7 }), { mark: 7, box: false })
+  assert.deepEqual(plannedWrites({ revealedThrough: 0 }), { mark: 0, box: false })
+})
+
+test('plannedWrites takes the box bit on its own, with no mark invented for it', () => {
+  // The ORDINARY case for a box score: a reader opens one on a game they have
+  // never hand-revealed a half of. `mark: null` is what keeps the endpoint from
+  // storing a 0 and claiming they had.
+  assert.deepEqual(plannedWrites({ boxRevealed: true }), { mark: null, box: true })
+})
+
+test('plannedWrites takes both together', () => {
+  assert.deepEqual(plannedWrites({ revealedThrough: 4, boxRevealed: true }), { mark: 4, box: true })
+})
+
+test('plannedWrites refuses a body that asks for nothing', () => {
+  for (const body of [{}, null, undefined, { boxRevealed: false }, { game: {} }]) {
+    assert.equal(plannedWrites(body).error, 'nothing to store')
+  }
+})
+
+test('plannedWrites refuses a malformed mark even when the box bit rides along', () => {
+  // A bad field is refused outright rather than dropped while the rest of the
+  // request quietly succeeds.
+  for (const raw of [-1, 2.5, 201, '7', NaN, Infinity, true]) {
+    assert.equal(
+      plannedWrites({ revealedThrough: raw, boxRevealed: true }).error,
+      'revealedThrough out of range',
+      `${String(raw)} must be refused`,
+    )
+  }
+})
+
+test('plannedWrites demands the box bit be spelled `true`', () => {
+  // This bit lifts a seal. A truthy string or a 1 from some future client is a
+  // shape we never agreed to, and reads as no write at all.
+  for (const raw of [1, '1', 'true', {}]) {
+    assert.equal(plannedWrites({ boxRevealed: raw }).error, 'nothing to store')
+    assert.equal(plannedWrites({ revealedThrough: 3, boxRevealed: raw }).box, false)
+  }
 })
 
 test('isFullyWrappedUp is false for a live game (finalHalfIndex still null)', () => {

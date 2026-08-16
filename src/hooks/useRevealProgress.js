@@ -4,6 +4,7 @@ import { computeDerivedByInning } from '../api/derive.js'
 import {
   parseRevealMark,
   parseAtBatMark,
+  parseBoxRevealMark,
   mergeMark,
   unlockedInnings,
 } from './revealProgressCore.js'
@@ -169,4 +170,84 @@ export function useRevealProgress(feed, regulation, actualCount) {
     atBatCountFor,
     revealAtBat,
   }
+}
+
+// localStorage key prefix for the box score's own mark (ADR-0049): "this reader
+// has opened this game's box score by hand". One bit per gamePk, written as the
+// string "1", parsed by parseBoxRevealMark — never a score, and unlike
+// `bbsbh:reveal:{gamePk}` not even a position. It says only THAT the seal was
+// lifted, never how far or on what.
+//
+// It lives beside the reveal mark rather than inside it on purpose. The box
+// score's seal is one seal over one page; `revealedThrough` is the by-hand
+// scoring frontier that the innings viewer, the scorecard's ink and the slate's
+// "pick up your pencil" strip all read. Folding the box score into that mark
+// would ratchet all three from a single tap on a different page — which is the
+// exact leak ADR-0026 and ADR-0048 both keep their overrides away from.
+const BOX_KEY = 'bbsbh:boxreveal:'
+function readBoxMark(storageKey) {
+  if (!storageKey) return false
+  try {
+    return parseBoxRevealMark(window.localStorage.getItem(storageKey))
+  } catch {
+    return false
+  }
+}
+
+// The box score's own reveal state, persisted per game and mirrored across a
+// signed-in reader's devices (BoxRevealCloudSync.jsx). ADR-0049 has the why;
+// this is the storage I/O and the React wiring, the same division of labour
+// useRevealProgress above keeps with revealProgressCore.js.
+//
+// A LATCH, in the same one-directional spirit as `mergeMark`: `false → true`
+// from any source (this device's tap, another tab's `storage` event, another
+// device's mark arriving from the cloud), and never back. There is no unset
+// path, by design — nothing in the app asks to re-seal a box score, and a
+// setter that could would be a way for a stale value to close a page the reader
+// had open. Re-seeding happens only when the gamePk itself changes: a different
+// game is a different question, and it is asked of storage afresh.
+//
+// The gamePk change is handled during render rather than in an effect because
+// this value gates what renders. BoxScore stays mounted when the reader moves
+// between games on the same tab, so an effect-based re-seed would paint one
+// frame of the previous game's answer — a game the reader may not have opened.
+// That frame would be the wrong direction of wrong: it would show, not seal.
+export function useBoxScoreReveal(gamePk) {
+  const storageKey = gamePk ? `${BOX_KEY}${gamePk}` : null
+  const [mark, setMark] = useState(() => ({ key: storageKey, opened: readBoxMark(storageKey) }))
+  let opened = mark.opened
+  if (mark.key !== storageKey) {
+    opened = readBoxMark(storageKey)
+    setMark({ key: storageKey, opened })
+  }
+
+  const markBoxOpened = useCallback(() => {
+    setMark((prev) => (prev.opened ? prev : { ...prev, opened: true }))
+  }, [])
+
+  useEffect(() => {
+    if (!storageKey || !opened) return
+    try {
+      window.localStorage.setItem(storageKey, '1')
+    } catch {
+      // Private-mode / storage-disabled — degrade to in-session memory only,
+      // exactly as the reveal mark does. The seal simply returns next visit.
+    }
+  }, [storageKey, opened])
+
+  // Same cross-tab pickup as the reveal mark: 'storage' fires only in the OTHER
+  // tabs, so a box score opened in a second tab on the same game opens here too
+  // without a reload. A null or mangled `newValue` parses to false, which the
+  // latch ignores.
+  useEffect(() => {
+    if (!storageKey) return
+    function onStorage(e) {
+      if (e.key !== storageKey) return
+      if (parseBoxRevealMark(e.newValue)) markBoxOpened()
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [storageKey, markBoxOpened])
+
+  return { boxOpened: opened, markBoxOpened }
 }

@@ -10,6 +10,7 @@ import { scorecardFull, scorecardStep } from '../../api/scorecardGame.js'
 import { Scorecard } from '../Scorecard.jsx'
 import { ScorecardCellEditor } from '../../components/scoring/ScorecardCellEditor.jsx'
 import { RefreshButton } from '../TeamInfo.jsx'
+import { useStampUnseal } from '../../hooks/useStamps.js'
 
 // The live scorecard — `/{date}/{matchup}/scorecard`, the Numbers Game "22"
 // sheet filled exactly as far as YOU have revealed, at any point in the game.
@@ -54,8 +55,23 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
     regulation,
     actualCount,
   )
+  // THE THIRD OPENER (ADR-0048): the reader's own stamp on this game. A stamp is
+  // minted only from inside a revealed box score of a FINAL game and records "I
+  // was there", so re-sealing a game they stamped protects them from nothing.
+  //
+  // Read HERE rather than handed down beside `spoilersOff`, because the two are
+  // different KINDS of fact. `spoilersOff` is a property of the DAY and needs
+  // GameView's `officialDate` to resolve; a stamp is a property of this one
+  // gamePk, which this screen already holds. Keeping them apart also keeps the
+  // day-pass chrome honest — a stamped game must never make the banner announce
+  // an unlocked day (see effectiveReveal, which takes them as two inputs).
+  //
+  // Why a latch rather than `isStamped` straight: useStampUnseal's own header.
+  const stamped = useStampUnseal(feed?.gamePk)
+
   const { renderRevealedThrough } = effectiveReveal({
     scoresUnlocked: spoilersOff,
+    stamped,
     revealedThrough,
     unlocked,
     actualCount,
@@ -124,7 +140,10 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // beat. A still-live half just parks the cursor at the feed's edge and
   // waits for Refresh to bring the next batter.
   const onFrontierTap = () => {
-    if (!stepInfo || spoilersOff) return
+    // `stamped` joins `spoilersOff` here for the same reason (ADR-0048): the
+    // sheet is already inked to the end, so there is no frontier left to tap,
+    // and committing would ratchet a mark the reader never earned by hand.
+    if (!stepInfo || spoilersOff || stamped) return
     setArmed(true)
     const { inning, half, total, nextCount, halfOver } = stepInfo
     if (nextCount >= total && halfOver) revealTo(inning, half)

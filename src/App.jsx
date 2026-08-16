@@ -281,7 +281,9 @@ export default function App() {
   } else if (route.name === 'fouls') {
     content = <FoulTrackerPage />
   } else if (route.name === 'admin') {
-    content = <AdminCopyPage onBack={() => go('/')} />
+    content = (
+      <AdminCopyPage onBack={() => go('/')} focus={route.focus} returnTo={route.returnTo} />
+    )
   } else if (route.name === 'profile') {
     // Deliberately NOT gated on isClerkEnabled or on being signed in: settings
     // are settings, and every one of them works on this device with no account

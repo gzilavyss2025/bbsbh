@@ -1,0 +1,378 @@
+/* Styles for the server-rendered guides at /learn/*.
+   ------------------------------------------------------------------
+   WHY THIS FILE IS NOT IN src/styles/ AND NOT PART OF THE BUNDLE.
+
+   These pages are standalone HTML documents served by api/page.js. They
+   have no #root, no React and no bundle, because the crawlers that feed AI
+   assistants do not run JavaScript and the entire point of the guides is to
+   be readable without it (see the header of src/copy/landing/render.js).
+   A hashed asset from the Vite build is therefore not addressable from
+   them; a plain file in public/ is.
+
+   Two consequences worth stating out loud, because both look like
+   shortcuts and neither is:
+
+   1. THE ALL-CAPS INVARIANT DOES NOT APPLY HERE, and this file is not
+      evading it. That rule is scoped to `#root *` in src/styles/01-base.css
+      and it is right: the app is a scorebook, and scorebook chrome shouts.
+      Fourteen hundred words of body copy is a different kind of surface —
+      the same reasoning that made the welcome modal's explainer a
+      sanctioned exception, applied to a whole document. There is no #root
+      in these pages, so natural case is what they get by construction.
+      NOTHING here uses `text-transform`, so nothing here could undo the
+      invariant even if it were in scope.
+
+   2. THE COLOUR VALUES BELOW ARE A DELIBERATE COPY of src/tokens/colors.css,
+      because this file cannot @import a bundled token sheet. A copy drifts,
+      so scripts/check-learn-css.mjs fails the build if any value here stops
+      matching its source. Change a colour there, run lint, fix it here.
+
+   FONTS ARE SYSTEM FONTS ON PURPOSE. src/tokens/fonts.css loads webfonts
+   through Vite's bare-module resolution (`@fontsource/...`), which only
+   works inside the bundler. Rather than hand-maintain a second set of
+   @font-face rules and ship 5 woff2 files to a reader who came for one
+   article, these pages use the fallback stacks the tokens already name.
+   The reading serif is Georgia, which was designed for screens and is on
+   effectively every device. It also means a guide renders instantly with no
+   font swap, which matters more on a page somebody opened from a search
+   result than anywhere else in the app. */
+
+:root {
+  /* --- copied from src/tokens/colors.css, guarded by check-learn-css.mjs --- */
+  --paper-0: #F6EFDC;
+  --paper-1: #F3ECD8;
+  --paper-2: #FBF6E9;
+  --paper-3: #FFFDF6;
+  --ink-0: #16222F;
+  --ink-1: #1B2A3A;
+  --ink-2: #3C4A5A;
+  --graphite: #6B6558;
+  --rule: #CBC1A7;
+  --rule-soft: #DED6C0;
+  --field: #2F6E4F;
+  --field-deep: #255740;
+  --seal: #B5824A;
+  --seal-ink: #1E1405;
+
+  /* --- local scale. Reading sizes, not app-chrome sizes: these pages are
+         read at arm's length for several minutes, not glanced at between
+         pitches. font-size uses clamp() so a phone and a laptop each get a
+         comfortable measure without a media query. --- */
+  --lh-title: 1.1;
+  --lh-snug: 1.25;
+  --lh-prose: 1.45;
+  --lh-read: 1.62;
+  --w-regular: 400;
+  --w-semibold: 600;
+  --w-bold: 700;
+  --ls-text: 0.01em;
+  --ls-label: 0.08em;
+  --font-read: Georgia, "Times New Roman", serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --measure: 34rem;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper-0);
+  color: var(--ink-1);
+  font-family: var(--font-read);
+  font-size: clamp(1.0625rem, 0.98rem + 0.42vw, 1.1875rem);
+  line-height: var(--lh-read);
+  letter-spacing: var(--ls-text);
+  /* Manila paper wants a faint grid, the way a scorebook page does. Kept very
+     low contrast so it never competes with the text sitting on it. */
+  background-image:
+    linear-gradient(var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size: 100% 2.4rem, 2.4rem 100%;
+  background-position: 0 -1px, -1px 0;
+}
+
+main,
+.masthead,
+.footer {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+/* --- masthead ------------------------------------------------------- */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
+.masthead__mark {
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: 0.8125rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink-0);
+  text-decoration: none;
+}
+
+.masthead__crumb {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.masthead__crumb a {
+  color: inherit;
+}
+
+.masthead__gear {
+  margin-left: auto;
+  font-size: 1.25rem;
+  line-height: var(--lh-snug);
+  text-decoration: none;
+  color: var(--graphite);
+}
+
+/* --- type ----------------------------------------------------------- */
+
+h1 {
+  font-size: clamp(1.9rem, 1.4rem + 2.4vw, 2.75rem);
+  line-height: var(--lh-title);
+  font-weight: var(--w-bold);
+  color: var(--ink-0);
+  margin: 0 0 var(--space-6);
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: clamp(1.3rem, 1.15rem + 0.75vw, 1.6rem);
+  line-height: var(--lh-snug);
+  font-weight: var(--w-bold);
+  color: var(--ink-0);
+  margin: var(--space-12) 0 var(--space-4);
+  text-wrap: balance;
+}
+
+h3 {
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  line-height: var(--lh-snug);
+  font-weight: var(--w-semibold);
+  color: var(--ink-0);
+  margin: var(--space-8) 0 var(--space-2);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--field-deep);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--ink-0);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--field);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* --- the answer block ------------------------------------------------
+   The first thing on the page, and the block an AI assistant is most
+   likely to quote, so it is set larger and marked off by a rule rather
+   than buried under a hero image. Roughly 44% of the citations these
+   engines make come from the first 30% of a page's text; this is that
+   30%, and the styling should say so to a human too. */
+
+.answer {
+  font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
+  line-height: var(--lh-prose);
+  color: var(--ink-0);
+  border-left: 3px solid var(--seal);
+  padding: var(--space-2) 0 var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-8);
+}
+
+.answer p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- lists ---------------------------------------------------------- */
+
+ul {
+  padding-left: 1.15em;
+  margin: 0 0 var(--space-4);
+}
+
+li {
+  margin-bottom: var(--space-3);
+}
+
+/* --- tables ---------------------------------------------------------
+   Reference data, and the shape a machine reader parses most reliably.
+   The wrapper scrolls on its own so a wide table never makes the whole
+   page scroll sideways on a phone. */
+
+.tablewrap {
+  overflow-x: auto;
+  margin: 0 0 var(--space-6);
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  line-height: var(--lh-prose);
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+thead th {
+  font-size: 0.75rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+  background: var(--paper-1);
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+/* Row headers WRAP. They used to be `white-space: nowrap`, which is right for a
+   short mark like `4-6-3` and wrong for the glossary, where a full stat name
+   ("wOBA (weighted on-base average)") became one unbreakable line that pushed
+   the definition off the side of a phone. The wrapper still scrolls when a table
+   genuinely needs it; this stops it needing to. */
+tbody th {
+  font-weight: var(--w-semibold);
+  color: var(--ink-0);
+  min-width: 6.5em;
+}
+
+tbody tr:last-child th,
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* --- the one call to action ------------------------------------------
+   Kraft-tape amber, the same colour the app uses for a seal, because this
+   is the one place on the page where the guide points at the product. */
+
+.cta {
+  background: var(--paper-3);
+  border: 1px solid var(--seal);
+  border-left-width: 4px;
+  padding: var(--space-6);
+  margin: var(--space-12) 0;
+}
+
+.cta h2 {
+  margin-top: 0;
+  font-size: clamp(1.2rem, 1.1rem + 0.6vw, 1.45rem);
+}
+
+.cta p:last-of-type {
+  margin-bottom: 0;
+}
+
+.cta__go {
+  margin: var(--space-6) 0 0;
+}
+
+.cta__go a {
+  display: inline-block;
+  background: var(--field);
+  color: var(--paper-3);
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: 1rem;
+  letter-spacing: var(--ls-text);
+  text-decoration: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 3px;
+}
+
+.cta__go a:hover {
+  background: var(--field-deep);
+  color: var(--paper-3);
+}
+
+/* --- faq, related, footer ------------------------------------------- */
+
+.faq h3 {
+  color: var(--ink-0);
+}
+
+.related {
+  margin-top: var(--space-12);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--space-4);
+}
+
+.related ul,
+.index {
+  list-style: none;
+  padding-left: 0;
+}
+
+.index li {
+  border-bottom: 1px solid var(--rule-soft);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.index h2 {
+  margin: 0 0 var(--space-2);
+}
+
+.index p {
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.footer {
+  border-top: 1px solid var(--rule);
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-12);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  line-height: var(--lh-prose);
+  color: var(--ink-2);
+}
+
+.footer__meta {
+  color: var(--graphite);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

@@ -12,6 +12,8 @@
     }
   },
   "rewrites": [
+    { "source": "/learn", "destination": "/api/page" },
+    { "source": "/learn/:slug", "destination": "/api/page?slug=:slug" },
     { "source": "/player/:id", "destination": "/api/preview?route=player&id=:id" },
     { "source": "/team/:id/leaders", "destination": "/api/preview?route=team-leaders&id=:id" },
     { "source": "/team/:id/roster", "destination": "/api/preview?route=team-roster&id=:id" },

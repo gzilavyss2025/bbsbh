@@ -24,7 +24,7 @@ import { formatResetTime, nextResetAt } from '../lib/scoresUnlocked.js'
 // the user's actual next-8am. Kept literal here so the preview is deterministic.
 const PREVIEW_TIME = '8:00 AM'
 
-function Shell({ onBack, children }) {
+function Shell({ onBack, children, title = 'Copy editor', returnTo = null }) {
   return (
     <div className="screen admincopy">
       <SiteHeader />
@@ -32,7 +32,15 @@ function Shell({ onBack, children }) {
         <button className="topbar__back" onClick={onBack}>
           ‹ Games
         </button>
-        <h1 className="topbar__title">Copy editor</h1>
+        <h1 className="topbar__title">{title}</h1>
+        {/* A guide is a server-rendered document, so returning to it is a real
+            navigation rather than a route change — the browser has to fetch the
+            page api/page.js produces. A plain link is the honest control. */}
+        {returnTo && (
+          <a className="topbar__link" href={returnTo}>
+            View guide
+          </a>
+        )}
       </header>
       {children}
     </div>
@@ -184,7 +192,13 @@ function HistoryPanel({ history, onRestore, onClose }) {
 
 // The editor body — only rendered for a confirmed admin, so Clerk hooks here
 // always have a provider (main.jsx only mounts one when Clerk is enabled).
-function Editor({ onDirty }) {
+// `focus` narrows the panel to ONE landing page's slots — set when the owner
+// arrived from the gear on /learn/{slug}, which links here as
+// '/learn/{slug}?edit'. It is a VIEW filter and nothing more: the save path,
+// the merge and the history are identical either way, so a focused save is the
+// same partial-override POST a full-panel save of the same fields would be.
+// Unset, the panel is what it has always been — every editable string in the app.
+function Editor({ onDirty, focus }) {
   const { getToken } = useAuth()
   const defaults = useMemo(() => defaultCopy(), [])
   // values[id] is the current text in each box: an override, or the default.
@@ -384,8 +398,10 @@ function Editor({ onDirty }) {
         <HistoryPanel history={history} onRestore={restore} onClose={() => setHistory(null)} />
       )}
 
-      {GROUPS.map((group) => {
-        const groupFields = FIELDS.filter((f) => f.group === group.id)
+      {GROUPS.filter((group) => !focus || group.id === focus.split('.')[0]).map((group) => {
+        const groupFields = FIELDS.filter(
+          (f) => f.group === group.id && (!focus || f.id.startsWith(`${focus}.`)),
+        )
         const ids = Object.fromEntries(groupFields.map((f) => [f.id.split('.')[1], f.id]))
         // Only a group that composes ONE modal can be staged as one. The
         // ballpark notes are 30 independent paragraphs on a plain page, so they
@@ -448,7 +464,7 @@ function Editor({ onDirty }) {
 
 // Gate: signed in? admin? Only then mount the Editor. Uses Clerk hooks, so it is
 // only ever rendered under a ClerkProvider (see AdminCopyPage).
-function AdminGate({ onDirty }) {
+function AdminGate({ onDirty, focus }) {
   const { isLoaded, isSignedIn, user } = useUser()
   if (!isLoaded) return <Notice>Checking your access…</Notice>
   if (!isSignedIn) {
@@ -463,11 +479,11 @@ function AdminGate({ onDirty }) {
       </Notice>
     )
   }
-  return <Editor onDirty={onDirty} />
+  return <Editor onDirty={onDirty} focus={focus} />
 }
 
-export function AdminCopyPage({ onBack }) {
-  useDocumentTitle('Copy editor')
+export function AdminCopyPage({ onBack, focus, returnTo }) {
+  useDocumentTitle(focus ? 'Edit guide' : 'Copy editor')
   // Track unsaved edits so leaving via the in-app back button can confirm first
   // (the beforeunload handler in Editor covers tab-close/reload separately).
   const dirtyRef = useRef(false)
@@ -479,9 +495,9 @@ export function AdminCopyPage({ onBack }) {
     onBack?.()
   }, [onBack])
   return (
-    <Shell onBack={guardedBack}>
+    <Shell onBack={guardedBack} title={focus ? 'Edit guide' : 'Copy editor'} returnTo={returnTo}>
       {isClerkEnabled ? (
-        <AdminGate onDirty={(d) => (dirtyRef.current = d)} />
+        <AdminGate onDirty={(d) => (dirtyRef.current = d)} focus={focus} />
       ) : (
         <Notice>
           The copy editor needs sign-in configured (Clerk) on this deploy. The app still runs on the

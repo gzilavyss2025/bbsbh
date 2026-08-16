@@ -209,3 +209,35 @@ export function useStamps() {
     mergeRemoteStamps,
   }
 }
+
+// "Does this game open unsealed for its owner?" — the reveal override ADR-0048
+// defines, and the one thing the three in-game scoring surfaces (InningViewer,
+// BoxScore, ScorecardPage) actually want from this module.
+//
+// A LATCH, NOT A MIRROR, and that is the whole reason it is a hook rather than
+// a bare `isStamped(gamePk)` call. Two directions, and they are not symmetric:
+//
+//   • false → true must be live. On a device that has never held the stamp,
+//     StampsCloudSync's first pull lands after mount; the game opens the moment
+//     it arrives, rather than staying sealed for the rest of the visit.
+//   • true → false must NOT be. Un-stamping happens from a control INSIDE the
+//     revealed box score, so mirroring it would slam the page shut underneath
+//     the reader mid-tap — on the very surface the button lives on. Reveal is
+//     one-directional within a visit everywhere else in this app (ADR-0002);
+//     this keeps that promise.
+//
+// The latch lives only as long as the mount, so nothing is persisted and the
+// re-seal is not lost — merely deferred to the next visit, which is exactly when
+// `revealedThrough` re-seals a game too. Navigate away and back after
+// un-stamping and the seal is there.
+//
+// `useState` + the render-time adjust is React's documented escape hatch for
+// deriving state from a changed input, and is the same pattern GameView.jsx uses
+// for its section memory. A ref would be wrong: it is read during render.
+export function useStampUnseal(gamePk) {
+  const { isStamped } = useStamps()
+  const stamped = isStamped(gamePk)
+  const [unsealed, setUnsealed] = useState(stamped)
+  if (stamped && !unsealed) setUnsealed(true)
+  return unsealed
+}

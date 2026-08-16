@@ -185,3 +185,15 @@ change §1 first, in the open, rather than as a side effect.
   small component and widens nothing.
 - **Fetch every game's signals on mount and cache the lot.** Rejected on cost
   alone; see the lazy-loading consequence above.
+
+## Amendment (2026-08-16) — the constraint cited above has moved
+
+The parenthetical citation of ADR-0035 ("no `onReveal`, and persists nothing")
+describes the box score as it was. **ADR-0049** gave that `SealBox` an `onReveal`
+that records a real tap as one bit (`bbsbh:boxreveal:{gamePk}`) and nothing more.
+
+Nothing about this page changes. Stamp In still mounts no `SealBox`, imports no
+`useRevealProgress`, and passes no `onReveal` anywhere — it reaches the reveal
+ratchet nowhere, which is the property this ADR needed. And ADR-0049's bit is
+scoped to the one box score whose seal was tapped, so a season of games listed
+here can never acquire one.

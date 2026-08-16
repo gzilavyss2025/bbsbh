@@ -63,14 +63,43 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
 
   // Un-stamp from the box score and the Logbook empties again — a stamp is a
   // keepsake, deliberately NOT ratcheted the way revealedThrough is.
+  //
+  // NO SEAL TO TAP ON THE WAY BACK IN (ADR-0048). Returning to a game you have
+  // stamped opens it: that is the whole point of the decision, and this line
+  // used to be a second `Tap to reveal the box score` click. Its removal is the
+  // assertion — the seal is asserted absent below, so this cannot quietly rot
+  // into "the button moved and we stopped looking for it".
   await page.goto(`${GAME}/boxscore`)
-  await page.getByRole('button', { name: 'Tap to reveal the box score' }).click()
+  await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Details' }).click()
   await page.getByRole('button', { name: 'Remove stamp' }).click()
+  // The page does NOT slam shut underneath the tap that un-stamped it: the
+  // unlock is latched for the life of the visit (useStampUnseal), so the mint
+  // strip is still right there, now offering to stamp again.
   await expect(page.getByRole('button', { name: 'Stamp this game' })).toBeVisible()
 
   await page.goto('/logbook')
   await expect(page.locator('.logbook__cell')).toHaveCount(0)
+
+  // …and the stamp's unlock is gone with the stamp — the reversibility half of
+  // ADR-0048, and the reason that override persists nothing.
+  //
+  // It is checked on the INNINGS VIEWER, not here. This spec tapped the box
+  // score's seal by hand at the top, and a tap is recorded (ADR-0049), so that
+  // page stays open on its own account now — for the reader's own reason, not
+  // the stamp's. The innings viewer holds no such mark, so it is where the
+  // stamp override can still be seen going away.
+  const boxMark = await page.evaluate(() => localStorage.getItem('bbsbh:boxreveal:823035'))
+  expect(boxMark).toBe('1')
+  await page.goto(`${GAME}/boxscore`)
+  await expect(page.getByRole('button', { name: 'Tap to reveal the box score' })).toHaveCount(0)
+
+  await page.goto(`${GAME}/top1`)
+  await expect(page.getByRole('button', { name: /, sealed$/ }).first()).toBeVisible()
+  // And neither the stamp nor the box score's own bit ever touched the by-hand
+  // scoring frontier. Had opening a stamped game ratcheted `revealedThrough`,
+  // this game would stay open forever, on every device the reader owns.
+  expect(await page.evaluate(() => localStorage.getItem('bbsbh:reveal:823035'))).toBeNull()
 })
 
 // The retrospective (/logbook/stats) renders final scores plainly, on the same
