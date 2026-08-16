@@ -13,7 +13,7 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
-  stepBounds,
+  focusWindows,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
@@ -102,9 +102,13 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
-  // Focus mode: the boundaries `nextStepBoundary` walks one tap at a time,
-  // enumerated. Counting only those at or under the cap is what keeps every
-  // window inside it.
+  // Focus mode: one window per revealed scorecard CELL (focusWindows — an
+  // at-bat or the extras placement), leading notices at each window's head,
+  // every window clamped to the cap. NOT one window per reveal tap: see
+  // focusWindows' own header for the three live-scoring defects the tap-
+  // shaped windows caused (the buried extras hero, tier-1 notices filed
+  // into already-left windows, and the view snapping back an at-bat when a
+  // Refresh appended a trailing notice).
   //
   // `focusOne` ALONE, not `focusOne && stepping`. The last at-bat of a half
   // commits it, which drops `stepCap` to null and turned `stepping` off — and
@@ -119,9 +123,9 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // the half a summary in the first place. Nothing here reveals: `stepCap` is
   // still the single boundary, and past the commit the whole half is already
   // past it.
-  const bounds = focusOne ? stepBounds(entries) : null
   const stepCountCap = effectiveCap ?? entries.length
-  const revealedSteps = bounds ? bounds.filter((b) => b <= stepCountCap).length : 0
+  const wins = focusOne ? focusWindows(entries, stepCountCap) : null
+  const revealedSteps = wins ? wins.length : 0
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -144,7 +148,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // itself is a fresh array every render and would loop.
   useEffect(() => {
     if (!focusOne) return
-    onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
+    onFocusInfo?.(revealedSteps, buildTrailItems(entries, wins, (t) => EVENT_CODES[t]))
   }, [focusOne, revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
@@ -198,12 +202,12 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // card. See HalfInning.jsx's nowPitching.)
 
   if (entries.length === 0) return null
-  // One step's WINDOW. `focusStep` null is "the newest"; a number is clamped
-  // rather than trusted, the count it was chosen against being a component away.
+  // One window. `focusStep` null is "the newest"; a number is clamped rather
+  // than trusted, the count it was chosen against being a component away.
   let visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
-  if (bounds && revealedSteps > 0) {
-    const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
-    visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
+  if (wins && wins.length > 0) {
+    const i = focusStep == null ? wins.length - 1 : Math.min(Math.max(focusStep, 0), wins.length - 1)
+    visibleEntries = entries.slice(wins[i].start, wins[i].end)
   }
 
   // Annotate each mound-visit note with the club's visits-remaining right after

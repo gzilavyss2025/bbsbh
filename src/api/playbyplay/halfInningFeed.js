@@ -309,11 +309,14 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         // `kind: 'placed'`, deliberately a THIRD kind rather than an at-bat
         // card carrying a flag. Two guards elsewhere key on `kind === 'atbat'`
         // and are correct as written only if a placement doesn't answer to it:
-        // nextStepBoundary (a placement is not a step of its own — it bundles
-        // forward with the leadoff plate appearance, exactly as today's event
-        // note does, so no already-stored step count changes meaning) and
-        // PlayByPlay's `hasAtBat` (a live half whose only fetched content is
-        // the placement must not read as a whole revealed half).
+        // nextStepBoundary (a placement is not a reveal TAP of its own — it
+        // bundles forward with the leadoff plate appearance, exactly as
+        // today's event note does, so no already-stored step count changes
+        // meaning; focus mode's focusWindows DOES anchor a display window and
+        // a trail chip on it, which is presentation over already-revealed
+        // entries, not a cap change) and PlayByPlay's `hasAtBat` (a live half
+        // whose only fetched content is the placement must not read as a
+        // whole revealed half).
         //
         // Field paths verified live against gamePk 777747's 10th, both halves:
         // `player.id` is the runner, `base` the base he's given (2), the event

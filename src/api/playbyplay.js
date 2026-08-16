@@ -84,7 +84,7 @@ export {
 
 export {
   nextStepBoundary,
-  stepBounds,
+  focusWindows,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,

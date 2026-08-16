@@ -95,6 +95,25 @@
   color: var(--graphite-soft);
 }
 
+/* The extras placement's own cell (AR + the runner) — graphite like the other
+   scorer's-note marks: it is a pre-pitch fact, not a batting result. */
+.trailcell--placed .trailcell__code {
+  color: var(--text-caption);
+}
+
+/* The notice markers under a chip's name (buildTrailItems' `notices`): the
+   scorer shorthand of every tier 1-3 card riding that window (ADR-0017 — a
+   pitching change, a mound visit, a steal), so the card stays findable after
+   the reader steps past it. Graphite and small: a cue, not a second code. */
+.trailcell__notes {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-label);
+  color: var(--graphite-soft);
+  white-space: nowrap;
+}
+
 /* The live cell, inked the way .half__title and RollingLine's current half are
    — navy fill, paper text. Answers "where is live" at a glance once the reader
    has paged back. */
