@@ -28,6 +28,14 @@ export default {
   ],
   schema: ['Article', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'Bob Carpenter’s Baseball Scorebook — Features', href: 'https://bcscorebook.com/pages/features' },
+    { name: 'Numbers Game — Scorebooks', href: 'https://www.numbersgame.co/' },
+    { name: 'Numbers Game — #22 Scorebook specifications', href: 'https://www.numbersgame.co/products/scorebook-22' },
+    { name: 'Eephus League — The Halfliner', href: 'https://eephusleague.com/product/the-halfliner/' },
+    { name: 'THIRTY81 Press — Travel Scorebook', href: 'https://thirty81press.com/products/traveler-scorebook' },
+    { name: '7-2 Double Play — Square Scorebook', href: 'https://www.72doubleplay.com/square-scorebook/' },
+  ],
   sections: [
     {
       id: 'answer',
@@ -119,7 +127,7 @@ export default {
       kind: 'prose',
       heading: '7-2 Double Play',
       body: [
-        'This is the custom option. The Square Scorebook is an unusual 8½-by-8½, sixty games, hand-assembled with a heavy cover and double wire-O binding, and it can be ordered on water-resistant Rite in the Rain paper — the only book here built to survive a rain delay with a pencil still working. The grid runs to fourteen innings. Covers and binding position are chosen through an online builder. A pocket-sized Small Ball book joined the line for 2026, and it holds sixty games too, by dropping the inning numbers and the stat tallies.',
+        'This is the custom option. The Square Scorebook is an unusual 8½-by-8½, sixty games, hand-assembled with a heavy cover and double wire-O binding. It can be ordered with water-resistant Rite in the Rain paper. The maker says the paper resists droplets, warns that some inks dry slowly, and recommends testing your writing tool on the cover sheet. The grid runs to fourteen innings. Covers and binding position are chosen through an online builder. A pocket-sized Small Ball book joined the line for 2026, and it holds sixty games too, by dropping the inning numbers and the stat tallies.',
         'Not everyone gets on with the square page, and it does not slide into a bag pocket the way a 5½-by-8½ book does. Hand assembly means lead times, and the builder asks for a decision where other makers hand you a book.',
       ],
     },
@@ -138,7 +146,7 @@ export default {
       heading: 'Whichever book you buy, the lineup problem is still yours',
       body: [
         'No scorebook can tell you that the shortstop moved to second base in the seventh, or who bats fifth after a double switch. That is the part of scoring by hand that paper cannot solve.',
-        'Tally is a free, spoiler-safe companion for exactly that. It shows both lineups, every substitution, and the defensive alignment for the half-inning you are scoring right now. Inning totals stay sealed until you tap, so you can check your card without a screen telling you how the game ends. It runs in a browser, installs to a phone home screen, asks for no account, and takes no entry — it is not a data-entry tool. You keep score on paper. It sits open beside the book.',
+        'Tally is a free, spoiler-safe companion for exactly that. It shows both lineups and the defense entering the half-inning before you score it. A change during the half appears in order as you reveal the play feed. Later results stay sealed until you open them. It runs in a browser, installs to a phone home screen, asks for no account, and takes no entry — it is not a data-entry tool. You keep score on paper. It sits open beside the book.',
       ],
       linkText: 'Open tonight’s games',
       href: '/',
@@ -162,7 +170,7 @@ export default {
         },
         {
           q: 'Pen or pencil?',
-          a: 'Pencil, in any book. The official scorer can change a hit to an error, sometimes the next day, and you want to be able to change it too. Bring a second pencil.',
+          a: 'Start with a 0.5 mm mechanical pencil if you want easy corrections. Use a fine pen if you prefer a permanent record, but test it on the paper first for smearing and bleed-through.',
         },
       ],
     },
@@ -173,6 +181,7 @@ export default {
       items: [
         { text: 'How to score a baseball game', href: '/learn/score-a-baseball-game' },
         { text: 'Every scorekeeping symbol, in one reference', href: '/learn/scorekeeping-symbols' },
+        { text: 'Pen or pencil for scorekeeping?', href: '/learn/pen-or-pencil-baseball-scorekeeping' },
         { text: 'Keeping score at the ballpark', href: '/learn/score-at-the-ballpark' },
         { text: 'Ballpark passports and park collecting', href: '/learn/ballpark-passports' },
       ],

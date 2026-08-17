@@ -21,12 +21,16 @@ export default {
   ],
   schema: ['Article', 'HowTo', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Scorekeeping', href: 'https://www.mlb.com/glossary/miscellaneous/scorekeeping' },
+    { name: '2026 Official Baseball Rules', href: 'https://mktg.mlbstatic.com/mlb/official-information/2026-official-baseball-rules.pdf' },
+  ],
   sections: [
     {
       id: 'answer',
       kind: 'answer',
       body: [
-        'To score a baseball game, you write down what happened in every at-bat on a scorecard grid where each row is a spot in the batting order, one through nine, and each column is an inning. Keeping score by hand takes three things: the nine fielding positions memorized as numbers, a small set of symbols for hits, outs and walks, and a pencil. A ground ball to the shortstop who throws to first base is written 6-3. A strikeout is K. A run is a diamond filled in solid, and the runs in a column are that inning’s score. That is most of it. The rest is practice, and the practice is the enjoyable part.',
+        'To score a baseball game, you write down what happened in every at-bat on a scorecard grid where each row is a spot in the batting order, one through nine, and each column is an inning. Keeping score by hand takes three things: the nine fielding positions memorized as numbers, a small set of symbols for hits, outs and walks, and something to write with. A ground ball to the shortstop who throws to first base is written 6-3. A strikeout is K. A run is a diamond filled in solid, and the runs in a column are that inning’s score. That is most of it. The rest is practice, and the practice is the enjoyable part.',
       ],
     },
     {
@@ -49,7 +53,7 @@ export default {
           text: 'A scorecard. A printed one from the team, a page from a bound scorebook, or a sheet you drew yourself. Any grid with nine numbered rows and nine or more columns will do.',
         },
         {
-          text: 'A pencil, and a second pencil. Never a pen. You will change your mind about a hit that becomes an error, and you will want that change to be invisible.',
+          text: 'A pencil, and a second pencil. Pencil makes ruling changes easy. If you choose pen, bring two fine points and use one clean strike-through for corrections.',
         },
         {
           text: 'Something firm to write on. A bound scorebook solves this. A loose card and a bare knee does not.',
@@ -153,7 +157,7 @@ export default {
       heading: 'Tally keeps the lineup straight so you can keep the pencil moving',
       body: [
         'The hard part of scoring by hand was never the notation. It is knowing who is actually standing in right field in the sixth inning after a double switch nobody announced clearly.',
-        'Tally is a free, spoiler-safe companion for exactly that. Open the game you are watching and it shows both lineups, every substitution, and who is on the field for the half-inning you are scoring right now. Inning totals stay sealed until you tap to reveal them, one half at a time, so you can check your card against the official one without a screen telling you how the game ends. It runs in a browser, it installs to a phone home screen, and it never asks you to enter a thing — the pencil is yours.',
+        'Tally is a free, spoiler-safe companion for exactly that. It shows both lineups and the defense entering the half-inning before you score it. A change during the half appears in order with the play feed as you reveal each plate appearance. Later results stay sealed until you open them. It runs in a browser, installs to a phone home screen, and never asks you to enter a play — the scorecard is yours.',
       ],
       linkText: 'Open tonight’s games',
       href: '/',
@@ -169,11 +173,11 @@ export default {
         },
         {
           q: 'Pen or pencil?',
-          a: 'Pencil. A ball that goes into the books as a hit can be changed to an error by the official scorer, sometimes the next day, and you want to be able to change it too.',
+          a: 'A 0.5 mm mechanical pencil is the easiest place to start because it fits small cells and makes corrections simple. A fine pen works too if you prefer a permanent page and use one clear correction mark.',
         },
         {
           q: 'What happens if I miss a play?',
-          a: 'Leave the cell empty, keep scoring, and fill it in between innings once you have looked it up. A gap in the fourth is not a ruined card. Trying to reconstruct three innings from memory in the seventh is how a card gets abandoned.',
+          a: 'Mark the gap, record the new out count and occupied bases, then keep scoring. Rebuild the missing play from official play-by-play during the next pause.',
         },
         {
           q: 'How long does it take to learn?',
@@ -191,7 +195,10 @@ export default {
       heading: 'Keep going',
       items: [
         { text: 'Every scorekeeping symbol, in one reference', href: '/learn/scorekeeping-symbols' },
+        { text: 'How to record baseball substitutions', href: '/learn/score-baseball-substitutions' },
+        { text: 'What to do when you miss a play', href: '/learn/missed-play-scorekeeping' },
         { text: 'Choosing a baseball scorebook', href: '/learn/choose-a-scorebook' },
+        { text: 'Pen or pencil for scorekeeping?', href: '/learn/pen-or-pencil-baseball-scorekeeping' },
         { text: 'Keeping score at the ballpark', href: '/learn/score-at-the-ballpark' },
         { text: 'How to read a box score', href: '/learn/read-a-box-score' },
       ],

@@ -17,6 +17,10 @@ export default {
   ],
   schema: ['Article', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Substitutions', href: 'https://www.mlb.com/glossary/rules/substitutions' },
+    { name: '2026 Official Baseball Rules', href: 'https://mktg.mlbstatic.com/mlb/official-information/2026-official-baseball-rules.pdf' },
+  ],
   sections: [
     {
       id: 'answer',

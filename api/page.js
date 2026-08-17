@@ -22,7 +22,7 @@
 // here. A function per page would read more simply and would also put this
 // project against Vercel's Hobby function ceiling for the sake of eight files.
 
-import { LANDING_PAGES, pageBySlug } from '../src/copy/landing/pages/index.js'
+import { LANDING_GROUPS, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { renderIndex, renderPage } from '../src/copy/landing/render.js'
 import { resolvePage } from '../src/copy/landing/schema.js'
 import { sanitizeOverrides } from '../src/copy/registry.js'
@@ -99,8 +99,11 @@ export default async function handler(req, res) {
   const overrides = await readOverrides()
 
   if (!slug) {
-    const pages = LANDING_PAGES.map((page) => resolvePage(page, overrides))
-    return send(renderIndex(pages), 200, 'public, max-age=0, s-maxage=60, stale-while-revalidate=86400')
+    const groups = LANDING_GROUPS.map((group) => ({
+      ...group,
+      pages: group.pages.map((page) => resolvePage(page, overrides)),
+    }))
+    return send(renderIndex(groups), 200, 'public, max-age=0, s-maxage=60, stale-while-revalidate=86400')
   }
 
   const page = pageBySlug(slug)

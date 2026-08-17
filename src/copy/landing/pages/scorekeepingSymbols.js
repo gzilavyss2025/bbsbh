@@ -23,6 +23,10 @@ export default {
   ],
   schema: ['Article', 'DefinedTermSet', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Scorekeeping', href: 'https://www.mlb.com/glossary/miscellaneous/scorekeeping' },
+    { name: '2026 Official Baseball Rules', href: 'https://mktg.mlbstatic.com/mlb/official-information/2026-official-baseball-rules.pdf' },
+  ],
   sections: [
     {
       id: 'answer',
@@ -172,7 +176,7 @@ export default {
       heading: 'Keep the lineup straight',
       body: [
         'The notation is the easy half. The hard half is knowing who is actually playing right field in the seventh after a substitution nobody announced clearly.',
-        'Tally is free, needs no account, and shows both lineups, every substitution, and the defensive alignment for the half-inning you are on — with the inning totals sealed until you tap. You keep score on paper; it just tells you who is out there.',
+        'Tally is free and needs no account. It shows both lineups and the defense entering the half-inning before you score it. A change during the half appears with the play feed when you reveal that plate appearance. Later results stay sealed until you open them. You keep score on paper; Tally keeps the reference beside it.',
       ],
       linkText: 'Open tonight’s games',
       href: '/',
@@ -206,6 +210,7 @@ export default {
       heading: 'Keep going',
       items: [
         { text: 'How to score a baseball game', href: '/learn/score-a-baseball-game' },
+        { text: 'How to record baseball substitutions', href: '/learn/score-baseball-substitutions' },
         { text: 'Choosing a baseball scorebook', href: '/learn/choose-a-scorebook' },
         { text: 'How to read a box score', href: '/learn/read-a-box-score' },
         { text: 'Baseball stats glossary', href: '/learn/stats-glossary' },

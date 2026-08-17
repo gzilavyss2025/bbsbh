@@ -28,19 +28,38 @@ import scorekeepingSymbols from './scorekeepingSymbols.js'
 import statsGlossary from './statsGlossary.js'
 import watchWithoutSpoilers from './watchWithoutSpoilers.js'
 
-export const LANDING_PAGES = Object.freeze([
-  scoreABaseballGame,
-  scorekeepingSymbols,
-  scoreSubstitutions,
-  missedPlayScorekeeping,
-  chooseAScorebook,
-  penOrPencil,
-  scoreAtTheBallpark,
-  watchWithoutSpoilers,
-  ballparkPassports,
-  readABoxScore,
-  statsGlossary,
+// The hub is a task map, not a flat archive. Each guide has one primary job and
+// appears in one group. LANDING_PAGES stays the flat source for the registry,
+// sitemap, and slug lookup, derived here so those consumers cannot drift from
+// the visible information architecture.
+export const LANDING_GROUPS = Object.freeze([
+  {
+    id: 'start',
+    heading: 'Start keeping score',
+    description: 'Learn the grid, the common notation and its variations, and how to stay with the game when it gets complicated.',
+    pages: [scoreABaseballGame, scorekeepingSymbols, scoreSubstitutions, missedPlayScorekeeping],
+  },
+  {
+    id: 'tools',
+    heading: 'Choose your paper setup',
+    description: 'Pick a scorebook and writing tool that fit the detail you want to keep.',
+    pages: [chooseAScorebook, penOrPencil],
+  },
+  {
+    id: 'ballpark',
+    heading: 'Take the book to the ballpark',
+    description: 'Score from the stands and keep a record of the parks and games you saw.',
+    pages: [scoreAtTheBallpark, ballparkPassports],
+  },
+  {
+    id: 'read',
+    heading: 'Read and follow the game',
+    description: 'Read a line score and box score, put statistics in context, or follow a game without seeing ahead.',
+    pages: [readABoxScore, statsGlossary, watchWithoutSpoilers],
+  },
 ])
+
+export const LANDING_PAGES = Object.freeze(LANDING_GROUPS.flatMap((group) => group.pages))
 
 const BY_SLUG = new Map(LANDING_PAGES.map((page) => [page.slug, page]))
 

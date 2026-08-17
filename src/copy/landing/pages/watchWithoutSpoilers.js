@@ -93,7 +93,7 @@ export default {
       heading: 'Tally is a scoreboard that waits for you',
       body: [
         'Tally is a spoiler-free baseball app for people watching on delay and people keeping score by hand. It is free, it needs no account, it runs in any browser, and it installs to a phone home screen. It does not stream video and it is not a data-entry tool — you watch the game somewhere else, and the paper stays yours.',
-        'What it does is invert the usual order. Scores and inning totals are sealed. They are not on the screen when you open a game, and they are not hidden behind a blur — the number is not there until you tap to reveal it, one half-inning at a time. Everything that is not a result stays open: both lineups, every substitution, the rosters, the umpiring crew, ballpark details, season and career statistics, standings and leader boards. A stat line is not a score, so Tally leaves it alone. You can read a batter’s season numbers in the fourth without being told what he did tonight.',
+        'What it does is invert the usual order. Scores and inning totals are sealed. They are not on the screen when you open a game, and they are not hidden behind a blur — the number is not there until you choose to reveal it. Both starting lineups, rosters, the umpiring crew, ballpark details, season and career statistics, standings and leader boards stay open. The defense entering a half appears when you reach it. A substitution during the half appears in order as you reveal the play feed. A stat line is not a score, so Tally leaves it alone.',
         'That is the whole idea. Check who came in to pitch, read his career numbers, find out who is umpiring at first base, and go back to the broadcast without having seen a run total you did not ask for.',
       ],
       linkText: 'Open Tally',
@@ -104,7 +104,7 @@ export default {
       kind: 'prose',
       heading: 'Following along at your own pace',
       body: [
-        'You move through a game half-inning by half-inning. When the top of the third finishes on your screen, you tap to reveal what happened in the top of the third, and the app shows that and nothing after it. It never runs ahead of you. If you stop watching in the fifth, the app knows five innings, the same as you do.',
+        'You move through a game at your own pace. Reveal one plate appearance at a time, or open the rest of the half when you are ready. The app shows that and nothing after it. It never runs ahead of you. If you stop watching in the fifth, the app remembers the same boundary you reached.',
         'Your position is remembered on the device, so closing the tab costs you nothing. Come back tomorrow and the game is where you left it, still sealed from that point on. If you sign in, that position follows you between your own devices, which matters if you start on a phone and finish on a laptop.',
         'Extra innings are held back until you reach them. This is easy to get wrong: the existence of a tenth inning is itself a spoiler, because it tells you the ninth ended level. So a game shows nine innings until you have revealed through the ninth, and the tenth appears only then, one at a time after that. It is the smallest detail here and it is the one that keeps the rest honest.',
       ],

@@ -33,6 +33,11 @@ export default {
   ],
   schema: ['Article', 'DefinedTermSet', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Standard and advanced statistics', href: 'https://www.mlb.com/glossary' },
+    { name: 'FanGraphs Library — WAR', href: 'https://library.fangraphs.com/misc/war/' },
+    { name: 'FanGraphs Library — wRC and wRC+', href: 'https://library.fangraphs.com/offense/wrc/' },
+  ],
   sections: [
     {
       id: 'answer',

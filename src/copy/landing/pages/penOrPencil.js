@@ -16,6 +16,10 @@ export default {
   ],
   schema: ['Article', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Official Scorer', href: 'https://www.mlb.com/glossary/rules/official-scorer' },
+    { name: '7-2 Double Play — Testing pens on scorebook paper', href: 'https://store.72doubleplay.com/product/water-resistant-paper-upgrade' },
+  ],
   sections: [
     {
       id: 'answer',
@@ -82,8 +86,8 @@ export default {
       kind: 'cta',
       heading: 'Keep the phone out of the scorebook',
       body: [
-        'Tally is a companion for paper scoring, not a replacement for it. Use it to check the lineup, substitutions, and defensive alignment while your scorebook stays in your hands.',
-        'Every inning total stays sealed until you tap, so the reference does not tell you the result before you record it.',
+        'Tally is a companion for paper scoring, not a replacement for it. Use the lineups and the defense entering each half as a reference while your scorebook stays in your hands.',
+        'A change during the half appears as you reveal the play sequence. Later results stay sealed until you open them.',
       ],
       linkText: 'Open today’s games',
       href: '/',

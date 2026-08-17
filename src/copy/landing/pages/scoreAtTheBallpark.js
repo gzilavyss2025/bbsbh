@@ -23,6 +23,9 @@ export default {
   ],
   schema: ['Article', 'HowTo', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Scorekeeping', href: 'https://www.mlb.com/glossary/miscellaneous/scorekeeping' },
+  ],
   sections: [
     {
       id: 'answer',
@@ -109,7 +112,7 @@ export default {
       kind: 'cta',
       heading: 'Add Tally to your home screen before you go',
       body: [
-        'Tally is a free, spoiler-safe companion for the card in your lap. It opens to the day’s games and shows both lineups, every substitution, and the defensive alignment for the half-inning you are scoring — the things a ballpark will not reliably tell you. Inning totals stay sealed until you tap to reveal them, so you can check your own work without a screen announcing the game.',
+        'Tally is a free, spoiler-safe companion for the card in your lap. It opens to the day’s games and shows both lineups and the defense entering the half-inning before you score it. A change during the half appears in order as you reveal the play feed. Later results stay sealed until you open them.',
         'It is a web app, so there is no app store download and nothing to update at the gate. No account. Add it to your home screen on your own wifi, and it is there when you sit down. It is not a data-entry tool and will never ask you to tap in a play. The pencil stays yours.',
       ],
       linkText: 'Open today’s games',
@@ -149,6 +152,8 @@ export default {
       items: [
         { text: 'How to score a baseball game', href: '/learn/score-a-baseball-game' },
         { text: 'Choosing a baseball scorebook', href: '/learn/choose-a-scorebook' },
+        { text: 'What to do when you miss a play', href: '/learn/missed-play-scorekeeping' },
+        { text: 'How to record baseball substitutions', href: '/learn/score-baseball-substitutions' },
         { text: 'Ballpark passports and stamping what you saw', href: '/learn/ballpark-passports' },
         { text: 'Every scorekeeping symbol, in one reference', href: '/learn/scorekeeping-symbols' },
       ],

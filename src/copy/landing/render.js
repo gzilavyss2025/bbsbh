@@ -118,6 +118,17 @@ ${section.items.map((i) => `<li><a href="${esc(i.href)}">${esc(i.text)}</a></li>
   }
 }
 
+function renderSources(sources = []) {
+  if (!sources.length) return ''
+  return `<section class="sources">
+<h2>Sources</h2>
+<p>Primary references used for the rules, definitions, and product details on this page.</p>
+<ul>
+${sources.map((source) => `<li><a href="${esc(source.href)}">${esc(source.name)}</a></li>`).join('\n')}
+</ul>
+</section>`
+}
+
 // JSON-LD. Worth being clear-eyed about what this buys in 2026: Google removed
 // FAQ rich results in May 2026 and had already dropped HowTo, so none of this
 // produces a search feature any more. It stays because it is still the cheapest
@@ -133,6 +144,8 @@ function jsonLd(page, url) {
       dateModified: page.updated,
       mainEntityOfPage: url,
       publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      citation: (page.sources || []).map((source) => source.href),
       isAccessibleForFree: true,
     },
   ]
@@ -159,11 +172,27 @@ function jsonLd(page, url) {
 // see what else is here, and a crawler that needs one page linking to all of
 // them. A set of guides with no index is a set of orphans — internal links are
 // how a crawler discovers that page six exists.
-export function renderIndex(pages) {
+export function renderIndex(groups) {
   const title = `Baseball Scorekeeping Guides | ${SITE_NAME}`
   const description =
     'Free guides to keeping score of a baseball game by hand — notation, scorebooks, box scores, statistics, and watching on delay without spoilers.'
   const url = `${SITE_URL}/learn`
+  const pages = groups.flatMap((group) => group.pages)
+  const itemList = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Baseball scorekeeping guides',
+    url,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: pages.map((page, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: page.h1,
+        url: `${SITE_URL}/learn/${page.slug}`,
+      })),
+    },
+  }).replace(/</g, '\\u003c')
 
   return `<!doctype html>
 <html lang="en">
@@ -183,6 +212,7 @@ export function renderIndex(pages) {
 <meta property="og:image" content="${SITE_URL}/og-image.png" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="stylesheet" href="/learn.css" />
+<script type="application/ld+json">${itemList}</script>
 </head>
 <body>
 <header class="masthead">
@@ -192,13 +222,21 @@ export function renderIndex(pages) {
 <article>
 <h1>Scorekeeping guides</h1>
 <div class="answer"><p>Everything here is free, and none of it needs an account. These guides cover keeping score of a baseball game by hand — the notation, the equipment, and the reading skills that go with it — written for somebody starting from nothing.</p></div>
-<ul class="index">
-${pages
+${groups
   .map(
-    (page) => `<li><h2><a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a></h2><p>${esc(page.metaDescription)}</p></li>`,
+    (group) => `<section class="index-group" aria-labelledby="group-${esc(group.id)}">
+<h2 id="group-${esc(group.id)}">${esc(group.heading)}</h2>
+<p>${esc(group.description)}</p>
+<ul class="index">
+${group.pages
+  .map(
+    (page) => `<li><h3><a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a></h3><p>${esc(page.metaDescription)}</p></li>`,
   )
   .join('\n')}
 </ul>
+</section>`,
+  )
+  .join('\n')}
 </article>
 </main>
 <footer class="footer">
@@ -270,7 +308,9 @@ ${gear(page.slug, admin)}
 <main>
 <article>
 <h1>${esc(page.h1)}</h1>
-${page.sections.map(renderSection).join('\n')}
+${page.sections.filter((section) => section.kind !== 'related').map(renderSection).join('\n')}
+${renderSources(page.sources)}
+${page.sections.filter((section) => section.kind === 'related').map(renderSection).join('\n')}
 </article>
 </main>
 <footer class="footer">

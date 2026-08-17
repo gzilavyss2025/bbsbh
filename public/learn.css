@@ -329,16 +329,31 @@ tbody tr:last-child td {
   color: var(--ink-0);
 }
 
-.related {
+.related,
+.sources {
   margin-top: var(--space-12);
   border-top: 1px solid var(--rule);
   padding-top: var(--space-4);
 }
 
 .related ul,
+.sources ul,
 .index {
   list-style: none;
   padding-left: 0;
+}
+
+.index-group {
+  margin-top: var(--space-10);
+}
+
+.index-group > h2 {
+  margin-bottom: var(--space-2);
+}
+
+.index-group > p,
+.sources > p {
+  color: var(--ink-2);
 }
 
 .index li {
@@ -347,8 +362,9 @@ tbody tr:last-child td {
   margin-bottom: var(--space-6);
 }
 
-.index h2 {
+.index h3 {
   margin: 0 0 var(--space-2);
+  font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
 }
 
 .index p {

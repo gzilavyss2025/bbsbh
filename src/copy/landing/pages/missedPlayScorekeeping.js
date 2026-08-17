@@ -16,6 +16,11 @@ export default {
   ],
   schema: ['Article', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — Official Scorer', href: 'https://www.mlb.com/glossary/rules/official-scorer' },
+    { name: 'MLB Glossary — Ordinary Effort', href: 'https://www.mlb.com/glossary/rules/ordinary-effort' },
+    { name: '2026 Official Baseball Rules', href: 'https://mktg.mlbstatic.com/mlb/official-information/2026-official-baseball-rules.pdf' },
+  ],
   sections: [
     {
       id: 'answer',
