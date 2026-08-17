@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import test from 'node:test'
 
-import { LANDING_PAGES, pageBySlug } from '../src/copy/landing/pages/index.js'
+import { LANDING_GROUPS, LANDING_PAGES, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { esc, renderIndex, renderPage } from '../src/copy/landing/render.js'
 import {
   SECTION_KINDS,
@@ -37,6 +37,28 @@ test('every page has the required shape', () => {
     assert.ok(page.h1.length <= SLOT_LIMITS.h1, `${page.slug} h1 fits`)
     assert.match(page.updated, /^\d{4}-\d{2}-\d{2}$/, `${page.slug} has an ISO updated date`)
     assert.ok(Array.isArray(page.keywords) && page.keywords.length, `${page.slug} names its queries`)
+  }
+})
+
+test('the guide groups form one complete task map', () => {
+  const grouped = LANDING_GROUPS.flatMap((group) => group.pages)
+  assert.deepEqual(grouped, LANDING_PAGES)
+  assert.equal(new Set(grouped).size, LANDING_PAGES.length, 'each guide appears in one group')
+  for (const group of LANDING_GROUPS) {
+    assert.match(group.id, /^[a-z0-9-]+$/)
+    assert.ok(group.heading && group.description && group.pages.length)
+  }
+})
+
+test('source references are safe, visible, and machine-readable', () => {
+  for (const page of LANDING_PAGES) {
+    const out = html(page)
+    for (const source of page.sources || []) {
+      assert.match(source.href, /^https:\/\//, `${page.slug} source uses HTTPS`)
+      assert.ok(source.name.trim(), `${page.slug} source has a label`)
+      assert.ok(out.includes(`href="${esc(source.href)}"`), `${page.slug} source is visible`)
+      assert.ok(out.includes(JSON.stringify(source.href)), `${page.slug} source is in JSON-LD`)
+    }
   }
 })
 
@@ -222,10 +244,18 @@ test('JSON-LD is valid JSON and cannot break out of its script tag', () => {
 })
 
 test('the hub links to every guide', () => {
-  const out = renderIndex(LANDING_PAGES.map((p) => resolvePage(p, {})))
+  const groups = LANDING_GROUPS.map((group) => ({
+    ...group,
+    pages: group.pages.map((page) => resolvePage(page, {})),
+  }))
+  const out = renderIndex(groups)
   for (const page of LANDING_PAGES) {
     assert.ok(out.includes(`/learn/${page.slug}`), `the hub links to ${page.slug}`)
   }
+  const match = out.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)
+  const data = JSON.parse(match[1])
+  assert.equal(data['@type'], 'CollectionPage')
+  assert.equal(data.mainEntity.itemListElement.length, LANDING_PAGES.length)
 })
 
 // ---------------------------------------------------------------- sitemap

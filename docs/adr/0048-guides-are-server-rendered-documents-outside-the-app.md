@@ -49,6 +49,17 @@ self-contained, quotable answer before any framing or any brand. This is pinned
 by a test rather than left to taste, because it is the whole reason the pages are
 shaped the way they are and it is the first thing a redesign would undo.
 
+**The hub is a task map.** Guides belong to one editorial group, and the visible
+hub plus its `ItemList` JSON-LD derive from the same group list. The flat page
+array used by the copy registry and sitemap derives from those groups. A new
+guide cannot appear in one system and become an orphan in the other.
+
+**References stay visible and structural.** A guide can list primary sources
+after its body. The renderer also emits those URLs as `Article.citation` values.
+Names and URLs are not copy slots because they identify the authority behind a
+fact; an editor can rewrite the explanation without silently changing its
+source.
+
 **Editing happens on the page, via `?edit`.** The gear links to
 `/learn/{slug}?edit`; `api/page.js` answers that one URL with the app shell so
 the existing copy editor takes over, filtered to that guide's slots. ADR-0044's

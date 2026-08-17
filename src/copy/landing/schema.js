@@ -49,6 +49,10 @@
 //             collapsed text reads as de-emphasized, and it is worse for a
 //             person holding a phone at a ballpark.
 //   related — sibling links out to the other landing pages.
+//
+// A page can also declare a top-level `sources` array. Source names and HTTPS
+// URLs are structural references, not editable prose. The renderer prints them
+// after the article body and adds their URLs to Article.citation in JSON-LD.
 export const SECTION_KINDS = Object.freeze([
   'answer',
   'prose',

@@ -30,6 +30,12 @@ export default {
   ],
   schema: ['Article', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB BallPark Pass-Port — How It Works', href: 'https://mlbballparkpassport.com/how-it-works/' },
+    { name: 'MLB BallPark Pass-Port — Our Story', href: 'https://mlbballparkpassport.com/our-story/' },
+    { name: 'MLB BallPark Pass-Port — Book and Backstamping', href: 'https://mlbballparkpassport.com/product/the-mlb-ballpark-pass-port/' },
+    { name: 'MLB BallPark Pass-Port — Official site', href: 'https://mlbballparkpassport.com/' },
+  ],
   sections: [
     {
       id: 'answer',

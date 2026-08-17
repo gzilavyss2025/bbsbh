@@ -27,6 +27,11 @@ export default {
   ],
   schema: ['Article', 'DefinedTermSet', 'FAQPage'],
   updated: '2026-08-16',
+  sources: [
+    { name: 'MLB Glossary — At-bat', href: 'https://www.mlb.com/glossary/standard-stats/at-bat' },
+    { name: 'MLB Glossary — Innings pitched', href: 'https://www.mlb.com/glossary/standard-stats/innings-pitched' },
+    { name: '2026 Official Baseball Rules', href: 'https://mktg.mlbstatic.com/mlb/official-information/2026-official-baseball-rules.pdf' },
+  ],
   sections: [
     {
       id: 'answer',
