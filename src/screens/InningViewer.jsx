@@ -25,6 +25,7 @@ import { FocusControls, FocusTrail, useFocusMode } from '../components/inning/fo
 import { InningActionBar } from '../components/inning/InningActionBar.jsx'
 import { bookIsClosed } from '../components/inning/focus/beats.js'
 import { ReferencePanel } from '../components/inning/focus/ReferencePanel.jsx'
+import { DueUpNextCard } from '../components/playbyplay/DueUpNextCard.jsx'
 import { DelayCard } from '../components/inning/DelayCard.jsx'
 import { ConsoleBand } from '../components/gamehud/ConsoleBand.jsx'
 import { InningPage } from './innings/InningPage.jsx'
@@ -861,6 +862,23 @@ export function InningViewer({
             renderPage={renderInningPage}
             onCommit={goTo}
             onStatusChange={setTurnStatus}
+          />
+
+          {/* A preview of the OTHER side's next half, moved here from the
+              ReferencePanel Arms tab: it belongs beside the cards it follows
+              on, not tucked behind a tab a reader may not open. Its own gate
+              (selectDueUpNext) is what makes this conditional — it renders
+              nothing until the half on screen is fully revealed, i.e. right
+              as "See the whole half" appears below it. */}
+          <DueUpNextCard
+            feed={feed}
+            inning={effInning}
+            half={effHalf}
+            revealedThrough={renderRevealedThrough}
+            awayId={meta.away.id}
+            homeId={meta.home.id}
+            awayName={meta.away.clubName}
+            homeName={meta.home.clubName}
           />
 
           <FocusControls focus={focus} turning={turning} />

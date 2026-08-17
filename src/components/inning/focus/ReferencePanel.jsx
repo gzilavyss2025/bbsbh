@@ -13,7 +13,6 @@ import { ExtrasFacts } from './ExtrasFacts.jsx'
 import { UmpireTendenciesFold } from '../../umpire/UmpireTendenciesFold.jsx'
 import { StatBox, AbsCard } from '../../gamehud/StatBox.jsx'
 import { WinProbChart } from '../../charts/WinProbChart.jsx'
-import { DueUpNextCard } from '../../playbyplay/DueUpNextCard.jsx'
 
 // Focus mode's reference shelf — lineups, the fielding diamond, the pitcher
 // tables, the benches (ADR-0043). This replaces ReferenceRail.jsx, which
@@ -344,6 +343,22 @@ function Section({
             groups={groups}
           />
         ))}
+        {/* The win-probability chart, moved here from the Arms tab: a
+            once-a-half-ish reference rather than something a scorer checks
+            between every pitch, so it belongs with the drawers, not pinned
+            under the pitching lines. Sits above the Tendencies card so the
+            two once-a-game references still read as a pair below it. */}
+        <WinProbChart
+          points={winProbPoints}
+          bigPlays={winProbBigPlays}
+          awayAbbr={meta.away.abbreviation}
+          homeAbbr={meta.home.abbreviation}
+          awayId={meta.away.id}
+          homeId={meta.home.id}
+          awayTreatment={treatment?.away}
+          homeTreatment={treatment?.home}
+          partial
+        />
         {/* The plate ump's Tendencies card as a drawer (open by default,
             foldable), between the benches and the fill-in facts: it reads
             like the crew line below (a once-a-game reference), so it sits
@@ -374,10 +389,10 @@ function Section({
   // same lines. Jump straight to a half ahead of the reveal mark and that
   // half of the tab legitimately has nothing — which as bare emptiness read
   // as a broken panel holding a reserved column open for no reason. Say so
-  // instead, scoped to just that pair (see `armsEmpty` below) — the stat/WPA
+  // instead, scoped to just that pair (see `armsEmpty` below) — the stat
   // content that follows has its own "nothing revealed yet" answer (a null
-  // render from StatBox's own `revealed` gate, an empty chart), so it isn't
-  // folded into this same empty state.
+  // render from StatBox's own `revealed` gate), so it isn't folded into this
+  // same empty state.
   //
   // The pre-half strip's own notes land here too — HalfInning declines to
   // render the strip inline (its own `windowed` gate no longer applies here —
@@ -395,10 +410,13 @@ function Section({
   const notes = mergeNotes(preHalf, marginNotes)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)
 
-  // The stat/WPA content that used to be InningPage.jsx's `.innings__row2`,
-  // built only while NOT windowed (decision 5) — now it always builds, for
-  // every half, live or historical, moved permanently into this tab. Same
-  // already-gated values, same components, only the destination changed.
+  // The stat-line content that used to be part of InningPage.jsx's
+  // `.innings__row2`, built only while NOT windowed (decision 5) — now it
+  // always builds, for every half, live or historical, moved permanently
+  // into this tab. Same already-gated values, same components, only the
+  // destination changed. The WPA chart that used to sit alongside it here
+  // moved on to the Extras tab — a once-a-half reference, not something a
+  // scorer checks between pitches.
   const idx = halfIndex(effInning, effHalf)
   const revealed = idx <= revealedThrough
   const battingSide = effHalf === 'top' ? 'away' : 'home'
@@ -438,27 +456,6 @@ function Section({
         revealed={revealed}
         awayAbbr={meta.away.abbreviation}
         homeAbbr={meta.home.abbreviation}
-      />
-      <WinProbChart
-        points={winProbPoints}
-        bigPlays={winProbBigPlays}
-        awayAbbr={meta.away.abbreviation}
-        homeAbbr={meta.home.abbreviation}
-        awayId={meta.away.id}
-        homeId={meta.home.id}
-        awayTreatment={treatment?.away}
-        homeTreatment={treatment?.home}
-        partial
-      />
-      <DueUpNextCard
-        feed={feed}
-        inning={effInning}
-        half={effHalf}
-        revealedThrough={revealedThrough}
-        awayId={meta.away.id}
-        homeId={meta.home.id}
-        awayName={meta.away.clubName}
-        homeName={meta.home.clubName}
       />
     </>
   )
