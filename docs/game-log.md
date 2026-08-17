@@ -83,13 +83,16 @@ ever sees the path segment as a word.
 lint guard (`scripts/check-stamp-surfaces.mjs`), and the e2e specs; renaming
 half of them leaves the next reader unsure which name means what.
 
-### The fifteen files display copy lives in
+### The seventeen files display copy lives in
 
 If you are changing the user-facing name or wording, these are all of them.
 Six are new since ADR-0041 gave the Game Log more than one book —
 `LogbookPage.jsx` shrank to the route shell + book resolver when the shelf
 pushed it past the file-size guard, and its old page-level copy (empty
-state, tray and placement ledes) moved to `LogbookCollection.jsx` with it:
+state, tray and placement ledes) moved to `LogbookCollection.jsx` with it.
+Two more are newer still: the season grid moved out of `LogbookCollection.jsx`
+into `StampCollection.jsx` for the same reason (that file reached the same
+600-line ceiling), and `ClubsSeen.jsx` arrived beside it:
 
 | File | What it carries |
 |---|---|
@@ -98,6 +101,8 @@ state, tray and placement ledes) moved to `LogbookCollection.jsx` with it:
 | `src/lib/reportPages.js` | the label in the More menu, site footer, and report footer |
 | `src/screens/LogbookPage.jsx` | page `<h1>`, browser tab title — the route shell only now; see `LogbookCollection.jsx` below for the rest |
 | `src/screens/LogbookCollection.jsx` | one open book's page: empty state, tray and placement ledes |
+| `src/screens/logbook/StampCollection.jsx` | the closed-by-default card over the season grid — its title and its summary line |
+| `src/components/logbook/ClubsSeen.jsx` | the league grid under the book, and the one line that must never turn it into a checklist |
 | `src/components/passport/LogbookShelf.jsx` | the multi-book shelf's copy — "your books," the new-book tile |
 | `src/components/passport/BookManagementSheet.jsx` | one book's Settings — rename, re-cover, and what removing it does to its stamps |
 | `src/components/passport/BookCoverPicker.jsx` | the cover picker's own labels — the league presets, the board colours, the team rail, the phone stepper's steps |
@@ -190,7 +195,9 @@ soften it, do not bury it, and do not ship anything that makes it untrue.
 | Placing | *"Tap the page where you want {date} to go."* → *"There? Confirm it, or tap somewhere else."* → `Stamp it here` |
 | Moving | *"Tap where {date} should go instead — any page."* → *"There instead? Confirm it, or tap somewhere else."* → `Move it here` |
 | Page full | *"This page holds 8. Turn to a new one, or add one from the corner."* |
-| Re-order control | label `By date` → `Oldest first` / `Newest first` — two verbs, never a toggle, because the book is in whatever order its owner put it in (ADR-0036's re-order addendum) |
+| Re-order control | label `By date` → `Oldest first` / `Newest first` — two verbs, never a toggle, because the book is in whatever order its owner put it in (ADR-0036's re-order addendum). Offered only while the book is turned OPEN: it re-places every stamp from page 1, which is an action on pages, and over a closed cover it read as chrome belonging to the screen |
+| Clubs grid | heading `Clubs you've seen` · *"{n} clubs have turned up in your book."* — and, at zero, *"Every club in the league. The ones you stamp a game of come up in their own colours."* **Never `n of 30`, never a bar, never praise for reaching the end.** The Game Log has no completion state (§1, "not a checklist"), and this grid is the one surface where inventing one would be a single word's work |
+| Stamp card | `All your stamps`, with `{n} stamps · {season}` as its summary — the season grid is closed on arrival, because the book above it already IS the collection |
 | Re-order confirm | *"This re-places every stamp in this book — each one lifted off its page and pressed back down {oldest\|newest} first, from page 1. The order you put them in by hand does not come back."* · *"The tray and your other books stay as they are."* → `Re-place them` / `Leave it as it is` |
 | Selected stamp | `Open game ›` / `Move it` |
 | Unplaced marker | `unplaced` |

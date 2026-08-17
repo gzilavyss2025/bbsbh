@@ -29,15 +29,26 @@
    Change either one and the boards stop landing under the books. */
 .shelf {
   --shelf-pad: var(--space-2);
-  /* The board, its front lip, and the label strip below it — the three bands
-     under every cover, in slot-bottom order. */
-  --shelf-plank-h: var(--space-4);
+  /* The label strip under each board, and the band where a cover meets it.
+     The shelf's own two, which the single-book stand below has no use for —
+     it carries no per-book label. */
   --shelf-caption-h: var(--space-8);
   --shelf-contact-h: var(--space-2);
-  /* A warm timber board, every tone mixed off the same --book-board-kraft the
-     covers print on, so the furniture is the same warm brown family as the
-     books and the manila page. Held lighter than any cover, so a book always
-     reads as the darker object standing on the shelf. */
+}
+
+/* THE TIMBER, cut once and used twice: by the shelf's planks here, and by the
+   board ONE closed book stands on when it has a page to itself
+   (`.passportbook__stand`, at the foot of this file). One book on its own page
+   and four books on a shelf are furniture of the same kind, so they share
+   these tokens rather than carrying two sets that drift.
+
+   A warm board, every tone mixed off the same --book-board-kraft the covers
+   print on, so the furniture is the same warm brown family as the books and
+   the manila page. Held lighter than any cover, so a book always reads as the
+   darker object standing on the shelf. */
+.shelf,
+.passportbook__stand {
+  --shelf-plank-h: var(--space-4);
   --shelf-wood: color-mix(in srgb, var(--book-board-kraft) 54%, var(--bg-page));
   --shelf-wood-top: color-mix(in srgb, var(--book-board-kraft) 28%, var(--surface-inset));
   --shelf-wood-lip: color-mix(in srgb, var(--book-board-kraft) 66%, var(--text-heading));
@@ -127,13 +138,8 @@
         enough that a cover's own focus ring (2px at a 3px offset,
         49-passport-book.css) lands on the LIT band rather than on the darker
         front, where it would fall under the 3:1 non-text bar. */
-.shelf__slot::before {
-  content: none;
-  position: absolute;
-  bottom: var(--shelf-caption-h);
-  left: calc(-1 * var(--space-2));
-  right: calc(100% * (1 - var(--shelf-cols)) - var(--space-2));
-  height: var(--shelf-plank-h);
+.shelf__slot::before,
+.passportbook__stand {
   border-radius: 0 0 var(--radius-xs) var(--radius-xs);
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='16'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85 0.035' numOctaves='4' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='16' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E"),
@@ -165,6 +171,18 @@
   background-blend-mode: soft-light, normal, normal, normal;
   box-shadow: 0 3px 6px -2px color-mix(in srgb, var(--text-heading) 22%, transparent);
   pointer-events: none;
+}
+
+/* Where the shelf's own board sits: stretched across its row, hanging past the
+   first and last cover a little so it reads as furniture rather than a rule
+   ending at the last book. `content` is switched on per breakpoint below. */
+.shelf__slot::before {
+  content: none;
+  position: absolute;
+  bottom: var(--shelf-caption-h);
+  left: calc(-1 * var(--space-2));
+  right: calc(100% * (1 - var(--shelf-cols)) - var(--space-2));
+  height: var(--shelf-plank-h);
 }
 
 /* Which slot leads a row, per breakpoint. Every later rule turns the previous
@@ -297,6 +315,38 @@
   line-height: var(--lh-solid);
 }
 
+/* ---- the board ONE book stands on ----
+   A user with a single book never sees the shelf (screens/LogbookPage.jsx
+   opens that book directly, and always has), so their cover used to float on
+   the paper with nothing under it while everyone else's stood on timber. This
+   is the same board, cut for one: drawn by PassportBook while the cover is up,
+   and gone the moment the book is turned open.
+
+   A SIBLING of `.passportbook__stage`, not a child. The stage clips (it has to
+   — a turning leaf sweeps outside the book), and a board that stops dead at
+   the book's own edge reads as a plinth rather than a shelf. Out here it can
+   overhang. The negative top margin cancels `.passportbook`'s flex gap so the
+   cover stands ON the board rather than hovering above it. */
+.passportbook__stand {
+  height: var(--shelf-plank-h);
+  margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-2)) 0;
+}
+
+/* The contact shadow where the cover meets the board — the shelf draws this
+   from `.shelf__slot::after` for the same reason, and both are held entirely
+   below the cover's bottom edge so neither paints over it. */
+.passportbook__stand::before {
+  content: '';
+  display: block;
+  height: var(--space-2);
+  margin-top: calc(-1 * var(--space-2));
+  background-image: radial-gradient(
+    62% 100% at 50% 0%,
+    color-mix(in srgb, var(--text-heading) 38%, transparent),
+    transparent 74%
+  );
+}
+
 /* ---- the book management sheet (create / edit / remove) ---- */
 .bookmgmt {
   display: flex;
@@ -417,15 +467,19 @@
   min-width: 0;
 }
 
+/* Tighter than it was: these are outlined chips now (`.btn--chip`) rather than
+   bare green text, and a button carries its own edges, so the air between them
+   no longer has to do that work. Three of them plus a book title still fit one
+   phone line. */
 .logbook__headtools {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-2);
   flex: 0 0 auto;
 }
 
+/* On its own line under the head, hard left with the title above it. */
 .logbook__headstats {
-  display: block;
-  padding-top: 0;
+  margin-bottom: var(--space-4);
 }
 

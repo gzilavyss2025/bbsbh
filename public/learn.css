@@ -69,13 +69,29 @@
   --ls-label: 0.08em;
   --font-read: Georgia, "Times New Roman", serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
-  --measure: 34rem;
+  /* Two columns, not one. --measure is the READING column: the width a
+     paragraph is allowed to reach, held near 70 characters at the body size
+     above, which is where a long article stays comfortable. --measure-wide is
+     the PAGE column: the frame the masthead, the footer and the blocks that
+     are reference rather than prose (a table, the guide index) live in. A
+     single 34rem column for both was the old shape, and on a laptop it read as
+     a ribbon of text with two thirds of the window empty beside it.
+
+     Nothing here needs a breakpoint. Every column is a `max-width` — below it
+     a block simply fills the space it has — and the gutter grows with the
+     viewport, so a phone gets one full-bleed column and a desktop gets a
+     centred article with wider tables from the same rules. */
+  --measure: 42rem;
+  --measure-wide: 60rem;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
   --space-8: 32px;
+  --space-10: 40px;
   --space-12: 48px;
+  --space-16: 64px;
 }
 
 * {
@@ -99,22 +115,53 @@ body {
   background-position: 0 -1px, -1px 0;
 }
 
+/* --- page frame ------------------------------------------------------
+   The outer frame is the WIDE column. Inside it, each block is pulled back
+   to the reading column by the rules below, and the two blocks that are
+   reference rather than prose — a table, the guide index — are allowed to
+   keep the full frame.
+
+   The selectors are written as explicit child paths (`article > section > *`)
+   rather than as a bare element list, because the same tags appear inside the
+   call-to-action and inside a table cell, where a centred 42rem box would be
+   wrong. render.js emits a small, closed set of shapes; these match it. */
+
 main,
 .masthead,
 .footer {
-  max-width: var(--measure);
+  max-width: var(--measure-wide);
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 var(--gutter);
+}
+
+main > article > h1,
+main > article > .answer,
+main > article > aside,
+main > article > nav,
+main > article > section > * {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
+/* The two exceptions, both wider on purpose: reference data reads better with
+   room for its columns, and the hub's guide list becomes a two-up grid. */
+main > article > section > .tablewrap,
+main > article > section > .index {
+  max-width: var(--measure-wide);
 }
 
 /* --- masthead ------------------------------------------------------- */
 
+/* The rule under it runs the width of the page column, not the reading
+   column, so the frame is legible before a word is read. */
 .masthead {
   display: flex;
   align-items: baseline;
   gap: var(--space-3);
   padding-top: var(--space-6);
-  padding-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: var(--space-10);
 }
 
 .masthead__mark {
@@ -289,7 +336,9 @@ tbody tr:last-child td {
   border: 1px solid var(--seal);
   border-left-width: 4px;
   padding: var(--space-6);
-  margin: var(--space-12) 0;
+  /* `auto`, not 0: this shorthand comes after the page-frame rules and would
+     otherwise undo the centring they set on it. */
+  margin: var(--space-12) auto;
 }
 
 .cta h2 {
@@ -329,9 +378,12 @@ tbody tr:last-child td {
   color: var(--ink-0);
 }
 
+/* Both close the article, so both take the reading column — their rule has to
+   line up with the last paragraph above it, not with the page frame. */
 .related,
 .sources {
-  margin-top: var(--space-12);
+  max-width: var(--measure);
+  margin: var(--space-12) auto 0;
   border-top: 1px solid var(--rule);
   padding-top: var(--space-4);
 }
@@ -344,10 +396,11 @@ tbody tr:last-child td {
 }
 
 .index-group {
-  margin-top: var(--space-10);
+  margin-top: var(--space-16);
 }
 
 .index-group > h2 {
+  margin-top: 0;
   margin-bottom: var(--space-2);
 }
 
@@ -356,10 +409,27 @@ tbody tr:last-child td {
   color: var(--ink-2);
 }
 
+/* The hub is a list of guides, so it lays out as a list of cards and wraps to
+   as many columns as the frame has room for. `auto-fit` with a 20rem floor
+   gives one column on a phone and two on a laptop with no breakpoint, and it
+   is the one place a guide page uses its full width for something other than
+   a table. The floor is 20rem rather than something smaller because a guide
+   title runs to three lines below that, and because two columns divide the
+   four-guide group evenly where three leave one card alone on a second row. */
+.index {
+  display: grid;
+  /* `min(20rem, 100%)`, not a bare 20rem: a grid track floor is a hard
+     minimum, so on a 320px phone the bare value pushed the page 16px wider
+     than the viewport and the whole document scrolled sideways. */
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
+  gap: var(--space-6) var(--space-8);
+  margin-top: var(--space-6);
+}
+
 .index li {
   border-bottom: 1px solid var(--rule-soft);
   padding-bottom: var(--space-4);
-  margin-bottom: var(--space-6);
+  margin-bottom: 0;
 }
 
 .index h3 {

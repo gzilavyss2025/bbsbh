@@ -83,6 +83,32 @@
 .player .section__title em {
   text-transform: uppercase;
 }
+/* SUB-SECTION LEADER RULE. The player page has two heading tiers and they
+   were a full octave apart: the top-level headings wear a solid club bar
+   (.section__title--bar), while every sub-card heading under them — Statcast,
+   Advanced, Foul balls, Pitches, Pitches like / Hits like, By handedness,
+   Situational, Splits vs team, Firsts — was small graphite caps floating on
+   the page with nothing under it, so a reader scrolling a long analytics
+   shelf could not see where one card stopped and the next started. A hairline
+   leader running from the label across to its right-hand note gives that tier
+   a middle weight: still quiet, but it draws the card's top edge, and it ties
+   the label to the note it belongs to instead of leaving them as two loose
+   ends of a wide row. Almanac/scorecard idiom, and on-metaphor for ruled
+   paper. Only the un-barred tier gets it — a bar heading already has all the
+   structure it needs, and --primary is the page headline. */
+.player .section__title:not(.section__title--bar):not(.section__title--primary) > span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.player .section__title:not(.section__title--bar):not(.section__title--primary) > span::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
 .team-hub .section__title em {
   text-transform: uppercase;
 }
@@ -265,6 +291,20 @@
    splitting "Throws" from "R" and stranding the separator before the team. */
 .player__hand {
   white-space: nowrap;
+}
+/* The hero's second meta line: club, roster status, prospect pills. Its own
+   row rather than the tail of the attribute line above it (see PlayerPage's
+   comment) — a flex row with a real gap, so the pills sit beside the club
+   name without mid-dots and wrap cleanly when both ranks are present. */
+.player__clubline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 3px 0 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-prose);
+  text-transform: uppercase;
 }
 .player__team {
   color: var(--navy);
@@ -1046,6 +1086,28 @@
   color: var(--accent-primary);
 }
 
+/* ONE NUMERIC VOICE. The Advanced and Foul cards borrow .factgrid from the
+   bio card above them, and .fact__value is body type, because a bio fact's
+   value is a place or a date ("Moca, Dominican Republic"). Every OTHER number
+   on this page is set in mono with tabular figures — the season tiles, the
+   Statcast strip, the game log, the register — so these two grids were the
+   only place a figure changed typeface, and .267 / .797 sat in the proportional
+   face right under a mono 5.27. These two grids hold nothing but numbers, so
+   they take the page's numeric face; the bio grid is untouched. The value also
+   steps up a size, so it outweighs its own label rather than matching it —
+   in a stat card the number is the content and the label is the caption.
+   .advcard/.foulcard scope this deliberately: the workload card next door
+   mixes prose into its values ("1 of last 7 days") and stays body type. */
+.advcard .fact__value,
+.foulcard .fact__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+  line-height: var(--lh-score);
+}
+
 /* FoulCard's "League foul tracker ›" — a destination-named chevron link out
    of the card, same register as .chevron-link's "See all ›". Compound to
    beat .plink's `font: inherit`/`color: inherit` reset (same fix as
@@ -1059,242 +1121,5 @@
   text-transform: uppercase;
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
-}
-
-/* TROPHY CASE — career-honors card (api/person.js's trophyCaseView): a
-   marquee (.plaque) for the single most prestigious honor, then everything
-   else as ledger groups below it. Sits in the achievements zone alongside
-   Milestone Watch and Firsts, right after the fact grid — same bordered-card
-   treatment as .milestonewatch so the two read as siblings.
-
-   No per-award icon: a lettered badge in a ring reads as a generic avatar
-   no matter which two letters go inside it, so the marquee is pure
-   typographic hierarchy — an eyebrow, the headline, a short tier-coloured
-   rule (a divider, not an icon standing in for one), then the honor's own
-   dates. A ledger row's tier reads from a background tint (see
-   .ledger-row.is-allstar), the same mechanism the career register already
-   uses for its own All-Star rows, not a rail or a badge. */
-.trophycase {
-  margin: 0 2px;
-  padding: 10px 12px 12px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  background: var(--surface-card);
-}
-
-/* ---- marquee: the single hero honor, no enclosing shape ---- */
-.plaque {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.plaque-eyebrow {
-  margin: 0 0 3px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-}
-.plaque-eyebrow.tier-hw {
-  color: var(--award-ink);
-}
-.plaque-eyebrow.tier-as {
-  color: var(--allstar-blue);
-}
-.plaque-eyebrow.tier-is {
-  color: var(--graphite);
-}
-.plaque-name {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-title-sm);
-  line-height: var(--lh-tight);
-  color: var(--text-heading);
-}
-/* A hardware honor outside the top of HERO_RANK (person.js) — Gold Glove
-   down through All-MLB Second Team — is real, but not career-defining the
-   way an MVP or Cy Young is; the marquee says so by rendering smaller and
-   lighter, not just via the (identical) tier-hw color every hardware honor
-   already shares. */
-.plaque-name--lesser {
-  font-weight: var(--w-semibold);
-  font-size: var(--fs-body);
-}
-.plaque-rule {
-  display: block;
-  width: 30px;
-  height: 3px;
-  margin: 9px 0 8px;
-  border-radius: var(--radius-xs);
-}
-.plaque-rule.tier-hw {
-  background: var(--award-line);
-}
-.plaque-rule.tier-as {
-  background: var(--allstar-blue);
-}
-.plaque-rule.tier-is {
-  background: var(--graphite-soft);
-}
-.plaque-years {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
-  color: var(--graphite);
-}
-
-/* ---- ledger: flex rows, not a rigid table — a date list needs to wrap,
-   not truncate to fit a table cell. Every row shows ALL of its honor's
-   dates, uncapped — a row with more than one grows onto its own line and
-   wraps rather than hiding a "+N more". ---- */
-.ledger-group {
-  margin-top: 14px;
-}
-.plaque + .ledger-group {
-  padding-top: 12px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.ledger-taglabel {
-  margin: 0 0 6px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--graphite);
-}
-.ledger-rows {
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.ledger-row {
-  padding: 7px 9px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-}
-.ledger-row:first-child {
-  border-top: none;
-}
-.ledger-row .lbl {
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  color: var(--text-body);
-}
-.ledger-row .val {
-  display: block;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-caption);
-  color: var(--graphite);
-}
-/* One date: label + date share the line, date pinned right. */
-.ledger-row.single {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-.ledger-row.single .val {
-  text-align: right;
-  white-space: nowrap;
-}
-/* Several dates: label gets its own line, the full list wraps beneath it
-   across as many lines as it needs — the card grows, nothing truncates. */
-.ledger-row.multi .lbl {
-  display: block;
-  margin-bottom: 3px;
-}
-.ledger-row.multi .val {
-  line-height: var(--lh-loose);
-}
-.ledger-row.is-allstar {
-  background: color-mix(in srgb, var(--allstar-blue) 8%, var(--surface-inset));
-}
-.ledger-row.is-allstar .val {
-  color: var(--allstar-blue-deep);
-  font-weight: var(--w-semibold);
-}
-
-/* ---- collapsed tally + expand — dense careers (see COLLAPSE_THRESHOLD in
-   TrophyCase.jsx) open the ledger collapsed to one line per group instead
-   of the full list, with a real "show everything" action, never a
-   dead-end "+N more". ---- */
-.ledger-tally {
-  margin-top: 14px;
-  background: var(--surface-inset);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-.ledger-tally__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 7px 9px;
-  border-top: var(--bw-hair) solid var(--border-hairline);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-num);
-  color: var(--graphite);
-}
-.ledger-tally__row:first-child {
-  border-top: none;
-}
-.ledger-tally__row b {
-  font-family: var(--font-mono);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-}
-.ledger-expand {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 9px;
-  appearance: none;
-  cursor: pointer;
-  border: var(--bw-hair) dashed var(--award-line);
-  border-radius: var(--radius-sm);
-  background: var(--award-soft);
-  color: var(--award-ink);
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-}
-.ledger-expand:hover {
-  background: var(--award-line);
-  color: var(--paper-2);
-}
-.ledger-expand:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.ledger-collapse {
-  display: block;
-  width: 100%;
-  margin-top: 10px;
-  padding: 4px;
-  appearance: none;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  color: var(--graphite);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.ledger-collapse:hover {
-  color: var(--text-body);
-}
-.ledger-collapse:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
 }
 

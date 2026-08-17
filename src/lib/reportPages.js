@@ -137,9 +137,27 @@ export const TOOLS_GROUP = {
 
 // Every group, in the order the menu and the /more page both render them.
 // The two callers that show everything (SiteMenu, MorePage) spread this; the
-// three footers spread REPORT_PAGES and append About themselves, which is the
-// behaviour check-report-pages.mjs guards.
+// two footers render PAGE_GROUPS as columns and finish with FOOTER_TRAIL —
+// all four of them reading this module is what check-report-pages.mjs guards.
 export const MENU_GROUPS = [...PAGE_GROUPS, GUIDES_GROUP, TOOLS_GROUP]
+
+// The two addresses a footer ends on, under its four columns of report pages.
+//
+// Both footers used to append `{ label: 'About', path: '/about' }` as a
+// literal, in two files — the one shape this module exists to prevent — so it
+// is declared here with the rest of them. The guides hub joins it because a
+// footer's job is to say what else the site holds, and eleven server-rendered
+// documents nothing inside the app linked to (ADR-0048) is a large part of
+// what it holds. The HUB only: listing all eleven would put a second copy of
+// /learn's own grouped task map at the foot of every page.
+//
+// Logo Sheet stays out. It is TOOLS_GROUP's other page, and on the slate it is
+// already one of the three bordered action buttons; on a report page it is a
+// printable worksheet rather than somewhere that page leads.
+export const FOOTER_TRAIL = [
+  GUIDES_GROUP.pages[GUIDES_GROUP.pages.length - 1],
+  TOOLS_GROUP.pages.find((page) => page.path === '/about'),
+]
 
 // A guide path is an ordinary URL, not an app route — anything rendering one
 // of these must use a real anchor and let the browser leave the SPA, or the

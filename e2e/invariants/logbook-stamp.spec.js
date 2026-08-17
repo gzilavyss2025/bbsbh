@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures.js'
+import { test, expect, openStampCard } from '../fixtures.js'
 
 // The Logbook's half of the spoiler invariant (ADR-0035). A game stamp IS a
 // final score, so the two things this file pins are:
@@ -58,6 +58,7 @@ test('minting files the game in the Game Log, and un-stamping takes it back', as
   // signed out, there is no server to ask, which is the whole local-first
   // point. One stamp, and it links back to the game it came from.
   await page.goto('/logbook')
+  await openStampCard(page)
   await expect(page.locator('.logbook__cell')).toHaveCount(1)
   await expect(page.locator('.logbook__cell .gamestamp')).toHaveCount(1)
 

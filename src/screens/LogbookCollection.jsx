@@ -22,6 +22,8 @@ import {
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 import { GameStamp } from '../components/logbook/GameStamp.jsx'
+import { ClubsSeen } from '../components/logbook/ClubsSeen.jsx'
+import { StampCollection } from './logbook/StampCollection.jsx'
 import { PassportBook } from '../components/passport/PassportBook.jsx'
 import { PassportCover } from '../components/passport/PassportCover.jsx'
 import { BookOrderControl } from '../components/passport/BookOrderControl.jsx'
@@ -121,6 +123,14 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
   const [openPage, setOpenPage] = useState(() =>
     placing ? openingPageFor(bookStamps, placing) : null,
   )
+  // Whether the book is turned open or still showing its cover. Reported up by
+  // PassportBook, because `openPage` above is a NUDGE rather than the book's
+  // position (see its header) and says nothing once the reader pages by hand.
+  // Only "arrange this book by date" needs it: that control acts on pages, so
+  // it waits until there are pages in front of you. Seeded from `placing`,
+  // which is a book opened to be written in.
+  const [bookOpen, setBookOpen] = useState(Boolean(placing))
+  const onOpeningChange = useCallback(({ cover }) => setBookOpen(!cover), [])
 
   // Re-seed from the prop when `?place=` CHANGES — React's documented
   // adjust-state-during-render pattern rather than an effect, which would
@@ -284,18 +294,18 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
           {bookCount > 1 && (
             <button
               type="button"
-              className="topbar__back"
+              className="btn btn--chip"
               onClick={() => navigate(placingPk ? logbookPlacePath(placingPk) : logbookPath())}
             >
               ‹ Shelf
             </button>
           )}
-          <button type="button" className="topbar__back" onClick={() => setManaging(true)}>
+          <button type="button" className="btn btn--chip" onClick={() => setManaging(true)}>
             Settings
           </button>
           <button
             type="button"
-            className="topbar__back logbook__add"
+            className="btn btn--chip"
             onClick={() => navigate(logbookNewPath(placingPk))}
           >
             Add +
@@ -306,7 +316,7 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
       {total > 0 && (
         <button
           type="button"
-          className="topbar__back logbook__headstats"
+          className="btn btn--chip logbook__headstats"
           onClick={() => navigate(thisStatsPath)}
         >
           Stats ›
@@ -479,8 +489,13 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
           {/* An action on the whole book, so it sits with the book's other
               controls above the pages rather than over them. Never while a bar
               is up: placing and a stamp's options are both conversations about
-              ONE keepsake, and one bar at a time is the rule of this slot. */}
-          {!placingPk && !selectedStamp && (
+              ONE keepsake, and one bar at a time is the rule of this slot.
+
+              And never while the book is CLOSED. Re-placing every stamp from
+              page 1 is an action on pages, offered over a cover with no page in
+              sight — it read as chrome belonging to the whole screen rather
+              than to the book, and it was the loudest thing above the fold. */}
+          {!placingPk && !selectedStamp && bookOpen && (
             <BookOrderControl count={bookStamps.length} onReorder={reorderBook} />
           )}
 
@@ -500,97 +515,38 @@ export function LogbookCollection({ book, season: requestedSeason = null, placin
             onStampClick={setSelectedPk}
             onPageTap={onPageTap}
             onAddPage={addPage}
+            onOpeningChange={onOpeningChange}
+            stand
             coverSlot={<PassportCover book={book} onOpen={() => setOpenPage(1)} />}
           />
 
-          {/* Everything the Logbook already showed, shifted below the book. */}
-          {seasons.length > 1 && (
-            <nav className="logbook__seasons" aria-label="Game Log seasons">
-              {seasons.map((year) => (
-                <button
-                  type="button"
-                  key={year}
-                  className={year === season ? 'is-active' : ''}
-                  aria-current={year === season ? 'page' : undefined}
-                  onClick={() => navigate(pathForBook(book, { season: year, bookCount }))}
-                >
-                  {year}
-                  <small>{counts[year]}</small>
-                </button>
-              ))}
-            </nav>
-          )}
+          {/* The league under the book — which clubs have turned up in a game
+              you stamped. Reads the WHOLE collection (`all`), not the season
+              the grid below is paged to: a club you sat with in 2024 is a club
+              you have seen. */}
+          <ClubsSeen stamps={all} factsByPk={byPk} />
 
-          <p className="logbook__count">
-            {seasonStamps.length} {seasonStamps.length === 1 ? 'stamp' : 'stamps'}
-            {season ? ` · ${season}` : ''}
-            <button
-              type="button"
-              className="logbook__statslink"
-              onClick={() => navigate(thisStatsPath)}
-            >
-              What it adds up to ›
-            </button>
-          </p>
-
-          <ul className="logbook__grid">
-            {seasonStamps.map((entry) => {
-              const game = byPk[entry.gamePk]
-              return (
-                <li className="logbook__cell" key={entry.gamePk}>
-                  {game ? (
-                    <button
-                      type="button"
-                      className="logbook__stampbtn"
-                      onClick={() => openGame(entry.gamePk)}
-                    >
-                      <GameStamp game={game} />
-                    </button>
-                  ) : (
-                    // Facts unresolved (offline, or a batch that failed). The
-                    // keepsake still belongs to the user, so it holds its place
-                    // with what the local record itself carries rather than
-                    // vanishing from the grid.
-                    <div className="logbook__pending">
-                      <span>{monthDay(entry.date)}</span>
-                      <small>{facts.loading ? 'Loading' : 'Not available offline'}</small>
-                    </div>
-                  )}
-                  <p className="logbook__caption">
-                    <span>{monthDay(entry.date)}</span>
-                    <span className="logbook__mode">{entry.mode}</span>
-                    {isFiled(entry) ? (
-                      // Which page this keepsake sits on, and the way back to
-                      // it. Deliberately no longer an un-place: a control
-                      // labelled "p.3" that silently took the stamp off page 3
-                      // was the only thing here that could undo a placement,
-                      // and it read as a page number. It now turns the book to
-                      // that page and opens the stamp's options, where moving
-                      // it and returning it to the tray are both named.
-                      // `isFiled`, not `entry.placement`: a placement naming a
-                      // book that is gone has no page to send anyone to.
-                      <button
-                        type="button"
-                        className="logbook__unplace"
-                        aria-label={`Options for the ${monthDay(entry.date)} stamp on page ${entry.placement.page}`}
-                        onClick={() => {
-                          setPlacingPk(null)
-                          setPending(null)
-                          setSelectedPk(entry.gamePk)
-                          setOpenPage(entry.placement.page)
-                        }}
-                      >
-                        p.{entry.placement.page}
-                      </button>
-                    ) : (
-                      <span className="logbook__unplaced">unplaced</span>
-                    )}
-                  </p>
-                  {entry.note && <p className="logbook__note">{entry.note}</p>}
-                </li>
-              )
-            })}
-          </ul>
+          {/* Everything the Logbook already showed, shifted below the book —
+              and now behind a disclosure, closed on arrival. See that file. */}
+          <StampCollection
+            seasons={seasons}
+            season={season}
+            counts={counts}
+            stamps={seasonStamps}
+            factsByPk={byPk}
+            loading={facts.loading}
+            isFiled={isFiled}
+            monthDay={monthDay}
+            onSeason={(year) => navigate(pathForBook(book, { season: year, bookCount }))}
+            onStats={() => navigate(thisStatsPath)}
+            onOpenGame={openGame}
+            onOpenOptions={(entry) => {
+              setPlacingPk(null)
+              setPending(null)
+              setSelectedPk(entry.gamePk)
+              setOpenPage(entry.placement.page)
+            }}
+          />
         </>
       )}
 

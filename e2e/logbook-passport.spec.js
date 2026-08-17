@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures.js'
+import { test, expect, openStampCard } from './fixtures.js'
 
 // Arranging the passport book (ADR-0036), and specifically the two things no
 // other suite can reach: that a placement REPAINTS the book it was made in,
@@ -137,5 +137,6 @@ test('a placed stamp can be sent back to the tray', async ({ page }) => {
   // Off the page, still in the collection — the keepsake outranks its spot.
   await expect(stampsOnBook(page)).toHaveCount(0)
   await expect(page.locator('.logbook__traystamp')).toHaveCount(1)
+  await openStampCard(page)
   await expect(page.locator('.logbook__cell')).toHaveCount(1)
 })
