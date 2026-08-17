@@ -442,6 +442,27 @@ export default defineConfig({
           '**/og-image.png',
         ],
         navigateFallback: '/index.html',
+        // …EXCEPT the guides. `navigateFallback` alone registers a
+        // NavigationRoute that answers EVERY navigation this worker controls
+        // with the precached shell, and the guides at /learn are the one part
+        // of this site the server renders itself (ADR-0048). Without this
+        // denylist an installed reader tapping a guide got index.html at the
+        // guide's URL, the client router failed to match '/learn/{slug}' (it
+        // never matches one, on purpose — see src/lib/route.js) and fell
+        // through to the slate. The document api/page.js had already written
+        // was never requested.
+        //
+        // It survived review because nothing that tests this app runs a
+        // service worker: `npm run dev` registers none, curl and Playwright
+        // start with an empty one, and the crawlers these pages exist for
+        // execute no JavaScript at all. Only a returning human with the PWA
+        // installed ever saw it. scripts/check-sw-learn-fallback.mjs now reads
+        // the assertion out of the built worker for that reason.
+        //
+        // Scope is exactly /learn. Every other rewrite in vercel.json points at
+        // api/preview.js, which returns this same app shell with its OG block
+        // swapped — serving those from the precache is correct.
+        navigateFallbackDenylist: [/^\/learn(\/|$)/],
         runtimeCaching: [
           {
             // Every whole-file dataset. NetworkFirst keeps them fresh online
