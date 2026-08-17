@@ -708,20 +708,6 @@
   margin: 0;
 }
 
-.sitemenusheet__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sitemenusheet__item {
-  font-size: var(--fs-body);
-  font-weight: var(--w-semibold);
-}
-
 /* -------------------------------------------------- settings modal
    FavoriteTeamModal's dialog chrome — a centered card (like .logomodal, via
    .scrim--center) rather than a docked bottom sheet, so it reads as a

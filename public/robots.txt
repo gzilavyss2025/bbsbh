@@ -1,4 +1,4 @@
-# Tally Baseball — https://bbsbh.vercel.app
+# Tally Baseball — https://tallybb.com
 #
 # Everything here is public, free and read-only. AI crawlers are explicitly
 # welcome: the guides at /learn are written to be quoted, and an assistant
@@ -67,4 +67,4 @@ Allow: /
 User-agent: DuckAssistBot
 Allow: /
 
-Sitemap: https://bbsbh.vercel.app/sitemap.xml
+Sitemap: https://tallybb.com/sitemap.xml

@@ -20,7 +20,14 @@ const FILES = [
   join(ROOT, 'src/components/chrome/ReportFooter.jsx'),
 ]
 
-const IMPORT_RE = /import\s*\{\s*REPORT_PAGES\s*\}\s*from\s*['"].*lib\/reportPages\.js['"]/
+// Either shared export satisfies the guard: the three footers flatten
+// REPORT_PAGES, while SiteMenu renders the grouped MENU_GROUPS. Both come from
+// reportPages.js, and REPORT_PAGES is derived from those same groups, so a
+// file importing either one cannot drift from the others. What must never
+// happen — and what this still catches — is a file going back to a
+// hand-rolled literal list.
+const IMPORT_RE =
+  /import\s*\{[^}]*\b(?:REPORT_PAGES|MENU_GROUPS)\b[^}]*\}\s*from\s*['"].*lib\/reportPages\.js['"]/
 
 const problems = []
 for (const file of FILES) {
@@ -42,7 +49,8 @@ for (const file of FILES) {
 if (problems.length) {
   console.error(
     '\n✗ Menu/footer page-list parity guard failed — the following file(s) no\n' +
-      "  longer import REPORT_PAGES from src/lib/reportPages.js. That's exactly\n" +
+      "  longer import REPORT_PAGES or MENU_GROUPS from src/lib/reportPages.js.\n" +
+      "  That's exactly\n" +
       '  how the hamburger menu and the footer\'s "More Baseball" list drifted\n' +
       '  apart before (a page added/renamed in one file but not the other):\n'
   )

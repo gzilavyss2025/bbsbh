@@ -8,6 +8,7 @@
 //   '/{MMDDYYYY}'                       -> { name: 'home', date: YYYY-MM-DD }
 //   '/logos'                            -> { name: 'logos' }
 //   '/about'                            -> { name: 'about' }
+//   '/more'                             -> { name: 'more' }  (every standalone page, grouped — WCAG 2.4.5's second way in)
 //   '/prospects'                        -> { name: 'prospects' }
 //   '/rehab'                            -> { name: 'rehab' }
 //   '/milestones'                       -> { name: 'milestones' }
@@ -124,6 +125,7 @@ export function parseRoute(url) {
   }
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
+  if (parts.length === 1 && parts[0] === 'more') return { name: 'more' }
   if (parts.length === 1 && parts[0] === 'prospects') return { name: 'prospects' }
   if (parts.length === 1 && parts[0] === 'rehab') return { name: 'rehab' }
   if (parts.length === 1 && parts[0] === 'milestones') return { name: 'milestones' }

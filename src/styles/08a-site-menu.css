@@ -1,0 +1,160 @@
+/* ============================================================
+   SITE MENU + GUIDE LINK
+   The hamburger sheet's grouped list (SiteMenu.jsx) and the
+   contextual /learn guide link (GuideLink.jsx). Split out of
+   08-site-shell.css, which was at its size budget; loads
+   immediately after it so the cascade is unchanged.
+   ============================================================ */
+
+/* The list scrolls, and until now it did not. `.sheet` (14-strike-zone.css)
+   sets no max-height and no overflow, and `.scrim` docks it to the BOTTOM of a
+   fixed, full-viewport box — so a list taller than the screen grew upward and
+   its head ran off the top edge, out of reach of any gesture. Nineteen rows
+   ran about 860 CSS px against 692 px of usable height on an iPhone 14.
+   The cap lives on the sheet and the overflow on the list inside it, so the
+   title and the "Everything" footer stay put while the middle moves. */
+.sitemenusheet {
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+  max-height: 82dvh;
+}
+
+.sitemenusheet__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.sitemenusheet__group + .sitemenusheet__group {
+  margin-top: var(--space-3);
+}
+
+/* Same condensed uppercase label as the footer's "More Baseball" heading —
+   these are the same kind of thing, so they read as the same kind of thing. */
+.sitemenusheet__grouphd {
+  margin: 0 0 var(--space-1);
+  padding: 0 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.sitemenusheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* A row is an <a> now (middle-click, open-in-new-tab), so it needs the text
+   decoration and colour a .searchbox__item button never had to state. */
+.sitemenusheet__item {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.sitemenusheet__foot {
+  flex: none;
+  padding-top: var(--space-2);
+  margin-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.sitemenusheet__everything {
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-2);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+
+.sitemenusheet__everything:active {
+  background: var(--surface-inset);
+}
+
+/* Wide layout: the sheet has never had one. Above the tablet breakpoint it
+   stayed a 440px card docked to the bottom edge of a 1280px screen, scrolling
+   a single column while two thirds of the width sat empty. Here it becomes a
+   panel of columns — the same groups, laid across instead of down, so nothing
+   scrolls at all. Kept in sync with 25-wide-layout.css's breakpoint. */
+@media (min-width: 740px) {
+  .sitemenusheet {
+    max-width: 900px;
+    max-height: 78vh;
+    max-height: 78dvh;
+  }
+
+  .sitemenusheet__scroll {
+    columns: 3;
+    column-gap: var(--space-4);
+  }
+
+  .sitemenusheet__group {
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+  }
+
+  .sitemenusheet__group + .sitemenusheet__group {
+    margin-top: 0;
+    padding-top: var(--space-3);
+  }
+}
+
+/* -------------------------------------------------- guide link
+   GuideLink.jsx — a link to a /learn guide placed on the surface that guide
+   explains. Kraft-amber like a seal, because it is the same gesture: a thing
+   laid ON the page rather than part of the scorebook printed underneath.
+   Carries no game data and never sits inside a SealBox, so an unrevealed
+   reader can still reach it. */
+.guidelink {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: var(--tap-min);
+  justify-content: center;
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--seal-cover);
+  border-left: var(--bw-thick) solid var(--seal-cover);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  text-decoration: none;
+}
+
+.guidelink__eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.guidelink__label {
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-heading);
+}
+
+.guidelink:active {
+  background: var(--surface-inset);
+}
+

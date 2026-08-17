@@ -294,7 +294,7 @@ const BUDGETS = {
   // that card's rows across a whole level. The table itself is `.standings`,
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
-  'src/styles': 86,
+  'src/styles': 88,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -493,7 +493,7 @@ const BUDGETS = {
   // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
   // set. It is not a team-hub screen and does not belong in src/screens/team/,
   // which holds the tabs of one club's page.
-  'src/screens': 42,
+  'src/screens': 43,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

@@ -78,6 +78,7 @@ const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminC
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
 const LogoSheet = lazyNamed(() => import('./screens/LogoSheet.jsx'), 'LogoSheet')
 const PlayerPage = lazyNamed(() => import('./screens/PlayerPage.jsx'), 'PlayerPage')
+const MorePage = lazyNamed(() => import('./screens/MorePage.jsx'), 'MorePage')
 const ProspectsPage = lazyNamed(() => import('./screens/ProspectsPage.jsx'), 'ProspectsPage')
 const RehabPage = lazyNamed(() => import('./screens/RehabPage.jsx'), 'RehabPage')
 const MilestoneWatchPage = lazyNamed(
@@ -267,6 +268,8 @@ export default function App() {
     content = <LogoSheet onBack={() => go('/')} />
   } else if (route.name === 'about') {
     content = <AboutPage onBack={() => go('/')} />
+  } else if (route.name === 'more') {
+    content = <MorePage />
   } else if (route.name === 'prospects') {
     content = <ProspectsPage />
   } else if (route.name === 'rehab') {

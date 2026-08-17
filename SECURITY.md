@@ -10,7 +10,7 @@ configured. See `CLAUDE.md` and `docs/api/` for what each one does.
 ## Supported versions
 
 There are no version branches. Only the latest code on `main`, as deployed
-at [bbsbh.vercel.app](https://bbsbh.vercel.app), is supported. Fixes land as
+at [tallybb.com](https://tallybb.com), is supported. Fixes land as
 a new commit, not a backport.
 
 ## Reporting a vulnerability
@@ -30,7 +30,7 @@ varies — expect an acknowledgment within a few days.
 ## Scope
 
 In scope:
-- The deployed app at bbsbh.vercel.app.
+- The deployed app at tallybb.com.
 - The opt-in Vercel functions in `api/` (auth bypass, data leakage between
   accounts, injection, etc.).
 - Anything that would let one user read or modify another user's data
