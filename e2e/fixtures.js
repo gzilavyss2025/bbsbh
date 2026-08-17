@@ -22,6 +22,19 @@ export const test = base.extend({
 
 export { expect }
 
+// The Game Log's season grid (`.logbook__cell`) sits inside a disclosure that
+// is CLOSED when the page loads — the book above it is already the collection,
+// so the same keepsakes as a list wait to be asked for
+// (screens/logbook/StampCollection.jsx). Any spec reading a cell opens the card
+// first. The closed state is asserted on the way in, so this can never quietly
+// become a no-op if the default ever flips back.
+export async function openStampCard(page) {
+  const head = page.locator('.stampcard__head')
+  await expect(head).toHaveAttribute('aria-expanded', 'false')
+  await head.click()
+  await expect(head).toHaveAttribute('aria-expanded', 'true')
+}
+
 // Append `?nointro` without clobbering an existing query string or hash, and
 // without doubling up if the caller already opted out. Handles absolute URLs,
 // root-relative paths, and bare paths alike.
