@@ -276,7 +276,13 @@ const BUDGETS = {
   // about drawing chrome in the club's own colours. Neither is @imported by
   // index.css — the lazy component that draws it imports it — so the growth
   // here costs a visitor nothing.
-  'src/styles': 83,
+  //
+  // 83 -> 84 for `65-about-page.css`: the About page redesign outgrew the
+  // headroom left in `08-site-shell.css`, so its rules MOVED there rather than
+  // being stacked on top of it. A net +1 file that is also a net win — About is
+  // one lazy route, `screens/AboutPage.jsx` imports the sheet itself, and the
+  // core render-blocking sheet got ~140 lines lighter in the trade.
+  'src/styles': 84,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
