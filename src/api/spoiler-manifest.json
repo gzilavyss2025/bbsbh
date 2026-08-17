@@ -677,6 +677,14 @@
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
+    "teamRecordRankings.js": {
+      "class": "spoiler-free",
+      "why": "Pivots the same team-records ledgers across one level for the standalone /team-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
+    },
+    "teamRecords.js": {
+      "class": "spoiler-free",
+      "why": "Static team-records/{season}/{teamId}.json — a ledger of FINAL games tallied into season situational records for the team hub's Numbers tab. Same footing as comebackWins.js and the team-score aggregates: the nightly cron writes it before the day's games, and the reader applies the page's own day-before cutoff. An open surface (ADR-0034)."
+    },
     "teams-static.js": {
       "class": "spoiler-free",
       "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."

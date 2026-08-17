@@ -218,6 +218,14 @@ jobs:
         id: highlights
         continue-on-error: true
         run: node scripts/gen-highlights.mjs
+      # Reads the committed public/data/teams.json (update-teams.yml's weekly
+      # output) for each club's league and division, so it must not be reordered
+      # ahead of a checkout — but it has no dependency on any step above it in
+      # this file. Append-only over newly-Final games at all five levels.
+      - name: Team situational records
+        id: team-records
+        continue-on-error: true
+        run: node scripts/gen-team-records.mjs
       - name: Warm preview cache
         id: warm-previews
         continue-on-error: true
@@ -241,7 +249,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/attendance.json scripts/data/attendance.sql public/data/highlights public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/attendance.json scripts/data/attendance.sql public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main
@@ -286,6 +294,7 @@ jobs:
           steps.pitch-arsenal.outcome == 'failure' ||
           steps.attendance.outcome == 'failure' ||
           steps.highlights.outcome == 'failure' ||
+          steps.team-records.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
           steps.compress-logos.outcome == 'failure'
         run: |

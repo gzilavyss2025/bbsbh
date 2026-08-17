@@ -67,6 +67,7 @@ const STATIC_REPORT_ROUTES = [
   'about',
   'logos',
   'fouls',
+  'team-records',
   'milestones',
   'umpires',
   'awards',
