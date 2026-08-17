@@ -137,22 +137,22 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Ten narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when unconfigured;
-**nine never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
+**Eleven narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when unconfigured;
+**ten never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
 render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
 `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);
 `spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, reversible (ADR-0026).
-`copy.js` + `src/copy/` store editable wording behind a cached read and an allowlisted write
-(ADR-0025), tuned without a deploy and edited ON the page that renders it — the Ballpark card's
-gear, whose `ballpark-photo.js` puts images in Vercel Blob: the only exception taking BYTES
-(ADR-0044). `identity.js` + `src/lib/identity/` do the same for a CLUB's identity, as an overlay
-under the pure resolvers, gated twice on WCAG AA (ADR-0050, `docs/identity-overrides.md`). **My
+`copy.js` + `src/copy/` store editable wording behind a cached read and an allowlisted write,
+edited ON the page that renders it — the Ballpark card's gear, whose `ballpark-photo.js` puts
+images in Vercel Blob (ADR-0025/0044). `identity.js` + `src/lib/identity/` overlay a CLUB's
+identity under the pure resolvers, gated twice on WCAG AA; `identity-logo.js` takes a mark's
+BYTES the same way, feeding the overlay's `logo` URLs (ADR-0050, `docs/identity-overrides.md`). **My
 Tally**'s `preferences.js` + `src/lib/account/` mirror a CLOSED four-field set, last-write-wins;
 `account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the shelf — a
 cover's title, club and mark, never a stamp (ADR-0041). `game-story.js` is a CORS hop to MLB.com's
 team RSS feeds, which send none. `page.js` + `src/copy/landing/` server-render `/learn` for AI
-crawlers, which run no JS (ADR-0048). **The tenth stores a score, by design**: the Game Log's stamps
-(`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
+crawlers, which run no JS (ADR-0048). **The eleventh stores a score, by design**: the Game Log's
+stamps (`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
 (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
 
 Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:

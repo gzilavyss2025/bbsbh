@@ -15,6 +15,7 @@ import ALT2_COLORS_JSON from './data/alt2-colors.json' with { type: 'json' }
 import ALT3_COLORS_JSON from './data/alt3-colors.json' with { type: 'json' }
 import ALT4_COLORS_JSON from './data/alt4-colors.json' with { type: 'json' }
 import CITY_CONNECT_COLORS_JSON from './data/city-connect-colors.json' with { type: 'json' }
+import { logoUrlOverride, logoUrlOverrideForVariant } from './identity/logoUrlOverrides.js'
 
 // Registered with the key their RUNTIME overrides are filed under, then read
 // only through tuningStore's readers — so a value retuned from a club's own page
@@ -464,6 +465,12 @@ export function localLogoUrl(teamId, treatment) {
 
 export function teamLogoUrl(teamId, variant = 'base') {
   if (!teamId) return null
+  // A runtime logo override (the team hub drawer's upload/URL, ADR-0050) wins
+  // outright for a treatment tile — checked before the custom-mark assignment
+  // and the *_USES_BASE_LOGO early returns, which would otherwise shadow it
+  // for exactly the clubs those sets name (identity/logoUrlOverrides.js).
+  const runtimeMark = logoUrlOverrideForVariant(teamId, variant)
+  if (runtimeMark) return runtimeMark
   // A custom-mark assignment (LogoDropZone's "Replace art" select — a saved
   // recolor, or one of the CDN's own vectors) is an explicit override and
   // must win outright, even for a treatment in one of the *_USES_BASE_LOGO
@@ -787,6 +794,11 @@ const MAIN_USES_BASE_LOGO = new Set([115])
 // exceptions above; callers fall back to the normal CDN base logo
 // (teamLogoUrl(teamId, 'base')).
 export function mainOverrideLogoUrl(teamId) {
+  // The runtime override first — answering it from HERE is what routes Main's
+  // tile to it: mainTreatmentRecolor turns true, treatmentTile picks
+  // 'main-recolor', and that variant resolves right back through this function.
+  const runtime = logoUrlOverride(teamId, 'main')
+  if (runtime) return runtime
   // Same override as localLogoUrl's, for the one treatment that doesn't go
   // through it — a Main assignment beats even the MAIN_USES_BASE_LOGO
   // exceptions, since assigning one is an explicit act about this club.

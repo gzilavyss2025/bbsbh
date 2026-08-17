@@ -6,6 +6,7 @@ import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from './wpa/wpaDefaults.js
 import { byTreatment, liveStore } from './tuningStore.js'
 import { registerIdentityStore } from './identity/overlay.js'
 import { teamLogoUrl } from './teams.js'
+import { logoUrlOverride } from './identity/logoUrlOverrides.js'
 import { customMarkFor } from './customMarks.js'
 import {
   MILB_COLORS,
@@ -280,7 +281,16 @@ export function milbHasLogoArt(teamId, variant) {
 // assigned mark, teams.js) instead of falling back to `base`.
 export function milbHasArt(teamId, variant) {
   const side = variant === 'home' ? 'home' : 'away'
-  return milbHasLogoArt(teamId, side) || Boolean(customMarkFor(teamId, `milb-${side}`))
+  return (
+    milbHasLogoArt(teamId, side) ||
+    Boolean(customMarkFor(teamId, `milb-${side}`)) ||
+    // A runtime logo override saved from the affiliate's own team page
+    // (teams.js's logoUrlOverride, ADR-0050) is real art the same way an
+    // assignment is: without this rung an affiliate with NO procured file
+    // would keep answering 'base' below and the overridden URL would never
+    // be asked for.
+    Boolean(logoUrlOverride(teamId, side))
+  )
 }
 
 // The real game-card/masthead tile's shape (see teams.js's treatmentTile,

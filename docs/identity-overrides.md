@@ -77,6 +77,7 @@ storing a blank — the same delete semantics `mergeOverrides` has for copy.
 | `colors` | `mlb-team-colors` | `{team}.{field}` | `primary`, `secondary`, `accent`, `accent2`, `offDayTreatment`, `defaultHomeTreatment`, `defaultAwayTreatment` |
 | `stamp` | `stamp-logo-tuning` | `{team}.treatments.{side}.{field}` | `scale`, `offsetX`, `offsetY`, `rotation` |
 | `wpa` | `wpa-tuning` | `{team}.bandColor` | `bandColor` |
+| `logo` | `logo-url-overrides` | `{team}.{slot}` | (no field segment — an https URL per tile mark) |
 
 **There are two header dimensions, not one.** MLB clubs are keyed by treatment
 and MiLB affiliates by game side — the split the rest of `src/lib` keeps — and
@@ -93,6 +94,21 @@ shared Main bar. A record filed under `alternate-3` is one no resolver reads.
 has exactly one background, and Main's is `bgHex` on the tuning store rather than
 a swatch — which is why `TILE_BG_STORES` has five keys, not six.
 
+**`logo` is ONE dimension for both vocabularies**, unlike the headers: its MLB
+treatment keys and MiLB's `home`/`away` are disjoint sets writing one store, so
+the id needs no club classification. The store ships EMPTY
+(`src/lib/data/logo-url-overrides.json`); the reader and its variant mapping are
+`src/lib/identity/logoUrlOverrides.js`, consulted by `teamLogoUrl` ahead of the
+custom-mark assignment and the `*_USES_BASE_LOGO` early returns (which would
+otherwise shadow it), and by `mainOverrideLogoUrl` — which is what routes Main's
+tile through `main-recolor`. The decorative `base`/`mono` variants stay
+override-blind on purpose. The value is normally what **`/api/identity-logo`**
+answered after taking the bytes — admin-gated Vercel Blob, ballpark-photo's
+pattern, held to `src/lib/logoArt.js`'s 512×512-PNG standard, and *uploading is
+not saving*: the URL lands only through the drawer's ordinary Save. Any pasted
+https URL is equally legal, which is also what keeps the field usable on a
+deploy with no blob store (the endpoint answers 501 there).
+
 ## Adding a field
 
 1. Add it to the dimension's `fields` in `src/lib/identity/fields.js`, with a
@@ -106,9 +122,9 @@ a swatch — which is why `TILE_BG_STORES` has five keys, not six.
 
 ## What is deliberately not here
 
-- **Logo-art upload and the recolour library.** They take raw bytes and rebuild a
-  manifest from disk. `api/ballpark-photo.js` plus Vercel Blob is the precedent
-  if this is ever wanted.
+- **The recolour library.** It repaints shapes and rebuilds a manifest from
+  disk; only whole-file logo art moved here (the `logo` dimension above,
+  ADR-0050's amendment).
 - **A club's researched `extras`, and a MiLB affiliate's colour pair.** Nothing
   on the team hub renders either, so a control for them here would have no
   visible effect on the page holding it — which is the one promise this
@@ -172,3 +188,14 @@ POST  /api/identity   -> the same
   is exactly the path a returning visitor takes.
 - **Clearing everything for a club** is the drawer's Save with every box empty:
   the patch names every id the club owns, and an empty value deletes.
+- **The drawer's previews are the app's own components, never mocks** — the
+  jersey strip and the logo group render `TeamTreatmentMark` through
+  `treatmentTile`, so they repaint from the draft's preview layer live. The
+  Stamp placement group draws two real `GameStamp`s for a game FABRICATED as a
+  literal in `IdentityStampPreview.jsx` — that literal (no schedule, no feed, no
+  collection, no route param) is what earned the file its
+  `check-stamp-surfaces.mjs` allowlist entry despite shipping in production;
+  read that guard's comment and ADR-0035 before touching it.
+- **Colour boxes carry an eyedropper** where the browser has the EyeDropper API
+  (Chromium; feature-detected, simply absent elsewhere) — pick a hex straight
+  off the club art already on the page.

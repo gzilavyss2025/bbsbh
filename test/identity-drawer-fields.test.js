@@ -76,6 +76,19 @@ test('the stamp group carries its retroactive warning and both sides', () => {
   assert.ok(stamp.fields.some((f) => f.label === 'Away nudge down'))
 })
 
+test('every tile carries a logo group whose row writes the logo-url store', () => {
+  const logo = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'city-connect' }), 'logo')
+  assert.equal(logo.logo, true, 'the drawer renders this group with the upload control')
+  const [field] = logo.fields
+  const parsed = parseIdentityFieldId(field.id)
+  assert.equal(parsed.store, 'logo-url-overrides')
+  assert.equal(parsed.key, 'city-connect')
+  assert.ok(field.landed, 'the placeholder names the art the tile resolves today')
+
+  const away = groupBy(identityGroups(MEMPHIS, { isMilb: true, treatment: 'away' }), 'logo')
+  assert.equal(parseIdentityFieldId(away.fields[0].id).key, 'away')
+})
+
 test('an affiliate gets no club-colours group', () => {
   const groups = identityGroups(MEMPHIS, { isMilb: true, treatment: 'home' })
   assert.equal(groupBy(groups, 'club'), undefined)

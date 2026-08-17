@@ -31,12 +31,15 @@ import { bundledIdentityStore } from '../src/lib/identity/stores.js'
 import {
   MLB_TREATMENT_KEYS,
   MAIN_OVERRIDES,
+  mainOverrideLogoUrl,
+  teamLogoUrl,
   treatmentBgColor,
   treatmentHeaderColorOverride,
   treatmentScale,
   treatmentTile,
 } from '../src/lib/teams.js'
 import { TEAM_COLOR_PAIRS } from '../src/lib/brandColors.js'
+import { milbTreatmentTile } from '../src/lib/milbColors.js'
 import { stampLogoTuning } from '../src/lib/stampLogoTuning.js'
 import { identityWriteRefusal } from '../api/identity.js'
 
@@ -259,6 +262,75 @@ test('an override reaches the header triad, the tile background, the brand pair 
   assert.equal(stampLogoTuning(158, 'away').offsetY, 9)
 })
 
+test('a logo id resolves like any other leaf, and only inside the vocabulary', () => {
+  const alt = parseIdentityFieldId('identity.logo.158.alternate')
+  assert.equal(alt.store, 'logo-url-overrides')
+  assert.deepEqual(alt.path, ['158', 'alternate'])
+  assert.equal(parseIdentityFieldId('identity.logo.235.home').store, 'logo-url-overrides')
+  for (const id of [
+    'identity.logo.158.road', // not a slot either vocabulary names
+    'identity.logo.158.main.extra',
+    'identity.logo.158',
+  ]) {
+    assert.equal(parseIdentityFieldId(id), null, id)
+  }
+})
+
+test('a url value must be one https token', () => {
+  const spec = IDENTITY_DIMENSIONS.logo.leaf
+  const good = 'https://example.public.blob.vercel-storage.com/identity-logos/158-alternate.png'
+  assert.equal(coerceIdentityValue(spec, good), good)
+  for (const bad of [
+    'http://example.com/mark.png', // the scheme is the point — this lands in an <img src>
+    'javascript:alert(1)',
+    'data:image/png;base64,AAAA',
+    '/team-logos/alternate/MIL.png', // relative would resolve against whichever page renders it
+    'https://example.com/a b.png',
+    `https://example.com/${'a'.repeat(500)}`,
+  ]) {
+    assert.equal(coerceIdentityValue(spec, bad), undefined, bad)
+  }
+})
+
+test('a logo override rewires the tile resolvers, and clearing restores the shipped art', () => {
+  const url = 'https://example.public.blob.vercel-storage.com/identity-logos/mark.png'
+  const shipped = teamLogoUrl(158, 'alternate')
+
+  withOverrides({ 'identity.logo.158.alternate': url }, () => {
+    assert.equal(teamLogoUrl(158, 'alternate'), url)
+    assert.notEqual(teamLogoUrl(158, 'base'), url, 'the decorative base mark stays override-blind')
+  })
+  assert.equal(teamLogoUrl(158, 'alternate'), shipped)
+
+  // Main routes through mainOverrideLogoUrl: the override flips the tile's
+  // variant to 'main-recolor', and that variant resolves the override.
+  withOverrides({ 'identity.logo.158.main': url }, () => {
+    assert.equal(mainOverrideLogoUrl(158), url)
+    assert.equal(treatmentTile(158, 'main').logoVariant, 'main-recolor')
+    assert.equal(teamLogoUrl(158, 'main-recolor'), url)
+  })
+
+  // A club in ALT_USES_BASE_LOGO (the Angels): its early return would shadow a
+  // localLogoUrl-level check, which is why the hook sits at the top instead.
+  withOverrides({ 'identity.logo.108.alternate': url }, () => {
+    assert.equal(teamLogoUrl(108, 'alternate'), url)
+  })
+  assert.notEqual(teamLogoUrl(108, 'alternate'), url)
+})
+
+test('an affiliate with no art at all starts wearing its override', () => {
+  // SCRATCH has no procured file, no assignment, nothing — so without the
+  // override its tile falls back to the plain CDN base mark.
+  assert.equal(milbTreatmentTile(SCRATCH, 'home').logoVariant, 'base')
+  const url = 'https://example.public.blob.vercel-storage.com/identity-logos/milb.png'
+  withOverrides({ [`identity.logo.${SCRATCH}.home`]: url }, () => {
+    assert.equal(milbTreatmentTile(SCRATCH, 'home').logoVariant, 'milb-home')
+    assert.equal(teamLogoUrl(SCRATCH, 'milb-home'), url)
+    assert.equal(milbTreatmentTile(SCRATCH, 'away').logoVariant, 'base', 'the other side is untouched')
+  })
+  assert.equal(milbTreatmentTile(SCRATCH, 'home').logoVariant, 'base')
+})
+
 test('the draft preview layer paints but is never an override', () => {
   try {
     setIdentityPreview({ 'identity.mlbTuning.158.city-connect.scale': '2.2' })
@@ -322,7 +394,18 @@ test('a well-formed save is accepted across every dimension', () => {
       'identity.colors.158.defaultHomeTreatment': 'city-connect',
       'identity.stamp.158.home.scale': '1.1',
       'identity.wpa.158.bandColor': '#0C436A',
+      'identity.logo.158.alternate': 'https://example.public.blob.vercel-storage.com/x.png',
+      'identity.logo.235.away': 'https://example.com/mark.png',
     }),
     null,
+  )
+})
+
+test('an http logo URL cannot reach the store from any path', () => {
+  // Dropped by the sanitizer every read and write runs — the same one-layer-
+  // earlier closed-set argument the stamp ranges test above makes.
+  assert.deepEqual(
+    sanitizeIdentityOverrides({ 'identity.logo.158.alternate': 'http://example.com/x.png' }),
+    {},
   )
 })
