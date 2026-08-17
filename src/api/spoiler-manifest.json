@@ -459,6 +459,7 @@
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
+        "components/playbyplay/PlayByPlay.jsx",
         "screens/InningViewer.jsx"
       ]
     },

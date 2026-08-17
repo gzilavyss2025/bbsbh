@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { selectPrePitchChanges, selectHalfStartingPitcher, selectIsFreshPitcher, halfIndex } from '../../api/select.js'
-import { computePitcherLines } from '../../api/pitchers.js'
+import { computePitcherLines, pitcherHandoffs, pitcherLineAt, halfClosingPitcher } from '../../api/pitchers.js'
 import { battingSlot, pitchingChangePitcher } from '../../api/playbyplay.js'
 import { selectDueUpNow } from '../../api/dueup.js'
 import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
@@ -11,6 +11,7 @@ import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { FielderNotice } from '../playbyplay/FielderNotice.jsx'
 import { PitcherNotice } from '../playbyplay/PitcherNotice.jsx'
 import { BatterNotice } from '../playbyplay/BatterNotice.jsx'
+import { FinalizedLineCard } from '../playbyplay/PitcherHandoffCard.jsx'
 import { UpNextBatters } from '../playbyplay/UpNextBatters.jsx'
 
 export function HalfInning({
@@ -154,6 +155,57 @@ export function HalfInning({
   const entering =
     enteringPitches != null ? { pitches: enteringPitches, halfLabel: `the start of the ${ordinal(inning)}` } : null
 
+  // Deferred final-line cards: a pitcher who departed during the PREVIOUS
+  // half this same team pitched (same half label — a team pitches every
+  // OTHER half), whose runners resolved exactly as THAT half ended
+  // (pitcherHandoffs' resolvedAtHalfEnd — see api/pitchers.js). A resolution
+  // that instead landed mid-half, with more of that half still to reveal
+  // afterward, already rendered in-feed there (PlayByPlay.jsx's own pass);
+  // this is only the half-end case, moved to the top of the NEXT page per
+  // the user's ask. Always safe to compute with no extra gate: `revealed ||
+  // isNextToReveal` on THIS half already implies revealedThrough >=
+  // halfIndex(inning, half) - 1 >= halfIndex(inning - 1, half), so the half
+  // these handoffs and their resolving plays live in is always already fully
+  // revealed by the time this one is reachable at all.
+  const deferredFinals = useMemo(() => {
+    if (inning <= 1) return []
+    return pitcherHandoffs(feed, inning - 1, half, battingSide).filter((h) => h.resolvedAtHalfEnd)
+  }, [feed, inning, half, battingSide])
+
+  // The pitcher who threw the PREVIOUS half's own last play, when he isn't
+  // THIS half's starter — the ordinary clean between-innings change, which
+  // never touches pitcherHandoffs since nothing about it happened mid-half.
+  // Same reachability footing as deferredFinals above: always safe once this
+  // half is (revealed || isNextToReveal).
+  const closingPitcher = useMemo(() => {
+    if (inning <= 1) return null
+    const closer = halfClosingPitcher(feed, inning - 1, half, battingSide)
+    return closer && closer.pitcherId !== nowPitching?.id ? closer : null
+  }, [feed, inning, half, battingSide, nowPitching?.id])
+
+  // Both kinds of "who just left" notice, in one chronological list — a
+  // handoff's own departure always precedes the half's closing pitcher (who
+  // by definition pitched its very last play). Same FinalizedLineCard either
+  // way; only which cut freezes his line differs.
+  const finalLineNotices = [
+    ...deferredFinals.map((h) => ({
+      key: `handoff-${h.incomingPitcherId}`,
+      pitcherId: h.departingPitcherId,
+      side: h.side,
+      cutAtBatIndex: h.resolutionAtBatIndex,
+    })),
+    ...(closingPitcher
+      ? [
+          {
+            key: `closer-${closingPitcher.pitcherId}`,
+            pitcherId: closingPitcher.pitcherId,
+            side: closingPitcher.side,
+            cutAtBatIndex: closingPitcher.lastAtBatIndex,
+          },
+        ]
+      : []),
+  ]
+
   // The persistent scorebug HUD (src/components/Scorebug.jsx): a batter/
   // pitcher/bases/outs snapshot reported UP to InningViewer, which owns
   // whether it's actually mounted. `hasContent` is the SAME `revealed ||
@@ -291,6 +343,17 @@ export function HalfInning({
             entering={entering}
           />
         )}
+
+        {/* Every pitcher who's now done for this team from the previous half
+            it pitched — see finalLineNotices above. Same reachability gate as
+            the Now Pitching card above it. */}
+        {(revealed || isNextToReveal) &&
+          finalLineNotices.map((n) => {
+            const line = pitcherLineAt(feed, n.side, n.pitcherId, n.cutAtBatIndex, halfIndex(inning - 1, half))
+            return line ? (
+              <FinalizedLineCard key={n.key} line={line} teamId={battingSide === 'away' ? homeId : awayId} />
+            ) : null
+          })}
 
         {/* Who's due up to face him — gone the moment reveal starts, same
             gate as PrePitchChanges below. */}

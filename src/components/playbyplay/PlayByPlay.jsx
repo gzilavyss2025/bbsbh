@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   computeHalfInningFeed,
   pitchLadder,
@@ -19,6 +19,8 @@ import {
   deriveLiveState,
   buildTrailItems,
 } from '../../api/playbyplay.js'
+import { halfIndex } from '../../api/select.js'
+import { pitcherHandoffs, pitcherLineAt, isLastHalfOfGame, handoffsResolvingAt } from '../../api/pitchers.js'
 import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.js'
 import { INK_SET_MS, INK_SET_OVERSHOOT } from '../inning/focus/beats.js'
 import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
@@ -26,6 +28,7 @@ import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
+import { DepartureLineCard, FinalizedLineCard } from './PitcherHandoffCard.jsx'
 import { AtBatHero } from './AtBatHero.jsx'
 import { FielderNotice } from './FielderNotice.jsx'
 import { PinchRunNotice } from './PinchRunNotice.jsx'
@@ -220,6 +223,24 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // the `pitching_substitution` branch below already renders it as the same
   // card. See HalfInning.jsx's nowPitching.)
 
+  // Pitching-handoff cards — a departing pitcher's line frozen at the exact
+  // moment he's pulled (DepartureLineCard), and, once every runner he left on
+  // base has resolved, his settled line (FinalizedLineCard, in-feed or —
+  // resolvedAtHalfEnd — deferred to HalfInning.jsx's leading notice on the
+  // team's next defensive half). See api/pitchers.js's pitcherHandoffs for
+  // the spoiler footing; this only ever reads a cut at or before what's
+  // already on screen. Keyed by `incomingPitcherId` (== the substitution
+  // entry's own `playerId`): a removed pitcher can never return, so it's a
+  // stable unique key across one half's substitutions.
+  const handoffs = useMemo(
+    () => pitcherHandoffs(feed, inning, half, battingSide),
+    [feed, inning, half, battingSide],
+  )
+  const handoffByIncomingId = new Map(handoffs.map((h) => [h.incomingPitcherId, h]))
+  const lastHalfOfGame = isLastHalfOfGame(feed, inning, half)
+  const stepHalfIdx = halfIndex(inning, half)
+  const renderedFinal = new Set() // incomingPitcherId already placed in-feed, this render
+
   if (entries.length === 0) return null
   // One window. `focusStep` null is "the newest"; a number is clamped rather
   // than trusted, the count it was chosen against being a component away.
@@ -309,15 +330,31 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
           // A mid-inning pitching change renders as the same "now pitching" card
           // the stat slot shows for a between-halves change (see PitcherNotice),
           // headshot and all — falling back to the plain note only if the pitcher
-          // can't be resolved.
+          // can't be resolved. Immediately below it, the arm going OUT gets his
+          // own line frozen at this exact moment (DepartureLineCard) — see the
+          // `handoffs` note above.
           const pitcher = pitchingChangePitcher(feed, entry.playerId)
+          const handoff = handoffByIncomingId.get(entry.playerId)
+          const departureLine = handoff
+            ? pitcherLineAt(feed, handoff.side, handoff.departingPitcherId, handoff.snapshotAtBatIndex, stepHalfIdx)
+            : null
           node = pitcher ? (
-            <PitcherNotice
-              pitcher={pitcher}
-              teamId={pitchingTeamId}
-              teamName={pitchingName}
-              className="pitchernotice--pbp"
-            />
+            <>
+              <PitcherNotice
+                pitcher={pitcher}
+                teamId={pitchingTeamId}
+                teamName={pitchingName}
+                className="pitchernotice--pbp"
+              />
+              {departureLine && (
+                <DepartureLineCard
+                  line={departureLine}
+                  teamId={pitchingTeamId}
+                  bookOpen={handoff.inheritedCount > 0}
+                  inheritedCount={handoff.inheritedCount}
+                />
+              )}
+            </>
           ) : (
             <EventNote entry={entry} />
           )
@@ -420,19 +457,38 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
         // DIFFERENT half, mounted alongside the active one — InningPageTurn)
         // can never collide with it.
         const step = stepStartEntryIndex?.get(i)
-        return (
+        const entryKey =
+          entry.kind === 'event'
+            ? `event-${i}`
+            : `${entry.kind === 'placed' ? entry.runnerId : entry.batterId}-${i}`
+        const entryEl = (
           <div
             className="pbp__entry"
             id={step != null ? `pbp-${inning}-${half}-step-${step}` : undefined}
-            key={
-              entry.kind === 'event'
-                ? `event-${i}`
-                : `${entry.kind === 'placed' ? entry.runnerId : entry.batterId}-${i}`
-            }
+            key={entryKey}
           >
             {node}
           </div>
         )
+
+        // In-feed finalized line(s), right after the entry whose play did the
+        // resolving — see handoffsResolvingAt for which handoffs qualify here
+        // vs. HalfInning.jsx's leading-notice placement.
+        const finals =
+          entry.atBatIndex == null
+            ? []
+            : handoffsResolvingAt(handoffs, entry.atBatIndex, renderedFinal, lastHalfOfGame)
+                .map((h) => {
+                  const line = pitcherLineAt(feed, h.side, h.departingPitcherId, h.resolutionAtBatIndex, stepHalfIdx)
+                  return line ? (
+                    <div className="pbp__entry" key={`${entryKey}-final-${h.incomingPitcherId}`}>
+                      <FinalizedLineCard line={line} teamId={pitchingTeamId} />
+                    </div>
+                  ) : null
+                })
+                .filter(Boolean)
+
+        return finals.length > 0 ? [entryEl, ...finals] : entryEl
       })}
     </div>
   )

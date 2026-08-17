@@ -76,6 +76,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pitch-locations.test.js | 7 | src/api/playbyplay.js (pitchInfo) | Whether a park tracked plate locations — gates the strike-zone pane and the at-bat row's second column |
 | pitcher-advanced.test.js | 9 | src/api/person.js | Player page Advanced card, situational splits, rank chips, QS flag |
 | pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
+| pitcher-handoff.test.js | 10 | src/api/pitchers.js (pitcherHandoffs, pitcherLineAt, isLastHalfOfGame, handoffsResolvingAt, halfClosingPitcher) | Pitching-handoff cards: departure-snapshot/finalized-line spoiler cut, inherited-runner resolution tracking, in-feed vs. deferred-to-next-half placement, and the ordinary closing-pitcher recap |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
 | pitcher-starts.test.js | 6 | scripts/lib/pitcher-starts.mjs | starterRecords' team-attributed tallies stay scoped to a pitcher's CURRENT club through a mid-season trade/option |
 | placed-runner.test.js | 11 | src/api/playbyplay.js | Placed-runner card |
