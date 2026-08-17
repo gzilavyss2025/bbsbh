@@ -440,6 +440,32 @@ for each generator; the reader modules:
   `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
+- `teamRecords.js` — the Numbers tab's situational **Records** card, from
+  `public/data/team-records/{season}/{teamId}.json` (`gen-team-records.mjs`),
+  MLB and all four full-season MiLB levels. The file is a compact ROW PER GAME,
+  not finished records; `teamRecordsFor(data, { cutoff, half })` does the
+  tallying, and that is the point rather than an implementation detail. Two
+  things follow. A dated (`?d=`) page passes the same day-before `cutoff` its
+  standings use, so the records cannot look further ahead than the rest of the
+  tab — a precomputed season total could not do that without a date-keyed
+  snapshot per club per day. And `half` (`'all' | 'pre' | 'post'`, `HALVES`)
+  answers the pre/post-All-Star lever off the same rows, with no second dataset;
+  `data.allStarDate` absent (an early-season file) makes the lever a no-op and
+  the card hides it.
+  `RECORD_GROUPS` is the declared table — each row a label and a PREDICATE over
+  one game. A predicate returning false EXCLUDES that game from the row rather
+  than scoring it a loss, so a row nobody has a game for is dropped instead of
+  printing `0-0`, and a thin MiLB feed thins a row instead of voiding the table.
+  Every shipped row omits its falsy keys, so each predicate coalesces: absent
+  `h` is an away game, absent `n` a day game, absent `oh` a starting hand the
+  generator could not resolve (counted in neither the RHS nor the LHS row).
+  `longestStreaks` / `sweepCounts` / `daysAtPlace` are the season COUNTS, exported
+  separately because they are single numbers rather than records; a sweep needs
+  every game of its series inside the filter, so a set straddling the break
+  belongs to neither half. Spoiler-free (a Final-games ledger, same footing as
+  `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
+  nightly cron writes the file before the day's games. Degrades to null with no
+  file, and the card hides.
 - `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and

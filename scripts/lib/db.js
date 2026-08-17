@@ -80,6 +80,15 @@ export const GROUPS = {
     file: join(dataDir, 'pitch-arsenal.sql'),
     tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games'],
   },
+  // Both tables are written by the one nightly gen-team-records.mjs — its own
+  // group, same as jerseys/pitch-arsenal above. The largest group by row count
+  // (one row per club per game, at five levels — roughly 20,600 rows a
+  // season), which a primary-key-ordered TEXT dump handles fine: a nightly run
+  // appends ~130 rows and the diff shows exactly those.
+  'team-records': {
+    file: join(dataDir, 'team-records.sql'),
+    tables: ['team_record_games', 'team_record_ingested_games'],
+  },
 }
 
 // Reconstitutes a fresh in-memory database: apply the schema, then replay

@@ -403,6 +403,58 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_ingested_games (
   PRIMARY KEY (game_pk, level)
 );
 
+-- One row per (game, club) — the raw per-game FACTS every situational team
+-- record is summed from, at MLB and the four full-season MiLB levels. Written
+-- by gen-team-records.mjs.
+--
+-- FACTS, NOT FLAGS, and the distinction is the whole design (the module header
+-- in scripts/lib/team-records.mjs has the argument). Nothing here is a "this
+-- game was a one-run game" boolean; it is the run totals, the per-inning
+-- scoring, the starter's line, and the schedule context. Every record the app
+-- shows is derived from these columns at EXPORT time, so changing a definition
+-- costs `--export-only` instead of re-fetching ten thousand box scores.
+--
+-- SEVEN COLUMNS PLUS A PAYLOAD, not thirty-one, and the reason is the dump
+-- format rather than the data. scripts/lib/db.js writes plain INSERT
+-- statements that repeat every column NAME on every row; at thirty-one columns
+-- that is ~370 bytes of column names per row, so a five-level season would
+-- have committed more than seven megabytes of the word "opp_starter_hand".
+-- The columns kept out here are the ones a query ever narrows on (the
+-- per-season export, the idempotency join); every remaining fact rides in
+-- payload_json, the same shape team_snapshots above already uses. Nothing is
+-- queried out of the payload — the export reads whole rows and derives in JS.
+--
+-- payload_json keys: innings (a flat [[away, home], ...] array, home null when
+-- that side did not bat), isHome, runs/oppRuns, hits/oppHits, errors/oppErrors,
+-- homeRuns/oppHomeRuns, scheduledInnings, dayNight, doubleHeader, gameNumber,
+-- venueId, starterId/starterOuts/starterEr, oppStarterId/oppStarterOuts/
+-- oppStarterEr/oppStarterHand, battedAround/oppBattedAround.
+--
+-- Keeping the whole inning line rather than the three lead-state numbers the
+-- app reads today is deliberate: it costs ~45 bytes, and it is what lets a
+-- future "leading after 5" or "scored in the first" split land with no
+-- backfill at all.
+CREATE TABLE IF NOT EXISTS team_record_games (
+  game_pk      INTEGER NOT NULL,
+  team_id      INTEGER NOT NULL,
+  season       INTEGER NOT NULL,
+  sport_id     INTEGER NOT NULL,
+  date         TEXT NOT NULL,
+  opp_id       INTEGER NOT NULL,
+  result       TEXT NOT NULL,                -- 'W' | 'L' | 'T'
+  payload_json TEXT NOT NULL,
+  PRIMARY KEY (game_pk, team_id)
+);
+
+-- Idempotency guard. A Final game's box score is immutable, so an ingested
+-- gamePk is never refetched — this is what keeps the nightly run at the ~65
+-- games that actually finished rather than a season-wide re-walk.
+CREATE TABLE IF NOT EXISTS team_record_ingested_games (
+  game_pk INTEGER NOT NULL PRIMARY KEY,
+  date    TEXT NOT NULL,
+  season  INTEGER NOT NULL
+);
+
 CREATE VIEW IF NOT EXISTS season_grade AS
 SELECT
   q.season, q.team_id, q.date,

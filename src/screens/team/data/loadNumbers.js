@@ -1,6 +1,7 @@
 import { fetchTeam, fetchStandings, fetchLeagueTeamStats, fetchTeamIL } from '../../../api/team.js'
 import { fetchTeamSchedule } from '../../../api/schedule.js'
 import { fetchComebackWins, comebackRatesFor } from '../../../api/comebackWins.js'
+import { fetchTeamRecords } from '../../../api/teamRecords.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { rankTeam, ordinal } from '../../../api/person.js'
@@ -46,6 +47,10 @@ export async function loadNumbers(id, asOf) {
     leaderPool,
     postseasonOddsData,
     comebackWinsData,
+    // The situational-records ledger — one static file per club per season,
+    // every level. The card tallies it against `standingsDate` itself, so it
+    // reads no further ahead than the standings and the day-of-week card.
+    teamRecordsData,
     schedule,
     ilRoster,
     uniformCatalog,
@@ -56,6 +61,7 @@ export async function loadNumbers(id, asOf) {
     loadCombinedPoolForTeams([{ id }], season),
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
+    fetchTeamRecords(id, season),
     // Cutoff-gated rows only — `won` stays null past standingsDate (see
     // fetchTeamSchedule), which is what keeps the day-of-week record from
     // looking ahead. Don't re-derive it from Final status. Also feeds the
@@ -147,6 +153,10 @@ export async function loadNumbers(id, asOf) {
     pitching,
     leaderPool,
     comeback,
+    teamRecords: teamRecordsData,
+    // The card tallies rows itself (it owns the pre/post-break lever), so the
+    // cutoff travels with the data rather than being applied here.
+    recordsCutoff: standingsDate,
     dayOfWeek,
     jerseyCombos,
     homeRecord,
