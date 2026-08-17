@@ -282,19 +282,18 @@ const BUDGETS = {
   // being stacked on top of it. A net +1 file that is also a net win — About is
   // one lazy route, `screens/AboutPage.jsx` imports the sheet itself, and the
   // core render-blocking sheet got ~140 lines lighter in the trade.
-  // +1 for `65-team-records.css`: the Numbers tab's Records card. A
-  // genuinely new UI rather than a split-out of an over-budget file, so it
-  // earns the next free integer rather than a lettered sibling, and like the
-  // two entries above it is imported by its own component (`RecordsCard.jsx`),
-  // not by index.css — so no route but the Numbers tab pays for it.
+  // +1 for `65-team-records.css`: the Numbers tab's Records card. A genuinely
+  // new UI rather than a split-out of an over-budget file. It SHARES the 65
+  // prefix with `65-about-page.css` above — the two branches picked the next
+  // free integer independently, and the collision is harmless because neither
+  // is @imported by index.css, so no cascade order depends on the numbers.
   // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
-  // 31-wild-card.css, and only the half toggle, the group subheadings and the
-  // counts block are new rules.
-  // +1 for `66-team-record-rankings.css`: the standalone page that ranks
-  // one of that card's rows across a whole level. Same argument again — the
-  // table itself is `.standings`, shared with the standings and umpire boards,
-  // so only the control strip, the rank badge and two row states are new — and
-  // the page imports the partial itself, so no other route pays for it.
+  // 31-wild-card.css; only the half toggle, the group subheadings and the
+  // counts block are new.
+  // +1 for `66-team-record-rankings.css`: the standalone page that ranks one of
+  // that card's rows across a whole level. The table itself is `.standings`,
+  // shared with the standings and umpire boards, so only the control strip, the
+  // rank badge and two row states are new — and the page imports it itself.
   'src/styles': 86,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
