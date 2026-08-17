@@ -88,6 +88,7 @@ export function TeamPage({ id, asOf, sportId }) {
     injuredIds,
     transactionsPage,
     milbAlumni,
+    attendance,
   } = data
 
   return (
@@ -120,7 +121,7 @@ export function TeamPage({ id, asOf, sportId }) {
           MiLB park's outfield); a MiLB park still gets the photo/name/logo
           half and the owner's gear, minus that section. Renders nothing at
           all when the feed carries no venue name. */}
-      <BallparkCard team={team} />
+      <BallparkCard team={team} attendance={attendance} />
 
       {/* Form — the season grade and form rails, in full. This is the page's
           headline, and the one preview that isn't a smaller version of

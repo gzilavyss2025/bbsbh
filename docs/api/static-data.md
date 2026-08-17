@@ -440,6 +440,16 @@ for each generator; the reader modules:
   `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
+- `attendance.js` — the Ballpark card's attendance stats, from
+  `public/data/attendance.json` (`gen-attendance.mjs`). Per-team, per-season
+  HOME-game attendance: `games`/`avg`/`high`/`low`, computed from the
+  boxscore's `Att` figure only (an away game folds in nothing — attendance is
+  a fact about the HOME club's own park). `attendanceRatesFor(data, teamId,
+  season)` is what the card uses: the club's own `avg`/`high`/`low` plus its
+  `rank`/`of`/`tied` among every club with a row this season (by average,
+  ties sharing the best rank). `attendanceFor` selects the raw row. MLB only
+  — the generator is. Spoiler-free (a Final-games aggregate, same footing as
+  WAR) — no `SealBox`; the Facts rows render only when the club has one.
 - `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and

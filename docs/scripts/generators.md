@@ -256,6 +256,21 @@ don't run these by hand.
   file, so a schema change like this needs an explicit `--since=` backfill
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
+- `gen-attendance.mjs` → `public/data/attendance.json` — per-team, per-season
+  HOME-game attendance: games counted, season average, high, and low gate. An
+  away game folds in nothing — attendance is a fact about the HOME club's own
+  park. Source is the lightweight `/api/v1/game/{gamePk}/boxscore` endpoint's
+  existing `info[]` array (`Att`, comma-grouped with a trailing period, e.g.
+  `"15,952."`) rather than the full live feed — far cheaper per game than
+  `gen-fouls.mjs`/`gen-comeback-wins.mjs`, since no play-by-play is needed.
+  SQLite-backed (`attendance` group, ADR-0021) APPEND-ONLY incremental sweep of
+  Final MLB regular-season games like `gen-comeback-wins.mjs` (`--days`
+  trailing window / `--since`/`--until` backfill); `attendance_ingested_games`
+  is the idempotency guard — a game with no parseable `Att` is still marked
+  (a Final game's attendance never changes, so it isn't worth retrying
+  forever). MLB only — a league rank needs the whole 30-team pool. App reads
+  it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
+  rank).
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile

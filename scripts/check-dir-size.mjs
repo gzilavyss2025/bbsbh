@@ -323,7 +323,10 @@ const BUDGETS = {
   // split out of loadScorecard.js so each half of that old mixed module
   // carries one honest classification. Both belong in the flat set
   // check-spoiler-manifest classifies, same argument as gamePreview.js.
-  'src/api': 95,
+  // +1 for attendance.js — the Ballpark card's attendance reader, same
+  // spoiler-free static-JSON shape as comebackWins.js beside it, and
+  // belongs in the flat set check-spoiler-manifest classifies.
+  'src/api': 96,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -366,7 +369,10 @@ const BUDGETS = {
   // palette drift, since a page served outside the bundle cannot import the
   // token sheet). Both are top-level by the rule stated below — a generator runs
   // on import, and scripts/lib is for helpers that do not.
-  scripts: 79,
+  // +1 for gen-attendance.mjs — the nightly per-team attendance sweep behind
+  // the Ballpark card's avg/high/low/rank, flat here like every other
+  // gen-*.mjs.
+  scripts: 80,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
