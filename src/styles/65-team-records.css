@@ -98,6 +98,41 @@
   color: var(--text-caption);
 }
 
+/* Both kinds of row are a BUTTON now — the label of a W-L row, and the whole
+   tile of a season count — because each one opens that same split ranked
+   across the level (/team-records, screens/TeamRecordsPage.jsx). The rules
+   here only undo the browser's button chrome and put back the layout the span
+   and the div had. The dotted rule under the text is the entire visible
+   affordance: a ledger full of underlined links stops reading as a ledger. */
+/* Only the properties a <button> actually brings with it. Fonts, colour and
+   the caps treatment are left alone deliberately: `.tstatrow__k`,
+   `.trec__countv` and `.trec__countk` already declare them, and an author
+   declaration beats the UA button style whatever its specificity — so
+   re-stating them here (or reaching for `font: inherit`) would only risk
+   overriding the very rules that make these rows match their neighbours. */
+.trec__rank {
+  border: 0;
+  background: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+button.tstatrow__k.trec__rank,
+.trec__count.trec__rank .trec__countk {
+  border-bottom: var(--bw-hair) dotted var(--border-rule);
+}
+.trec__count.trec__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.trec__rank:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .trec__empty {
   margin: 0;
   padding: var(--space-3) 8px;

@@ -27,6 +27,14 @@
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
+//   '/team-records'                     -> { name: 'team-records', asOf, sportId, metric, half }
+//                                          (one situational record, every club at one level,
+//                                           ranked — the Numbers tab's Records card read across
+//                                           the league. '?metric=' names a row of that card and
+//                                           '?half=' one side of the All-Star break; both are
+//                                           the page's OPENING state, not a live mirror of its
+//                                           controls, the same way the standings page keeps its
+//                                           own board mode off the URL.)
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
@@ -162,6 +170,20 @@ export function parseRoute(url) {
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
+  // One situational record across a whole level. Carries the two scope hints
+  // every stats page carries (`?d=` cutoff, `?s=` level) plus two of its own:
+  // which split to open on, and which half of the season. Both of those are
+  // free-form strings here — the page resolves an unknown one to the first
+  // split in its menu rather than showing an empty table, so a link written
+  // against a renamed row still lands somewhere useful.
+  if (parts.length === 1 && parts[0] === 'team-records')
+    return {
+      name: 'team-records',
+      asOf,
+      sportId,
+      metric: q.get('metric') || null,
+      half: q.get('half') || null,
+    }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
     return { name: 'scorecard-lab' }
@@ -466,6 +488,19 @@ export function tradeDeadlineSeasonPath(year) {
 }
 export function umpirePath(id) {
   return `/umpire/${id}`
+}
+// The league-wide view of ONE situational record. `metric` is a row id from
+// teamRecords.js's RECORD_GROUPS / COUNT_METRICS, `half` a HALVES key — this is
+// how every row of the Numbers tab's Records card opens its own ranking. Built
+// on top of linkQuery so the `?d=`/`?s=` hints stay identical to every other
+// link's, rather than a second hand-built query that could drift from theirs.
+export function teamRecordsPath({ metric, half, ...opts } = {}) {
+  const base = linkQuery(opts)
+  const q = new URLSearchParams(base.slice(1))
+  if (metric) q.set('metric', metric)
+  if (half && half !== 'all') q.set('half', half)
+  const qs = q.toString()
+  return `/team-records${qs ? `?${qs}` : ''}`
 }
 export function managerPath(id) {
   return `/manager/${id}`

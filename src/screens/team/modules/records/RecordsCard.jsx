@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { HALVES, teamRecordsFor } from '../../../../api/teamRecords.js'
+import { COUNT_METRICS, HALVES, teamRecordsFor } from '../../../../api/teamRecords.js'
+import { teamRecordsPath } from '../../../../lib/route.js'
+import { useNav } from '../../../../lib/nav.js'
 import '../../../../styles/65-team-records.css'
 
 // The Numbers tab's Records card: this club's W-L in ~50 situations, grouped
@@ -8,7 +10,10 @@ import '../../../../styles/65-team-records.css'
 //
 // Everything here is derived in src/api/teamRecords.js from the per-game rows
 // the nightly gen-team-records.mjs ships — this component picks the half and
-// prints. It reuses `.tstats-card` / `.tstatrow` wholesale so it reads as a
+// prints. Every row is also a door: it opens that one split ranked across the
+// club's whole level at /team-records (screens/TeamRecordsPage.jsx), because a
+// record read alone raises "out of thirty, where is that?" and this card can
+// only answer it for one club. It reuses `.tstats-card` / `.tstatrow` so it reads as a
 // sibling of the Team batting, Team pitching and Record by Day of Week cards
 // above it rather than a new kind of object; only the half toggle, the group
 // subheadings and the counts block are new (styles/64-team-records.css).
@@ -18,12 +23,24 @@ import '../../../../styles/65-team-records.css'
 // `cutoff` prop is the same day-before cutoff every other dated card on this
 // tab honours, applied to the rows before anything is tallied.
 
-function RecordRows({ rows }) {
+// Every row's label opens the same split for the whole level (/team-records),
+// carrying the half the card is showing — "64-10 scoring four or more" invites
+// "out of thirty, where is that?" on every single line, and the ranking page is
+// the answer. The label is the button rather than the whole row, so the two
+// figures beside it stay selectable text.
+function RecordRows({ rows, sportId, half }) {
+  const navigate = useNav()
   return (
     <div className="tstats">
       {rows.map((r) => (
         <div key={r.k} className="tstatrow">
-          <span className="tstatrow__k">{r.k}</span>
+          <button
+            type="button"
+            className="tstatrow__k trec__rank"
+            onClick={() => navigate(teamRecordsPath({ metric: r.id, half, s: sportId }))}
+          >
+            {r.k}
+          </button>
           <span className="tstatrow__v">{r.v}</span>
           <span className="tstatrow__r">{r.pct}</span>
         </div>
@@ -35,35 +52,28 @@ function RecordRows({ rows }) {
 // The counts that are a single number rather than a W-L. Days-at-place is
 // folded in as one row per place the club has actually spent a day at, so a
 // runaway leader doesn't print four empty lines.
-function SeasonCounts({ counts }) {
-  const places = ['1st', '2nd', '3rd', '4th', '5th']
-  const items = [
-    // "Wins after trailing", not "comeback wins" — the Comeback wins card
-    // further down this same tab counts a different thing (games where the
-    // club's win probability sank below 10/20/30%, api/comebackWins.js), and
-    // two cards on one page using one name for two numbers reads as a bug.
-    // This one is the plain ledger fact: it trailed at the end of some
-    // half-inning and won anyway.
-    ['Wins after trailing', counts.comebackWins],
-    ['Losses after leading', counts.lossesAfterLeading],
-    ['Walk-off wins', counts.walkOffWins],
-    ['Walk-off losses', counts.walkOffLosses],
-    ['Times batted around', counts.battedAround],
-    ['Series sweeps', counts.swept],
-    ['Series swept', counts.sweptBy],
-    ['Longest win streak', counts.streaks.wins],
-    ['Longest losing streak', counts.streaks.losses],
-    ...counts.daysAtPlace
-      .map((days, i) => [`Days in ${places[i]} place`, days])
-      .filter(([, days]) => days > 0),
-  ]
+function SeasonCounts({ counts, sportId, half }) {
+  const navigate = useNav()
+  // Order, wording and which end of each is the good one all live in the
+  // COUNT_METRICS catalog (api/teamRecords.js), so this block and the ranking
+  // page name the same numbers the same way. Days-at-place rows drop out when
+  // the club has never been there, so a runaway leader doesn't print four
+  // empty lines.
+  const items = COUNT_METRICS.map((m) => ({ ...m, value: m.get(counts) })).filter(
+    (m) => !m.id.startsWith('count-days-') || m.value > 0,
+  )
   return (
     <div className="trec__counts">
-      {items.map(([label, value]) => (
-        <div key={label} className="trec__count">
-          <span className="trec__countv">{value}</span>
-          <span className="trec__countk">{label}</span>
-        </div>
+      {items.map((m) => (
+        <button
+          key={m.id}
+          type="button"
+          className="trec__count trec__rank"
+          onClick={() => navigate(teamRecordsPath({ metric: m.id, half, s: sportId }))}
+        >
+          <span className="trec__countv">{m.value}</span>
+          <span className="trec__countk">{m.k}</span>
+        </button>
       ))}
     </div>
   )
@@ -105,7 +115,7 @@ export function RecordsCard({ data, cutoff }) {
           records.groups.map((g) => (
             <div key={g.title} className="trec__group">
               <h4 className="trec__grouphead">{g.title}</h4>
-              <RecordRows rows={g.rows} />
+              <RecordRows rows={g.rows} sportId={data.sportId} half={half} />
             </div>
           ))
         ) : (
@@ -114,7 +124,7 @@ export function RecordsCard({ data, cutoff }) {
         {records && (
           <div className="trec__group">
             <h4 className="trec__grouphead">Season counts</h4>
-            <SeasonCounts counts={records.counts} />
+            <SeasonCounts counts={records.counts} sportId={data.sportId} half={half} />
           </div>
         )}
       </div>

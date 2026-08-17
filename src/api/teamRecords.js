@@ -53,84 +53,89 @@ const oppStarterOuts = (g) => g.oi ?? null
 // (a starter with no innings on file, a game that never reached the 8th) are
 // skipped for that game alone, so a thin MiLB feed thins a row instead of
 // voiding the table.
+//
+// Every row carries a stable `id` as well as its printed `k`. The id is what a
+// URL names (`/team-records?metric=scored-4-plus`) and what teamRecordRankings
+// pivots 30 clubs on, so it must NOT be derived from the label — a reworded row
+// would silently break every shared link. Add rows freely; never renumber one.
 export const RECORD_GROUPS = [
   {
     title: 'Scoring',
     rows: [
-      { k: 'Scoring first', p: (g) => g.sf === 1 },
-      { k: 'Opponent scores first', p: (g) => g.sf === -1 },
-      { k: 'Scoring 4+ runs', p: (g) => g.rs >= 4 },
-      { k: 'Scoring 3 or fewer', p: (g) => g.rs <= 3 },
-      { k: 'Pitching a shutout', p: (g) => g.ra === 0 },
-      { k: 'Shut out', p: (g) => g.rs === 0 },
+      { id: 'scored-first', k: 'Scoring first', p: (g) => g.sf === 1 },
+      { id: 'opp-scored-first', k: 'Opponent scores first', p: (g) => g.sf === -1 },
+      { id: 'scored-4-plus', k: 'Scoring 4+ runs', p: (g) => g.rs >= 4 },
+      { id: 'scored-3-fewer', k: 'Scoring 3 or fewer', p: (g) => g.rs <= 3 },
+      { id: 'shutout-thrown', k: 'Pitching a shutout', p: (g) => g.ra === 0 },
+      { id: 'shutout-suffered', k: 'Shut out', p: (g) => g.rs === 0 },
     ],
   },
   {
     title: 'Hits and homers',
     rows: [
-      { k: 'Out-hitting opponent', p: (g) => g.hi > g.ha },
-      { k: 'Out-hit by opponent', p: (g) => g.hi < g.ha },
-      { k: 'Hit totals even', p: (g) => g.hi === g.ha },
-      { k: '10 or more hits', p: (g) => g.hi >= 10 },
-      { k: 'Hitting a home run', p: (g) => (g.hr ?? 0) >= 1 },
-      { k: 'Not hitting a home run', p: (g) => (g.hr ?? 0) === 0 },
-      { k: 'Hitting 2+ homers', p: (g) => (g.hr ?? 0) >= 2 },
-      { k: 'Opponent homers', p: (g) => (g.hra ?? 0) >= 1 },
-      { k: 'Opponent held homerless', p: (g) => (g.hra ?? 0) === 0 },
-      { k: 'Opponent hits 2+ homers', p: (g) => (g.hra ?? 0) >= 2 },
+      { id: 'out-hitting', k: 'Out-hitting opponent', p: (g) => g.hi > g.ha },
+      { id: 'out-hit', k: 'Out-hit by opponent', p: (g) => g.hi < g.ha },
+      { id: 'hits-even', k: 'Hit totals even', p: (g) => g.hi === g.ha },
+      { id: 'hits-10-plus', k: '10 or more hits', p: (g) => g.hi >= 10 },
+      { id: 'homered', k: 'Hitting a home run', p: (g) => (g.hr ?? 0) >= 1 },
+      { id: 'no-homer', k: 'Not hitting a home run', p: (g) => (g.hr ?? 0) === 0 },
+      { id: 'homers-2-plus', k: 'Hitting 2+ homers', p: (g) => (g.hr ?? 0) >= 2 },
+      { id: 'opp-homered', k: 'Opponent homers', p: (g) => (g.hra ?? 0) >= 1 },
+      { id: 'opp-homerless', k: 'Opponent held homerless', p: (g) => (g.hra ?? 0) === 0 },
+      { id: 'opp-homers-2-plus', k: 'Opponent hits 2+ homers', p: (g) => (g.hra ?? 0) >= 2 },
     ],
   },
   {
     title: 'Defense',
     rows: [
-      { k: 'Committing an error', p: (g) => (g.e ?? 0) >= 1 },
-      { k: 'Committing no errors', p: (g) => (g.e ?? 0) === 0 },
+      { id: 'error-committed', k: 'Committing an error', p: (g) => (g.e ?? 0) >= 1 },
+      { id: 'error-free', k: 'Committing no errors', p: (g) => (g.e ?? 0) === 0 },
     ],
   },
   {
     title: 'Leading and trailing',
     rows: [
-      { k: 'Leading after 6', p: (g) => g.l6 === 1 },
-      { k: 'Trailing after 6', p: (g) => g.l6 === -1 },
-      { k: 'Leading after 7', p: (g) => g.l7 === 1 },
-      { k: 'Trailing after 7', p: (g) => g.l7 === -1 },
-      { k: 'Tied after 7', p: (g) => g.l7 === 0 },
-      { k: 'Leading after 8', p: (g) => g.l8 === 1 },
-      { k: 'Trailing after 8', p: (g) => g.l8 === -1 },
-      { k: 'Tied after 8', p: (g) => g.l8 === 0 },
+      { id: 'lead-6', k: 'Leading after 6', p: (g) => g.l6 === 1 },
+      { id: 'trail-6', k: 'Trailing after 6', p: (g) => g.l6 === -1 },
+      { id: 'lead-7', k: 'Leading after 7', p: (g) => g.l7 === 1 },
+      { id: 'trail-7', k: 'Trailing after 7', p: (g) => g.l7 === -1 },
+      { id: 'tied-7', k: 'Tied after 7', p: (g) => g.l7 === 0 },
+      { id: 'lead-8', k: 'Leading after 8', p: (g) => g.l8 === 1 },
+      { id: 'trail-8', k: 'Trailing after 8', p: (g) => g.l8 === -1 },
+      { id: 'tied-8', k: 'Tied after 8', p: (g) => g.l8 === 0 },
     ],
   },
   {
     title: 'Close games',
     rows: [
-      { k: 'One-run games', p: (g) => margin(g) === 1 },
-      { k: 'Two-run games', p: (g) => margin(g) === 2 },
-      { k: 'Extra innings', p: (g) => g.x === 1 },
-      { k: 'Decided in last at-bat', p: (g) => g.la === 1 },
-      { k: 'Walk-off games', p: (g) => g.wo === 1 || g.wo === -1 },
+      { id: 'one-run', k: 'One-run games', p: (g) => margin(g) === 1 },
+      { id: 'two-run', k: 'Two-run games', p: (g) => margin(g) === 2 },
+      { id: 'extra-innings', k: 'Extra innings', p: (g) => g.x === 1 },
+      { id: 'last-at-bat', k: 'Decided in last at-bat', p: (g) => g.la === 1 },
+      { id: 'walk-off-game', k: 'Walk-off games', p: (g) => g.wo === 1 || g.wo === -1 },
     ],
   },
   {
     title: 'Starting pitching',
     rows: [
-      { k: 'Quality start', p: (g) => g.qs === 1 },
-      { k: 'Starter goes 6+ innings', p: (g) => starterOuts(g) != null && g.si >= 18 },
-      { k: 'Starter goes under 6', p: (g) => starterOuts(g) != null && g.si < 18 },
-      { k: 'Opposing starter 6+', p: (g) => oppStarterOuts(g) != null && g.oi >= 18 },
-      { k: 'Opposing starter under 6', p: (g) => oppStarterOuts(g) != null && g.oi < 18 },
-      { k: 'Vs. right-handed starter', p: (g) => g.oh === 'R' },
-      { k: 'Vs. left-handed starter', p: (g) => g.oh === 'L' },
+      { id: 'quality-start', k: 'Quality start', p: (g) => g.qs === 1 },
+      { id: 'starter-6-plus', k: 'Starter goes 6+ innings', p: (g) => starterOuts(g) != null && g.si >= 18 },
+      { id: 'starter-under-6', k: 'Starter goes under 6', p: (g) => starterOuts(g) != null && g.si < 18 },
+      { id: 'opp-starter-6-plus', k: 'Opposing starter 6+', p: (g) => oppStarterOuts(g) != null && g.oi >= 18 },
+      { id: 'opp-starter-under-6', k: 'Opposing starter under 6', p: (g) => oppStarterOuts(g) != null && g.oi < 18 },
+      { id: 'vs-rhs', k: 'Vs. right-handed starter', p: (g) => g.oh === 'R' },
+      { id: 'vs-lhs', k: 'Vs. left-handed starter', p: (g) => g.oh === 'L' },
     ],
   },
   {
     title: 'Schedule',
     rows: [
-      { k: 'Day games', p: (g) => g.n !== 1 },
-      { k: 'Night games', p: (g) => g.n === 1 },
-      { k: 'Doubleheaders', p: (g) => g.dh === 1 },
-      { k: 'Series opener', p: (g) => g.op === 1 },
-      { k: 'Series finale', p: (g) => g.fi === 1 },
-      { k: 'Getaway day', p: (g) => g.ga === 1 },
+      { id: 'day-game', k: 'Day games', p: (g) => g.n !== 1 },
+      { id: 'night-game', k: 'Night games', p: (g) => g.n === 1 },
+      { id: 'doubleheader', k: 'Doubleheaders', p: (g) => g.dh === 1 },
+      { id: 'series-opener', k: 'Series opener', p: (g) => g.op === 1 },
+      { id: 'series-finale', k: 'Series finale', p: (g) => g.fi === 1 },
+      { id: 'getaway-day', k: 'Getaway day', p: (g) => g.ga === 1 },
     ],
   },
 ]
@@ -157,12 +162,21 @@ function fold(tally, result) {
 // a permanent "-0" on every row would be noise.
 function formatRecord(t) {
   const played = t.wins + t.losses + t.ties
-  if (!played) return { v: DASH, pct: DASH }
-  const v = t.ties ? `${t.wins}-${t.losses}-${t.ties}` : `${t.wins}-${t.losses}`
   const decided = t.wins + t.losses
+  // `rate` is the same number `pct` prints, kept unrounded and unformatted so
+  // the cross-club ranking page can sort on it. Null with nothing decided —
+  // NOT 0, which would rank a club that has never been in the split below one
+  // that is genuinely 0-8 there.
+  const rate = decided ? t.wins / decided : null
+  if (!played) return { v: DASH, pct: DASH, wins: 0, losses: 0, ties: 0, rate: null }
+  const v = t.ties ? `${t.wins}-${t.losses}-${t.ties}` : `${t.wins}-${t.losses}`
   return {
     v,
-    pct: decided ? (t.wins / decided).toFixed(3).replace(/^0/, '') : DASH,
+    pct: rate == null ? DASH : rate.toFixed(3).replace(/^0/, ''),
+    wins: t.wins,
+    losses: t.losses,
+    ties: t.ties,
+    rate,
   }
 }
 
@@ -250,6 +264,53 @@ export function daysAtPlace(dailyRank, { cutoff, half, allStarDate }) {
 }
 
 // ---------------------------------------------------------------------------
+// The season counts, as a catalog
+// ---------------------------------------------------------------------------
+
+// The single-number counts, in the order the card prints them. Each one names
+// which END of the column is the good one, because that is NOT uniform here:
+// more wins after trailing is a club's resilience, more losses after leading is
+// the same trait failing, and ranking both "highest first" would put the worst
+// bullpen in the league at the top of a list titled the same way as the best.
+//
+//   high    — the leader is first when the list is sorted best-first
+//   low     — the leader is LAST; fewest is the achievement
+//   neutral — an honest ordering exists but neither end is praise. Days in 2nd
+//             and 3rd place are the case: a lot of them can mean a good club
+//             that never caught the division or a bad one that never fell out
+//             of it, so the ranking page ranks them without a best/worst tone.
+//
+// `get` reads the counts block teamRecordsFor returns, so this catalog is the
+// one place a count is named, ordered and judged — the card prints it and the
+// cross-club page ranks it from the same entry.
+const PLACES = ['1st', '2nd', '3rd', '4th', '5th']
+export const COUNT_METRICS = [
+  // "Wins after trailing", not "comeback wins" — the Comeback wins card
+  // further down the Numbers tab counts a different thing (games where the
+  // club's win probability sank below 10/20/30%, api/comebackWins.js), and two
+  // cards on one page using one name for two numbers reads as a bug. This one
+  // is the plain ledger fact: it trailed at the end of some half-inning and
+  // won anyway.
+  { id: 'count-wins-after-trailing', k: 'Wins after trailing', better: 'high', get: (c) => c.comebackWins },
+  { id: 'count-losses-after-leading', k: 'Losses after leading', better: 'low', get: (c) => c.lossesAfterLeading },
+  { id: 'count-walk-off-wins', k: 'Walk-off wins', better: 'high', get: (c) => c.walkOffWins },
+  { id: 'count-walk-off-losses', k: 'Walk-off losses', better: 'low', get: (c) => c.walkOffLosses },
+  { id: 'count-batted-around', k: 'Times batted around', better: 'high', get: (c) => c.battedAround },
+  { id: 'count-sweeps', k: 'Series sweeps', better: 'high', get: (c) => c.swept },
+  { id: 'count-swept', k: 'Series swept', better: 'low', get: (c) => c.sweptBy },
+  { id: 'count-win-streak', k: 'Longest win streak', better: 'high', get: (c) => c.streaks.wins },
+  { id: 'count-losing-streak', k: 'Longest losing streak', better: 'low', get: (c) => c.streaks.losses },
+  ...PLACES.map((place, i) => ({
+    id: `count-days-${i + 1}`,
+    k: `Days in ${place} place`,
+    // First place is the only unambiguous end of this one; last place in a
+    // five-club division is the other. The middle three are neutral.
+    better: i === 0 ? 'high' : i === 4 ? 'low' : 'neutral',
+    get: (c) => c.daysAtPlace[i],
+  })),
+]
+
+// ---------------------------------------------------------------------------
 // The card's whole payload
 // ---------------------------------------------------------------------------
 
@@ -270,7 +331,7 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       .map((row) => {
         const t = blank()
         for (const g of games) if (row.p(g)) fold(t, g.r)
-        return { k: row.k, played: t.wins + t.losses + t.ties, ...formatRecord(t) }
+        return { id: row.id, k: row.k, played: t.wins + t.losses + t.ties, ...formatRecord(t) }
       })
       .filter((r) => r.played > 0),
   })).filter((g) => g.rows.length > 0)
@@ -286,7 +347,12 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
     title: 'By month',
     rows: [...byMonth.entries()]
       .sort((a, b) => a[0] - b[0])
-      .map(([m, t]) => ({ k: MONTHS[m - 1], played: t.wins + t.losses + t.ties, ...formatRecord(t) })),
+      .map(([m, t]) => ({
+        id: `month-${m}`,
+        k: MONTHS[m - 1],
+        played: t.wins + t.losses + t.ties,
+        ...formatRecord(t),
+      })),
   }
 
   // Opponent groups. Every club gets its own level's divisions; only an MLB
@@ -307,9 +373,13 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       fold(byLeague.get(meta.l), g.r)
     }
   }
-  const namedRows = (tallies, labels) =>
+  // `prefix` keys the metric id by the KIND of opponent group (a division id
+  // and a league id come from different statsapi number spaces and could
+  // otherwise collide).
+  const namedRows = (tallies, labels, prefix) =>
     [...tallies.entries()]
       .map(([id, t]) => ({
+        id: `${prefix}-${id}`,
         k: labels[id] ? `Vs. ${labels[id]}` : null,
         played: t.wins + t.losses + t.ties,
         ...formatRecord(t),
@@ -318,12 +388,12 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       .sort((a, b) => a.k.localeCompare(b.k))
 
   const opponentGroups = []
-  const divisionRows = namedRows(byDivision, names.divisions ?? {})
+  const divisionRows = namedRows(byDivision, names.divisions ?? {}, 'div')
   if (divisionRows.length) opponentGroups.push({ title: 'By division', rows: divisionRows })
   // MLB only: below it, a club's own league IS its schedule, so the row would
   // just restate the season record.
   if (data.sportId === 1) {
-    const leagueRows = namedRows(byLeague, names.leagues ?? {})
+    const leagueRows = namedRows(byLeague, names.leagues ?? {}, 'lg')
     if (leagueRows.length) opponentGroups.push({ title: 'By league', rows: leagueRows })
   }
 

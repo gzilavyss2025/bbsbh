@@ -284,7 +284,12 @@ const BUDGETS = {
   // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
   // 31-wild-card.css, and only the half toggle, the group subheadings and the
   // counts block are new rules.
-  'src/styles': 84,
+  // 84 -> 85 for `66-team-record-rankings.css`: the standalone page that ranks
+  // one of that card's rows across a whole level. Same argument again — the
+  // table itself is `.standings`, shared with the standings and umpire boards,
+  // so only the control strip, the rank badge and two row states are new — and
+  // the page imports the partial itself, so no other route pays for it.
+  'src/styles': 85,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -330,7 +335,12 @@ const BUDGETS = {
   // argument as every entry above: a subdirectory would take it out of the
   // flat set check-spoiler-manifest classifies, which is where a module that
   // reads per-game results needs to stay.
-  'src/api': 96,
+  // +1 for teamRecordRankings.js — the same ledger pivoted across a level for
+  // the standalone Team Records page. Kept OUT of teamRecords.js on purpose:
+  // one module answers "this club's fifty splits", the other "this split's
+  // thirty clubs", and merging them would put a page-sized fan-out fetch in the
+  // module every Numbers tab loads. Flat for the manifest reason above.
+  'src/api': 97,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -467,7 +477,12 @@ const BUDGETS = {
   // shape as its siblings: one route, one screen, in the flat set.
   // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
   // AnimationLab.jsx beside it.
-  'src/screens': 41,
+  // +1 for TeamRecordsPage.jsx — the standalone Team Records ranking page, one
+  // more entry in REPORT_PAGES and so the same shape as StandingsPage.jsx and
+  // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
+  // set. It is not a team-hub screen and does not belong in src/screens/team/,
+  // which holds the tabs of one club's page.
+  'src/screens': 42,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

@@ -29,6 +29,7 @@
     { "source": "/rehab", "destination": "/api/preview?route=rehab" },
     { "source": "/about", "destination": "/api/preview?route=about" },
     { "source": "/logos", "destination": "/api/preview?route=logos" },
+    { "source": "/team-records", "destination": "/api/preview?route=team-records" },
     { "source": "/fouls", "destination": "/api/preview?route=fouls" },
     { "source": "/milestones", "destination": "/api/preview?route=milestones" },
     { "source": "/umpires", "destination": "/api/preview?route=umpires" },

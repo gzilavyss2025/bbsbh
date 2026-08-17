@@ -466,6 +466,27 @@ for each generator; the reader modules:
   `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
   nightly cron writes the file before the day's games. Degrades to null with no
   file, and the card hides.
+- `teamRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
+  one level, ranked — the standalone `/team-records` page
+  (`screens/TeamRecordsPage.jsx`), which every row of the Records card links
+  into. `fetchLevelTeamRecords(sportId, season)` pulls that level's thirty
+  shards (`teams-static.js` supplies the club list; `staticJsonBy` memoizes each
+  one, so paging between splits, halves and levels re-downloads nothing);
+  `buildRankingIndex(entries, { cutoff, half })` calls `teamRecordsFor` per club
+  and inverts the result into a metric-keyed table; `rankMetric` sorts one of
+  them. It derives NOTHING new — a changed predicate in `RECORD_GROUPS` changes
+  the card and this page together, which is why the row `id`s there are stable
+  strings rather than slugs of the labels (a URL names them).
+  **Order is not always highest-first.** A W-L split ranks by win percentage,
+  best at the top. A season count ranks by whichever end `COUNT_METRICS` calls
+  good: `better: 'low'` opens ASCENDING (fewest losses after leading leads that
+  column), `'neutral'` (days in 2nd through 4th) is ordered but carries no
+  best/worst framing at all. A club that has never been in the split keeps its
+  row, unranked, below the ranked ones — and is excluded from the field size, so
+  "of 30" never counts clubs that could not be ranked. The cost is stated in the
+  module header: ~99 KB over the wire per level, which is why this is a page a
+  reader opts into rather than a card. Spoiler-free, same footing as
+  `teamRecords.js`.
 - `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and

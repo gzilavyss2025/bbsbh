@@ -254,6 +254,7 @@ const GENERIC = {
   rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
   about: { eyebrow: 'ABOUT', title: 'Tally Baseball', sub: 'Keep score. Keep the surprise.' },
   logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
+  'team-records': { eyebrow: 'TEAM RECORDS', title: 'Team Records', sub: 'Every club ranked in one situation at a time — spoiler-safe.' },
   fouls: { eyebrow: 'FOUL TRACKER', title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
   milestones: { eyebrow: 'MILESTONE WATCH', title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
   umpires: { eyebrow: 'UMPIRE RANKINGS', title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
@@ -310,6 +311,7 @@ export async function buildCard(params, origin) {
       case 'rehab':
       case 'about':
       case 'logos':
+      case 'team-records':
       case 'fouls':
       case 'milestones':
       case 'umpires':
