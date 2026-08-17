@@ -1,4 +1,5 @@
 import { revealRunsThrough } from '../../api/linescore.js'
+import { selectFinalReached } from '../../api/select.js'
 import { Scorebug } from './Scorebug.jsx'
 
 // The scorebug's one placement now: an ANCHORED band at the top of the stage
@@ -68,6 +69,17 @@ export function ScorebugMount({
   const shownInning = reviewing && viewInning != null ? viewInning : live.inning
   const shownHalf = reviewing && viewHalf != null ? viewHalf : live.half
 
+  // A GAME THAT IS OVER SAYS F, NOT "TOP 10TH". Pointing at what comes next is
+  // right at every frontier but the last one: the 3rd out of the final half
+  // has no next half, and the indicator read one inning past the end of the
+  // game. `throughIdx` — the CLAMPED mark, not the game-wide one — is what
+  // makes this safe both ways: it can only be true once the reader has
+  // revealed the half that ended the game (never a spoiler), and it goes back
+  // to false the moment they page back to an earlier half (which is still
+  // captioned by its own inning, above a score frozen where that half left
+  // it).
+  const finished = selectFinalReached(feed, throughIdx)
+
   return (
     <Scorebug
       awayName={meta.away.clubName}
@@ -80,6 +92,7 @@ export function ScorebugMount({
       homeRuns={runsFor('home', 1)}
       inning={shownInning}
       half={shownHalf}
+      final={finished}
       batter={live.batter}
       pitcher={live.pitcher}
       bases={live.bases}

@@ -24,6 +24,7 @@ export function Scorebug({
   homeRuns = 0,
   inning,
   half, // 'top' | 'bottom'
+  final = false, // game over AND revealed as over — the indicator reads F
   batter, // { order, last, line } | null
   pitcher, // { last, pitches } | null
   bases,
@@ -97,10 +98,23 @@ export function Scorebug({
           <span className="gamehud__runs">{homeRuns}</span>
         </div>
         <div className="gamehud__div" />
-        <div className="gamehud__inninghalf">
-          <span className={`gamehud__tri gamehud__tri--up ${top ? '' : 'gamehud__tri--dim'}`} />
-          <span className="gamehud__innnum">{inning}</span>
-          <span className={`gamehud__tri gamehud__tri--down ${top ? 'gamehud__tri--dim' : ''}`} />
+        <div className={`gamehud__inninghalf ${final ? 'gamehud__inninghalf--final' : ''}`}>
+          {/* THE END OF THE GAME IS A STATE, NOT AN INNING. The triangles say
+              which half of an inning is being played; once the last out is
+              in, no half is, so both marks go rather than dimming one of a
+              pair that no longer means anything. The caller decides WHEN
+              (ScorebugMount.jsx) — this only draws it. */}
+          {final ? (
+            <span className="gamehud__innnum" aria-label="Final">
+              F
+            </span>
+          ) : (
+            <>
+              <span className={`gamehud__tri gamehud__tri--up ${top ? '' : 'gamehud__tri--dim'}`} />
+              <span className="gamehud__innnum">{inning}</span>
+              <span className={`gamehud__tri gamehud__tri--down ${top ? 'gamehud__tri--dim' : ''}`} />
+            </>
+          )}
         </div>
         <div className="gamehud__div" />
         <div className="gamehud__diamondwrap">

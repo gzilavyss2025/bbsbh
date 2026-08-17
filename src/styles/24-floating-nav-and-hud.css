@@ -451,6 +451,15 @@
   line-height: var(--lh-solid);
 }
 
+/* Game over (Scorebug.jsx's `final`): both triangles go — no half is being
+   played — and the F takes the space they leave, so the indicator still reads
+   as the strip's one big mark rather than a shrunken inning number. The
+   diamond beside it sets the strip's height, so dropping the triangles moves
+   nothing. */
+.gamehud__inninghalf--final .gamehud__innnum {
+  font-size: var(--fs-title-lg);
+}
+
 /* The bases BESIDE the outs, not above them — and this block takes whatever
    the rest of the strip leaves (`flex: 1`), which is the width the run numbers
    gave back. Stacked, the two out dots sat under a diamond that had to stay
