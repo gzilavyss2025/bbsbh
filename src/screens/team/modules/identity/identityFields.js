@@ -26,6 +26,8 @@ import {
   hasAlternate2,
   hasAlternate3,
   hasAlternate4,
+  mainOverrideLogoUrl,
+  teamLogoUrl,
   treatmentBgColor,
   treatmentHeaderColorOverride,
   treatmentTuningRecord,
@@ -133,6 +135,16 @@ const STAMP_FIELD_SUFFIX = {
   rotation: 'rotation',
 }
 
+// What the tile for (club, key) resolves as its mark URL today, through the
+// same chain the page renders with — which is what makes it an honest
+// placeholder for the Art URL box. Main's rung order is treatmentTile's own:
+// the recolor/override file when one exists, else the plain CDN base mark.
+function landedTileArtUrl(teamId, key, isMilb) {
+  if (isMilb) return text(teamLogoUrl(teamId, `milb-${key}`))
+  if (key === 'main') return text(mainOverrideLogoUrl(teamId) ?? teamLogoUrl(teamId, 'base'))
+  return text(teamLogoUrl(teamId, key))
+}
+
 // The groups the drawer renders for one club and one selected treatment. The
 // order here is the order on screen, coarsest control last: the tile you are
 // looking at, then the club, then its bar, then the two dimensions that are not
@@ -181,6 +193,26 @@ export function identityGroups(teamId, { isMilb, treatment }) {
       ],
     })
   }
+
+  // The mark this tile wears. One url field (fields.js's `logo` dimension) —
+  // the drawer renders it with the upload control beside it, and the landed
+  // value is the URL the tile resolves TODAY through the app's own chain
+  // (override, assignment, procured file, CDN), so the placeholder always names
+  // real art rather than a path that may 404.
+  groups.push({
+    key: 'logo',
+    title: `${treatmentLabel(treatment)} logo art`,
+    logo: true,
+    fields: [
+      {
+        id: identityFieldId('logo', id, treatment),
+        name: 'logoUrl',
+        label: 'Art URL',
+        spec: IDENTITY_DIMENSIONS.logo.leaf,
+        landed: landedTileArtUrl(teamId, treatment, isMilb),
+      },
+    ],
+  })
 
   // Club-level colours are an MLB store. An affiliate's pair is researched, and
   // carries provenance a hex box cannot hold, so it stays in /identity-lab —

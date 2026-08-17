@@ -145,3 +145,30 @@ the one promise this placement makes.
 silently into every client's "not configured" degrade. The twelve endpoints stay
 flat and the budget records the decision, which is the deliberate exception
 ADR-0038's guard asks for rather than a directory awaiting subdivision.
+
+## Amendment (2026-08-17): the logo dimension, and the drawer became visual
+
+The first of the two v1 exclusions above is reversed. The drawer now carries a
+**`logo` dimension** (`identity.logo.{teamId}.{slot}`, slots = the MLB
+treatment vocabulary plus MiLB's `home`/`away`): a URL per tile mark, layered
+into a new bundled-empty store (`src/lib/data/logo-url-overrides.json`) and
+consulted by `teamLogoUrl`/`mainOverrideLogoUrl` ahead of every disk/CDN rung
+(`src/lib/identity/logoUrlOverrides.js`). The bytes go exactly where this ADR
+predicted: **`api/identity-logo.js`**, the ballpark-photo pattern applied to a
+club's mark — admin-gated, Vercel Blob, held to `src/lib/logoArt.js`'s same
+512×512-PNG standard, and *uploading is not saving*: the endpoint answers a URL
+and the URL only lands through the drawer's ordinary Save. The recolour
+library, a club's `extras`, and an affiliate's researched pair still live only
+in the Lab, for the unchanged reasons above.
+
+The same round made the drawer visual, holding the one-render-path rule: the
+jersey strip renders each treatment as its real `TeamTreatmentMark` tile, the
+logo group shows the tile at judging size, and the Stamp placement group draws
+two REAL `GameStamp`s (away and home slots) above its four fields — for a game
+fabricated as a literal in `IdentityStampPreview.jsx`, which is why that file
+could join `check-stamp-surfaces.mjs`'s allowlist even though, unlike the Lab's
+editor, it ships in production (the safety case is the fabricated literal, not
+the admin gating). Colour boxes gained an EyeDropper-API picker where the
+browser has one. `teams.js` crossed its file-size ceiling for the two hook
+sites and took a documented raise; `api/` took its budget to 14 for the new
+endpoint, on the rename-is-an-outage argument already recorded above.

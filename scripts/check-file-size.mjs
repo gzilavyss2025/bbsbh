@@ -110,7 +110,13 @@ const BUDGETS = {
   'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1200, // 1179 — InningTally moved to screens/boxscore/InningTally.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
-  'src/lib/teams.js': 1200, // 1110 — new cityConnectMastheadUrl
+  // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo
+  // dimension): the store/reader themselves went to their own module
+  // (src/lib/identity/logoUrlOverrides.js), but the two consult points must
+  // live here — teamLogoUrl's, ahead of the *_USES_BASE_LOGO early returns
+  // that would shadow it, and mainOverrideLogoUrl's, which is what routes
+  // Main's tile through 'main-recolor'.
+  'src/lib/teams.js': 1225, // 1212
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them

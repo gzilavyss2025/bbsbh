@@ -246,7 +246,13 @@ export function TeamHubShell({
             being edited, so it has to stay visible while the drawer is open. */}
         {identity.editing && (
           <Suspense fallback={null}>
-            <IdentityDrawer teamId={team.id} isMilb={isMilb} draft={identity} />
+            <IdentityDrawer
+              teamId={team.id}
+              isMilb={isMilb}
+              name={team.name}
+              abbreviation={team.abbreviation}
+              draft={identity}
+            />
           </Suspense>
         )}
 

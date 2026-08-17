@@ -62,7 +62,12 @@ const BUDGETS = {
   //
   // 12 -> 13 for `identity.js`: the club-identity override store (ADR-0050),
   // the sibling of `copy.js` that /team/{id}'s admin gear writes through.
-  api: 13,
+  //
+  // 13 -> 14 for `identity-logo.js`: the logo-art byte upload feeding that same
+  // store (the ballpark-photo pattern applied to a club's mark) — a URL like
+  // every other file here, so it stays flat for the same rename-is-an-outage
+  // reason.
+  api: 14,
   // The 51 stylesheet partials src/index.css @imports in order. This one is a
   // deliberate exception rather than a directory awaiting subdivision: the files
   // are an ORDERED SEQUENCE, not independent modules, and the numeric prefix is

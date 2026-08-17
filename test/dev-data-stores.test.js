@@ -382,3 +382,23 @@ test('a stamp-placement store rejects prototype-poisoning keys at every level', 
     /away is not an object/,
   )
 })
+
+test('a logo-url-override entry pins known slots to single https tokens', () => {
+  const logoUrls = DEV_DATA_STORES['logo-url-overrides'].validate
+  assert.equal(logoUrls({}), null, 'the store ships empty and empty must validate')
+  assert.equal(
+    logoUrls({
+      158: { alternate: 'https://example.public.blob.vercel-storage.com/158-alternate.png' },
+      235: { home: 'https://example.com/mark.png', away: 'https://example.com/mark2.png' },
+    }),
+    null,
+  )
+  assert.match(logoUrls({ 158: { road: 'https://example.com/a.png' } }), /bad logo slot/)
+  assert.match(logoUrls({ 158: { alternate: 'http://example.com/a.png' } }), /not an https URL/)
+  assert.match(logoUrls({ 158: { alternate: 'javascript:alert(1)' } }), /not an https URL/)
+  assert.match(logoUrls({ 158: { alternate: 'https://example.com/a b.png' } }), /not an https URL/)
+  assert.match(logoUrls({ 158: { alternate: `https://x.example/${'a'.repeat(500)}` } }), /not an https URL/)
+  assert.match(logoUrls({ brewers: {} }), /not a team id/)
+  assert.match(logoUrls({ 158: 'nope' }), /not an object/)
+  assert.match(logoUrls(JSON.parse('{"__proto__": {}}')), /expected an object keyed by team id/)
+})

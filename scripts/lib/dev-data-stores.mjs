@@ -335,6 +335,48 @@ function isColorSwatchStore(parsed) {
   return null
 }
 
+// logo-url-overrides.json: the runtime logo-art overrides the team hub's admin
+// drawer saves through /api/identity (src/lib/identity/fields.js's `logo`
+// dimension) — `{ teamId: { slot: httpsUrl } }`, slots being the MLB treatment
+// vocabulary plus MiLB's home/away. Ships empty; a value is normally a Vercel
+// Blob URL /api/identity-logo answered, but any https URL is legal (the same
+// paste-a-URL stance the ballpark photo field takes). The scheme check matters:
+// this value lands in an <img src>, so javascript:/data:/relative must bounce
+// here exactly as fields.js's own `url` kind bounces them in the browser.
+const LOGO_URL_SLOTS = new Set([
+  'main',
+  'alternate',
+  'alternate-2',
+  'alternate-3',
+  'alternate-4',
+  'city-connect',
+  'home',
+  'away',
+])
+
+function isHttpsUrl(value) {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 500) return false
+  if (/[\s"'<>\\]/.test(value)) return false
+  try {
+    return new URL(value).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function isLogoUrlOverrideStore(parsed) {
+  if (!isPlainObject(parsed) || hasPoisonKey(parsed)) return 'expected an object keyed by team id'
+  for (const [teamId, entry] of Object.entries(parsed)) {
+    if (!isTeamIdKey(teamId)) return `"${teamId}" is not a team id`
+    if (!isPlainObject(entry) || hasPoisonKey(entry)) return `team ${teamId} is not an object`
+    for (const [slot, url] of Object.entries(entry)) {
+      if (!LOGO_URL_SLOTS.has(slot)) return `team ${teamId} has a bad logo slot "${slot}"`
+      if (!isHttpsUrl(url)) return `team ${teamId}'s ${slot} logo is not an https URL`
+    }
+  }
+  return null
+}
+
 // route key -> { file, validate }. `file` is a repo-relative literal; nothing
 // from a request ever contributes to it.
 export const DEV_DATA_STORES = {
@@ -393,6 +435,10 @@ export const DEV_DATA_STORES = {
   'city-connect-colors': {
     file: 'src/lib/data/city-connect-colors.json',
     validate: isColorSwatchStore,
+  },
+  'logo-url-overrides': {
+    file: 'src/lib/data/logo-url-overrides.json',
+    validate: isLogoUrlOverrideStore,
   },
 }
 

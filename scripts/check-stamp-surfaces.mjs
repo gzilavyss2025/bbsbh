@@ -62,6 +62,17 @@ const STAMP_ALLOWLIST = {
   // one. The allowlist got shorter rather than longer for it. Read ADR-0035
   // before adding a fourth.
   //
+  // `screens/team/modules/identity/IdentityStampPreview.jsx` is the second
+  // entry that renders a stamp for no real game at all — the team hub drawer's
+  // pair of placement previews, StampPlacementEditor's argument carried to the
+  // one editor that ships. The game its two stamps draw is a literal in that
+  // file (a constant gamePk, a made-up ballpark, invented run totals); it reads
+  // no schedule, no feed, no collection and no route param, so there is no
+  // unrevealed game there to leak. UNLIKE the lab it IS reachable in a
+  // production build (lazy, behind the admin gear), so the safety case rests
+  // entirely on the fabricated literal — the admin gating is real but is not
+  // the argument. Read ADR-0035 and that file's header before widening it.
+  //
   // `screens/LogbookCollection.jsx` replaced `screens/LogbookPage.jsx` here
   // (ADR-0036's multi-book addendum) when that file's multi-book shelf pushed
   // it past check-file-size.mjs's 600-line ceiling: LogbookPage.jsx now holds
@@ -75,6 +86,7 @@ const STAMP_ALLOWLIST = {
     'screens/LogbookCollection.jsx',
     'components/passport/PassportPage.jsx',
     'screens/identity-lab/editors/StampPlacementEditor.jsx',
+    'screens/team/modules/identity/IdentityStampPreview.jsx',
   ],
   // The mint affordance lives inside the box score's SealBox reveal render
   // function (ADR-0002 is what makes that safe). One importer, on purpose.

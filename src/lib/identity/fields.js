@@ -81,6 +81,25 @@ const RGB = /^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*(?:,\s*[\d.]+\s*)?\)$
 // keywords the tuning store actually uses today, plus a percentage.
 const ORIGIN_Y = /^(?:center|top|bottom|-?\d{1,3}(?:\.\d+)?%)$/
 
+// An https image URL, as the `logo` dimension stores it. Deliberately looser
+// than "our own blob host" — the ballpark photo copy field takes any https URL,
+// and its paste-a-URL fallback is what keeps an unconfigured deploy usable —
+// but strict about the two things that matter for a value landing in an
+// <img src>: the scheme is https (never javascript:, data:, or a relative path
+// that would resolve against whichever page renders it), and it is one token
+// with no whitespace or quote characters. Length-capped like every other wire
+// value here.
+const URL_MAX = 500
+
+function isHttpsUrl(value) {
+  if (value.length > URL_MAX || /[\s"'<>\\]/.test(value)) return false
+  try {
+    return new URL(value).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 const color = () => ({ kind: 'color' })
 const number = (min, max, step) => ({ kind: 'number', min, max, step })
 const pick = (values) => ({ kind: 'pick', values })
@@ -93,6 +112,7 @@ export function coerceIdentityValue(spec, raw) {
   const value = raw.trim()
   if (!value) return undefined
   if (spec.kind === 'color') return HEX.test(value) || RGB.test(value) ? value : undefined
+  if (spec.kind === 'url') return isHttpsUrl(value) ? value : undefined
   if (spec.kind === 'originY') return ORIGIN_Y.test(value) ? value : undefined
   if (spec.kind === 'pick') return spec.values.includes(value) ? value : undefined
   if (spec.kind === 'number') {
@@ -234,6 +254,27 @@ export const IDENTITY_DIMENSIONS = {
     path: (teamId, field) => [teamId, field],
     fields: { bandColor: color() },
   },
+
+  // The mark a treatment's tile wears, as a URL — the runtime counterpart to
+  // dropping a PNG on /identity-lab's tile (which writes public/team-logos/ and
+  // takes a deploy to ship). The value is normally what /api/identity-logo
+  // answered after taking the bytes (Vercel Blob, the ballpark-photo
+  // precedent), but any https URL an admin pastes works, for the same reason
+  // the ballpark photo field predates its own upload endpoint.
+  //
+  // ONE dimension for both vocabularies, unlike the header triads: the MLB
+  // treatment keys and MiLB's home/away are disjoint sets writing ONE store,
+  // so the id needs no club classification to know where it lands — the
+  // two-store problem that split mlbHeader/milbHeader does not exist here.
+  //
+  // Like tileBg it has no field segment (a tile wears exactly one mark), but
+  // unlike tileBg the write is a plain leaf at {teamId}.{key}.
+  logo: {
+    store: () => 'logo-url-overrides',
+    keys: [...MLB_TREATMENTS, ...MILB_SIDES],
+    leaf: { kind: 'url' },
+    path: (teamId, key) => [teamId, key],
+  },
 }
 
 const isTeamIdSegment = (s) => /^[1-9]\d*$/.test(s)
@@ -252,9 +293,13 @@ export function parseIdentityFieldId(id) {
   if (dimension.leaf) {
     if (rest.length !== 1) return null
     const [key] = rest
+    if (dimension.keys && !dimension.keys.includes(key)) return null
     const store = dimension.store(key)
     if (!store) return null
-    return { id, dimension: name, store, teamId, key, field: null, spec: dimension.leaf, path: null }
+    // A leaf dimension with a `path` writes a plain value there (logo); one
+    // without is tileBg's replace-the-bg-swatch special case (apply.js).
+    const path = dimension.path ? dimension.path(teamId, key) : null
+    return { id, dimension: name, store, teamId, key, field: null, spec: dimension.leaf, path }
   }
 
   if (dimension.teamLevel) {

@@ -115,7 +115,9 @@
 }
 
 /* The jersey strip. One row, finger-scrollable on a phone, same as every other
-   horizontal picker here. */
+   horizontal picker here — each stop is now the REAL tile that jersey renders
+   (TeamTreatmentMark through treatmentTile), not a text pill, so the strip is
+   the club's wardrobe at a glance and repaints live as the draft moves. */
 .iddrawer__strip {
   display: flex;
   gap: var(--space-2);
@@ -125,9 +127,12 @@
 
 .iddrawer__tile {
   flex: 0 0 auto;
-  padding: 5px 12px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 6px 10px;
   border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--surface-card);
   color: var(--text-body);
   font-family: var(--font-display);
@@ -144,6 +149,34 @@
 .iddrawer__tile:focus-visible {
   outline: none;
   box-shadow: var(--ring);
+}
+
+/* The mark box inside a strip stop — the same three-custom-property contract
+   every tile stylesheet reads (.gamecard__logobox, .masthead__logobox), at
+   thumb size. The label under it stays readable in both selection states
+   because it inherits the button's own color. */
+.iddrawer__tilemark {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--tint, var(--paper-1));
+}
+.iddrawer__tilemark--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.iddrawer__tilemark .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
 }
 
 .iddrawer__group {
@@ -261,4 +294,135 @@
 .iddrawer__foot {
   border-top: var(--bw-hair) dashed var(--border-rule);
   padding-top: var(--space-2);
+}
+
+/* The eyedropper beside a colour box — same footing as the native swatch it
+   sits next to: a shortcut into the text field, never the control itself. */
+.iddrawer__eyedrop {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  cursor: pointer;
+}
+.iddrawer__eyedrop:hover {
+  color: var(--text-body);
+}
+.iddrawer__eyedrop:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ---- the Logo art group ---- */
+
+/* The tile at judging size beside its controls; stacks on a narrow phone. */
+.iddrawer__logo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+/* Same custom-property contract as the strip's thumb, at judging size. */
+.iddrawer__logomark {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--tint, var(--paper-1));
+}
+.iddrawer__logomark--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.iddrawer__logomark .teamlogo {
+  transform: translateX(var(--offset-x, 0)) translateY(var(--offset-y, 0)) scale(var(--scale, 1.32));
+}
+
+.iddrawer__logocontrols {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* The real picker is the button; the input only has to exist and stay
+   reachable to assistive tech. Not display:none — that removes it from the
+   accessibility tree along with the layout. */
+.iddrawer__logofile {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.iddrawer__logoactions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* The drawer's own working-surface button — the idadmin__btn look, re-inked
+   for paper (that one draws in the hero's `currentColor`, which down here
+   would be body text on body text). */
+.iddrawer__btn {
+  padding: 4px 11px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.iddrawer__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.iddrawer__btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* ---- the stamp previews ---- */
+
+/* Two real stamps, away slot and home slot, capped so a desktop drawer doesn't
+   print them poster-sized — the art is judged at roughly Logbook scale. */
+.iddrawer__stamps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 150px));
+  gap: var(--space-3);
+}
+
+.iddrawer__stamp {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.iddrawer__stampcap {
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
