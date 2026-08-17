@@ -76,6 +76,10 @@
       "class": "spoiler-free",
       "why": "Static all-star-rosters.json reader. Shows each game's final plainly, but an All-Star Game is decades-settled exhibition trivia outside the rule's scope (ADR-0019)."
     },
+    "attendance.js": {
+      "class": "spoiler-free",
+      "why": "Static attendance.json — a Final-games season aggregate (avg/high/low gate), same footing as WAR. No SealBox."
+    },
     "awardsHistory.js": {
       "class": "spoiler-free",
       "why": "Static awards-history.json reader — who won what, by season."
@@ -87,13 +91,6 @@
     "between-innings.js": {
       "class": "caller-gated",
       "why": "Focus mode's post-half card set (ConsoleBand.jsx/BetweenInnings.jsx) — up to 5 score-free facts, filtered through a hard kind allowlist that excludes every score-reading checkpoint family. Reads the batting side's previous halves' plays via the SAME caller-gated builders prehalf-callouts.js uses (foulVolume/pitchPace/tto/ttoPitches), computed for the half about to be entered next. This module owns that gate (halfIndex(next) <= revealedThrough + 1), same contract as prehalf-callouts.js."
-    },
-    "boxscore/gameNotes.js": {
-      "class": "reveal-only",
-      "why": "The info block under the tables — HBP, WP, Balk, Pitches-strikes — and the rule filing each row under a club. Split out of boxscore.js; same footing, because these rows are read off a FINAL box score and several of them state an outcome outright. Runs only from inside `selectBoxscore`.",
-      "importers": [
-        "api/boxscore.js"
-      ]
     },
     "boxscore.js": {
       "class": "reveal-only",
@@ -107,6 +104,13 @@
         "screens/BoxScore.jsx",
         "screens/boxscore/revealBoxScore.js",
         "screens/PostseasonSeriesPage.jsx"
+      ]
+    },
+    "boxscore/gameNotes.js": {
+      "class": "reveal-only",
+      "why": "The info block under the tables — HBP, WP, Balk, Pitches-strikes — and the rule filing each row under a club. Split out of boxscore.js; same footing, because these rows are read off a FINAL box score and several of them state an outcome outright. Runs only from inside `selectBoxscore`.",
+      "importers": [
+        "api/boxscore.js"
       ]
     },
     "broadcast.js": {
@@ -191,10 +195,6 @@
         "screens/BoxScore.jsx"
       ]
     },
-    "attendance.js": {
-      "class": "spoiler-free",
-      "why": "Static attendance.json — a Final-games season aggregate (avg/high/low gate), same footing as WAR. No SealBox."
-    },
     "comebackWins.js": {
       "class": "spoiler-free",
       "why": "Static comeback-wins.json — a Final-games season aggregate, same footing as WAR. No SealBox."
@@ -245,14 +245,6 @@
       "class": "spoiler-free",
       "why": "The raw feed/manager/win-probability FETCHERS. A raw fetch result produces no DOM on its own, so fetching is spoiler-safe — but the feed IS score-bearing, so every SELECTOR over it is classified separately and useGameData still defers the fetch until its consuming surface is opened."
     },
-    "gamePreview.js": {
-      "class": "spoiler-free",
-      "why": "The preview poster's data model — the ONE place every value that can be printed into a shareable image is assembled. Spoiler-free by construction: it composes select.js only (selectGameInfo/selectLineup/selectOfficials/selectTeamMeta), plus the season aggregates the caller already fetched and the nightly umpire-accuracy summary. It deliberately imports no reveal-only module and none of the caller-gated staging selectors — a poster has no half-inning to be 'entering', so the posted card is the only correct source. Auditing the poster is reading this one file: the canvas painter in src/lib/preview/ is handed this object and no feed."
-    },
-    "gamehighlights.js": {
-      "class": "spoiler-free",
-      "why": "The static per-team highlight archive reader. Decided games only, every filter already ran in the generator, so the rails stay dumb. Not a scoring surface."
-    },
     "gameNotes.js": {
       "class": "spoiler-free",
       "why": "Pre-game press-notes PDF links. Renders only a link in-app; the PDF recaps prior results, so it opens in a new tab as a user-initiated jump."
@@ -261,12 +253,20 @@
       "class": "spoiler-free",
       "why": "Deliberately NOT reveal-only. A recap photo narrates the outcome by looking at it, but /photos is a standalone page OUTSIDE the scoring flow — it sits outside the rule's scope rather than carving a hole in it, and carries its own disclaimer. pickHeroPhoto() is the one export with scoring-surface consumers (the condensed-game poster, on the slate and in the box score) and earns its safety separately: it returns bare URLs with no caption text, and both readers render the image only after a reveal — the slate's on an already-revealed flip-card back face, the box score's from inside its SealBox reveal (GameVideoRow, which calls pickHeroPhoto live because the nightly day index has nothing yet for a game just finished). See pickHeroPhoto's own header."
     },
+    "gamePreview.js": {
+      "class": "spoiler-free",
+      "why": "The preview poster's data model — the ONE place every value that can be printed into a shareable image is assembled. Spoiler-free by construction: it composes select.js only (selectGameInfo/selectLineup/selectOfficials/selectTeamMeta), plus the season aggregates the caller already fetched and the nightly umpire-accuracy summary. It deliberately imports no reveal-only module and none of the caller-gated staging selectors — a poster has no half-inning to be 'entering', so the posted card is the only correct source. Auditing the poster is reading this one file: the canvas painter in src/lib/preview/ is handed this object and no feed."
+    },
     "gameStory.js": {
       "class": "reveal-only",
       "why": "MLB.com recap headlines routinely state the final. Safe only because GameStoryCard mounts inside the box score's already-revealed render.",
       "importers": [
         "components/game/GameStoryCard.jsx"
       ]
+    },
+    "gamehighlights.js": {
+      "class": "spoiler-free",
+      "why": "The static per-team highlight archive reader. Decided games only, every filter already ran in the generator, so the rails stay dumb. Not a scoring surface."
     },
     "highlights.js": {
       "class": "mixed",
@@ -581,13 +581,13 @@
       "class": "caller-gated",
       "why": "The pre-half strip shown ABOVE a half's seal — what a broadcast would tell you as the half begins, before any of its results. It OWNS the gate for the checkpoint/tto/inning builders it calls."
     },
-    "prospects.js": {
-      "class": "spoiler-free",
-      "why": "Static top-prospects reader. Rankings, not game state."
-    },
     "prospectTrend.js": {
       "class": "spoiler-free",
       "why": "Static prospect-trend reader — a level-relative OPS/ERA percentile computed from season stat splits. Season aggregate, not game state."
+    },
+    "prospects.js": {
+      "class": "spoiler-free",
+      "why": "Static top-prospects reader. Rankings, not game state."
     },
     "recentForm.js": {
       "class": "spoiler-free",
@@ -601,6 +601,22 @@
       "class": "spoiler-free",
       "why": "Static rehab.json — league-wide rehab assignments. Roster state, no score."
     },
+    "reports/bullpen.js": {
+      "class": "spoiler-free",
+      "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."
+    },
+    "reports/clubs.js": {
+      "class": "spoiler-free",
+      "why": "Club identity (name, abbreviation, division) off the static teams.json, so the report boards can join a bare teamId to a name. Identity data only. No SealBox."
+    },
+    "reports/farmSystem.js": {
+      "class": "spoiler-free",
+      "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
+    },
+    "reports/gate.js": {
+      "class": "spoiler-free",
+      "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
+    },
     "rookies.js": {
       "class": "spoiler-free",
       "why": "Static rookies.json — debut dates and rookie windows."
@@ -609,18 +625,6 @@
       "class": "spoiler-free",
       "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
     },
-    "scorecardGame.js": {
-      "class": "reveal-gated",
-      "why": "The scorecard's inked grid, P/WH/FO row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the DEV-only Lab passes Infinity from behind the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
-      "importers": [
-        "screens/ScorecardLab.jsx",
-        "screens/scorecard/ScorecardPage.jsx"
-      ]
-    },
-    "scorecard/notation.js": {
-      "class": "spoiler-free",
-      "why": "The scorecard's pure notation rules, split off scorecardGame.js at the file cap: the non-at-bat event set, the out-kind classifier, and the diamond-center chip's single-line code. Every input is an eventType, a description sentence or an already-derived scorebook code — no feed, no linescore, no reveal mark."
-    },
     "schedule.js": {
       "class": "spoiler-free",
       "why": "The slate/schedule fetchers. Every one PRUNES the score out with `fields=` (see GAMES_BY_PK_FIELDS) — that pruning is what makes this file spoiler-free, and is why logbook.js lives in its own file rather than beside these."
@@ -628,6 +632,18 @@
     "scheduleGames.js": {
       "class": "spoiler-free",
       "why": "Pure post-fetch filters over schedule.js's already cutoff-respecting rows (split out at the 600-line file-size cap) — no fetch of its own, so it inherits schedule.js's footing rather than earning a separate one."
+    },
+    "scorecard/notation.js": {
+      "class": "spoiler-free",
+      "why": "The scorecard's pure notation rules, split off scorecardGame.js at the file cap: the non-at-bat event set, the out-kind classifier, and the diamond-center chip's single-line code. Every input is an eventType, a description sentence or an already-derived scorebook code — no feed, no linescore, no reveal mark."
+    },
+    "scorecardGame.js": {
+      "class": "reveal-gated",
+      "why": "The scorecard's inked grid, P/WH/FO row, scoreboard, decisions and pitcher table. Every builder clamps to a `through` half-index (ADR-0009, same shape as pitchers.js): the live scorecard page passes the user's own revealedThrough, the DEV-only Lab passes Infinity from behind the DEV gate. Extras unlock one inning at a time off the same clamp (ADR-0008).",
+      "importers": [
+        "screens/ScorecardLab.jsx",
+        "screens/scorecard/ScorecardPage.jsx"
+      ]
     },
     "search.js": {
       "class": "spoiler-free",
@@ -661,13 +677,13 @@
       "class": "spoiler-free",
       "why": "The memoized same-origin read every build-time-fetch reader shares. Transport only — like statsapi.js it has no idea what it is fetching, and its callers carry the classification."
     },
-    "statsapi.js": {
-      "class": "spoiler-free",
-      "why": "The one getJson fetch wrapper. Transport only — it has no idea what it is fetching."
-    },
     "statsLevels.js": {
       "class": "spoiler-free",
       "why": "The roster-independent season-stats endpoint, summing a player's lines across levels. Season aggregates."
+    },
+    "statsapi.js": {
+      "class": "spoiler-free",
+      "why": "The one getJson fetch wrapper. Transport only — it has no idea what it is fetching."
     },
     "team.js": {
       "class": "spoiler-free",
@@ -685,10 +701,6 @@
       "class": "spoiler-free",
       "why": "Static team-records/{season}/{teamId}.json — a ledger of FINAL games tallied into season situational records for the team hub's Numbers tab. Same footing as comebackWins.js and the team-score aggregates: the nightly cron writes it before the day's games, and the reader applies the page's own day-before cutoff. An open surface (ADR-0034)."
     },
-    "teams-static.js": {
-      "class": "spoiler-free",
-      "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."
-    },
     "teamScore.js": {
       "class": "cutoff-gated",
       "why": "Dated Quality and Current Form readers, same snapshot-at-or-before-cutoff selection as seasonScore.js."
@@ -700,6 +712,10 @@
     "teamTransactions.js": {
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
+    },
+    "teams-static.js": {
+      "class": "spoiler-free",
+      "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."
     },
     "tradeDeadline.js": {
       "class": "spoiler-free",

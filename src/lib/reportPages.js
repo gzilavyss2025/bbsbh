@@ -51,6 +51,29 @@ export const PAGE_GROUPS = [
     ],
   },
   {
+    id: 'reports',
+    label: 'The reports',
+    // The broadcast package (src/screens/reports/, styles/68-broadcast-reports.css).
+    // Its own group rather than five more rows under "This season" for two
+    // reasons. They are a SET — one graphics package, one voice, one nightly
+    // pair of data files behind four of them — and a reader who finds one is
+    // very likely to want the others. And they answer a different KIND of
+    // question than the rest of that group: Standings and League Leaders say
+    // who is winning, while these say who is showing up, how long it takes,
+    // what a club has coming and how much work its pen has already done. None
+    // of them is about a result.
+    //
+    // The Rundown leads because it is the way in: one figure from each of the
+    // other four, each opening the board it came from.
+    pages: [
+      { label: 'The Rundown', path: '/rundown' },
+      { label: 'Attendance', path: '/attendance' },
+      { label: 'Farm System Index', path: '/farm' },
+      { label: 'Bullpen Availability', path: '/bullpens' },
+      { label: 'Pace of Play', path: '/pace' },
+    ],
+  },
+  {
     id: 'prospects',
     label: 'Prospects & injuries',
     // Unsettled: two items is a label pretending to be a group. It survives
@@ -158,6 +181,27 @@ export const FOOTER_TRAIL = [
   GUIDES_GROUP.pages[GUIDES_GROUP.pages.length - 1],
   TOOLS_GROUP.pages.find((page) => page.path === '/about'),
 ]
+
+// The five broadcast reports, ADDRESS -> route name (src/screens/reports/).
+// Their addresses live here rather than in route.js because this file is
+// already the single source of truth for what a report page is and where it
+// lives, and the group above lists these same five: a table beside those rows
+// cannot drift from them the way a second copy in the parser could. route.js
+// imports it for its one parse branch.
+//
+// They are flat segments carrying no query. Each shows a whole league's season
+// to date, so `?d=`/`?s=` has nothing to narrow, and every control on them (the
+// sort column, the index weighting) is page state rather than an address — the
+// same call StandingsPage and TeamRecordsPage already made for their boards.
+// '/farm' is the address because it is the word people say; the route name is
+// 'farm-system' so App.jsx's switch reads unambiguously.
+export const REPORT_ROUTES = {
+  rundown: 'rundown',
+  attendance: 'attendance',
+  pace: 'pace',
+  farm: 'farm-system',
+  bullpens: 'bullpens',
+}
 
 // A guide path is an ordinary URL, not an app route — anything rendering one
 // of these must use a real anchor and let the browser leave the SPA, or the

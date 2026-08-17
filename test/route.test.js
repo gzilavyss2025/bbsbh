@@ -94,6 +94,14 @@ test('single-segment named routes resolve to their route name', () => {
     '/admin': 'admin',
     '/umpires': 'umpire-rankings',
     '/team-records': 'team-records',
+    // The five broadcast reports (REPORT_ROUTES, lib/reportPages.js). '/farm'
+    // is the address; 'farm-system' is the route name — the one pair in the
+    // set where the two deliberately differ.
+    '/rundown': 'rundown',
+    '/attendance': 'attendance',
+    '/pace': 'pace',
+    '/farm': 'farm-system',
+    '/bullpens': 'bullpens',
     '/scorecard-lab': 'scorecard-lab',
     '/identity-lab': 'identity-lab',
     '/uniform-names': 'uniform-names',

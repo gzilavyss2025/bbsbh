@@ -100,6 +100,24 @@ const BUDGETS = {
   // left here is PassportBook/PassportPage/PassportCover's own art, including
   // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
+  // ONE sheet for the five pages in src/screens/reports/, which is why it
+  // starts life over the cap rather than growing into it. Splitting it is the
+  // wrong fix twice over: it would put five near-identical partials into
+  // src/styles (whose own directory budget this consolidation exists to
+  // protect), and it would hit the shared-chunk ordering trap src/index.css's
+  // header records — a partial two lazy routes share becomes its own chunk
+  // whose <link> order Vite decides. The right lever if it keeps growing is a
+  // sixth report page earning its own partial, not a split of this one.
+  'src/styles/68-broadcast-reports.css': 700, // 644
+  // The directory-budget table itself. Every entry in it carries an inline
+  // rationale BY DESIGN — that is the whole convention, and it means the file
+  // grows a few lines on any commit that adds a deliberate exception. It was
+  // trimmed back under the cap once already (c1b9043b) and immediately went
+  // over again on the next such commit, which is the signal that the cap is
+  // the wrong instrument for a documented lookup table. The thing worth
+  // watching here is the BUDGET NUMBERS, and check-dir-size.mjs watches those
+  // itself.
+  'scripts/check-dir-size.mjs': 700, // 608
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep

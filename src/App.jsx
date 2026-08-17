@@ -151,6 +151,21 @@ const TeamRecordsPage = lazyNamed(
   () => import('./screens/TeamRecordsPage.jsx'),
   'TeamRecordsPage',
 )
+// The five broadcast report pages (src/screens/reports/). Lazy like every
+// other screen, and they SHARE one stylesheet
+// (styles/68-broadcast-reports.css) which each of them imports — see that
+// file's header for why one partial rather than five.
+const RundownPage = lazyNamed(() => import('./screens/reports/RundownPage.jsx'), 'RundownPage')
+const AttendancePage = lazyNamed(
+  () => import('./screens/reports/AttendancePage.jsx'),
+  'AttendancePage',
+)
+const PacePage = lazyNamed(() => import('./screens/reports/PacePage.jsx'), 'PacePage')
+const FarmSystemPage = lazyNamed(
+  () => import('./screens/reports/FarmSystemPage.jsx'),
+  'FarmSystemPage',
+)
+const BullpenPage = lazyNamed(() => import('./screens/reports/BullpenPage.jsx'), 'BullpenPage')
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
@@ -322,6 +337,16 @@ export default function App() {
         half={route.half}
       />
     )
+  } else if (route.name === 'rundown') {
+    content = <RundownPage />
+  } else if (route.name === 'attendance') {
+    content = <AttendancePage />
+  } else if (route.name === 'pace') {
+    content = <PacePage />
+  } else if (route.name === 'farm-system') {
+    content = <FarmSystemPage />
+  } else if (route.name === 'bullpens') {
+    content = <BullpenPage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes-debug') {

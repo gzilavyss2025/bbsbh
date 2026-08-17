@@ -1,0 +1,644 @@
+/* ============================================================
+   BROADCAST REPORTS — the shared graphics package for the five
+   standalone report pages under src/screens/reports/:
+   The Rundown, The Gate, The Clock, The Farm Report, The Pen.
+
+   ONE STYLESHEET FOR FIVE PAGES, deliberately. Each is a lazy
+   route, and Vite emits a partial that two lazy chunks share as
+   its OWN chunk whose <link> order it decides — the trap
+   src/index.css's header records (38-umpire-pages and
+   52-highlight-clip-card came back into the core sheet for
+   exactly that reason). All five import this one instead, so the
+   chunk is emitted once and its rules never race a sibling's.
+
+   THE LOOK, AND WHY IT IS NOT THE SCOREBOOK. The scoring surfaces
+   are paper — manila, pencil rules, kraft seals, a quiet voice,
+   because a scorer is writing on them. A report is the segment
+   BETWEEN innings: it is read, not written on, and it should
+   announce itself. So this borrows a broadcast's lower thirds — a
+   hard slab of ink, a seam-red bar down its edge, condensed
+   capitals at a size no scorebook cell would use, mono figures,
+   and rules that are heavy where the scorebook's are hairlines.
+
+   It introduces NO new colour: --navy for the slab, --clay (the
+   infield-clay seam red) for the accent, --paper-* for the field,
+   --field green for a meter's positive end. The global ALL-CAPS
+   invariant does the shouting; nothing here sets text-transform.
+   ============================================================ */
+
+/* ---- masthead ---------------------------------------------- */
+
+.bcast {
+  position: relative;
+  display: flex;
+  margin: var(--space-4) 0 var(--space-6);
+  background: var(--navy);
+  color: var(--text-on-ink);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: var(--shadow-raised);
+}
+
+/* The seam-red edge. 6px, full height, no radius of its own — it is
+   the one element on the page allowed to touch both corners. */
+.bcast__bar {
+  flex: 0 0 6px;
+  background: var(--clay);
+}
+
+.bcast__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.bcast__eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-display);
+  color: var(--paper-2);
+  opacity: 0.72;
+}
+
+/* The strand name sits in a clay chip — the one place the accent
+   colour carries text, which is why the pairing (--paper-2 on
+   --clay, 4.6:1) is an entry in check-contrast.mjs. */
+.bcast__strand {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--clay);
+  color: var(--paper-2);
+  opacity: 1;
+}
+
+.bcast__slash {
+  opacity: 0.5;
+}
+
+.bcast__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-tight-display);
+  color: var(--paper-3);
+}
+
+.bcast__dek {
+  margin: var(--space-3) 0 0;
+  max-width: 56ch;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--paper-2);
+  opacity: 0.86;
+}
+
+/* The lower third: season, through-date, sample size. Mono, because
+   these are the numbers that say how much to trust the page. */
+.bcast__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) 0 0;
+  border-top: var(--bw-hair) solid rgba(251, 246, 233, 0.22);
+}
+
+.bcast__metaitem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.bcast__meta dt {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--paper-2);
+  opacity: 0.62;
+}
+
+.bcast__meta dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-variant-numeric: tabular-nums;
+  color: var(--paper-3);
+}
+
+/* ---- section divider --------------------------------------- */
+
+.bcast-sec {
+  margin: var(--space-8) 0 0;
+}
+
+.bcast-sec__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+/* The rule that runs out from the heading to the edge of the column —
+   a broadcast's own way of saying "new segment". */
+.bcast-sec__title::after {
+  content: '';
+  flex: 1 1 auto;
+  height: var(--bw-heavy);
+  background: var(--clay);
+  opacity: 0.5;
+}
+
+.bcast-sec__note {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+/* ---- stat slabs -------------------------------------------- */
+
+.slabrow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+}
+
+@media (min-width: 620px) {
+  .slabrow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.slab {
+  padding: var(--space-3);
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-heavy) solid var(--navy);
+  border-radius: var(--radius-xs);
+}
+
+/* A slab whose figure is the point of the page gets the seam-red cap
+   instead of the navy one. One per row, at most — a page where every
+   slab is emphasised has emphasised nothing. */
+.slab--lead {
+  border-top-color: var(--clay);
+}
+
+.slab__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-sm);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+
+.slab__label {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.slab__note {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+/* ---- bar cells --------------------------------------------- */
+
+.barcell {
+  position: relative;
+  display: block;
+  min-width: 84px;
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--rule-grid);
+  overflow: hidden;
+}
+
+.barcell__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--navy);
+  opacity: 0.16;
+}
+
+.barcell--hot .barcell__fill {
+  background: var(--clay);
+  opacity: 0.24;
+}
+
+.barcell--cool .barcell__fill {
+  background: var(--field);
+  opacity: 0.2;
+}
+
+.barcell__text {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-heading);
+}
+
+/* ---- month trend strip ------------------------------------- */
+
+.trendstrip {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 68px;
+  height: 26px;
+}
+
+.trendstrip__col {
+  flex: 1 1 0;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  background: var(--rule-grid);
+  border-radius: 1px;
+}
+
+.trendstrip__col--none {
+  background: transparent;
+  border-bottom: var(--bw-hair) dotted var(--border-rule);
+}
+
+.trendstrip__fill {
+  width: 100%;
+  background: var(--navy);
+  opacity: 0.55;
+  border-radius: 1px;
+}
+
+/* ---- three-way status meter (The Pen) ---------------------- */
+
+.statusmeter {
+  display: flex;
+  width: 100%;
+  min-width: 90px;
+  height: 12px;
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  background: var(--rule-grid);
+}
+
+.statusmeter__seg {
+  height: 100%;
+}
+
+.statusmeter__seg--fresh {
+  background: var(--field);
+}
+
+.statusmeter__seg--limited {
+  background: var(--marker);
+}
+
+.statusmeter__seg--down {
+  background: var(--clay);
+}
+
+/* ---- shared report table ----------------------------------- */
+
+/* These pages all print the same shape of board — rank, club, then
+   numeric columns — so the treatment lives once here rather than
+   five times. It layers ON the app's existing `.standings` table
+   rather than replacing it: same borders, same row rhythm, with the
+   broadcast's heavier head rule and mono figures. */
+.rpt {
+  width: 100%;
+}
+
+.rpt thead th {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  border-bottom: var(--bw-heavy) solid var(--navy);
+  white-space: nowrap;
+}
+
+.rpt td {
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+.rpt td.team,
+.rpt th.team {
+  font-family: var(--font-body);
+  text-align: left;
+}
+
+.rpt__rank {
+  display: inline-block;
+  min-width: 2.2em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  color: var(--text-caption);
+}
+
+/* THE STICKY CLUB COLUMN. Thirty clubs and five numeric columns do not fit a
+   phone, and the app's answer to a wide ledger is .ledger-wrap's horizontal
+   scroll — which on a first draft of these boards scrolled the numbers away
+   and left a list of club names. Pinning the club cell lets the figures scroll
+   UNDER it, the same treatment .standings--full already gives its own team
+   column, and it inherits both of that one's hard-won caveats.
+   `border-collapse: separate` (set on .standings) is what keeps each row's
+   hairline aligned across the pinned/scrolling seam; and Safari drops
+   position:sticky on a cell whose own display is not table-cell, which the
+   shared `.standings td.team { display: flex }` sets — so the TD goes back to
+   a table cell and the flex moves onto .rpt__club inside it
+   (components/reports/ClubCell.jsx). */
+.rpt th.team,
+.rpt td.team {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 132px;
+  background: var(--bg-page);
+}
+
+.rpt td.team {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.rpt thead th.team {
+  z-index: 2;
+}
+
+.rpt__club {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rpt__club > .plink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* The reader's own club, wherever it lands on the board. */
+.rpt__row--mine {
+  background: var(--paper-3);
+}
+
+/* Solid, not translucent: a pinned cell that lets the scrolling columns show
+   through is worse than no highlight at all. The clay edge marks the row. */
+.rpt__row--mine td.team {
+  background: var(--paper-3);
+  box-shadow: inset 3px 0 0 var(--clay);
+}
+
+.rpt__sub {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* ---- control chips ----------------------------------------- */
+
+.rpt-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-3);
+}
+
+.rpt-chip {
+  min-height: var(--tap-min);
+  padding: var(--space-2) var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.rpt-chip.is-on {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--text-on-ink);
+}
+
+/* ---- the rundown's card grid ------------------------------- */
+
+.rundown {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+}
+
+@media (min-width: 620px) {
+  .rundown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rundown__card {
+  display: block;
+  width: 100%;
+  padding: var(--space-4);
+  text-align: left;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-heavy) solid var(--clay);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.rundown__card:hover {
+  background: var(--surface-inset);
+}
+
+.rundown__eyebrow {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-display);
+  color: var(--clay-deep);
+}
+
+.rundown__figure {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-hero-sm);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-tight-score);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+}
+
+.rundown__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.rundown__note {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-muted);
+}
+
+/* ---- the farm index's pillar bars -------------------------- */
+
+.pillars {
+  display: flex;
+  gap: 2px;
+  /* A fixed width, not 100%: the cell is inside an auto-layout table whose
+     other columns are shrink-to-fit, so a percentage width resolves against a
+     box that has not been sized yet. 118px is the width the three segments
+     are scaled against, which makes the bar comparable down the column. */
+  width: 118px;
+  height: 14px;
+  background: var(--rule-grid);
+  border-radius: 1px;
+}
+
+.pillars__seg {
+  height: 100%;
+  border-radius: 1px;
+  background: var(--navy);
+}
+
+.pillars__seg--capital {
+  opacity: 0.85;
+}
+
+.pillars__seg--production {
+  background: var(--field);
+  opacity: 0.8;
+}
+
+.pillars__seg--youth {
+  background: var(--seal);
+  opacity: 0.9;
+}
+
+.pillar-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pillar-key li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+.pillar-key__swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.pillar-key__swatch--capital {
+  background: var(--navy);
+}
+
+.pillar-key__swatch--production {
+  background: var(--field);
+}
+
+.pillar-key__swatch--youth {
+  background: var(--seal);
+}
+
+/* The Pen's legend reads the same three inks as its own meter, so the key and
+   the bar can never disagree about which colour means "likely down". */
+.pillar-key__swatch--fresh {
+  background: var(--field);
+}
+
+.pillar-key__swatch--limited {
+  background: var(--marker);
+}
+
+.pillar-key__swatch--down {
+  background: var(--clay);
+}
+
+/* ---- the method note --------------------------------------- */
+
+/* Every page that computes something rather than reporting it ends on
+   one of these: what was measured, what it cannot see, where the
+   numbers came from. Set in the reading serif and boxed, so it reads
+   as editorial rather than as another stat block. */
+.method {
+  margin: var(--space-8) 0 0;
+  padding: var(--space-4);
+  background: var(--paper-1);
+  border: var(--bw-hair) dashed var(--border-rule);
+  border-radius: var(--radius-sm);
+}
+
+.method h2 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.method p {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+.method p:last-child {
+  margin-bottom: 0;
+}
