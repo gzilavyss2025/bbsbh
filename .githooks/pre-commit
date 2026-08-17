@@ -1,11 +1,22 @@
 #!/bin/sh
-# Local safety net: refuse a commit whose unit suite is red, so a break is
-# caught on your machine before it reaches a PR (see docs/testing.md).
+# Local safety net: refuse a commit whose unit suite is red, or whose staged
+# content carries CRLF line endings, so either is caught on your machine before
+# it reaches a PR (see docs/testing.md).
 #
 # Skips itself in CI (GitHub Actions sets $CI=true), so it NEVER interferes with
 # the nightly data crons or the Actions runners — it only guards local commits.
 # Bypass for a genuine work-in-progress commit with `git commit --no-verify`.
 [ "$CI" = "true" ] && exit 0
+
+# Line endings first: it is one git call, and the commit is the last place the
+# fix is still free. Let CRLF reach a branch and the next edit to that file
+# arrives as a whole-file merge conflict rather than a diff — PR #740 turned a
+# two-line change into a 684-line one that way. .gitattributes should make this
+# unreachable; this is the alarm that tells you when it stopped working.
+if ! node scripts/check-line-endings.mjs; then
+  echo "pre-commit: CRLF blocked the commit. Run 'git add --renormalize .', stage the result, and commit again."
+  exit 1
+fi
 
 # Only worth running when JS/JSON under test actually changed — a docs- or
 # CSS-only commit skips the suite so committing stays fast.

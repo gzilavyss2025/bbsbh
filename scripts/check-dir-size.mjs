@@ -366,20 +366,17 @@ const BUDGETS = {
   // gen-mono-logos.mjs: that script prunes its output directory of anything
   // not keyed by a numeric team id on every full run, so a league mark living
   // there would be deleted nightly. Flat here like every other gen-*.mjs.
-  // +1 for gen-prospect-trend.mjs — the nightly prospect percentile
-  // generator, flat here like every other gen-*.mjs in this directory.
-  // +1 for gen-prospect-trend-backfill.mjs — its one-time historical
-  // backfill, the same pair-of-files shape as gen-rookies.mjs/gen-rookies-
-  // backfill.mjs already noted above.
+  // +2 for gen-prospect-trend.mjs (the nightly prospect percentile generator)
+  // and gen-prospect-trend-backfill.mjs (its one-time historical backfill) —
+  // the same pair-of-files shape as gen-rookies.mjs/gen-rookies-backfill.mjs
+  // already noted above, flat here like every other gen-*.mjs.
   // +1 for check-strike-links.mjs — another flat lint guard over src/styles/,
   // the same shape and directory as check-focus-ring.mjs and
   // check-typography.mjs already here. A guards/ subdirectory would have to
   // take all fourteen of them at once, which is a move, not this change.
-  // +1 for gen-milb-ballparks.mjs — the MiLB venue-list generator, flat here
-  // like every other gen-*.mjs in this directory.
-  // +1 for gen-ballpark-thumbs.mjs — the mobile-sized ballpark-photo
-  // thumbnail generator, flat here like every other gen-*.mjs in this
-  // directory.
+  // +2 for gen-milb-ballparks.mjs (the MiLB venue-list generator) and
+  // gen-ballpark-thumbs.mjs (mobile-sized ballpark-photo thumbnails) — flat
+  // here like every other gen-*.mjs in this directory.
   // +1 for gen-milb-alumni.mjs — the nightly precompute behind the "Made The
   // Show" card. A generator belongs beside its siblings here: the nightly
   // workflow runs this directory as a flat list, and scripts/lib/ is for
@@ -392,14 +389,17 @@ const BUDGETS = {
   // token sheet). Both are top-level by the rule stated below — a generator runs
   // on import, and scripts/lib is for helpers that do not.
   // +1 for gen-attendance.mjs — the nightly per-team attendance sweep behind
-  // the Ballpark card's avg/high/low/rank, flat here like every other
-  // gen-*.mjs.
+  // the Ballpark card's avg/high/low/rank, flat like every other gen-*.mjs.
   // +1 for gen-team-records.mjs — the nightly per-game ledger behind the
   // Numbers tab's situational Records card. Same reason gen-milb-alumni.mjs
   // took a number above: the nightly workflow runs this directory as a flat
   // list, and a generator file RUNS on import, so it cannot live in
   // scripts/lib/ — which is where its testable half (team-records.mjs) went.
-  scripts: 82,
+  // +1 for check-line-endings.mjs — another flat lint guard, same shape and
+  // argument as check-dead-exports.mjs and check-strike-links.mjs already
+  // counted here. It is the REPORTING half of the LF rule whose enforcing half
+  // is .gitattributes; a guards/ subdirectory would take all sixteen at once.
+  scripts: 83,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
