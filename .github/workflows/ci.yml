@@ -33,3 +33,7 @@ jobs:
       # dev-only write-back endpoint never reached the shipped bundle. See
       # docs/adr/0029-dev-only-data-write-back.md.
       - run: npm run check:dist-dev
+      # Also needs the artifact: asserts the built worker's navigation fallback
+      # still lets the server-rendered guides at /learn reach the network,
+      # instead of answering them from the precached app shell.
+      - run: npm run check:sw-learn

@@ -399,7 +399,7 @@ const BUDGETS = {
   // took a number above: the nightly workflow runs this directory as a flat
   // list, and a generator file RUNS on import, so it cannot live in
   // scripts/lib/ — which is where its testable half (team-records.mjs) went.
-  scripts: 81,
+  scripts: 82,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
