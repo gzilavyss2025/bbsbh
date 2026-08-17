@@ -6,6 +6,7 @@ import {
   GUIDES_GROUP,
   TOOLS_GROUP,
   MENU_GROUPS,
+  FOOTER_TRAIL,
   isGuidePath,
 } from '../src/lib/reportPages.js'
 
@@ -71,9 +72,9 @@ test('every group has a stable id and a label, and holds at least one page', () 
   }
 })
 
-// The two menu-only groups must stay OUT of the flat array: ReportFooter
-// appends its own About link, and a report page's footer listing "About" and
-// "Logo Sheet" is what REPORT_PAGES existing separately is meant to prevent.
+// The two menu-only groups must stay OUT of the flat array. The footers render
+// PAGE_GROUPS as columns and finish with FOOTER_TRAIL, so a page that leaked
+// into the report groups would be listed twice on every page of the site.
 test('guides and tools are menu-only — never report pages', () => {
   const reportPaths = new Set(REPORT_PAGES.map((p) => p.path))
   for (const page of [...GUIDES_GROUP.pages, ...TOOLS_GROUP.pages]) {
@@ -90,6 +91,29 @@ test('MENU_GROUPS is the report groups plus guides and tools, in that order', ()
     MENU_GROUPS.map((g) => g.id),
     [...PAGE_GROUPS.map((g) => g.id), 'guides', 'tools']
   )
+})
+
+// Both footers end on FOOTER_TRAIL. It is derived from the two menu-only
+// groups by lookup rather than by index alone, so it fails here — not silently
+// on every page of the site — if either group is reordered or renamed. The
+// About literal it replaced was hand-written in two component files.
+test('FOOTER_TRAIL is the guides hub and About, in that order, both resolved', () => {
+  assert.equal(FOOTER_TRAIL.length, 2)
+  for (const page of FOOTER_TRAIL) {
+    assert.ok(page, 'a footer trail entry did not resolve — check the group it is read from')
+    assert.ok(page.label && page.label.trim(), `${page.path} has no label`)
+  }
+  assert.equal(FOOTER_TRAIL[0].path, '/learn')
+  assert.equal(FOOTER_TRAIL[1].path, '/about')
+})
+
+// The footers list PAGE_GROUPS, so anything in FOOTER_TRAIL must NOT also be a
+// report page — otherwise the trail repeats a link the columns above it hold.
+test('nothing in FOOTER_TRAIL is also a report page', () => {
+  const reportPaths = new Set(REPORT_PAGES.map((p) => p.path))
+  for (const page of FOOTER_TRAIL) {
+    assert.equal(reportPaths.has(page.path), false, `${page.path} is listed twice in the footer`)
+  }
 })
 
 // Guides are server-rendered documents outside the React app (ADR-0048).

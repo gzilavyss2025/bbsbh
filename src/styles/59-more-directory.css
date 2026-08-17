@@ -41,55 +41,13 @@
   background: var(--surface-card);
 }
 
-.moredir__cardhd {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--text-caption);
-}
-
-.moredir__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* A real anchor, and sized as a real target: WCAG 2.5.8 puts the floor at
-   24x24 CSS px, and --tap-min is this app's own (higher) standard. */
-.moredir__link {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-min);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-xs);
-  font-size: var(--fs-body);
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-  text-decoration: none;
-}
-
-.moredir__link:active {
-  background: var(--surface-inset);
-}
-
-.moredir__tag {
-  margin-left: auto;
-  padding: 2px var(--space-1);
-  border-radius: var(--radius-xs);
-  background: var(--seal-cover);
-  color: var(--seal-cover-ink);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
+/* A card's heading, its list and its rows are the shared `.dirhd` /
+   `.navdir__list` / `.dirlink` / `.dirtag` set in 08a-site-menu.css — the same
+   four the More sheet and both footers render, so the three containers read as
+   one system. This partial holds only what is particular to the PAGE: its
+   masthead, and the board the cards sit on. */
+.moredir__card .dirhd {
+  margin-bottom: var(--space-2);
 }
 
 @media (min-width: 740px) {

@@ -48,20 +48,20 @@ export function MorePage() {
       <div className="moredir__grid">
         {MENU_GROUPS.map((group) => (
           <section key={group.id} className="moredir__card">
-            <h2 className="moredir__cardhd">{group.label}</h2>
-            <ul className="moredir__list">
+            <h2 className="dirhd">{group.label}</h2>
+            <ul className="navdir__list">
               {group.pages.map((page) => {
                 const props = linkProps(page.path)
                 return (
                   <li key={page.path}>
-                    <a className="moredir__link" href={props.href} onClick={props.onClick}>
+                    <a className="dirlink" href={props.href} onClick={props.onClick}>
                       {page.label}
                       {isGuidePath(page.path) && (
                         // The guides are documents, not app screens. Saying so
                         // is honest about the page load, and it is visible
                         // text rather than a title= tooltip, which is
                         // invisible on the phone this app is built for.
-                        <span className="moredir__tag">Guide</span>
+                        <span className="dirtag">Guide</span>
                       )}
                     </a>
                   </li>
