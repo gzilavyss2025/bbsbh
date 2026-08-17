@@ -86,7 +86,7 @@ const BUDGETS = {
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 700, // 637
-  'src/styles/26-player-page.css': 1300, // 1262 — the percentile strip split out to 26a-percentile-strip.css
+  'src/styles/26-player-page.css': 1200, // 1125 — the Trophy Case split out to 67-trophy-case.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
   'src/styles/29-team-transactions.css': 900, // 844
