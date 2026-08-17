@@ -24,3 +24,33 @@ export function useNav() {
 export function useLinkScope() {
   return useContext(ScopeContext)
 }
+
+// A real anchor beats a button for navigation. `<button onClick={navigate}>`
+// silently swallows middle-click, cmd/ctrl-click, "open link in new tab", and
+// the browser's own status-bar destination preview — every one of which a
+// reader expects from something that looks like a link. This returns the props
+// to spread onto an `<a>`, so those gestures reach the browser while a plain
+// left-click still becomes a client-side push with no page load.
+//
+// A `/learn` path is deliberately NOT intercepted: the guides are
+// server-rendered documents outside the React app (ADR-0048), and pushing one
+// through the client router would paint the SPA over a document the server
+// already sent. Those links are ordinary navigations, on purpose.
+export function useRouteLink() {
+  const navigate = useNav()
+  return function linkProps(path) {
+    return {
+      href: path,
+      onClick(event) {
+        if (event.defaultPrevented) return
+        if (path.startsWith('/learn')) return
+        // Anything but an unmodified primary click is the reader asking the
+        // browser for something we are not being asked to do.
+        if (event.button !== 0) return
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+        event.preventDefault()
+        navigate(path)
+      },
+    }
+  }
+}
