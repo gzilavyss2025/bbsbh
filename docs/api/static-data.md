@@ -440,6 +440,63 @@ for each generator; the reader modules:
   `{ teamId, stat }` count shape (still exported for reuse). Spoiler-free (a
   Final-games aggregate, same footing as WAR) — no `SealBox`; the card renders
   only when the club has at least one comeback win.
+- `attendance.js` — the Ballpark card's attendance stats, from
+  `public/data/attendance.json` (`gen-attendance.mjs`). Per-team, per-season
+  HOME-game attendance: `games`/`avg`/`high`/`low`, computed from the
+  boxscore's `Att` figure only (an away game folds in nothing — attendance is
+  a fact about the HOME club's own park). `attendanceRatesFor(data, teamId,
+  season)` is what the card uses: the club's own `avg`/`high`/`low` plus its
+  `rank`/`of`/`tied` among every club with a row this season (by average,
+  ties sharing the best rank). `attendanceFor` selects the raw row. MLB only
+  — the generator is. Spoiler-free (a Final-games aggregate, same footing as
+  WAR) — no `SealBox`; the Facts rows render only when the club has one.
+- `teamRecords.js` — the Numbers tab's situational **Records** card, from
+  `public/data/team-records/{season}/{teamId}.json` (`gen-team-records.mjs`),
+  MLB and all four full-season MiLB levels. The file is a compact ROW PER GAME,
+  not finished records; `teamRecordsFor(data, { cutoff, half })` does the
+  tallying, and that is the point rather than an implementation detail. Two
+  things follow. A dated (`?d=`) page passes the same day-before `cutoff` its
+  standings use, so the records cannot look further ahead than the rest of the
+  tab — a precomputed season total could not do that without a date-keyed
+  snapshot per club per day. And `half` (`'all' | 'pre' | 'post'`, `HALVES`)
+  answers the pre/post-All-Star lever off the same rows, with no second dataset;
+  `data.allStarDate` absent (an early-season file) makes the lever a no-op and
+  the card hides it.
+  `RECORD_GROUPS` is the declared table — each row a label and a PREDICATE over
+  one game. A predicate returning false EXCLUDES that game from the row rather
+  than scoring it a loss, so a row nobody has a game for is dropped instead of
+  printing `0-0`, and a thin MiLB feed thins a row instead of voiding the table.
+  Every shipped row omits its falsy keys, so each predicate coalesces: absent
+  `h` is an away game, absent `n` a day game, absent `oh` a starting hand the
+  generator could not resolve (counted in neither the RHS nor the LHS row).
+  `longestStreaks` / `sweepCounts` / `daysAtPlace` are the season COUNTS, exported
+  separately because they are single numbers rather than records; a sweep needs
+  every game of its series inside the filter, so a set straddling the break
+  belongs to neither half. Spoiler-free (a Final-games ledger, same footing as
+  `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
+  nightly cron writes the file before the day's games. Degrades to null with no
+  file, and the card hides.
+- `teamRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
+  one level, ranked — the standalone `/team-records` page
+  (`screens/TeamRecordsPage.jsx`), which every row of the Records card links
+  into. `fetchLevelTeamRecords(sportId, season)` pulls that level's thirty
+  shards (`teams-static.js` supplies the club list; `staticJsonBy` memoizes each
+  one, so paging between splits, halves and levels re-downloads nothing);
+  `buildRankingIndex(entries, { cutoff, half })` calls `teamRecordsFor` per club
+  and inverts the result into a metric-keyed table; `rankMetric` sorts one of
+  them. It derives NOTHING new — a changed predicate in `RECORD_GROUPS` changes
+  the card and this page together, which is why the row `id`s there are stable
+  strings rather than slugs of the labels (a URL names them).
+  **Order is not always highest-first.** A W-L split ranks by win percentage,
+  best at the top. A season count ranks by whichever end `COUNT_METRICS` calls
+  good: `better: 'low'` opens ASCENDING (fewest losses after leading leads that
+  column), `'neutral'` (days in 2nd through 4th) is ordered but carries no
+  best/worst framing at all. A club that has never been in the split keeps its
+  row, unranked, below the ranked ones — and is excluded from the field size, so
+  "of 30" never counts clubs that could not be ranked. The cost is stated in the
+  module header: ~99 KB over the wire per level, which is why this is a page a
+  reader opts into rather than a card. Spoiler-free, same footing as
+  `teamRecords.js`.
 - `postseasonOdds.js` — MLB postseason odds (playoff / division / bye
   probability + projected wins) from `public/data/postseason-odds.json`, the
   Team hub's odds pill. DATE-KEYED, exactly like `seasonScore.js` and

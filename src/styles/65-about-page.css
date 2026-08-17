@@ -1,0 +1,426 @@
+/* ============================================================
+   ABOUT PAGE — the one broadsheet in a scorebook
+
+   Lifted out of `08-site-shell.css` when the page was redesigned: it is a
+   single lazily-loaded route, so `screens/AboutPage.jsx` imports this sheet
+   directly and no other screen render-blocks on it.
+
+   THE LOOK. Everywhere else Tally is a quiet paper scorebook, because
+   everywhere else you are trying to read a game. The About page is the one
+   surface with no game on it, so it is allowed to behave like the front of a
+   sports section: a reversed navy masthead, display type at broadsheet scale,
+   a figures strip, heavy rules instead of hairlines, and numbered beats.
+
+   IT BORROWS SCALE, NOT A PALETTE. The energy here is type size, contrast and
+   structure — every colour is still a Tally token. There is no imported sports-
+   network red: navy is the dark ground, medal amber (--award-line) is the
+   accent, and clay/field appear only where they already mean something. Amber
+   on navy is 5.67:1, which is why the eyebrows use --award-line rather than
+   --seal (4.35:1, under AA and text-bearing here).
+
+   PHONE FIRST, same as every other screen. The masthead and the figures strip
+   break the gutter with the standard bleed idiom
+   (`margin: 0 calc(-1 * var(--app-gutter))` + matching padding) that
+   `.slatehead` uses; nothing here needs a viewport unit.
+   ============================================================ */
+
+.aboutpage {
+  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom));
+}
+
+/* The marker has to reach DESCENDANTS, not just the element carrying it. The
+   ALL-CAPS invariant is `#root *`, so it matches every child in its own right —
+   exempting only the marked element left the data note's <p>s shouting while
+   the <section> holding the class was exempt and had no text of its own. */
+#root .aboutpage .caps-exempt,
+#root .aboutpage .caps-exempt * {
+  text-transform: none; /* caps-exempt: About page explanatory copy reads as natural sentences */
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+/* Full-bleed navy, cut off on a slant. The slant is the one purely
+   decorative gesture on the page and it is deliberately shallow — a steeper
+   angle starts eating the first line of the figures strip below it on a
+   narrow phone. */
+.abouthero {
+  margin: 0 calc(-1 * var(--app-gutter)) 0;
+  padding: var(--space-6) var(--app-gutter) var(--space-10);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - 20px));
+}
+
+.abouthero__brand {
+  display: flex;
+  align-items: center;
+}
+
+/* `.tally-wordmark` sets `color: var(--clay)` on the element itself
+   (03-slate-header.css), so inheriting paper from the parent is not enough —
+   the mark's own class beats it. Clay on navy is 2.7:1 and reads muddy; this
+   is the one place the wordmark reverses. */
+.abouthero__brand .tally-wordmark {
+  color: var(--text-on-ink);
+}
+
+/* The brand line runs as a slug above the headline, in soft paper rather than
+   amber: the deck below it is already amber, and two accented lines stacked
+   read as two kickers competing instead of one leading into the other. */
+.abouthero__kicker {
+  display: block;
+  margin: var(--space-4) 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  color: var(--rule-soft);
+}
+
+/* The headline is one sentence set at two scales — the qualifying clause as a
+   deck, the subject at broadsheet size. Splitting the SIZE rather than the
+   SENTENCE keeps the keyword phrase intact for a crawler reading the h2 and
+   still reads as a magazine headline to a person. */
+.abouthero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+}
+
+.abouthero__deck {
+  display: block;
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  color: var(--award-line);
+}
+
+.abouthero__big {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-hero-xl);
+  line-height: var(--lh-hero);
+  letter-spacing: var(--ls-tight-display);
+}
+
+.abouthero__rule {
+  width: 64px;
+  height: 4px;
+  margin: var(--space-4) 0;
+  background: var(--award-line);
+}
+
+.abouthero__lede {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--paper-1);
+}
+
+/* ---------------------------------------------------------------- figures */
+
+/* Four facts about the app, set like a box-score totals row. Every number
+   here is a fixed property of the product, never a value read from a game —
+   this page fetches nothing, and that is what keeps a figures strip safe on a
+   surface the spoiler rule otherwise governs. */
+.aboutfigs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: 0 var(--app-gutter);
+  background: var(--surface-inset);
+  border-bottom: var(--bw-heavy) solid var(--accent-primary);
+}
+
+.aboutfigs__cell {
+  padding: var(--space-4) 4px var(--space-3);
+  text-align: center;
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
+.aboutfigs__cell:first-child {
+  border-left: 0;
+}
+
+.aboutfigs__v {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-tight-score);
+  color: var(--accent-primary);
+}
+
+.aboutfigs__k {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
+/* ---------------------------------------------------------------- sections */
+
+.aboutpage__section {
+  padding: var(--space-8) 0 0;
+}
+
+/* A section head that reads as a sports-page rail: a short amber tick, the
+   title, then a rule running out to the gutter. */
+.abouthead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-5);
+}
+
+.abouthead__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  white-space: nowrap;
+}
+
+.abouthead::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 22px;
+  background: var(--award-line);
+}
+
+.abouthead::after {
+  content: '';
+  flex: 1;
+  height: var(--bw-heavy);
+  background: var(--border-rule);
+}
+
+/* ---------------------------------------------------------------- the story */
+
+/* Numbered beats. The numeral is watermark-scale and sits BEHIND its own
+   paragraph rather than in a gutter column: a real gutter costs 40-odd px of
+   a 390px phone for three characters. */
+.aboutstory {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.aboutstory__beat {
+  position: relative;
+  padding-top: var(--space-3);
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+}
+
+.aboutstory__n {
+  position: absolute;
+  top: var(--space-2);
+  right: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-xl);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-tight-score);
+  color: var(--rule-soft);
+  pointer-events: none;
+}
+
+.aboutstory__beat p {
+  position: relative;
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: var(--fs-body);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+}
+
+/* ---------------------------------------------------------------- principles */
+
+.aboutrules {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.aboutrule {
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* The dark header bar is the page's most ESPN-borrowed move and the reason
+   these read as cards rather than as a list: --text-on-ink on
+   --accent-primary is the pairing check-contrast.mjs already pins at 13.5:1. */
+.aboutrule__bar {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px var(--space-3);
+  background: var(--accent-primary);
+}
+
+.aboutrule__n {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--award-line);
+}
+
+.aboutrule__bar h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-on-ink);
+}
+
+.aboutrule p {
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+/* ---------------------------------------------------------------- included */
+
+/* A ledger, not a bullet list: mono row numbers down the left the way a
+   scorebook numbers its lines. */
+.aboutledger {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+}
+
+.aboutledger li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: 10px 8px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-size: var(--fs-ui);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+}
+
+.aboutledger li:nth-child(odd) {
+  background: var(--surface-inset);
+}
+
+.aboutledger__n {
+  flex: none;
+  width: 2ch;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-num);
+  color: var(--award-ink);
+}
+
+/* ---------------------------------------------------------------- questions */
+
+.aboutqa {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.aboutqa__item {
+  padding-top: var(--space-3);
+  border-top: var(--bw-rule) solid var(--border-rule);
+}
+
+.aboutqa__item h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+}
+
+.aboutqa__item p {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+/* ---------------------------------------------------------------- guides */
+
+.aboutguides {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--bw-heavy) solid var(--accent-primary);
+}
+
+.aboutguides a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-min);
+  padding: 10px 8px;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-semibold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+  text-decoration: none;
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+
+.aboutguides a:hover,
+.aboutguides a:focus-visible {
+  background: var(--surface-inset);
+}
+
+.aboutguides a:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.aboutguides__go {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--award-ink);
+}
+
+/* ---------------------------------------------------------------- footnote */
+
+.aboutpage__note {
+  display: grid;
+  gap: 10px;
+  margin-top: var(--space-8);
+  padding: var(--space-4);
+  border-left: var(--bw-heavy) solid var(--border-rule);
+  background: var(--surface-inset);
+}
+
+.aboutpage__note p {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+}

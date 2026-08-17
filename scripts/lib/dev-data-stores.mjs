@@ -396,6 +396,13 @@ export const DEV_DATA_STORES = {
     file: 'src/lib/data/wpa-tuning.json',
     validate: isTreatmentStore,
   },
+  // No `treatments` at all — a team-level record only (`{ color, intensity }`),
+  // which is exactly the shape isTreatmentStore already validates generically
+  // for any store's non-`treatments`/`name`/`note` fields.
+  'park-wash-tuning': {
+    file: 'src/lib/data/park-wash-tuning.json',
+    validate: isTreatmentStore,
+  },
   'milb-colors': {
     file: 'src/lib/data/milb-colors.json',
     validate: isMilbColorStore,

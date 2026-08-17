@@ -251,6 +251,7 @@ export function TeamHubShell({
               isMilb={isMilb}
               name={team.name}
               abbreviation={team.abbreviation}
+              venueName={team.venue?.name}
               draft={identity}
             />
           </Suspense>

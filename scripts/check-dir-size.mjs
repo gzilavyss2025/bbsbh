@@ -276,7 +276,25 @@ const BUDGETS = {
   // about drawing chrome in the club's own colours. Neither is @imported by
   // index.css — the lazy component that draws it imports it — so the growth
   // here costs a visitor nothing.
-  'src/styles': 83,
+  //
+  // 83 -> 84 for `65-about-page.css`: the About page redesign outgrew the
+  // headroom left in `08-site-shell.css`, so its rules MOVED there rather than
+  // being stacked on top of it. A net +1 file that is also a net win — About is
+  // one lazy route, `screens/AboutPage.jsx` imports the sheet itself, and the
+  // core render-blocking sheet got ~140 lines lighter in the trade.
+  // +1 for `65-team-records.css`: the Numbers tab's Records card. A genuinely
+  // new UI rather than a split-out of an over-budget file. It SHARES the 65
+  // prefix with `65-about-page.css` above — the two branches picked the next
+  // free integer independently, and the collision is harmless because neither
+  // is @imported by index.css, so no cascade order depends on the numbers.
+  // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
+  // 31-wild-card.css; only the half toggle, the group subheadings and the
+  // counts block are new.
+  // +1 for `66-team-record-rankings.css`: the standalone page that ranks one of
+  // that card's rows across a whole level. The table itself is `.standings`,
+  // shared with the standings and umpire boards, so only the control strip, the
+  // rank badge and two row states are new — and the page imports it itself.
+  'src/styles': 86,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -317,7 +335,20 @@ const BUDGETS = {
   // split out of loadScorecard.js so each half of that old mixed module
   // carries one honest classification. Both belong in the flat set
   // check-spoiler-manifest classifies, same argument as gamePreview.js.
-  'src/api': 95,
+  // +1 for attendance.js — the Ballpark card's attendance reader, same
+  // spoiler-free static-JSON shape as comebackWins.js beside it, and
+  // belongs in the flat set check-spoiler-manifest classifies.
+  // +1 for teamRecords.js — the static reader behind the Numbers tab's
+  // situational Records card, sibling to comebackWins.js already here. Same
+  // argument as every entry above: a subdirectory would take it out of the
+  // flat set check-spoiler-manifest classifies, which is where a module that
+  // reads per-game results needs to stay.
+  // +1 for teamRecordRankings.js — the same ledger pivoted across a level for
+  // the standalone Team Records page. Kept OUT of teamRecords.js on purpose:
+  // one module answers "this club's fifty splits", the other "this split's
+  // thirty clubs", and merging them would put a page-sized fan-out fetch in the
+  // module every Numbers tab loads. Flat for the manifest reason above.
+  'src/api': 98,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -360,7 +391,15 @@ const BUDGETS = {
   // palette drift, since a page served outside the bundle cannot import the
   // token sheet). Both are top-level by the rule stated below — a generator runs
   // on import, and scripts/lib is for helpers that do not.
-  scripts: 79,
+  // +1 for gen-attendance.mjs — the nightly per-team attendance sweep behind
+  // the Ballpark card's avg/high/low/rank, flat here like every other
+  // gen-*.mjs.
+  // +1 for gen-team-records.mjs — the nightly per-game ledger behind the
+  // Numbers tab's situational Records card. Same reason gen-milb-alumni.mjs
+  // took a number above: the nightly workflow runs this directory as a flat
+  // list, and a generator file RUNS on import, so it cannot live in
+  // scripts/lib/ — which is where its testable half (team-records.mjs) went.
+  scripts: 81,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -430,7 +469,12 @@ const BUDGETS = {
   // games floor behind gen-milb-alumni.mjs. This directory exists precisely for
   // this: a generator file RUNS on import, so a helper worth a unit test has to
   // live here to be testable at all (test/milb-alumni.test.js).
-  'scripts/lib': 19,
+  // +1 for team-records.mjs — gen-team-records.mjs's per-game derivations
+  // (linescore lead states, walk-off detection, series tagging, daily division
+  // ranks), here for exactly the reason the entry above gives: a generator is
+  // a top-level script, so importing one RUNS it, and this is the half worth
+  // pinning with tests (test/team-records.test.js).
+  'scripts/lib': 20,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -444,7 +488,12 @@ const BUDGETS = {
   // shape as its siblings: one route, one screen, in the flat set.
   // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
   // AnimationLab.jsx beside it.
-  'src/screens': 41,
+  // +1 for TeamRecordsPage.jsx — the standalone Team Records ranking page, one
+  // more entry in REPORT_PAGES and so the same shape as StandingsPage.jsx and
+  // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
+  // set. It is not a team-hub screen and does not belong in src/screens/team/,
+  // which holds the tabs of one club's page.
+  'src/screens': 42,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

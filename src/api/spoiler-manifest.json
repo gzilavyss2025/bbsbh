@@ -191,6 +191,10 @@
         "screens/BoxScore.jsx"
       ]
     },
+    "attendance.js": {
+      "class": "spoiler-free",
+      "why": "Static attendance.json — a Final-games season aggregate (avg/high/low gate), same footing as WAR. No SealBox."
+    },
     "comebackWins.js": {
       "class": "spoiler-free",
       "why": "Static comeback-wins.json — a Final-games season aggregate, same footing as WAR. No SealBox."
@@ -459,6 +463,7 @@
         "api/pitcher-callouts.js",
         "api/scorecardGame.js",
         "components/inning/HalfInning.jsx",
+        "components/playbyplay/PlayByPlay.jsx",
         "screens/InningViewer.jsx"
       ]
     },
@@ -671,6 +676,14 @@
     "teamLeaders.js": {
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
+    },
+    "teamRecordRankings.js": {
+      "class": "spoiler-free",
+      "why": "Pivots the same team-records ledgers across one level for the standalone /team-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
+    },
+    "teamRecords.js": {
+      "class": "spoiler-free",
+      "why": "Static team-records/{season}/{teamId}.json — a ledger of FINAL games tallied into season situational records for the team hub's Numbers tab. Same footing as comebackWins.js and the team-score aggregates: the nightly cron writes it before the day's games, and the reader applies the page's own day-before cutoff. An open surface (ADR-0034)."
     },
     "teams-static.js": {
       "class": "spoiler-free",

@@ -146,6 +146,10 @@ const UmpireRankingsPage = lazyNamed(
   () => import('./screens/UmpireRankingsPage.jsx'),
   'UmpireRankingsPage',
 )
+const TeamRecordsPage = lazyNamed(
+  () => import('./screens/TeamRecordsPage.jsx'),
+  'TeamRecordsPage',
+)
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
@@ -306,6 +310,15 @@ export default function App() {
     content = <UmpirePage id={route.id} />
   } else if (route.name === 'umpire-rankings') {
     content = <UmpireRankingsPage />
+  } else if (route.name === 'team-records') {
+    content = (
+      <TeamRecordsPage
+        asOf={route.asOf}
+        sportId={route.sportId}
+        metric={route.metric}
+        half={route.half}
+      />
+    )
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes-debug') {

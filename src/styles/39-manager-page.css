@@ -379,13 +379,22 @@
   dominant-baseline: middle;
 }
 
-/* Facts strip: opened / roof / capacity. */
+/* Facts strip: opened / roof / capacity. A second strip (avg/high/low
+   attendance) can follow directly beneath it — .bpsheet__facts + .bpsheet__facts
+   drops the shared border to a single hairline between them rather than
+   doubling it up. */
 .bpsheet__facts {
   display: flex;
   margin: 6px 0 4px;
   padding: 12px 0;
   border-top: var(--bw-hair) solid var(--border-rule);
   border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.bpsheet__facts + .bpsheet__facts {
+  margin-top: -4px;
+  padding-top: 8px;
+  border-top: none;
 }
 
 .bpfact {

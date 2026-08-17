@@ -1,6 +1,10 @@
 import { contrastRatio } from '../../../../lib/contrast.js'
 import { HEADER_CONTRAST_MIN } from '../../../../lib/identity/fields.js'
+import { mastheadBarFor, mastheadMarkUrl } from '../../../../lib/teams.js'
+import { parkBackdrop } from '../../../../lib/ballpark/parkBackdrop.js'
+import { useCopy } from '../../../../copy/copyContext.js'
 import { TeamTreatmentMark } from '../../../../components/logo/TeamTreatmentMark.jsx'
+import { HeaderBarMock } from '../../../identity-lab/editors/HeaderPreview.jsx'
 import { identityGroups, treatmentLabel, treatmentsForClub } from './identityFields.js'
 import { IdentityLogoField } from './IdentityLogoField.jsx'
 import { IdentityStampPreview } from './IdentityStampPreview.jsx'
@@ -49,8 +53,21 @@ async function pickFromScreen(id, onChange) {
   }
 }
 
+// A number field's step buttons need a starting point even when the box is
+// still empty — the landed value (what the club renders right now), or 0 if
+// even that is unset. Re-rounded to the field's own step precision, the same
+// fix identity-lab's shiftStepKeys applies, since e.g. 0.85 + 0.1 is
+// 0.9500000000000001 in binary floating point and that lands in the store as
+// typed.
+function nudge(shown, landed, spec, dir) {
+  const base = shown !== '' ? Number(shown) : landed !== '' ? Number(landed) : 0
+  const decimals = Math.max(0, String(spec.step).split('.')[1]?.length ?? 0)
+  const next = Number((base + spec.step * dir).toFixed(decimals))
+  return String(Math.min(spec.max, Math.max(spec.min, next)))
+}
+
 function Field({ field, value, onChange }) {
-  const { spec, id, label, landed } = field
+  const { spec, id, label, hint, landed } = field
   const shown = value ?? ''
   const common = {
     id,
@@ -61,6 +78,7 @@ function Field({ field, value, onChange }) {
   return (
     <label className="iddrawer__field" htmlFor={id}>
       <span className="iddrawer__label">{label}</span>
+      {hint && <span className="iddrawer__hint">{hint}</span>}
       {spec.kind === 'pick' ? (
         <select {...common} className="iddrawer__input">
           {/* An empty option is not "none" — it is "whatever this club already
@@ -75,6 +93,21 @@ function Field({ field, value, onChange }) {
         </select>
       ) : (
         <span className="iddrawer__inputrow">
+          {/* A thumb can drag a native slider more precisely than it can key a
+              number in — but a slider alone would hide the landed value's
+              placeholder and cost a second control for the rare exact typed
+              number, so this is a third way IN beside the box, not instead of
+              it: dragging and typing both land on the same field. */}
+          {spec.kind === 'number' && (
+            <button
+              type="button"
+              className="iddrawer__stepbtn"
+              aria-label={`Decrease ${label}`}
+              onClick={() => onChange(id, nudge(shown, landed, spec, -1))}
+            >
+              −
+            </button>
+          )}
           <input
             {...common}
             className="iddrawer__input"
@@ -84,6 +117,16 @@ function Field({ field, value, onChange }) {
             spellCheck="false"
             autoComplete="off"
           />
+          {spec.kind === 'number' && (
+            <button
+              type="button"
+              className="iddrawer__stepbtn"
+              aria-label={`Increase ${label}`}
+              onClick={() => onChange(id, nudge(shown, landed, spec, 1))}
+            >
+              +
+            </button>
+          )}
           {spec.kind === 'color' && (
             <input
               className="iddrawer__swatch"
@@ -121,14 +164,20 @@ function Field({ field, value, onChange }) {
   )
 }
 
+// A group's fields already resolve through the overlay (identityFields.js's
+// header comment), so reading `landed` off them here is reading the draft's
+// own preview layer — this moves as the owner types, not just after Save.
+function fieldValue(fields, name) {
+  return fields.find((f) => f.name === name)?.landed || ''
+}
+
 // The live WCAG readout for a club's bar. Rendered from the group's own fields,
 // which already resolve through the overlay, so it moves as the owner types —
 // the same number scripts/check-contrast.mjs asserts at lint and the endpoint
 // asserts at save. Retune the pair; the threshold does not move.
 function ContrastReadout({ fields }) {
-  const value = (name) => fields.find((f) => f.name === name)?.landed || ''
-  const bar = value('bar')
-  const onBar = value('onBar')
+  const bar = fieldValue(fields, 'bar')
+  const onBar = fieldValue(fields, 'onBar')
   if (!bar || !onBar) {
     return (
       <p className="iddrawer__note">
@@ -149,7 +198,68 @@ function ContrastReadout({ fields }) {
   )
 }
 
-export function IdentityDrawer({ teamId, isMilb, name, abbreviation, draft }) {
+// The bar this drawer's Header bars group tunes, as it would actually draw —
+// identity-lab's own bar mock, reused rather than re-implemented so this
+// preview and that one can't quietly disagree. It exists because the team hub
+// never wears its own bar: `--bar-fill` is only consumed by TeamInfo's lineup
+// page (src/styles/09-team-info.css), so unlike every other group here — whose
+// live effect is already visible somewhere on this page — a triad tuned from
+// this drawer would otherwise have no honest preview until you left the page.
+function BarPreview({ teamId, name, treatment, fields }) {
+  const bar = fieldValue(fields, 'bar')
+  const onBar = fieldValue(fields, 'onBar')
+  const accent = fieldValue(fields, 'accent')
+  const markScale = Number(fieldValue(fields, 'markScale')) || null
+  return (
+    <HeaderBarMock
+      teamId={teamId}
+      name={name}
+      colors={{ bar, accent, onBar }}
+      unset={!bar || !onBar}
+      overrideUrl={mastheadMarkUrl(teamId, mastheadBarFor(teamId, treatment))}
+      markScale={markScale}
+    />
+  )
+}
+
+// The slate card's ballpark wash, at the intensity a hover (or a phone's
+// press-and-hold) shows it — not the resting 0.24 grayscale-only state,
+// because the whole point of tuning this group is judging the COLOUR, and a
+// resting card never shows one. No team page otherwise renders this wash at
+// all (GameCard is a slate-only component), so unlike the header bar above —
+// which the lineup page at least shows somewhere — this drawer is the only
+// place it can be judged full stop.
+function ParkWashPreview({ venueName, fields }) {
+  const { t } = useCopy()
+  const park = venueName ? parkBackdrop(venueName, t) : null
+  const color = fieldValue(fields, 'color')
+  const intensity = fieldValue(fields, 'intensity')
+  if (!park) {
+    return (
+      <p className="iddrawer__note">
+        No ballpark photo on file for this club&apos;s home venue, so the slate card
+        shows no wash to tune — the plain untinted grayscale card is what ships either way.
+      </p>
+    )
+  }
+  return (
+    <div
+      className="iddrawer__parkwash"
+      style={{
+        '--park-art': park.cssUrl,
+        '--park-focus': park.focus,
+        ...(color ? { '--park-tint': color } : null),
+        '--park-wash-intensity': intensity || undefined,
+      }}
+    >
+      <span className="iddrawer__parkwash__photo" aria-hidden="true" />
+      <span className="iddrawer__parkwash__tint" aria-hidden="true" />
+      <span className="iddrawer__parkwash__label">@</span>
+    </div>
+  )
+}
+
+export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, draft }) {
   const treatments = treatmentsForClub(teamId, isMilb)
   // The strip's selection, defaulting to the first tile this club has rather
   // than assuming Main — a MiLB affiliate has no Main.
@@ -194,13 +304,19 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, draft }) {
         <section key={group.key} className="iddrawer__group">
           <h3 className="iddrawer__title">{group.title}</h3>
           {group.warning && <p className="iddrawer__warn">{group.warning}</p>}
-          {group.triad && <ContrastReadout fields={group.fields} />}
+          {group.triad && (
+            <>
+              <BarPreview teamId={teamId} name={name} treatment={treatment} fields={group.fields} />
+              <ContrastReadout fields={group.fields} />
+            </>
+          )}
           {/* The stamp group's controls are judged on real stamps — no team
               page renders one otherwise, so without these the four fields
               below would be the one control here with no visible effect. */}
           {group.key === 'stamp' && (
             <IdentityStampPreview teamId={teamId} name={name} abbreviation={abbreviation} />
           )}
+          {group.preview === 'parkwash' && <ParkWashPreview venueName={venueName} fields={group.fields} />}
           {group.logo ? (
             <IdentityLogoField
               teamId={teamId}

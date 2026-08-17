@@ -1,0 +1,141 @@
+/* Numbers tab → Records card (screens/team/modules/records/RecordsCard.jsx).
+
+   Deliberately small. The card reuses `.tstats-card` / `.tstats` / `.tstatrow`
+   from 31-wild-card.css wholesale, so it inherits the two-column ledger, the
+   tabular figures and the themed masthead the Team batting, Team pitching and
+   Record by Day of Week cards beside it already use. Only three things here
+   are new: the pre/post-All-Star toggle, the per-group subheading that lets
+   fifty rows read as nine short ledgers instead of one wall, and the season
+   counts block (a number, not a W-L, so it can't be a `.tstatrow`).
+
+   Imported by RecordsCard.jsx rather than by index.css — the 58+ convention
+   (see index.css's own manifest): the Numbers tab is a lazily-loaded route, so
+   no other page pays for these rules. Its position in the cascade is therefore
+   not load-bearing, but the number keeps the manifest honest. */
+
+/* The half toggle sits between the masthead and the body, on the card's own
+   paper rather than on the themed bar — a club colour behind three small
+   controls made the unselected two hard to read at AA (ADR-0023), and this is
+   a control, which ADR-0030's addendum keeps off a themed surface anyway. */
+.trec__halves {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-2) 12px;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.trec__half {
+  flex: 1;
+  padding: 6px 8px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.trec__half.is-on {
+  background: var(--seal-soft, var(--paper-2));
+  border-color: var(--seal);
+  color: var(--text-heading);
+  font-weight: var(--w-bold);
+}
+.trec__half:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.trec__group + .trec__group {
+  margin-top: var(--space-3);
+}
+/* A rule ABOVE the label, not a boxed header — the groups are divisions of one
+   ledger, and a second card chrome inside the card read as nested boxes. */
+.trec__grouphead {
+  margin: 0 0 var(--space-1);
+  padding-top: var(--space-2);
+  border-top: var(--bw-hair) solid var(--seal);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+}
+.trec__group:first-child .trec__grouphead {
+  padding-top: 0;
+  border-top: none;
+}
+
+/* Season counts: a figure over its label, wrapping as many per row as fit.
+   A `.tstatrow` would have printed a lone number in the W-L column and an
+   empty win-pct column beside it. */
+.trec__counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-1) 8px var(--space-2);
+}
+.trec__count {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.trec__countv {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.trec__countk {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  line-height: var(--lh-title);
+  color: var(--text-caption);
+}
+
+/* Both kinds of row are a BUTTON now — the label of a W-L row, and the whole
+   tile of a season count — because each one opens that same split ranked
+   across the level (/team-records, screens/TeamRecordsPage.jsx). The rules
+   here only undo the browser's button chrome and put back the layout the span
+   and the div had. The dotted rule under the text is the entire visible
+   affordance: a ledger full of underlined links stops reading as a ledger. */
+/* Only the properties a <button> actually brings with it. Fonts, colour and
+   the caps treatment are left alone deliberately: `.tstatrow__k`,
+   `.trec__countv` and `.trec__countk` already declare them, and an author
+   declaration beats the UA button style whatever its specificity — so
+   re-stating them here (or reaching for `font: inherit`) would only risk
+   overriding the very rules that make these rows match their neighbours. */
+.trec__rank {
+  border: 0;
+  background: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+}
+button.tstatrow__k.trec__rank,
+.trec__count.trec__rank .trec__countk {
+  border-bottom: var(--bw-hair) dotted var(--border-rule);
+}
+.trec__count.trec__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.trec__rank:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.trec__empty {
+  margin: 0;
+  padding: var(--space-3) 8px;
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+}

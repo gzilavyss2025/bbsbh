@@ -201,6 +201,53 @@ don't run these by hand.
   `att*` columns) needs a one-time `--rebuild` (wipe both tables, re-sweep) since
   old rows carry no attempts. App reads it via `src/api/comebackWins.js` (Team
   Page's "Comeback wins" card — team rate vs. the pooled MLB average).
+- `gen-team-records.mjs` → `public/data/team-records/{season}/{teamId}.json` (one
+  file per club per season, ~24 KB) — the per-game LEDGER every club's
+  situational records are read off, at MLB and the four full-season MiLB levels.
+  Feeds the Numbers tab's Records card (`src/api/teamRecords.js`): W-L when
+  scoring first, out-hitting the opponent, leading after 7, facing a left-handed
+  starter, on a getaway day, by month, by division, plus the season counts that
+  aren't records (wins after trailing, sweeps, days in first place, longest
+  streak) — each answerable for the full season or either side of the All-Star
+  break.
+  **The records themselves are not stored.** Each row is raw FACTS (run totals,
+  the whole inning line, both starters' lines, the schedule context) and every
+  split is derived at EXPORT time, so a new split or a changed definition costs
+  `--export-only` and no network at all — the bill `gen-pitch-arsenal.mjs` and
+  `gen-comeback-wins.mjs` each paid once, as a `--since` backfill and a
+  `--rebuild`. The app derives one more layer at READ time, which is what lets a
+  dated (`?d=`) team page apply its own day-before cutoff exactly rather than
+  print a season total that looks past it. SQLite-backed (`team-records` group,
+  ADR-0021), APPEND-ONLY over newly-Final games; `team_record_ingested_games` is
+  the idempotency guard, so the nightly cost is the ~65 games that finished,
+  never the season. That table is **seven columns plus a `payload_json`**, not
+  thirty-one, and the schema comment says why: `dumpGroup` repeats every column
+  NAME on every row, so a five-level season would otherwise have committed
+  megabytes of column names.
+  **Three calls per game and no more**: the date's schedule (bulk, one per date
+  per level, carrying the full linescore), the box score, and a field-pruned
+  play-by-play at ~8 KB — the last only for the batted-around count, which no
+  other endpoint carries. Pitcher handedness is an EXPORT-time join off one bulk
+  `/sports/{id}/players` call per level, same pattern and reasoning as
+  `gen-pitch-arsenal.mjs`'s `throws`; an unresolved hand counts in neither the
+  vs-RHS nor the vs-LHS row rather than being guessed. Series boundaries, sweeps
+  and getaway days come from the LEDGER, not the feed's `seriesGameNumber` /
+  `gamesInSeries` — those describe the series as SCHEDULED, and a rained-out
+  middle game leaves them describing one that never happened. Daily division
+  ranks are computed from the ledger too, since `/standings` carries no history
+  and answers a completed season's `date=` query empty.
+  **Verified against statsapi's own splits**, the free oracle this dataset
+  happens to have: `/standings` publishes eight of these records per club at
+  every level. Across all 30 MLB clubs the overall record and the home / away /
+  one-run / extra-inning splits matched EXACTLY. Two known disagreements are
+  recorded in the generator header and are deliberate — the day/night split of a
+  doubleheader's nightcap (statsapi's standings disagrees with its own schedule
+  feed there; this generator takes the game's own `dayNight`), and one game's
+  starting hand (the starter here is always the boxscore's `pitchers[0]`,
+  whoever actually threw the first pitch). Re-run that check after touching the
+  linescore handling. Out of the PWA precache with no extra rule —
+  `vite.config.js` opts `data/**.json` out unless a file is named.
+  Backfill: `--since=YYYY-MM-DD [--until=…]`; `--sports=1` restricts the sweep.
 - `gen-jerseys.mjs` → `public/data/jerseys.json` — what each MLB club wore in
   every game, from `/api/v1/uniforms/game` (`docs/uniforms-and-logos.md` — the
   live feed carries zero uniform data). SQLite-backed (`jerseys` group,
@@ -256,6 +303,21 @@ don't run these by hand.
   file, so a schema change like this needs an explicit `--since=` backfill
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
+- `gen-attendance.mjs` → `public/data/attendance.json` — per-team, per-season
+  HOME-game attendance: games counted, season average, high, and low gate. An
+  away game folds in nothing — attendance is a fact about the HOME club's own
+  park. Source is the lightweight `/api/v1/game/{gamePk}/boxscore` endpoint's
+  existing `info[]` array (`Att`, comma-grouped with a trailing period, e.g.
+  `"15,952."`) rather than the full live feed — far cheaper per game than
+  `gen-fouls.mjs`/`gen-comeback-wins.mjs`, since no play-by-play is needed.
+  SQLite-backed (`attendance` group, ADR-0021) APPEND-ONLY incremental sweep of
+  Final MLB regular-season games like `gen-comeback-wins.mjs` (`--days`
+  trailing window / `--since`/`--until` backfill); `attendance_ingested_games`
+  is the idempotency guard — a game with no parseable `Att` is still marked
+  (a Final game's attendance never changes, so it isn't worth retrying
+  forever). MLB only — a league rank needs the whole 30-team pool. App reads
+  it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
+  rank).
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile

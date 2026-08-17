@@ -22,6 +22,13 @@ import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 // nothing when there is no venue name at all — a lean feed row, same graceful
 // degrade every MiLB selector uses.
 //
+// `attendance` (season avg/high/low + league rank, MLB only) is the one piece
+// of this card built from completed games rather than hand-authored geometry —
+// still spoiler-free (a season aggregate over Final games, same footing as
+// WAR), precomputed by the nightly gen-attendance.mjs (src/api/attendance.js).
+// null for MiLB or a club with no home games ingested yet; the Facts rows
+// simply don't render.
+//
 // MEASUREMENTS ARE MLB-ONLY; THE PHOTO/NAME HALF IS NOT. `ballparkData.js`'s
 // BALLPARKS table is a hand-verified diagram nobody has built for a MiLB
 // park, so `rankedDimensions` finds nothing for one and the diagram/dimensions
@@ -118,7 +125,7 @@ function ParkPhoto({ name, photo, onPickFocus }) {
   )
 }
 
-export function BallparkCard({ team }) {
+export function BallparkCard({ team, attendance }) {
   const { t } = useCopy()
   const venueName = team.venue?.name
   const park = venueName ? rankedDimensions(venueName) : null
@@ -223,6 +230,18 @@ export function BallparkCard({ team }) {
                 <Facts label="Roof" value={park.roof} />
                 <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
               </dl>
+              {attendance && (
+                <dl className="bpsheet__facts">
+                  <Facts label="Avg attendance" value={attendance.avg.toLocaleString()} />
+                  <Facts label="Season high" value={attendance.high.toLocaleString()} />
+                  <Facts label="Season low" value={attendance.low.toLocaleString()} />
+                </dl>
+              )}
+              {attendance && (
+                <p className="ballparkcard__note">
+                  Attendance rank: {attendance.rank} of {attendance.of}
+                </p>
+              )}
               {note && <p className="ballparkcard__note">{note}</p>}
               <div className="bpsheet__ranks">
                 <RankGroup

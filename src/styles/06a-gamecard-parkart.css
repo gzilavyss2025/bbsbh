@@ -158,8 +158,11 @@
   .gamecard:hover .gamecard__parkart::after,
   .gamecard:focus-within .gamecard__parkart::after {
     /* Strong enough to read as "this club's colour," restrained enough that
-       the photo underneath (and the ink over it) stays the thing you see. */
-    opacity: 0.55;
+       the photo underneath (and the ink over it) stays the thing you see.
+       Overridable per home club from the identity drawer's Ballpark wash
+       group (--park-wash-intensity, GameCard.jsx's `parkWashOpacity`) — kept
+       in step with src/lib/ballpark/parkWash.js's PARK_WASH_DEFAULT_INTENSITY. */
+    opacity: var(--park-wash-intensity, 0.55);
   }
 }
 

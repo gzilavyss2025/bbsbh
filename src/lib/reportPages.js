@@ -29,6 +29,7 @@
 export const REPORT_PAGES = [
   { label: 'Standings', path: '/standings' },
   { label: 'League Leaders', path: '/leaders' },
+  { label: 'Team Records', path: '/team-records' },
   { label: 'Foul Tracker', path: '/fouls' },
   { label: 'Top MLB Prospects', path: '/prospects' },
   { label: 'Rehab Assignments', path: '/rehab' },
