@@ -3,31 +3,53 @@
 import { readableTextColor } from './contrast.js'
 import { isFriday } from './dates.js'
 import { LOGO_CDN_BASE as LOGO_BASE, LOGO_VARIANTS } from './logoCdn.js'
-import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, milbBrandPair } from './brandColors.js'
-import { byTeam, byTreatment as byTreatmentIn, treatmentRecord } from './tuningStore.js'
+import { TEAM_COLOR_PAIRS, MLB_TEAM_COLORS, MLB_TEAM_COLORS_STORE, milbBrandPair } from './brandColors.js'
+import { byTeam, byTreatment as byTreatmentIn, liveStore, treatmentRecord } from './tuningStore.js'
+import { registerIdentityStore } from './identity/overlay.js'
 import { customMarkFor } from './customMarks.js'
-import MLB_TREATMENT_TUNING from './data/mlb-treatment-tuning.json' with { type: 'json' }
+import MLB_TREATMENT_TUNING_JSON from './data/mlb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 import MONO_LOGO_MANIFEST from './data/mono-logo-manifest.json' with { type: 'json' }
-import ALT_COLORS_STORE from './data/alt-colors.json' with { type: 'json' }
-import ALT2_COLORS_STORE from './data/alt2-colors.json' with { type: 'json' }
-import ALT3_COLORS_STORE from './data/alt3-colors.json' with { type: 'json' }
-import ALT4_COLORS_STORE from './data/alt4-colors.json' with { type: 'json' }
-import CITY_CONNECT_COLORS_STORE from './data/city-connect-colors.json' with { type: 'json' }
+import ALT_COLORS_JSON from './data/alt-colors.json' with { type: 'json' }
+import ALT2_COLORS_JSON from './data/alt2-colors.json' with { type: 'json' }
+import ALT3_COLORS_JSON from './data/alt3-colors.json' with { type: 'json' }
+import ALT4_COLORS_JSON from './data/alt4-colors.json' with { type: 'json' }
+import CITY_CONNECT_COLORS_JSON from './data/city-connect-colors.json' with { type: 'json' }
+
+// Registered with the key their RUNTIME overrides are filed under, then read
+// only through tuningStore's readers — so a value retuned from a club's own page
+// reaches every resolver below without any of them knowing an overlay exists
+// (src/lib/identity/overlay.js, ADR-0050). Beside the imports rather than in one
+// central module: one file importing all ten stores would pull
+// data/wpa-tuning.json back into the eager entry chunk.
+const MLB_TUNING_STORE = registerIdentityStore('mlb-treatment-tuning', MLB_TREATMENT_TUNING_JSON)
+const ALT_STORE = registerIdentityStore('alt-colors', ALT_COLORS_JSON)
+const ALT2_STORE = registerIdentityStore('alt2-colors', ALT2_COLORS_JSON)
+const ALT3_STORE = registerIdentityStore('alt3-colors', ALT3_COLORS_JSON)
+const ALT4_STORE = registerIdentityStore('alt4-colors', ALT4_COLORS_JSON)
+const CITY_CONNECT_STORE = registerIdentityStore('city-connect-colors', CITY_CONNECT_COLORS_JSON)
 
 // The per-team, per-treatment tile tuning the Team Identity Lab writes back to
-// (src/lib/data/mlb-treatment-tuning.json, ADR-0029) — re-exported raw so that
-// lab has one thing to read, edit, and POST as a whole file. Everything else in
+// (src/lib/data/mlb-treatment-tuning.json, ADR-0029) — re-exported so that lab
+// has one thing to read, edit, and POST as a whole file. Everything else in
 // this module reads it through the derived tables below, which keep the exact
 // shapes (and the exact resolver semantics) the app had when these were JS
 // literals. See src/lib/CLAUDE.md for the store's schema.
-export { MLB_TREATMENT_TUNING }
+//
+// The OVERLAID view rather than the raw file, so the lab and the app cannot
+// disagree about what is landed. Under `vite dev` the overlay is always empty —
+// /api/identity is a Vercel function and the dev server serves none — so in the
+// one place the lab's Save works, this is the file byte for byte.
+export const MLB_TREATMENT_TUNING = liveStore(MLB_TUNING_STORE)
 
-// Same idea as MLB_TREATMENT_TUNING above, one store per non-Main treatment's
-// background swatches (ALT_COLORS and friends below, ADR-0029) — re-exported
-// raw so the lab can merge a swatch edit in and POST the whole file back,
-// same as every other dimension it saves.
-export { ALT_COLORS_STORE, ALT2_COLORS_STORE, ALT3_COLORS_STORE, ALT4_COLORS_STORE, CITY_CONNECT_COLORS_STORE }
+// Same idea, one store per non-Main treatment's background swatches (ALT_COLORS
+// and friends below, ADR-0029) — re-exported so the lab can merge a swatch edit
+// in and POST the whole file back, same as every other dimension it saves.
+export const ALT_COLORS_STORE = liveStore(ALT_STORE)
+export const ALT2_COLORS_STORE = liveStore(ALT2_STORE)
+export const ALT3_COLORS_STORE = liveStore(ALT3_STORE)
+export const ALT4_COLORS_STORE = liveStore(ALT4_STORE)
+export const CITY_CONNECT_COLORS_STORE = liveStore(CITY_CONNECT_STORE)
 
 // The derived-table shape every reader of ALT_COLORS/ALT2_COLORS/etc actually
 // wants: `{ teamId: swatches }`, the exact shape these were as JS literals
@@ -42,13 +64,13 @@ function swatchesFromColorStore(store) {
 // the jerseys.json vocabulary ('main' / 'alternate' / 'alternate-2…4' /
 // 'city-connect').
 function treatmentTuning(teamId, treatment) {
-  return treatmentRecord(MLB_TREATMENT_TUNING, teamId, treatment)
+  return treatmentRecord(MLB_TUNING_STORE, teamId, treatment)
 }
 
 // tuningStore's byTreatment, bound to this store and defaulting to the
 // Main-excluding behaviour these MLB tables need (see its own doc comment).
 function byTreatment(pick, { includeMain = false } = {}) {
-  return byTreatmentIn(MLB_TREATMENT_TUNING, pick, { includeMain })
+  return byTreatmentIn(MLB_TUNING_STORE, pick, { includeMain })
 }
 
 // The user scores Brewers games most often, so we pin them to the top of the
@@ -524,11 +546,11 @@ export function leagueLogoUrl() {
 // Alternate background rather than being promoted into the app-wide brand
 // pair. Promoting it means editing 115.primary in mlb-team-colors.json on
 // purpose, and it would retint every surface teamPrimaryColor feeds.
-export const ALT_COLORS = swatchesFromColorStore(ALT_COLORS_STORE)
-export const CITY_CONNECT_COLORS = swatchesFromColorStore(CITY_CONNECT_COLORS_STORE)
-export const ALT2_COLORS = swatchesFromColorStore(ALT2_COLORS_STORE)
-export const ALT3_COLORS = swatchesFromColorStore(ALT3_COLORS_STORE)
-export const ALT4_COLORS = swatchesFromColorStore(ALT4_COLORS_STORE)
+export const ALT_COLORS = liveStore(ALT_STORE, swatchesFromColorStore)
+export const CITY_CONNECT_COLORS = liveStore(CITY_CONNECT_STORE, swatchesFromColorStore)
+export const ALT2_COLORS = liveStore(ALT2_STORE, swatchesFromColorStore)
+export const ALT3_COLORS = liveStore(ALT3_STORE, swatchesFromColorStore)
+export const ALT4_COLORS = liveStore(ALT4_STORE, swatchesFromColorStore)
 
 // Whether `teamId` has an Alternate 2/3/4 set up at all — either curated
 // colors (ALT2_COLORS/ALT3_COLORS/ALT4_COLORS) or an explicit plain-CDN-mark
@@ -722,10 +744,12 @@ function mainOverrideFields(main) {
   return Object.keys(out).length ? out : null
 }
 
-export const MAIN_OVERRIDES = Object.fromEntries(
-  Object.entries(MLB_TREATMENT_TUNING)
-    .map(([teamId, entry]) => [teamId, mainOverrideFields(entry.treatments?.main)])
-    .filter(([, fields]) => fields),
+export const MAIN_OVERRIDES = liveStore(MLB_TUNING_STORE, (store) =>
+  Object.fromEntries(
+    Object.entries(store)
+      .map(([teamId, entry]) => [teamId, mainOverrideFields(entry.treatments?.main)])
+      .filter(([, fields]) => fields),
+  ),
 )
 
 // A team's triad color by role name — 'primary'/'secondary' from
@@ -974,7 +998,7 @@ export function headshotSources(personId, { coach = false, mlb = false } = {}) {
 // secondary, because the pick optimizes for "tells two clubs apart" rather than
 // "a third color the club owns". A real third-or-later brand color lives in
 // `extras` (teamColorExtras below) and must never be conflated with this one.
-const TEAM_COLORS = byTeam(MLB_TEAM_COLORS, (e) => e.accent)
+const TEAM_COLORS = byTeam(MLB_TEAM_COLORS_STORE, (e) => e.accent)
 
 // Extra current-era brand colors beyond a club's primary/secondary/accent —
 // only for clubs with a well-documented third-or-later color in their CURRENT

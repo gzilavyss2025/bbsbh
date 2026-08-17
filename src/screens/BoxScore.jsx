@@ -236,21 +236,18 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, stars, potg, potgHi
     return byRole
   }, [feed])
 
-  // Each club's batting/pitching card, ABS card, and Defense card wear the
-  // header colors of the jersey it's actually wearing that game — the same
-  // ADR-0030 mechanism TeamInfo.jsx's club-name bar uses, scoped per card here
-  // instead of to one page-wide `.teaminfo`. `winProbTreatment` is the same
-  // jersey-treatment pair already threaded to WinProbChart, so this is no new
-  // fetch. Null for a club with no curated triad, which leaves that card on
-  // the app's default navy chrome.
-  const awayTheme = useMemo(
-    () => headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away)),
-    [box.away.id, winProbTreatment?.away],
-  )
-  const homeTheme = useMemo(
-    () => headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home)),
-    [box.home.id, winProbTreatment?.home],
-  )
+  // Each club's batting/pitching card, ABS card, and Defense card wear the header
+  // colors of the jersey it's actually wearing that game — the same ADR-0030
+  // mechanism TeamInfo.jsx's club-name bar uses, scoped per card here instead of to
+  // one page-wide `.teaminfo`. `winProbTreatment` is the same jersey-treatment pair
+  // already threaded to WinProbChart, so this is no new fetch. Null for a club with
+  // no curated triad, which leaves that card on the app's default navy chrome.
+  // Resolved on every render rather than memoized. It is a table lookup and two
+  // string compares, and the overlay behind those tables refills them IN PLACE
+  // (ADR-0050) — so a memo here would keep serving the pre-override triad until one
+  // of its other deps happened to move. Same class of trap as ADR-0007.
+  const awayTheme = headerThemeFor(box.away.id, themeKeyFor(box.away.id, 'away', winProbTreatment?.away))
+  const homeTheme = headerThemeFor(box.home.id, themeKeyFor(box.home.id, 'home', winProbTreatment?.home))
   const hpId = officialIdByRole.HP ?? null
   const { data: hpAccuracy } = useAsync(() => umpireAccuracySummary(hpId), [hpId])
   const [modalId, setModalId] = useState(null)

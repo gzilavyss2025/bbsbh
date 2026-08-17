@@ -3,7 +3,8 @@
 // (headerTheme.js -> SiteHeader), and importing them from their home modules
 // pulled data/wpa-tuning.json into the entry chunk. See lib/wpa/wpaDefaults.js.
 import { WPA_LOGO_DEFAULTS, DEFAULT_PINSTRIPE_COLOR } from './wpa/wpaDefaults.js'
-import { byTreatment } from './tuningStore.js'
+import { byTreatment, liveStore } from './tuningStore.js'
+import { registerIdentityStore } from './identity/overlay.js'
 import { teamLogoUrl } from './teams.js'
 import { customMarkFor } from './customMarks.js'
 import {
@@ -12,7 +13,7 @@ import {
   milbColorPair,
   milbHasResearchedColor,
 } from './brandColors.js'
-import MILB_TREATMENT_TUNING from './data/milb-treatment-tuning.json' with { type: 'json' }
+import MILB_TREATMENT_TUNING_JSON from './data/milb-treatment-tuning.json' with { type: 'json' }
 import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 
 // Per-affiliate MiLB brand colors + the Home/Away tuning tables behind the
@@ -41,7 +42,15 @@ import LOGO_ART from './data/logo-art.json' with { type: 'json' }
 // snippet to paste (ADR-0029). They're re-exported raw for that lab; every
 // resolver in this file reads the derived tables. See src/lib/CLAUDE.md for
 // the schema.
-export { MILB_COLORS, MILB_TREATMENT_TUNING }
+// Registered so an affiliate's Home/Away tile tuning and its header triad can
+// be retuned at runtime from that club's own team page
+// (src/lib/identity/overlay.js). Every table below is derived from THIS object
+// and refills in place when a save lands; the re-export is the overlaid view,
+// so the lab reads back what the app renders.
+const MILB_TUNING_STORE = registerIdentityStore('milb-treatment-tuning', MILB_TREATMENT_TUNING_JSON)
+
+export { MILB_COLORS }
+export const MILB_TREATMENT_TUNING = liveStore(MILB_TUNING_STORE)
 
 // The affiliate -> color-pair chain itself lives in brandColors.js, one layer
 // down, because teams.js's headshot tint reads the exact same chain and this
@@ -86,29 +95,29 @@ export const MILB_COLOR_LAB_LEVELS = [
 // rather than a snippet to paste by hand.
 
 // `{ [teamId]: { [variant]: { scale, offsetX, offsetY, bg, pinstripe, pinstripeBg? } } }`
-export const MILB_LOGO_POS_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.position)
+export const MILB_LOGO_POS_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) => f.position)
 
 // `{ [teamId]: { [variant]: { size, rotate, offsetX, offsetY, paddingX, paddingY, rowShift } } }`
 export const MILB_WPA_LOGO_LAYOUT_OVERRIDES = byTreatment(
-  MILB_TREATMENT_TUNING,
+  MILB_TUNING_STORE,
   (f) => f.wpaLayout,
 )
 
 // `{ [teamId]: { [variant]: string | { pinstripe: true, color, bg? } } }` —
 // `bg` is the colored fill under the stripes (mlb.jsx's own `band.bg`
 // convention), omitted for the plain-white default.
-export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.band)
+export const MILB_WPA_BAND_COLOR_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) => f.band)
 
 // `{ [teamId]: { [variant]: boolean } }` — whether the WPA band tiles the
 // club's wordmark instead of its usual mark (milbWpaMarkUrl below).
-export const MILB_WPA_WORDMARK_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.wpaWordmark)
+export const MILB_WPA_WORDMARK_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) => f.wpaWordmark)
 
 // `{ [teamId]: { [variant]: { bar, accent, onBar } } }` — the MiLB half of the
 // header chrome a themed lineup page wears (ADR-0030), same shape and same
 // role as teams.js's TREATMENT_HEADER_COLOR_OVERRIDES. `lib/headerTheme.js` is
 // what both of them resolve through; nothing else should read either table
 // directly except the lab that authors them.
-export const MILB_HEADER_COLOR_OVERRIDES = byTreatment(MILB_TREATMENT_TUNING, (f) => f.header)
+export const MILB_HEADER_COLOR_OVERRIDES = byTreatment(MILB_TUNING_STORE, (f) => f.header)
 
 // The resolved Scale/X/Y/Background/Pinstripe for a (team, variant)'s main
 // logo-box tile — a draft (the lab's own unsaved edit) wins outright over a

@@ -17,10 +17,21 @@
 // tables they used to declare inline, so every resolver below them — and every
 // test pinning one — keeps its behaviour unchanged. The store is the authoring
 // format; those tables are still the lookup format.
+//
+// EVERY READ HERE GOES THROUGH THE OVERLAY (identity/overlay.js), which is what
+// lets the site owner retune one club from that club's own page at runtime
+// rather than through a deploy. A store nothing overrides is returned by
+// IDENTITY, so on a deploy with no override store — and in every unit test —
+// these three functions read exactly the bundled JSON they always did. The
+// tables `byTreatment`/`byTeam` hand back REFILL IN PLACE when the overlay
+// changes, so the module-level `export const` each consumer builds stays the
+// same object and no call site had to learn that the overlay exists.
+
+import { effectiveStore, liveTable } from './identity/overlay.js'
 
 // One (team, treatment) record, or null.
 export function treatmentRecord(store, teamId, treatment) {
-  return store[teamId]?.treatments?.[treatment] ?? null
+  return effectiveStore(store)[teamId]?.treatments?.[treatment] ?? null
 }
 
 // Rebuild a `{ [teamId]: { [treatment]: value } }` table from `store`. `pick`
@@ -33,26 +44,40 @@ export function treatmentRecord(store, teamId, treatment) {
 // treatmentScale/treatmentPinstripeColor must keep returning the no-override
 // default for it. Merging the two would silently double-apply Main's scale.
 export function byTreatment(store, pick, { includeMain = true } = {}) {
-  const out = {}
-  for (const [teamId, entry] of Object.entries(store)) {
-    for (const [treatment, fields] of Object.entries(entry.treatments ?? {})) {
-      if (!includeMain && treatment === 'main') continue
-      const value = pick(fields)
-      if (value === undefined) continue
-      out[teamId] ??= {}
-      out[teamId][treatment] = value
+  return liveTable(() => {
+    const out = {}
+    for (const [teamId, entry] of Object.entries(effectiveStore(store))) {
+      for (const [treatment, fields] of Object.entries(entry.treatments ?? {})) {
+        if (!includeMain && treatment === 'main') continue
+        const value = pick(fields)
+        if (value === undefined) continue
+        out[teamId] ??= {}
+        out[teamId][treatment] = value
+      }
     }
-  }
-  return out
+    return out
+  })
 }
 
 // Rebuild a flat `{ [teamId]: value }` table from the store's team-level
 // fields (e.g. wpa-tuning.json's Main-only `bandColor`).
 export function byTeam(store, pick) {
-  const out = {}
-  for (const [teamId, entry] of Object.entries(store)) {
-    const value = pick(entry)
-    if (value !== undefined) out[teamId] = value
-  }
-  return out
+  return liveTable(() => {
+    const out = {}
+    for (const [teamId, entry] of Object.entries(effectiveStore(store))) {
+      const value = pick(entry)
+      if (value !== undefined) out[teamId] = value
+    }
+    return out
+  })
+}
+
+// The overlay-aware view of a whole store, as a table that refills in place —
+// for the handful of places that read a store DIRECTLY rather than through a
+// derived table (teams.js's MAIN_OVERRIDES and swatch tables, the raw
+// re-exports the Team Identity Lab edits, stampLogoTuning.js's per-render
+// lookup). Same contract as byTreatment/byTeam: one stable object, refreshed
+// under the caller when a save lands.
+export function liveStore(store, derive = (s) => s) {
+  return liveTable(() => derive(effectiveStore(store)))
 }

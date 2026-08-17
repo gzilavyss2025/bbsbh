@@ -22,14 +22,33 @@
 // so the two disagreed by construction. There is now one ordering, and both
 // teams.js's teamTintColor and milbColors.js's milbTreatmentTile read it.
 
-import { byTeam } from './tuningStore.js'
+import { byTeam, liveStore } from './tuningStore.js'
+import { registerIdentityStore } from './identity/overlay.js'
 import MILB_COLORS from './data/milb-colors.json' with { type: 'json' }
-import MLB_TEAM_COLORS from './data/mlb-team-colors.json' with { type: 'json' }
+import MLB_TEAM_COLORS_JSON from './data/mlb-team-colors.json' with { type: 'json' }
 
-// Re-exported raw for the Team Identity Lab, which reads, edits, and POSTs the
+// A club's brand triad is editable at runtime from that club's own team page
+// (identity/overlay.js), so this store is registered and every read below goes
+// through the overlay. `milb-colors.json` is deliberately NOT registered: the
+// gear edits identity where it is rendered, and an affiliate's researched pair
+// travels with provenance (`confidence`, `source`, `found: false`) that belongs
+// with the research pass in /identity-lab, not behind a hex box on a team page.
+// Exported as well as used here because teams.js derives TEAM_COLORS from it.
+// A derived table must be built from the REGISTERED store, never from the
+// overlaid view below: both refill in place when a save lands, and deriving one
+// live table from another would make the result depend on which of the two
+// happened to refill first.
+export const MLB_TEAM_COLORS_STORE = registerIdentityStore('mlb-team-colors', MLB_TEAM_COLORS_JSON)
+
+// Re-exported for the Team Identity Lab, which reads, edits, and POSTs the
 // whole store as one file (ADR-0029). Every resolver below reads the derived
 // table instead. Schema in src/lib/CLAUDE.md.
-export { MILB_COLORS, MLB_TEAM_COLORS }
+//
+// MLB_TEAM_COLORS is the OVERLAID view — a table that refills in place when a
+// save lands — so `stampInk.js`, the lab, and the resolvers here all read one
+// answer for a club's colours. MILB_COLORS is the raw file: nothing overrides it.
+export { MILB_COLORS }
+export const MLB_TEAM_COLORS = liveStore(MLB_TEAM_COLORS_STORE)
 
 // Each MLB club's REAL primary + secondary brand colors — distinct from
 // teams.js's TEAM_COLORS, which deliberately picks ONE rival-distinguishing
@@ -42,7 +61,7 @@ export { MILB_COLORS, MLB_TEAM_COLORS }
 // this couldn't reuse its data even if it wanted to. Sourced from
 // mlb-team-colors.json (ADR-0029) so the Team Identity Lab can edit and save a
 // club's triad directly — see src/lib/CLAUDE.md.
-export const TEAM_COLOR_PAIRS = byTeam(MLB_TEAM_COLORS, (e) =>
+export const TEAM_COLOR_PAIRS = byTeam(MLB_TEAM_COLORS_STORE, (e) =>
   e.primary && e.secondary ? [e.primary, e.secondary] : undefined,
 )
 

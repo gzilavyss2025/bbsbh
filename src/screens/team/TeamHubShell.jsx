@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { Suspense, lazy, useMemo } from 'react'
 import { fetchTeams } from '../../api/schedule.js'
 import { resolveGameNotes } from '../../api/gameNotes.js'
 import { ordinal } from '../../api/person.js'
@@ -10,6 +10,7 @@ import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { LinkScope } from '../../lib/nav.jsx'
 import { useNav } from '../../lib/nav.js'
+import { identityVersion } from '../../lib/identity/overlay.js'
 import { headerThemeFor, headerThemeClass, headerThemeStyle, themeKeyFor } from '../../lib/headerTheme.js'
 import { humanDate } from '../../lib/dates.js'
 import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
@@ -19,7 +20,25 @@ import { ManagerLink } from '../../components/team/ManagerLink.jsx'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsOfBanner } from '../../components/seal/AsOfBanner.jsx'
 import { BackBtn } from '../../components/chrome/BackBtn.jsx'
+import { isClerkEnabled } from '../../lib/clerkConfig.js'
 import { TeamTabBar } from './TeamTabBar.jsx'
+import { useIdentityDraft } from './modules/identity/useIdentityDraft.js'
+
+// Both halves of the identity editor are lazy, for two different reasons — the
+// same split BallparkCard makes.
+//
+// The BAR imports @clerk/clerk-react at its top level, whose hooks throw with no
+// ClerkProvider ancestor, so it must not even be fetched on a deploy without
+// Clerk. The DRAWER has no such constraint and is lazy anyway, because a form
+// exactly one person in the world can open has no business in the chunk every
+// visitor downloads — and it carries the field catalog, 62-identity-admin.css
+// and (through the catalog) the WPA and stamp modules with it.
+const IdentityAdminBar = lazy(() =>
+  import('./modules/identity/IdentityAdminBar.jsx').then((m) => ({ default: m.IdentityAdminBar })),
+)
+const IdentityDrawer = lazy(() =>
+  import('./modules/identity/IdentityDrawer.jsx').then((m) => ({ default: m.IdentityDrawer })),
+)
 
 const DASH = '—'
 
@@ -88,14 +107,34 @@ export function TeamHubShell({
   const tabTitle = TAB_TITLE[active] ?? null
   useDocumentTitle(team.name ? [team.name, tabTitle].filter(Boolean).join(' · ') : null)
 
+  // Called for every visitor, admin or not — it touches no Clerk API and holds
+  // nothing but unsaved text, so it is safe with no provider mounted. Nothing
+  // can set `editing` except the lazily-loaded bar above.
+  const identity = useIdentityDraft(team.id)
   // Not tied to any one game, so the hub always wears the club's Main home
   // jersey (MLB) / Home side (MiLB) — the same triad the identity header's Main
   // treatment mark already renders. Null for a club with no curated triad,
   // which leaves every bar below on the app's default navy chrome — coverage is
   // partial by design (ADR-0030).
+  //
+  // `wearing` is normally that Main/Home jersey and nothing else. While the
+  // owner has the identity drawer open it becomes the tile SELECTED in the
+  // drawer's strip, so that tuning a club's City Connect repaints the header
+  // in City Connect rather than leaving the edit invisible behind a Main hero.
+  // That is what makes the claim in IdentityDrawer.jsx's header true: the page
+  // is the preview, through this one render path, with no editor-only mock.
+  const wearing = (identity.editing && identity.treatment) || (isMilb ? 'home' : null)
+  // `identityVersion()` is a memo dep, not decoration: both memos below read
+  // module-level identity tables that the overlay REFILLS IN PLACE when a save,
+  // a keystroke in the drawer, or the hydrating fetch lands
+  // (src/lib/identity/overlay.js). The re-render arrives — App subscribes for it
+  // — but a useMemo whose other deps did not move would hand back the
+  // pre-override tile, which is exactly the "live preview" that quietly is not
+  // one. Same class of trap as ADR-0007.
+  const identityAt = identityVersion()
   const theme = useMemo(
-    () => headerThemeFor(team.id, themeKeyFor(team.id, 'home', 'main')),
-    [team.id],
+    () => headerThemeFor(team.id, themeKeyFor(team.id, wearing ?? 'home', wearing ?? 'main')),
+    [team.id, wearing, identityAt],
   )
   // The hero row's own background: the club's curated DEFAULT HOME jersey
   // tile — Identity Lab's "Default home" pick (MLB), or the Home side
@@ -108,15 +147,15 @@ export function TeamHubShell({
   // JerseyCombos.jsx makes for the identical "tile color IS the surface" case.
   const headerTile = useMemo(() => {
     const tile = isMilb
-      ? milbTreatmentTile(team.id, 'home')
-      : treatmentTile(team.id, defaultHomeTreatmentFor(team.id) ?? 'main')
+      ? milbTreatmentTile(team.id, wearing ?? 'home')
+      : treatmentTile(team.id, wearing ?? defaultHomeTreatmentFor(team.id) ?? 'main')
     const ink = tile.pinstripeColor
       ? INK_DARK
       : tile.tint
         ? readableTextColor(tile.tint, INK_LIGHT, INK_DARK)
         : null
     return { ...tile, ink }
-  }, [team.id, isMilb])
+  }, [team.id, isMilb, wearing, identityAt])
   const headerStyle = {
     '--tint': headerTile.tint || undefined,
     '--pinstripe-color': headerTile.pinstripeColor || undefined,
@@ -179,18 +218,37 @@ export function TeamHubShell({
               </p>
             )}
           </div>
-          {isMilb && team.parentOrgId && (
-            <TeamLink
-              id={team.parentOrgId}
-              className="team-hub__parent"
-              ariaLabel={`Affiliate of ${team.parentOrgName ?? 'its MLB club'}`}
-            >
-              <span className="team-hub__parent-label">Affiliate</span>
-              <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={34} />
-            </TeamLink>
-          )}
-          {!isMilb && <GameNotesLink teamId={team.id} />}
+          {/* The header's right-hand slot is an action CLUSTER rather than one
+              control: the Affiliate chip on a MiLB club, the Game Notes link on
+              an MLB one, and — for the site owner only — the identity gear,
+              last. */}
+          <div className="team-hub__actions">
+            {isMilb && team.parentOrgId && (
+              <TeamLink
+                id={team.parentOrgId}
+                className="team-hub__parent"
+                ariaLabel={`Affiliate of ${team.parentOrgName ?? 'its MLB club'}`}
+              >
+                <span className="team-hub__parent-label">Affiliate</span>
+                <TeamLogo teamId={team.parentOrgId} name={team.parentOrgName} size={34} />
+              </TeamLink>
+            )}
+            {!isMilb && <GameNotesLink teamId={team.id} />}
+            {isClerkEnabled && (
+              <Suspense fallback={null}>
+                <IdentityAdminBar teamId={team.id} isMilb={isMilb} draft={identity} />
+              </Suspense>
+            )}
+          </div>
         </header>
+
+        {/* Below the header, never over it — the header is themed from the data
+            being edited, so it has to stay visible while the drawer is open. */}
+        {identity.editing && (
+          <Suspense fallback={null}>
+            <IdentityDrawer teamId={team.id} isMilb={isMilb} draft={identity} />
+          </Suspense>
+        )}
 
         {/* Same finger-scrollable club-logo strip GameSelect's slate header uses
             to jump between teams — nothing here is ever "selected"

@@ -21,13 +21,27 @@
 // Retuning a club restyles that club's stamps everywhere, including ones
 // already placed in someone's passport book, as soon as the change ships.
 
-import store from './data/stamp-logo-tuning.json' with { type: 'json' }
+import bundled from './data/stamp-logo-tuning.json' with { type: 'json' }
+import { liveStore, treatmentRecord } from './tuningStore.js'
+import { registerIdentityStore } from './identity/overlay.js'
 import { markPlacement, resolveMarkPlacement } from './stampArt.js'
+
+// Registered so a club's mark placement can be retuned at runtime from that
+// club's own team page (src/lib/identity/overlay.js).
+//
+// THE RETROACTIVE PROPERTY IS UNCHANGED, AND SHARPER. This is already the one
+// store read at RENDER time, so retuning a club has always restyled the stamps
+// already sitting in someone's passport book — on the next deploy (ADR-0035's
+// amendment). Through the gear the same change arrives at once, on every device,
+// with no deploy in between. It is not a new kind of change; it is the same one
+// landing sooner, and the drawer says so beside these four fields rather than
+// leaving it to be discovered.
+const STORE = registerIdentityStore('stamp-logo-tuning', bundled)
 
 // The raw fields on file for one (club, side), or null. Only the lab reads this
 // — the app wants the resolved placement below.
 export function stampLogoTuningRecord(teamId, side) {
-  return store[String(teamId)]?.treatments?.[side] ?? null
+  return treatmentRecord(STORE, String(teamId), side)
 }
 
 // The four numbers, defaulted and clamped — always an answer, so a caller never
@@ -43,7 +57,10 @@ export function stampMarkPlacement(teamId, side, override) {
 }
 
 // The whole store, for the lab's save path (which posts it back in full, like
-// every other dev store).
+// every other dev store) — the overlaid view, so the lab reads back what the app
+// renders.
+const OVERLAID = liveStore(STORE)
+
 export function stampLogoTuningStore() {
-  return store
+  return OVERLAID
 }

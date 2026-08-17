@@ -123,17 +123,15 @@ export function TeamInfo({
   const info = useMemo(() => selectGameInfo(feed), [feed])
   // Null for a club with no curated triad, which leaves every bar below on the
   // app's default navy chrome — coverage is partial by design (ADR-0030).
-  const theme = useMemo(
-    () => headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment)),
-    [meta.id, side, treatment],
-  )
+  // Resolved on every render rather than memoized. It is a table lookup and two
+  // string compares, and the overlay behind those tables refills them IN PLACE
+  // (ADR-0050) — so a memo here would keep serving the pre-override triad until one
+  // of its other deps happened to move. Same class of trap as ADR-0007.
+  const theme = headerThemeFor(meta.id, themeKeyFor(meta.id, side, treatment))
   // The Starting pitcher card shows the OTHER club's starter, so its own
   // masthead wears THAT club's jersey colors rather than this page's — see
   // OpposingStarterCard.
-  const oppTheme = useMemo(
-    () => headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment)),
-    [oppMeta.id, oppSide, oppTreatment],
-  )
+  const oppTheme = headerThemeFor(oppMeta.id, themeKeyFor(oppMeta.id, oppSide, oppTreatment))
   // A club's own override for the mark ITS mastheads draw on the BAR it wears
   // tonight (teams.js's mastheadMarkUrl) — null for a bar nobody has dressed,
   // the overwhelming default, so TeamLogo's club-wide mono mark still draws.

@@ -43,6 +43,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
 | half-feed-note-order.test.js | 6 | src/api/playbyplay.js (halfInningFeed, eventTypes) | Same-play notes render in the feed's own playEvents order, not stoppages-then-baserunning; delay advisories reach the feed while the lifecycle "Status Change" lines stay out |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
+| identity-drawer-fields.test.js | 9 | screens/team/modules/identity/identityFields.js | The team hub gear's field model — which tiles a club offers, which store each row writes into, the browser-side contrast gate (ADR-0050) |
+| identity-overrides.test.js | 20 | src/lib/identity/*, api/identity.js | The runtime club-identity overlay: the closed field catalog, the merge rules, the seam that puts an override under a pure resolver, and the endpoint's write rule (ADR-0050) |
 | identity-lab-stores.test.js | 24 | tuningStore.js, teams.js, brandColors.js, saveStores.js, mlbColorRoles.js, dev-data-stores.mjs | /identity-lab data stores |
 | interrupted-at-bat.test.js | 14 | src/api/playbyplay.js, src/api/scorecardGame.js | Interrupted at-bat handling |
 | invariant-real-game.test.js | 6 | linescore.js, derive.js, pitchers.js, select.js | Spoiler invariant pinned on captured real feed |

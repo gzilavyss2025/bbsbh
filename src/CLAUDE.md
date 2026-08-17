@@ -2,10 +2,10 @@
 
 React 18 + Vite SPA, phone-first, no backend. This file covers screens, routing,
 fetching, and the design system. The data layer has its own file
-(`src/api/CLAUDE.md`), as does the club-identity data model — colours, logo
-treatments, the hand-tuned `src/lib/data/*.json` stores and the dev-only lab that
-writes them (`src/lib/CLAUDE.md`). The always-loaded root `CLAUDE.md` carries the
-spoiler-rule summary and the high-level architecture map.
+(`src/api/CLAUDE.md`), as does club identity — colours, logo treatments, the
+`src/lib/data/*.json` stores, and their two editors: the dev-only lab
+(`src/lib/CLAUDE.md`) and the team hub's gear, whose runtime overlay is
+`docs/identity-overrides.md`. Root `CLAUDE.md` has the spoiler rule and the map.
 
 ## Screens (`src/screens/`)
 

@@ -174,16 +174,16 @@ Two things to know before editing:
   — Vite is happy either way, but the unit suite imports these modules in plain
   Node, which requires it.
 
-## Editing a value
+## Editing a value — two paths, one set of stores
 
-Run `npm run dev`, open `/identity-lab`, tune, and hit Save; the store is
-rewritten sorted by team id and the page hot-reloads off the landed value. The
-endpoint exists only under `vite dev` — see ADR-0029 for the allowlist and the
-four layers that keep it out of production.
+Run `npm run dev`, open `/identity-lab`, tune, hit Save; the store is rewritten
+sorted by team id and the page hot-reloads off the landed value. That endpoint
+exists only under `vite dev` — ADR-0029 has the allowlist and the four layers.
 
-A few values have no home in a store yet and still land by hand from an editor's
-copy icon: the flat background hex for a non-Main MLB treatment lives in
-`ALT_COLORS` and friends, which are still JS literals.
+The second takes no deploy: an admin gear on `/team/{id}` writes a RUNTIME override
+that `src/lib/identity/`'s overlay layers under these same readers, so every
+resolver here answers with it and none changed signature (ADR-0050). Id grammar,
+traps and the two save gates: `docs/identity-overrides.md`.
 
 ## Stamp placement (`stampLogoTuning.js` + `data/stamp-logo-tuning.json`)
 
