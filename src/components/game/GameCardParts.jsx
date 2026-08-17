@@ -1,13 +1,19 @@
 import { TeamTreatmentMark } from '../logo/TeamTreatmentMark.jsx'
 import { BreakableLocation } from '../ui/BreakableLocation.jsx'
 import { splitName } from '../../lib/teamSplits.js'
-import { defaultTreatmentFor, treatmentTile, isMlbTeamId } from '../../lib/teams.js'
-import { milbTreatmentTile } from '../../lib/milbColors.js'
+import { defaultTreatmentFor } from '../../lib/teams.js'
 import { selectGameStatus } from '../../api/select.js'
 import { rescheduleLabel, resumeLabel } from '../../lib/resultCards.js'
 import { jerseyTreatmentFor } from '../../api/jerseys.js'
 import { liveTreatmentFor } from '../../api/uniforms.js'
 import { broadcastLogoFor } from '../../lib/broadcastLogos.js'
+
+// Pure (no JSX), so it also has to be importable from a plain Node test and
+// from the team hub's identity drawer (test/identity-drawer-fields.test.js
+// loads identityFields.js directly, which cannot pull in a .jsx module) —
+// lives in lib/ballpark/parkWash.js and is re-exported here so every existing
+// `import { tileColorFor } from './GameCardParts.jsx'` keeps working.
+export { tileColorFor } from '../../lib/ballpark/parkWash.js'
 
 // Split out of GameCard.jsx to keep that file under the 600-line budget
 // (check-file-size.mjs, ADR-0038) — everything here is a small piece GameCard
@@ -31,19 +37,6 @@ export function resolveTreatment(team, side, gamePk, officialDate, jerseysData, 
     jerseyTreatmentFor(jerseysData, gamePk, team.id) ??
     defaultTreatmentFor(team.id, side, officialDate)
   )
-}
-
-// The one solid colour a team's tile actually wears — the same MLB/MiLB
-// branch TeamTreatmentMark resolves its tile from, collapsed to a single
-// value. A pinstriped club's `tint` is null (its tile is mostly paper-white
-// with thin colored lines), so `pinstripeColor` — the stripe's own ink — is
-// the meaningful "team color" for that club instead; the two are already
-// mutually exclusive in both treatmentTile and milbTreatmentTile, so reading
-// either in either order is safe. Null for a team with no curated colour on
-// file (see teams.js/milbColors.js's own graceful degrade).
-export function tileColorFor(teamId, treatment, side) {
-  const tile = isMlbTeamId(teamId) ? treatmentTile(teamId, treatment) : milbTreatmentTile(teamId, side)
-  return tile.tint || tile.pinstripeColor || null
 }
 
 // The Scores Unlocked run totals, one per team column (away left, home right,

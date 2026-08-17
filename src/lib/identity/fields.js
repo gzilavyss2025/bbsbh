@@ -255,6 +255,17 @@ export const IDENTITY_DIMENSIONS = {
     fields: { bandColor: color() },
   },
 
+  // The slate card's hover/press wash over this club's HOME ballpark photo
+  // (src/lib/ballpark/parkWash.js, GameCardParts.jsx's `tileColorFor`). Team-level, not
+  // per-treatment: the wash is a fact about which club plays there, not which
+  // jersey it wears that day.
+  parkWash: {
+    store: () => 'park-wash-tuning',
+    teamLevel: true,
+    path: (teamId, field) => [teamId, field],
+    fields: { color: color(), intensity: number(0, 1, 0.05) },
+  },
+
   // The mark a treatment's tile wears, as a URL — the runtime counterpart to
   // dropping a PNG on /identity-lab's tile (which writes public/team-logos/ and
   // takes a deploy to ship). The value is normally what /api/identity-logo
