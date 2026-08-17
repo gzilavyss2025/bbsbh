@@ -1,0 +1,101 @@
+/* ============================================================
+   MORE DIRECTORY — /more (screens/MorePage.jsx)
+   Every standalone page, grouped, on one address. Imported by
+   that screen alone, not by src/index.css, so no other route
+   pays for it. Purely static: no data, no seal, no fetch.
+   ============================================================ */
+
+.moredir__head {
+  padding: var(--space-3) 0 var(--space-4);
+}
+
+.moredir__title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-md);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.moredir__blurb {
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+}
+
+/* One column on a phone; the cards are short enough that a grid would just
+   make a reader's thumb travel further. The wide layout below turns them into
+   the three-across board the sheet's panel is a compressed version of. */
+.moredir__grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.moredir__card {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+}
+
+.moredir__cardhd {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+.moredir__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* A real anchor, and sized as a real target: WCAG 2.5.8 puts the floor at
+   24x24 CSS px, and --tap-min is this app's own (higher) standard. */
+.moredir__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  text-decoration: none;
+}
+
+.moredir__link:active {
+  background: var(--surface-inset);
+}
+
+.moredir__tag {
+  margin-left: auto;
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--seal-cover);
+  color: var(--seal-cover-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+@media (min-width: 740px) {
+  .moredir__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+}

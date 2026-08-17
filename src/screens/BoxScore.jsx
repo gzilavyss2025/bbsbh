@@ -11,6 +11,7 @@ import { umpireAccuracySummary } from '../api/umpires.js'
 import { selectChallengeState, gameHasAbs } from '../api/challenges.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from '../components/SealBox.jsx'
+import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { PerformerCard } from '../components/player/PerformerCard.jsx'
@@ -184,6 +185,8 @@ export function BoxScore({
           )
         }}
       </SealBox>
+
+      <GuideLink path="/learn/read-a-box-score" />
 
       {/* Mobile-only: Refresh moves down here as a floating pill, same
           placement as the Innings page's own mobile Refresh (see
