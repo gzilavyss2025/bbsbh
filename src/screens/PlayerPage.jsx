@@ -186,29 +186,31 @@ export function PlayerPage({ id, asOf, sportId }) {
                 {bio.number && <span className="player__num">#{bio.number}</span>}
               </span>
             </h1>
+            {/* Two lines, not one run-on list. The old single line ran
+                position · hand · club · pill through mid-dots and wrapped
+                wherever it ran out of room, which stranded a separator at the
+                end of line one ("SP · THROWS R ·") and dropped the club into
+                the position of an afterthought. The club is the identity half
+                of a player's card, so it gets its own line under the
+                attributes — and the wrap can no longer split a dot from what
+                it separates, because line one is the only line with dots. */}
             <p className="player__meta">
               {heroPos && <span className="player__pos">{heroPos}</span>}
               {hand && <> <span className="sep">·</span> <span className="player__hand">{hand}</span></>}
-              {club && (
-                <> <span className="sep">·</span>{' '}
+            </p>
+            {(club || status || data.prospectRank || data.orgProspectRank) && (
+              <p className="player__clubline">
+                {club && (
                   <TeamLink id={club.id} className="player__team">{club.name}</TeamLink>
-                </>
-              )}
-              {status && (
-                <> <span className="sep">·</span>{' '}
-                  <span className="player__status">{status.label}</span>
-                </>
-              )}
-              {data.prospectRank && (
-                <> <span className="sep">·</span>{' '}
+                )}
+                {status && <span className="player__status">{status.label}</span>}
+                {data.prospectRank && (
                   <span className="prospectpill">
                     <img src={leagueLogoUrl()} alt="" className="prospectpill__logo" />
                     #{data.prospectRank} PROSPECT
                   </span>
-                </>
-              )}
-              {data.orgProspectRank && (
-                <> <span className="sep">·</span>{' '}
+                )}
+                {data.orgProspectRank && (
                   <span className="prospectpill">
                     <TeamLogo
                       teamId={club?.parentOrgId ?? club?.id}
@@ -217,9 +219,9 @@ export function PlayerPage({ id, asOf, sportId }) {
                     />
                     #{data.orgProspectRank} PROSPECT
                   </span>
-                </>
-              )}
-            </p>
+                )}
+              </p>
+            )}
           </div>
           {club && (
             <TeamLink id={club.id} className="player__herologo" ariaLabel={club.name}>

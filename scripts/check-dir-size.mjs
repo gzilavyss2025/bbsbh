@@ -294,7 +294,7 @@ const BUDGETS = {
   // that card's rows across a whole level. The table itself is `.standings`,
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
-  'src/styles': 88,
+  'src/styles': 89,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
