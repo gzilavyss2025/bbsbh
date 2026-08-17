@@ -72,23 +72,37 @@ export function AtBatTrail({
         aria-label="At-bats this half"
         onKeyDown={onKeyDown}
       >
-        {items.map((item, i) => (
-          <button
-            key={i}
-            type="button"
-            className={`trailcell trailcell--${item.kind || 'note'}`}
-            aria-current={(!stacked && i === cursor) || undefined}
-            aria-disabled={turning || undefined}
-            aria-label={`${item.name}${item.code ? ` — ${item.code}` : ''}`}
-            title={`${item.name}${item.code ? ` — ${item.code}` : ''}`}
-            onClick={() => onSelect(i)}
-          >
-            <span className="trailcell__code">{item.code || '···'}</span>
-            <span className="trailcell__name" aria-hidden="true">
-              {item.name}
-            </span>
-          </button>
-        ))}
+        {items.map((item, i) => {
+          // The notice markers (ADR-0017's tiers, as scorer shorthand: P, MV,
+          // SB…) ride the chip whose window carries those cards, so a
+          // pitching change or a steal stays findable after the reader steps
+          // on — the walk-back cue the trail owed them. Spoken as part of the
+          // accessible name too, not just drawn.
+          const notes = item.notices?.length ? item.notices.join(' ') : ''
+          const label = `${item.name}${item.code ? ` — ${item.code}` : ''}${notes ? ` (${notes})` : ''}`
+          return (
+            <button
+              key={i}
+              type="button"
+              className={`trailcell trailcell--${item.kind || 'note'}`}
+              aria-current={(!stacked && i === cursor) || undefined}
+              aria-disabled={turning || undefined}
+              aria-label={label}
+              title={label}
+              onClick={() => onSelect(i)}
+            >
+              <span className="trailcell__code">{item.code || '···'}</span>
+              <span className="trailcell__name" aria-hidden="true">
+                {item.name}
+              </span>
+              {notes && (
+                <span className="trailcell__notes" aria-hidden="true">
+                  {notes}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
       {!stacked && !following && (
         <button

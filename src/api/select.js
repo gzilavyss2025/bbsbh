@@ -558,19 +558,23 @@ export function selectPrePitchChanges(feed, inning, half, revealedThrough = Infi
             position: POSITION_LOWER[ev.position?.abbreviation] ?? '',
           },
         })
-      } else if (
-        type === 'offensive_substitution' &&
-        ev.player?.id != null &&
-        ev.position?.abbreviation !== 'PR'
-      ) {
+      } else if (type === 'offensive_substitution' && ev.position?.abbreviation === 'PR') {
+        // A pinch RUNNER announced before the first pitch. This used to fall
+        // to the text list on the claim that "no one is aboard at a half's
+        // start" — false in extra innings, where the automatic runner is, and
+        // a pre-pitch PR exists exactly to run for HIM (verified live,
+        // gamePk 823263 top 11: Bae for the placed Contreras). The placement's
+        // own card names the chain itself (halfInningFeed hangs `pinchRunners`
+        // on the `placed` entry; PlacedRunnerCard draws it), so a second line
+        // here would double it. Skipped.
+        continue
+      } else if (type === 'offensive_substitution' && ev.player?.id != null) {
         // A pinch-hitter announced before this half's first pitch gets the same
         // headshot "now batting" card the fresh fielder/pitcher entries get,
         // rather than a plain list line — all pre-pitch changes read as matching
-        // cards staged at the top of the half. A pinch RUNNER (position 'PR') is
-        // excluded: he owns no plate appearance and never enters pre-pitch (no
-        // one is aboard at a half's start), so he keeps the text fallback. On
-        // reveal this card is replaced by the pinch-hitter's own at-bat card, so
-        // the caller's startedRevealing gate keeps it from doubling up.
+        // cards staged at the top of the half. On reveal this card is replaced
+        // by the pinch-hitter's own at-bat card, so the caller's
+        // startedRevealing gate keeps it from doubling up.
         const person = players[`ID${ev.player.id}`] ?? {}
         const { last, first } = personNameParts(person)
         const name = last ? `${last}${first ? `, ${first}` : ''}` : person.fullName ?? ''

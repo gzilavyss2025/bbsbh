@@ -33,6 +33,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | dev-data-stores.test.js | 24 | scripts/lib/dev-data-stores.mjs | Dev-lab data-store validators/allowlists |
 | due-up.test.js | 8 | src/api/dueup.js | "Due up" pre-pitch preview |
 | fielders-choice-force-out.test.js | 2 | src/api/playbyplay.js | force_out eventType scorebook code |
+| focus-windows.test.js | 10 | src/api/playbyplay/entriesView.js | Focus mode's display windows: one per at-bat, each card in exactly one window, and the count never drops when a stoppage reaches the feed under an unchanged cap (replayed tap by tap on the captured game) |
 | foul-callouts.test.js | 15 | src/api/callout-notes.js | Marathon-AB / steal-streak / bullpen-thin callouts |
 | fouls.test.js | 16 | scripts/gen-fouls.mjs, src/api/fouls.js | Foul Tracker stats/leaderboards |
 | fresh-pitcher.test.js | 4 | src/api/select.js | selectIsFreshPitcher |

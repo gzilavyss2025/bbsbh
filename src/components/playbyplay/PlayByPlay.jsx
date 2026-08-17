@@ -13,7 +13,7 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
-  stepBounds,
+  focusWindows,
   stepTotals,
   lastVisibleAtBatIndex,
   deriveLiveState,
@@ -112,29 +112,33 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   const hasAtBat = entries.some((e) => e.kind === 'atbat')
   const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
 
-  // The boundaries `nextStepBoundary` walks one tap at a time, enumerated.
-  // Counting only those at or under the cap is what keeps every window
-  // inside it.
+  // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
+  // staging it at its head, every window clamped to the cap. NOT one window
+  // per reveal tap — see focusWindows' own header for the defect the
+  // tap-shaped windows caused (a notice reaching the feed after the tap that
+  // revealed the previous at-bat disqualified the last window and moved the
+  // reader BACK an at-bat; 14 of 89 taps on a replayed real game).
   //
-  // `windowed` ALONE, not `windowed && stepping`. The last at-bat of a half
-  // commits it, which drops `stepCap` to null and turns `stepping` off — and
-  // the window must NOT go with it, or the tap that revealed the 3rd out
-  // would answer by dumping the entire half onto the screen at once. That is
-  // the one moment the windowed mode is meant to hold still: the reader has
-  // just charted a play and is writing it down. `windowed` itself outlives
-  // the commit on purpose (`postHalf`, useFocusMode) until the reader taps
-  // "See the whole half," and that link is exactly where the stacked half
-  // belongs. Once the commit lands there is no cap left to measure against,
-  // so the cap is the full array — every step is revealed by then, which is
-  // what makes a windowed post-half hold safe to keep windowed. Nothing here
-  // reveals: `stepCap` is still the single boundary, and past the commit the
-  // whole half is already past it.
-  // Unconditional now (commit 3): a stacked half's trail needs the same step
+  // Built for a STACKED half too (commit 3): its trail needs the same
   // boundaries to build its scroll targets, not just a windowed half's single
   // card. Cheap either way — a pure walk over `entries`, not a fetch.
-  const bounds = stepBounds(entries)
+  //
+  // The cap is `effectiveCap ?? entries.length`, which is what carries the
+  // windows PAST the commit. The last at-bat of a half commits it, dropping
+  // `stepCap` to null and turning `stepping` off — and the windows must NOT go
+  // with it, or the tap that revealed the 3rd out would answer by dumping the
+  // entire half onto the screen at once. That is the one moment the windowed
+  // mode is meant to hold still: the reader has just charted a play and is
+  // writing it down. `windowed` itself outlives the commit on purpose
+  // (`postHalf`, useFocusMode) until the reader taps "See the whole half," and
+  // that link is exactly where the stacked half belongs. Once the commit lands
+  // there is no cap left to measure against, so the cap is the full array —
+  // every step is revealed by then, which is what makes a windowed post-half
+  // hold safe to keep windowed. Nothing here reveals: `stepCap` is still the
+  // single boundary, and past the commit the whole half is already past it.
   const stepCountCap = effectiveCap ?? entries.length
-  const revealedSteps = bounds.filter((b) => b <= stepCountCap).length
+  const wins = focusWindows(entries, stepCountCap)
+  const revealedSteps = wins.length
 
   // Must run before the empty-entries early return below (rules-of-hooks) —
   // guarded internally by `stepping`/`exhausted` instead.
@@ -163,7 +167,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // revealedThrough`, so there is no stacked state describing a step the
   // reader hasn't themselves revealed.
   useEffect(() => {
-    onFocusInfo?.(revealedSteps, buildTrailItems(entries, bounds, revealedSteps, (t) => EVENT_CODES[t]))
+    onFocusInfo?.(revealedSteps, buildTrailItems(entries, wins, (t) => EVENT_CODES[t]))
   }, [revealedSteps, feed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The runs and hits scored in the STEPPED-THROUGH portion of this half —
@@ -217,35 +221,35 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
   // card. See HalfInning.jsx's nowPitching.)
 
   if (entries.length === 0) return null
-  // One step's WINDOW. `focusStep` null is "the newest"; a number is clamped
-  // rather than trusted, the count it was chosen against being a component away.
+  // One window. `focusStep` null is "the newest"; a number is clamped rather
+  // than trusted, the count it was chosen against being a component away.
   let visibleEntries = stepping ? entries.slice(0, effectiveCap) : entries
-  // Which step the window landed on, or null while stacked (`!windowed`) —
+  // Which window the view landed on, or null while stacked (`!windowed`) —
   // handed down as `beatKey` so the denotation hold (ADR-0046) replays on
   // every fresh step.
   // NOT the card's React key: that is `${batterId}-${indexWithinTheWindow}`,
   // and a club batting around sends the same man up twice at the same index,
   // so React reconciles the second card onto the first and the mark prints
-  // with no hold. A step index is unique for the life of a half.
+  // with no hold. A window index is unique for the life of a half.
   let beatKey = null
-  if (windowed && revealedSteps > 0) {
-    const i = focusStep == null ? revealedSteps - 1 : Math.min(Math.max(focusStep, 0), revealedSteps - 1)
+  if (windowed && wins.length > 0) {
+    const i = focusStep == null ? wins.length - 1 : Math.min(Math.max(focusStep, 0), wins.length - 1)
     beatKey = i
-    visibleEntries = entries.slice(i === 0 ? 0 : bounds[i - 1], bounds[i])
+    visibleEntries = entries.slice(wins[i].start, wins[i].end)
   }
 
   // Step-scroll targets for a STACKED half's trail (commit 3, decision 4): a
   // trail chip click scrolls the stage to that step's first card instead of
   // switching a window (there is no window to switch while stacked). Built
   // only when it can be used — `visibleEntries`' index only lines up with its
-  // TRUE index into `entries` (and hence with `bounds`) when nothing above
-  // narrowed it to a mid-array window, which is exactly `beatKey == null`:
-  // the un-windowed case slices from 0 (a prefix, index-aligned) or not at
-  // all, and only the windowed branch above slices from `bounds[i-1]`
+  // TRUE index into `entries` (and hence with a window's `start`) when nothing
+  // above narrowed it to a mid-array window, which is exactly `beatKey ==
+  // null`: the un-windowed case slices from 0 (a prefix, index-aligned) or not
+  // at all, and only the windowed branch above slices from `wins[i].start`
   // (a mid-array window, NOT index-aligned). Cheap either way — a Map built
   // from an array already in hand, not a second walk of the feed.
   const stepStartEntryIndex =
-    beatKey == null ? new Map(bounds.map((b, i) => [i === 0 ? 0 : bounds[i - 1], i])) : null
+    beatKey == null ? new Map(wins.map((w, i) => [w.start, i])) : null
 
   // Annotate each mound-visit note with the club's visits-remaining right after
   // it (see moundVisitRemainings) — the mound-visit events come back in
