@@ -11,6 +11,7 @@
 // replace the marker block. Any failure — statsapi down, card unresolved — falls
 // through to the static default card, so a shared link can never break.
 
+import { SITE_URL } from '../src/copy/landing/site.js'
 import { buildCard } from './_lib/cards.js'
 
 export const config = { runtime: 'edge' }
@@ -29,7 +30,19 @@ function esc(s) {
 
 // The public URL the user actually shared, rebuilt from the rewrite params —
 // clean of the ?route=… internals (and of any spoiler-cutoff ?d/?s hints).
-function canonicalUrl(params, origin) {
+//
+// ALWAYS ON SITE_URL, never on the request's own origin. Three hostnames serve
+// this same function — tallybb.com, www.tallybb.com and bbsbh.vercel.app — plus
+// a deployment URL per build, and a page that names whichever one the reader
+// arrived on is a page telling a crawler that four URLs of identical content are
+// four different pages. This value is BOTH og:url and rel=canonical below, so it
+// has to be the one origin the site advertises everywhere else (the sitemap,
+// robots.txt, /learn). See src/copy/landing/site.js.
+//
+// This is the only surface that can emit a correct canonical for these routes:
+// the static shell has no idea which route it is about to boot, and vercel.json
+// rewrites ~30 real paths through here WITH the route in hand.
+export function canonicalUrl(params) {
   const route = params.get('route')
   let path
   switch (route) {
@@ -85,16 +98,17 @@ function canonicalUrl(params, origin) {
     default:
       path = '/'
   }
-  return `${origin}${path}`
+  return `${SITE_URL}${path}`
 }
 
-function renderHead(card, url) {
+export function renderHead(card, url) {
   const t = esc(card.title)
   const d = esc(card.description)
   const img = esc(card.image)
   const alt = esc(card.alt || card.title)
   const u = esc(url)
   return `<!-- OG:BEGIN (dynamic, injected per route by /api/preview) -->
+    <link rel="canonical" href="${u}" />
     <meta name="description" content="${d}" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Tally Baseball" />
@@ -142,7 +156,10 @@ export default async function handler(req) {
   }
 
   if (card && MARKER.test(html)) {
-    html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams, origin)))
+    // The card's IMAGE stays on the request origin (buildCard, above) so a
+    // preview deploy renders its own /api/og; the PAGE URL does not, so a
+    // preview deploy never advertises itself as canonical.
+    html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams)))
   }
 
   return new Response(html, {

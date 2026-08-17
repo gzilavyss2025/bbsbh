@@ -2,7 +2,7 @@
 
 **A spoiler-safe second screen for people who keep score by hand.**
 
-[bbsbh.vercel.app](https://bbsbh.vercel.app) · installable PWA · no sign-in
+[tallybb.com](https://tallybb.com) · installable PWA · no sign-in
 needed · no backend
 
 Tally Baseball sits next to your paper scorebook. It looks up the game in front

@@ -23,6 +23,7 @@ import {
   slotId,
 } from '../src/copy/landing/schema.js'
 import { buildSitemap } from '../scripts/gen-sitemap.mjs'
+import { SITE_URL } from '../src/copy/landing/site.js'
 
 const html = (page) => renderPage(resolvePage(page, {}))
 
@@ -276,4 +277,38 @@ test('the sitemap lists every guide and no scoring surface', () => {
   assert.doesNotMatch(xml, /-lab</, 'the dev labs are not advertised')
   assert.doesNotMatch(xml, /\?edit/, 'the editor is not advertised')
   assert.doesNotMatch(xml, /<loc>[^<]*\/\d{8}[^<]*<\/loc>/, 'no dated slate is listed')
+})
+
+// The duplicate-origin bug: tallybb.com, www.tallybb.com and the deployment
+// hostname bbsbh.vercel.app all served the same bytes, and the sitemap named the
+// deployment hostname. A sitemap that lists a hostname other than the one people
+// arrive on hands a crawler a second, competing copy of every page.
+test('every sitemap URL is on the one advertised origin', () => {
+  const xml = buildSitemap()
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+  assert.ok(locs.length > 0, 'the sitemap has URLs at all')
+  for (const loc of locs) {
+    assert.ok(loc.startsWith(`${SITE_URL}/`), `${loc} is not on ${SITE_URL}`)
+  }
+  assert.equal(new Set(locs.map((l) => new URL(l).origin)).size, 1, 'exactly one origin')
+})
+
+// The static shell (index.html), robots.txt and llms.txt cannot import SITE_URL
+// — they are not JavaScript — so nothing but this test keeps them in step with
+// it. Each of them makes a claim about where this site lives.
+test('the files that hardcode the origin agree with SITE_URL', () => {
+  for (const path of ['index.html', 'public/robots.txt', 'public/llms.txt', 'public/sitemap.xml']) {
+    const text = readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
+    assert.doesNotMatch(text, /https:\/\/bbsbh\.vercel\.app/, `${path} still names the deployment hostname`)
+    assert.ok(text.includes(SITE_URL), `${path} should name ${SITE_URL}`)
+  }
+})
+
+// A single hardcoded canonical in the SPA shell would tell every unrewritten
+// route — a dated slate, Settings, a lab — that it is really the home page. That
+// is worse than none, so the shell deliberately has none and the per-route tag
+// is written by api/preview.js and by render.js below.
+test('the SPA shell carries no rel=canonical', () => {
+  const shell = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+  assert.doesNotMatch(shell, /<link[^>]+rel="canonical"/, 'the shell must not claim a canonical')
 })
