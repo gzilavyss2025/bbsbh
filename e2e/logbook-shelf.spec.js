@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures.js'
+import { test, expect, openStampCard } from './fixtures.js'
 
 // The Game Log with more than one book on the shelf (ADR-0041) — the flow that
 // starts at a revealed box score and ends with a stamp on a page of the book
@@ -268,6 +268,7 @@ test('a stamp whose book is gone waits in the tray instead of vanishing', async 
   await expect(page.locator('.logbook__tray')).toBeVisible()
   await expect(page.locator('.passportbook__spread .passportpage__stamp')).toHaveCount(0)
   // And the season grid stops offering a page number for a page no book has.
+  await openStampCard(page)
   await expect(page.locator('.logbook__cell .logbook__unplaced')).toHaveCount(1)
 })
 

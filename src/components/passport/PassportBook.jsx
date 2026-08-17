@@ -68,6 +68,11 @@ import { usePageTurn } from './usePageTurn.js'
 //   landedPk      the stamp just confirmed, which plays the press once.
 //   onLanded      (gamePk) => void when that press finishes.
 //   coverSlot     React node rendered as the front cover.
+//   stand         draw the timber board the closed book stands on (below).
+//   onOpeningChange  ({ cover }) => void whenever the visible opening changes.
+//                 The screen around the book has controls that only make sense
+//                 once the book is OPEN — arranging it by date is the one
+//                 today — and nothing else here tells it which opening is up.
 
 // The two-page breakpoint. Deliberately NOT the app's shared WIDE_QUERY
 // (740px, hooks/useMediaQuery.js): at 740 a two-up spread of passport-shaped
@@ -118,6 +123,8 @@ export function PassportBook({
   movingPk = null,
   landedPk = null,
   onLanded,
+  stand = false,
+  onOpeningChange,
 }) {
   const wide = useMediaQuery(BOOK_WIDE_QUERY)
   const perOpening = wide ? 2 : 1
@@ -150,6 +157,15 @@ export function PassportBook({
 
   const current = openings[spread] ?? openings[0]
   const leaving = from == null ? null : openings[from] ?? null
+
+  // Closed or open, reported up. `usePageTurn` commits the navigation before it
+  // plays the leaf (see its header), so this flips at the START of a turn off
+  // the cover rather than when the sheet finishes — which is what the screen
+  // above wants: the book is being opened from the moment you turn it.
+  const onCover = Boolean(current?.cover)
+  useEffect(() => {
+    onOpeningChange?.({ cover: onCover })
+  }, [onCover, onOpeningChange])
 
   const handleKeyDown = useCallback(
     (event) => {
@@ -292,6 +308,15 @@ export function PassportBook({
           </div>
         )}
       </div>
+
+      {/* The board a closed book stands on — the same timber the shelf's own
+          planks are drawn from (58-logbook-shelf.css), so one book on its own
+          page and four books on a shelf are furniture of the same kind. A
+          sibling of the stage rather than something inside it: the stage clips,
+          and this board overhangs the book on both sides the way a shelf does.
+          Only while the cover is up — turn the page and the book is open on a
+          desk, which is not a thing that stands on anything. */}
+      {stand && onCover && <div className="passportbook__stand" aria-hidden="true" />}
 
       <nav className="passportbook__nav" aria-label="Passport pages">
         <button

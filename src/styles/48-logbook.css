@@ -61,13 +61,12 @@
   opacity: 0.7;
 }
 
-.logbook__count {
+/* The one way through to the retrospective, inside the stamp card. This used
+   to be `.logbook__count` and to lead with the season's stamp total; that count
+   now sits in the card's own head, where it summarises what is behind the
+   disclosure, so all this line carries is the way onward. */
+.stampcard__through {
   margin: 0 0 var(--space-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
 }
 
 .logbook__grid {
@@ -152,20 +151,160 @@
   text-align: center;
 }
 
-/* ---- the "View stats" link on the collection page (LogbookCollection.jsx) ---- */
-.logbook__statslink {
-  border: 0;
-  background: none;
-  padding: 0 var(--space-2);
-  color: var(--accent-primary);
+/* ---- the small outlined button this page's actions wear ----
+   A `.btn` modifier (07-team-logo-and-buttons.css), carried here rather than
+   there because the Game Log is its only caller and that file is at
+   check-file-size.mjs's ceiling. It loads after the base `.btn`, so the
+   cascade lands the same either way; move it back if a second feature adopts it.
+
+   It exists because the Game Log's page head (Shelf / Settings / Add +) and the
+   way through to its retrospective were bare green text, which is what this app
+   uses for a LINK. Every one of them opens a sheet or a route inside the
+   feature, so they now look like what they are. Sized off the same 34px box the
+   season chips and the book sheet's mode buttons already use, so "a small
+   button" is one shape in the Game Log rather than three. */
+.btn--chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+/* ---- the league under the book (components/logbook/ClubsSeen.jsx) ----
+   Every current MLB club, the ones you have stamped a game of in their own
+   colours and the rest grey. Read that file's header for why it is not a
+   checklist and never says "n of 30". */
+.clubsseen {
+  margin: var(--space-6) 0;
+}
+
+.clubsseen__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+.clubsseen__lede {
+  margin: var(--space-1) 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+}
+
+/* Fixed 5-across on a phone, which is the widest a 30-mark league grid reads as
+   one block rather than as a list; auto-fill above it, where there is room for
+   the club name beside each mark to breathe. */
+.clubsseen__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-3) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 740px) {
+  .clubsseen__grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  }
+}
+
+/* A club not in your book is not an absence to fix — it is just the rest of the
+   league, held back so the ones you have sat with come forward. Greyed by
+   TeamLogo's own `bw` filter plus this fade, and said in words for anyone not
+   reading the colour (the .sr-only line in the component). */
+.clubsseen__club {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  opacity: 0.34;
+}
+
+.clubsseen__club.is-seen {
+  opacity: 1;
+}
+
+.clubsseen__name {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
-  text-decoration: underline;
+  line-height: var(--lh-snug);
+  text-align: center;
+  color: var(--text-caption);
 }
 
-.logbook__statslink:focus-visible {
+.clubsseen__club.is-seen .clubsseen__name {
+  color: var(--text-body);
+}
+
+/* ---- the stamp collection card (screens/logbook/StampCollection.jsx) ----
+   The season-paged grid of every stamp, behind a disclosure and closed on
+   arrival — the book above it is already the collection, and this is the same
+   keepsakes again as a list. */
+.stampcard {
+  margin: var(--space-6) 0 var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+}
+
+.stampcard__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stampcard__head:focus-visible {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -2px;
+  border-radius: var(--radius-md);
+}
+
+.stampcard__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+
+/* Pushed to the chevron, so the count reads as the card's own summary rather
+   than as part of its title. */
+.stampcard__meta {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.stampcard__chev {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-caption);
+}
+
+.stampcard__body {
+  padding: var(--space-4);
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }

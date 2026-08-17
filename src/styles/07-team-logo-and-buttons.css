@@ -562,6 +562,11 @@
   border-color: transparent;
 }
 
+/* (`.btn--chip`, the small outlined skin, is a `.btn` modifier but lives in
+   48-logbook.css with its only caller — this file is at check-file-size.mjs's
+   ceiling, and the convention when a skin has one consumer is that the consumer
+   carries it. Move it here if a second feature reaches for it.) */
+
 .btn--danger {
   background: var(--clay);
   border-color: var(--clay-deep);

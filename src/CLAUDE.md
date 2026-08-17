@@ -357,9 +357,9 @@ you place by tapping the page. Three rules, each with a reason:
 allowlist since that guard was written — justified because a page's entire input
 is the user's own collection. `/logbook/stats` renders no stamp art and stays
 off it. Read ADR-0036 before adding a third name; the multi-book split
-(ADR-0041) renamed the `LogbookPage.jsx` entry there to `LogbookCollection.jsx`
-rather than adding one — `LogbookShelf.jsx` and `BookManagementSheet.jsx`
-render no stamp art and are not on it.
+(ADR-0041) renamed the `LogbookPage.jsx` entry to `LogbookCollection.jsx` rather
+than adding one, and `StampCollection.jsx` joined it the same way (read that
+script). `LogbookShelf.jsx`/`BookManagementSheet.jsx` draw no stamp art.
 
 ## Notification cards, casing, color, and button copy (ADR-0017)
 

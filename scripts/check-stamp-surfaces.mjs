@@ -81,9 +81,19 @@ const STAMP_ALLOWLIST = {
   // season grid — moved to LogbookCollection.jsx. A mechanical relocation,
   // not a new spoiler-relevant surface: its entire input is still this user's
   // own collection (src/hooks/useStamps.js), never a schedule, never a slate.
+  //
+  // `screens/logbook/StampCollection.jsx` is the SAME relocation happening a
+  // second time, for the same reason: LogbookCollection.jsx reached that same
+  // 600-line ceiling, so the season grid — one of its two GameStamp surfaces —
+  // moved into its own file. The tray is the other, and stayed, which is why
+  // both names are here rather than one replacing the other. The grid's input
+  // did not change: it is the stamps for one season of this user's own
+  // collection, handed down as a prop by the file above it, and there is still
+  // no path by which a game the user has not revealed can reach it.
   'components/logbook/GameStamp.jsx': [
     'components/logbook/StampGameButton.jsx',
     'screens/LogbookCollection.jsx',
+    'screens/logbook/StampCollection.jsx',
     'components/passport/PassportPage.jsx',
     'screens/identity-lab/editors/StampPlacementEditor.jsx',
     'screens/team/modules/identity/IdentityStampPreview.jsx',
