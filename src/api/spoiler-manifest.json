@@ -191,6 +191,10 @@
         "screens/BoxScore.jsx"
       ]
     },
+    "attendance.js": {
+      "class": "spoiler-free",
+      "why": "Static attendance.json — a Final-games season aggregate (avg/high/low gate), same footing as WAR. No SealBox."
+    },
     "comebackWins.js": {
       "class": "spoiler-free",
       "why": "Static comeback-wins.json — a Final-games season aggregate, same footing as WAR. No SealBox."

@@ -11,6 +11,7 @@ import { recentDecidedGames, allDecidedGames, allStartedGames } from '../../../a
 import { fetchSeasonScores, leagueSurpriseScoresFor, seasonScoreFor } from '../../../api/seasonScore.js'
 import { fetchTeamScores, teamScoreFor, leagueScoresFor, leagueSeasonGradesFor } from '../../../api/teamScore.js'
 import { fetchPostseasonOdds, postseasonOddsFor } from '../../../api/postseasonOdds.js'
+import { fetchAttendance, attendanceRatesFor } from '../../../api/attendance.js'
 import { loadCombinedPoolForTeams } from '../../../api/statsLevels.js'
 import { loadMoreTeamTransactions } from '../../../api/teamTransactions.js'
 import {
@@ -86,6 +87,7 @@ export async function loadOverview(id, asOf) {
     postseasonOddsData,
     transactionsPage,
     milbAlumni,
+    attendanceData,
   ] = await Promise.all([
     team.league?.id ? fetchStandings(team.league.id, season, cutoff) : Promise.resolve([]),
     // Degrades to null on a thin MiLB feed (see fetchManager's own try/catch) —
@@ -118,6 +120,8 @@ export async function loadOverview(id, asOf) {
     // shard, so it costs the MLB pages nothing to skip and the MiLB pages
     // nothing to take.
     isMilb ? fetchMilbAlumni(id) : Promise.resolve({ minGames: null, players: [] }),
+    // Ballpark card's attendance stats — MLB only (the generator is).
+    isMilb ? Promise.resolve(null) : fetchAttendance(),
   ])
 
   const standingsRows = standingsRowsFor(standings, team, id)
@@ -183,5 +187,7 @@ export async function loadOverview(id, asOf) {
     transactionsPage,
     // Made The Show — MiLB only, and the page's last card.
     milbAlumni,
+    // Ballpark card's attendance stats.
+    attendance: isMilb ? null : attendanceRatesFor(attendanceData, id, season),
   }
 }
