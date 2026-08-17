@@ -17,22 +17,22 @@ to read.
 
 ## Guides
 
-- [How to score a baseball game](https://bbsbh.vercel.app/learn/score-a-baseball-game): The beginner's guide — the scorecard grid, the nine position numbers, the symbols, and a worked half-inning.
-- [Scorekeeping symbols and position numbers](https://bbsbh.vercel.app/learn/scorekeeping-symbols): The complete notation reference, including where scorers legitimately disagree.
-- [How to record baseball substitutions](https://bbsbh.vercel.app/learn/score-baseball-substitutions): Pinch hitters, pinch runners, pitching changes, defensive replacements and position changes on a paper scorecard.
-- [What to do when you miss a play](https://bbsbh.vercel.app/learn/missed-play-scorekeeping): A four-step recovery that protects the batting order, base state and out count while you reconstruct the play.
-- [Choosing a baseball scorebook](https://bbsbh.vercel.app/learn/choose-a-scorebook): What differs between paper scorebooks, and which suits which kind of scorer.
-- [Pen or pencil for baseball scorekeeping?](https://bbsbh.vercel.app/learn/pen-or-pencil-baseball-scorekeeping): How line width, paper, correction needs and writing feel affect the best tool for a scorebook.
-- [Watching a game on delay without spoilers](https://bbsbh.vercel.app/learn/watch-without-spoilers): What actually leaks a score, and how to follow a game you are watching later.
-- [Keeping score at the ballpark](https://bbsbh.vercel.app/learn/score-at-the-ballpark): What to bring, where to sit, and the substitutions you will miss from a stadium seat.
-- [Ballpark passports](https://bbsbh.vercel.app/learn/ballpark-passports): How ballpark stamp books work, and keeping a record of the games you saw.
-- [How to read a box score](https://bbsbh.vercel.app/learn/read-a-box-score): Every column in a box score and a line score, explained.
-- [Baseball stats glossary](https://bbsbh.vercel.app/learn/stats-glossary): Plain-language definitions from batting average through WAR, with rough scales.
+- [How to score a baseball game](https://tallybb.com/learn/score-a-baseball-game): The beginner's guide — the scorecard grid, the nine position numbers, the symbols, and a worked half-inning.
+- [Scorekeeping symbols and position numbers](https://tallybb.com/learn/scorekeeping-symbols): The complete notation reference, including where scorers legitimately disagree.
+- [How to record baseball substitutions](https://tallybb.com/learn/score-baseball-substitutions): Pinch hitters, pinch runners, pitching changes, defensive replacements and position changes on a paper scorecard.
+- [What to do when you miss a play](https://tallybb.com/learn/missed-play-scorekeeping): A four-step recovery that protects the batting order, base state and out count while you reconstruct the play.
+- [Choosing a baseball scorebook](https://tallybb.com/learn/choose-a-scorebook): What differs between paper scorebooks, and which suits which kind of scorer.
+- [Pen or pencil for baseball scorekeeping?](https://tallybb.com/learn/pen-or-pencil-baseball-scorekeeping): How line width, paper, correction needs and writing feel affect the best tool for a scorebook.
+- [Watching a game on delay without spoilers](https://tallybb.com/learn/watch-without-spoilers): What actually leaks a score, and how to follow a game you are watching later.
+- [Keeping score at the ballpark](https://tallybb.com/learn/score-at-the-ballpark): What to bring, where to sit, and the substitutions you will miss from a stadium seat.
+- [Ballpark passports](https://tallybb.com/learn/ballpark-passports): How ballpark stamp books work, and keeping a record of the games you saw.
+- [How to read a box score](https://tallybb.com/learn/read-a-box-score): Every column in a box score and a line score, explained.
+- [Baseball stats glossary](https://tallybb.com/learn/stats-glossary): Plain-language definitions from batting average through WAR, with rough scales.
 
 ## The app
 
-- [Today's games](https://bbsbh.vercel.app/): The slate, with every score sealed until revealed.
-- [Leaders](https://bbsbh.vercel.app/leaders): Season leaderboards. Stat lines are never sealed — a season line is not a score.
-- [Standings](https://bbsbh.vercel.app/standings)
-- [Game Log](https://bbsbh.vercel.app/logbook): A stamp for each game you saw, arranged in books by hand.
-- [About](https://bbsbh.vercel.app/about)
+- [Today's games](https://tallybb.com/): The slate, with every score sealed until revealed.
+- [Leaders](https://tallybb.com/leaders): Season leaderboards. Stat lines are never sealed — a season line is not a score.
+- [Standings](https://tallybb.com/standings)
+- [Game Log](https://tallybb.com/logbook): A stamp for each game you saw, arranged in books by hand.
+- [About](https://tallybb.com/about)

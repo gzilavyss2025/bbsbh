@@ -9,6 +9,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
+import { canonicalUrl, renderHead } from '../api/preview.js'
+import { SITE_URL } from '../src/copy/landing/site.js'
 
 const delay = (ms, value) => new Promise((resolve) => setTimeout(() => resolve(value), ms))
 const rejectAfter = (ms, err) => new Promise((_, reject) => setTimeout(() => reject(err), ms))
@@ -92,6 +94,62 @@ for (const route of STATIC_REPORT_ROUTES) {
 test('buildCard still falls back to null for an unrecognized route', async () => {
   const card = await buildCard(new URLSearchParams({ route: 'not-a-real-route' }), 'https://example.test')
   assert.equal(card, null)
+})
+
+// ------------------------------------------------- canonical origin (preview)
+//
+// The bug these pin: three hostnames served identical bytes — tallybb.com,
+// www.tallybb.com and the bbsbh.vercel.app deployment name — and the pages
+// advertised the deployment name while readers arrived on the apex. The whole
+// site now names ONE origin, SITE_URL, and api/preview.js is the only surface
+// able to emit a per-route canonical (the static shell is the SPA fallback for
+// every unrewritten route and cannot know which page it is about to boot).
+
+test('a route canonical is built on SITE_URL, never on the requested host', () => {
+  const params = new URLSearchParams({ route: 'player', id: '668227' })
+  assert.equal(canonicalUrl(params), `${SITE_URL}/player/668227`)
+  // The old signature took the request origin and used it. Nothing about the
+  // hostname a reader (or a preview deployment) arrived on may reach the tag.
+  assert.doesNotMatch(canonicalUrl(params), /vercel\.app|www\./)
+})
+
+test('every rewritten route resolves to its own canonical path, not the home page', () => {
+  const cases = [
+    [{ route: 'team', id: '158' }, '/team/158'],
+    [{ route: 'team-roster', id: '158' }, '/team/158/roster'],
+    [{ route: 'leaders', scope: 'pitching' }, '/leaders/pitching'],
+    [{ route: 'leaders-org', orgId: '158' }, '/leaders/org/158'],
+    [{ route: 'standings' }, '/standings'],
+    [{ route: 'game', date: '20260817', matchup: 'mil-chc', section: 'boxscore' }, '/20260817/mil-chc/boxscore'],
+  ]
+  for (const [params, path] of cases) {
+    assert.equal(canonicalUrl(new URLSearchParams(params)), `${SITE_URL}${path}`)
+  }
+  // An unresolvable route falls back to the home page, which is the one case
+  // where "/" is the honest answer.
+  assert.equal(canonicalUrl(new URLSearchParams({ route: 'nope' })), `${SITE_URL}/`)
+})
+
+test('the injected head carries a rel=canonical, and it agrees with og:url', () => {
+  const card = {
+    title: 'Christian Yelich | Tally Baseball',
+    description: 'Season line, splits and recent form.',
+    image: 'https://deploy-abc123.vercel.app/api/og?card=player',
+    alt: 'Christian Yelich',
+  }
+  const url = canonicalUrl(new URLSearchParams({ route: 'player', id: '592885' }))
+  const head = renderHead(card, url)
+
+  const canonical = head.match(/<link rel="canonical" href="([^"]+)"/)
+  const ogUrl = head.match(/<meta property="og:url" content="([^"]+)"/)
+  assert.ok(canonical, 'a canonical tag is emitted')
+  assert.ok(ogUrl, 'an og:url is emitted')
+  // site.js's rule: a canonical and an og:url that disagree are worse than
+  // neither, because the crawler picks one and does not tell you which.
+  assert.equal(canonical[1], ogUrl[1])
+  assert.equal(canonical[1], `${SITE_URL}/player/592885`)
+  // The IMAGE still comes off the serving deploy — only the page URL is pinned.
+  assert.ok(head.includes(card.image))
 })
 
 // Every team-hub tab (Overview is untagged; the other five pass `tab`) needs
