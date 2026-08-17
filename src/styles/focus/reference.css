@@ -216,22 +216,24 @@
   box-shadow: var(--shadow-card);
 }
 
-/* `:not([aria-selected='true'])` is load-bearing, not tidiness. This rule and
-   `.refpanel__tab[aria-selected='true']` above are BOTH (0,2,0), so the later
-   one — this hover — used to win and repaint the chosen tab's ground back to
-   near-white paper while `--text-on-ink` kept its text paper-white. On a
-   pointer that is a flicker; on a phone it is the permanent state, because iOS
-   Safari leaves :hover stuck on the last element tapped until the reader taps
-   somewhere else. The reader's own tab was the one tab they could not read. */
+/* `:not([aria-selected='true'])` / `:not([aria-current='true'])` is
+   load-bearing, not tidiness. This rule and `.refpanel__tab[aria-selected='true']`
+   / `.trailcell[aria-current='true']` above are BOTH (0,2,0), so the later
+   one — this hover — used to win and repaint the chosen tab's, or the live
+   trail cell's, ground back to near-white paper while `--text-on-ink` kept
+   its text paper-white. On a pointer that is a flicker; on a phone it is the
+   permanent state, because iOS Safari leaves :hover stuck on the last element
+   tapped until the reader taps somewhere else. The reader's own tab — or the
+   live at-bat's own cell — was the one they could not read. */
 .refpanel__tab:not([aria-selected='true']):hover,
 .refbar__chip:hover,
 .trailstrip__followbtn:hover,
 .trailstrip__summarybtn:hover,
-.trailcell:hover {
+.trailcell:not([aria-current='true']):hover {
   background: var(--surface-inset);
 }
 
-.trailcell:hover {
+.trailcell:not([aria-current='true']):hover {
   border-color: var(--border-rule);
 }
 
