@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNav, useRouteLink } from '../../lib/nav.js'
-import { MENU_GROUPS } from '../../lib/reportPages.js'
+import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
 
 // A persistent icon button, sibling to SiteSearchButton, that opens a sheet
 // listing the app's standalone pages — grouped now, not one flat run of
@@ -131,14 +131,14 @@ function SiteMenuModal({ onClose }) {
         <div className="sitemenusheet__scroll">
           {MENU_GROUPS.map((group) => (
             <section key={group.id} className="sitemenusheet__group">
-              <h3 className="sitemenusheet__grouphd">{group.label}</h3>
-              <ul className="sitemenusheet__list">
+              <h3 className="dirhd">{group.label}</h3>
+              <ul className="navdir__list">
                 {group.pages.map((item) => {
                   const props = linkProps(item.path)
                   return (
                     <li key={item.path}>
                       <a
-                        className="searchbox__item sitemenusheet__item"
+                        className="dirlink sitemenusheet__item"
                         href={props.href}
                         onClick={(event) => {
                           props.onClick(event)
@@ -148,6 +148,11 @@ function SiteMenuModal({ onClose }) {
                         }}
                       >
                         {item.label}
+                        {/* Says the row leaves the app for a server-rendered
+                            document — the same tag /more puts on the same rows,
+                            and visible text rather than a title= tooltip, which
+                            is invisible on the phone this app is built for. */}
+                        {isGuidePath(item.path) && <span className="dirtag">Guide</span>}
                       </a>
                     </li>
                   )
@@ -160,7 +165,7 @@ function SiteMenuModal({ onClose }) {
         <div className="sitemenusheet__foot">
           <button
             type="button"
-            className="sitemenusheet__everything"
+            className="navdir__everything"
             onClick={() => {
               onClose()
               navigate('/more')

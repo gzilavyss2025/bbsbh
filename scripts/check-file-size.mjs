@@ -74,7 +74,7 @@ const BUDGETS = {
   'src/styles/02-wordmark-lab.css': 700, // 644
   'src/styles/05-masthead-nav.css': 700, // 697 — current player-page masthead and level-progression rules after CareerTimeline moved to 05a
   'src/styles/06-loader-and-cards.css': 900, // 850
-  'src/styles/08-site-shell.css': 1000, // 1016 -> 952: the About page's rules left for 65-about-page.css, which AboutPage.jsx imports itself
+  'src/styles/08-site-shell.css': 900, // 1000 -> 898: the footer's flat link-list rules left for 08a-site-menu.css, which holds the shared site-directory language the sheet, the footer and /more all read
   'src/styles/09-team-info.css': 800, // 700 -> 716: the innings view's lineup masthead (.lineupteam__name) joined the header-theme system (EnteringReference.jsx), the same `.is-themed`/`--bar-fill` triad .halfdefense__title already wore — one more selector in the same family, not a new one. 687 — the Ballpark card moved out to 57-ballpark-card.css
   'src/styles/10-lineup.css': 800, // 797
   'src/styles/12-sealbox.css': 1700, // 1639 — unified focus/stacked layout: dropped the unfocused page's .prehalf, .half__entering/.halfentering, .innings__reference/.innings__ref-*, .innings__rosters, and .innings__row2 rules
