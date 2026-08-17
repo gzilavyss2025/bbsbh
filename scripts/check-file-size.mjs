@@ -141,7 +141,10 @@ const BUDGETS = {
   // the per-play loop — a coveredRunnerEvents Set plus one call, the sentence
   // building itself lives in the new module, not here.
   'src/api/playbyplay/halfInningFeed.js': 900, // 807
-  'src/screens/PlayerPage.jsx': 800, // 794 — Prospect Card remains, duplicate trendBySportId progression wiring removed
+  // 800 -> 830 for the Career register's MLB-only pill: three lines of filter
+  // state in CareerRegister, the .mastheadpill button in its SectionTitle, and
+  // an `aside` slot on that local SectionTitle. No logic worth its own module.
+  'src/screens/PlayerPage.jsx': 830, // 817 — Prospect Card remains, duplicate trendBySportId progression wiring removed
   // 700 -> 750 for Focus Mode's matchup header: threading pitchingTeamId and
   // a focusHeader flag into AtBatCard, plus the buildTrailItems import for
   // the at-bat trail. The header itself (AtBatHero.jsx), the trail's

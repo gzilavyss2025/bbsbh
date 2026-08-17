@@ -641,12 +641,20 @@ const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
 
 function CareerRegister({ register }) {
   const { columns, rows, totals } = register
+  // A big leaguer with a long option/rehab history (Snell) carries more MiLB
+  // lines than MLB ones, which buries the register's point. The pill drops the
+  // penciled rows and their footed MiLB total; gap years stay either way. Only
+  // offered to someone who HAS an MLB row — for a prospect the MiLB rows ARE
+  // the register.
+  const [mlbOnly, setMlbOnly] = useState(false)
+  const canFilter = rows.some((r) => r.tier === 'mlb') && rows.some((r) => r.tier === 'milb')
+  const keep = (r) => !(mlbOnly && canFilter) || r.tier !== 'milb'
   // +2 for the leading Year + Team columns this table prepends to the stat cells.
   const hideNarrow = columns
     .map((c, i) => (NARROW_HIDE_COLS.has(c) ? i + 2 : -1))
     .filter((i) => i >= 0)
 
-  const ledgerRows = rows.map((r) => ({
+  const ledgerRows = rows.filter(keep).map((r) => ({
     key: r.key,
     className: r.tier === 'mlb' ? 'reg-mlb' : r.tier === 'gap' ? 'reg-gap' : 'reg-milb',
     allStar: r.allStar,
@@ -675,13 +683,25 @@ function CareerRegister({ register }) {
 
   return (
     <>
-      <SectionTitle title="Career stats" bar />
+      <SectionTitle
+        title="Career stats"
+        bar
+        // Same .mastheadpill idiom, and the same measured contrast against a
+        // club bar, as the lineup page's Bullpen / vs-starter toggles — hollow
+        // dot off, filled on. See styles/10-lineup.css.
+        aside={canFilter && (
+          <button type="button" className="mastheadpill" aria-pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
+            <span className="mastheadpill__dot" aria-hidden="true" />
+            MLB only
+          </button>
+        )}
+      />
       <Ledger
         leftCols={2}
         head={['Year', 'Team', ...columns]}
         rows={ledgerRows}
         hideNarrow={hideNarrow}
-        totals={totals.map((t) => ({
+        totals={totals.filter(keep).map((t) => ({
           label: t.label,
           cells: t.cells,
           className: t.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
@@ -770,13 +790,16 @@ function StatGrid({ tiles }) {
 // components; the workload/form pair share one slot, split by group) so it
 // wears the club bar (.section__title--bar in index.css); their sub-card
 // headings underneath render through this same component without it.
-function SectionTitle({ title, note, primary = false, bar = false }) {
+// `aside` puts a control (the Career register's MLB-only pill) on the far end
+// of the bar, the way SectionMasthead carries the lineup page's toggles.
+function SectionTitle({ title, note, primary = false, bar = false, aside = null }) {
   return (
     <h3
-      className={`section__title${primary ? ' section__title--primary' : ''}${bar ? ' section__title--bar' : ''}`}
+      className={`section__title${primary ? ' section__title--primary' : ''}${bar ? ' section__title--bar' : ''}${aside ? ' section__title--aside' : ''}`}
     >
       <span>{title}</span>
       {note && <em>{note}</em>}
+      {aside}
     </h3>
   )
 }
