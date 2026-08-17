@@ -1,0 +1,56 @@
+# LINE ENDINGS ARE LF IN THIS REPO. THIS FILE IS WHAT ENFORCES IT.
+#
+# The whole development machine is Windows, so an editor or a tool that writes
+# CRLF is not an unusual event here — it is the default failure. What made it
+# worth a rule is how the damage shows up, which is nowhere near the cause.
+#
+# A file committed with CRLF differs from its LF counterpart on EVERY line. Git
+# has no way to see a two-line edit inside that; it reports the file as entirely
+# rewritten. So a branch that touched two lines of `api/_lib/cards.js` produced a
+# 684-line merge conflict, and three files did it at once (PR #740, resolved in
+# the integration stack #742). Nothing was wrong with the change. The endings
+# were wrong, and the conflict was noise standing between a reviewer and a
+# two-line diff.
+#
+# `text=auto eol=lf` fixes it at the only place that holds: git normalizes CRLF
+# to LF when it writes the file into the INDEX, whatever the working tree looks
+# like. A tool that insists on CRLF locally is then harmless, because what gets
+# committed is LF either way. This costs nothing on Windows — git checks the
+# file back out however `core.autocrlf` says to.
+#
+# `scripts/check-line-endings.mjs` is the second layer, and it exists because a
+# rule that only lives in configuration is a rule nobody is told they broke: it
+# reads the INDEX (not the working tree, which is legitimately CRLF on Windows)
+# and fails `npm run lint` on anything that got through. Keep both — this file
+# prevents, that one reports.
+#
+# The repo has no .bat/.cmd/.ps1 files, which are the usual reason to carve out a
+# CRLF exception. If one is ever added, give it `eol=crlf` here rather than
+# weakening the blanket rule.
+
+# Everything git considers text is stored LF, regardless of the working tree.
+* text=auto eol=lf
+
+# Binary assets, marked explicitly rather than left to the content heuristic.
+# `text=auto` guesses by looking for NUL bytes, and the guess is wrong for the
+# occasional asset that has none — an SVG is XML, so it is text by any heuristic
+# and a mangled one is a broken image, not a diff.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.pdf   binary
+*.mp4   binary
+*.webm  binary
+
+# SVG is text and must stay diffable — the logo-art pipeline reads and rewrites
+# these, and a reviewer needs to see which path changed.
+*.svg   text eol=lf
