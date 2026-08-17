@@ -157,7 +157,12 @@
   background: var(--bar-fill, transparent);
   border-bottom: 3px solid var(--bar-accent, transparent);
 }
-.player.is-themed .section__title--bar span {
+/* DIRECT children only. A descendant `span` also caught the aside pill's
+   state dot, which draws itself in currentColor — it took the bar's ink
+   (white on most clubs) while sitting on the pill's own paper fill, so the
+   dot vanished in the unpressed state. The pill paints its own text and dot;
+   the bar must not reach inside it. */
+.player.is-themed .section__title--bar > span {
   color: var(--bar-text, var(--text-caption));
 }
 .player.is-themed .section__title--bar em {
@@ -168,7 +173,7 @@
    below) but still takes the bar's ink rather than the accent color that
    role normally carries — the accent-primary/bar-fill pairing isn't a
    reviewed combination. */
-.player.is-themed .section__title--bar.section__title--primary span {
+.player.is-themed .section__title--bar.section__title--primary > span {
   color: var(--bar-text, var(--accent-primary));
 }
 
