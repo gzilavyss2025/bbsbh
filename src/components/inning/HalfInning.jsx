@@ -345,9 +345,14 @@ export function HalfInning({
         )}
 
         {/* Every pitcher who's now done for this team from the previous half
-            it pitched — see finalLineNotices above. Same reachability gate as
-            the Now Pitching card above it. */}
-        {(revealed || isNextToReveal) &&
+            it pitched — see finalLineNotices above. Shown only alongside the
+            half's FIRST batter (revealedAtBatCount <= 1, 0 before any
+            stepping starts): it's the context for why a new arm just took
+            over, not something to keep pinned above every card in the half.
+            `revealed` (a full-half commit, which clears the stepping mark —
+            see useRevealProgress's revealTo) means more than the first
+            batter is on screen at once, so it drops out then too. */}
+        {isNextToReveal && !revealed && revealedAtBatCount <= 1 &&
           finalLineNotices.map((n) => {
             const line = pitcherLineAt(feed, n.side, n.pitcherId, n.cutAtBatIndex, halfIndex(inning - 1, half))
             return line ? (
