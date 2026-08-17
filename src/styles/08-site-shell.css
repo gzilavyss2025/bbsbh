@@ -1023,6 +1023,28 @@
   color: var(--text-body);
 }
 
+.aboutpage__prose {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.aboutpage__prose p {
+  margin: 0;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-body);
+  color: var(--text-body);
+}
+
+/* A question is a sentence, not a shouted label — so it drops the condensed
+   caps treatment `.aboutpage__principle h3` gives a principle's name and picks
+   up body leading instead. Same card, different job. */
+.aboutpage__qa h3 {
+  margin-bottom: 6px;
+  font-size: var(--fs-ui);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-none);
+}
+
 .aboutpage__list {
   display: grid;
   gap: 0;
@@ -1050,6 +1072,17 @@
   border-radius: 50%;
   background: var(--surface-card);
   vertical-align: 1px;
+}
+
+.aboutpage__list--links li::before {
+  display: none;
+}
+
+.aboutpage__list--links a {
+  color: var(--text-heading);
+  text-decoration: underline;
+  text-decoration-color: var(--border-rule);
+  text-underline-offset: 3px;
 }
 
 .aboutpage__note {

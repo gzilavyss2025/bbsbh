@@ -247,12 +247,24 @@ async function gameCard(date, matchup, origin) {
 
 // Static-but-labeled cards for the app's non-entity screens. No statsapi call —
 // the words are fixed, so the image is generated from the query alone.
+//
+// `sub` is drawn INTO the card art, so it has to stay short enough to set on one
+// or two lines at card size. The optional `desc` splits the other job off it:
+// the `<meta name="description">` a crawler reads, where ~150 characters is the
+// budget and a five-word tagline wastes it. A route with no `desc` keeps using
+// `sub` for both, which is right for a page whose whole pitch fits in a line.
 const GENERIC = {
   leaders: { eyebrow: 'LEADERBOARDS', title: 'League Leaders', sub: 'Every level, every category — spoiler-safe.' },
   standings: { eyebrow: 'STANDINGS', title: 'Standings', sub: 'MLB divisions and the wild-card race.' },
   prospects: { eyebrow: 'PROSPECTS', title: 'Top Prospects', sub: 'The pipeline, ranked — a spoiler-safe scouting board.' },
   rehab: { eyebrow: 'REHAB', title: 'Rehab Assignments', sub: 'Who is on a rehab stint, league-wide.' },
-  about: { eyebrow: 'ABOUT', title: 'Tally Baseball', sub: 'Keep score. Keep the surprise.' },
+  about: {
+    eyebrow: 'ABOUT',
+    title: 'Tally Baseball',
+    sub: 'Keep score. Keep the surprise.',
+    metaTitle: 'About Tally Baseball — The Spoiler-Free Scorekeeping App',
+    desc: 'Tally Baseball is a free, spoiler-free baseball app for keeping score by hand and watching on delay. Lineups, rosters and umpires open; the score stays sealed until you reveal it.',
+  },
   logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
   fouls: { eyebrow: 'FOUL TRACKER', title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
   milestones: { eyebrow: 'MILESTONE WATCH', title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
@@ -272,8 +284,11 @@ function genericCard(route, origin) {
   const g = GENERIC[route]
   if (!g) return null
   return {
-    title: `${g.title} — Tally Baseball`,
-    description: g.sub,
+    // `metaTitle` overrides the suffixed default. /about's card title IS the
+    // site name, so the default suffix printed "Tally Baseball — Tally
+    // Baseball" as the <title> and the og:title both.
+    title: g.metaTitle || `${g.title} — Tally Baseball`,
+    description: g.desc || g.sub,
     image: ogUrl(origin, { type: 'generic', eyebrow: g.eyebrow, title: g.title, sub: g.sub }),
     alt: `${g.title} — ${g.sub}`,
   }
