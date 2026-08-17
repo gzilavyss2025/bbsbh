@@ -235,6 +235,32 @@
   font-size: var(--fs-field);
 }
 
+/* A number field's +/- pair, flanking the box. A real 34px tap target each,
+   the same footing as the swatch and eyedropper beside a colour box: a
+   shortcut into the same field, not a second source of truth for it — the box
+   keeps taking a typed value too. Added because a text box with no native
+   stepper is unusable to nudge with a thumb; see the swatch's comment for
+   why the box stays authoritative regardless. */
+.iddrawer__stepbtn {
+  flex: 0 0 auto;
+  width: 34px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font: inherit;
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+.iddrawer__stepbtn:active {
+  background: var(--bg-canvas);
+}
+.iddrawer__stepbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
 /* The native picker beside a hex box. Deliberately small and square — it is a
    shortcut to the text field's value, not the control itself, which is why the
    text stays authoritative for the `rgba(...)` values these stores also hold. */
@@ -425,4 +451,104 @@
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   color: var(--text-caption);
+}
+
+/* ---- the Header bars group's bar mock ----
+
+   This drawer renders identity-lab's own HeaderBarMock (editors/HeaderPreview.jsx)
+   rather than a second component, so these rules are that component's own
+   class names, restated here rather than pulled in via
+   17-identity-lab-workbench.css — that partial is the WHOLE lab workbench,
+   most of it dead weight on a page that only ever mounts this one piece of it.
+   Keep in sync with that file's .idlab__barmock rules by eye; the classes are
+   shared on purpose so the two previews can't quietly drift apart in markup,
+   only in which few rules render them. */
+.idlab__barmock {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-bottom: 3px solid var(--header-accent, var(--seal));
+  border-radius: var(--radius-sm);
+  background: var(--header-bar, var(--navy));
+  gap: var(--space-2);
+}
+.idlab__barmock--unset {
+  border: var(--bw-heavy) dashed var(--border-rule);
+  background: none;
+}
+.idlab__barmock__logo {
+  flex: 0 0 auto;
+  height: 100%;
+}
+.idlab__barmock--darkmark .idlab__barmock__logo {
+  filter: brightness(0);
+}
+.idlab__barmock--darkmark .idlab__barmock__logo.idlab__barmock__logo--custom {
+  filter: none;
+}
+.idlab__barmock__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--header-onbar, var(--paper-3));
+}
+.idlab__barmock__empty {
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-caps);
+  color: var(--graphite);
+}
+
+/* ---- the Ballpark hover wash group's preview ----
+
+   A fixed mock of what 06a-gamecard-parkart.css's .gamecard__parkart /
+   ::before / ::after layers paint on a slate card — always shown at the
+   HOVERED strength, never the resting 0.24-grayscale-only state, since the
+   whole point here is judging a colour a resting card never shows. Not the
+   same elements as the real card (a `<span>` pair rather than pseudo-
+   elements), because those two layers are reused across the Ballpark hover
+   wash preview and nothing else here needs them — but the same three custom
+   properties (`--park-art`/`--park-focus`/`--park-tint`) and the same
+   `--park-wash-intensity` opacity var feed both, so what is judged here is
+   never a second recipe that could quietly disagree with the real card's. */
+.iddrawer__parkwash {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  max-width: 220px;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+}
+.iddrawer__parkwash__photo {
+  position: absolute;
+  inset: -5%;
+  background-image: var(--park-art, none);
+  background-size: cover;
+  background-position: var(--park-focus, 50% 50%);
+  background-repeat: no-repeat;
+  filter: grayscale(1);
+  opacity: 0.24;
+}
+.iddrawer__parkwash__tint {
+  position: absolute;
+  inset: -5%;
+  background: var(--park-tint, none);
+  mix-blend-mode: color;
+  opacity: var(--park-wash-intensity, 0.55);
+}
+.iddrawer__parkwash__label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+  opacity: 0.28;
 }

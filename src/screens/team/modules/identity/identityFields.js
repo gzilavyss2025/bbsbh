@@ -23,6 +23,7 @@
 // which are server-side only (src/lib/identity/stores.js).
 
 import {
+  defaultHomeTreatmentFor,
   hasAlternate2,
   hasAlternate3,
   hasAlternate4,
@@ -36,6 +37,7 @@ import { MLB_TEAM_COLORS } from '../../../../lib/brandColors.js'
 import { MILB_HEADER_COLOR_OVERRIDES, MILB_LOGO_POS_OVERRIDES } from '../../../../lib/milbColors.js'
 import { stampLogoTuningRecord } from '../../../../lib/stampLogoTuning.js'
 import { BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
+import { parkWashColorOverride, parkWashIntensity, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
 import {
   IDENTITY_DIMENSIONS,
   MLB_TREATMENTS,
@@ -96,9 +98,17 @@ function fieldsFrom(dimension, teamId, key, record, only) {
     id: key == null ? identityFieldId(dimension, teamId, name) : identityFieldId(dimension, teamId, key, name),
     name,
     label: FIELD_LABELS[name] ?? name,
+    hint: FIELD_HINTS[name] ?? null,
     spec: spec.fields[name],
     landed: text(record?.[name]),
   }))
+}
+
+// A plain-language explanation for a field whose label alone doesn't say what
+// it does. Rendered under the box every time — no native `title`, which a
+// touch screen never sees.
+const FIELD_HINTS = {
+  originY: 'Where the logo scales and rotates from, vertically: top, center, bottom, or a percent down the tile.',
 }
 
 const FIELD_LABELS = {
@@ -262,6 +272,37 @@ export function identityGroups(teamId, { isMilb, treatment }) {
     key: 'wpa',
     title: 'Win-probability band',
     fields: fieldsFrom('wpa', id, null, { bandColor: BAND_COLOR_OVERRIDES[id] }),
+  })
+
+  // The slate card's hover/press wash over this club's HOME ballpark photo
+  // (06a-gamecard-parkart.css, src/lib/ballpark/parkWash.js). Not `fieldsFrom`, like
+  // the logo group above it: the landed values are the app's own COMPUTED
+  // defaults (the home tile colour, the app-wide 0.55 opacity), not a raw
+  // store record — an override is this club's escape hatch on top of those,
+  // the same relationship mainOverrideLogoUrl has to the plain CDN mark.
+  groups.push({
+    key: 'parkwash',
+    title: 'Ballpark hover wash',
+    preview: 'parkwash',
+    fields: [
+      {
+        id: identityFieldId('parkWash', id, 'color'),
+        name: 'color',
+        label: 'Wash color',
+        spec: IDENTITY_DIMENSIONS.parkWash.fields.color,
+        landed: text(
+          parkWashColorOverride(teamId) ?? tileColorFor(teamId, defaultHomeTreatmentFor(teamId) ?? 'main', 'home'),
+        ),
+      },
+      {
+        id: identityFieldId('parkWash', id, 'intensity'),
+        name: 'intensity',
+        label: 'Wash intensity',
+        hint: '0 is invisible, 1 is a solid fill — the app ships 0.55.',
+        spec: IDENTITY_DIMENSIONS.parkWash.fields.intensity,
+        landed: text(parkWashIntensity(teamId)),
+      },
+    ],
   })
 
   return groups
