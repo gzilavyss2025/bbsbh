@@ -29,6 +29,11 @@ function outsToIp(outs) {
   return `${Math.floor(outs / 3)}.${outs % 3}`
 }
 
+// Local copy of playbyplay/shared.js's BASE_NUM (barrel-internal, not
+// re-exported) — this module lives outside playbyplay/, and the table is
+// four literals, not worth reaching into that directory's internals for.
+const HANDOFF_BASE_NUM = { '1B': 1, '2B': 2, '3B': 3 }
+
 // Per-team pitching lines for every pitcher who has appeared in a revealed
 // half-inning, or in the currently-stepped half up through `throughAtBatIndex`.
 // `revealedThrough` is a half-index (see halfIndex); pass -1 for "nothing
@@ -177,4 +182,185 @@ export function computePitcherLines(
     }
   }
   return out
+}
+
+// One pitcher's line frozen at an exact atBatIndex cut, for the pitching-
+// handoff cards (see pitcherHandoffs below) — a thin call shape over
+// computePitcherLines, not a new spoiler surface. Forcing `revealedThrough`
+// to `stepHalfIndex - 1` always routes through computePitcherLines' partial/
+// accumulator branch (never its "whole outing revealed, use the exact
+// boxscore line" branch — see that function's `fullyRevealed` check), so the
+// result is always the running total AT `cutAtBatIndex`, regardless of how
+// far the reader has actually revealed. Returns null if the pitcher has no
+// accumulated line at that cut (nothing thrown yet, or a bad id).
+export function pitcherLineAt(feed, side, pitcherId, cutAtBatIndex, stepHalfIndex) {
+  if (pitcherId == null || cutAtBatIndex == null || stepHalfIndex == null) return null
+  const lines = computePitcherLines(feed, stepHalfIndex - 1, {
+    stepHalfIndex,
+    throughAtBatIndex: cutAtBatIndex,
+  })
+  return lines[side]?.find((row) => row.id === pitcherId) ?? null
+}
+
+// Whether (inning, half) is the GAME's very last half played — no play exists
+// anywhere in the feed for a later inning. The one case a `resolvedAtHalfEnd`
+// handoff (see pitcherHandoffs) has no "next defensive half" page to defer
+// its finalized card to, and must render in-feed instead — PlayByPlay.jsx's
+// own fallback.
+export function isLastHalfOfGame(feed, inning, half) {
+  const last = (feed?.liveData?.plays?.allPlays ?? []).at(-1)
+  return last?.about?.inning === inning && last?.about?.halfInning === half
+}
+
+// The pitcher who threw (inning, half)'s own LAST play — distinct from
+// pitcherHandoffs' departing pitchers (who each left mid-half, before the
+// half was over). A team's next defensive half's leading notice
+// (HalfInning.jsx) shows a finalized card for this pitcher too whenever he
+// ISN'T that next half's own starter — the ordinary case of a clean
+// between-innings change, which never touches pitcherHandoffs at all since
+// nothing about it happens mid-half. Returns null for an empty/malformed
+// half.
+export function halfClosingPitcher(feed, inning, half, battingSide) {
+  const plays = (feed?.liveData?.plays?.allPlays ?? []).filter(
+    (p) => p?.about?.inning === inning && p?.about?.halfInning === half,
+  )
+  const last = plays.at(-1)
+  const pitcherId = last?.matchup?.pitcher?.id
+  if (pitcherId == null) return null
+  return {
+    pitcherId,
+    side: battingSide === 'away' ? 'home' : 'away',
+    lastAtBatIndex: last.about?.atBatIndex ?? null,
+  }
+}
+
+// The handoffs (from `handoffs`, pitcherHandoffs' output) whose finalized
+// card belongs in-feed right after the play at `atBatIndex` — mid-half
+// resolutions always, plus `resolvedAtHalfEnd` ones when there's no later
+// half to defer to (`isLastHalfOfGame`). Marks each match into
+// `renderedFinal` (a caller-owned Set of `incomingPitcherId`) so a later
+// entry in the same half never re-renders it. Pure bookkeeping — the caller
+// still resolves each match's actual `line` via `pitcherLineAt`.
+export function handoffsResolvingAt(handoffs, atBatIndex, renderedFinal, isLastHalf) {
+  const matches = []
+  for (const h of handoffs) {
+    if (renderedFinal.has(h.incomingPitcherId)) continue
+    if (h.resolvedAtHalfEnd && !isLastHalf) continue
+    if (h.resolutionAtBatIndex !== atBatIndex) continue
+    renderedFinal.add(h.incomingPitcherId)
+    matches.push(h)
+  }
+  return matches
+}
+
+// For each MID-half pitching change in (inning, half) — the half's very
+// first, pre-pitch change is skipped, same `anyPitchInHalf`-style rule
+// halfInningFeed.js already uses for the same reason (selectHalfStartingPitcher
+// / HalfInning's persistent header already names that arm) — reports:
+//   - who left (`departingPitcherId`) and who entered (`incomingPitcherId`)
+//   - `snapshotAtBatIndex`: the last play BEFORE the change, i.e. the cut for
+//     "his line at the moment he left" (feed straight into pitcherLineAt)
+//   - `inheritedCount`: how many runners were on base at that moment
+//   - `resolutionAtBatIndex`: the cut at which every one of those runners'
+//     fates (scored, put out, or left on base when the half ended) is known
+//     — before this cut, his R/ER could still change; at and after it, they
+//     cannot
+//   - `resolvedAtHalfEnd`: true when resolution coincided with the half's
+//     own last play (there were inherited runners, and the half ended before
+//     they all individually resolved) rather than happening mid-half with
+//     more of the half still to reveal afterward. The two placements this
+//     drives (in-feed vs. a leading card on the team's NEXT defensive half)
+//     are the caller's job — see PlayByPlay.jsx and HalfInning.jsx.
+// `side` is which team was PITCHING this half (`battingSide`'s opposite),
+// same convention computePitcherLines uses internally.
+export function pitcherHandoffs(feed, inning, half, battingSide) {
+  const plays = (feed?.liveData?.plays?.allPlays ?? []).filter(
+    (p) => p?.about?.inning === inning && p?.about?.halfInning === half,
+  )
+  if (plays.length === 0) return []
+  const side = battingSide === 'away' ? 'home' : 'away'
+  const halfLastAtBatIndex = plays[plays.length - 1]?.about?.atBatIndex ?? null
+
+  const handoffs = []
+  const bases = [null, null, null] // runner id currently on 1B/2B/3B, this half only
+  let anyPitchInHalf = false
+
+  plays.forEach((play, idx) => {
+    // Event-level, same as halfInningFeed.js's own anyPitchInHalf walk — a
+    // change nested ahead of this play's OWN first pitch (still pre-pitch as
+    // of the moment it happens) must agree with that derivation's skip, or
+    // this card would contradict HalfInning's persistent "Now pitching" header
+    // about who started the half.
+    for (const e of play.playEvents ?? []) {
+      if (e.isPitch) {
+        anyPitchInHalf = true
+        continue
+      }
+      if (e.details?.eventType === 'pitching_substitution' && anyPitchInHalf) {
+        const prevPlay = idx > 0 ? plays[idx - 1] : null
+        const departingPitcherId = prevPlay?.matchup?.pitcher?.id ?? null
+        const snapshotAtBatIndex = prevPlay?.about?.atBatIndex ?? null
+        if (departingPitcherId != null && snapshotAtBatIndex != null) {
+          const inheritedRunnerIds = bases.filter((id) => id != null)
+          const resolutionAtBatIndex = resolveHandoffRunners(
+            plays,
+            snapshotAtBatIndex,
+            inheritedRunnerIds,
+          )
+          handoffs.push({
+            subAtBatIndex: play.about?.atBatIndex ?? null,
+            departingPitcherId,
+            incomingPitcherId: play.matchup?.pitcher?.id ?? null,
+            side,
+            snapshotAtBatIndex,
+            inheritedCount: inheritedRunnerIds.length,
+            resolutionAtBatIndex,
+            resolvedAtHalfEnd:
+              inheritedRunnerIds.length > 0 && resolutionAtBatIndex === halfLastAtBatIndex,
+          })
+        }
+      }
+    }
+
+    // Fold this play's own baserunning in AFTER checking it for a leading
+    // substitution — `bases` must reflect state as of the moment he left,
+    // which is everything from STRICTLY EARLIER plays only.
+    for (const r of play.runners ?? []) {
+      const startBase = HANDOFF_BASE_NUM[r.movement?.start]
+      const endBase = HANDOFF_BASE_NUM[r.movement?.end]
+      if (startBase) bases[startBase - 1] = null
+      if (!r.movement?.isOut && endBase) bases[endBase - 1] = r.details?.runner?.id ?? null
+    }
+  })
+
+  return handoffs
+}
+
+// The atBatIndex at which every runner in `runnerIds` has an individually
+// known fate (scored or put out) — or, for whoever's still pending once
+// `plays` runs out, the half's own last play (left on base is a resolution
+// too). `plays` is the WHOLE half's plays (pitcherHandoffs already scoped
+// it); only entries after `afterAtBatIndex` are walked. Bases-empty case
+// (`runnerIds` empty) returns `afterAtBatIndex` unchanged — already closed.
+function resolveHandoffRunners(plays, afterAtBatIndex, runnerIds) {
+  if (runnerIds.length === 0) return afterAtBatIndex
+  const pending = new Set(runnerIds)
+  let maxResolved = afterAtBatIndex
+  let lastAtBatIndex = afterAtBatIndex
+  for (const play of plays) {
+    const idx = play.about?.atBatIndex
+    if (idx == null || idx <= afterAtBatIndex) continue
+    lastAtBatIndex = idx
+    for (const r of play.runners ?? []) {
+      const rid = r.details?.runner?.id
+      if (rid == null || !pending.has(rid)) continue
+      if (r.movement?.end === 'score' || r.movement?.isOut) {
+        pending.delete(rid)
+        if (idx > maxResolved) maxResolved = idx
+      }
+    }
+    if (pending.size === 0) break
+  }
+  if (pending.size > 0) maxResolved = lastAtBatIndex
+  return maxResolved
 }

@@ -896,6 +896,54 @@
   background: color-mix(in srgb, var(--seal) 14%, var(--surface-card));
 }
 
+/* The two pitching-handoff cards (PitcherHandoffCard.jsx) — a departing
+   pitcher's line frozen at the moment he's pulled, and, once his inherited
+   runners resolve, his settled line. Same .pitchernotice--pbp outer chrome
+   as the tier-1 cards, stacked into a column: the .pitchernotice header row
+   (reused as-is, nested rather than applied to the outer element, since a
+   flex row can't also hold a full-width table below it) over the Arms tab's
+   own .pitchers__grid table (20-charts.css). */
+.pitcherhandoff {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* .pitchers__grid's table-layout:fixed splits its 10 columns evenly, sized
+   for the Arms tab's FULL page width — nested in this narrower card on a
+   phone, that same split left too little room per numeric column (confirmed
+   against a real game: "0.1" IP butted straight against "11" P with no
+   visible gap, reading as "0.111"). Scroll horizontally instead of letting
+   the columns compress below a legible width; the min-width is what actually
+   forces that — without it, `width: 100%` just shrinks to fit and there is
+   nothing to scroll. */
+.pitcherhandoff__tablewrap {
+  overflow-x: auto;
+}
+.pitcherhandoff .pitchers__grid {
+  margin: 0;
+  min-width: 460px;
+}
+/* A subheading under the pitcher's name/jersey/hand line, inside
+   .pitchernotice__body (its flex-column stacks it below, not beside, the
+   name row). Text-only, no fill — same recipe as .pitchernotice__code--alert
+   below (color, no background). check-contrast.mjs only walks its own fixed
+   pairing list, not arbitrary CSS, so this isn't guarded the way that one
+   is; --clay-deep/--field-deep against this card's ~14%-seal-tinted
+   background both measure over 6:1, well past the 4.5:1 AA floor for text. */
+.pitcherhandoff__chip {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+}
+.pitcherhandoff__chip--open {
+  color: var(--clay-deep);
+}
+.pitcherhandoff__chip--closed {
+  color: var(--field-deep);
+}
+
 /* Notification-card family, tier 2/3 — mound visits, ejections, and the
    baserunning/misc events with no plate appearance of their own (steal,
    caught stealing, pickoff, wild pitch, passed ball, balk) all ride the SAME
