@@ -1,8 +1,7 @@
 /* Salary and control context from Fever Baseball's Cot's-to-MLBAM join.
-   A broadcast scorebug translated into Tally's paper-and-ink palette: the
-   navy field makes the compensation number the page's one obvious read;
-   light-catching gradients and a restrained shadow give it Apple-like depth
-   without introducing a second visual language or decorative motion. */
+   A cream broadcast scorebug with Apple-like material depth: the oversized
+   navy figure and disciplined ticker hierarchy carry the broadcast energy,
+   while the paper surface keeps it native to Tally's scorebook palette. */
 .contractcard {
   margin-top: var(--space-5);
 }
@@ -10,11 +9,11 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  color: var(--text-on-ink);
+  color: var(--text-body);
   background:
-    radial-gradient(circle at 92% -20%, color-mix(in srgb, var(--seal) 38%, transparent), transparent 43%),
-    linear-gradient(145deg, color-mix(in srgb, var(--navy) 88%, var(--ink-2)), var(--navy) 62%);
-  border: var(--bw-hair) solid color-mix(in srgb, var(--paper-2) 20%, var(--navy));
+    radial-gradient(circle at 94% -18%, color-mix(in srgb, var(--seal) 20%, transparent), transparent 42%),
+    linear-gradient(145deg, var(--paper-3), color-mix(in srgb, var(--paper-2) 88%, var(--paper-1)) 68%);
+  border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-raised);
 }
@@ -24,8 +23,7 @@
   inset: 0;
   content: '';
   pointer-events: none;
-  background: linear-gradient(110deg, color-mix(in srgb, var(--paper-3) 9%, transparent), transparent 32%);
-  border-top: var(--bw-hair) solid color-mix(in srgb, var(--paper-3) 28%, transparent);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--paper-3) 68%, transparent), transparent 35%);
   border-radius: inherit;
 }
 .contractcard__header {
@@ -41,7 +39,7 @@
 .contractcard__ticker dt,
 .contractcard__controlhead span {
   display: block;
-  color: color-mix(in srgb, var(--paper-2) 68%, var(--graphite-soft));
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-semibold);
@@ -51,7 +49,7 @@
 }
 .contractcard__header h2 {
   margin: 3px 0 0;
-  color: var(--paper-3);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-title-lg);
   font-weight: var(--w-bold);
@@ -62,11 +60,11 @@
 .contractcard__regime {
   flex: none;
   padding: 5px 9px;
-  color: var(--navy);
-  background: var(--seal);
-  border: var(--bw-hair) solid color-mix(in srgb, var(--paper-3) 30%, var(--seal));
+  color: var(--text-on-ink);
+  background: var(--navy);
+  border: var(--bw-hair) solid var(--navy);
   border-radius: var(--radius-pill);
-  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink-0) 28%, transparent);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink-0) 16%, transparent);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
@@ -81,10 +79,13 @@
   gap: var(--space-4);
   padding: var(--space-5) var(--space-4);
 }
+.contractcard__hero--solo {
+  grid-template-columns: 1fr;
+}
 .contractcard__salary strong {
   display: block;
   margin-top: var(--space-1);
-  color: var(--paper-3);
+  color: var(--navy);
   font-family: var(--font-mono);
   font-size: clamp(var(--fs-hero-lg), 11vw, var(--fs-hero-xl));
   font-weight: var(--w-bold);
@@ -94,7 +95,7 @@
 }
 .contractcard__scorebug {
   margin: 0;
-  border-left: var(--bw-hair) solid color-mix(in srgb, var(--paper-2) 22%, transparent);
+  border-left: var(--bw-hair) solid var(--border-rule);
 }
 .contractcard__scorebug > div {
   display: flex;
@@ -102,14 +103,14 @@
   justify-content: space-between;
   gap: var(--space-2);
   padding: 6px 0 6px var(--space-3);
-  border-bottom: var(--bw-hair) solid color-mix(in srgb, var(--paper-2) 14%, transparent);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
 }
 .contractcard__scorebug > div:last-child {
   border-bottom: 0;
 }
 .contractcard__scorebug dd {
   margin: 0;
-  color: var(--paper-3);
+  color: var(--text-heading);
   font-family: var(--font-mono);
   font-size: var(--fs-ui);
   font-weight: var(--w-bold);
@@ -121,18 +122,18 @@
   gap: 1px;
   margin: 0;
   padding: 1px 0;
-  background: color-mix(in srgb, var(--paper-2) 14%, transparent);
-  border-block: var(--bw-hair) solid color-mix(in srgb, var(--paper-2) 18%, transparent);
+  background: var(--border-rule);
+  border-block: var(--bw-hair) solid var(--border-rule);
 }
 .contractcard__ticker > div {
   min-width: 0;
   padding: 9px var(--space-4);
-  background: color-mix(in srgb, var(--paper-3) 7%, transparent);
+  background: color-mix(in srgb, var(--paper-3) 78%, var(--paper-2));
 }
 .contractcard__ticker dd {
   overflow: hidden;
   margin: 3px 0 0;
-  color: var(--paper-3);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   font-weight: var(--w-semibold);
@@ -151,7 +152,7 @@
 }
 .contractcard__control h3 {
   margin: 0;
-  color: var(--paper-3);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   letter-spacing: var(--ls-caps);
@@ -168,7 +169,7 @@
   padding: 0 0 var(--space-1);
   list-style: none;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--paper-2) 32%, transparent) transparent;
+  scrollbar-color: var(--border-rule) transparent;
 }
 .contractcard__control li {
   position: relative;
@@ -177,8 +178,8 @@
   gap: 3px;
   min-width: 0;
   padding: 13px var(--space-3) 0 0;
-  border-top: var(--bw-hair) solid color-mix(in srgb, var(--paper-2) 28%, transparent);
-  color: color-mix(in srgb, var(--paper-2) 68%, var(--graphite-soft));
+  border-top: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-caption);
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
@@ -190,40 +191,28 @@
   width: 7px;
   height: 7px;
   content: '';
-  background: var(--seal);
+  background: var(--clay);
   border: var(--bw-hair) solid var(--paper-3);
   border-radius: var(--radius-pill);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--seal) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay) 14%, transparent);
 }
 .contractcard__control strong {
-  color: var(--paper-3);
+  color: var(--text-heading);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   letter-spacing: var(--ls-label);
   line-height: var(--lh-compact);
 }
 .contractcard__control em {
-  color: color-mix(in srgb, var(--paper-2) 68%, var(--graphite-soft));
+  color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-style: normal;
   letter-spacing: var(--ls-label);
 }
-.contractcard__source {
-  margin: 0;
-  padding: 9px var(--space-4) 10px;
-  color: color-mix(in srgb, var(--paper-2) 62%, var(--graphite-soft));
-  background: color-mix(in srgb, var(--ink-0) 34%, transparent);
-  font-size: var(--fs-caption);
-  line-height: var(--lh-prose);
-}
-.contractcard__source a {
-  color: var(--paper-2);
-  font-weight: var(--w-semibold);
-}
 @media (prefers-reduced-transparency: reduce) {
   .contractcard__frame {
-    background: var(--navy);
+    background: var(--surface-card);
   }
   .contractcard__frame::before {
     display: none;

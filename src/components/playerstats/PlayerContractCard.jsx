@@ -11,13 +11,6 @@ const exactMoney = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   maximumFractionDigits: 0,
 })
-const date = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  timeZone: 'UTC',
-})
-
 function Money({ value }) {
   if (value == null) return '—'
   return <data value={value} title={exactMoney.format(value)}>{money.format(value)}</data>
@@ -40,21 +33,13 @@ function statusLabel(status) {
   return status
 }
 
-function sourceDate(value) {
-  const timestamp = Date.parse(`${value}T00:00:00Z`)
-  return Number.isFinite(timestamp) ? date.format(timestamp) : value
-}
-
 export function PlayerContractCard({ contract }) {
   if (!contract) return null
   const service = serviceLabel(contract.service)
   const scorebugFacts = [
-    contract.cbtUsd != null && { label: 'Tax payroll', value: <Money value={contract.cbtUsd} /> },
     contract.contractTotalUsd != null && { label: 'Guaranteed', value: <Money value={contract.contractTotalUsd} /> },
     contract.aavUsd != null && { label: 'AAV', value: <Money value={contract.aavUsd} /> },
   ].filter(Boolean)
-  const cotsAsOf = contract.cotsAsOf ?? contract.source?.cotsAsOf
-
   return (
     <section className="contractcard" aria-labelledby="player-contract-title">
       <div className="contractcard__frame">
@@ -68,7 +53,7 @@ export function PlayerContractCard({ contract }) {
           </span>
         </header>
 
-        <div className="contractcard__hero">
+        <div className={`contractcard__hero${scorebugFacts.length ? '' : ' contractcard__hero--solo'}`}>
           <div className="contractcard__salary">
             <span>{contract.season} salary</span>
             <strong><Money value={contract.salaryUsd} /></strong>
@@ -113,18 +98,6 @@ export function PlayerContractCard({ contract }) {
             </ol>
           </div>
         )}
-
-        <p className="contractcard__source">
-          Data via{' '}
-          <a href={contract.source?.attributionUrl} target="_blank" rel="noreferrer">
-            {contract.source?.attribution ?? 'Fever Baseball'}
-          </a>
-          {' · Source: '}
-          <a href={contract.source?.sourceUrl} target="_blank" rel="noreferrer">
-            {contract.source?.source ?? "Cot's Baseball Contracts"}
-          </a>
-          {cotsAsOf && ` · Updated ${sourceDate(cotsAsOf)}`}
-        </p>
       </div>
     </section>
   )
