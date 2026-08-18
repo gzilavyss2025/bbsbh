@@ -2,6 +2,7 @@ import { useRouteLink } from '../../lib/nav.js'
 import { isGuidePath } from '../../lib/reportPages.js'
 import { TallyBaseballMark, TallyWordmark } from './TallyBrand.jsx'
 import { BuildStamp } from '../ui/BuildStamp.jsx'
+import { DirectoryHeading } from './DirectoryHeading.jsx'
 
 // The two blocks the slate's SiteFooter and every report page's ReportFooter
 // both end with. They were duplicated line-for-line in those two files, which
@@ -33,7 +34,7 @@ export function FooterDirectory({ groups, trail, onEverything }) {
       <div className="navdir">
         {groups.map((group) => (
           <section key={group.id} className="navdir__col">
-            <h2 className="dirhd">{group.label}</h2>
+            <DirectoryHeading group={group} />
             <ul className="navdir__list">
               {group.pages.map((page) => (
                 <li key={page.path}>
@@ -49,10 +50,13 @@ export function FooterDirectory({ groups, trail, onEverything }) {
 
       <div className="navdir__trail">
         {trail.map((page) => (
-          <a key={page.path} className="dirlink dirlink--trail" {...linkProps(page.path)}>
-            {page.label}
-            {isGuidePath(page.path) && <span className="dirtag">Guides</span>}
-          </a>
+          <section key={page.path} className="navdir__trail-group">
+            <DirectoryHeading group={page.group} />
+            <a className="dirlink dirlink--trail" {...linkProps(page.path)}>
+              {page.label}
+              {isGuidePath(page.path) && <span className="dirtag">Guides</span>}
+            </a>
+          </section>
         ))}
         <button type="button" className="navdir__everything" onClick={onEverything}>
           Everything, on one page

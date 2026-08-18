@@ -41,9 +41,9 @@
   background: var(--surface-card);
 }
 
-/* A card's heading, its list and its rows are the shared `.dirhd` /
-   `.navdir__list` / `.dirlink` / `.dirtag` set in 08a-site-menu.css — the same
-   four the More sheet and both footers render, so the three containers read as
+/* A card's heading, its glyph, list and rows are the shared `.dirhd` /
+   `.dirglyph` / `.navdir__list` / `.dirlink` / `.dirtag` set in
+   08a-site-menu.css — the same set the More sheet and both footers render, so the three containers read as
    one system. This partial holds only what is particular to the PAGE: its
    masthead, and the board the cards sit on. */
 .moredir__card .dirhd {

@@ -6,6 +6,7 @@ import { useRouteLink } from '../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../lib/reportPages.js'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
+import { DirectoryHeading } from '../components/chrome/DirectoryHeading.jsx'
 
 // "Everything" — every standalone page on the site, grouped, on one address.
 //
@@ -48,7 +49,7 @@ export function MorePage() {
       <div className="moredir__grid">
         {MENU_GROUPS.map((group) => (
           <section key={group.id} className="moredir__card">
-            <h2 className="dirhd">{group.label}</h2>
+            <DirectoryHeading group={group} />
             <ul className="navdir__list">
               {group.pages.map((page) => {
                 const props = linkProps(page.path)
