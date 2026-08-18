@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 
 # Highlight sheet renders UNDER the floating bar, making the clip unwatchable
 
@@ -62,3 +62,7 @@ after; the fourth pins the backdrop-tap dismiss + focus-return across the
 portal boundary.
 
 Also re-ran `npm run lint`, `npm test` (668 pass), and `npm run build`.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.

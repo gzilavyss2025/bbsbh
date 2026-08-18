@@ -1,6 +1,6 @@
 # 05 — Numbers tab
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 01, 02 (both must be merged to `main` first)
 **Runs alongside:** issues 03, 04, 06
@@ -77,3 +77,7 @@ cheap call) rather than reaching into another tab's loader.
   comeback data is normal).
 - `npm run lint` and `npm test` pass.
 - Handoff includes `http://localhost:<port>/team/158/numbers?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

@@ -1,4 +1,4 @@
-Status: partially fixed — `sac_fly_double_play` added to `NON_AB_EVENTS`
+Status: resolved — filed as gzilavyss2025/bbsbh#765
 (unambiguous per 9.02(a)(1)/9.08(d)), regression test in
 test/scorecard-sac-double-play.test.js. `sac_bunt_double_play` deliberately
 left out — tracked as an open judgment call in

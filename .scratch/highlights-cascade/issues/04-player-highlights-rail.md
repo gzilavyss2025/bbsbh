@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 Blocked by: 01-data-layer.md
 
 # Player page: PlayerHighlightsRail
@@ -266,3 +266,7 @@ screenshots confirm the visual result matches the new shared component.
 dependency on PR #588 (`claude/team-highlights-rail`, currently open) for
 `HighlightClipCard`; note that dependency when opening this issue's own PR,
 per `docs/development.md`'s "Task that depends on an open PR" guidance.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.

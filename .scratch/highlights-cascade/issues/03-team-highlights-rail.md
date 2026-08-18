@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 Blocked by: 01-data-layer.md (merged, PR #586)
 
 # Team hub → Games tab: TeamHighlightsRail
@@ -232,3 +232,7 @@ with implementation details the issue didn't anticipate:
 - [x] Renders on the Games tab, outside any `SealBox`, same footing as
       `TeamPhotosRail` right below it — no new spoiler surface, no new
       precedent.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.
