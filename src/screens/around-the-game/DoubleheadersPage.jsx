@@ -256,6 +256,7 @@ export function DoubleheadersPage() {
       <BroadcastMasthead
         eyebrow="Doubleheaders"
         title="Doubleheader Records"
+        dekFull
         dek="Every MLB club’s record in doubleheader games since 2004 — who sweeps the day, who
              drops both, and who they keep meeting."
       />

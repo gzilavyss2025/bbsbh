@@ -101,6 +101,12 @@
   opacity: 0.86;
 }
 
+/* Opt-in, one page at a time (BroadcastMasthead's `dekFull`): a one-line dek
+   held to 56ch breaks early and leaves the right half of the slab empty. */
+.bcast__dek--full {
+  max-width: none;
+}
+
 /* The lower third: season, through-date, sample size. Mono, because
    these are the numbers that say how much to trust the page. */
 .bcast__meta {
