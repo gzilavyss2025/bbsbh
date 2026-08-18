@@ -7,7 +7,7 @@
    whose own partial 59-more-directory.css adds only the page
    furniture around these same rows).
 
-   The shared half is `.dirhd` / `.dirlink` / `.dirtag` /
+   The shared half is `.dirhd` / `.dirglyph` / `.dirlink` / `.dirtag` /
    `.navdir__list` — a group heading, a row, a "this leaves the
    app" tag, and the list between them. A reader who learns the
    sheet's headings meets the same six words in the footer and
@@ -20,8 +20,8 @@
    ============================================================ */
 
 /* -------------------------------------------------- shared: group heading
-   Condensed uppercase graphite, an amber index tab in front of it, and a
-   hairline running out to the end of the column.
+   A small scorebook glyph, condensed uppercase graphite, and a hairline
+   running out to the end of the column.
 
    The navigation study drew this heading in kraft amber (--seal). It is not:
    #B5824A on manila reaches about 3.1:1, and this is small text, so AA (4.5:1)
@@ -41,18 +41,33 @@
   color: var(--text-caption);
 }
 
-.dirhd::before {
-  content: '';
+.dirglyph {
   flex: none;
-  width: 14px;
-  height: var(--bw-heavy);
-  border-radius: var(--radius-pill);
-  background: var(--seal-cover);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-left: var(--bw-heavy) solid var(--seal-cover);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-body);
+  box-shadow: var(--inset-cell);
 }
 
-.dirhd::after {
-  content: '';
+.dirglyph svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+
+.dirhd__label {
+  min-width: 0;
+}
+
+.dirhd__rule {
   flex: 1 1 auto;
+  min-width: var(--space-2);
   height: var(--bw-hair);
   background: var(--border-hairline);
 }
@@ -85,16 +100,21 @@
   color: var(--text-body);
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-standard);
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-out);
 }
 
-.dirlink:hover {
-  background: var(--surface-inset);
-  color: var(--text-heading);
+@media (hover: hover) and (pointer: fine) {
+  .dirlink:hover {
+    background: var(--surface-inset);
+    color: var(--text-heading);
+  }
 }
 
 .dirlink:active {
   background: var(--field-soft);
+  transform: scale(0.985);
 }
 
 .dirlink:focus-visible {
@@ -163,24 +183,29 @@
    door. Set apart by a rule, because they are about the SITE rather than about
    baseball — the same distinction TOOLS_GROUP's "The site" heading draws. */
 .navdir__trail {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
   margin-top: var(--space-3);
   padding-top: var(--space-3);
   border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
+.navdir__trail-group {
+  min-width: 0;
+}
+
+.navdir__trail-group .dirhd {
+  margin-bottom: var(--space-1);
+}
+
 .dirlink--trail {
-  flex: 0 0 auto;
   font-size: var(--fs-small);
   color: var(--text-caption);
 }
 
 .navdir__trail .navdir__everything {
-  width: auto;
-  margin-left: auto;
+  grid-column: 1 / -1;
   padding: var(--space-2) var(--space-3);
   font-size: var(--fs-small);
 }
@@ -194,23 +219,60 @@
    on an iPhone 14. The cap lives on the sheet and the overflow on the list
    inside it, so the title and the "Everything" footer stay put while the
    middle moves. */
-.sitemenusheet {
+.sheet.sitemenusheet {
   display: flex;
   flex-direction: column;
+  width: calc(100% - var(--space-4));
   max-height: 82vh;
   max-height: 82dvh;
+  margin: 0 var(--space-2) var(--space-2);
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  animation-duration: var(--dur-med);
+}
+
+.sitemenusheet__head {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  margin-bottom: 0;
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  background: var(--surface-card);
+}
+
+.sitemenusheet__eyebrow {
+  margin: 0 0 2px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
 }
 
 .sitemenusheet__scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding: var(--space-3);
+  background: var(--bg-page);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
 
+.sitemenusheet__group {
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+
 .sitemenusheet__group + .sitemenusheet__group {
-  margin-top: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.sitemenusheet__group .dirhd {
+  margin-bottom: var(--space-2);
 }
 
 /* The navigation study striped these rows (`.mitem:nth-child(odd)`). Not
@@ -223,9 +285,10 @@
 
 .sitemenusheet__foot {
   flex: none;
-  padding-top: var(--space-2);
-  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  margin-top: 0;
   border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--surface-card);
 }
 
 /* Wide layout: the sheet has never had one. Above the tablet breakpoint it
@@ -240,6 +303,11 @@
    respond to how many groups there are. Kept in sync with 25-wide-layout.css's
    breakpoint. */
 @media (min-width: 740px) {
+  .scrim--site-menu {
+    align-items: center;
+    padding: var(--space-4);
+  }
+
   /* `.sheet.sitemenusheet`, not `.sitemenusheet`: `.sheet` sets
      `max-width: var(--app-width)` and lives in 14-strike-zone.css, six
      partials LATER in the cascade — so the single-class rule this shipped as
@@ -250,12 +318,13 @@
     max-width: 900px;
     max-height: 78vh;
     max-height: 78dvh;
+    margin: 0;
   }
 
   .sitemenusheet__scroll {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--space-4);
+    gap: var(--space-3);
     align-items: start;
   }
 

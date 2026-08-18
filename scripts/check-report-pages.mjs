@@ -65,6 +65,43 @@ if (problems.length) {
   process.exit(1)
 }
 
+// Second half of the same guard, for the second thing that can drift: the
+// directory GLYPHS. DirectoryHeading.jsx draws one line mark per group and
+// picks it by `group.id`, with a `default` branch so it can never crash — and
+// that fallback is the hazard. A group added to reportPages.js without a mark
+// of its own does not fail, it silently borrows "The site"'s scoreboard, and
+// two headings then read as the same thing. This is not hypothetical: the
+// broadcast strand ("Around the game") arrived on one branch while the glyphs
+// arrived on another, and nothing but this check would have said so.
+const GLYPH_FILE = join(ROOT, 'src/components/chrome/DirectoryHeading.jsx')
+const glyphSrc = readFileSync(GLYPH_FILE, 'utf8')
+const { MENU_GROUPS } = await import(
+  new URL('../src/lib/reportPages.js', import.meta.url).href
+)
+
+const unmarked = MENU_GROUPS.map((group) => group.id).filter(
+  (id) => !new RegExp(`case '${id}':`).test(glyphSrc)
+)
+
+if (unmarked.length) {
+  console.error(
+    '\n✗ Directory glyph coverage failed — the following group id(s) in\n' +
+      '  src/lib/reportPages.js have no `case` of their own in\n' +
+      '  src/components/chrome/DirectoryHeading.jsx, so the menu, both footers\n' +
+      "  and /more all draw them with the fallback mark — the same one 'tools'\n" +
+      '  uses:\n'
+  )
+  for (const id of unmarked) console.error(`  ${id}`)
+  console.error(
+    '\n  Draw the group its own line mark in DirectoryHeading.jsx. Keep it to\n' +
+      '  the same few strokes as its neighbours — these render at 19px.\n'
+  )
+  process.exit(1)
+}
+
 console.log(
   '✓ SiteMenu.jsx, SiteFooter.jsx, and ReportFooter.jsx all build their page list from src/lib/reportPages.js.'
+)
+console.log(
+  `✓ All ${MENU_GROUPS.length} directory groups have a glyph of their own in DirectoryHeading.jsx.`
 )

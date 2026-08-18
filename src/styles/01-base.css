@@ -45,6 +45,10 @@
      - the welcome modal's explainer copy — `.favteamsheet__title--intro`,
        `.favteamsheet__pitch`, and the account panel's pitch/confirmation prose
        `.favteamsheet__accountpitch` (the section title + button stay uppercase)
+     - the broadcast report pages' method notes — `.method p` (the "how this
+       was counted" prose closing each of the four pages under
+       `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted,
+       same split as the Team Score modal below)
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`
      - the Team Score modal's headline + explainer paragraphs —

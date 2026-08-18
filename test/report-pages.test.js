@@ -19,10 +19,15 @@ import {
 
 // The report pages as they stood before PAGE_GROUPS existed, plus
 // /team-records, which landed on main (#742) while the regrouping was in
-// flight. Typed out rather than derived, so this test fails if the flattening
-// loses one — deriving the expectation from the thing under test would assert
+// flight, and the five broadcast reports that came with src/screens/around-the-game/.
+// Typed out rather than derived, so this test fails if the flattening loses
+// one — deriving the expectation from the thing under test would assert
 // nothing.
 const PATHS_BEFORE_GROUPING = [
+  '/attendance',
+  '/farm-system-rankings',
+  '/bullpen-availability',
+  '/pace-of-play',
   '/standings',
   '/leaders',
   '/team-records',
@@ -105,6 +110,11 @@ test('FOOTER_TRAIL is the guides hub and About, in that order, both resolved', (
   }
   assert.equal(FOOTER_TRAIL[0].path, '/learn')
   assert.equal(FOOTER_TRAIL[1].path, '/about')
+  assert.deepEqual(
+    FOOTER_TRAIL.map((page) => page.group?.id),
+    ['guides', 'tools'],
+    'footer trail entries need their directory glyph groups',
+  )
 })
 
 // The footers list PAGE_GROUPS, so anything in FOOTER_TRAIL must NOT also be a

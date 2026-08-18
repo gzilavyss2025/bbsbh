@@ -318,6 +318,36 @@ don't run these by hand.
   forever). MLB only — a league rank needs the whole 30-team pool. App reads
   it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
   rank).
+- `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
+  DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
+  (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
+  Ballpark card's own file: this one reads the same figures off the SCHEDULE
+  endpoint's `hydrate=gameInfo` (`{ attendance, firstPitch,
+  gameDurationMinutes, delayDurationMinutes }`), which is roughly a dozen
+  requests for a whole season instead of one boxscore per game — so it needs no
+  SQLite, no ingested-games table and no incremental window, and rebuilds from
+  scratch every night. TWO DENOMINATORS on purpose: attendance is counted for
+  the HOME club only (a gate is a fact about that club's park), game length for
+  BOTH clubs (it is made by the two rosters on the field, not by the park).
+  Ships per-club aggregates only — month splits, day/night, weekend/weekday,
+  top-drawing opponents, the extremes with their dates — never a per-game
+  table; every rank, fill rate and league comparison is derived in
+  `src/api/around-the-game/gate.js`. `--season=`/`--seasons=` for a past year. MLB
+  regular season, Final games only. Spoiler-free.
+- `gen-farm-system.mjs` → `public/data/farm-system.json` — the facts behind
+  `/farm-system-rankings` (The Farm Report): every organisation's four full-season affiliates
+  with their won-lost records, plus every ranked prospect it holds. A JOIN, not
+  a sweep — it READS the committed `public/data/affiliates.json`
+  (`gen-affiliates.mjs`) and `public/data/top-prospects.json`
+  (`fetch-top-prospects.mjs`) rather than refetching either, and adds only live
+  minor-league standings. Those come **by league, not by sport**:
+  `?sportId=11` returns an empty `records: []` — a successful-looking response
+  that would have shipped a page of blank records — so the sweep resolves
+  `/api/v1/leagues?sportId={11..14}` first and then one `/api/v1/standings`
+  per league. The Farm Index itself (the value curve, the level weights, the
+  three-pillar composite) is NOT here: it lives in
+  `src/api/around-the-game/farmSystem.js` where it is testable and visible, and the
+  research behind every constant is `docs/farm-index.md`. Spoiler-free.
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from
   Baseball Savant's CORS-open percentile-rankings CSV. Savant does the percentile

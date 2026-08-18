@@ -100,6 +100,28 @@ const BUDGETS = {
   // left here is PassportBook/PassportPage/PassportCover's own art, including
   // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
+  // ONE sheet for the four pages in src/screens/around-the-game/, which is why it is
+  // over the line: four partials would cost src/styles four directory slots
+  // and would hit the shared-chunk ordering trap src/index.css's header
+  // records. It briefly dropped back under 600 when the Rundown's grid was
+  // deleted and the entry went with it, as the ratchet requires — this is a
+  // deliberate re-entry, not a drift back. What put it over again is two
+  // rules that had to be explained rather than merely written: the sticky
+  // column's containing block (a bug this repo had already found, documented
+  // and fixed once in 26-player-page.css, then reintroduced here) and the
+  // caps-exempt method-note prose, whose `#root` prefix is the whole reason
+  // it works. Both notes prevented a real regression. Trimming them to hit a
+  // line count would be deleting the reason the rules are correct.
+  'src/styles/68-around-the-game.css': 700, // 608
+  // The directory-budget table itself. Every entry in it carries an inline
+  // rationale BY DESIGN — that is the whole convention, and it means the file
+  // grows a few lines on any commit that adds a deliberate exception. It was
+  // trimmed back under the cap once already (c1b9043b) and immediately went
+  // over again on the next such commit, which is the signal that the cap is
+  // the wrong instrument for a documented lookup table. The thing worth
+  // watching here is the BUDGET NUMBERS, and check-dir-size.mjs watches those
+  // itself.
+  'scripts/check-dir-size.mjs': 700, // 608
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
   // +9 lines to attach gen-pitch-arsenal.mjs's century-pitch sweep

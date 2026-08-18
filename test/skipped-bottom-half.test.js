@@ -16,7 +16,7 @@
 // (which the live feed pads out to scheduledInnings).
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { selectSkippedBottomHalf, selectFinalHalfIndex, halfIndex } from '../src/api/select.js'
+import { selectSkippedBottomHalf, selectFinalHalfIndex, selectFinalReached, halfIndex } from '../src/api/select.js'
 
 function feedWithInning9Home(finalStatus, homeInning9) {
   return {
@@ -93,4 +93,40 @@ test('ignores scheduledInnings padding past the last row anyone actually batted 
 
 test('null when the feed carries no innings at all', () => {
   assert.equal(selectFinalHalfIndex({ gameData: { status: { abstractGameState: 'Final' } } }), null)
+})
+
+// --------------------------------------------------------------------------
+// selectFinalReached — the scorebug HUD's "say F, not top 10th" predicate
+// (ScorebugMount.jsx). The bug: a game ending on the 3rd out of the bottom of
+// the 9th left the bug captioned "top 10th", because the inning indicator
+// always names the half that comes NEXT. It must be true only once the reader
+// has revealed the half that ended the game, and false again on a half they
+// paged back to (callers pass the CLAMPED mark for exactly that).
+// --------------------------------------------------------------------------
+
+test('final reached: true once the mark covers the last half played', () => {
+  const feed = feedWithInning9Home('Final', { runs: 2, hits: 3, errors: 0, leftOnBase: 1 })
+  assert.equal(selectFinalReached(feed, halfIndex(9, 'bottom')), true)
+})
+
+test('final reached: false one half short of the end', () => {
+  const feed = feedWithInning9Home('Final', { runs: 2, hits: 3, errors: 0, leftOnBase: 1 })
+  assert.equal(selectFinalReached(feed, halfIndex(9, 'top')), false)
+})
+
+test('final reached: false on an earlier half the reader paged back to', () => {
+  // The caller clamps its mark to the half on screen, so reviewing the bottom
+  // of the 1st in a fully revealed game asks about half-index 1, not 17.
+  const feed = feedWithInning9Home('Final', { runs: 2, hits: 3, errors: 0, leftOnBase: 1 })
+  assert.equal(selectFinalReached(feed, halfIndex(1, 'bottom')), false)
+})
+
+test('final reached: false while the game is Live, however far the reader has gotten', () => {
+  const feed = feedWithInning9Home('Live', { runs: 2, hits: 3, errors: 0, leftOnBase: 1 })
+  assert.equal(selectFinalReached(feed, 99), false)
+})
+
+test('final reached: true at the TOP of the 9th when the bottom was never needed', () => {
+  const feed = feedWithInning9Home('Final', { hits: 0, errors: 0, leftOnBase: 0 })
+  assert.equal(selectFinalReached(feed, halfIndex(9, 'top')), true)
 })

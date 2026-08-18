@@ -727,6 +727,23 @@ export function selectFinalHalfIndex(feed) {
   return halfIndex(last.num, homeBattedLast ? 'bottom' : 'top')
 }
 
+// Whether the reader has reached the end of a FINISHED game — the last half
+// actually played is inside what they have revealed. The scorebug HUD reads
+// this to caption itself "F" instead of pointing its inning indicator at a
+// half that will never be played (a game ending on the 3rd out of the bottom
+// of the 9th left the bug reading "top 10th", because the indicator always
+// names what comes NEXT — see ScorebugMount.jsx).
+//
+// Spoiler-free on the same footing as selectFinalHalfIndex it wraps: it reads
+// the mere PRESENCE of a `runs` key, never a value, and it can only say "the
+// game is over" to a reader who has already revealed the half that ended it.
+// Callers reviewing an earlier half must pass the CLAMPED mark (the half on
+// screen), not the game-wide high-water mark.
+export function selectFinalReached(feed, revealedThrough) {
+  const last = selectFinalHalfIndex(feed)
+  return last != null && revealedThrough >= last
+}
+
 // Coarse game-state flags for the delayed/suspended/postponed/warmup banner.
 // Structural metadata, not a score — safe to render unconditionally, same as
 // selectHasStarted above. `detailedState` carries MLB's specific phrasing

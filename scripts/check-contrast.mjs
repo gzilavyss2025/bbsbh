@@ -145,6 +145,14 @@ const PAIRINGS = [
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
   // green tint (TradeCard.jsx's ConsiderationRow, tone="cash").
   { fg: 'field-deep', bg: 'field-soft', min: TEXT, note: 'Trade Deadline cash consideration icon' },
+  // The broadcast report package (styles/68-around-the-game.css). Its
+  // masthead is the one surface in the app that sets text on the seam red
+  // rather than on paper or on ink, and the strand chip's knockout is the pair
+  // that has to hold — 5.05:1, which is real but is the thinnest margin in
+  // this table, so a future nudge to --clay must be re-checked here first.
+  { fg: 'paper-2', bg: 'clay', min: TEXT, note: 'report masthead strand chip' },
+  { fg: 'paper-3', bg: 'navy', min: TEXT, note: 'report masthead title on the ink slab' },
+  { fg: 'clay-deep', bg: 'surface-card', min: TEXT, note: 'rundown card eyebrow' },
 ]
 
 const failures = []
