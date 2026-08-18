@@ -19,6 +19,7 @@
 import { ImageResponse } from '@vercel/og'
 import { fetchWithTimeout } from './_lib/http.js'
 import { PLEX_COND_600, PLEX_COND_700, PLEX_SANS_600 } from './_lib/fonts.js'
+import { TEAM_LOGOS } from './_lib/logos.js'
 
 export const config = { runtime: 'edge' }
 
@@ -249,8 +250,17 @@ async function playerCard(p, F) {
   )
 }
 
+// MLB club logos rarely change, so the 30 marks TEAM_COLORS already knows
+// about are bundled (api/_lib/logos.js) instead of hitting mlbstatic on every
+// team/game card render. A MiLB id (or any id outside that bundle) falls
+// through to the runtime fetch, same as before.
+function bundledLogoDataUri(id) {
+  const svg = TEAM_LOGOS[numericId(id)]
+  return svg ? `data:image/svg+xml,${encodeURIComponent(svg)}` : null
+}
+
 async function logoMark(id, size, fallbackText, F) {
-  const svg = await fetchImage(logoSrc(id), 'image/svg+xml')
+  const svg = bundledLogoDataUri(id) || (await fetchImage(logoSrc(id), 'image/svg+xml'))
   if (svg) {
     return el('div', { display: 'flex', width: `${size}px`, height: `${size}px` }, {
       type: 'img',
