@@ -321,7 +321,7 @@ export function adoptRemotePreferences(remote) {
 // WHY THIS IS A COMPARISON AND NOT A CHANGE LOG — the backfill gap
 // ---------------------------------------------------------------------------
 // Verbatim the lesson ADR-0026's 2026-08-06 amendment records, and the reason
-// `stampsToPublish` exists (src/lib/stamps.js, PR #545). A sync that publishes
+// `stampsToPublish` exists (src/lib/stamps.js). A sync that publishes
 // "whatever changed since the last state I saw" establishes a silent baseline on
 // its first observation — so state that existed BEFORE sign-in registers as no
 // change, publishes nothing, and never will. The owner's second device signs in

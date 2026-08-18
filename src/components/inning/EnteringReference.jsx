@@ -46,7 +46,7 @@ import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from 
 // surface that is already one — the tab IS the disclosure, and a reader who
 // wants this section gone taps a different tab. The club masthead stays,
 // because "which club is fielding" is real information the tab label ("Field")
-// does not carry. Same shape RosterPanel took in PR #685: one prop, defaulting
+// does not carry. Same shape RosterPanel takes: one prop, defaulting
 // to the stacked page's existing behaviour, so nothing outside focus mode moves.
 export const DefenseSection = memo(function DefenseSection({ feed, inning, half, fieldingSide, fieldingName, fieldingTeamId, fieldingTreatment, revealedThrough, bare = false }) {
   const [open, setOpen] = useState(true)
@@ -120,7 +120,7 @@ export const DefenseSection = memo(function DefenseSection({ feed, inning, half,
 const UP_NEXT_LABELS = ['Due up', 'On deck', 'In the hole']
 
 // TWO PROPS FOR FOCUS MODE'S LINEUPS TAB, both defaulting to the stacked page's
-// existing behaviour — the same shape RosterPanel took in PR #685.
+// existing behaviour — the same shape RosterPanel takes.
 //
 //  • `bare` — drop the "Lineups ▾" disclosure. Inside a tab already called
 //    LINEUPS it was a second collapse control on a surface that is one, and

@@ -13,7 +13,7 @@
 // fix, rather than always walking every batter on file — cheap to re-run,
 // since it only fetches feeds for rows the WHERE clause still finds broken.
 // IMPORTANT: the default of 20 dates from before the Foul Tracker's per-team
-// filter (PR #319) — with no filter, only the global top 12 ever rendered, so
+// filter — with no filter, only the global top 12 ever rendered, so
 // 20 was headroom. Once a reader can filter to any of the 30 clubs, ANY
 // batter's row can surface (a team's own top 12 reaches far past the global
 // top 20), so a real catch-up run needs `--top` at least the total row count

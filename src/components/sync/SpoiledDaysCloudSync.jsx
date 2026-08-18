@@ -43,7 +43,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // one it saw, with the first observation establishing a silent baseline. A device
 // holding days from before sign-in therefore saw no change, published nothing, and
 // never would; the owner's second device signed in to an empty map. That module's
-// header has the full argument, and `stampsToPublish` (src/lib/stamps.js, PR #545)
+// header has the full argument, and `stampsToPublish` (src/lib/stamps.js)
 // is the same fix for the identical defect in the Logbook.
 //
 // The one thing a comparison can't see is a WITHDRAWAL, since the local list keeps

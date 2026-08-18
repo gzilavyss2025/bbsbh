@@ -12,12 +12,11 @@
 //
 // A SECOND, SMALLER FACT rides the same (userId, gamePk) address: whether the
 // reader has opened this game's BOX SCORE (ADR-0049), at
-// `revealbox:{userId}:{gamePk}`. One bit, and less than the mark beside it — it
-// carries no position at all, only that one seal on one page was lifted. It is
-// here rather than on an endpoint of its own because it is the same family
-// answering to the same key: same auth, same erase index (`reveal:index:{u}`,
-// which api/account.js reads to find both), and one round trip for the client
-// that wants both. Its ratchet is set-only: 1, never back to 0.
+// `revealbox:{userId}:{gamePk}`. One bit, no position — only that one seal on
+// one page was lifted. It lives here rather than on its own endpoint because
+// it shares the family: same auth, same erase index (`reveal:index:{u}`, which
+// api/account.js reads to find both), one round trip for a client that wants
+// both. Its ratchet is set-only: 1, never back to 0.
 
 import { authenticateUser } from './_lib/auth.js'
 import { jsonResponse, readJsonBody, requestUrl } from './_lib/nodeHandler.js'
@@ -25,10 +24,9 @@ import { getRedis } from './_lib/redis.js'
 
 // Node.js runtime, NOT edge (unlike og.js/preview.js) — @clerk/backend's
 // verifyToken pulls in @clerk/shared internals that Vercel's edge sandbox
-// rejects outright (confirmed live: NOW_SANDBOX_WORKER_EDGE_FUNCTION_UNSUPPORTED_MODULES,
-// deployment dpl_F3DPPSY3uQvXPyecXSRMVhwPCWtw). The handler below still uses
-// the Web-standard Request/Response shape, which Vercel's Node.js runtime
-// supports the same as edge — only the `config.runtime` value changes.
+// rejects outright (confirmed live: NOW_SANDBOX_WORKER_EDGE_FUNCTION_UNSUPPORTED_MODULES).
+// The handler below still uses the Web-standard Request/Response shape, which
+// Vercel's Node.js runtime supports the same as edge — only `config.runtime` changes.
 export const config = { runtime: 'nodejs' }
 
 // Per-user, auth-gated data — never let a shared cache (or the browser) hold one

@@ -174,8 +174,8 @@ if (process.argv[1] && process.argv[1].endsWith('worktrees.mjs')) {
 
   const stale = rows.filter((r) => r.stale)
   const blocked = rows.filter((r) => r.dirty > 0 && r.status.startsWith('merged,'))
-  // Active, unmerged branches that origin/<base> has since moved past — the
-  // PR #362 case: a long-open branch silently drifts as other work lands on
+  // Active, unmerged branches that origin/<base> has since moved past — a
+  // long-open branch silently drifts as other work lands on
   // main, so a merge/build surprise only surfaces once someone finally looks.
   // Stale ones are excluded; they're already flagged for removal above and a
   // behind-count on a branch about to be deleted is just noise.

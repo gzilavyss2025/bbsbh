@@ -20,19 +20,15 @@
 //
 //   - **It was not the mechanism doing the work.** What actually keeps a stamp
 //     from spoiling anything is WHERE stamp art may render —
-//     `scripts/check-stamp-surfaces.mjs`, which allowlists the import sites of
-//     `GameStamp.jsx`/`StampGameButton.jsx` by path and forbids a named set of
-//     unrevealed-game surfaces from so much as mentioning them, with
-//     `e2e/invariants/logbook-stamp.spec.js` as its runtime half. That guard is
-//     untouched and is now the entire containment argument. A stamp still cannot
-//     appear on the slate, on a game card, or in any list of unrevealed games.
+//     `scripts/check-stamp-surfaces.mjs` (allowlisting `GameStamp.jsx`/
+//     `StampGameButton.jsx`'s import sites, runtime half in
+//     `e2e/invariants/logbook-stamp.spec.js`). That guard is untouched and is now
+//     the entire containment argument.
 //   - **It refused the ordinary case.** The mint affordance lives inside the box
-//     score's `SealBox` reveal render function — you cannot reach it without
-//     opening the box score — but that `SealBox` deliberately persists nothing
-//     (giving it an `onReveal` would let a box score opened under the Scores
-//     Unlocked pass ratchet the whole game's `revealedThrough`; see
-//     src/CLAUDE.md). So the normal path to a stamp left no mark for the gate to
-//     find, and every such mint 403'd. That is not an edge case, it is the flow.
+//     score's `SealBox` reveal render function, which deliberately persists
+//     nothing (an `onReveal` would let Scores Unlocked ratchet `revealedThrough`;
+//     see src/CLAUDE.md) — so the normal path to a stamp left no mark for the
+//     gate to find, and every such mint 403'd.
 //   - **What it defended against was a hostile client**, and the only client is
 //     the user themself, spoiling a game they went out of their way to stamp.
 //
@@ -182,10 +178,6 @@ async function resolveGameFinal(redis, gamePk) {
   }
   return fetched
 }
-
-// ---------------------------------------------------------------------------
-// Reading the collection
-// ---------------------------------------------------------------------------
 
 // Re-validate whatever Redis hands back before it reaches a client, exactly as
 // spoiled-days.js does: a hand-edited or cross-version hash can only ever yield
