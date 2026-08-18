@@ -37,6 +37,7 @@ import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
 import { fetchPitchArsenalPool, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookieRecord } from './rookies.js'
+import { fetchPlayerContract } from './person/contracts.js'
 import {
   personBio,
   signedFallback,
@@ -172,7 +173,7 @@ export async function loadPlayer(id, asOf) {
   // same-origin static file, session-cached after the first read anywhere in
   // the app (TeamInfo's opposing-starter card already asks for it), and the
   // source of the "Pitches like" card's comparison pool.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookieInfo] = await Promise.all([
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookieInfo, contract] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
@@ -180,6 +181,7 @@ export async function loadPlayer(id, asOf) {
     fetchVsTeamSplitsForPlayer(id),
     fetchSavantPercentiles(),
     fetchRookieRecord(id),
+    asOf ? Promise.resolve(null) : fetchPlayerContract(id),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -715,6 +717,7 @@ export async function loadPlayer(id, asOf) {
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     prospectCard, prospectCardGroup,
     conversionNote, positionInnings, transactions, trophyCase,
+    contract,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }

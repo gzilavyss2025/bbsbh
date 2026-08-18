@@ -3,7 +3,7 @@ name: Update nightly data
 # Nightly precompute batch: game notes, WAR, rehab assignments, umpires,
 # umpire plate accuracy, minor-league leaders, game call-outs, former
 # teammates, career matchups, vs-team splits, milestone watch, team
-# transactions, the Fever Baseball radar snapshot (each documented at the top
+# transactions, the Fever Baseball radar and contract snapshots (each documented at the top
 # of its own scripts/gen-*.mjs) in ONE workflow with a SINGLE commit+push,
 # instead of separate crons each triggering its own Vercel deployment.
 # Consolidated 2026-07-11 after two of the eight (update-callouts and
@@ -194,6 +194,10 @@ jobs:
         id: fever-radar
         continue-on-error: true
         run: node scripts/gen-fever-radar.mjs
+      - name: Player contracts
+        id: player-contracts
+        continue-on-error: true
+        run: node scripts/fever/gen-player-contracts.mjs
       - name: Prospect level percentile
         id: prospect-trend
         continue-on-error: true
@@ -284,7 +288,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/attendance.json scripts/data/attendance.sql public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
+          git add public/data/game-notes public/data/war.json public/data/milb-alumni scripts/data/milb-alumni-scan.json public/data/rehab.json public/data/umpires public/data/umpire-accuracy public/data/umpire-accuracy-summary.json public/data/minors-leaders.json public/data/callouts public/data/former-teammates public/data/career-matchups.json public/data/fouls.json public/data/fouls public/data/workload.json scripts/data/fouls.sql public/data/vs-team-splits public/data/savant-percentiles.json public/data/milestones.json public/data/rookies.json public/data/rookies public/data/season-score.json public/data/team-score.json public/data/team-transactions public/data/fever-radar.json public/data/player-contracts public/data/prospect-trend.json public/data/postseason-odds.json public/data/manager-history scripts/data/team-snapshots.sql scripts/data/player-snapshots.sql public/data/comeback-wins.json scripts/data/comeback-wins.sql scripts/data/jerseys.sql public/data/jerseys.json public/data/pitch-arsenal public/data/pitch-arsenal-pool scripts/data/pitch-arsenal.sql public/data/attendance.json scripts/data/attendance.sql public/data/gate.json public/data/doubleheaders.json public/data/farm-system.json public/data/highlights public/data/team-records scripts/data/team-records.sql public/team-logos src/lib/data/logo-art.json 2>/dev/null || true
           git diff --cached --quiet && exit 0
           git commit -m "Update nightly data"
           # Retry with a rebase on a push race — a concurrent push to main
@@ -323,6 +327,7 @@ jobs:
           steps.postseason-odds.outcome == 'failure' ||
           steps.manager-history.outcome == 'failure' ||
           steps.fever-radar.outcome == 'failure' ||
+          steps.player-contracts.outcome == 'failure' ||
           steps.prospect-trend.outcome == 'failure' ||
           steps.comeback-wins.outcome == 'failure' ||
           steps.jerseys.outcome == 'failure' ||

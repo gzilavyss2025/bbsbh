@@ -325,6 +325,7 @@
   margin-top: var(--space-4);
 }
 
+
 /* ---- 5-tile season row (reuses .stat) ----
    Same edge-to-edge hairline-ruled container as .factgrid/.player__splits —
    also covers SplitsVsTeam's career line, which reuses this class
@@ -1122,4 +1123,3 @@
   letter-spacing: var(--ls-caps);
   color: var(--accent-link);
 }
-

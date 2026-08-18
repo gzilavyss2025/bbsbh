@@ -510,9 +510,9 @@ export default defineConfig({
             // it: an LRU cap sized for a page-snapshot cache would evict a
             // visited page's data on the next player tap.
             urlPattern: ({ url }) =>
-              // Career WAR, coaching history, fouls and pitch mix, all bucketed
+              // Career WAR, coaching history, fouls, contracts and pitch mix, all bucketed
               // on personId % 100 like the rookie records.
-              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal)\/\d{2}\.json$/.test(
+              /^\/data\/(?:war-history|manager-history|fouls|pitch-arsenal|player-contracts)\/\d{2}\.json$/.test(
                 url.pathname,
               ) ||
               // One file per MATCHUP, keyed by the two team ids ascending.

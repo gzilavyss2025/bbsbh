@@ -515,6 +515,13 @@ don't run these by hand.
   official MLB record, and a model output can't be reconciled that way, so it
   gets its own clearly-sourced surface (a `RadarPill`) instead of a rank in the
   callout worthiness table. App reads it via `src/api/feverRadar.js`.
+- `fever/gen-player-contracts.mjs` → `public/data/player-contracts/{00..99}.json` —
+  Fever Baseball's current contract feed, reduced from its league-wide payload
+  into player-ID shards for the profile-page Contract card. The generator
+  validates the feed's shipped count and its MLBAM-key join, retains source and
+  Cot's freshness dates, and writes every bucket so an unmatched player is a
+  normal null result rather than a 404. App reads it via
+  `src/api/person/contracts.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

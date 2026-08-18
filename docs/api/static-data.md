@@ -578,6 +578,13 @@ for each generator; the reader modules:
   (`player_snapshots`); each exported row's `movement` is a self-join against
   the nearest prior snapshot bbsbh itself recorded, not Fever's own
   `/api/data/movers` feed.
+- `person/contracts.js` — current salary, competitive-balance-tax payroll,
+  service time, options and future club-control status from Fever Baseball's
+  Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly
+  league feed into `public/data/player-contracts/{00..99}.json`, bucketed by
+  `personId % 100`; a profile downloads one small shard and receives null on a
+  missing source/player. The card attributes both Fever and Cot's and is omitted
+  from historical `asOf` player pages, where today's contract would be anachronistic.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
   `feverRadar.js` above: not a third party, not attributed, and not an MLE —
