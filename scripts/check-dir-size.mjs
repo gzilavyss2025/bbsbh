@@ -290,7 +290,7 @@ const BUDGETS = {
   // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
   // 31-wild-card.css; only the half toggle, the group subheadings and the
   // counts block are new.
-  // +1 for `66-team-record-rankings.css`: the standalone page that ranks one of
+  // +1 for `66-situational-records.css`: the standalone page that ranks one of
   // that card's rows across a whole level. The table itself is `.standings`,
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
@@ -347,8 +347,9 @@ const BUDGETS = {
   // argument as every entry above: a subdirectory would take it out of the
   // flat set check-spoiler-manifest classifies, which is where a module that
   // reads per-game results needs to stay.
-  // +1 for teamRecordRankings.js — the same ledger pivoted across a level for
-  // the standalone Team Records page. Kept OUT of teamRecords.js on purpose:
+  // +1 for situationalRecordRankings.js — the same ledger pivoted across a
+  // level for the standalone Situational Records page. Kept OUT of
+  // teamRecords.js on purpose:
   // one module answers "this club's fifty splits", the other "this split's
   // thirty clubs", and merging them would put a page-sized fan-out fetch in the
   // module every Numbers tab loads. Flat for the manifest reason above.
@@ -503,7 +504,8 @@ const BUDGETS = {
   // shape as its siblings: one route, one screen, in the flat set.
   // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
   // AnimationLab.jsx beside it.
-  // +1 for TeamRecordsPage.jsx — the standalone Team Records ranking page, one
+  // +1 for SituationalRecordsPage.jsx — the standalone Situational Records
+  // ranking page, one
   // more entry in REPORT_PAGES and so the same shape as StandingsPage.jsx and
   // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
   // set. It is not a team-hub screen and does not belong in src/screens/team/,

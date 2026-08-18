@@ -1,11 +1,11 @@
-import '../styles/66-team-record-rankings.css'
-import '../styles/team-records/66a-detail.css'
+import '../styles/66-situational-records.css'
+import '../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
-import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, defaultOrder } from '../api/teamRecordRankings.js'
+import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, defaultOrder } from '../api/situationalRecordRankings.js'
 import { HALVES } from '../api/teamRecords.js'
 import { seasonOf, cutoffFor } from './team/data/shared.js'
 import { SPORT_LABEL, offDayTreatmentFor } from '../lib/teams.js'
-import { teamRecordsPath } from '../lib/route.js'
+import { situationalRecordsPath } from '../lib/route.js'
 import { useNav, useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
@@ -19,7 +19,7 @@ import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
 // One situational record, every club at one level, in rank order. The bare
-// route is a browse-first record book: every split stays visible inside its
+// route is a browse-first index: every split stays visible inside its
 // baseball subject and each card shows its leader before the reader chooses
 // anything. A `?metric=` route is the focused broadcast board for that split.
 // Both views use the same ranking index and download the level's ledgers once.
@@ -80,7 +80,7 @@ function MetricFigure({ row, metric, compact = false }) {
   )
 }
 
-function RecordTile({ result, favoriteTeamId, linkProps, path }) {
+function SituationTile({ result, favoriteTeamId, linkProps, path }) {
   const leader = result.ranked.find((row) => row.rank != null)
   const favorite = result.ranked.find((row) => row.teamId === favoriteTeamId)
   const leaderName = leader?.team.teamName ?? leader?.team.name ?? 'No leader yet'
@@ -131,10 +131,10 @@ function RecordTile({ result, favoriteTeamId, linkProps, path }) {
   )
 }
 
-function RecordBook({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
+function SituationalIndex({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
   return (
     <>
-      {preview && <nav className="trrank__jump" aria-label="Record categories">
+      {preview && <nav className="trrank__jump" aria-label="Situational record categories">
         {groups.map((group, index) => (
           <a key={group.title} href={`#record-group-${index}`}>
             {group.title}
@@ -142,7 +142,7 @@ function RecordBook({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
         ))}
       </nav>}
 
-      <div className="trrank__book">
+      <div className="trrank__index">
         {groups.map((group, index) => {
           const visibleResults = preview ? group.results.slice(0, 2) : group.results
           return (
@@ -156,7 +156,7 @@ function RecordBook({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
               </header>
               <div className="trrank__tilegrid">
                 {visibleResults.map((result) => (
-                  <RecordTile
+                  <SituationTile
                     key={result.metric.id}
                     result={result}
                     favoriteTeamId={favoriteTeamId}
@@ -200,7 +200,7 @@ function LeadersSpotlight({ rows, metric }) {
   )
 }
 
-export function TeamRecordsPage({
+export function SituationalRecordsPage({
   asOf,
   sportId: routeSportId,
   category: routeCategory,
@@ -229,7 +229,7 @@ export function TeamRecordsPage({
   )
 
   // A stale metric link still opens a useful board. A bare route stays bare:
-  // it is the record-book overview, not an implicit first leaderboard.
+  // it is the situational index, not an implicit first leaderboard.
   const resolvedId = routeMetric
     ? index.metrics.has(routeMetric)
       ? routeMetric
@@ -271,10 +271,10 @@ export function TeamRecordsPage({
 
   useDocumentTitle(
     metric
-      ? `${metric.k} · Team Records`
+      ? `${metric.k} · Situational Records`
       : activeCategory
-        ? `${activeCategory.title} · Team Records`
-        : 'Team Records',
+        ? `${activeCategory.title} · Situational Records`
+        : 'Situational Records',
   )
 
   const pathFor = ({
@@ -284,7 +284,7 @@ export function TeamRecordsPage({
     sport: nextSport = sportId,
     sort: nextSort = sortBy,
     order: nextOrder = order,
-  } = {}) => teamRecordsPath({
+  } = {}) => situationalRecordsPath({
     category: nextMetric ? null : nextCategory,
     metric: nextMetric,
     half: nextHalf,
@@ -299,17 +299,17 @@ export function TeamRecordsPage({
       <SiteHeader />
 
       <header className="trrank__hero">
-        <span className="trrank__eyebrow">{season} {SPORT_LABEL[sportId] ?? ''} record book</span>
-        <h1>Team Records</h1>
-        <p>Every split. Every club. See who owns the season’s defining situations.</p>
+        <span className="trrank__eyebrow">{season} {SPORT_LABEL[sportId] ?? ''} season</span>
+        <h1>Situational Records</h1>
+        <p>W–L records and season totals for every club, split by game situation.</p>
         <dl className="trrank__herostats">
           <div><dt>Clubs</dt><dd>{data?.length || '—'}</dd></div>
-          <div><dt>Records</dt><dd>{index.metrics.size || '—'}</dd></div>
+          <div><dt>Situations</dt><dd>{index.metrics.size || '—'}</dd></div>
           <div><dt>Range</dt><dd>{halfShortLabel}</dd></div>
         </dl>
       </header>
 
-      <section className="trrank__scope" aria-label="Record book filters">
+      <section className="trrank__scope" aria-label="Situational record filters">
         <div className="trrank__scopehead">
           <span>League filters</span>
           <strong>{season} · {SPORT_LABEL[sportId] ?? ''}</strong>
@@ -339,8 +339,8 @@ export function TeamRecordsPage({
         loading={loading}
         error={error}
         hasData={index.groups.length > 0}
-        errorMessage="Couldn’t load team records. Try again."
-        emptyMessage="No team records on file for this level yet."
+        errorMessage="Couldn’t load situational records. Try again."
+        emptyMessage="No situational records on file for this level yet."
         emptyProse
       />
 
@@ -351,10 +351,10 @@ export function TeamRecordsPage({
               className="trrank__back trrank__categoryback"
               {...linkProps(pathFor({ category: null, metric: null, sort: null, order: null }))}
             >
-              <span aria-hidden="true">‹</span> All record categories
+              <span aria-hidden="true">‹</span> All situational categories
             </a>
           )}
-          <RecordBook
+          <SituationalIndex
             groups={activeCategory ? [activeCategory] : overviewGroups}
             favoriteTeamId={favoriteTeamId}
             pathFor={pathFor}
@@ -375,11 +375,11 @@ export function TeamRecordsPage({
               order: null,
             }))}
           >
-            <span aria-hidden="true">‹</span> {activeGroup?.title ?? 'All team records'}
+            <span aria-hidden="true">‹</span> {activeGroup?.title ?? 'All situational records'}
           </a>
 
           <section className="trrank__detailhead">
-            <span className="trrank__detailgroup">{activeGroup?.title ?? 'Team records'}</span>
+            <span className="trrank__detailgroup">{activeGroup?.title ?? 'Situational records'}</span>
             <h2>{metric.k}</h2>
             <p>
               {result.of} club{result.of === 1 ? '' : 's'} ranked

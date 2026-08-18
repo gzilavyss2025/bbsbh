@@ -55,7 +55,8 @@ const oppStarterOuts = (g) => g.oi ?? null
 // voiding the table.
 //
 // Every row carries a stable `id` as well as its printed `k`. The id is what a
-// URL names (`/team-records?metric=scored-4-plus`) and what teamRecordRankings
+// URL names (`/situational-records?metric=scored-4-plus`) and what
+// situationalRecordRankings
 // pivots 30 clubs on, so it must NOT be derived from the label — a reworded row
 // would silently break every shared link. Add rows freely; never renumber one.
 export const RECORD_GROUPS = [

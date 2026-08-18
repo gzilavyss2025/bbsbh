@@ -30,7 +30,7 @@
 //
 // NOT "the reports". That was the first name and it was wrong: half the pages
 // on this page's other groups are reports too — Standings, League Leaders,
-// Team Records, Umpire Rankings and Milestone Watch are all reports on a
+// Situational Records, Umpire Rankings and Milestone Watch are all reports on a
 // season, and a group that claims the word for four of them implies the rest
 // are something else. What actually separates these four is their SUBJECT, not
 // their form: crowds, clock, pipeline and arm workload are the conditions
@@ -52,7 +52,7 @@ export const PAGE_GROUPS = [
       // to League Leaders because it is the same gesture — a season-to-date
       // board read across the league — not next to the club pages it is
       // reached from.
-      { label: 'Team Records', path: '/team-records' },
+      { label: 'Situational Records', path: '/situational-records' },
       { label: 'Foul Tracker', path: '/fouls' },
       { label: 'Milestone Watch', path: '/milestones' },
       { label: 'Umpire Rankings', path: '/umpires' },
@@ -223,7 +223,7 @@ export const FOOTER_TRAIL = [
 // They are flat segments carrying no query. Each shows a whole league's season
 // to date, so `?d=`/`?s=` has nothing to narrow, and every control on them (the
 // sort column, the index weighting) is page state rather than an address — the
-// same call StandingsPage and TeamRecordsPage already made for their boards.
+// same call StandingsPage and SituationalRecordsPage already made for their boards.
 //
 // THE ADDRESSES SPELL THEIR SUBJECT OUT. '/farm-system-rankings',
 // '/bullpen-availability' and '/pace-of-play' are the phrases people actually

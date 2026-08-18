@@ -1,6 +1,6 @@
-/* Team Records explorer (screens/TeamRecordsPage.jsx).
+/* Situational Records explorer (screens/SituationalRecordsPage.jsx).
 
-   The page uses a broadcast-record-book hierarchy without leaving Tally's
+   The page uses a broadcast-index hierarchy without leaving Tally's
    scorebook palette: navy ink for the broadcast frame, clay for the live-data
    edge, and raised paper for every result card. The overview exposes every
    split and its leader. A metric URL turns that card into the focused board. */
@@ -9,7 +9,7 @@
   --trrank-edge: var(--accent-negative);
 }
 
-/* Record-book masthead: a compact broadcast frame, not a generic page bar. */
+/* Situational-index masthead: a compact broadcast frame, not a generic page bar. */
 .trrank__hero {
   position: relative;
   margin: 0 calc(-1 * var(--app-gutter));
@@ -212,7 +212,7 @@
   white-space: nowrap;
 }
 
-.trrank__book {
+.trrank__index {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);

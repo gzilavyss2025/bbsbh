@@ -1,5 +1,5 @@
-/* Focused Team Records leaderboard. The browse-first record-book rules live
-   in 66-team-record-rankings.css; this companion stays lazy with the screen. */
+/* Focused Situational Records leaderboard. The browse-first index rules live
+   in 66-situational-records.css; this companion stays lazy with the screen. */
 
 .trrank__detail {
   display: flex;

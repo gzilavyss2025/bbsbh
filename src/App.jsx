@@ -147,9 +147,9 @@ const UmpireRankingsPage = lazyNamed(
   () => import('./screens/UmpireRankingsPage.jsx'),
   'UmpireRankingsPage',
 )
-const TeamRecordsPage = lazyNamed(
-  () => import('./screens/TeamRecordsPage.jsx'),
-  'TeamRecordsPage',
+const SituationalRecordsPage = lazyNamed(
+  () => import('./screens/SituationalRecordsPage.jsx'),
+  'SituationalRecordsPage',
 )
 // The five broadcast report pages (src/screens/around-the-game/). Lazy like every
 // other screen, and they SHARE one stylesheet
@@ -331,9 +331,9 @@ export default function App() {
     content = <UmpirePage id={route.id} />
   } else if (route.name === 'umpire-rankings') {
     content = <UmpireRankingsPage />
-  } else if (route.name === 'team-records') {
+  } else if (route.name === 'situational-records') {
     content = (
-      <TeamRecordsPage
+      <SituationalRecordsPage
         asOf={route.asOf}
         sportId={route.sportId}
         category={route.category}
