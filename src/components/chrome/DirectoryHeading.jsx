@@ -34,6 +34,26 @@ function DirectoryGlyph({ name }) {
           <path d="m12 11 3 3-3 3-3-3 3-3Z" />
         </svg>
       )
+    // The broadcast strand (src/screens/around-the-game/). Its subject is the
+    // conditions AROUND a game rather than a result, so the mark is the park
+    // itself — a light standard — and not a diamond, which 'this-season'
+    // already owns.
+    //
+    // The park drawn FROM ABOVE was tried first and abandoned twice, which is
+    // worth recording because it looks like the obvious answer. At 19px with a
+    // 1.7 stroke, an outfield arc over two foul lines is the wifi glyph, and
+    // nesting the field inside the stands is a life preserver. Enclosed curves
+    // fill in at this size. Every mark in this file that works is sparse and
+    // rectilinear — a box with a few things inside it — so this one is too.
+    case 'around-the-game':
+      return (
+        <svg {...common}>
+          <rect x="4.5" y="4" width="15" height="8" rx="1.5" />
+          <path d="M8 7h.01M12 7h.01M16 7h.01M8 9.5h.01M12 9.5h.01M16 9.5h.01" />
+          <path d="M12 12v7.5" />
+          <path d="M9 20h6" />
+        </svg>
+      )
     case 'prospects':
       return (
         <svg {...common}>

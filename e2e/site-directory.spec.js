@@ -2,6 +2,7 @@ import { test, expect } from './fixtures.js'
 
 const GROUP_LABELS = [
   'This season',
+  'Around the game',
   'Prospects & injuries',
   'History',
   'Yours',
@@ -41,7 +42,7 @@ test.describe('site directory wayfinding', () => {
     expect(bounds.bottom).toBeLessThanOrEqual(bounds.viewportHeight)
   })
 
-  test('footer carries the same six group glyphs', async ({ page }) => {
+  test('footer carries the same group glyphs', async ({ page }) => {
     await page.goto('/more')
 
     const footer = page.locator('.sitefooter')
