@@ -37,3 +37,7 @@ pnpm-debug.log*
 # the mono-logo contact sheet (a --sheet artifact for eyeballing a regeneration,
 # not app content — see scripts/gen-mono-logos.mjs)
 .scratch/mono-logos/
+
+# the callout audit's report + run logs (an analysis artifact for tuning the
+# rubric, not app data — see scripts/audit-callouts.mjs)
+.scratch/callout-audit/

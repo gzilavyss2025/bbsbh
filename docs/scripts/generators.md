@@ -693,6 +693,16 @@ Re-run only to fold in a new season.
 
 ## Assets / off-app
 
+- `audit-callouts.mjs` — NOT a generator and NOT a CI gate: a developer tool that
+  replays every committed nightly callout bundle's game through the app's own five
+  callout builders, at each half's honest reader position, and reports per family how
+  often the data was there, how often the family fired, its worthiness spread, and —
+  on the two surfaces whose builder does not truncate itself — how often it survived
+  the cap. It names the families that never fire, which is the point. `--bundle-only`
+  runs with no network (a data-gate upper bound, never a fire rate); `--since/--until/
+  --date/--limit/--concurrency` scope the sweep. Writes `.scratch/callout-audit/`
+  (gitignored), never `public/data/`. Read alongside `docs/callouts.md`.
+
 - `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR knockout
   version of every club's mlbstatic mark, worn by the navy section mastheads (Batting
   order / Starting pitcher / Defense / Due up next) on the lineup, innings, and box

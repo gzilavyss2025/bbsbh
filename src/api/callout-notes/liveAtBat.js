@@ -6,8 +6,11 @@
 
 import { FOUL_CODES, FOUL_ENDS_AB_CODES, pitchDotCategory } from '../playbyplay.js'
 import { dayWordFor } from '../select.js'
-import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skew, SCORE_BASE, parseRecord } from './shared.js'
+import { HIT_TRIGGERS, STRIKEOUT_EVENTS, SB_EVENTS, otherSide, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, parseRecord } from './shared.js'
 import { buildVsTeamNote } from './vsTeamNote.js'
+// The league-rank clause the scoring-first cards append (rank.js). Additive —
+// no rank in the bundle leaves the sentence exactly as it reads today.
+import { withRank } from './rank.js'
 import { ELITE_VELO_MPH } from '../pitchArsenal.js'
 
 // Fouls in one at-bat, from its ordered pitch call codes alone. The strike
@@ -52,22 +55,24 @@ const MARATHON_PRIOR_2K = 3
 // a .78 front-runner and a .50 shrug-it-off club are both stories; a .66 club
 // is just Tuesday.
 const SCORING_FIRST_NORM = 0.66
-const SCORING_FIRST_MIN_GAMES = 10
+export const SCORING_FIRST_MIN_GAMES = 10
 const SCORING_FIRST_DEV = 0.08
-function scoringFirstNote(recStr, side, teamName, opponentScored) {
-  const rec = parseRecord(recStr)
+function scoringFirstNote(bundle, side, opponentScored) {
+  const key = opponentScored ? 'opponentScoringFirst' : 'scoringFirst'
+  const rec = parseRecord(bundle?.teamRecords?.[side]?.[key])
+  const teamName = bundle?.[side]?.name
   if (!rec || rec.total < SCORING_FIRST_MIN_GAMES || !teamName) return null
   const norm = opponentScored ? 1 - SCORING_FIRST_NORM : SCORING_FIRST_NORM
   const dev = Math.abs(rec.pct - norm)
   if (dev < SCORING_FIRST_DEV) return null
   const when = opponentScored ? 'when the opponent scores first' : 'when scoring first'
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} ${when}`,
+    text: withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when}`, bundle, side, key),
     personId: null,
     side,
     kind: opponentScored ? 'oppScoringFirst' : 'scoringFirst',
     dedupeKey: `${opponentScored ? 'oppScoringFirst' : 'scoringFirst'}-${side}`,
-    score: clampScore(SCORE_BASE.scoringFirst + 100 * dev),
+    score: clampScore(SCORE_BASE.scoringFirst + magnitudeOf(dev - SCORING_FIRST_DEV, 0.22)),
     rec: { w: rec.w, l: rec.l },
     when,
   }
@@ -85,7 +90,6 @@ export function buildCallouts(
     streaks = {},
     homerRecords = {},
     situational = {},
-    teamRecords = {},
   } = bundle
   const snap = entry.atBatIndex != null ? progress?.byPlay?.get(entry.atBatIndex) : null
 
@@ -116,7 +120,7 @@ export function buildCallouts(
         inGame,
         total,
         dedupeKey: `leader-${trig.cat}-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 4)),
+        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 4, 15)),
       })
     }
   }
@@ -141,7 +145,7 @@ export function buildCallouts(
         side: battingSide,
         kind: 'marathonAb',
         dedupeKey: `marathon-${entry.atBatIndex}`,
-        score: clampScore(SCORE_BASE.marathonAb + Math.min(15, 3 * (fouls - MARATHON_FOULS))),
+        score: clampScore(SCORE_BASE.marathonAb + magnitudeOf(fouls - MARATHON_FOULS, 5)),
       })
     }
   }
@@ -173,7 +177,7 @@ export function buildCallouts(
         mph,
         isSeasonHigh,
         dedupeKey: `veloPeak-${entry.pitcher.id}`,
-        score: clampScore(SCORE_BASE.veloPeak + Math.max(0, Math.min(20, 4 * (mph - ELITE_VELO_MPH)))),
+        score: clampScore(SCORE_BASE.veloPeak + magnitudeOf(mph - ELITE_VELO_MPH, 5)),
       })
     }
   }
@@ -191,7 +195,7 @@ export function buildCallouts(
         side: battingSide,
         kind: 'homerRec',
         dedupeKey: `homerRec-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.homerRec + 40 * skew(rec.w, rec.l)),
+        score: clampScore(SCORE_BASE.homerRec + skewBonus(rec.w, rec.l)),
         rec: { w: rec.w, l: rec.l },
       })
     }
@@ -218,7 +222,7 @@ export function buildCallouts(
         inGame,
         total,
         dedupeKey: `leaderK-${entry.pitcher.id}`,
-        score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 12)),
+        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 12, 15)),
       })
     }
   }
@@ -270,7 +274,7 @@ export function buildCallouts(
         inGame: sbSnap?.n ?? 0,
         total,
         dedupeKey: `leaderSb-${bn.runnerId}`,
-        score: clampScore(SCORE_BASE.leader + Math.min(15, (total ?? entering ?? 0) / 4)),
+        score: clampScore(SCORE_BASE.leader + magnitudeOf((total ?? entering ?? 0) / 4, 15)),
       })
     }
     const run = streaks[bn.runnerId]?.stolenBase
@@ -282,7 +286,7 @@ export function buildCallouts(
         kind: 'sbStreak',
         run, // the entering streak, for the roll-up's narrative rewrite
         dedupeKey: `sbstreak-${bn.runnerId}`,
-        score: clampScore(SCORE_BASE.sbStreak + Math.min(10, run + sbSnap.n - 4)),
+        score: clampScore(SCORE_BASE.sbStreak + magnitudeOf(run + sbSnap.n - 4, 10)),
       })
     }
   }
@@ -301,7 +305,7 @@ export function buildCallouts(
       streak: s.onBase + 1,
       start: s.onBaseStart ?? null, // when the run began, for the roll-up's prose
       dedupeKey: `onbase-${entry.batterId}`,
-      score: clampScore(SCORE_BASE.onBaseExtended + Math.min(15, s.onBase + 1 - 8)),
+      score: clampScore(SCORE_BASE.onBaseExtended + magnitudeOf(s.onBase + 1 - 8, 15)),
     })
   }
 
@@ -338,7 +342,7 @@ export function buildCallouts(
         side: battingSide,
         kind: 'onBaseRiding',
         dedupeKey: `onbase-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.onBaseRiding + Math.min(15, s.onBase - 8)),
+        score: clampScore(SCORE_BASE.onBaseRiding + magnitudeOf(s.onBase - 8, 15)),
       })
     }
     const platoon = entry.pitcher?.hand === 'L' ? sit?.vl : entry.pitcher?.hand === 'R' ? sit?.vr : null
@@ -366,7 +370,7 @@ export function buildCallouts(
         side: battingSide,
         kind: 'foulSpoiler',
         dedupeKey: `foulspoiler-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.foulSpoiler + Math.max(0, 11 - spoiler.rank)),
+        score: clampScore(SCORE_BASE.foulSpoiler + magnitudeOf(11 - spoiler.rank, 10)),
       })
     }
 
@@ -416,7 +420,7 @@ export function buildCallouts(
         side: battingSide,
         kind: 'vsTeam',
         dedupeKey: `vsteam-${entry.batterId}`,
-        score: clampScore(SCORE_BASE.vsTeam + Math.min(15, (vsNote.strength - 1) * 15)),
+        score: clampScore(SCORE_BASE.vsTeam + magnitudeOf(vsNote.strength - 1, 1)),
       })
     }
   }
@@ -432,13 +436,9 @@ export function buildCallouts(
   if (firstRun && firstRun.atBatIndex != null && entry.atBatIndex === firstRun.atBatIndex) {
     const side = firstRun.side
     const other = otherSide(side)
-    const scored = scoringFirstNote(
-      teamRecords[side]?.scoringFirst, side, bundle[side]?.name, false,
-    )
+    const scored = scoringFirstNote(bundle, side, false)
     if (scored) notes.push(scored)
-    const conceded = scoringFirstNote(
-      teamRecords[other]?.opponentScoringFirst, other, bundle[other]?.name, true,
-    )
+    const conceded = scoringFirstNote(bundle, other, true)
     if (conceded) notes.push(conceded)
   }
 

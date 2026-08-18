@@ -414,7 +414,7 @@ const BUDGETS = {
   // 87 -> 89 for check-fixture-freshness.mjs and check-feed-shape-drift.mjs,
   // the e2e mock-fixture guards — flat lint/cron scripts, same shape as
   // every other check-*.mjs already counted here.
-  scripts: 89,
+  scripts: 90,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -517,7 +517,10 @@ const BUDGETS = {
   // hook it sits beside.
   // 20 -> 21 for useScorecardNotes.js — the storage wiring over
   // lib/scorecardNotes.js, the same shape one more time.
-  'src/hooks': 21,
+  // 21 -> 22 for useCalloutLedger.js — the per-game "already shown" memory the
+  // callout surfaces rank against. React wiring (a context over a Map) with its
+  // rules pure in api/callout-notes/shared.js, the same split one more time.
+  'src/hooks': 22,
   'src/screens/identity-lab': 15,
 }
 

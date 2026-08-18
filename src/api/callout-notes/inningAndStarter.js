@@ -6,7 +6,7 @@
 import { pitchCallCode, FOUL_CODES } from '../playbyplay.js'
 import { personNameParts, dayWordFor, halfIndex } from '../select.js'
 import { availabilityFor } from '../workload.js'
-import { otherSide, ordinal, isNum, clampScore, skew, SCORE_BASE } from './shared.js'
+import { otherSide, ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE } from './shared.js'
 
 // --- run differential by inning --------------------------------------------------
 // "The Brewers have outscored opponents 38-14 in the 7th this season" — from
@@ -38,7 +38,7 @@ export function buildInningRunDiffNote(bundle, side, inning, extraF = 0, extraA 
     side,
     kind: 'inningRunDiff',
     dedupeKey: `inningRunDiff-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.inningRunDiff + Math.min(20, margin / 2)),
+    score: clampScore(SCORE_BASE.inningRunDiff + magnitudeOf(margin / 2, 20)),
     margin,
   }
 }
@@ -58,7 +58,7 @@ export function buildStarterTeamRecordNote(bundle, side, pitcherId) {
     side,
     kind: 'starterRec',
     dedupeKey: `starterRec-${pitcherId}`,
-    score: clampScore(SCORE_BASE.starterRec + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.starterRec + skewBonus(rec.w, rec.l)),
   }
 }
 
@@ -113,7 +113,7 @@ export function buildFoulVolumeNote(feed, bundle, inning, half) {
     side: battingSide,
     kind: 'foulVolume',
     dedupeKey: `foulvolume-${battingSide}-${inning}`,
-    score: clampScore(SCORE_BASE.foulVolume + Math.min(15, fouls - expected)),
+    score: clampScore(SCORE_BASE.foulVolume + magnitudeOf(fouls - expected, 15)),
   }
 }
 
@@ -164,7 +164,7 @@ export function buildStarterPitchPaceNote(feed, bundle, inning, half) {
     side: pitchingSide,
     kind: 'pitchPace',
     dedupeKey: `pitchPace-${pitchingSide}-${inning}`,
-    score: clampScore(SCORE_BASE.pitchPace + Math.min(15, Math.abs(diff) / 2)),
+    score: clampScore(SCORE_BASE.pitchPace + magnitudeOf(Math.abs(diff) / 2, 15)),
   }
 }
 
@@ -199,6 +199,6 @@ export function buildBullpenThinNote(bundle, side, workload, gameDate) {
     side,
     kind: 'bullpenThin',
     dedupeKey: `bullpenthin-${side}`,
-    score: clampScore(SCORE_BASE.bullpenThin + Math.min(10, 5 * (down.length - BULLPEN_THIN_MIN_DOWN))),
+    score: clampScore(SCORE_BASE.bullpenThin + magnitudeOf(down.length - BULLPEN_THIN_MIN_DOWN, 2)),
   }
 }

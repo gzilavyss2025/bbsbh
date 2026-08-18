@@ -7,7 +7,11 @@
 // box-score roll-up's result-aware "Held" counterparts live in heldNotes.js.
 
 import { dayWord } from '../select.js'
-import { ordinal, isNum, clampScore, skew, SCORE_BASE, parseRecord } from './shared.js'
+import { ordinal, isNum, clampScore, skewBonus, SCORE_BASE, parseRecord } from './shared.js'
+// The league-rank clause each record note below appends when the club's mark
+// sits near either end of its level. Purely additive: no rank, today's
+// sentence (see rank.js).
+import { withRank } from './rank.js'
 
 // Cumulative runs each side has scored through each inning, stopping at the
 // first inning whose bottom half never completed (a walk-off, or a
@@ -120,7 +124,7 @@ export function buildLeadReversalNote(feed, bundle) {
       side: leadingSide,
       oppSide: winnerSide,
       kind: 'leadReversal',
-      score: clampScore(SCORE_BASE.leadReversal + 20 * skew(rec.w, rec.l)),
+      score: clampScore(SCORE_BASE.leadReversal + skewBonus(rec.w, rec.l)),
     }
   }
   return null
@@ -137,12 +141,15 @@ export function buildLeadingAfterNote(bundle, side, inning) {
   const teamName = bundle?.[side]?.name
   if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} this season when leading after the ${ordinal(inning)}`,
+    text: withRank(
+      `The ${teamName} are ${rec.w}-${rec.l} this season when leading after the ${ordinal(inning)}`,
+      bundle, side, 'leadAfter', inning,
+    ),
     personId: null,
     side,
     kind: 'leadAfterLive',
     dedupeKey: `leadAfterLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.leadHeld + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.leadHeld + skewBonus(rec.w, rec.l)),
   }
 }
 
@@ -159,12 +166,15 @@ export function buildTiedAfterNote(bundle, side, inning) {
   const teamName = bundle?.[side]?.name
   if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} this season when tied after the ${ordinal(inning)}`,
+    text: withRank(
+      `The ${teamName} are ${rec.w}-${rec.l} this season when tied after the ${ordinal(inning)}`,
+      bundle, side, 'tiedAfter', inning,
+    ),
     personId: null,
     side,
     kind: 'tiedAfterLive',
     dedupeKey: `tiedAfterLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.tiedAfter + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.tiedAfter + skewBonus(rec.w, rec.l)),
   }
 }
 
@@ -195,12 +205,15 @@ export function buildScorelessThroughNote(bundle, side, inning) {
   if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
   if (!scorelessLopsided(rec.w, rec.l)) return null
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} ${scorelessWhen(inning)}`,
+    text: withRank(
+      `The ${teamName} are ${rec.w}-${rec.l} ${scorelessWhen(inning)}`,
+      bundle, side, 'scorelessThrough', inning,
+    ),
     personId: null,
     side,
     kind: 'scorelessThrough',
     dedupeKey: `scorelessThroughLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.scorelessThrough + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.scorelessThrough + skewBonus(rec.w, rec.l)),
   }
 }
 
@@ -216,12 +229,15 @@ export function buildBothScorelessNote(bundle, side, inning) {
   const teamName = bundle?.[side]?.name
   if (!rec || !isNum(rec.w) || !isNum(rec.l) || !teamName) return null
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} ${bothScorelessWhen(inning)}`,
+    text: withRank(
+      `The ${teamName} are ${rec.w}-${rec.l} ${bothScorelessWhen(inning)}`,
+      bundle, side, 'bothScoreless', inning,
+    ),
     personId: null,
     side,
     kind: 'bothScoreless',
     dedupeKey: `bothScorelessLive-${side}-${inning}`,
-    score: clampScore(SCORE_BASE.bothScoreless + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.bothScoreless + skewBonus(rec.w, rec.l)),
   }
 }
 
@@ -258,11 +274,14 @@ export function buildDayOfWeekNote(bundle, side, dow) {
   const p = total > 0 ? rec.w / total : 0
   if (!(p >= DOW_LOPSIDED || p <= 1 - DOW_LOPSIDED)) return null
   return {
-    text: `The ${teamName} are ${rec.w}-${rec.l} ${dowWhen(dow)} this season`,
+    text: withRank(
+      `The ${teamName} are ${rec.w}-${rec.l} ${dowWhen(dow)} this season`,
+      bundle, side, 'dayOfWeek', dow,
+    ),
     personId: null,
     side,
     kind: 'dayOfWeek',
     dedupeKey: `dayOfWeek-${side}-${dow}`,
-    score: clampScore(SCORE_BASE.dayOfWeek + 40 * skew(rec.w, rec.l)),
+    score: clampScore(SCORE_BASE.dayOfWeek + skewBonus(rec.w, rec.l)),
   }
 }

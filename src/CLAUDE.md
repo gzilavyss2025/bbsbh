@@ -183,9 +183,9 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
 - **The Pitchers table** (`src/api/pitchers.js` → `computePitcherLines`, rendered by
   `PitchersSection` in `InningViewer.jsx`) is gated by the same `revealedThrough`
   high-water mark as the seals rather than wrapped in a `SealBox` (ADR-0009). A
-  pure numeric stat grid — the season-context/health prose that used to stack under
-  each row now lives in **Margin Notes** (`MarginNotes.jsx`, same reveal-clamp
-  footing), a ranked digest spanning both teams' pitchers; see `docs/callouts.md`.
+  pure numeric stat grid — the season-context/health prose now lives in **Margin Notes**
+  (`MarginNotes.jsx`, same reveal-clamp footing), a ranked digest over both teams' arms that
+  demotes what this reader already saw (`hooks/useCalloutLedger.js`; rules `docs/callouts.md`).
 - **The "Now Pitching" card** (`HalfInning.jsx`) names the arm the half OPENS
   with, from `select.js`'s `selectHalfStartingPitcher` (spoiler-safe, callable
   before reveal), gated `revealed || isNextToReveal` (ADR-0010). It names that

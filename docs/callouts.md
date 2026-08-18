@@ -45,39 +45,51 @@ own floor this instance landed. `skew(w,l)` below is the record's distance
 from .500 (0–0.5). Tune bases in `SCORE_BASE` (`callout-notes.js`) and this
 table together.
 
-| Family | Base | Bonus |
+**Every bonus lands on ONE scale, 0–`MAGNITUDE_MAX` (20).** It did not always:
+each family used to stop wherever its author stopped — 10 here, 15 there, 20
+somewhere else — so a family whose bonus capped at 10 was ranked almost
+entirely by its base, and no instance of a 25-base family could overtake a
+40-base one however extreme it was. On a two-slot strip the base WAS the
+ranking. `magnitudeOf(raw, full)` in `callout-notes/shared.js` is the one
+converter (`skewBonus(w, l)` is the W-L families' shortcut through it): `raw`
+is the family's own measure of how big this instance is, `full` the value that
+earns the whole 20. Each family kept its old saturation point — only what
+saturation is worth changed. The column below names that saturation point, so
+"full at X" reads as "an instance at X earns the whole 20".
+
+| Family | Base | Bonus, 0–20 — full credit at |
 | --- | --- | --- |
-| leadReversal | 85 | + 20 × skew |
+| leadReversal | 85 | a spotless record (skew .5) |
 | birthdayStats | 60 | — |
 | birthday | 55 | — |
-| homerRec | 55 | + 40 × skew |
-| veloPeak | 55 | + min(20, 4 × (velo − ELITE_VELO_MPH)) |
-| onBaseEnded | 50 | + min(15, streak − 8) |
-| onBaseExtended | 45 | + min(15, streak+1 − 8) |
-| marathonAb | 45 | + min(15, 3 × (fouls − 6)) |
-| onBaseRiding | 40 | + min(15, streak − 8) |
-| leadHeld / leadAfterLive | 40 | + 40 × skew |
-| bothScoreless | 42 | + 40 × skew |
-| tiedAfter / tiedAfterLive | 40 | + 40 × skew |
-| starterRec | 40 | + 40 × skew |
-| bullpenThin | 40 | + min(10, 5 × (relievers down − 2)) |
-| vsTeam | 40 | + min(15, 15 × (angle strength − 1)) |
-| leader (hits/SB) | 35 | + min(15, count / 4) |
-| leader (pitcher K) | 35 | + min(15, count / 12) |
-| sbStreak | 35 | + min(10, run − 4) |
-| foulVolume | 35 | + min(15, fouls − expected) |
-| runsScored | 35 | + 40 × skew |
-| runsAllowed | 35 | + 40 × skew |
-| oneRun / extraInnings | 35 | + 40 × skew |
-| tto (with a season split) | 35 | + min(15, 100 × AVG gap) |
-| scorelessThrough | 34 | + 40 × skew |
-| ttoPitches | 30 | + min(15, 10 × per-PA climb) |
-| pitchPace | 32 | + min(15, \|tonight − avg\| / 2) |
-| comeback | 30 | + 60 × win% (resilience, not lopsidedness) |
-| scoringFirst / oppScoringFirst | 30 | + 100 × deviation from league norm |
-| inningRunDiff | 30 | + min(20, margin / 2) |
-| dayOfWeek | 30 | + 40 × skew |
-| foulSpoiler | 30 | + (11 − rank); roll-up restatement adds + min(6, tonight − 3) |
+| homerRec | 55 | a spotless record |
+| veloPeak | 55 | 5 mph past ELITE_VELO_MPH |
+| onBaseEnded | 50 | a 23-game streak (a 14-steal run on the caught-stealing wording) |
+| onBaseExtended | 45 | a 23-game streak |
+| marathonAb | 45 | 11 fouls in the at-bat |
+| onBaseRiding | 40 | a 23-game streak |
+| leadHeld / leadAfterLive | 40 | a spotless record |
+| bothScoreless | 42 | a spotless record |
+| tiedAfter / tiedAfterLive | 40 | a spotless record |
+| starterRec | 40 | a spotless record |
+| bullpenThin | 40 | 4 relievers down |
+| vsTeam | 40 | angle strength 2 |
+| leader (hits/SB) | 35 | a count of 60 |
+| leader (pitcher K) | 35 | a count of 180 |
+| sbStreak | 35 | a run of 14 |
+| foulVolume | 35 | 15 fouls past the expected count |
+| runsScored | 35 | a spotless record |
+| runsAllowed | 35 | a spotless record |
+| oneRun / extraInnings | 35 | a spotless record |
+| tto (with a season split) | 35 | a .150 AVG gap |
+| scorelessThrough | 34 | a spotless record |
+| ttoPitches | 30 | +1.5 pitches per PA each trip |
+| pitchPace | 32 | 30 pitches off his norm |
+| comeback | 30 | a 1.000 win% (resilience, not lopsidedness) |
+| scoringFirst / oppScoringFirst | 30 | .300 deviation from the league norm |
+| inningRunDiff | 30 | a margin of 40 |
+| dayOfWeek | 30 | a spotless record |
+| foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
 
@@ -85,22 +97,147 @@ Margin Notes' own family bases (`src/api/pitcher-callouts.js`'s local
 `SCORE_BASE` — self-contained rather than imported from `callout-notes.js`,
 same precedent the pre-half strip sets):
 
-| Family | Base | Bonus |
+| Family | Base | Bonus, 0–20 — full credit at |
 | --- | --- | --- |
-| laboring | 48 | + min(15, 30 × (ratio − 1)) |
-| veloVariety | 47 | + min(20, 5 × (types − 2) + 3 × (peak velo − CENTURY_MPH)) |
-| veloDecay | 46 | + min(15, 6 × (drop − 1.5)) |
+| laboring | 48 | a 1.5× pitches-per-inning ratio |
+| veloVariety | 47 | 5 × (types − 2) + 3 × (peak velo − CENTURY_MPH) reaching 20 |
+| veloDecay | 46 | a 4.0 mph drop |
 | penFatigue | 42 | — |
 | workload | 38 | — |
 | backToBack | 36 | — |
-| leverage | 34 | + min(15, 100 × (gap − 0.06)) |
-| centuryClub | 34 | + min(15, count / 10) + 10 if a non-fastball type qualifies |
+| leverage | 34 | a .210 AVG gap |
+| centuryClub | 34 | 150 pitches, + 10 flat if a non-fastball type qualifies |
 | tenK | 33 | — |
-| scorelessStreak | 32 | + min(15, streak − 1) |
+| scorelessStreak | 32 | a 16-outing streak |
 | sixIp | 28 | — |
 | homeAway | 30 | — |
 | cgShutout | 25 | — |
 | recentAppearances | 20 | — |
+
+## Repetition — the shown ledger, decay, and diversity
+
+Every surface here rebuilds from scratch on every half, and all of them sort on
+the same score. Without a memory, the same high-base note therefore wins the
+same sort every half of the game: a reader who sits through nine innings meets
+the identical card fifteen times, and the three unconditional pushes in
+`between-innings.js` (`starterRec`, `dayOfWeek`, `bullpenThin`) could each
+print seventeen times. Four rules answer that.
+
+- **The ledger.** `src/hooks/useCalloutLedger.js` remembers, per gamePk, which
+  `dedupeKey` reached the screen on which HALF — distinct halves, never
+  renders. It is a `Map` inside a React context mounted in `InningViewer`,
+  ABOVE every keyed boundary (`InningPage` and `BetweenInnings` both remount on
+  each half, which is exactly when the memory is needed), so a `SealBox`
+  re-seal leaves it alone. It is deliberately NOT persisted: after a reload the
+  reader is reading the page again and the strip must populate normally. It
+  holds no game data — dedupeKeys and half indices, nothing else — and it can
+  only ever SUBTRACT a note from a ranked list, never add one and never relax a
+  reveal gate.
+- **Decay.** A note loses `SHOWN_DECAY` (25, `callout-notes/shared.js`) for
+  each EARLIER half it was already shown on. A demotion, not a ban: a decayed
+  note with nothing to beat it still shows, which is the right answer for a
+  thin bundle. The half a note sits on never counts against it, so nothing
+  decays itself out from under the reader mid-half.
+- **Once per game.** `ONCE_PER_GAME_KINDS` — the facts that cannot change while
+  a game is played (the weekday, the club's record in its starter's starts, a
+  short bullpen, a club's runs in inning N, and every season aggregate
+  `buildPitcherNotes` reads off `starterRecords`). A second showing of one of
+  those adds nothing at all, so after one showing they drop rather than decay.
+  `sixIp`, `tenK` and every health read are deliberately absent: those restate
+  as tonight's line grows, and restating IS the note.
+- **Diversity.** At most one note per KIND per surface per half, and at most
+  ONE `RECORD_KINDS` note ("the club is W-L when X") per pre-half strip -
+  eleven families are that one sentence with a different clause, which is why
+  the voice repeated even when the facts did not. A note a diversity rule turns
+  down is DEFERRED to the tail rather than discarded, and what a CAPPED surface
+  then does with that tail is per-surface, because the two want opposite things:
+  - The **pre-half strip** passes `strictCaps: true` and DROPS the tail. Its
+    pool for a top half is very often nothing but record notes (both clubs'
+    `tiedAfterLive`, or both clubs' `bothScoreless`), so letting the tail
+    backfill hands both slots to one kind again and the cap delivers nothing.
+    A one-note strip is the honest outcome — there is only one thing to say.
+  - **Between Innings** does NOT, and must not. Its card depth is a spoiler
+    invariant (`between-innings.test.js`): a quiet half and a loud half must
+    return the same count once both clear `CARD_MAX`, so the tail has to
+    backfill or depth would track how eventful the half was.
+  - **Margin Notes** is uncapped, so it always carries the tail behind
+    "Show N more".
+
+All four are applied by one pure function, `rankNotes` in
+`callout-notes/shared.js`, at each surface's own sort-and-cap step: the
+pre-half strip (`prehalf-callouts.js`, `maxRecordNotes: 1`), Between Innings
+(`between-innings.js`), and the Arms tab's merge of the strip with Margin Notes
+(`ReferencePanel.jsx`'s `mergeNotes`, uncapped). The builders stay pure — they
+are HANDED the counts (`shownCounts`) and only read them. A surface records
+what it showed from an effect, on the notes that actually reached the screen:
+`MarginNotes.jsx` marks the notes it renders (not the hidden tail), and
+`BetweenInnings.jsx` marks only the card the reader advanced to. Play cards
+(`liveAtBat.js`) and the box-score roll-up stay outside all of this: neither
+ranks against a cap, and the roll-up's whole job is to restate (ADR-0014).
+
+### Caps — how many notes each surface keeps
+
+Every cap is a constant with one home. `rankNotes` applies the diversity ones;
+the surface applies its own count.
+
+| Constant | Value | Where | What it caps |
+| --- | --- | --- | --- |
+| `PREHALF_MAX` | 2 | `prehalf-callouts.js` | Notes on the pre-half strip |
+| `PREHALF_MAX_RECORDS` | 1 | `prehalf-callouts.js` | `RECORD_KINDS` notes on that strip |
+| `CARD_MAX` | 5 | `between-innings.js` | Cards in one Between Innings set |
+| `MARGIN_NOTES_SHOWN` | 5 | `MarginNotes.jsx` | Margin Notes shown before "Show N more" |
+| `INSIGHTS_SHOWN` | 6 | `src/screens/BoxScore.jsx` | Roll-up notes shown before Show more |
+| `VS_TEAM_ROLLUP_MAX` | 3 | roll-up | `vsTeam` notes in the roll-up |
+| `MAGNITUDE_MAX` | 20 | `callout-notes/shared.js` | Every family's magnitude bonus |
+| `SHOWN_DECAY` | 25 | `callout-notes/shared.js` | Points lost per earlier showing |
+| `maxPerKind` | 1 | `rankNotes` callers | Notes of one `kind` per surface per half |
+| `strictCaps` | strip only | `rankNotes` callers | Whether a capped surface DROPS the turned-down tail or backfills from it |
+
+The builders never truncate for the components: `buildMarginNotes` sorts and
+returns everything, and the roll-up does the same. Only `buildPreHalfCallouts`
+and `buildBetweenInnings` cap themselves, which is why an audit of those two
+surfaces cannot measure how many notes a cap cut.
+
+
+## League ranks on the W-L record families
+
+A bare split is a number; a ranked split is a fact. Every W-L record family
+below carries a league rank, appended to the entering-tense sentence after an
+em dash and NEVER replacing the record:
+
+> The Rays are 62-1 this season when leading after the 7th — the best mark in
+> the majors
+
+Ranked families: `leadAfterLive`, `tiedAfterLive`, `scorelessThrough`,
+`bothScoreless`, `dayOfWeek`, `runsScored`, `runsAllowed`, `comeback`,
+`scoringFirst` / `oppScoringFirst`. Each family's own bullet below repeats the
+marker **(ranked)**. `oneRun` / `extraInnings` carry NO rank: those notes are
+Final-only and always folded, so a rank could never print.
+
+Rules, all in `src/api/callout-notes/rank.js`:
+
+- **The rank comes from the same tally as the record.** `gen-callouts.mjs`
+  runs its situational sweep over EVERY club at each level on the slate, not
+  only the clubs playing, and ranks the raw tallies before any show floor. The
+  league-wide ledger in `public/data/team-records/*` counts the walk-off inning
+  this sweep deliberately skips and reads a later cutoff — up to seven games
+  apart on one club's "leading after the 8th" — so it cannot supply this.
+- **The field is the club's own level**, named in words: "in the majors", "in
+  Triple-A", "in Double-A", "in High-A", "in Single-A".
+- **Rank display**: ordinal words only, never `#`, and the field size always
+  printed — "2nd of 30 in the majors". Rank 1 and last read "the best mark" /
+  "the worst mark"; a shared rank reads "tied for …".
+- **Only the ends of the table speak.** Top three or bottom three
+  (`RANK_NOTABLE`), and only in a field of at least eight (`RANK_MIN_FIELD`).
+  A 14th-of-30 rank is noise. The precompute drops those ranks outright
+  (`rankWorthPrinting`), so a bundle carries only the standings a note can say
+  — about a fifth of what the pass computes, and roughly 0.2 KB per bundle.
+- **Never on a folded sentence.** "Moved to 59-2" states tonight's record; the
+  rank was computed against last night's. Every `result?.final` branch in
+  `heldNotes.js` and the roll-up's own re-fold stay bare.
+- **A missing rank prints today's wording.** An older bundle, a MiLB level with
+  no standings splits, a club under the family's sample floor — all degrade to
+  the unranked sentence. No note's `SCORE_BASE` moves for a rank.
 
 ## The families
 
@@ -198,7 +335,7 @@ shape: `src/api/callouts.js`).
 
 ### Team, on the play it happens
 
-- **scoringFirst / oppScoringFirst** — fires on the play that scored the
+- **scoringFirst / oppScoringFirst** (ranked) — fires on the play that scored the
   game's first run, as TWO separate one-club cards: the scorer's record when
   scoring first, the conceder's when the opponent does. Gate: ≥ 10 games and
   win% ≥ .08 away from the league norm for that situation (~.66 scoring
@@ -212,20 +349,20 @@ shape: `src/api/callouts.js`).
   starts (`starterRecords[id].teamStarts`, ≥ 3 starts) — independent of his
   personal decisions. Roll-up restates it folded once Final, keyed to the
   actual (not probable) starters.
-- **dayOfWeek** — 1st inning, on the top half only (shown once): each club's
+- **dayOfWeek** (ranked) — 1st inning, on the top half only (shown once): each club's
   W-L on tonight's day of the week (`dayOfWeek`, keyed 0=Sun…6=Sat from the
   game's official date). "The Brewers are 10-4 on Sundays this season." A pure
   calendar fact — no reveal gate — but only when genuinely one-sided: ≥ 6 games
   and win% ≥ .66 or ≤ .34 (`DOW_MIN_GAMES`/`DOW_LOPSIDED` in callout-notes.js),
   or an ordinary weekday is noise. Roll-up (`buildDayOfWeekNotes`) folds tonight
   in once Final. MLB + MiLB (the linescore sweep covers every level).
-- **leadAfterLive** — top of inning N ≥ 7 (checkpoints 6–8): whoever leads
+- **leadAfterLive** (ranked) — top of inning N ≥ 7 (checkpoints 6–8): whoever leads
   tonight after N−1 + their season record at that checkpoint
   (`leadAfterFull`, ≥ 5 games). Self-gates on `revealedThrough` covering
   inning N−1 (ADR-0014). **No 9th checkpoint anywhere in this family**: a club
   leading after nine completed innings has won, so the record can only read
   N-0 and the note says nothing. See `LEAD_CHECKPOINTS`.
-- **tiedAfterLive** — the tied-game sibling of `leadAfterLive`: entering top of
+- **tiedAfterLive** (ranked) — the tied-game sibling of `leadAfterLive`: entering top of
   inning N (checkpoints 6–8 only — a tie after the 9th is extra innings, never
   surfaced up front) when the game is level after N−1, BOTH clubs' season
   record when tied at that checkpoint (`tiedAfterFull`, ≥ 5 games, no
@@ -234,7 +371,7 @@ shape: `src/api/callouts.js`).
   (`tiedAfter`, both clubs) folds tonight's result in once Final — "moved to
   13-9…" for the winner, "dropped to 8-11…" for the loser — latest checkpoint
   only, via `buildTiedAfterHeldNotes`.
-- **scorelessThrough** — entering top of inning N (checkpoints 1–6) when a club
+- **scorelessThrough** (ranked) — entering top of inning N (checkpoints 1–6) when a club
   is still shut out after N−1: that club's season record when scoreless through
   that inning (`scorelessThroughFull`). "The Brewers are 2-15 when scoreless
   through 6 innings." Numbers-only in the bundle so the roll-up folds tonight
@@ -244,7 +381,7 @@ shape: `src/api/callouts.js`).
   Fires for whichever side is at 0 — but NOT when the game itself is 0-0, where
   the bothScoreless framing takes over. Roll-up: `buildScorelessHeldNotes`,
   deepest checkpoint, folded. MLB + MiLB.
-- **bothScoreless** — the pitchers'-duel sibling: entering top of inning N
+- **bothScoreless** (ranked) — the pitchers'-duel sibling: entering top of inning N
   (checkpoints 2–7) when the GAME is still 0-0 after N−1, BOTH clubs' record in
   such games (`bothScorelessThroughFull`, ≥ 4 games, no lopsidedness floor — a
   rare situation whose record is the point). "The Brewers are 5-3 in games
@@ -316,12 +453,13 @@ shape: `src/api/callouts.js`).
 - **leadHeld** — Final only: the winner led after checkpoint N and closed —
   "moved to 18-2 when leading after the 8th" (`leadAfterFull`, ungated —
   post-game the moved-to fact is the point). Latest checkpoint only.
-- **runsScored** — highest bucket (4/6/8+) tonight's own final clears, ≥ 5
-  games sampled; folded once Final.
-- **runsAllowed** — allowed 4+ by checkpoint inning 5–8, precompute-gated to
-  a losing-lopsided record; latest checkpoint only; folded once Final.
-- **comeback** — trailed by 3+ at some point tonight → season record in such
-  games (≥ 5 sampled); folded once Final.
+- **runsScored** (ranked) — highest bucket (4/6/8+) tonight's own final clears,
+  ≥ 5 games sampled; folded once Final, and the rank drops with the fold.
+- **runsAllowed** (ranked) — allowed 4+ by checkpoint inning 5–8,
+  precompute-gated to a losing-lopsided record; latest checkpoint only; folded
+  once Final, and the rank drops with the fold.
+- **comeback** (ranked) — trailed by 3+ at some point tonight → season record
+  in such games (≥ 5 sampled); folded once Final, and the rank drops with it.
 - **oneRun / extraInnings** — Final only, fired only when tonight actually
   WAS that kind of game: the standings splits folded with the result — "Just
   the 4th loss in 19 one-run games for the Brewers (now 15-4)", "The Cubs
@@ -401,6 +539,27 @@ on a pitcher, ahead of every season aggregate above:
   to his latest revealed one (`computeVeloDecay`): "Fastball down 2.0 mph
   from his early innings (93.9 → 91.9)."
 
+## Auditing the rubric
+
+`scripts/audit-callouts.mjs` replays every committed bundle through the app's
+own builders and reports, per family: how many games it was ELIGIBLE in, how
+often it fired, how many instances it produced, its score spread, and how many
+instances survived the surface's cap. It is read-only and touches no app file.
+
+```bash
+node scripts/audit-callouts.mjs --concurrency=8
+node scripts/audit-callouts.mjs --date=2026-08-16 --limit=20   # cheap smoke run
+node scripts/audit-callouts.mjs --bundle-only                  # no network
+```
+
+Read the output with two cautions. A family the bundle cannot feed counts as
+INELIGIBLE, never as a non-fire — a zero fire rate is only a finding when the
+eligible count is high. And the pre-half strip and Between Innings truncate
+inside their own builders, so their rows are labelled `post-cap` and report no
+cut count; only Margin Notes and the roll-up report real cap survival. Low
+survival on a high-volume family (`risp`, `platoon`) is the signal that its
+base or its magnitude bonus needs a look.
+
 ## Extending
 
 One metric-adjacent family was deliberately NOT built as a callout: the
@@ -416,7 +575,12 @@ Per CLAUDE.md's standing rule: new record/streak/split families extend
 from data already on hand computes live. When adding a family, give it a
 `kind`, a `dedupeKey` if it can restate itself, a `SCORE_BASE` row (and a
 line in the rubric table above), and decide its tense per ADR-0014's rule
-before picking its surface.
+before picking its surface. Then decide two more things: whether the fact can
+change during a game (if it cannot, add its `kind` to `ONCE_PER_GAME_KINDS`),
+and whether it is another "the club is W-L when X" sentence (if it is, add it
+to `RECORD_KINDS`). Cover the new family in `test/` — `callout-repetition.test.js`
+for ranking rules, `callout-ledger.test.js` for the ledger and the two capped
+surfaces, `record-ranks.test.js` for a ranked record family.
 
 **Names in callout prose read "First Last"** (or surname alone), never the
 scorebook's "Last, First" — callout copy is broadcast-voice, not a ledger

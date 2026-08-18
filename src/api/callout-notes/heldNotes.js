@@ -23,7 +23,11 @@ import {
   DOW_LOPSIDED,
   dowWhen,
 } from './checkpoints.js'
-import { ordinal, isNum, clampScore, skew, SCORE_BASE, otherSide, foldedRecordText, parseRecord } from './shared.js'
+import { ordinal, isNum, clampScore, skewBonus, magnitudeOf, SCORE_BASE, otherSide, foldedRecordText, parseRecord } from './shared.js'
+// The league-rank clause, appended ONLY to the entering-tense wording below.
+// A folded sentence ("moved to 59-2") states tonight's record, which the rank
+// was not computed against — so every `result?.final` branch stays bare.
+import { withRank } from './rank.js'
 
 // The winner's mirror image of the reversal above: led after checkpoint N and
 // closed it out, so the record moves. "The Brewers moved to 18-2 when leading
@@ -46,7 +50,7 @@ export function buildLeadHeldNote(feed, bundle, result) {
       personId: null,
       side: winnerSide,
       kind: 'leadHeld',
-      score: clampScore(SCORE_BASE.leadHeld + 40 * skew(rec.w, rec.l)),
+      score: clampScore(SCORE_BASE.leadHeld + skewBonus(rec.w, rec.l)),
     }
   }
   return null
@@ -76,7 +80,7 @@ export function buildTiedAfterHeldNotes(feed, bundle, result) {
         side,
         kind: 'tiedAfter',
         dedupeKey: `tiedAfter-${side}-${n}`,
-        score: clampScore(SCORE_BASE.tiedAfter + 40 * skew(rec.w, rec.l)),
+        score: clampScore(SCORE_BASE.tiedAfter + skewBonus(rec.w, rec.l)),
       })
     }
     return notes
@@ -115,13 +119,13 @@ export function buildScorelessHeldNotes(feed, bundle, result) {
     notes.push({
       text: result?.final
         ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
-        : `The ${teamName} are ${rec.w}-${rec.l} ${when}`,
+        : withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when}`, bundle, side, 'scorelessThrough', n),
       personId: null,
       side,
       oppSide: otherSide(side),
       kind: 'scorelessThrough',
       dedupeKey: `scorelessThrough-${side}`,
-      score: clampScore(SCORE_BASE.scorelessThrough + 40 * skew(rec.w, rec.l)),
+      score: clampScore(SCORE_BASE.scorelessThrough + skewBonus(rec.w, rec.l)),
     })
   }
   return notes
@@ -145,13 +149,13 @@ export function buildBothScorelessHeldNotes(feed, bundle, result) {
       notes.push({
         text: result?.final
           ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
-          : `The ${teamName} are ${rec.w}-${rec.l} ${when}`,
+          : withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when}`, bundle, side, 'bothScoreless', n),
         personId: null,
         side,
         oppSide: otherSide(side),
         kind: 'bothScoreless',
         dedupeKey: `bothScoreless-${side}`,
-        score: clampScore(SCORE_BASE.bothScoreless + 40 * skew(rec.w, rec.l)),
+        score: clampScore(SCORE_BASE.bothScoreless + skewBonus(rec.w, rec.l)),
       })
     }
     return notes
@@ -178,13 +182,13 @@ export function buildDayOfWeekNotes(feed, bundle, result) {
     notes.push({
       text: result?.final
         ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
-        : `The ${teamName} are ${rec.w}-${rec.l} ${when} this season`,
+        : withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when} this season`, bundle, side, 'dayOfWeek', dow),
       personId: null,
       side,
       oppSide: otherSide(side),
       kind: 'dayOfWeek',
       dedupeKey: `dayOfWeek-${side}`,
-      score: clampScore(SCORE_BASE.dayOfWeek + 40 * skew(rec.w, rec.l)),
+      score: clampScore(SCORE_BASE.dayOfWeek + skewBonus(rec.w, rec.l)),
     })
   }
   return notes
@@ -211,14 +215,14 @@ export function buildRunsScoredNote(feed, bundle, result) {
       if (!rec || !teamName) continue
       const text = result?.final
         ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, `when scoring ${n}+ runs`)
-        : `The ${teamName} are ${rec.w}-${rec.l} when scoring ${n}+ runs`
+        : withRank(`The ${teamName} are ${rec.w}-${rec.l} when scoring ${n}+ runs`, bundle, side, 'runsScored', n)
       return {
         text,
         personId: null,
         side,
         oppSide: otherSide(side),
         kind: 'runsScored',
-        score: clampScore(SCORE_BASE.runsScored + 40 * skew(rec.w, rec.l)),
+        score: clampScore(SCORE_BASE.runsScored + skewBonus(rec.w, rec.l)),
       }
     }
   }
@@ -244,14 +248,14 @@ export function buildRunsAllowedNote(feed, bundle, result) {
       const when = `when allowing ${RUNS_ALLOWED_THRESHOLD}+ runs by the ${ordinal(n)}`
       const text = result?.final
         ? foldedRecordText(rec.w, rec.l, side === result.winnerSide, teamName, when)
-        : `The ${teamName} are ${rec.w}-${rec.l} ${when}`
+        : withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when}`, bundle, side, 'runsAllowedByInning', n)
       return {
         text,
         personId: null,
         side,
         oppSide: otherSide(side),
         kind: 'runsAllowed',
-        score: clampScore(SCORE_BASE.runsAllowed + 40 * skew(rec.w, rec.l)),
+        score: clampScore(SCORE_BASE.runsAllowed + skewBonus(rec.w, rec.l)),
       }
     }
   }
@@ -278,14 +282,14 @@ export function buildComebackNote(feed, bundle, result) {
   const when = `in games they've trailed by ${COMEBACK_DEFICIT}+`
   const text = result?.final
     ? foldedRecordText(rec.w, rec.l, deficitSide === result.winnerSide, teamName, when)
-    : `The ${teamName} are ${rec.w}-${rec.l} ${when}`
+    : withRank(`The ${teamName} are ${rec.w}-${rec.l} ${when}`, bundle, deficitSide, 'comeback')
   return {
     text,
     personId: null,
     side: deficitSide,
     oppSide: otherSide(deficitSide),
     kind: 'comeback',
-    score: clampScore(SCORE_BASE.comeback + 60 * (rec.pct ?? 0)),
+    score: clampScore(SCORE_BASE.comeback + magnitudeOf(rec.pct ?? 0, 1)),
   }
 }
 
@@ -319,7 +323,7 @@ export function buildCloseGameNotes(feed, bundle, result) {
           oppSide: otherSide(side),
           kind: 'oneRun',
           dedupeKey: `oneRun-${side}`,
-          score: clampScore(SCORE_BASE.oneRun + 40 * skew(rec.w, rec.l)),
+          score: clampScore(SCORE_BASE.oneRun + skewBonus(rec.w, rec.l)),
         })
       }
     }
@@ -333,7 +337,7 @@ export function buildCloseGameNotes(feed, bundle, result) {
           oppSide: otherSide(side),
           kind: 'extraInnings',
           dedupeKey: `extraInnings-${side}`,
-          score: clampScore(SCORE_BASE.extraInnings + 40 * skew(rec.w, rec.l)),
+          score: clampScore(SCORE_BASE.extraInnings + skewBonus(rec.w, rec.l)),
         })
       }
     }

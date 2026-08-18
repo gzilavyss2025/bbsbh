@@ -2,6 +2,8 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { halfIndex } from '../../../api/select.js'
 import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
+import { rankNotes } from '../../../api/callout-notes.js'
+import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { ChevronLink } from '../../ui/ChevronLink.jsx'
@@ -257,6 +259,11 @@ function Section({
   winProbBigPlays,
   onScorecard,
 }) {
+  // The per-game shown ledger (src/hooks/useCalloutLedger.js). Read here, at
+  // the top of the component, because the ARMS branch below is an early
+  // return — and inert outside a provider, so this panel still renders
+  // standalone. It only ever SUBTRACTS from a list; no gate below moves.
+  const ledger = useCalloutLedger()
   if (tab === 'lineups' && showEntering) {
     return (
       <LineupSection
@@ -404,10 +411,18 @@ function Section({
   // file's header — the gate lives there precisely so no caller can skip it),
   // and `showEntering` is the same reached-half caller gate HalfInning applies
   // before rendering the strip inline (ADR-0010). Both are in force below.
+  //
+  // REPETITION IS RANKED HERE TOO, and it is one surface's worth: the strip's
+  // notes and the Margin Notes digest render as ONE list under this tab, so
+  // they share one ledger read (`shownCounts`) and one diversity pass. The
+  // ledger counts distinct HALVES, and never the half being staged, so nothing
+  // below can decay itself out from under the reader mid-half.
+  const armsHalfIdx = halfIndex(effInning, effHalf)
+  const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
-    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate })
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts })
     : []
-  const notes = mergeNotes(preHalf, marginNotes)
+  const notes = mergeNotes(preHalf, marginNotes, shownCounts)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)
 
   // The stat-line content that used to be part of InningPage.jsx's
@@ -417,7 +432,7 @@ function Section({
   // destination changed. The WPA chart that used to sit alongside it here
   // moved on to the Extras tab — a once-a-half reference, not something a
   // scorer checks between pitches.
-  const idx = halfIndex(effInning, effHalf)
+  const idx = armsHalfIdx
   const revealed = idx <= revealedThrough
   const battingSide = effHalf === 'top' ? 'away' : 'home'
   return (
@@ -430,7 +445,7 @@ function Section({
         <p className="refpanel__empty">No pitching lines yet</p>
       ) : (
         <>
-          <MarginNotes notes={notes} feed={feed} bundle={callouts} />
+          <MarginNotes notes={notes} feed={feed} bundle={callouts} halfIdx={armsHalfIdx} />
           <PitchersSection teams={pitcherTeams} />
         </>
       )}
@@ -463,13 +478,20 @@ function Section({
 
 // One ranked list out of two already-ranked ones. Both builders emit the same
 // `{ text, personId, side, kind, score, dedupeKey }` note shape and score on the
-// same 0–100 worthiness rubric (docs/callouts.md), so re-sorting on `score` is a
+// same 0–100 worthiness rubric (docs/callouts.md), so re-ranking on `score` is a
 // merge, not a re-ranking — a strip note and a digest note compete on the terms
 // they were already scored under. Deduped on `dedupeKey` for the case both
 // builders reach the same fact about the same pitcher; the pre-half copy wins
-// ties by arriving first, which is the entering-tense wording (ADR-0014) and
-// the right one for a half still being scored.
-function mergeNotes(preHalf, marginNotes) {
+// by arriving first, which is the entering-tense wording (ADR-0014) and the
+// right one for a half still being scored.
+//
+// The re-rank is `rankNotes` (api/callout-notes/shared.js), so the merged list
+// carries the same decay and once-per-game rules the two builders already
+// applied to themselves, plus one note per kind ACROSS both of them. This one
+// is deliberately UNCAPPED: MarginNotes.jsx shows the first few and hides the
+// rest behind "Show N more", and a note a diversity rule turned down is
+// deferred to the tail rather than thrown away, so it is still there to find.
+function mergeNotes(preHalf, marginNotes, shownCounts) {
   const seen = new Set()
   const out = []
   for (const n of [...preHalf, ...(marginNotes ?? [])]) {
@@ -478,7 +500,7 @@ function mergeNotes(preHalf, marginNotes) {
     seen.add(key)
     out.push(n)
   }
-  return out.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  return rankNotes(out, { shownCounts, maxPerKind: 1 })
 }
 
 function RefSheet({ onClose, children }) {
