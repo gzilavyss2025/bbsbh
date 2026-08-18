@@ -112,7 +112,7 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
-  'src/styles/68-around-the-game.css': 700, // 608
+  'src/styles/68-around-the-game.css': 900, // 642 -> 856: The Double Dip's year slider (.yrange, two stacked native range inputs) and its board cells
   // The directory-budget table itself. Every entry in it carries an inline
   // rationale BY DESIGN — that is the whole convention, and it means the file
   // grows a few lines on any commit that adds a deliberate exception. It was

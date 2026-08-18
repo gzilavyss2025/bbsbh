@@ -151,7 +151,7 @@ const TeamRecordsPage = lazyNamed(
   () => import('./screens/TeamRecordsPage.jsx'),
   'TeamRecordsPage',
 )
-// The four broadcast report pages (src/screens/around-the-game/). Lazy like every
+// The five broadcast report pages (src/screens/around-the-game/). Lazy like every
 // other screen, and they SHARE one stylesheet
 // (styles/68-around-the-game.css) which each of them imports — see that
 // file's header for why one partial rather than four.
@@ -165,6 +165,10 @@ const FarmSystemPage = lazyNamed(
   'FarmSystemPage',
 )
 const BullpenPage = lazyNamed(() => import('./screens/around-the-game/BullpenPage.jsx'), 'BullpenPage')
+const DoubleheadersPage = lazyNamed(
+  () => import('./screens/around-the-game/DoubleheadersPage.jsx'),
+  'DoubleheadersPage',
+)
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),
@@ -344,6 +348,8 @@ export default function App() {
     content = <FarmSystemPage />
   } else if (route.name === 'bullpens') {
     content = <BullpenPage />
+  } else if (route.name === 'doubleheaders') {
+    content = <DoubleheadersPage />
   } else if (route.name === 'manager') {
     content = <ManagerPage id={route.id} />
   } else if (route.name === 'game-notes-debug') {

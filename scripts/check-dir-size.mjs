@@ -407,7 +407,7 @@ const BUDGETS = {
   // 83 -> 85 for the broadcast reports' two generators, `gen-gate.mjs` and
   // `gen-farm-system.mjs`. Both RUN on import, which the note above says
   // scripts/lib is not for, so they stay flat with every other gen-*.mjs.
-  scripts: 85,
+  scripts: 86,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

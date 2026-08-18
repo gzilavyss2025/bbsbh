@@ -28,6 +28,7 @@ const PATHS_BEFORE_GROUPING = [
   '/farm-system-rankings',
   '/bullpen-availability',
   '/pace-of-play',
+  '/doubleheaders',
   '/standings',
   '/leaders',
   '/team-records',

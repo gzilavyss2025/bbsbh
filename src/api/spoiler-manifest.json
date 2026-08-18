@@ -609,6 +609,10 @@
       "class": "spoiler-free",
       "why": "Club identity (name, abbreviation, division) off the static teams.json, so the report boards can join a bare teamId to a name. Identity data only. No SealBox."
     },
+    "around-the-game/doubleheaders.js": {
+      "class": "spoiler-free",
+      "why": "Static doubleheaders.json — per-season, per-club records on doubleheader days, folded from one row per completed PAIR. Same footing as comebackWins.js: a season aggregate over Final games, and the file carries no per-game runs at all, so no individual result can be read back out of it. Current-season rows only ever cover games statsapi has already called Final. No SealBox."
+    },
     "around-the-game/farmSystem.js": {
       "class": "spoiler-free",
       "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."

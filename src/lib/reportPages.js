@@ -76,8 +76,16 @@ export const PAGE_GROUPS = [
     // very likely to want the others. And they answer a different KIND of
     // question than the rest of that group: Standings and League Leaders say
     // who is winning, while these say who is showing up, how long it takes,
-    // what a club has coming and how much work its pen has already done. None
-    // of them is about a result.
+    // what a club has coming and how much work its pen has already done.
+    //
+    // Four of the five are not about a result at all. The fifth, The Double
+    // Dip, is the group's edge case and is here deliberately: a doubleheader is
+    // a scheduling condition — rain in April, two games in August — and the
+    // page is about what that condition DOES to a club, which is the same
+    // question the other four ask about crowds, clock, pipeline and workload.
+    // It is a season aggregate over finished games, so it spoils nothing; if a
+    // first-click test says readers look for it under History instead, move it
+    // rather than duplicating it.
     //
     // Attendance leads on busiest-first, the same rule every other group here
     // orders by: it is the one a reader is most likely to have come looking
@@ -87,6 +95,7 @@ export const PAGE_GROUPS = [
       { label: 'Farm System Rankings', path: '/farm-system-rankings' },
       { label: 'Bullpen Availability', path: '/bullpen-availability' },
       { label: 'Pace of Play', path: '/pace-of-play' },
+      { label: 'Doubleheaders', path: '/doubleheaders' },
     ],
   },
   {
@@ -229,6 +238,7 @@ export const FOOTER_TRAIL = [
 export const REPORT_ROUTES = {
   attendance: 'attendance',
   'pace-of-play': 'pace',
+  doubleheaders: 'doubleheaders',
   'farm-system-rankings': 'farm-system',
   'bullpen-availability': 'bullpens',
 }

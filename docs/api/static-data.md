@@ -463,6 +463,17 @@ for each generator; the reader modules:
   same shape over game length, plus the three-hour/three-and-a-half-hour
   counts and the delay totals. `asClock` renders minutes the way baseball says
   them. Spoiler-free — a crowd count and a clock reading carry no result.
+- `around-the-game/doubleheaders.js` — the reader behind `/doubleheaders` (The
+  Double Dip), over `gen-doubleheaders.mjs`'s pair rows. The file is one row per
+  doubleheader and carries NO per-club totals, because the page's year slider
+  changes all of them: `buildBoard(data, { from, to, sortBy })` folds both sides
+  of every pair inside the span into per-club rows (games W-L, sweeps, swept-by,
+  splits, per-season lines, per-opponent counts) and ranks them, ties sharing the
+  best rank. `topOpponents` returns EVERY club tied at the top of the most-met
+  count rather than picking one — at a short span a tie is the common case.
+  `boardHighlights` reads the slabs off the built board so a slab cannot disagree
+  with the row under it. Spoiler-free: season aggregates over Final games, and
+  the file holds no per-game runs to leak.
 - `around-the-game/farmSystem.js` — THE FARM INDEX, from `public/data/farm-system.json`
   (`gen-farm-system.mjs`). Three pillars over thirty organisations: an
   exponential value curve on prospect rank (60%), level-weighted affiliate
