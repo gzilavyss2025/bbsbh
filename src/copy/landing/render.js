@@ -168,6 +168,61 @@ function jsonLd(page, url) {
   return `<script type="application/ld+json">${json.replace(/</g, '\\u003c')}</script>`
 }
 
+// One group heading, shared by every layout below: a lettered badge (A, B, C…,
+// the group's position in the hub) ahead of the heading text.
+function groupHead(group, index) {
+  const letter = String.fromCharCode(65 + index)
+  return `<h2 id="group-${esc(group.id)}"><span class="index-group__badge">${letter}</span>${esc(group.heading)}</h2>`
+}
+
+// "Start keeping score" is the one group a brand-new scorer works through in
+// order, not a shelf to browse — so it gets a numbered read-in-order list
+// plus a short jump rail, instead of the card grid every other group uses.
+function renderStartGroup(group, index) {
+  const items = group.pages
+    .map(
+      (page, i) => `<li>
+<span class="basics__num">${String(i + 1).padStart(2, '0')}</span>
+<div><h3><a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a></h3><p>${esc(page.metaDescription)}</p></div>
+</li>`,
+    )
+    .join('\n')
+  const rail = group.pages
+    .map((page) => `<a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a>`)
+    .join('\n')
+
+  return `<section class="index-group" aria-labelledby="group-${esc(group.id)}">
+${groupHead(group, index)}
+<p>${esc(group.description)}</p>
+<div class="basics">
+<ol class="basics__list">
+${items}
+</ol>
+<nav class="basics__rail" aria-label="Jump to a guide in this group">
+<p class="basics__rail-label">Read in order</p>
+${rail}
+</nav>
+</div>
+</section>`
+}
+
+function renderCardGroup(group, index) {
+  return `<section class="index-group" aria-labelledby="group-${esc(group.id)}">
+${groupHead(group, index)}
+<p>${esc(group.description)}</p>
+<ul class="index">
+${group.pages
+  .map(
+    (page, i) => `<li>
+<span class="index__num">${i + 1}</span>
+<div><h3><a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a></h3><p>${esc(page.metaDescription)}</p></div>
+</li>`,
+  )
+  .join('\n')}
+</ul>
+</section>`
+}
+
 // The hub at /learn. It exists for two audiences at once: a reader who wants to
 // see what else is here, and a crawler that needs one page linking to all of
 // them. A set of guides with no index is a set of orphans — internal links are
@@ -223,19 +278,7 @@ export function renderIndex(groups) {
 <h1>Scorekeeping guides</h1>
 <div class="answer"><p>Everything here is free, and none of it needs an account. These guides cover keeping score of a baseball game by hand — the notation, the equipment, and the reading skills that go with it — written for somebody starting from nothing.</p></div>
 ${groups
-  .map(
-    (group) => `<section class="index-group" aria-labelledby="group-${esc(group.id)}">
-<h2 id="group-${esc(group.id)}">${esc(group.heading)}</h2>
-<p>${esc(group.description)}</p>
-<ul class="index">
-${group.pages
-  .map(
-    (page) => `<li><h3><a href="/learn/${esc(page.slug)}">${esc(page.h1)}</a></h3><p>${esc(page.metaDescription)}</p></li>`,
-  )
-  .join('\n')}
-</ul>
-</section>`,
-  )
+  .map((group, index) => (group.id === 'start' ? renderStartGroup(group, index) : renderCardGroup(group, index)))
   .join('\n')}
 </article>
 </main>
