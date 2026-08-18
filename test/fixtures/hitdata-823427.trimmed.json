@@ -1,0 +1,4253 @@
+{
+  "gamePk": 823427,
+  "gameData": {
+    "venue": {
+      "name": "Citizens Bank Park"
+    },
+    "teams": {
+      "away": {
+        "id": 146,
+        "name": "Miami Marlins",
+        "abbreviation": "MIA"
+      },
+      "home": {
+        "id": 143,
+        "name": "Philadelphia Phillies",
+        "abbreviation": "PHI"
+      }
+    }
+  },
+  "liveData": {
+    "plays": {
+      "allPlays": [
+        {
+          "about": {
+            "inning": 1,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Esteury Ruiz grounds out, shortstop Trea Turner to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665923,
+              "fullName": "Esteury Ruiz"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665923
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "6"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 93.7,
+                "launchAngle": -8,
+                "totalDistance": 12,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 104.09,
+                  "coordY": 148.98
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 1,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Pop Out",
+            "eventType": "field_out",
+            "description": "Xavier Edwards pops out to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669364,
+              "fullName": "Xavier Edwards"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 81.6,
+                "launchAngle": 72,
+                "totalDistance": 121,
+                "trajectory": "popup",
+                "hardness": "medium",
+                "location": "3",
+                "coordinates": {
+                  "coordX": 150.42,
+                  "coordY": 160.65
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 1,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Pop Out",
+            "eventType": "field_out",
+            "description": "Trea Turner pops out to catcher Brian Navarreto in foul territory."
+          },
+          "matchup": {
+            "batter": {
+              "id": 607208,
+              "fullName": "Trea Turner"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "2"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 62.3,
+                "launchAngle": 87,
+                "totalDistance": 21,
+                "trajectory": "popup",
+                "hardness": "medium",
+                "location": "2",
+                "coordinates": {
+                  "coordX": 132.2,
+                  "coordY": 210.56
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 1,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Bryce Harper singles on a ground ball to second baseman Xavier Edwards."
+          },
+          "matchup": {
+            "batter": {
+              "id": 547180,
+              "fullName": "Bryce Harper"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 93.6,
+                "launchAngle": -8,
+                "totalDistance": 16,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 140.53,
+                  "coordY": 147.46
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 1,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Flyout",
+            "eventType": "field_out",
+            "description": "Luis Arraez flies out to center fielder Esteury Ruiz."
+          },
+          "matchup": {
+            "batter": {
+              "id": 650333,
+              "fullName": "Luis Arraez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 91.6,
+                "launchAngle": 25,
+                "totalDistance": 329,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 133.76,
+                  "coordY": 79.01
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Agustín Ramírez grounds out, third baseman Bryson Stott to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 682663,
+              "fullName": "Agustín Ramírez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 96.9,
+                "launchAngle": -10,
+                "totalDistance": 14,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 88.12,
+                  "coordY": 157.27
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Javier Sanoja singles on a ground ball to left fielder Brandon Marsh."
+          },
+          "matchup": {
+            "batter": {
+              "id": 691594,
+              "fullName": "Javier Sanoja"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 103.4,
+                "launchAngle": 8,
+                "totalDistance": 147,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 60.89,
+                  "coordY": 102.84
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Leo Jiménez singles on a line drive to left fielder Brandon Marsh. Javier Sanoja to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 677870,
+              "fullName": "Leo Jiménez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 677870
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 78.5,
+                "launchAngle": 21,
+                "totalDistance": 245,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 77.73,
+                  "coordY": 102.28
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Alec Bohm grounds out, shortstop Otto Lopez to first baseman Leo Jiménez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 664761,
+              "fullName": "Alec Bohm"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "6"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 90.8,
+                "launchAngle": -15,
+                "totalDistance": 12,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 94.58,
+                  "coordY": 140.09
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Bryson Stott singles on a sharp line drive to right fielder Griffin Conine."
+          },
+          "matchup": {
+            "batter": {
+              "id": 681082,
+              "fullName": "Bryson Stott"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 103.5,
+                "launchAngle": 9,
+                "totalDistance": 165,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 180.98,
+                  "coordY": 99.14
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Flyout",
+            "eventType": "field_out",
+            "description": "Brandon Marsh flies out to left fielder Heriberto Hernández."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669016,
+              "fullName": "Brandon Marsh"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669016
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 82.6,
+                "launchAngle": 52,
+                "totalDistance": 239,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 81.71,
+                  "coordY": 112.98
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 2,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Forceout",
+            "eventType": "force_out",
+            "description": "J.T. Realmuto grounds into a force out, third baseman Javier Sanoja to second baseman Xavier Edwards. Bryson Stott out at 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 592663,
+              "fullName": "J.T. Realmuto"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 90.8,
+                "launchAngle": 1,
+                "totalDistance": 51,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 102.53,
+                  "coordY": 161.15
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Esteury Ruiz singles on a sharp line drive to left fielder Brandon Marsh."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665923,
+              "fullName": "Esteury Ruiz"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665923
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 102.3,
+                "launchAngle": 14,
+                "totalDistance": 227,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 80.14,
+                  "coordY": 88.11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Double",
+            "eventType": "double",
+            "description": "Justin Crawford doubles (17) on a ground ball to left fielder Heriberto Hernández."
+          },
+          "matchup": {
+            "batter": {
+              "id": 702222,
+              "fullName": "Justin Crawford"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 702222
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 100,
+                "launchAngle": -12,
+                "totalDistance": 14,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 38.5,
+                  "coordY": 108.92
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Trea Turner singles on a ground ball to left fielder Heriberto Hernández. Justin Crawford scores."
+          },
+          "matchup": {
+            "batter": {
+              "id": 607208,
+              "fullName": "Trea Turner"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 702222
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 102.2,
+                "launchAngle": 2,
+                "totalDistance": 79,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 70.26,
+                  "coordY": 101.82
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Luis Arraez singles on a ground ball to right fielder Griffin Conine. Trea Turner scores. Bryce Harper to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 650333,
+              "fullName": "Luis Arraez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 93.2,
+                "launchAngle": 3,
+                "totalDistance": 70,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 186.86,
+                  "coordY": 112.98
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Forceout",
+            "eventType": "force_out",
+            "description": "Alec Bohm grounds into a force out, third baseman Javier Sanoja to second baseman Xavier Edwards. Bryce Harper to 3rd. Luis Arraez out at 2nd. Alec Bohm to 1st."
+          },
+          "matchup": {
+            "batter": {
+              "id": 664761,
+              "fullName": "Alec Bohm"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 72.7,
+                "launchAngle": -16,
+                "totalDistance": 7,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 104.61,
+                  "coordY": 163.18
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 3,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Forceout",
+            "eventType": "force_out",
+            "description": "Brandon Marsh grounds into a force out, fielded by shortstop Otto Lopez. Bryson Stott out at 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669016,
+              "fullName": "Brandon Marsh"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "6"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 669016
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 102.7,
+                "launchAngle": -4,
+                "totalDistance": 21,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 120.23,
+                  "coordY": 142.9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Otto Lopez singles on a line drive to center fielder Justin Crawford. Agustín Ramírez to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 672640,
+              "fullName": "Otto Lopez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 100,
+                "launchAngle": 11,
+                "totalDistance": 236,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 150.13,
+                  "coordY": 87.67
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Javier Sanoja grounds out, pitcher Cristopher Sánchez to first baseman Alec Bohm. Agustín Ramírez to 3rd. Otto Lopez to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 691594,
+              "fullName": "Javier Sanoja"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "1"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 69.9,
+                "launchAngle": -78,
+                "totalDistance": 2,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "1",
+                "coordinates": {
+                  "coordX": 128.56,
+                  "coordY": 191.58
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Pop Out",
+            "eventType": "field_out",
+            "description": "Griffin Conine pops out to second baseman Luis Arraez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665052,
+              "fullName": "Griffin Conine"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665052
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 94.2,
+                "launchAngle": 67,
+                "totalDistance": 156,
+                "trajectory": "popup",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 140.53,
+                  "coordY": 141.38
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "J.T. Realmuto singles on a sharp line drive to center fielder Esteury Ruiz."
+          },
+          "matchup": {
+            "batter": {
+              "id": 592663,
+              "fullName": "J.T. Realmuto"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 101.4,
+                "launchAngle": 12,
+                "totalDistance": 253,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 116.2,
+                  "coordY": 70.5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Sac Bunt",
+            "eventType": "sac_bunt",
+            "description": "Justin Crawford out on a sacrifice bunt, catcher Brian Navarreto to first baseman Leo Jiménez. J.T. Realmuto to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 702222,
+              "fullName": "Justin Crawford"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 702222
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "2"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 49.5,
+                "launchAngle": -87,
+                "totalDistance": 0,
+                "trajectory": "bunt_grounder",
+                "hardness": "medium",
+                "location": "2",
+                "coordinates": {
+                  "coordX": 125.63,
+                  "coordY": 203.87
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Kyle Schwarber singles on a sharp line drive to right fielder Griffin Conine. J.T. Realmuto to 3rd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 656941,
+              "fullName": "Kyle Schwarber"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 656941
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 104.2,
+                "launchAngle": 15,
+                "totalDistance": 254,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 183.88,
+                  "coordY": 115.45
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 4,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Grounded Into DP",
+            "eventType": "grounded_into_double_play",
+            "description": "Trea Turner grounds into a double play, third baseman Javier Sanoja to second baseman Xavier Edwards to first baseman Leo Jiménez. Kyle Schwarber out at 2nd. Trea Turner out at 1st."
+          },
+          "matchup": {
+            "batter": {
+              "id": 607208,
+              "fullName": "Trea Turner"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 656941
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 93.1,
+                "launchAngle": -5,
+                "totalDistance": 26,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 120.11,
+                  "coordY": 195.36
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Brian Navarreto singles on a ground ball to left fielder Brandon Marsh."
+          },
+          "matchup": {
+            "batter": {
+              "id": 640459,
+              "fullName": "Brian Navarreto"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 640459
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 94.2,
+                "launchAngle": 5,
+                "totalDistance": 92,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 80.67,
+                  "coordY": 102.84
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Esteury Ruiz singles on a bunt ground ball to pitcher Cristopher Sánchez. Brian Navarreto to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665923,
+              "fullName": "Esteury Ruiz"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665923
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "1"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 640459
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 26.1,
+                "launchAngle": -24,
+                "totalDistance": 6,
+                "trajectory": "bunt_grounder",
+                "hardness": "medium",
+                "location": "1",
+                "coordinates": {
+                  "coordX": 122.23,
+                  "coordY": 197.99
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Double Play",
+            "eventType": "double_play",
+            "description": "Heriberto Hernández grounds into a double play, third baseman Bryson Stott to second baseman Luis Arraez. Brian Navarreto out at 3rd. Esteury Ruiz out at 2nd. Heriberto Hernández to 1st."
+          },
+          "matchup": {
+            "batter": {
+              "id": 681715,
+              "fullName": "Heriberto Hernández"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 640459
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "5"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 665923
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681715
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 82.1,
+                "launchAngle": -14,
+                "totalDistance": 9,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 99.93,
+                  "coordY": 169.27
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Xavier Edwards grounds out, pitcher Cristopher Sánchez to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669364,
+              "fullName": "Xavier Edwards"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "1"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": null,
+                "launchAngle": -71,
+                "totalDistance": 3,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "1",
+                "coordinates": {
+                  "coordX": 128.56,
+                  "coordY": 176.87
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Bryce Harper singles on a sharp line drive to center fielder Esteury Ruiz."
+          },
+          "matchup": {
+            "batter": {
+              "id": 547180,
+              "fullName": "Bryce Harper"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 105.3,
+                "launchAngle": 10,
+                "totalDistance": 253,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 115.25,
+                  "coordY": 99.34
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Lineout",
+            "eventType": "field_out",
+            "description": "Luis Arraez lines out to right fielder Griffin Conine."
+          },
+          "matchup": {
+            "batter": {
+              "id": 650333,
+              "fullName": "Luis Arraez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 87.8,
+                "launchAngle": 25,
+                "totalDistance": 291,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 191.06,
+                  "coordY": 101.77
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 5,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Grounded Into DP",
+            "eventType": "grounded_into_double_play",
+            "description": "Alec Bohm grounds into a double play, third baseman Javier Sanoja to second baseman Xavier Edwards to first baseman Leo Jiménez. Bryce Harper out at 2nd. Alec Bohm out at 1st."
+          },
+          "matchup": {
+            "batter": {
+              "id": 664761,
+              "fullName": "Alec Bohm"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 87.3,
+                "launchAngle": -5,
+                "totalDistance": 19,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 103.57,
+                  "coordY": 163.18
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Double",
+            "eventType": "double",
+            "description": "Agustín Ramírez doubles (8) on a ground ball to right fielder Bryce Harper."
+          },
+          "matchup": {
+            "batter": {
+              "id": 682663,
+              "fullName": "Agustín Ramírez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 106,
+                "launchAngle": 1,
+                "totalDistance": 59,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 210.81,
+                  "coordY": 118.05
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Fielders Choice Out",
+            "eventType": "fielders_choice_out",
+            "description": "Otto Lopez reaches on a fielder's choice out, shortstop Trea Turner to third baseman Bryson Stott. Agustín Ramírez out at 3rd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 672640,
+              "fullName": "Otto Lopez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "6"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "5"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 84.2,
+                "launchAngle": -3,
+                "totalDistance": 24,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 112.94,
+                  "coordY": 146.45
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Flyout",
+            "eventType": "field_out",
+            "description": "Javier Sanoja flies out to shortstop Trea Turner in foul territory."
+          },
+          "matchup": {
+            "batter": {
+              "id": 691594,
+              "fullName": "Javier Sanoja"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "6"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 86,
+                "launchAngle": 60,
+                "totalDistance": 203,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 63.65,
+                  "coordY": 146.85
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Griffin Conine singles on a line drive to left fielder Brandon Marsh. Otto Lopez scores. Leo Jiménez to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665052,
+              "fullName": "Griffin Conine"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665052
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "7"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 677870
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 89.7,
+                "launchAngle": 12,
+                "totalDistance": 221,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 48.68,
+                  "coordY": 117.73
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Brian Navarreto grounds out, second baseman Luis Arraez to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 640459,
+              "fullName": "Brian Navarreto"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 640459
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 107.7,
+                "launchAngle": -25,
+                "totalDistance": 5,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 150.94,
+                  "coordY": 151.01
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Sac Bunt",
+            "eventType": "sac_bunt",
+            "description": "Brandon Marsh out on a sacrifice bunt, pitcher John King to first baseman Leo Jiménez. Bryson Stott to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669016,
+              "fullName": "Brandon Marsh"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669016
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "1"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 41.4,
+                "launchAngle": -43,
+                "totalDistance": 5,
+                "trajectory": "bunt_grounder",
+                "hardness": "medium",
+                "location": "1",
+                "coordinates": {
+                  "coordX": 134.88,
+                  "coordY": 183.32
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Derek Hill singles on a ground ball to center fielder Esteury Ruiz. Bryson Stott scores. J.T. Realmuto to 3rd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 656537,
+              "fullName": "Derek Hill"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 656537
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 101.2,
+                "launchAngle": 1,
+                "totalDistance": 55,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 116.59,
+                  "coordY": 82.05
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Sac Fly",
+            "eventType": "sac_fly",
+            "description": "Kyle Schwarber out on a sacrifice fly to center fielder Esteury Ruiz. J.T. Realmuto scores. Derek Hill to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 656941,
+              "fullName": "Kyle Schwarber"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 656941
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 656537
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 592663
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 97.8,
+                "launchAngle": 51,
+                "totalDistance": 265,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 114.41,
+                  "coordY": 94.48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 6,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Bryce Harper grounds out, second baseman Xavier Edwards to first baseman Leo Jiménez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 547180,
+              "fullName": "Bryce Harper"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 87.7,
+                "launchAngle": -21,
+                "totalDistance": 6,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 153.02,
+                  "coordY": 155.07
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Heriberto Hernández grounds out softly, pitcher Jonathan Bowlan to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 681715,
+              "fullName": "Heriberto Hernández"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 681715
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "1"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 57.7,
+                "launchAngle": -74,
+                "totalDistance": 2,
+                "trajectory": "ground_ball",
+                "hardness": "soft",
+                "location": "1",
+                "coordinates": {
+                  "coordX": 119.19,
+                  "coordY": 185.4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Xavier Edwards singles on a ground ball to right fielder Bryce Harper."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669364,
+              "fullName": "Xavier Edwards"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 100.9,
+                "launchAngle": 0,
+                "totalDistance": 59,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 172.13,
+                  "coordY": 130.97
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Agustín Ramírez singles on a line drive to right fielder Bryce Harper. Xavier Edwards to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 682663,
+              "fullName": "Agustín Ramírez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 95,
+                "launchAngle": 10,
+                "totalDistance": 221,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 171.37,
+                  "coordY": 100.48
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Double",
+            "eventType": "double",
+            "description": "Marlins challenged (fair or foul in outfield), call on the field was overturned: Javier Sanoja doubles (26) on a line drive to right fielder Bryce Harper. Xavier Edwards scores. Agustín Ramírez scores. Otto Lopez to 3rd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 691594,
+              "fullName": "Javier Sanoja"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 94.7,
+                "launchAngle": 3,
+                "totalDistance": 135,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 221.74,
+                  "coordY": 106.9
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Luis Arraez grounds out to first baseman Leo Jiménez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 650333,
+              "fullName": "Luis Arraez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 95.1,
+                "launchAngle": 3,
+                "totalDistance": 78,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "3",
+                "coordinates": {
+                  "coordX": 161.35,
+                  "coordY": 164.2
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Fielders Choice",
+            "eventType": "fielders_choice",
+            "description": "Bryson Stott reaches on a fielder's choice, fielded by first baseman Leo Jiménez. Alec Bohm to 2nd. Alec Bohm advances to 2nd, on a throwing error by first baseman Leo Jiménez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 681082,
+              "fullName": "Bryson Stott"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_throwing_error",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 96.4,
+                "launchAngle": -14,
+                "totalDistance": 10,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "3",
+                "coordinates": {
+                  "coordX": 145.22,
+                  "coordY": 169.77
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Brandon Marsh grounds out, second baseman Xavier Edwards to first baseman Leo Jiménez. Alec Bohm to 3rd. Bryson Stott to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669016,
+              "fullName": "Brandon Marsh"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669016
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 85.7,
+                "launchAngle": -39,
+                "totalDistance": 2,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 146.78,
+                  "coordY": 153.04
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 7,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Kyle Schwarber grounds out, second baseman Xavier Edwards to first baseman Leo Jiménez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 656941,
+              "fullName": "Kyle Schwarber"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 656941
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "4"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 90.6,
+                "launchAngle": -26,
+                "totalDistance": 8,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 153.54,
+                  "coordY": 152.03
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Flyout",
+            "eventType": "field_out",
+            "description": "Griffin Conine flies out to right fielder Bryce Harper."
+          },
+          "matchup": {
+            "batter": {
+              "id": 665052,
+              "fullName": "Griffin Conine"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 665052
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "9"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 96.4,
+                "launchAngle": 47,
+                "totalDistance": 296,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "9",
+                "coordinates": {
+                  "coordX": 167.14,
+                  "coordY": 88.01
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Home Run",
+            "eventType": "home_run",
+            "description": "Brian Navarreto homers (1) on a fly ball to left field."
+          },
+          "matchup": {
+            "batter": {
+              "id": 640459,
+              "fullName": "Brian Navarreto"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 640459
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 103.4,
+                "launchAngle": 23,
+                "totalDistance": 368,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "7",
+                "coordinates": {
+                  "coordX": 27.07,
+                  "coordY": 86.68
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Jakob Marsee grounds out to first baseman Alec Bohm."
+          },
+          "matchup": {
+            "batter": {
+              "id": 805300,
+              "fullName": "Jakob Marsee"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 805300
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 98.6,
+                "launchAngle": -20,
+                "totalDistance": 8,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "3",
+                "coordinates": {
+                  "coordX": 162.39,
+                  "coordY": 163.18
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Flyout",
+            "eventType": "field_out",
+            "description": "Trea Turner flies out to center fielder Jakob Marsee."
+          },
+          "matchup": {
+            "batter": {
+              "id": 607208,
+              "fullName": "Trea Turner"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 607208
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 96,
+                "launchAngle": 25,
+                "totalDistance": 375,
+                "trajectory": "fly_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 136.82,
+                  "coordY": 48.23
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Bryce Harper singles on a ground ball to center fielder Jakob Marsee."
+          },
+          "matchup": {
+            "batter": {
+              "id": 547180,
+              "fullName": "Bryce Harper"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 107.6,
+                "launchAngle": 6,
+                "totalDistance": 140,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 141.57,
+                  "coordY": 82.05
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Luis Arraez grounds out, third baseman Javier Sanoja to first baseman Leo Jiménez. Bryce Harper to 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 650333,
+              "fullName": "Luis Arraez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 650333
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "5"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 51.5,
+                "launchAngle": -30,
+                "totalDistance": 6,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "5",
+                "coordinates": {
+                  "coordX": 114.15,
+                  "coordY": 161.23
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Alec Bohm singles on a ground ball to center fielder Jakob Marsee. Bryce Harper scores."
+          },
+          "matchup": {
+            "batter": {
+              "id": 664761,
+              "fullName": "Alec Bohm"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 664761
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 547180
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 103.3,
+                "launchAngle": 2,
+                "totalDistance": 60,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 119.19,
+                  "coordY": 82.05
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 8,
+            "halfInning": "bottom"
+          },
+          "result": {
+            "event": "Lineout",
+            "eventType": "field_out",
+            "description": "Bryson Stott lines out to center fielder Jakob Marsee."
+          },
+          "matchup": {
+            "batter": {
+              "id": 681082,
+              "fullName": "Bryson Stott"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 681082
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 92.7,
+                "launchAngle": 23,
+                "totalDistance": 323,
+                "trajectory": "line_drive",
+                "hardness": "medium",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 100.8,
+                  "coordY": 72.03
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 9,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Xavier Edwards singles on a ground ball to second baseman Luis Arraez."
+          },
+          "matchup": {
+            "batter": {
+              "id": 669364,
+              "fullName": "Xavier Edwards"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 83.8,
+                "launchAngle": -52,
+                "totalDistance": 3,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 136.89,
+                  "coordY": 162.68
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 9,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Groundout",
+            "eventType": "field_out",
+            "description": "Agustín Ramírez grounds out, shortstop Trea Turner to first baseman Alec Bohm. Xavier Edwards to 3rd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 682663,
+              "fullName": "Agustín Ramírez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": "2B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 682663
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 1
+              },
+              "credits": [
+                {
+                  "credit": "f_assist",
+                  "position": {
+                    "code": "6"
+                  }
+                },
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "3"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": "2B",
+                "end": "3B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 88.1,
+                "launchAngle": -37,
+                "totalDistance": 4,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 111.38,
+                  "coordY": 147.46
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 9,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Single",
+            "eventType": "single",
+            "description": "Otto Lopez singles on a sharp line drive to center fielder Derek Hill. Xavier Edwards scores."
+          },
+          "matchup": {
+            "batter": {
+              "id": 672640,
+              "fullName": "Otto Lopez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": [
+                {
+                  "credit": "f_fielded_ball",
+                  "position": {
+                    "code": "8"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 669364
+                }
+              },
+              "movement": {
+                "start": "3B",
+                "end": "score",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 106.2,
+                "launchAngle": 13,
+                "totalDistance": 303,
+                "trajectory": "line_drive",
+                "hardness": "hard",
+                "location": "8",
+                "coordinates": {
+                  "coordX": 157.12,
+                  "coordY": 58.63
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 9,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Pop Out",
+            "eventType": "field_out",
+            "description": "Javier Sanoja pops out to shortstop Trea Turner."
+          },
+          "matchup": {
+            "batter": {
+              "id": 691594,
+              "fullName": "Javier Sanoja"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 691594
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": null,
+                "isOut": true,
+                "outNumber": 2
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "6"
+                  }
+                }
+              ]
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 51,
+                "launchAngle": 52,
+                "totalDistance": 134,
+                "trajectory": "popup",
+                "hardness": "medium",
+                "location": "6",
+                "coordinates": {
+                  "coordX": 116.7,
+                  "coordY": 149.37
+                }
+              }
+            }
+          ]
+        },
+        {
+          "about": {
+            "inning": 9,
+            "halfInning": "top"
+          },
+          "result": {
+            "event": "Forceout",
+            "eventType": "force_out",
+            "description": "Leo Jiménez grounds into a force out, fielded by second baseman Luis Arraez. Otto Lopez out at 2nd."
+          },
+          "matchup": {
+            "batter": {
+              "id": 677870,
+              "fullName": "Leo Jiménez"
+            }
+          },
+          "runners": [
+            {
+              "details": {
+                "runner": {
+                  "id": 672640
+                }
+              },
+              "movement": {
+                "start": "1B",
+                "end": null,
+                "isOut": true,
+                "outNumber": 3
+              },
+              "credits": [
+                {
+                  "credit": "f_putout",
+                  "position": {
+                    "code": "4"
+                  }
+                }
+              ]
+            },
+            {
+              "details": {
+                "runner": {
+                  "id": 677870
+                }
+              },
+              "movement": {
+                "start": null,
+                "end": "1B",
+                "isOut": false,
+                "outNumber": null
+              },
+              "credits": []
+            }
+          ],
+          "playEvents": [
+            {
+              "hitData": {
+                "launchSpeed": 105.4,
+                "launchAngle": -5,
+                "totalDistance": 22,
+                "trajectory": "ground_ball",
+                "hardness": "medium",
+                "location": "4",
+                "coordinates": {
+                  "coordX": 132.2,
+                  "coordY": 142.9
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

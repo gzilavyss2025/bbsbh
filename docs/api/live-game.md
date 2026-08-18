@@ -244,6 +244,21 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   `derive.js` also computes the per-half Statcast superlatives (fastest pitch /
   hardest-hit / longest ball from `playEvents[].pitchData`/`hitData`) — absent
   at most MiLB parks, so every field is null-guarded and the UI hides the row.
+- **`hitchart.js`** — reveal-only. The hit chart's data layer, and the only
+  reader of `hitData.coordinates` (`coordX`/`coordY`, verified against gamePk
+  823427). `selectBattedBalls(feed, { teamId, throughHalfIndex })` returns one
+  entry per batted ball, each carrying its exit velocity, its trajectory and
+  the batter's own scorebook denotation — the latter from
+  `playbyplay/scorebookCode.js`, so the card speaks the same notation the
+  play-by-play cards do rather than a second spelling of it. `hitCoordToSvg`
+  projects Gameday's coordinate pixels into the ballpark drawing's own space at
+  `HIT_COORD_FT_PER_UNIT` (2.51), a constant fitted against the feed's own
+  carry distances and pinned by `test/hitchart.test.js` — the pin is the only
+  defence against a feed change silently shifting every dot. `throughHalfIndex`
+  clamps to `halfIndex <= revealedThrough`, one half tighter than the pre-pitch
+  selectors, because a batted ball is the result rather than the staging for one
+  (ADR-0051). A park that sends no `hitData` yields an empty array and the card
+  renders nothing.
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches

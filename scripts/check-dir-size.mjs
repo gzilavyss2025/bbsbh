@@ -298,7 +298,7 @@ const BUDGETS = {
   // 89 -> 90 for `68-around-the-game.css`: ONE sheet for all FIVE pages in
   // src/screens/around-the-game/. Five partials would have cost 94 here and hit the
   // shared-chunk ordering trap src/index.css's header records.
-  'src/styles': 90,
+  'src/styles': 91,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -352,7 +352,7 @@ const BUDGETS = {
   // one module answers "this club's fifty splits", the other "this split's
   // thirty clubs", and merging them would put a page-sized fan-out fetch in the
   // module every Numbers tab loads. Flat for the manifest reason above.
-  'src/api': 98,
+  'src/api': 99,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly

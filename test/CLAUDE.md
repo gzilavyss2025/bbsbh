@@ -44,6 +44,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | graceful-degradation.test.js | 6 | select.js, linescore.js, derive.js, pitchers.js, defense.js, battingorder.js, enteringHalf.js | MiLB sparse-feed crash safety |
 | half-feed-note-order.test.js | 6 | src/api/playbyplay.js (halfInningFeed, eventTypes) | Same-play notes render in the feed's own playEvents order, not stoppages-then-baserunning; delay advisories reach the feed while the lifecycle "Status Change" lines stay out |
 | header-theme.test.js | 11 | headerTheme.js, milbColors.js, contrast.js | Masthead theming + contrast guard |
+| hitchart.test.js | 15 | src/api/hitchart.js | The hit chart's data layer — the Gameday-coordinate projection (its scale pinned against the feed's own carry distances) and the reveal-clamped batted-ball walk |
 | identity-drawer-fields.test.js | 10 | screens/team/modules/identity/identityFields.js | The team hub gear's field model — which tiles a club offers, which store each row writes into (the logo-art row included), the browser-side contrast gate (ADR-0050) |
 | identity-overrides.test.js | 25 | src/lib/identity/*, api/identity.js | The runtime club-identity overlay: the closed field catalog, the merge rules, the seam that puts an override under a pure resolver, and the endpoint's write rule (ADR-0050) |
 | identity-lab-stores.test.js | 24 | tuningStore.js, teams.js, brandColors.js, saveStores.js, mlbColorRoles.js, dev-data-stores.mjs | /identity-lab data stores |

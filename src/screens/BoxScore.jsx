@@ -13,6 +13,7 @@ import { useAsync } from '../hooks/useAsync.js'
 import { SealBox } from '../components/SealBox.jsx'
 import { GuideLink } from '../components/chrome/GuideLink.jsx'
 import { WinProbChart } from '../components/charts/WinProbChart.jsx'
+import { HitChartCard } from './boxscore/HitChartCard.jsx'
 import { AbsRow } from '../components/gamehud/StatBox.jsx'
 import { PerformerCard } from '../components/player/PerformerCard.jsx'
 import { CalloutNote } from '../components/playbyplay/CalloutNote.jsx'
@@ -167,6 +168,7 @@ export function BoxScore({
               stampFacts={r.stampFacts}
               feed={feed}
               box={r.box}
+              battedBalls={r.battedBalls}
               stars={r.stars}
               potg={r.potg}
               potgHighlight={r.potgHighlight}
@@ -223,7 +225,7 @@ export function BoxScore({
 // that render out. It cannot render anything the un-memoized version would not
 // have: memo only skips a render whose props are identical, and it is still
 // mounted only from inside the SealBox reveal function (ADR-0002).
-const BoxScoreBody = memo(function BoxScoreBody({ feed, box, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
+const BoxScoreBody = memo(function BoxScoreBody({ feed, box, battedBalls, stars, potg, potgHighlight, highlights, winProbPoints, winProbBigPlays, winProbTreatment, insights, inningDigest, calloutNotes, managers, uniforms, scorebookWeather, onSection, stampFacts }) {
   const get = (label) =>
     box.gameInfo.find((r) => r.label === label)?.value ?? ''
   const u = box.umpires ?? {}
@@ -424,6 +426,7 @@ const BoxScoreBody = memo(function BoxScoreBody({ feed, box, stars, potg, potgHi
             <BoxDefense feed={feed} sideKey="home" theme={homeTheme} />
           </div>
         </div>
+        <HitChartCard battedBalls={battedBalls} box={box} venue={get('Venue').replace(/\.\s*$/, '')} />
         <GameInfo rows={box.footNotes} />
       </section>
 
