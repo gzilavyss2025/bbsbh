@@ -81,7 +81,7 @@ const STATIC_REPORT_ROUTES = [
   'logbook',
   'first-scorebook',
   'photos',
-  // The five broadcast reports (src/screens/reports/).
+  // The five broadcast reports (src/screens/around-the-game/).
   'attendance',
   'pace',
   'farm-system',

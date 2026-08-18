@@ -279,7 +279,7 @@ const GENERIC = {
   logbook: { eyebrow: 'GAME LOG', title: 'Game Log', sub: "A passport of the games you've scored — every stamp your own." },
   'first-scorebook': { eyebrow: 'MY FIRST SCOREBOOK', title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
   photos: { eyebrow: 'GAME PHOTOS', title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
-  // The broadcast reports (src/screens/reports/). Each sub says what the page
+  // The broadcast reports (src/screens/around-the-game/). Each sub says what the page
   // MEASURES rather than what it is called, because these four are the pages
   // whose names alone give a reader the least — "Pace of Play" could be a
   // rules explainer, and "The Gate" could be anything.

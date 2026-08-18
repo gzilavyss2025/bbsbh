@@ -332,7 +332,7 @@ don't run these by hand.
   Ships per-club aggregates only — month splits, day/night, weekend/weekday,
   top-drawing opponents, the extremes with their dates — never a per-game
   table; every rank, fill rate and league comparison is derived in
-  `src/api/reports/gate.js`. `--season=`/`--seasons=` for a past year. MLB
+  `src/api/around-the-game/gate.js`. `--season=`/`--seasons=` for a past year. MLB
   regular season, Final games only. Spoiler-free.
 - `gen-farm-system.mjs` → `public/data/farm-system.json` — the facts behind
   `/farm-system-rankings` (The Farm Report): every organisation's four full-season affiliates
@@ -346,7 +346,7 @@ don't run these by hand.
   `/api/v1/leagues?sportId={11..14}` first and then one `/api/v1/standings`
   per league. The Farm Index itself (the value curve, the level weights, the
   three-pillar composite) is NOT here: it lives in
-  `src/api/reports/farmSystem.js` where it is testable and visible, and the
+  `src/api/around-the-game/farmSystem.js` where it is testable and visible, and the
   research behind every constant is `docs/farm-index.md`. Spoiler-free.
 - `gen-savant-percentiles.mjs` → `public/data/savant-percentiles.json` — season
   Statcast percentile ranks per player (`bat`/`pit`), keyed by personId, from

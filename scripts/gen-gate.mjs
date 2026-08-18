@@ -2,8 +2,8 @@
 // carries that nobody has ever put on a page here: HOW MANY PEOPLE CAME, and
 // HOW LONG IT TOOK. One sweep, two report pages:
 //
-//   /attendance  ("The Gate")  — src/screens/reports/AttendancePage.jsx
-//   /pace-of-play ("The Clock") — src/screens/reports/PacePage.jsx
+//   /attendance  ("The Gate")  — src/screens/around-the-game/AttendancePage.jsx
+//   /pace-of-play ("The Clock") — src/screens/around-the-game/PacePage.jsx
 //
 // SOURCE, and why this generator is cheap where gen-attendance.mjs is not.
 // gen-attendance.mjs fetches ONE BOXSCORE PER GAME to read the `Att` row out
@@ -27,7 +27,7 @@
 //
 // WHAT IT SHIPS: FACTS, NOT THE INDEX. Every ranking, fill rate, percentile
 // and league-average comparison the two pages draw is computed in
-// src/api/reports/gate.js, which is pure and unit-tested (test/gate.test.js).
+// src/api/around-the-game/gate.js, which is pure and unit-tested (test/gate.test.js).
 // This file's only job is to reduce ~2,400 games into per-club aggregates
 // small enough to ship as one static file, which is the build-time-fetch
 // pattern in src/api/CLAUDE.md.
@@ -305,7 +305,7 @@ export function leagueFor(rows) {
     // standard error is this over the square root of its games played, and
     // with ~19 minutes of per-game spread over ~125 games that is about 1.7
     // minutes per club — big enough that most of a thirty-club ranking is
-    // inside its own noise. src/api/reports/gate.js turns it into the interval
+    // inside its own noise. src/api/around-the-game/gate.js turns it into the interval
     // the page prints; shipping the ranking without it was the single worst
     // thing about the first version of that page.
     paceSd: min.length > 1 ? stdev(min) : null,

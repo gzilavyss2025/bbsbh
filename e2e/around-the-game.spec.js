@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js'
 
-// The four broadcast report boards (src/screens/reports/), checked at PHONE
+// The four broadcast report boards (src/screens/around-the-game/), checked at PHONE
 // WIDTH, which is the only width where the thing under test exists.
 //
 // WHY THIS SPEC EXISTS. Every one of these boards is wider than a phone and

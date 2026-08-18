@@ -25,7 +25,7 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 //      worth closing everywhere, not a reason to leave it open here too.
 //
 //   3. STICKY. The cell pins to the left edge so the numbers scroll UNDER it
-//      (styles/68-broadcast-reports.css), which is the pattern the Standings
+//      (styles/68-around-the-game.css), which is the pattern the Standings
 //      board already uses — including its two hard-won caveats, both worth
 //      knowing before touching this markup: Safari drops position:sticky on a
 //      table cell whose own `display` is not `table-cell`, and the shared

@@ -151,20 +151,20 @@ const TeamRecordsPage = lazyNamed(
   () => import('./screens/TeamRecordsPage.jsx'),
   'TeamRecordsPage',
 )
-// The four broadcast report pages (src/screens/reports/). Lazy like every
+// The four broadcast report pages (src/screens/around-the-game/). Lazy like every
 // other screen, and they SHARE one stylesheet
-// (styles/68-broadcast-reports.css) which each of them imports — see that
+// (styles/68-around-the-game.css) which each of them imports — see that
 // file's header for why one partial rather than four.
 const AttendancePage = lazyNamed(
-  () => import('./screens/reports/AttendancePage.jsx'),
+  () => import('./screens/around-the-game/AttendancePage.jsx'),
   'AttendancePage',
 )
-const PacePage = lazyNamed(() => import('./screens/reports/PacePage.jsx'), 'PacePage')
+const PacePage = lazyNamed(() => import('./screens/around-the-game/PacePage.jsx'), 'PacePage')
 const FarmSystemPage = lazyNamed(
-  () => import('./screens/reports/FarmSystemPage.jsx'),
+  () => import('./screens/around-the-game/FarmSystemPage.jsx'),
   'FarmSystemPage',
 )
-const BullpenPage = lazyNamed(() => import('./screens/reports/BullpenPage.jsx'), 'BullpenPage')
+const BullpenPage = lazyNamed(() => import('./screens/around-the-game/BullpenPage.jsx'), 'BullpenPage')
 const ManagerPage = lazyNamed(() => import('./screens/ManagerPage.jsx'), 'ManagerPage')
 const GameNotesDebugPage = lazyNamed(
   () => import('./screens/GameNotesDebugPage.jsx'),

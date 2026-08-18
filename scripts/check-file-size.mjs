@@ -100,7 +100,7 @@ const BUDGETS = {
   // left here is PassportBook/PassportPage/PassportCover's own art, including
   // the three league-mark board colours.
   'src/styles/49-passport-book.css': 1100, // 1036
-  // ONE sheet for the four pages in src/screens/reports/, which is why it is
+  // ONE sheet for the four pages in src/screens/around-the-game/, which is why it is
   // over the line: four partials would cost src/styles four directory slots
   // and would hit the shared-chunk ordering trap src/index.css's header
   // records. It briefly dropped back under 600 when the Rundown's grid was
@@ -112,7 +112,7 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
-  'src/styles/68-broadcast-reports.css': 700, // 608
+  'src/styles/68-around-the-game.css': 700, // 608
   // The directory-budget table itself. Every entry in it carries an inline
   // rationale BY DESIGN — that is the whole convention, and it means the file
   // grows a few lines on any commit that adds a deliberate exception. It was

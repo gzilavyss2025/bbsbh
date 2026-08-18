@@ -295,8 +295,8 @@ const BUDGETS = {
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
   //
-  // 89 -> 90 for `68-broadcast-reports.css`: ONE sheet for all FIVE pages in
-  // src/screens/reports/. Five partials would have cost 94 here and hit the
+  // 89 -> 90 for `68-around-the-game.css`: ONE sheet for all FIVE pages in
+  // src/screens/around-the-game/. Five partials would have cost 94 here and hit the
   // shared-chunk ordering trap src/index.css's header records.
   'src/styles': 90,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team

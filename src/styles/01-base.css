@@ -47,7 +47,7 @@
        `.favteamsheet__accountpitch` (the section title + button stay uppercase)
      - the broadcast report pages' method notes — `.method p` (the "how this
        was counted" prose closing each of the four pages under
-       `src/screens/reports/`; the `.method h2` heading above it stays shouted,
+       `src/screens/around-the-game/`; the `.method h2` heading above it stays shouted,
        same split as the Team Score modal below)
      - the About page body copy — `.aboutpage .caps-exempt`
      - the signed-out Game Log pitch — `.logbooklanding .caps-exempt`

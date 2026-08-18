@@ -1,7 +1,7 @@
-import '../../styles/68-broadcast-reports.css'
+import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
-import { fetchWorkload, bullpenBoard, leagueBullpen, BULLPEN_SORTS } from '../../api/reports/bullpen.js'
-import { loadClubs, clubName, clubShort } from '../../api/reports/clubs.js'
+import { fetchWorkload, bullpenBoard, leagueBullpen, BULLPEN_SORTS } from '../../api/around-the-game/bullpen.js'
+import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { toApiDate, humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -10,11 +10,11 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
-import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
-import { ClubCell } from '../../components/reports/ClubCell.jsx'
-import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
-import { BarCell, StatusMeter } from '../../components/reports/ReportBar.jsx'
+import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
+import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { BarCell, StatusMeter } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE PEN — all thirty bullpens on one board, tonight.
 //
@@ -80,7 +80,7 @@ export function BullpenPage() {
     <div className="screen">
       <SiteHeader />
 
-      <ReportMasthead
+      <BroadcastMasthead
         eyebrow="The Pen"
         title="Bullpen Availability"
         dek="All thirty bullpens on one board, run through the same workload rules a broadcast
@@ -128,7 +128,7 @@ export function BullpenPage() {
             />
           </SlabRow>
 
-          <ReportSection
+          <BroadcastSection
             title="The board"
             note="The meter is each staff split three ways — available, limited, likely down.
                   A pen reading mostly red has usually had a week of one-run games, extra
@@ -211,9 +211,9 @@ export function BullpenPage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
-          <ReportSection
+          <BroadcastSection
             title="Arm by arm"
             note="One club’s pen in full, most-worked first, with the rule that flagged each
                   name. Pick from the ten most-taxed staffs above, or your own club is opened
@@ -272,7 +272,7 @@ export function BullpenPage() {
                 </table>
               </BoardScroller>
             )}
-          </ReportSection>
+          </BroadcastSection>
 
           <section className="method">
             <h2>How availability is decided</h2>

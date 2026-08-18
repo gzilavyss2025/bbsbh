@@ -1,4 +1,4 @@
-import '../../styles/68-broadcast-reports.css'
+import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
 import {
   fetchGate,
@@ -8,8 +8,8 @@ import {
   latestSeason,
   monthsIn,
   asClock,
-} from '../../api/reports/gate.js'
-import { loadClubs, clubName, clubShort } from '../../api/reports/clubs.js'
+} from '../../api/around-the-game/gate.js'
+import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -17,11 +17,11 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
-import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
-import { ClubCell } from '../../components/reports/ClubCell.jsx'
-import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
-import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
+import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
+import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE CLOCK — how long a club's games take.
 //
@@ -43,7 +43,7 @@ import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
 // zero-based bar draws thirty identical bars and hides the only thing worth
 // seeing. The floor is the league's own fastest club.
 //
-// SPOILER-FREE. A clock reading carries no result (api/reports/gate.js).
+// SPOILER-FREE. A clock reading carries no result (api/around-the-game/gate.js).
 
 const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 
@@ -138,7 +138,7 @@ export function PacePage() {
     <div className="screen">
       <SiteHeader />
 
-      <ReportMasthead
+      <BroadcastMasthead
         eyebrow="The Clock"
         title="Pace of Play"
         dek="How long each club’s games actually take — home and road together, because game
@@ -206,7 +206,7 @@ export function PacePage() {
             />
           </SlabRow>
 
-          <ReportSection
+          <BroadcastSection
             title="The board"
             note={
               <>
@@ -328,9 +328,9 @@ export function PacePage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
-          <ReportSection
+          <BroadcastSection
             title="The extremes"
             note="Each club’s longest and shortest game of the season. A four-hour game is
                   almost always extra innings; a two-hour game is almost always two starters
@@ -379,7 +379,7 @@ export function PacePage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
           <section className="method">
             <h2>How this was counted</h2>

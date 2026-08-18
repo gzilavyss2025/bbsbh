@@ -1,4 +1,4 @@
-// The Farm Index (src/api/reports/farmSystem.js) and the join that feeds it
+// The Farm Index (src/api/around-the-game/farmSystem.js) and the join that feeds it
 // (scripts/gen-farm-system.mjs).
 //
 // A composite ranking is the easiest kind of number to ship wrong, because a
@@ -22,7 +22,7 @@ import {
   LEVEL_WEIGHTS,
   PILLARS,
   WEIGHT_PRESETS,
-} from '../src/api/reports/farmSystem.js'
+} from '../src/api/around-the-game/farmSystem.js'
 
 // ---- the generator's join ----
 

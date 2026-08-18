@@ -1,5 +1,5 @@
 // The two halves of the gate/pace pipeline: what scripts/gen-gate.mjs reduces
-// a schedule response down to, and what src/api/reports/gate.js turns those
+// a schedule response down to, and what src/api/around-the-game/gate.js turns those
 // aggregates into for The Gate and The Clock.
 //
 // The assertions worth having here are the ones about DENOMINATORS and about
@@ -18,7 +18,7 @@ import {
   capacityFor,
   latestSeason,
   monthsIn,
-} from '../src/api/reports/gate.js'
+} from '../src/api/around-the-game/gate.js'
 
 const game = (over = {}) => ({
   gamePk: 1,

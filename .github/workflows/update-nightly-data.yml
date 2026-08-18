@@ -214,7 +214,7 @@ jobs:
         id: attendance
         continue-on-error: true
         run: node scripts/gen-attendance.mjs
-      # The Gate + The Clock (src/screens/reports/). One stateless sweep of the
+      # The Gate + The Clock (src/screens/around-the-game/). One stateless sweep of the
       # schedule feed's gameInfo hydration — no SQLite and no incremental
       # window, so it rebuilds the whole season each night in about a dozen
       # requests. Deliberately separate from the Attendance step above, which

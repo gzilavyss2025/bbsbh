@@ -25,7 +25,7 @@ import { BROADCAST_STRAND } from '../../lib/reportPages.js'
 // It used to read "Tally Reports", which quietly claimed the word for four
 // pages while Standings, League Leaders and Umpire Rankings — all reports —
 // sat under other headings. See that file for the argument.
-export function ReportMasthead({ eyebrow, title, dek, meta = [] }) {
+export function BroadcastMasthead({ eyebrow, title, dek, meta = [] }) {
   return (
     <header className="bcast">
       <div className="bcast__bar" aria-hidden="true" />
@@ -55,7 +55,7 @@ export function ReportMasthead({ eyebrow, title, dek, meta = [] }) {
 // A section rule with a title — the "coming up next" divider between blocks of
 // a report. Kept here rather than in each page so the six pages cannot each
 // invent their own heading treatment.
-export function ReportSection({ title, note, children }) {
+export function BroadcastSection({ title, note, children }) {
   return (
     <section className="bcast-sec">
       <h2 className="bcast-sec__title">{title}</h2>

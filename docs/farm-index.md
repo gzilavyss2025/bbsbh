@@ -1,7 +1,7 @@
 # The Farm Index
 
 The research pass behind `/farm-system-rankings` (The Farm Report). The arithmetic lives in
-`src/api/reports/farmSystem.js`; the facts it runs on are shipped nightly by
+`src/api/around-the-game/farmSystem.js`; the facts it runs on are shipped nightly by
 `scripts/gen-farm-system.mjs`. This document is the *why* — the part a reader
 who disagrees with the ranking is entitled to argue with.
 

@@ -145,7 +145,7 @@ const PAIRINGS = [
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
   // green tint (TradeCard.jsx's ConsiderationRow, tone="cash").
   { fg: 'field-deep', bg: 'field-soft', min: TEXT, note: 'Trade Deadline cash consideration icon' },
-  // The broadcast report package (styles/68-broadcast-reports.css). Its
+  // The broadcast report package (styles/68-around-the-game.css). Its
   // masthead is the one surface in the app that sets text on the seam red
   // rather than on paper or on ink, and the strand chip's knockout is the pair
   // that has to hold — 5.05:1, which is real but is the thinnest margin in

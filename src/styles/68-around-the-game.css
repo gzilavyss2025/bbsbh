@@ -1,6 +1,6 @@
 /* ============================================================
    BROADCAST REPORTS — the shared graphics package for the four
-   standalone report pages under src/screens/reports/:
+   standalone report pages under src/screens/around-the-game/:
    The Gate, The Clock, The Farm Report, The Pen.
 
    ONE STYLESHEET FOR FOUR PAGES, deliberately. Each is a lazy
@@ -341,7 +341,7 @@
    x = -261 once scrolled right, leaving eighteen rows of unattributable
    numbers. 26-player-page.css:812 writes the trap up in full; `.standings-wrap`
    is the same reset for the Standings board. Invisible above 768px, where
-   there is no overflow to scroll — e2e/reports.spec.js pins it at 390. */
+   there is no overflow to scroll — e2e/around-the-game.spec.js pins it at 390. */
 .ledger-wrap .rpt {
   overflow: visible;
 }
@@ -387,7 +387,7 @@
    position:sticky on a cell whose own display is not table-cell, which the
    shared `.standings td.team { display: flex }` sets — so the cell goes back to
    a table cell and the flex moves onto .rpt__club inside it
-   (components/reports/ClubCell.jsx).
+   (components/around-the-game/ClubCell.jsx).
 
    The body cell is a `<th scope="row">` here rather than a `<td>`, which is why
    these selectors name both: it is the cell that NAMES its row for a screen

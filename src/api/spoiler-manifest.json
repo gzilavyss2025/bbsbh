@@ -601,19 +601,19 @@
       "class": "spoiler-free",
       "why": "Static rehab.json — league-wide rehab assignments. Roster state, no score."
     },
-    "reports/bullpen.js": {
+    "around-the-game/bullpen.js": {
       "class": "spoiler-free",
       "why": "Re-runs api/workload.js’s availability rules across all thirty clubs. Inherits that module’s classification unchanged: completed appearances only, as-of date excludes today, so no in-progress line can leak. No SealBox."
     },
-    "reports/clubs.js": {
+    "around-the-game/clubs.js": {
       "class": "spoiler-free",
       "why": "Club identity (name, abbreviation, division) off the static teams.json, so the report boards can join a bare teamId to a name. Identity data only. No SealBox."
     },
-    "reports/farmSystem.js": {
+    "around-the-game/farmSystem.js": {
       "class": "spoiler-free",
       "why": "Static farm-system.json — minor-league affiliate season records and published prospect ranks, aggregates over completed games in another league (ADR-0034: a stat line is not a score). Computes the Farm Index; touches no MLB game. No SealBox."
     },
-    "reports/gate.js": {
+    "around-the-game/gate.js": {
       "class": "spoiler-free",
       "why": "Static gate.json — per-club home attendance and game DURATION, both season aggregates over Final games. A crowd count and a clock reading carry no result, same footing as the weather string and the umpire crew the app has always shown live. No SealBox."
     },

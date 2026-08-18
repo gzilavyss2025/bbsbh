@@ -1,4 +1,4 @@
-import '../../styles/68-broadcast-reports.css'
+import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
 import {
   fetchFarmSystem,
@@ -7,8 +7,8 @@ import {
   PILLARS,
   WEIGHT_PRESETS,
   LEVEL_WEIGHTS,
-} from '../../api/reports/farmSystem.js'
-import { loadClubs, clubName, clubShort } from '../../api/reports/clubs.js'
+} from '../../api/around-the-game/farmSystem.js'
+import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -16,17 +16,17 @@ import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { PlayerLink } from '../../components/player/PlayerLink.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
-import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
-import { ClubCell } from '../../components/reports/ClubCell.jsx'
-import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
-import { BarCell } from '../../components/reports/ReportBar.jsx'
+import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
+import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { BarCell } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE FARM REPORT — one number for how good an organisation's farm system is,
 // and an honest account of what that number can and cannot see.
 //
 // The arithmetic, the research behind every weight, and the reasons the
-// winning pillar is small all live in api/reports/farmSystem.js and
+// winning pillar is small all live in api/around-the-game/farmSystem.js and
 // docs/farm-index.md. This file is the presentation, and it has one editorial
 // job the maths cannot do: make the reader aware that the ORDER OF THE LEAGUE
 // IS A CHOICE. That is why the weight presets are a control on the page rather
@@ -96,7 +96,7 @@ export function FarmSystemPage() {
     <div className="screen">
       <SiteHeader />
 
-      <ReportMasthead
+      <BroadcastMasthead
         eyebrow="The Farm Report"
         title="Farm System Index"
         dek="Thirty organisations, scored on the talent they hold, the games their affiliates
@@ -149,7 +149,7 @@ export function FarmSystemPage() {
             />
           </SlabRow>
 
-          <ReportSection
+          <BroadcastSection
             title="The board"
             note="Each bar is the index itself, split into the three pillars that made it. Change
                   the weighting and watch the order move — that movement is the honest content of
@@ -238,9 +238,9 @@ export function FarmSystemPage() {
                 one number.
               </p>
             )}
-          </ReportSection>
+          </BroadcastSection>
 
-          <ReportSection
+          <BroadcastSection
             title="Inside a system"
             note="Pick an organisation to see the four full-season clubs the index weighed and
                   every ranked name it holds."
@@ -259,7 +259,7 @@ export function FarmSystemPage() {
               ))}
             </div>
             <OrgDetail row={selected} clubs={clubs} />
-          </ReportSection>
+          </BroadcastSection>
 
           <section className="method">
             <h2>How the index is built</h2>

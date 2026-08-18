@@ -67,7 +67,9 @@ export const PAGE_GROUPS = [
   {
     id: 'around-the-game',
     label: BROADCAST_STRAND,
-    // The broadcast package (src/screens/reports/, styles/68-broadcast-reports.css).
+    // The broadcast package (src/screens/around-the-game/,
+    // styles/68-around-the-game.css — those paths carry this group's name, not
+    // this FILE's, for the collision reason spelled out at BROADCAST_STRAND).
     // Its own group rather than four more rows under "This season" for two
     // reasons. They are a SET — one graphics package, one voice, one nightly
     // pair of data files behind three of them — and a reader who finds one is
@@ -196,7 +198,7 @@ export const FOOTER_TRAIL = [
   TOOLS_GROUP.pages.find((page) => page.path === '/about'),
 ]
 
-// The four broadcast reports, ADDRESS -> route name (src/screens/reports/).
+// The four broadcast reports, ADDRESS -> route name (src/screens/around-the-game/).
 // Their addresses live here rather than in route.js because this file is
 // already the single source of truth for what a report page is and where it
 // lives, and the group above lists these same four: a table beside those rows

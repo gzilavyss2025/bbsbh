@@ -1,4 +1,4 @@
-// The league-wide bullpen board (src/api/reports/bullpen.js).
+// The league-wide bullpen board (src/api/around-the-game/bullpen.js).
 //
 // It re-runs api/workload.js's availability rules across all thirty clubs, so
 // the RULES themselves are not retested here — they belong to that module. What
@@ -8,7 +8,7 @@
 // is the one claim the page makes in its own words.
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { bullpenFor, bullpenBoard, leagueBullpen } from '../src/api/reports/bullpen.js'
+import { bullpenFor, bullpenBoard, leagueBullpen } from '../src/api/around-the-game/bullpen.js'
 
 const AS_OF = '2026-08-17'
 

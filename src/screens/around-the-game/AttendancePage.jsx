@@ -1,7 +1,7 @@
-import '../../styles/68-broadcast-reports.css'
+import '../../styles/68-around-the-game.css'
 import { useMemo, useState } from 'react'
-import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn } from '../../api/reports/gate.js'
-import { loadClubs, clubName, clubShort } from '../../api/reports/clubs.js'
+import { fetchGate, gateBoard, GATE_SORTS, latestSeason, monthsIn } from '../../api/around-the-game/gate.js'
+import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
 import { humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
@@ -9,11 +9,11 @@ import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
 import { SiteHeader } from '../../components/chrome/SiteHeader.jsx'
 import { AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
-import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
-import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
-import { ClubCell } from '../../components/reports/ClubCell.jsx'
-import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
-import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
+import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
+import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
+import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
+import { BarCell, TrendStrip } from '../../components/around-the-game/BroadcastBar.jsx'
 
 // THE GATE — who is actually going to the ballpark.
 //
@@ -33,7 +33,7 @@ import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
 // curve as a summer either arrives or does not, weekend against weekday, and
 // which visiting club a park fills up for.
 //
-// SPOILER-FREE. A crowd count is not a score (api/reports/gate.js).
+// SPOILER-FREE. A crowd count is not a score (api/around-the-game/gate.js).
 
 const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 const pct1 = (n) => (n == null ? '—' : `${n.toFixed(1)}%`)
@@ -90,7 +90,7 @@ export function AttendancePage() {
     <div className="screen">
       <SiteHeader />
 
-      <ReportMasthead
+      <BroadcastMasthead
         eyebrow="The Gate"
         title="Attendance"
         dek="Every club’s home gate, ranked by the share of the park that fills rather than by
@@ -143,7 +143,7 @@ export function AttendancePage() {
             />
           </SlabRow>
 
-          <ReportSection
+          <BroadcastSection
             title="The board"
             note="Bars are scaled across the league’s own range on the sorted column, not from
                   zero — off a zero floor thirty clubs draw as thirty identical bars. Fill rate
@@ -210,9 +210,9 @@ export function AttendancePage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
-          <ReportSection
+          <BroadcastSection
             title="When the house fills"
             note="Every club draws better on a Saturday than on a Tuesday. What separates them
                   is by how much — a club whose weekend and weekday lines nearly meet sells the
@@ -247,9 +247,9 @@ export function AttendancePage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
-          <ReportSection
+          <BroadcastSection
             title="Who fills the place"
             note="The three visiting clubs each park draws best for, by average gate. Three
                   dates is a small sample and a single sold-out weekend can carry one — read
@@ -287,7 +287,7 @@ export function AttendancePage() {
                 </tbody>
               </table>
             </BoardScroller>
-          </ReportSection>
+          </BroadcastSection>
 
           <section className="method">
             <h2>How this was counted</h2>

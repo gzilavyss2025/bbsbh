@@ -1,11 +1,11 @@
 // Regenerates public/data/farm-system.json — the FACTS behind
-// /farm-system-rankings ("The Farm Report", src/screens/reports/FarmSystemPage.jsx): every organisation's
+// /farm-system-rankings ("The Farm Report", src/screens/around-the-game/FarmSystemPage.jsx): every organisation's
 // four full-season affiliates with their won-lost records, and every ranked
 // prospect that organisation holds.
 //
 // It ships facts only. The Farm Index itself — the value curve over prospect
 // ranks, the level weights on affiliate winning, the readiness share and the
-// three-pillar composite — is computed in src/api/reports/farmSystem.js, where
+// three-pillar composite — is computed in src/api/around-the-game/farmSystem.js, where
 // it is pure, unit-tested (test/farm-system.test.js) and, crucially, VISIBLE:
 // an index whose weights are buried in a nightly script is an index nobody can
 // argue with, and this one should be arguable. See docs/farm-index.md for the
