@@ -304,12 +304,15 @@ const BUDGETS = {
   // the rules beside the component also leaves them out of unrelated routes.
   //
   // 91 -> 92 for `69-pitch-arsenal.css`: the player page's redressed Pitches
-  // card and its times-through-the-order split. Same reason as the line above —
-  // 26-player-page.css has no headroom left, and the card is one lazy route.
+  // card and its times-through-the-order split. Same reason as the line above:
+  // 26-player-page.css has no headroom left under its own file-size ceiling,
+  // so the card's rules had to land in a partial of their own.
   //
   // 92 -> 93 for `69-hit-chart.css`: the spray chart's own partial. It shares
-  // the 69 prefix with the file above, which is harmless — neither is
-  // @imported by index.css, so no cascade order depends on the number.
+  // the 69 prefix with the file above — two branches picked the next free
+  // integer independently, the same harmless collision 62- and 65- already
+  // carry. index.css names every partial in its own explicit order, so the
+  // prefix is a label, not a cascade position.
   'src/styles': 93,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.

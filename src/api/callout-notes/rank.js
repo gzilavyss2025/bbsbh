@@ -15,7 +15,7 @@
 // gen-callouts.mjs deliberately skips and reads a later cutoff — measured up
 // to seven games apart on one club's "leading after the 8th". Joining it would
 // rank a number the note never printed. A client join would also cost 30 shard
-// fetches on the in-game path (see teamRecordRankings.js's own header).
+// fetches on the in-game path (see situationalRecordRankings.js's own header).
 //
 // SPOILER-FREE. A rank is a season aggregate over Final games, exactly like
 // the record it decorates, so it rides inside whichever `revealedThrough`
