@@ -128,7 +128,15 @@ one you need:
 
 `reports/` is the fourth subdirectory and the odd one out: it holds no new
 fetching and no new spoiler footing, only the four spoiler-FREE readers behind
-the four broadcast report pages (`src/screens/reports/`). Two of them read files
+the four pages the app shows a reader under **Around the game**
+(`src/screens/reports/`). MIND THE TWO SENSES OF "REPORT" HERE. `reportPages.js`,
+`ReportFooter.jsx` and `check-report-pages.mjs` predate these pages and mean
+EVERY standalone page — Standings and League Leaders included. These directories
+mean only the broadcast four. The reader-facing label was deliberately changed
+away from "the reports" for exactly that collision (see `lib/reportPages.js`);
+the code paths kept the older word rather than churn every import, so read a
+`reports/` path as "the broadcast four" and a `reportPages` one as "all of
+them". Two of them read files
 their own generators ship (`gate.js`, `farmSystem.js`); one re-runs an existing
 module's rules across the whole league (`bullpen.js` over `workload.js`); one is
 the club-name join all three share (`clubs.js`). The rule that directory adds is

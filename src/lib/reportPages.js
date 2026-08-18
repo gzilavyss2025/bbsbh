@@ -24,6 +24,20 @@
 // "what's happening now" → "who's coming up" → "what already happened" →
 // "your own things", with the two menu-only groups (guides, tools) last.
 
+// WHAT THE BROADCAST FOUR ARE CALLED, in the menu, in the footer, on /more,
+// and on each page's own masthead — one string, because those are four places
+// and this file exists because copies drift.
+//
+// NOT "the reports". That was the first name and it was wrong: half the pages
+// on this page's other groups are reports too — Standings, League Leaders,
+// Team Records, Umpire Rankings and Milestone Watch are all reports on a
+// season, and a group that claims the word for four of them implies the rest
+// are something else. What actually separates these four is their SUBJECT, not
+// their form: crowds, clock, pipeline and arm workload are the conditions
+// around a game rather than its result. So the label names that, and reads in
+// the same plain register as "This season" and "History" beside it.
+export const BROADCAST_STRAND = 'Around the game'
+
 // The four groups whose pages are report pages proper — the ones every
 // footer lists. Guides and Tools are NOT here; see below for why.
 export const PAGE_GROUPS = [
@@ -51,12 +65,12 @@ export const PAGE_GROUPS = [
     ],
   },
   {
-    id: 'reports',
-    label: 'The reports',
+    id: 'around-the-game',
+    label: BROADCAST_STRAND,
     // The broadcast package (src/screens/reports/, styles/68-broadcast-reports.css).
-    // Its own group rather than five more rows under "This season" for two
+    // Its own group rather than four more rows under "This season" for two
     // reasons. They are a SET — one graphics package, one voice, one nightly
-    // pair of data files behind four of them — and a reader who finds one is
+    // pair of data files behind three of them — and a reader who finds one is
     // very likely to want the others. And they answer a different KIND of
     // question than the rest of that group: Standings and League Leaders say
     // who is winning, while these say who is showing up, how long it takes,
