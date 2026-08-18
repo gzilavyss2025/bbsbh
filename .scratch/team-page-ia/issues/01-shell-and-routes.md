@@ -1,6 +1,6 @@
 # 01 — Shell, tab bar, shelf, and the five routes
 
-**Status:** ready-for-agent
+**Status:** resolved
 **Type:** task
 **Blocked by:** nothing — starts immediately
 **Runs alongside:** issue 02 (disjoint files, safe in parallel)
@@ -125,3 +125,7 @@ apart so parallel edits merge cleanly.
 - The old `/team/{id}` page is untouched and still renders in full.
 - `npm run lint` and `npm test` pass.
 - Handoff includes `http://localhost:<port>/team/158/roster?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

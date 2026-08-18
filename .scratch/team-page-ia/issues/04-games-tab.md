@@ -1,6 +1,6 @@
 # 04 — Games tab
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 01, 02 (both must be merged to `main` first)
 **Runs alongside:** issues 03, 05, 06
@@ -68,3 +68,7 @@ this at length; keep it, and keep passing the filtered list.
   no game after the cutoff shows a result.
 - `npm run lint` and `npm test` pass.
 - Handoff includes `http://localhost:<port>/team/158/games?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

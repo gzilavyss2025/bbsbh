@@ -1,6 +1,6 @@
 # 03 — Roster tab
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 01, 02 (both must be merged to `main` first)
 **Runs alongside:** issues 04, 05, 06
@@ -69,3 +69,7 @@ carry them across intact:
   PR roughly how many requests the tab makes.
 - `npm run lint` and `npm test` pass.
 - Handoff includes `http://localhost:<port>/team/158/roster?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

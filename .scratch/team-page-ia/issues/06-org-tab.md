@@ -1,6 +1,6 @@
 # 06 — Org tab, with the index grid
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 01, 02 (both must be merged to `main` first)
 **Runs alongside:** issues 03, 04, 05
@@ -81,3 +81,7 @@ a dated page never counts a game past its cutoff. Keep that filter.
 - `npm run lint` and `npm test` pass.
 - Handoff includes both `http://localhost:<port>/team/158/org?nointro` and a
   MiLB club's org tab.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

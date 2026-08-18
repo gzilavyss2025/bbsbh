@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 
 # Highlights cascade — schema extraction, nightly per-team precompute, blocklist hook
 
@@ -419,3 +419,7 @@ can't be filed anywhere and are dropped rather than guessed at.
 - The four clips per window with no `playerId` (team-level plays like "Pirates'
   around-the-horn double play") land on a team rail but never a player rail.
   That falls out correctly; worth not treating as a bug in issue 04.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.

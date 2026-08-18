@@ -870,9 +870,13 @@ catches geometry bugs invisible at phone size.
 1. **The Clerk `user.deleted` webhook** (§4.5). Until it exists, deleting a Clerk
    account without erasing first leaves unreachable-but-unerased keys. The copy
    states the ordering; the ADR records the gap.
+   **Resolved, no action (2026-08-18):** deliberate architectural call — no
+   webhook infra for a solo project. Not worth filing as a GitHub issue.
 2. **`reveal:index:{userId}` growth.** A heavy user across many seasons. Cap and
    prune, or accept a documented bound — decide in phase 2 with the number in
    front of you.
+   **Resolved, no action (2026-08-18):** already decided at §11.7 below —
+   deliberately left unbounded so "erase everywhere" stays complete.
 3. **The "Game log" name collision** (docs/game-log.md §2) is untouched by this
    program and stays open. My Tally must not make it worse: the profile's ledger
    row says **Game Log** and links to `/logbook`, never "your game log" as a

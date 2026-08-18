@@ -1,3 +1,5 @@
+> **2026-08-18**: shared-device leak (item 1 below) filed as gzilavyss2025/bbsbh#771.
+
 # My Tally — program handoff
 
 Multi-phase program. **Phases 1–3 are complete.** Phases 4–5 continue in this

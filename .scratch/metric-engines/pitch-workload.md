@@ -1,3 +1,5 @@
+> **2026-08-18**: W1 (rolling buckets) + W5 (availability board) filed as gzilavyss2025/bbsbh#770.
+
 # Weighted pitch-count workload (rolling 1/3/10-game load)
 
 Status: scoping (no implementation)

@@ -1,6 +1,6 @@
 # 07 — The Overview, and retiring the old page
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 01, 02, 03, 04, 05, 06 (all merged to `main`)
 **Runs:** alone. Nothing else may be in flight on the team page.
@@ -85,3 +85,7 @@ parameterised one.
   cutoff on every tab.
 - `npm run lint`, `npm test` and `npm run build` pass.
 - Handoff includes `http://localhost:<port>/team/158?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.
