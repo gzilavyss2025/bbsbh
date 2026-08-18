@@ -35,8 +35,9 @@ import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
-import { fetchPitchArsenalPool, similarPitchersFor } from './pitchArsenal.js'
+import { arsenalTtoView, fetchPitchArsenalFor, fetchPitchArsenalPool, heatView, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookieRecord } from './rookies.js'
+import { fetchPlayerContract } from './person/contracts.js'
 import {
   personBio,
   signedFallback,
@@ -172,7 +173,7 @@ export async function loadPlayer(id, asOf) {
   // same-origin static file, session-cached after the first read anywhere in
   // the app (TeamInfo's opposing-starter card already asks for it), and the
   // source of the "Pitches like" card's comparison pool.
-  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookieInfo] = await Promise.all([
+  const [person, txns, warCurrent, warHistory, vsTeamData, savantData, rookieInfo, contract] = await Promise.all([
     fetchPerson(id),
     fetchTransactions(id, endDate),
     fetchWarData(),
@@ -180,6 +181,7 @@ export async function loadPlayer(id, asOf) {
     fetchVsTeamSplitsForPlayer(id),
     fetchSavantPercentiles(),
     fetchRookieRecord(id),
+    asOf ? Promise.resolve(null) : fetchPlayerContract(id),
   ])
   if (!person) return null
   const bio = personBio(person)
@@ -344,6 +346,17 @@ export async function loadPlayer(id, asOf) {
           group === 'pitching'
             ? similarPitchersFor(await fetchPitchArsenalPool(tileSportId === 1), id)
             : similarHittersFor(savantData, id)
+        // The Pitches card's heat band — his season count of 100+ mph pitches
+        // and his hardest reading. Same attach-after-buildBlock pattern, and
+        // the same nightly file the "Pitches like" pool is cut from, but the
+        // ONE-PITCHER shard rather than the whole level: the band is about
+        // him alone, so it pays for ~12 KB instead of the pool's 149 KB.
+        // Null for a hitter, and null for any arm under the century floor.
+        // ONE fetch of his shard feeds both: the heat band and the
+        // times-through split are different reads of the same ~12 KB file.
+        const arsenalShard = group === 'pitching' ? await fetchPitchArsenalFor(id) : null
+        block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
+        block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the
         // situational-splits ledger and the league-rank strip.
@@ -715,6 +728,7 @@ export async function loadPlayer(id, asOf) {
     isAllStar, currentYear, firsts, progression, timeline, prospectRank, orgProspectRank,
     prospectCard, prospectCardGroup,
     conversionNote, positionInnings, transactions, trophyCase,
+    contract,
     vsTeam: vsTeamSplitsFor(vsTeamData, bio.id),
     debutBoxscorePath: debutGamePk ? boxPath(debutGamePk) : null,
   }

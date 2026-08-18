@@ -13,7 +13,7 @@ see "Where the per-module notes live" at the bottom.
 
 ## The spoiler rule, applied here
 
-`linescore.js` and `derive.js` are **reveal-only** modules — callable only from
+`linescore.js`, `derive.js` and `hitchart.js` are **reveal-only** modules — callable only from
 inside a `SealBox`'s reveal render function, never at render top-level or in an
 eager `useMemo` (ADR-0001). `highlights.js`'s join (`highlightsByPlayId`) is
 reveal-only in the same sense — a video clip's title/description narrate the
@@ -28,8 +28,11 @@ spoiler-safe, not free.
 **caller-gated pre-pitch selectors** (`selectPrePitchChanges` in `select.js`,
 `defenseEntering` in `defense.js`, `lineupEntering` in `battingorder.js`),
 spoiler-free only when restricted to the half the user has reached
-(`halfIndex <= revealedThrough + 1`). See the root `CLAUDE.md` spoiler section and
-`docs/adr/` (0001, 0003, 0005–0007, 0009, 0010) before touching any of these.
+(`halfIndex <= revealedThrough + 1`). `hitchart.js`'s clamp looks like theirs but
+stops one half earlier — `<= revealedThrough`, no `+ 1` — because a batted ball
+IS the result, not the staging for one (ADR-0051). See the root `CLAUDE.md`
+spoiler section and `docs/adr/` (0001, 0003, 0005–0007, 0009, 0010, 0051) before
+touching any of these.
 
 **The classification is also machine-readable.** `spoiler-manifest.json` in this
 directory carries one entry per module — its class (`reveal-only`, `reveal-gated`,
@@ -96,7 +99,12 @@ catalogued in `docs/callouts.md` (every family, trigger, surface, gate, worthine
 score) and ADR-0014 (the two-tense rule). Extend the nightly precompute — do NOT
 build a parallel generation path. The checkpoint innings and thresholds live ONCE,
 in `callout-notes/checkpoints.js`, and `gen-callouts.mjs` imports them: a second
-copy would tally one inning while the note spoke about another. Before adding a data source, check whether an
+copy would tally one inning while the note spoke about another. `callout-notes/rank.js`
+holds both halves of the league rank the W-L families print for the same reason. What
+each surface SHOWS is a second, purely presentational layer: `rankNotes`
+(`callout-notes/shared.js`) decays a note the reader already saw, drops the facts that
+cannot change during a game, and caps one note per kind — it only ever subtracts, and
+never touches a gate. Before adding a data source, check whether an
 existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per-PA
 `playLog`). Notes computable from data on hand should be computed live.
 

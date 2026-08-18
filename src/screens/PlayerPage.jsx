@@ -30,6 +30,7 @@ import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../components/playerstats/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
+import { PlayerContractCard } from '../components/playerstats/PlayerContractCard.jsx'
 import { RecentFormCard } from '../components/playerstats/RecentFormCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
 import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
@@ -287,6 +288,8 @@ export function PlayerPage({ id, asOf, sportId }) {
           )}
         </div>
 
+        <PlayerContractCard contract={data.contract} />
+
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
         {/* Trophy Case stays here as identity — "who is this guy" — ahead of
@@ -399,7 +402,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.arsenal && (
               <>
                 <SectionTitle title="Pitches" note="share of pitches · avg velo" />
-                <PitchMix arsenal={block.arsenal} />
+                <PitchMix arsenal={block.arsenal} heat={block.heat} tto={block.arsenalTto} />
               </>
             )}
 
@@ -816,4 +819,3 @@ function Fact({ label, value, mono = false, wide = false }) {
     </div>
   )
 }
-

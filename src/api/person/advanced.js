@@ -18,11 +18,19 @@ export function arsenalView(splits) {
     .map((st) => {
       const velo = Number(st.averageSpeed)
       const usage = Number(st.percentage)
+      // `count` rides along so the card can foot its own total ("2,083
+      // pitches") without a second request — the feed already sends a
+      // per-type count and a totalPitches on every split, and the total is
+      // what tells a reader whether a 63.9% share rests on a season or on
+      // one relief outing. Null-safe like the rest: a split with no count
+      // simply drops the card's total line rather than showing a wrong one.
+      const count = Number(st.count)
       return {
         code: st.type.code,
         name: st.type.description || st.type.code,
         velo: Number.isFinite(velo) && velo > 0 ? velo : null,
         usage: Number.isFinite(usage) ? usage : null,
+        count: Number.isFinite(count) ? count : null,
       }
     })
     .sort((a, b) => (b.usage ?? 0) - (a.usage ?? 0))

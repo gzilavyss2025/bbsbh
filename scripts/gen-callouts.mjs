@@ -128,7 +128,7 @@ import {
   HITTING_CATEGORIES,
   PITCHING_CATEGORIES,
 } from '../src/api/teamLeaders.js'
-import { HIT_CATEGORY_KEYS } from '../src/api/callout-notes.js'
+import { HIT_CATEGORY_KEYS, SCORING_FIRST_MIN_GAMES } from '../src/api/callout-notes.js'
 // The checkpoint innings and thresholds these records are tallied against come
 // FROM the note builders that read them (the "import the app's own shaper so
 // the two can't drift" rule this script already follows for computeLeaders): a
@@ -141,7 +141,11 @@ import {
   RUNS_ALLOWED_THRESHOLD,
   RUNS_ALLOWED_CHECKPOINTS,
   COMEBACK_DEFICIT,
+  DOW_MIN_GAMES,
 } from '../src/api/callout-notes/checkpoints.js'
+// The league-rank math the record notes print — imported, not re-implemented,
+// so the field this ranks over is the one rankClause names (see rank.js).
+import { rankAllLevels } from '../src/api/callout-notes/rank.js'
 import { MILESTONE_DEFS, nearestMilestone } from '../src/api/person.js'
 import { tallyStarterRecord, starterCgShutoutCount } from './lib/pitcher-starts.mjs'
 
@@ -693,7 +697,50 @@ async function scoringRecord(teamId, sportId) {
     scorelessThroughFull,
     bothScorelessThroughFull,
     dayOfWeek,
+    // The RAW tallies, before every show floor above — the only input the
+    // league-rank pass reads (see rankAllLevels). A rank taken off the WRITTEN
+    // records would rank a club against whichever clubs happened to clear a
+    // lopsidedness gate, not against the league. Stripped before the bundle is
+    // written, so it never ships.
+    _tallies: {
+      leadAfter: leadTally,
+      tiedAfter: tiedTally,
+      scorelessThrough: slTally,
+      bothScoreless: bothSlTally,
+      runsScored: rsTally,
+      runsAllowedByInning: raTally,
+      dayOfWeek: dowTally,
+      scoringFirst: { w: sfW, l: sfL },
+      opponentScoringFirst: { w: osW, l: osL },
+      comeback: { w: cbW, l: cbL },
+    },
   }
+}
+
+// --- league ranks ------------------------------------------------------------
+// "12-3 when leading after the 7th — 2nd of 30 in the majors". Every W-L record
+// family above is ranked across the club's OWN LEVEL, from the tallies this
+// script just built (rank.js's header argues why the ledger in
+// public/data/team-records/* cannot supply this).
+//
+// The floors are the families' own sample floors, applied to every club alike
+// so the field is honest — which means each floor must match the floor the NOTE
+// itself checks. A field admitting clubs that could never get a note of their
+// own pushes a genuinely notable club down the order and mislabels the `of`
+// count the sentence prints (DOW_MIN_GAMES, SCORING_FIRST_MIN_GAMES). The standings splits (one-run,
+// extra-inning) are ranked nowhere: their notes are Final-only and always
+// folded, so a rank could never print (see rank.js).
+const RANK_FLOORS = {
+  leadAfter: LEAD_MIN_GAMES,
+  tiedAfter: TIED_MIN_GAMES,
+  scorelessThrough: SCORELESS_MIN_GAMES,
+  bothScoreless: BOTH_SCORELESS_MIN_GAMES,
+  runsScored: RUN_SCORED_MIN_GAMES,
+  runsAllowedByInning: RUNS_ALLOWED_MIN_GAMES,
+  comeback: COMEBACK_MIN_GAMES,
+  dayOfWeek: DOW_MIN_GAMES,
+  scoringFirst: SCORING_FIRST_MIN_GAMES,
+  opponentScoringFirst: SCORING_FIRST_MIN_GAMES,
 }
 
 // A hitter's game-log-derived enrichment: current on-base streak (consecutive
@@ -1203,8 +1250,36 @@ await mapPool(teamIds, 6, async (teamId) => {
   pitcherIdsByTeam.set(teamId, pitchers)
   for (const id of hitters) allHitterIds.add(id)
   for (const id of pitchers) allPitcherIds.add(id)
-  scoringByTeam.set(teamId, await scoringRecord(teamId, sportId))
 })
+
+// The situational-record sweep, run over EVERY club at each level on the slate
+// rather than only the clubs playing tonight — that whole-league pass is what
+// makes the league rank below possible, and a rank has to come from the same
+// tally that produced the record it ranks (rank.js's header). The incremental
+// cost is only the clubs with an off day: one ~63 KB schedule fetch each, and
+// no roster or per-player work for them.
+const rankIdsBySport = new Map() // sportId -> [teamId] (the whole level)
+const rankSportById = new Map() // teamId -> its level
+for (const sportId of new Set([...teamMeta.values()].map((m) => m.sportId))) {
+  let ids = []
+  try {
+    const res = await getJson(`/api/v1/teams?sportId=${sportId}&season=${season}&fields=teams,id,sport`)
+    ids = (res.teams ?? []).map((t) => t.id).filter((id) => id != null)
+  } catch {
+    /* the level roll-call is best-effort — fall back to the slate's own clubs */
+  }
+  for (const [id, meta] of teamMeta) if (meta.sportId === sportId && !ids.includes(id)) ids.push(id)
+  rankIdsBySport.set(sportId, ids)
+  for (const id of ids) rankSportById.set(id, sportId)
+}
+await mapPool([...rankSportById.keys()], 6, async (teamId) => {
+  scoringByTeam.set(teamId, await scoringRecord(teamId, rankSportById.get(teamId) ?? MLB))
+})
+const ranksByTeam = rankAllLevels(
+  rankIdsBySport,
+  (id) => scoringByTeam.get(id)?._tallies ?? null,
+  RANK_FLOORS,
+)
 
 // Per-hitter game-log + situational-splits sweep (the heaviest fan-out) —
 // bounded concurrency, each hitter fetched once even if his club plays a
@@ -1282,6 +1357,20 @@ await mapPool(birthdayIds, 4, async (id) => {
   const line = await birthdayLine(id, birthDateById.get(id), debutById.get(id))
   if (line) birthdayStatsById.set(id, line)
 })
+
+// One club's written record block: the standings splits, the swept records
+// with the rank pass's raw `_tallies` dropped, and its league ranks when the
+// pass produced any. `ranks` is absent — not empty — when it did not, so an
+// older bundle and a new one degrade to exactly the same wording.
+function teamRecordFor(teamId) {
+  const { _tallies, ...records } = scoringByTeam.get(teamId) ?? {}
+  const ranks = ranksByTeam.get(teamId)
+  return {
+    ...(splitRecords[teamId] ?? {}),
+    ...records,
+    ...(ranks && Object.keys(ranks).length ? { ranks } : {}),
+  }
+}
 
 // Assemble per-game bundles keyed by gamePk. Everything the render layer needs,
 // pre-joined so the app only ever does one static read + object lookups.
@@ -1472,8 +1561,8 @@ for (const g of games) {
     birthdays,
     birthdayStats,
     teamRecords: {
-      away: { ...(splitRecords[awayId] ?? {}), ...(scoringByTeam.get(awayId) ?? {}) },
-      home: { ...(splitRecords[homeId] ?? {}), ...(scoringByTeam.get(homeId) ?? {}) },
+      away: teamRecordFor(awayId),
+      home: teamRecordFor(homeId),
     },
   }
 }

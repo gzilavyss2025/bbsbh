@@ -16,6 +16,17 @@
 // promoted it as a standalone one-liner under HalfTally's grid; now that the
 // grid IS the card's resting state and the one-liner is gone
 // (BetweenInnings.jsx), index 0 is no longer a special case.
+//
+// WHAT KEEPS THAT POOL FROM SAYING THE SAME THING ALL NIGHT is `rankNotes`
+// (callout-notes/shared.js): a note decays by SHOWN_DECAY for each EARLIER half
+// it was already shown on, a fact that cannot change during a game (the
+// weekday, the starter's team record, a bullpen already short) drops outright
+// after one showing, and no two cards in one set share a kind. The unconditional
+// starterRec/dayOfWeek/bullpenThin pushes below used to put three once-a-game
+// facts in this card after every half of the game; they still compute here, and
+// the ledger is what stops them printing seventeen times. `shownCounts` is that
+// ledger's read (src/hooks/useCalloutLedger.js) and is optional — without it
+// this card ranks exactly as it always did.
 
 import { halfIndex } from './select.js'
 import {
@@ -29,6 +40,7 @@ import {
   buildDayOfWeekNote,
   weekdayFromDate,
   gameWeekday,
+  rankNotes,
 } from './callout-notes.js'
 
 export const CARD_MAX = 5
@@ -49,6 +61,7 @@ function nextHalfOf(inning, half) {
 
 export function buildBetweenInnings({
   feed, bundle, marginNotes = [], inning, half, revealedThrough, workload, gameDate,
+  shownCounts = null,
 }) {
   if (!bundle) return []
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
@@ -89,5 +102,5 @@ export function buildBetweenInnings({
 
   // min(CARD_MAX, pool.length) — a sub-5 pool tracks data completeness
   // (pre-game data, MiLB gaps), never how eventful the half was.
-  return ordered.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, CARD_MAX)
+  return rankNotes(ordered, { shownCounts, maxPerKind: 1, limit: CARD_MAX })
 }

@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 
 # Watch-highlight bottom sheet on revealed plate appearances
 
@@ -235,3 +235,7 @@ Not yet done: a real-device Safari/iPhone playback check (native HLS support
 assumed but only checked via HLS URL correctness + Chromium's `<source>`
 resolution, not actual playback), and a code review pass. Changes are
 committed nowhere yet — sitting uncommitted in the worktree pending review.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.

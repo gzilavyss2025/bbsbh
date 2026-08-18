@@ -37,6 +37,17 @@
 // Ranked by the shared worthiness score and capped at PREHALF_MAX so the strip
 // stages the half rather than burying it. Returns [] with no bundle
 // (an un-generated date), like every other callout surface.
+//
+// The ranking is `rankNotes` (callout-notes/shared.js), so this strip obeys the
+// same three repetition rules every other surface does: a note decays by
+// SHOWN_DECAY for each earlier half it was already shown on, a fact that cannot
+// change during a game drops after one showing, and no two notes of one kind
+// share the strip. It additionally caps the "the club is W-L when X" families
+// at ONE — eleven families are that same sentence with a different clause, and
+// two slots filled by two of them is the strip saying nothing twice.
+// `shownCounts` comes from the reader's per-game ledger
+// (src/hooks/useCalloutLedger.js) and is optional: without it the strip ranks
+// exactly as it always did.
 
 import { halfIndex } from './select.js'
 import {
@@ -55,11 +66,16 @@ import {
   buildTtoPitchesNote,
   buildFoulVolumeNote,
   buildBullpenThinNote,
+  rankNotes,
 } from './callout-notes.js'
 
 const PREHALF_MAX = 2
+// At most one "the club is W-L when X" note per strip. See rankNotes.
+const PREHALF_MAX_RECORDS = 1
 
-export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrough, workload, gameDate }) {
+export function buildPreHalfCallouts({
+  feed, bundle, inning, half, revealedThrough, workload, gameDate, shownCounts = null,
+}) {
   if (!bundle) return []
   const notes = []
 
@@ -165,5 +181,16 @@ export function buildPreHalfCallouts({ feed, bundle, inning, half, revealedThrou
     if (note) notes.push(note)
   }
 
-  return notes.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, PREHALF_MAX)
+  // strictCaps: this strip has two slots and a pool that is often nothing but
+  // record notes. Letting the turned-down tail backfill would hand both slots
+  // to one kind again, which is what the caps are here to prevent. A short
+  // strip is the honest outcome. (Between Innings deliberately does not set
+  // this — its depth is an invariant; see rankNotes' header.)
+  return rankNotes(notes, {
+    shownCounts,
+    maxPerKind: 1,
+    maxRecordNotes: PREHALF_MAX_RECORDS,
+    limit: PREHALF_MAX,
+    strictCaps: true,
+  })
 }

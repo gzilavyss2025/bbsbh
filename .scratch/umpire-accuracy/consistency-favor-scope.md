@@ -134,6 +134,12 @@ node scripts/gen-run-expectancy.mjs --seasons=2024,2025
   it once and keeps it in memory — same load-once pattern as
   `umpires.js`'s `load()`.
 
+**Resolved, no action (2026-08-18):** already shipped with exactly this
+doc's own recommended answer — `scripts/gen-run-expectancy.mjs` defaults to
+2 complete seasons. `src/api/umpireFavor.js`, `src/lib/euz.js`, and the
+`consistency`/`favorMagnitude` fields in `src/api/umpires.js` all exist.
+Nothing pending.
+
 **Open question for the maintainer: how many seasons?** More seasons =
 smoother 288-bucket estimates, at roughly linear extra one-time runtime (a
 single season's backfill is the same shape as the existing accuracy

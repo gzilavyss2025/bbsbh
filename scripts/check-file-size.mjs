@@ -130,7 +130,7 @@ const BUDGETS = {
   'scripts/gen-callouts.mjs': 1600, // 1507
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
   'src/screens/TeamInfo.jsx': 1300, // 1299
-  'src/screens/BoxScore.jsx': 1200, // 1179 — InningTally moved to screens/boxscore/InningTally.jsx
+  'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
   // 1200 -> 1225 for the runtime logo-override hooks (ADR-0050's logo
   // dimension): the store/reader themselves went to their own module

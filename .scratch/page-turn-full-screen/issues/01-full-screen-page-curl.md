@@ -1,4 +1,4 @@
-Status: needs-triage
+Status: wontfix
 
 # Build a true full-screen page-curl — PR #316 only turns the play-by-play card
 

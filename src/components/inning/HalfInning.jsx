@@ -5,7 +5,9 @@ import { battingSlot, pitchingChangePitcher } from '../../api/playbyplay.js'
 import { selectDueUpNow } from '../../api/dueup.js'
 import { preGameAvg, computeBatterLine } from '../../api/boxscore.js'
 import { highlightsByPlayId } from '../../api/highlights.js'
+import { selectBattedBalls } from '../../api/hitchart.js'
 import { ordinal } from '../../lib/format.js'
+import { HitChart } from '../charts/HitChart.jsx'
 import { SealBox } from '../SealBox.jsx'
 import { PlayByPlay } from '../playbyplay/PlayByPlay.jsx'
 import { FielderNotice } from '../playbyplay/FielderNotice.jsx'
@@ -444,8 +446,41 @@ export function HalfInning({
             )
           }}
         </SealBox>
+        {/* Where this half's contact went. Mounted only once the half is
+            committed, so the selector behind it never runs against a half the
+            reader has not reached — the render gate IS the reveal gate here,
+            the same footing PrePitchChanges above sits on. */}
+        {halfIndex(inning, half) <= revealedThrough && (
+          <HalfHitChart
+            feed={feed}
+            inning={inning}
+            half={half}
+            label={label}
+            teamId={battingSide === 'away' ? awayId : homeId}
+          />
+        )}
       </section>
     </>
+  )
+}
+
+// This half's batted balls, drawn on the park. Its own component so the
+// reveal-only walk happens only when the gate above has already mounted it —
+// a `useMemo` up in HalfInning would run the selector on every render of an
+// unrevealed half. `throughHalfIndex` is passed as well as the render gate:
+// belt and braces, the same doubling ADR-0003's selectors use.
+function HalfHitChart({ feed, inning, half, label, teamId }) {
+  const idx = halfIndex(inning, half)
+  const balls = selectBattedBalls(feed, { teamId, throughHalfIndex: idx }).filter(
+    (b) => b.inning === inning && b.half === half,
+  )
+  return (
+    <HitChart
+      balls={balls}
+      venue={feed?.gameData?.venue?.name ?? ''}
+      variant="half"
+      eyebrow={`${label} ${ordinal(inning)}`}
+    />
   )
 }
 

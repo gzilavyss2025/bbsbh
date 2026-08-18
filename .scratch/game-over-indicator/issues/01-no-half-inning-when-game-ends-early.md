@@ -1,4 +1,4 @@
-Status: needs-triage
+Status: resolved
 
 # Innings navigator gives no "game over" signal when a half-inning never happens
 
@@ -42,3 +42,5 @@ touches game-completion/walk-off logic; this gap predates it.
   `/grilling` pass before implementation.
 
 ## Comments
+
+2026-08-18: Closed during issue-tracker triage — this is already solved. InningViewer.jsx computes finalHalfIndex (walk-off-aware, selectFinalHalfIndex) and bookClosed; per ADR-0046, InningActionBar relabels to "Close the book ›" once reveal reaches the last half actually played, a deliberate spoiler-safe game-over signal. Postdates this ticket. No GitHub issue needed.

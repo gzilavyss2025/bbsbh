@@ -143,10 +143,12 @@ main > article > section > * {
   margin-inline: auto;
 }
 
-/* The two exceptions, both wider on purpose: reference data reads better with
-   room for its columns, and the hub's guide list becomes a two-up grid. */
+/* The three exceptions, all wider on purpose: reference data reads better with
+   room for its columns, the hub's guide list becomes a two-up grid, and the
+   "start" group's read-in-order list needs room for its jump rail. */
 main > article > section > .tablewrap,
-main > article > section > .index {
+main > article > section > .index,
+main > article > section > .basics {
   max-width: var(--measure-wide);
 }
 
@@ -409,6 +411,44 @@ tbody tr:last-child td {
   color: var(--ink-2);
 }
 
+/* The lettered badge ahead of every group heading (A, B, C…) — its position in
+   the hub, so a reader can tell at a glance how many groups there are and
+   where they are in the list. Inline in the h2 rather than a wrapping element,
+   so the `.index-group > h2` margins above still apply untouched. */
+.index-group__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin-right: var(--space-2);
+  vertical-align: middle;
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: 0.8125rem;
+  color: var(--paper-2);
+  background: var(--ink-0);
+  border-radius: 3px;
+}
+
+/* The small numbered chip ahead of a guide's title, in both the card grid
+   below and the "start" group's read-in-order list. Kraft-tape amber, same as
+   the answer block's rule: a mark of where you are in the reading, not the
+   call-to-action's colour (that stays the only *filled* use of this hue). */
+.index__num,
+.basics__num {
+  flex: none;
+  margin-top: 0.2em;
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: 0.75rem;
+  letter-spacing: var(--ls-label);
+  color: var(--seal-ink);
+  background: var(--seal);
+  border-radius: 2px;
+  padding: 0.0625rem var(--space-2);
+}
+
 /* The hub is a list of guides, so it lays out as a list of cards and wraps to
    as many columns as the frame has room for. `auto-fit` with a 20rem floor
    gives one column on a phone and two on a laptop with no breakpoint, and it
@@ -427,6 +467,9 @@ tbody tr:last-child td {
 }
 
 .index li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
   border-bottom: 1px solid var(--rule-soft);
   padding-bottom: var(--space-4);
   margin-bottom: 0;
@@ -440,6 +483,102 @@ tbody tr:last-child td {
 .index p {
   color: var(--ink-2);
   margin: 0;
+}
+
+/* --- "start" group: read in order + a jump rail ----------------------
+   The other groups are a shelf to browse; this one is four guides a
+   brand-new scorer works through in sequence, so it reads as a numbered
+   list with a short rail alongside for jumping ahead or back. */
+
+.basics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: var(--space-8);
+  align-items: start;
+  margin-top: var(--space-6);
+}
+
+.basics__list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.basics__list li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--rule-soft);
+  margin-bottom: 0;
+}
+
+.basics__list li:first-child {
+  padding-top: 0;
+}
+
+.basics__list li:last-child {
+  border-bottom: 0;
+}
+
+.basics__list h3 {
+  margin: 0 0 var(--space-2);
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+}
+
+.basics__list p {
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.basics__rail {
+  position: sticky;
+  top: var(--space-6);
+  border-top: 2px solid var(--ink-0);
+  padding-top: var(--space-3);
+}
+
+.basics__rail-label {
+  font-family: var(--font-body);
+  font-weight: var(--w-bold);
+  font-size: 0.6875rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+  margin: 0 0 var(--space-2);
+}
+
+.basics__rail a {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  line-height: var(--lh-prose);
+  color: var(--ink-1);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.basics__rail a:last-child {
+  border-bottom: 0;
+}
+
+.basics__rail a:hover {
+  color: var(--field-deep);
+}
+
+/* The one breakpoint in this file. Every other block reflows through
+   `minmax()`/`auto-fit`, but a fixed 220px rail beside a fluid column has
+   nothing left to shrink into on a phone — past this width the rail moves
+   below the list instead of squeezing down to nothing. */
+@media (max-width: 30rem) {
+  .basics {
+    grid-template-columns: 1fr;
+  }
+
+  .basics__rail {
+    position: static;
+    margin-top: var(--space-2);
+  }
 }
 
 .footer {

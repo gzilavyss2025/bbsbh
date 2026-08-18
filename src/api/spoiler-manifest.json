@@ -155,6 +155,10 @@
         "api/callout-notes/rollup.js"
       ]
     },
+    "callout-notes/rank.js": {
+      "class": "spoiler-free",
+      "why": "League ranks for the W-L record families — the ranking math gen-callouts.mjs runs over a level, and the clause the note builders append. A season aggregate over Final games, like the record it decorates."
+    },
     "callout-notes/rollup.js": {
       "class": "reveal-only",
       "why": "`computeGameCalloutNotes` — the box score's Insights roll-up. The whole game is already behind that SealBox by the time it runs, which is the only reason its result-aware wording is safe.",
@@ -285,6 +289,14 @@
         "screens/logbook/RetrospectiveSections.jsx"
       ]
     },
+    "hitchart.js": {
+      "class": "reveal-only",
+      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed, but ships in this file so the geometry and its one consumer cannot drift. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051).",
+      "importers": [
+        "screens/boxscore/revealBoxScore.js",
+        "components/inning/HalfInning.jsx"
+      ]
+    },
     "hitterForm.js": {
       "class": "cutoff-gated",
       "why": "The player page's Recent form card — live lastXGames splits. Current-day only; the card skips under a spoiler `asOf`."
@@ -380,6 +392,10 @@
         "api/dayHighlights.js",
         "api/logbookRetrospective.js"
       ]
+    },
+    "person/contracts.js": {
+      "class": "spoiler-free",
+      "why": "Static salary, contract and club-control facts. Current-day player identity context with no game result; historical asOf pages deliberately do not fetch it."
     },
     "person-fetch.js": {
       "class": "spoiler-free",
@@ -548,8 +564,9 @@
     },
     "playbyplay/scorebookCode.js": {
       "class": "reveal-only",
-      "why": "The batter's own scorebook denotation — how he reached or was retired. Reached through the barrel's re-export.",
+      "why": "The batter's own scorebook denotation — how he reached or was retired. Reached through the barrel's re-export. api/hitchart.js reaches it directly rather than through the barrel: a hit-chart dot carries the same mark as the at-bat card, and a second spelling of the notation would let the two disagree.",
       "importers": [
+        "api/hitchart.js",
         "api/playbyplay/halfInningFeed.js"
       ]
     },
@@ -697,9 +714,9 @@
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
-    "teamRecordRankings.js": {
+    "situationalRecordRankings.js": {
       "class": "spoiler-free",
-      "why": "Pivots the same team-records ledgers across one level for the standalone /team-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
+      "why": "Pivots the same team-records ledgers across one level for the standalone /situational-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
     },
     "teamRecords.js": {
       "class": "spoiler-free",

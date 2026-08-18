@@ -290,7 +290,7 @@ const BUDGETS = {
   // Deliberately small: the card reuses `.tstats-card`/`.tstatrow` from
   // 31-wild-card.css; only the half toggle, the group subheadings and the
   // counts block are new.
-  // +1 for `66-team-record-rankings.css`: the standalone page that ranks one of
+  // +1 for `66-situational-records.css`: the standalone page that ranks one of
   // that card's rows across a whole level. The table itself is `.standings`,
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
@@ -298,7 +298,22 @@ const BUDGETS = {
   // 89 -> 90 for `68-around-the-game.css`: ONE sheet for all FIVE pages in
   // src/screens/around-the-game/. Five partials would have cost 94 here and hit the
   // shared-chunk ordering trap src/index.css's header records.
-  'src/styles': 90,
+  // 90 -> 91 for `26b-player-contract.css`: the player-page contract scorebug
+  // is a self-contained lazy component, and its broadcast treatment would push
+  // the already-budgeted 26-player-page.css over its file-size ceiling. Keeping
+  // the rules beside the component also leaves them out of unrelated routes.
+  //
+  // 91 -> 92 for `69-pitch-arsenal.css`: the player page's redressed Pitches
+  // card and its times-through-the-order split. Same reason as the line above:
+  // 26-player-page.css has no headroom left under its own file-size ceiling,
+  // so the card's rules had to land in a partial of their own.
+  //
+  // 92 -> 93 for `69-hit-chart.css`: the spray chart's own partial. It shares
+  // the 69 prefix with the file above — two branches picked the next free
+  // integer independently, the same harmless collision 62- and 65- already
+  // carry. index.css names every partial in its own explicit order, so the
+  // prefix is a label, not a cascade position.
+  'src/styles': 93,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -347,12 +362,13 @@ const BUDGETS = {
   // argument as every entry above: a subdirectory would take it out of the
   // flat set check-spoiler-manifest classifies, which is where a module that
   // reads per-game results needs to stay.
-  // +1 for teamRecordRankings.js — the same ledger pivoted across a level for
-  // the standalone Team Records page. Kept OUT of teamRecords.js on purpose:
+  // +1 for situationalRecordRankings.js — the same ledger pivoted across a
+  // level for the standalone Situational Records page. Kept OUT of
+  // teamRecords.js on purpose:
   // one module answers "this club's fifty splits", the other "this split's
   // thirty clubs", and merging them would put a page-sized fan-out fetch in the
   // module every Numbers tab loads. Flat for the manifest reason above.
-  'src/api': 98,
+  'src/api': 99,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -414,7 +430,7 @@ const BUDGETS = {
   // 87 -> 89 for check-fixture-freshness.mjs and check-feed-shape-drift.mjs,
   // the e2e mock-fixture guards — flat lint/cron scripts, same shape as
   // every other check-*.mjs already counted here.
-  scripts: 89,
+  scripts: 90,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -503,7 +519,8 @@ const BUDGETS = {
   // shape as its siblings: one route, one screen, in the flat set.
   // +1 for BetweenInningsLab.jsx — an unlisted QA page, same shape as
   // AnimationLab.jsx beside it.
-  // +1 for TeamRecordsPage.jsx — the standalone Team Records ranking page, one
+  // +1 for SituationalRecordsPage.jsx — the standalone Situational Records
+  // ranking page, one
   // more entry in REPORT_PAGES and so the same shape as StandingsPage.jsx and
   // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
   // set. It is not a team-hub screen and does not belong in src/screens/team/,
@@ -517,7 +534,10 @@ const BUDGETS = {
   // hook it sits beside.
   // 20 -> 21 for useScorecardNotes.js — the storage wiring over
   // lib/scorecardNotes.js, the same shape one more time.
-  'src/hooks': 21,
+  // 21 -> 22 for useCalloutLedger.js — the per-game "already shown" memory the
+  // callout surfaces rank against. React wiring (a context over a Map) with its
+  // rules pure in api/callout-notes/shared.js, the same split one more time.
+  'src/hooks': 22,
   'src/screens/identity-lab': 15,
 }
 

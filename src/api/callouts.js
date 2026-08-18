@@ -111,7 +111,11 @@ export async function fetchCallouts(urlDate, gamePks) {
 //       dayOfWeek:{[0-6]:{w,l}} (record by day of week, 0=Sun…6=Sat),
 //       inningRuns:{[inning]:{f,a,g}} (runs for/against + games sampled,
 //       innings 1–9), runsScored:{[bucket]:'W-L'},
-//       runsAllowedByInning:{[inning]:'W-L'}, comeback}, home:{…} } }
+//       runsAllowedByInning:{[inning]:'W-L'}, comeback,
+//       ranks:{[family]:{r,of,t?} | {[sub]:{r,of,t?}}} — the club's league
+//       rank at its OWN level for each W-L family above, kept only where a
+//       note would actually print it (top/bottom 3 of a field of 8+); see
+//       callout-notes/rank.js}, home:{…} } }
 //
 // Fields newer than a given date's committed file simply aren't there (the
 // nightly cron regenerates future dates only) — every consumer null-guards, so

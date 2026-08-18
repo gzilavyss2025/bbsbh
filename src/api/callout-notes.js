@@ -43,11 +43,13 @@ export {
   parseRecord,
   foldedRecordText,
   gameResult,
+  magnitudeOf,
+  rankNotes,
 } from './callout-notes/shared.js'
 
 export { computeCalloutProgress } from './callout-notes/progress.js'
 
-export { foulCountsFromCodes, buildCallouts } from './callout-notes/liveAtBat.js'
+export { foulCountsFromCodes, buildCallouts, SCORING_FIRST_MIN_GAMES } from './callout-notes/liveAtBat.js'
 
 export {
   cumulativeInnings,

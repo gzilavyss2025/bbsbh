@@ -39,7 +39,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
-import { CENTURY_MPH } from '../src/api/pitchArsenal.js'
+import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -59,11 +59,23 @@ const CONCURRENCY = 8
 // No network, no DB — a pure function of the feed, so a synthetic fixture can
 // drive the exact counting rules. Shape: Map personId -> { name, teamId,
 // types: Map code -> { description, pitches, velocitySum, velocityN,
-// centuryPitches, maxVelo } } — centuryPitches counts this type's pitches at
-// CENTURY_MPH+ (the veloVariety/centuryClub/veloPeak callout families' data,
-// docs/callouts.md); maxVelo is this type's single fastest pitch on file,
-// regardless of the century floor, so a pitcher's hardest-ever reading is
-// never lost even on a type that never clears it.
+// centuryPitches, maxVelo, tto: [{pitches, velocitySum, velocityN} x3] } } —
+// centuryPitches counts this type's pitches at CENTURY_MPH+ (the
+// veloVariety/centuryClub/veloPeak callout families' data, docs/callouts.md);
+// maxVelo is this type's single fastest pitch on file, regardless of the
+// century floor, so a pitcher's hardest-ever reading is never lost even on a
+// type that never clears it.
+//
+// `tto` splits the same pitches by TIMES THROUGH THE ORDER — how many times
+// this pitcher had already faced THIS batter in THIS game when the pitch was
+// thrown. Buckets are 1st, 2nd, and 3rd-or-later, capped at three because a
+// fourth look is rare enough that its own bucket would be mostly noise, and
+// because a starter's third time through is the split the reading is
+// actually about. Counted per (pitcher, batter) within the game, so a batter
+// who bats twice against one reliever and once against another gives each
+// arm its own first look. The MLB Stats API publishes no times-through
+// split, but this sweep already walks every play and already holds the
+// batter, so the count rides along for free.
 export function aggregateGamePitchTypes(feed) {
   const plays = feed?.liveData?.plays?.allPlays ?? []
   const awayId = feed?.gameData?.teams?.away?.id ?? null
@@ -84,13 +96,26 @@ export function aggregateGamePitchTypes(feed) {
   const getType = (p, code, desc) => {
     let t = p.types.get(code)
     if (!t) {
-      t = { description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0, centuryPitches: 0, maxVelo: null }
+      t = {
+        description: desc || '', pitches: 0, velocitySum: 0, velocityN: 0, centuryPitches: 0, maxVelo: null,
+        tto: [
+          { pitches: 0, velocitySum: 0, velocityN: 0 },
+          { pitches: 0, velocitySum: 0, velocityN: 0 },
+          { pitches: 0, velocitySum: 0, velocityN: 0 },
+        ],
+      }
       p.types.set(code, t)
     } else if (desc && !t.description) {
       t.description = desc
     }
     return t
   }
+
+  // How many times each pitcher has already faced each batter in THIS game.
+  // Keyed on the pair, not on the batter alone, so a pitching change resets
+  // the count for the arm that comes in — his first look at that hitter is a
+  // first look however deep into the game it happens.
+  const faced = new Map()
 
   for (const play of plays) {
     const half = play?.about?.halfInning
@@ -100,18 +125,39 @@ export function aggregateGamePitchTypes(feed) {
     if (pitcherId == null) continue
     const p = getPitcher(pitcherId, play.matchup?.pitcher?.fullName ?? '', fieldingTeamId)
 
+    // One plate appearance is one look, counted once for the whole play
+    // rather than per pitch. A batter with no id on file (it happens on
+    // MiLB feeds) still has his pitches counted in the season totals; he
+    // simply contributes to no times-through bucket, which is why the
+    // buckets are read as their own denominators downstream and never
+    // assumed to foot to `pitches`.
+    const batterId = play.matchup?.batter?.id ?? null
+    let ttoIndex = null
+    if (batterId != null) {
+      const key = `${pitcherId}:${batterId}`
+      const seen = (faced.get(key) ?? 0) + 1
+      faced.set(key, seen)
+      ttoIndex = Math.min(seen, 3) - 1
+    }
+
     for (const e of play.playEvents ?? []) {
       if (!e.isPitch) continue
       const code = e.details?.type?.code
       if (!code) continue
       const t = getType(p, code, e.details?.type?.description)
       t.pitches += 1
+      const bucket = ttoIndex == null ? null : t.tto[ttoIndex]
+      if (bucket) bucket.pitches += 1
       const speed = e.pitchData?.startSpeed
       if (typeof speed === 'number' && Number.isFinite(speed)) {
         t.velocitySum += speed
         t.velocityN += 1
         if (speed >= CENTURY_MPH) t.centuryPitches += 1
         if (t.maxVelo == null || speed > t.maxVelo) t.maxVelo = speed
+        if (bucket) {
+          bucket.velocitySum += speed
+          bucket.velocityN += 1
+        }
       }
     }
   }
@@ -123,8 +169,11 @@ export function aggregateGamePitchTypes(feed) {
 const upsertPitchType = (db) =>
   db.prepare(
     `INSERT INTO pitch_arsenal_totals
-       (person_id, level, code, season, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       (person_id, level, code, season, name, team_id, description, pitches, velocity_sum, velocity_n, century_pitches, max_velo,
+        tto1_pitches, tto1_velocity_sum, tto1_velocity_n,
+        tto2_pitches, tto2_velocity_sum, tto2_velocity_n,
+        tto3_pitches, tto3_velocity_sum, tto3_velocity_n)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(person_id, level, code) DO UPDATE SET
        season = excluded.season,
        name = excluded.name,
@@ -138,7 +187,16 @@ const upsertPitchType = (db) =>
          WHEN pitch_arsenal_totals.max_velo IS NULL THEN excluded.max_velo
          WHEN excluded.max_velo IS NULL THEN pitch_arsenal_totals.max_velo
          ELSE MAX(pitch_arsenal_totals.max_velo, excluded.max_velo)
-       END`,
+       END,
+       tto1_pitches = pitch_arsenal_totals.tto1_pitches + excluded.tto1_pitches,
+       tto1_velocity_sum = pitch_arsenal_totals.tto1_velocity_sum + excluded.tto1_velocity_sum,
+       tto1_velocity_n = pitch_arsenal_totals.tto1_velocity_n + excluded.tto1_velocity_n,
+       tto2_pitches = pitch_arsenal_totals.tto2_pitches + excluded.tto2_pitches,
+       tto2_velocity_sum = pitch_arsenal_totals.tto2_velocity_sum + excluded.tto2_velocity_sum,
+       tto2_velocity_n = pitch_arsenal_totals.tto2_velocity_n + excluded.tto2_velocity_n,
+       tto3_pitches = pitch_arsenal_totals.tto3_pitches + excluded.tto3_pitches,
+       tto3_velocity_sum = pitch_arsenal_totals.tto3_velocity_sum + excluded.tto3_velocity_sum,
+       tto3_velocity_n = pitch_arsenal_totals.tto3_velocity_n + excluded.tto3_velocity_n`,
   )
 
 const markIngested = (db) =>
@@ -156,6 +214,9 @@ async function ingestGame(db, stmts, gamePk, level, date, season) {
         stmts.pitchType.run(
           id, level, code, season, p.name, p.teamId, t.description,
           t.pitches, t.velocitySum, t.velocityN, t.centuryPitches, t.maxVelo,
+          t.tto[0].pitches, t.tto[0].velocitySum, t.tto[0].velocityN,
+          t.tto[1].pitches, t.tto[1].velocitySum, t.tto[1].velocityN,
+          t.tto[2].pitches, t.tto[2].velocitySum, t.tto[2].velocityN,
         )
       }
     }
@@ -201,6 +262,26 @@ async function fetchPitcherHands(sportIds, season) {
   return hands
 }
 
+// Competition ranking (1, 2, 2, 4) over one level's century-club counts —
+// ties share a place and the next man skips, the way a leaderboard reads.
+// `counts` is [id, count] pairs ALREADY filtered to the cohort being ranked;
+// `of` is that cohort's size, so the rank a card renders and the denominator
+// beside it always describe the same population. Pure, exported for tests.
+export function centuryRankMap(counts) {
+  const sorted = [...counts].sort((a, b) => b[1] - a[1])
+  const of = sorted.length
+  const ranks = new Map()
+  let lastCount = null
+  let lastRank = 0
+  sorted.forEach(([id, count], i) => {
+    const rank = count === lastCount ? lastRank : i + 1
+    lastCount = count
+    lastRank = rank
+    ranks.set(id, { rank, of })
+  })
+  return ranks
+}
+
 // --- JSON export from the accumulated table ----------------------------------
 export function exportPitchArsenal(db, hands = {}) {
   const ingested = db.prepare('SELECT game_pk, level, date FROM pitch_arsenal_ingested_games').all()
@@ -217,14 +298,58 @@ export function exportPitchArsenal(db, hands = {}) {
     // treats a missing hand as "don't guess", and an omitted key keeps the
     // committed file from growing a column of nulls.
     if (hands[r.person_id]) entry.throws = hands[r.person_id]
-    entry[r.level].push({
+    const type = {
       code: r.code,
       description: r.description,
       pitches: r.pitches,
       avgVelo: r.velocity_n > 0 ? Math.round((r.velocity_sum / r.velocity_n) * 10) / 10 : null,
       century: r.century_pitches,
       maxVelo: r.max_velo,
-    })
+    }
+    // The times-through split, only when the row actually carries one. Rows
+    // ingested before the sweep started counting it hold nine zeroes, and an
+    // all-zero `tto` would tell the reader "he threw nothing on any look"
+    // rather than "this was never measured" — so the key is omitted instead,
+    // and the reader treats absent as unknown and hides the filter.
+    //
+    // PAIRS, not objects, and trailing empty looks trimmed: this rides in a
+    // per-pitcher bucket the player page fetches on its own, and the bucket
+    // has a 30 KB ceiling it is measured against (test/bucket-shards.test.js).
+    // Spelled out as {pitches, avgVelo} the split alone pushed the largest
+    // bucket past it; `[616, 101.3]` says the same thing in a third of the
+    // bytes. The reader names the positions.
+    const tto = [1, 2, 3].map((n) => [
+      r[`tto${n}_pitches`],
+      r[`tto${n}_velocity_n`] > 0
+        ? Math.round((r[`tto${n}_velocity_sum`] / r[`tto${n}_velocity_n`]) * 10) / 10
+        : null,
+    ])
+    while (tto.length && tto[tto.length - 1][0] === 0) tto.pop()
+    if (tto.length) type.tto = tto
+    entry[r.level].push(type)
+  }
+
+  // Where a pitcher places among the arms at his own level who have thrown
+  // CENTURY_CLUB_MIN+ pitches at CENTURY_MPH+. Ranked HERE rather than in the
+  // app because ranking needs the whole level and the player page fetches one
+  // hundredth of it — a reader cannot derive this from the bucket he holds.
+  //
+  // The cohort is the century club itself, not every arm on file: "2nd of 58"
+  // means second among the 58 who have been there, which is the honest
+  // denominator for a fact about triple digits. Ranking him against 800 arms
+  // who have never touched 100 would put almost everyone in a tie for last and
+  // say nothing. Per LEVEL, never pooled — the same rule the rest of this
+  // file follows.
+  for (const level of ['mlb', 'aaa']) {
+    const counts = []
+    for (const [id, entry] of Object.entries(pit)) {
+      const n = (entry[level] ?? []).reduce((sum, t) => sum + (t.century ?? 0), 0)
+      if (n >= CENTURY_CLUB_MIN) counts.push([id, n])
+    }
+    for (const [id, place] of centuryRankMap(counts)) {
+      pit[id].centuryRank ??= {}
+      pit[id].centuryRank[level] = place
+    }
   }
 
   return {

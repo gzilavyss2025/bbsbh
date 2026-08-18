@@ -61,6 +61,7 @@
 @import './styles/26-player-page.css';
 @import './styles/67-trophy-case.css';
 @import './styles/27-player-position-innings.css';
+@import './styles/69-pitch-arsenal.css';
 @import './styles/28-team-hub.css';
 @import './styles/28a-team-hub-hero.css';
 @import './styles/29-team-transactions.css';
@@ -84,6 +85,7 @@
 @import './styles/56-my-tally-intro.css';
 @import './styles/57-ballpark-card.css';
 @import './styles/64-milb-alumni.css';
+@import './styles/69-hit-chart.css';
 /* Focus mode — the innings viewer's scoring console (ADR-0043). A SUBDIRECTORY
    rather than three more numbered siblings: src/styles is a flat directory at
    its own file ratchet (scripts/check-dir-size.mjs), so the honest way to split
@@ -112,6 +114,7 @@
      17-identity-lab-workbench  screens/identity-lab/index.jsx (DEV-only)
      17a-identity-lab-mark-panels  screens/identity-lab/index.jsx (DEV-only)
      26a-percentile-strip     components/charts/PercentileStrip.jsx
+     26b-player-contract      components/playerstats/PlayerContractCard.jsx
      30-standings             screens/StandingsPage.jsx
      32-milestone-watch       screens/MilestoneWatchPage.jsx
      34-postseason            screens/PostseasonHistoryPage.jsx

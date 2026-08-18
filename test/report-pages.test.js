@@ -18,7 +18,7 @@ import {
 // allowed to do.
 
 // The report pages as they stood before PAGE_GROUPS existed, plus
-// /team-records, which landed on main (#742) while the regrouping was in
+// /situational-records, which landed on main (#742) while the regrouping was in
 // flight, and the five broadcast reports that came with src/screens/around-the-game/.
 // Typed out rather than derived, so this test fails if the flattening loses
 // one — deriving the expectation from the thing under test would assert
@@ -31,7 +31,7 @@ const PATHS_BEFORE_GROUPING = [
   '/doubleheaders',
   '/standings',
   '/leaders',
-  '/team-records',
+  '/situational-records',
   '/fouls',
   '/prospects',
   '/rehab',

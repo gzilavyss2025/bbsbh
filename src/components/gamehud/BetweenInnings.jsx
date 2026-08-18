@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { buildBetweenInnings } from '../../api/between-innings.js'
+import { halfIndex } from '../../api/select.js'
+import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 import { Headshot } from '../player/Headshot.jsx'
 import { HalfTally } from './HalfTally.jsx'
 
@@ -15,9 +17,25 @@ export function BetweenInnings({
   feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
   battingSide, getDerived, phase,
 }) {
+  // This card stages the NEXT half (between-innings.js's nextHalfOf), which in
+  // half-index terms is simply the one after this — so that is the half the
+  // shown ledger reads and writes under. Reading a half the Arms tab has
+  // already written is the point: the pool this card draws from IS the Margin
+  // Notes list, and a fact the reader met beside the box is not news here.
+  const ledger = useCalloutLedger()
+  const stagedIdx = halfIndex(inning, half) + 1
+  // Frozen for the half. Read inline, this recounts on every live feed poll, so
+  // an Arms-tab marking of the SAME half could decay a card out of the stack
+  // while the reader sits on it — `idx` is independent state and would then
+  // point at a different fact. It rebuilds only when the staged half changes,
+  // which is what the key on this card already resets `idx` for.
+  const shownCounts = useMemo(() => ledger.countsFor(stagedIdx), [ledger, stagedIdx])
   const cards = useMemo(
-    () => buildBetweenInnings({ feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate }),
-    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate],
+    () => buildBetweenInnings({
+      feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
+      shownCounts,
+    }),
+    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts],
   )
   const [idx, setIdx] = useState(0)
   const advance = () => setIdx((i) => (i + 1) % (cards.length + 1))
@@ -26,6 +44,16 @@ export function BetweenInnings({
   // an idx that outlived a shrinking list must fall back to the grid rather
   // than read past the end of the array.
   const safeIdx = Math.min(idx, cards.length)
+
+  // Only the card the reader actually advanced to counts as shown — this card
+  // holds up to CARD_MAX facts one at a time and most readers never reach the
+  // last of them. Same effect-not-render rule MarginNotes.jsx follows.
+  const seenCard = safeIdx > 0 ? cards[safeIdx - 1] : null
+  const seenKey = seenCard ? seenCard.dedupeKey ?? seenCard.text : ''
+  useEffect(() => {
+    if (!seenKey) return
+    ledger.markShown([{ dedupeKey: seenKey }], stagedIdx)
+  }, [ledger, seenKey, stagedIdx])
 
   const grid = (
     <HalfTally

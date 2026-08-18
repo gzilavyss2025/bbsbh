@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # Build the cross-game photo index so photos can be pulled by player and by team
 
@@ -60,3 +60,7 @@ Cost-driven precompute, the pattern `src/api/CLAUDE.md` documents:
   probably applies — but a still can be swapped in late (MLB re-thumbnails
   clips hours after a game; observed live during PR #487, a game's asset count
   went 31 → 40 within the hour and 6 assets changed classification).
+
+## Comments
+
+2026-08-18: Closed during issue-tracker triage. Decision: season-only (current live team-page/player-page coverage) is enough; not worth building a full career-spanning multi-team photo index for now. Revisit if a traded-player use case becomes a real ask.

@@ -35,6 +35,7 @@ import { useRevealProgress } from '../hooks/useRevealProgress.js'
 import { effectiveReveal } from '../hooks/revealProgressCore.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
+import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -586,6 +587,14 @@ export function InningViewer({
     [feed, renderRevealedThrough, callouts, rosters, workload, workloadGameDate],
   )
 
+  // The per-game record of which callout notes this reader has already been
+  // shown (src/hooks/useCalloutLedger.js), provided to the whole subtree below.
+  // It lives HERE, above every keyed boundary: InningPage and BetweenInnings
+  // both remount on each half — exactly when the ledger has to remember — and
+  // this component does not. It stores dedupeKeys and half indices, nothing
+  // else, and can only ever remove a note from a ranked list.
+  const calloutLedger = useCalloutLedgerValue(feed?.gamePk)
+
   // The win-probability line "so far" — the plays through the revealed half,
   // PLUS (when the half on screen is being stepped through one at-bat at a
   // time rather than committed whole, ADR-0016) the plays of that one half up
@@ -743,6 +752,7 @@ export function InningViewer({
   }
 
   return (
+    <CalloutLedgerProvider value={calloutLedger}>
     <div className={`innings innings--focus innings--${focus.windowed ? 'windowed' : 'stacked'}`}>
       {cloudSync}
       {/* The section tabs (LINEUPS / INNINGS / BOX, handed down from GameView)
@@ -938,6 +948,7 @@ export function InningViewer({
         onBoxScore={onBoxScore}
       />
     </div>
+    </CalloutLedgerProvider>
   )
 }
 

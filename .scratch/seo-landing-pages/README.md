@@ -1,6 +1,11 @@
 # SEO / GEO landing pages — research, plan, and the build decision
 
-Status: `needs-triage` → awaiting owner decision on the editor approach.
+Status: wontfix (2026-08-18) — the "phase 2" pages this doc once deferred
+(minor league baseball, umpires, printable scorecard, "where Tally fits")
+are not worth filing. 11 guide pages have shipped since (PR #732,
+`src/copy/landing/pages/`), well past the original plan, and the topic is
+thriving without the deferred four. Revisit only if more `/learn` content
+is specifically wanted later.
 Scope: organic discovery, with AI assistants as the primary referrer.
 
 ---

@@ -1,4 +1,4 @@
-Status: ready-for-human
+Status: resolved
 Blocked by: 01-data-layer.md
 
 # Box score — give the existing Play of the Game card a Watch affordance
@@ -283,3 +283,7 @@ the issue anticipated it might have to be).
   depends on the image resolving.
 - Not folded in, as instructed: the per-play `AtBatCard` poster (a separate
   follow-up against the ORIGINAL video-highlights feature) is untouched.
+
+## Comments
+
+2026-08-18: Closed out during issue-tracker triage — this shipped (highlights-cascade PRs #586-589, #601: src/api/highlights.js, HighlightSheet.jsx, ModalPortal.jsx, HighlightClipCard.jsx, Team/PlayerHighlightsRail all present in src/). No GitHub issue needed.

@@ -1,5 +1,6 @@
-import { memo, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { Headshot } from '../player/Headshot.jsx'
+import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 
 // Show only the first handful up front and let a button reveal the rest —
 // same FormerTeammates/InsightsCard pattern (TeamInfo.jsx, BoxScore.jsx) as
@@ -41,11 +42,27 @@ function groupNotesBySubject(shown) {
 // empty (no bundle, or nothing yet qualifies).
 // Memoized: `notes` is already a memoized digest in InningViewer, so this whole
 // card can sit out any re-render the feed and the reveal mark didn't cause.
-export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle }) {
+export const MarginNotes = memo(function MarginNotes({ notes, feed, bundle, halfIdx = null }) {
   const [showAll, setShowAll] = useState(false)
-  if (!notes || notes.length === 0) return null
-  const shown = showAll ? notes : notes.slice(0, MARGIN_NOTES_SHOWN)
-  const hidden = notes.length - shown.length
+  const list = notes ?? []
+  const shown = showAll ? list : list.slice(0, MARGIN_NOTES_SHOWN)
+
+  // THE SHOWING IS RECORDED HERE, not where the notes were built — this is the
+  // component that decides which of them a reader actually meets, and the tail
+  // behind "Show N more" is not a showing until it is opened. Marking is one
+  // key per DISTINCT half (useCalloutLedger.js), and it happens in an effect
+  // rather than during render: a render runs twice under StrictMode and again
+  // on every feed poll, and only a committed one put anything on screen.
+  const ledger = useCalloutLedger()
+  const shownRef = useRef(shown)
+  shownRef.current = shown
+  const shownKeys = shown.map((n) => n.dedupeKey ?? n.text).join('|')
+  useEffect(() => {
+    ledger.markShown(shownRef.current, halfIdx)
+  }, [ledger, halfIdx, shownKeys])
+
+  if (list.length === 0) return null
+  const hidden = list.length - shown.length
   const groups = groupNotesBySubject(shown)
   return (
     <section className="marginnotes">

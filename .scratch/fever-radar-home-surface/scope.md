@@ -72,6 +72,10 @@ concerns the home-page/game-card surface.
 
 ## One separate, unresolved thread worth keeping
 
+**Status (2026-08-18): parked, not filed** — genuinely still open, distinct
+from the wontfix above. Needs its own scoping pass (does this belong
+anywhere at all, not just "where") before it's ready for GitHub.
+
 A research pass (independent of the placement question above) found that
 Baseball Savant already publishes the data needed to compute bbsbh's **own**
 version of this signal — `est_woba_minus_woba_diff` on Savant's Expected

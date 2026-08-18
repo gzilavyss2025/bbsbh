@@ -1,6 +1,6 @@
 # Knockout (mono) mark editing from the team-hub identity drawer
 
-Status: needs-triage
+Status: resolved — filed as gzilavyss2025/bbsbh#767
 
 ## Where this came from
 

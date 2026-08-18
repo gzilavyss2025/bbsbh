@@ -1,4 +1,4 @@
-// The SAME situational records as teamRecords.js, turned ninety degrees: one
+// The situational records from teamRecords.js, turned ninety degrees: one
 // split at a time, every club at one level, in rank order. "The Brewers are
 // 64-10 when they score four or more — where does that sit among the thirty?"
 // is the question this module answers and the per-club card cannot.

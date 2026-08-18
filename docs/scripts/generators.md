@@ -515,6 +515,13 @@ don't run these by hand.
   official MLB record, and a model output can't be reconciled that way, so it
   gets its own clearly-sourced surface (a `RadarPill`) instead of a rank in the
   callout worthiness table. App reads it via `src/api/feverRadar.js`.
+- `fever/gen-player-contracts.mjs` → `public/data/player-contracts/{00..99}.json` —
+  Fever Baseball's current contract feed, reduced from its league-wide payload
+  into player-ID shards for the profile-page Contract card. The generator
+  validates the feed's shipped count and its MLBAM-key join, retains source and
+  Cot's freshness dates, and writes every bucket so an unmatched player is a
+  normal null result rather than a 404. App reads it via
+  `src/api/person/contracts.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits
@@ -692,6 +699,16 @@ Re-run only to fold in a new season.
   closed list, not a moving season.
 
 ## Assets / off-app
+
+- `audit-callouts.mjs` — NOT a generator and NOT a CI gate: a developer tool that
+  replays every committed nightly callout bundle's game through the app's own five
+  callout builders, at each half's honest reader position, and reports per family how
+  often the data was there, how often the family fired, its worthiness spread, and —
+  on the two surfaces whose builder does not truncate itself — how often it survived
+  the cap. It names the families that never fire, which is the point. `--bundle-only`
+  runs with no network (a data-gate upper bound, never a fire rate); `--since/--until/
+  --date/--limit/--concurrency` scope the sweep. Writes `.scratch/callout-audit/`
+  (gitignored), never `public/data/`. Read alongside `docs/callouts.md`.
 
 - `gen-mono-logos.mjs` → `public/data/logos/mono/{teamId}.svg` — a ONE-COLOR knockout
   version of every club's mlbstatic mark, worn by the navy section mastheads (Batting

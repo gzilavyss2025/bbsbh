@@ -1,6 +1,6 @@
 # 08 — Empty tabs, tests, and the final sweep
 
-**Status:** blocked
+**Status:** resolved
 **Type:** task
 **Blocked by:** 07 (merged to `main`)
 **Runs:** alone.
@@ -69,3 +69,7 @@ tabs, asserting each renders its headline section. Import `test`/`expect` from
 - `npm run e2e` passes the five-tab walk locally.
 - `npm run lint`, `npm test` and `npm run build` pass.
 - Handoff names the MiLB club you tested and its URL.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.

@@ -30,7 +30,7 @@
 //   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
-//   '/team-records'                     -> { name: 'team-records', asOf, sportId, metric, half }
+//   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half }
 //                                          (one situational record, every club at one level, ranked.
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
 //                                           not a live mirror of its controls — same as standings.)
@@ -174,19 +174,20 @@ export function parseRoute(url) {
   // The four broadcast reports — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
-  // One situational record across a whole level. Carries the two scope hints
-  // every stats page carries (`?d=` cutoff, `?s=` level) plus two of its own:
-  // which split to open on, and which half of the season. Both of those are
-  // free-form strings here — the page resolves an unknown one to the first
-  // split in its menu rather than showing an empty table, so a link written
-  // against a renamed row still lands somewhere useful.
-  if (parts.length === 1 && parts[0] === 'team-records')
+  // Situational-record explorer. The old /team-records address remains an
+  // inbound alias for shared links; every path we emit uses the new name.
+  // The query carries scope plus optional category, metric, half, sort and
+  // order. The page validates each free-form value.
+  if (parts.length === 1 && (parts[0] === 'situational-records' || parts[0] === 'team-records'))
     return {
-      name: 'team-records',
+      name: 'situational-records',
       asOf,
       sportId,
+      category: q.get('category') || null,
       metric: q.get('metric') || null,
       half: q.get('half') || null,
+      sort: q.get('sort') || null,
+      order: q.get('order') || null,
     }
   // Dev-only scorecard harness — parsed and rendered, but linked from nowhere.
   if (parts.length === 1 && parts[0] === 'scorecard-lab')
@@ -498,13 +499,16 @@ export function umpirePath(id) {
 // how every row of the Numbers tab's Records card opens its own ranking. Built
 // on top of linkQuery so the `?d=`/`?s=` hints stay identical to every other
 // link's, rather than a second hand-built query that could drift from theirs.
-export function teamRecordsPath({ metric, half, ...opts } = {}) {
+export function situationalRecordsPath({ category, metric, half, sort, order, ...opts } = {}) {
   const base = linkQuery(opts)
   const q = new URLSearchParams(base.slice(1))
+  if (category) q.set('category', category)
   if (metric) q.set('metric', metric)
   if (half && half !== 'all') q.set('half', half)
+  if (sort && sort !== 'pct') q.set('sort', sort)
+  if (order === 'asc' || order === 'desc') q.set('order', order)
   const qs = q.toString()
-  return `/team-records${qs ? `?${qs}` : ''}`
+  return `/situational-records${qs ? `?${qs}` : ''}`
 }
 export function managerPath(id) {
   return `/manager/${id}`

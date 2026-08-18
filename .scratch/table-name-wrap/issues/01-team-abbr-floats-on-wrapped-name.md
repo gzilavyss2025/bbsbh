@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved — filed as gzilavyss2025/bbsbh#766
 
 # A wrapped player name floats its team abbreviation mid-row — fixed on the Foul Tracker, other flex-row name+team layouts likely share it
 

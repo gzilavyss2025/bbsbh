@@ -10,14 +10,27 @@ import { buildFieldGeometry, wallStroke, VIEWBOX, HOME } from '../../lib/ballpar
 
 const f = (n) => Math.round(n * 100) / 100
 
-export function BallparkDiagram({ dist, wall, arc, className = '' }) {
+// `viewBox` and `label` exist for the hit chart, which reuses this drawing as a
+// plot ground rather than as a dimensions diagram: it crops the dead sky off
+// the top so the field fills its card, and it is not "a ballpark diagram" to a
+// screen reader — it is a spray chart. Both default to what every other caller
+// already gets, so nothing else moves.
+export function BallparkDiagram({
+  dist,
+  wall,
+  arc,
+  className = '',
+  viewBox = `0 0 ${VIEWBOX.w} ${VIEWBOX.h}`,
+  label = 'Ballpark field dimensions diagram',
+  children = null,
+}) {
   const g = buildFieldGeometry(dist, wall, arc)
   return (
     <svg
       className={`bpdiagram ${className}`}
-      viewBox={`0 0 ${VIEWBOX.w} ${VIEWBOX.h}`}
+      viewBox={viewBox}
       role="img"
-      aria-label="Ballpark field dimensions diagram"
+      aria-label={label}
     >
       <path d={g.foul} className="bpdiagram__foul" />
       <path d={g.fair} className="bpdiagram__grass" />
@@ -87,6 +100,14 @@ export function BallparkDiagram({ dist, wall, arc, className = '' }) {
           {w.h}′
         </text>
       ))}
+      {/* An overlay drawn LAST, so a caller's own marks sit on top of the park
+          rather than under the fence. Plain children, not a render function:
+          a render function in this codebase means a spoiler gate (SealBox),
+          and this is only composition. The caller works in the same fixed
+          620x560 space the geometry above uses — feet map 1:1 to SVG units
+          off HOME (ballparkGeometry.js's header) — so it needs no scale of
+          its own. The hit chart's batted-ball dots are the first user. */}
+      {children}
     </svg>
   )
 }

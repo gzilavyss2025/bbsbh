@@ -1,6 +1,6 @@
 # 02 — Extract TeamPage's modules into components
 
-**Status:** ready-for-agent
+**Status:** resolved
 **Type:** task
 **Blocked by:** nothing — starts immediately
 **Runs alongside:** issue 01 (disjoint files, safe in parallel)
@@ -80,3 +80,7 @@ history) and one that only appears on MLB (jersey combos).
 - `npm run lint` and `npm test` pass.
 - PR description lists any bug you noticed and deliberately left alone.
 - Handoff includes `http://localhost:<port>/team/158?nointro`.
+
+## Comments
+
+2026-08-18: Closed out — team hub tabs already shipped in `src/screens/team/` (TeamHubShell, RosterTab, GamesTab, NumbersTab, MinorsTab, TeamTabBar). No GitHub issue needed.
