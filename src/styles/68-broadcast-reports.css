@@ -385,9 +385,16 @@
    `border-collapse: separate` (set on .standings) is what keeps each row's
    hairline aligned across the pinned/scrolling seam; and Safari drops
    position:sticky on a cell whose own display is not table-cell, which the
-   shared `.standings td.team { display: flex }` sets — so the TD goes back to
+   shared `.standings td.team { display: flex }` sets — so the cell goes back to
    a table cell and the flex moves onto .rpt__club inside it
-   (components/reports/ClubCell.jsx). */
+   (components/reports/ClubCell.jsx).
+
+   The body cell is a `<th scope="row">` here rather than a `<td>`, which is why
+   these selectors name both: it is the cell that NAMES its row for a screen
+   reader. `.standings`'s own body-cell treatment is written for `td`, so the
+   rule below restates it — a bare tbody `th` would otherwise inherit the
+   browser default (bold, centred) and read as a stray header inside the
+   board. */
 .rpt th.team,
 .rpt td.team {
   position: sticky;
@@ -397,9 +404,24 @@
   background: var(--bg-page);
 }
 
-.rpt td.team {
+.rpt td.team,
+.rpt tbody th.team {
   display: table-cell;
   vertical-align: middle;
+}
+
+/* `.standings td.team`'s treatment, restated for the row-header cell — the
+   shared rule is written for `td` and cannot see this one. Body cells only:
+   the `thead` cell above is a plain column caption and keeps the muted
+   condensed header styling every other header in the row has. */
+.rpt tbody th.team {
+  font-family: var(--font-body);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-small);
+  color: var(--text-body);
+  letter-spacing: var(--ls-caps);
+  padding: 7px 8px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
 
 .rpt thead th.team {
@@ -425,7 +447,8 @@
 
 /* Solid, not translucent: a pinned cell that lets the scrolling columns show
    through is worse than no highlight at all. The clay edge marks the row. */
-.rpt__row--mine td.team {
+.rpt__row--mine td.team,
+.rpt__row--mine th.team {
   background: var(--paper-3);
   box-shadow: inset 3px 0 0 var(--clay);
 }
@@ -605,4 +628,15 @@
 
 .method p:last-child {
   margin-bottom: 0;
+}
+
+/* The board scroller's focus ring. `.ledger-wrap` was never focusable before
+   BoardScroller.jsx made it a keyboard-reachable region, so it had no focus
+   treatment at all — and a focus stop a keyboard user cannot see is barely
+   better than one that is not there. Uses the shared ring token, like every
+   other focus indicator in the app. */
+.rpt-region:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: var(--space-1);
+  border-radius: var(--radius-xs);
 }

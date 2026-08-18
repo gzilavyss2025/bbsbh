@@ -20,6 +20,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
 import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
 import { ClubCell } from '../../components/reports/ClubCell.jsx'
+import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
 import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
 
 // THE CLOCK — how long a club's games take.
@@ -247,6 +248,16 @@ export function PacePage() {
               ))}
             </div>
 
+            {months.length > 0 && (
+              <p className="bcast-sec__note">
+                The BY MONTH column runs {MONTH_NAMES[Number(months[0])]} to{' '}
+                {MONTH_NAMES[Number(months[months.length - 1])]}, left to right, on one scale
+                shared by all thirty clubs — a taller column is a longer month, and the scale runs
+                from {asClock(monthMin)} to {asClock(monthMax)}. A month a club barely played is
+                drawn but is left out of that scale.
+              </p>
+            )}
+
             {board && !board.rankable && (
               <p className="hint">
                 Only {board.medianGames} games apiece so far. That is too few to tell these clubs
@@ -256,7 +267,7 @@ export function PacePage() {
               </p>
             )}
 
-            <div className="ledger-wrap">
+            <BoardScroller label="Game length board, every club ranked">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -316,7 +327,7 @@ export function PacePage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <ReportSection
@@ -327,7 +338,7 @@ export function PacePage() {
                   under each club that played it — the league’s longest night is one game, not
                   two."
           >
-            <div className="ledger-wrap">
+            <BoardScroller label="Longest and shortest game by club">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -367,7 +378,7 @@ export function PacePage() {
                     ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <section className="method">
@@ -406,8 +417,7 @@ export function PacePage() {
               {shortestGame
                 ? ` The quickest game anyone has played this season is ${asClock(shortestGame.shortest)} —
                    ${clubName(clubs, shortestGame.teamId)}, ${humanDate(shortestGame.shortestDate)}.`
-                : ''}{' '}
-              Regular season only, and only games already final.
+                : ''}
             </p>
           </section>
         </>

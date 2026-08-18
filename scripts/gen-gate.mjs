@@ -120,6 +120,16 @@ export function toRow(game, date) {
     venue: game?.venue?.name ?? null,
     dow: dayOfWeek(game.officialDate),
     month: Number(game.officialDate?.slice(5, 7)) || null,
+    // A game CALLED EARLY is still Final and still counted — a rain-shortened
+    // seven innings is a real, and really short, game. But it is a different
+    // kind of short from two starters working fast, and a page that reports a
+    // league's quickest games without being able to say how many of them were
+    // rained off is hiding a category rather than reporting one. Flagged here
+    // so the league line can count them and the method note can be honest.
+    shortened:
+      Number.isFinite(game?.linescore?.scheduledInnings) &&
+      Number.isFinite(game?.linescore?.currentInning) &&
+      game.linescore.currentInning < game.linescore.scheduledInnings,
   }
 }
 
@@ -300,6 +310,10 @@ export function leagueFor(rows) {
     // thing about the first version of that page.
     paceSd: min.length > 1 ? stdev(min) : null,
     over180: min.filter((v) => v >= 180).length,
+    // How many completed games did not reach their scheduled innings. The
+    // method note prints it rather than letting "only games already final"
+    // quietly cover the category.
+    shortened: rows.filter((r) => r.shortened && r.minutes != null).length,
     // COUNTED OFF THE GAMES, not off the clubs. Both clubs in a delayed game
     // carry that delay in their own row, so summing the club column doubles
     // every figure — which is exactly what the page did before this existed.
@@ -328,7 +342,7 @@ async function fetchSeason(season) {
     const endDate = `${season}-${pad(month)}-${pad(lastDayOf(season, month))}`
     const schedule = await getJson(
       `/api/v1/schedule?sportId=1&gameType=R&startDate=${startDate}&endDate=${endDate}` +
-        `&hydrate=gameInfo,venue`,
+        `&hydrate=gameInfo,venue,linescore`,
     )
     let kept = 0
     for (const d of schedule.dates ?? []) {

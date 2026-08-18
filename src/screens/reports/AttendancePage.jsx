@@ -12,6 +12,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
 import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
 import { ClubCell } from '../../components/reports/ClubCell.jsx'
+import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
 import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
 
 // THE GATE — who is actually going to the ballpark.
@@ -163,7 +164,7 @@ export function AttendancePage() {
               ))}
             </div>
 
-            <div className="ledger-wrap">
+            <BoardScroller label="Attendance board, every club ranked">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -208,7 +209,7 @@ export function AttendancePage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <ReportSection
@@ -217,7 +218,7 @@ export function AttendancePage() {
                   is by how much — a club whose weekend and weekday lines nearly meet sells the
                   same house whoever is in town and whenever they come."
           >
-            <div className="ledger-wrap">
+            <BoardScroller label="Weekend and weekday attendance by club">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -245,7 +246,7 @@ export function AttendancePage() {
                     ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <ReportSection
@@ -254,7 +255,7 @@ export function AttendancePage() {
                   dates is a small sample and a single sold-out weekend can carry one — read
                   it as who the town turns out for, not as a ranking."
           >
-            <div className="ledger-wrap">
+            <BoardScroller label="Best-drawing opponents and quietest night by club">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -285,7 +286,7 @@ export function AttendancePage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <section className="method">

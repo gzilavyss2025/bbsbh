@@ -19,6 +19,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
 import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
 import { ClubCell } from '../../components/reports/ClubCell.jsx'
+import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
 import { BarCell } from '../../components/reports/ReportBar.jsx'
 
 // THE FARM REPORT — one number for how good an organisation's farm system is,
@@ -179,7 +180,7 @@ export function FarmSystemPage() {
               ))}
             </ul>
 
-            <div className="ledger-wrap">
+            <BoardScroller label="Farm system index, every organisation ranked">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -226,7 +227,7 @@ export function FarmSystemPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
 
             {r2 && (
               <p className="bcast-sec__note">
@@ -326,7 +327,7 @@ function OrgDetail({ row, clubs }) {
   if (!row) return null
   return (
     <>
-      <div className="ledger-wrap">
+      <BoardScroller label="Affiliates of the selected organisation">
         <table className="standings rpt">
           <thead>
             <tr>
@@ -339,7 +340,9 @@ function OrgDetail({ row, clubs }) {
           <tbody>
             {row.affiliates.map((a) => (
               <tr key={a.id}>
-                <td className="team">{a.name}</td>
+                <th scope="row" className="team">
+                  {a.name}
+                </th>
                 <td>{a.level}</td>
                 <td>{a.w == null ? '—' : `${a.w}-${a.l}`}</td>
                 <td>{a.w == null || a.w + a.l === 0 ? '—' : pct3(a.w / (a.w + a.l))}</td>
@@ -347,9 +350,9 @@ function OrgDetail({ row, clubs }) {
             ))}
           </tbody>
         </table>
-      </div>
+      </BoardScroller>
 
-      <div className="ledger-wrap">
+      <BoardScroller label="Ranked prospects of the selected organisation">
         <table className="standings rpt">
           <thead>
             <tr>
@@ -362,7 +365,9 @@ function OrgDetail({ row, clubs }) {
           <tbody>
             {row.prospects.length === 0 ? (
               <tr>
-                <td className="team">None inside the published list</td>
+                <th scope="row" className="team">
+                  None inside the published list
+                </th>
                 <td>—</td>
                 <td>—</td>
                 <td>—</td>
@@ -370,9 +375,9 @@ function OrgDetail({ row, clubs }) {
             ) : (
               row.prospects.map((p) => (
                 <tr key={p.playerId}>
-                  <td className="team">
+                  <th scope="row" className="team">
                     <PlayerLink id={p.playerId}>{p.name}</PlayerLink>
-                  </td>
+                  </th>
                   <td>{p.position}</td>
                   <td>#{p.rank}</td>
                   <td>{p.age ?? '—'}</td>
@@ -381,7 +386,7 @@ function OrgDetail({ row, clubs }) {
             )}
           </tbody>
         </table>
-      </div>
+      </BoardScroller>
     </>
   )
 }

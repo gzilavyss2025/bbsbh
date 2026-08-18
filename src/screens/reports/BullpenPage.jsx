@@ -13,6 +13,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { ReportMasthead, ReportSection } from '../../components/reports/ReportMasthead.jsx'
 import { Slab, SlabRow } from '../../components/reports/StatSlab.jsx'
 import { ClubCell } from '../../components/reports/ClubCell.jsx'
+import { BoardScroller } from '../../components/reports/BoardScroller.jsx'
 import { BarCell, StatusMeter } from '../../components/reports/ReportBar.jsx'
 
 // THE PEN — all thirty bullpens on one board, tonight.
@@ -156,7 +157,7 @@ export function BullpenPage() {
               ))}
             </ul>
 
-            <div className="ledger-wrap">
+            <BoardScroller label="Bullpen board, every club ranked">
               <table className="standings rpt">
                 <thead>
                   <tr>
@@ -209,7 +210,7 @@ export function BullpenPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </BoardScroller>
           </ReportSection>
 
           <ReportSection
@@ -233,7 +234,7 @@ export function BullpenPage() {
             </div>
 
             {selected && (
-              <div className="ledger-wrap">
+              <BoardScroller label="Arm by arm for the selected club">
                 <table className="standings rpt">
                   <thead>
                     <tr>
@@ -246,12 +247,12 @@ export function BullpenPage() {
                   <tbody>
                     {selected.arms.map((a) => (
                       <tr key={a.personId}>
-                        <td className="team">
+                        <th scope="row" className="team">
                           <PlayerLink id={a.personId}>{a.name}</PlayerLink>
                           {a.reasons.length > 0 && (
                             <span className="rpt__sub">{a.reasons.join(' · ')}</span>
                           )}
-                        </td>
+                        </th>
                         <td>{STATUS[a.status]?.label ?? a.status}</td>
                         <td>
                           {a.last7dayPitches}
@@ -269,7 +270,7 @@ export function BullpenPage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </BoardScroller>
             )}
           </ReportSection>
 

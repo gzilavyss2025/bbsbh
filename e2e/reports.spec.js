@@ -44,7 +44,7 @@ for (const board of BOARDS) {
     const overflow = await wrap.evaluate((el) => el.scrollWidth - el.clientWidth)
     expect(overflow, 'board should be wider than a phone').toBeGreaterThan(0)
 
-    const cell = wrap.locator('tbody td.team').first()
+    const cell = wrap.locator('tbody th.team').first()
     const before = await cell.boundingBox()
     await wrap.evaluate((el) => {
       el.scrollLeft = el.scrollWidth
@@ -76,10 +76,11 @@ test('The Clock: rows showing the same time carry the same rank', async ({ page 
 
   const rows = await body.evaluateAll((trs) =>
     trs.map((tr) => {
-      const cells = tr.querySelectorAll('td')
+      // The club cell is a `<th scope="row">`, so the numeric columns are the
+      // `td`s and the rank glyph lives in the header cell beside them.
       return {
-        rank: cells[0].querySelector('.rpt__rank')?.textContent?.trim() ?? '',
-        clock: cells[1].textContent.trim(),
+        rank: tr.querySelector('th.team .rpt__rank')?.textContent?.trim() ?? '',
+        clock: tr.querySelectorAll('td')[0].textContent.trim(),
       }
     }),
   )
