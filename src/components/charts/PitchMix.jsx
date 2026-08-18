@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ordinal } from '../../api/person.js'
 import { pitchFamily } from '../../api/pitchArsenal.js'
 
 const DASH = '—'
@@ -148,8 +149,11 @@ function LookTab({ label, active, onSelect }) {
 }
 
 // The 100 mph band. Two facts always (how many, and his hardest), a third when
-// the nightly file carries a rank — see heatView, which leaves rank null until
-// gen-pitch-arsenal.mjs writes one.
+// the nightly file carries a rank. The rank's label names its COHORT rather
+// than saying "MLB rank": the denominator is the century club at his level,
+// so "2nd of 58" is second among arms who have been to triple digits, and a
+// label reading "MLB rank" would invite a reader to take 58 for the size of
+// the league.
 function HeatBand({ heat }) {
   return (
     <div className="pitchslab__heat">
@@ -169,10 +173,14 @@ function HeatBand({ heat }) {
         )}
         {heat.rank != null && heat.of != null && (
           <div className="pitchslab__fact pitchslab__fact--rank">
+            {/* An ORDINAL, not a bare number. "1 of 63" beside a label
+                reading "among arms at 100+" says he is one of sixty-three
+                such arms — the opposite of a ranking. "1st of 63" can only
+                mean the one thing. */}
             <span className="pitchslab__factnum">
-              {heat.rank} of {heat.of}
+              {ordinal(heat.rank)} of {heat.of}
             </span>
-            <span className="pitchslab__factlabel">MLB rank</span>
+            <span className="pitchslab__factlabel">Among arms at 100+</span>
           </div>
         )}
       </div>

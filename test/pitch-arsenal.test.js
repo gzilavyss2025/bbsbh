@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { aggregateGamePitchTypes } from '../scripts/gen-pitch-arsenal.mjs'
+import { aggregateGamePitchTypes, centuryRankMap } from '../scripts/gen-pitch-arsenal.mjs'
 import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, MIN_ARSENAL_PITCHES, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
@@ -180,10 +180,13 @@ test('heatView leaves rank null until the generator writes one, and reads it whe
   assert.equal(bare.of, null)
 
   const ranked = dataWith(100, [heatRow('FF', 40, 103.4)])
-  ranked.pit[100].centuryRank = { rank: 2, of: 58 }
+  ranked.pit[100].centuryRank = { mlb: { rank: 2, of: 58 }, aaa: { rank: 1, of: 4 } }
   const heat = heatView(ranked, 100, true)
   assert.equal(heat.rank, 2)
   assert.equal(heat.of, 58)
+  // The AAA season is ranked against AAA, never against the majors.
+  ranked.pit[100].aaa = ranked.pit[100].mlb
+  assert.equal(heatView(ranked, 100, false).of, 4)
 })
 
 test('heatView degrades to null for a missing personId or absent file', () => {
@@ -291,4 +294,22 @@ test('arsenalTtoView reads a trimmed tto array — a look he never reached is si
   const looks = arsenalTtoView(data, 100, true)
   assert.deepEqual(looks.map((l) => l.look), [1, 2], 'no third look, and none invented')
   assert.equal(looks[1].rows[0].velo, 100.1, 'the pair reads [pitches, avgVelo] in that order')
+})
+
+// --- century-club league ranking --------------------------------------------
+test('centuryRankMap ranks most pitches first and shares a place on a tie', () => {
+  const ranks = centuryRankMap([['a', 40], ['b', 120], ['c', 40], ['d', 5]])
+  assert.deepEqual(ranks.get('b'), { rank: 1, of: 4 })
+  assert.deepEqual(ranks.get('a'), { rank: 2, of: 4 })
+  assert.deepEqual(ranks.get('c'), { rank: 2, of: 4 }, 'a tie shares the place')
+  assert.deepEqual(ranks.get('d'), { rank: 4, of: 4 }, 'and the next man skips one')
+})
+
+test('centuryRankMap reports the COHORT size, not the league size', () => {
+  const ranks = centuryRankMap([['a', 10], ['b', 9]])
+  assert.equal(ranks.get('a').of, 2, 'of counts who was handed in, which is the century club')
+})
+
+test('centuryRankMap handles an empty cohort', () => {
+  assert.equal(centuryRankMap([]).size, 0)
 })

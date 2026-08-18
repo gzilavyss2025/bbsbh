@@ -120,10 +120,13 @@ export function pitchArsenalFor(data, personId, isMlb) {
 // doesn't render, which is the right answer for the large majority of arms
 // who never touch triple digits.
 //
-// `rank`/`of` stay null until the generator writes a `centuryRank` onto his
-// entry: ranking him against the league needs the whole level, and the shard
-// he rides in is one hundredth of it, so the reader cannot derive it. The
-// band renders the two facts it does have and leaves the rank out.
+// `rank`/`of` come from the generator's own league pass (`centuryRank`, keyed
+// by level): ranking him needs the whole level and the shard he rides in is
+// one hundredth of it, so the reader cannot derive it. `of` is the size of the
+// CENTURY CLUB at his level, not of the league — second of the 58 arms who
+// have been to triple digits, which is the only denominator that says
+// anything. Both stay null on a file written before that pass existed, and
+// the band then renders the two facts it does have.
 export function heatView(data, personId, isMlb) {
   const entry = data?.pit?.[personId]
   const types = isMlb ? entry?.mlb : entry?.aaa
@@ -134,11 +137,12 @@ export function heatView(data, personId, isMlb) {
   for (const t of types) {
     if (t.maxVelo != null && (maxVelo == null || t.maxVelo > maxVelo)) maxVelo = t.maxVelo
   }
+  const place = entry.centuryRank?.[isMlb ? 'mlb' : 'aaa']
   return {
     count,
     maxVelo: maxVelo == null ? null : Math.round(maxVelo * 10) / 10,
-    rank: entry.centuryRank?.rank ?? null,
-    of: entry.centuryRank?.of ?? null,
+    rank: place?.rank ?? null,
+    of: place?.of ?? null,
   }
 }
 

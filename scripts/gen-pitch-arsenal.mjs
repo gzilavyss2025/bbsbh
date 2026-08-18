@@ -39,7 +39,7 @@ import { getJson } from './lib/statsapi.mjs'
 import { writeShards } from './lib/io.js'
 import { shardKey100 } from '../src/lib/shardKey.js'
 import { MIN_SIMILARITY_PITCHES } from '../src/lib/pitcherSimilarity.js'
-import { CENTURY_MPH } from '../src/api/pitchArsenal.js'
+import { CENTURY_CLUB_MIN, CENTURY_MPH } from '../src/api/pitchArsenal.js'
 import { parseArgs, dateRange } from './lib/args.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -262,6 +262,26 @@ async function fetchPitcherHands(sportIds, season) {
   return hands
 }
 
+// Competition ranking (1, 2, 2, 4) over one level's century-club counts —
+// ties share a place and the next man skips, the way a leaderboard reads.
+// `counts` is [id, count] pairs ALREADY filtered to the cohort being ranked;
+// `of` is that cohort's size, so the rank a card renders and the denominator
+// beside it always describe the same population. Pure, exported for tests.
+export function centuryRankMap(counts) {
+  const sorted = [...counts].sort((a, b) => b[1] - a[1])
+  const of = sorted.length
+  const ranks = new Map()
+  let lastCount = null
+  let lastRank = 0
+  sorted.forEach(([id, count], i) => {
+    const rank = count === lastCount ? lastRank : i + 1
+    lastCount = count
+    lastRank = rank
+    ranks.set(id, { rank, of })
+  })
+  return ranks
+}
+
 // --- JSON export from the accumulated table ----------------------------------
 export function exportPitchArsenal(db, hands = {}) {
   const ingested = db.prepare('SELECT game_pk, level, date FROM pitch_arsenal_ingested_games').all()
@@ -307,6 +327,29 @@ export function exportPitchArsenal(db, hands = {}) {
     while (tto.length && tto[tto.length - 1][0] === 0) tto.pop()
     if (tto.length) type.tto = tto
     entry[r.level].push(type)
+  }
+
+  // Where a pitcher places among the arms at his own level who have thrown
+  // CENTURY_CLUB_MIN+ pitches at CENTURY_MPH+. Ranked HERE rather than in the
+  // app because ranking needs the whole level and the player page fetches one
+  // hundredth of it — a reader cannot derive this from the bucket he holds.
+  //
+  // The cohort is the century club itself, not every arm on file: "2nd of 58"
+  // means second among the 58 who have been there, which is the honest
+  // denominator for a fact about triple digits. Ranking him against 800 arms
+  // who have never touched 100 would put almost everyone in a tie for last and
+  // say nothing. Per LEVEL, never pooled — the same rule the rest of this
+  // file follows.
+  for (const level of ['mlb', 'aaa']) {
+    const counts = []
+    for (const [id, entry] of Object.entries(pit)) {
+      const n = (entry[level] ?? []).reduce((sum, t) => sum + (t.century ?? 0), 0)
+      if (n >= CENTURY_CLUB_MIN) counts.push([id, n])
+    }
+    for (const [id, place] of centuryRankMap(counts)) {
+      pit[id].centuryRank ??= {}
+      pit[id].centuryRank[level] = place
+    }
   }
 
   return {
