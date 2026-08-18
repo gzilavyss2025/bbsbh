@@ -87,6 +87,30 @@ for usage; never troubleshoot a network failure by re-running headed —
 Chromium unreachable is a sandbox limitation the mock/relay already handles,
 not something a visible browser window fixes.
 
+**`e2e/fixtures/manifest.json`** is the registry for what's captured — one
+entry per file under `e2e/fixtures/`, each naming its capture date, source
+URL, and a short note (a generic image sets `noExpiry: true` since it doesn't
+go stale the way live-game data does). It's the source of truth; don't
+hand-duplicate its contents elsewhere. Two guards read it:
+
+- `check-fixture-freshness.mjs` (`npm run lint`, no network needed) fails a
+  captured fixture past a 180-day budget — same "a convention with no script
+  behind it drifts" argument as `check-dir-size.mjs` (ADR-0038), aimed at
+  fixture age instead of directory size.
+- `check-feed-shape-drift.mjs` (`npm run check:feed-shape-drift`, needs live
+  network so it's **not** part of `npm run lint` — see the PR template) fetches
+  a fresh copy of the anchor game's feed and checks that every path the
+  captured fixture depends on still resolves. A completed historical game's
+  own content never changes, so a missing path means MLB changed the API
+  shape, not the game — this automates the half of "confirm a new field
+  against a real response; do not guess" (root CLAUDE.md) a script can do. It
+  runs nightly from `update-nightly-data.yml` (the one environment in this
+  repo with real, scheduled network access).
+
+Recapturing a fixture: refetch it with the same recipe as the unit-suite
+fixture above, save it under `e2e/fixtures/api/` or `e2e/fixtures/images/`,
+and update its `capturedAt` (and `sourceUrl` if it changed) in manifest.json.
+
 The unit suite's `invariant-real-game.test.js` now pins the same spoiler
 guarantee at the **data layer** deterministically in CI, so a regression in the
 reveal-only selectors is caught automatically even though the browser specs

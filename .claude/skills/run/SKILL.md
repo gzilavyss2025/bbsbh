@@ -72,8 +72,12 @@ returns a fresh parse every call — no `structuredClone` needed. A spec pinned
 to a *different* game still benefits from `installMockApi`'s image fixtures
 and relay fallback even without a captured feed for that gamePk; add one
 (capture via the recipe in `docs/testing.md`, drop the JSON under
-`e2e/fixtures/api/`, add an entry to `API_FIXTURES` in `mock-api.js`) when a
-spec's real network dependency becomes a recurring problem, not preemptively.
+`e2e/fixtures/api/`, add an entry to `API_FIXTURES` in `mock-api.js`, **and an
+entry in `e2e/fixtures/manifest.json`** — `check-fixture-freshness.mjs`
+enforces every captured file is listed there) when a spec's real network
+dependency becomes a recurring problem, not preemptively. Check
+`e2e/fixtures/manifest.json` first — what's already captured, and why — before
+assuming a spec needs its own new mock.
 
 ## Fast path: Playwright (preferred)
 
