@@ -105,6 +105,11 @@ test('FOOTER_TRAIL is the guides hub and About, in that order, both resolved', (
   }
   assert.equal(FOOTER_TRAIL[0].path, '/learn')
   assert.equal(FOOTER_TRAIL[1].path, '/about')
+  assert.deepEqual(
+    FOOTER_TRAIL.map((page) => page.group?.id),
+    ['guides', 'tools'],
+    'footer trail entries need their directory glyph groups',
+  )
 })
 
 // The footers list PAGE_GROUPS, so anything in FOOTER_TRAIL must NOT also be a

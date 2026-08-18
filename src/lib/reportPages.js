@@ -155,8 +155,14 @@ export const MENU_GROUPS = [...PAGE_GROUPS, GUIDES_GROUP, TOOLS_GROUP]
 // already one of the three bordered action buttons; on a report page it is a
 // printable worksheet rather than somewhere that page leads.
 export const FOOTER_TRAIL = [
-  GUIDES_GROUP.pages[GUIDES_GROUP.pages.length - 1],
-  TOOLS_GROUP.pages.find((page) => page.path === '/about'),
+  {
+    ...GUIDES_GROUP.pages[GUIDES_GROUP.pages.length - 1],
+    group: { id: GUIDES_GROUP.id, label: GUIDES_GROUP.label },
+  },
+  {
+    ...TOOLS_GROUP.pages.find((page) => page.path === '/about'),
+    group: { id: TOOLS_GROUP.id, label: TOOLS_GROUP.label },
+  },
 ]
 
 // A guide path is an ordinary URL, not an app route — anything rendering one

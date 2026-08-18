@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNav, useRouteLink } from '../../lib/nav.js'
 import { MENU_GROUPS, isGuidePath } from '../../lib/reportPages.js'
+import { DirectoryHeading } from './DirectoryHeading.jsx'
 
 // A persistent icon button, sibling to SiteSearchButton, that opens a sheet
 // listing the app's standalone pages — grouped now, not one flat run of
@@ -34,7 +35,7 @@ export function SiteMenuButton({ className = '' }) {
         type="button"
         className={`sitemenu-btn ${className}`}
         onClick={() => setOpen(true)}
-        aria-label="More pages"
+        aria-label="Site menu"
         aria-haspopup="dialog"
         aria-expanded={open}
       >
@@ -105,7 +106,7 @@ function SiteMenuModal({ onClose }) {
 
   return (
     <div
-      className="scrim"
+      className="scrim scrim--site-menu"
       onClick={(e) => e.target.classList.contains('scrim') && onClose()}
     >
       <div
@@ -113,10 +114,13 @@ function SiteMenuModal({ onClose }) {
         className="sheet sitemenusheet"
         role="dialog"
         aria-modal="true"
-        aria-label="More pages"
+        aria-label="Site menu"
       >
         <div className="sitemenusheet__head">
-          <h2 className="sheet__title">More</h2>
+          <div>
+            <p className="sitemenusheet__eyebrow">Tally Baseball</p>
+            <h2 className="sheet__title">Site menu</h2>
+          </div>
           <button
             ref={closeRef}
             type="button"
@@ -131,7 +135,7 @@ function SiteMenuModal({ onClose }) {
         <div className="sitemenusheet__scroll">
           {MENU_GROUPS.map((group) => (
             <section key={group.id} className="sitemenusheet__group">
-              <h3 className="dirhd">{group.label}</h3>
+              <DirectoryHeading group={group} as="h3" />
               <ul className="navdir__list">
                 {group.pages.map((item) => {
                   const props = linkProps(item.path)
