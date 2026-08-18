@@ -422,3 +422,151 @@
     font-size: var(--fs-hero-sm);
   }
 }
+
+/* ============================================================
+   PITCH MIX, LINEUP CARD — the OPPOSING STARTER's mix on the lineup page
+   (PitchArsenalMix.jsx, .startercard__arsenal in 10-lineup.css /
+   25-wide-layout.css). Plain paper rows, not the ink slab above: it is one
+   panel of a manila card, and inverting it would make the mix shout over the
+   pitcher whose card it is.
+
+   These rules lived in 10-lineup.css and moved here whole, so both readers of
+   api/pitchArsenal.js are dressed in one file. Nothing else styles `.arsenal`.
+   ============================================================ */
+
+.arsenal__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+  margin: 0;
+}
+
+.arsenal__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rows read as ledger lines — same dashed divider the card uses between its
+   season-stats/last-outing rows above (.startercard__stats/__last) — rather
+   than a gap, so the mix reads as one continuous stack of dated facts. */
+/* Two flexible spacer tracks (2 and 4, left empty — .arsenal__pct/__velo are
+   placed explicitly into 3 and 5) soak up the row's leftover width instead of
+   leaving it stranded past the last column: % lands further from the name,
+   MPH lands flush against the card's right edge, and both grow apart as the
+   card gets wider rather than staying bunched at a fixed offset. */
+.arsenal__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr 5ch 1fr 74px;
+  align-items: center;
+  column-gap: var(--space-2);
+  padding: 5px 0;
+  font-size: var(--fs-compact);
+  border-top: var(--bw-hair) dashed var(--border-hairline);
+}
+.arsenal__row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.arsenal__name {
+  font-weight: var(--w-semibold);
+  color: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.arsenal__pct {
+  grid-column: 3;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-body);
+  font-weight: var(--w-bold);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.arsenal__velo {
+  grid-column: 5;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+  color: var(--text-caption);
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* The head row: the label on the left, the times-through filter on the right,
+   in the open space the label left (this is the top-right corner of the mix
+   panel). The filter renders only when the nightly file carries more than one
+   qualifying look — see arsenalTtoView — so on a card with no split the row is
+   the label alone and reads exactly as it did before. */
+.arsenal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: 6px;
+}
+
+/* A pencil-ruled segmented control rather than the slab's filled tabs: this
+   sits on manila, where the slab's --heat-* inks have nothing to sit on. Same
+   construction as .levelnav — a hairline between cells, the active cell taking
+   the accent behind knocked-out type. */
+.arsenal__tabs {
+  display: flex;
+  flex: none;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.arsenal__tab {
+  appearance: none;
+  min-width: 34px;
+  min-height: 24px;
+  padding: 0 7px;
+  border: 0;
+  border-left: var(--bw-hair) solid var(--border-rule);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+.arsenal__tab:first-child {
+  border-left: 0;
+}
+
+/* Hover and keyboard focus light the cell the same way, and the active cell
+   stays lit — three unlit siblings make that unambiguous without a ring. */
+.arsenal__tab.is-active,
+.arsenal__tab:hover,
+.arsenal__tab:focus-visible {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+/* What the tabs mean, said once beneath them — "1st" beside "2nd" is only
+   legible if something nearby says first WHAT. Right-aligned under the tabs
+   it labels, not centered under the whole panel. */
+.arsenal__tabnote {
+  margin: 0 0 6px;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--text-muted);
+}

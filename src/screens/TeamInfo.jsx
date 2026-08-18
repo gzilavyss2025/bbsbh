@@ -50,7 +50,7 @@ import { RadarPill } from '../components/badges/RadarPill.jsx'
 import { milestoneTextFor } from '../api/callouts.js'
 import { radarEntryFor } from '../api/feverRadar.js'
 import { savantPercentilesFor, qualifiedCount } from '../api/savantPercentiles.js'
-import { fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
+import { arsenalTtoView, fetchPitchArsenalFor, pitchArsenalFor } from '../api/pitchArsenal.js'
 import { PitchArsenalMix } from '../components/charts/PitchArsenalMix.jsx'
 import { SectionMasthead } from '../components/ui/SectionMasthead.jsx'
 import { BullpenBoard, useBullpenReveal, BullpenToggle } from '../components/teamstats/BullpenBoard.jsx'
@@ -411,6 +411,13 @@ function TeamSections({
     () => pitchArsenalFor(arsenalShard, oppPitcher?.id, isMlb),
     [arsenalShard, oppPitcher?.id, isMlb],
   )
+  // The same mix split by times through the order, off the same shard — the
+  // card's filter. Null for an arm the file carries no split for, and the
+  // card then renders the season with no filter at all.
+  const oppArsenalTto = useMemo(
+    () => arsenalTtoView(arsenalShard, oppPitcher?.id, isMlb),
+    [arsenalShard, oppPitcher?.id, isMlb],
+  )
   const oppDefense = useMemo(() => selectOpposingDefense(feed, side), [feed, side])
   // The bullpen this side's lineup is about to face, not its own — it nests
   // under the opposing starter card (see BullpenBoard's own header), so it
@@ -497,6 +504,7 @@ function TeamSections({
         callouts={callouts}
         isMlb={isMlb}
         arsenal={oppArsenal}
+        arsenalTto={oppArsenalTto}
         bullpenToggle={
           <BullpenToggle
             hasArms={oppBullpenArms.length > 0}
@@ -697,6 +705,7 @@ function OpposingStarterCard({
   callouts,
   isMlb,
   arsenal,
+  arsenalTto,
   bullpenToggle,
 }) {
   return (
@@ -768,7 +777,13 @@ function OpposingStarterCard({
           {/* Fills the wide layout's open right half (see .startercard__arsenal
               in index.css) — hidden below the wide breakpoint, where there's
               no room for it next to the headshot + info column. */}
-          {arsenal && <PitchArsenalMix arsenal={arsenal} className="startercard__arsenal" />}
+          {arsenal && (
+            <PitchArsenalMix
+              arsenal={arsenal}
+              tto={arsenalTto}
+              className="startercard__arsenal"
+            />
+          )}
         </div>
       ) : (
         <p className="hint">Not posted yet.</p>

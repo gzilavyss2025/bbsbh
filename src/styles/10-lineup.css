@@ -258,73 +258,9 @@
   display: none;
 }
 
-.arsenal__title {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-caption);
-  margin: 0 0 6px;
-}
-
-.arsenal__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Rows read as ledger lines — same dashed divider the card uses between its
-   season-stats/last-outing rows above (.startercard__stats/__last) — rather
-   than a gap, so the mix reads as one continuous stack of dated facts. */
-/* Two flexible spacer tracks (2 and 4, left empty — .arsenal__pct/__velo are
-   placed explicitly into 3 and 5) soak up the row's leftover width instead of
-   leaving it stranded past the last column: % lands further from the name,
-   MPH lands flush against the card's right edge, and both grow apart as the
-   card gets wider rather than staying bunched at a fixed offset. */
-.arsenal__row {
-  display: grid;
-  grid-template-columns: minmax(120px, 180px) 1fr 5ch 1fr 74px;
-  align-items: center;
-  column-gap: var(--space-2);
-  padding: 5px 0;
-  font-size: var(--fs-compact);
-  border-top: var(--bw-hair) dashed var(--border-hairline);
-}
-.arsenal__row:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-
-.arsenal__name {
-  font-weight: var(--w-semibold);
-  color: var(--text-body);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.arsenal__pct {
-  grid-column: 3;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  color: var(--text-body);
-  font-weight: var(--w-bold);
-  text-align: left;
-  white-space: nowrap;
-}
-
-.arsenal__velo {
-  grid-column: 5;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-num);
-  color: var(--text-caption);
-  text-align: left;
-  white-space: nowrap;
-}
+/* The mix's own rows, its times-through filter and the card's dark dress live
+   in 69-pitch-arsenal.css beside the player page's Pitches card, so both
+   readers of api/pitchArsenal.js are dressed in one file. */
 
 /* ---------------------------------------------------------- former teammates
    Pairs of players — one from each club — who once shared a (team, season):
