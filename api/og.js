@@ -8,9 +8,8 @@
 // Part of the crawler-only link-preview layer (see api/_lib/cards.js and
 // docs/adr/0012-dynamic-link-previews.md). The palette is lifted verbatim from
 // src/tokens/colors.css and the type from src/tokens/typography.css (IBM Plex,
-// loaded per-request from Google Fonts and subset to the card's own glyphs) —
-// the paper-scorebook look (manila paper, navy ink, kraft-amber seal) the rest
-// of the app wears.
+// bundled in api/_lib/fonts.js — see the note below) — the paper-scorebook look
+// (manila paper, navy ink, kraft-amber seal) the rest of the app wears.
 //
 // Built as plain Satori element objects (no JSX) so the function needs no React
 // dependency or JSX build pragma. Every remote image is fetched here and inlined
@@ -19,6 +18,7 @@
 
 import { ImageResponse } from '@vercel/og'
 import { fetchWithTimeout } from './_lib/http.js'
+import { PLEX_COND_600, PLEX_COND_700, PLEX_SANS_600 } from './_lib/fonts.js'
 
 export const config = { runtime: 'edge' }
 
@@ -47,51 +47,31 @@ const TEAM_COLORS = {
   144: '#CE1141', 145: '#27251F', 146: '#00A3E0', 147: '#003087', 158: '#FFC52F',
 }
 
-// --- fonts: IBM Plex, fetched from Google Fonts and subset to the card ------
-// Satori needs real TTF/OTF buffers (it can't read CSS @imports), so we ask the
-// css2 endpoint for exactly the glyphs this card uses. `head` is the app's
+// --- fonts: IBM Plex, bundled — no per-request network fetch ---------------
+// Satori needs real TTF/OTF buffers (it can't read CSS @imports). These three
+// weights used to be fetched fresh from Google Fonts on every single card
+// render (three font requests, each a CSS lookup plus a follow-up TTF fetch);
+// that was the single largest cost in this function's CPU/latency budget for
+// zero benefit, since the font bytes never change. api/_lib/fonts.js bundles
+// the same files as base64 (the full family file, not glyph-subset, so an
+// accented name — "Muñoz", "Valdez" — still renders). `head` is the app's
 // display face (Plex Sans Condensed — the athletic all-caps header voice from
-// typography.css); `body` is Plex Sans for the sub line. If Google is
-// unreachable, everything falls back to Satori's bundled font (fonts: []).
-const FONT_FALLBACK = 'sans-serif'
-const BASE_GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 @·—|#.,&'\"()/:+-"
-
-// Cap the glyph subset too, so a cache-busting query can't inflate the font
-// requests. The upstream-timeout guard itself (fetchWithTimeout) is shared
-// with api/_lib/cards.js — see api/_lib/http.js.
-const MAX_CARD_TEXT = 160
-
-async function loadGoogleFont(spec, text) {
-  const url = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(spec)}&text=${encodeURIComponent(text)}`
-  const css = await (await fetchWithTimeout(url)).text()
-  const m = css.match(/src:\s*url\((.+?)\)\s*format\('(?:opentype|truetype)'\)/)
-  if (!m) throw new Error(`no ttf src for ${spec}`)
-  const res = await fetchWithTimeout(m[1])
-  if (!res.ok) throw new Error(`font ${res.status} for ${spec}`)
-  return res.arrayBuffer()
+// typography.css); `body` is Plex Sans for the sub line.
+function b64ToArrayBuffer(b64) {
+  const binary = atob(b64)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return bytes.buffer
 }
 
-async function loadFonts(cardText) {
-  const capped = (cardText || '').slice(0, MAX_CARD_TEXT)
-  const text = BASE_GLYPHS + capped.toUpperCase() + capped
-  try {
-    const [cond6, cond7, sans6] = await Promise.all([
-      loadGoogleFont('IBM Plex Sans Condensed:wght@600', text),
-      loadGoogleFont('IBM Plex Sans Condensed:wght@700', text),
-      loadGoogleFont('IBM Plex Sans:wght@600', text),
-    ])
-    return {
-      head: 'IBM Plex Sans Condensed',
-      body: 'IBM Plex Sans',
-      fonts: [
-        { name: 'IBM Plex Sans Condensed', data: cond6, weight: 600, style: 'normal' },
-        { name: 'IBM Plex Sans Condensed', data: cond7, weight: 700, style: 'normal' },
-        { name: 'IBM Plex Sans', data: sans6, weight: 600, style: 'normal' },
-      ],
-    }
-  } catch {
-    return { head: FONT_FALLBACK, body: FONT_FALLBACK, fonts: [] }
-  }
+const FONTS = {
+  head: 'IBM Plex Sans Condensed',
+  body: 'IBM Plex Sans',
+  fonts: [
+    { name: 'IBM Plex Sans Condensed', data: b64ToArrayBuffer(PLEX_COND_600), weight: 600, style: 'normal' },
+    { name: 'IBM Plex Sans Condensed', data: b64ToArrayBuffer(PLEX_COND_700), weight: 700, style: 'normal' },
+    { name: 'IBM Plex Sans', data: b64ToArrayBuffer(PLEX_SANS_600), weight: 600, style: 'normal' },
+  ],
 }
 
 // --- tiny hyperscript for Satori (element = { type, props }) ---------------
@@ -388,12 +368,11 @@ export async function buildTree(p, F) {
 
 export default async function handler(req) {
   const { searchParams } = new URL(req.url)
-  const F = await loadFonts([...searchParams.values()].join(' '))
-  const tree = await buildTree(searchParams, F)
+  const tree = await buildTree(searchParams, FONTS)
   return new ImageResponse(tree, {
     width: 1200,
     height: 630,
-    fonts: F.fonts,
+    fonts: FONTS.fonts,
     headers: {
       // crawlers refetch rarely; let Vercel's edge cache hold the render
       'cache-control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
