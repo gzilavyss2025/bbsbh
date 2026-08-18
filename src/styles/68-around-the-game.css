@@ -101,6 +101,12 @@
   opacity: 0.86;
 }
 
+/* Opt-in, one page at a time (BroadcastMasthead's `dekFull`): a one-line dek
+   held to 56ch breaks early and leaves the right half of the slab empty. */
+.bcast__dek--full {
+  max-width: none;
+}
+
 /* The lower third: season, through-date, sample size. Mono, because
    these are the numbers that say how much to trust the page. */
 .bcast__meta {
@@ -639,4 +645,316 @@
   outline: var(--bw-heavy) solid var(--focus-ring);
   outline-offset: var(--space-1);
   border-radius: var(--radius-xs);
+}
+
+/* ---- the year slider (components/around-the-game/YearRange.jsx) ----
+   Two native range inputs stacked on one track. The component's header has the
+   argument for why it is two real sliders rather than a drawn widget; these are
+   the three rules that make the stack work.
+
+   1. THE INPUTS ARE TRANSPARENT AND UNTAPPABLE, their THUMBS ARE NOT. A
+      full-width input laid over another swallows every tap, so the input takes
+      `pointer-events: none` and each thumb takes it back. A tap lands on
+      whichever handle is under the finger.
+   2. THE TRACK IS DRAWN ONCE, by the wrapper — `::before` for the empty span
+      and `.yrange__fill` for the selected one. Each input's own track stays
+      invisible; two stacked visible tracks would print a double rule.
+   3. THE THUMB IS TAP-SIZED. 24px of visual handle inside a `--tap-min` tall
+      input is the WCAG 2.5.8 target, and it is what makes the control usable
+      on a phone at all. */
+.yrange {
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.yrange__readout {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-1);
+}
+
+.yrange__years {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.yrange__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.yrange__track {
+  position: relative;
+  height: var(--tap-min);
+}
+
+.yrange__track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  background: var(--rule-grid);
+  border-radius: 2px;
+}
+
+.yrange__fill {
+  position: absolute;
+  top: 50%;
+  height: 4px;
+  margin-top: -2px;
+  background: var(--navy);
+  border-radius: 2px;
+}
+
+.yrange__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+
+.yrange__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--paper-1);
+  border: var(--bw-heavy) solid var(--navy);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.yrange__input::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--paper-1);
+  border: var(--bw-heavy) solid var(--navy);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.yrange__input::-moz-range-track {
+  background: transparent;
+}
+
+/* The ring goes on the THUMB, not on the input: the input is a transparent box
+   the full width of the track, so a ring around it would outline the whole
+   control and say nothing about which end has focus. */
+.yrange__input:focus-visible::-webkit-slider-thumb {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.yrange__input:focus-visible::-moz-range-thumb {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.yrange__ends {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* ---- the doubleheader report's own cells (screens/around-the-game/DoubleheadersPage.jsx) ---- */
+
+/* The DHs figure is also the drawer's handle. A button rather than a row click
+   because the row already holds a link (the club) — a clickable row containing
+   a link is two targets fighting over one tap. */
+.dh__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--tap-min);
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-compact);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.dh__open:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-xs);
+}
+
+.dh__chev {
+  font-size: 0.9em;
+  color: var(--clay);
+}
+
+/* What the board is ranked on, said in words. Eight columns do not fit a phone,
+   so the column a rank came from is often scrolled out of sight; without this
+   line the board reads as sorted wrong. */
+.dh__caption {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+.dh__caption strong {
+  color: var(--text-heading);
+}
+
+.dh__opp {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  white-space: nowrap;
+}
+
+/* The most-met opponent carries its club's mark, the way the club column does.
+   The cell is right-aligned like every other figure on the board, so the parts
+   are laid out from the right — mark, name, then the count — and a tie prints
+   two of them. `inline-flex` rather than `flex` on the cell itself: the cell is
+   a table cell whose alignment the shared `.standings` rules own, and turning
+   it into a flex container would take that away. */
+.dh__oppclub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: var(--space-2);
+}
+
+.dh__oppclub:first-child {
+  margin-left: 0;
+}
+
+/* A tied cell is marks only — the names are there for a screen reader and take
+   no room — so they sit closer together than a mark-and-name pair does. */
+.dh__oppclub--mark {
+  margin-left: 5px;
+}
+
+.dh__oppcount {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* THE WHOLE ROW IS THE HANDLE. The drawer used to open only from the DHs
+   figure, which is one small target at the left of a board eight columns wide —
+   findable once you know it is there, and not before. The row takes the click
+   now (the button stays, as the keyboard's way in), so the cursor and the hover
+   have to say the row is live. */
+.dh__row {
+  cursor: pointer;
+}
+
+.dh__row:hover td,
+.dh__row:hover th.team {
+  background: var(--paper-2);
+}
+
+.dh__row--open td,
+.dh__row--open th.team {
+  background: var(--paper-1);
+}
+
+/* The reader's own club keeps its clay edge and its own ground under both. */
+.dh__row.rpt__row--mine:hover td,
+.dh__row.rpt__row--mine:hover th.team,
+.dh__row--open.rpt__row--mine td,
+.dh__row--open.rpt__row--mine th.team {
+  background: var(--paper-3);
+}
+
+/* Marks instead of a count, in the drawer's Swept and Swept by columns. The
+   same club can appear twice — it swept the same opponent twice that year —
+   and that repeat is the point, so nothing here dedupes. */
+.dh__marks {
+  white-space: nowrap;
+}
+
+.dh__mark {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.dh__mark + .dh__mark {
+  margin-left: 4px;
+}
+
+/* Every doubleheader of the season, named and placed. The one cell on this page
+   that WRAPS: eleven opponents on one line (2020 happened) would push the
+   drawer past any width. Left-aligned against the numeric columns beside it,
+   because it is prose, not a figure. */
+.dh__against {
+  max-width: 34ch;
+  text-align: left;
+  white-space: normal;
+}
+
+.dh__against-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 var(--space-2) 2px 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+
+.dh__at {
+  font-family: var(--font-mono);
+  color: var(--text-caption);
+}
+
+/* The year drawer. It is a table inside a cell that spans the whole board, and
+   it is deliberately narrow and indented — a second full-width table under a
+   row reads as the board losing its place. */
+.dh__drawerrow > td {
+  padding: 0 0 var(--space-3);
+  background: var(--paper-1);
+}
+
+.dh__drawer {
+  width: auto;
+  margin-left: var(--space-4);
+  border-collapse: collapse;
+}
+
+.dh__drawer th,
+.dh__drawer td {
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dh__drawer thead th {
+  font-family: var(--font-display);
+  color: var(--text-caption);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+}
+
+.dh__drawer tbody th {
+  text-align: left;
+  color: var(--text-heading);
 }

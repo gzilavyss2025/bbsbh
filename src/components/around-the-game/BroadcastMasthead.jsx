@@ -25,7 +25,11 @@ import { BROADCAST_STRAND } from '../../lib/reportPages.js'
 // It used to read "Tally Reports", which quietly claimed the word for four
 // pages while Standings, League Leaders and Umpire Rankings — all reports —
 // sat under other headings. See that file for the argument.
-export function BroadcastMasthead({ eyebrow, title, dek, meta = [] }) {
+// `dekFull` drops the dek's 56ch measure and lets the sentence run the full
+// width of the slab. Opt-in, per page: a measure is right for the four pages
+// whose dek is two or three lines of prose, and wrong for a one-line dek that
+// would otherwise break early and leave half the slab empty.
+export function BroadcastMasthead({ eyebrow, title, dek, dekFull = false, meta = [] }) {
   return (
     <header className="bcast">
       <div className="bcast__bar" aria-hidden="true" />
@@ -36,7 +40,9 @@ export function BroadcastMasthead({ eyebrow, title, dek, meta = [] }) {
           {eyebrow ? <span>{eyebrow}</span> : null}
         </p>
         <h1 className="bcast__title">{title}</h1>
-        {dek ? <p className="bcast__dek">{dek}</p> : null}
+        {dek ? (
+          <p className={`bcast__dek${dekFull ? ' bcast__dek--full' : ''}`}>{dek}</p>
+        ) : null}
         {meta.length > 0 && (
           <dl className="bcast__meta">
             {meta.map((m) => (

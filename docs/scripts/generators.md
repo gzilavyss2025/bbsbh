@@ -318,6 +318,21 @@ don't run these by hand.
   forever). MLB only — a league rank needs the whole 30-team pool. App reads
   it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
   rank).
+- `gen-doubleheaders.mjs` → `public/data/doubleheaders.json` — every completed
+  MLB regular-season DOUBLEHEADER from 2004 to now, the file behind
+  `/doubleheaders`. One row per PAIR — `[date, teamA, teamB,
+  teamAWins, teamBWins]`, club ids sorted low-first — and nothing per club: the
+  page's year slider changes every per-club number, so the fold lives in
+  `src/api/around-the-game/doubleheaders.js` instead. FULL REBUILD each night
+  (23 schedule requests with a narrow `fields` filter, ~20 KB out); only the
+  current season's rows can change. TWO RULES ARE LOAD-BEARING. The day is keyed
+  on the UNORDERED club pair, because a makeup doubleheader swaps home and away
+  between its two games (2020-08-05 has two) and an away|home key silently drops
+  every one of them. And a day with only ONE Final game is DROPPED, not folded
+  in — that is a rained-out second game, and counting it would put single games
+  inside a doubleheader record; those days are counted as `incomplete` in the
+  run log and the payload. `--from=`/`--to=` for a shorter sweep. MLB only, and
+  regular season only.
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
   DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
   (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the

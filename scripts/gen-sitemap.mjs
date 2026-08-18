@@ -65,6 +65,7 @@ const APP_ROUTES = [
   { path: '/pace-of-play', priority: '0.6', changefreq: 'daily' },
   { path: '/farm-system-rankings', priority: '0.6', changefreq: 'weekly' },
   { path: '/bullpen-availability', priority: '0.6', changefreq: 'daily' },
+  { path: '/doubleheaders', priority: '0.6', changefreq: 'daily' },
 ]
 
 function url({ path, lastmod, priority, changefreq }) {

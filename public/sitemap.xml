@@ -96,6 +96,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tallybb.com/doubleheaders</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://tallybb.com/learn</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

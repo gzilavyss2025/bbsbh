@@ -22,7 +22,7 @@
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
 //   '/attendance' '/pace-of-play' '/farm-system-rankings' '/bullpen-availability'
-//                                       -> the four broadcast reports (REPORT_ROUTES, reportPages.js)
+//   '/doubleheaders'                    -> the five broadcast reports (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
