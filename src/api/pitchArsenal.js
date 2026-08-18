@@ -77,6 +77,14 @@ export const MIN_ARSENAL_PITCHES = 15
 export const CENTURY_MPH = 100
 export const ELITE_VELO_MPH = 102
 
+// How many CENTURY_MPH+ pitches a season has to hold before either surface
+// says anything about it: the Margin Notes `centuryClub` callout
+// (pitcher-callouts.js, which owned this number privately until the player
+// page's heat band wanted the same floor) and heatView below. A one-off 100
+// mph touch is unremarkable for a real flamethrower, and a band reading "1
+// pitch at 100+" is noise rather than a fact worth a gold bar.
+export const CENTURY_CLUB_MIN = 5
+
 // One pitcher's pitch-type mix for the level the game he's starting is being
 // played at, each entry carrying its share of pitches thrown + average
 // velocity, sorted most-thrown first. Each entry also carries `century`
@@ -96,6 +104,42 @@ export function pitchArsenalFor(data, personId, isMlb) {
   return types
     .map((t) => ({ ...t, pct: Math.round((t.pitches / total) * 1000) / 10 }))
     .sort((a, b) => b.pitches - a.pitches)
+}
+
+// The "heat" band at the foot of the player page's Pitches card: how many
+// pitches at CENTURY_MPH+ this pitcher has thrown this season, and his
+// hardest reading of the year. Both were already gathered by
+// scripts/gen-pitch-arsenal.mjs's sweep and already ride the same shard file
+// the mix does (`century` / `maxVelo`, per pitch type) — this is a sum over
+// the types he actually threw, not a second fetch. Same completed-game
+// season-aggregate spoiler footing as the rest of this module.
+//
+// Same level rule as pitchArsenalFor: MLB and AAA are separate bodies of work
+// and are never pooled. Null when the file hasn't loaded, when he isn't in
+// it, or when he sits under CENTURY_CLUB_MIN — in which case the band simply
+// doesn't render, which is the right answer for the large majority of arms
+// who never touch triple digits.
+//
+// `rank`/`of` stay null until the generator writes a `centuryRank` onto his
+// entry: ranking him against the league needs the whole level, and the shard
+// he rides in is one hundredth of it, so the reader cannot derive it. The
+// band renders the two facts it does have and leaves the rank out.
+export function heatView(data, personId, isMlb) {
+  const entry = data?.pit?.[personId]
+  const types = isMlb ? entry?.mlb : entry?.aaa
+  if (!types || types.length === 0) return null
+  const count = types.reduce((n, t) => n + (t.century ?? 0), 0)
+  if (count < CENTURY_CLUB_MIN) return null
+  let maxVelo = null
+  for (const t of types) {
+    if (t.maxVelo != null && (maxVelo == null || t.maxVelo > maxVelo)) maxVelo = t.maxVelo
+  }
+  return {
+    count,
+    maxVelo: maxVelo == null ? null : Math.round(maxVelo * 10) / 10,
+    rank: entry.centuryRank?.rank ?? null,
+    of: entry.centuryRank?.of ?? null,
+  }
 }
 
 // "Pitches like" — the closest arms in ARSENAL space to one pitcher, for the

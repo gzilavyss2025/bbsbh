@@ -152,6 +152,17 @@ const PAIRINGS = [
   // this table, so a future nudge to --clay must be re-checked here first.
   { fg: 'paper-2', bg: 'clay', min: TEXT, note: 'report masthead strand chip' },
   { fg: 'paper-3', bg: 'navy', min: TEXT, note: 'report masthead title on the ink slab' },
+
+  // The player page's Pitches card — an ink slab (tokens/colors.css's --heat-*).
+  // Every ink that carries TEXT on it is here: the pitch names, the four family
+  // labels, and the per-pitch share figures, which are inked to match their own
+  // bar rather than the body ink.
+  { fg: 'heat-ink', bg: 'heat-slab', min: TEXT, note: 'pitch name / velocity on the heat slab' },
+  { fg: 'heat-fastball', bg: 'heat-slab', min: TEXT, note: 'fastball family label + share on the heat slab' },
+  { fg: 'heat-breaking', bg: 'heat-slab', min: TEXT, note: 'breaking family label + share on the heat slab' },
+  { fg: 'heat-offspeed', bg: 'heat-slab', min: TEXT, note: 'offspeed family label + share on the heat slab' },
+  { fg: 'heat-other', bg: 'heat-slab', min: TEXT, note: 'other family label + share on the heat slab' },
+  { fg: 'heat-band-ink', bg: 'heat-band', min: TEXT, note: '100 mph band figures on the band' },
   { fg: 'clay-deep', bg: 'surface-card', min: TEXT, note: 'rundown card eyebrow' },
 ]
 

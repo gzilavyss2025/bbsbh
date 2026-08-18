@@ -33,7 +33,7 @@ import { dayWordFor } from './select.js'
 import { workloadFor } from './workload.js'
 import { computePitcherLines } from './pitchers.js'
 import { laboringFor, computeVeloDecay, computeVeloVariety } from './pitcherHealth.js'
-import { CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
+import { CENTURY_CLUB_MIN, CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -60,10 +60,6 @@ const SCORE_BASE = {
   recentAppearances: 20, // plain "Nth appearance in the last several days" fallback
 }
 const clampScore = (n) => Math.max(0, Math.min(100, Math.round(n)))
-
-// A one-off 100 mph touch is unremarkable for a real flamethrower — this
-// keeps the centuryClub note from firing every game for every hard thrower.
-const CENTURY_CLUB_MIN = 5
 
 // Innings pitched ("6.1" = 6⅓) -> outs, so a 6.0-or-better check compares
 // linearly. Self-contained copy of the same helper used elsewhere (teamLeaders.js,

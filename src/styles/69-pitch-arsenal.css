@@ -1,0 +1,337 @@
+/* ============================================================
+   PITCH ARSENAL — the player page's "Pitches" card (PitchMix.jsx)
+   An ink slab on a paper page. Every other card on the player page is
+   manila with navy on it; this one inverts, because a pitcher's mix and
+   his velocity are the numbers a reader opened the page for, and they
+   were previously the quietest thing on it — a 10px chart chip and a
+   14px figure, both softer than the row label beside them.
+
+   Its inks are the --heat-* set (tokens/colors.css), fixed app colours
+   rather than the club's triad: this card renders for all 30 clubs and
+   AAA, and every text-on-ink pair here is asserted by check-contrast.mjs.
+
+   DELIBERATELY ITS OWN NAMESPACE. The old `.pitchmix` classes stay put and
+   unchanged, because BattedBallMix.jsx (the hitter's "Batted balls" card)
+   reuses them verbatim — restyling `.pitchmix` here would silently redress
+   a card nobody asked about. The two cards no longer read as one system;
+   that is the intended trade, and the hitter card is the one that kept the
+   original dress.
+   ============================================================ */
+
+.pitchslab {
+  background: var(--heat-slab);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  margin: 0 0 18px;
+}
+
+/* The card's top edge, in the same accent the band at the foot uses — the
+   two together bracket the rows, which is what stops an ink block this tall
+   from reading as a hole cut in the page. */
+.pitchslab__rule {
+  height: 3px;
+  background: var(--heat-band);
+}
+
+.pitchslab__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 11px 14px 9px;
+}
+
+.pitchslab__title {
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--heat-fastball);
+}
+
+.pitchslab__total {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--heat-offspeed);
+}
+
+.pitchslab__list {
+  list-style: none;
+  margin: 0;
+  padding: 2px 14px 12px;
+}
+
+/* Two lines per pitch rather than the old single grid row: the name and the
+   velocity on top, the usage meter under them running the full width of the
+   card. A 6px meter needs that width to distinguish 11.0% from 10.6%, which
+   the old whole-percent figures could not do at all (both read "11%"). */
+.pitchslab__row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 12px 0 11px;
+  border-top: var(--bw-hair) solid rgba(255, 255, 255, 0.10);
+}
+.pitchslab__row:first-child {
+  border-top: 0;
+}
+
+.pitchslab__line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pitchslab__id {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.pitchslab__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-md);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-title);
+  color: var(--heat-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The family as a WORD, not a colour chip. The old card's 10px square carried
+   fastball/breaking/offspeed/other in low-chroma ink alone, which is both the
+   least readable way to say it and colour-alone identity; spelling it out
+   costs one short word and the colour then only has to agree, not carry. */
+.pitchslab__family {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
+.pitchslab__velo {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-lg);
+  letter-spacing: var(--ls-tight-display);
+  color: var(--heat-ink);
+  white-space: nowrap;
+}
+
+.pitchslab__unit {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  font-size: var(--fs-caption);
+  color: var(--heat-offspeed);
+  margin-left: 5px;
+}
+
+.pitchslab__meterrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pitchslab__meter {
+  flex: 1 1 auto;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.13);
+  overflow: hidden;
+}
+
+/* min-width, because a genuine 1.3% show-me changeup rounds to well under a
+   pixel on a phone-width meter and would otherwise render as nothing at all —
+   an empty track reading as "no data" rather than "barely throws it". */
+.pitchslab__fill {
+  min-width: 3px;
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+
+.pitchslab__pct {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  width: 46px;
+  text-align: right;
+}
+
+/* The four family inks, on the three things that carry a family: the word,
+   the meter fill, and the share figure. Same four-way split as --arsenal-*
+   (see pitchFamily in src/api/pitchArsenal.js) — restated for the ink ground.
+   The share figure takes the family ink rather than body ink so the eye can
+   pair a number with its bar without a legend. */
+.pitchslab__family--fastball,
+.pitchslab__pct--fastball { color: var(--heat-fastball); }
+.pitchslab__family--breaking,
+.pitchslab__pct--breaking { color: var(--heat-breaking); }
+.pitchslab__family--offspeed,
+.pitchslab__pct--offspeed { color: var(--heat-offspeed); }
+.pitchslab__family--other,
+.pitchslab__pct--other { color: var(--heat-other); }
+
+.pitchslab__fill--fastball { background: var(--heat-fastball); }
+.pitchslab__fill--breaking { background: var(--heat-breaking); }
+.pitchslab__fill--offspeed { background: var(--heat-offspeed); }
+.pitchslab__fill--other { background: var(--heat-other); }
+
+/* ---- the 100 mph band ----------------------------------------------------
+   Renders only for an arm past CENTURY_CLUB_MIN (src/api/pitchArsenal.js), so
+   the large majority of pitchers never see it and it stays a real signal
+   rather than a row of zeroes. */
+.pitchslab__heat {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--heat-band);
+  /* A fine diagonal rake across the band. Low enough (10% ink) to read as
+     texture at arm's length without touching the figures' legibility — the
+     contrast pair asserted in check-contrast.mjs is against the flat band
+     colour, so this must stay faint enough not to matter. */
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(27, 42, 58, 0.10) 0 2px,
+    transparent 2px 13px
+  );
+}
+
+/* The flame's plate. The angled trailing edge is the broadcast lower-third
+   idiom, and it is the one place in the app that cuts a corner off-square —
+   deliberate: this band is the card's celebration, and a rectangle would read
+   as one more table row. */
+.pitchslab__flame {
+  width: 56px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-right: 12px;
+  background: var(--heat-slab);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+}
+
+.pitchslab__flame svg {
+  display: block;
+}
+
+.pitchslab__heatfacts {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px 12px 4px;
+}
+
+.pitchslab__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.pitchslab__fact--rank {
+  align-items: flex-end;
+}
+
+.pitchslab__factnum {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-hero-sm);
+  letter-spacing: var(--ls-tight-display);
+  color: var(--heat-band-ink);
+  line-height: var(--lh-solid);
+}
+/* The rank is the least of the three facts — it is a placing, not a reading —
+   so it sits a tier down rather than competing with the two counts. */
+.pitchslab__fact--rank .pitchslab__factnum {
+  font-size: var(--fs-num-md);
+}
+
+.pitchslab__factlabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--heat-band-ink);
+  white-space: nowrap;
+}
+
+/* ---- tablet / desktop ----------------------------------------------------
+   Breakpoint matches 25-wide-layout.css (WIDE_QUERY in useMediaQuery.js). The
+   player page's body stays ONE column up here — only its hero widens — so this
+   card gets the whole 960px sheet. Two lines per pitch stop earning their keep
+   at that width: the row becomes a real four-column grid, and the meter, which
+   is the only element that actually wants the room, gets all of it. */
+@media (min-width: 740px) {
+  .pitchslab__list {
+    padding: 4px 20px 14px;
+  }
+
+  .pitchslab__row {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr) 62px 132px;
+    align-items: center;
+    gap: 20px;
+    padding: 13px 0;
+  }
+
+  /* The two-line stack's wrappers go transparent so their children land
+     directly in the grid's tracks. Each child then names its own column:
+     source order is name, velocity, meter, share (which is the order the two
+     stacked lines want on a phone), while the wide row reads name, meter,
+     share, velocity — so leaving them to flow would put velocity in the
+     meter's track. */
+  .pitchslab__line,
+  .pitchslab__meterrow {
+    display: contents;
+  }
+  .pitchslab__id { grid-column: 1; }
+  .pitchslab__meter { grid-column: 2; }
+  .pitchslab__pct { grid-column: 3; }
+  .pitchslab__velo { grid-column: 4; }
+
+  .pitchslab__meter {
+    height: 8px;
+  }
+
+  .pitchslab__pct {
+    width: auto;
+    font-size: var(--fs-ui);
+  }
+
+  .pitchslab__velo {
+    text-align: right;
+  }
+
+  .pitchslab__head {
+    padding: 10px 20px;
+    border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
+  }
+
+  .pitchslab__flame {
+    width: 76px;
+    padding-right: 16px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
+  }
+
+  .pitchslab__heatfacts {
+    justify-content: flex-start;
+    gap: 44px;
+    padding: 12px 20px 13px 6px;
+  }
+
+  /* With room to spread left, the rank joins the other two as an equal rather
+     than being pushed to the far edge, where it read as an unrelated fact. */
+  .pitchslab__fact--rank {
+    align-items: flex-start;
+  }
+  .pitchslab__fact--rank .pitchslab__factnum {
+    font-size: var(--fs-hero-sm);
+  }
+}
