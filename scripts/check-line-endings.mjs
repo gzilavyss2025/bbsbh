@@ -11,8 +11,8 @@
 //
 // WHY IT COST SOMETHING. A CRLF file differs from its LF counterpart on every
 // line, so git cannot see a small edit inside one; it reports a whole-file
-// rewrite. Three files in PR #740 did exactly that, turning a two-line change to
-// `api/_lib/cards.js` into a 684-line merge conflict (resolved in #742). The
+// rewrite. Three files once did exactly that, turning a two-line change to
+// `api/_lib/cards.js` into a 684-line merge conflict. The
 // reviewer's problem is not the endings, it is that the real diff is no longer
 // visible anywhere.
 //

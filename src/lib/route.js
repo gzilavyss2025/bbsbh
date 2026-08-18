@@ -31,13 +31,9 @@
 //   '/umpire/{id}'                      -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
 //   '/team-records'                     -> { name: 'team-records', asOf, sportId, metric, half }
-//                                          (one situational record, every club at one level,
-//                                           ranked — the Numbers tab's Records card read across
-//                                           the league. '?metric=' names a row of that card and
-//                                           '?half=' one side of the All-Star break; both are
-//                                           the page's OPENING state, not a live mirror of its
-//                                           controls, the same way the standings page keeps its
-//                                           own board mode off the URL.)
+//                                          (one situational record, every club at one level, ranked.
+//                                           '?metric=' and '?half=' set the page's OPENING state only,
+//                                           not a live mirror of its controls — same as standings.)
 //   '/manager/{id}'                     -> { name: 'manager', id }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
@@ -64,9 +60,8 @@
 //                                          (a club's played season, every result showing, one
 //                                           stamp per game you watched — ADR-0042. NOT a tab.)
 //   '/team/{id}/photos'                 -> { name: 'team-photos', id, asOf, sportId }
-//                                          (professional photos merged across the whole season's
-//                                           decided games, unsealed like '/photos'. NOT a tab —
-//                                           one entry point, the Photos rail's own door.)
+//                                          (professional photos across the season's decided games,
+//                                           unsealed like '/photos'. NOT a tab — the Photos rail's own door.)
 //   '/leaders'                          -> { name: 'leaders', scope: 'mlb', asOf, sportId }
 //   '/leaders/{scope}'                  -> { name: 'leaders', scope, asOf, sportId }
 //   '/leaders/org/{orgId}'              -> { name: 'leaders', scope: 'org', orgId, asOf, sportId }

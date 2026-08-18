@@ -332,7 +332,6 @@ async function main() {
   await mkdir(dirname(needsResearchPath), { recursive: true })
   await writeFile(needsResearchPath, JSON.stringify(mergedNeedsResearch, null, 2) + '\n')
 
-  // Build the final personId -> stints map, sorted chronologically.
   const freshByPersonId = {}
   for (const [personId, stints] of byPersonId) {
     freshByPersonId[personId] = stints.sort((a, b) => a.season - b.season || a.teamId - b.teamId)

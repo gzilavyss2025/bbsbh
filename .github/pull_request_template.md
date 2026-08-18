@@ -34,8 +34,10 @@ rule" section of CLAUDE.md + docs/adr/.
 No CI-enforced test suite here — verify by exercising the real flow.
 Note: this sandbox usually can't reach statsapi.mlb.com from a headless
 browser, so live-game screenshots often aren't possible — say how you
-verified instead (curl-fed mock via page.route(), the `preview` branch URL,
-regenerated data file, etc.).
+verified instead (`e2e/fixtures/mock-api.js` for a spec pinned to the anchor
+game, the `preview` branch URL, regenerated data file, etc.). Don't
+troubleshoot an unreachable-network failure by re-running headed/`--debug` —
+it's a sandbox limitation, not something a visible browser fixes.
 -->
 
 - [ ] `npm run lint` passes

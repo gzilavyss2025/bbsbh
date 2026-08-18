@@ -24,7 +24,7 @@
 //
 // HISTORY. This grid began as loadScorecard.js's full-reveal half, safe only
 // because its one consumer was DEV-gated out of the production build (the
-// "scorecardPlays appears nowhere in a built dist/" era, PR #705). That
+// "scorecardPlays appears nowhere in a built dist/" era). That
 // containment argument is retired on purpose: the grid is a product surface
 // now, and its safety is the clamp above rather than a DEV gate. The
 // spoiler-free pre-pitch half (the loader + staging view) stays behind in
@@ -441,7 +441,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
   // The #22's own row under the grid: P (pitches this side's batters saw that
   // inning), WH (swings and misses) and FO (balls fouled off) — what the half
   // COST the pitcher, which is what a scorer keeps a foot row for. It read
-  // P/TP/LOB until PR #725: the running pitch total repeated P's own sum a
+  // P/TP/LOB until a fix: the running pitch total repeated P's own sum a
   // column later, and LOB is already on the sheet in the FINAL block. All
   // three come from the per-half readers the innings viewer's tally reads
   // (computeDerivedByInning / revealInning) — never a second walk that could
