@@ -81,6 +81,11 @@ const STATIC_REPORT_ROUTES = [
   'logbook',
   'first-scorebook',
   'photos',
+  // The five broadcast reports (src/screens/around-the-game/).
+  'attendance',
+  'pace',
+  'farm-system',
+  'bullpens',
 ]
 
 for (const route of STATIC_REPORT_ROUTES) {

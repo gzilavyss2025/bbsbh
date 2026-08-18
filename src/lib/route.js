@@ -21,6 +21,8 @@
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
+//   '/attendance' '/pace-of-play' '/farm-system-rankings' '/bullpen-availability'
+//                                       -> the four broadcast reports (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
@@ -92,6 +94,8 @@
 // — it still parses and still applies, so an already-shared dated link resolves
 // the way its sender meant it to, but nothing puts it there for you. Accepts a
 // URL that may include a `?query`.
+
+import { REPORT_ROUTES } from './reportPages.js'
 
 // The team hub's tabs, as `third URL segment -> route name`. Every one of these
 // is a real address (the URL changes, back/forward work, each tab is
@@ -172,6 +176,9 @@ export function parseRoute(url) {
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
+  // The four broadcast reports — table in lib/reportPages.js, beside the menu
+  // rows that link to them, so an address and its parse cannot drift.
+  if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
   // One situational record across a whole level. Carries the two scope hints
   // every stats page carries (`?d=` cutoff, `?s=` level) plus two of its own:
   // which split to open on, and which half of the season. Both of those are

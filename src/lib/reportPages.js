@@ -24,6 +24,20 @@
 // "what's happening now" → "who's coming up" → "what already happened" →
 // "your own things", with the two menu-only groups (guides, tools) last.
 
+// WHAT THE BROADCAST FOUR ARE CALLED, in the menu, in the footer, on /more,
+// and on each page's own masthead — one string, because those are four places
+// and this file exists because copies drift.
+//
+// NOT "the reports". That was the first name and it was wrong: half the pages
+// on this page's other groups are reports too — Standings, League Leaders,
+// Team Records, Umpire Rankings and Milestone Watch are all reports on a
+// season, and a group that claims the word for four of them implies the rest
+// are something else. What actually separates these four is their SUBJECT, not
+// their form: crowds, clock, pipeline and arm workload are the conditions
+// around a game rather than its result. So the label names that, and reads in
+// the same plain register as "This season" and "History" beside it.
+export const BROADCAST_STRAND = 'Around the game'
+
 // The four groups whose pages are report pages proper — the ones every
 // footer lists. Guides and Tools are NOT here; see below for why.
 export const PAGE_GROUPS = [
@@ -48,6 +62,31 @@ export const PAGE_GROUPS = [
       // them there, move them back rather than duplicating them.
       { label: 'Trade Deadline', path: '/trade-deadline' },
       { label: 'All Star Game', path: '/all-star-rosters' },
+    ],
+  },
+  {
+    id: 'around-the-game',
+    label: BROADCAST_STRAND,
+    // The broadcast package (src/screens/around-the-game/,
+    // styles/68-around-the-game.css — those paths carry this group's name, not
+    // this FILE's, for the collision reason spelled out at BROADCAST_STRAND).
+    // Its own group rather than four more rows under "This season" for two
+    // reasons. They are a SET — one graphics package, one voice, one nightly
+    // pair of data files behind three of them — and a reader who finds one is
+    // very likely to want the others. And they answer a different KIND of
+    // question than the rest of that group: Standings and League Leaders say
+    // who is winning, while these say who is showing up, how long it takes,
+    // what a club has coming and how much work its pen has already done. None
+    // of them is about a result.
+    //
+    // Attendance leads on busiest-first, the same rule every other group here
+    // orders by: it is the one a reader is most likely to have come looking
+    // for by name.
+    pages: [
+      { label: 'Attendance', path: '/attendance' },
+      { label: 'Farm System Rankings', path: '/farm-system-rankings' },
+      { label: 'Bullpen Availability', path: '/bullpen-availability' },
+      { label: 'Pace of Play', path: '/pace-of-play' },
     ],
   },
   {
@@ -164,6 +203,35 @@ export const FOOTER_TRAIL = [
     group: { id: TOOLS_GROUP.id, label: TOOLS_GROUP.label },
   },
 ]
+
+// The four broadcast reports, ADDRESS -> route name (src/screens/around-the-game/).
+// Their addresses live here rather than in route.js because this file is
+// already the single source of truth for what a report page is and where it
+// lives, and the group above lists these same four: a table beside those rows
+// cannot drift from them the way a second copy in the parser could. route.js
+// imports it for its one parse branch.
+//
+// They are flat segments carrying no query. Each shows a whole league's season
+// to date, so `?d=`/`?s=` has nothing to narrow, and every control on them (the
+// sort column, the index weighting) is page state rather than an address — the
+// same call StandingsPage and TeamRecordsPage already made for their boards.
+//
+// THE ADDRESSES SPELL THEIR SUBJECT OUT. '/farm-system-rankings',
+// '/bullpen-availability' and '/pace-of-play' are the phrases people actually
+// search for, and a report page's URL is one of the few places in this app that
+// has to answer to a search engine as well as to a reader (ADR-0048).
+// '/attendance' is already that phrase and needs no lengthening.
+//
+// Each of the three keeps a SHORTER route name ('farm-system', 'bullpens',
+// 'pace'), which is what App.jsx's switch and the preview-card key read. The
+// address and the name are allowed to differ, and this table is the only place
+// that has to know they do.
+export const REPORT_ROUTES = {
+  attendance: 'attendance',
+  'pace-of-play': 'pace',
+  'farm-system-rankings': 'farm-system',
+  'bullpen-availability': 'bullpens',
+}
 
 // A guide path is an ordinary URL, not an app route — anything rendering one
 // of these must use a real anchor and let the browser leave the SPA, or the

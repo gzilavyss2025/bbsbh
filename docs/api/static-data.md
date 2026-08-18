@@ -450,6 +450,39 @@ for each generator; the reader modules:
   ties sharing the best rank). `attendanceFor` selects the raw row. MLB only
   — the generator is. Spoiler-free (a Final-games aggregate, same footing as
   WAR) — no `SealBox`; the Facts rows render only when the club has one.
+- `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
+  `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
+  The file holds each club's own totals and nothing about the other 29;
+  everything comparative is derived here. `gateBoard(data, season, sortBy)`
+  ranks the home gate, joining the club's park to
+  `lib/ballpark/ballparkData.js`'s capacity table for a **fill rate** — the
+  headline column, because a raw average mostly measures how many seats a club
+  built. A park not in that table yields a null fill and still ranks on every
+  other column. Fill rates over 100% are printed as they are: capacity is a
+  listed figure, not a turnstile cap. `paceBoard(data, season, sortBy)` is the
+  same shape over game length, plus the three-hour/three-and-a-half-hour
+  counts and the delay totals. `asClock` renders minutes the way baseball says
+  them. Spoiler-free — a crowd count and a clock reading carry no result.
+- `around-the-game/farmSystem.js` — THE FARM INDEX, from `public/data/farm-system.json`
+  (`gen-farm-system.mjs`). Three pillars over thirty organisations: an
+  exponential value curve on prospect rank (60%), level-weighted affiliate
+  winning (25%), and value-weighted youth (15%), each min-max scaled across the
+  league before the weights apply. `farmBoard(data, weights)` takes the
+  weighting as an ARGUMENT rather than a constant, which is what lets the page
+  offer presets and show the order changing; `correlate(board)` measures the
+  talent/winning relationship live, next to the published R² ≈ 0.11 that set
+  the winning weight. Every constant is argued in `docs/farm-index.md`.
+  Spoiler-free (ADR-0034: a stat line is not a score).
+- `around-the-game/bullpen.js` — `/bullpen-availability` (The Pen). Adds no data and invents no
+  rules: it runs `workload.js`'s own availability thresholds across all thirty
+  clubs instead of the two in one game, and ranks on the SHARE of each staff
+  that is likely down rather than the count. Starters are excluded outright.
+  Inherits `workload.js`'s spoiler class unchanged.
+- `around-the-game/clubs.js` — the one club-identity lookup those three boards share,
+  off the static `teams.json`. `clubShort` (Padres) is what a board ROW uses
+  and `clubName` (San Diego Padres) what prose uses; the full name in a row
+  makes the club column wide enough on a phone to push every number off the
+  right edge.
 - `teamRecords.js` — the Numbers tab's situational **Records** card, from
   `public/data/team-records/{season}/{teamId}.json` (`gen-team-records.mjs`),
   MLB and all four full-season MiLB levels. The file is a compact ROW PER GAME,

@@ -294,7 +294,11 @@ const BUDGETS = {
   // that card's rows across a whole level. The table itself is `.standings`,
   // shared with the standings and umpire boards, so only the control strip, the
   // rank badge and two row states are new — and the page imports it itself.
-  'src/styles': 89,
+  //
+  // 89 -> 90 for `68-around-the-game.css`: ONE sheet for all FIVE pages in
+  // src/screens/around-the-game/. Five partials would have cost 94 here and hit the
+  // shared-chunk ordering trap src/index.css's header records.
+  'src/styles': 90,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -399,7 +403,11 @@ const BUDGETS = {
   // argument as check-dead-exports.mjs and check-strike-links.mjs already
   // counted here. It is the REPORTING half of the LF rule whose enforcing half
   // is .gitattributes; a guards/ subdirectory would take all sixteen at once.
-  scripts: 83,
+  //
+  // 83 -> 85 for the broadcast reports' two generators, `gen-gate.mjs` and
+  // `gen-farm-system.mjs`. Both RUN on import, which the note above says
+  // scripts/lib is not for, so they stay flat with every other gen-*.mjs.
+  scripts: 85,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

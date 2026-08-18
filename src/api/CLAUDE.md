@@ -126,7 +126,24 @@ one you need:
 | `docs/api/static-data.md` | The build-time-fetch readers — one entry per `public/data/*.json` file and the module that reads it. |
 | `docs/api/account-layer.md` | `src/lib/account/` — the per-user state that crosses a signed-in user's devices (ADR-0039, ADR-0026). |
 
-The three subdirectories here — `person/`, `playbyplay/`, `callout-notes/` — carry
+`around-the-game/` is the fourth subdirectory and the odd one out: it holds no
+new fetching and no new spoiler footing, only the four spoiler-FREE readers
+behind the four pages listed under **Around the game**
+(`src/screens/around-the-game/`). It is named for the group a reader sees rather
+than for what it is made of, and that is deliberate: it was called `reports/`
+first, which collided with `reportPages.js` / `ReportFooter.jsx` /
+`check-report-pages.mjs` — all of which predate it and mean EVERY standalone
+page, Standings and League Leaders included. One word, two scopes, in one
+codebase. The label moved for the same reason (see `lib/reportPages.js`), and
+the paths followed it. Two of them read files
+their own generators ship (`gate.js`, `farmSystem.js`); one re-runs an existing
+module's rules across the whole league (`bullpen.js` over `workload.js`); one is
+the club-name join all three share (`clubs.js`). The rule that directory adds is
+about WHERE THE MATH LIVES: the generators ship FACTS, and every ranking, rate,
+league comparison and weighted index is computed here, where it is pure,
+unit-tested and arguable. `docs/farm-index.md` argues the one that needs it.
+
+The three older subdirectories — `person/`, `playbyplay/`, `callout-notes/` — carry
 their notes in each file's own header plus a barrel file that explains the split
 (`playbyplay.js`, `callout-notes.js`, `person.js`). Read the barrel first; it is
 the one that states the directory's shared spoiler footing.

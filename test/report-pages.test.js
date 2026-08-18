@@ -19,10 +19,15 @@ import {
 
 // The report pages as they stood before PAGE_GROUPS existed, plus
 // /team-records, which landed on main (#742) while the regrouping was in
-// flight. Typed out rather than derived, so this test fails if the flattening
-// loses one — deriving the expectation from the thing under test would assert
+// flight, and the five broadcast reports that came with src/screens/around-the-game/.
+// Typed out rather than derived, so this test fails if the flattening loses
+// one — deriving the expectation from the thing under test would assert
 // nothing.
 const PATHS_BEFORE_GROUPING = [
+  '/attendance',
+  '/farm-system-rankings',
+  '/bullpen-availability',
+  '/pace-of-play',
   '/standings',
   '/leaders',
   '/team-records',
