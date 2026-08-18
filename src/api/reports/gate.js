@@ -143,17 +143,50 @@ export function gateBoard(data, season, sortBy = 'fill') {
 // ---- The Clock ----
 
 export const PACE_SORTS = [
-  { key: 'avg', label: 'Longest', lowIsBest: false },
-  { key: 'avgFast', label: 'Quickest', lowIsBest: true, field: 'avg' },
-  { key: 'over180', label: 'Three-hour games', lowIsBest: false },
+  // `rankOn` is the field the RANK and the tie flag are computed from, when it
+  // differs from the field the board is sorted by. On game length they differ
+  // on purpose: the board sorts on the float (164.3) so the order is stable,
+  // but the rank is computed on the MINUTE the reader actually sees. Without
+  // that split the board printed "T3 2:47 / T3 2:47 / T3 2:47 / 6 2:47" —
+  // three clubs marked as tied and a fourth showing the identical clock denied
+  // the same tie, which reads as a broken table and is the correct reading.
+  { key: 'avg', label: 'Longest', lowIsBest: false, rankOn: 'avgMin' },
+  { key: 'avgFast', label: 'Quickest', lowIsBest: true, field: 'avg', rankOn: 'avgMin' },
+  // Sorted on the SHARE, not the count. The caption promises a club that has
+  // played more games is not penalised for it, and a raw count breaks that
+  // promise the moment games played stop being level across the league — which
+  // is most of April, and any week after a rainout cluster.
+  { key: 'over180Pct', label: 'Three-hour games', lowIsBest: false },
   { key: 'delayMinutes', label: 'Time in delay', lowIsBest: false },
 ]
+
+// How far a club's own average could sit from its true pace on this many
+// games, at roughly 95% confidence — two standard errors, where the standard
+// error is the league's per-game spread over the square root of games played.
+//
+// THE PAGE PRINTS THIS, and the board is unhonest without it. Game length has
+// a per-game standard deviation near 19 minutes; over ~125 games that is about
+// ±3.4 minutes on every club, against a slowest-to-quickest gap near 11. Most
+// of a thirty-club ranking is therefore inside its own margin, and in April —
+// at ~18 games each — effectively all of it is.
+export function paceMargin(sd, games) {
+  if (!sd || !games || games < 2) return null
+  return Math.round((2 * (sd / Math.sqrt(games))) * 10) / 10
+}
+
+// Below this many games a club's average says almost nothing, so the board
+// stops printing a 1-30 order over it and says why. Set where two standard
+// errors fall under about five minutes — around half the league's own
+// season-long spread, which is the point at which an ordering starts to carry
+// more signal than coin flips.
+export const PACE_RANK_MIN_GAMES = 60
 
 export function paceBoard(data, season, sortBy = 'avg') {
   const clubs = data?.seasons?.[season]?.clubs
   if (!clubs) return null
   const sort = PACE_SORTS.find((s) => s.key === sortBy) ?? PACE_SORTS[0]
   const field = sort.field ?? sort.key
+  const league = data.seasons[season].league
 
   const rows = Object.entries(clubs)
     .filter(([, c]) => c?.pace)
@@ -175,6 +208,12 @@ export function paceBoard(data, season, sortBy = 'avg') {
         // Share of this club's games that ran past three hours — the column
         // that makes a 125-game club comparable to a 120-game one.
         over180Pct: p.games ? Math.round((p.over180 / p.games) * 1000) / 10 : null,
+        // The minute the reader sees, kept as a field so rank and display are
+        // computed from the same number (see PACE_SORTS's `rankOn`).
+        avgMin: p.avg == null ? null : Math.round(p.avg),
+        // This club's own ± at 95%, from the league's per-game spread and its
+        // own games played. Printed beside its average.
+        margin: paceMargin(league?.paceSd, p.games),
         delayGames: p.delays?.games ?? 0,
         delayMinutes: p.delays?.minutes ?? 0,
         day: p.day,
@@ -183,7 +222,7 @@ export function paceBoard(data, season, sortBy = 'avg') {
       }
     })
 
-  const withRank = ranked(rows, field, { lowIsBest: sort.lowIsBest })
+  const withRank = ranked(rows, sort.rankOn ?? field, { lowIsBest: sort.lowIsBest })
   withRank.sort((a, b) => {
     const av = a[field]
     const bv = b[field]
@@ -191,7 +230,23 @@ export function paceBoard(data, season, sortBy = 'avg') {
     if (bv == null) return -1
     return sort.lowIsBest ? av - bv : bv - av
   })
-  return { rows: withRank, league: data.seasons[season].league, through: data.seasons[season].through }
+  // Every club is measured on the same schedule, so "enough games to rank" is a
+  // league-level fact, not a per-club one: either the season is far enough
+  // along for the board to mean something or it is not.
+  const median = withRank.length
+    ? [...withRank].sort((a, b) => a.games - b.games)[withRank.length >> 1].games
+    : 0
+  return {
+    rows: withRank,
+    league,
+    through: data.seasons[season].through,
+    sortLabel: sort.label,
+    // The ± every club on this board carries, at the median club's games
+    // played — the figure the page states once above the table.
+    margin: paceMargin(league?.paceSd, median),
+    rankable: median >= PACE_RANK_MIN_GAMES,
+    medianGames: median,
+  }
 }
 
 // Minutes as a broadcast clock reading — 164 -> '2:44'. Baseball talks about

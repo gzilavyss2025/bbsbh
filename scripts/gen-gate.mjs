@@ -142,6 +142,14 @@ function median(values) {
   return s.length % 2 ? s[mid] : Math.round((s[mid - 1] + s[mid]) / 2)
 }
 
+// Sample standard deviation. Bessel-corrected (n-1), because these are a
+// season IN PROGRESS standing in for the season, not a closed population.
+function stdev(values) {
+  const m = values.reduce((a, b) => a + b, 0) / values.length
+  const v = values.reduce((a, b) => a + (b - m) ** 2, 0) / (values.length - 1)
+  return Math.round(Math.sqrt(v) * 10) / 10
+}
+
 // { g, avg } for a bucket of rows on one numeric field — the shape every split
 // below ships. A bucket with no usable value returns null rather than a zero,
 // so the page never prints a 0 it would have to explain.
@@ -207,12 +215,17 @@ function paceFor(rows) {
     day: bucket(counted.filter((r) => r.dayNight === 'day'), 'minutes', 1),
     night: bucket(counted.filter((r) => r.dayNight === 'night'), 'minutes', 1),
     // Total minutes this club has spent waiting for weather, and how many of
-    // its games carried any wait at all.
+    // its games carried any wait at all. NOTE both clubs in a delayed game
+    // carry the same figure, so these NEVER sum to a league total — the league
+    // line below owns that, counted off the games. A first draft summed the
+    // club column instead and printed a delay total exactly twice the truth.
     delays: { games: delayed.length, minutes: delayed.reduce((a, r) => a + r.delayMinutes, 0) },
-    // How many of its games ran past three hours, and past three and a half —
-    // the two thresholds a broadcast actually talks about.
-    over180: values.filter((v) => v > 180).length,
-    over210: values.filter((v) => v > 210).length,
+    // How many of its games reached three hours, and three and a half. `>=`,
+    // not `>`: the columns these feed are captioned "3:00+", and a game of
+    // exactly 180 minutes is one a reader counting by that label expects to see
+    // in it (21 games this season sit exactly on 180, 4 exactly on 210).
+    over180: values.filter((v) => v >= 180).length,
+    over210: values.filter((v) => v >= 210).length,
   }
 }
 
@@ -267,6 +280,7 @@ export function aggregate(rows) {
 export function leagueFor(rows) {
   const att = rows.map((r) => r.attendance).filter((v) => v != null)
   const min = rows.map((r) => r.minutes).filter((v) => v != null)
+  const delayed = rows.filter((r) => r.delayMinutes > 0)
   return {
     games: rows.length,
     attGames: att.length,
@@ -276,7 +290,23 @@ export function leagueFor(rows) {
     paceGames: min.length,
     paceAvg: mean(min, 1),
     paceMedian: median(min),
-    over180: min.filter((v) => v > 180).length,
+    // The per-game standard deviation of game length, which is the ONLY thing
+    // that lets a page say how much of a club-to-club gap is real. A club's
+    // standard error is this over the square root of its games played, and
+    // with ~19 minutes of per-game spread over ~125 games that is about 1.7
+    // minutes per club — big enough that most of a thirty-club ranking is
+    // inside its own noise. src/api/reports/gate.js turns it into the interval
+    // the page prints; shipping the ranking without it was the single worst
+    // thing about the first version of that page.
+    paceSd: min.length > 1 ? stdev(min) : null,
+    over180: min.filter((v) => v >= 180).length,
+    // COUNTED OFF THE GAMES, not off the clubs. Both clubs in a delayed game
+    // carry that delay in their own row, so summing the club column doubles
+    // every figure — which is exactly what the page did before this existed.
+    delays: {
+      games: delayed.length,
+      minutes: delayed.reduce((a, r) => a + r.delayMinutes, 0),
+    },
   }
 }
 

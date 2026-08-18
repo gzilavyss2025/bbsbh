@@ -1,6 +1,14 @@
 import '../../styles/68-broadcast-reports.css'
 import { useMemo, useState } from 'react'
-import { fetchGate, paceBoard, PACE_SORTS, latestSeason, monthsIn, asClock } from '../../api/reports/gate.js'
+import {
+  fetchGate,
+  paceBoard,
+  PACE_SORTS,
+  PACE_RANK_MIN_GAMES,
+  latestSeason,
+  monthsIn,
+  asClock,
+} from '../../api/reports/gate.js'
 import { loadClubs, clubName, clubShort } from '../../api/reports/clubs.js'
 import { humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
@@ -46,6 +54,29 @@ const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 // itself, and the delay totals spell out hours and minutes in words.
 const HMM = 'h:mm'
 
+// Month numbers as names, for the trend strip's text alternative.
+const MONTH_NAMES = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+// The strip's text alternative, built FROM THE DATA. A label reading only
+// "Yankees game length by month" describes the picture's subject and conveys
+// none of its content, which is a text alternative that does not serve the
+// same purpose — and sighted readers have no axis or legend either, so this is
+// the only place the strip's actual numbers exist.
+function monthLabel(months, byMonth) {
+  return months
+    .map((m) => {
+      const cell = byMonth?.[m]
+      return cell?.avg == null ? null : `${MONTH_NAMES[Number(m)]} ${asClock(cell.avg)}`
+    })
+    .filter(Boolean)
+    .join(', ')
+}
+
+// A club-month below this many games is left out of the trend strip's SCALE
+// (it is still drawn). Ten is roughly a homestand — under it, one extra-inning
+// night moves the month by two minutes.
+const MONTH_MIN_GAMES = 10
+
 // Minutes into a plain "3h 42m" reading, for durations too long to read as a
 // clock — total time spent in weather delays, mostly.
 function asHours(minutes) {
@@ -76,7 +107,15 @@ export function PacePage() {
   const barMin = avgs.length ? Math.min(...avgs) - 2 : 0
   const barMax = avgs.length ? Math.max(...avgs) : 1
 
-  const monthValues = rows.flatMap((r) => Object.values(r.byMonth ?? {}).map((m) => m.avg))
+  // The trend strip's scale ignores months a club barely played. A club-month
+  // of four games swings twenty minutes on nothing, and the first version let
+  // exactly two such cells — a five-game March and a four-game March — set the
+  // floor and ceiling for all thirty strips.
+  const monthValues = rows.flatMap((r) =>
+    Object.values(r.byMonth ?? {})
+      .filter((m) => m.g >= MONTH_MIN_GAMES && m.avg != null)
+      .map((m) => m.avg),
+  )
   const monthMin = monthValues.length ? Math.min(...monthValues) - 2 : 0
   const monthMax = monthValues.length ? Math.max(...monthValues) : 1
 
@@ -86,7 +125,12 @@ export function PacePage() {
   const shortestGame = [...rows]
     .filter((r) => r.shortest != null)
     .sort((a, b) => a.shortest - b.shortest)[0]
-  const delayMinutes = rows.reduce((s, r) => s + r.delayMinutes, 0)
+  // OFF THE LEAGUE LINE, not off the club column. Both clubs in a delayed game
+  // carry that delay in their own row, so summing the rows doubles it — which
+  // this slab did, printing 243h against a true 122h under a note claiming
+  // each game was counted once.
+  const delayMinutes = league?.delays?.minutes ?? null
+  const delayGames = league?.delays?.games ?? null
   const spread = slowest && quickest ? Math.round((slowest.avg - quickest.avg) * 10) / 10 : null
 
   return (
@@ -123,7 +167,12 @@ export function PacePage() {
               value={asClock(league?.paceAvg)}
               label={`League average game (${HMM})`}
               note={`Median ${asClock(league?.paceMedian)}. ${commas(league?.over180)} games have
-                     run past three hours.`}
+                     reached three hours.${
+                       board?.margin
+                         ? ` Any one club's average carries about ±${board.margin} min at this
+                            point in the season.`
+                         : ''
+                     }`}
             />
             <Slab
               value={spread != null ? `${Math.round(spread)} min` : '—'}
@@ -147,17 +196,43 @@ export function PacePage() {
             <Slab
               value={asHours(delayMinutes)}
               label="Spent waiting on weather"
-              note="Total delay across the league this season, both clubs counted once each."
+              note={
+                delayGames
+                  ? `Across ${delayGames} delayed games. Counted once per game — and it is NOT
+                     inside the game times above.`
+                  : ''
+              }
             />
           </SlabRow>
 
           <ReportSection
             title="The board"
-            note="Bars run from the league’s quickest club, not from zero — every club sits
-                  inside a twelve-minute band, and a zero-based bar would draw thirty identical
-                  bars. The three-hour column is the share of that club’s own games, so a club
-                  that has played more of them is not penalised for it."
+            note={
+              <>
+                The bar shows how many minutes above the league’s quickest club a club sits — not
+                how long its games are. It has to: {spread != null ? `the whole league fits inside
+                ${Math.round(spread)} minutes` : 'the whole league fits inside a few minutes'}, and
+                a bar drawn from zero would be thirty identical bars. Read the bars against each
+                other and the clocks as the real figures.{' '}
+                {board?.margin
+                  ? `And read the order loosely: on ${board.medianGames} games apiece, each of
+                     these averages carries about ±${board.margin} minutes, so most of this board
+                     is a tie.`
+                  : ''}
+              </>
+            }
           >
+            <ul className="pillar-key">
+              <li>
+                <span className="pillar-key__swatch pillar-key__swatch--down" />
+                <span>Above the league average of {asClock(league?.paceAvg)}</span>
+              </li>
+              <li>
+                <span className="pillar-key__swatch pillar-key__swatch--fresh" />
+                <span>Below it</span>
+              </li>
+            </ul>
+
             <div className="rpt-controls" role="group" aria-label="Sort the board">
               {PACE_SORTS.map((s) => (
                 <button
@@ -172,11 +247,26 @@ export function PacePage() {
               ))}
             </div>
 
+            {board && !board.rankable && (
+              <p className="hint">
+                Only {board.medianGames} games apiece so far. That is too few to tell these clubs
+                apart — the gaps below are smaller than the margin on each figure — so the board
+                is sorted but not ranked. Numbered places return around{' '}
+                {PACE_RANK_MIN_GAMES} games.
+              </p>
+            )}
+
             <div className="ledger-wrap">
               <table className="standings rpt">
                 <thead>
                   <tr>
-                    <th className="team">Club</th>
+                    {/* The rank glyph lives inside the club cell, and "1" means
+                        slowest, quickest or rainiest depending on which chip is
+                        pressed. Say which, here, rather than leave a reader to
+                        remember a tap they made two scrolls ago. */}
+                    <th className="team">
+                      {board?.rankable ? `Club — ranked by ${board.sortLabel}` : 'Club'}
+                    </th>
                     <th>Average ({HMM})</th>
                     <th>Median ({HMM})</th>
                     <th>Games 3:00+</th>
@@ -190,8 +280,8 @@ export function PacePage() {
                       <ClubCell
                         teamId={r.teamId}
                         name={clubShort(clubs, r.teamId)}
-                        rank={r.rank}
-                        tied={r.tied}
+                        rank={board.rankable ? r.rank : null}
+                        tied={board.rankable ? r.tied : false}
                         sub={`${r.games} games`}
                       />
                       <td>
@@ -206,8 +296,8 @@ export function PacePage() {
                       </td>
                       <td>{asClock(r.median)}</td>
                       <td>
-                        {r.over180}
-                        <span className="rpt__sub">{r.over180Pct}%</span>
+                        {r.over180Pct == null ? '—' : `${r.over180Pct.toFixed(1)}%`}
+                        <span className="rpt__sub">{r.over180} games</span>
                       </td>
                       <td>{r.over210}</td>
                       <td>
@@ -216,7 +306,10 @@ export function PacePage() {
                           byMonth={r.byMonth}
                           min={monthMin}
                           max={monthMax}
-                          label={`${clubName(clubs, r.teamId)} game length by month`}
+                          label={`${clubName(clubs, r.teamId)} game length by month: ${monthLabel(
+                            months,
+                            r.byMonth,
+                          )}`}
                         />
                       </td>
                     </tr>
@@ -230,7 +323,9 @@ export function PacePage() {
             title="The extremes"
             note="Each club’s longest and shortest game of the season. A four-hour game is
                   almost always extra innings; a two-hour game is almost always two starters
-                  having a very good night at the same time."
+                  having a very good night at the same time. A game appears twice here, once
+                  under each club that played it — the league’s longest night is one game, not
+                  two."
           >
             <div className="ledger-wrap">
               <table className="standings rpt">
@@ -280,10 +375,12 @@ export function PacePage() {
             <p>
               <strong>The unit is hours and minutes.</strong> Every figure written as{' '}
               <code>2:44</code> on this page means two hours and forty-four minutes. Game length
-              is the elapsed-time figure the league publishes for each completed game — first
-              pitch to final out, including any weather delay that happened inside it. The delay
-              column is that same feed’s separate delay total, so a club with a long average and
-              a large delay column has had its clock inflated by rain rather than by baseball.
+              is the elapsed-time figure the league publishes for each completed game, first pitch
+              to final out. Weather delay is <em>not</em> inside it — the league keeps that clock
+              separately, and it is the last column of the table below. A game this season was
+              delayed 3:35 and still recorded as 3:24 long. So a club with a long average and a
+              large delay column has not had its clock inflated by rain; those are two independent
+              facts about its season.
             </p>
             <p>
               <strong>Both clubs are counted in every game.</strong> How long a game takes is made
@@ -300,11 +397,12 @@ export function PacePage() {
               by about half a minute; the extremes table below is where to find it.
             </p>
             <p>
-              <strong>The bars do not start at zero.</strong> Every club in the league sits inside
-              a band of roughly ten minutes, and a bar drawn from zero would show thirty
-              identical bars. They run from the league’s quickest club instead, so the length you
-              see is the difference between clubs rather than the length of a game. The numbers
-              beside them are the real figures either way.
+              <strong>The bars do not start at zero.</strong> The whole league sits inside{' '}
+              {spread != null ? `${Math.round(spread)} minutes` : 'a few minutes'}, and a bar drawn
+              from zero would be thirty identical bars. They run from the league’s quickest club
+              instead, which means bar length is the gap between clubs and not the length of a
+              game — a club whose bar is twice another’s does not play games twice as long. The
+              clock beside each bar is the real figure.
               {shortestGame
                 ? ` The quickest game anyone has played this season is ${asClock(shortestGame.shortest)} —
                    ${clubName(clubs, shortestGame.teamId)}, ${humanDate(shortestGame.shortestDate)}.`

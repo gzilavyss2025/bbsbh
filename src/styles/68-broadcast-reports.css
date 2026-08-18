@@ -325,13 +325,25 @@
 
 /* ---- shared report table ----------------------------------- */
 
-/* These pages all print the same shape of board — rank, club, then
-   numeric columns — so the treatment lives once here rather than
-   five times. It layers ON the app's existing `.standings` table
-   rather than replacing it: same borders, same row rhythm, with the
-   broadcast's heavier head rule and mono figures. */
+/* All four boards print the same shape — rank, club, then numeric
+   columns — so the treatment lives once here. It layers ON the app's
+   `.standings` table rather than replacing it: same borders and row
+   rhythm, with a heavier head rule and mono figures. */
 .rpt {
   width: 100%;
+}
+
+/* THE STICKY COLUMN'S CONTAINING BLOCK. `position: sticky` resolves against
+   the nearest ancestor whose overflow is not `visible`, and the shared
+   `.standings` base sets `overflow: hidden` ON THE TABLE (to clip the header
+   row's corners) — so the table, which never scrolls, was the container and
+   the pinned cell slid off with everything else: at 390px `td.team` sat at
+   x = -261 once scrolled right, leaving eighteen rows of unattributable
+   numbers. 26-player-page.css:812 writes the trap up in full; `.standings-wrap`
+   is the same reset for the Standings board. Invisible above 768px, where
+   there is no overflow to scroll — e2e/reports.spec.js pins it at 390. */
+.ledger-wrap .rpt {
+  overflow: visible;
 }
 
 .rpt thead th {

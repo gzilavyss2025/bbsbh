@@ -13,6 +13,7 @@ import { toRow, dayOfWeek, aggregate, leagueFor, buildSeason } from '../scripts/
 import {
   gateBoard,
   paceBoard,
+  paceMargin,
   asClock,
   capacityFor,
   latestSeason,
@@ -136,6 +137,44 @@ test('delay minutes are summed only over the games that carried one', () => {
 
 // Averaging thirty per-club averages weights a club with 59 home dates the
 // same as one with 66. The league line has to come off the rows.
+// THE DOUBLE-COUNT INVARIANT. Both clubs in a delayed game carry that game's
+// delay in their own row, so the club column can never be summed into a league
+// total — a page that did exactly that printed 243 hours of weather delay
+// against a true 122, under a caption promising each game was counted once.
+// This pins the relationship so the two can never drift apart silently.
+test('every club carries its delays, so the club column is exactly twice the league total', () => {
+  const clubs = aggregate(rows)
+  const league = leagueFor(rows)
+  const clubGames = Object.values(clubs).reduce((n, c) => n + (c.pace?.delays.games ?? 0), 0)
+  const clubMinutes = Object.values(clubs).reduce((n, c) => n + (c.pace?.delays.minutes ?? 0), 0)
+  assert.equal(league.delays.games, 1)
+  assert.equal(league.delays.minutes, 30)
+  assert.equal(clubGames, league.delays.games * 2)
+  assert.equal(clubMinutes, league.delays.minutes * 2)
+})
+
+// The columns these feed are captioned "3:00+" and "3:30+". A game of exactly
+// three hours belongs in the first of those to any reader reading the label.
+test('the three-hour counts include a game of exactly three hours', () => {
+  const exact = [
+    toRow(game({ gamePk: 9, gameInfo: { attendance: 1, gameDurationMinutes: 180 } }), null),
+    toRow(game({ gamePk: 10, gameInfo: { attendance: 1, gameDurationMinutes: 210 } }), null),
+    toRow(game({ gamePk: 11, gameInfo: { attendance: 1, gameDurationMinutes: 179 } }), null),
+  ]
+  const clubs = aggregate(exact)
+  assert.equal(clubs[158].pace.over180, 2)
+  assert.equal(clubs[158].pace.over210, 1)
+  assert.equal(leagueFor(exact).over180, 2)
+})
+
+// The per-game spread is the only thing that lets the page say how much of a
+// club-to-club gap is real, so it has to actually ship.
+test('the league line carries the per-game spread the margin is built from', () => {
+  const league = leagueFor(rows)
+  assert.ok(league.paceSd > 0)
+  assert.equal(leagueFor([rows[0]]).paceSd, null)
+})
+
 test('the league line is computed from the games, not from the club averages', () => {
   const league = leagueFor(rows)
   assert.equal(league.attGames, 3)
@@ -209,6 +248,87 @@ test('paceBoard can be sorted from either end of the clock', () => {
   assert.equal(slow.rows[0].teamId, 143)
   assert.equal(quick.rows[0].teamId, 158)
   assert.equal(slow.rows[slow.rows.length - 1].teamId, 158)
+})
+
+// THE RANK AND THE NUMBER BESIDE IT MUST COME FROM THE SAME PLACE. The board
+// sorts on the float and prints the minute; ranking on the float printed
+// "T3 2:47 / T3 2:47 / T3 2:47 / 6 2:47" — three clubs tied and a fourth
+// showing the identical clock denied the same tie.
+test('two clubs whose printed clock is the same are ranked the same', () => {
+  const near = {
+    seasons: {
+      2026: {
+        through: '2026-06-12',
+        league: { paceSd: 19, paceGames: 4 },
+        clubs: {
+          1: { pace: { games: 100, avg: 167.1, median: 167, over180: 0, over210: 0, byMonth: {} } },
+          2: { pace: { games: 100, avg: 166.9, median: 167, over180: 0, over210: 0, byMonth: {} } },
+          3: { pace: { games: 100, avg: 160.0, median: 160, over180: 0, over210: 0, byMonth: {} } },
+        },
+      },
+    },
+  }
+  const board = paceBoard(near, 2026, 'avg')
+  const [a, b] = board.rows
+  assert.equal(asClock(a.avg), asClock(b.avg))
+  assert.equal(a.rank, b.rank)
+  assert.ok(a.tied && b.tied)
+})
+
+// A board with eighteen games a club apiece is a coin flip, and the page has
+// to know that before it prints a 1-30 order over it.
+test('the board reports whether it has enough games to be ranked at all', () => {
+  const thin = {
+    seasons: {
+      2026: {
+        through: '2026-04-15',
+        league: { paceSd: 19.4 },
+        clubs: {
+          1: { pace: { games: 18, avg: 167, median: 167, over180: 0, over210: 0, byMonth: {} } },
+          2: { pace: { games: 18, avg: 160, median: 160, over180: 0, over210: 0, byMonth: {} } },
+        },
+      },
+    },
+  }
+  const early = paceBoard(thin, 2026, 'avg')
+  assert.equal(early.rankable, false)
+  // ±9 minutes on an 18-game sample, against a 7-minute gap: the whole board.
+  assert.ok(early.margin > 8)
+
+  // The same two clubs a full season in. Nothing about the gap changed; the
+  // sample did, and that alone is what earns the board its numbers.
+  const late = structuredClone(thin)
+  for (const club of Object.values(late.seasons[2026].clubs)) club.pace.games = 125
+  const full = paceBoard(late, 2026, 'avg')
+  assert.equal(full.rankable, true)
+  assert.ok(full.margin < early.margin)
+})
+
+test('paceMargin narrows as the season lengthens, and is null before it starts', () => {
+  assert.ok(paceMargin(19.4, 18) > paceMargin(19.4, 125))
+  assert.equal(paceMargin(19.4, 0), null)
+  assert.equal(paceMargin(null, 125), null)
+})
+
+// The caption promises a club that has played more games is not penalised on
+// the three-hour column, which is only true if the SHARE is what sorts it.
+test('the three-hour sort ranks on the share, not the raw count', () => {
+  const uneven = {
+    seasons: {
+      2026: {
+        through: '2026-06-12',
+        league: { paceSd: 19 },
+        clubs: {
+          // Fewer games, higher rate — must lead.
+          1: { pace: { games: 50, avg: 165, median: 165, over180: 20, over210: 0, byMonth: {} } },
+          2: { pace: { games: 125, avg: 165, median: 165, over180: 30, over210: 0, byMonth: {} } },
+        },
+      },
+    },
+  }
+  const board = paceBoard(uneven, 2026, 'over180Pct')
+  assert.equal(board.rows[0].teamId, 1)
+  assert.equal(board.rows[0].over180Pct, 40)
 })
 
 test('asClock reads minutes the way baseball says them', () => {
