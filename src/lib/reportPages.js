@@ -54,14 +54,7 @@ export const PAGE_GROUPS = [
       // reached from.
       { label: 'Team Records', path: '/team-records' },
       { label: 'Foul Tracker', path: '/fouls' },
-      { label: 'Milestone Watch', path: '/milestones' },
       { label: 'Umpire Rankings', path: '/umpires' },
-      // Unsettled: these two are this season's EVENTS, and they become
-      // archives the moment the season turns. They sat under History until
-      // the nav study moved them; if a first-click test says readers look for
-      // them there, move them back rather than duplicating them.
-      { label: 'Trade Deadline', path: '/trade-deadline' },
-      { label: 'All Star Game', path: '/all-star-rosters' },
     ],
   },
   {
@@ -79,34 +72,38 @@ export const PAGE_GROUPS = [
     // what a club has coming and how much work its pen has already done.
     //
     // Four of the five are not about a result at all. The fifth, The Double
-    // Dip, is the group's edge case and is here deliberately: a doubleheader is
-    // a scheduling condition — rain in April, two games in August — and the
-    // page is about what that condition DOES to a club, which is the same
-    // question the other four ask about crowds, clock, pipeline and workload.
-    // It is a season aggregate over finished games, so it spoils nothing; if a
-    // first-click test says readers look for it under History instead, move it
-    // rather than duplicating it.
+    // Dip, is here deliberately: a doubleheader is a scheduling condition —
+    // rain in April, two games in August — and the page is about what that
+    // condition DOES to a club, which is the same question the other four ask
+    // about crowds, clock, pipeline and workload. It is a season aggregate
+    // over finished games, so it spoils nothing; if a first-click test says
+    // readers look for it under History instead, move it rather than
+    // duplicating it.
     //
     // Attendance leads on busiest-first, the same rule every other group here
     // orders by: it is the one a reader is most likely to have come looking
     // for by name.
+    //
+    // All Star Game trails, outside that SET on purpose — it carries none of
+    // the broadcast package's shared graphics or nightly data files. It sits
+    // here because it answers the same "what's happening around the game
+    // right now" question the rest of the group asks rather than a result;
+    // if a first-click test says readers look for it under This season
+    // instead, move it back rather than duplicating it.
     pages: [
       { label: 'Attendance', path: '/attendance' },
-      { label: 'Farm System Rankings', path: '/farm-system-rankings' },
       { label: 'Bullpen Availability', path: '/bullpen-availability' },
       { label: 'Pace of Play', path: '/pace-of-play' },
       { label: 'Doubleheaders', path: '/doubleheaders' },
+      { label: 'All Star Game', path: '/all-star-rosters' },
     ],
   },
   {
     id: 'prospects',
     label: 'Prospects & injuries',
-    // Unsettled: two items is a label pretending to be a group. It survives
-    // this pass because both pages are about players who are NOT in tonight's
-    // lineup, which is a real distinction — but a third page, or a merge into
-    // "This season", would both be defensible.
     pages: [
       { label: 'Top MLB Prospects', path: '/prospects' },
+      { label: 'Farm System Rankings', path: '/farm-system-rankings' },
       { label: 'Rehab Assignments', path: '/rehab' },
     ],
   },
@@ -120,6 +117,8 @@ export const PAGE_GROUPS = [
       // by season. Same kind of page, two different groups.
       { label: 'Postseason Leaders', path: '/postseason-leaders' },
       { label: 'All-Star Legacy', path: '/all-star-legacy' },
+      { label: 'Milestone Watch', path: '/milestones' },
+      { label: 'Trade Deadline', path: '/trade-deadline' },
     ],
   },
   {
@@ -136,12 +135,9 @@ export const PAGE_GROUPS = [
   },
 ]
 
-// The flat list, derived. Same pages as before this file grew groups; the
-// ORDER changed, deliberately — Trade Deadline and All Star Game moved up out
-// of History, and the two player-trajectory pages moved down below the live
-// season pages. test/report-pages.test.js pins the SET (nothing lost, nothing
-// added, no duplicate path), not the order, because the order is the one thing
-// this change is allowed to move.
+// The flat list, derived. test/report-pages.test.js pins the SET (nothing
+// lost, nothing added, no duplicate path), not the order, because the order
+// is the one thing a regrouping is allowed to move.
 export const REPORT_PAGES = PAGE_GROUPS.flatMap((group) => group.pages)
 
 // The guides live at /learn and are NOT React routes — they are server-
