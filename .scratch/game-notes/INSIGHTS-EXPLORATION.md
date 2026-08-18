@@ -1,3 +1,5 @@
+> **2026-08-18**: decided — curation-signal-only, filed as gzilavyss2025/bbsbh#774.
+
 # Game Notes → Insights: exploration + findings (deferred)
 
 **Status:** exploration only — no product code written. **Decision deferred** to a

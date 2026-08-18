@@ -1,3 +1,5 @@
+> **2026-08-18**: printable scorecard sheet follow-up filed as gzilavyss2025/bbsbh#773.
+
 # Placed runner in extra innings — a card of his own
 
 Status: ready-for-human

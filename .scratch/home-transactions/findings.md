@@ -1,3 +1,5 @@
+> **2026-08-18**: decisions made, filed as gzilavyss2025/bbsbh#772.
+
 # Home-page transaction log — data study
 
 > **Read `docs/transactions-wire.md` first.** Everything this session learned
