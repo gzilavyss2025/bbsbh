@@ -28,7 +28,7 @@ const BOARDS = [
   { path: '/pace-of-play', name: 'The Clock' },
   { path: '/farm-system-rankings', name: 'The Farm Report' },
   { path: '/bullpen-availability', name: 'The Pen' },
-  { path: '/doubleheaders', name: 'The Double Dip' },
+  { path: '/doubleheaders', name: 'Doubleheader Records' },
 ]
 
 for (const board of BOARDS) {
@@ -104,7 +104,7 @@ test('The Clock: rows showing the same time carry the same rank', async ({ page 
 // Driven by the keyboard rather than by a drag, deliberately: a native range
 // input answers arrow keys, so this tests the CONTROL rather than testing
 // Playwright's mouse. If the inputs ever stop being real sliders, this fails.
-test('The Double Dip: narrowing the year range recounts the board', async ({ page }) => {
+test('Doubleheaders: narrowing the year range recounts the board', async ({ page }) => {
   await page.setViewportSize(PHONE)
   await page.goto('/doubleheaders')
 
@@ -124,7 +124,7 @@ test('The Double Dip: narrowing the year range recounts the board', async ({ pag
   // A preset chip sets a NAMED, fixed span rather than a trailing window, so
   // the chip and the readout have to say the same years.
   await page.getByRole('button', { name: '2011' }).click()
-  await expect(readout).toHaveText('2011–2020')
+  await expect(readout).toHaveText('2011–2019')
 
   // One season only: send the first handle past the last one. The two are
   // allowed to meet — a single season is a legitimate span — but never to
@@ -141,7 +141,7 @@ test('The Double Dip: narrowing the year range recounts the board', async ({ pag
 
 // The year drawer — the "per year" half of the page. It opens from the DHs
 // figure rather than from the row, because the row already holds a link.
-test('The Double Dip: a row opens its year-by-year lines', async ({ page }) => {
+test('Doubleheaders: a row opens its year-by-year lines', async ({ page }) => {
   await page.setViewportSize(PHONE)
   await page.goto('/doubleheaders')
 
@@ -159,11 +159,35 @@ test('The Double Dip: a row opens its year-by-year lines', async ({ page }) => {
   await expect(drawer).toHaveCount(0)
 })
 
+// The row itself opens the drawer — and the two controls inside it must not.
+// The club name is the trap: TeamLink renders a <button>, not an anchor, so a
+// row handler that only stepped around `a` elements toggled the drawer on its
+// way out to the club page.
+test('Doubleheaders: the row opens the drawer, its controls still do their own job', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1200, height: 900 })
+  await page.goto('/doubleheaders')
+
+  const row = page.locator('table.dh tbody tr').first()
+  await expect(row).toBeVisible()
+
+  // A plain cell — no control in it — opens and closes the drawer.
+  await row.locator('td').nth(2).click()
+  await expect(page.locator('.dh__drawer')).toBeVisible()
+  await row.locator('td').nth(2).click()
+  await expect(page.locator('.dh__drawer')).toHaveCount(0)
+
+  // The club name navigates instead.
+  await row.locator('th.team button.plink').click()
+  await expect(page).toHaveURL(/\/team\//)
+})
+
 // The most-met opponent carries its club's mark. It is the one cell on the
 // board that names a club OTHER than the row's own, and a name with no mark
 // beside it in a column of marked names reads as a missing logo rather than as
 // a deliberate difference.
-test('The Double Dip: the most-met opponent shows its club mark', async ({ page }) => {
+test('Doubleheaders: the most-met opponent shows its club mark', async ({ page }) => {
   await page.setViewportSize({ width: 1200, height: 900 })
   await page.goto('/doubleheaders')
 

@@ -228,7 +228,7 @@ jobs:
       # public/data/top-prospects.json (update-top-prospects.yml) — and joins
       # them to live minor-league standings, so it must run after a checkout
       # but has no dependency on any step in this file.
-      # The Double Dip. A full rebuild of 2004-to-now every night — twenty-three
+      # the doubleheader report. A full rebuild of 2004-to-now every night — twenty-three
       # schedule requests with a narrow fields filter — because only the current
       # season's rows can change and the file is 20 KB either way. No SQLite,
       # nothing incremental, nothing to backfill.

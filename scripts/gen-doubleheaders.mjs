@@ -70,6 +70,7 @@ const FIELDS = [
   'id',
   'score',
   'isWinner',
+  'venue',
 ].join(',')
 
 function parseArgs(argv) {
@@ -86,6 +87,48 @@ function parseArgs(argv) {
 // the one the rest of this app already treats as decided.
 const isFinal = (g) => g?.status?.codedGameState === 'F' || g?.status?.codedGameState === 'O'
 
+// WHOSE PARK IS THIS. The report wants to say "@ Brewers" or "vs Brewers", and
+// the home/away flag on a doubleheader's two games cannot answer that: a makeup
+// doubleheader flips it between game one and game two while both games are
+// played at the SAME park (that is what a makeup is — the postponed game
+// replayed at the wrong address). So the host is worked out from the VENUE
+// instead, by asking who plays there the rest of the year.
+//
+// A club is the home side at its own park some eighty times a season, so the
+// mode is not a close call. The threshold exists for the other case: neutral
+// sites (London, Mexico City, the Field of Dreams game, a club playing a
+// temporary home season) host a handful of games and belong to nobody, and
+// calling one of them a club's park would print "@ Cubs" for a game nobody
+// played in Chicago. Below the threshold the host is null and the report names
+// the opponent with no preposition at all.
+const HOME_PARK_MIN_GAMES = 20
+
+export function hostsByVenue(games, { min = HOME_PARK_MIN_GAMES } = {}) {
+  const counts = new Map() // venueId -> Map(teamId -> games)
+  for (const g of games) {
+    const venue = g?.venue?.id
+    const home = g?.teams?.home?.team?.id
+    if (!venue || !home) continue
+    if (!counts.has(venue)) counts.set(venue, new Map())
+    const perTeam = counts.get(venue)
+    perTeam.set(home, (perTeam.get(home) ?? 0) + 1)
+  }
+
+  const hosts = new Map() // venueId -> teamId
+  for (const [venue, perTeam] of counts) {
+    let best = null
+    let bestCount = 0
+    for (const [teamId, n] of perTeam) {
+      if (n > bestCount) {
+        best = teamId
+        bestCount = n
+      }
+    }
+    if (best != null && bestCount >= min) hosts.set(venue, best)
+  }
+  return hosts
+}
+
 // Group one season's games into candidate doubleheader days: same date, same
 // two clubs. Exported for the unit test, which feeds it hand-built days rather
 // than a live season.
@@ -98,7 +141,8 @@ const isFinal = (g) => g?.status?.codedGameState === 'F' || g?.status?.codedGame
 // those into two lone games and drops the whole doubleheader as incomplete —
 // it cost 2020 more than twenty real pairs before this was caught. Sorting the
 // two ids into a stable order keys the DAY, which is what a doubleheader is.
-export function pairsFromGames(games) {
+export function pairsFromGames(games, { hosts = null } = {}) {
+  const venueHosts = hosts ?? hostsByVenue(games)
   const byDay = new Map()
   for (const g of games) {
     const away = g?.teams?.away?.team?.id
@@ -143,7 +187,10 @@ export function pairsFromGames(games) {
       if (winner === low) lowWins += 1
       else highWins += 1
     }
-    pairs.push([date, low, Number(highId), lowWins, highWins])
+    // The park, not the home flag — see hostsByVenue. Game one's venue is the
+    // day's venue; a doubleheader is not played at two addresses.
+    const host = venueHosts.get(gameA?.venue?.id) ?? null
+    pairs.push([date, low, Number(highId), lowWins, highWins, host])
   }
   pairs.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]))
   return { pairs, incomplete }
@@ -179,10 +226,12 @@ async function main() {
     firstSeason: from,
     lastSeason: to,
     incomplete: incompleteTotal,
-    // [date, teamA, teamB, teamAWins, teamBWins] per pair, per season. The two
-    // club ids are sorted, low first; see pairsFromGames for why the pair is
-    // unordered rather than away/home.
-    columns: ['date', 'teamA', 'teamB', 'teamAWins', 'teamBWins'],
+    // [date, teamA, teamB, teamAWins, teamBWins, host] per pair, per season. The
+    // two club ids are sorted, low first; see pairsFromGames for why the pair is
+    // unordered rather than away/home. `host` is the club whose PARK the day was
+    // played at (null at a neutral site), which is what "@" and "vs" are read
+    // from — the per-game home flag cannot answer that for a makeup.
+    columns: ['date', 'teamA', 'teamB', 'teamAWins', 'teamBWins', 'host'],
     seasons,
   }
   await writeJsonAtomic(out, payload)

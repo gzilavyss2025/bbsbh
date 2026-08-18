@@ -1,4 +1,4 @@
-// The two halves of The Double Dip's pipeline: what scripts/gen-doubleheaders.mjs
+// The two halves of the doubleheader report's pipeline: what scripts/gen-doubleheaders.mjs
 // reduces a season's schedule down to, and what src/api/around-the-game/doubleheaders.js
 // folds those pair rows into for the board.
 //
@@ -17,7 +17,7 @@
 //     has to equal twice it (less any tie).
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { pairsFromGames } from '../scripts/gen-doubleheaders.mjs'
+import { pairsFromGames, hostsByVenue } from '../scripts/gen-doubleheaders.mjs'
 import {
   buildBoard,
   boardHighlights,
@@ -27,16 +27,33 @@ import {
 } from '../src/api/around-the-game/doubleheaders.js'
 
 // One schedule row, in the shape the fields-filtered feed returns.
-const game = ({ date = '2026-07-04', away, home, winner, dh = 'S', num = 1, state = 'F' }) => ({
+const game = ({
+  date = '2026-07-04',
+  away,
+  home,
+  winner,
+  dh = 'S',
+  num = 1,
+  state = 'F',
+  venue = 1,
+}) => ({
   date,
   gameNumber: num,
   doubleHeader: dh,
   status: { codedGameState: state },
+  venue: { id: venue },
   teams: {
     away: { team: { id: away }, isWinner: winner === away },
     home: { team: { id: home }, isWinner: winner === home },
   },
 })
+
+// A season's worth of home dates at one park, so hostsByVenue clears its
+// minimum and calls that park the club's own.
+const homeStand = (teamId, venue, n = 25) =>
+  Array.from({ length: n }, (_, i) =>
+    game({ date: `2026-04-${String((i % 28) + 1).padStart(2, '0')}`, away: 999, home: teamId, venue, dh: 'N' }),
+  )
 
 test('pairs a doubleheader whose two games swap home and away', () => {
   // The 2020-08-05 shape: game 1 at one park, game 2 the makeup, so the
@@ -54,6 +71,37 @@ test('pairs a doubleheader whose two games swap home and away', () => {
   assert.equal(teamB, 147)
   assert.equal(winsA, 0)
   assert.equal(winsB, 2)
+})
+
+// The half of the swap case the pairing rule cannot answer on its own: which
+// club's park was this? The two games disagree — one has 147 at home, the other
+// 143 — and both were played at one address. Only the venue knows.
+test('the host is the park\u2019s usual occupant, not the game\u2019s home flag', () => {
+  const season = [
+    ...homeStand(147, 55),
+    game({ date: '2026-07-04', away: 143, home: 147, winner: 147, dh: 'Y', num: 1, venue: 55 }),
+    game({ date: '2026-07-04', away: 147, home: 143, winner: 147, dh: 'Y', num: 2, venue: 55 }),
+  ]
+  const { pairs } = pairsFromGames(season)
+  const day = pairs.find((r) => r[0] === '2026-07-04')
+  assert.equal(day[5], 147, 'the day belongs to the club that plays at venue 55')
+})
+
+test('a park nobody calls home leaves the host unset', () => {
+  // London, Mexico City, the Field of Dreams game: a handful of dates at a
+  // venue no club occupies. Calling it somebody's park would print "@ Cubs"
+  // for a game nobody played in Chicago.
+  const { pairs } = pairsFromGames([
+    game({ away: 112, home: 158, winner: 112, num: 1, venue: 401 }),
+    game({ away: 112, home: 158, winner: 158, num: 2, venue: 401 }),
+  ])
+  assert.equal(pairs[0][5], null)
+})
+
+test('hostsByVenue takes the mode, and only past the threshold', () => {
+  const hosts = hostsByVenue([...homeStand(158, 7), ...homeStand(112, 9, 3)])
+  assert.equal(hosts.get(7), 158)
+  assert.equal(hosts.has(9), false, 'three dates is not a home park')
 })
 
 test('a doubleheader with only one game played is dropped, and counted', () => {
@@ -80,9 +128,10 @@ test('a tied game counts in the pair but credits neither club', () => {
     game({ away: 158, home: 138, winner: null, num: 2 }),
   ])
   assert.equal(pairs.length, 1)
-  // Row is [date, 138, 158, ...] — ids sorted low-first — so the club that won
-  // the first game is the SECOND number, and the tie credits neither.
-  assert.deepEqual(pairs[0].slice(3), [0, 1])
+  // Row is [date, 138, 158, wins, wins, host] — ids sorted low-first — so the
+  // club that won the first game is the SECOND number, and the tie credits
+  // neither. The host is unset here: this fixture has no home stand behind it.
+  assert.deepEqual(pairs[0].slice(3), [0, 1, null])
 })
 
 test("'Game Over' counts as played, the way the rest of the app treats it", () => {
@@ -93,13 +142,14 @@ test("'Game Over' counts as played, the way the rest of the app treats it", () =
   assert.equal(pairs.length, 1)
 })
 
-// A three-season file: 158 sweeps 138 in 2024, is swept by 138 in 2025, and
-// splits with 112 in 2026.
+// A three-season file: 158 sweeps 138 in 2024 at 138's park, is swept by 138 in
+// 2025 at its own, and splits with 112 in 2026 at its own. The sixth column is
+// the host club.
 const FILE = {
   seasons: {
-    2024: [['2024-05-01', 138, 158, 0, 2]],
-    2025: [['2025-05-01', 138, 158, 2, 0]],
-    2026: [['2026-05-01', 112, 158, 1, 1]],
+    2024: [['2024-05-01', 138, 158, 0, 2, 138]],
+    2025: [['2025-05-01', 138, 158, 2, 0, 158]],
+    2026: [['2026-05-01', 112, 158, 1, 1, 158]],
   },
 }
 
@@ -163,6 +213,49 @@ test('the per-year drawer lists only the seasons a club actually played one', ()
     cardinals.seasons.map((s) => s.season),
     [2025, 2024], // newest first, and no 2026 line at all
   )
+})
+
+// The drawer draws a MARK per sweep, not a count, so each season has to carry
+// the ids — and carry a repeat as a repeat.
+test('each season names the clubs swept and the clubs that swept it', () => {
+  const file = {
+    seasons: {
+      2026: [
+        ['2026-05-01', 112, 158, 0, 2, 158],
+        ['2026-06-01', 112, 158, 0, 2, 112], // 158 sweeps the same club twice
+        ['2026-07-01', 138, 158, 2, 0, 138], // and is swept once
+      ],
+    },
+  }
+  const { rows } = buildBoard(file, { from: 2026, to: 2026 })
+  const year = rows.find((r) => r.teamId === 158).seasons[0]
+  assert.deepEqual(year.swept, [112, 112], 'the same opponent twice is two marks')
+  assert.deepEqual(year.sweptBy, [138])
+  // The counts the row prints are derived from those same lists.
+  assert.equal(year.swept.length + year.sweptBy.length <= year.dh, true)
+})
+
+// "@ Brewers" or "vs Brewers" — read off the host column, never off a per-game
+// home flag.
+test('each doubleheader in a season knows whose park it was at', () => {
+  const { rows } = buildBoard(FILE, { from: 2024, to: 2026 })
+  const brewers = rows.find((r) => r.teamId === 158)
+  const byYear = Object.fromEntries(brewers.seasons.map((s) => [s.season, s.days]))
+  assert.deepEqual(byYear[2024], [{ oppId: 138, home: false, w: 2, l: 0, swept: true, sweptBy: false }])
+  assert.deepEqual(byYear[2025], [{ oppId: 138, home: true, w: 0, l: 2, swept: false, sweptBy: true }])
+  assert.equal(byYear[2026][0].home, true)
+
+  // The other side of the same row sees the mirror image.
+  const cardinals = rows.find((r) => r.teamId === 138)
+  assert.equal(cardinals.seasons.find((s) => s.season === 2024).days[0].home, true)
+})
+
+test('a neutral-site doubleheader is neither home nor away', () => {
+  const file = { seasons: { 2026: [['2026-06-20', 112, 158, 1, 1, null]] } }
+  const { rows } = buildBoard(file, { from: 2026, to: 2026 })
+  for (const row of rows) {
+    assert.equal(row.seasons[0].days[0].home, null)
+  }
 })
 
 test('a tie at the top of the opponent column names every club sharing it', () => {

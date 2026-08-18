@@ -769,7 +769,7 @@
   color: var(--text-caption);
 }
 
-/* ---- The Double Dip's own cells (screens/around-the-game/DoubleheadersPage.jsx) ---- */
+/* ---- the doubleheader report's own cells (screens/around-the-game/DoubleheadersPage.jsx) ---- */
 
 /* The DHs figure is also the drawer's handle. A button rather than a row click
    because the row already holds a link (the club) — a clickable row containing
@@ -837,10 +837,84 @@
   margin-left: 0;
 }
 
+/* A tied cell is marks only — the names are there for a screen reader and take
+   no room — so they sit closer together than a mark-and-name pair does. */
+.dh__oppclub--mark {
+  margin-left: 5px;
+}
+
 .dh__oppcount {
   margin-left: 6px;
   font-family: var(--font-mono);
   font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
+/* THE WHOLE ROW IS THE HANDLE. The drawer used to open only from the DHs
+   figure, which is one small target at the left of a board eight columns wide —
+   findable once you know it is there, and not before. The row takes the click
+   now (the button stays, as the keyboard's way in), so the cursor and the hover
+   have to say the row is live. */
+.dh__row {
+  cursor: pointer;
+}
+
+.dh__row:hover td,
+.dh__row:hover th.team {
+  background: var(--paper-2);
+}
+
+.dh__row--open td,
+.dh__row--open th.team {
+  background: var(--paper-1);
+}
+
+/* The reader's own club keeps its clay edge and its own ground under both. */
+.dh__row.rpt__row--mine:hover td,
+.dh__row.rpt__row--mine:hover th.team,
+.dh__row--open.rpt__row--mine td,
+.dh__row--open.rpt__row--mine th.team {
+  background: var(--paper-3);
+}
+
+/* Marks instead of a count, in the drawer's Swept and Swept by columns. The
+   same club can appear twice — it swept the same opponent twice that year —
+   and that repeat is the point, so nothing here dedupes. */
+.dh__marks {
+  white-space: nowrap;
+}
+
+.dh__mark {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.dh__mark + .dh__mark {
+  margin-left: 4px;
+}
+
+/* Every doubleheader of the season, named and placed. The one cell on this page
+   that WRAPS: eleven opponents on one line (2020 happened) would push the
+   drawer past any width. Left-aligned against the numeric columns beside it,
+   because it is prose, not a figure. */
+.dh__against {
+  max-width: 34ch;
+  text-align: left;
+  white-space: normal;
+}
+
+.dh__against-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 var(--space-2) 2px 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+
+.dh__at {
+  font-family: var(--font-mono);
   color: var(--text-caption);
 }
 

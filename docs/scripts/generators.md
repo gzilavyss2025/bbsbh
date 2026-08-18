@@ -320,7 +320,7 @@ don't run these by hand.
   rank).
 - `gen-doubleheaders.mjs` → `public/data/doubleheaders.json` — every completed
   MLB regular-season DOUBLEHEADER from 2004 to now, the file behind
-  `/doubleheaders` (The Double Dip). One row per PAIR — `[date, teamA, teamB,
+  `/doubleheaders`. One row per PAIR — `[date, teamA, teamB,
   teamAWins, teamBWins]`, club ids sorted low-first — and nothing per club: the
   page's year slider changes every per-club number, so the fold lives in
   `src/api/around-the-game/doubleheaders.js` instead. FULL REBUILD each night

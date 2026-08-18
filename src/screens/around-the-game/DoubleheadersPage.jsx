@@ -5,10 +5,8 @@ import {
   buildBoard,
   boardHighlights,
   seasonBounds,
-  throughDate,
 } from '../../api/around-the-game/doubleheaders.js'
 import { loadClubs, clubName, clubShort } from '../../api/around-the-game/clubs.js'
-import { humanDate } from '../../lib/dates.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../../hooks/preferences/useFavoriteTeam.js'
@@ -22,7 +20,7 @@ import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
 import { YearRange } from '../../components/around-the-game/YearRange.jsx'
 
-// THE DOUBLE DIP — how clubs fare on the days they have to play twice.
+// DOUBLEHEADER RECORDS — how clubs fare on the days they have to play twice.
 //
 // THE ARGUMENT THE PAGE MAKES. A doubleheader is a scheduling accident, not a
 // matchup: rain in April sends two clubs out for eighteen innings in August,
@@ -64,8 +62,13 @@ const SORTS = [
 const PRESETS = [
   { key: 'all', label: 'All Years', from: null, to: null },
   { key: '2004', label: '2004–2010', from: 2004, to: 2010 },
-  { key: '2011', label: '2011–2020', from: 2011, to: 2020 },
-  { key: '2021', label: '2021–Present', from: 2021, to: null },
+  { key: '2011', label: '2011–2019', from: 2011, to: 2019 },
+  // 2020 and 2021 on their own, because they are not the same game: every
+  // doubleheader in those two seasons was seven innings a side. Folded into a
+  // longer span they quietly move a club's record; on their own they are the
+  // one span here that is internally consistent.
+  { key: '2020', label: '2020–2021', from: 2020, to: 2021 },
+  { key: '2022', label: '2022–Present', from: 2022, to: null },
 ]
 
 // A preset's years, clamped to what the file actually holds — a span that ran
@@ -81,26 +84,29 @@ function presetRange(preset, bounds) {
 // pairing the club column of every board in this app uses, so the eye can run
 // down this column on the marks alone.
 //
-// A tie at the top is common once the slider is short — two clubs each met
-// twice — and the reader is told so rather than shown one of them picked
-// arbitrarily. Past two, the marks stop earning their room and the cell counts
-// instead of naming: eight logos in one cell is not a fact, it is a texture.
+// A TIE IS SHOWN AS MARKS, NOT AS A COUNT. Ties at the top are common once the
+// slider is short — five clubs a club met three times each — and the cell used
+// to give up and print "5 clubs (3 DHs each)", which names nobody and is the
+// one answer a reader cannot use. Five marks in a row fit where five names
+// never would, and they say WHICH five.
+//
+// The marks are decorative to a screen reader (TeamLogo renders alt=""), so
+// each one carries its club's name in an `.sr-only` span. Without that a
+// logos-only cell is a silent cell.
 function OpponentCell({ top, clubs }) {
   if (!top || !top.dh) return <td className="dh__opp">—</td>
-  const suffix = `${top.dh} DH${top.dh === 1 ? '' : 's'}`
-  if (top.ids.length > 2) {
-    return (
-      <td className="dh__opp">
-        {top.ids.length} clubs ({suffix} each)
-      </td>
-    )
-  }
+  const tied = top.ids.length > 1
+  const suffix = `${top.dh} DH${top.dh === 1 ? '' : 's'}${tied ? ' each' : ''}`
   return (
     <td className="dh__opp">
       {top.ids.map((id) => (
-        <span key={id} className="dh__oppclub">
+        <span key={id} className={`dh__oppclub${tied ? ' dh__oppclub--mark' : ''}`}>
           <TeamLogo teamId={id} name={clubShort(clubs, id)} size={16} />
-          {clubShort(clubs, id)}
+          {tied ? (
+            <span className="sr-only">{clubShort(clubs, id)}</span>
+          ) : (
+            clubShort(clubs, id)
+          )}
         </span>
       ))}
       <span className="dh__oppcount">({suffix})</span>
@@ -108,12 +114,68 @@ function OpponentCell({ top, clubs }) {
   )
 }
 
+// A row of club marks — one per doubleheader, repeated when the same club did
+// it twice. This is what the drawer's Swept and Swept by columns print instead
+// of a number: "2" says a club swept two doubleheaders, and three marks say
+// WHICH clubs, in the room a two-character figure took.
+//
+// The marks are decorative to a screen reader (TeamLogo renders alt=""), so
+// each carries its club's name in an `.sr-only` span. A repeat is a repeat in
+// both channels: two Cubs marks read as "Cubs Cubs", which is the fact.
+function MarkRow({ ids, clubs, label }) {
+  if (!ids?.length) return <td className="dh__marks">—</td>
+  return (
+    <td className="dh__marks">
+      <span className="sr-only">{`${ids.length} ${label}: `}</span>
+      {ids.map((id, i) => (
+        // The same club can appear twice, so the index is part of the key —
+        // there is no id here that is unique on its own.
+        <span key={`${id}-${i}`} className="dh__mark">
+          <TeamLogo teamId={id} name={clubShort(clubs, id)} size={16} />
+          <span className="sr-only">{clubShort(clubs, id)} </span>
+        </span>
+      ))}
+    </td>
+  )
+}
+
+// Every doubleheader of one season, placed: the preposition and the opponent's
+// mark, "vs" at home and "@" on the road.
+//
+// THE MARK CARRIES IT, not a name. A club that played eleven doubleheaders in a
+// season (2020 happened) prints eleven names as a paragraph and eleven marks as
+// a row you can read at a glance — and the mark is the thing the eye is already
+// matching against the board above. The name is still there for a screen
+// reader, in an `.sr-only` span, because TeamLogo renders alt="".
+//
+// HOME AND AWAY COMES FROM THE PARK, not from the feed's home/away flag. A
+// makeup doubleheader flips that flag between its two games while both are
+// played at one address, so the flag would print a club as both host and
+// visitor on the same day. The generator resolves the venue's usual occupant
+// instead (scripts/gen-doubleheaders.mjs); a neutral site names the opponent
+// with no preposition rather than guessing one.
+function OpponentList({ days, clubs }) {
+  if (!days?.length) return <td className="dh__against">—</td>
+  return (
+    <td className="dh__against">
+      {days.map((d, i) => (
+        <span key={`${d.oppId}-${i}`} className="dh__against-item">
+          {d.home === true ? <span className="dh__at">vs</span> : null}
+          {d.home === false ? <span className="dh__at">@</span> : null}
+          <TeamLogo teamId={d.oppId} name={clubShort(clubs, d.oppId)} size={16} />
+          <span className="sr-only">{clubShort(clubs, d.oppId)} </span>
+        </span>
+      ))}
+    </td>
+  )
+}
+
 // One club's years, opened from its row. This is the "per year" half of the
 // page: the board answers "over this span", and the drawer answers "which of
-// those years was it". Seasons with no doubleheader for that club simply do not
-// appear — a club that played none in 2016 has no 2016 line, rather than a row
-// of zeroes.
-function SeasonDrawer({ row, columns }) {
+// those years was it, and against whom". Seasons with no doubleheader for that
+// club simply do not appear — a club that played none in 2016 has no 2016 line,
+// rather than a row of zeroes.
+function SeasonDrawer({ row, clubs, columns }) {
   return (
     <tr className="dh__drawerrow">
       <td colSpan={columns}>
@@ -125,6 +187,7 @@ function SeasonDrawer({ row, columns }) {
               <th>W-L</th>
               <th>Swept</th>
               <th>Swept by</th>
+              <th className="dh__against">Doubleheaders against</th>
             </tr>
           </thead>
           <tbody>
@@ -135,8 +198,9 @@ function SeasonDrawer({ row, columns }) {
                 <td>
                   {s.w}-{s.l}
                 </td>
-                <td>{s.sweeps || '—'}</td>
-                <td>{s.sweptBy || '—'}</td>
+                <MarkRow ids={s.swept} clubs={clubs} label="swept" />
+                <MarkRow ids={s.sweptBy} clubs={clubs} label="swept by" />
+                <OpponentList days={s.days} clubs={clubs} />
               </tr>
             ))}
           </tbody>
@@ -147,7 +211,7 @@ function SeasonDrawer({ row, columns }) {
 }
 
 export function DoubleheadersPage() {
-  useDocumentTitle('The Double Dip — Doubleheaders')
+  useDocumentTitle('MLB Doubleheader Records by Team, 2004–Present')
   const [sortBy, setSortBy] = useState('pct')
   const [range, setRange] = useState(null) // null until the file says what it holds
   const [openTeam, setOpenTeam] = useState(null)
@@ -168,7 +232,6 @@ export function DoubleheadersPage() {
     [data, from, to, sortBy],
   )
   const highs = useMemo(() => boardHighlights(board), [board])
-  const through = useMemo(() => throughDate(data), [data])
 
   const rows = board?.rows ?? []
   const setPreset = (preset) => {
@@ -191,15 +254,10 @@ export function DoubleheadersPage() {
       <SiteHeader />
 
       <BroadcastMasthead
-        eyebrow="The Double Dip"
-        title="Doubleheaders"
-        dek="Every club’s record on the days it had to play twice — and how often those days
-             ended 2-0 one way or the other. Nobody keeps this record, so this page does."
-        meta={[
-          { label: 'Seasons', value: bounds ? `${bounds.first}–${bounds.last}` : '—' },
-          { label: 'Through', value: through ? humanDate(through) : '—' },
-          { label: 'Doubleheaders', value: board?.pairs ?? '—' },
-        ]}
+        eyebrow="Doubleheaders"
+        title="Doubleheader Records"
+        dek="Every MLB club’s record in doubleheader games since 2004 — who sweeps the day, who
+             drops both, and who they keep meeting."
       />
 
       <AsyncStatus
@@ -214,11 +272,7 @@ export function DoubleheadersPage() {
       {bounds && (
         <>
           <BroadcastSection
-            title="The years"
-            note="Drag either end to narrow the span. Every number below — records, sweeps,
-                  ranks and the most-met opponent — is recounted over the years between the
-                  handles."
-          >
+            title="Choose the seasons">
             <YearRange
               min={bounds.first}
               max={bounds.last}
@@ -246,7 +300,6 @@ export function DoubleheadersPage() {
               tone="lead"
               value={board?.pairs ?? 0}
               label="Doubleheaders played"
-              note={`${board?.clubs ?? 0} club${board?.clubs === 1 ? '' : 's'} played at least one.`}
             />
             <Slab
               value={highs?.busiest?.dh ?? '—'}
@@ -256,22 +309,17 @@ export function DoubleheadersPage() {
             <Slab
               value={highs?.mostSweeps?.sweeps ?? '—'}
               label="Most sweeps"
-              note={highs?.mostSweeps ? `${clubName(clubs, highs.mostSweeps.teamId)} took both.` : ''}
+              note={highs?.mostSweeps ? clubName(clubs, highs.mostSweeps.teamId) : ''}
             />
             <Slab
               value={highs?.mostSweptBy?.sweptBy ?? '—'}
               label="Most swept"
-              note={
-                highs?.mostSweptBy ? `${clubName(clubs, highs.mostSweptBy.teamId)} dropped both.` : ''
-              }
+              note={highs?.mostSweptBy ? clubName(clubs, highs.mostSweptBy.teamId) : ''}
             />
           </SlabRow>
 
           <BroadcastSection
-            title="The board"
-            note="One row per club with a doubleheader in the span. W-L counts GAMES; sweeps
-                  and splits count DAYS. Open a row for that club’s year-by-year lines."
-          >
+            title="Doubleheader records by club">
             <div className="rpt-controls" role="group" aria-label="Sort the board">
               {SORTS.map((s) => (
                 <button
@@ -314,7 +362,26 @@ export function DoubleheadersPage() {
                   <tbody>
                     {rows.map((r) => (
                       <Fragment key={r.teamId}>
-                        <tr className={r.teamId === favoriteTeamId ? 'rpt__row--mine' : undefined}>
+                        {/* THE WHOLE ROW OPENS THE YEARS. The button below is
+                            still the real control — it is what a keyboard
+                            reaches and what carries aria-expanded — but a
+                            reader who has just read across a row should not
+                            have to travel back to one small figure to open it.
+                            A click landing on a CONTROL is left alone. The club
+                            name is one: TeamLink renders a <button>, not an
+                            anchor (it navigates through the app's own router),
+                            so an `a`-only guard misses it and the row would
+                            toggle on its way out to the club page. The DHs
+                            button is the other. */}
+                        <tr
+                          className={`dh__row${r.teamId === favoriteTeamId ? ' rpt__row--mine' : ''}${
+                            openTeam === r.teamId ? ' dh__row--open' : ''
+                          }`}
+                          onClick={(e) => {
+                            if (e.target.closest('a, button')) return
+                            setOpenTeam(openTeam === r.teamId ? null : r.teamId)
+                          }}
+                        >
                           <ClubCell
                             teamId={r.teamId}
                             name={clubShort(clubs, r.teamId)}
@@ -348,7 +415,7 @@ export function DoubleheadersPage() {
                           <OpponentCell top={r.top} clubs={clubs} />
                         </tr>
                         {openTeam === r.teamId && (
-                          <SeasonDrawer row={r} columns={COLUMN_COUNT} />
+                          <SeasonDrawer row={r} clubs={clubs} columns={COLUMN_COUNT} />
                         )}
                       </Fragment>
                     ))}
@@ -359,33 +426,31 @@ export function DoubleheadersPage() {
           </BroadcastSection>
 
           <section className="method">
-            <h2>How this is counted</h2>
+            <h2>How doubleheader records are counted</h2>
             <p>
               <strong>A doubleheader is a day, not a game.</strong> Two regular-season games
               between the same two clubs on the same date, both finished. Traditional
-              doubleheaders (one admission) and split ones (two) both count — the difference is
+              doubleheaders (one admission) and split ones (two) both count: that difference is
               how tickets were sold, not whether a club played twice.
             </p>
             <p>
               <strong>A rained-out second game is not a doubleheader.</strong> When only one game
-              of a scheduled pair is played, the day is dropped rather than folded in, because
-              counting it would put single games inside a doubleheader record.
+              of a pair is played, the day is dropped — counting it would put single games inside
+              a doubleheader record.
             </p>
             <p>
-              <strong>Sweeps and splits count days; W-L counts games.</strong> A club that took
-              both games has one sweep and a 2-0 line. The three columns therefore add up to the
-              DHs column, and the W-L column adds up to twice it.
+              <strong>Home and away is the park, not the box score.</strong> A makeup
+              doubleheader flips which club bats last between its two games while both are played
+              at one address, so “@” and “vs” name the club whose park it was.
             </p>
             <p>
-              <strong>Two eras are folded into one line, and the slider is how you separate
-              them.</strong> The 2020 and 2021 doubleheaders were seven innings each; every other
-              season here played nine. The years are counted the same way regardless, so a span
-              that crosses those two seasons is comparing games of different lengths.
+              <strong>2020 and 2021 were seven innings.</strong> Every other season here played
+              nine. The years are counted the same way regardless, so a span crossing those two
+              is comparing games of different lengths.
             </p>
             <p>
               <strong>Source.</strong> The MLB Stats API schedule feed, regular season only,
-              rebuilt nightly (scripts/gen-doubleheaders.mjs). Postseason and spring games are
-              out; so is the minor leagues, whose feeds do not carry the flag reliably.
+              rebuilt nightly. Postseason, spring and the minor leagues are out.
             </p>
           </section>
         </>

@@ -1,4 +1,4 @@
-// The reader behind /doubleheaders — "The Double Dip".
+// The reader behind /doubleheaders — "the doubleheader report".
 //
 // SPOILER-FREE, on the same footing as api/comebackWins.js: every figure here
 // is a season-level aggregate over games statsapi has already called Final. A
@@ -23,15 +23,21 @@ import { staticJson } from '../staticJson.js'
 
 export const fetchDoubleheaders = staticJson('/data/doubleheaders.json', { fallback: null })
 
-// Column positions in a pair row: [date, teamA, teamB, teamAWins, teamBWins].
+// Column positions in a pair row: [date, teamA, teamB, teamAWins, teamBWins, host].
+// The date is carried for the record rather than read here — nothing on the
+// board is per-day, and a season is the finest slice the page shows.
 // The two club ids are sorted low-first by the generator, so neither side is
-// "home" — a makeup doubleheader can swap that between its two games, which is
-// why the file does not record it (scripts/gen-doubleheaders.mjs).
-const DATE = 0
+// the "home" side of the row — a makeup doubleheader can swap the home flag
+// between its two games. Where the day was PLAYED is a separate column
+// (`host`), resolved from the venue (scripts/gen-doubleheaders.mjs).
 const TEAM_A = 1
 const TEAM_B = 2
 const WINS_A = 3
 const WINS_B = 4
+// The club whose PARK the day was played at — what "@" and "vs" are read from.
+// Never the per-game home flag, which a makeup doubleheader flips between its
+// two games while both are played at one address (scripts/gen-doubleheaders.mjs).
+const HOST = 5
 
 // The full span the file covers — what the year slider's two ends clamp to.
 export function seasonBounds(data) {
@@ -58,7 +64,14 @@ function emptyRow(teamId) {
 }
 
 // Fold one side of one pair into a running club row.
-function foldSide(row, season, oppId, mine, theirs) {
+//
+// EVERY SEASON KEEPS ITS DAYS, not just their counts. The year drawer names the
+// opponent of each doubleheader, marks whether it was home or away, and draws
+// the mark of each club swept — none of which a count can answer. The list is
+// the source of the season's counts too (they are derived from it below rather
+// than tallied beside it), so a drawer showing three marks under a "2" is not
+// a state this can reach.
+function foldSide(row, season, oppId, mine, theirs, atHome) {
   row.dh += 1
   row.w += mine
   row.l += theirs
@@ -67,12 +80,11 @@ function foldSide(row, season, oppId, mine, theirs) {
   else if (theirs === 2) row.sweptBy += 1
   else row.splits += 1
 
-  const s = row.bySeason.get(season) ?? { season, dh: 0, w: 0, l: 0, sweeps: 0, sweptBy: 0 }
+  const s = row.bySeason.get(season) ?? { season, dh: 0, w: 0, l: 0, days: [] }
   s.dh += 1
   s.w += mine
   s.l += theirs
-  if (mine === 2) s.sweeps += 1
-  else if (theirs === 2) s.sweptBy += 1
+  s.days.push({ oppId, home: atHome, w: mine, l: theirs, swept: mine === 2, sweptBy: theirs === 2 })
   row.bySeason.set(season, s)
 
   const o = row.byOpponent.get(oppId) ?? { teamId: oppId, dh: 0, w: 0, l: 0 }
@@ -153,8 +165,12 @@ export function buildBoard(data, { from, to, sortBy = 'pct' } = {}) {
       pairs += 1
       if (!rows.has(a)) rows.set(a, emptyRow(a))
       if (!rows.has(b)) rows.set(b, emptyRow(b))
-      foldSide(rows.get(a), season, b, aw, bw)
-      foldSide(rows.get(b), season, a, bw, aw)
+      // NULL, not false, at a neutral site: "not this club's park" and "nobody's
+      // park" are different facts, and the drawer prints "@" for the first and
+      // no preposition at all for the second.
+      const host = pair[HOST] ?? null
+      foldSide(rows.get(a), season, b, aw, bw, host == null ? null : host === a)
+      foldSide(rows.get(b), season, a, bw, aw, host == null ? null : host === b)
     }
   }
 
@@ -163,7 +179,15 @@ export function buildBoard(data, { from, to, sortBy = 'pct' } = {}) {
     pctValue: r.w + r.l ? r.w / (r.w + r.l) : null,
     pct: pct(r.w, r.l),
     top: topOpponents(r.byOpponent),
-    seasons: [...r.bySeason.values()].sort((x, y) => y.season - x.season),
+    seasons: [...r.bySeason.values()]
+      .map((s) => ({
+        ...s,
+        // Derived from the days, never tallied alongside them, so the marks the
+        // drawer draws and the count beside them cannot disagree.
+        swept: s.days.filter((d) => d.swept).map((d) => d.oppId),
+        sweptBy: s.days.filter((d) => d.sweptBy).map((d) => d.oppId),
+      }))
+      .sort((x, y) => y.season - x.season),
     opponents: [...r.byOpponent.values()].sort((x, y) => y.dh - x.dh || x.teamId - y.teamId),
   }))
 
@@ -190,16 +214,4 @@ export function boardHighlights(board) {
     mostSweeps: best('sweeps'),
     mostSweptBy: best('sweptBy'),
   }
-}
-
-// The date of the newest pair in the file — the "through" line under the
-// masthead, so a reader knows how current the current season's numbers are.
-export function throughDate(data) {
-  let latest = null
-  for (const list of Object.values(data?.seasons ?? {})) {
-    for (const pair of list ?? []) {
-      if (!latest || pair[DATE] > latest) latest = pair[DATE]
-    }
-  }
-  return latest
 }

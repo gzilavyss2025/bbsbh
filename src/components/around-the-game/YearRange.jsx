@@ -1,4 +1,4 @@
-// THE YEAR SLIDER — the one control on The Double Dip, and the only
+// THE YEAR SLIDER — the one control on the doubleheader report, and the only
 // two-handled one in the app.
 //
 // WHY TWO NATIVE INPUTS AND NOT A DRAWN WIDGET. A range with two handles is the
