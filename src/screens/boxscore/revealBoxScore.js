@@ -4,6 +4,7 @@ import { selectWinProbPath, selectWinProbBigPlays } from '../../api/winprob.js'
 import { computeDerivedByInning, computeGameSuperlatives, computeInningDigest } from '../../api/derive.js'
 import { computeGameCalloutNotes } from '../../api/callout-notes.js'
 import { eligibleHighlightForPlay } from '../../api/highlights.js'
+import { selectBattedBalls } from '../../api/hitchart.js'
 
 // REVEAL-ONLY, with ONE legal call site: the render function inside
 // `BoxScore.jsx`'s SealBox. Every export of every module imported above is a
@@ -74,9 +75,14 @@ export function revealBoxScore(cacheRef, feed, winProbability, highlights, callo
   // here. See StampGameButton for why rendering inside the reveal render
   // function IS the client-side reveal gate.
   const stampFacts = revealStampFacts(feed)
+  // Every batted ball with a landing coordinate, for the hit chart. No half
+  // clamp: the box score is already one seal over the whole game (ADR-0049), so
+  // the chart here shows what the rest of this line already shows (ADR-0051).
+  const battedBalls = selectBattedBalls(feed)
 
   const value = {
     box,
+    battedBalls,
     stars,
     potg,
     potgHighlight,

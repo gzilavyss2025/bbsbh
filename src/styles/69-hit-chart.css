@@ -1,0 +1,476 @@
+/* ── Hit chart ───────────────────────────────────────────────────────────────
+   The balls-in-play card (components/charts/HitChart.jsx). Broadcast keeps its
+   shape here — condensed caps, an accent rule, a lower-third readout, a divided
+   stat bar — but the ground is manila and the ink is navy, so the card lands on
+   a box-score page without a seam. Every colour is a semantic token; the marks
+   are the paper answer to a broadcast spray chart (ink where television lit
+   white, medal amber where it gilded, and the heat ramp run through clay).
+
+   It sits after the ballpark partial on purpose: the field drawing arrives with
+   the modal's own sizing (a centred 380px sketch), and this card needs it
+   full-bleed so the half's HTML dot numbers can be positioned in percentages
+   against the very box the SVG occupies. */
+
+.hitchart {
+  position: relative;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  padding-bottom: 6px;
+}
+
+/* ---- Head ---- */
+
+.hitchart__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) 14px var(--space-3);
+}
+
+.hitchart__eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-display);
+  color: var(--text-caption);
+}
+
+.hitchart__headline {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+}
+
+/* Kraft into clay — a short seam under the title, the same two inks the seals
+   and the outs are drawn in. */
+.hitchart__rule {
+  width: 42px;
+  height: 3px;
+  margin-top: 9px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--seal-cover), var(--accent-negative));
+}
+
+.hitchart__tag {
+  flex: none;
+  margin: 3px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  text-align: right;
+  color: var(--text-caption);
+}
+
+/* ---- Chips ────────────────────────────────────────────────────────────────
+   The same switch idiom the slate's day-state chips use (.daystate__chip): OFF
+   is ordinary chrome, because off is the common state and a card should not
+   shout about its defaults; ON takes either the ink fill (a filter you applied)
+   or the kraft fill the app already reads as "you are in a mode". */
+
+.hitchart__chiprow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 14px var(--space-3);
+}
+
+.hitchart__chiprow--switches {
+  padding-top: var(--space-3);
+}
+
+.hitchart__chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: background var(--dur-fast) ease, border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease, transform var(--dur-fast) ease;
+}
+
+.hitchart__chip:active {
+  transform: scale(0.98);
+}
+
+.hitchart__chip:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+/* A club chip inverts to ink when it is the club being charted. The mark it
+   carries switches to the precomputed knockout art in the JSX (ADR-0031), so
+   nothing here filters a colour logo — that treatment flattens any mark whose
+   interior detail is drawn in a light fill. */
+.hitchart__chip--club,
+.hitchart__chip--on-ink {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
+.hitchart__chip--on-seal {
+  background: var(--seal-cover);
+  border-color: var(--seal-hatch);
+  color: var(--seal-cover-ink);
+}
+
+/* Held just off full strength: on the kraft chip this figure sits on --seal,
+   where --seal-ink is already at the contrast guard's floor. */
+.hitchart__count {
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-none);
+  opacity: 0.8;
+}
+
+/* The switch glyph: a pill track with the dot sliding on currentColor, so it
+   needs no ON/OFF colour rules of its own beyond the chip's. */
+.hitchart__switch {
+  position: relative;
+  flex: none;
+  width: 20px;
+  height: 12px;
+  border: var(--bw-hair) solid currentColor;
+  border-radius: var(--radius-pill);
+}
+
+.hitchart__switch::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  transition: transform var(--dur-fast) ease;
+}
+
+.hitchart__chip--on-ink .hitchart__switch::before,
+.hitchart__chip--on-seal .hitchart__switch::before {
+  transform: translateX(8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hitchart__switch::before {
+    transition: none;
+  }
+}
+
+/* ---- The field ---- */
+
+.hitchart__fieldwrap {
+  padding: 0 var(--space-2);
+}
+
+/* The plot box must be exactly the drawing's box: the half's dot numbers are
+   positioned in percentages of the cropped viewBox, and any margin or max-width
+   between the two would slide every label off its dot. */
+.hitchart__plot {
+  position: relative;
+}
+
+.hitchart .hitchart__field {
+  max-width: none;
+  margin: 0;
+}
+
+/* ---- The marks ---- */
+
+.hitchart__ball {
+  cursor: pointer;
+}
+
+.hitchart__tap {
+  fill: transparent;
+}
+
+.hitchart__hit {
+  fill: var(--accent-primary);
+  stroke: var(--paper-3);
+  stroke-width: 1.2;
+}
+
+.hitchart__out {
+  fill: none;
+  stroke: var(--graphite);
+  stroke-width: 2;
+}
+
+.hitchart__hr {
+  fill: var(--award-ink);
+  stroke: var(--paper-3);
+  stroke-width: 1.2;
+}
+
+/* Stroked from a per-instance gradient set in the JSX, so two charts on one
+   page cannot repaint each other's rings. */
+.hitchart__heat {
+  fill: none;
+  stroke-width: 3;
+}
+
+.hitchart__heat--key {
+  stroke-width: 2.4;
+}
+
+.hitchart__heat-from {
+  stop-color: var(--clay);
+}
+
+.hitchart__heat-to {
+  stop-color: var(--award-line);
+}
+
+.hitchart__picked {
+  fill: none;
+  stroke: var(--ink-0);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2.5;
+}
+
+.hitchart__dotnum {
+  position: absolute;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+  pointer-events: none;
+}
+
+/* ---- The readout ────────────────────────────────────────────────────────
+   The tapped ball's line, sitting under the chart the way a lower third sits
+   under a replay. At rest it reports the hardest ball struck, so it is never a
+   blank frame waiting to be filled. */
+
+.hitchart__readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: var(--space-1) 14px 0;
+  padding: 10px var(--space-3);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+}
+
+.hitchart__who {
+  min-width: 0;
+}
+
+.hitchart__batter {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-heading);
+}
+
+/* The scorer's own denotation (1B, F8, 6-3) rather than the feed's event name:
+   this card is read next to a paper scorebook, where that is what the reader
+   has just pencilled in. */
+.hitchart__code {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-body);
+}
+
+.hitchart__meta {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-title);
+  white-space: nowrap;
+  color: var(--text-body);
+}
+
+.hitchart__inning {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.hitchart__arrow {
+  width: 9px;
+  height: 9px;
+  fill: currentColor;
+}
+
+/* ---- The key ---- */
+
+.hitchart__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) 14px;
+  padding: var(--space-3) 14px 0;
+}
+
+.hitchart__keyitem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-xwide);
+  color: var(--text-caption);
+}
+
+/* ---- The stat bar ────────────────────────────────────────────────────────
+   Four numbers across, divided the way a broadcast stat bar is. It is the
+   card's last element, so its own bottom rule would double up with the card
+   border. */
+
+.hitchart__facts {
+  display: flex;
+  margin: 14px 0 0;
+  border-top: var(--bw-hair) solid var(--border-rule);
+}
+
+.hitchart__fact {
+  flex: 1;
+  padding: 11px var(--space-1);
+  text-align: center;
+}
+
+.hitchart__fact + .hitchart__fact {
+  border-left: var(--bw-hair) solid var(--border-hairline);
+}
+
+.hitchart__factlabel {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-display);
+  color: var(--text-caption);
+}
+
+.hitchart__factvalue {
+  margin: 5px 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-none);
+  color: var(--text-heading);
+}
+
+.hitchart__unit {
+  margin-left: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-wide);
+  color: var(--text-caption);
+}
+
+/* ---- The half's list ────────────────────────────────────────────────────
+   Numbered against the dots on the chart above. The column head carries the
+   unit once, so no figure in the rows has to repeat it. */
+
+.hitchart__listhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 2px 14px 7px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-xwide);
+  color: var(--text-caption);
+}
+
+.hitchart__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 14px var(--space-4);
+}
+
+.hitchart__row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 0;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
+.hitchart__rownum {
+  flex: none;
+  width: 14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  color: var(--text-caption);
+}
+
+.hitchart__rowname {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-heading);
+}
+
+.hitchart__rowcode {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-emphasis);
+  color: var(--text-caption);
+}
+
+.hitchart__rowvelo {
+  flex: none;
+  width: 62px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  color: var(--text-body);
+}
+
+.hitchart__rowvelo--hard {
+  color: var(--clay-deep);
+}
+
+/* The wall-height tags belong to the DIMENSIONS reading of this drawing, not to
+   this one. Here the field is a plot ground, and a "13′" printed inside the
+   right-field corner lands among the dots it is meant to sit behind. The posted
+   distances stay: they are the scale a reader measures a ball against. */
+.hitchart .bpdiagram__wallh {
+  display: none;
+}

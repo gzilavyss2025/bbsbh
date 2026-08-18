@@ -306,7 +306,11 @@ const BUDGETS = {
   // 91 -> 92 for `69-pitch-arsenal.css`: the player page's redressed Pitches
   // card and its times-through-the-order split. Same reason as the line above —
   // 26-player-page.css has no headroom left, and the card is one lazy route.
-  'src/styles': 92,
+  //
+  // 92 -> 93 for `69-hit-chart.css`: the spray chart's own partial. It shares
+  // the 69 prefix with the file above, which is harmless — neither is
+  // @imported by index.css, so no cascade order depends on the number.
+  'src/styles': 93,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -361,7 +365,7 @@ const BUDGETS = {
   // one module answers "this club's fifty splits", the other "this split's
   // thirty clubs", and merging them would put a page-sized fan-out fetch in the
   // module every Numbers tab loads. Flat for the manifest reason above.
-  'src/api': 98,
+  'src/api': 99,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
