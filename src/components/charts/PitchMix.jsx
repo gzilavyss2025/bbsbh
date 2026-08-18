@@ -1,13 +1,20 @@
+import { useState } from 'react'
 import { pitchFamily } from '../../api/pitchArsenal.js'
 
 const DASH = '—'
+
+// The times-through tabs are labelled by the look they show. Ordinals rather
+// than "TTO 2", which is broadcast shorthand a scorer reading this page has no
+// reason to know.
+const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
 
 // The player page's "Pitches" body: an ink slab carrying one row per pitch —
 // the pitch by name, its family spelled out, a usage meter, its share, and the
 // average velocity — over a band naming his 100 mph work when he has any.
 // `arsenal` is person.js's arsenalView output (already sorted most-thrown
 // first); `heat` is pitchArsenal.js's heatView, null for any arm under the
-// century floor.
+// century floor; `tto` is its arsenalTtoView, null for any arm the nightly
+// file carries no times-through split for, in which case no filter renders.
 //
 // WHY THIS IS INK AND THE REST OF THE PAGE IS PAPER. Velocity and mix are the
 // numbers a reader opens a pitcher's page for, and in the old dress they were
@@ -26,14 +33,37 @@ const DASH = '—'
 // restyled: BattedBallMix.jsx reuses them verbatim for the hitter's "Batted
 // balls" card, and this redesign was asked for on the pitcher's card only.
 // See src/styles/69-pitch-arsenal.css.
-export function PitchMix({ arsenal, heat }) {
+export function PitchMix({ arsenal, heat, tto }) {
+  // `null` is the season, a number is that look. Held here rather than lifted:
+  // nothing else on the page reacts to it, and it deliberately does NOT
+  // persist — a reader who comes back to a pitcher wants the season first.
+  const [look, setLook] = useState(null)
   if (!arsenal?.length) return null
+
+  // A look the file no longer carries can't be selected, so the tabs are the
+  // looks that exist, never a fixed three. A reliever with only first looks
+  // gets no filter at all (arsenalTtoView returns null), and a swingman who
+  // has been through twice gets two tabs beside All.
+  const looks = tto ?? []
+  const selected = look == null ? null : looks.find((l) => l.look === look) ?? null
+
+  // Pitch NAMES come from the live feed's view either way. The nightly file
+  // spells the same pitch differently ("Four-Seam Fastball" vs "Four-seam
+  // FB"), and a name that changes when you tap a tab reads as a different
+  // pitch rather than the same one on a different look.
+  const nameByCode = new Map(arsenal.map((p) => [p.code, p.name]))
+  const rows = selected
+    ? selected.rows.map((r) => ({ ...r, name: nameByCode.get(r.code) ?? r.name }))
+    : arsenal
+
   // The season's pitch count, footed from the rows themselves. Every row has
   // to carry a count for the total to be honest, so one missing count drops
   // the line rather than under-reporting the season.
-  const total = arsenal.every((p) => p.count != null)
-    ? arsenal.reduce((n, p) => n + p.count, 0)
-    : null
+  const total = selected
+    ? selected.total
+    : arsenal.every((p) => p.count != null)
+      ? arsenal.reduce((n, p) => n + p.count, 0)
+      : null
   return (
     <div className="pitchslab">
       <div className="pitchslab__rule" />
@@ -43,8 +73,24 @@ export function PitchMix({ arsenal, heat }) {
           <span className="pitchslab__total">{total.toLocaleString()} pitches</span>
         )}
       </div>
+      {looks.length > 0 && (
+        <>
+          <div className="pitchslab__tabs" role="group" aria-label="Times facing a batter in a game">
+            <LookTab label="All" active={look == null} onSelect={() => setLook(null)} />
+            {looks.map((l) => (
+              <LookTab
+                key={l.look}
+                label={LOOK_LABEL[l.look]}
+                active={look === l.look}
+                onSelect={() => setLook(l.look)}
+              />
+            ))}
+          </div>
+          <p className="pitchslab__tabnote">Times facing a batter in a game</p>
+        </>
+      )}
       <ul className="pitchslab__list">
-        {arsenal.map((p) => {
+        {rows.map((p) => {
           const family = pitchFamily(p.code)
           return (
             <li className="pitchslab__row" key={p.code}>
@@ -85,6 +131,19 @@ export function PitchMix({ arsenal, heat }) {
       </ul>
       {heat && <HeatBand heat={heat} />}
     </div>
+  )
+}
+
+function LookTab({ label, active, onSelect }) {
+  return (
+    <button
+      type="button"
+      className={`pitchslab__tab${active ? ' is-active' : ''}`}
+      aria-pressed={active}
+      onClick={onSelect}
+    >
+      {label}
+    </button>
   )
 }
 

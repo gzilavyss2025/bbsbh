@@ -390,6 +390,22 @@ CREATE TABLE IF NOT EXISTS pitch_arsenal_totals (
   velocity_n      INTEGER NOT NULL DEFAULT 0,
   century_pitches INTEGER NOT NULL DEFAULT 0,
   max_velo        REAL,
+  -- The same pitches split by TIMES THROUGH THE ORDER (1st / 2nd / 3rd-or-
+  -- later look at that batter, by this pitcher, in that game). Nine columns
+  -- on the existing row rather than a `tto` column in the primary key: the
+  -- key form would triple the row count and the committed dump with it, for
+  -- a split only one card reads. A bucket's own velocity_n is carried
+  -- because a bucket can hold pitches with no reading on file, so its
+  -- average has to divide by what it actually measured.
+  tto1_pitches      INTEGER NOT NULL DEFAULT 0,
+  tto1_velocity_sum REAL    NOT NULL DEFAULT 0,
+  tto1_velocity_n   INTEGER NOT NULL DEFAULT 0,
+  tto2_pitches      INTEGER NOT NULL DEFAULT 0,
+  tto2_velocity_sum REAL    NOT NULL DEFAULT 0,
+  tto2_velocity_n   INTEGER NOT NULL DEFAULT 0,
+  tto3_pitches      INTEGER NOT NULL DEFAULT 0,
+  tto3_velocity_sum REAL    NOT NULL DEFAULT 0,
+  tto3_velocity_n   INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (person_id, level, code)
 );
 

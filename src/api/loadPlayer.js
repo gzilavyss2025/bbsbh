@@ -35,7 +35,7 @@ import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
 import { fetchVsTeamSplitsForPlayer, vsTeamSplitsFor } from './vsTeamSplits.js'
 import { fetchSavantPercentiles, savantPercentilesFor, savantRawFor, similarHittersFor } from './savantPercentiles.js'
-import { fetchPitchArsenalFor, fetchPitchArsenalPool, heatView, similarPitchersFor } from './pitchArsenal.js'
+import { arsenalTtoView, fetchPitchArsenalFor, fetchPitchArsenalPool, heatView, similarPitchersFor } from './pitchArsenal.js'
 import { fetchRookieRecord } from './rookies.js'
 import {
   personBio,
@@ -350,10 +350,11 @@ export async function loadPlayer(id, asOf) {
         // ONE-PITCHER shard rather than the whole level: the band is about
         // him alone, so it pays for ~12 KB instead of the pool's 149 KB.
         // Null for a hitter, and null for any arm under the century floor.
-        block.heat =
-          group === 'pitching'
-            ? heatView(await fetchPitchArsenalFor(id), id, tileSportId === 1)
-            : null
+        // ONE fetch of his shard feeds both: the heat band and the
+        // times-through split are different reads of the same ~12 KB file.
+        const arsenalShard = group === 'pitching' ? await fetchPitchArsenalFor(id) : null
+        block.heat = arsenalShard ? heatView(arsenalShard, id, tileSportId === 1) : null
+        block.arsenalTto = arsenalShard ? arsenalTtoView(arsenalShard, id, tileSportId === 1) : null
         // Same attach-after pattern: the Advanced card's shaped view rides
         // the block rather than widening buildBlock's signature, as do the
         // situational-splits ledger and the league-rank strip.

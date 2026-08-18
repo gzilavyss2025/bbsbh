@@ -57,6 +57,76 @@
   color: var(--heat-offspeed);
 }
 
+/* ---- times-through-the-order filter -------------------------------------
+   The app's own segmented control (.levelnav, 05-masthead-nav.css) in the
+   slab's inks: same grid of equal cells, same condensed caps, same 34px cell
+   and the same rounded fill inset from the cell's edge — the active cell just
+   takes the band accent instead of navy ink, since navy on navy would be
+   invisible here. Rendered only when the nightly file carries the split, so
+   most relievers never see it. */
+.pitchslab__tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-top: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
+  border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
+}
+
+.pitchslab__tab {
+  appearance: none;
+  min-width: 0;
+  min-height: 42px;
+  margin: 4px;
+  padding: 0 var(--space-1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--heat-offspeed);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-standard),
+    background var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+/* The divider rides the cell rather than the button, so it stays put while the
+   button's own margin insets the fill — same construction as .levelnav. */
+.pitchslab__tab + .pitchslab__tab {
+  box-shadow: -1px 0 0 rgba(255, 255, 255, 0.14);
+}
+
+.pitchslab__tab:active {
+  transform: scale(0.96);
+}
+
+/* Focus indicates itself by taking the hover fill rather than drawing a ring:
+   the shared --focus-ring is field green, which is the one thing in the
+   palette that does NOT hold up on this navy, and a bespoke ring colour is
+   exactly what check-focus-ring.mjs exists to stop. A tabbed-to cell lights
+   the same way a hovered one does, which is unambiguous against three unlit
+   siblings. */
+.pitchslab__tab.is-active,
+.pitchslab__tab:hover,
+.pitchslab__tab:focus-visible {
+  background: var(--heat-band);
+  color: var(--heat-band-ink);
+}
+
+/* What the tabs mean, said once under them rather than in each label — "1st"
+   beside "2nd" is only legible if something nearby says first WHAT. */
+.pitchslab__tabnote {
+  margin: 0;
+  padding: 6px 14px 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--heat-other);
+}
+
 .pitchslab__list {
   list-style: none;
   margin: 0;
@@ -312,6 +382,23 @@
   .pitchslab__head {
     padding: 10px 20px;
     border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
+  }
+
+  /* The filter stops spanning the card and sits as a control of its own, with
+     its caption beside it rather than under it — a 928px-wide segmented bar
+     reads as navigation, not as a filter on the rows below it. */
+  .pitchslab__tabs {
+    width: 300px;
+    margin: 8px 20px 0 auto;
+    border: var(--bw-hair) solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-sm);
+  }
+  .pitchslab__tab {
+    min-height: 30px;
+  }
+  .pitchslab__tabnote {
+    padding: 6px 20px 0;
+    text-align: right;
   }
 
   .pitchslab__flame {

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { aggregateGamePitchTypes } from '../scripts/gen-pitch-arsenal.mjs'
-import { pitchArsenalFor, pitchFamily, heatView, MIN_ARSENAL_PITCHES, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, MIN_ARSENAL_PITCHES, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -10,9 +10,12 @@ const pitch = (typeCode, description, startSpeed) => ({
   pitchData: startSpeed == null ? undefined : { startSpeed },
 })
 
-const play = ({ half = 'top', pitcher, events }) => ({
+const play = ({ half = 'top', pitcher, batter, events }) => ({
   about: { halfInning: half },
-  matchup: { pitcher: { id: pitcher, fullName: `Pitcher ${pitcher}` } },
+  matchup: {
+    pitcher: { id: pitcher, fullName: `Pitcher ${pitcher}` },
+    ...(batter == null ? {} : { batter: { id: batter } }),
+  },
   playEvents: events,
 })
 
@@ -186,4 +189,106 @@ test('heatView leaves rank null until the generator writes one, and reads it whe
 test('heatView degrades to null for a missing personId or absent file', () => {
   assert.equal(heatView(dataWith(100, [heatRow('FF', 40, 103.4)]), 999, true), null)
   assert.equal(heatView(null, 100, true), null)
+})
+
+// --- times through the order -------------------------------------------------
+test('aggregateGamePitchTypes buckets pitches by how many times that batter has been faced', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 95)] }),
+      play({ pitcher: 200, batter: 11, events: [pitch('FF', 'Four-Seam Fastball', 96)] }),
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 94)] }),
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 93)] }),
+      // A fourth look folds into the third bucket rather than opening its own.
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 92)] }),
+    ]),
+  )
+  const t = agg.get(200).types.get('FF')
+  assert.equal(t.pitches, 5)
+  assert.deepEqual(t.tto.map((b) => b.pitches), [2, 1, 2], 'two firsts (one each batter), one second, two thirds')
+  assert.equal(t.tto[0].velocitySum, 95 + 96)
+  assert.equal(t.tto[2].velocitySum, 93 + 92)
+})
+
+test('aggregateGamePitchTypes counts a look per PITCHER, so a reliever starts fresh on a batter', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 95)] }),
+      play({ pitcher: 200, batter: 10, events: [pitch('FF', 'Four-Seam Fastball', 95)] }),
+      play({ pitcher: 201, batter: 10, events: [pitch('SL', 'Slider', 85)] }),
+    ]),
+  )
+  assert.deepEqual(agg.get(200).types.get('FF').tto.map((b) => b.pitches), [1, 1, 0])
+  assert.deepEqual(
+    agg.get(201).types.get('SL').tto.map((b) => b.pitches),
+    [1, 0, 0],
+    'the arm that just came in is seeing this hitter for the FIRST time',
+  )
+})
+
+test('aggregateGamePitchTypes still counts a pitch whose play carries no batter, in no bucket', () => {
+  const agg = aggregateGamePitchTypes(
+    feedWith([play({ pitcher: 200, events: [pitch('FF', 'Four-Seam Fastball', 95)] })]),
+  )
+  const t = agg.get(200).types.get('FF')
+  assert.equal(t.pitches, 1, 'the season total still has it')
+  assert.deepEqual(t.tto.map((b) => b.pitches), [0, 0, 0], 'but it joins no look')
+})
+
+// `tto` is [pitches, avgVelo] pairs, trailing empty looks trimmed — see
+// exportPitchArsenal on why the file spells it this way.
+const ttoRow = (code, pitches, buckets) => ({
+  code, description: code, pitches, avgVelo: 95, century: 0, maxVelo: 99, tto: buckets,
+})
+
+test('arsenalTtoView gives each look its OWN denominator', () => {
+  const data = dataWith(100, [
+    ttoRow('FF', 100, [[60, 101.3], [30, 100.1], [10, 100.0]]),
+    ttoRow('SL', 40, [[10, 88], [20, 87], [10, 86]]),
+  ])
+  const looks = arsenalTtoView(data, 100, true)
+  assert.deepEqual(looks.map((l) => l.look), [1, 2, 3])
+  assert.equal(looks[0].total, 70)
+  assert.equal(looks[0].rows[0].code, 'FF')
+  assert.equal(Math.round(looks[0].rows[0].usage * 1000) / 10, 85.7, '60 of 70 on the first look, not 60 of 140')
+  assert.equal(looks[1].total, 50)
+  assert.equal(Math.round(looks[1].rows[0].usage * 1000) / 10, 60, '30 of 50 the second time through')
+})
+
+test('arsenalTtoView sorts each look by its own usage, not the season order', () => {
+  const data = dataWith(100, [
+    ttoRow('FF', 100, [[60, 101], [5, 100], [5, 100]]),
+    ttoRow('SL', 40, [[10, 88], [40, 87], [40, 87]]),
+  ])
+  const looks = arsenalTtoView(data, 100, true)
+  assert.equal(looks[0].rows[0].code, 'FF', 'first time through he is a fastball pitcher')
+  assert.equal(looks[1].rows[0].code, 'SL', 'by the second he is a slider pitcher, and the order says so')
+})
+
+test('arsenalTtoView drops a look under the qualifier floor and returns null when none qualify', () => {
+  const thin = dataWith(100, [ttoRow('FF', 100, [[60, 101], [30, 100], [MIN_ARSENAL_PITCHES - 1, 99]])])
+  const looks = arsenalTtoView(thin, 100, true)
+  assert.deepEqual(looks.map((l) => l.look), [1, 2], 'a third look he has barely reached is not offered')
+
+  const reliever = dataWith(100, [ttoRow('FF', 10, [[10, 99]])])
+  assert.equal(arsenalTtoView(reliever, 100, true), null, 'nobody qualifies, so no filter renders')
+
+  // A closer clears the floor on his first look and never on a second. One
+  // look is no split — "All" beside "1st" is not a choice to offer.
+  const closer = dataWith(100, [ttoRow('FC', 400, [[380, 94], [8, 93]])])
+  assert.equal(arsenalTtoView(closer, 100, true), null)
+})
+
+test('arsenalTtoView returns null when the file carries no split at all', () => {
+  const old = dataWith(100, [{ code: 'FF', description: 'FF', pitches: 500, avgVelo: 95, century: 0, maxVelo: 99 }])
+  assert.equal(arsenalTtoView(old, 100, true), null, 'rows ingested before the sweep counted looks read as unknown, not zero')
+  assert.equal(arsenalTtoView(null, 100, true), null)
+  assert.equal(arsenalTtoView(dataWith(100, []), 999, true), null)
+})
+
+test('arsenalTtoView reads a trimmed tto array — a look he never reached is simply absent', () => {
+  const data = dataWith(100, [ttoRow('FF', 100, [[60, 101.3], [40, 100.1]])])
+  const looks = arsenalTtoView(data, 100, true)
+  assert.deepEqual(looks.map((l) => l.look), [1, 2], 'no third look, and none invented')
+  assert.equal(looks[1].rows[0].velo, 100.1, 'the pair reads [pitches, avgVelo] in that order')
 })

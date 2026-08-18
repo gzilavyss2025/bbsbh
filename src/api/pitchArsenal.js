@@ -142,6 +142,54 @@ export function heatView(data, personId, isMlb) {
   }
 }
 
+// The same season's mix, split by TIMES THROUGH THE ORDER — his first look at
+// a batter, his second, and his third or later. gen-pitch-arsenal.mjs counts
+// these in the sweep it already runs (the MLB Stats API publishes no such
+// split), so they ride the same shard file as everything else here.
+//
+// Returns one entry per look that clears MIN_ARSENAL_PITCHES, most recent
+// look last, or null when the file carries no split at all — which is the
+// case for any row ingested before the sweep started counting.
+//
+// Null ALSO when only one look qualifies, which is every closer: a filter
+// offering "All" and "1st" is not a choice, and the two would differ only by
+// the handful of pitches that fell outside a qualifying look, which reads as
+// a bug rather than a split. One look is no split; the card hides the filter
+// and shows the season, which is the same thing said once.
+//
+// Each look is its OWN denominator: `usage` is the share of the pitches he
+// threw on that look, not of his season. That is the whole point of the
+// split — a starter who goes to his slider a third of the time the third
+// time through is the fact, and dividing by the season would bury it.
+export function arsenalTtoView(data, personId, isMlb) {
+  const entry = data?.pit?.[personId]
+  const types = isMlb ? entry?.mlb : entry?.aaa
+  if (!types || types.length === 0) return null
+  if (!types.some((t) => t.tto)) return null
+  const looks = []
+  for (let i = 0; i < 3; i += 1) {
+    const rows = []
+    for (const t of types) {
+      // Each bucket is a [pitches, avgVelo] pair, and the array is trimmed of
+      // trailing empty looks — see exportPitchArsenal on why it is not
+      // spelled out. A missing bucket is a look he never reached.
+      const bucket = t.tto?.[i]
+      if (!bucket || bucket[0] <= 0) continue
+      rows.push({ code: t.code, name: t.description || t.code, count: bucket[0], velo: bucket[1] })
+    }
+    const total = rows.reduce((n, r) => n + r.count, 0)
+    if (total < MIN_ARSENAL_PITCHES) continue
+    looks.push({
+      look: i + 1,
+      total,
+      rows: rows
+        .map((r) => ({ ...r, usage: r.count / total }))
+        .sort((a, b) => b.count - a.count),
+    })
+  }
+  return looks.length > 1 ? looks : null
+}
+
 // "Pitches like" — the closest arms in ARSENAL space to one pitcher, for the
 // player page's SimilarPitchers card. The ranking model is pure and lives in
 // src/lib/pitcherSimilarity.js; this is only the part that knows how
