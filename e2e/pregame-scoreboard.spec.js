@@ -1,12 +1,12 @@
-import { readFileSync } from 'node:fs'
 import { test, expect } from './fixtures.js'
+import { installMockApi, loadFixture } from './fixtures/mock-api.js'
 
-const baseFeed = JSON.parse(
-  readFileSync(new URL('../test/fixtures/game-823035.trimmed.json', import.meta.url), 'utf8'),
-)
-
+// Repurposes the anchor game's captured feed (mock-api.js) as a template for
+// a fictional PIT@MIL pregame — this spec doesn't need real anchor-game
+// data, just a realistically-shaped feed to override into a "not started
+// yet" state.
 function pregameFeed() {
-  const feed = structuredClone(baseFeed)
+  const feed = loadFixture('feed-823035')
   feed.gamePk = 823754
   feed.gameData.datetime = {
     ...feed.gameData.datetime,
@@ -43,6 +43,7 @@ test('pregame Innings route renders and advances the manual countdown board', as
     if (message.type() === 'error') consoleErrors.push(message.text())
   })
 
+  await installMockApi(page)
   await page.route('**/api/v1/schedule?*', async (route) => {
     await route.fulfill({
       json: {

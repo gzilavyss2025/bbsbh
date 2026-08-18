@@ -7,26 +7,17 @@
 // tab bar, and the lineup page's door to the preview card that replaced it
 // there — ADR-0047's second amendment).
 import { test, expect } from './fixtures.js'
+import { installMockApi } from './fixtures/mock-api.js'
 
-// Some sandboxes' Chromium cannot reach statsapi directly (CONNECTs reset by
-// an egress proxy) while Node's fetch goes through fine — so the browser's
-// statsapi traffic is relayed through the test runner (the page.route
-// technique the PR template itself suggests). Real live data, no mocks; with
-// direct network the relay is a transparent pass-through.
+// This spec is pinned on the anchor game (823035), which mock-api.js has a
+// captured feed for — so it now runs on that offline snapshot instead of
+// live network. `relay: true` (the default) still covers any statsapi call
+// this page makes beyond feed/live, falling back to the same
+// relay-through-Node technique this file used to hand-roll (some sandboxes'
+// Chromium can't reach statsapi directly — CONNECTs reset by an egress
+// proxy — while Node's fetch goes through fine).
 test.beforeEach(async ({ page }) => {
-  await page.route('https://statsapi.mlb.com/**', async (route) => {
-    try {
-      const res = await fetch(route.request().url())
-      const body = Buffer.from(await res.arrayBuffer())
-      await route.fulfill({
-        status: res.status,
-        contentType: res.headers.get('content-type') ?? 'application/json',
-        body,
-      })
-    } catch {
-      await route.abort()
-    }
-  })
+  await installMockApi(page)
 })
 
 const ROUTE = '/07072026/milstl-2/scorecard'

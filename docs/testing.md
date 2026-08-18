@@ -68,13 +68,24 @@ captured real feed for "does the real shape still parse" confidence.
 ## Browser harness — `npm run e2e` (not CI-gated)
 
 Playwright specs under `e2e/`. This is a **verification harness**, not a
-regression suite (see the config header and CLAUDE.md): the invariant specs
-(`e2e/invariants/**`) fetch the live statsapi at test time, so they depend on
-network and on games that age out — deliberately kept out of CI. They're the
-only place the **DOM-level** guarantee is checked (a `SealBox` never renders its
-children until revealed), which the unit suite can't reach because `SealBox` is
-a `.jsx` component. Run them locally against a live or recent game when changing
-anything user-visible; `docs/test-games.md` lists gamePks with rare events.
+regression suite (see the config header and CLAUDE.md), and it's **opt-in**:
+reach for it only when a change is something the unit suite can't see —
+layout, interaction, DOM-level spoiler timing — not routinely on top of a
+passing `npm test`. The invariant specs (`e2e/invariants/**`) fetch the live
+statsapi at test time, so they depend on network and on games that age out —
+deliberately kept out of CI. They're the only place the **DOM-level**
+guarantee is checked (a `SealBox` never renders its children until revealed),
+which the unit suite can't reach because `SealBox` is a `.jsx` component. Run
+them locally against a live or recent game when changing anything
+user-visible; `docs/test-games.md` lists gamePks with rare events.
+
+Specs pinned to the anchor game (823035) can skip live network entirely via
+`e2e/fixtures/mock-api.js` — a captured real feed/schedule/logo/headshot,
+falling back to a Node-`fetch` relay (works in sandboxes where Chromium's own
+network is blocked) for anything not captured. See `.claude/skills/run/SKILL.md`
+for usage; never troubleshoot a network failure by re-running headed —
+Chromium unreachable is a sandbox limitation the mock/relay already handles,
+not something a visible browser window fixes.
 
 The unit suite's `invariant-real-game.test.js` now pins the same spoiler
 guarantee at the **data layer** deterministically in CI, so a regression in the
