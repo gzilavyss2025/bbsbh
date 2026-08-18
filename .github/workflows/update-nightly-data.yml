@@ -256,6 +256,15 @@ jobs:
         id: warm-previews
         continue-on-error: true
         run: node scripts/warm-previews.mjs
+      # Like warm-previews, not a gen-*.mjs data generator and writes no
+      # committed file — it needs real network to catch statsapi renaming or
+      # dropping a field bbsbh's captured e2e fixture depends on, which is
+      # exactly what this cron has and CI (npm run lint) doesn't. See the
+      # script's own header for why it's scoped to the anchor game only.
+      - name: Feed-shape drift check
+        id: feed-shape-drift
+        continue-on-error: true
+        run: node scripts/check-feed-shape-drift.mjs
       # Like warm-previews, not a gen-*.mjs data generator — but unlike it,
       # this one DOES write committed files (recompressed curated logo PNGs +
       # the rebuilt logo-art.json manifest), so it IS in the commit step's
@@ -325,7 +334,8 @@ jobs:
           steps.highlights.outcome == 'failure' ||
           steps.team-records.outcome == 'failure' ||
           steps.warm-previews.outcome == 'failure' ||
-          steps.compress-logos.outcome == 'failure'
+          steps.compress-logos.outcome == 'failure' ||
+          steps.feed-shape-drift.outcome == 'failure'
         run: |
           echo "One or more nightly generators failed — see the step logs above."
           exit 1

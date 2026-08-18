@@ -18,8 +18,66 @@ This is a phone-first PWA with no backend — every screen fetches live from
 Playwright invariant specs; browser verification is still required for
 user-visible changes because unit tests cannot prove layout or interaction. This
 skill cuts the token/time cost of that loop: fixed port, no port-discovery, no
-manual server start/stop/poll cycle, and a pinned set of real games with
-known-rare events so you're not hunting for a live game each session.
+manual server start/stop/poll cycle, a pinned set of real games with
+known-rare events so you're not hunting for a live game each session, and
+captured API/image fixtures so a spec doesn't need live network at all.
+
+## e2e is opt-in, not a default step
+
+The unit suite (`npm test`, CI-gated) already covers the highest-risk logic —
+spoiler gating, reveal derivations, routing — deterministically and without a
+browser. Reach for Playwright only when the change is genuinely something the
+unit suite can't see: layout, an interaction/animation, or DOM-level
+spoiler-timing. For a logic-only change, `npm test` passing is enough; don't
+run a browser sweep on top of it just to be thorough.
+
+When e2e IS warranted, scope it to the change: one spec (or `-g "name"`), one
+`--project` when the check doesn't care about breakpoint (most don't — see
+below). Reserve the full `npm run e2e` (all specs × all three projects) for a
+final pre-handoff pass, not every iteration.
+
+**Never troubleshoot a failing run by going headed (`--headed`, `--debug`,
+`--ui`) or reaching for an interactive/computer-use browser tool.** Nothing in
+this repo's `playwright.config.js` sets headed mode — if a window is popping
+up, that's the troubleshooting reflex, not the repo. It doesn't fix the
+underlying problem, and it's why real browser windows started popping up
+during otherwise-headless sessions. If a run fails because `statsapi.mlb.com`
+is unreachable, that's expected in some sandboxes (see "Offline API/image
+fixtures" below and the PR template's Verification section) — mock it or
+say so, don't pop a browser to watch it fail again.
+
+## Offline API/image fixtures
+
+`e2e/fixtures/mock-api.js` serves captured real responses for the anchor game
+(`ANCHOR_GAME_PK` 823035, 2026-07-07 MIL@STL g2) plus its day's schedule, and
+a captured team logo + headshot for any `mlbstatic.com` image request — so a
+spec pinned to that game runs fully offline instead of depending on live
+network or hand-rolled mock JSON. Anything not captured falls back to
+relaying the request through Node's `fetch` (which reaches statsapi in
+sandboxes where Chromium's own requests are blocked) and only aborts if that
+also fails.
+
+```js
+import { test, expect } from './fixtures.js'
+import { installMockApi } from './fixtures/mock-api.js'
+
+test.beforeEach(async ({ page }) => {
+  await installMockApi(page)
+})
+```
+
+Need a mutable copy of the captured feed (e.g. to repurpose it as a different
+scenario, as `pregame-scoreboard.spec.js` does)? `loadFixture('feed-823035')`
+returns a fresh parse every call — no `structuredClone` needed. A spec pinned
+to a *different* game still benefits from `installMockApi`'s image fixtures
+and relay fallback even without a captured feed for that gamePk; add one
+(capture via the recipe in `docs/testing.md`, drop the JSON under
+`e2e/fixtures/api/`, add an entry to `API_FIXTURES` in `mock-api.js`, **and an
+entry in `e2e/fixtures/manifest.json`** — `check-fixture-freshness.mjs`
+enforces every captured file is listed there) when a spec's real network
+dependency becomes a recurring problem, not preemptively. Check
+`e2e/fixtures/manifest.json` first — what's already captured, and why — before
+assuming a spec needs its own new mock.
 
 ## Fast path: Playwright (preferred)
 

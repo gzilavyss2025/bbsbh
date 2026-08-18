@@ -1,0 +1,24 @@
+{
+  "api/feed-823035.json": {
+    "capturedAt": "2026-08-18",
+    "sourceUrl": "https://statsapi.mlb.com/api/v1.1/game/823035/feed/live",
+    "note": "Anchor game feed (2026-07-07 MIL@STL g2). Trimmed: each playEvent's pitchData/hitData is stripped to keep the file a manageable size — see docs/testing.md's capture recipe."
+  },
+  "api/schedule-20260707.json": {
+    "capturedAt": "2026-08-18",
+    "sourceUrl": "https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=2026-07-07&hydrate=team,venue(timezone),probablePitcher,linescore,broadcasts(all)",
+    "note": "The anchor game's full day slate (16 games), untrimmed."
+  },
+  "images/team-logo.svg": {
+    "capturedAt": "2026-08-18",
+    "sourceUrl": "https://www.mlbstatic.com/team-logos/158.svg",
+    "note": "Generic logo served for ANY team-logos request, regardless of team id — layout checks don't need the correct team's mark.",
+    "noExpiry": true
+  },
+  "images/headshot.png": {
+    "capturedAt": "2026-08-18",
+    "sourceUrl": "https://img.mlbstatic.com/mlb-photos/image/upload/w_180,q_auto:best/v1/people/592885/headshot/silo/current",
+    "note": "Generic headshot served for ANY headshot request, regardless of person id.",
+    "noExpiry": true
+  }
+}
