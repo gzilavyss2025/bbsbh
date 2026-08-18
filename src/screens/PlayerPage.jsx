@@ -402,7 +402,7 @@ export function PlayerPage({ id, asOf, sportId }) {
             {block.arsenal && (
               <>
                 <SectionTitle title="Pitches" note="share of pitches · avg velo" />
-                <PitchMix arsenal={block.arsenal} />
+                <PitchMix arsenal={block.arsenal} heat={block.heat} tto={block.arsenalTto} />
               </>
             )}
 

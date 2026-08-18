@@ -302,7 +302,11 @@ const BUDGETS = {
   // is a self-contained lazy component, and its broadcast treatment would push
   // the already-budgeted 26-player-page.css over its file-size ceiling. Keeping
   // the rules beside the component also leaves them out of unrelated routes.
-  'src/styles': 91,
+  //
+  // 91 -> 92 for `69-pitch-arsenal.css`: the player page's redressed Pitches
+  // card and its times-through-the-order split. Same reason as the line above —
+  // 26-player-page.css has no headroom left, and the card is one lazy route.
+  'src/styles': 92,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

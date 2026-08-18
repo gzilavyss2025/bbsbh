@@ -77,6 +77,14 @@ export const MIN_ARSENAL_PITCHES = 15
 export const CENTURY_MPH = 100
 export const ELITE_VELO_MPH = 102
 
+// How many CENTURY_MPH+ pitches a season has to hold before either surface
+// says anything about it: the Margin Notes `centuryClub` callout
+// (pitcher-callouts.js, which owned this number privately until the player
+// page's heat band wanted the same floor) and heatView below. A one-off 100
+// mph touch is unremarkable for a real flamethrower, and a band reading "1
+// pitch at 100+" is noise rather than a fact worth a gold bar.
+export const CENTURY_CLUB_MIN = 5
+
 // One pitcher's pitch-type mix for the level the game he's starting is being
 // played at, each entry carrying its share of pitches thrown + average
 // velocity, sorted most-thrown first. Each entry also carries `century`
@@ -97,6 +105,115 @@ export function pitchArsenalFor(data, personId, isMlb) {
     .map((t) => ({ ...t, pct: Math.round((t.pitches / total) * 1000) / 10 }))
     .sort((a, b) => b.pitches - a.pitches)
 }
+
+// The "heat" band at the foot of the player page's Pitches card: how many
+// pitches at CENTURY_MPH+ this pitcher has thrown this season, and his
+// hardest reading of the year. Both were already gathered by
+// scripts/gen-pitch-arsenal.mjs's sweep and already ride the same shard file
+// the mix does (`century` / `maxVelo`, per pitch type) — this is a sum over
+// the types he actually threw, not a second fetch. Same completed-game
+// season-aggregate spoiler footing as the rest of this module.
+//
+// Same level rule as pitchArsenalFor: MLB and AAA are separate bodies of work
+// and are never pooled. Null when the file hasn't loaded, when he isn't in
+// it, or when he sits under CENTURY_CLUB_MIN — in which case the band simply
+// doesn't render, which is the right answer for the large majority of arms
+// who never touch triple digits.
+//
+// `rank`/`of` come from the generator's own league pass (`centuryRank`, keyed
+// by level): ranking him needs the whole level and the shard he rides in is
+// one hundredth of it, so the reader cannot derive it. `of` is the size of the
+// CENTURY CLUB at his level, not of the league — second of the 58 arms who
+// have been to triple digits, which is the only denominator that says
+// anything. Both stay null on a file written before that pass existed, and
+// the band then renders the two facts it does have.
+export function heatView(data, personId, isMlb) {
+  const entry = data?.pit?.[personId]
+  const types = isMlb ? entry?.mlb : entry?.aaa
+  if (!types || types.length === 0) return null
+  const count = types.reduce((n, t) => n + (t.century ?? 0), 0)
+  if (count < CENTURY_CLUB_MIN) return null
+  let maxVelo = null
+  for (const t of types) {
+    if (t.maxVelo != null && (maxVelo == null || t.maxVelo > maxVelo)) maxVelo = t.maxVelo
+  }
+  const place = entry.centuryRank?.[isMlb ? 'mlb' : 'aaa']
+  return {
+    count,
+    maxVelo: maxVelo == null ? null : Math.round(maxVelo * 10) / 10,
+    rank: place?.rank ?? null,
+    of: place?.of ?? null,
+  }
+}
+
+// The same season's mix, split by TIMES THROUGH THE ORDER — his first look at
+// a batter, his second, and his third or later. gen-pitch-arsenal.mjs counts
+// these in the sweep it already runs (the MLB Stats API publishes no such
+// split), so they ride the same shard file as everything else here.
+//
+// Returns one entry per look that clears MIN_ARSENAL_PITCHES, most recent
+// look last, or null when the file carries no split at all — which is the
+// case for any row ingested before the sweep started counting.
+//
+// Null ALSO when only one look qualifies, which is every closer: a filter
+// offering "All" and "1st" is not a choice, and the two would differ only by
+// the handful of pitches that fell outside a qualifying look, which reads as
+// a bug rather than a split. One look is no split; the card hides the filter
+// and shows the season, which is the same thing said once.
+//
+// Each look is its OWN denominator: `usage` is the share of the pitches he
+// threw on that look, not of his season. That is the whole point of the
+// split — a starter who goes to his slider a third of the time the third
+// time through is the fact, and dividing by the season would bury it.
+//
+// Each row also carries `delta`: the change in that pitch's usage from the
+// look BEFORE it, in share (0.043 is up 4.3 points), so a reader can see
+// which way an arm is drifting without holding two tabs in his head. Null on
+// the first look, and null for a pitch the previous look has no row for —
+// a pitch first thrown the third time through has nothing to be up from, and
+// "up from zero" would be the loudest arrow on the card for the rarest pitch
+// on it. Compared against the previous QUALIFYING look (the array's own
+// neighbour), so a dropped middle look doesn't silently pair 1st with 3rd.
+export function arsenalTtoView(data, personId, isMlb) {
+  const entry = data?.pit?.[personId]
+  const types = isMlb ? entry?.mlb : entry?.aaa
+  if (!types || types.length === 0) return null
+  if (!types.some((t) => t.tto)) return null
+  const looks = []
+  for (let i = 0; i < 3; i += 1) {
+    const rows = []
+    for (const t of types) {
+      // Each bucket is a [pitches, avgVelo] pair, and the array is trimmed of
+      // trailing empty looks — see exportPitchArsenal on why it is not
+      // spelled out. A missing bucket is a look he never reached.
+      const bucket = t.tto?.[i]
+      if (!bucket || bucket[0] <= 0) continue
+      rows.push({ code: t.code, name: t.description || t.code, count: bucket[0], velo: bucket[1] })
+    }
+    const total = rows.reduce((n, r) => n + r.count, 0)
+    if (total < MIN_ARSENAL_PITCHES) continue
+    const prev = looks.length ? looks[looks.length - 1] : null
+    const before = prev ? new Map(prev.rows.map((r) => [r.code, r.usage])) : null
+    looks.push({
+      look: i + 1,
+      total,
+      rows: rows
+        .map((r) => {
+          const usage = r.count / total
+          const was = before?.get(r.code)
+          return { ...r, usage, delta: was == null ? null : usage - was }
+        })
+        .sort((a, b) => b.count - a.count),
+    })
+  }
+  return looks.length > 1 ? looks : null
+}
+
+// How far a pitch's usage has to move between two looks before the card draws
+// an arrow beside it. Under a couple of points the move is the ordinary
+// wobble of a few hundred pitches split three ways, and an arrow on it claims
+// a plan the pitcher does not have. Share, not percent: 0.02 is two points.
+export const MIN_LOOK_SHIFT = 0.02
 
 // "Pitches like" — the closest arms in ARSENAL space to one pitcher, for the
 // player page's SimilarPitchers card. The ranking model is pure and lives in
