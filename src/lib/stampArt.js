@@ -1,4 +1,4 @@
-// The Logbook stamp's geometry, as pure math (ADR-0035, PR #502).
+// The Logbook stamp's geometry, as pure math (ADR-0035).
 //
 // The art is Concept 1, "The Cancellation" — a national-park-passport
 // cancellation stamp with the two club marks as the central emblem pair and the

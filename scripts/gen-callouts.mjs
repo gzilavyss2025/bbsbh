@@ -161,8 +161,8 @@ const sportParam = (sportId) => (sportId === MLB ? '' : `&sportId=${sportId}`)
 // One team's roster → PoolPlayer[] (see teamLeaders.js's PoolPlayer shape),
 // self-contained like the rest of this script's fetches — `normalizeRosterToPool`
 // used to live in teamLeaders.js itself but was replaced there by the
-// roster-INDEPENDENT `loadCombinedPoolForTeams` (see PR #25, "Include departed
-// players in team/league leader boards"); this script still wants the CURRENT
+// roster-INDEPENDENT `loadCombinedPoolForTeams` (added to include departed
+// players in team/league leader boards); this script still wants the CURRENT
 // roster (a departed player has no bearing on tonight's game), so the
 // normalizer is kept here instead of re-added to the app module.
 function splitFor(person, group) {

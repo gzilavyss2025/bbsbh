@@ -20,7 +20,7 @@
 // These numbers are measured against the tree the branch was cut from, so a
 // branch that sits behind `main` while other doc work lands will carry stale
 // ones — and if it merges last, it turns `main` red for something no PR author
-// did wrong. This guard hit it on its own first day: PR #602 grew
+// did wrong. This guard hit it on its own first day: a PR grew
 // src/CLAUDE.md from 434 to 441 lines mid-review. REBASE ONTO `main` AND
 // RE-MEASURE BEFORE MERGING anything that touches BUDGETS.
 //

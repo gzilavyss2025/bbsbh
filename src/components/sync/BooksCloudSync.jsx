@@ -47,7 +47,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // device forever. `src/lib/books.js`'s own header on `booksToPublish` — "WHY
 // THIS IS A COMPARISON AND NOT A CHANGE LOG" — makes the identical argument
 // for books that SpoiledDaysCloudSync's header makes for days (and
-// `stampsToPublish` made for stamps, PR #545): a device that only diffs
+// `stampsToPublish` made for stamps): a device that only diffs
 // against the last thing IT observed can never describe a collection that
 // predates that first observation, so read either header rather than this
 // one for the full case.

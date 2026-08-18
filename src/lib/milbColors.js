@@ -220,7 +220,7 @@ export function milbWpaMarkUrl(teamId, variant, draft) {
 
 // Every affiliate's Home and Away jerseys share ONE header bar rather than
 // each owning its own — same idea as teams.js's treatmentHeaderColorOverride
-// collapsing MLB's five jerseys down to two (PR #453), except MiLB never had
+// collapsing MLB's five jerseys down to two, except MiLB never had
 // a Main/City-Connect-style asymmetry to justify keeping two in the first
 // place. Always resolves off the 'home' slot regardless of which side is
 // asked, falling back to 'away' for any club whose header landed before this

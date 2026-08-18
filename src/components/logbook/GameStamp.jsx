@@ -32,7 +32,7 @@ import {
 } from '../../lib/stampArt.js'
 
 // A Logbook game stamp (ADR-0035) — Concept 1, "The Cancellation", the locked
-// design from PR #502. This file is a tracing of that art; every number it
+// design. This file is a tracing of that art; every number it
 // draws with comes from the pure module src/lib/stampArt.js, whose header
 // records what is locked and why. Do not redesign here.
 //

@@ -38,7 +38,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // header carries the full argument; the short version is that a change log
 // cannot describe state that never changed, and a comparison can. Both
 // SpoiledDaysCloudSync and StampsCloudSync had to be fixed from the former to
-// the latter (ADR-0026, 2026-08-06; PR #545). This one starts there.
+// the latter (ADR-0026, 2026-08-06). This one starts there.
 //
 // ---------------------------------------------------------------------------
 // WHOSE DOCUMENT IS IT — the shared-device guard
