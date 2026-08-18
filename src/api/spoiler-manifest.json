@@ -155,6 +155,10 @@
         "api/callout-notes/rollup.js"
       ]
     },
+    "callout-notes/rank.js": {
+      "class": "spoiler-free",
+      "why": "League ranks for the W-L record families — the ranking math gen-callouts.mjs runs over a level, and the clause the note builders append. A season aggregate over Final games, like the record it decorates."
+    },
     "callout-notes/rollup.js": {
       "class": "reveal-only",
       "why": "`computeGameCalloutNotes` — the box score's Insights roll-up. The whole game is already behind that SealBox by the time it runs, which is the only reason its result-aware wording is safe.",

@@ -34,6 +34,12 @@ import { workloadFor } from './workload.js'
 import { computePitcherLines } from './pitchers.js'
 import { laboringFor, computeVeloDecay, computeVeloVariety } from './pitcherHealth.js'
 import { CENTURY_MPH, pitchFamily } from './pitchArsenal.js'
+// The one magnitude scale every callout family shares (callout-notes/shared.js).
+// The bases below stay local — this family never existed in that table — but a
+// bonus has to mean the same thing here as it does there, or a Margin Note and
+// a pre-half note cannot be merged into one ranked list (ReferencePanel.jsx)
+// without the merge quietly favouring whichever surface capped its bonus higher.
+import { magnitudeOf } from './callout-notes.js'
 
 // Worthiness bases for this family, same 0–100 scale and clamp/skew idiom as
 // callout-notes.js's SCORE_BASE (kept local rather than imported — this
@@ -142,7 +148,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
     )
   }
   if (rec.scorelessStreak > 1) {
-    push('scorelessStreak', `Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`, Math.min(15, rec.scorelessStreak - 1))
+    push('scorelessStreak', `Riding a ${rec.scorelessStreak}-outing scoreless streak entering ${word}`, magnitudeOf(rec.scorelessStreak - 1, 15))
   }
 
   // Bullpen workload — a reliever who's been ridden hard lately, measured in
@@ -192,7 +198,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
       push(
         'leverage',
         `Opponents hit ${ahead.avg} off him with the ${team} ahead this season, ${contrast.avg} with them ${label}`,
-        Math.min(15, Math.round((gap - LEVERAGE_AVG_GAP) * 100)),
+        magnitudeOf((gap - LEVERAGE_AVG_GAP) * 100, 15),
       )
     }
   }
@@ -216,7 +222,7 @@ export function buildPitcherNotes(row, side, teamName, bundle, extras = {}, isSt
     const text = offSpeed.length
       ? `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season — including ${offSpeed[0].count} ${offSpeed[0].description.toLowerCase()}${offSpeed[0].count === 1 ? '' : 's'}, extraordinarily rare for a breaking or offspeed pitch${peak}`
       : `Has thrown ${cc.count} pitches at ${CENTURY_MPH}+ mph this season${peak}`
-    push('centuryClub', text, Math.min(15, Math.round(cc.count / 10)) + (offSpeed.length ? 10 : 0))
+    push('centuryClub', text, magnitudeOf(cc.count / 10, 15) + (offSpeed.length ? 10 : 0))
   }
   return notes
 }
@@ -239,7 +245,7 @@ function healthNotes(id, side, health) {
       side,
       kind: 'laboring',
       dedupeKey: `laboring-${id}`,
-      score: clampScore(SCORE_BASE.laboring + Math.min(15, Math.round((labor.ratio - 1) * 30))),
+      score: clampScore(SCORE_BASE.laboring + magnitudeOf((labor.ratio - 1) * 30, 15)),
     })
   }
   const velo = health?.velo?.[id]
@@ -250,7 +256,7 @@ function healthNotes(id, side, health) {
       side,
       kind: 'veloDecay',
       dedupeKey: `veloDecay-${id}`,
-      score: clampScore(SCORE_BASE.veloDecay + Math.min(15, Math.round((velo.drop - 1.5) * 6))),
+      score: clampScore(SCORE_BASE.veloDecay + magnitudeOf((velo.drop - 1.5) * 6, 15)),
     })
   }
   const variety = health?.variety?.[id]
@@ -264,7 +270,7 @@ function healthNotes(id, side, health) {
       kind: 'veloVariety',
       dedupeKey: `veloVariety-${id}`,
       score: clampScore(
-        SCORE_BASE.veloVariety + Math.min(20, 5 * (variety.count - 2) + 3 * (peak - CENTURY_MPH)),
+        SCORE_BASE.veloVariety + magnitudeOf(5 * (variety.count - 2) + 3 * (peak - CENTURY_MPH), 20),
       ),
     })
   }

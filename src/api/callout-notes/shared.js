@@ -143,3 +143,132 @@ export function ordinal(n) {
   const v = n % 100
   return n + (s[(v - 20) % 10] ?? s[v] ?? s[0])
 }
+
+// --- magnitude bonuses --------------------------------------------------------
+// A family's BASE says how rare the family is; its magnitude bonus says how far
+// past its own floor THIS instance landed. Those bonuses used to stop wherever
+// each family's author happened to stop — 10 here, 15 there, 20 somewhere else —
+// so a family whose bonus capped at 10 was ranked almost entirely by its base,
+// and no instance of a 25-base family could ever overtake a 40-base one however
+// extreme it was. On a two-slot strip that made the base the whole ranking.
+//
+// Every bonus now lands on ONE scale, 0..MAGNITUDE_MAX. `magnitudeOf(raw, full)`
+// is the single converter: `raw` is the family's own measure of how big this
+// instance is, `full` the value that earns the whole bonus. It replaces every
+// hand-written `Math.min(cap, expr)` and keeps each family's saturation point —
+// only what saturation is WORTH changed.
+export const MAGNITUDE_MAX = 20
+export function magnitudeOf(raw, full) {
+  if (!isNum(raw) || !isNum(full) || full <= 0) return 0
+  return Math.max(0, Math.min(MAGNITUDE_MAX, (MAGNITUDE_MAX * raw) / full))
+}
+
+// The W-L families' shared bonus. skew() maxes at 0.5 (a spotless record), so a
+// perfectly lopsided record earns the whole magnitude and a .500 one earns none.
+export const skewBonus = (w, l) => magnitudeOf(skew(w, l), 0.5)
+
+// --- repetition: decay, diversity, and the once-per-game families -------------
+// Every callout surface rebuilds from scratch on every half, so the same
+// high-base note used to win the same sort again and again: a reader who sat
+// through nine innings met the same card fifteen times. Three rules answer
+// that, all applied by rankNotes below.
+//
+//   1. DECAY. A note loses SHOWN_DECAY points for each EARLIER half it was
+//      already shown in, so a fresher note of a lower family overtakes it.
+//      It is a demotion, not a ban — a note with nothing to beat it still
+//      shows, which is the right answer for a thin bundle.
+//   2. ONCE PER GAME. Some facts cannot change while a game is played: the
+//      weekday, a club's record in its starter's starts, a reliever's season
+//      splits. A second showing of one of those adds nothing at all, so after
+//      one showing they drop rather than decay.
+//   3. DIVERSITY. At most one note per KIND per surface per half, and (where
+//      the caller asks for it) at most one "the club is W-L when X" note —
+//      eleven of the families are that same sentence with a different clause,
+//      which is why the voice repeated even when the facts did not.
+//
+// The ledger of what was already shown is per-game and lives in the React tree
+// (src/hooks/useCalloutLedger.js) — every builder here stays pure and only
+// READS the counts it is handed.
+export const SHOWN_DECAY = 25
+
+// Facts that are fixed for the whole game (or, where the dedupeKey carries an
+// inning, for the whole of that inning) — rule 2 above. `sixIp`, `tenK` and
+// every health read are deliberately absent: those restate as tonight's line
+// grows, and restating IS the note.
+export const ONCE_PER_GAME_KINDS = new Set([
+  // pre-half / between-innings season and calendar facts
+  'starterRec', 'dayOfWeek', 'bullpenThin', 'inningRunDiff',
+  // Margin Notes' season aggregates (pitcher-callouts.js's buildPitcherNotes)
+  'homeAway', 'cgShutout', 'scorelessStreak', 'workload', 'backToBack',
+  'penFatigue', 'leverage', 'centuryClub', 'recentAppearances',
+])
+
+// "The club is W-L when X" — one sentence shape, eleven families. A strip that
+// caps at two has room for one of them and one of anything else.
+export const RECORD_KINDS = new Set([
+  'starterRec', 'dayOfWeek', 'leadAfterLive', 'leadHeld', 'tiedAfter',
+  'tiedAfterLive', 'scorelessThrough', 'bothScoreless', 'runsScored',
+  'runsAllowed', 'comeback', 'oneRun', 'extraInnings', 'homerRec',
+  'scoringFirst', 'oppScoringFirst', 'sixIp', 'homeAway',
+])
+
+const NO_COUNTS = new Map()
+
+// Rank one surface's candidate notes: decay by what the reader has already
+// been shown, drop the facts that cannot change, then take the highest scorer
+// of each kind before any second note of a kind it already holds.
+//
+// `shownCounts` is `Map<dedupeKey, number of EARLIER halves it was shown in>`
+// (useCalloutLedger's `countsFor`), which is why re-rendering the half a note
+// is currently on never decays it out from under itself.
+//
+// Notes a diversity rule turns down are DEFERRED, not discarded: they come back
+// after the accepted ones in score order. Sorting is stable, so equal scores
+// keep build order.
+//
+// `strictCaps` decides what a CAPPED surface does with that tail, and the two
+// surfaces genuinely want opposite things:
+//   - The pre-half strip sets it. Its pool for a top half is very often ALL
+//     record notes (tiedAfterLive x2, or bothScoreless x2), and letting the tail
+//     backfill the two slots is the strip saying the same thing twice — the
+//     exact case maxRecordNotes exists to stop.
+//   - Between Innings must NOT set it. Its card depth is a spoiler invariant
+//     (see between-innings.test.js): a quiet half and a loud half must return
+//     the same number of cards once both clear CARD_MAX, so the tail has to
+//     backfill or depth would track how eventful the half was.
+export function rankNotes(notes, {
+  shownCounts = null,
+  maxPerKind = 1,
+  maxRecordNotes = Infinity,
+  limit = Infinity,
+  strictCaps = false,
+} = {}) {
+  const counts = shownCounts ?? NO_COUNTS
+  const scored = []
+  for (const note of notes ?? []) {
+    if (!note) continue
+    const seen = counts.get(note.dedupeKey ?? note.text) ?? 0
+    if (seen > 0 && ONCE_PER_GAME_KINDS.has(note.kind)) continue
+    scored.push({ note, rank: (note.score ?? 0) - SHOWN_DECAY * seen })
+  }
+  scored.sort((a, b) => b.rank - a.rank)
+
+  const picked = []
+  const deferred = []
+  const perKind = new Map()
+  let records = 0
+  for (const { note } of scored) {
+    const kind = note.kind ?? ''
+    const isRecord = RECORD_KINDS.has(kind)
+    if ((perKind.get(kind) ?? 0) >= maxPerKind || (isRecord && records >= maxRecordNotes)) {
+      deferred.push(note)
+      continue
+    }
+    perKind.set(kind, (perKind.get(kind) ?? 0) + 1)
+    if (isRecord) records += 1
+    picked.push(note)
+  }
+  if (strictCaps) return Number.isFinite(limit) ? picked.slice(0, limit) : picked
+  const out = picked.concat(deferred)
+  return Number.isFinite(limit) ? out.slice(0, limit) : out
+}

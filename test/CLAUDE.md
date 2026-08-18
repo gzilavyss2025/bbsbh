@@ -18,6 +18,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | between-innings.test.js | 6 | src/api/between-innings.js | Post-half card allowlist, CARD_MAX cap, marginNotes[0] eligibility, quiet-vs-loud spoiler invariant |
 | box-score-note-attribution.test.js | 13 | src/api/boxscore.js, src/api/boxscore/gameNotes.js | Which club each info-block row prints under (HBP/IBB follow the BATTER), and the three parse shapes that used to drop a row into the shared foot |
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
+| callout-ledger.test.js | 8 | src/hooks/useCalloutLedger.js, prehalf-callouts.js, between-innings.js | The shown ledger (distinct halves, never the half a note sits on) and the two capped surfaces that read it — one record note per strip, once-per-game facts dropped |
+| callout-repetition.test.js | 9 | src/api/callout-notes/shared.js | rankNotes' three repetition rules (decay, once-per-game, diversity) + the one 0–MAGNITUDE_MAX bonus scale |
 | cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 11 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + the Team history rail's season order (a traded year groups by ORG, not by level) |
@@ -75,7 +77,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | pitch-codes.test.js | 12 | src/api/playbyplay.js (pitchInfo), src/api/derive.js, src/api/callout-notes.js | The pitch call-code table against MLB's own strike/ball flags: which ladder lane a code takes, automatic calls (the count, not the pitches), and the two-strike fouls that END an at-bat |
 | pitch-locations.test.js | 7 | src/api/playbyplay.js (pitchInfo) | Whether a park tracked plate locations — gates the strike-zone pane and the at-bat row's second column |
 | pitcher-advanced.test.js | 9 | src/api/person.js | Player page Advanced card, situational splits, rank chips, QS flag |
-| pitcher-callouts.test.js | 10 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
+| pitcher-callouts.test.js | 16 | src/api/pitcher-callouts.js, select.js | Margin Notes / Now Pitching card |
 | pitcher-handoff.test.js | 10 | src/api/pitchers.js (pitcherHandoffs, pitcherLineAt, isLastHalfOfGame, handoffsResolvingAt, halfClosingPitcher) | Pitching-handoff cards: departure-snapshot/finalized-line spoiler cut, inherited-runner resolution tracking, in-feed vs. deferred-to-next-half placement, and the ordinary closing-pitcher recap |
 | pitcher-health.test.js | 4 | src/api/pitcherHealth.js | laboringFor metric (ADR-0009) |
 | pitcher-starts.test.js | 6 | scripts/lib/pitcher-starts.mjs | starterRecords' team-attributed tallies stay scoped to a pitcher's CURRENT club through a mid-season trade/option |
@@ -88,6 +90,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | preview-resolver.test.js | 6 | src/copy/previewResolver.js, registry.js | Consent-modal copy slot resolution |
 | prospect-trend.test.js | 14 | src/api/prospectTrend.js | vs. Level percentile label + levelTier 5-dot bucketing |
 | prospects.test.js | 20 | src/api/prospects.js | Top-100/org-prospect selectors + resolveCurrentLevels' live-roster resolution and MLB/MiLB "Line" split, incl. the "ALL (n)" fallback fix |
+| record-ranks.test.js | 10 | src/api/callout-notes/rank.js, checkpoints.js, heldNotes.js | League ranks on the W-L record families — tie/floor math, the no-"#" display rule, a legacy bundle reading byte-identical, and a folded sentence staying bare |
 | recent-decided-games.test.js | 4 | src/api/scheduleGames.js | recentDecidedGames' `won != null` cutoff invariant (Last 10 Games) |
 | recent-form.test.js | 14 | src/api/recentForm.js | Recent form roster eligibility |
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
@@ -155,6 +158,12 @@ candidates noted, not acted on: `milb-color-chain.test.js` +
   comments that make the fixture legible and wouldn't reduce total tokens read once
   you need both files open anyway. Don't extract a fixture just because the file is
   long; only extract if the data itself (not its rationale) is reused across files.
+- **A hook is exercised through one server render.** `callout-ledger.test.js` reads
+  `useCalloutLedgerValue` by rendering a probe component with
+  `react-dom/server`'s `renderToStaticMarkup`. That is the only React in the suite,
+  and it stays node-only — no DOM, no browser, no timers. Prefer a pure module
+  (`revealProgressCore.js` is the pattern) when a hook's logic can live in one; use
+  the probe only when the value the hook returns IS the thing under test.
 - **Prefer asserting the field(s) under test, not the whole object**, when adding new
   cases — `assert.equal(sig.performer.id, 2)` over
   `assert.deepStrictEqual(sig, entireExpectedObject)`. A failing assertion on a whole

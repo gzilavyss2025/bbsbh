@@ -183,3 +183,37 @@ test('buildMarginNotes withholds veloVariety at only 1 qualifying pitch type', (
   const notes = buildMarginNotes(feed, 3, { starterRecords: { 200: {} } }, { away: 'Aways', home: 'Homes' })
   assert.ok(!notes.some((n) => n.kind === 'veloVariety'))
 })
+
+// --- the shared magnitude scale ------------------------------------------------
+// This file's bonuses used to stop at 15 (and one at 20) because that is where
+// each author stopped, so a Margin Note could never reach as far past its base
+// as a pre-half note of the same family could. They now run through
+// `magnitudeOf` on the one 0–MAGNITUDE_MAX (20) scale every callout shares —
+// same saturation point, a full 20 when it is reached.
+test('a saturated scorelessStreak bonus reaches the full 20, not the old 15', () => {
+  const row = { id: 'starter1', ip: '5.0' }
+  const b = { starterRecords: { starter1: { scorelessStreak: 16 } } }
+  const note = buildPitcherNotes(row, 'home', 'Miami Marlins', b, {}, true)
+    .find((n) => n.kind === 'scorelessStreak')
+  assert.equal(note.score, 52) // base 32 + MAGNITUDE_MAX
+})
+
+test('a saturated centuryClub bonus reaches the full 20 and never overshoots it', () => {
+  const row = { id: 'starter1', ip: '5.0' }
+  const century = (count) => ({
+    starterRecords: {
+      starter1: {
+        centuryClub: {
+          count,
+          types: [{ code: 'FF', description: 'Four-Seam Fastball', count, maxVelo: 102.1 }],
+          seasonMaxVelo: 102.1,
+        },
+      },
+    },
+  })
+  const at = (count) => buildPitcherNotes(row, 'home', 'Miami Marlins', century(count), {}, true)
+    .find((n) => n.kind === 'centuryClub').score
+  assert.equal(at(150), 54) // base 34 + MAGNITUDE_MAX
+  assert.equal(at(900), 54) // saturated, never past it
+  assert.ok(at(75) > 34 && at(75) < 54) // and still proportional below saturation
+})

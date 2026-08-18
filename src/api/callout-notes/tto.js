@@ -7,7 +7,7 @@
 
 import { NON_PA_EVENT_TYPES } from '../playbyplay.js'
 import { personNameParts, selectPrePitchChanges } from '../select.js'
-import { otherSide, ordinal, isNum, clampScore, SCORE_BASE } from './shared.js'
+import { otherSide, ordinal, isNum, clampScore, magnitudeOf, SCORE_BASE } from './shared.js'
 
 // --- times-through-the-order --------------------------------------------------
 // "Batters see Imanaga a 3rd time this inning — they're hitting .444 off him
@@ -114,7 +114,7 @@ export function buildThirdTimeThroughNote(feed, bundle, inning, half) {
       side: pitchingSide,
       kind: 'tto',
       dedupeKey: `tto-${pitchingSide}-${lastPitcher}`,
-      score: clampScore(SCORE_BASE.ttoSplit + Math.min(15, diff * 100)),
+      score: clampScore(SCORE_BASE.ttoSplit + magnitudeOf(diff * 100, 15)),
     }
   }
   return {
@@ -168,6 +168,6 @@ export function buildTtoPitchesNote(feed, bundle, inning, half) {
     side: pitchingSide,
     kind: 'ttoPitches',
     dedupeKey: `ttoPitches-${pitchingSide}-${pitcherId}`,
-    score: clampScore(SCORE_BASE.ttoPitches + Math.min(15, step * 10)),
+    score: clampScore(SCORE_BASE.ttoPitches + magnitudeOf(step * 10, 15)),
   }
 }

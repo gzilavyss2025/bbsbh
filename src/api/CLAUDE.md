@@ -96,7 +96,12 @@ catalogued in `docs/callouts.md` (every family, trigger, surface, gate, worthine
 score) and ADR-0014 (the two-tense rule). Extend the nightly precompute — do NOT
 build a parallel generation path. The checkpoint innings and thresholds live ONCE,
 in `callout-notes/checkpoints.js`, and `gen-callouts.mjs` imports them: a second
-copy would tally one inning while the note spoke about another. Before adding a data source, check whether an
+copy would tally one inning while the note spoke about another. `callout-notes/rank.js`
+holds both halves of the league rank the W-L families print for the same reason. What
+each surface SHOWS is a second, purely presentational layer: `rankNotes`
+(`callout-notes/shared.js`) decays a note the reader already saw, drops the facts that
+cannot change during a game, and caps one note per kind — it only ever subtracts, and
+never touches a gate. Before adding a data source, check whether an
 existing split file covers it (`vs-team-splits`, the API's own `statSplits`, per-PA
 `playLog`). Notes computable from data on hand should be computed live.
 
