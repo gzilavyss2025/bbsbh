@@ -820,6 +820,30 @@
   white-space: nowrap;
 }
 
+/* The most-met opponent carries its club's mark, the way the club column does.
+   The cell is right-aligned like every other figure on the board, so the parts
+   are laid out from the right — mark, name, then the count — and a tie prints
+   two of them. `inline-flex` rather than `flex` on the cell itself: the cell is
+   a table cell whose alignment the shared `.standings` rules own, and turning
+   it into a flex container would take that away. */
+.dh__oppclub {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: var(--space-2);
+}
+
+.dh__oppclub:first-child {
+  margin-left: 0;
+}
+
+.dh__oppcount {
+  margin-left: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+
 /* The year drawer. It is a table inside a cell that spans the whole board, and
    it is deliberately narrow and indented — a second full-width table under a
    row reads as the board losing its place. */

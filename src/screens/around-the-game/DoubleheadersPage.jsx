@@ -18,6 +18,7 @@ import { ReportFooter } from '../../components/chrome/ReportFooter.jsx'
 import { BroadcastMasthead, BroadcastSection } from '../../components/around-the-game/BroadcastMasthead.jsx'
 import { Slab, SlabRow } from '../../components/around-the-game/StatSlab.jsx'
 import { ClubCell } from '../../components/around-the-game/ClubCell.jsx'
+import { TeamLogo } from '../../components/logo/TeamLogo.jsx'
 import { BoardScroller } from '../../components/around-the-game/BoardScroller.jsx'
 import { YearRange } from '../../components/around-the-game/YearRange.jsx'
 
@@ -54,27 +55,57 @@ const SORTS = [
   { key: 'sweptBy', label: 'Most swept', caption: 'doubleheaders swept by the opponent' },
 ]
 
-// Quick spans, because dragging two handles from 2004 to 2022 is a chore and
-// "the last ten years" is the question most readers actually have. Each is
-// resolved against the file's own last season, never against today's date.
+// Named eras, because dragging two handles from 2004 to 2020 is a chore and
+// because these are the spans a reader compares. They are FIXED years, not
+// trailing windows: "2011-2020" means the same decade next season, so a link
+// to it keeps saying what it said. Only the open-ended pair reads the file —
+// `null` at either end means "whatever the file starts or stops at", so the
+// first chip and the last one follow the data forward without an edit here.
 const PRESETS = [
-  { key: 'all', label: 'All years', span: null },
-  { key: '10', label: 'Last 10', span: 10 },
-  { key: '5', label: 'Last 5', span: 5 },
-  { key: '1', label: 'This season', span: 1 },
+  { key: 'all', label: 'All Years', from: null, to: null },
+  { key: '2004', label: '2004–2010', from: 2004, to: 2010 },
+  { key: '2011', label: '2011–2020', from: 2011, to: 2020 },
+  { key: '2021', label: '2021–Present', from: 2021, to: null },
 ]
 
-// The most-met opponent, worded. A tie at the top is common once the slider is
-// short — two clubs each met twice — and the reader is told so rather than
-// shown one of them picked arbitrarily.
-function opponentCell(top, clubs) {
-  if (!top || !top.dh) return '—'
-  const suffix = `${top.dh} DH${top.dh === 1 ? '' : 's'}`
-  if (top.ids.length === 1) return `${clubShort(clubs, top.ids[0])} (${suffix})`
-  if (top.ids.length === 2) {
-    return `${clubShort(clubs, top.ids[0])}, ${clubShort(clubs, top.ids[1])} (${suffix})`
+// A preset's years, clamped to what the file actually holds — a span that ran
+// past either end would put the slider handles somewhere the data does not go.
+function presetRange(preset, bounds) {
+  return {
+    from: Math.max(bounds.first, preset.from ?? bounds.first),
+    to: Math.min(bounds.last, preset.to ?? bounds.last),
   }
-  return `${top.ids.length} clubs (${suffix} each)`
+}
+
+// The most-met opponent, with the club's mark beside its name — the same
+// pairing the club column of every board in this app uses, so the eye can run
+// down this column on the marks alone.
+//
+// A tie at the top is common once the slider is short — two clubs each met
+// twice — and the reader is told so rather than shown one of them picked
+// arbitrarily. Past two, the marks stop earning their room and the cell counts
+// instead of naming: eight logos in one cell is not a fact, it is a texture.
+function OpponentCell({ top, clubs }) {
+  if (!top || !top.dh) return <td className="dh__opp">—</td>
+  const suffix = `${top.dh} DH${top.dh === 1 ? '' : 's'}`
+  if (top.ids.length > 2) {
+    return (
+      <td className="dh__opp">
+        {top.ids.length} clubs ({suffix} each)
+      </td>
+    )
+  }
+  return (
+    <td className="dh__opp">
+      {top.ids.map((id) => (
+        <span key={id} className="dh__oppclub">
+          <TeamLogo teamId={id} name={clubShort(clubs, id)} size={16} />
+          {clubShort(clubs, id)}
+        </span>
+      ))}
+      <span className="dh__oppcount">({suffix})</span>
+    </td>
+  )
 }
 
 // One club's years, opened from its row. This is the "per year" half of the
@@ -140,17 +171,17 @@ export function DoubleheadersPage() {
   const through = useMemo(() => throughDate(data), [data])
 
   const rows = board?.rows ?? []
-  const setPreset = (span) => {
+  const setPreset = (preset) => {
     if (!bounds) return
-    setRange(span ? { from: Math.max(bounds.first, bounds.last - span + 1), to: bounds.last } : null)
+    setRange(presetRange(preset, bounds))
   }
   // Which preset chip reads as pressed — worked out from the handles rather
-  // than remembered, so dragging a handle onto "the last five seasons" lights
-  // that chip and dragging off it puts the light out.
+  // than remembered, so dragging a handle onto a decade lights that chip and
+  // dragging off it puts the light out.
   const activePreset = (p) => {
     if (!bounds || from == null) return false
-    if (!p.span) return from === bounds.first && to === bounds.last
-    return to === bounds.last && from === Math.max(bounds.first, bounds.last - p.span + 1)
+    const span = presetRange(p, bounds)
+    return from === span.from && to === span.to
   }
 
   const COLUMN_COUNT = 8
@@ -202,7 +233,7 @@ export function DoubleheadersPage() {
                   type="button"
                   className={`rpt-chip${activePreset(p) ? ' is-on' : ''}`}
                   aria-pressed={activePreset(p)}
-                  onClick={() => setPreset(p.span)}
+                  onClick={() => setPreset(p)}
                 >
                   {p.label}
                 </button>
@@ -314,7 +345,7 @@ export function DoubleheadersPage() {
                           <td>{r.sweeps || '—'}</td>
                           <td>{r.sweptBy || '—'}</td>
                           <td>{r.splits || '—'}</td>
-                          <td className="dh__opp">{opponentCell(r.top, clubs)}</td>
+                          <OpponentCell top={r.top} clubs={clubs} />
                         </tr>
                         {openTeam === r.teamId && (
                           <SeasonDrawer row={r} columns={COLUMN_COUNT} />

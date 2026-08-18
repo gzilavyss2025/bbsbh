@@ -121,9 +121,16 @@ test('The Double Dip: narrowing the year range recounts the board', async ({ pag
   await page.keyboard.press('ArrowRight')
   await expect(readout).not.toHaveText(wholeSpan)
 
-  // One season only: drag the first handle up to the last. The two are allowed
-  // to meet — a single season is a legitimate span — but never to cross.
-  await page.getByRole('button', { name: 'This season' }).click()
+  // A preset chip sets a NAMED, fixed span rather than a trailing window, so
+  // the chip and the readout have to say the same years.
+  await page.getByRole('button', { name: '2011' }).click()
+  await expect(readout).toHaveText('2011–2020')
+
+  // One season only: send the first handle past the last one. The two are
+  // allowed to meet — a single season is a legitimate span — but never to
+  // cross, which is what the clamp in the change handler is for.
+  await page.locator('.yrange__input--from').focus()
+  await page.keyboard.press('End')
   await expect(page.locator('.yrange__count')).toHaveText(/1 SEASON/i)
 
   // The board is recounted, not merely re-sorted: one season holds a few dozen
@@ -150,4 +157,24 @@ test('The Double Dip: a row opens its year-by-year lines', async ({ page }) => {
 
   await opener.click()
   await expect(drawer).toHaveCount(0)
+})
+
+// The most-met opponent carries its club's mark. It is the one cell on the
+// board that names a club OTHER than the row's own, and a name with no mark
+// beside it in a column of marked names reads as a missing logo rather than as
+// a deliberate difference.
+test('The Double Dip: the most-met opponent shows its club mark', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 900 })
+  await page.goto('/doubleheaders')
+
+  const cell = page.locator('.dh__opp').first()
+  await expect(cell).toBeVisible()
+  // A tied top count prints two clubs, and past two the cell counts instead of
+  // naming — so the assertion is "every club named here has a mark", not "one".
+  const named = cell.locator('.dh__oppclub')
+  const count = await named.count()
+  for (let i = 0; i < count; i += 1) {
+    await expect(named.nth(i).locator('img, svg')).toHaveCount(1)
+  }
+  await expect(cell.locator('.dh__oppcount')).toContainText(/DH/i)
 })
