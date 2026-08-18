@@ -557,16 +557,3 @@
   background: var(--accent-primary);
   color: var(--text-on-ink);
 }
-
-/* What the tabs mean, said once beneath them — "1st" beside "2nd" is only
-   legible if something nearby says first WHAT. Right-aligned under the tabs
-   it labels, not centered under the whole panel. */
-.arsenal__tabnote {
-  margin: 0 0 6px;
-  text-align: right;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--text-muted);
-}

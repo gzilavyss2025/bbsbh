@@ -1,10 +1,19 @@
 import { useState } from 'react'
 
-// The times-through tabs are labelled by the look they show, matching the
-// player page's Pitches card (components/charts/PitchMix.jsx). Ordinals
-// rather than "TTO 2", which is broadcast shorthand a scorer staging a game
-// has no reason to know.
-const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
+// The times-through tabs, labelled by the look they show. Ordinals rather
+// than "TTO 2", which is broadcast shorthand a scorer staging a game has no
+// reason to know.
+//
+// The word "look" is carried by the FIRST tab only and the rest run on as a
+// series — "1st look, 2nd, 3rd+" — the way a sentence names a unit once. It
+// is what replaced a caption line under the strip reading "times facing a
+// batter in a game": four bare ordinals need something nearby to say first
+// WHAT, but a whole line of chrome to say it, under a control this small and
+// on a card that is already a stack of dated facts, was more filter than
+// filtered. Spelling the unit into the tab says the same thing in the space
+// the tab already occupies. The full sentence still reaches a screen reader,
+// as the group's aria-label.
+const LOOK_LABEL = { 1: '1st look', 2: '2nd', 3: '3rd+' }
 
 // The opposing starter's season pitch-type mix — one row per pitch, his
 // share of pitches thrown as a percentage, with his average velocity for
@@ -66,7 +75,6 @@ export function PitchArsenalMix({ arsenal, tto, className = '' }) {
           </div>
         )}
       </div>
-      {looks.length > 0 && <p className="arsenal__tabnote">Times facing a batter in a game</p>}
       <ul className="arsenal__list">
         {rows.map((t) => (
           <li key={t.code} className="arsenal__row">
