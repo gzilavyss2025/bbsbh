@@ -705,9 +705,9 @@
       "class": "spoiler-free",
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
-    "teamRecordRankings.js": {
+    "situationalRecordRankings.js": {
       "class": "spoiler-free",
-      "why": "Pivots the same team-records ledgers across one level for the standalone /team-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
+      "why": "Pivots the same team-records ledgers across one level for the standalone /situational-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
     },
     "teamRecords.js": {
       "class": "spoiler-free",

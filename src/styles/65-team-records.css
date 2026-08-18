@@ -100,7 +100,8 @@
 
 /* Both kinds of row are a BUTTON now — the label of a W-L row, and the whole
    tile of a season count — because each one opens that same split ranked
-   across the level (/team-records, screens/TeamRecordsPage.jsx). The rules
+   across the level (/situational-records, screens/SituationalRecordsPage.jsx).
+   The rules
    here only undo the browser's button chrome and put back the layout the span
    and the div had. The dotted rule under the text is the entire visible
    affordance: a ledger full of underlined links stops reading as a ledger. */

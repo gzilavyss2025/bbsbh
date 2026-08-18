@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { COUNT_METRICS, HALVES, teamRecordsFor } from '../../../../api/teamRecords.js'
-import { teamRecordsPath } from '../../../../lib/route.js'
+import { situationalRecordsPath } from '../../../../lib/route.js'
 import { useNav } from '../../../../lib/nav.js'
 import '../../../../styles/65-team-records.css'
 
@@ -11,7 +11,8 @@ import '../../../../styles/65-team-records.css'
 // Everything here is derived in src/api/teamRecords.js from the per-game rows
 // the nightly gen-team-records.mjs ships — this component picks the half and
 // prints. Every row is also a door: it opens that one split ranked across the
-// club's whole level at /team-records (screens/TeamRecordsPage.jsx), because a
+// club's whole level at /situational-records
+// (screens/SituationalRecordsPage.jsx), because a
 // record read alone raises "out of thirty, where is that?" and this card can
 // only answer it for one club. It reuses `.tstats-card` / `.tstatrow` so it reads as a
 // sibling of the Team batting, Team pitching and Record by Day of Week cards
@@ -23,7 +24,8 @@ import '../../../../styles/65-team-records.css'
 // `cutoff` prop is the same day-before cutoff every other dated card on this
 // tab honours, applied to the rows before anything is tallied.
 
-// Every row's label opens the same split for the whole level (/team-records),
+// Every row's label opens the same split for the whole level
+// (/situational-records),
 // carrying the half the card is showing — "64-10 scoring four or more" invites
 // "out of thirty, where is that?" on every single line, and the ranking page is
 // the answer. The label is the button rather than the whole row, so the two
@@ -37,7 +39,7 @@ function RecordRows({ rows, sportId, half }) {
           <button
             type="button"
             className="tstatrow__k trec__rank"
-            onClick={() => navigate(teamRecordsPath({ metric: r.id, half, s: sportId }))}
+            onClick={() => navigate(situationalRecordsPath({ metric: r.id, half, s: sportId }))}
           >
             {r.k}
           </button>
@@ -69,7 +71,7 @@ function SeasonCounts({ counts, sportId, half }) {
           key={m.id}
           type="button"
           className="trec__count trec__rank"
-          onClick={() => navigate(teamRecordsPath({ metric: m.id, half, s: sportId }))}
+          onClick={() => navigate(situationalRecordsPath({ metric: m.id, half, s: sportId }))}
         >
           <span className="trec__countv">{m.value}</span>
           <span className="trec__countk">{m.k}</span>

@@ -1,5 +1,5 @@
-// The cross-club pivot behind the standalone Team Records page
-// (src/api/teamRecordRankings.js): one situational split, every club at a
+// The cross-club pivot behind the standalone Situational Records page
+// (src/api/situationalRecordRankings.js): one situational split, every club at a
 // level, in rank order.
 //
 // The cases here are the ones where "sort it highest first" is the wrong
@@ -9,7 +9,7 @@
 // test/team-records.test.js; nothing is re-tested here.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRankingIndex, rankMetric, defaultOrder } from '../src/api/teamRecordRankings.js'
+import { buildRankingIndex, rankMetric, defaultOrder } from '../src/api/situationalRecordRankings.js'
 
 const row = (over) => ({ d: '2026-04-01', o: 10, r: 'W', rs: 4, ra: 2, hi: 9, ha: 7, ...over })
 

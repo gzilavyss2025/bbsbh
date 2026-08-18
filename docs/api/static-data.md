@@ -523,9 +523,9 @@ for each generator; the reader modules:
   `comebackWins.js` and the team-score aggregates) — no `SealBox`, and the
   nightly cron writes the file before the day's games. Degrades to null with no
   file, and the card hides.
-- `teamRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
-  one level, ranked — the standalone `/team-records` page
-  (`screens/TeamRecordsPage.jsx`), which every row of the Records card links
+- `situationalRecordRankings.js` — the same ledgers, PIVOTED: one split, every club at
+  one level, ranked — the standalone `/situational-records` page
+  (`screens/SituationalRecordsPage.jsx`), which every row of the Records card links
   into. `fetchLevelTeamRecords(sportId, season)` pulls that level's thirty
   shards (`teams-static.js` supplies the club list; `staticJsonBy` memoizes each
   one, so paging between splits, halves and levels re-downloads nothing);
