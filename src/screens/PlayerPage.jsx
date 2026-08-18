@@ -30,6 +30,7 @@ import { SimilarPitchers } from '../components/playercard/SimilarPitchers.jsx'
 import { SimilarHitters } from '../components/playercard/SimilarHitters.jsx'
 import { FoulCard } from '../components/playerstats/FoulCard.jsx'
 import { PitcherWorkloadCard } from '../components/playerstats/PitcherWorkloadCard.jsx'
+import { PlayerContractCard } from '../components/playerstats/PlayerContractCard.jsx'
 import { RecentFormCard } from '../components/playerstats/RecentFormCard.jsx'
 import { PlayerPhotosRail } from '../components/player/PlayerPhotosRail.jsx'
 import { PlayerHighlightsRail } from '../components/player/PlayerHighlightsRail.jsx'
@@ -286,6 +287,8 @@ export function PlayerPage({ id, asOf, sportId }) {
             />
           )}
         </div>
+
+        <PlayerContractCard contract={data.contract} />
 
         {data.conversionNote && <p className="hint reg-convert">{data.conversionNote}</p>}
 
@@ -816,4 +819,3 @@ function Fact({ label, value, mono = false, wide = false }) {
     </div>
   )
 }
-

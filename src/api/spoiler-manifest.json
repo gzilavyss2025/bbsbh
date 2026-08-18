@@ -381,6 +381,10 @@
         "api/logbookRetrospective.js"
       ]
     },
+    "person/contracts.js": {
+      "class": "spoiler-free",
+      "why": "Static salary, contract and club-control facts. Current-day player identity context with no game result; historical asOf pages deliberately do not fetch it."
+    },
     "person-fetch.js": {
       "class": "spoiler-free",
       "why": "The player page's bio/stats/firsts fetchers. Read by the player page only, never wired into a sealed game surface."
