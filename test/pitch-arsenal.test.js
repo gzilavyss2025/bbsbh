@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { aggregateGamePitchTypes, centuryRankMap } from '../scripts/gen-pitch-arsenal.mjs'
-import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, MIN_ARSENAL_PITCHES, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
+import { pitchArsenalFor, pitchFamily, heatView, arsenalTtoView, MIN_ARSENAL_PITCHES, MIN_LOOK_SHIFT, CENTURY_MPH, CENTURY_CLUB_MIN } from '../src/api/pitchArsenal.js'
 
 // --- helpers to build a tiny synthetic feed ----------------------------------
 const pitch = (typeCode, description, startSpeed) => ({
@@ -294,6 +294,52 @@ test('arsenalTtoView reads a trimmed tto array — a look he never reached is si
   const looks = arsenalTtoView(data, 100, true)
   assert.deepEqual(looks.map((l) => l.look), [1, 2], 'no third look, and none invented')
   assert.equal(looks[1].rows[0].velo, 100.1, 'the pair reads [pitches, avgVelo] in that order')
+})
+
+test('arsenalTtoView carries the move each pitch made from the look before it', () => {
+  const data = dataWith(100, [
+    ttoRow('FF', 100, [[70, 97], [50, 96], [30, 96]]),
+    ttoRow('SL', 100, [[30, 88], [50, 88], [70, 87]]),
+  ])
+  const looks = arsenalTtoView(data, 100, true)
+  assert.equal(looks[0].rows[0].delta, null, 'the first look has nothing to be a change from')
+  assert.equal(looks[0].rows[1].delta, null)
+
+  const second = new Map(looks[1].rows.map((r) => [r.code, r.delta]))
+  assert.equal(Math.round(second.get('FF') * 1000) / 10, -20, '70% of the first look down to 50% of the second')
+  assert.equal(Math.round(second.get('SL') * 1000) / 10, 20)
+
+  const third = new Map(looks[2].rows.map((r) => [r.code, r.delta]))
+  assert.equal(Math.round(third.get('FF') * 1000) / 10, -20, 'measured against the SECOND look, not the first')
+  assert.equal(Math.round(third.get('SL') * 1000) / 10, 20)
+})
+
+test('arsenalTtoView leaves delta null for a pitch the previous look never saw', () => {
+  const data = dataWith(100, [
+    ttoRow('FF', 100, [[60, 97], [40, 96], [40, 96]]),
+    ttoRow('CH', 40, [[0, null], [20, 86], [20, 86]]),
+  ])
+  const looks = arsenalTtoView(data, 100, true)
+  const ch = looks[1].rows.find((r) => r.code === 'CH')
+  assert.equal(ch.delta, null, 'a pitch first thrown on this look is not "up from zero"')
+  assert.equal(looks[2].rows.find((r) => r.code === 'CH').delta, 0, 'once both looks have it, the move is real and can be flat')
+})
+
+test('arsenalTtoView measures a move against the previous QUALIFYING look', () => {
+  // The middle look falls under the floor and is dropped, so the third look's
+  // neighbour in the array is the first — and that is what it is compared to.
+  const data = dataWith(100, [
+    ttoRow('FF', 100, [[60, 97], [MIN_ARSENAL_PITCHES - 1, 96], [30, 96]]),
+    ttoRow('SL', 100, [[40, 88], [0, null], [70, 87]]),
+  ])
+  const looks = arsenalTtoView(data, 100, true)
+  assert.deepEqual(looks.map((l) => l.look), [1, 3])
+  const third = new Map(looks[1].rows.map((r) => [r.code, r.delta]))
+  assert.equal(Math.round(third.get('FF') * 1000) / 10, -30, '60 of 100 on the first look, 30 of 100 on the third')
+})
+
+test('MIN_LOOK_SHIFT is a share, not a percentage', () => {
+  assert.ok(MIN_LOOK_SHIFT > 0 && MIN_LOOK_SHIFT < 1, 'the arrow floor is compared against a usage share')
 })
 
 // --- century-club league ranking --------------------------------------------

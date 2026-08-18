@@ -1,4 +1,21 @@
 import { useState } from 'react'
+import { MIN_LOOK_SHIFT } from '../../api/pitchArsenal.js'
+
+// Direction of a pitch's usage between one look and the look before it. The
+// SHAPE carries the direction and the colour only agrees with it — the same
+// rule the standings trend glyph and the prospect movement pill follow, so
+// the arrow still reads for a reader who cannot separate the two inks.
+//
+// DRAWN, not the ▲/▼ characters those two use. A typeface sets those glyphs
+// at roughly half the height of the digits beside them and no font-size can
+// fix that without making the arrow's own box bigger than the row — the
+// triangle is a fraction of its em box, and how big a fraction is the font's
+// business. A path in a box sized in em is exactly as tall as the figure it
+// annotates, at any row size.
+const SHIFT_PATH = {
+  up: 'M5 0.5 9.6 9.5 0.4 9.5Z',
+  down: 'M5 9.5 0.4 0.5 9.6 0.5Z',
+}
 
 // The times-through tabs, labelled by the look they show. Ordinals rather
 // than "TTO 2", which is broadcast shorthand a scorer staging a game has no
@@ -49,12 +66,16 @@ export function PitchArsenalMix({ arsenal, tto, className = '' }) {
         name: nameByCode.get(r.code) ?? r.name,
         pct: Math.round(r.usage * 1000) / 10,
         avgVelo: r.velo,
+        // How this look differs from the one before it. Only on a look, and
+        // never on the season, which has nothing to be a change FROM.
+        delta: r.delta,
       }))
     : arsenal.map((t) => ({
         code: t.code,
         name: t.description || t.code,
         pct: t.pct,
         avgVelo: t.avgVelo,
+        delta: null,
       }))
 
   return (
@@ -79,7 +100,10 @@ export function PitchArsenalMix({ arsenal, tto, className = '' }) {
         {rows.map((t) => (
           <li key={t.code} className="arsenal__row">
             <span className="arsenal__name">{t.name}</span>
-            <span className="arsenal__pct">{t.pct}%</span>
+            <span className="arsenal__pct">
+              {t.pct}%
+              <ShiftGlyph delta={t.delta} />
+            </span>
             {t.avgVelo != null && <span className="arsenal__velo">{t.avgVelo} mph</span>}
           </li>
         ))}
@@ -98,5 +122,30 @@ function LookTab({ label, active, onSelect }) {
     >
       {label}
     </button>
+  )
+}
+
+// The arrow beside a look's share: up in green when he went to the pitch more
+// than he did the look before, down in clay when he went to it less, nothing
+// at all under MIN_LOOK_SHIFT or on a pitch the previous look never saw.
+//
+// The figure it moved BY is not printed. Two numbers in a 5ch column is a
+// column of arithmetic, and the shares of the neighbouring look are one tap
+// away for a reader who wants the subtraction. It reaches a screen reader
+// through the label, which has room for it.
+function ShiftGlyph({ delta }) {
+  if (delta == null || Math.abs(delta) < MIN_LOOK_SHIFT) return null
+  const dir = delta > 0 ? 'up' : 'down'
+  const points = Math.abs(Math.round(delta * 1000) / 10)
+  return (
+    <span
+      className={`arsenal__shift arsenal__shift--${dir}`}
+      role="img"
+      aria-label={`${dir === 'up' ? 'Up' : 'Down'} ${points} points from the previous look`}
+    >
+      <svg viewBox="0 0 10 10" focusable="false" aria-hidden="true">
+        <path d={SHIFT_PATH[dir]} />
+      </svg>
+    </span>
   )
 }

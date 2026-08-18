@@ -165,6 +165,15 @@ export function heatView(data, personId, isMlb) {
 // threw on that look, not of his season. That is the whole point of the
 // split — a starter who goes to his slider a third of the time the third
 // time through is the fact, and dividing by the season would bury it.
+//
+// Each row also carries `delta`: the change in that pitch's usage from the
+// look BEFORE it, in share (0.043 is up 4.3 points), so a reader can see
+// which way an arm is drifting without holding two tabs in his head. Null on
+// the first look, and null for a pitch the previous look has no row for —
+// a pitch first thrown the third time through has nothing to be up from, and
+// "up from zero" would be the loudest arrow on the card for the rarest pitch
+// on it. Compared against the previous QUALIFYING look (the array's own
+// neighbour), so a dropped middle look doesn't silently pair 1st with 3rd.
 export function arsenalTtoView(data, personId, isMlb) {
   const entry = data?.pit?.[personId]
   const types = isMlb ? entry?.mlb : entry?.aaa
@@ -183,16 +192,28 @@ export function arsenalTtoView(data, personId, isMlb) {
     }
     const total = rows.reduce((n, r) => n + r.count, 0)
     if (total < MIN_ARSENAL_PITCHES) continue
+    const prev = looks.length ? looks[looks.length - 1] : null
+    const before = prev ? new Map(prev.rows.map((r) => [r.code, r.usage])) : null
     looks.push({
       look: i + 1,
       total,
       rows: rows
-        .map((r) => ({ ...r, usage: r.count / total }))
+        .map((r) => {
+          const usage = r.count / total
+          const was = before?.get(r.code)
+          return { ...r, usage, delta: was == null ? null : usage - was }
+        })
         .sort((a, b) => b.count - a.count),
     })
   }
   return looks.length > 1 ? looks : null
 }
+
+// How far a pitch's usage has to move between two looks before the card draws
+// an arrow beside it. Under a couple of points the move is the ordinary
+// wobble of a few hundred pitches split three ways, and an arrow on it claims
+// a plan the pitcher does not have. Share, not percent: 0.02 is two points.
+export const MIN_LOOK_SHIFT = 0.02
 
 // "Pitches like" — the closest arms in ARSENAL space to one pitcher, for the
 // player page's SimilarPitchers card. The ranking model is pure and lives in

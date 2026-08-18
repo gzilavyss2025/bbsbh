@@ -461,7 +461,7 @@
    card gets wider rather than staying bunched at a fixed offset. */
 .arsenal__row {
   display: grid;
-  grid-template-columns: minmax(120px, 180px) 1fr 5ch 1fr 74px;
+  grid-template-columns: minmax(120px, 180px) 1fr 7ch 1fr 74px;
   align-items: center;
   column-gap: var(--space-2);
   padding: 5px 0;
@@ -481,8 +481,15 @@
   white-space: nowrap;
 }
 
+/* 7ch rather than the 5ch "31.5%" needs, so the movement arrow has a place of
+   its own to stand in and the shares stay in one column whether an arrow is
+   beside them or not. The two flexible tracks either side absorb the
+   difference — MPH still lands flush right. */
 .arsenal__pct {
   grid-column: 3;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--ls-num);
@@ -556,4 +563,31 @@
 .arsenal__tab:focus-visible {
   background: var(--accent-primary);
   color: var(--text-on-ink);
+}
+
+/* Which way a pitch's usage moved from the look before it — up in green, down
+   in clay, and nothing at all for a move under MIN_LOOK_SHIFT. Only ever
+   rendered on a look, never on the season.
+
+   The SHAPE is the direction and the colour only agrees with it, so the arrow
+   survives a reader who cannot separate the two inks: same construction as
+   .standings-trend and .prospecttrend__move. Small — this is an annotation on
+   a figure, not a figure. */
+.arsenal__shift {
+  display: inline-flex;
+}
+/* Sized in em off the row's own figure, so the arrow stands exactly as tall
+   as the digits it annotates however the row is set — 0.72em is the cap
+   height of the mono face the shares are set in. The triangle fills its box,
+   which is the whole reason this is drawn and not a ▲ character. */
+.arsenal__shift svg {
+  width: 0.72em;
+  height: 0.72em;
+  fill: currentColor;
+}
+.arsenal__shift--up {
+  color: var(--accent-positive);
+}
+.arsenal__shift--down {
+  color: var(--accent-negative);
 }
