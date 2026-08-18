@@ -566,6 +566,11 @@ port against a live game before merge, per root `CLAUDE.md`.
 
 ## 11. Open questions / decisions for the user
 
+**Resolved, no action (2026-08-18):** all 7 questions below were settled by
+what shipped in PR #362 and its follow-ups — see the amendments at the top
+of this doc and `implementation-log.md` in this folder. Kept below for
+historical reasoning only.
+
 1. **Scores Unlocked scope while active:** every game surface viewed during
    the window (recommended, simplest), or only games whose `officialDate` is
    today (stricter "today only" — paging back keeps the normal reveal-all

@@ -1,6 +1,10 @@
 # Player OVR / POT — deferred scope
 
-**Status:** parked · discovery only, no implementation scheduled
+**Status:** wontfix (2026-08-18) — already substantially served by shipped
+Savant percentiles (`StatcastPercentiles.jsx`) + prospect trajectory
+(`ProspectTrendPill.jsx`). A single 0–100 OVR/POT number is a bigger,
+less-validated commitment than what's already live. Revisit only if those
+existing signals prove insufficient.
 **Slug:** `player-ovr`
 
 ## Idea
