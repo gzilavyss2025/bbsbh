@@ -451,7 +451,7 @@ for each generator; the reader modules:
   — the generator is. Spoiler-free (a Final-games aggregate, same footing as
   WAR) — no `SealBox`; the Facts rows render only when the club has one.
 - `reports/gate.js` — the reader behind BOTH broadcast report boards that
-  `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace` (The Clock).
+  `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;
   everything comparative is derived here. `gateBoard(data, season, sortBy)`
   ranks the home gate, joining the club's park to
@@ -473,7 +473,7 @@ for each generator; the reader modules:
   talent/winning relationship live, next to the published R² ≈ 0.11 that set
   the winning weight. Every constant is argued in `docs/farm-index.md`.
   Spoiler-free (ADR-0034: a stat line is not a score).
-- `reports/bullpen.js` — `/bullpens` (The Pen). Adds no data and invents no
+- `reports/bullpen.js` — `/bullpen-availability` (The Pen). Adds no data and invents no
   rules: it runs `workload.js`'s own availability thresholds across all thirty
   clubs instead of the two in one game, and ranks on the SHARE of each staff
   that is likely down rather than the count. Starters are excluded outright.

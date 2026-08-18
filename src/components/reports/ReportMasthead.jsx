@@ -1,4 +1,4 @@
-// The broadcast masthead every page under /reports opens on.
+// The broadcast masthead every broadcast report page opens on.
 //
 // WHY THESE PAGES LOOK DIFFERENT FROM THE REST OF THE APP, ON PURPOSE. The
 // scoring surfaces are a paper scorebook: manila, pencil rules, kraft seals,

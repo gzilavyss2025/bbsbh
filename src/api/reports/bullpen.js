@@ -1,5 +1,5 @@
 // THE PEN — every club's bullpen, ranked by how much of it is still available
-// tonight. Behind /bullpens (src/screens/reports/BullpenPage.jsx).
+// tonight. Behind /bullpen-availability (src/screens/reports/BullpenPage.jsx).
 //
 // It adds no data. api/workload.js already owns the rules that decide whether
 // one arm is fresh, limited or likely down (the ESPN thresholds: 25+ pitches

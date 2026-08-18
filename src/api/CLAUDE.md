@@ -128,7 +128,7 @@ one you need:
 
 `reports/` is the fourth subdirectory and the odd one out: it holds no new
 fetching and no new spoiler footing, only the four spoiler-FREE readers behind
-the five broadcast report pages (`src/screens/reports/`). Two of them read files
+the four broadcast report pages (`src/screens/reports/`). Two of them read files
 their own generators ship (`gate.js`, `farmSystem.js`); one re-runs an existing
 module's rules across the whole league (`bullpen.js` over `workload.js`); one is
 the club-name join all three share (`clubs.js`). The rule that directory adds is

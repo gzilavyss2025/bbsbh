@@ -263,40 +263,51 @@ export function FarmSystemPage() {
           <section className="method">
             <h2>How the index is built</h2>
             <p>
-              THREE PILLARS. Talent (60%) sums a value curve over every ranked prospect the
-              organisation holds — an exponential curve, not a straight line, because prospect
-              value is not linear in rank. Public valuation work puts a top-five name near
-              $150–200M of surplus value and a fortieth-percentile name near $16M, which means
-              the No. 1 prospect in baseball is worth roughly twelve No. 100s. A system of six
-              names ranked in the nineties is not a better system than one holding the best
-              player in the minors, and this curve is what stops the board saying otherwise.
+              <strong>The index runs from 0 to 100.</strong> It is not a rating of players and it
+              is not in any real-world unit — it is a club’s standing among these thirty clubs,
+              this season, on three things added together. Each of the three is scored 0 to 100
+              across the league first, then weighted, so the leader’s 100 means “furthest ahead
+              of the field here” rather than “perfect”.
             </p>
             <p>
-              WINNING (25%) is the four full-season affiliates’ records, weighted by how close
-              each level is to the majors — Triple-A at {Math.round(LEVEL_WEIGHTS[11] * 100)}%
-              down to Single-A at {Math.round(LEVEL_WEIGHTS[14] * 100)}%, because a Triple-A club
-              is one phone call from the big league roster and a Single-A club is three years
-              away. It is only a quarter of the index on purpose: the one published attempt to
-              regress farm-system rankings against system-wide minor-league winning found R² ≈
-              0.11. Affiliate rosters carry organisational filler and repeat-level veterans, and
-              a club that promotes aggressively strips its own Triple-A team of the players that
-              made it good. Winning is evidence. It is weak evidence.
+              <strong>Talent is 60 per cent.</strong> It adds up a value curve over every ranked
+              prospect the organisation holds — an exponential curve, not a straight line,
+              because prospect value is not linear in rank. Public valuation work puts a top-five
+              name near $150–200 million of surplus value and a fortieth-percentile name near $16
+              million, which makes the No. 1 prospect in baseball worth roughly twelve No. 100s.
+              A system of six names ranked in the nineties is not a better system than one holding
+              the best player in the minors, and this curve is what stops the board saying
+              otherwise.
             </p>
             <p>
-              YOUTH (15%) is the value-weighted average age of those ranked names, against a
-              pivot of 21. It is runway, not readiness — a nineteen-year-old at Double-A has
-              more development left than a twenty-four-year-old at the same rank, and also has
-              further to walk. It is the smallest pillar because it modifies talent that has
-              already been counted rather than adding any.
+              <strong>Winning is 25 per cent.</strong> It is the four full-season affiliates’
+              records, weighted by how close each level is to the majors — Triple-A at{' '}
+              {Math.round(LEVEL_WEIGHTS[11] * 100)} per cent down to Single-A at{' '}
+              {Math.round(LEVEL_WEIGHTS[14] * 100)} per cent, because a Triple-A club is one
+              phone call from the big league roster and a Single-A club is three years away. It
+              is only a quarter of the index on purpose. The one published attempt to regress
+              farm-system rankings against system-wide minor-league winning found an R² of about
+              0.11: affiliate rosters carry organisational filler and repeat-level veterans, and a
+              club that promotes aggressively strips its own Triple-A team of the players who made
+              it good. Winning is evidence, and it is weak evidence.
             </p>
             <p>
-              WHAT IT CANNOT SEE. Ordinal ranks, not tools. It has no view of depth below the
-              published Top {data?.prospectPool ?? 100}, of an international class just signed, of
-              the arm that blew out in June, or of a club’s record at actually developing the
-              players it drafts. It is a snapshot of held assets and recent results, and it is
-              worth exactly that. Every pillar is rescaled across the thirty organisations before
-              the weights are applied, so a score is a club’s position in this league in this
-              season and never a number that carries between seasons.
+              <strong>Youth is 15 per cent.</strong> It is the value-weighted average age of those
+              ranked names, measured against a pivot of 21. It is runway, not readiness — a
+              nineteen-year-old at Double-A has more development left than a twenty-four-year-old
+              at the same rank, and also has further to walk before he helps anyone. It is the
+              smallest pillar because it modifies talent that has already been counted rather
+              than adding any of its own.
+            </p>
+            <p>
+              <strong>What it cannot see.</strong> It reads ordinal ranks, not tools. It has no
+              view of depth below the published top {data?.prospectPool ?? 100}, of an
+              international class just signed, of the arm that blew out in June, or of a club’s
+              record at actually developing the players it drafts — which is the question most
+              people are really asking. It is a snapshot of held assets and recent results, and it
+              is worth exactly that. Because every pillar is rescaled across the thirty
+              organisations before the weights are applied, a score describes a position in this
+              league in this season and never carries between seasons.
             </p>
           </section>
         </>

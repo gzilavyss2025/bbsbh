@@ -82,7 +82,6 @@ const STATIC_REPORT_ROUTES = [
   'first-scorebook',
   'photos',
   // The five broadcast reports (src/screens/reports/).
-  'rundown',
   'attendance',
   'pace',
   'farm-system',

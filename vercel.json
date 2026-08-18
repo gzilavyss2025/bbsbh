@@ -42,11 +42,10 @@
     { "source": "/logbook", "destination": "/api/preview?route=logbook" },
     { "source": "/first-scorebook", "destination": "/api/preview?route=first-scorebook" },
     { "source": "/photos", "destination": "/api/preview?route=photos" },
-    { "source": "/rundown", "destination": "/api/preview?route=rundown" },
     { "source": "/attendance", "destination": "/api/preview?route=attendance" },
-    { "source": "/pace", "destination": "/api/preview?route=pace" },
-    { "source": "/farm", "destination": "/api/preview?route=farm-system" },
-    { "source": "/bullpens", "destination": "/api/preview?route=bullpens" },
+    { "source": "/pace-of-play", "destination": "/api/preview?route=pace" },
+    { "source": "/farm-system-rankings", "destination": "/api/preview?route=farm-system" },
+    { "source": "/bullpen-availability", "destination": "/api/preview?route=bullpens" },
     { "source": "/:date(\\d{8})/:matchup/:section", "destination": "/api/preview?route=game&date=:date&matchup=:matchup&section=:section" },
     { "source": "/((?!assets/|api/).*)", "destination": "/index.html" }
   ]

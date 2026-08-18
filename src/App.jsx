@@ -151,11 +151,10 @@ const TeamRecordsPage = lazyNamed(
   () => import('./screens/TeamRecordsPage.jsx'),
   'TeamRecordsPage',
 )
-// The five broadcast report pages (src/screens/reports/). Lazy like every
+// The four broadcast report pages (src/screens/reports/). Lazy like every
 // other screen, and they SHARE one stylesheet
 // (styles/68-broadcast-reports.css) which each of them imports — see that
-// file's header for why one partial rather than five.
-const RundownPage = lazyNamed(() => import('./screens/reports/RundownPage.jsx'), 'RundownPage')
+// file's header for why one partial rather than four.
 const AttendancePage = lazyNamed(
   () => import('./screens/reports/AttendancePage.jsx'),
   'AttendancePage',
@@ -337,8 +336,6 @@ export default function App() {
         half={route.half}
       />
     )
-  } else if (route.name === 'rundown') {
-    content = <RundownPage />
   } else if (route.name === 'attendance') {
     content = <AttendancePage />
   } else if (route.name === 'pace') {

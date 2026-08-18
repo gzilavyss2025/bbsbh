@@ -280,10 +280,9 @@ const GENERIC = {
   'first-scorebook': { eyebrow: 'MY FIRST SCOREBOOK', title: 'My First Scorebook', sub: 'A season retrospective, built from the games you scored.' },
   photos: { eyebrow: 'GAME PHOTOS', title: 'Game Photos', sub: 'An unsealed photo finder for any game — never a score.' },
   // The broadcast reports (src/screens/reports/). Each sub says what the page
-  // MEASURES rather than what it is called, because these five are the pages
+  // MEASURES rather than what it is called, because these four are the pages
   // whose names alone give a reader the least — "Pace of Play" could be a
   // rules explainer, and "The Gate" could be anything.
-  rundown: { eyebrow: 'THE RUNDOWN', title: 'The Rundown', sub: 'One number from each report, and the door into it.' },
   attendance: { eyebrow: 'THE GATE', title: 'Attendance', sub: 'Every club ranked by the share of the park that fills.' },
   pace: { eyebrow: 'THE CLOCK', title: 'Pace of Play', sub: 'How long each club’s games actually take, home and road.' },
   'farm-system': { eyebrow: 'THE FARM REPORT', title: 'Farm System Index', sub: 'Thirty systems scored on talent, winning and youth.' },
@@ -346,7 +345,6 @@ export async function buildCard(params, origin) {
       case 'all-star-rosters':
       case 'all-star-legacy':
       case 'logbook':
-      case 'rundown':
       case 'attendance':
       case 'pace':
       case 'farm-system':

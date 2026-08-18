@@ -1,6 +1,7 @@
 // THE FARM INDEX — one number for "how good is this organisation's farm
 // system", built from the facts scripts/gen-farm-system.mjs ships. Behind
-// /farm ("The Farm Report", src/screens/reports/FarmSystemPage.jsx).
+// /farm-system-rankings ("The Farm Report",
+// src/screens/reports/FarmSystemPage.jsx).
 //
 // The research pass behind every constant in this file is written up in
 // docs/farm-index.md. The short version, because the numbers below are

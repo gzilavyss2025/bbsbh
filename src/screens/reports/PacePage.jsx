@@ -38,12 +38,20 @@ import { BarCell, TrendStrip } from '../../components/reports/ReportBar.jsx'
 
 const commas = (n) => (n == null ? '—' : n.toLocaleString('en-US'))
 
+// EVERY DURATION ON THIS PAGE CARRIES ITS UNIT. A column of "2:49" is only
+// obviously hours-and-minutes to someone who already knows what the page is
+// about — it reads just as easily as a time of day, or as minutes and seconds,
+// and a reader who guesses the last one is off by a factor of sixty. So the
+// clock columns are captioned `h:mm`, the gap figures say "min" in the figure
+// itself, and the delay totals spell out hours and minutes in words.
+const HMM = 'h:mm'
+
 // Minutes into a plain "3h 42m" reading, for durations too long to read as a
 // clock — total time spent in weather delays, mostly.
 function asHours(minutes) {
   if (!minutes) return '—'
   const h = Math.floor(minutes / 60)
-  return h ? `${h}h ${minutes % 60}m` : `${minutes}m`
+  return h ? `${h}h ${minutes % 60}m` : `${minutes} min`
 }
 
 export function PacePage() {
@@ -113,22 +121,23 @@ export function PacePage() {
             <Slab
               tone="lead"
               value={asClock(league?.paceAvg)}
-              label="League average game"
+              label={`League average game (${HMM})`}
               note={`Median ${asClock(league?.paceMedian)}. ${commas(league?.over180)} games have
                      run past three hours.`}
             />
             <Slab
-              value={spread != null ? `${spread}m` : '—'}
-              label="Slowest to quickest"
+              value={spread != null ? `${Math.round(spread)} min` : '—'}
+              label="Longest club to quickest"
               note={
                 slowest && quickest
-                  ? `${clubName(clubs, slowest.teamId)} to ${clubName(clubs, quickest.teamId)}, every night.`
+                  ? `A ${clubShort(clubs, slowest.teamId)} game averages ${asClock(slowest.avg)}.
+                     A ${clubShort(clubs, quickest.teamId)} game averages ${asClock(quickest.avg)}.`
                   : ''
               }
             />
             <Slab
               value={asClock(longestGame?.longest)}
-              label="Longest game"
+              label={`Longest game (${HMM})`}
               note={
                 longestGame
                   ? `${clubName(clubs, longestGame.teamId)}, ${humanDate(longestGame.longestDate)}`
@@ -168,11 +177,11 @@ export function PacePage() {
                 <thead>
                   <tr>
                     <th className="team">Club</th>
-                    <th>Average</th>
-                    <th>Median</th>
-                    <th>3:00+</th>
-                    <th>3:30+</th>
-                    <th>By month</th>
+                    <th>Average ({HMM})</th>
+                    <th>Median ({HMM})</th>
+                    <th>Games 3:00+</th>
+                    <th>Games 3:30+</th>
+                    <th>By month ({HMM})</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -228,9 +237,9 @@ export function PacePage() {
                 <thead>
                   <tr>
                     <th className="team">Club</th>
-                    <th>Longest</th>
-                    <th>Shortest</th>
-                    <th>Delays</th>
+                    <th>Longest ({HMM})</th>
+                    <th>Shortest ({HMM})</th>
+                    <th>Total delay</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -269,21 +278,36 @@ export function PacePage() {
           <section className="method">
             <h2>How this was counted</h2>
             <p>
-              Game length is the elapsed-time figure the league publishes for each completed
-              game — first pitch to final out, INCLUDING any weather delay inside it. The delay
-              column is the same feed’s separate delay total, so a club with a long average and
+              <strong>The unit is hours and minutes.</strong> Every figure written as{' '}
+              <code>2:44</code> on this page means two hours and forty-four minutes. Game length
+              is the elapsed-time figure the league publishes for each completed game — first
+              pitch to final out, including any weather delay that happened inside it. The delay
+              column is that same feed’s separate delay total, so a club with a long average and
               a large delay column has had its clock inflated by rain rather than by baseball.
             </p>
             <p>
-              Extra innings are in. They are a real part of how long a club’s games take, and
-              stripping them would flatter clubs that happen to play close games. What that
-              means in practice: a single fourteen-inning night moves a club’s average by
-              roughly half a minute, and the extremes table is where to look for it.
+              <strong>Both clubs are counted in every game.</strong> How long a game takes is made
+              by the two rosters on the field, not by the ballpark, and a club that works quickly
+              does not stop working quickly on the road. Counting only home dates would halve
+              every sample and quietly measure the park instead of the club — which also means a
+              single game appears once for each of the two clubs that played it, and never twice
+              for either.
             </p>
             <p>
+              <strong>Extra innings are included.</strong> They are a real part of how long a
+              club’s games take, and stripping them out would flatter the clubs that happen to
+              play close ones. In practice a single fourteen-inning night moves a club’s average
+              by about half a minute; the extremes table below is where to find it.
+            </p>
+            <p>
+              <strong>The bars do not start at zero.</strong> Every club in the league sits inside
+              a band of roughly ten minutes, and a bar drawn from zero would show thirty
+              identical bars. They run from the league’s quickest club instead, so the length you
+              see is the difference between clubs rather than the length of a game. The numbers
+              beside them are the real figures either way.
               {shortestGame
-                ? `The quickest game anyone has played this season is ${asClock(shortestGame.shortest)},
-                   by ${clubName(clubs, shortestGame.teamId)} on ${humanDate(shortestGame.shortestDate)}.`
+                ? ` The quickest game anyone has played this season is ${asClock(shortestGame.shortest)} —
+                   ${clubName(clubs, shortestGame.teamId)}, ${humanDate(shortestGame.shortestDate)}.`
                 : ''}{' '}
               Regular season only, and only games already final.
             </p>

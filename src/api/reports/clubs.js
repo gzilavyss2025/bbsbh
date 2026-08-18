@@ -1,4 +1,4 @@
-// The one club-identity lookup the five report pages share.
+// The one club-identity lookup the four report pages share.
 //
 // All five of them start from a bare teamId — gate.json, farm-system.json and
 // workload.json each key on it and none of them ships a club name, which is

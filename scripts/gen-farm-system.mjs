@@ -1,5 +1,5 @@
-// Regenerates public/data/farm-system.json — the FACTS behind /farm ("The
-// Farm Report", src/screens/reports/FarmSystemPage.jsx): every organisation's
+// Regenerates public/data/farm-system.json — the FACTS behind
+// /farm-system-rankings ("The Farm Report", src/screens/reports/FarmSystemPage.jsx): every organisation's
 // four full-season affiliates with their won-lost records, and every ranked
 // prospect that organisation holds.
 //

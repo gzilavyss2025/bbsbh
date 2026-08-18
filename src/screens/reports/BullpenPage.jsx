@@ -276,26 +276,32 @@ export function BullpenPage() {
           <section className="method">
             <h2>How availability is decided</h2>
             <p>
-              Three flags, all of them public broadcast rules rather than anything this site
-              invented: a reliever who threw 25 or more pitches yesterday, one who has thrown 35
-              or more across the last three days, and one who worked both of the previous two
-              days. A pitcher carrying two of those, or who has worked three straight days, is
-              filed LIKELY DOWN. One flag is LIMITED. None is AVAILABLE.
+              <strong>Three flags, counted in pitches and days.</strong> They are public
+              broadcast rules rather than anything this site invented: a reliever who threw 25 or
+              more pitches yesterday, one who has thrown 35 or more across the last three days,
+              and one who worked both of the previous two days. A pitcher carrying two of those,
+              or who has worked three straight days, is filed as likely down. One flag is
+              limited. None is available.
             </p>
             <p>
-              These are rules, not information. No club publishes who is unavailable, and a
-              manager’s own list will differ from this one on any given night — a pitcher may be
-              held back for a matchup two days away, or sent out on a fourth straight day
-              because the game demanded it. Read the board as workload, which is a fact, rather
-              than as availability, which is a decision.
+              <strong>These are rules, not information.</strong> No club publishes who is
+              unavailable, and a manager’s own list will differ from this one on any given night —
+              a pitcher may be held back for a matchup two days away, or sent out on a fourth
+              straight day because the game demanded it. Read the board as workload, which is a
+              fact, rather than as availability, which is a decision.
             </p>
             <p>
-              Starters are excluded outright: a rotation is not a bullpen, and counting five
-              starters as available would flatter every club by the same five names. The file
+              <strong>Starters are excluded outright.</strong> A rotation is not a bullpen, and
+              counting five starters as available would flatter every club by the same five
+              names. The board is also ranked on the share of each staff rather than the count,
+              because four tired arms out of six is a different night than four out of eleven.
+            </p>
+            <p>
+              <strong>It is a board about the current staff, not the season.</strong> The file
               behind this page carries the arms that have pitched recently — roughly thirteen a
-              club — so a reliever just up from Triple-A may not appear until he works.
-              Appearances are counted strictly before today, so nothing in progress is on this
-              page.
+              club — so a reliever just up from Triple-A will not appear until he works. Every
+              appearance is counted strictly before today, which is why nothing in progress
+              reaches this page.
             </p>
           </section>
         </>

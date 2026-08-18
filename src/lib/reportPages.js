@@ -63,14 +63,14 @@ export const PAGE_GROUPS = [
     // what a club has coming and how much work its pen has already done. None
     // of them is about a result.
     //
-    // The Rundown leads because it is the way in: one figure from each of the
-    // other four, each opening the board it came from.
+    // Attendance leads on busiest-first, the same rule every other group here
+    // orders by: it is the one a reader is most likely to have come looking
+    // for by name.
     pages: [
-      { label: 'The Rundown', path: '/rundown' },
       { label: 'Attendance', path: '/attendance' },
-      { label: 'Farm System Index', path: '/farm' },
-      { label: 'Bullpen Availability', path: '/bullpens' },
-      { label: 'Pace of Play', path: '/pace' },
+      { label: 'Farm System Rankings', path: '/farm-system-rankings' },
+      { label: 'Bullpen Availability', path: '/bullpen-availability' },
+      { label: 'Pace of Play', path: '/pace-of-play' },
     ],
   },
   {
@@ -182,10 +182,10 @@ export const FOOTER_TRAIL = [
   TOOLS_GROUP.pages.find((page) => page.path === '/about'),
 ]
 
-// The five broadcast reports, ADDRESS -> route name (src/screens/reports/).
+// The four broadcast reports, ADDRESS -> route name (src/screens/reports/).
 // Their addresses live here rather than in route.js because this file is
 // already the single source of truth for what a report page is and where it
-// lives, and the group above lists these same five: a table beside those rows
+// lives, and the group above lists these same four: a table beside those rows
 // cannot drift from them the way a second copy in the parser could. route.js
 // imports it for its one parse branch.
 //
@@ -193,14 +193,22 @@ export const FOOTER_TRAIL = [
 // to date, so `?d=`/`?s=` has nothing to narrow, and every control on them (the
 // sort column, the index weighting) is page state rather than an address — the
 // same call StandingsPage and TeamRecordsPage already made for their boards.
-// '/farm' is the address because it is the word people say; the route name is
-// 'farm-system' so App.jsx's switch reads unambiguously.
+//
+// THE ADDRESSES SPELL THEIR SUBJECT OUT. '/farm-system-rankings',
+// '/bullpen-availability' and '/pace-of-play' are the phrases people actually
+// search for, and a report page's URL is one of the few places in this app that
+// has to answer to a search engine as well as to a reader (ADR-0048).
+// '/attendance' is already that phrase and needs no lengthening.
+//
+// Each of the three keeps a SHORTER route name ('farm-system', 'bullpens',
+// 'pace'), which is what App.jsx's switch and the preview-card key read. The
+// address and the name are allowed to differ, and this table is the only place
+// that has to know they do.
 export const REPORT_ROUTES = {
-  rundown: 'rundown',
   attendance: 'attendance',
-  pace: 'pace',
-  farm: 'farm-system',
-  bullpens: 'bullpens',
+  'pace-of-play': 'pace',
+  'farm-system-rankings': 'farm-system',
+  'bullpen-availability': 'bullpens',
 }
 
 // A guide path is an ordinary URL, not an app route — anything rendering one

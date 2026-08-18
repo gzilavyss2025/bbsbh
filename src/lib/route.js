@@ -21,8 +21,8 @@
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
-//   '/rundown' '/attendance' '/pace' '/farm' '/bullpens'
-//                                       -> the five broadcast reports (REPORT_ROUTES, reportPages.js)
+//   '/attendance' '/pace-of-play' '/farm-system-rankings' '/bullpen-availability'
+//                                       -> the four broadcast reports (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
@@ -176,7 +176,7 @@ export function parseRoute(url) {
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
-  // The five broadcast reports — table in lib/reportPages.js, beside the menu
+  // The four broadcast reports — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
   // One situational record across a whole level. Carries the two scope hints

@@ -291,24 +291,36 @@ export function AttendancePage() {
           <section className="method">
             <h2>How this was counted</h2>
             <p>
-              Attendance is the figure the club reports to the league for each home date, read
-              off the MLB schedule feed. It is TICKETS DISTRIBUTED, not turnstile count — a
-              rainy Wednesday with 30,000 sold and 12,000 in seats is filed here as 30,000.
-              Every club counts the same way, so the board compares fairly; it just does not
-              measure how full the place looked.
+              <strong>The unit is people, per home game.</strong> Attendance is the figure each
+              club reports to the league for a home date, read off the MLB schedule feed. It is
+              tickets distributed, not a turnstile count — a rainy Wednesday with 30,000 sold and
+              12,000 in the seats is filed here as 30,000. Every club counts it the same way, so
+              the board compares fairly; it simply does not measure how full the place looked.
             </p>
             <p>
-              Fill rate divides that figure by the park’s listed capacity. Capacity is itself a
-              published number rather than a physical limit, which is why the leaders sit above
-              100%: standing room, club seats and a generous listing all push past it.{' '}
+              <strong>Only the home club is counted.</strong> A gate is a fact about a club’s own
+              ballpark, so a road game folds nothing into that club’s figures. The season total is
+              every home date added together, which is why a club with a few more home dates
+              played can lead that column without leading the average.
+            </p>
+            <p>
+              <strong>Fill rate divides the average by the park’s listed capacity.</strong> That
+              capacity is a published number rather than a physical limit, which is why the
+              leaders sit above 100 per cent: standing room, club seats and a generous listing all
+              push past it. Those are printed as they came in rather than trimmed back to 100,
+              because trimming them would erase exactly the clubs the column exists to find. A
+              club whose park is not on file shows no fill rate and still ranks on every other
+              column.
+            </p>
+            <p>
+              <strong>Swing is the distance between a club’s biggest night and its smallest.</strong>{' '}
+              A wide swing means the crowd depends on the opponent and the day of the week; a
+              narrow one means the club sells much the same house whoever is in town.
               {widestSwing
-                ? `The widest swing in the league belongs to ${clubName(clubs, widestSwing.teamId)} —
-                   ${commas(widestSwing.swing)} between its biggest night and its smallest.`
-                : ''}
-            </p>
-            <p>
-              Only regular-season home games count, and only games already final. A club with no
-              park on file shows no fill rate and still ranks on every other column.
+                ? ` The widest in the league belongs to ${clubName(clubs, widestSwing.teamId)}, at
+                   ${commas(widestSwing.swing)} people.`
+                : ''}{' '}
+              Regular season only, and only games already final.
             </p>
           </section>
         </>

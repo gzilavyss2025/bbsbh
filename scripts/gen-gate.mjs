@@ -3,7 +3,7 @@
 // HOW LONG IT TOOK. One sweep, two report pages:
 //
 //   /attendance  ("The Gate")  — src/screens/reports/AttendancePage.jsx
-//   /pace        ("The Clock") — src/screens/reports/PacePage.jsx
+//   /pace-of-play ("The Clock") — src/screens/reports/PacePage.jsx
 //
 // SOURCE, and why this generator is cheap where gen-attendance.mjs is not.
 // gen-attendance.mjs fetches ONE BOXSCORE PER GAME to read the `Att` row out

@@ -1,5 +1,5 @@
 // The reader behind the two pages scripts/gen-gate.mjs feeds — /attendance
-// ("The Gate") and /pace ("The Clock"). One static file, two boards.
+// ("The Gate") and /pace-of-play ("The Clock"). One static file, two boards.
 //
 // SPOILER-FREE. A crowd count and a clock reading say nothing about who won.
 // Same footing as the weather string and the umpire crew, both of which this

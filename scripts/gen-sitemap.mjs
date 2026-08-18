@@ -59,13 +59,12 @@ const APP_ROUTES = [
   { path: '/trade-deadline', priority: '0.4', changefreq: 'yearly' },
   { path: '/logos', priority: '0.3', changefreq: 'yearly' },
   // The broadcast reports. Daily on the three that move every night; the farm
-  // index is weekly because the rank list behind it is republished far less
+  // board is weekly because the rank list behind it is republished far less
   // often than the affiliate records are.
-  { path: '/rundown', priority: '0.6', changefreq: 'daily' },
-  { path: '/attendance', priority: '0.5', changefreq: 'daily' },
-  { path: '/pace', priority: '0.5', changefreq: 'daily' },
-  { path: '/farm', priority: '0.5', changefreq: 'weekly' },
-  { path: '/bullpens', priority: '0.5', changefreq: 'daily' },
+  { path: '/attendance', priority: '0.6', changefreq: 'daily' },
+  { path: '/pace-of-play', priority: '0.6', changefreq: 'daily' },
+  { path: '/farm-system-rankings', priority: '0.6', changefreq: 'weekly' },
+  { path: '/bullpen-availability', priority: '0.6', changefreq: 'daily' },
 ]
 
 function url({ path, lastmod, priority, changefreq }) {

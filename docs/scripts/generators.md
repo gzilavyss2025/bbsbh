@@ -319,8 +319,8 @@ don't run these by hand.
   it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
   rank).
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
-  DURATION, the two facts behind `/attendance` (The Gate) and `/pace` (The
-  Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
+  DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
+  (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
   Ballpark card's own file: this one reads the same figures off the SCHEDULE
   endpoint's `hydrate=gameInfo` (`{ attendance, firstPitch,
   gameDurationMinutes, delayDurationMinutes }`), which is roughly a dozen
@@ -335,7 +335,7 @@ don't run these by hand.
   `src/api/reports/gate.js`. `--season=`/`--seasons=` for a past year. MLB
   regular season, Final games only. Spoiler-free.
 - `gen-farm-system.mjs` → `public/data/farm-system.json` — the facts behind
-  `/farm` (The Farm Report): every organisation's four full-season affiliates
+  `/farm-system-rankings` (The Farm Report): every organisation's four full-season affiliates
   with their won-lost records, plus every ranked prospect it holds. A JOIN, not
   a sweep — it READS the committed `public/data/affiliates.json`
   (`gen-affiliates.mjs`) and `public/data/top-prospects.json`

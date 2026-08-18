@@ -24,11 +24,10 @@ import {
 // one — deriving the expectation from the thing under test would assert
 // nothing.
 const PATHS_BEFORE_GROUPING = [
-  '/rundown',
   '/attendance',
-  '/farm',
-  '/bullpens',
-  '/pace',
+  '/farm-system-rankings',
+  '/bullpen-availability',
+  '/pace-of-play',
   '/standings',
   '/leaders',
   '/team-records',

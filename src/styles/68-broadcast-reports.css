@@ -1,14 +1,14 @@
 /* ============================================================
-   BROADCAST REPORTS — the shared graphics package for the five
+   BROADCAST REPORTS — the shared graphics package for the four
    standalone report pages under src/screens/reports/:
-   The Rundown, The Gate, The Clock, The Farm Report, The Pen.
+   The Gate, The Clock, The Farm Report, The Pen.
 
-   ONE STYLESHEET FOR FIVE PAGES, deliberately. Each is a lazy
+   ONE STYLESHEET FOR FOUR PAGES, deliberately. Each is a lazy
    route, and Vite emits a partial that two lazy chunks share as
    its OWN chunk whose <link> order it decides — the trap
    src/index.css's header records (38-umpire-pages and
    52-highlight-clip-card came back into the core sheet for
-   exactly that reason). All five import this one instead, so the
+   exactly that reason). All four import this one instead, so the
    chunk is emitted once and its rules never race a sibling's.
 
    THE LOOK, AND WHY IT IS NOT THE SCOREBOOK. The scoring surfaces
@@ -454,74 +454,6 @@
   color: var(--text-on-ink);
 }
 
-/* ---- the rundown's card grid ------------------------------- */
-
-.rundown {
-  display: grid;
-  gap: var(--space-3);
-  margin: var(--space-4) 0 0;
-}
-
-@media (min-width: 620px) {
-  .rundown {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.rundown__card {
-  display: block;
-  width: 100%;
-  padding: var(--space-4);
-  text-align: left;
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-top: var(--bw-heavy) solid var(--clay);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.rundown__card:hover {
-  background: var(--surface-inset);
-}
-
-.rundown__eyebrow {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-display);
-  color: var(--clay-deep);
-}
-
-.rundown__figure {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--fs-hero-sm);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: var(--ls-tight-score);
-  line-height: var(--lh-solid);
-  color: var(--text-heading);
-}
-
-.rundown__line {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-}
-
-.rundown__note {
-  margin: var(--space-2) 0 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-small);
-  line-height: var(--lh-snug);
-  color: var(--text-muted);
-}
-
 /* ---- the farm index's pillar bars -------------------------- */
 
 .pillars {
@@ -634,9 +566,29 @@
 .method p {
   margin: 0 0 var(--space-3);
   font-family: var(--font-read);
-  font-size: var(--fs-small);
+  font-size: var(--fs-body);
   line-height: var(--lh-prose);
   color: var(--text-body);
+}
+
+/* THE ONE CAPS-EXEMPT SURFACE HERE — the shouted-heading / natural-case-body
+   split the Team Score modal already uses (ALL-CAPS INVARIANT, 01-base.css).
+   The h2 stays chrome; four hundred words of method prose set in capitals is
+   not read, it is skipped, and this is the part a sceptic should finish.
+   `#root` PREFIX REQUIRED: the invariant is `#root *` (1,0,1), so a bare
+   `.method p` (0,1,1) loses and the paragraph keeps shouting — the first draft
+   shipped exactly that way. The `p *` half covers `<strong>`/`<code>`, matched
+   by `#root *` in their own right. */
+#root .method p,
+#root .method p * {
+  text-transform: none; /* caps-exempt: method-note prose reads as natural sentences */
+}
+
+/* The lead-in phrase each paragraph opens on — "Three pillars." — carrying the
+   emphasis that ALL CAPS used to carry before the paragraph became sentences. */
+.method strong {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
 }
 
 .method p:last-child {
