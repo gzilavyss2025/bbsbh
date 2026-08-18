@@ -336,8 +336,11 @@ export default function App() {
       <TeamRecordsPage
         asOf={route.asOf}
         sportId={route.sportId}
+        category={route.category}
         metric={route.metric}
         half={route.half}
+        sort={route.sort}
+        order={route.order}
       />
     )
   } else if (route.name === 'attendance') {

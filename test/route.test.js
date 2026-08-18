@@ -280,12 +280,20 @@ test('the stamp-in branch wins over the generic 3-segment game branch', () => {
 // --------------------------------------------------------------------------
 // teamRecordsPath / parseRoute — one situational record across a whole level
 // --------------------------------------------------------------------------
-test('teamRecordsPath carries the split, the half and the usual scope hints', () => {
+test('teamRecordsPath carries the explorer state and the usual scope hints', () => {
   assert.equal(teamRecordsPath(), '/team-records')
   assert.equal(teamRecordsPath({ metric: 'scored-4-plus' }), '/team-records?metric=scored-4-plus')
   assert.equal(
-    teamRecordsPath({ metric: 'lead-8', half: 'post', s: 11, d: '2026-07-05' }),
-    '/team-records?d=2026-07-05&s=11&metric=lead-8&half=post',
+    teamRecordsPath({
+      metric: 'lead-8',
+      category: 'late-innings',
+      half: 'post',
+      sort: 'played',
+      order: 'asc',
+      s: 11,
+      d: '2026-07-05',
+    }),
+    '/team-records?d=2026-07-05&s=11&category=late-innings&metric=lead-8&half=post&sort=played&order=asc',
   )
   // 'all' is the default, so it stays out of the URL rather than pinning the
   // page to a lever the reader never touched.
@@ -297,15 +305,21 @@ test('parseRoute reads the split and the half back off the URL', () => {
     name: 'team-records',
     asOf: null,
     sportId: null,
+    category: null,
     metric: null,
     half: null,
+    sort: null,
+    order: null,
   })
-  assert.deepEqual(parseRoute('/team-records?metric=lead-8&half=post&s=12&d=2026-07-05'), {
+  assert.deepEqual(parseRoute('/team-records?category=late-innings&metric=lead-8&half=post&sort=played&order=asc&s=12&d=2026-07-05'), {
     name: 'team-records',
     asOf: '2026-07-05',
     sportId: 12,
+    category: 'late-innings',
     metric: 'lead-8',
     half: 'post',
+    sort: 'played',
+    order: 'asc',
   })
 })
 

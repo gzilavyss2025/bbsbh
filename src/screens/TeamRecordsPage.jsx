@@ -1,9 +1,12 @@
 import '../styles/66-team-record-rankings.css'
-import { useMemo, useState } from 'react'
+import '../styles/team-records/66a-detail.css'
+import { useMemo } from 'react'
 import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, defaultOrder } from '../api/teamRecordRankings.js'
 import { HALVES } from '../api/teamRecords.js'
 import { seasonOf, cutoffFor } from './team/data/shared.js'
-import { SPORT_LABEL } from '../lib/teams.js'
+import { SPORT_LABEL, offDayTreatmentFor } from '../lib/teams.js'
+import { teamRecordsPath } from '../lib/route.js'
+import { useNav, useRouteLink } from '../lib/nav.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
@@ -11,60 +14,49 @@ import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
 import { LevelNav } from '../components/team/LevelNav.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { ReportFooter } from '../components/chrome/ReportFooter.jsx'
 
-// One situational record, every club at one level, in rank order — the Numbers
-// tab's Records card read across the league instead of down one club. "The
-// Brewers are 64-10 scoring four or more; where does that sit among the
-// thirty?" is a question the card raises on every one of its fifty rows and
-// cannot answer, so every row on it links here with that row preselected.
-//
-// The whole page is three choices — the split, the level, the half of the
-// season — over one pivot (api/teamRecordRankings.js). It computes nothing
-// itself.
-//
-// ORDER IS NOT ALWAYS HIGHEST-FIRST, and that is the point of the direction
-// control. A win percentage always reads best at the top. A single-number
-// count does not: most walk-off wins leads its column, FEWEST losses after
-// leading leads its own, and days in third place have no good end at all. The
-// catalog in teamRecords.js (COUNT_METRICS) says which is which; this page
-// prints the framing that follows and lets the reader flip it either way.
-//
-// Spoiler-free on the same footing as the card it came from: a season
-// aggregate over Final games, cut off at `?d=` exactly where the card cuts off.
+// One situational record, every club at one level, in rank order. The bare
+// route is a browse-first record book: every split stays visible inside its
+// baseball subject and each card shows its leader before the reader chooses
+// anything. A `?metric=` route is the focused broadcast board for that split.
+// Both views use the same ranking index and download the level's ledgers once.
 
 const SORTS = [
   { key: 'pct', label: 'Win pct' },
   { key: 'played', label: 'How often' },
 ]
 
-// The picker's whole menu, flattened into one <select> with a group per
-// heading. A phone gets its native scroll wheel over sixty-odd splits, which
-// beats a chip strip that would wrap to eight lines, and the group headings are
-// the card's own — so a reader who tapped in from a row lands in a list
-// organised the way the card they left was.
-function MetricPicker({ groups, value, onChange }) {
-  return (
-    <label className="trrank__picker">
-      <span className="trrank__pickerlabel">Record type</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
-        {groups.map((g) => (
-          <optgroup key={g.title} label={g.title}>
-            {g.metrics.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.k}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-    </label>
-  )
+const GROUP_NOTES = {
+  Scoring: 'Runs on the board and the games they shaped.',
+  'Hits and homers': 'Contact, power and what each club allowed.',
+  Defense: 'Clean sheets and costly mistakes.',
+  'Leading and trailing': 'Who closed leads and who changed the ending.',
+  'Close games': 'The margins that made every pitch matter.',
+  'Starting pitching': 'Length, quality and the starter matchup.',
+  Schedule: 'When the game was played and where it sat in the series.',
+  'By month': 'The season, one calendar turn at a time.',
+  'By division': 'How each club handled its division matchups.',
+  'By league': 'The record on the other side of the league line.',
+  'Season counts': 'Streaks, rallies, walk-offs and season-long totals.',
 }
 
-// Rank cell. A shared rank prints with the leaderboard's 'T'; a club that has
-// never been in the split prints nothing rather than a number it did not earn.
+const GROUP_KEYS = {
+  Scoring: 'scoring',
+  'Hits and homers': 'hits-homers',
+  Defense: 'defense',
+  'Leading and trailing': 'late-innings',
+  'Close games': 'close-games',
+  'Starting pitching': 'starting-pitching',
+  Schedule: 'schedule',
+  'By month': 'by-month',
+  'By division': 'by-division',
+  'By league': 'by-league',
+  'Season counts': 'season-counts',
+}
+
 function RankCell({ rank, tied }) {
   if (rank == null) return <span className="trrank__rank trrank__rank--none">—</span>
   return (
@@ -75,16 +67,154 @@ function RankCell({ rank, tied }) {
   )
 }
 
-export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetric, half: routeHalf }) {
-  useDocumentTitle('Team Records')
-  const [sportId, setSportId] = useState(routeSportId ?? 1)
-  const [metricId, setMetricId] = useState(routeMetric ?? 'scored-4-plus')
-  const [half, setHalf] = useState(HALVES.some((h) => h.key === routeHalf) ? routeHalf : 'all')
-  const [sortBy, setSortBy] = useState('pct')
-  // null means "whatever this metric's own good end is" — the flip button sets
-  // an explicit direction, and picking a different metric clears it back to
-  // null so the next column opens the right way round again.
-  const [order, setOrder] = useState(null)
+function MetricFigure({ row, metric, compact = false }) {
+  if (!row) return <span className="trrank__figuremain">—</span>
+  if (metric.kind === 'count') {
+    return <span className="trrank__figuremain">{row.value ?? '—'}</span>
+  }
+  return (
+    <>
+      <span className="trrank__figuremain">{row.v}</span>
+      {!compact && <span className="trrank__figuresub">{row.pct} pct</span>}
+    </>
+  )
+}
+
+function RecordTile({ result, favoriteTeamId, linkProps, path }) {
+  const leader = result.ranked.find((row) => row.rank != null)
+  const favorite = result.ranked.find((row) => row.teamId === favoriteTeamId)
+  const leaderName = leader?.team.teamName ?? leader?.team.name ?? 'No leader yet'
+
+  return (
+    <a
+      className="trrank__tile"
+      aria-label={`View ${result.metric.k} leaderboard`}
+      {...linkProps(path)}
+    >
+      <span className="trrank__tilelabel">{result.metric.k}</span>
+      <div className="trrank__tileleader">
+        {leader && (
+          <TeamTreatmentMark
+            teamId={leader.teamId}
+            name={leader.team.name}
+            treatment={offDayTreatmentFor(leader.teamId)}
+            side="home"
+            size={42}
+            block="trrank__tilemark"
+          />
+        )}
+        <span className="trrank__tileteam">
+          <strong>{leaderName}</strong>
+        </span>
+        <span className="trrank__tilefigure">
+          <MetricFigure row={leader} metric={result.metric} />
+        </span>
+      </div>
+      <span className={`trrank__tilefoot${favorite ? ' trrank__tilefoot--mine' : ''}`}>
+        {favorite ? (
+          <>
+            <span>{favorite.team.teamName ?? favorite.team.name}</span>
+            <strong>
+              {favorite.rank == null ? 'Not ranked' : `#${favorite.rank}`} ·{' '}
+              {result.metric.kind === 'count' ? favorite.value : favorite.v}
+            </strong>
+          </>
+        ) : (
+          <>
+            <span>Full leaderboard</span>
+            <strong>{result.of} ranked</strong>
+          </>
+        )}
+        <span className="trrank__tilearrow" aria-hidden="true">›</span>
+      </span>
+    </a>
+  )
+}
+
+function RecordBook({ groups, favoriteTeamId, pathFor, linkProps, preview }) {
+  return (
+    <>
+      {preview && <nav className="trrank__jump" aria-label="Record categories">
+        {groups.map((group, index) => (
+          <a key={group.title} href={`#record-group-${index}`}>
+            {group.title}
+          </a>
+        ))}
+      </nav>}
+
+      <div className="trrank__book">
+        {groups.map((group, index) => {
+          const visibleResults = preview ? group.results.slice(0, 2) : group.results
+          return (
+            <section className="trrank__group" id={`record-group-${index}`} key={group.title}>
+              <header className="trrank__grouphead">
+                <span className="trrank__groupnum">{String(group.order).padStart(2, '0')}</span>
+                <span>
+                  <h2>{group.title}</h2>
+                  <p>{GROUP_NOTES[group.title] ?? 'Every club, ranked in this split.'}</p>
+                </span>
+              </header>
+              <div className="trrank__tilegrid">
+                {visibleResults.map((result) => (
+                  <RecordTile
+                    key={result.metric.id}
+                    result={result}
+                    favoriteTeamId={favoriteTeamId}
+                    path={pathFor({ category: null, metric: result.metric.id, sort: null, order: null })}
+                    linkProps={linkProps}
+                  />
+                ))}
+              </div>
+              {preview && group.results.length > visibleResults.length && (
+                <a
+                  className="trrank__groupdoor"
+                  {...linkProps(pathFor({ category: group.key, metric: null, sort: null, order: null }))}
+                >
+                  Explore all {group.results.length} {group.title} records <span aria-hidden="true">›</span>
+                </a>
+              )}
+            </section>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
+function LeadersSpotlight({ rows, metric }) {
+  return (
+    <div className="trrank__podium" aria-label="Top three clubs">
+      {rows.map((row) => (
+        <div className="trrank__podiumcard" key={row.teamId}>
+          <span className="trrank__podiumrank">{row.tied ? 'T' : ''}{row.rank}</span>
+          <TeamLogo teamId={row.teamId} name={row.team.name} size={42} />
+          <TeamLink id={row.teamId} tab="numbers" className="trrank__podiumteam">
+            {row.team.teamName ?? row.team.name}
+          </TeamLink>
+          <span className="trrank__podiumfigure">
+            <MetricFigure row={row} metric={metric} compact />
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function TeamRecordsPage({
+  asOf,
+  sportId: routeSportId,
+  category: routeCategory,
+  metric: routeMetric,
+  half: routeHalf,
+  sort: routeSort,
+  order: routeOrder,
+}) {
+  const navigate = useNav()
+  const linkProps = useRouteLink()
+  const sportId = routeSportId ?? 1
+  const half = HALVES.some((item) => item.key === routeHalf) ? routeHalf : 'all'
+  const sortBy = routeSort === 'played' ? 'played' : 'pct'
+  const order = routeOrder === 'asc' || routeOrder === 'desc' ? routeOrder : null
   const { favoriteTeamId } = useFavoriteTeam()
 
   const season = seasonOf(asOf)
@@ -93,32 +223,42 @@ export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetr
     () => fetchLevelTeamRecords(sportId, season),
     [sportId, season],
   )
-
-  // Rebuilt only when the level, the cutoff or the half changes — NOT when the
-  // reader pages through splits, which is the common move and is then a pure
-  // re-sort of an index already in hand.
   const index = useMemo(
     () => buildRankingIndex(data ?? [], { cutoff, half }),
     [data, cutoff, half],
   )
-  // A split can be absent from a level (only MLB has the by-league rows) or
-  // from a half (a club may not have been shut out since the break). Falling
-  // back to the first split in the menu keeps a stale link or a level switch on
-  // a page rather than on an empty table.
-  const resolvedId = index.metrics.has(metricId)
-    ? metricId
-    : index.groups[0]?.metrics[0]?.id ?? null
+
+  // A stale metric link still opens a useful board. A bare route stays bare:
+  // it is the record-book overview, not an implicit first leaderboard.
+  const resolvedId = routeMetric
+    ? index.metrics.has(routeMetric)
+      ? routeMetric
+      : index.groups[0]?.metrics[0]?.id ?? null
+    : null
   const result = useMemo(
     () => (resolvedId ? rankMetric(index, resolvedId, { sortBy, order }) : null),
     [index, resolvedId, sortBy, order],
   )
+  const overviewGroups = useMemo(
+    () => index.groups.map((group, groupIndex) => ({
+      ...group,
+      key: GROUP_KEYS[group.title] ?? group.title,
+      order: groupIndex + 1,
+      results: group.metrics.map((metric) => rankMetric(index, metric.id)).filter(Boolean),
+    })),
+    [index],
+  )
 
   const metric = result?.metric
   const isCount = metric?.kind === 'count'
-  // The break only exists once a level's files carry its date — an early-season
-  // file, or a level whose season has not reached it, leaves only 'all'
-  // meaningful and the toggle hides, exactly as it does on the card.
-  const showHalves = (data ?? []).some((e) => e.data?.allStarDate)
+  const activeGroup = resolvedId
+    ? overviewGroups.find((group) => group.metrics.some((item) => item.id === resolvedId))
+    : null
+  const activeCategory = routeCategory
+    ? overviewGroups.find((group) => group.key === routeCategory) ?? null
+    : null
+  const leaders = result?.ranked.filter((row) => row.rank != null).slice(0, 3) ?? []
+  const showHalves = (data ?? []).some((entry) => entry.data?.allStarDate)
   const dir = result?.order ?? 'desc'
   const flipLabel = result?.byQuality
     ? dir === defaultOrder(metric)
@@ -127,98 +267,176 @@ export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetr
     : dir === 'desc'
       ? 'Highest first'
       : 'Lowest first'
+  const halfShortLabel = half === 'pre' ? 'Pre-ASG' : half === 'post' ? 'Post-ASG' : 'Full'
 
-  const pickMetric = (id) => {
-    setMetricId(id)
-    setOrder(null)
-  }
+  useDocumentTitle(
+    metric
+      ? `${metric.k} · Team Records`
+      : activeCategory
+        ? `${activeCategory.title} · Team Records`
+        : 'Team Records',
+  )
+
+  const pathFor = ({
+    category: nextCategory = routeCategory,
+    metric: nextMetric = resolvedId,
+    half: nextHalf = half,
+    sport: nextSport = sportId,
+    sort: nextSort = sortBy,
+    order: nextOrder = order,
+  } = {}) => teamRecordsPath({
+    category: nextMetric ? null : nextCategory,
+    metric: nextMetric,
+    half: nextHalf,
+    sort: nextMetric ? nextSort : null,
+    order: nextMetric ? nextOrder : null,
+    d: asOf,
+    s: nextSport,
+  })
 
   return (
-    <div className="screen">
+    <div className="screen trrank-page">
       <SiteHeader />
-      <header className="topbar">
-        <h1 className="topbar__title">Team Records</h1>
+
+      <header className="trrank__hero">
+        <span className="trrank__eyebrow">{season} {SPORT_LABEL[sportId] ?? ''} record book</span>
+        <h1>Team Records</h1>
+        <p>Every split. Every club. See who owns the season’s defining situations.</p>
+        <dl className="trrank__herostats">
+          <div><dt>Clubs</dt><dd>{data?.length || '—'}</dd></div>
+          <div><dt>Records</dt><dd>{index.metrics.size || '—'}</dd></div>
+          <div><dt>Range</dt><dd>{halfShortLabel}</dd></div>
+        </dl>
       </header>
 
-      <p className="hint">
-        Every club’s record in one situation at a time — {season} {SPORT_LABEL[sportId] ?? ''} — from
-        the same ledger the Records card on a club’s Numbers tab reads. Pick a split, and the whole
-        level sorts by it. Some columns read best from the top and some from the bottom; the arrow
-        turns the list either way.
-      </p>
-
-      <LevelNav sportId={sportId} onChange={setSportId} />
-
-      <div className="trrank__controls">
-        <MetricPicker groups={index.groups} value={resolvedId ?? ''} onChange={pickMetric} />
-
+      <section className="trrank__scope" aria-label="Record book filters">
+        <div className="trrank__scopehead">
+          <span>League filters</span>
+          <strong>{season} · {SPORT_LABEL[sportId] ?? ''}</strong>
+        </div>
+        <LevelNav
+          sportId={sportId}
+          onChange={(nextSport) => navigate(pathFor({ sport: nextSport }))}
+        />
         {showHalves && (
           <div className="trrank__chips" role="group" aria-label="Season half">
-            {HALVES.map((h) => (
+            {HALVES.map((item) => (
               <button
-                key={h.key}
+                key={item.key}
                 type="button"
-                className={`trrank__chip${h.key === half ? ' is-on' : ''}`}
-                aria-pressed={h.key === half}
-                onClick={() => setHalf(h.key)}
+                className={`trrank__chip${item.key === half ? ' is-on' : ''}`}
+                aria-pressed={item.key === half}
+                onClick={() => navigate(pathFor({ half: item.key }))}
               >
-                {h.label}
+                {item.label}
               </button>
             ))}
           </div>
         )}
-
-        <div className="trrank__chips">
-          {!isCount &&
-            SORTS.map((s) => (
-              <button
-                key={s.key}
-                type="button"
-                className={`trrank__chip${s.key === sortBy ? ' is-on' : ''}`}
-                aria-pressed={s.key === sortBy}
-                onClick={() => {
-                  setSortBy(s.key)
-                  setOrder(null)
-                }}
-              >
-                {s.label}
-              </button>
-            ))}
-          <button
-            type="button"
-            className="trrank__chip trrank__flip"
-            onClick={() => setOrder(dir === 'desc' ? 'asc' : 'desc')}
-          >
-            {flipLabel} {dir === 'desc' ? '↓' : '↑'}
-          </button>
-        </div>
-      </div>
+      </section>
 
       <AsyncStatus
         loading={loading}
         error={error}
-        hasData={Boolean(result)}
+        hasData={index.groups.length > 0}
         errorMessage="Couldn’t load team records. Try again."
         emptyMessage="No team records on file for this level yet."
         emptyProse
       />
 
-      {result && (
+      {!loading && !error && index.groups.length > 0 && !result && (
         <>
-          <p className="trrank__caption">
-            <strong>{metric.k}</strong> · {result.of} club{result.of === 1 ? '' : 's'} ranked
-            {isCount ? '' : sortBy === 'played' ? ', by how often' : ', by win percentage'}
-            {/* Said in words, not left to the arrow: on a count the good end is
-                whichever one the catalog names, and a reader who lands on
-                "Losses after leading" should not have to work out that the club
-                at the top is the best rather than the worst. */}
-            {isCount && result.byQuality
-              ? ` · ${metric.better === 'low' ? 'fewest is best' : 'most is best'}`
-              : ''}
-            {half !== 'all' ? ` · ${HALVES.find((h) => h.key === half).label}` : ''}
-          </p>
-          <div className="ledger-wrap">
+          {activeCategory && (
+            <a
+              className="trrank__back trrank__categoryback"
+              {...linkProps(pathFor({ category: null, metric: null, sort: null, order: null }))}
+            >
+              <span aria-hidden="true">‹</span> All record categories
+            </a>
+          )}
+          <RecordBook
+            groups={activeCategory ? [activeCategory] : overviewGroups}
+            favoriteTeamId={favoriteTeamId}
+            pathFor={pathFor}
+            linkProps={linkProps}
+            preview={!activeCategory}
+          />
+        </>
+      )}
+
+      {result && (
+        <main className="trrank__detail">
+          <a
+            className="trrank__back"
+            {...linkProps(pathFor({
+              category: activeGroup?.key ?? null,
+              metric: null,
+              sort: null,
+              order: null,
+            }))}
+          >
+            <span aria-hidden="true">‹</span> {activeGroup?.title ?? 'All team records'}
+          </a>
+
+          <section className="trrank__detailhead">
+            <span className="trrank__detailgroup">{activeGroup?.title ?? 'Team records'}</span>
+            <h2>{metric.k}</h2>
+            <p>
+              {result.of} club{result.of === 1 ? '' : 's'} ranked
+              {isCount ? '' : sortBy === 'played' ? ' by frequency' : ' by win percentage'}
+              {isCount && result.byQuality
+                ? ` · ${metric.better === 'low' ? 'Fewest is best' : 'Most is best'}`
+                : ''}
+            </p>
+          </section>
+
+          {leaders.length > 0 && <LeadersSpotlight rows={leaders} metric={metric} />}
+
+          <section className="trrank__boardcontrols" aria-label="Leaderboard controls">
+            <span className="trrank__controltitle">Rank the board</span>
+            <div className="trrank__chips">
+              {!isCount && SORTS.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`trrank__chip${item.key === sortBy ? ' is-on' : ''}`}
+                  aria-pressed={item.key === sortBy}
+                  onClick={() => navigate(pathFor({ sort: item.key, order: null }))}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="trrank__chip trrank__flip"
+                onClick={() => navigate(pathFor({ order: dir === 'desc' ? 'asc' : 'desc' }))}
+              >
+                {flipLabel} {dir === 'desc' ? '↓' : '↑'}
+              </button>
+            </div>
+          </section>
+
+          {activeGroup && activeGroup.metrics.length > 1 && (
+            <nav className="trrank__related" aria-label={`More ${activeGroup.title} records`}>
+              <span>More in {activeGroup.title}</span>
+              <div>
+                {activeGroup.metrics.map((item) => (
+                  <a
+                    key={item.id}
+                    className={item.id === resolvedId ? 'is-active' : ''}
+                    aria-current={item.id === resolvedId ? 'page' : undefined}
+                    {...linkProps(pathFor({ metric: item.id, sort: null, order: null }))}
+                  >
+                    {item.k}
+                  </a>
+                ))}
+              </div>
+            </nav>
+          )}
+
+          <div className="ledger-wrap trrank__tablewrap">
             <table className="standings trrank">
+              <caption className="sr-only">{metric.k} team rankings</caption>
               <thead>
                 <tr>
                   <th className="team">Club</th>
@@ -244,8 +462,9 @@ export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetr
                     <td className="team">
                       <RankCell rank={row.rank} tied={row.tied} />
                       <TeamLink id={row.teamId} tab="numbers">
-                        <TeamLogo teamId={row.teamId} name={row.team.name} size={18} />
-                        {row.team.name}
+                        <TeamLogo teamId={row.teamId} name={row.team.name} size={22} />
+                        <span className="trrank__teamname">{row.team.name}</span>
+                        <span className="trrank__teamabbr">{row.team.abbreviation}</span>
                       </TeamLink>
                     </td>
                     {isCount ? (
@@ -253,7 +472,7 @@ export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetr
                     ) : (
                       <>
                         <td className="trrank__num">{row.v}</td>
-                        <td className="trrank__num">{row.pct}</td>
+                        <td className="trrank__num trrank__pct">{row.pct}</td>
                         <td className="trrank__num">{row.played || '—'}</td>
                       </>
                     )}
@@ -262,7 +481,7 @@ export function TeamRecordsPage({ asOf, sportId: routeSportId, metric: routeMetr
               </tbody>
             </table>
           </div>
-        </>
+        </main>
       )}
 
       <ReportFooter />

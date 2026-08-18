@@ -1,51 +1,142 @@
-/* Team Records rankings page (screens/TeamRecordsPage.jsx).
+/* Team Records explorer (screens/TeamRecordsPage.jsx).
 
-   Small on purpose, the same way 65-team-records.css is. The table itself is
-   `.standings` — the class the Standings page, the wild-card table and the
-   umpire rankings all already wear — so this page reads as another ledger in
-   that family rather than a new kind of table. Only the control strip above it,
-   the rank badge inside the club cell and the two row states (your club, a club
-   with no games in the split) are new.
+   The page uses a broadcast-record-book hierarchy without leaving Tally's
+   scorebook palette: navy ink for the broadcast frame, clay for the live-data
+   edge, and raised paper for every result card. The overview exposes every
+   split and its leader. A metric URL turns that card into the focused board. */
 
-   Imported by the page component, not by index.css (the 58+ convention in
-   index.css's manifest): the page is a lazily-loaded route, so no other screen
-   pays for these rules. */
-
-.trrank__controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3) 0;
+.trrank-page {
+  --trrank-edge: var(--accent-negative);
 }
 
-/* The split picker. A native <select> deliberately: sixty-odd options over five
-   headings is a scroll wheel on a phone, not a chip strip that would wrap to
-   eight lines and bury the table. */
-.trrank__picker {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* Record-book masthead: a compact broadcast frame, not a generic page bar. */
+.trrank__hero {
+  position: relative;
+  margin: 0 calc(-1 * var(--app-gutter));
+  padding: var(--space-6) var(--app-gutter) var(--space-8);
+  overflow: hidden;
+  border-top: var(--bw-heavy) solid var(--trrank-edge);
+  background: linear-gradient(135deg, var(--accent-primary), var(--text-heading));
+  color: var(--text-on-ink);
 }
-.trrank__pickerlabel {
+.trrank__hero::after {
+  content: '';
+  position: absolute;
+  right: calc(-1 * var(--space-10));
+  bottom: calc(-1 * var(--space-16));
+  width: 180px;
+  height: 180px;
+  border: var(--bw-heavy) solid color-mix(in srgb, var(--text-on-ink) 12%, transparent);
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+.trrank__eyebrow,
+.trrank__detailgroup,
+.trrank__controltitle,
+.trrank__scopehead span,
+.trrank__related > span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.trrank__eyebrow {
+  position: relative;
+  z-index: 1;
+  color: var(--seal-cover);
+}
+.trrank__hero h1 {
+  position: relative;
+  z-index: 1;
+  margin: var(--space-1) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-display-lg);
+  font-weight: var(--w-black);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-title);
+  text-transform: uppercase;
+}
+.trrank__hero > p {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  margin: 0;
+  color: var(--text-on-ink);
+  font-size: var(--fs-body);
+  line-height: var(--lh-ui);
+}
+.trrank__herostats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 25%, transparent);
+}
+.trrank__herostats div {
+  min-width: 0;
+  padding: 0 var(--space-3);
+  border-right: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 18%, transparent);
+}
+.trrank__herostats div:first-child {
+  padding-left: 0;
+}
+.trrank__herostats div:last-child {
+  border-right: 0;
+}
+.trrank__herostats dt {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
+  color: color-mix(in srgb, var(--text-on-ink) 72%, transparent);
+}
+.trrank__herostats dd {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* One shared filter panel controls the overview and detail board. */
+.trrank__scope {
+  position: relative;
+  z-index: 2;
+  margin: calc(-1 * var(--space-4)) 0 var(--space-5);
+  padding: var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  background: var(--surface-inset);
+  box-shadow: var(--shadow-raised);
+}
+.trrank__scopehead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+.trrank__scopehead span {
   color: var(--text-caption);
 }
-.trrank__picker select {
-  width: 100%;
-  padding: 8px 10px;
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: var(--surface-card);
+.trrank__scopehead strong {
   color: var(--text-heading);
-  font-family: var(--font-ui);
-  font-size: var(--fs-ui);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
 }
-.trrank__picker select:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
+.trrank__scope .levelnav {
+  margin-bottom: var(--space-2);
 }
 
 .trrank__chips {
@@ -55,73 +146,319 @@
 }
 .trrank__chip {
   flex: 1 1 auto;
-  padding: 6px 10px;
+  min-height: 34px;
+  padding: var(--space-1) var(--space-3);
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
   color: var(--text-caption);
   font-family: var(--font-display);
   font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
   letter-spacing: var(--ls-caps);
   text-transform: uppercase;
   cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
 }
 .trrank__chip.is-on {
-  background: var(--seal-soft, var(--paper-2));
-  border-color: var(--seal);
-  color: var(--text-heading);
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
   font-weight: var(--w-bold);
 }
-.trrank__chip:focus-visible {
+.trrank__chip:active {
+  transform: scale(0.97);
+}
+.trrank__chip:focus-visible,
+.trrank__tile:focus-visible,
+.trrank__jump a:focus-visible,
+.trrank__back:focus-visible,
+.trrank__related a:focus-visible {
   outline: var(--focus-ring);
   outline-offset: 2px;
 }
-/* The direction control is not a member of the set beside it — it says which
-   way the SAME list runs — so it never takes the selected fill, only its own
-   dashed edge. */
 .trrank__flip {
   flex: 0 0 auto;
   border-style: dashed;
 }
 
-.trrank__caption {
-  margin: var(--space-2) 0 0;
-  padding: 0 var(--space-3);
-  color: var(--text-caption);
-  font-size: var(--fs-caption);
+/* Topic rail. It acts as a compact broadcast subnav, while normal anchor
+   behavior keeps every section reachable without adding route state. */
+.trrank__jump {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0 calc(-1 * var(--app-gutter)) var(--space-6);
+  padding: var(--space-2) var(--app-gutter);
+  overflow-x: auto;
+  background: var(--accent-primary);
+  scrollbar-width: none;
 }
-.trrank__caption strong {
-  color: var(--text-heading);
+.trrank__jump::-webkit-scrollbar {
+  display: none;
+}
+.trrank__jump a {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 7px var(--space-3);
+  border: var(--bw-hair) solid color-mix(in srgb, var(--text-on-ink) 22%, transparent);
+  border-radius: var(--radius-pill);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-/* The rank rides inside the club cell rather than taking a column of its own —
-   the table is already four columns wide on a phone. */
-.trrank__rank {
-  display: inline-block;
-  min-width: 2.1em;
+.trrank__book {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.trrank__group {
+  scroll-margin-top: var(--space-3);
+}
+.trrank__grouphead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--bw-rule) solid var(--accent-primary);
+}
+.trrank__groupnum {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: var(--radius-xs);
+  background: var(--trrank-edge);
+  color: var(--text-on-ink);
   font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
-  color: var(--graphite-soft);
 }
-.trrank__rank--none {
+.trrank__grouphead h2 {
+  margin: 0;
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  font-weight: var(--w-black);
+  line-height: var(--lh-solid);
+  text-transform: uppercase;
+}
+.trrank__grouphead p {
+  margin: 3px 0 0;
   color: var(--text-caption);
-  font-weight: var(--w-regular);
+  font-size: var(--fs-small);
+  line-height: var(--lh-ui);
 }
 
-.trrank__num {
+.trrank__tilegrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+  gap: var(--space-3);
+}
+.trrank__tile {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: var(--bw-heavy) solid var(--trrank-edge);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+  color: var(--text-body);
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.trrank__tile:active {
+  transform: scale(0.98);
+}
+.trrank__tilelabel {
+  min-height: 44px;
+  padding: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  color: var(--text-heading);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  text-transform: uppercase;
+}
+.trrank__tileleader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 72px;
+  padding: var(--space-3);
+}
+.trrank__tilemark {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  overflow: hidden;
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  background: var(--tint, var(--paper-1));
+  box-shadow: var(--inset-cell);
+}
+.trrank__tilemark--pinstripe {
+  background: repeating-linear-gradient(
+    to right,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 0,
+    var(--pinstripe-color, rgba(0, 0, 0, 0.16)) 1px,
+    var(--pinstripe-bg, #fff) 1px,
+    var(--pinstripe-bg, #fff) 7px
+  );
+}
+.trrank__tilemark .teamlogo {
+  width: 38px !important;
+  height: 38px !important;
+  object-fit: contain;
+  border-radius: 0;
+  transform: none;
+}
+.trrank__tilemark .teamlogo--fallback {
+  border: none;
+  background: none;
+  transform: none;
+}
+.trrank__tileteam {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.trrank__tileteam strong {
+  overflow: hidden;
+  color: var(--text-heading);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-title);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.trrank__tilefigure,
+.trrank__podiumfigure {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  color: var(--text-heading);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
-
-/* Your club, marked the way the standings mark it. */
-.trrank__row--mine {
-  background: var(--seal-soft, var(--paper-2));
+.trrank__figuremain {
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+  white-space: nowrap;
 }
-/* A club that has never been in this split at all: present, so the reader can
-   see WHO has never trailed after eight, and dimmed, so it doesn't read as a
-   last-place finish. */
-.trrank__row--none {
+.trrank__figuresub {
+  margin-top: 3px;
   color: var(--text-caption);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+.trrank__tilefoot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--bg-page);
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+}
+.trrank__tilefoot strong {
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: var(--fs-caption);
+  white-space: nowrap;
+}
+.trrank__tilefoot--mine {
+  background: var(--field-soft);
+}
+.trrank__tilearrow {
+  color: var(--trrank-edge);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-solid);
+}
+
+.trrank__groupdoor {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  color: var(--text-body);
+  font-family: var(--font-display);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.trrank__groupdoor span {
+  color: var(--trrank-edge);
+  font-size: var(--fs-title-sm);
+  line-height: var(--lh-solid);
+}
+.trrank__categoryback {
+  margin-bottom: var(--space-4);
+}
+.trrank__groupdoor:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .trrank__tile:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-raised);
+  }
+  .trrank__jump a:hover {
+    border-color: var(--seal-cover);
+  }
+  .trrank__groupdoor:hover {
+    color: var(--trrank-edge);
+  }
+}
+
+@media (max-width: 430px) {
+  .trrank__hero {
+    padding-top: var(--space-5);
+  }
+  .trrank__hero h1 {
+    font-size: var(--fs-display-md);
+  }
+  .trrank__herostats div {
+    padding: 0 var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trrank__chip,
+  .trrank__tile {
+    transition: none;
+  }
+  .trrank__tile:hover,
+  .trrank__tile:active,
+  .trrank__chip:active {
+    transform: none;
+  }
 }
