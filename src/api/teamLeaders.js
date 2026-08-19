@@ -131,12 +131,24 @@ export const PITCHING_CATEGORIES = [
 // Phase 2 full list (a dedicated /team/{id}/leaders page).
 export const ALL_CATEGORIES = [...HITTING_CATEGORIES, ...PITCHING_CATEGORIES]
 
-// Phase 1 starter set on the team page itself — a sensible cross-section to
-// validate the layout + data wiring end to end.
-const FEATURED_KEYS = ['avg', 'hr', 'rbi', 'era', 'so_p', 'sv']
-export const FEATURED_CATEGORIES = FEATURED_KEYS.map((k) =>
-  ALL_CATEGORIES.find((c) => c.key === k),
-)
+// The team hub's own set, split by GROUP rather than served as one mixed list —
+// because the split is the point. The mixed six this replaces ran
+// avg, hr, rbi, era, so_p, sv, which reads as balanced in the source and was
+// anything but on the page: the Overview showed the first THREE of it (three
+// hitters), and the Numbers tab put all six in a 280px-card deck inside a 440px
+// column, so the pitching half sat three swipes behind a gesture nothing
+// announced. Two lists, rendered as two labelled blocks, make "half of this is
+// pitching" a fact of the layout instead of a promise about scroll position
+// (see components/teamstats/TeamLeadersLedger.jsx).
+//
+// Each list is ordered rate-first, then counting — the order a scorekeeper
+// reads a leaderboard in — and the ledger's two depths take a PREFIX of each:
+// the Overview's door takes 3 a side, the Numbers tab takes all 6.
+const LEDGER_HITTING_KEYS = ['avg', 'ops', 'hr', 'rbi', 'hits', 'sb']
+const LEDGER_PITCHING_KEYS = ['era', 'whip', 'so_p', 'w', 'sv', 'ip']
+const byKey = (k) => ALL_CATEGORIES.find((c) => c.key === k)
+export const LEDGER_HITTING = LEDGER_HITTING_KEYS.map(byKey)
+export const LEDGER_PITCHING = LEDGER_PITCHING_KEYS.map(byKey)
 
 // ---------------------------------------------------------------------------
 // Pool producers + ranking

@@ -3,8 +3,8 @@ import { AsyncGate, AsyncStatus } from '../../components/ui/AsyncGate.jsx'
 import { useNav } from '../../lib/nav.js'
 import { teamLeadersPath, orgLeadersPath } from '../../lib/route.js'
 import { teamClubName } from '../../lib/teams.js'
-import { FEATURED_CATEGORIES } from '../../api/teamLeaders.js'
-import { TeamLeaders } from '../../components/teamstats/TeamLeaders.jsx'
+import { LEDGER_HITTING, LEDGER_PITCHING } from '../../api/teamLeaders.js'
+import { TeamLeadersLedger } from '../../components/teamstats/TeamLeadersLedger.jsx'
 import { ChevronLink } from '../../components/ui/ChevronLink.jsx'
 import { JerseyCombos, MilbUniformStrip } from '../../components/logo/JerseyCombos.jsx'
 import { TeamHubShell } from './TeamHubShell.jsx'
@@ -74,13 +74,15 @@ export function NumbersTab({ id, asOf, sportId }) {
           {n.batting && <TeamStats title="Team batting" stats={n.batting} />}
           {n.pitching && <TeamStats title="Team pitching" stats={n.pitching} />}
 
-          <TeamLeaders
+          {/* The full ledger — six categories a side, every one on screen. The
+              "See all ›" door goes on to /team/{id}/leaders, which is where the
+              headshot card board and the runners-up still live. */}
+          <TeamLeadersLedger
             pool={n.leaderPool}
-            categories={FEATURED_CATEGORIES}
+            hitting={LEDGER_HITTING}
+            pitching={LEDGER_PITCHING}
             onSeeAll={() => navigate(teamLeadersPath(teamId, { d: asOf, s: sportId }))}
-            showTeamAbbr={false}
             injuredIds={n.injuredIds}
-            horizontal
             secondaryAction={
               (!isMilb || team.parentOrgId) && (
                 <ChevronLink

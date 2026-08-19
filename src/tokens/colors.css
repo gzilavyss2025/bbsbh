@@ -75,6 +75,16 @@
   --accent-primary:   var(--navy);
   --accent-positive:  var(--field);
   --accent-negative:  var(--clay);
+  /* Text that is a LINK or a text-button: "See all ›", the deck steppers, a
+     "more" affordance, an inline link inside a hint. Four rules across three
+     partials asked for this token and it was never defined, so `color:
+     var(--accent-link)` was invalid at computed-value time and every one of
+     them silently inherited its parent's ink instead — "See all ›" rendered in
+     the section heading's graphite, indistinguishable from the label beside it.
+     Field green rather than a new hue: it is already the app's action colour
+     (--focus-ring, --accent-positive), and it clears AA on all four papers
+     (5.14:1 at worst, asserted in check-contrast.mjs). */
+  --accent-link:      var(--field);
 
   --seal-cover:       var(--seal);
   --seal-cover-ink:   var(--seal-ink);

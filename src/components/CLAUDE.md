@@ -37,7 +37,7 @@ about what it is. Do not tidy it into a folder.
 | `seal/` | `ConsentModal`, `AsOfBanner` | Spoiler-consent surfaces that aren't `SealBox` itself |
 | `sync/` | `RevealCloudSync`, `SpoiledDaysCloudSync`, `StampsCloudSync`, `BooksCloudSync` | Headless multi-device cloud-sync components (ADR-0022/0026/0035/0036/0041) |
 | `team/` | `TeamLink`, `TeamSearchBox`, `TeamFilterStrip`, `LevelNav`, `ManagerLink`, `OffDaySection` | Team-identity/navigation primitives |
-| `teamstats/` | `TeamLeaders`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal`, `StarterMatchups` | Team-level statistical cards |
+| `teamstats/` | `TeamLeaders`, `TeamLeadersLedger`, `TeamScoreCard`, `SeasonSeriesStrip`, `BullpenBoard`, `DeckNudge`, `PostseasonOddsModal`, `StarterMatchups` | Team-level statistical cards. The two leader renderings share `computeLeaders` and the descriptors, not a box model: `TeamLeaders` is the headshot-card board the dedicated leader pages render, `TeamLeadersLedger` the two-block ruled ledger the team hub renders |
 | `transactions/` | `TeamTransactionsCard`, `TradeCard`, `TransactionTimeline` | Roster-move surfaces |
 | `umpire/` | `UmpireAccuracyModal`, `UmpireLink`, `UmpireTendencies`, `UmpireZoneMap`, `UmpiresCard`, `UmpireTendenciesFold` | Umpire-specific surfaces: the Tendencies card and its hosts — the modal, the lineup page's top zone (TeamInfo renders it beside the factgrid + crew section `UmpiresCard`), and focus mode's EXTRAS-tab drawer (`UmpireTendenciesFold`). The tier pill/glyph live in `badges/` — shared with Game Score rankings |
 

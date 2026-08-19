@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { computeLeaders } from '../../api/teamLeaders.js'
 import { splitDisplayName } from '../../api/person.js'
 import { prospectBadge } from '../../api/prospects.js'
@@ -9,19 +9,21 @@ import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
-import { DeckNudge } from './DeckNudge.jsx'
 import { ChevronLink } from '../ui/ChevronLink.jsx'
 
-// The horizontal deck's per-card scroll step (card width + gap, both from
-// .tlead__grid--horizontal in index.css) — DeckNudge's click target.
-const HORIZONTAL_CARD_STEP = 290
-
-// TEAM LEADERS — per-category season leaderboards for a team. Each category
-// features its leader as a headshot card (styled like the slate's Top Performers
-// row) with the chasers (ranks 2–N) as plain rows beneath. Pool-agnostic: it
-// ranks whatever normalized PoolPlayer[] it's handed (see api/teamLeaders.js),
-// so the same component serves both the team page's Phase-1 cross-section and the
-// dedicated leaders page's full list — and, later, a league/level pool.
+// TEAM LEADERS, CARD FORM — per-category season leaderboards for a team. Each
+// category features its leader as a headshot card (styled like the slate's Top
+// Performers row) with the chasers (ranks 2–N) as plain rows beneath.
+// Pool-agnostic: it ranks whatever normalized PoolPlayer[] it's handed (see
+// api/teamLeaders.js), so one component serves /team/{id}/leaders, the
+// league/level/org boards and the postseason boards alike.
+//
+// It is no longer what the team HUB renders. A card is ~180px tall, so the
+// hub's 440px column fits two; the Overview showed three (all hitters) and the
+// Numbers tab hid the rest in a horizontal deck. Both now render
+// TeamLeadersLedger — same pool, same computeLeaders, same descriptors, one row
+// per category instead of one card. This board stays where the page's whole job
+// IS leaders and there is room to spend on a face and four chasers.
 
 // The level a ranked row is tagged with. On a combining pool (org / all-minors)
 // a row can span levels, so join every level its totals cover ("A+·AA", ordered
@@ -205,9 +207,9 @@ function LeaderCategory({
 }
 
 // `pool`: normalized PoolPlayer[]. `categories`: descriptor array to rank.
-// `limit`: how many players per category (5 on the team page, more on the
-// full page). `onSeeAll`: optional — renders a "See all ›" affordance in the
-// header (the team page links to the dedicated leaders page). `title`: section
+// `limit`: how many players per category (10 on every page that renders this
+// board today). `onSeeAll`: optional — renders a "See all ›" affordance in the
+// header. `title`: section
 // heading (the broader leader pages pass their scope's title). `showLevel`:
 // badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
 // fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
@@ -228,23 +230,15 @@ function LeaderCategory({
 // under the featured leader's logo, and inline next to each chaser's
 // name — on by default for the
 // multi-team boards (league/level/org) where it's the only way to tell whose
-// row is whose; the single-team pages (TeamPage, TeamLeadersPage) pass false
-// since every row already shares the one team the page is about. `injuredIds`:
-// a Set of person ids currently on that team's IL, flagging a leader's name
-// with the same ✚ mark as the
-// player page's il-banner — the team hub passes its own already-fetched IL id
-// set (see the Overview's and the Numbers tab's loaders); null everywhere else
-// (see InjuredMark above).
-// `horizontal`: swipeable full-bleed card deck (same idiom as the Team
-// Transactions card) instead of the responsive wrap grid — opt-in, TeamPage's
-// own small fixed-size FEATURED_CATEGORIES set only. TeamLeadersPage/
-// LeadersPage share this component too but show many more categories at
-// once (limit=10, ALL_CATEGORIES), where a long horizontal deck would be
-// worse than the page's own vertical scroll, so they leave this off.
-// `secondaryAction`: optional extra node rendered after "See all ›" in the
-// same header slot — TeamPage's only use is its "Organization leaders ›"
-// link, built from the same shared ChevronLink as this component's own
-// "See all ›".
+// row is whose; the single-team pages (TeamLeadersPage, the postseason boards)
+// pass false since every row already shares the one team the page is about.
+// `injuredIds`: a Set of person ids currently on that team's IL, flagging a
+// leader's name with the same ✚ mark as the player page's il-banner (see
+// InjuredMark above). `secondaryAction`: optional extra node rendered after
+// "See all ›" in the same header slot. Those last two, and `onSeeAll`, have no
+// caller since the hub moved to TeamLeadersLedger — they are kept because they
+// are this board's door/annotation API and the pages that render it are the
+// ones most likely to grow one, not because anything renders them today.
 export function TeamLeaders({
   pool,
   categories,
@@ -259,7 +253,6 @@ export function TeamLeaders({
   filtering = false,
   showTeamAbbr = true,
   injuredIds = null,
-  horizontal = false,
   secondaryAction = null,
 }) {
   const ranked = useMemo(
@@ -277,8 +270,6 @@ export function TeamLeaders({
     [pool, categories, limit, qualifier, precomputed],
   )
 
-  const scrollRef = useRef(null)
-
   if (ranked.length === 0) return null
 
   return (
@@ -286,21 +277,15 @@ export function TeamLeaders({
       <SectionTitle
         title={title}
         action={
-          horizontal || onSeeAll || secondaryAction ? (
+          onSeeAll || secondaryAction ? (
             <span className="tlead__actions">
-              {horizontal && (
-                <DeckNudge scrollRef={scrollRef} cardStep={HORIZONTAL_CARD_STEP} label="team leaders" />
-              )}
               {onSeeAll && <ChevronLink onClick={onSeeAll}>See all</ChevronLink>}
               {secondaryAction}
             </span>
           ) : null
         }
       />
-      <div
-        className={`tlead__grid${horizontal ? ' tlead__grid--horizontal' : ''}`}
-        ref={scrollRef}
-      >
+      <div className="tlead__grid">
         {ranked.map(({ category, entries }) => (
           <LeaderCategory
             key={category.key}

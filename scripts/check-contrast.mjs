@@ -140,6 +140,12 @@ const PAIRINGS = [
   // Games stub above, since this checker doesn't parse color-mix().
   { fg: 'text-heading', bg: '#D1E0D3', min: TEXT, note: 'live band numerals on hover mow stripe' },
   { fg: 'text-muted', bg: '#D1E0D3', min: TEXT, note: 'live band state token on hover mow stripe' },
+  // Link / text-button ink, on each of the three grounds it lands on: the app
+  // canvas, a page, and a raised card. Held to the full text bar because these
+  // run SMALL — "See all ›" and the "more" affordance are --fs-caption caps.
+  { fg: 'accent-link', bg: 'bg-canvas', min: TEXT, note: 'link text on app canvas' },
+  { fg: 'accent-link', bg: 'bg-page', min: TEXT, note: 'link text on page' },
+  { fg: 'accent-link', bg: 'surface-card', min: TEXT, note: 'link text on raised card' },
   // Non-text UI: the focus ring must stay visible against the canvas.
   { fg: 'focus-ring', bg: 'bg-canvas', min: UI, note: 'focus ring on app canvas' },
   // Trade Deadline's cash-consideration icon frame — the positive/acquired
