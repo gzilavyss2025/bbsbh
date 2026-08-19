@@ -505,7 +505,14 @@ const BUDGETS = {
   // ranks), here for exactly the reason the entry above gives: a generator is
   // a top-level script, so importing one RUNS it, and this is the half worth
   // pinning with tests (test/team-records.test.js).
-  'scripts/lib': 20,
+  // +1 for contract-pay-rank.mjs — the Contract card's positional pay rank
+  // (which pool a player is ranked in, the prorated-salary normalisation, the
+  // competition ranking). Here for the reason every entry above gives: a
+  // generator is a top-level script, so importing one RUNS it, and this is a
+  // pile of judgement calls that is worth pinning with tests
+  // (test/contract-pay-rank.test.js) rather than leaving inline in
+  // fever/gen-player-contracts.mjs.
+  'scripts/lib': 21,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line

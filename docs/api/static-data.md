@@ -583,7 +583,12 @@ for each generator; the reader modules:
   Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly
   league feed into `public/data/player-contracts/{00..99}.json`, bucketed by
   `personId % 100`; a profile downloads one small shard and receives null on a
-  missing source/player. The card attributes both Fever and Cot's and is omitted
+  missing source/player. Each record also carries `payRank` — the player's
+  positional pay rank (`{pos, rank, of, tied, onMinimum, fractionBelow}`, plus
+  `also` for the two-way player who holds a second one), or null when he cannot
+  be placed. It is precomputed nightly, never derived in the app; the pools and
+  the calls behind them are `scripts/lib/contract-pay-rank.mjs`. The card
+  attributes both Fever and Cot's and is omitted
   from historical `asOf` player pages, where today's contract would be anachronistic.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
