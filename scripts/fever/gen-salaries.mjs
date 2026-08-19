@@ -11,11 +11,12 @@
 // up yesterday's contracts under today's timestamp.
 //
 // The one thing the contract feed does not carry is a POSITION, so the 40-man
-// roster supplies it (statsapi, 30 requests, hydrated with season pitching
-// stats so a pitcher can be told apart as a starter or a reliever — the feed
-// only ever says "P"). A player in the contract feed with no 40-man place is
-// not dropped: he is money the club still owes with nobody to show for it,
-// which is exactly what the ledger's "Off roster" group is for.
+// roster supplies it (statsapi, 30 requests through the shared pool in
+// scripts/lib/concurrency.mjs, hydrated with season pitching stats so a pitcher
+// can be told apart as a starter or a reliever — the feed only ever says "P").
+// A player in the contract feed with no 40-man place is not dropped: he is
+// money the club still owes with nobody to show for it, which is exactly what
+// the ledger's "Off roster" group is for.
 //
 // Attribution rides through unchanged in `meta` — Fever Baseball and, under
 // them, Cot's Baseball Contracts. Every surface that renders these files must
@@ -26,6 +27,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readdir, readFile } from 'node:fs/promises'
 import { writeJsonAtomic, writeShards } from '../lib/io.js'
+import { mapConcurrent } from '../lib/concurrency.mjs'
 import { rollUpSalaries } from '../lib/salaries.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -71,9 +73,16 @@ async function fetchTeams() {
 // that lumps a closer in with the rotation is telling the reader the wrong
 // thing about how the club spends. No line yet (a September call-up, an arm who
 // has not appeared) leaves him "P" rather than guessing.
+//
+// Thirty requests through the shared pool at the house limit of 8, the same
+// shape every other roster fan-out in scripts/ uses. FAILS LOUD, which is the
+// part worth keeping: mapConcurrent is best-effort and hands back `null` for a
+// call that threw, and a null here would not empty the page — it would move a
+// whole club's players into the "Off roster" band, reading as money owed to
+// nobody rather than as a club whose roster did not load. A wrong ledger is
+// worse than no ledger, so a missing club aborts the run.
 async function fetchPlaces(teamIds, season) {
-  const byTeam = new Map()
-  for (const teamId of teamIds) {
+  const rosters = await mapConcurrent(teamIds, 8, async (teamId) => {
     const data = await getJson(
       `/api/v1/teams/${teamId}/roster?rosterType=40Man` +
         `&hydrate=person(stats(type=season,group=[pitching],season=${season}))`,
@@ -84,9 +93,11 @@ async function fetchPlaces(teamIds, season) {
       if (id == null) continue
       map.set(id, { pos: resolvePosition(entry), age: entry.person?.currentAge ?? null })
     }
-    byTeam.set(teamId, map)
-  }
-  return byTeam
+    return map
+  })
+  const missing = teamIds.filter((_, i) => rosters[i] == null)
+  if (missing.length) throw new Error(`40-man roster failed for team ${missing.join(', ')}`)
+  return new Map(teamIds.map((teamId, i) => [teamId, rosters[i]]))
 }
 
 function resolvePosition(entry) {

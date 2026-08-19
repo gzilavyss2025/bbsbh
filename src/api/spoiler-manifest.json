@@ -648,7 +648,7 @@
     },
     "salaries.js": {
       "class": "spoiler-free",
-      "why": "Club contract ledgers and the league salary rollup, both static build-time files. Money a club owes, never a game's line — the same season-long identity class as a stat line or a standings row (ADR-0034)."
+      "why": "Club contract ledgers and the league salary rollup, both static build-time files. Money a club owes, never a game's line — the same season-long identity class as a stat line or a standings row (ADR-0034, and ADR-0052 for this pair specifically). e2e/salaries.spec.js holds it at runtime: neither page may print a score-shaped token, and /salaries never reaches statsapi at all."
     },
     "schedule.js": {
       "class": "spoiler-free",

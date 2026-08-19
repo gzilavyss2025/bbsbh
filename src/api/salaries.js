@@ -8,7 +8,9 @@ import { staticJson, staticJsonBy } from './staticJson.js'
 // same class of fact as a stat line, a roster spot or a standings row, and
 // ADR-0034 is explicit that gating those was the rule reaching past what it
 // protects. Nothing here reads a linescore, a game feed or a reveal mark, and
-// nothing on either page is sealed.
+// nothing on either page is sealed. ADR-0052 records that decision, together
+// with the money rule the ledger runs on; e2e/salaries.spec.js holds both pages
+// to it at runtime.
 //
 // Both readers fail SOFT: a club with no ledger yet, or a league file that has
 // not been generated, renders an honest "not published yet" card rather than

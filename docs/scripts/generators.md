@@ -529,8 +529,14 @@ don't run these by hand.
   MUST run directly after that step in the nightly workflow. Its one live call is
   to statsapi for the 40-man rosters, hydrated with season pitching lines so an
   arm can be told apart as a starter or a reliever (the contract feed only ever
-  says "P"). The arithmetic is pure and lives in `scripts/lib/salaries.mjs`, so
-  `test/salaries.test.js` can pin it. App reads it via `src/api/salaries.js`.
+  says "P"). Those thirty requests go through `scripts/lib/concurrency.mjs` at
+  the house limit of 8, and — unlike most callers of that helper — a club that
+  comes back `null` ABORTS the run: a missing roster would not empty the page, it
+  would move that club's whole squad into the "Off roster" band and read as money
+  owed to nobody. The arithmetic is pure and lives in `scripts/lib/salaries.mjs`,
+  so `test/salaries.test.js` can pin it, and the money rule it enforces (an
+  out-year code is a status, never an amount) is ADR-0052. App reads it via
+  `src/api/salaries.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

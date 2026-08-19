@@ -9,7 +9,9 @@
 // the club has no hold at all, OPT for an option nobody has exercised. A code
 // is a status, never an amount, so it adds nothing to a total. That is what
 // makes a club's later columns fall away, and the fall is the true shape of the
-// book rather than a gap in the data.
+// book rather than a gap in the data. ADR-0052 has the why, and the two
+// alternatives (projected arbitration figures, options counted at face) that
+// were weighed and turned down.
 
 // Out-year codes, exactly as Cot's writes them.
 const ARBITRATION = /^A\d+$/i
