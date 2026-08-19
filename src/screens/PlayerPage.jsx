@@ -11,14 +11,13 @@ import { useNav } from '../lib/nav.js'
 import { Headshot } from '../components/player/Headshot.jsx'
 import { TeamLink } from '../components/team/TeamLink.jsx'
 import { PlayerLink } from '../components/player/PlayerLink.jsx'
+import { CareerRegister } from '../components/player/CareerRegister.jsx'
 import { LevelProgressionCard } from '../components/player/LevelProgressionCard.jsx'
 import { MilestoneWatchCard } from '../components/playerstats/MilestoneWatchCard.jsx'
 import { TrophyCase } from '../components/player/TrophyCase.jsx'
 import { CareerTimeline } from '../components/player/CareerTimeline.jsx'
 import { TransactionTimeline } from '../components/transactions/TransactionTimeline.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
-import { Ledger } from '../components/player/Ledger.jsx'
-import { spanCell } from '../lib/ledger.js'
 import { PositionInnings } from '../components/player/PositionInnings.jsx'
 import { SplitsSection, hasSplits } from '../components/playerstats/SplitsSection.jsx'
 import { StatcastPercentiles } from '../components/charts/StatcastPercentiles.jsx'
@@ -631,88 +630,6 @@ function GameLink({ path, className = '', children }) {
     >
       {children}
     </button>
-  )
-}
-
-// The unified MLB + MiLB career table (see api/person.js careerRegisterView).
-// MLB rows are inked, MiLB penciled with a level pill; one row per season, level
-// AND club, with no workload threshold anywhere, so a split season repeats the
-// year on each club's line. The footer's separate MLB and MiLB totals each show
-// only when their side of the ledger has more than one row.
-// The secondary pitching columns that drop out on a phone (see the Ledger's
-// hideNarrow + the col-narrow-hide media query) — the essentials (G, W–L/SV,
-// ERA, IP, WHIP) stay; GS, K and BB return once there's room.
-const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
-
-function CareerRegister({ register }) {
-  const { columns, rows, totals } = register
-  // A big leaguer with a long option/rehab history (Snell) carries more MiLB
-  // lines than MLB ones, which buries the register's point. The pill drops the
-  // penciled rows and their footed MiLB total; gap years stay either way. Only
-  // offered to someone who HAS an MLB row — for a prospect the MiLB rows ARE
-  // the register.
-  const [mlbOnly, setMlbOnly] = useState(false)
-  const canFilter = rows.some((r) => r.tier === 'mlb') && rows.some((r) => r.tier === 'milb')
-  const keep = (r) => !(mlbOnly && canFilter) || r.tier !== 'milb'
-  // +2 for the leading Year + Team columns this table prepends to the stat cells.
-  const hideNarrow = columns
-    .map((c, i) => (NARROW_HIDE_COLS.has(c) ? i + 2 : -1))
-    .filter((i) => i >= 0)
-
-  const ledgerRows = rows.filter(keep).map((r) => ({
-    key: r.key,
-    className: r.tier === 'mlb' ? 'reg-mlb' : r.tier === 'gap' ? 'reg-gap' : 'reg-milb',
-    allStar: r.allStar,
-    cells: r.gap
-      ? [
-          <>{r.year}</>,
-          // A gap year (see missingSeasonRows) has no team or stat line — its
-          // note ("Injured — missed season" / "Did not play") spans the rest
-          // of the row (spanCell) instead of sitting in one `nowrap` cell
-          // beside a run of dashes, so the sentence wraps within the table's
-          // width rather than forcing horizontal scroll on a phone.
-          spanCell(<span className="reg-gap__note">{r.note}</span>),
-        ]
-      : [
-          <>
-            {r.year}
-            {r.allStar && <span className="ledger__allstar" title="All Star">★</span>}
-          </>,
-          <>
-            {r.team || DASH}
-            {r.pill && <span className="reg-pill">{r.pill}</span>}
-          </>,
-          ...r.cells,
-        ],
-  }))
-
-  return (
-    <>
-      <SectionTitle
-        title="Career stats"
-        bar
-        // Same .mastheadpill idiom, and the same measured contrast against a
-        // club bar, as the lineup page's Bullpen / vs-starter toggles — hollow
-        // dot off, filled on. See styles/10-lineup.css.
-        aside={canFilter && (
-          <button type="button" className="mastheadpill" aria-pressed={mlbOnly} onClick={() => setMlbOnly(!mlbOnly)}>
-            <span className="mastheadpill__dot" aria-hidden="true" />
-            MLB only
-          </button>
-        )}
-      />
-      <Ledger
-        leftCols={2}
-        head={['Year', 'Team', ...columns]}
-        rows={ledgerRows}
-        hideNarrow={hideNarrow}
-        totals={totals.filter(keep).map((t) => ({
-          label: t.label,
-          cells: t.cells,
-          className: t.tier === 'mlb' ? 'reg-mlb' : 'reg-milb',
-        }))}
-      />
-    </>
   )
 }
 

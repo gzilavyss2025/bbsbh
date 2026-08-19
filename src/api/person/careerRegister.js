@@ -3,7 +3,7 @@
 // header for the module's overall spoiler footing.
 
 import { SPORT_LABEL, MILB_LEVELS } from '../../lib/teams.js'
-import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, txnDate } from '../rehab-policy.js'
+import { ipToOuts, meetsWorkload, CUP_OF_COFFEE_FLOOR, REHAB_CAP, txnDate, transactionTeamRanks } from '../rehab-policy.js'
 import { DASH, num } from './shared.js'
 import { aggregateSplits, withoutMultiTeamAggregate } from './stats.js'
 import { isIlPlacementTxn } from './activity.js'
@@ -80,12 +80,12 @@ const CAREER_ORDER = [16, 14, 13, 12, 11, 1]
 // activity.js's promoted other-level TILES are a curated highlight, not a
 // record, and the career timeline drops rehab noise for the same reason.
 //
-// Totals never blend levels: a separate MLB and MiLB footer, each footing only
-// its own side of the ledger. The MLB total uses the API's own career line when
-// supplied (authoritative), the MiLB total sums the shown rows. A side gets a
-// subtotal only when it has more than one row — two clubs in a season, two
-// levels in a climb, or two seasons anywhere. A single line already foots
-// itself, and a footer repeating it verbatim reads as a second season.
+// Same-level, same-season team changes get an N TM subtotal in the body. Career
+// totals never blend levels: a separate MLB and MiLB footer each foots only its
+// own side of the ledger. The MLB total uses the API's own career line when
+// supplied (authoritative), and the MiLB total sums the real rows. A side gets a
+// career footer only when it has more than one real row. A single line already
+// foots itself, and a footer repeating it verbatim reads as a second season.
 // ---------------------------------------------------------------------------
 
 // Split one (season, level) bucket into its per-club stints, keeping the order
@@ -142,7 +142,7 @@ function missingSeasonRows(presentYears, debutYear, currentSeason, transactions,
   return rows
 }
 
-export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [] }) {
+export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYear, currentStat, currentSplits, currentSeason, currentSportId, careerStat, warByYear = {}, transactions = [], orgOf = null }) {
   // Group every split (MLB + all MiLB levels) into season -> sportId -> rows.
   const bySeason = new Map()
   for (const s of [...(mlbSplits ?? []), ...(milbSplits ?? [])]) {
@@ -177,7 +177,16 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   const real = []
   const stint = (yr, sid, stat, teamIds) => {
     if (!stat) return
-    real.push({ year: yr, sid, tier: sid === 1 ? 'mlb' : 'milb', stat, teamIds })
+    const teamId = teamIds[0] ?? null
+    real.push({
+      year: yr,
+      sid,
+      tier: sid === 1 ? 'mlb' : 'milb',
+      stat,
+      teamIds,
+      inputOrder: real.length,
+      orgId: sid === 1 ? teamId : orgOf?.(teamId, yr) ?? null,
+    })
   }
   for (const [yr, byLevel] of bySeason) {
     for (const [sid, rows] of byLevel) {
@@ -194,10 +203,50 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   if (!real.length) return null
   const presentYears = new Set(real.map((s) => s.year))
 
-  // Newest season first, and within a season the higher level first. Clubs
-  // within one (season, level) keep the API's own order — Array#sort is stable,
-  // so the chronological run of a traded season survives the sort untouched.
-  const bySeasonOrder = (a, b) => b.year - a.year || LEVEL_ORDER_DESC.indexOf(a.sid) - LEVEL_ORDER_DESC.indexOf(b.sid)
+  // Newest season first; WITHIN one season, use the transaction wire as the
+  // cross-level clock. The stats rows themselves cannot do this: MLB and every
+  // MiLB level arrive from separate requests and carry no stint date. Only use
+  // transaction order when every displayed club resolved, so a sparse old wire
+  // cannot shove an unknown stop to the end. The fallback groups resolved orgs
+  // and reads each org bottom-up, matching the Team history rail's honest best
+  // effort when exact dates are unavailable.
+  const seasonPlans = new Map()
+  for (const year of presentYears) {
+    const stints = real.filter((s) => s.year === year)
+    const teamIds = stints.flatMap((s) => s.teamIds)
+    const txnRanks = transactionTeamRanks(transactions, year, teamIds)
+    const useTransactions = stints.every((s) => s.teamIds.length === 1 && txnRanks.has(s.teamIds[0]))
+    const orgOrder = new Map()
+    let orgsResolved = true
+    for (const st of stints) {
+      if (!st.orgId) orgsResolved = false
+      else orgOrder.set(st.orgId, Math.min(orgOrder.get(st.orgId) ?? Infinity, st.inputOrder))
+    }
+    seasonPlans.set(year, {
+      txnRanks,
+      useTransactions,
+      orgOrder,
+      groupByOrg: orgsResolved && orgOrder.size > 1,
+      multipleOrgs: orgOrder.size > 1,
+    })
+  }
+  const careerLevelRank = (sid) => {
+    const rank = CAREER_ORDER.indexOf(sid)
+    return rank < 0 ? CAREER_ORDER.length : rank
+  }
+  const bySeasonOrder = (a, b) => {
+    const yearDiff = b.year - a.year
+    if (yearDiff) return yearDiff
+    const plan = seasonPlans.get(a.year)
+    if (plan?.useTransactions && a.teamIds?.length && b.teamIds?.length) {
+      return plan.txnRanks.get(a.teamIds[0]) - plan.txnRanks.get(b.teamIds[0])
+    }
+    if (plan?.groupByOrg && a.orgId && b.orgId) {
+      const orgDiff = plan.orgOrder.get(a.orgId) - plan.orgOrder.get(b.orgId)
+      if (orgDiff) return orgDiff
+    }
+    return careerLevelRank(a.sid) - careerLevelRank(b.sid) || (a.inputOrder ?? 0) - (b.inputOrder ?? 0)
+  }
   real.sort(bySeasonOrder)
 
   // SV leads the register (instead of W–L) for anyone who regularly closes —
@@ -214,32 +263,61 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // worth a column when the player has an MLB row to carry a value — a pure
   // prospect's all-MiLB register would otherwise gain a dead all-dashes column.
   const showWar = real.some((s) => s.tier === 'mlb')
-  const warCell = (st, lead) =>
-    lead && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
+  const warCell = (st, carriesSeasonWar) =>
+    carriesSeasonWar && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
   const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
 
-  // A season split across clubs is several rows, so `seasonLead` marks the FIRST
-  // of them — the one row that may carry anything belonging to the SEASON rather
-  // than to the stint. Two things do: WAR (FanGraphs publishes it per season, not
-  // per club) below, and the All-Star star the caller adds afterwards. On both
-  // rows either would read as double. MLB sorts ahead of every MiLB level within
-  // a season, so the lead of a split big-league year is always the big-league row.
-  const seasonsSeen = new Set()
-  const rows = real.map((st) => {
-    const lead = !seasonsSeen.has(st.year)
-    seasonsSeen.add(st.year)
-    return {
-      key: `${st.year}-${st.sid}-${st.teamIds[0] ?? 'na'}`,
+  // Baseball-Reference's compact convention is a combined N-TM row. Here each
+  // season's chronological stints come first and its combined rows foot them,
+  // equation-style. Career totals still sum `real`, never these display rows.
+  const levelGroups = new Map()
+  for (const st of real) {
+    const key = `${st.year}-${st.sid}`
+    if (!levelGroups.has(key)) levelGroups.set(key, [])
+    levelGroups.get(key).push(st)
+  }
+  const rows = []
+  const mlbSeasonsSeen = new Set()
+  const appendRow = (st, members, subtotal = false) => {
+    const teamCount = members.length
+    const seasonLead = st.tier === 'mlb' && (subtotal || teamCount === 1) && !mlbSeasonsSeen.has(st.year)
+    if (seasonLead) mlbSeasonsSeen.add(st.year)
+    const carriesSeasonWar = st.tier === 'mlb' && (subtotal || teamCount === 1)
+    const multiOrg = seasonPlans.get(st.year)?.multipleOrgs ?? false
+    const mixedMulti = [...levelGroups.values()].some((group) => group.length > 1 && group[0].year === st.year && group[0].tier !== st.tier)
+    rows.push({
+      key: subtotal ? `${st.year}-${st.sid}-subtotal` : `${st.year}-${st.sid}-${st.teamIds[0] ?? 'na'}`,
       year: String(st.year),
-      seasonLead: lead,
+      seasonLead,
       tier: st.tier,
       level: SPORT_LABEL[st.sid] ?? '',
       sportId: st.sid,
-      pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
-      teamIds: st.teamIds,
-      cells: withWar(yearByYearCells(st.stat ?? {}, group, showSaves), warCell(st, lead)),
+      pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : subtotal && mixedMulti ? SPORT_LABEL[1] : '',
+      pillTeamId: !subtotal && st.tier === 'milb' && multiOrg ? st.orgId : null,
+      teamIds: subtotal ? [] : st.teamIds,
+      teamLabel: subtotal ? `${teamCount} TM` : null,
+      subtotal,
+      cells: withWar(
+        yearByYearCells(st.stat ?? {}, group, showSaves),
+        warCell(st, carriesSeasonWar),
+      ),
+    })
+  }
+  for (let index = 0; index < real.length; index++) {
+    const st = real[index]
+    const key = `${st.year}-${st.sid}`
+    const members = levelGroups.get(key)
+    appendRow(st, members)
+    if (real[index + 1]?.year === st.year) continue
+    for (const levelMembers of levelGroups.values()) {
+      if (levelMembers.length < 2 || levelMembers[0].year !== st.year) continue
+      appendRow(
+        { ...levelMembers[0], stat: aggregateSplits(levelMembers.map((member) => ({ stat: member.stat })), group) },
+        levelMembers,
+        true,
+      )
     }
-  })
+  }
 
   // Split totals — never blend levels. MLB uses the API career line when we have
   // it; MiLB sums the rows actually shown (every stint above, at every level).
@@ -282,7 +360,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
   const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group) : []
-  const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
+  const allRows = gapRows.length ? [...rows, ...gapRows].sort((a, b) => b.year - a.year) : rows
 
   return { columns, rows: allRows, totals }
 }

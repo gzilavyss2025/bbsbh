@@ -994,12 +994,32 @@
   padding: 1px 4px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
   color: var(--graphite);
   vertical-align: middle;
+}
+.reg-pill__logo {
+  vertical-align: middle;
+}
+/* A same-season, same-level N TM row is a subtotal, not another stint. Its
+   inset paper and heavier figures set it apart while leaving it in the tbody,
+   immediately before that level's first chronological club row. */
+.ledger tr.reg-subtotal td {
+  background: var(--surface-inset);
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+.ledger tr.reg-subtotal .ledger__sub {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
 }
 /* Split totals — the MLB footer inked, the MiLB footer penciled, so neither
    reads as a blended cross-level career line. */

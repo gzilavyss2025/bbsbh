@@ -80,6 +80,7 @@ test('careerRegisterView: a same-season AA -> AAA promotion produces two indepen
     careerStat: null,
     warByYear: {},
     transactions: [],
+    orgOf: () => 158,
   })
 
   const aaaRow = register.rows.find((r) => r.sportId === SPORT_IDS.AAA)
@@ -97,6 +98,76 @@ test('careerRegisterView: a same-season AA -> AAA promotion produces two indepen
   // (gamesPlayed 20, IP '27.2' — the blended tile's own values above).
   assert.notEqual(aaaRow.cells[0], 20)
   assert.notEqual(aaaRow.cells[4], '27.2')
+  assert.equal(aaaRow.pillTeamId, null, 'one organization keeps the plain AAA pill')
+  assert.equal(aaRow.pillTeamId, null, 'one organization keeps the plain AA pill')
+})
+
+// Regression coverage for Jake Woodford's 2026 season (player 663765): the
+// year-by-year fetch returns MLB as one block and AAA as another, so a plain
+// level sort prints MIL / CHC / Nashville / Iowa / Durham even though his real
+// path was MIL -> Nashville -> CHC -> Iowa -> Durham. Each level also needs a
+// combined row, but that row must not feed either career total a second time.
+test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed once, and marks affiliates', () => {
+  const pitch = (gamesPlayed, inningsPitched) => ({
+    gamesPlayed, gamesStarted: 0, wins: 0, losses: 0, saves: 0,
+    inningsPitched, earnedRuns: 0, hits: 0, baseOnBalls: 0, strikeOuts: gamesPlayed,
+    era: '0.00', whip: '0.00',
+  })
+  const register = careerRegisterView({
+    mlbSplits: [
+      { season: 2026, sport: { id: SPORT_IDS.MLB }, team: { id: 158 }, stat: pitch(5, '10.0') },
+      { season: 2026, sport: { id: SPORT_IDS.MLB }, team: { id: 112 }, stat: pitch(2, '4.0') },
+    ],
+    milbSplits: [
+      { season: 2026, sport: { id: SPORT_IDS.AAA }, team: { id: 556 }, stat: pitch(4, '8.0') },
+      { season: 2026, sport: { id: SPORT_IDS.AAA }, team: { id: 451 }, stat: pitch(3, '6.0') },
+      { season: 2026, sport: { id: SPORT_IDS.AAA }, team: { id: 234 }, stat: pitch(1, '2.0') },
+    ],
+    group: 'pitching',
+    role: null,
+    debutYear: null,
+    currentStat: null,
+    currentSeason: 2026,
+    currentSportId: SPORT_IDS.AAA,
+    careerStat: null,
+    warByYear: { 2026: 0.4 },
+    transactions: [
+      { typeCode: 'TR', effectiveDate: '2026-03-24', toTeam: { id: 158 } },
+      { typeCode: 'OUT', effectiveDate: '2026-06-08', toTeam: { id: 556 } },
+      { typeCode: 'SFA', effectiveDate: '2026-07-04', toTeam: { id: 112 }, description: 'Chicago Cubs signed free agent RHP Jake Woodford.' },
+      { typeCode: 'OUT', effectiveDate: '2026-07-14', toTeam: { id: 451 } },
+      { typeCode: 'ASG', effectiveDate: '2026-08-11', toTeam: { id: 234 } },
+    ],
+    orgOf: (teamId) => ({ 556: 158, 451: 112, 234: 139 })[teamId] ?? null,
+  })
+
+  assert.deepEqual(
+    register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]),
+    [158, 556, 112, 451, 234, '2 TM', '3 TM'],
+    'chronological stints come first, followed by the season subtotal rows',
+  )
+
+  const mlbSubtotal = register.rows.find((r) => r.subtotal && r.sportId === SPORT_IDS.MLB)
+  const aaaSubtotal = register.rows.find((r) => r.subtotal && r.sportId === SPORT_IDS.AAA)
+  const mlbStints = register.rows.filter((r) => !r.subtotal && r.sportId === SPORT_IDS.MLB)
+  assert.equal(mlbSubtotal.cells[0], 7)
+  assert.equal(mlbSubtotal.cells[4], '14.0')
+  assert.equal(mlbSubtotal.cells[8], '0.4', 'season WAR belongs to the MLB combined row')
+  assert.equal(mlbSubtotal.pill, 'MLB', 'a mixed multi-team season labels the MLB subtotal')
+  assert.deepEqual(mlbStints.map((r) => r.cells[8]), ['—', '—'])
+  assert.equal(aaaSubtotal.cells[0], 8)
+  assert.equal(aaaSubtotal.cells[4], '16.0')
+  assert.equal(aaaSubtotal.pill, 'AAA')
+
+  const mlbTotal = register.totals.find((t) => t.label === 'MLB')
+  const milbTotal = register.totals.find((t) => t.label === 'MiLB')
+  assert.equal(mlbTotal.cells[0], 7, 'the MLB subtotal is not counted again')
+  assert.equal(milbTotal.cells[0], 8, 'the AAA subtotal is not counted again')
+  assert.deepEqual(
+    register.rows.filter((r) => !r.subtotal && r.tier === 'milb').map((r) => r.pillTeamId),
+    [158, 112, 139],
+    'a multi-org season puts each historical MLB affiliate mark in its level pill',
+  )
 })
 
 // ---------------------------------------------------------------------------
@@ -157,25 +228,31 @@ test('careerRegisterView: an MLB season split between two clubs is one row per c
     currentSeason: 2026,
     currentSportId: 1,
     careerStat: null,
-    // A season's WAR is not published per club: it belongs to the first row of
-    // the season, and the total must count it once — never once per club.
+    // A season's WAR is not published per club: it belongs to the combined row,
+    // and the career total must count it once — never once per club.
     warByYear: { 2026: 1.8 },
     transactions: [],
   })
 
-  assert.equal(register.rows.length, 2)
-  assert.deepEqual(register.rows.map((r) => r.teamIds), [[111], [147]])
-  assert.deepEqual(register.rows.map((r) => r.year), ['2026', '2026'])
+  assert.equal(register.rows.length, 3)
+  const subtotal = register.rows.find((r) => r.subtotal)
+  const stints = register.rows.filter((r) => !r.subtotal)
+  assert.equal(subtotal.teamLabel, '2 TM')
+  assert.equal(subtotal.pill, '', 'an MLB-only multi-team season needs no redundant MLB pill')
+  assert.deepEqual(stints.map((r) => r.teamIds), [[111], [147]])
+  assert.deepEqual(register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]), [111, 147, '2 TM'])
+  assert.deepEqual(register.rows.map((r) => r.year), ['2026', '2026', '2026'])
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
-  assert.deepEqual(register.rows.map((r) => r.cells[8]), ['1.8', '—'])
+  assert.equal(subtotal.cells[8], '1.8')
+  assert.deepEqual(stints.map((r) => r.cells[8]), ['—', '—'])
   const mlbTotal = register.totals.find((t) => t.label === 'MLB')
   assert.equal(mlbTotal.cells[0], 60, 'the two clubs foot to the whole season')
   assert.equal(mlbTotal.cells[8], '1.8', 'season WAR counted once, not twice')
   // Distinct row keys, or React collapses the second club's line.
-  assert.equal(new Set(register.rows.map((r) => r.key)).size, 2)
+  assert.equal(new Set(register.rows.map((r) => r.key)).size, 3)
 })
 
-test('careerRegisterView: a subtotal appears only when its side has more than one row', () => {
+test('careerRegisterView: a career footer appears only when its side has more than one row', () => {
   const oneEach = careerRegisterView({
     mlbSplits: [{ season: 2026, sport: { id: 1 }, team: { id: 158 }, stat: MLB_STAT }],
     milbSplits: [{ season: 2022, sport: { id: SPORT_IDS.AAA }, team: { id: 5015 }, stat: REHAB_STAT }],
@@ -313,7 +390,11 @@ test('careerRegisterView: the current season splits per club from the date-cut s
     transactions: [],
   })
 
-  assert.deepEqual(register.rows.map((r) => r.cells[0]), [40, 20], 'the date-cut figures, per club')
+  assert.deepEqual(
+    register.rows.filter((r) => !r.subtotal).map((r) => r.cells[0]),
+    [40, 20],
+    'the date-cut figures, per club',
+  )
 })
 
 test('careerRegisterView: with no date-cut splits the current season collapses to one row that keeps its clubs', () => {
