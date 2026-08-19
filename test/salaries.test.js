@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   cellFor,
+  resolvePosition,
   positionGroup,
   playerRow,
   yearsCovered,
@@ -18,6 +19,89 @@ import { payrollScale, commitmentCliff, salaryBoard, clubStanding } from '../src
 // Get that wrong in either direction and the club ledger's totals, the
 // commitment cliff and the league payroll board are all silently wrong together,
 // because all three read the same cells.
+
+// --------------------------------------------------------- roster position
+// A pitcher's line decides whether he reads as a starter or a reliever, and the
+// CAREER fallback is the half that had to be added: in August, an arm with no
+// season line is overwhelmingly an injured pitcher, and leaving those on "P"
+// took Corbin Burnes' $31M, Pablo Lopez's $21.8M and Joe Musgrove's $20M out of
+// the rotation their clubs are plainly paying for. Shapes below are statsapi's,
+// checked against team 109's real 40-man on 2026-08-19.
+const arm = (lines) => ({
+  position: { abbreviation: 'P' },
+  person: {
+    stats: lines.map(([type, stat]) => ({
+      type: { displayName: type },
+      splits: stat ? [{ stat }] : [],
+    })),
+  },
+})
+
+test('a position player keeps the position the roster states', () => {
+  assert.equal(resolvePosition({ position: { abbreviation: 'SS' } }), 'SS')
+  assert.equal(resolvePosition({ position: { abbreviation: 'TWP' } }), 'TWP')
+  assert.equal(resolvePosition({}), null)
+})
+
+test("a pitcher's season line decides his role, and a start is worth two appearances", () => {
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 24, gamesStarted: 24 }]])), 'SP')
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 55, gamesStarted: 0 }]])), 'RP')
+  // A swingman starting half his games reads as a starter.
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 10 }]])), 'SP')
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 9 }]])), 'RP')
+})
+
+test('an arm with no season line falls back to his career line, not to "P"', () => {
+  // Corbin Burnes: no 2026 appearance, career 210 G / 149 GS. His $31M belongs
+  // to Arizona's rotation, not to an "unassigned" bucket.
+  assert.equal(
+    resolvePosition(arm([['season', null], ['career', { gamesPitched: 210, gamesStarted: 149 }]])),
+    'SP',
+  )
+  // A.J. Puk: career 212 G / 4 GS — a reliever, and the fallback says so.
+  assert.equal(
+    resolvePosition(arm([['season', null], ['career', { gamesPitched: 212, gamesStarted: 4 }]])),
+    'RP',
+  )
+})
+
+test('the season line wins over the career line whenever it exists', () => {
+  // A career starter working out of the bullpen this year reads as what he is
+  // NOW: the ledger is about how this club is spending, not about who he was.
+  assert.equal(
+    resolvePosition(
+      arm([
+        ['season', { gamesPitched: 30, gamesStarted: 0 }],
+        ['career', { gamesPitched: 210, gamesStarted: 149 }],
+      ]),
+    ),
+    'RP',
+  )
+})
+
+test('only a pitcher who has never appeared in the majors stays unassigned', () => {
+  assert.equal(resolvePosition(arm([['season', null], ['career', null]])), 'P')
+  assert.equal(
+    resolvePosition(arm([['season', { gamesPitched: 0 }], ['career', { gamesPitched: 0 }]])),
+    'P',
+  )
+  assert.equal(resolvePosition(arm([])), 'P')
+})
+
+test('the two stat lines are found by name, never by their order', () => {
+  // statsapi returned ["career","season"] for team 109 — index 0 is not the
+  // season line, and reading it positionally is how the career fallback would
+  // silently become the primary.
+  assert.equal(
+    resolvePosition(
+      arm([
+        ['career', { gamesPitched: 210, gamesStarted: 149 }],
+        ['season', { gamesPitched: 40, gamesStarted: 0 }],
+      ]),
+    ),
+    'RP',
+  )
+})
 
 test('an out-year figure is committed money', () => {
   assert.deepEqual(cellFor(2028, 26_000_000), { year: 2028, kind: 'guaranteed', value: 26_000_000 })

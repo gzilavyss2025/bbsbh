@@ -108,7 +108,66 @@ watching one.
   disagree about the same contract. The nightly ordering is a requirement, not a
   preference, and is recorded at both steps of `update-nightly-data.yml`.
 - Two buckets on `/salaries` are labelled rather than folded into a neighbour:
-  pitchers with no appearance yet (no line to split SP from RP) and the one- and
-  three-player `TWP`/`OF` groups. Quietly adding an unclassified arm's money to
-  the bullpen would invent a fact the source never states, which is the same
-  error as projecting arbitration, only smaller.
+  the one-player `TWP` group (Ohtani) and the three-player `OF` group. Quietly
+  adding an unclassified player's money to a neighbouring position would invent a
+  fact the source never states, which is the same error as projecting
+  arbitration, only smaller.
+
+## Amendment (2026-08-19): a career line is a fact, so a pitcher may use one
+
+The `Pitcher, unassigned` bucket was originally everyone the 40-man listed as
+"P" with no line in the season in hand — 94 players and **$174.9M**, and the
+money is the part that mattered. In August, an arm with no season line is
+overwhelmingly an INJURED pitcher rather than an unknown one, so the bucket's top
+was Corbin Burnes ($31.0M), Pablo López ($21.8M) and Joe Musgrove ($20.0M). Their
+clubs are plainly paying for a rotation, and the position-spend graphic was
+drawing that money as belonging to no position at all.
+
+**The 40-man request now hydrates the career pitching line beside the season
+one**, on the same request, and `resolvePosition()` falls back to it. This does
+not bend the rule above — a career line is a fact statsapi states, not a
+projection, and it answers the only question being asked: does this man start or
+relieve. The season line still wins wherever it exists, because the ledger is
+about how a club is spending NOW; a career starter working out of the bullpen
+this year reads as a reliever.
+
+The bucket fell to **20 players and $1.6M**, all of them league-minimum arms who
+have never appeared in the majors — where the source truly has nothing and a
+label is the honest answer. **The league payroll total did not move**: the money
+was reassigned, never invented.
+
+One trap is pinned by a test of its own. The two stat groups come back in an
+order statsapi does not promise — team 109 returned `["career", "season"]` — so
+they are selected by name. Reading `stats[0]` positionally, as the single-line
+version did, would silently make the career line the primary.
+
+## Amendment (2026-08-19): the MiLB case is decided, not open
+
+A MiLB club's Contracts tab stays hidden, and nothing points a MiLB page at its
+parent club's book. Two reasons, and the second is the one that settles it:
+
+1. The link already exists. A MiLB club's header carries an **Affiliate** chip
+   linking to its parent org (`TeamHubShell.jsx`), so the parent's ledger is two
+   taps away by navigation the reader already uses for rosters and prospects. A
+   contracts-specific pointer would be a second link to a club the header
+   already links to.
+2. It would imply something untrue. Cot's does not cover minor-league contracts
+   at all, so a parent club's payroll says nothing about the affiliate whose page
+   it would sit on. Putting one there suggests a relationship the data does not
+   support.
+
+`ContractsTab` keeps its message for anyone who reaches the route directly, so
+the URL stays safe. This is recorded as **decided** rather than deferred.
+
+## Amendment (2026-08-19): a ledger carries no date, and now says so
+
+`TeamHubShell` renders `AsOfBanner` under every tab, and `loadContracts` is
+deliberately not keyed on `asOf`. Together those put "Stats entering July 15"
+over today's figures on a dated visit, and on a live one offered "View as of a
+date" — an invitation to date a page that will not date.
+
+The shell now takes `datable`, and the Contracts tab passes `false`. The source
+line says the same thing in words: *a season's book, not a day's*. Dating the
+ledger for real would need Cot's contract HISTORY, which the feed does not carry;
+until it does, no banner is the honest answer, and `/salaries` needs none for the
+same reason.

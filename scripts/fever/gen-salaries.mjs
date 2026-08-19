@@ -12,8 +12,10 @@
 //
 // The one thing the contract feed does not carry is a POSITION, so the 40-man
 // roster supplies it (statsapi, 30 requests through the shared pool in
-// scripts/lib/concurrency.mjs, hydrated with season pitching stats so a pitcher
-// can be told apart as a starter or a reliever — the feed only ever says "P").
+// scripts/lib/concurrency.mjs, hydrated with BOTH the season and the career
+// pitching line so a pitcher can be told apart as a starter or a reliever — the
+// feed only ever says "P", and an arm with no season line is usually injured
+// rather than unknown).
 // A player in the contract feed with no 40-man place is not dropped: he is
 // money the club still owes with nobody to show for it, which is exactly what
 // the ledger's "Off roster" group is for.
@@ -28,7 +30,7 @@ import { fileURLToPath } from 'node:url'
 import { readdir, readFile } from 'node:fs/promises'
 import { writeJsonAtomic, writeShards } from '../lib/io.js'
 import { mapConcurrent } from '../lib/concurrency.mjs'
-import { rollUpSalaries } from '../lib/salaries.mjs'
+import { resolvePosition, rollUpSalaries } from '../lib/salaries.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const contractsDir = join(here, '..', '..', 'public', 'data', 'player-contracts')
@@ -68,11 +70,11 @@ async function fetchTeams() {
     .sort((a, b) => a.abbrev.localeCompare(b.abbrev))
 }
 
-// teamId -> { playerId -> { pos, age } }. A pitcher comes back as "P";
-// his own season line decides whether he reads as SP or RP, since a club ledger
-// that lumps a closer in with the rotation is telling the reader the wrong
-// thing about how the club spends. No line yet (a September call-up, an arm who
-// has not appeared) leaves him "P" rather than guessing.
+// teamId -> { playerId -> { pos, age } }. A pitcher comes back as "P"; his own
+// stat lines decide whether he reads as SP or RP. Both the season line and the
+// career line are hydrated on this one request, because an arm with no season
+// line is usually an INJURED starter rather than an unknown one — resolvePosition
+// in scripts/lib/salaries.mjs has the rule and the reason.
 //
 // Thirty requests through the shared pool at the house limit of 8, the same
 // shape every other roster fan-out in scripts/ uses. FAILS LOUD, which is the
@@ -85,7 +87,7 @@ async function fetchPlaces(teamIds, season) {
   const rosters = await mapConcurrent(teamIds, 8, async (teamId) => {
     const data = await getJson(
       `/api/v1/teams/${teamId}/roster?rosterType=40Man` +
-        `&hydrate=person(stats(type=season,group=[pitching],season=${season}))`,
+        `&hydrate=person(stats(type=[season,career],group=[pitching],season=${season}))`,
     )
     const map = new Map()
     for (const entry of data.roster ?? []) {
@@ -98,17 +100,6 @@ async function fetchPlaces(teamIds, season) {
   const missing = teamIds.filter((_, i) => rosters[i] == null)
   if (missing.length) throw new Error(`40-man roster failed for team ${missing.join(', ')}`)
   return new Map(teamIds.map((teamId, i) => [teamId, rosters[i]]))
-}
-
-function resolvePosition(entry) {
-  const abbrev = entry.position?.abbreviation ?? null
-  if (abbrev !== 'P') return abbrev
-  const splits = entry.person?.stats?.[0]?.splits ?? []
-  const stat = splits[0]?.stat ?? {}
-  const games = Number(stat.gamesPlayed ?? stat.gamesPitched ?? 0)
-  const started = Number(stat.gamesStarted ?? 0)
-  if (!games) return 'P'
-  return started * 2 >= games ? 'SP' : 'RP'
 }
 
 async function main() {

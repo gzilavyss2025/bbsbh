@@ -63,6 +63,7 @@ export function ContractsTab({ id, asOf, sportId }) {
       sportId={sportId}
       active="contracts"
       hiddenTabs={hiddenTeamTabs(team)}
+      datable={false}
     >
       <AsyncStatus
         loading={contracts.loading}
@@ -122,9 +123,12 @@ export function ContractsTab({ id, asOf, sportId }) {
             </p>
           )}
 
+          {/* Says out loud what `datable={false}` above does silently, so a
+              reader who arrived from a dated page knows why this one carries no
+              date rather than assuming the date was lost. */}
           <SourceLine
             meta={ledger.meta}
-            note="Pre-arbitration figures are estimates."
+            note="A season’s book, not a day’s — these figures do not move with a date. Pre-arbitration figures are estimates."
           />
         </section>
       )}

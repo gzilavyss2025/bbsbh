@@ -1,7 +1,7 @@
 import { test, expect } from './fixtures.js'
 
 // The two money pages, driven the way a reader drives them: `/salaries` (the
-// thirty-club board) and `/team/{id}/contracts` (one club's book). Three things
+// thirty-club board) and `/team/{id}/contracts` (one club's book). Four things
 // are checked here, and only the third is about the spoiler rule.
 //
 //   1. THE TWO FILTERS COMPOSE. The club rail and the position chips narrow the
@@ -19,6 +19,11 @@ import { test, expect } from './fixtures.js'
 //      on ADR-0034's reasoning: a salary is season-long identity context, not a
 //      result). That decision is only safe while it stays true that nothing on
 //      these pages comes from a game, so it is asserted rather than assumed.
+//   4. THE LEDGER CARRIES NO AS-OF BANNER, and its siblings still do. A contract
+//      ledger is a season's book, not a day's, so the tab opts out of the
+//      cutoff — and the assertion is two-sided on purpose, because the failure
+//      worth catching is the opt-out leaking into the shell's default and
+//      quietly taking the date picker off every team page.
 //
 // The scope of check 3 is narrow on purpose, and the exclusions are the
 // interesting part — each is a real string these pages print that is
@@ -182,4 +187,27 @@ test('/team/158/contracts renders the ledger, and the ledger prints nothing scor
   expect(ledger).not.toMatch(SCORE)
   expect(ledger).not.toMatch(/\bfinal\b/i)
   expect(ledger).not.toMatch(/\b(top|bottom) \d/i)
+})
+
+test('the contract ledger carries no as-of banner, and the rest of the hub still does', async ({
+  page,
+}) => {
+  // A contract ledger is a SEASON's book, so loadContracts.js is deliberately
+  // not keyed on `asOf` and the tab passes `datable={false}`. Without that, the
+  // shell's banner offered "View as of a date" on a page that will not date,
+  // and would have printed "Stats entering <day>" over today's figures.
+  await page.goto('/team/158/contracts')
+  await expect(page.locator('.ctr__table tbody').first()).toBeVisible()
+  await expect(page.locator('.asof-banner')).toHaveCount(0)
+
+  // Scoped, not removed: the suppression is one tab's, and a sibling tab that
+  // DOES move with the cutoff must still offer the way in. If this half ever
+  // fails, `datable` leaked into the shell's default rather than staying the
+  // Contracts tab's own answer.
+  await page.goto('/team/158/roster')
+  await expect(page.locator('.asof-banner')).toHaveCount(1)
+
+  // And the page says in words what the missing banner says by absence.
+  await page.goto('/team/158/contracts')
+  await expect(page.locator('.paysource')).toContainText('A season’s book, not a day’s')
 })

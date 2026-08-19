@@ -32,9 +32,54 @@ export function cellFor(year, value) {
   return { year, kind: 'other', code }
 }
 
+// ---------------------------------------------------------- roster position
+// The contract feed only ever says "P". A club ledger that lumps a closer in
+// with the rotation tells the reader the wrong thing about how the club spends,
+// so the 40-man roster's own stat lines decide whether an arm reads as SP or RP.
+//
+// TWO LINES, IN ORDER, and the second is the one that matters. The season line
+// is the truth about how this club is using him NOW, so it wins whenever it
+// exists. But an arm who has not appeared in the season in hand has no season
+// line at all — and in August that is overwhelmingly an INJURED pitcher, not an
+// unknown one. Leaving those on "P" put Corbin Burnes' $31M, Pablo Lopez's
+// $21.8M and Joe Musgrove's $20M into an "unassigned" bucket and took that money
+// out of the rotation their clubs are plainly paying for, which is exactly the
+// fact the position-spend graphic exists to state.
+//
+// So the career line is the fallback. It is still a fact the source states —
+// nothing here is projected, which is the same rule the money runs on — and it
+// answers the only question being asked: does this man start or relieve. Only a
+// pitcher who has NEVER appeared in the majors stays "P", where the source truly
+// has nothing and a label is the honest answer.
+//
+// Both lines come back on one request; see the hydrate in
+// scripts/fever/gen-salaries.mjs. Selected BY NAME rather than by index,
+// because statsapi does not promise the order of the two groups.
+export function statLine(entry, type) {
+  const group = (entry?.person?.stats ?? []).find((s) => s.type?.displayName === type)
+  return group?.splits?.[0]?.stat ?? null
+}
+
+// SP or RP from one stat line, or null when the line says nothing to decide on.
+// A start is worth two appearances, so a swingman who starts half his games
+// reads as a starter.
+export function pitcherRole(stat) {
+  if (!stat) return null
+  const games = Number(stat.gamesPitched ?? stat.gamesPlayed ?? 0)
+  if (!games) return null
+  const started = Number(stat.gamesStarted ?? 0)
+  return started * 2 >= games ? 'SP' : 'RP'
+}
+
+export function resolvePosition(entry) {
+  const abbrev = entry?.position?.abbreviation ?? null
+  if (abbrev !== 'P') return abbrev
+  return pitcherRole(statLine(entry, 'season')) ?? pitcherRole(statLine(entry, 'career')) ?? 'P'
+}
+
 // Which band of the ledger a player sits in. The contract feed says only "P";
-// the generator has already split that into SP/RP off the season line, so a
-// bare "P" here is an arm with no appearances yet rather than an unknown.
+// resolvePosition above has already split that into SP/RP off the roster's stat
+// lines, so a bare "P" here is an arm who has never pitched in the majors.
 export function positionGroup(pos) {
   if (pos === 'SP') return 'rotation'
   if (pos === 'RP' || pos === 'P') return 'bullpen'
