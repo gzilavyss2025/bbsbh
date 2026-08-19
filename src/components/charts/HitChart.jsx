@@ -101,7 +101,10 @@ export function HitChart({
   const [showHard, setShowHard] = useState(true)
   const [pickedBall, setPickedBall] = useState(null)
 
-  const clubId = pickedClub ?? clubs[0]?.teamId ?? null
+  // null IS a selection here - it is the All chip, and it is where the card
+  // opens. The chart's first answer should be the whole night's contact, not
+  // one club's half of it chosen for the reader by list order.
+  const clubId = pickedClub
 
   const inScope = useMemo(
     () => (clubId == null ? balls ?? [] : (balls ?? []).filter((b) => b.teamId === clubId)),
@@ -159,6 +162,24 @@ export function HitChart({
           (ADR-0031). */}
       {!isHalf && clubs.length > 0 && (
         <div className="hitchart__chiprow">
+          {/* ALL, AND IT LEADS. The clubs beside it filter DOWN from this, so
+              the row reads the way it behaves: everything, then one side or the
+              other. It carries a word where the others carry a crest because
+              there is no mark for "both", and a word beside two crests says
+              plainly that it is not a third club. */}
+          <button
+            type="button"
+            className={chip(clubId == null, 'club')}
+            aria-pressed={clubId == null}
+            aria-label={`Both clubs, ${balls.length} balls in play`}
+            onClick={() => {
+              setPickedClub(null)
+              setPickedBall(null)
+            }}
+          >
+            All
+            <span className="hitchart__count">{balls.length}</span>
+          </button>
           {clubs.map((club) => {
             const on = club.teamId === clubId
             return (
@@ -314,8 +335,13 @@ export function HitChart({
         </div>
       )}
 
-      <div className="hitchart__chiprow hitchart__chiprow--switches">
-        {!isHalf && (
+      {/* THE SWITCHES ARE THE GAME CARD'S. A half's chart held one of them, on
+          its own row, to toggle rings the list underneath already reports in
+          clay - a control that cost fifty pixels to restate what was three
+          lines below it. The rings themselves stay: `showHard` opens true and
+          the half never turns it off. */}
+      {!isHalf && (
+        <div className="hitchart__chiprow hitchart__chiprow--switches">
           <button
             type="button"
             className={chip(showOuts, 'on-ink')}
@@ -325,17 +351,17 @@ export function HitChart({
             <span className="hitchart__switch" aria-hidden="true" />
             Show outs
           </button>
-        )}
-        <button
-          type="button"
-          className={chip(showHard, 'on-seal')}
-          aria-pressed={showHard}
-          onClick={() => setShowHard((v) => !v)}
-        >
-          <span className="hitchart__switch" aria-hidden="true" />
-          Hard hits <span className="hitchart__count">{hardHitMph}+</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            className={chip(showHard, 'on-seal')}
+            aria-pressed={showHard}
+            onClick={() => setShowHard((v) => !v)}
+          >
+            <span className="hitchart__switch" aria-hidden="true" />
+            Hard hits <span className="hitchart__count">{hardHitMph}+</span>
+          </button>
+        </div>
+      )}
 
       {!isHalf && (
         <>
@@ -380,11 +406,12 @@ export function HitChart({
             </span>
           </div>
 
+          {/* TWO NUMBERS, NOT FOUR. The other two were already on the card:
+              "In play" is the count printed on the lit chip above, and
+              "Hardest" is the figure the readout rests on when nothing is
+              tapped. A stat bar that repeats its own page reads as filler and
+              costs a phone sixty pixels of height to do it. */}
           <div className="hitchart__facts">
-            <div className="hitchart__fact">
-              <p className="hitchart__factlabel">In play</p>
-              <p className="hitchart__factvalue">{inScope.length}</p>
-            </div>
             <div className="hitchart__fact">
               <p className="hitchart__factlabel">Hits</p>
               <p className="hitchart__factvalue">{hits}</p>
@@ -392,13 +419,6 @@ export function HitChart({
             <div className="hitchart__fact">
               <p className="hitchart__factlabel">Hard</p>
               <p className="hitchart__factvalue">{hard}</p>
-            </div>
-            <div className="hitchart__fact">
-              <p className="hitchart__factlabel">Hardest</p>
-              <p className="hitchart__factvalue">
-                {veloText(hardest)}
-                <span className="hitchart__unit">mph</span>
-              </p>
             </div>
           </div>
         </>

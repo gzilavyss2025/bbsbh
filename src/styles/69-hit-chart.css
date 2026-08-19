@@ -445,15 +445,6 @@
   color: var(--text-heading);
 }
 
-.hitchart__unit {
-  margin-left: var(--space-1);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-wide);
-  color: var(--text-caption);
-}
-
 /* ---- The half's list ────────────────────────────────────────────────────
    Numbered against the dots on the chart above. The column head carries the
    unit once, so no figure in the rows has to repeat it. */
