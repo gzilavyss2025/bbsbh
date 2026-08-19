@@ -21,8 +21,8 @@
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
-//   '/attendance' '/pace-of-play' '/farm-system-rankings' '/bullpen-availability'
-//   '/doubleheaders'                    -> the five broadcast reports (REPORT_ROUTES, reportPages.js)
+//   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
+//   '/bullpen-availability' '/doubleheaders' -> single-segment report pages (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
@@ -54,7 +54,7 @@
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
-//   '/team/{id}/{roster|games|numbers|minors}'
+//   '/team/{id}/{roster|games|numbers|contracts|minors}'
 //                                       -> { name: 'team-{tab}', id, asOf, sportId }
 //   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
 //                                          (a club's played season, every result showing, one
@@ -103,6 +103,7 @@ const TEAM_TAB_ROUTES = {
   roster: 'team-roster',
   games: 'team-games',
   numbers: 'team-numbers',
+  contracts: 'team-contracts',
   minors: 'team-minors',
 }
 
@@ -171,7 +172,7 @@ export function parseRoute(url) {
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
-  // The four broadcast reports — table in lib/reportPages.js, beside the menu
+  // Single-segment report pages — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
   // Situational-record explorer. The old /team-records address remains an
@@ -565,8 +566,8 @@ export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
 }
 // Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
-// 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs
-// hang off.
+// 'contracts' / 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'
+// the tabs hang off.
 // Goes through linkQuery like every other team link: a team page opened at a
 // dated URL must keep `?d=`/`?s=` across a tab switch, or the same visit would
 // answer "entering April 1" on one tab and "today" on the next.

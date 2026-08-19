@@ -537,6 +537,21 @@ don't run these by hand.
   quoting a rank the tie cannot support; a pool under ten players is not ranked;
   and a season with no seeded league minimum ranks nobody. A two-way player is
   ranked in BOTH his pools, hitting first, with the second in `also`.
+- `fever/gen-salaries.mjs` → `public/data/team-contracts/{teamId}.json` +
+  `public/data/salaries.json` — one contract ledger per club and one league
+  rollup, for the Contracts tab and `/salaries`. DERIVED, not re-fetched: it
+  reads the shards `fever/gen-player-contracts.mjs` just wrote, which is why it
+  MUST run directly after that step in the nightly workflow. Its one live call is
+  to statsapi for the 40-man rosters, hydrated with season pitching lines so an
+  arm can be told apart as a starter or a reliever (the contract feed only ever
+  says "P"). Those thirty requests go through `scripts/lib/concurrency.mjs` at
+  the house limit of 8, and — unlike most callers of that helper — a club that
+  comes back `null` ABORTS the run: a missing roster would not empty the page, it
+  would move that club's whole squad into the "Off roster" band and read as money
+  owed to nobody. The arithmetic is pure and lives in `scripts/lib/salaries.mjs`,
+  so `test/salaries.test.js` can pin it, and the money rule it enforces (an
+  out-year code is a status, never an amount) is ADR-0052. App reads it via
+  `src/api/salaries.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

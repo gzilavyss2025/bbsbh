@@ -593,6 +593,20 @@ for each generator; the reader modules:
   the calls behind them are `scripts/lib/contract-pay-rank.mjs`. The card
   attributes both Fever and Cot's and is omitted
   from historical `asOf` player pages, where today's contract would be anachronistic.
+- `salaries.js` — the same contract facts, rolled up two ways: one ledger per
+  club in `public/data/team-contracts/{teamId}.json` (the Contracts tab at
+  `/team/{id}/contracts`) and one league file in `public/data/salaries.json`
+  (`/salaries`). Written by `scripts/fever/gen-salaries.mjs`, which derives both
+  from the shards above rather than calling Fever again — a club ledger and a
+  player card must never disagree about the same contract — joined to the 40-man
+  roster for the one thing the contract feed does not carry, a position (and, off
+  the same roster row, an age). A player in the feed with no 40-man place is not
+  dropped: he is money the club still owes with nobody to show for it, which is
+  what the ledger's "Off roster" band is for. Both readers fail soft to an honest
+  "not published yet" card. The money rule both files run on: a dollar is
+  committed only when Cot's states a dollar, so an out-year written as a CODE
+  (`A1`..`A4`, `OPT`, `FA`) is a status and adds nothing to a total — which is
+  what makes a club's later columns fall away.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
   `feverRadar.js` above: not a third party, not attributed, and not an MLE —

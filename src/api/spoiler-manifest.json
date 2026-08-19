@@ -646,6 +646,10 @@
       "class": "spoiler-free",
       "why": "Static savant-percentiles.json — completed-game season percentile ranks, same footing as war.js."
     },
+    "salaries.js": {
+      "class": "spoiler-free",
+      "why": "Club contract ledgers and the league salary rollup, both static build-time files. Money a club owes, never a game's line — the same season-long identity class as a stat line or a standings row (ADR-0034, and ADR-0052 for this pair specifically). e2e/salaries.spec.js holds it at runtime: neither page may print a score-shaped token, and /salaries never reaches statsapi at all."
+    },
     "schedule.js": {
       "class": "spoiler-free",
       "why": "The slate/schedule fetchers. Every one PRUNES the score out with `fields=` (see GAMES_BY_PK_FIELDS) — that pruning is what makes this file spoiler-free, and is why logbook.js lives in its own file rather than beside these."

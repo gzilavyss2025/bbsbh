@@ -349,6 +349,10 @@ export function hiddenTeamTabs(team) {
   const hidden = new Set()
   const isMilb = (team.sport?.id ?? 1) !== 1
   if (!isMilb) return hidden
+  // Cot's covers the major leagues only, so a MiLB club's Contracts tab would
+  // open on an empty ledger every time. Hidden rather than shown-and-apologetic:
+  // a tab that is always empty is not a tab.
+  hidden.add('contracts')
   if (!team.parentOrgId) hidden.add('minors')
   if (!team.league?.id) hidden.add('numbers')
   return hidden

@@ -18,6 +18,7 @@ const TABS = [
   { key: 'roster', label: 'Roster' },
   { key: 'games', label: 'Games' },
   { key: 'numbers', label: 'Numbers' },
+  { key: 'contracts', label: 'Contracts' },
   { key: 'minors', label: 'Minors' },
 ]
 

@@ -98,6 +98,7 @@ export function TeamHubShell({
   sportId = null,
   active,
   hiddenTabs,
+  datable = true,
   children,
 }) {
   const navigate = useNav()
@@ -283,7 +284,16 @@ export function TeamHubShell({
 
         {children}
 
-        <AsOfBanner asOf={asOf} sportId={sportId} />
+        {/* `datable` is false for a tab whose data does not move with the
+            cutoff. The Contracts tab is the one: a contract ledger is a
+            SEASON's book, not a day's, so loadContracts.js is deliberately not
+            keyed on `asOf` — and a banner reading "Stats entering July 15" over
+            today's figures would be asserting something about the page that is
+            not true of it. On a live visit the banner's other face is just as
+            wrong: "View as of a date" invites the reader to date a page that
+            will not date. Dating the ledger for real would need Cot's contract
+            HISTORY, which the feed does not carry. */}
+        {datable && <AsOfBanner asOf={asOf} sportId={sportId} />}
       </div>
     </LinkScope>
   )

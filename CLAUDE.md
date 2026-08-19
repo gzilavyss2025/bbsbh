@@ -92,16 +92,16 @@ tests land in the same PR. `main` requires the `lint-and-build` check (lint +
 This is the whole point of the app. **Don't let either half drift.** On the surfaces
 where you score a game — the slate's score cells, the lineup pages, the innings viewer,
 the box score — a score-revealing value never exists in the DOM until you reveal it. It
-is never fetched-then-hidden, and never computed early. Everything else about baseball
-opens live: season and career stats, player and team pages, leader boards, standings,
-and the standalone pages outside the scoring flow. A stat line is not a score, and
-gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is opt-in
-now"). Four **opt-in, consented** departures lift the seal inside the scope. Three are *render*
-overrides that persist nothing: the site-wide **Scores Unlocked** switch, unsealing a day you
-agree to spoil (ADR-0026); **Stamp In** (`/team/{id}/stamp-in`), a club's played season shown so
-you can stamp it, gated on the PAGE (ADR-0042); and a game carrying your own **stamp** (ADR-0048).
-The fourth persists one bit per game, never the reveal mark: **a box score you tapped open stays
-open**, on every device you own (ADR-0049). A fifth is a call. `docs/adr/` has the *why* — read it.
+is never fetched-then-hidden, and never computed early. Everything else about baseball opens live:
+season and career stats, player and team pages, leader boards, standings, the money pages (`/salaries`
+and a club's Contracts tab, ADR-0052), and the standalone pages outside the scoring flow. A stat line
+is not a score, and gating one was the rule reaching past what it protects (ADR-0034, "The cutoff is
+opt-in now"). Four **opt-in, consented** departures lift the seal inside the scope. Three are *render*
+overrides that persist nothing: the site-wide **Scores Unlocked** switch, unsealing a day you agree to
+spoil (ADR-0026); **Stamp In** (`/team/{id}/stamp-in`), a club's played season shown so you can stamp
+it, gated on the PAGE (ADR-0042); and a game carrying your own **stamp** (ADR-0048). The fourth
+persists one bit per game, never the reveal mark: **a box score you tapped open stays open**, on every
+device you own (ADR-0049). A fifth is a call. `docs/adr/` has the *why* — read it.
 
 Inside that scope, two conventions enforce it structurally:
 

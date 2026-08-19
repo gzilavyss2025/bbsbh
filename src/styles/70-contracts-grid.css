@@ -1,0 +1,419 @@
+/* ============================================================
+   CONTRACTS — the club ledger at /team/{id}/contracts.
+
+   Players down the page, seasons across it, exactly the shape a
+   scorer already reads a scorebook in. The header row is where
+   the money actually reads: every season carries its own bar, so
+   a club's commitment cliff lands before a single cell does.
+
+   Dressed as a broadcast graphics package on paper: the navy slab
+   with its kraft-gold underline is .metricbar's own treatment
+   (SectionMasthead), the same move tokens/colors.css's --heat-slab
+   block makes for the player page's Pitches card — "an INK slab,
+   not paper", for the one card whose numbers are the reason the
+   reader came.
+
+   Per-route partial: imported by screens/team/ContractsTab.jsx,
+   never by index.css. No selector here is named anywhere else.
+   ============================================================ */
+
+.ctr {
+  margin-top: var(--space-4);
+}
+
+/* --------------------------------------------------------- the stat wall */
+.ctr__wall {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.ctr__tile {
+  padding: 10px 12px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-top: 3px solid var(--seal);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.ctr__tile--good {
+  border-top-color: var(--field);
+}
+.ctr__tilelabel {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.ctr__tilevalue {
+  display: block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-hero-sm);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-tight-display);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+.ctr__tilenote {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+}
+
+/* ------------------------------------------------- the commitment cliff
+   Six bars carry the whole story, which is why they are their own card on a
+   phone rather than only living in the grid's header: the full matrix has to
+   scroll sideways at 440px, and the shape must not scroll with it. */
+.cliff {
+  margin-bottom: var(--space-4);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--navy);
+}
+.cliff__row {
+  display: flex;
+  gap: 6px;
+  padding: 12px 14px 13px;
+}
+.cliff__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.cliff__value {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-on-ink);
+}
+.cliff__track {
+  display: flex;
+  align-items: flex-end;
+  height: 72px;
+}
+.cliff__bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--seal);
+  border-top: var(--bw-heavy) solid var(--marker);
+}
+.cliff__year {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+  color: var(--marker);
+}
+
+/* ----------------------------------------------------------- the matrix
+   The player column is pinned and the seasons scroll under it — the move
+   StandingsPage already makes with its club column, and for the same reason:
+   a row that loses its name mid-scroll stops being a row. */
+.ctr__card {
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--surface-card);
+  box-shadow: var(--shadow-card);
+}
+.ctr__scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.ctr__table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.ctr__table th,
+.ctr__table td {
+  white-space: nowrap;
+}
+.ctr__namehead,
+.ctr__name {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  min-width: 168px;
+}
+.ctr__namehead {
+  z-index: 2;
+  padding: 7px 10px;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.ctr__agehead {
+  padding: 7px var(--space-2);
+  text-align: right;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.ctr__age {
+  padding: 6px var(--space-2);
+  text-align: right;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  background: var(--surface-card);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.ctr__yearhead {
+  padding: 7px 10px;
+  vertical-align: bottom;
+  text-align: right;
+  background: var(--bg-page);
+  border-bottom: var(--bw-hair) solid var(--border-rule);
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-heading);
+}
+.ctr__yearhead--now {
+  color: var(--award-ink);
+}
+
+.ctr__group td {
+  padding: 8px 10px 5px;
+  border-top: var(--bw-heavy) solid var(--navy);
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-body);
+}
+.ctr__name {
+  padding: 6px 10px;
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+.ctr__player {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ctr__pos {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-xs);
+  background: var(--ink-2);
+  color: var(--text-on-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-caps);
+}
+.ctr__pos--rotation {
+  background: var(--navy);
+}
+.ctr__pos--bullpen {
+  background: var(--award-ink);
+}
+.ctr__pos--offRoster {
+  background: var(--graphite-soft);
+}
+.ctr__playername {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--fs-ui);
+  color: var(--text-heading);
+}
+.ctr__terms {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+}
+
+/* Cell state says how FIRM the money is, never how much: cream guaranteed,
+   inset arbitration, amber an option nobody has exercised, clay a player's own
+   call, and pencil hatch a year the club has no hold at all. That last one is
+   the point of the whole grid — the hatch is where a book runs out. */
+.ctr__cell {
+  padding: 6px 10px;
+  text-align: right;
+  border-top: var(--bw-hair) solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+}
+.ctr__cell--salary,
+.ctr__cell--guaranteed {
+  background: var(--surface-card);
+  color: var(--text-heading);
+}
+.ctr__cell--arbitration {
+  background: var(--surface-inset);
+  color: var(--text-muted);
+}
+.ctr__cell--option {
+  background: var(--award-soft);
+  color: var(--award-ink);
+}
+.ctr__cell--other {
+  background: var(--clay-soft);
+  color: var(--clay-deep);
+}
+.ctr__cell--free,
+.ctr__cell--none {
+  padding: 0;
+  background-color: var(--bg-page);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--bg-page) 0,
+    var(--bg-page) 5px,
+    var(--rule-soft) 5px,
+    var(--rule-soft) 7px
+  );
+}
+.ctr__code {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+
+.ctr__subtotal td {
+  padding: 5px 10px;
+  text-align: right;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  background: var(--bg-page);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  color: var(--text-caption);
+}
+.ctr__subtotal th {
+  padding: 5px 10px;
+  text-align: right;
+  border-top: var(--bw-hair) solid var(--border-rule);
+  background: var(--bg-page);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite-soft);
+}
+
+.ctr__foot th,
+.ctr__foot td {
+  padding: 10px;
+  border-top: var(--bw-heavy) solid var(--seal);
+  background: var(--ink-0);
+  color: var(--text-on-ink);
+}
+.ctr__foot th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: var(--fs-small);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+}
+.ctr__foot td {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  font-weight: var(--w-bold);
+}
+
+/* ------------------------------------------------------------------- key */
+.ctr__key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-3) 0 var(--space-2);
+}
+.ctr__keyitem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.ctr__swatch {
+  width: 26px;
+  height: 15px;
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-xs);
+  background: var(--surface-card);
+}
+.ctr__swatch--arbitration {
+  background: var(--surface-inset);
+}
+.ctr__swatch--option {
+  border-color: var(--award-line);
+  background: var(--award-soft);
+}
+.ctr__swatch--free {
+  background-color: var(--bg-page);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--bg-page) 0,
+    var(--bg-page) 5px,
+    var(--rule-soft) 5px,
+    var(--rule-soft) 7px
+  );
+}
+
+@media (min-width: 740px) {
+  .ctr__wall {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ctr__table {
+    min-width: 0;
+  }
+  .cliff__track {
+    height: 96px;
+  }
+}
