@@ -313,7 +313,13 @@ const BUDGETS = {
   // integer independently, the same harmless collision 62- and 65- already
   // carry. index.css names every partial in its own explicit order, so the
   // prefix is a label, not a cascade position.
-  'src/styles': 93,
+  //
+  // 93 -> 95 for `70-contracts-grid.css` and `71-salaries-league.css`: the club
+  // ledger at /team/{id}/contracts and the thirty-club board at /salaries. Two
+  // partials rather than one because they are two routes — each is imported by
+  // its own screen and neither ships on the other's chunk — and this directory
+  // cannot nest without breaking the ordering the exception above protects.
+  'src/styles': 95,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -368,7 +374,11 @@ const BUDGETS = {
   // one module answers "this club's fifty splits", the other "this split's
   // thirty clubs", and merging them would put a page-sized fan-out fetch in the
   // module every Numbers tab loads. Flat for the manifest reason above.
-  'src/api': 99,
+  // +1 for salaries.js — the club-ledger and league-rollup readers behind the
+  // two new money pages. Flat for the manifest reason above: check-spoiler-
+  // manifest classifies the flat set, and a subdirectory would quietly take a
+  // new module out of the thing that proves it carries a classification at all.
+  'src/api': 100,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -505,7 +515,12 @@ const BUDGETS = {
   // ranks), here for exactly the reason the entry above gives: a generator is
   // a top-level script, so importing one RUNS it, and this is the half worth
   // pinning with tests (test/team-records.test.js).
-  'scripts/lib': 20,
+  // +1 for salaries.mjs — gen-salaries.mjs's pure roll-up (cell kinds, per-year
+  // totals, the league board), here for the same reason as the two entries
+  // above: importing the generator would RUN it, so the arithmetic the two
+  // money pages print has to live beside it to be testable at all
+  // (test/salaries.test.js).
+  'scripts/lib': 21,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
@@ -525,7 +540,10 @@ const BUDGETS = {
   // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
   // set. It is not a team-hub screen and does not belong in src/screens/team/,
   // which holds the tabs of one club's page.
-  'src/screens': 43,
+  // +1 for SalariesPage.jsx — the league salary board, one route, one screen,
+  // the same shape as StandingsPage.jsx beside it. The club-scoped half of the
+  // same feature is a team-hub TAB and correctly went to src/screens/team/.
+  'src/screens': 44,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

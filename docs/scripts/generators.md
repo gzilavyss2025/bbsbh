@@ -522,6 +522,15 @@ don't run these by hand.
   Cot's freshness dates, and writes every bucket so an unmatched player is a
   normal null result rather than a 404. App reads it via
   `src/api/person/contracts.js`.
+- `fever/gen-salaries.mjs` → `public/data/team-contracts/{teamId}.json` +
+  `public/data/salaries.json` — one contract ledger per club and one league
+  rollup, for the Contracts tab and `/salaries`. DERIVED, not re-fetched: it
+  reads the shards `fever/gen-player-contracts.mjs` just wrote, which is why it
+  MUST run directly after that step in the nightly workflow. Its one live call is
+  to statsapi for the 40-man rosters, hydrated with season pitching lines so an
+  arm can be told apart as a starter or a reliever (the contract feed only ever
+  says "P"). The arithmetic is pure and lives in `scripts/lib/salaries.mjs`, so
+  `test/salaries.test.js` can pin it. App reads it via `src/api/salaries.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

@@ -19,7 +19,8 @@ import {
 
 // The report pages as they stood before PAGE_GROUPS existed, plus
 // /situational-records, which landed on main (#742) while the regrouping was in
-// flight, and the five broadcast reports that came with src/screens/around-the-game/.
+// flight, the five broadcast reports that came with src/screens/around-the-game/,
+// and /salaries, the league money board that came with the Contracts tab.
 // Typed out rather than derived, so this test fails if the flattening loses
 // one — deriving the expectation from the thing under test would assert
 // nothing.
@@ -32,6 +33,7 @@ const PATHS_BEFORE_GROUPING = [
   '/standings',
   '/leaders',
   '/situational-records',
+  '/salaries',
   '/fouls',
   '/prospects',
   '/rehab',

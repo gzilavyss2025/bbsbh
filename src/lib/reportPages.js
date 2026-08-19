@@ -53,6 +53,12 @@ export const PAGE_GROUPS = [
       // board read across the league — not next to the club pages it is
       // reached from.
       { label: 'Situational Records', path: '/situational-records' },
+      // Money, read across the league: who is paid the most, what each club
+      // spends, where the spend goes by position. Here rather than under
+      // "Around the game" because it is a season-to-date board over the whole
+      // league, the same gesture as the two rows above it; a club's own book is
+      // the Contracts tab on its team page, reached from this page's club rail.
+      { label: 'Salaries', path: '/salaries' },
       { label: 'Foul Tracker', path: '/fouls' },
       { label: 'Umpire Rankings', path: '/umpires' },
     ],
@@ -232,6 +238,7 @@ export const FOOTER_TRAIL = [
 // address and the name are allowed to differ, and this table is the only place
 // that has to know they do.
 export const REPORT_ROUTES = {
+  salaries: 'salaries',
   attendance: 'attendance',
   'pace-of-play': 'pace',
   doubleheaders: 'doubleheaders',
