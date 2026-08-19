@@ -219,9 +219,12 @@ for each generator; the reader modules:
   MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
   PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
   Kept OUT of the PWA precache (grows each game day).
-- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; all
-  30 MLB clubs as of this writing), the Game notes button opens an in-app modal
-  (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF. Parses
+- `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a
+  `CONFIG` map keyed by teamId; all 30 MLB clubs), it parses the narrative blurbs
+  out of the PDF for an in-app modal (`WhatsBrewingModal.jsx`). No game surface
+  opens that modal any more — the parse proved too brittle across the clubs'
+  shifting templates, so every Game Notes button links straight to the PDF; the
+  one caller left is the unlisted `/game-notes-debug` QA page. Parses
   client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
   main bundle — see `vite.config.js`) rather than in the cron, because tonight's
   note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
@@ -230,8 +233,8 @@ for each generator; the reader modules:
   full-width, most other clubs) — plus font/geometry tunables (single zone or a
   `columns:` array for multi-column pages). `hasWhatsBrewing`/
   `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
-  teamId→title map) rather than here, so `TeamInfo.jsx`'s gate check can import
-  them statically without pulling this whole parser out of its lazy chunk; add a
+  teamId→title map) rather than here, so a caller's gate check can import them
+  statically without pulling this whole parser out of its lazy chunk; add a
   club = add a `CONFIG` entry here + a title there (not a new parser). See
   `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
   and `docs/whats-brewing.md` for parsing details + the Node harness
@@ -583,8 +586,27 @@ for each generator; the reader modules:
   Cot's-to-MLBAM reconciliation. `scripts/fever/gen-player-contracts.mjs` reduces the nightly
   league feed into `public/data/player-contracts/{00..99}.json`, bucketed by
   `personId % 100`; a profile downloads one small shard and receives null on a
-  missing source/player. The card attributes both Fever and Cot's and is omitted
+  missing source/player. Each record also carries `payRank` — the player's
+  positional pay rank (`{pos, rank, of, tied, onMinimum, fractionBelow}`, plus
+  `also` for the two-way player who holds a second one), or null when he cannot
+  be placed. It is precomputed nightly, never derived in the app; the pools and
+  the calls behind them are `scripts/lib/contract-pay-rank.mjs`. The card
+  attributes both Fever and Cot's and is omitted
   from historical `asOf` player pages, where today's contract would be anachronistic.
+- `salaries.js` — the same contract facts, rolled up two ways: one ledger per
+  club in `public/data/team-contracts/{teamId}.json` (the Contracts tab at
+  `/team/{id}/contracts`) and one league file in `public/data/salaries.json`
+  (`/salaries`). Written by `scripts/fever/gen-salaries.mjs`, which derives both
+  from the shards above rather than calling Fever again — a club ledger and a
+  player card must never disagree about the same contract — joined to the 40-man
+  roster for the one thing the contract feed does not carry, a position (and, off
+  the same roster row, an age). A player in the feed with no 40-man place is not
+  dropped: he is money the club still owes with nobody to show for it, which is
+  what the ledger's "Off roster" band is for. Both readers fail soft to an honest
+  "not published yet" card. The money rule both files run on: a dollar is
+  committed only when Cot's states a dollar, so an out-year written as a CODE
+  (`A1`..`A4`, `OPT`, `FA`) is a status and adds nothing to a total — which is
+  what makes a club's later columns fall away.
 - `prospectTrend.js` — bbsbh's OWN level-relative OPS/ERA percentile, from
   `public/data/prospect-trend.json` (`gen-prospect-trend.mjs`). Contrast
   `feverRadar.js` above: not a third party, not attributed, and not an MLE —

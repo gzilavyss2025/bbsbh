@@ -1,5 +1,5 @@
 // Coverage for hiddenTeamTabs (src/screens/team/data/shared.js) — which of the
-// team hub's five tab buttons a club with a thin feed should not render, per
+// team hub's six tab buttons a club with a thin feed should not render, per
 // .scratch/team-page-ia/issues/08-polish-and-tests.md. Decided cheaply off the
 // `team` object every tab's loadTeamIdentity already fetches, never a tab's own
 // payload.
@@ -12,22 +12,25 @@ test('an MLB club never hides a tab', () => {
   assert.deepEqual(hiddenTeamTabs(team), new Set())
 })
 
-test('a normal MiLB affiliate (parent org + a real league) hides nothing', () => {
+// Contracts is the one tab hidden for a reason that has nothing to do with a
+// thin feed: Cot's covers the major leagues only, so every MiLB club's ledger
+// would be empty. A tab that is always empty is not a tab.
+test('every MiLB club hides the Contracts tab, however complete its feed', () => {
   const team = { sport: { id: 11 }, league: { id: 117 }, parentOrgId: 158 }
-  assert.deepEqual(hiddenTeamTabs(team), new Set())
+  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts']))
 })
 
 test('a MiLB team with no parent org hides the Minors tab', () => {
   const team = { sport: { id: 11 }, league: { id: 117 }, parentOrgId: null }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['minors']))
+  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'minors']))
 })
 
 test('a MiLB team with no league at all hides the Numbers tab', () => {
   const team = { sport: { id: 11 }, league: null, parentOrgId: 158 }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['numbers']))
+  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'numbers']))
 })
 
 test('a MiLB team missing both hides both, and Roster/Games never hide', () => {
   const team = { sport: { id: 16 }, league: null, parentOrgId: null }
-  assert.deepEqual(hiddenTeamTabs(team), new Set(['minors', 'numbers']))
+  assert.deepEqual(hiddenTeamTabs(team), new Set(['contracts', 'minors', 'numbers']))
 })

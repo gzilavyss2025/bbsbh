@@ -3,12 +3,12 @@ import { useNav } from '../lib/nav.js'
 import { teamTabPath } from '../lib/route.js'
 import { isMlbTeamId } from '../lib/teams.js'
 import { AsyncGate } from '../components/ui/AsyncGate.jsx'
-import { TeamLeaders } from '../components/teamstats/TeamLeaders.jsx'
+import { TeamLeadersLedger } from '../components/teamstats/TeamLeadersLedger.jsx'
 import { MilbAlumni } from '../components/teamstats/MilbAlumni.jsx'
 import { TeamScoreCard } from '../components/teamstats/TeamScoreCard.jsx'
 import { TeamTransactionsCard } from '../components/transactions/TeamTransactionsCard.jsx'
 import { ChevronLink } from '../components/ui/ChevronLink.jsx'
-import { FEATURED_CATEGORIES } from '../api/teamLeaders.js'
+import { LEDGER_HITTING, LEDGER_PITCHING } from '../api/teamLeaders.js'
 import { TeamHubShell } from './team/TeamHubShell.jsx'
 import { loadOverview } from './team/data/loadOverview.js'
 import { hiddenTeamTabs } from './team/data/shared.js'
@@ -22,6 +22,7 @@ import { BallparkCard } from './team/modules/ballpark/BallparkCard.jsx'
 // How many rows each preview shows. A preview is a DOOR, not a smaller
 // duplicate — every one of these ends in a link to the tab that holds the whole
 // thing, and none of them is the last word on anything.
+// Leaders counts per SIDE, not in total — three batting and three pitching.
 const PREVIEW_LEADER_CATEGORIES = 3
 const PREVIEW_TRANSACTIONS = 3
 // Lighter than the Games tab's own rails on purpose — loadOverview.js's own
@@ -30,8 +31,8 @@ const PREVIEW_HIGHLIGHTS = 6
 const PREVIEW_PHOTOS = 6
 
 // The door itself: one text link under a preview, built from the same shared
-// ChevronLink TeamLeaders' own built-in door uses (reused as-is below rather
-// than doubled up). It is a link, not a card — the tab bar, the shelf row and
+// ChevronLink TeamLeadersLedger's own built-in door uses (reused as-is below
+// rather than doubled up). It is a link, not a card — the tab bar, the shelf row and
 // the Org index tile remain the only new chrome this rebuild introduces (see
 // the PRD's non-negotiable 4).
 function PreviewDoor({ label, onClick }) {
@@ -192,16 +193,17 @@ export function TeamPage({ id, asOf, sportId }) {
         </>
       )}
 
-      {/* Leaders — three featured categories. Its own "See all ›" is the door
-          (to Numbers, which carries the full featured set and its own link on
-          to /team/{id}/leaders), so this preview needs no PreviewDoor. */}
-      <TeamLeaders
+      {/* Leaders — three categories a side, hitting and pitching both. A PREFIX
+          of each ledger list rather than the head of one mixed list, which is
+          what made this door three hitters and no pitchers. Its own "See all ›"
+          is the door (to Numbers, which carries all six a side and its own link
+          on to /team/{id}/leaders), so this preview needs no PreviewDoor. */}
+      <TeamLeadersLedger
         pool={leaderPool}
-        categories={FEATURED_CATEGORIES.slice(0, PREVIEW_LEADER_CATEGORIES)}
+        hitting={LEDGER_HITTING.slice(0, PREVIEW_LEADER_CATEGORIES)}
+        pitching={LEDGER_PITCHING.slice(0, PREVIEW_LEADER_CATEGORIES)}
         onSeeAll={() => go('numbers')}
-        showTeamAbbr={false}
         injuredIds={injuredIds}
-        horizontal
       />
 
       {/* Latest moves — the three most recent transaction stories, paging off

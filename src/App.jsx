@@ -101,6 +101,10 @@ const PostseasonSeriesPage = lazyNamed(
   () => import('./screens/PostseasonSeriesPage.jsx'),
   'PostseasonSeriesPage',
 )
+const PostseasonRacePage = lazyNamed(
+  () => import('./screens/PostseasonRacePage.jsx'),
+  'PostseasonRacePage',
+)
 const TradeDeadlinePage = lazyNamed(
   () => import('./screens/TradeDeadlinePage.jsx'),
   'TradeDeadlinePage',
@@ -118,6 +122,7 @@ const AllStarLegacyPage = lazyNamed(
   'AllStarLegacyPage',
 )
 const StandingsPage = lazyNamed(() => import('./screens/StandingsPage.jsx'), 'StandingsPage')
+const SalariesPage = lazyNamed(() => import('./screens/SalariesPage.jsx'), 'SalariesPage')
 const FoulTrackerPage = lazyNamed(
   () => import('./screens/FoulTrackerPage.jsx'),
   'FoulTrackerPage',
@@ -134,6 +139,7 @@ const TeamLeadersPage = lazyNamed(
 const RosterTab = lazyNamed(() => import('./screens/team/RosterTab.jsx'), 'RosterTab')
 const GamesTab = lazyNamed(() => import('./screens/team/GamesTab.jsx'), 'GamesTab')
 const NumbersTab = lazyNamed(() => import('./screens/team/NumbersTab.jsx'), 'NumbersTab')
+const ContractsTab = lazyNamed(() => import('./screens/team/ContractsTab.jsx'), 'ContractsTab')
 const MinorsTab = lazyNamed(() => import('./screens/team/MinorsTab.jsx'), 'MinorsTab')
 // Stamp In (ADR-0042) — NOT a sixth tab. A standalone page under the team's
 // address, reached only from the Schedule card's button on the Games tab, and
@@ -302,6 +308,8 @@ export default function App() {
     content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {
     content = <PostseasonSeriesPage seriesId={route.seriesId} />
+  } else if (route.name === 'postseason-race') {
+    content = <PostseasonRacePage />
   } else if (route.name === 'trade-deadline') {
     content = <TradeDeadlinePage />
   } else if (route.name === 'trade-deadline-season') {
@@ -312,6 +320,8 @@ export default function App() {
     content = <AllStarLegacyPage />
   } else if (route.name === 'standings') {
     content = <StandingsPage />
+  } else if (route.name === 'salaries') {
+    content = <SalariesPage />
   } else if (route.name === 'fouls') {
     content = <FoulTrackerPage />
   } else if (route.name === 'admin') {
@@ -401,6 +411,8 @@ export default function App() {
     content = <GamesTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-numbers') {
     content = <NumbersTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
+  } else if (route.name === 'team-contracts') {
+    content = <ContractsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-minors') {
     content = <MinorsTab id={route.id} asOf={route.asOf} sportId={route.sportId} />
   } else if (route.name === 'team-stamp-in') {

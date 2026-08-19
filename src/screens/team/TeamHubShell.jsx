@@ -54,15 +54,14 @@ const TAB_TITLE = {
   roster: 'Roster',
   games: 'Games',
   numbers: 'Numbers',
+  contracts: 'Contracts',
   minors: 'Minors',
 }
 
-// The club's most recent official press-notes PDF — a direct link-out (never
-// the What's Brewing in-app modal the lineup page's Game Notes button opens for
-// calibrated clubs; the team hub always jumps straight to the PDF, since
-// there's no single game's blurbs to parse). No gameDate, so resolveGameNotes
-// falls through to the newest note on file rather than one tied to tonight's
-// game. MLB only — see gameNotes.js.
+// The club's most recent official press-notes PDF — a direct link-out, the same
+// as the lineup page's Game Notes button. No gameDate, so resolveGameNotes falls
+// through to the newest note on file rather than one tied to tonight's game.
+// MLB only — see gameNotes.js.
 function GameNotesLink({ teamId }) {
   const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
   if (!notes?.url) return null
@@ -100,6 +99,7 @@ export function TeamHubShell({
   sportId = null,
   active,
   hiddenTabs,
+  datable = true,
   children,
 }) {
   const navigate = useNav()
@@ -285,7 +285,16 @@ export function TeamHubShell({
 
         {children}
 
-        <AsOfBanner asOf={asOf} sportId={sportId} />
+        {/* `datable` is false for a tab whose data does not move with the
+            cutoff. The Contracts tab is the one: a contract ledger is a
+            SEASON's book, not a day's, so loadContracts.js is deliberately not
+            keyed on `asOf` — and a banner reading "Stats entering July 15" over
+            today's figures would be asserting something about the page that is
+            not true of it. On a live visit the banner's other face is just as
+            wrong: "View as of a date" invites the reader to date a page that
+            will not date. Dating the ledger for real would need Cot's contract
+            HISTORY, which the feed does not carry. */}
+        {datable && <AsOfBanner asOf={asOf} sportId={sportId} />}
       </div>
     </LinkScope>
   )

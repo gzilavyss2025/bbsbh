@@ -15,14 +15,15 @@
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
+//   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
 //   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
 //   '/all-star-rosters'                 -> { name: 'all-star-rosters' }
 //   '/all-star-legacy'                  -> { name: 'all-star-legacy' }
 //   '/standings'                        -> { name: 'standings' }
-//   '/attendance' '/pace-of-play' '/farm-system-rankings' '/bullpen-availability'
-//   '/doubleheaders'                    -> the five broadcast reports (REPORT_ROUTES, reportPages.js)
+//   '/salaries' '/attendance' '/pace-of-play' '/farm-system-rankings'
+//   '/bullpen-availability' '/doubleheaders' -> single-segment report pages (REPORT_ROUTES, reportPages.js)
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
@@ -54,7 +55,7 @@
 //   '/photos'                            -> { name: 'photos' }   (high-res game photo finder, unsealed — see root CLAUDE.md)
 //   '/photos/{gamePk}'                   -> { name: 'photos', gamePk }   (same page, deep-linked to one game)
 //   '/team/{id}/leaders'                -> { name: 'team-leaders', id, asOf, sportId }
-//   '/team/{id}/{roster|games|numbers|minors}'
+//   '/team/{id}/{roster|games|numbers|contracts|minors}'
 //                                       -> { name: 'team-{tab}', id, asOf, sportId }
 //   '/team/{id}/stamp-in'               -> { name: 'team-stamp-in', id, asOf, sportId }
 //                                          (a club's played season, every result showing, one
@@ -103,6 +104,7 @@ const TEAM_TAB_ROUTES = {
   roster: 'team-roster',
   games: 'team-games',
   numbers: 'team-numbers',
+  contracts: 'team-contracts',
   minors: 'team-minors',
 }
 
@@ -110,7 +112,18 @@ export function parseRoute(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)
   const q = new URLSearchParams(query)
-  const asOf = q.get('d') || null
+  // A `?d=` that is not a real calendar date degrades to LIVE, never rides on.
+  // Every dated loader funnels it into dayBefore(), whose
+  // `new Date(...).toISOString()` THROWS on an unparseable value, and the throw
+  // surfaced three different ways: the team hub and /player showed "Couldn't
+  // load this…", /leaders drew a banner reading "Stats entering Invalid Date",
+  // and /situational-records rendered a blank page. A regex is not enough —
+  // '2026-02-30' matches the shape and still makes an Invalid Date — so this
+  // takes the same calendar-validity check the date picker already uses.
+  // Same stance the bare-date slate below already takes: a hand-mangled date
+  // falls through to the live page rather than erroring on it.
+  const raw = q.get('d')
+  const asOf = isRealDate(raw) ? raw : null
   const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
   // A bare 8-digit date is the slate paged to that day ('/07172026') — the
@@ -133,6 +146,8 @@ export function parseRoute(url) {
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
+  if (parts.length === 1 && parts[0] === 'postseason-race')
+    return { name: 'postseason-race' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
     return { name: 'trade-deadline' }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')
@@ -171,7 +186,7 @@ export function parseRoute(url) {
   // shape as every other unknown second segment here.
   if (parts.length === 1 && parts[0] === 'profile') return { name: 'profile' }
   if (parts.length === 1 && parts[0] === 'umpires') return { name: 'umpire-rankings' }
-  // The four broadcast reports — table in lib/reportPages.js, beside the menu
+  // Single-segment report pages — table in lib/reportPages.js, beside the menu
   // rows that link to them, so an address and its parse cannot drift.
   if (parts.length === 1 && REPORT_ROUTES[parts[0]]) return { name: REPORT_ROUTES[parts[0]] }
   // Situational-record explorer. The old /team-records address remains an
@@ -431,10 +446,14 @@ export function apiDateToUrl(api) {
   return `${m}${d}${y}`
 }
 
-// Whether a YYYY-MM-DD string names a real calendar date — a Date round-trip
-// catches out-of-range months/days (e.g. '2026-13-45', '2026-02-30') that a
-// pure digit-count regex lets through.
+// Whether a string is a real calendar date IN THE API'S OWN SHAPE. Two checks,
+// and both earn their place: the round-trip catches out-of-range months/days
+// ('2026-13-45', '2026-02-30') that a digit-count regex lets through, and the
+// regex catches an unpadded date ('2026-7-5') that names a real day but is not
+// what the feed writes — `new Date('2026-7-5T00:00:00Z')` is an Invalid Date,
+// so anything that passed it on would throw a step later.
 function isRealDate(api) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(api ?? '')) return false
   const [y, m, d] = (api || '').split('-').map(Number)
   const dt = new Date(y, m - 1, d)
   return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
@@ -565,8 +584,8 @@ export function teamLeadersPath(id, opts = {}) {
   return `/team/${id}/leaders${linkQuery(opts)}`
 }
 // Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
-// 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}' the tabs
-// hang off.
+// 'contracts' / 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'
+// the tabs hang off.
 // Goes through linkQuery like every other team link: a team page opened at a
 // dated URL must keep `?d=`/`?s=` across a tab switch, or the same visit would
 // answer "entering April 1" on one tab and "today" on the next.

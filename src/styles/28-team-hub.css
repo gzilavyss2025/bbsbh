@@ -15,8 +15,8 @@
    real logo art unaltered on top, name and the club's record in games it
    wore it below. Native overflow-x scroll gives touch/trackpad panning;
    useDragScroll (JerseyCombos.jsx) adds mouse click-drag. Same carousel
-   idiom as .tlead__grid--horizontal / .txcard__scroll elsewhere on this
-   page, rather than a fourth different scrolling pattern. */
+   idiom as .txcard__scroll elsewhere on this page, rather than a third
+   different scrolling pattern. */
 .jerseydeck {
   display: flex;
   gap: var(--space-3);

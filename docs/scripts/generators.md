@@ -522,6 +522,36 @@ don't run these by hand.
   Cot's freshness dates, and writes every bucket so an unmatched player is a
   normal null result rather than a 404. App reads it via
   `src/api/person/contracts.js`.
+
+  It also attaches each player's POSITIONAL PAY RANK (`payRank`) — "12th of 259
+  starting pitchers". The Fever feed carries no position, so the generator makes
+  one batched `/people` call per 100 players, hydrating season and career
+  pitching in the same request; that hydrate is what lets pitchers split into SP
+  and RP, since `primaryPosition` returns a flat `P`. A failed chunk costs those
+  players their rank and nothing else. The ranking itself, and the five
+  judgement calls behind it, live in `scripts/lib/contract-pay-rank.mjs` — read
+  that file's header before changing a threshold. In short: outfielders are one
+  pool; estimated salaries are ranked; a prorated part-season figure (44% of the
+  feed) is lifted to the league minimum rather than dropped, with `onMinimum`
+  marking that tied band so the card can say "on the league minimum" instead of
+  quoting a rank the tie cannot support; a pool under ten players is not ranked;
+  and a season with no seeded league minimum ranks nobody. A two-way player is
+  ranked in BOTH his pools, hitting first, with the second in `also`.
+- `fever/gen-salaries.mjs` → `public/data/team-contracts/{teamId}.json` +
+  `public/data/salaries.json` — one contract ledger per club and one league
+  rollup, for the Contracts tab and `/salaries`. DERIVED, not re-fetched: it
+  reads the shards `fever/gen-player-contracts.mjs` just wrote, which is why it
+  MUST run directly after that step in the nightly workflow. Its one live call is
+  to statsapi for the 40-man rosters, hydrated with season pitching lines so an
+  arm can be told apart as a starter or a reliever (the contract feed only ever
+  says "P"). Those thirty requests go through `scripts/lib/concurrency.mjs` at
+  the house limit of 8, and — unlike most callers of that helper — a club that
+  comes back `null` ABORTS the run: a missing roster would not empty the page, it
+  would move that club's whole squad into the "Off roster" band and read as money
+  owed to nobody. The arithmetic is pure and lives in `scripts/lib/salaries.mjs`,
+  so `test/salaries.test.js` can pin it, and the money rule it enforces (an
+  out-year code is a status, never an amount) is ADR-0052. App reads it via
+  `src/api/salaries.js`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits

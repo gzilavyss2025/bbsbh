@@ -85,7 +85,7 @@ const BUDGETS = {
   'src/styles/21-box-score.css': 800, // 771 — the Three Stars card split out to 21a-box-score-stars.css,
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
-  'src/styles/23-box-score-detail.css': 700, // 637
+  'src/styles/23-box-score-detail.css': 800, // 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.
   'src/styles/26-player-page.css': 1200, // 1125 — the Trophy Case split out to 67-trophy-case.css
   'src/styles/27-player-position-innings.css': 700, // 636 — "Pitches like" / "Hits like" moved to 51-similar-players.css
   'src/styles/28-team-hub.css': 900, // 859 — the identity hero split out to 28a-team-hub-hero.css
@@ -121,6 +121,15 @@ const BUDGETS = {
   // the wrong instrument for a documented lookup table. The thing worth
   // watching here is the BUDGET NUMBERS, and check-dir-size.mjs watches those
   // itself.
+  // 600 -> 620 for the `?d=` calendar-validity guard. route.js had been held at
+  // EXACTLY 600 for several commits, which is why this is written down rather
+  // than quietly absorbed: the guard is a bug fix, not a feature, and the nine
+  // lines are the reason it exists — an unparseable date threw out of
+  // dayBefore() and took the team hub, /player, /leaders and
+  // /situational-records down in three different ways. A one-line guard with no
+  // explanation in a file where every other branch is explained would be the
+  // thing a later reader deletes.
+  'src/lib/route.js': 620, // 614
   'scripts/check-dir-size.mjs': 700, // 608
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):
@@ -139,6 +148,7 @@ const BUDGETS = {
   // that would shadow it, and mainOverrideLogoUrl's, which is what routes
   // Main's tile through 'main-recolor'.
   'src/lib/teams.js': 1225, // 1212
+  'src/lib/route.js': 700, // 602 — one more parse branch and path doc line for '/postseason-race'
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them

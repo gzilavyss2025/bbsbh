@@ -253,12 +253,13 @@
   color: var(--bar-text, var(--graphite-soft));
 }
 
-/* Transactions and Team Leaders each carry a swipeable deck that
-   deliberately bleeds past the card gutter (.txcard__scroll,
-   .tlead__grid--horizontal — see the .txcard comment above) — a bordered
+/* Transactions carries a swipeable deck that deliberately bleeds past the
+   card gutter (.txcard__scroll — see the .txcard comment above) — a bordered
    card whose own content escapes its border reads as broken, not
-   deliberate, so these two stay unwrapped, plain-caption headers rather
-   than a bolted bar, same as before theming existed. */
+   deliberate, so it stays an unwrapped, plain-caption header rather than a
+   bolted bar, same as before theming existed. Team Leaders sat here too while
+   it rendered a deck of its own; the hub's ledger (.tledg) does not bleed, so
+   only Transactions still needs the exemption. */
 
 /* Header buttons/pills/toggles ride on a themed bar as neutral opaque
    chips — the same "card floating on the bar" convention the lineup page's

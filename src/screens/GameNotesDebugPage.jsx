@@ -16,6 +16,11 @@ import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
 // layout), plus a shortcut straight to that modal for its most recent note,
 // so calibration work can be scanned/spot-checked club by club without
 // digging up a live game for each one. No scores anywhere on this page.
+//
+// This is now the ONLY caller of that modal: the game surfaces link straight to
+// the club's PDF, because the parse was too brittle across the clubs' shifting
+// templates to sit between the reader and the notes (see whatsBrewing.js's
+// header). The page is the sandbox for getting a club's calibration right again.
 export function GameNotesDebugPage() {
   useDocumentTitle('Game Notes debug')
   const [openTeamId, setOpenTeamId] = useState(null)

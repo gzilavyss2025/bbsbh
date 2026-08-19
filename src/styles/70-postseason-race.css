@@ -1,0 +1,136 @@
+/* ---------------------------------------------------------- Postseason
+   Race (PostseasonRacePage.jsx) — "if the season ended today," as two
+   self-contained AL/NL brackets (Wild Card → Division Series →
+   Championship — see the screen's own header for why there's no shared
+   World Series column), each followed directly by its own wild-card table.
+   Reuses Postseason History's `.seedcard`/`.seedrow` card family and
+   `.psbracket__col`/`.psbracket__collabel`/`.psbracket__lanes` pieces
+   (34-postseason.css) and the `.standings`/`.lgstand` table family
+   (30-standings.css) — this file holds only what's new: the per-league
+   3-column mini-board, the DS/CS pending/TBD treatments, and the page
+   furniture. */
+
+.psrace__asof {
+  margin: 4px 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+
+/* American League, then National League, always full width — never side by
+   side. Splitting each league into its own bracket only pays off if each one
+   gets the whole row to stay readable; halving the width back at a desktop
+   breakpoint would just reintroduce the cramped-column truncation problem
+   the split was meant to fix. */
+.psrace__leagues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* One league's own 3-column bracket. */
+.psrace__miniboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 var(--space-2);
+  margin-top: 4px;
+}
+.psrace__ministack {
+  margin-top: 4px;
+}
+
+/* A column's connector stub — always right-pointing, since within one
+   league's own bracket a column only ever feeds the one to its right (no
+   converging-from-two-sides shape here to borrow 34-postseason.css's
+   `--al`/`--nl` connector direction from). Deliberately a new modifier
+   rather than reusing `.psbracket__col--al` for this: that class ALSO
+   drives the AL/NL label color there, and here label color and connector
+   direction are independent (an NL column still reads left-to-right). */
+.psrace__col--connect {
+  position: relative;
+}
+.psrace__col--connect .seedcard::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -9px;
+  width: 8px;
+  height: var(--bw-hair);
+  background: var(--border-rule);
+}
+
+/* A real Wild Card matchup card holds two independently-tappable SeedRow
+   links rather than opening a series (there's no series yet) — the card
+   itself carries no affordance of its own. */
+.psrace__matchup {
+  cursor: default;
+}
+
+/* A Division Series card: a real, clickable SeedRow (the bye seed) over a
+   PendingRow (the fixed-but-unplayed Wild Card matchup that feeds this
+   slot). `.psrace__ds` only overrides the pointer — `.seedcard`'s own
+   column layout and border already fit this card unchanged. */
+.psrace__ds {
+  cursor: default;
+}
+.seedrow--pending {
+  color: var(--text-caption);
+}
+.seedrow--pending .seedrow__seed {
+  color: var(--text-caption);
+}
+.seedrow__pendteams {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.seedrow__pendslash {
+  color: var(--text-caption);
+  font-size: var(--fs-caption);
+}
+.seedrow__pendlabel {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-style: italic;
+  color: var(--text-caption);
+}
+
+/* A round nothing has been played for yet: dashed and muted, same visual
+   family as .seedcard--bye's "nothing to tap" treatment, but its own
+   modifier — a bye is a known team waiting out a round, while a TBD slot is
+   an unknown team. */
+.seedcard--tbd {
+  border-style: dashed;
+  opacity: 0.55;
+  cursor: default;
+}
+.seedrow--tbd {
+  justify-content: center;
+  color: var(--text-caption);
+  font-style: italic;
+}
+.seedrow--tbd .seedrow__seed {
+  color: var(--text-caption);
+}
+
+.psrace__tbdcaption {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-body);
+  color: var(--text-caption);
+  text-align: center;
+}
+
+/* The condensed wild-card table under each league's bracket — tighter top
+   margin than a full standalone section gets, since it's a continuation of
+   the bracket above it, not its own page section. */
+.psrace__minitable {
+  margin-top: var(--space-2);
+}
