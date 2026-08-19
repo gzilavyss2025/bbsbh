@@ -82,7 +82,7 @@ function buildFeed() {
 }
 
 test('a sac fly that also turns a double play is not charged an at-bat on the printable grid', () => {
-  const grid = scorecardPlays(buildFeed(), 'bottom')
+  const grid = scorecardPlays(buildFeed(), 'bottom', { through: Infinity })
   const albiesSlot = grid.slots[1] // slot 2
   assert.equal(albiesSlot.ab, 0, 'the sacrifice fly stays out of the AB tally even with a second runner retired')
   const inning3Col = grid.columns.findIndex((c) => c.inning === 3)

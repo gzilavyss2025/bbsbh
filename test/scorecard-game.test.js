@@ -85,7 +85,7 @@ test('the clamp holds: no card, no P/TP/LOB line, no scoreboard cell past `throu
   }
   // The away sheet is three innings in; the home sheet two. Both partial.
   const away = scorecardPlays(FEED, 'top', { through })
-  const awayFull = scorecardPlays(FEED, 'top')
+  const awayFull = scorecardPlays(FEED, 'top', { through: Infinity })
   assert.ok(placedCards(away).length > 0)
   assert.ok(away.totals.ab < awayFull.totals.ab)
 
@@ -111,7 +111,7 @@ test('the sheet agrees with the innings viewer’s own readers, inning by inning
     ['top', 'away', 'top'],
     ['bottom', 'home', 'bottom'],
   ]) {
-    const grid = scorecardPlays(FEED, side)
+    const grid = scorecardPlays(FEED, side, { through: Infinity })
     let tp = 0
     for (let n = 1; n <= 9; n++) {
       const line = grid.perInning[n]
@@ -143,7 +143,7 @@ test('a pinch runner’s run fills the ORIGIN batter’s diamond, with the PR pe
   // playEvent's `position`/`replacedPlayer` fields are what let the feed
   // builder alias Mitchell's baserunning back onto Bauers' card, so a
   // re-trimmed fixture that drops them regresses this exact test.
-  const grid = scorecardPlays(FEED, 'top')
+  const grid = scorecardPlays(FEED, 'top', { through: Infinity })
   const bauers = Object.entries(grid.slots[4].cells) // slot 5
     .map(([ci, card]) => ({ card, inning: grid.columns[Number(ci)].inning }))
     .find(({ card, inning }) => inning === 7 && card.batter?.last === 'Bauers')
@@ -154,7 +154,7 @@ test('a pinch runner’s run fills the ORIGIN batter’s diamond, with the PR pe
 })
 
 test('the finished scoreboard fills the FINAL block from the linescore totals', () => {
-  const sb = scorecardScoreboard(FEED)
+  const sb = scorecardScoreboard(FEED, { through: Infinity })
   assert.equal(sb.done, true)
   const away = revealTotals(FEED, 'away')
   const home = revealTotals(FEED, 'home')
@@ -188,7 +188,7 @@ test('visible innings match unlockedInnings at every mark (the two walks never d
 })
 
 test('the leadoff box names the next-due batter’s unused cell', () => {
-  const grid = scorecardPlays(FEED, 'top')
+  const grid = scorecardPlays(FEED, 'top', { through: Infinity })
   assert.ok(
     grid.leadoffMarks.length >= 7,
     `only ${grid.leadoffMarks.length} leadoff boxes on a 9-inning sheet`,
@@ -259,7 +259,7 @@ function skippedBottomFeed() {
 
 test('a skipped final bottom reads X once the game is done — and not before', () => {
   const feed = skippedBottomFeed()
-  const done = scorecardScoreboard(feed)
+  const done = scorecardScoreboard(feed, { through: Infinity })
   assert.equal(done.done, true)
   assert.equal(done.innings[8].home, 'X')
   assert.equal(done.innings[8].away, 0)
@@ -298,7 +298,7 @@ test('extra innings unlock scoreboard columns one at a time (ADR-0008)', () => {
 })
 
 test('the end-of-inning slash marks the box the half actually ENDED on', () => {
-  const grid = scorecardPlays(FEED, 'top')
+  const grid = scorecardPlays(FEED, 'top', { through: Infinity })
   const marked = placedCards(grid).filter(({ card }) => card.endsHalf)
   // One per played half of a 9-inning sheet.
   assert.equal(marked.length, 9)
@@ -526,4 +526,26 @@ test('a bat-around frontier widens its inning by the column its card needs', () 
     count = s.nextCount
   }
   assert.ok(sawSecondColumn, 'the 7th batted around, so a frontier card must have opened its second column')
+})
+
+// THE DEFAULT FAILS CLOSED (ADR-0047).
+//
+// These four builders used to default `through` to Infinity, so a caller that
+// forgot the option inked a finished game end to end. ADR-0047 already asserted
+// the Scorecard Lab "passes through: Infinity explicitly" — it did not, it rode
+// the default, which is precisely why a permissive default could not be trusted
+// to stay unused. A forgotten option must now draw a blank card, not a spoiler.
+test('a caller that forgets `through` gets nothing revealed, not everything', () => {
+  const grid = scorecardPlays(FEED, 'top')
+  assert.equal(placedCards(grid).length, 0, 'no at-bat may ink without a stated clamp')
+  assert.deepEqual(grid.totals, { ab: 0, h: 0, r: 0, rbi: 0 })
+  assert.equal(grid.leadoffMarks.length, 0)
+  for (let n = 1; n <= 9; n++) assert.equal(grid.perInning[n], null)
+
+  // The blank columns still draw — a sealed card is a card to write on.
+  assert.equal(grid.innings.length, selectRegulationInnings(FEED))
+
+  const sb = scorecardScoreboard(FEED)
+  assert.equal(sb.innings.every((cell) => cell?.runs == null), true, 'no scoreboard cell inks')
+  assert.deepEqual(scorecardPitchers(FEED, 'top'), [])
 })

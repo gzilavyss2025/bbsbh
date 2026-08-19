@@ -41,7 +41,12 @@ export function ScorecardLab() {
     [gamePk],
   )
   const view = useMemo(
-    () => (gamePk ? scorecardFull(loaded.data, side) : null),
+    // Infinity, said out loud. These builders default to -1 (nothing revealed)
+    // so a caller that forgets the option draws a blank card rather than inking
+    // a finished game end to end — ADR-0047, which already described the Lab as
+    // passing this explicitly. It did not; it rode the default, which is exactly
+    // why the default could not stay permissive.
+    () => (gamePk ? scorecardFull(loaded.data, side, { through: Infinity }) : null),
     [gamePk, loaded.data, side],
   )
 

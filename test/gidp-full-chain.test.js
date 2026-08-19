@@ -124,7 +124,7 @@ test("the forced lead runner's own out notation is unaffected — still his own 
 // sheet gets the chain alone; the "DP" it drops is already in the outcome box
 // beside it (classifyOut).
 test("the scorecard sheet's diamond center takes the GIDP chain alone, not the two-line play-by-play mark", () => {
-  const grid = scorecardPlays(buildFeed(), 'top')
+  const grid = scorecardPlays(buildFeed(), 'top', { through: Infinity })
   const vierling = grid.slots
     .flatMap((s) => Object.values(s.cells))
     .find((c) => c.batter.last === 'Vierling')

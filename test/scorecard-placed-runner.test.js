@@ -170,7 +170,7 @@ function buildFeed() {
 }
 
 test('the placed runner gets a cell in his own slot row on the printable grid', () => {
-  const grid = scorecardPlays(buildFeed(), 'bottom')
+  const grid = scorecardPlays(buildFeed(), 'bottom', { through: Infinity })
   const ortizSlot = grid.slots[5] // slot 6
   const inning10Col = grid.columns.findIndex((c) => c.inning === 10)
   const cell = ortizSlot.cells[inning10Col]
@@ -182,7 +182,7 @@ test('the placed runner gets a cell in his own slot row on the printable grid', 
 })
 
 test('his run reaches the slot tally, agreeing with the scoreboard instead of undercounting it', () => {
-  const grid = scorecardPlays(buildFeed(), 'bottom')
+  const grid = scorecardPlays(buildFeed(), 'bottom', { through: Infinity })
   const ortizSlot = grid.slots[5]
   assert.equal(ortizSlot.r, 1, "the placed runner's own run counts toward his slot")
   const totalR = grid.slots.reduce((sum, s) => sum + s.r, 0)
@@ -190,7 +190,7 @@ test('his run reaches the slot tally, agreeing with the scoreboard instead of un
 })
 
 test('the placed runner is not charged a plate appearance', () => {
-  const grid = scorecardPlays(buildFeed(), 'bottom')
+  const grid = scorecardPlays(buildFeed(), 'bottom', { through: Infinity })
   const ortizSlot = grid.slots[5]
   assert.equal(ortizSlot.ab, 0, 'he never batted this half — no AB for the placement')
 })

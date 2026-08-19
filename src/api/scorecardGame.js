@@ -149,7 +149,7 @@ function visibleInnings(feed, through) {
 // mid-step. When there is a next plate appearance to reveal on THIS side's
 // sheet, the grid also carries `frontier` — the { slot, colIndex } cell that
 // card will occupy, where the page renders its face-down seal.
-export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = Infinity, step = null } = {}) {
+export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1, step = null } = {}) {
   if (!feed) return null
   const battingSide = side === 'bottom' ? 'home' : 'away'
   const half = side === 'bottom' ? 'bottom' : 'top'
@@ -496,7 +496,7 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = In
 // boxes empty — the same "you haven't gotten there yet" blank as an
 // unrevealed inning cell. A skipped bottom half (the home club ahead, never
 // needed to bat) reads 'X' once the game is done, the linescore's own mark.
-export function scorecardScoreboard(feed, { through = Infinity } = {}) {
+export function scorecardScoreboard(feed, { through = -1 } = {}) {
   if (!feed) return null
   const maxInning = visibleInnings(feed, through)
   const lastHalf = lastPlayedHalfIndex(feed)
@@ -548,7 +548,7 @@ export function scorecardScoreboard(feed, { through = Infinity } = {}) {
 // computePitcherLines, which owns the ADR-0009 clamp: a line accumulates only
 // from plays in half-innings at or under `through`, and only pitchers who
 // have already appeared within the clamp get a row at all.
-export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through = Infinity } = {}) {
+export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through = -1 } = {}) {
   if (!feed) return []
   const fieldingSide = side === 'bottom' ? 'away' : 'home'
   const lines = computePitcherLines(feed, through)[fieldingSide] ?? []
@@ -577,7 +577,7 @@ export function scorecardPitchers(feed, side /* 'top' | 'bottom' */, { through =
 // above, for a given half. `loaded` is loadScorecardGame's shape, or any
 // `{ feed, managers, uniformBrief }` a screen assembled from useGameData's
 // own fetches (see scorecardView's header for the accepted shapes).
-export function scorecardFull(loaded, side, { through = Infinity, step = null } = {}) {
+export function scorecardFull(loaded, side, { through = -1, step = null } = {}) {
   const view = scorecardView(loaded, side)
   if (!view) return null
   return {
