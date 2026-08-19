@@ -69,6 +69,34 @@ test('the retired lab routes fall through to the home slate', () => {
   }
 })
 
+// The same stance the slate above takes, applied to `?d=`. Every dated loader
+// funnels asOf into dayBefore(), whose `new Date(...).toISOString()` raises
+// RangeError on an unparseable date, and the throw surfaced three different
+// ways: "Couldn't load this team" / "…this player" on the hub and the profile,
+// a /leaders banner reading "Stats entering Invalid Date", and a completely
+// blank /situational-records.
+test('an unparseable ?d= degrades to live rather than riding into the loaders', () => {
+  for (const bad of [
+    '07152026', // the slate's own MMDDYYYY shape, which `?d=` does not take
+    '2026-13-01',
+    '2026-02-30', // a real SHAPE that is not a real day
+    '2026-7-5', // a real day in the wrong shape — still an Invalid Date downstream
+    'yesterday',
+    '',
+  ]) {
+    for (const path of ['/team/158', '/team/158/roster', '/player/677594', '/leaders', '/situational-records']) {
+      assert.equal(parseRoute(`${path}?d=${bad}`).asOf, null, `${path}?d=${bad} must not survive`)
+    }
+  }
+})
+
+test('a real as-of date still rides through untouched', () => {
+  assert.equal(parseRoute('/team/158?d=2026-07-05').asOf, '2026-07-05')
+  assert.equal(parseRoute('/player/677594?d=2024-02-29').asOf, '2024-02-29') // leap day
+  // The guard must not eat the other query param on its way past.
+  assert.equal(parseRoute('/team/158?d=07152026&s=11').sportId, 11)
+})
+
 test('an impossible calendar date falls through to today rather than erroring', () => {
   // '13452026' is 8 digits but not a real date — no `date`, just today's slate.
   assert.deepEqual(parseRoute('/13452026'), { name: 'home' })
