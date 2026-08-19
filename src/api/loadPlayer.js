@@ -29,7 +29,7 @@ import {
   fetchPlayerAwards,
   fetchTradeCohort,
 } from './person-fetch.js'
-import { buildCareerTimeline } from './careerTimeline.js'
+import { buildCareerTimeline, resolveCareerOrgs } from './careerTimeline.js'
 import { fetchGamesByPk } from './schedule.js'
 import { fetchTeam } from './team.js'
 import { fetchWarData, fetchWarHistory, warByYearFor } from './war.js'
@@ -317,6 +317,12 @@ export async function loadPlayer(id, asOf) {
           id, group, season, startDate, endDate, sportId: currentActivitySportId,
           hasDebuted: Boolean(bio.debut), levelStat: seasonStat, levelSplits: seasonSplits,
         })
+        // The register merges independently-fetched MLB and MiLB rows. Resolve
+        // each farm club to its parent for that season before shaping so it can
+        // recognize a true multi-organization year (for affiliate marks) and
+        // make the same org-aware ordering fallback as Team history when the
+        // transaction wire is sparse.
+        const registerOrgOf = await resolveCareerOrgs([...mlbYbySplits, ...milbYbySplits])
         const role = group === 'pitching' ? pitcherRole(tileStat) : null
         const block = buildBlock({
           group, role, seasonSplits, careerSplits, lrSplits,
@@ -325,6 +331,7 @@ export async function loadPlayer(id, asOf) {
           logTagLevel: onRehab,
           warByYear: warByYearFor(id, group, warCurrent, warHistory),
           transactions: txns,
+          orgOf: registerOrgOf,
         })
         // Pure passthrough lookup, not a derivation — attached here rather
         // than threaded into buildBlock's (pure-shaping) signature.
@@ -605,7 +612,7 @@ export async function loadPlayer(id, asOf) {
   for (const b of blocks) {
     const reg = b.register
     if (!reg) continue
-    for (const r of reg.rows) r.team = abbrevs(r.teamIds)
+    for (const r of reg.rows) r.team = r.teamLabel || abbrevs(r.teamIds)
   }
 
   const debutGamePk = (debutSplits ?? []).find((s) => s.date === bio.debut)?.game?.gamePk ?? null

@@ -99,7 +99,7 @@ export async function enrichTimelineEntries(entries) {
 // costs no statsapi call in the ordinary case. An unresolved club is simply
 // absent from the map; the sort then falls back per season, so this never has
 // to be complete to be safe.
-async function resolveTimelineOrgs(splits) {
+export async function resolveCareerOrgs(splits) {
   const pairs = new Map()
   for (const s of splits ?? []) {
     const teamId = s.team?.id
@@ -125,7 +125,7 @@ async function resolveTimelineOrgs(splits) {
 // here, so the two rails can't order a season differently. Returns the
 // timeline object, or null when nothing qualifies.
 export async function buildCareerTimeline(splits, group, debutYear) {
-  const orgOf = await resolveTimelineOrgs(splits)
+  const orgOf = await resolveCareerOrgs(splits)
   const timeline = careerTimelineView(splits, group, debutYear, orgOf)
   if (!timeline) return null
   await enrichTimelineEntries(timeline.entries)

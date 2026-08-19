@@ -83,6 +83,39 @@ export function txnDate(t) {
   return t.effectiveDate || t.date || ''
 }
 
+// Arrival/move rows are the one cross-level clock available to the player
+// career register: Stats API returns MLB and each MiLB level separately, and
+// the stat splits carry no stint date. A signing explicitly identified as a
+// minor-league contract belongs to the parent organization, not to an MLB stat
+// stint; the later affiliate assignment or contract selection is the playing
+// stop. Exported here beside txnDate so that transaction semantics stay in one
+// pure module rather than being reimplemented in a view shaper.
+const ARRIVAL_TRANSACTION_TYPES = new Set([
+  'ASG', 'SE', 'OUT', 'TR', 'SFA', 'SGN', 'CLW', 'ACQ', 'RTN', 'OBT',
+  'LON', 'CP', 'PUR', 'CU', 'OPT', 'SC',
+])
+
+export function transactionTeamRanks(transactions, year, teamIds) {
+  const wanted = new Set(teamIds)
+  const ranks = new Map()
+  const ordered = (transactions ?? [])
+    .map((txn, index) => ({ txn, index, date: txnDate(txn) }))
+    .filter(({ date }) => date?.slice(0, 4) === String(year))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.index - b.index)
+
+  for (const { txn } of ordered) {
+    if (!ARRIVAL_TRANSACTION_TYPES.has(txn.typeCode)) continue
+    if (
+      (txn.typeCode === 'SFA' || txn.typeCode === 'SGN') &&
+      /minor league contract/i.test(txn.description ?? '')
+    ) continue
+    const teamId = txn.toTeam?.id
+    if (!wanted.has(teamId) || ranks.has(teamId)) continue
+    ranks.set(teamId, ranks.size)
+  }
+  return ranks
+}
+
 export function isRehabTxn(t) {
   return t.typeCode === 'ASG' && /rehab/i.test(t.description || '')
 }
