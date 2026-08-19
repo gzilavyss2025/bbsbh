@@ -12,7 +12,7 @@ import { browserStorage } from '../../lib/account/preferencesStorage.js'
 // (PRD §6.2 row 3, `third-game`).
 const THIRD_GAME_THRESHOLD = 3
 
-// "Pick up your pencil" — the signed-in slate strip listing the user's own
+// "In progress" — the signed-in slate strip listing the user's own
 // recently-scored games from the cloud scorebook index (api/reveal.js
 // ?recent=1; written by RevealCloudSync alongside every reveal ratchet).
 // Spoiler-free by construction: each entry is only the game's identity plus
@@ -71,8 +71,8 @@ export function ContinueScoring() {
     const games = (recent.data ?? []).filter((g) => !removedIds.has(g.gamePk))
     if (games.length === 0) return null
     return (
-      <section className="continuebar" aria-label="Pick up your pencil">
-        <h2 className="continuebar__label">Pick up your pencil</h2>
+      <section className="continuebar" aria-label="Games in progress">
+        <h2 className="continuebar__label">In progress</h2>
         <ul className="continuebar__list">
           {games.slice(0, 3).map((g) => (
             <li key={g.gamePk} className="continuebar__row">
@@ -81,7 +81,7 @@ export function ContinueScoring() {
                 type="button"
                 className="continuebar__delete"
                 onClick={() => removeGame(g.gamePk)}
-                aria-label={`Remove ${g.away} at ${g.home}, ${humanDate(g.date)}, from your pencil`}
+                aria-label={`Remove ${g.away} at ${g.home}, ${humanDate(g.date)}, from games in progress`}
               >
                 ✕
               </button>
@@ -96,13 +96,12 @@ export function ContinueScoring() {
   return (
     <section className="continuebar continuebar--pitch" aria-label="Sign in to carry your games">
       <p className="continuebar__pitchline caps-exempt">
-        Three games in your pencil. Sign in and they&rsquo;ll be waiting on
-        your other devices too.
+        Keep games in progress on your other devices.
       </p>
       <div className="continuebar__pitchactions">
         <SignInButton mode="modal">
           <button type="button" className="btn btn--account continuebar__pitchcta">
-            Create account or sign in
+            Sign in
           </button>
         </SignInButton>
         <button
@@ -166,12 +165,13 @@ function ContinueCard({ game }) {
   const navigate = useNav()
   const done = Number.isInteger(game.revealedThrough) && game.revealedThrough >= 0
   const progress = done
-    ? `through ${halfPhrase(game.revealedThrough)}`
+    ? `Through ${halfPhrase(game.revealedThrough)}`
     : 'not started'
   return (
     <button
       type="button"
       className="continuebar__item"
+      aria-label={`${game.away} at ${game.home}, ${humanDate(game.date)}, ${progress}. Continue.`}
       onClick={() =>
         navigate(
           gamePath(
@@ -188,8 +188,9 @@ function ContinueCard({ game }) {
         {game.away} @ {game.home}
         {game.gameNumber > 1 ? ` · G${game.gameNumber}` : ''}
       </span>
-      <span className="continuebar__meta">
-        {humanDate(game.date)} · {progress}
+      <span className="continuebar__meta" aria-hidden="true">
+        <span className="continuebar__date">{humanDate(game.date)} · </span>
+        {progress}
       </span>
       <span className="continuebar__chevron" aria-hidden="true">
         ›

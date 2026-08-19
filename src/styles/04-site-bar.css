@@ -205,19 +205,21 @@
   color: var(--text-body) !important;
 }
 
-/* "Pick up your pencil" — the signed-in slate strip of recently-scored games
-   (ContinueScoring.jsx). Reads as a slim ledger card above the day's slate:
-   condensed uppercase label, mono matchup line, pencil-graphite meta. */
+/* "In progress" — the signed-in slate list of recently-scored games
+   (ContinueScoring.jsx). This is a compact utility strip, not a feature card:
+   a ruled band, one short heading and dense one-line resume targets. */
 .continuebar {
-  margin: var(--space-3) var(--app-gutter) 0;
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  background: var(--surface-card);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-card);
+  margin: var(--space-2) var(--app-gutter) 0;
+  padding: 0 var(--space-3);
+  background: var(--surface-inset);
+  border-block: var(--bw-hair) solid var(--border-rule);
 }
 .continuebar__label {
-  margin: 0 0 var(--space-1);
+  margin: 0;
+  min-height: var(--space-6);
+  display: flex;
+  align-items: center;
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
   font-family: var(--font-display);
   font-size: var(--fs-label);
   font-weight: var(--w-semibold);
@@ -243,38 +245,40 @@
 }
 .continuebar__item {
   display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   column-gap: var(--space-2);
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--tap-min);
-  padding: var(--space-2) 0;
+  padding: 0;
   border: none;
   background: none;
   text-align: left;
   cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .continuebar__item:active {
   background: var(--surface-inset);
+  transform: scale(0.98);
 }
 .continuebar__matchup {
-  grid-column: 1;
+  white-space: nowrap;
   font-size: var(--fs-num-md);
   font-weight: var(--w-semibold);
   color: var(--text-heading);
 }
 .continuebar__meta {
-  grid-column: 1;
-  grid-row: 2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   color: var(--text-caption);
 }
 .continuebar__chevron {
-  grid-column: 2;
-  grid-row: 1 / span 2;
   font-family: var(--font-display);
   font-size: var(--fs-title-md);
   color: var(--text-caption);
@@ -293,16 +297,16 @@
   box-shadow: var(--ring);
 }
 
-/* The SAME slot, signed out: the third-game contextual prompt
-   (ContinueScoring.jsx, PRD §6.2 row 3) — "what the strip would be" once
-   three-plus games are in this visitor's pencil. Reads as a natural sentence
-   rather than shouted chrome, like the rest of this app's account voice. */
+/* The same slot, signed out: the third-game contextual prompt
+   (ContinueScoring.jsx, PRD §6.2 row 3). Keep the prompt on one utility row. */
 #root .continuebar--pitch .caps-exempt {
   text-transform: none; /* caps-exempt: the third-game prompt reads as a natural sentence */
 }
 
 .continuebar__pitchline {
-  margin: 0 0 var(--space-2);
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: var(--font-body);
   font-size: var(--fs-caption);
   line-height: var(--lh-body);
@@ -312,12 +316,15 @@
 .continuebar__pitchactions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 0;
+  flex: 0 0 auto;
 }
 
-.continuebar__pitchcta {
-  flex: 1 1 auto;
+.btn--account.continuebar__pitchcta {
+  flex: 0 0 auto;
+  width: auto;
   min-height: var(--tap-min);
+  padding-inline: var(--space-3);
 }
 
 .continuebar__dismiss {
@@ -337,6 +344,22 @@
 .continuebar__dismiss:focus-visible {
   outline: none;
   box-shadow: var(--ring);
+}
+
+.continuebar--pitch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 360px) {
+  .continuebar__date {
+    display: none;
+  }
+
+  .continuebar--pitch {
+    padding-left: var(--space-2);
+  }
 }
 
 /* Box-score shortcut, top-right of the site bar — reachable from any in-game
@@ -360,4 +383,3 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
-

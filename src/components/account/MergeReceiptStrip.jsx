@@ -50,7 +50,7 @@ export function MergeReceiptStrip() {
         className="mergestrip__link caps-exempt"
         onClick={() => navigate(profilePath())}
       >
-        Your book is on this account now — see what joined it in My Tally ›
+        Account sync complete. View details in My Tally ›
       </button>
       <button
         type="button"

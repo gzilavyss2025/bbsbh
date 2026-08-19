@@ -31,7 +31,7 @@ test('My Tally opens on this device, with every setting usable and no account ga
   await expect(page.locator('.mytally__ledgerrow')).toHaveCount(3)
 
   // One row per CHANNEL, not one per claim. `reveal` backs two claims —
-  // "Reveal progress" and "Pick up your pencil" — and rendering the ledger
+  // "Reveal progress" and "Games in progress" — and rendering the ledger
   // directly produced two rows showing byte-identical state under two labels.
   // Signed out, every row says where the thing is.
   //
