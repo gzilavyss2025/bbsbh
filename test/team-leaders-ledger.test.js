@@ -15,6 +15,7 @@ import {
   LEDGER_HITTING,
   LEDGER_PITCHING,
   computeLeaders,
+  positionTag,
 } from '../src/api/teamLeaders.js'
 
 // The depth the Overview's door takes from each list.
@@ -89,4 +90,31 @@ test('every ledger category yields exactly the leader of its own group', () => {
     }
     assert.equal(leader?.id, 2, `${category.key} should rank the pitcher`)
   }
+})
+
+// The tag after a leader's name. Its one interesting decision is that it reads
+// the BLOCK rather than the player's own listed position, so a two-way player
+// leading the club in ERA is tagged as the arm he is ranked as.
+test('a pitching row tags an arm by throwing hand, a batting row by position', () => {
+  const arm = { position: 'P', hand: 'L' }
+  assert.equal(positionTag(arm, 'pitching'), 'LHP')
+  assert.equal(positionTag({ position: 'P', hand: 'R' }, 'pitching'), 'RHP')
+  assert.equal(positionTag({ position: '1B' }, 'hitting'), '1B')
+})
+
+test('an arm with no hand on file falls back to a plain P, never a blank', () => {
+  // A MiLB pool, or one built without `withHand` (api/statsLevels.js).
+  assert.equal(positionTag({ position: 'P', hand: '' }, 'pitching'), 'P')
+  assert.equal(positionTag({ position: '' }, 'pitching'), 'P')
+})
+
+test('a two-way player is tagged by the block he is ranked in, not his position', () => {
+  const twoWay = { position: 'DH', hand: 'R' }
+  assert.equal(positionTag(twoWay, 'pitching'), 'RHP')
+  assert.equal(positionTag(twoWay, 'hitting'), 'DH')
+})
+
+test('a hitter with no position on file renders no tag rather than a dash', () => {
+  assert.equal(positionTag({ position: '' }, 'hitting'), '')
+  assert.equal(positionTag({}, 'hitting'), '')
 })

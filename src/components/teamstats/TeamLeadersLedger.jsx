@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { computeLeaders } from '../../api/teamLeaders.js'
+import { computeLeaders, positionTag } from '../../api/teamLeaders.js'
 import { SectionTitle } from '../ui/SectionTitle.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { InjuredMark } from '../badges/InjuredMark.jsx'
@@ -43,11 +43,14 @@ function leadersOf(pool, categories) {
 // `pool`: normalized PoolPlayer[] (api/teamLeaders.js). `hitting`/`pitching`:
 // the descriptor list for each block — the hub passes a PREFIX of
 // LEDGER_HITTING/LEDGER_PITCHING, three a side on the Overview's door and all
-// six on the Numbers tab. `onSeeAll` / `secondaryAction` fill the header's
-// right slot exactly as they do on TeamLeaders, so the two renderings are
-// interchangeable from a caller's point of view. `injuredIds`: a Set of person
-// ids on the club's IL, flagging a leader with the same ✚ mark the card board
-// uses; null where the caller has not fetched one.
+// six on the Numbers tab. `onSeeAll` renders the header's "See all ›" door and
+// `secondaryAction` any extra link beside it (the hub's "Org leaders ›").
+// `injuredIds`: a Set of person ids on the club's IL, flagging a leader with
+// the shared inline ✚ mark; null where the caller has not fetched one.
+//
+// Every row's shaping — the ranking, the formatting, and the RHP/LHP tag — is
+// api/teamLeaders.js's, so this file stays render-only and that logic stays
+// testable by the pure node:test suite, which cannot import JSX.
 export function TeamLeadersLedger({
   pool,
   hitting,
@@ -86,16 +89,25 @@ export function TeamLeadersLedger({
           <section key={block.key} className="tledg__block">
             <h4 className="tledg__block-title">{block.label}</h4>
             <ul className="tledg__rows">
-              {block.rows.map(({ category, entry }) => (
-                <li key={category.key} className="tledg__row">
-                  <span className="tledg__cat">{category.short}</span>
-                  <PlayerLink id={entry.id} className="tledg__name">
-                    {entry.name}
-                  </PlayerLink>
-                  <InjuredMark hurt={injuredIds?.has(entry.id)} />
-                  <span className="tledg__val">{entry.display}</span>
-                </li>
-              ))}
+              {block.rows.map(({ category, entry }) => {
+                const tag = positionTag(entry, category.group)
+                return (
+                  <li key={category.key} className="tledg__row">
+                    <span className="tledg__cat">{category.short}</span>
+                    {/* Name and tag share one flex child so the tag rides with
+                        the name and a long name still ellipsises against it,
+                        instead of the tag being pushed into the value. */}
+                    <span className="tledg__who">
+                      <PlayerLink id={entry.id} className="tledg__name">
+                        {entry.name}
+                      </PlayerLink>
+                      {tag && <span className="tledg__pos">{tag}</span>}
+                      <InjuredMark hurt={injuredIds?.has(entry.id)} />
+                    </span>
+                    <span className="tledg__val">{entry.display}</span>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         ))}

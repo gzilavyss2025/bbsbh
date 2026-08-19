@@ -8,8 +8,6 @@ import { Headshot } from '../player/Headshot.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { PlayerLink } from '../player/PlayerLink.jsx'
 import { ProspectPill } from '../badges/ProspectPill.jsx'
-import { InjuredMark } from '../badges/InjuredMark.jsx'
-import { ChevronLink } from '../ui/ChevronLink.jsx'
 
 // TEAM LEADERS, CARD FORM — per-category season leaderboards for a team. Each
 // category features its leader as a headshot card (styled like the slate's Top
@@ -73,7 +71,6 @@ function FeaturedLeader({
   favoriteTeamId,
   filtering,
   showTeamAbbr,
-  injuredIds,
 }) {
   const teamId = entry.displayTeamId ?? entry.teamId
   const teamAbbr = entry.displayTeamAbbr ?? entry.teamAbbr
@@ -106,7 +103,6 @@ function FeaturedLeader({
           {first && <span className="tlead__name-first">{first}</span>}
           <span className="tlead__name-last">
             {last}
-            <InjuredMark hurt={injuredIds?.has(entry.id)} />
             {entry.position && <span className="tlead__pos">{entry.position}</span>}
           </span>
         </PlayerLink>
@@ -155,7 +151,6 @@ function LeaderCategory({
   favoriteTeamId,
   filtering,
   showTeamAbbr,
-  injuredIds,
 }) {
   const [leader, ...rest] = entries
   const ranks = displayRanks(entries)
@@ -170,7 +165,6 @@ function LeaderCategory({
         favoriteTeamId={favoriteTeamId}
         filtering={filtering}
         showTeamAbbr={showTeamAbbr}
-        injuredIds={injuredIds}
       />
       {rest.length > 0 && (
         <ol className="tlead__rest">
@@ -194,7 +188,6 @@ function LeaderCategory({
                   {e.name}
                 </PlayerLink>
                 {showTeamAbbr && teamAbbr && <span className="tlead__rowteam">{teamAbbr}</span>}
-                <InjuredMark hurt={injuredIds?.has(e.id)} />
                 <LeaderBadges entry={e} showLevel={showLevel} prospectSnapshot={prospectSnapshot} />
                 <span className="tlead__rowval">{e.display}</span>
               </li>
@@ -208,8 +201,7 @@ function LeaderCategory({
 
 // `pool`: normalized PoolPlayer[]. `categories`: descriptor array to rank.
 // `limit`: how many players per category (10 on every page that renders this
-// board today). `onSeeAll`: optional — renders a "See all ›" affordance in the
-// header. `title`: section
+// board today). `title`: section
 // heading (the broader leader pages pass their scope's title). `showLevel`:
 // badge each leader's level (org scope, a multi-level pool). `prospectSnapshot`:
 // fetchTopProspects() result to add prospect pills (any MiLB scope). `qualifier`:
@@ -232,18 +224,17 @@ function LeaderCategory({
 // multi-team boards (league/level/org) where it's the only way to tell whose
 // row is whose; the single-team pages (TeamLeadersPage, the postseason boards)
 // pass false since every row already shares the one team the page is about.
-// `injuredIds`: a Set of person ids currently on that team's IL, flagging a
-// leader's name with the same ✚ mark as the player page's il-banner (see
-// InjuredMark above). `secondaryAction`: optional extra node rendered after
-// "See all ›" in the same header slot. Those last two, and `onSeeAll`, have no
-// caller since the hub moved to TeamLeadersLedger — they are kept because they
-// are this board's door/annotation API and the pages that render it are the
-// ones most likely to grow one, not because anything renders them today.
+//
+// This board carries NO header action and no IL mark. It had `onSeeAll`,
+// `secondaryAction` and `injuredIds` while the team hub rendered it; the hub
+// renders TeamLeadersLedger now, and the four pages left here are destinations
+// rather than doors, so nothing passed any of the three. They are gone rather
+// than kept warm — an unreachable prop reads as a supported feature to the next
+// reader, and the ledger is where a door or an IL mark actually belongs.
 export function TeamLeaders({
   pool,
   categories,
   limit = 5,
-  onSeeAll,
   title = 'Team leaders',
   showLevel = false,
   prospectSnapshot = null,
@@ -252,8 +243,6 @@ export function TeamLeaders({
   favoriteTeamId = null,
   filtering = false,
   showTeamAbbr = true,
-  injuredIds = null,
-  secondaryAction = null,
 }) {
   const ranked = useMemo(
     () =>
@@ -274,17 +263,7 @@ export function TeamLeaders({
 
   return (
     <div className="tlead">
-      <SectionTitle
-        title={title}
-        action={
-          onSeeAll || secondaryAction ? (
-            <span className="tlead__actions">
-              {onSeeAll && <ChevronLink onClick={onSeeAll}>See all</ChevronLink>}
-              {secondaryAction}
-            </span>
-          ) : null
-        }
-      />
+      <SectionTitle title={title} />
       <div className="tlead__grid">
         {ranked.map(({ category, entries }) => (
           <LeaderCategory
@@ -296,7 +275,6 @@ export function TeamLeaders({
             favoriteTeamId={favoriteTeamId}
             filtering={filtering}
             showTeamAbbr={showTeamAbbr}
-            injuredIds={injuredIds}
           />
         ))}
       </div>

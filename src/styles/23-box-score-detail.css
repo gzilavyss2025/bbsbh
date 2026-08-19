@@ -10,7 +10,7 @@
   margin-top: 4px;
 }
 /* .chevron-link — the shared "See all ›" text-button primitive (see
-   ChevronLink.jsx), composed by TeamLeaders' header action, TeamPage's
+   ChevronLink.jsx), composed by TeamLeadersLedger's header action, TeamPage's
    PreviewDoor, and NumbersTab's "Org leaders ›". One padding/hit-target model
    for all three, so a tweak here reaches every placement. */
 .chevron-link {
@@ -29,15 +29,9 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
-/* Groups DeckNudge alongside "See all ›" in the header's right slot when
-   TeamLeaders renders horizontal. */
-.tlead__actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-/* DeckNudge — the desktop "‹ ›" step control shared by TeamLeaders'
-   horizontal deck and TeamTransactionsCard. Bare text, same quiet register
+/* DeckNudge — the desktop "‹ ›" step control for TeamTransactionsCard's swipe
+   deck (Team Leaders had one too until the hub moved to the ledger, which does
+   not scroll). Bare text, same quiet register
    as .chevron-link/.inningnav's chevron labels, not a floating icon button:
    no border, no background, no shadow. Mouse/trackpad only — a deck you can
    swipe never needs a click alternative, so this only exists where hover is
@@ -193,19 +187,14 @@
 }
 /* Shared inline IL cross (see components/InjuredMark.jsx) — same glyph/color
    as .il-banner__mark (player page), sized inline for a name rather than a
-   full banner. Base rule here; each context that uses it sets its own size. */
+   full banner. Base rule here; each context that uses it sets its own size.
+   The `.tlead__*` board carried two of those sizings until it stopped
+   rendering the mark; the ledger below is this file's only user now. */
 .ilmark {
   flex: none;
   color: var(--accent-negative);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
-}
-.tlead__name-last .ilmark {
-  font-size: var(--fs-small);
-  margin-left: 6px;
-}
-.tlead__row .ilmark {
-  font-size: var(--fs-caption);
 }
 .tlead__pos {
   margin-left: 6px;
@@ -351,7 +340,7 @@
 .tledg {
   margin-top: 4px;
 }
-/* Same header slot as .tlead__actions — "See all ›" plus the hub's optional
+/* The header's right slot — "See all ›" plus the hub's optional
    "Org leaders ›". */
 .tledg__actions {
   display: flex;
@@ -409,18 +398,50 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-/* Compound to beat .plink's `font: inherit` / `text-align: inherit` reset —
-   same fix as .tlead__row .tlead__rowname above. */
-.tledg__row .tledg__name {
+/* Name + position tag as one flex child, so the tag travels with the name and
+   the name (not the tag) is what gives way when the row runs out of room. */
+.tledg__who {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+/* Source Sans at the app's NAME role — every player name in this app is
+   --font-body at --fs-body/--w-semibold (.tlead__name-last, .playercard__name,
+   .lineup__name), and this row is no exception; it read a size small before,
+   at --fs-ui, which is the role for UI chrome rather than for content.
+   (Only one weight of Source Sans is registered, so --w-semibold renders at
+   400 today — it is declared because that is the role, and because a second
+   weight would otherwise reach every name in the app but this one.)
+   The tracking is the part that was genuinely missing: this row sits between a
+   tracked condensed label and a mono figure, and an all-caps run with no
+   tracking between those two reads soft.
+   Compound to beat .plink's `font: inherit` / `text-align: inherit` reset —
+   same fix as .tlead__row .tlead__rowname above. */
+.tledg__who .tledg__name {
+  min-width: 0;
   font-family: var(--font-body);
-  font-size: var(--fs-ui);
+  font-size: var(--fs-body);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-caps);
   color: var(--text-heading);
   text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* Position, or an arm's throwing hand as RHP/LHP — the same quiet condensed
+   aside .tlead__pos gives the card board's featured leader, so a position
+   reads identically on both leader surfaces. `flex: none` keeps it whole while
+   the name beside it ellipsises. */
+.tledg__pos {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
 }
 .tledg__val {
   flex: none;
@@ -431,6 +452,7 @@
   color: var(--text-heading);
 }
 .tledg__row .ilmark {
+  flex: none;
   font-size: var(--fs-caption);
 }
 

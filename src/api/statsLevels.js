@@ -88,15 +88,51 @@ export async function fetchTeamSeasonStats(teamId, group, season) {
 // leaderboard pool — team, league/level, and org (see leaders.js) — so a
 // traded-away Rengifo or a promoted-out-of-A Fischer still shows up, credited
 // only for his time on the club being viewed.
-export async function loadCombinedPoolForTeams(teams, season) {
+export async function loadCombinedPoolForTeams(teams, season, { withHand = false } = {}) {
   if (!teams.length) return []
   const [hit, pit] = await Promise.all([
     Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'hitting', season))),
     Promise.allSettled(teams.map((t) => fetchTeamSeasonStats(t.id, 'pitching', season))),
   ])
   const settledFlat = (results) => results.flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
-  const pool = combineToPool(settledFlat(hit), settledFlat(pit))
-  return attachDisplayTeams(pool)
+  const pool = await attachDisplayTeams(combineToPool(settledFlat(hit), settledFlat(pit)))
+  return withHand ? attachPitchHands(pool) : pool
+}
+
+// Throwing hand for every ARM in a pool, as its own narrow /people read.
+//
+// It is a second request rather than a field on the pool's own fetch because
+// the stats endpoint only carries handedness under `hydrate=person`, and that
+// hydrate is expensive in the wrong place: it returns the full 34-field person
+// on every split, which took one club's two season-stat reads from 75KB to
+// 125KB (measured, 2026 Brewers). This asks for two fields about the arms
+// alone — 1.3KB for the same club's 32 pitchers — and leaves the shared pool
+// producers every league/level/org board depends on exactly as they were.
+//
+// Opt-in (`withHand`) for the same reason: only the team hub's ledger prints
+// RHP/LHP, and a 5,000-player level pool has no business paying for it.
+// Degrades to the pool untouched — a missing hand renders as a plain "P", so a
+// thin MiLB feed or a failed call costs a letter, never a row.
+const HAND_CHUNK = 100
+async function attachPitchHands(pool) {
+  const ids = pool.filter((p) => p.pitching).map((p) => p.id)
+  if (!ids.length) return pool
+  const byId = new Map()
+  const chunks = []
+  for (let i = 0; i < ids.length; i += HAND_CHUNK) chunks.push(ids.slice(i, i + HAND_CHUNK))
+  const results = await Promise.allSettled(
+    chunks.map((chunk) =>
+      getJson(`/api/v1/people?personIds=${chunk.join(',')}&fields=people,id,pitchHand,code`),
+    ),
+  )
+  for (const r of results) {
+    if (r.status !== 'fulfilled') continue
+    for (const person of r.value.people ?? []) {
+      if (person.pitchHand?.code) byId.set(person.id, person.pitchHand.code)
+    }
+  }
+  if (byId.size === 0) return pool
+  return pool.map((p) => (byId.has(p.id) ? { ...p, hand: byId.get(p.id) } : p))
 }
 
 // The team a leader row shows its logo/abbreviation for: the player's own club

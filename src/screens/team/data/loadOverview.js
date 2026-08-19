@@ -101,7 +101,7 @@ export async function loadOverview(id, asOf) {
     // The leaderboard pool is built from the club's season stats rather than its
     // current roster, so a player traded away or promoted off the club still
     // ranks, scoped to only his stats from while he was here.
-    loadCombinedPoolForTeams([{ id }], season),
+    loadCombinedPoolForTeams([{ id }], season, { withHand: true }),
     // Cutoff-gated rows only — `won` stays null past `cutoff` (see
     // fetchTeamSchedule), which is what keeps the Last 10 stubs from showing a
     // result the visitor hasn't reached. Never re-derive it from Final status.
