@@ -94,6 +94,9 @@ export function canonicalUrl(params) {
     case 'first-scorebook':
     case 'photos':
     case 'situational-records':
+    case 'salaries':
+    case 'doubleheaders':
+    case 'postseason-race':
     case 'attendance':
       path = `/${route}`
       break

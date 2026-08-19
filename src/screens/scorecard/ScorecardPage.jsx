@@ -69,7 +69,7 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // Why a latch rather than `isStamped` straight: useStampUnseal's own header.
   const stamped = useStampUnseal(feed?.gamePk)
 
-  const { renderRevealedThrough } = effectiveReveal({
+  const { renderRevealedThrough, commitReveals } = effectiveReveal({
     scoresUnlocked: spoilersOff,
     stamped,
     revealedThrough,
@@ -140,10 +140,14 @@ export function ScorecardPage({ feed, managers, uniformBrief, spoilersOff, onRel
   // beat. A still-live half just parks the cursor at the feed's edge and
   // waits for Refresh to bring the next batter.
   const onFrontierTap = () => {
-    // `stamped` joins `spoilersOff` here for the same reason (ADR-0048): the
-    // sheet is already inked to the end, so there is no frontier left to tap,
-    // and committing would ratchet a mark the reader never earned by hand.
-    if (!stepInfo || spoilersOff || stamped) return
+    // ASK `effectiveReveal`, do not re-derive the answer. `commitReveals` is
+    // false under EVERY force-reveal source — the day pass (ADR-0026) and a
+    // stamp (ADR-0048) today — for one reason that covers both: the sheet is
+    // already inked to the end, so there is no frontier left to tap, and
+    // committing would ratchet a mark the reader never earned by hand. Spelling
+    // that list out again here meant a third source would have to remember to
+    // update this line, which is the drift ADR-0026 asks each new source about.
+    if (!stepInfo || !commitReveals) return
     setArmed(true)
     const { inning, half, total, nextCount, halfOver } = stepInfo
     if (nextCount >= total && halfOver) revealTo(inning, half)

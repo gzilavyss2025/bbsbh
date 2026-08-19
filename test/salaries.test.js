@@ -10,7 +10,14 @@ import {
   leagueRollup,
   rollUpSalaries,
 } from '../scripts/lib/salaries.mjs'
-import { payrollScale, commitmentCliff, salaryBoard, clubStanding } from '../src/api/salaries.js'
+import {
+  payrollScale,
+  commitmentCliff,
+  salaryBoard,
+  clubStanding,
+  usableLeague,
+  usableLedger,
+} from '../src/api/salaries.js'
 
 // THE INVARIANT THESE EXIST FOR: a dollar is committed only when Cot's states a
 // dollar. Every out-year is either a figure or a CODE — A1..A4 for an
@@ -421,4 +428,32 @@ test('a club can find its own rank without knowing the whole table', () => {
   const league = leagueFixture()
   assert.equal(clubStanding(league, 158).rank, 2)
   assert.equal(clubStanding(league, 999), null)
+})
+
+// A file that PARSED is not a file the page can draw. `staticJson` falls back
+// only on a non-200 or a parse failure, so `{}`, a half-written file, or a
+// renamed field all arrive truthy — and both pages gate on `data != null`, so
+// the value reaches `.owed.map` and takes the route down with a blank screen.
+test('a parsed but unusable salaries file degrades to "not published yet"', () => {
+  for (const bad of [
+    {},
+    { owed: [] },
+    { owed: [], clubs: [], positions: [] },
+    { owed: 'nope', clubs: [], positions: [], totals: {} },
+    null,
+    'a string',
+  ]) {
+    assert.equal(usableLeague(bad), null, `${JSON.stringify(bad)} must not reach the page`)
+  }
+  // The real shape still passes, or the guard would be a page-killer of its own.
+  const good = { owed: [], clubs: [], positions: [], totals: { payroll: 0 }, season: 2026 }
+  assert.equal(usableLeague(good), good)
+})
+
+test('a parsed but unusable club ledger degrades the same way', () => {
+  for (const bad of [{}, { groups: [] }, { totals: [] }, { groups: {}, totals: [] }, null]) {
+    assert.equal(usableLedger(bad), null)
+  }
+  const good = { groups: [], totals: [], season: 2026, payroll: 0, committedAfter: 0 }
+  assert.equal(usableLedger(good), good)
 })
