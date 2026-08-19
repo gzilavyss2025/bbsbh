@@ -20,6 +20,28 @@
 
 export const BOOKS_KEY = 'bbsbh:books'
 
+// ---------------------------------------------------------------------------
+// WHOSE SHELF IS THIS? — the shared-device leak
+// ---------------------------------------------------------------------------
+// A local-first shelf plus an account leaks on a family iPad. User A signs in,
+// their books sync DOWN into `bbsbh:books`, A signs out, B signs in. The device
+// still holds A's books as ordinary local state, and `booksToPublish` — which
+// asks "what do I have that the server doesn't?" — finds every one of them
+// missing from B's remote and pushes A's shelf UP into B's ACCOUNT. B never
+// made those books and A never shared them.
+//
+// Nulling the in-memory baseline on sign-out does not stop it. That only
+// prevents a publish against a STALE baseline; the next pull hands over a
+// perfectly good baseline that happens to belong to the NEW user, while the
+// shelf on disk still belongs to the old one. Only knowing WHOSE shelf this is
+// stops it, so the device records the account it last merged from and
+// `mergeStrategyFor` (src/lib/account/preferences.js) reads it back.
+//
+// Its own key, not the preferences or stamps one: the channels sync
+// independently, and a device that reached one endpoint but not another must
+// not be recorded as holding this user's books.
+export const BOOKS_OWNER_KEY = 'bbsbh:booksOwner'
+
 // The one book every collection starts with, before this feature existed and
 // after it: the id `useBooks.js` synthesizes on first mount so a pre-existing
 // single collection always lands somewhere, and `books` is never empty.
@@ -302,6 +324,22 @@ export function removeBook(map, id, { now } = {}) {
 // Safe for the same reason it's safe for stamps: a book only ever changes by a
 // deliberate action on one of THIS user's own devices. There is no third party
 // to race, and the loser of a tie is always one of the user's own two taps.
+// Take the remote shelf WHOLESALE, discarding whatever this device held. The
+// 'adopt' half of the shared-device guard (BOOKS_OWNER_KEY): when the local
+// books belong to a different account, none of them are this user's to keep or
+// to publish, so there is nothing to merge — B gets B's shelf, and A's books
+// neither travel to B's account nor sit on B's shelf.
+//
+// Contrast `applyRemoteBooks`, which is the ordinary same-owner path.
+//
+// Note what this does NOT do: guarantee a live `default` book. That invariant
+// belongs to the store that owns it (`useBooks.js`'s migration), and an adopt
+// of an empty remote goes straight back through it — this module has no
+// business inventing a book, here or anywhere.
+export function adoptRemoteBooks(remote) {
+  return normalizeAllBooks(remote && typeof remote === 'object' && !Array.isArray(remote) ? remote : {})
+}
+
 export function applyRemoteBooks(local, remote) {
   const out = normalizeAllBooks(local)
   if (!remote || typeof remote !== 'object' || Array.isArray(remote)) return out

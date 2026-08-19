@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
-import { useBooks } from '../../hooks/useBooks.js'
+import { readBooksOwner, useBooks, writeBooksOwner } from '../../hooks/useBooks.js'
 import { booksToPublish } from '../../lib/books.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
@@ -62,9 +63,31 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // against `known.current`, the same way `dayStatesToPublish`'s `previous`
 // argument exists only to answer "did this device just take one back", never
 // to be stored itself.
+//
+// ---------------------------------------------------------------------------
+// WHOSE SHELF IS THIS? — the shared-device guard (BOOKS_OWNER_KEY)
+// ---------------------------------------------------------------------------
+// Everything above is a COMPARISON, which is what makes it back-fill a shelf
+// that predates sign-in — and, on a shared device, exactly what makes it leak.
+// A signs in, their shelf syncs down; A signs out (the shelf stays, local-first
+// by design); B signs in, the pull sets `known.current` to B's shelf, and
+// `booksToPublish` dutifully reports every one of A's books as "missing from
+// the server". They then publish into B's account.
+//
+// Nulling `known`/`seen` on sign-out — which the effect below already did, with
+// a comment saying so — does not prevent it. That guards against a STALE
+// baseline; here the baseline is perfectly good and belongs to the new user,
+// while the shelf on disk still belongs to the old one. Same mechanism, line
+// for line, as the stamps leak StampsCloudSync closed.
+//
+// So the device records WHICH ACCOUNT its shelf was last merged from
+// (BOOKS_OWNER_KEY, its own key — see src/lib/books.js) and asks
+// `mergeStrategyFor` on every pull. A different account means `adopt`: take the
+// remote shelf wholesale and publish nothing. `StampsCloudSync` is the worked
+// example this follows.
 export function BooksCloudSync() {
-  const { isSignedIn, getToken } = useAuth()
-  const { books, mergeRemoteBooks } = useBooks()
+  const { isSignedIn, userId, getToken } = useAuth()
+  const { books, mergeRemoteBooks, adoptRemoteBooks } = useBooks()
   const report = useSyncReport()
 
   // What the server held as of the last successful pull. Starts null for "we
@@ -114,7 +137,19 @@ export function BooksCloudSync() {
         // what keep a reply that lands after a sign-out from re-seeding that
         // baseline with the previous account's map.
         known.current = remote
-        mergeRemoteBooks(remote)
+        if (mergeStrategyFor(readBooksOwner(), userId) === 'adopt') {
+          // A different account's books are sitting on this device. None of
+          // them are this user's to publish, so the remote shelf replaces them
+          // outright instead of merging.
+          adoptRemoteBooks(remote)
+        } else {
+          mergeRemoteBooks(remote)
+        }
+        // This device's shelf now belongs to this account either way, which is
+        // what makes the NEXT user's sign-in an `adopt`. Written synchronously
+        // after the merge, so the publish effect the merge wakes already reads
+        // the settled owner.
+        writeBooksOwner(userId)
         report('books', 'synced')
       } catch {
         // Offline / unauthorized / store not configured on this deploy —
@@ -127,7 +162,7 @@ export function BooksCloudSync() {
     return () => {
       cancelled = true
     }
-  }, [isSignedIn, getToken, mergeRemoteBooks, report])
+  }, [isSignedIn, userId, getToken, mergeRemoteBooks, adoptRemoteBooks, report])
 
   // Publish what the server is missing.
   useEffect(() => {
@@ -140,6 +175,10 @@ export function BooksCloudSync() {
     // Nothing has been heard from the server yet, so there is no baseline to
     // compare against. The pull above supplies one and this effect re-runs.
     if (known.current === null) return
+
+    // An adopted shelf is not this device's to publish. The owner tag is
+    // rewritten by the pull, so this only holds for the window before it lands.
+    if (mergeStrategyFor(readBooksOwner(), userId) === 'adopt') return
 
     // The local map `booksToPublish` compares against `known`: every live
     // book, plus an inferred tombstone for any id that just fell out of the
@@ -217,7 +256,7 @@ export function BooksCloudSync() {
         })
       }
     })()
-  }, [isSignedIn, getToken, books, report])
+  }, [isSignedIn, userId, getToken, books, report])
 
   return null
 }
