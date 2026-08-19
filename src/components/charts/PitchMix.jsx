@@ -9,26 +9,18 @@ const DASH = '—'
 // reason to know.
 const LOOK_LABEL = { 1: '1st', 2: '2nd', 3: '3rd+' }
 
-// The player page's "Pitches" body: an ink slab carrying one row per pitch —
-// the pitch by name, its family spelled out, a usage meter, its share, and the
-// average velocity — over a band naming his 100 mph work when he has any.
+// The player page's "Pitches" body: a compact scorebook card carrying one row
+// per pitch — the pitch by name, its family spelled out, a usage meter, its
+// share, and the average velocity — over a band naming his 100 mph work when
+// he has any.
 // `arsenal` is person.js's arsenalView output (already sorted most-thrown
 // first); `heat` is pitchArsenal.js's heatView, null for any arm under the
 // century floor; `tto` is its arsenalTtoView, null for any arm the nightly
 // file carries no times-through split for, in which case no filter renders.
 //
-// WHY THIS IS INK AND THE REST OF THE PAGE IS PAPER. Velocity and mix are the
-// numbers a reader opens a pitcher's page for, and in the old dress they were
-// the quietest things on it: a 10px chart chip carried the family, the share
-// was rounded to whole percent (so a 11.0% slider and a 10.6% curveball both
-// read "11%", and the bar above them was the only place the difference
-// existed), and the velocity sat at body size in the last column. Inverting
-// the card puts the figures at the size they earn.
-//
 // THE FAMILY IS A WORD NOW, NOT A CHIP. Colour still agrees with it — the
-// meter, the word and the share figure all take the family's ink so a number
-// pairs with its bar without a legend — but colour no longer CARRIES it. The
-// old chip was identity by low-chroma colour alone at 10px.
+// meter and the word take the family's ink — but colour no longer CARRIES it.
+// The old chip was identity by low-chroma colour alone at 10px.
 //
 // The old `.pitchmix` classes are deliberately left alone rather than
 // restyled: BattedBallMix.jsx reuses them verbatim for the hitter's "Batted
@@ -67,7 +59,6 @@ export function PitchMix({ arsenal, heat, tto }) {
       : null
   return (
     <div className="pitchslab">
-      <div className="pitchslab__rule" />
       <div className="pitchslab__head">
         <span className="pitchslab__title">Arsenal</span>
         {total != null && (
@@ -75,7 +66,8 @@ export function PitchMix({ arsenal, heat, tto }) {
         )}
       </div>
       {looks.length > 0 && (
-        <>
+        <div className="pitchslab__filter">
+          <span className="pitchslab__filterlabel">Batter look</span>
           <div className="pitchslab__tabs" role="group" aria-label="Times facing a batter in a game">
             <LookTab label="All" active={look == null} onSelect={() => setLook(null)} />
             {looks.map((l) => (
@@ -87,31 +79,18 @@ export function PitchMix({ arsenal, heat, tto }) {
               />
             ))}
           </div>
-          <p className="pitchslab__tabnote">Times facing a batter in a game</p>
-        </>
+        </div>
       )}
       <ul className="pitchslab__list">
         {rows.map((p) => {
           const family = pitchFamily(p.code)
           return (
             <li className="pitchslab__row" key={p.code}>
-              <div className="pitchslab__line">
-                <span className="pitchslab__id">
-                  <span className="pitchslab__name">{p.name}</span>
-                  <span className={`pitchslab__family pitchslab__family--${family}`}>{family}</span>
-                </span>
-                <span className="pitchslab__velo">
-                  {p.velo != null ? (
-                    <>
-                      {p.velo.toFixed(1)}
-                      <span className="pitchslab__unit">mph</span>
-                    </>
-                  ) : (
-                    DASH
-                  )}
-                </span>
-              </div>
-              <div className="pitchslab__meterrow">
+              <span className="pitchslab__id">
+                <span className="pitchslab__name">{p.name}</span>
+                <span className={`pitchslab__family pitchslab__family--${family}`}>{family}</span>
+              </span>
+              <div className="pitchslab__mix">
                 {/* Decorative: the share it encodes is spelled out right
                     beside it, same rule the old bar followed. */}
                 <div className="pitchslab__meter" aria-hidden="true">
@@ -126,6 +105,16 @@ export function PitchMix({ arsenal, heat, tto }) {
                   {p.usage != null ? `${(p.usage * 100).toFixed(1)}%` : DASH}
                 </span>
               </div>
+              <span className="pitchslab__velo">
+                {p.velo != null ? (
+                  <>
+                    {p.velo.toFixed(1)}
+                    <span className="pitchslab__unit">mph</span>
+                  </>
+                ) : (
+                  DASH
+                )}
+              </span>
             </li>
           )
         })}
@@ -188,19 +177,18 @@ function HeatBand({ heat }) {
   )
 }
 
-// Drawn rather than an emoji so it takes the band's inks and scales with it.
-// Two paths: the body in the band's own accent, a core knocked back to the
-// slab ink so the shape reads as a flame and not a leaf at 26px.
+// Drawn rather than an emoji so it takes the card's inks and scales with it.
+// Two paths: a kraft body with a paper core, both readable on the navy footer.
 function Flame() {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
         d="M12 1.5c.6 2.9 2.1 4.6 3.6 6.3C17.4 9.9 19 11.9 19 14.8 19 18.9 15.9 22 12 22s-7-3.1-7-7.2c0-2.2 1-3.9 2.3-5.4C8.9 7.5 10 5.6 10.4 3.4c1 1.6 1.6 3.2 1.8 4.9.5-2.1.3-4.4-.2-6.8z"
-        fill="var(--heat-band)"
+        fill="var(--seal-cover)"
       />
       <path
         d="M12 13c1.3 1.3 2.4 2.2 2.4 3.7 0 1.4-1.1 2.5-2.4 2.5s-2.4-1.1-2.4-2.5c0-1.3.9-2.2 2.4-3.7z"
-        fill="var(--heat-slab)"
+        fill="var(--heat-band-ink)"
       />
     </svg>
   )

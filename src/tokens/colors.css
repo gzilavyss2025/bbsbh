@@ -120,24 +120,20 @@
   --arsenal-offspeed: #B4453A; /* clay */
   --arsenal-other:    #938C7C; /* graphite-soft — knuckleball/eephus/etc */
 
-  /* ---- Pitch arsenal heat slab ---- the player page's "Pitches" card
-     (PitchMix.jsx) is an INK slab, not paper: the one card on that page whose
-     numbers are the reason a reader came, dressed as the broadcast graphic it
-     is. Fixed app inks, deliberately NOT the club's triad — the card renders
-     for all 30 clubs plus AAA, and every pair below is asserted by
-     check-contrast.mjs, which a hand-picked club colour could not be.
-     The four family inks are the --arsenal-* set restated for an ink ground:
-     those run dark because they sit on manila, and would disappear here. */
-  --heat-slab:     var(--navy);
-  --heat-ink:      var(--paper-3);
-  --heat-fastball: var(--marker);
-  --heat-breaking: #9DC6E8;   /* soft sky — the one ink with no paper-side twin */
-  --heat-offspeed: var(--paper-1);
-  --heat-other:    var(--rule);
-  /* The band at the foot carrying the 100 mph facts — the slab inverted, so it
-     reads as the payoff line rather than another row. */
-  --heat-band:     var(--marker);
-  --heat-band-ink: var(--navy);
+  /* ---- Pitch arsenal card ---- the player page's "Pitches" card
+     (PitchMix.jsx) uses the same paper and scorebook inks as the rest of the
+     page. Fixed app inks, deliberately NOT the club's triad — the card renders
+     for all 30 clubs plus AAA, and every text pair below is asserted by
+     check-contrast.mjs. */
+  --heat-slab:     var(--surface-card);
+  --heat-ink:      var(--text-heading);
+  --heat-fastball: var(--arsenal-fastball);
+  --heat-breaking: var(--arsenal-breaking);
+  --heat-offspeed: var(--arsenal-offspeed);
+  --heat-other:    var(--text-caption);
+  /* Navy bookends the ledger in its header and optional 100 mph footer. */
+  --heat-band:     var(--accent-primary);
+  --heat-band-ink: var(--text-on-ink);
 
   /* ---- Batted-ball mix bar ---- the hitter page's counterpart to the
      arsenal bar (BattedBallMix.jsx), same chart-only rule: no text ever sits
