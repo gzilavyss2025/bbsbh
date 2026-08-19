@@ -219,9 +219,12 @@ for each generator; the reader modules:
   MiLB and any date with no note. Spoiler-free in-app (renders only a link), but the
   PDF recaps prior results, so it opens in a new tab as a user-initiated jump.
   Kept OUT of the PWA precache (grows each game day).
-- `whatsBrewing.js` — for CALIBRATED clubs (a `CONFIG` map keyed by teamId; all
-  30 MLB clubs as of this writing), the Game notes button opens an in-app modal
-  (`WhatsBrewingModal.jsx`) of the narrative blurbs parsed out of the PDF. Parses
+- `whatsBrewing.js` — **QA-only since 2026-08-18.** For a CALIBRATED club (a
+  `CONFIG` map keyed by teamId; all 30 MLB clubs), it parses the narrative blurbs
+  out of the PDF for an in-app modal (`WhatsBrewingModal.jsx`). No game surface
+  opens that modal any more — the parse proved too brittle across the clubs'
+  shifting templates, so every Game Notes button links straight to the PDF; the
+  one caller left is the unlisted `/game-notes-debug` QA page. Parses
   client-side on demand (pdfjs-dist, dynamically imported so pdfjs stays off the
   main bundle — see `vite.config.js`) rather than in the cron, because tonight's
   note posts after the cron runs and the PDF host is CORS-open. Each club's InDesign
@@ -230,8 +233,8 @@ for each generator; the reader modules:
   full-width, most other clubs) — plus font/geometry tunables (single zone or a
   `columns:` array for multi-column pages). `hasWhatsBrewing`/
   `whatsBrewingTitle` live in the separate `whatsBrewingClubs.js` (a lightweight
-  teamId→title map) rather than here, so `TeamInfo.jsx`'s gate check can import
-  them statically without pulling this whole parser out of its lazy chunk; add a
+  teamId→title map) rather than here, so a caller's gate check can import them
+  statically without pulling this whole parser out of its lazy chunk; add a
   club = add a `CONFIG` entry here + a title there (not a new parser). See
   `.scratch/game-notes/CALIBRATION.md` for the per-club calibration methodology
   and `docs/whats-brewing.md` for parsing details + the Node harness

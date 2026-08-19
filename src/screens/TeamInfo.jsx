@@ -12,8 +12,6 @@ import {
 } from '../api/select.js'
 import { fetchTeam, fetchTeamRoster } from '../api/team.js'
 import { resolveGameNotes } from '../api/gameNotes.js'
-import { hasWhatsBrewing, whatsBrewingTitle } from '../api/whatsBrewingClubs.js'
-import { WhatsBrewingModal } from '../components/game/WhatsBrewingModal.jsx'
 import { BallparkModal } from '../components/ballpark/BallparkModal.jsx'
 import { ballparkFor } from '../lib/ballpark/ballparkData.js'
 import { POS_ORDER } from '../api/person.js'
@@ -1074,6 +1072,13 @@ function seasonRange(seasons) {
 // (every MiLB game, or a date the club never posted), so it degrades to nothing
 // like the rest of the lineup surfaces. The PDF opens in a new tab: a deliberate
 // jump to an external, spoiler-bearing press packet, not an in-app reveal.
+//
+// The button used to open the What's Brewing modal (the club's notes parsed into
+// tap-to-read blurbs) instead of the PDF. The parse was too brittle across the
+// clubs' shifting PDF templates to be worth the extra tap, so every club now gets
+// the plain link-out. The parser and the modal still exist, reachable only from
+// the unlisted /game-notes-debug QA page (src/screens/GameNotesDebugPage.jsx).
+
 // How often to re-check the live feed for a not-yet-posted note (see below).
 const NOTES_POLL_MS = 5 * 60 * 1000
 // Today's calendar date in America/New_York — the tz the game's officialDate and
@@ -1085,7 +1090,6 @@ function GameNotesButton({ feed, side }) {
   const meta = useMemo(() => selectTeamMeta(feed, side), [feed, side])
   const info = useMemo(() => selectGameInfo(feed), [feed])
   const isMlb = (meta.sportId ?? 1) === 1
-  const [showBrewing, setShowBrewing] = useState(false)
   const { data: notes, reload } = useAsync(
     () =>
       isMlb && meta.id ? resolveGameNotes(meta.id, info.officialDate) : Promise.resolve(null),
@@ -1108,34 +1112,8 @@ function GameNotesButton({ feed, side }) {
 
   if (!notes?.url) return null
 
-  // Calibrated clubs (see whatsBrewing.js's CONFIG): tap opens the What's Brewing
-  // modal (the parsed narrative blurbs) with the full PDF linked inside it. Every
-  // other club: the plain link-out to the PDF in a new tab. Both read "Game
-  // Notes"; the arrow distinguishes the in-app modal (›) from the external-PDF
-  // jump (↗).
-  if (hasWhatsBrewing(meta.id)) {
-    return (
-      <>
-        <button
-          className="notesbtn"
-          onClick={() => setShowBrewing(true)}
-          title={`${notes.title} — the club's game notes`}
-        >
-          Game Notes
-          <span className="notesbtn__ext" aria-hidden="true">›</span>
-        </button>
-        {showBrewing && (
-          <WhatsBrewingModal
-            notes={notes}
-            teamId={meta.id}
-            title={whatsBrewingTitle(meta.id)}
-            onClose={() => setShowBrewing(false)}
-          />
-        )}
-      </>
-    )
-  }
-
+  // One behavior for every club: tap opens the club's own notes PDF in a new tab.
+  // The ↗ says so.
   return (
     <a
       className="notesbtn"

@@ -1,16 +1,25 @@
 # What's Brewing: parsing a club's Game Notes PDF into text
 
-The lineup page's **Game notes** button used to only link out to a club's
-official pre-game press-notes PDF (see `src/api/gameNotes.js` and
-`docs`-adjacent notes there). For a **calibrated club**, it now instead opens an
-in-app modal of the narrative blurbs from the PDF — the hand-titled callouts
-(Brewers: *Hulk Logan*, *Don't Pitch to Mitch*, …; Pirates: *Beer Batter*, *Jake
-'n Rake*, *Home(r) Happy*, …) — with the full PDF still linked inside the modal.
+> **Status: QA-only (2026-08-18).** No game surface opens the What's Brewing
+> modal any more. The parse was too brittle across the clubs' shifting PDF
+> templates to sit between the reader and the notes, so the lineup page's **Game
+> Notes** button and the team hub's link both open the club's PDF directly. The
+> parser and the modal stay as a calibration sandbox behind the unlisted
+> `/game-notes-debug` page. Everything below still describes how the parse works;
+> re-check a club's `CONFIG` against its current PDF before wiring any game
+> surface back to the modal.
+
+The **Game Notes** button links out to a club's official pre-game press-notes PDF
+(see `src/api/gameNotes.js`). For a **calibrated club**, the parser pulls the
+narrative blurbs out of that PDF — the hand-titled callouts (Brewers: *Hulk
+Logan*, *Don't Pitch to Mitch*, …; Pirates: *Beer Batter*, *Jake 'n Rake*,
+*Home(r) Happy*, …) — into an in-app modal, with the full PDF still linked inside
+it.
 
 This documents how that parse works, why it's shaped the way it is, and how to
 verify or extend it. It's the companion to the code: `src/api/whatsBrewing.js`
 (parser + the per-club `CONFIG`), `src/components/game/WhatsBrewingModal.jsx` (the
-modal), and `GameNotesButton` in `src/screens/TeamInfo.jsx`.
+modal), and `GameNotesDebugPage` in `src/screens/GameNotesDebugPage.jsx`.
 
 ## The short version
 
@@ -34,7 +43,8 @@ modal), and `GameNotesButton` in `src/screens/TeamInfo.jsx`.
   loads when the modal opens, and it's kept out of the PWA precache.
 - Callers gate the modal on **`hasWhatsBrewing(teamId)`** (`whatsBrewingClubs.js`
   — split out of the parser so the gate check doesn't force a static import of
-  the whole heavy module); every un-calibrated club keeps the plain PDF link-out.
+  the whole heavy module); every un-calibrated club shows the plain PDF link-out.
+  The only caller left is the debug page.
 
 ## Why client-side, not the cron
 

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Loader } from '../ui/Loader.jsx'
 
 // What's Brewing — a bottom-sheet modal that surfaces the narrative blurbs from
-// the Brewers' pre-game Game Notes PDF (Hulk Logan, Don't Pitch to Mitch, …) as
-// tap-to-read text, instead of sending the user straight out to the full PDF.
-// The lineup page's Game notes button opens this for the Brewers; the whole-PDF
-// link lives inside it ("modal first, PDF link inside"). Every other club still
-// gets the plain link-out (see TeamInfo.jsx / whatsBrewing.js for why it's
-// Brewers-only for now).
+// a club's pre-game Game Notes PDF (Brewers: Hulk Logan, Don't Pitch to Mitch, …)
+// as tap-to-read text, with the whole-PDF link inside it.
+//
+// QA ONLY. No game surface opens this any more: the parse was too brittle across
+// the clubs' shifting PDF templates, so every Game Notes button now links
+// straight to the PDF (see TeamInfo.jsx / whatsBrewing.js). The one caller left
+// is the unlisted /game-notes-debug page, where it is the calibration preview.
 //
 // Spoiler-safe: the blurbs are pre-game color that only recaps prior results, so
 // this sits outside any seal like the rest of the lineup page. pdfjs is loaded

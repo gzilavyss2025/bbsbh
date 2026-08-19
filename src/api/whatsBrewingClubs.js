@@ -1,11 +1,13 @@
-// The calibrated-club gate for What's Brewing, split out of whatsBrewing.js so
-// TeamInfo.jsx's `hasWhatsBrewing`/`whatsBrewingTitle` checks (needed at render
-// time for every game, to decide modal-vs-plain-link) don't force a static
+// The calibrated-club gate for What's Brewing, split out of whatsBrewing.js so a
+// caller's `hasWhatsBrewing`/`whatsBrewingTitle` check doesn't force a static
 // import of the heavy PDF-parsing module — that defeated the dynamic import in
 // WhatsBrewingModal.jsx, since Rollup can't chunk-split a module that's also
 // imported statically elsewhere (it stays in the main bundle instead of its own
 // lazy chunk). Titles here must stay in sync with whatsBrewing.js's per-club
 // CONFIG.
+//
+// The only caller left is the /game-notes-debug QA page — the game surfaces link
+// straight to the PDF now (see whatsBrewing.js's header).
 
 export const BREWERS_ID = 158
 export const PIRATES_ID = 134

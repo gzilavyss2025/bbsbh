@@ -57,12 +57,10 @@ const TAB_TITLE = {
   minors: 'Minors',
 }
 
-// The club's most recent official press-notes PDF — a direct link-out (never
-// the What's Brewing in-app modal the lineup page's Game Notes button opens for
-// calibrated clubs; the team hub always jumps straight to the PDF, since
-// there's no single game's blurbs to parse). No gameDate, so resolveGameNotes
-// falls through to the newest note on file rather than one tied to tonight's
-// game. MLB only — see gameNotes.js.
+// The club's most recent official press-notes PDF — a direct link-out, the same
+// as the lineup page's Game Notes button. No gameDate, so resolveGameNotes falls
+// through to the newest note on file rather than one tied to tonight's game.
+// MLB only — see gameNotes.js.
 function GameNotesLink({ teamId }) {
   const { data: notes } = useAsync(() => resolveGameNotes(teamId), [teamId])
   if (!notes?.url) return null
