@@ -18,7 +18,24 @@
   border-radius: var(--radius-md);
   background: var(--surface-card);
   box-shadow: var(--shadow-card);
-  padding-bottom: 6px;
+}
+
+/* In the innings feed this card is a SIBLING of `.half`, not a child of it
+   (HalfInning.jsx) - so it carries the gap that separates it from the
+   play-by-play above and the "due up next" card below. The game-shaped card on
+   the box score sits in that page's own flow and wants nothing here. */
+.hitchart--half {
+  margin-top: var(--space-4);
+}
+
+/* `.inning` goes display:contents on a phone and `.half` claims `order: 1`
+   there (12-sealbox.css). Nothing between them is a flex container today — but
+   the moment one is, a card left at 0 would sort ABOVE the play-by-play it
+   summarises. Matching `.half` holds them on source order either way. */
+@media (max-width: 739.98px) {
+  .hitchart--half {
+    order: 1;
+  }
 }
 
 /* ---- Head ---- */
@@ -28,7 +45,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-4) 14px var(--space-3);
+  padding: var(--space-3) 14px 10px;
 }
 
 .hitchart__eyebrow {
@@ -43,11 +60,27 @@
 .hitchart__headline {
   margin: var(--space-1) 0 0;
   font-family: var(--font-display);
-  font-size: var(--fs-display);
+  font-size: var(--fs-h1);
   font-weight: var(--w-bold);
   line-height: var(--lh-display);
   letter-spacing: var(--ls-none);
   color: var(--text-heading);
+}
+
+/* A HALF'S CARD IS NOT A MASTHEAD. The game-shaped card heads one section of
+   the box score and can afford a title; this one repeats under every half a
+   reader opens, eighteen times a game, and a full masthead each time pushed
+   the plot itself off the phone. The same words, a quarter of the room. */
+.hitchart--half .hitchart__headline {
+  font-size: var(--fs-title-sm);
+}
+
+.hitchart--half .hitchart__head {
+  padding: 10px 14px 8px;
+}
+
+.hitchart--half .hitchart__rule {
+  display: none;
 }
 
 /* Kraft into clay — a short seam under the title, the same two inks the seals
@@ -55,7 +88,7 @@
 .hitchart__rule {
   width: 42px;
   height: 3px;
-  margin-top: 9px;
+  margin-top: 7px;
   border-radius: var(--radius-pill);
   background: linear-gradient(90deg, var(--seal-cover), var(--accent-negative));
 }
@@ -81,11 +114,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 14px var(--space-3);
+  padding: 0 14px 10px;
 }
 
 .hitchart__chiprow--switches {
-  padding-top: var(--space-3);
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .hitchart__chip {
@@ -93,7 +127,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 7px 11px;
+  padding: 6px 10px;
   border: var(--bw-hair) solid var(--border-rule);
   border-radius: var(--radius-sm);
   background: var(--surface-card);
@@ -179,8 +213,11 @@
 
 /* ---- The field ---- */
 
+/* THE SAME 14px INSET THE REST OF THE CARD IS SET ON. The drawing used to sit
+   on 8px, so its posted distances hung six pixels wider than the eyebrow, the
+   chips and the key — close enough to read as a slip rather than a bleed. */
 .hitchart__fieldwrap {
-  padding: 0 var(--space-2);
+  padding: 0 14px;
 }
 
 /* The plot box must be exactly the drawing's box: the half's dot numbers are
@@ -201,8 +238,11 @@
   cursor: pointer;
 }
 
+/* The thumb-target layer (HitChart.jsx). Transparent, and drawn under every
+   mark so it can never take a tap meant for a dot it overlaps. */
 .hitchart__tap {
   fill: transparent;
+  cursor: pointer;
 }
 
 .hitchart__hit {
@@ -249,6 +289,10 @@
   stroke-dasharray: 3 2.5;
 }
 
+/* A number rides beside its dot, over a drawing that already prints the park's
+   posted distances. The halo is the card's own ground pushed out around the
+   glyph, so a number that lands on a fence line or a distance stays readable
+   instead of dissolving into it. */
 .hitchart__dotnum {
   position: absolute;
   transform: translateY(-50%);
@@ -256,7 +300,17 @@
   font-size: var(--fs-caption);
   font-weight: var(--w-bold);
   color: var(--text-caption);
+  text-shadow:
+    0 0 3px var(--surface-card),
+    0 0 3px var(--surface-card);
   pointer-events: none;
+}
+
+/* Flipped to the dot's left near the right-field line (HitChart.jsx's
+   RIGHT_EDGE), where a number set to the right would sit on the posted
+   distance at the foul pole. */
+.hitchart__dotnum--flip {
+  transform: translate(-100%, -50%);
 }
 
 /* ---- The readout ────────────────────────────────────────────────────────
@@ -265,23 +319,28 @@
    blank frame waiting to be filled. */
 
 .hitchart__readout {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin: var(--space-1) 14px 0;
-  padding: 10px var(--space-3);
+  margin: var(--space-2) 14px 0;
+  padding: 9px var(--space-3) 10px;
   border: var(--bw-hair) solid var(--border-hairline);
   border-radius: var(--radius-sm);
   background: var(--surface-inset);
 }
 
+/* The name and the denotation share the first line; the measurements take the
+   second. See the readout's own note in HitChart.jsx for why it is rows here
+   and not the two columns it started as. */
 .hitchart__who {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
   min-width: 0;
 }
 
 .hitchart__batter {
   display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: var(--fs-title-sm);
   font-weight: var(--w-bold);
@@ -295,7 +354,7 @@
    has just pencilled in. */
 .hitchart__code {
   display: block;
-  margin-top: 5px;
+  flex: none;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
@@ -304,7 +363,8 @@
 }
 
 .hitchart__meta {
-  flex: none;
+  display: block;
+  margin-top: 6px;
   font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-weight: var(--w-bold);
@@ -331,7 +391,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2) 14px;
-  padding: var(--space-3) 14px 0;
+  padding: 10px 14px 0;
 }
 
 .hitchart__keyitem {
@@ -352,13 +412,13 @@
 
 .hitchart__facts {
   display: flex;
-  margin: 14px 0 0;
+  margin: var(--space-3) 0 0;
   border-top: var(--bw-hair) solid var(--border-rule);
 }
 
 .hitchart__fact {
   flex: 1;
-  padding: 11px var(--space-1);
+  padding: 9px var(--space-1);
   text-align: center;
 }
 
@@ -378,20 +438,11 @@
 .hitchart__factvalue {
   margin: 5px 0 0;
   font-family: var(--font-display);
-  font-size: var(--fs-h2);
+  font-size: var(--fs-title-md);
   font-weight: var(--w-bold);
   line-height: var(--lh-solid);
   letter-spacing: var(--ls-none);
   color: var(--text-heading);
-}
-
-.hitchart__unit {
-  margin-left: var(--space-1);
-  font-family: var(--font-mono);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-wide);
-  color: var(--text-caption);
 }
 
 /* ---- The half's list ────────────────────────────────────────────────────
@@ -413,7 +464,7 @@
 .hitchart__list {
   list-style: none;
   margin: 0;
-  padding: 0 14px var(--space-4);
+  padding: 0 14px var(--space-3);
 }
 
 .hitchart__row {
@@ -465,6 +516,67 @@
 
 .hitchart__rowvelo--hard {
   color: var(--clay-deep);
+}
+
+/* PHONE-FIRST, so every number above is the phone's. A tablet or a desktop has
+   the height to spend, and the game-shaped card heads a box-score section there
+   rather than competing with it for one screen: the masthead goes back to full
+   display size and the blocks around the plot get their air back. The half's
+   compact head is deliberately NOT restored - it repeats under every half at
+   every width, and it reads better small at all of them. */
+@media (min-width: 740px) {
+  .hitchart__head {
+    padding: var(--space-4) 14px var(--space-3);
+  }
+
+  .hitchart--game .hitchart__headline {
+    font-size: var(--fs-display);
+  }
+
+  .hitchart__rule {
+    margin-top: 9px;
+  }
+
+  .hitchart__chiprow {
+    padding-bottom: var(--space-3);
+  }
+
+  .hitchart__chiprow--switches {
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .hitchart__key {
+    padding-top: var(--space-3);
+  }
+
+  /* AND A CEILING ON THE DRAWING. The plot is a percentage of its card, and on
+     the box score that card is the full page: at 928px the field drew 739px
+     tall and the card passed 1,100px — a chart nobody can take in at once.
+
+     THE CAP GOES ON THE WRAP, NEVER ON `.hitchart__plot`. That box has to stay
+     exactly the drawing's own box — the half's dot numbers are positioned in
+     percentages of it — so a max-width or auto margin there would slide every
+     label off its dot. Constraining the parent moves both together. */
+  .hitchart__fieldwrap {
+    max-width: 568px;
+    margin-inline: auto;
+  }
+
+  /* The phone sets the name against the right edge because the strip is barely
+     wider than the two of them. Across a whole box-score row that same rule
+     strands the denotation half a page from its name, so it closes up. */
+  .hitchart__who {
+    justify-content: flex-start;
+  }
+
+  .hitchart__fact {
+    padding: 11px var(--space-1);
+  }
+
+  .hitchart__factvalue {
+    font-size: var(--fs-h2);
+  }
 }
 
 /* The wall-height tags belong to the DIMENSIONS reading of this drawing, not to

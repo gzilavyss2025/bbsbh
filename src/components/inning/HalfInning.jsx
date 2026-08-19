@@ -446,20 +446,30 @@ export function HalfInning({
             )
           }}
         </SealBox>
-        {/* Where this half's contact went. Mounted only once the half is
-            committed, so the selector behind it never runs against a half the
-            reader has not reached — the render gate IS the reveal gate here,
-            the same footing PrePitchChanges above sits on. */}
-        {halfIndex(inning, half) <= revealedThrough && (
-          <HalfHitChart
-            feed={feed}
-            inning={inning}
-            half={half}
-            label={label}
-            teamId={battingSide === 'away' ? awayId : homeId}
-          />
-        )}
       </section>
+
+      {/* Where this half's contact went. Mounted only once the half is
+          committed, so the selector behind it never runs against a half the
+          reader has not reached — the render gate IS the reveal gate here,
+          the same footing PrePitchChanges above sits on.
+
+          A SIBLING OF `.half`, not a child of it. `.hitchart` is a card in its
+          own right — border, radius, card ground, shadow — and nested inside
+          `.half` (itself all four of those) it read as a doubled border with no
+          gap above it, welded to whichever at-bat happened to come last. Out
+          here it takes the feed's own card rhythm, the same one `.dueup` and
+          `.rolling` below it sit on. It stays inside HalfInning's fragment, so
+          it is still within the page-turn scene and turns with the half it
+          belongs to. */}
+      {halfIndex(inning, half) <= revealedThrough && (
+        <HalfHitChart
+          feed={feed}
+          inning={inning}
+          half={half}
+          label={label}
+          teamId={battingSide === 'away' ? awayId : homeId}
+        />
+      )}
     </>
   )
 }
