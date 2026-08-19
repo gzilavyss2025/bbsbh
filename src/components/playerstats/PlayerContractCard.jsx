@@ -1,3 +1,4 @@
+import { SourceLine } from '../salaries/SourceLine.jsx'
 import '../../styles/26b-player-contract.css'
 
 const money = new Intl.NumberFormat('en-US', {
@@ -99,6 +100,11 @@ export function PlayerContractCard({ contract }) {
           </div>
         )}
       </div>
+      {/* Cot's and Fever get named HERE too, not only on /salaries and the club
+          ledger. This card renders the same figures under the same terms, and
+          `fetchPlayerContract` has always attached the shard's `meta` as
+          `source` for exactly this purpose — nothing was reading it. */}
+      <SourceLine meta={contract.source} note="Pre-arbitration figures are estimates." />
     </section>
   )
 }

@@ -16,6 +16,12 @@
 // renders the same before first pitch and after a final — a preview of a game
 // already played is still a preview, and this module has no path to a run.
 //
+// That is a property this module has to KEEP, not one the feed hands it. A
+// boxscore player's `seasonStats` updates during the game, so a hitter's RBI
+// total read straight off it moves when the game does — see `battingFor`,
+// which subtracts tonight back out. Any new season figure taken off a boxscore
+// player record needs the same treatment.
+//
 // NOT IMPORTED HERE, DELIBERATELY: linescore.js, derive.js, boxscore.js,
 // gameStory.js (all reveal-only), and the caller-gated staging selectors
 // (lineupEntering/defenseEntering/selectPrePitchChanges) — a poster has no
@@ -132,16 +138,29 @@ function starterFor(feed, side, line) {
 // numbers are already on the lineup pages, the player page, and the back of
 // every baseball card. Blank for a hitter with no plate appearances yet.
 function battingFor(feed, side, personId) {
-  const b = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${personId}`]?.seasonStats?.batting
+  const player = feed?.liveData?.boxscore?.teams?.[side]?.players?.[`ID${personId}`]
+  const b = player?.seasonStats?.batting
   if (!b || !b.avg || !b.atBats) return null
+  // `seasonStats` is NOT a pre-game figure — the feed updates it during the
+  // game, so on a played game it already counts tonight (src/api/boxscore.js
+  // says so, and built `preGameAvg` to undo it for the scorebug). Tonight's own
+  // line sits on the same record, so subtracting recovers what he entered on.
+  //
+  // Only the COUNTING stats need it. A slash that moved .003 says nothing about
+  // the game, which is why those pass through as the feed formatted them — but
+  // an RBI is a run driven in, and a poster is an image the reader posts in
+  // public. "48 RBI" on a hitter who entered on 46 has reported two runs.
+  const today = player?.stats?.batting ?? {}
+  const entering = (season, tonight) =>
+    season == null ? null : Math.max(0, season - (tonight ?? 0))
   return {
     avg: b.avg ?? '',
     obp: b.obp ?? '',
     slg: b.slg ?? '',
     ops: b.ops ?? '',
-    homeRuns: b.homeRuns ?? null,
-    rbi: b.rbi ?? null,
-    stolenBases: b.stolenBases ?? null,
+    homeRuns: entering(b.homeRuns, today.homeRuns),
+    rbi: entering(b.rbi, today.rbi),
+    stolenBases: entering(b.stolenBases, today.stolenBases),
   }
 }
 

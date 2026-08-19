@@ -93,7 +93,20 @@ export function canonicalUrl(params) {
     case 'logbook':
     case 'first-scorebook':
     case 'photos':
+    case 'situational-records':
+    case 'attendance':
       path = `/${route}`
+      break
+    // Three whose route name is not their path. They cannot join the
+    // fallthrough above, and that is precisely why they were missed.
+    case 'pace':
+      path = '/pace-of-play'
+      break
+    case 'farm-system':
+      path = '/farm-system-rankings'
+      break
+    case 'bullpens':
+      path = '/bullpen-availability'
       break
     default:
       path = '/'

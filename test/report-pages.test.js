@@ -130,7 +130,7 @@ test('nothing in FOOTER_TRAIL is also a report page', () => {
   }
 })
 
-// Guides are server-rendered documents outside the React app (ADR-0048).
+// Guides are server-rendered documents outside the React app (ADR-0053).
 // Rendering one through the client router would paint the SPA over a document
 // the server already sent, so callers key off this rather than off a hardcoded
 // prefix check scattered per component.

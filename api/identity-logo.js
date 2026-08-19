@@ -33,7 +33,7 @@
 
 import { describeLogoRejection, LOGO_MAX_BYTES } from '../src/lib/logoArt.js'
 import { IDENTITY_DIMENSIONS, identityFieldId } from '../src/lib/identity/fields.js'
-import { isOwnBlobUrl, sniffImage } from './ballpark-photo.js'
+import { isOwnBlobUrlUnder, sniffImage } from './ballpark-photo.js'
 import { authenticateAdmin } from './_lib/adminAuth.js'
 import { jsonResponse, readRawBody, requestUrl } from './_lib/nodeHandler.js'
 
@@ -110,7 +110,7 @@ export default async function handler(req, res) {
   // passes its own ABANDONED draft upload here (re-uploading before saving),
   // never a URL a saved override still points at.
   const replaces = searchParams.get('replaces')
-  if (replaces && isOwnBlobUrl(replaces) && replaces !== uploaded.url) {
+  if (replaces && isOwnBlobUrlUnder(replaces, 'identity-logos/') && replaces !== uploaded.url) {
     try {
       await del(replaces, { token })
     } catch {

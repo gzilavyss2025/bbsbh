@@ -123,7 +123,7 @@
 }
 
 /* "Guide" — this row leaves the SPA for a server-rendered document at /learn
-   (ADR-0048). Visible text, never a title= tooltip: a tooltip does not exist
+   (ADR-0053). Visible text, never a title= tooltip: a tooltip does not exist
    on the phone this app is built for. */
 .dirtag {
   margin-left: auto;

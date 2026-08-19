@@ -31,7 +31,7 @@ import revealHandler, {
 } from '../api/reveal.js'
 import spoiledDaysHandler from '../api/spoiled-days.js'
 import stampsHandler, { mint, mintRefusal, seasonRows, stampEntry } from '../api/stamps.js'
-import { applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
+import { MAX_STAMPS_PER_SEASON, applyRemoteStamps, isStamped } from '../src/lib/stamps.js'
 
 // A stand-in for Node's (IncomingMessage, ServerResponse) pair.
 function nodeReq(url, { method = 'GET', headers = {}, body } = {}) {
@@ -441,6 +441,9 @@ function fakeRedis(seed = {}) {
     async hlen(key) {
       return Object.keys(hashes[key] ?? {}).length
     },
+    async hgetall(key) {
+      return hashes[key] ? { ...hashes[key] } : null
+    },
     async sadd() {},
     async set(key, value) {
       store[key] = value
@@ -837,4 +840,53 @@ test('preflight failures never reach the log — they are not token failures', a
   await authenticateUser(nodeReq('/api/stamps'), { env: { CLERK_SECRET_KEY: 'sk_test_x' }, log })
   await authenticateUser(withToken('abc'), { env: {}, log })
   assert.equal(lines.length, 0)
+})
+
+// A season's cap counts KEEPSAKES, not rows. Un-stamping writes a tombstone
+// (`state: 'off'`) into the same hash rather than deleting the field, because a
+// stamp taken back must still be distinguishable from one never made. Counting
+// the hash's LENGTH therefore charges a user for every stamp they ever removed:
+// stamp and un-stamp the same game 500 times and the season reads as full while
+// the shelf is empty. The cap has to count the live ones.
+test('the season cap counts live stamps, not the tombstones un-stamping leaves', async () => {
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  const key = `stamps:u1:2026`
+  redis.hashes[key] = {}
+  for (let i = 0; i < MAX_STAMPS_PER_SEASON; i += 1) {
+    redis.hashes[key][900000 + i] = {
+      state: 'off',
+      mode: 'watched',
+      stampedAt: 1,
+      updatedAt: 1,
+      date: '2026-04-20',
+    }
+  }
+
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+
+  assert.equal(res.statusCode, 201, 'a shelf of nothing but tombstones is not a full season')
+  assert.equal(res.json.stamp.state, 'on')
+})
+
+// And the cap must still bite once the live stamps really do reach it.
+test('the season cap still refuses when the live stamps reach it', async () => {
+  const redis = fakeRedis({ 'game:final:778241': FINAL_GAME })
+  const key = `stamps:u1:2026`
+  redis.hashes[key] = {}
+  for (let i = 0; i < MAX_STAMPS_PER_SEASON; i += 1) {
+    redis.hashes[key][900000 + i] = {
+      state: 'on',
+      mode: 'watched',
+      stampedAt: 1,
+      updatedAt: 1,
+      date: '2026-04-20',
+    }
+  }
+
+  const res = nodeRes()
+  await mint(mintReq({ gamePk: 778241, mode: 'watched' }), res, redis, 'u1')
+
+  assert.equal(res.statusCode, 409)
+  assert.equal(res.json.error, 'season full')
 })

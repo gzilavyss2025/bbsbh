@@ -250,7 +250,7 @@ Drafts: `drafts.md`.
 Status: `ready-for-human` — implemented on `claude/seo-landing-pages`.
 
 **Option A, as recommended.** Structured copy slots, server-rendered, no WYSIWYG,
-no new dependency. ADR-0048 records the decision and its consequences.
+no new dependency. ADR-0053 records the decision and its consequences.
 
 **Eight guides, not six.** Two were added after the plan, on the owner's steer
 toward paper scorers:

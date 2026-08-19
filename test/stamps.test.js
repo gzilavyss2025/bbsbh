@@ -11,6 +11,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { mergeStrategyFor } from '../src/lib/account/preferences.js'
+
 import {
   DEFAULT_BOOK_ID,
   DEFAULT_STAMP_MODE,
@@ -19,6 +21,7 @@ import {
   MAX_PLACEMENT_TILT,
   MAX_STAMPS_PER_SEASON,
   addStamp,
+  adoptRemoteStamps,
   applyRemoteStamps,
   isStamped,
   normalizePlacement,
@@ -532,4 +535,50 @@ test('the full round trip: two devices, neither empty, converge', () => {
   const phoneMerged = applyRemoteStamps(phone, server2)
   assert.deepEqual(Object.keys(phoneMerged).map(Number).sort((a, b) => a - b), [101, 102, 303])
   assert.deepEqual(stampsToPublish(phoneMerged, server2), [])
+})
+
+// THE SHARED-DEVICE LEAK (STAMPS_OWNER_KEY).
+//
+// A local-first collection plus an account leaks on a family iPad. User A signs
+// in, their stamps sync down into `bbsbh:stamps`, A signs out, B signs in. The
+// device still holds A's stamps as ordinary local state, and two things follow
+// that neither user chose: `stampsToPublish` finds them "missing" from B's
+// remote and pushes A's collection into B's ACCOUNT, and every game A stamped
+// opens unsealed for B, because the unseal override only asks whether a stamp
+// exists on this device (ADR-0048).
+//
+// Nulling the in-memory baseline on sign-out does not stop it — the next pull
+// hands over a perfectly good baseline that happens to belong to the new user.
+// Only knowing WHOSE collection this is stops it.
+test('a collection belonging to another account is adopted away, never published', () => {
+  const a = {
+    777747: { state: 'on', mode: 'watched', stampedAt: 1, updatedAt: 1, date: '2026-05-27' },
+    777748: { state: 'on', mode: 'watched', stampedAt: 2, updatedAt: 2, date: '2026-05-28' },
+  }
+
+  // B signs in on the same device. B's account holds one different game.
+  const bRemote = {
+    900001: { state: 'on', mode: 'followed', stampedAt: 9, updatedAt: 9, date: '2026-06-01' },
+  }
+
+  // The leak, stated as the assertion that used to fail: merging would keep A's
+  // two games AND offer them up as B's to publish.
+  const merged = applyRemoteStamps(a, bRemote)
+  assert.ok(stampsToPublish(merged, bRemote).length > 0, 'the merge path really does offer A’s stamps for publish')
+
+  // Adopting is what B's sign-in must do instead.
+  const adopted = adoptRemoteStamps(bRemote)
+  assert.deepEqual(Object.keys(adopted), ['900001'], 'B gets B’s collection and nothing else')
+  assert.equal(stampFor(adopted, 777747), null, 'A’s game must not unseal for B')
+  assert.deepEqual(stampsToPublish(adopted, bRemote), [], 'and nothing of A’s travels into B’s account')
+})
+
+// The guard must not fire on the ordinary paths, or it would discard a guest's
+// own collection on their first sign-in — the case the owner tag exists to
+// carry UP, not throw away.
+test('the owner tag adopts only for a different account', () => {
+  assert.equal(mergeStrategyFor('', 'user_a'), 'backfill', 'a guest’s own stamps backfill into their new account')
+  assert.equal(mergeStrategyFor('user_a', 'user_a'), 'backfill', 'the same user on the same device is ordinary')
+  assert.equal(mergeStrategyFor('user_a', 'user_b'), 'adopt', 'a different account adopts')
+  assert.equal(mergeStrategyFor('user_a', null), 'none', 'signed out reconciles nothing')
 })

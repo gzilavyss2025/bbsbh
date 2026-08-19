@@ -1,4 +1,4 @@
-# ADR-0048 — The guides are server-rendered documents, not app routes
+# ADR-0053 — The guides are server-rendered documents, not app routes
 
 Status: accepted (2026-08-16)
 

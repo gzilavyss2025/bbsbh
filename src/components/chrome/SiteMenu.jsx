@@ -26,7 +26,7 @@ import { DirectoryHeading } from './DirectoryHeading.jsx'
 //    middle-click, cmd-click and "open in new tab" all did nothing. See
 //    useRouteLink in lib/nav.js, which keeps a plain click a client-side push.
 // 4. **The guides are in it.** Eleven server-rendered pages at /learn
-//    (ADR-0048) that nothing inside the app has ever linked to.
+//    (ADR-0053) that nothing inside the app has ever linked to.
 export function SiteMenuButton({ className = '' }) {
   const [open, setOpen] = useState(false)
   return (

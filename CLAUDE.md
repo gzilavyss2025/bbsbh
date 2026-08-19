@@ -151,7 +151,7 @@ Tally**'s `preferences.js` + `src/lib/account/` mirror a CLOSED four-field set, 
 `account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the shelf — a
 cover's title, club and mark, never a stamp (ADR-0041). `game-story.js` is a CORS hop to MLB.com's
 team RSS feeds, which send none. `page.js` + `src/copy/landing/` server-render `/learn` for AI
-crawlers, which run no JS (ADR-0048). **The eleventh stores a score, by design**: the Game Log's
+crawlers, which run no JS (ADR-0053). **The eleventh stores a score, by design**: the Game Log's
 stamps (`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
 (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
 

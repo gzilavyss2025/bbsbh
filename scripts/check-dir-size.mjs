@@ -449,7 +449,7 @@ const BUDGETS = {
   // 87 -> 89 for check-fixture-freshness.mjs and check-feed-shape-drift.mjs,
   // the e2e mock-fixture guards — flat lint/cron scripts, same shape as
   // every other check-*.mjs already counted here.
-  scripts: 90,
+  scripts: 91,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.

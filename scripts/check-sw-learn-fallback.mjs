@@ -3,7 +3,7 @@
 // THE BUG THIS EXISTS FOR. `navigateFallback: '/index.html'` in vite.config.js
 // registers a Workbox NavigationRoute that answers every navigation the worker
 // controls with the precached app shell. The guides at /learn are the one part
-// of this site the server renders itself (api/page.js, ADR-0048), so for a
+// of this site the server renders itself (api/page.js, ADR-0053), so for a
 // reader with the worker installed that fallback served index.html AT the
 // guide's URL — the client router then failed to match '/learn/{slug}', which
 // it never matches on purpose (src/lib/route.js), and fell through to the
@@ -72,7 +72,7 @@ if (unsealed.length) {
       unsealed.map((u) => `  ${u}`).join('\n') +
       '\n\nThese are server-rendered guides, not React routes. A reader with the PWA\n' +
       'installed would land on the slate with the guide URL still in the address bar.\n' +
-      'See docs/adr/0048 and the note beside navigateFallbackDenylist in vite.config.js.',
+      'See docs/adr/0053 and the note beside navigateFallbackDenylist in vite.config.js.',
   )
   process.exit(1)
 }

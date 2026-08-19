@@ -101,6 +101,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://tallybb.com/situational-records</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://tallybb.com/salaries</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://tallybb.com/postseason-race</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://tallybb.com/fouls</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://tallybb.com/learn</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
