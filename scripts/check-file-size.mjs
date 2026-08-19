@@ -121,6 +121,15 @@ const BUDGETS = {
   // the wrong instrument for a documented lookup table. The thing worth
   // watching here is the BUDGET NUMBERS, and check-dir-size.mjs watches those
   // itself.
+  // 600 -> 620 for the `?d=` calendar-validity guard. route.js had been held at
+  // EXACTLY 600 for several commits, which is why this is written down rather
+  // than quietly absorbed: the guard is a bug fix, not a feature, and the nine
+  // lines are the reason it exists — an unparseable date threw out of
+  // dayBefore() and took the team hub, /player, /leaders and
+  // /situational-records down in three different ways. A one-line guard with no
+  // explanation in a file where every other branch is explained would be the
+  // thing a later reader deletes.
+  'src/lib/route.js': 620, // 614
   'scripts/check-dir-size.mjs': 700, // 608
   'src/api/whatsBrewing.js': 1600, // 1581
   // 1500 -> 1600 for the veloVariety/centuryClub/veloPeak join (docs/callouts.md):

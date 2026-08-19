@@ -111,7 +111,18 @@ export function parseRoute(url) {
   const [path, query = ''] = (url || '').split('?')
   const parts = path.split('/').filter(Boolean)
   const q = new URLSearchParams(query)
-  const asOf = q.get('d') || null
+  // A `?d=` that is not a real calendar date degrades to LIVE, never rides on.
+  // Every dated loader funnels it into dayBefore(), whose
+  // `new Date(...).toISOString()` THROWS on an unparseable value, and the throw
+  // surfaced three different ways: the team hub and /player showed "Couldn't
+  // load this…", /leaders drew a banner reading "Stats entering Invalid Date",
+  // and /situational-records rendered a blank page. A regex is not enough —
+  // '2026-02-30' matches the shape and still makes an Invalid Date — so this
+  // takes the same calendar-validity check the date picker already uses.
+  // Same stance the bare-date slate below already takes: a hand-mangled date
+  // falls through to the live page rather than erroring on it.
+  const raw = q.get('d')
+  const asOf = isRealDate(raw) ? raw : null
   const sportId = q.get('s') ? Number(q.get('s')) : null
   if (parts.length === 0) return { name: 'home' }
   // A bare 8-digit date is the slate paged to that day ('/07172026') — the
@@ -432,10 +443,14 @@ export function apiDateToUrl(api) {
   return `${m}${d}${y}`
 }
 
-// Whether a YYYY-MM-DD string names a real calendar date — a Date round-trip
-// catches out-of-range months/days (e.g. '2026-13-45', '2026-02-30') that a
-// pure digit-count regex lets through.
+// Whether a string is a real calendar date IN THE API'S OWN SHAPE. Two checks,
+// and both earn their place: the round-trip catches out-of-range months/days
+// ('2026-13-45', '2026-02-30') that a digit-count regex lets through, and the
+// regex catches an unpadded date ('2026-7-5') that names a real day but is not
+// what the feed writes — `new Date('2026-7-5T00:00:00Z')` is an Invalid Date,
+// so anything that passed it on would throw a step later.
 function isRealDate(api) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(api ?? '')) return false
   const [y, m, d] = (api || '').split('-').map(Number)
   const dt = new Date(y, m - 1, d)
   return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
