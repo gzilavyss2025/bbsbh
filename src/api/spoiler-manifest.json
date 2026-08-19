@@ -628,7 +628,7 @@
     },
     "around-the-game/doubleheaders.js": {
       "class": "spoiler-free",
-      "why": "Static doubleheaders.json — per-season, per-club records on doubleheader days, folded from one row per completed PAIR. Same footing as comebackWins.js: a season aggregate over Final games, and the file carries no per-game runs at all, so no individual result can be read back out of it. Current-season rows only ever cover games statsapi has already called Final. No SealBox."
+      "why": "Static doubleheaders.json — per-season, per-club records on doubleheader days, folded from one row per completed PAIR. Safe by SCOPE, not by content: /doubleheaders is a standalone report outside the scoring flow (ADR-0034). Note what the file DOES carry — per-pair win counts, and sweep marks — so a 2–0 pair row is both games' results. The previous note here claimed 'the file carries no per-game runs at all, so no individual result can be read back out of it', which is false and would be the wrong reason to lean on if this data ever reached a game surface. Current-season rows only ever cover pairs statsapi has already called Final. No SealBox."
     },
     "around-the-game/farmSystem.js": {
       "class": "spoiler-free",
@@ -655,8 +655,8 @@
       "why": "The slate/schedule fetchers. Every one PRUNES the score out with `fields=` (see GAMES_BY_PK_FIELDS) — that pruning is what makes this file spoiler-free, and is why logbook.js lives in its own file rather than beside these."
     },
     "scheduleGames.js": {
-      "class": "spoiler-free",
-      "why": "Pure post-fetch filters over schedule.js's already cutoff-respecting rows (split out at the 600-line file-size cap) — no fetch of its own, so it inherits schedule.js's footing rather than earning a separate one."
+      "class": "cutoff-gated",
+      "why": "Every row it returns carries `won`, `runs` and `oppRuns` — one game's line. It adds no fetch of its own and inherits schedule.js's `resultsCutoff`, which is exactly what makes it cutoff-gated rather than spoiler-free: the safety is the DATE the caller asks for, never a property of these rows. Its own header already said so ('gated by fetchTeamSchedule's own resultsCutoff') while the class here claimed the rows were safe at render top-level on any surface. They are not — a caller that renders decided games on a scoring surface prints last night's finals, and nothing here would have objected."
     },
     "scorecard/notation.js": {
       "class": "spoiler-free",
@@ -719,12 +719,12 @@
       "why": "Category descriptors and computeLeaders — ranks any normalized pool. Pool-agnostic and season-aggregate."
     },
     "situationalRecordRankings.js": {
-      "class": "spoiler-free",
-      "why": "Pivots the same team-records ledgers across one level for the standalone /situational-records page. Reads no file teamRecords.js does not, computes no value teamRecordsFor does not, and applies the same day-before cutoff. An open surface (ADR-0034)."
+      "class": "cutoff-gated",
+      "why": "Calls teamRecordsFor once per club and pivots the result, so it inherits teamRecords.js's footing whole — including the `cutoff = null` default. It computes no value teamRecordsFor does not, which is precisely why it cannot carry a weaker classification than its source."
     },
     "teamRecords.js": {
-      "class": "spoiler-free",
-      "why": "Static team-records/{season}/{teamId}.json — a ledger of FINAL games tallied into season situational records for the team hub's Numbers tab. Same footing as comebackWins.js and the team-score aggregates: the nightly cron writes it before the day's games, and the reader applies the page's own day-before cutoff. An open surface (ADR-0034)."
+      "class": "cutoff-gated",
+      "why": "The shard is a row PER GAME carrying `rs`/`ra`/`hi`/`ha`, and `teamRecordsFor(data, { cutoff = null })` defaults the cutoff to null — so a bare link tallies every Final row, tonight's included. Same shape as standings.js, which is correctly cutoff-gated for the same reason: a season aggregate rather than one line, so no SealBox, but the safety lives entirely in the date the CALLER requests. ADR-0034 sanctions what it shows; the old spoiler-free label hid that a date gate exists at all."
     },
     "teamScore.js": {
       "class": "cutoff-gated",

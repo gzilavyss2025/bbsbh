@@ -78,6 +78,12 @@ line by starting a "bigger" animation at the hold and letting it run longer.
 
 ### 2. The rule starts at the commit, and nowhere before it
 
+> **Superseded in part by the 2026-08-13 amendment at the foot of this file.**
+> `HalfClose.jsx`/`HalfCloseRule.jsx` no longer exist and the timings below are
+> the ones they had. The PRINCIPLE this section states — that the sequence starts
+> at the commit and never consults the half's contents to decide whether or when
+> to run — is unchanged, and is what `HalfTally` now carries.
+
 Focus mode's closing rule (`HalfClose.jsx`) is mounted on `postHalf` — the
 `useFocusMode` flag that means the half finished under the reader's eyes. That
 is the commit itself, not a prediction of it. Nothing in the sequence consults
