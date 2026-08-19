@@ -8,6 +8,12 @@ import {
   mergeMark,
   unlockedInnings,
 } from './revealProgressCore.js'
+import {
+  BOX_REVEAL_PREFIX,
+  clearBoxRevealMarksIn,
+  readBoxRevealOwnerIn,
+  writeBoxRevealOwnerIn,
+} from '../lib/account/boxReveal.js'
 
 // localStorage key prefix + reader for the per-game reveal high-water mark.
 // The parse/merge/unlock rules are the React-free core in revealProgressCore.js
@@ -184,7 +190,7 @@ export function useRevealProgress(feed, regulation, actualCount) {
 // "pick up your pencil" strip all read. Folding the box score into that mark
 // would ratchet all three from a single tap on a different page — which is the
 // exact leak ADR-0026 and ADR-0048 both keep their overrides away from.
-const BOX_KEY = 'bbsbh:boxreveal:'
+const BOX_KEY = BOX_REVEAL_PREFIX
 function readBoxMark(storageKey) {
   if (!storageKey) return false
   try {
@@ -194,6 +200,52 @@ function readBoxMark(storageKey) {
   }
 }
 
+// The account this device's box-reveal bits belong to, and the two operations
+// the shared-device guard needs on them (BoxRevealOwnerGuard.jsx). The rules
+// are the React-free core in src/lib/account/boxReveal.js — including WHY the
+// adopt path removes the bits rather than ignoring them; these three are the
+// storage I/O, the same division of labour this file keeps everywhere else.
+export function readBoxRevealOwner() {
+  try {
+    return readBoxRevealOwnerIn(window.localStorage)
+  } catch {
+    return ''
+  }
+}
+
+export function writeBoxRevealOwner(userId) {
+  try {
+    return writeBoxRevealOwnerIn(window.localStorage, userId)
+  } catch {
+    return false
+  }
+}
+
+// Take every box-reveal bit off this device and tell anything mounted about it.
+//
+// The announcement is the part that is easy to leave out and must not be: the
+// browser fires `storage` only in OTHER tabs, so without this echo a box score
+// already on screen would keep rendering open from React state after its key
+// was removed underneath it — which is the exact page the guard exists to
+// re-seal. Same mechanism, and same reason, as useStamps.js's notifyLocalChange.
+export function clearBoxRevealMarks() {
+  let cleared = []
+  try {
+    cleared = clearBoxRevealMarksIn(window.localStorage)
+  } catch {
+    return 0
+  }
+  for (const key of cleared) {
+    try {
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue: null }))
+    } catch {
+      // StorageEvent unavailable — an open page re-seals on its next mount
+      // instead, which is the same answer one frame later.
+    }
+  }
+  return cleared.length
+}
+
 // The box score's own reveal state, persisted per game and mirrored across a
 // signed-in reader's devices (BoxRevealCloudSync.jsx). ADR-0049 has the why;
 // this is the storage I/O and the React wiring, the same division of labour
@@ -201,11 +253,17 @@ function readBoxMark(storageKey) {
 //
 // A LATCH, in the same one-directional spirit as `mergeMark`: `false → true`
 // from any source (this device's tap, another tab's `storage` event, another
-// device's mark arriving from the cloud), and never back. There is no unset
-// path, by design — nothing in the app asks to re-seal a box score, and a
-// setter that could would be a way for a stale value to close a page the reader
-// had open. Re-seeding happens only when the gamePk itself changes: a different
-// game is a different question, and it is asked of storage afresh.
+// device's mark arriving from the cloud), and never back — with ONE exception,
+// which is the key being REMOVED. No stale value can close a page through that
+// door, because a removal is not a value: nothing in this app writes anything
+// to this key but the string '1', so the key going away can only mean the two
+// things that take it away deliberately — "erase my Tally data", and the
+// shared-device guard finding these bits belong to a different account
+// (clearBoxRevealMarks above). Both of those must re-seal an open page; leaving
+// it open would be a score on screen that its reader never asked for, which is
+// the whole defect ADR-0049's amendment records. Re-seeding otherwise happens
+// only when the gamePk itself changes: a different game is a different
+// question, and it is asked of storage afresh.
 //
 // The gamePk change is handled during render rather than in an effect because
 // this value gates what renders. BoxScore stays mounted when the reader moves
@@ -223,6 +281,13 @@ export function useBoxScoreReveal(gamePk) {
 
   const markBoxOpened = useCallback(() => {
     setMark((prev) => (prev.opened ? prev : { ...prev, opened: true }))
+  }, [])
+
+  // The one path back. Private to the storage listener below — no screen calls
+  // this, and none should: re-sealing is a consequence of the bit being taken
+  // off the device, never something the UI decides.
+  const resealBox = useCallback(() => {
+    setMark((prev) => (prev.opened ? { ...prev, opened: false } : prev))
   }, [])
 
   useEffect(() => {
@@ -244,10 +309,14 @@ export function useBoxScoreReveal(gamePk) {
     function onStorage(e) {
       if (e.key !== storageKey) return
       if (parseBoxRevealMark(e.newValue)) markBoxOpened()
+      // A removal — `newValue: null` — is the re-seal door described above. A
+      // mangled value is NOT: it fails closed by simply not opening the page,
+      // and must not additionally close one that is already open.
+      else if (e.newValue == null) resealBox()
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [storageKey, markBoxOpened])
+  }, [storageKey, markBoxOpened, resealBox])
 
   return { boxOpened: opened, markBoxOpened }
 }
