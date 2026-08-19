@@ -522,6 +522,21 @@ don't run these by hand.
   Cot's freshness dates, and writes every bucket so an unmatched player is a
   normal null result rather than a 404. App reads it via
   `src/api/person/contracts.js`.
+
+  It also attaches each player's POSITIONAL PAY RANK (`payRank`) — "12th of 259
+  starting pitchers". The Fever feed carries no position, so the generator makes
+  one batched `/people` call per 100 players, hydrating season and career
+  pitching in the same request; that hydrate is what lets pitchers split into SP
+  and RP, since `primaryPosition` returns a flat `P`. A failed chunk costs those
+  players their rank and nothing else. The ranking itself, and the five
+  judgement calls behind it, live in `scripts/lib/contract-pay-rank.mjs` — read
+  that file's header before changing a threshold. In short: outfielders are one
+  pool; estimated salaries are ranked; a prorated part-season figure (44% of the
+  feed) is lifted to the league minimum rather than dropped, with `onMinimum`
+  marking that tied band so the card can say "on the league minimum" instead of
+  quoting a rank the tie cannot support; a pool under ten players is not ranked;
+  and a season with no seeded league minimum ranks nobody. A two-way player is
+  ranked in BOTH his pools, hitting first, with the second in `also`.
 - `gen-prospect-trend.mjs` → `public/data/prospect-trend.json` — a nightly,
   level-relative OPS/ERA percentile for every prospect in
   `top-prospects.json`, computed straight from statsapi's own season splits
