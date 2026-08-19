@@ -15,6 +15,7 @@
 //   '/awards'                           -> { name: 'awards-history' }
 //   '/postseason-history'               -> { name: 'postseason-history' }
 //   '/postseason-leaders'               -> { name: 'postseason-leaders' }
+//   '/postseason-race'                  -> { name: 'postseason-race' }
 //   '/postseason/{seriesId}'            -> { name: 'postseason-series', seriesId }
 //   '/trade-deadline'                   -> { name: 'trade-deadline' }  (redirects to the latest season)
 //   '/trade-deadline/{year}'            -> { name: 'trade-deadline-season', season: year }
@@ -145,6 +146,8 @@ export function parseRoute(url) {
     return { name: 'postseason-history' }
   if (parts.length === 1 && parts[0] === 'postseason-leaders')
     return { name: 'postseason-leaders' }
+  if (parts.length === 1 && parts[0] === 'postseason-race')
+    return { name: 'postseason-race' }
   if (parts.length === 1 && parts[0] === 'trade-deadline')
     return { name: 'trade-deadline' }
   if (parts.length === 1 && parts[0] === 'all-star-rosters')

@@ -42,6 +42,7 @@ const PATHS_BEFORE_GROUPING = [
   '/awards',
   '/postseason-history',
   '/postseason-leaders',
+  '/postseason-race',
   '/trade-deadline',
   '/all-star-rosters',
   '/all-star-legacy',

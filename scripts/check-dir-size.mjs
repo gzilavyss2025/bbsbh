@@ -319,7 +319,16 @@ const BUDGETS = {
   // partials rather than one because they are two routes — each is imported by
   // its own screen and neither ships on the other's chunk — and this directory
   // cannot nest without breaking the ordering the exception above protects.
-  'src/styles': 95,
+  //
+  // 95 -> 96 for `70-postseason-race.css`: PostseasonRacePage.jsx's own
+  // layout, reusing .seedcard/.seedrow (34-postseason.css) and
+  // .standings/.lgstand (30-standings.css) rather than redeclaring them. It
+  // SHARES the 70 prefix with `70-contracts-grid.css` above — the two
+  // branches picked the next free integer independently off the same base
+  // count (93), the same harmless collision 62-/65-/69- already carry;
+  // neither is @imported by index.css in a way that depends on the other's
+  // position.
+  'src/styles': 96,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -551,7 +560,9 @@ const BUDGETS = {
   // +1 for SalariesPage.jsx — the league salary board, one route, one screen,
   // the same shape as StandingsPage.jsx beside it. The club-scoped half of the
   // same feature is a team-hub TAB and correctly went to src/screens/team/.
-  'src/screens': 44,
+  // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
+  // bracket + Wild Card standings, same one-route-one-screen shape.
+  'src/screens': 45,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

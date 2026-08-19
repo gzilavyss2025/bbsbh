@@ -148,6 +148,7 @@ const BUDGETS = {
   // that would shadow it, and mainOverrideLogoUrl's, which is what routes
   // Main's tile through 'main-recolor'.
   'src/lib/teams.js': 1225, // 1212
+  'src/lib/route.js': 700, // 602 — one more parse branch and path doc line for '/postseason-race'
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 1000, // 961
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them

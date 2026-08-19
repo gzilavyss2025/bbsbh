@@ -199,6 +199,11 @@ export function shapeWildCard(records, pinnedTeamId = null) {
       const shaped = shapeTeam(t, pinnedTeamId)
       shaped.division = divShort
       shaped.pctNum = Number.parseFloat(t.winningPercentage) || 0
+      // MLB's own wild-card elimination number, straight off the record —
+      // 'E' once a club can no longer reach the field even by winning out.
+      // Postseason Race reads this to show every team still alive, not just
+      // the ones closest to the cutoff (PostseasonRacePage.jsx).
+      shaped.wcEliminated = t.wildCardEliminationNumber === 'E'
       if (t.divisionLeader) {
         lg.leaders.push(shaped)
       } else {
