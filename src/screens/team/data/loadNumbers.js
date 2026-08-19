@@ -58,7 +58,7 @@ export async function loadNumbers(id, asOf) {
   ] = await Promise.all([
     team.league?.id ? fetchStandings(team.league.id, season, standingsDate) : Promise.resolve([]),
     sportId === 1 ? fetchLeagueTeamStats(season) : Promise.resolve({ hitting: [], pitching: [] }),
-    loadCombinedPoolForTeams([{ id }], season),
+    loadCombinedPoolForTeams([{ id }], season, { withHand: true }),
     sportId === 1 ? fetchPostseasonOdds() : Promise.resolve(null),
     sportId === 1 ? fetchComebackWins() : Promise.resolve(null),
     fetchTeamRecords(id, season),

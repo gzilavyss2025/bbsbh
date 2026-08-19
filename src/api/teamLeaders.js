@@ -15,9 +15,14 @@
 // bottom.
 //
 // PoolPlayer shape (the swappable boundary):
-//   { id, name, teamId, teamAbbr, position, sportId,
+//   { id, name, teamId, teamAbbr, position, sportId, hand,
 //     hitting: <season hitting stat obj | null>,
 //     pitching: <season pitching stat obj | null> }
+//
+// `hand` is an arm's throwing hand ('L' | 'R'), and is OPTIONAL: only a pool
+// built with `{ withHand: true }` carries it (api/statsLevels.js explains why
+// that is opt-in). Absent everywhere else, which every reader must tolerate —
+// the ledger prints a plain "P" for an arm whose hand it does not know.
 //
 // `sportId` (the club's level: 1 MLB, 11 AAA, …) rides along so a multi-level
 // pool — an org's whole farm system — can badge each leader with his level;
@@ -63,6 +68,24 @@ function pct1(v) {
 function int(v) {
   if (!Number.isFinite(v)) return DASH
   return String(v)
+}
+
+// The tag a leader's name carries after it on the team hub's ledger, resolved
+// from the BLOCK he is ranked in rather than from his own listed position —
+// which is both the more truthful reading and the simpler one. A two-way player
+// has ONE `position` on his pool entry (taken from whichever split ranked
+// first), so reading that would tag him "DH" while he leads the club in ERA.
+// The block already knows: an arm ranked for pitching is an arm.
+//
+// Pitchers read as RHP/LHP, the way a rotation is written down, and fall back
+// to a plain "P" when no hand is on file — a pool built without `withHand`, or
+// a feed that omits it (api/statsLevels.js). Everyone else takes his own
+// position abbreviation, and an entry with neither renders NOTHING rather than
+// a dash: this tag is an aside, and MiLB feeds drop it often enough that a
+// column of dashes would read as breakage.
+export function positionTag(entry, group) {
+  if (group !== 'pitching') return entry.position || ''
+  return entry.hand ? `${entry.hand}HP` : 'P'
 }
 
 // ---------------------------------------------------------------------------
@@ -131,12 +154,24 @@ export const PITCHING_CATEGORIES = [
 // Phase 2 full list (a dedicated /team/{id}/leaders page).
 export const ALL_CATEGORIES = [...HITTING_CATEGORIES, ...PITCHING_CATEGORIES]
 
-// Phase 1 starter set on the team page itself — a sensible cross-section to
-// validate the layout + data wiring end to end.
-const FEATURED_KEYS = ['avg', 'hr', 'rbi', 'era', 'so_p', 'sv']
-export const FEATURED_CATEGORIES = FEATURED_KEYS.map((k) =>
-  ALL_CATEGORIES.find((c) => c.key === k),
-)
+// The team hub's own set, split by GROUP rather than served as one mixed list —
+// because the split is the point. The mixed six this replaces ran
+// avg, hr, rbi, era, so_p, sv, which reads as balanced in the source and was
+// anything but on the page: the Overview showed the first THREE of it (three
+// hitters), and the Numbers tab put all six in a 280px-card deck inside a 440px
+// column, so the pitching half sat three swipes behind a gesture nothing
+// announced. Two lists, rendered as two labelled blocks, make "half of this is
+// pitching" a fact of the layout instead of a promise about scroll position
+// (see components/teamstats/TeamLeadersLedger.jsx).
+//
+// Each list is ordered rate-first, then counting — the order a scorekeeper
+// reads a leaderboard in — and the ledger's two depths take a PREFIX of each:
+// the Overview's door takes 3 a side, the Numbers tab takes all 6.
+const LEDGER_HITTING_KEYS = ['avg', 'ops', 'hr', 'rbi', 'hits', 'sb']
+const LEDGER_PITCHING_KEYS = ['era', 'whip', 'so_p', 'w', 'sv', 'ip']
+const byKey = (k) => ALL_CATEGORIES.find((c) => c.key === k)
+export const LEDGER_HITTING = LEDGER_HITTING_KEYS.map(byKey)
+export const LEDGER_PITCHING = LEDGER_PITCHING_KEYS.map(byKey)
 
 // ---------------------------------------------------------------------------
 // Pool producers + ranking
@@ -214,6 +249,7 @@ export function computeLeaders(pool, category, { limit = 5, qualifier = 'roster'
       displayTeamId: r.p.displayTeamId ?? r.p.teamId,
       displayTeamAbbr: r.p.displayTeamAbbr ?? r.p.teamAbbr,
       sportId: r.p.sportId ?? null,
+      hand: r.p.hand ?? '',
       // The levels a combined (org / all-minors) total spans, for the multi-
       // level badge; absent on single-level pools (badge falls back to sportId).
       levels: r.p.levels ?? null,
