@@ -27,8 +27,13 @@ const SKY_CROP = 50
 const PLOT_H = VIEWBOX.h - SKY_CROP
 const CROPPED_VIEWBOX = `0 ${SKY_CROP} ${VIEWBOX.w} ${PLOT_H}`
 
-// The half's dot numbers ride beside their dot rather than on it.
-const NUMBER_OFFSET_X = 13
+// The half's dot numbers ride beside their dot rather than on it — to its
+// right normally, and to its LEFT once the dot is far enough over that the
+// number would land on the posted right-field distance (the '355′' the drawing
+// prints at the foul pole) or run out past the card. `RIGHT_EDGE` is where that
+// flip happens, in the same viewBox units the dots themselves live in.
+const NUMBER_OFFSET_X = 17
+const RIGHT_EDGE = VIEWBOX.w * 0.78
 
 // The data layer owns the real cut line (`HARD_HIT_MPH`) and the caller passes
 // it down. It is repeated here rather than imported because that module is
@@ -128,7 +133,7 @@ export function HitChart({
     `hitchart__chip${on ? ` hitchart__chip--${tone}` : ''}`
 
   return (
-    <div className="hitchart">
+    <div className={`hitchart hitchart--${isHalf ? 'half' : 'game'}`}>
       <div className="hitchart__head">
         <div>
           <p className="hitchart__eyebrow">{eyebrow ?? venue}</p>
@@ -199,17 +204,43 @@ export function HitChart({
                 <stop offset="100%" className="hitchart__heat-to" />
               </linearGradient>
             </defs>
+            {/* THE THUMB TARGETS, ALL OF THEM, IN ONE LAYER UNDER THE ART. A
+                dot draws at 6.5 units — about 7 CSS px on a phone — so each
+                carries a transparent circle far larger than itself: 24 units,
+                about 25 CSS px, against the 18.6 px this used to offer.
+                WHAT THE LAYER BUYS IS THAT ENLARGEMENT, FOR FREE. SVG
+                hit-testing takes the topmost painted element, so with the
+                target inside each ball's own group a later ball's invisible
+                circle sits over an earlier ball's visible dot — and the bigger
+                the target, the more dots it swallows. Measured on gamePk 823035
+                with all 32 balls plotted: 27 of 32 separately selectable at the
+                old 17-unit target, 26 at 24 units the old way, 27 at 24 units
+                this way. (The five that never separate are balls sharing a
+                landing coordinate — their ART overlaps, which no layering
+                fixes.) One layer underneath keeps every dot's own art above
+                every target, so a bigger target costs no precision. */}
+            {!isHalf && (
+              <g className="hitchart__taps">
+                {plotted.map((ball) => (
+                  <circle
+                    key={ball.id}
+                    className="hitchart__tap"
+                    cx={ball.x}
+                    cy={ball.y}
+                    r="24"
+                    onClick={() => setPickedBall(ball.id)}
+                  />
+                ))}
+              </g>
+            )}
             {plotted.map((ball) => (
               <g
                 key={ball.id}
                 className="hitchart__ball"
                 onClick={isHalf ? undefined : () => setPickedBall(ball.id)}
               >
-                {/* A 6.5px dot is not a thumb target. The transparent circle
-                    is, and it sits under the art so it never tints it. */}
-                <circle className="hitchart__tap" cx={ball.x} cy={ball.y} r="17" />
                 {!isHalf && current?.id === ball.id && (
-                  <circle className="hitchart__picked" cx={ball.x} cy={ball.y} r="17" />
+                  <circle className="hitchart__picked" cx={ball.x} cy={ball.y} r="18" />
                 )}
                 {showHard && isHard(ball, hardHitMph) && (
                   <circle
@@ -245,23 +276,32 @@ export function HitChart({
               size on every card width, so the half's dot numbers are HTML laid
               over the plot in percentages of the cropped viewBox instead. */}
           {isHalf &&
-            plotted.map((ball, i) => (
-              <span
-                key={ball.id}
-                className="hitchart__dotnum"
-                style={{
-                  left: `${(((ball.x + NUMBER_OFFSET_X) / VIEWBOX.w) * 100).toFixed(2)}%`,
-                  top: `${(((ball.y - SKY_CROP) / PLOT_H) * 100).toFixed(2)}%`,
-                }}
-              >
-                {i + 1}
-              </span>
-            ))}
+            plotted.map((ball, i) => {
+              const flip = ball.x > RIGHT_EDGE
+              const x = flip ? ball.x - NUMBER_OFFSET_X : ball.x + NUMBER_OFFSET_X
+              return (
+                <span
+                  key={ball.id}
+                  className={`hitchart__dotnum${flip ? ' hitchart__dotnum--flip' : ''}`}
+                  style={{
+                    left: `${((x / VIEWBOX.w) * 100).toFixed(2)}%`,
+                    top: `${(((ball.y - SKY_CROP) / PLOT_H) * 100).toFixed(2)}%`,
+                  }}
+                >
+                  {i + 1}
+                </span>
+              )
+            })}
         </div>
       </div>
 
       {!isHalf && current && (
         <div className="hitchart__readout">
+          {/* TWO ROWS, NOT TWO COLUMNS. Side by side, the measurements held a
+              nowrap column wide enough that a two-word name wrapped underneath
+              itself on every phone — a three-line strip whose height moved with
+              the batter. The scorer's own denotation belongs beside the name it
+              describes anyway, which is where it sits in his book. */}
           <span className="hitchart__who">
             <span className="hitchart__batter">{current.batter}</span>
             <span className="hitchart__code">{current.code}</span>
