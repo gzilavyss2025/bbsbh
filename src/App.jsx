@@ -101,6 +101,10 @@ const PostseasonSeriesPage = lazyNamed(
   () => import('./screens/PostseasonSeriesPage.jsx'),
   'PostseasonSeriesPage',
 )
+const PostseasonRacePage = lazyNamed(
+  () => import('./screens/PostseasonRacePage.jsx'),
+  'PostseasonRacePage',
+)
 const TradeDeadlinePage = lazyNamed(
   () => import('./screens/TradeDeadlinePage.jsx'),
   'TradeDeadlinePage',
@@ -302,6 +306,8 @@ export default function App() {
     content = <PostseasonLeadersPage />
   } else if (route.name === 'postseason-series') {
     content = <PostseasonSeriesPage seriesId={route.seriesId} />
+  } else if (route.name === 'postseason-race') {
+    content = <PostseasonRacePage />
   } else if (route.name === 'trade-deadline') {
     content = <TradeDeadlinePage />
   } else if (route.name === 'trade-deadline-season') {

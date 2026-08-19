@@ -313,7 +313,11 @@ const BUDGETS = {
   // integer independently, the same harmless collision 62- and 65- already
   // carry. index.css names every partial in its own explicit order, so the
   // prefix is a label, not a cascade position.
-  'src/styles': 93,
+  //
+  // 93 -> 94 for `70-postseason-race.css`: PostseasonRacePage.jsx's own
+  // layout, reusing .seedcard/.seedrow (34-postseason.css) and
+  // .standings/.lgstand (30-standings.css) rather than redeclaring them.
+  'src/styles': 94,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -525,7 +529,9 @@ const BUDGETS = {
   // UmpireRankingsPage.jsx already here: one route, one screen, in the flat
   // set. It is not a team-hub screen and does not belong in src/screens/team/,
   // which holds the tabs of one club's page.
-  'src/screens': 43,
+  // +1 for PostseasonRacePage.jsx — the current-season "if it ended today"
+  // bracket + Wild Card standings, same one-route-one-screen shape.
+  'src/screens': 44,
   // 21 -> 19: useFavoriteTeam.js and useKeepAwakePreference.js moved into
   // src/hooks/preferences/ alongside the usePreferences store they are now
   // thin wrappers over. Tightened rather than left pinned, per the rule above.

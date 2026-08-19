@@ -46,6 +46,9 @@ export const PAGE_GROUPS = [
     label: 'This season',
     pages: [
       { label: 'Standings', path: '/standings' },
+      // Sits next to Standings on purpose: it's the same "who's winning"
+      // question, narrowed to the six-team postseason field.
+      { label: 'Postseason Race', path: '/postseason-race' },
       { label: 'League Leaders', path: '/leaders' },
       // Landed on main while this regrouping was in flight (#742): one
       // situational record, every club at one level, ranked. It belongs next
