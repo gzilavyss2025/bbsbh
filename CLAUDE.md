@@ -187,8 +187,8 @@ Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
 
 ## Agent skills
 
-- **Issue tracker** — issues live as local markdown under `.scratch/<feature-slug>/`
-  (solo project, no GitHub Issues). See `docs/agents/issue-tracker.md`.
+- **Issue tracker** — issues go to **GitHub Issues** (`gh issue`). `.scratch/<slug>/`
+  holds working notes, not the tracker. See `docs/agents/issue-tracker.md`.
 - **Triage labels** — `needs-triage` / `needs-info` / `ready-for-agent` /
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
