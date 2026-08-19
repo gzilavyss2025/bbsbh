@@ -143,8 +143,8 @@ test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed 
 
   assert.deepEqual(
     register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]),
-    ['2 TM', 158, '3 TM', 556, 112, 451, 234],
-    'the combined rows do not disturb the chronological order of the real stints',
+    [158, 556, 112, 451, 234, '2 TM', '3 TM'],
+    'chronological stints come first, followed by the season subtotal rows',
   )
 
   const mlbSubtotal = register.rows.find((r) => r.subtotal && r.sportId === SPORT_IDS.MLB)
@@ -153,9 +153,11 @@ test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed 
   assert.equal(mlbSubtotal.cells[0], 7)
   assert.equal(mlbSubtotal.cells[4], '14.0')
   assert.equal(mlbSubtotal.cells[8], '0.4', 'season WAR belongs to the MLB combined row')
+  assert.equal(mlbSubtotal.pill, 'MLB', 'a mixed multi-team season labels the MLB subtotal')
   assert.deepEqual(mlbStints.map((r) => r.cells[8]), ['—', '—'])
   assert.equal(aaaSubtotal.cells[0], 8)
   assert.equal(aaaSubtotal.cells[4], '16.0')
+  assert.equal(aaaSubtotal.pill, 'AAA')
 
   const mlbTotal = register.totals.find((t) => t.label === 'MLB')
   const milbTotal = register.totals.find((t) => t.label === 'MiLB')
@@ -163,8 +165,8 @@ test('careerRegisterView: a multi-org MLB + AAA season is chronological, footed 
   assert.equal(milbTotal.cells[0], 8, 'the AAA subtotal is not counted again')
   assert.deepEqual(
     register.rows.filter((r) => !r.subtotal && r.tier === 'milb').map((r) => r.pillTeamId),
-    [556, 451, 234],
-    'a multi-org season puts each affiliate mark in its level pill',
+    [158, 112, 139],
+    'a multi-org season puts each historical MLB affiliate mark in its level pill',
   )
 })
 
@@ -236,7 +238,9 @@ test('careerRegisterView: an MLB season split between two clubs is one row per c
   const subtotal = register.rows.find((r) => r.subtotal)
   const stints = register.rows.filter((r) => !r.subtotal)
   assert.equal(subtotal.teamLabel, '2 TM')
+  assert.equal(subtotal.pill, '', 'an MLB-only multi-team season needs no redundant MLB pill')
   assert.deepEqual(stints.map((r) => r.teamIds), [[111], [147]])
+  assert.deepEqual(register.rows.map((r) => r.subtotal ? r.teamLabel : r.teamIds[0]), [111, 147, '2 TM'])
   assert.deepEqual(register.rows.map((r) => r.year), ['2026', '2026', '2026'])
   // cells: [G, GS, W-L, ERA, IP, K, BB, WHIP, WAR]
   assert.equal(subtotal.cells[8], '1.8')

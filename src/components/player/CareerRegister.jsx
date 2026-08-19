@@ -8,7 +8,7 @@ const NARROW_HIDE_COLS = new Set(['GS', 'K', 'BB'])
 
 // The unified MLB + MiLB career table (see api/person/careerRegister.js). MLB
 // rows are inked and MiLB rows carry level pills. A same-level multi-team
-// season gets an N TM subtotal before that level's first chronological stint;
+// season gets an N TM subtotal after that season's chronological stints;
 // MLB and MiLB career totals remain separate in the footer.
 export function CareerRegister({ register }) {
   const { columns, rows, totals } = register

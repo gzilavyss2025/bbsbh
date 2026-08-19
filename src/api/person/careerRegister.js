@@ -267,11 +267,9 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     carriesSeasonWar && st?.tier === 'mlb' && warByYear[st.year] != null ? warByYear[st.year].toFixed(1) : DASH
   const withWar = (cells, war) => (showWar ? [...cells, war] : cells)
 
-  // Baseball-Reference's compact convention is a combined N-TM row followed
-  // by the individual clubs. Here the real stints stay in chronological order,
-  // so a combined row is inserted immediately before that level's first stint
-  // rather than pulling the clubs back into a level block. It is display-only:
-  // career totals below still sum `real`, never these aggregate rows.
+  // Baseball-Reference's compact convention is a combined N-TM row. Here each
+  // season's chronological stints come first and its combined rows foot them,
+  // equation-style. Career totals still sum `real`, never these display rows.
   const levelGroups = new Map()
   for (const st of real) {
     const key = `${st.year}-${st.sid}`
@@ -279,14 +277,14 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
     levelGroups.get(key).push(st)
   }
   const rows = []
-  const groupsFooted = new Set()
   const mlbSeasonsSeen = new Set()
   const appendRow = (st, members, subtotal = false) => {
     const teamCount = members.length
-    const seasonLead = st.tier === 'mlb' && !mlbSeasonsSeen.has(st.year)
+    const seasonLead = st.tier === 'mlb' && (subtotal || teamCount === 1) && !mlbSeasonsSeen.has(st.year)
     if (seasonLead) mlbSeasonsSeen.add(st.year)
     const carriesSeasonWar = st.tier === 'mlb' && (subtotal || teamCount === 1)
     const multiOrg = seasonPlans.get(st.year)?.multipleOrgs ?? false
+    const mixedMulti = [...levelGroups.values()].some((group) => group.length > 1 && group[0].year === st.year && group[0].tier !== st.tier)
     rows.push({
       key: subtotal ? `${st.year}-${st.sid}-subtotal` : `${st.year}-${st.sid}-${st.teamIds[0] ?? 'na'}`,
       year: String(st.year),
@@ -294,8 +292,8 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
       tier: st.tier,
       level: SPORT_LABEL[st.sid] ?? '',
       sportId: st.sid,
-      pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : '',
-      pillTeamId: !subtotal && st.tier === 'milb' && multiOrg ? st.teamIds[0] ?? null : null,
+      pill: st.tier === 'milb' ? SPORT_LABEL[st.sid] ?? '' : subtotal && mixedMulti ? SPORT_LABEL[1] : '',
+      pillTeamId: !subtotal && st.tier === 'milb' && multiOrg ? st.orgId : null,
       teamIds: subtotal ? [] : st.teamIds,
       teamLabel: subtotal ? `${teamCount} TM` : null,
       subtotal,
@@ -305,18 +303,20 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
       ),
     })
   }
-  for (const st of real) {
+  for (let index = 0; index < real.length; index++) {
+    const st = real[index]
     const key = `${st.year}-${st.sid}`
     const members = levelGroups.get(key)
-    if (members.length > 1 && !groupsFooted.has(key)) {
-      groupsFooted.add(key)
+    appendRow(st, members)
+    if (real[index + 1]?.year === st.year) continue
+    for (const levelMembers of levelGroups.values()) {
+      if (levelMembers.length < 2 || levelMembers[0].year !== st.year) continue
       appendRow(
-        { ...st, stat: aggregateSplits(members.map((member) => ({ stat: member.stat })), group) },
-        members,
+        { ...levelMembers[0], stat: aggregateSplits(levelMembers.map((member) => ({ stat: member.stat })), group) },
+        levelMembers,
         true,
       )
     }
-    appendRow(st, members)
   }
 
   // Split totals — never blend levels. MLB uses the API career line when we have
@@ -360,7 +360,7 @@ export function careerRegisterView({ mlbSplits, milbSplits, group, role, debutYe
   // real rows rather than a separate section — a missed season reads most
   // clearly inline, between the years on either side of it.
   const gapRows = debutYear ? missingSeasonRows(presentYears, debutYear, cur, transactions, group) : []
-  const allRows = gapRows.length ? [...rows, ...gapRows].sort(bySeasonOrder) : rows
+  const allRows = gapRows.length ? [...rows, ...gapRows].sort((a, b) => b.year - a.year) : rows
 
   return { columns, rows: allRows, totals }
 }
