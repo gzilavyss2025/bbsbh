@@ -54,6 +54,7 @@ const TAB_TITLE = {
   roster: 'Roster',
   games: 'Games',
   numbers: 'Numbers',
+  contracts: 'Contracts',
   minors: 'Minors',
 }
 
