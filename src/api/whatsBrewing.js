@@ -1,9 +1,16 @@
 // What's Brewing — pulls the narrative blurbs out of a club's pre-game Game Notes
-// PDF into plain text, so the fun hand-titled callouts can pop out in an in-app
-// modal instead of making the user leave for the full PDF. The lineup page's Game
-// notes button (TeamInfo.jsx) opens that modal and keeps a link to the whole PDF
-// inside it. (The name is a Brewers pun — the first club wired up — but the parser
-// now serves any club with a CONFIG entry below.)
+// PDF into plain text, so the fun hand-titled callouts can be read as text
+// instead of making the user leave for the full PDF. (The name is a Brewers pun
+// — the first club wired up — but the parser serves any club with a CONFIG entry
+// below.)
+//
+// NOT ON A GAME SURFACE ANY MORE. The parse was too brittle across the clubs'
+// shifting PDF templates to sit between the user and the notes, so every Game
+// Notes button in the app (TeamInfo.jsx's lineup-page button, TeamHubShell.jsx's
+// team-hub link) now opens the PDF directly. This module and WhatsBrewingModal
+// stay as a calibration sandbox, reachable only from the unlisted
+// /game-notes-debug QA page (GameNotesDebugPage.jsx). Re-wiring a game surface to
+// the modal means re-checking the CONFIG below against current PDFs first.
 //
 // Why client-side, not the nightly cron: the note you most want parsed is
 // TONIGHT'S, and it posts only a few hours pre-game — after the daily
