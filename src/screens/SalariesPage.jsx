@@ -19,7 +19,7 @@ import { SourceLine } from '../components/salaries/SourceLine.jsx'
 import { moneyLabel, Money } from '../components/salaries/Money.jsx'
 
 // The thirty-club money page, beside Standings rather than inside any one club:
-// who is paid the most, who spends the most, who is still owed the most, and
+// who is paid the most, who spends the most, who is committed the most, and
 // where the money actually goes.
 //
 // TWO FILTERS, ONE BOARD. The club rail across the top is the app's own
@@ -96,7 +96,7 @@ export function SalariesPage() {
           <section className="payowed" aria-labelledby="payowed-title">
             <div className="metricbar">
               <span className="metricbar__title" id="payowed-title">
-                Most still owed
+                Most committed
               </span>
               <span className="payboard__context">
                 {data.season}–{data.throughYear}
@@ -129,7 +129,7 @@ export function SalariesPage() {
             positions={data.positions}
             note={`Covers ${moneyLabel(data.totals.covered)} of the league's ${moneyLabel(
               data.totals.payroll,
-            )} — the rest is money owed to players with no place on a 40-man roster.`}
+            )} — the rest is money owed to players with no place on their club's 40-man roster.`}
           />
 
           <SourceLine meta={data.meta} note="Pre-arbitration figures are estimates." />

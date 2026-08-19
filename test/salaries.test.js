@@ -43,12 +43,18 @@ test('a position player keeps the position the roster states', () => {
   assert.equal(resolvePosition({}), null)
 })
 
-test("a pitcher's season line decides his role, and a start is worth two appearances", () => {
+test("a pitcher's season line decides his role at a 40% start share", () => {
   assert.equal(resolvePosition(arm([['season', { gamesPitched: 24, gamesStarted: 24 }]])), 'SP')
   assert.equal(resolvePosition(arm([['season', { gamesPitched: 55, gamesStarted: 0 }]])), 'RP')
-  // A swingman starting half his games reads as a starter.
+  // The threshold is 40%, shared with contract-pay-rank.mjs — a swingman is
+  // paid out of the starter market. It used to be half here and 40% there, so
+  // the ledger and a player's pay rank could call the same arm two things.
   assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 10 }]])), 'SP')
-  assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 9 }]])), 'RP')
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 8 }]])), 'SP', 'exactly 40% is a starter')
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 20, gamesStarted: 7 }]])), 'RP', 'below it is not')
+  // Erick Fedde's 2026: 12 starts in 27 appearances (44%) — the case that used
+  // to land him in the bullpen band on one page and the rotation on another.
+  assert.equal(resolvePosition(arm([['season', { gamesPitched: 27, gamesStarted: 12 }]])), 'SP')
 })
 
 test('an arm with no season line falls back to his career line, not to "P"', () => {
@@ -299,7 +305,7 @@ test('clubs rank by payroll, biggest first', () => {
   assert.equal(league.totals.payroll, 77_850_000)
 })
 
-test('"still owed" is committed money across the years the source covers', () => {
+test('"most committed" is money across every year the source covers, current season included', () => {
   const league = leagueFixture()
   // Yelich's 52.0 beats the Mets star's single 51.0 season, which is the whole
   // reason this board is separate from the highest-paid one.
@@ -346,6 +352,42 @@ test('one pass builds both files, and they agree on a club payroll', () => {
     season: 2026,
   })
   assert.equal(clubs[0].payroll, league.clubs[0].payroll)
+})
+
+// The two files used to answer differently about the SAME man. A player whose
+// money is booked to one club while he sits on ANOTHER club's 40-man got a
+// position on the league board — which merged all thirty rosters into one
+// lookup — and none on his own club's ledger, which only ever sees its own.
+// So he counted toward league-wide position spend while his club filed him
+// under Off roster, and the two pages' totals could not be reconciled.
+test('a player rostered elsewhere reads the same on the ledger and the board', () => {
+  const { clubs, league } = rollUpSalaries({
+    meta: { season: 2026 },
+    // TURANG's contract is booked to MIL; his 40-man place is on CHC's roster.
+    players: [TURANG],
+    places: new Map([
+      [112, new Map([[TURANG.playerId, { pos: '2B', age: 26 }]])],
+      [158, new Map()],
+    ]),
+    teams: [
+      { id: 158, abbrev: 'MIL', name: 'Milwaukee Brewers' },
+      { id: 112, abbrev: 'CHC', name: 'Chicago Cubs' },
+    ],
+    season: 2026,
+  })
+
+  const mil = clubs.find((club) => club.abbrev === 'MIL')
+  const ledgerRow = mil.groups.flatMap((group) => group.players).find((row) => row.id === TURANG.playerId)
+  const boardRow = league.players.find((player) => player.id === TURANG.playerId)
+
+  assert.equal(ledgerRow.pos, null, 'his paying club has no roster place for him')
+  assert.equal(boardRow.pos, null, 'and the league board must not borrow another club’s')
+  // Which is the same thing as saying his money is not in anyone's position spend.
+  assert.equal(
+    league.positions.some((entry) => entry.pos === '2B'),
+    false,
+    'a foreign roster place must not put his salary in a position total',
+  )
 })
 
 // ------------------------------------------------------- the app's selectors

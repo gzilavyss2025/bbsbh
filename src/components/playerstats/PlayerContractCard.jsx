@@ -34,6 +34,25 @@ function statusLabel(status) {
   return status
 }
 
+// Where this salary sits among the players he is actually compared to — his
+// position's pool, precomputed nightly by scripts/lib/contract-pay-rank.mjs.
+//
+// Its own line, under the figure it ranks, and no "#" before the number: a rank
+// is a fact about the salary, not a decoration on it. Absent for anyone the
+// generator could not place — a pool under MIN_POOL, an unresolved position, or
+// a shard written before pay ranks existed — because "unranked" and "ranked
+// last" are different statements and only one of them is true.
+function PayRankLine({ rank }) {
+  if (!rank || !Number.isFinite(rank.rank) || !Number.isFinite(rank.of)) return null
+  return (
+    <span className="contractcard__payrank">
+      {rank.tied ? 'Tied ' : ''}
+      {rank.rank} of {rank.of}
+      <span className="contractcard__payrank-pool"> among {rank.pos}</span>
+    </span>
+  )
+}
+
 export function PlayerContractCard({ contract }) {
   if (!contract) return null
   const service = serviceLabel(contract.service)
@@ -58,6 +77,7 @@ export function PlayerContractCard({ contract }) {
           <div className="contractcard__salary">
             <span>{contract.season} salary</span>
             <strong><Money value={contract.salaryUsd} /></strong>
+            <PayRankLine rank={contract.payRank} />
           </div>
           {scorebugFacts.length > 0 && (
             <dl className="contractcard__scorebug">
