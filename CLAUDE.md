@@ -10,7 +10,7 @@ shows lineups, umpires, rosters, and inning totals from the public MLB Stats API
 number that would spoil the game stays sealed until you tap to reveal it. This app is
 **not** a data-entry tool. The user keeps score on paper.
 
-React 18 + Vite, phone-first (iPhone), installable PWA, **no backend**.
+React 19 + Vite, phone-first (iPhone), installable PWA, **no backend**.
 
 ## Maintaining these docs
 
@@ -19,9 +19,9 @@ is a fixed token cost per session. **Keep it lean**: stay under **200 lines**.
 `scripts/check-claude-md.mjs` enforces this cap; `npm run lint` runs the check in CI.
 Detail lives in three tiers, most specific first:
 
-- **Nested `CLAUDE.md`** files in `src/`, `src/api/`, and `scripts/`. Claude Code
-  loads these only when it opens that directory, so this detail costs tokens on
-  demand, not every session. Put per-module and per-script prose here.
+- **Nested `CLAUDE.md`** files — `src/`, `src/api/`, `src/components/`, `src/lib/`,
+  `scripts/`, `test/`. Claude Code loads one only when it opens that directory, so the
+  detail costs tokens on demand, not every session. Put per-module prose there.
 - **`docs/*` and `docs/adr/`** — reference catalogs and the *why* behind decisions.
 - **`CONTEXT.md`** — the domain glossary the spoiler and architecture prose relies on.
 
@@ -77,7 +77,7 @@ routing, and run-expectancy/tiering math, including the spoiler invariant pinned
 captured real-game feed (`docs/testing.md`). This suite does not replace the
 browser-level check. For anything user-visible, also run `npm run dev` or `npm run
 e2e` against a live or recent game. `docs/test-games.md` lists verified gamePks with
-rare in-game events; `.claude/skills/run.md` documents that loop.
+rare in-game events; `.claude/skills/run/` documents that loop.
 
 **Test discipline: the suite only has value if it stays honest.** Never delete,
 skip, or loosen a test's assertions to make CI or a commit pass — fix the code,
@@ -137,8 +137,8 @@ directly. Each game's reveal high-water mark (`revealedThrough`) persists in
 so the spoiler rule still holds on return. A same-device tab picks up another tab's
 reveal through a `storage` listener in `useRevealProgress.js`.
 
-**Eleven narrow, opt-in exceptions (`api/`)**, all Vercel functions, all inert when unconfigured;
-**ten never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
+**Fourteen narrow, opt-in exceptions (`api/`)**, all Vercel functions, inert when unconfigured;
+**thirteen never render or fetch a score.** Link previews (`og.js` + `preview.js` + `_lib/cards.js`)
 render Open Graph cards, failing safe to the default (ADR-0012). Reveal sync (Clerk-gated) mirrors
 `revealedThrough` via `reveal.js` + Upstash Redis, ratcheted both sides (ADR-0022);
 `spoiled-days.js` mirrors which DAYS the user consented to spoil — consent, reversible (ADR-0026).
@@ -151,15 +151,15 @@ Tally**'s `preferences.js` + `src/lib/account/` mirror a CLOSED four-field set, 
 `account.js` erases every per-user key (ADR-0039). The Game Log's `books.js` mirrors the shelf — a
 cover's title, club and mark, never a stamp (ADR-0041). `game-story.js` is a CORS hop to MLB.com's
 team RSS feeds, which send none. `page.js` + `src/copy/landing/` server-render `/learn` for AI
-crawlers, which run no JS (ADR-0053). **The eleventh stores a score, by design**: the Game Log's
+crawlers, which run no JS (ADR-0053). **The fourteenth stores a score, by design**: the Game Log's
 stamps (`stamps.js`, `src/lib/stamps.js`) — safe because of WHERE stamp art may render
 (`check-stamp-surfaces`), not a mint-time check (ADR-0035). Voice: `docs/game-log.md`.
 
-Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
+Two of those nested files carry the architecture detail, loaded when you work there:
 - **`src/CLAUDE.md`** — screens flow (`GameSelect → GameView → TeamInfo →
   InningViewer`), routing (`src/lib/route.js`, `src/App.jsx`), fetching (`useAsync`),
   the token-based design system, and the UI-side spoiler enforcement. `/team/{id}` is a
-  five-tab hub; each tab is a real route that loads only its own data (ADR-0034).
+  six-tab hub; each tab is a real route that loads only its own data (ADR-0034).
 - **`src/api/CLAUDE.md`** — the data layer's RULE, not its catalog: the reveal-only vs.
   spoiler-free split (machine-readable in `spoiler-manifest.json`), the
   **build-time-fetch pattern** (static `public/data/*.json` precomputed by
@@ -176,7 +176,7 @@ Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
   scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The Brewers (id 158) are
   pinned to the top of the slate (`PINNED_TEAM_ID`).
 - **Verify feed field paths against a live game.** The MLB feed shape is
-  undocumented; `api/statsapi.js` notes which paths were checked against which
+  undocumented; `src/api/statsapi.js` notes which paths were checked against
   gamePk. Confirm a new field against a real response; do not guess.
 - **Styling is a token-based design system.** `src/index.css` holds only `@import`s:
   `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where the rules live.
@@ -187,8 +187,8 @@ Two nested `CLAUDE.md` files carry the detail, loaded only when you work there:
 
 ## Agent skills
 
-- **Issue tracker** — issues live as local markdown under `.scratch/<feature-slug>/`
-  (solo project, no GitHub Issues). See `docs/agents/issue-tracker.md`.
+- **Issue tracker** — issues go to **GitHub Issues** (`gh issue`). `.scratch/<slug>/`
+  holds working notes, not the tracker. See `docs/agents/issue-tracker.md`.
 - **Triage labels** — `needs-triage` / `needs-info` / `ready-for-agent` /
   `ready-for-human` / `wontfix`, used as-is. See `docs/agents/triage-labels.md`.
 - **Domain docs** — single-context: one `CONTEXT.md` + `docs/adr/`. See
