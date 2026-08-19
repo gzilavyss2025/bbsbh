@@ -176,7 +176,7 @@ Two of those nested files carry the architecture detail, loaded when you work th
   scores, and the logo CDN (`teamLogoUrl` in `teams.js`). The Brewers (id 158) are
   pinned to the top of the slate (`PINNED_TEAM_ID`).
 - **Verify feed field paths against a live game.** The MLB feed shape is
-  undocumented; `api/statsapi.js` notes which paths were checked against which
+  undocumented; `src/api/statsapi.js` notes which paths were checked against
   gamePk. Confirm a new field against a real response; do not guess.
 - **Styling is a token-based design system.** `src/index.css` holds only `@import`s:
   `src/tokens/*.css`, then the ordered `src/styles/*.css` partials where the rules live.
