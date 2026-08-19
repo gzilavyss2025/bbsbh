@@ -1,37 +1,19 @@
 /* ============================================================
    PITCH ARSENAL — the player page's "Pitches" card (PitchMix.jsx)
-   An ink slab on a paper page. Every other card on the player page is
-   manila with navy on it; this one inverts, because a pitcher's mix and
-   his velocity are the numbers a reader opened the page for, and they
-   were previously the quietest thing on it — a 10px chart chip and a
-   14px figure, both softer than the row label beside them.
+   A compact scorebook ledger. It uses the site's paper, navy, field, clay,
+   and graphite inks instead of the former full-card broadcast treatment.
 
-   Its inks are the --heat-* set (tokens/colors.css), fixed app colours
-   rather than the club's triad: this card renders for all 30 clubs and
-   AAA, and every text-on-ink pair here is asserted by check-contrast.mjs.
-
-   DELIBERATELY ITS OWN NAMESPACE. The old `.pitchmix` classes stay put and
-   unchanged, because BattedBallMix.jsx (the hitter's "Batted balls" card)
-   reuses them verbatim — restyling `.pitchmix` here would silently redress
-   a card nobody asked about. The two cards no longer read as one system;
-   that is the intended trade, and the hitter card is the one that kept the
-   original dress.
+   DELIBERATELY ITS OWN NAMESPACE. The old `.pitchmix` classes stay put because
+   BattedBallMix.jsx reuses them for the hitter's "Batted balls" card.
    ============================================================ */
 
 .pitchslab {
-  background: var(--heat-slab);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
   margin: 0 0 18px;
-}
-
-/* The card's top edge, in the same accent the band at the foot uses — the
-   two together bracket the rows, which is what stops an ink block this tall
-   from reading as a hole cut in the page. */
-.pitchslab__rule {
-  height: 3px;
-  background: var(--heat-band);
+  overflow: hidden;
+  background: var(--heat-slab);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
 }
 
 .pitchslab__head {
@@ -39,49 +21,66 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
-  padding: 11px 14px 9px;
+  padding: 9px 12px 8px;
+  background: var(--heat-band);
+  border-bottom: 3px solid var(--seal-cover);
 }
 
 .pitchslab__title {
+  color: var(--heat-band-ink);
   font-family: var(--font-display);
   font-size: var(--fs-h3);
   text-transform: uppercase;
   letter-spacing: var(--ls-label);
-  color: var(--heat-fastball);
 }
 
 .pitchslab__total {
+  color: var(--heat-band-ink);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-size: var(--fs-caption);
-  color: var(--heat-offspeed);
 }
 
-/* ---- times-through-the-order filter -------------------------------------
-   The app's own segmented control (.levelnav, 05-masthead-nav.css) in the
-   slab's inks: same grid of equal cells, same condensed caps, same 34px cell
-   and the same rounded fill inset from the cell's edge — the active cell just
-   takes the band accent instead of navy ink, since navy on navy would be
-   invisible here. Rendered only when the nightly file carries the split, so
-   most relievers never see it. */
+/* The times-through filter stays labelled, but the explanation and control
+   share one line instead of consuming a full-width row plus a caption row. */
+.pitchslab__filter {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 8px 6px 12px;
+  background: var(--surface-inset);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+}
+
+.pitchslab__filterlabel {
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
 .pitchslab__tabs {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  border-top: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
-  border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
+  padding: 2px;
+  background: var(--bg-page);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
 }
 
 .pitchslab__tab {
   appearance: none;
   min-width: 0;
-  min-height: 42px;
-  margin: 4px;
+  min-height: 34px;
   padding: 0 var(--space-1);
   border: 0;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-xs);
   background: transparent;
-  color: var(--heat-offspeed);
+  color: var(--text-muted);
   font-family: var(--font-display);
   font-size: var(--fs-ui);
   text-transform: uppercase;
@@ -91,92 +90,72 @@
     background var(--dur-fast) var(--ease-standard),
     color var(--dur-fast) var(--ease-standard);
 }
-/* The divider rides the cell rather than the button, so it stays put while the
-   button's own margin insets the fill — same construction as .levelnav. */
-.pitchslab__tab + .pitchslab__tab {
-  box-shadow: -1px 0 0 rgba(255, 255, 255, 0.14);
-}
 
 .pitchslab__tab:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
-/* Focus indicates itself by taking the hover fill rather than drawing a ring:
-   the shared --focus-ring is field green, which is the one thing in the
-   palette that does NOT hold up on this navy, and a bespoke ring colour is
-   exactly what check-focus-ring.mjs exists to stop. A tabbed-to cell lights
-   the same way a hovered one does, which is unambiguous against three unlit
-   siblings. */
-.pitchslab__tab.is-active,
-.pitchslab__tab:hover,
+.pitchslab__tab.is-active {
+  background: var(--accent-primary);
+  color: var(--text-on-ink);
+}
+
 .pitchslab__tab:focus-visible {
-  background: var(--heat-band);
-  color: var(--heat-band-ink);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
 }
 
-/* What the tabs mean, said once under them rather than in each label — "1st"
-   beside "2nd" is only legible if something nearby says first WHAT. */
-.pitchslab__tabnote {
-  margin: 0;
-  padding: 6px 14px 0;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--heat-other);
+@media (hover: hover) and (pointer: fine) {
+  .pitchslab__tab:not(.is-active):hover {
+    background: var(--field-soft);
+    color: var(--text-heading);
+  }
 }
 
 .pitchslab__list {
   list-style: none;
   margin: 0;
-  padding: 2px 14px 12px;
+  padding: 0;
 }
 
-/* Two lines per pitch rather than the old single grid row: the name and the
-   velocity on top, the usage meter under them running the full width of the
-   card. A 6px meter needs that width to distinguish 11.0% from 10.6%, which
-   the old whole-percent figures could not do at all (both read "11%"). */
+/* Three compact columns keep the name, mix, and velocity readable without
+   giving each pitch a second full-width line. */
 .pitchslab__row {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 12px 0 11px;
-  border-top: var(--bw-hair) solid rgba(255, 255, 255, 0.10);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px 74px;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 7px 12px;
+  border-top: var(--bw-hair) solid var(--border-hairline);
 }
+
 .pitchslab__row:first-child {
   border-top: 0;
 }
 
-.pitchslab__line {
+.pitchslab__id,
+.pitchslab__mix {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.pitchslab__id {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
+  flex-direction: column;
   min-width: 0;
 }
 
+.pitchslab__id {
+  gap: 1px;
+}
+
 .pitchslab__name {
-  font-family: var(--font-display);
-  font-size: var(--fs-title-md);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-title);
-  color: var(--heat-ink);
   overflow: hidden;
+  color: var(--heat-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+  text-transform: uppercase;
   text-overflow: ellipsis;
+  letter-spacing: var(--ls-title);
   white-space: nowrap;
 }
 
-/* The family as a WORD, not a colour chip. The old card's 10px square carried
-   fastball/breaking/offspeed/other in low-chroma ink alone, which is both the
-   least readable way to say it and colour-alone identity; spelling it out
-   costs one short word and the colour then only has to agree, not carry. */
 .pitchslab__family {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -185,41 +164,19 @@
   white-space: nowrap;
 }
 
-.pitchslab__velo {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: var(--fs-num-lg);
-  letter-spacing: var(--ls-tight-display);
-  color: var(--heat-ink);
-  white-space: nowrap;
-}
-
-.pitchslab__unit {
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  font-size: var(--fs-caption);
-  color: var(--heat-offspeed);
-  margin-left: 5px;
-}
-
-.pitchslab__meterrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.pitchslab__mix {
+  align-items: stretch;
+  gap: 4px;
 }
 
 .pitchslab__meter {
-  flex: 1 1 auto;
-  height: 6px;
-  border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.13);
+  height: 5px;
   overflow: hidden;
+  background: var(--border-hairline);
+  border-radius: var(--radius-pill);
 }
 
-/* min-width, because a genuine 1.3% show-me changeup rounds to well under a
-   pixel on a phone-width meter and would otherwise render as nothing at all —
-   an empty track reading as "no data" rather than "barely throws it". */
+/* A genuine show-me pitch still gets a visible mark on the compact track. */
 .pitchslab__fill {
   min-width: 3px;
   height: 100%;
@@ -227,64 +184,56 @@
 }
 
 .pitchslab__pct {
+  color: var(--text-body);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-small);
-  width: 46px;
+  font-size: var(--fs-caption);
   text-align: right;
 }
 
-/* The four family inks, on the three things that carry a family: the word,
-   the meter fill, and the share figure. Same four-way split as --arsenal-*
-   (see pitchFamily in src/api/pitchArsenal.js) — restated for the ink ground.
-   The share figure takes the family ink rather than body ink so the eye can
-   pair a number with its bar without a legend. */
-.pitchslab__family--fastball,
-.pitchslab__pct--fastball { color: var(--heat-fastball); }
-.pitchslab__family--breaking,
-.pitchslab__pct--breaking { color: var(--heat-breaking); }
-.pitchslab__family--offspeed,
-.pitchslab__pct--offspeed { color: var(--heat-offspeed); }
-.pitchslab__family--other,
-.pitchslab__pct--other { color: var(--heat-other); }
-
-.pitchslab__fill--fastball { background: var(--heat-fastball); }
-.pitchslab__fill--breaking { background: var(--heat-breaking); }
-.pitchslab__fill--offspeed { background: var(--heat-offspeed); }
-.pitchslab__fill--other { background: var(--heat-other); }
-
-/* ---- the 100 mph band ----------------------------------------------------
-   Renders only for an arm past CENTURY_CLUB_MIN (src/api/pitchArsenal.js), so
-   the large majority of pitchers never see it and it stays a real signal
-   rather than a row of zeroes. */
-.pitchslab__heat {
-  display: flex;
-  align-items: stretch;
-  background-color: var(--heat-band);
-  /* A fine diagonal rake across the band. Low enough (10% ink) to read as
-     texture at arm's length without touching the figures' legibility — the
-     contrast pair asserted in check-contrast.mjs is against the flat band
-     colour, so this must stay faint enough not to matter. */
-  background-image: repeating-linear-gradient(
-    115deg,
-    rgba(27, 42, 58, 0.10) 0 2px,
-    transparent 2px 13px
-  );
+.pitchslab__velo {
+  color: var(--heat-ink);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-num-md);
+  letter-spacing: var(--ls-tight-display);
+  text-align: right;
+  white-space: nowrap;
 }
 
-/* The flame's plate. The angled trailing edge is the broadcast lower-third
-   idiom, and it is the one place in the app that cuts a corner off-square —
-   deliberate: this band is the card's celebration, and a rectangle would read
-   as one more table row. */
-.pitchslab__flame {
-  width: 56px;
-  flex: 0 0 auto;
+.pitchslab__unit {
+  margin-left: 3px;
+  color: var(--text-caption);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+}
+
+.pitchslab__family--fastball { color: var(--heat-fastball); }
+.pitchslab__family--breaking { color: var(--heat-breaking); }
+.pitchslab__family--offspeed { color: var(--heat-offspeed); }
+.pitchslab__family--other { color: var(--heat-other); }
+
+.pitchslab__fill--fastball { background: var(--arsenal-fastball); }
+.pitchslab__fill--breaking { background: var(--arsenal-breaking); }
+.pitchslab__fill--offspeed { background: var(--arsenal-offspeed); }
+.pitchslab__fill--other { background: var(--arsenal-other); }
+
+/* A rare 100 mph callout becomes a slim navy footer rather than a second card. */
+.pitchslab__heat {
   display: flex;
   align-items: center;
+  min-height: 48px;
+  background: var(--heat-band);
+  border-top: 3px solid var(--seal-cover);
+}
+
+.pitchslab__flame {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
   justify-content: center;
-  padding-right: 12px;
-  background: var(--heat-slab);
-  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
 }
 
 .pitchslab__flame svg {
@@ -292,134 +241,93 @@
 }
 
 .pitchslab__heatfacts {
-  flex: 1 1 auto;
   display: flex;
-  align-items: flex-end;
+  flex: 1 1 auto;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 11px 14px 12px 4px;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 6px 12px 7px 0;
 }
 
 .pitchslab__fact {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  min-width: 0;
 }
+
 .pitchslab__fact--rank {
   align-items: flex-end;
 }
 
 .pitchslab__factnum {
+  color: var(--heat-band-ink);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-size: var(--fs-hero-sm);
-  letter-spacing: var(--ls-tight-display);
-  color: var(--heat-band-ink);
-  line-height: var(--lh-solid);
-}
-/* The rank is the least of the three facts — it is a placing, not a reading —
-   so it sits a tier down rather than competing with the two counts. */
-.pitchslab__fact--rank .pitchslab__factnum {
   font-size: var(--fs-num-md);
-}
-
-.pitchslab__factlabel {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  text-transform: uppercase;
-  letter-spacing: var(--ls-label);
-  color: var(--heat-band-ink);
+  line-height: var(--lh-solid);
+  letter-spacing: var(--ls-tight-display);
   white-space: nowrap;
 }
 
-/* ---- tablet / desktop ----------------------------------------------------
-   Breakpoint matches 25-wide-layout.css (WIDE_QUERY in useMediaQuery.js). The
-   player page's body stays ONE column up here — only its hero widens — so this
-   card gets the whole 960px sheet. Two lines per pitch stop earning their keep
-   at that width: the row becomes a real four-column grid, and the meter, which
-   is the only element that actually wants the room, gets all of it. */
+.pitchslab__factlabel {
+  overflow: hidden;
+  color: var(--heat-band-ink);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  letter-spacing: var(--ls-label);
+  white-space: nowrap;
+}
+
 @media (min-width: 740px) {
-  .pitchslab__list {
-    padding: 4px 20px 14px;
+  .pitchslab__head {
+    padding-inline: 18px;
+  }
+
+  .pitchslab__filter {
+    grid-template-columns: max-content 300px;
+    justify-content: end;
+    padding-inline: 18px;
   }
 
   .pitchslab__row {
-    display: grid;
-    grid-template-columns: 236px minmax(0, 1fr) 62px 132px;
-    align-items: center;
+    grid-template-columns: 236px minmax(0, 1fr) 132px;
     gap: 20px;
-    padding: 13px 0;
+    min-height: 48px;
+    padding-inline: 18px;
   }
 
-  /* The two-line stack's wrappers go transparent so their children land
-     directly in the grid's tracks. Each child then names its own column:
-     source order is name, velocity, meter, share (which is the order the two
-     stacked lines want on a phone), while the wide row reads name, meter,
-     share, velocity — so leaving them to flow would put velocity in the
-     meter's track. */
-  .pitchslab__line,
-  .pitchslab__meterrow {
-    display: contents;
+  .pitchslab__id {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--space-2);
   }
-  .pitchslab__id { grid-column: 1; }
-  .pitchslab__meter { grid-column: 2; }
-  .pitchslab__pct { grid-column: 3; }
-  .pitchslab__velo { grid-column: 4; }
+
+  .pitchslab__mix {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 58px;
+    align-items: center;
+    gap: 14px;
+  }
 
   .pitchslab__meter {
-    height: 8px;
+    height: 7px;
   }
 
   .pitchslab__pct {
-    width: auto;
     font-size: var(--fs-ui);
-  }
-
-  .pitchslab__velo {
-    text-align: right;
-  }
-
-  .pitchslab__head {
-    padding: 10px 20px;
-    border-bottom: var(--bw-hair) solid rgba(255, 255, 255, 0.14);
-  }
-
-  /* The filter stops spanning the card and sits as a control of its own, with
-     its caption beside it rather than under it — a 928px-wide segmented bar
-     reads as navigation, not as a filter on the rows below it. */
-  .pitchslab__tabs {
-    width: 300px;
-    margin: 8px 20px 0 auto;
-    border: var(--bw-hair) solid rgba(255, 255, 255, 0.18);
-    border-radius: var(--radius-sm);
-  }
-  .pitchslab__tab {
-    min-height: 30px;
-  }
-  .pitchslab__tabnote {
-    padding: 6px 20px 0;
-    text-align: right;
-  }
-
-  .pitchslab__flame {
-    width: 76px;
-    padding-right: 16px;
-    clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 0 100%);
   }
 
   .pitchslab__heatfacts {
     justify-content: flex-start;
     gap: 44px;
-    padding: 12px 20px 13px 6px;
   }
 
-  /* With room to spread left, the rank joins the other two as an equal rather
-     than being pushed to the far edge, where it read as an unrelated fact. */
   .pitchslab__fact--rank {
     align-items: flex-start;
-  }
-  .pitchslab__fact--rank .pitchslab__factnum {
-    font-size: var(--fs-hero-sm);
   }
 }
 
