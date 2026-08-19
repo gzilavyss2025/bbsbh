@@ -55,9 +55,9 @@ export const SYNCED_ITEMS = Object.freeze([
   {
     id: 'continuation',
     channel: 'reveal',
-    label: 'Pick up your pencil',
+    label: 'Games in progress',
     // The cloud scorebook index — identity plus the user's own mark, no score.
-    blurb: 'The games you have open, waiting on whichever screen you pick up.',
+    blurb: 'Your open games and reveal progress stay available on every device.',
     module: 'src/components/game/ContinueScoring.jsx',
   },
   {
