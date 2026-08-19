@@ -93,6 +93,20 @@
   letter-spacing: var(--ls-tight-score);
   line-height: var(--lh-display);
 }
+
+/* The pay rank, on its own line UNDER the figure it ranks — never inline with
+   it, and never with a "#" in front. It inherits the caption treatment the
+   sibling label already uses (the `> span` rule above), so only the things that
+   must differ are set here: it sits below the number rather than above it, and
+   its digits are tabular so a rank does not shift as the pool changes. */
+.contractcard__salary > .contractcard__payrank {
+  margin-top: var(--space-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.contractcard__payrank-pool {
+  font-weight: var(--w-regular);
+}
 .contractcard__scorebug {
   margin: 0;
   border-left: var(--bw-hair) solid var(--border-rule);

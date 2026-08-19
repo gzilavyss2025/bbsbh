@@ -30,6 +30,28 @@
 
 export const STAMPS_KEY = 'bbsbh:stamps'
 
+// WHOSE COLLECTION IS IT — the shared-device guard.
+//
+// A local-first store plus an account leaks on a shared device, and the
+// Logbook had the leak that `src/lib/account/preferences.js` describes for
+// settings. User A signs in on the family iPad and their stamps sync DOWN into
+// `bbsbh:stamps`. A signs out. B signs in — and the device holds A's stamps as
+// ordinary local state, so `stampsToPublish` compares them against B's (empty)
+// remote and pushes A's collection UP into B's account. Worse than settings:
+// every game A stamped also OPENS unsealed for B, because `stampUnsealsGame`
+// asks only whether a stamp exists on this device (ADR-0048).
+//
+// Nulling the in-memory baseline on sign-out does not prevent this — that only
+// stops a publish against the WRONG baseline, and the next pull supplies a
+// perfectly good baseline belonging to the new user. What is needed is knowing
+// whose document this is, so the device records the account it last merged
+// from and `mergeStrategyFor` reads it back.
+//
+// Its own key, not the preferences one: the two documents sync independently,
+// and a device that merged settings but never reached the stamps endpoint must
+// not be recorded as holding this user's stamps.
+export const STAMPS_OWNER_KEY = 'bbsbh:stampsOwner'
+
 // A full MLB season is 2,430 games. 500 is generous for any real human and
 // bounds a hostile client; see `seasonIsFull` for why the cap REFUSES rather
 // than prunes.
@@ -414,6 +436,17 @@ export function removeStamp(map, gamePk, { now } = {}) {
 // Safe for a reason specific to this data: a stamp only ever changes by a
 // deliberate tap on one of THIS user's own devices. There is no third party to
 // race, and the loser of a tie is always one of the user's own two taps.
+// Take the remote collection WHOLESALE, discarding whatever this device held.
+// The 'adopt' half of the shared-device guard: when the local stamps belong to
+// a different account, none of them are this user's to keep or to publish, so
+// there is nothing to merge — B gets B's collection, and A's stamps neither
+// travel to B's account nor unseal B's games.
+//
+// Contrast `applyRemoteStamps`, which is the ordinary same-owner path.
+export function adoptRemoteStamps(remote) {
+  return normalizeAll(remote && typeof remote === 'object' && !Array.isArray(remote) ? remote : {})
+}
+
 export function applyRemoteStamps(local, remote) {
   const out = normalizeAll(local)
   if (!remote || typeof remote !== 'object' || Array.isArray(remote)) return out

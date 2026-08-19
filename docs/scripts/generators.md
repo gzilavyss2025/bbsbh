@@ -810,7 +810,7 @@ Re-run only to fold in a new season.
   the `/learn` guides plus the stable, public, non-scoring app routes, and
   deliberately lists NO game, date, player or team URL: a sitemap is a standing
   invitation to crawl, and inviting a crawler onto a scoring surface is the one
-  thing these pages exist to avoid (ADR-0048). `lastmod` for a guide comes from
+  thing these pages exist to avoid (ADR-0053). `lastmod` for a guide comes from
   that page's own `updated` field, not from the clock, so the file does not
   churn on every build. Exports `buildSitemap()` for `test/landing-pages.test.js`
   and only writes when run as a script.

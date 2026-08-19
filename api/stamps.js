@@ -367,9 +367,16 @@ export async function mint(req, res, redis, userId) {
   if (reviving) {
     // Reject at the cap rather than pruning: a stamp is a keepsake and must
     // never vanish on its own (contrast the scorebook index, which prunes).
+    //
+    // Count the LIVE stamps, not the hash's length. Taking a stamp back writes
+    // a `state: 'off'` tombstone into this same hash rather than deleting the
+    // field, so `hlen` charges the season for every stamp ever removed — stamp
+    // and un-stamp one game enough times and the shelf reads as full while it
+    // is empty.
     let count = 0
     try {
-      count = Number(await redis.hlen(key)) || 0
+      const stored = sanitizeStored(await redis.hgetall(key))
+      count = Object.values(stored).filter((entry) => entry.state === 'on').length
     } catch {
       count = 0
     }

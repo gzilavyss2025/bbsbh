@@ -97,8 +97,16 @@ async function fetchPlaces(teamIds, season) {
     }
     return map
   })
-  const missing = teamIds.filter((_, i) => rosters[i] == null)
-  if (missing.length) throw new Error(`40-man roster failed for team ${missing.join(', ')}`)
+  // EMPTY IS A FAILURE, NOT AN ANSWER. A null guard alone let a 200 carrying
+  // `{"roster": []}` through — statsapi's shape for a request it could not
+  // serve — and an empty map is indistinguishable downstream from a club whose
+  // players are all off the 40-man. The whole club's money would land in Off
+  // roster, out of `covered` and out of every position total, and the file
+  // would publish looking merely surprising rather than broken. No major-league
+  // club has an empty 40-man, so the only thing an empty map can mean is that
+  // the fetch did not really succeed.
+  const missing = teamIds.filter((_, i) => rosters[i] == null || rosters[i].size === 0)
+  if (missing.length) throw new Error(`40-man roster failed or came back empty for team ${missing.join(', ')}`)
   return new Map(teamIds.map((teamId, i) => [teamId, rosters[i]]))
 }
 

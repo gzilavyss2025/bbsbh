@@ -5,7 +5,7 @@ import { GUIDES_GROUP } from '../../lib/reportPages.js'
 // the scorecard.
 //
 // This exists because the guides had no way in. Eleven pages written to teach
-// somebody to keep score, server-rendered for crawlers (ADR-0048), in the
+// somebody to keep score, server-rendered for crawlers (ADR-0053), in the
 // sitemap, and linked from nowhere inside the app. Putting them in the
 // hamburger menu helps a reader who thinks to open the hamburger menu. Putting
 // one HERE reaches the reader who is looking at a box score wondering what

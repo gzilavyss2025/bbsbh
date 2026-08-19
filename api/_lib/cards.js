@@ -267,6 +267,9 @@ const GENERIC = {
   },
   logos: { eyebrow: 'LOGO SHEET', title: 'Logo Sheet', sub: 'Printable grayscale marks for pencil-sketching.' },
   'situational-records': { eyebrow: 'SITUATIONAL RECORDS', title: 'Situational Records', sub: 'Every club ranked in one situation at a time — spoiler-safe.' },
+  salaries: { eyebrow: 'LEAGUE SALARIES', title: 'League Salaries', sub: "Every club's payroll, and what the game's contracts commit." },
+  doubleheaders: { eyebrow: 'THE DOUBLE DIP', title: 'The Double Dip', sub: 'Every doubleheader since 2004, and who swept them.' },
+  'postseason-race': { eyebrow: 'POSTSEASON RACE', title: 'Postseason Race', sub: 'Division and wild-card standing, with elimination numbers.' },
   fouls: { eyebrow: 'FOUL TRACKER', title: 'Foul Tracker', sub: 'Season foul-ball rates and single-game highs, league-wide.' },
   milestones: { eyebrow: 'MILESTONE WATCH', title: 'Milestone Watch', sub: 'Every active player closing in on a round career number.' },
   umpires: { eyebrow: 'UMPIRE RANKINGS', title: 'Umpire Rankings', sub: "Every home-plate umpire's season strike-zone accuracy." },
@@ -335,6 +338,9 @@ export async function buildCard(params, origin) {
       case 'about':
       case 'logos':
       case 'situational-records':
+      case 'salaries':
+      case 'doubleheaders':
+      case 'postseason-race':
       case 'fouls':
       case 'milestones':
       case 'umpires':

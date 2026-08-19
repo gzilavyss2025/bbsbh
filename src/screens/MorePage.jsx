@@ -25,7 +25,7 @@ import { DirectoryHeading } from '../components/chrome/DirectoryHeading.jsx'
 // - It is not server-rendered, so it is not a crawl surface. vercel.json's
 //   catch-all serves every app route the empty #root shell; only /learn goes
 //   through api/page.js. Making this crawlable would mean a new serverless
-//   function, and api/ already sits at the Hobby plan's ceiling (ADR-0048).
+//   function, and api/ already sits at the Hobby plan's ceiling (ADR-0053).
 //   The argument for this page is readers and 2.4.5, not search engines.
 // - It is not a replacement for the sheet. The sheet is one tap from anywhere;
 //   this is the place to send someone, and the place to browse when the sheet's

@@ -66,6 +66,13 @@ const APP_ROUTES = [
   { path: '/farm-system-rankings', priority: '0.6', changefreq: 'weekly' },
   { path: '/bullpen-availability', priority: '0.6', changefreq: 'daily' },
   { path: '/doubleheaders', priority: '0.6', changefreq: 'daily' },
+  // The season boards. Same class as /standings and /leaders above — league-wide,
+  // public, no game's line on them — and they were left out only because each
+  // arrived after this list was last read end to end.
+  { path: '/situational-records', priority: '0.5', changefreq: 'daily' },
+  { path: '/salaries', priority: '0.5', changefreq: 'weekly' },
+  { path: '/postseason-race', priority: '0.6', changefreq: 'daily' },
+  { path: '/fouls', priority: '0.4', changefreq: 'daily' },
 ]
 
 function url({ path, lastmod, priority, changefreq }) {

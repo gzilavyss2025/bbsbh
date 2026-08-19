@@ -25,6 +25,7 @@
 import { LANDING_GROUPS, pageBySlug } from '../src/copy/landing/pages/index.js'
 import { renderIndex, renderPage } from '../src/copy/landing/render.js'
 import { resolvePage } from '../src/copy/landing/schema.js'
+import { SITE_URL } from '../src/copy/landing/site.js'
 import { sanitizeOverrides } from '../src/copy/registry.js'
 import { getRedis } from './_lib/redis.js'
 
@@ -70,14 +71,39 @@ function hashFromReply(reply) {
 // at the same URL. This is what makes the gear "edit where it is rendered"
 // (ADR-0044) without teaching a static document how to run React — the public
 // URL stays a plain document, and the editor is one query parameter away.
-async function spaShell(origin) {
-  const res = await fetch(`${origin}/index.html`, { headers: { Accept: 'text/html' } })
+// The shell is fetched from SITE_URL, never from the REQUEST's host. Two
+// reasons, and the second is the one that bites:
+//
+//   1. `req.headers.host` is attacker-supplied. Vercel routes by SNI and Host so
+//      a spoofed one does not reach this function today, which makes it a
+//      hardening rather than a live hole — but "unreachable because of how the
+//      platform routes" is a property of the platform, not of this file, and
+//      this file is where the URL is built. Every canonical and og:url on this
+//      page already comes from SITE_URL (render.js); the shell now agrees.
+//   2. It is the same constant the rest of the render path trusts, so there is
+//      one answer to "what origin is this page" instead of two.
+//
+// Memoised for the life of the lambda instance. index.html changes only on a
+// deploy, and a deploy gets fresh instances, so a warm instance serving many
+// `?edit` hits makes one origin fetch rather than one per request. A failure is
+// NOT cached — the caller falls back to a redirect, and the next request should
+// be free to try again.
+let shellCache = null
+
+async function spaShell() {
+  if (shellCache) return shellCache
+  const res = await fetch(`${SITE_URL}/index.html`, { headers: { Accept: 'text/html' } })
   if (!res.ok) throw new Error(`index ${res.status}`)
-  return res.text()
+  const html = await res.text()
+  shellCache = html
+  return html
 }
 
 export default async function handler(req, res) {
-  const url = new URL(req.url, `https://${req.headers.host}`)
+  // SITE_URL as the parse base, not the request's host. Nothing downstream reads
+  // `url.origin` any more — only the query string — but a `new URL` built on an
+  // attacker-supplied host is the kind of line the next person copies.
+  const url = new URL(req.url, SITE_URL)
   const slug = url.searchParams.get('slug')
 
   const send = (body, status, cache) => {
@@ -90,7 +116,7 @@ export default async function handler(req, res) {
   if (url.searchParams.has('edit')) {
     try {
       // never cached: it is a signed-in, one-person surface
-      return send(await spaShell(url.origin), 200, 'private, no-store')
+      return send(await spaShell(), 200, 'private, no-store')
     } catch {
       return send('<!doctype html><meta http-equiv="refresh" content="0;url=/">', 200, 'no-store')
     }

@@ -33,7 +33,7 @@ export function useLinkScope() {
 // left-click still becomes a client-side push with no page load.
 //
 // A `/learn` path is deliberately NOT intercepted: the guides are
-// server-rendered documents outside the React app (ADR-0048), and pushing one
+// server-rendered documents outside the React app (ADR-0053), and pushing one
 // through the client router would paint the SPA over a document the server
 // already sent. Those links are ordinary navigations, on purpose.
 export function useRouteLink() {

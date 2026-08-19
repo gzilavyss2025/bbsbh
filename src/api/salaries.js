@@ -21,13 +21,36 @@ import { staticJson, staticJsonBy } from './staticJson.js'
 const fetchLeague = staticJson('/data/salaries.json', { fallback: null })
 const fetchClub = staticJsonBy((teamId) => `/data/team-contracts/${teamId}.json`, { fallback: null })
 
+// A file that PARSED is not a file the page can draw. `staticJson`'s fallback
+// only fires on a non-200 or a parse failure, so an empty object, a half-written
+// file, or a generator that renames a field all arrive as a perfectly truthy
+// value — and both pages gate on `data != null`, so it reaches `.owed.map` and
+// white-screens the route. These two checks are the difference between "League
+// salaries have not been published yet", which is true and calm, and a blank
+// page with a console error, which tells the reader nothing.
+//
+// Deliberately shallow: presence and type of the fields the pages actually
+// index, not a schema. A deep validator would reject files over a field nobody
+// draws, which is its own way of taking a working page down.
+export function usableLeague(data) {
+  if (!data || typeof data !== 'object') return null
+  const shaped =
+    Array.isArray(data.owed) && Array.isArray(data.clubs) && Array.isArray(data.positions)
+  return shaped && data.totals && typeof data.totals === 'object' ? data : null
+}
+
+export function usableLedger(data) {
+  if (!data || typeof data !== 'object') return null
+  return Array.isArray(data.groups) && Array.isArray(data.totals) ? data : null
+}
+
 export async function fetchLeagueSalaries() {
-  return fetchLeague()
+  return usableLeague(await fetchLeague())
 }
 
 export async function fetchTeamContracts(teamId) {
   if (teamId == null) return null
-  return fetchClub(teamId)
+  return usableLedger(await fetchClub(teamId))
 }
 
 // ---------------------------------------------------------------- selectors

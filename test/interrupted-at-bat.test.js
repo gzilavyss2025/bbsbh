@@ -401,7 +401,7 @@ test('a walk-off steal (game Final) still gets the interrupted at-bat card', () 
 // ---- Scorecard Lab: the cell shows, the tallies don't move ------------------
 
 test('the scorecard grid shows the interrupted cell but charges no at-bat', () => {
-  const grid = scorecardPlays(buildFeed(), 'bottom')
+  const grid = scorecardPlays(buildFeed(), 'bottom', { through: Infinity })
   const sanchezSlot = grid.slots[7] // slot 8
   const laraSlot = grid.slots[8] // slot 9
   assert.equal(sanchezSlot.ab, 1) // the single is a real AB

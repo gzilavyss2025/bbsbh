@@ -203,8 +203,16 @@ jobs:
       # running it first would publish yesterday's contracts under today's stamp.
       # Same ordering requirement, same reason, as "Postseason odds" after "Team
       # Scores" further up this file.
+      #
+      # Ordering alone was not enough. Both steps are continue-on-error, so a
+      # failed contracts fetch used to leave the previous run's shards on disk and
+      # this step would roll them up anyway — yesterday's money joined to today's
+      # rosters, committed and shipped with nothing in the run marked red.
+      # gen-salaries.mjs cannot catch that itself: it throws on an EMPTY shard
+      # directory, never a stale one. So the gate has to be here.
       - name: Club ledgers and league salaries
         id: salaries
+        if: steps.player-contracts.outcome == 'success'
         continue-on-error: true
         run: node scripts/fever/gen-salaries.mjs
       - name: Prospect level percentile

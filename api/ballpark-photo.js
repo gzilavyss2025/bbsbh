@@ -95,6 +95,22 @@ export function isOwnBlobUrl(raw) {
   }
 }
 
+// The same check, narrowed to one folder of the store — what a DELETE needs.
+// The host check alone proves only "ours", and our store holds more than one
+// kind of thing: ballpark photos, club marks, and whatever comes next. A
+// replaces= pointing at a neighbouring folder is still our own URL, so the
+// host check waves it through and the upload quietly deletes an object some
+// other saved override still points at. A delete should only ever reach the
+// folder the uploader just wrote to.
+export function isOwnBlobUrlUnder(raw, prefix) {
+  if (!isOwnBlobUrl(raw) || !prefix) return false
+  try {
+    return new URL(String(raw)).pathname.startsWith(`/${prefix}`)
+  } catch {
+    return false
+  }
+}
+
 export default async function handler(req, res) {
   const reply = (body, status = 200) =>
     jsonResponse(res, body, status, { 'cache-control': 'private, no-store' })
@@ -160,7 +176,7 @@ export default async function handler(req, res) {
   // an orphaned object and nothing else, so it is swallowed rather than turned
   // into an error the admin has to think about.
   const replaces = searchParams.get('replaces')
-  if (replaces && isOwnBlobUrl(replaces) && replaces !== uploaded.url) {
+  if (replaces && isOwnBlobUrlUnder(replaces, 'ballparks/') && replaces !== uploaded.url) {
     try {
       await del(replaces, { token })
     } catch {

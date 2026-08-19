@@ -150,7 +150,7 @@ export const PAGE_GROUPS = [
 export const REPORT_PAGES = PAGE_GROUPS.flatMap((group) => group.pages)
 
 // The guides live at /learn and are NOT React routes — they are server-
-// rendered documents (ADR-0048), which is why they carry a full URL path here
+// rendered documents (ADR-0053), which is why they carry a full URL path here
 // and never belonged in REPORT_PAGES. Until now nothing inside the app linked
 // to them at all: eleven pages written to be found, reachable only from a
 // search engine. Four headliners plus the hub, rather than all eleven — the
@@ -200,7 +200,7 @@ export const MENU_GROUPS = [...PAGE_GROUPS, GUIDES_GROUP, TOOLS_GROUP]
 // literal, in two files — the one shape this module exists to prevent — so it
 // is declared here with the rest of them. The guides hub joins it because a
 // footer's job is to say what else the site holds, and eleven server-rendered
-// documents nothing inside the app linked to (ADR-0048) is a large part of
+// documents nothing inside the app linked to (ADR-0053) is a large part of
 // what it holds. The HUB only: listing all eleven would put a second copy of
 // /learn's own grouped task map at the foot of every page.
 //
@@ -233,7 +233,7 @@ export const FOOTER_TRAIL = [
 // THE ADDRESSES SPELL THEIR SUBJECT OUT. '/farm-system-rankings',
 // '/bullpen-availability' and '/pace-of-play' are the phrases people actually
 // search for, and a report page's URL is one of the few places in this app that
-// has to answer to a search engine as well as to a reader (ADR-0048).
+// has to answer to a search engine as well as to a reader (ADR-0053).
 // '/attendance' is already that phrase and needs no lengthening.
 //
 // Each of the three keeps a SHORTER route name ('farm-system', 'bullpens',

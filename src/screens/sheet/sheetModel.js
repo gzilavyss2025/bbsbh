@@ -14,16 +14,18 @@
 // here and must never be. That negative is enforced rather than promised: both
 // carry an `importers` allowlist in the manifest, and
 // `scripts/check-spoiler-manifest.mjs` (run by `npm run lint`) fails the moment a
-// file that isn't on it reaches for one. `api/loadScorecard.js` is off limits too,
-// for a subtler reason — it is classed `mixed`, its spoiler-free half sits two
-// lines above an import of `revealInning`, and pulling any of it in would drag the
-// full-reveal half back into the production module graph that `App.jsx` currently
-// keeps it out of.
+// file that isn't on it reaches for one. `api/scorecardGame.js` is off limits too,
+// for a subtler reason: it is classed `reveal-gated`, and every one of its
+// builders clamps on a `through` half-index rather than sealing. That is the
+// right shape for the scorecard PAGE, which inks what you have revealed and
+// stops. It is the wrong shape for a printable sheet, which has no reveal state
+// to clamp against and must be blank by construction.
 //
 // This model must also never grow a "fill in what has happened so far" mode. The
 // empty at-bat grid IS the product: Tally shows you the game, you keep the score
-// by hand. The inked grid already exists for the DEV-only Scorecard Lab
-// (`loadScorecard.js`'s `scorecardPlays`) — leave it there.
+// by hand. The inked grid already exists, in `api/scorecardGame.js`'s
+// `scorecardPlays` — reached by the scorecard page under its reveal clamp, and
+// by the DEV-only Scorecard Lab in full. Leave it there.
 //
 // MiLB degrades the way everything else does: every field falls back to `''` and
 // every unposted lineup slot becomes a blank write-in row, so a AA feed with no

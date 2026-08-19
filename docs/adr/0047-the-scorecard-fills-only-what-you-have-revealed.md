@@ -204,3 +204,22 @@ style that is simply invisible. It is an absolutely-positioned pseudo
 instead. Its host `.sc-ab__strip` must stay `position: static`: making the
 strip positioned lifts the whole strip into the positioned paint layer, where
 its fill covers the out circle's `right: -8px` overhang and clips the ①②③.
+
+## Amendment (2026-08-19): the default is `-1`, and it had to be
+
+The sentence above — "the Lab now passes `through: Infinity` explicitly" — was
+true of the intent and false of the code. The Lab called `scorecardFull(loaded.data,
+side)` with no options at all, and the four builders defaulted `through` to
+`Infinity`, so the Lab was riding a permissive default rather than stating a
+choice. Nothing shipped wrong: the Lab is DEV-gated out of the production graph,
+and every production caller passes its clamp. But the audit that found this is the
+argument against it. A default of `Infinity` means any future caller that forgets
+the option inks a finished game end to end, and the only thing standing between
+that and a reader is whether the author remembered — which is exactly what this
+ADR exists to stop being the mechanism.
+
+`scorecardPlays`, `scorecardScoreboard`, `scorecardPitchers` and `scorecardFull`
+now default `through` to `-1`: nothing revealed. A forgotten option draws the
+blank card, which is the product anyway. The Lab says `{ through: Infinity }` out
+loud, and `test/scorecard-game.test.js` pins both halves — that a caller with no
+clamp gets an empty card, and that the full card still draws when asked for.

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   STAMPS_KEY,
+  STAMPS_OWNER_KEY,
   addStamp,
+  adoptRemoteStamps,
   allStamps,
   applyRemoteStamps,
   parseStamps,
@@ -66,6 +68,27 @@ function notifyLocalChange() {
   }
 }
 
+// The account this device's stamps were last merged from — see
+// STAMPS_OWNER_KEY. Empty string for "nobody's yet", which `mergeStrategyFor`
+// reads as a guest's own collection and backfills rather than discards.
+export function readStampsOwner() {
+  try {
+    return window.localStorage?.getItem(STAMPS_OWNER_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+export function writeStampsOwner(userId) {
+  try {
+    if (!userId) window.localStorage?.removeItem(STAMPS_OWNER_KEY)
+    else window.localStorage?.setItem(STAMPS_OWNER_KEY, String(userId))
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function useStamps() {
   const [stamps, setStamps] = useState(readStamps)
 
@@ -121,6 +144,17 @@ export function useStamps() {
   const mergeRemoteStamps = useCallback(
     (remote) => {
       commit((prev) => applyRemoteStamps(prev, remote))
+    },
+    [commit],
+  )
+
+  // The 'adopt' path of the shared-device guard (STAMPS_OWNER_KEY): this
+  // device's collection belongs to a DIFFERENT account, so it is replaced
+  // outright rather than merged. Nothing local survives to be published into
+  // the new user's account, or to unseal their games.
+  const adoptRemoteStamps_ = useCallback(
+    (remote) => {
+      commit(() => adoptRemoteStamps(remote))
     },
     [commit],
   )
@@ -207,6 +241,7 @@ export function useStamps() {
     unplace,
     placeAll,
     mergeRemoteStamps,
+    adoptRemoteStamps: adoptRemoteStamps_,
   }
 }
 

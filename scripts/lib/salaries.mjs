@@ -61,14 +61,22 @@ export function statLine(entry, type) {
 }
 
 // SP or RP from one stat line, or null when the line says nothing to decide on.
-// A start is worth two appearances, so a swingman who starts half his games
-// reads as a starter.
+//
+// The threshold is 40% of appearances, NOT half, and it is shared with
+// scripts/lib/contract-pay-rank.mjs (judgement call 1 there carries the full
+// argument): a swingman splitting a season between the rotation and the pen is
+// paid out of the starter market, not the reliever one. Erick Fedde — 155
+// career starts in 192 games — read as a reliever here on a 12-of-27 season
+// while pay-rank called him a starter, which put him in a club's bullpen band
+// and in the league's RP spend on the strength of a default nobody had argued.
+export const STARTER_SHARE = 0.4
+
 export function pitcherRole(stat) {
   if (!stat) return null
   const games = Number(stat.gamesPitched ?? stat.gamesPlayed ?? 0)
   if (!games) return null
   const started = Number(stat.gamesStarted ?? 0)
-  return started * 2 >= games ? 'SP' : 'RP'
+  return started >= games * STARTER_SHARE ? 'SP' : 'RP'
 }
 
 export function resolvePosition(entry) {
@@ -210,6 +218,8 @@ export function clubLedger({ meta, team, records, placeFor, season, years }) {
 // The whole league, from the same records. Everything here is a sum of the club
 // ledgers' own inputs, so a figure on /salaries and the same figure on a club's
 // page come from one place.
+// `placeFor(playerId, teamId)` is scoped to the PAYING club deliberately — see
+// the note in rollUpSalaries.
 export function leagueRollup({ meta, teams, byClub, placeFor, season, years }) {
   const clubs = teams
     .map((team) => {
@@ -227,7 +237,7 @@ export function leagueRollup({ meta, teams, byClub, placeFor, season, years }) {
     for (const record of byClub.get(team.abbrev) ?? []) {
       const salary = record.salaryUsd
       if (salary == null) continue
-      const pos = placeFor(record.playerId)?.pos ?? null
+      const pos = placeFor(record.playerId, team.id)?.pos ?? null
       players.push({ id: record.playerId, name: record.name, teamId: team.id, abbrev: team.abbrev, pos, salary })
       if (pos) {
         positionTotals.set(pos, (positionTotals.get(pos) ?? 0) + salary)
@@ -241,12 +251,18 @@ export function leagueRollup({ meta, teams, byClub, placeFor, season, years }) {
     .map(([pos, total]) => ({ pos, total, players: players.filter((p) => p.pos === pos).length }))
     .sort((a, b) => b.total - a.total)
 
-  // "Still owed" is only ever the years the source actually covers, so the card
-  // says so rather than implying a career total it cannot see.
+  // COMMITTED, not "still owed". This sums every covered year INCLUDING the
+  // season in hand, most of which is already paid by midsummer — so the honest
+  // word is the one this variable already uses. Prorating the current year to
+  // make "owed" true would make the headline drift daily and stop matching the
+  // same club's 2026 column in the grid above it.
+  //
+  // It is also only ever the years the source actually covers, so the card says
+  // so rather than implying a career total it cannot see.
   const owed = []
   for (const team of teams) {
     for (const record of byClub.get(team.abbrev) ?? []) {
-      const row = playerRow(record, placeFor(record.playerId), season, years)
+      const row = playerRow(record, placeFor(record.playerId, team.id), season, years)
       if (row.committed > 0) {
         owed.push({ id: row.id, name: row.name, teamId: team.id, abbrev: team.abbrev, remaining: row.committed })
       }
@@ -295,18 +311,23 @@ export function rollUpSalaries({ meta, players, places, teams, season }) {
     })
   })
 
-  // A league-wide roster lookup: a club only knows its own 40-man, and the
-  // league board needs every player's position regardless of who pays him.
-  const everyPlace = new Map()
-  for (const roster of places.values()) {
-    for (const [id, place] of roster) everyPlace.set(id, place)
-  }
-
+  // ONE roster lookup, and it is the paying club's own — the same one the club
+  // ledgers above use. This was a league-wide merge of all thirty 40-mans, on
+  // the reasoning that "the league board needs every player's position
+  // regardless of who pays him". It made the two pages disagree about the same
+  // man: a player whose money is booked to one club while he sits on another's
+  // 40-man got a position here and none on his club's ledger, so he counted
+  // toward league position spend while his club filed him under Off roster.
+  // That was the whole reconciliation gap between the two pages.
+  //
+  // A club's ledger and the league board now answer the same question the same
+  // way. From the paying club's side he genuinely has no place — which is what
+  // the Off roster band means: money still owed with nobody to show for it.
   const league = leagueRollup({
     meta,
     teams,
     byClub,
-    placeFor: (id) => everyPlace.get(id) ?? null,
+    placeFor: (id, teamId) => places.get(teamId)?.get(id) ?? null,
     season,
     years,
   })

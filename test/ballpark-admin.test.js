@@ -20,7 +20,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { FIELD_IDS, mergeOverrides } from '../src/copy/registry.js'
 import { fieldIds, resolveParkName, venueKey } from '../src/lib/ballpark/ballparkArt.js'
-import { isOwnBlobUrl, sniffImage } from '../api/ballpark-photo.js'
+import { isOwnBlobUrl, isOwnBlobUrlUnder, sniffImage } from '../api/ballpark-photo.js'
 
 const FENWAY = venueKey('Fenway Park')
 
@@ -166,4 +166,33 @@ test('fieldIds builds ids the registry actually knows, with capitalised suffixes
     const suffix = id.slice(`ballpark.${FENWAY}`.length)
     assert.match(suffix, /^[A-Z]/, `${id} keeps its capitalised suffix`)
   }
+})
+
+// A delete must not be able to leave its own folder. Our store holds ballpark
+// photos AND club marks; `isOwnBlobUrl` says only "ours", so on its own it lets
+// a ballpark upload's `replaces=` name a club's logo and take it out from under
+// the identity override still pointing at it.
+test('isOwnBlobUrlUnder keeps a delete inside the folder that wrote it', () => {
+  const photo = 'https://abc123.public.blob.vercel-storage.com/ballparks/fenwaypark-photo-x.jpg'
+  const mark = 'https://abc123.public.blob.vercel-storage.com/identity-logos/158-main-y.png'
+
+  assert.ok(isOwnBlobUrlUnder(photo, 'ballparks/'))
+  assert.ok(isOwnBlobUrlUnder(mark, 'identity-logos/'))
+
+  // The crossing case: our own store, wrong folder.
+  assert.equal(isOwnBlobUrlUnder(mark, 'ballparks/'), false, 'a photo upload must not delete a mark')
+  assert.equal(isOwnBlobUrlUnder(photo, 'identity-logos/'), false, 'a mark upload must not delete a photo')
+
+  // Everything isOwnBlobUrl already refused stays refused.
+  assert.equal(isOwnBlobUrlUnder('https://example.com/ballparks/x.jpg', 'ballparks/'), false)
+  assert.equal(isOwnBlobUrlUnder('http://abc.public.blob.vercel-storage.com/ballparks/x.jpg', 'ballparks/'), false)
+  assert.equal(isOwnBlobUrlUnder('', 'ballparks/'), false)
+  assert.equal(isOwnBlobUrlUnder(null, 'ballparks/'), false)
+  // No prefix is not a licence to delete anything.
+  assert.equal(isOwnBlobUrlUnder(photo, ''), false)
+  assert.equal(isOwnBlobUrlUnder(photo), false)
+
+  // A folder name must not match by prefix alone.
+  const sneaky = 'https://abc123.public.blob.vercel-storage.com/ballparks-evil/x.jpg'
+  assert.equal(isOwnBlobUrlUnder(sneaky, 'ballparks/'), false)
 })

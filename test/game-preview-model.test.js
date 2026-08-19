@@ -222,3 +222,35 @@ test('a hitter with no plate appearances carries no season line', () => {
   feed.gameData.players.ID100 = { id: 100, fullName: 'Jackson Chourio' }
   assert.equal(buildPreviewModel(feed).lineups.away[0].batting, null)
 })
+
+// `seasonStats` on a boxscore player is NOT a pre-game figure: the feed updates
+// it DURING the game, so on a finished game it already counts tonight. That is
+// documented in src/api/boxscore.js, which built `preGameAvg` to subtract
+// tonight back out for exactly this reason.
+//
+// It matters most here. The rate stats move imperceptibly — an AVG that shifts
+// .003 says nothing — but HR, RBI and SB are COUNTING stats, and an RBI is a
+// run driven in. A poster built from a sealed game that prints "48 RBI" when
+// the hitter entered on 46 has told the reader two runs scored, in an image
+// they then post in public. The model must print what he entered the night on.
+test('a hitter line on the poster counts only what he brought into tonight', () => {
+  const feed = finishedFeed()
+  feed.liveData.boxscore.teams.away.battingOrder = [100]
+  feed.liveData.boxscore.teams.away.players = {
+    ID100: {
+      person: { id: 100, fullName: 'Jackson Chourio' },
+      battingOrder: '100',
+      allPositions: [{ abbreviation: 'LF' }],
+      // Season totals as the feed has them AFTER tonight...
+      seasonStats: { batting: { avg: '.278', obp: '.341', slg: '.480', ops: '.821', atBats: 400, hits: 111, homeRuns: 20, rbi: 48, stolenBases: 15 } },
+      // ...and tonight's own line, sitting on the same record.
+      stats: { batting: { atBats: 4, hits: 2, homeRuns: 2, rbi: 3, stolenBases: 1 } },
+    },
+  }
+  feed.gameData.players.ID100 = { id: 100, fullName: 'Jackson Chourio' }
+
+  const batting = buildPreviewModel(feed).lineups.away[0].batting
+  assert.equal(batting.homeRuns, 18, 'two of tonight’s homers must come back out')
+  assert.equal(batting.rbi, 45, 'an RBI is a run driven in — tonight’s three cannot show')
+  assert.equal(batting.stolenBases, 14)
+})

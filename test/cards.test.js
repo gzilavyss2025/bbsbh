@@ -6,6 +6,8 @@
 // exactly when a game is live and statsapi is busier) gated an already-found
 // match. Exercised here with plain fake-delay promises rather than mocked
 // fetch/statsapi calls, since the race behavior itself is network-agnostic.
+import { readFileSync } from 'node:fs'
+
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
@@ -134,6 +136,33 @@ test('every rewritten route resolves to its own canonical path, not the home pag
   // An unresolvable route falls back to the home page, which is the one case
   // where "/" is the honest answer.
   assert.equal(canonicalUrl(new URLSearchParams({ route: 'nope' })), `${SITE_URL}/`)
+})
+
+// The hand-written list above is what let six routes ship pointing at "/": a
+// page added to vercel.json gets its card from cards.js and is never noticed to
+// be missing a canonical, because nothing here knew to ask about it. So take the
+// list from vercel.json itself — every route the server actually rewrites
+// through api/preview has to answer with a path of its own.
+//
+// A wrong canonical is worse than none: it tells a search engine that six
+// distinct season boards ARE the home page, which is the one claim that can
+// de-index them all.
+test('every route vercel.json rewrites through api/preview has its own canonical', () => {
+  const config = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
+  const routes = new Set()
+  for (const { destination } of config.rewrites ?? []) {
+    const match = /^\/api\/preview\?route=([a-z-]+)/.exec(destination ?? '')
+    if (match) routes.add(match[1])
+  }
+  assert.ok(routes.size > 20, `expected the preview rewrites to be found, saw ${routes.size}`)
+
+  const homed = []
+  for (const route of routes) {
+    // Give the parameterised routes their parameters; the rest take none.
+    const params = new URLSearchParams({ route, id: '158', scope: 'pitching', orgId: '158' })
+    if (canonicalUrl(params) === `${SITE_URL}/`) homed.push(route)
+  }
+  assert.deepEqual(homed, [], `these routes canonicalise to the home page: ${homed.join(', ')}`)
 })
 
 test('the injected head carries a rel=canonical, and it agrees with og:url', () => {

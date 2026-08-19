@@ -445,7 +445,7 @@ export default defineConfig({
         // …EXCEPT the guides. `navigateFallback` alone registers a
         // NavigationRoute that answers EVERY navigation this worker controls
         // with the precached shell, and the guides at /learn are the one part
-        // of this site the server renders itself (ADR-0048). Without this
+        // of this site the server renders itself (ADR-0053). Without this
         // denylist an installed reader tapping a guide got index.html at the
         // guide's URL, the client router failed to match '/learn/{slug}' (it
         // never matches one, on purpose — see src/lib/route.js) and fell

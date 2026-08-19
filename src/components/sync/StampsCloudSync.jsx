@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
-import { useStamps } from '../../hooks/useStamps.js'
+import { readStampsOwner, useStamps, writeStampsOwner } from '../../hooks/useStamps.js'
 import { stampsToPublish } from '../../lib/stamps.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
@@ -65,8 +66,8 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // ADR-0022's total production failure hid for weeks, and what My Tally's sync
 // receipt exists to make visible.
 export function StampsCloudSync() {
-  const { isSignedIn, getToken } = useAuth()
-  const { stamps, mergeRemoteStamps } = useStamps()
+  const { isSignedIn, userId, getToken } = useAuth()
+  const { stamps, mergeRemoteStamps, adoptRemoteStamps } = useStamps()
   const report = useSyncReport()
 
   // What the server held as of the last successful pull. Starts null for "we
@@ -123,7 +124,17 @@ export function StampsCloudSync() {
       // change the merge causes, and it must already be comparing against what
       // the server actually has.
       known.current = remote
-      mergeRemoteStamps(remote)
+      if (mergeStrategyFor(readStampsOwner(), userId) === 'adopt') {
+        // A different account's stamps are sitting on this device. None of them
+        // are this user's to publish — or to unseal games with — so the remote
+        // collection replaces them outright instead of merging.
+        adoptRemoteStamps(remote)
+      } else {
+        mergeRemoteStamps(remote)
+      }
+      // This device's collection now belongs to this account either way, which
+      // is what makes the NEXT user's sign-in an `adopt`.
+      writeStampsOwner(userId)
       report('stamps', 'synced')
     } catch {
       // Offline / unauthorized / store not configured on this deploy — local
@@ -133,7 +144,7 @@ export function StampsCloudSync() {
     } finally {
       pulling.current = false
     }
-  }, [getToken, mergeRemoteStamps, report])
+  }, [getToken, userId, mergeRemoteStamps, adoptRemoteStamps, report])
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -179,6 +190,10 @@ export function StampsCloudSync() {
     // is deliberately NOT published as a removal: absence has to keep meaning
     // "no opinion", or a fresh device would erase the collection. Only an
     // explicit 'off' tombstone travels as a removal.
+    // An adopted collection is not this device's to publish. The owner tag is
+    // rewritten by the pull, so this only holds for the window before it lands.
+    if (mergeStrategyFor(readStampsOwner(), userId) === 'adopt') return
+
     const changed = stampsToPublish(stamps, known.current)
       .map((gamePk) => [gamePk, stamps[gamePk]])
       .filter(([, entry]) => entry)
@@ -252,7 +267,7 @@ export function StampsCloudSync() {
         )
       }
     })()
-  }, [isSignedIn, getToken, stamps, report])
+  }, [isSignedIn, userId, getToken, stamps, report])
 
   return null
 }

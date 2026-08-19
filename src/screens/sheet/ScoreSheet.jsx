@@ -13,8 +13,10 @@ import { SHEET_INNINGS } from './sheetModel.js'
 // numbers and positions from the spoiler-free selectors — see sheetModel.js) and
 // draws blank boxes for everything else. The at-bat boxes, the per-inning
 // totals, the AB/H/R/RBI columns and the decision line are yours to ink. Do not
-// add a mode that fills them in; the Scorecard Lab is where the inked grid lives
-// and where it stays (root CLAUDE.md's spoiler section).
+// add a mode that fills them in. An inked grid already exists — the scorecard
+// page draws one under its reveal clamp, and the DEV-only Scorecard Lab draws it
+// whole — and neither belongs on a sheet meant to be printed BEFORE the game
+// (root CLAUDE.md's spoiler section).
 //
 // Everything is drawn with BORDERS and TEXT, never a background fill, because a
 // browser's print dialog has "background graphics" switched off by default —
