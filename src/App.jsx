@@ -73,6 +73,23 @@ const PreferencesCloudSync = isClerkEnabled
     )
   : null
 
+// The shared-device guard for the box score's own bit (ADR-0049). Not a sync
+// channel — it makes no request at all — but it lives with them because it acts
+// on the same signal they do: the sign-in transition. Same dynamic-import shape
+// for the same reason, since it reads Clerk's userId.
+//
+// App-wide is the whole point: the bit is a RENDER override, read synchronously
+// when a box score first paints, so a guard that waited for that screen's own
+// network pull would decide after the score was already on the page. Its own
+// header has the full argument.
+const BoxRevealOwnerGuard = isClerkEnabled
+  ? lazy(() =>
+      import('./components/sync/BoxRevealOwnerGuard.jsx').then((m) => ({
+        default: m.BoxRevealOwnerGuard,
+      })),
+    )
+  : null
+
 const AboutPage = lazyNamed(() => import('./screens/AboutPage.jsx'), 'AboutPage')
 const AdminCopyPage = lazyNamed(() => import('./screens/AdminCopy.jsx'), 'AdminCopyPage')
 const GameView = lazyNamed(() => import('./screens/GameView.jsx'), 'GameView')
@@ -492,6 +509,11 @@ export default function App() {
         {PreferencesCloudSync && (
           <Suspense fallback={null}>
             <PreferencesCloudSync />
+          </Suspense>
+        )}
+        {BoxRevealOwnerGuard && (
+          <Suspense fallback={null}>
+            <BoxRevealOwnerGuard />
           </Suspense>
         )}
         <Suspense
