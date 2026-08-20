@@ -383,3 +383,218 @@
   text-transform: uppercase;
   color: var(--text-heading);
 }
+
+/* ----------------------------------------------------- around the league
+   The slate's roster-move card (components/transactions/LeagueMovesCard.jsx,
+   issue #772): every club's moves from the last 48 hours, read live off the
+   wire. A vertical WIRE LEDGER, not the team page's horizontal deck of paper
+   story cards: a real 48 hours holds about 35 stories across 20 clubs and the
+   worst of a measured month held 125 — the wrong shape for a swipe on the
+   page the reader came to for games.
+   It lives here beside .continuebar rather than in a partial of its own:
+   src/styles is at its own directory ratchet (check-dir-size) and
+   29-team-transactions.css is at its file budget (check-file-size), so the
+   honest home is the partial that already owns the slate's above-the-list
+   chrome. The .banner and .plink rules it leans on come from
+   29-team-transactions.css and 01-base.css and are deliberately not restated;
+   the two scoped overrides below win on specificity, not on order. */
+.wirecard {
+  margin: var(--space-3) var(--app-gutter) var(--space-4);
+}
+.wirecard__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-bottom: 6px;
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.wirecard__title,
+.wirecard__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-caption);
+}
+.wirecard__note {
+  font-weight: var(--w-semibold);
+  color: var(--graphite-soft);
+}
+
+/* Clamped to the height LeagueMovesCard measured for it (an inline max-height,
+   collapsed only) — which is what stops the frame BEFORE that measurement
+   painting a longer list than the fit is about to allow. */
+.wirecard__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.wire__date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 6px;
+}
+.wire__dateline {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.wire__rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--rule-soft);
+}
+.wire__count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--graphite-soft);
+}
+
+/* One move. The 3px spine is the club's own brand colour (--wire-club, set per
+   row in the component) — the thing that answers "whose move is this?" before
+   a word is read. Decorative and text-free, so no contrast floor applies. */
+.wire__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: start;
+  padding: var(--space-2) 0 var(--space-2) var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--rule-soft);
+}
+.wire__row::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--wire-club, var(--graphite));
+}
+
+/* Up to two faces — the in and the out of a move. A rail runs to three, and
+   the third is dropped rather than shrunk: the cutline still bolds his name,
+   and a third 33px column takes the sentence below a readable measure. */
+.wire__faces {
+  display: flex;
+  gap: var(--space-1);
+}
+.wire__face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  /* min-width, not width: an IL-15 banner is wider than the shot under it. */
+  min-width: var(--shot-2xs-w);
+}
+.wire__face .banner {
+  padding: 1px 4px;
+  letter-spacing: var(--ls-caps);
+}
+.shot.wire__shot {
+  width: var(--shot-2xs-w);
+  height: var(--shot-2xs-h);
+}
+
+.wire__body {
+  min-width: 0;
+}
+.wire__kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 3px;
+}
+/* The club's mark and abbreviation, linking to its own Transactions card. The
+   negative margins buy a taller hit area without moving the text. */
+.plink.wire__club {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 4px;
+  margin: -6px -4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.wire__mark { flex: 0 0 auto; }
+.wire__type {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+/* The team card's own three-tone map, so a move reads the same on both. */
+.wire__type--add { color: var(--field-deep); }
+.wire__type--out { color: var(--clay-deep); }
+.wire__type--move { color: var(--text-muted); }
+
+/* The team card's own cutline voice — Lora, the serif this app keeps for
+   sentence-like copy — one step down in size for a ledger row. */
+.wire__cutline {
+  margin: 0;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-prose);
+  color: var(--text-body);
+  text-wrap: pretty;
+}
+/* #root ties the ID component of #root *'s specificity — a plain selector
+   loses to the ALL-CAPS INVARIANT and is a silent no-op. Same technique and
+   the same split as #root .txstory__cutline (29-team-transactions.css). */
+#root .wire__cutline {
+  text-transform: none; /* caps-exempt: cutline prose reads as a natural sentence */
+}
+#root .wire__cutline .plink:not(.wire__namelink) {
+  text-transform: none; /* caps-exempt: team-name link matches the cutline's natural-case prose */
+}
+/* display: contents so a long player name wraps mid-sentence like the prose
+   around it instead of holding an unbreakable inline-block open — the same
+   fix .txstory__cutline .plink carries. */
+.wire__cutline .plink { display: contents; }
+.wire__cutline .wire__namelink {
+  font-weight: var(--w-bold);
+  color: var(--text-heading);
+}
+
+.wirecard__door {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-3);
+  border: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-sm);
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--accent-link);
+}
+.wirecard__door:active {
+  background: var(--surface-inset);
+}
+.wirecard__chevron {
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+}

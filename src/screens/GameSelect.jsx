@@ -28,6 +28,7 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
+import { LeagueMovesCard } from '../components/transactions/LeagueMovesCard.jsx'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
 import {
@@ -727,6 +728,13 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           <ContinueScoring />
         </Suspense>
       )}
+
+      {/* Roster moves from the last 48 hours, live off the wire (issue #772).
+          TODAY's MLB slate only — "the last 48 hours" is a claim about now, so
+          on a browsed-to past day it would read as a bug, not as news. Renders
+          null while loading, on failure, and on a quiet 48 hours, and sizes
+          itself to the space it has. See LeagueMovesCard.jsx. */}
+      {isToday && sportId === SPORT_IDS.MLB && <LeagueMovesCard endDate={dateStr} />}
 
       <AsyncStatus
         loading={loading}

@@ -148,6 +148,45 @@ export function assignRowOwners(rows, ctx = {}) {
   return owner
 }
 
+// Every owning club's rows, deduped and filtered down to the ones that could
+// become a story. `debutedIds` is passed EXPLICITLY rather than read off
+// `ctx`, because the two callers below want different answers from the same
+// walk: the grouper passes the real set, and `leagueCandidateIds` passes
+// nothing at all. Keeping it one function is what stops the two drifting —
+// see that export for why the second call has to be a superset of the first.
+function keptRowsByOrg(rows, ctx, debutedIds) {
+  const byOrg = new Map()
+  for (const [row, orgId] of assignRowOwners(rows, ctx)) {
+    if (!byOrg.has(orgId)) byOrg.set(orgId, [])
+    byOrg.get(orgId).push(row)
+  }
+  const kept = new Map()
+  for (const [orgId, orgRows] of byOrg) {
+    kept.set(orgId, filterStoryworthy(dedupeTransactions(orgRows), { orgId, debutedIds }))
+  }
+  return kept
+}
+
+// Which personIds a caller has to resolve before it can build this feed —
+// the `/people` prefilter for a LIVE reader, which the nightly generator does
+// not need because it happily asks about all 39,000 of a season's rows.
+//
+// It runs the real pass with NO debut set, which makes it a superset of the
+// final story rows: `debutedIds` only ever SUPPRESSES (it is the anonymous-
+// signing filter in vocabulary.js), so a row it would drop is already in
+// here, and a row it keeps could never be outside. That superset property is
+// the whole reason a browser can skip most of the call — measured over a
+// 30-day league-wide pull, 1,095 ids instead of the 3,086 a naive
+// "every row touching an MLB org" prefilter asks for, building byte-identical
+// stories (.scratch/home-transactions/probe-card-shape.mjs, Q7).
+export function leagueCandidateIds(rows, ctx = {}) {
+  const ids = new Set()
+  for (const orgRows of keptRowsByOrg(rows, ctx, undefined).values()) {
+    for (const t of orgRows) if (t.person?.id != null) ids.add(t.person.id)
+  }
+  return ids
+}
+
 // The whole pass: raw wire rows in, `[{ date, stories }]` newest day first
 // out, each story carrying the `teamId` whose story it is. `ctx` also takes
 // the `positions` and `debutedIds` the club-scoped pipeline wants — the
@@ -155,15 +194,8 @@ export function assignRowOwners(rows, ctx = {}) {
 // anonymous minor-league signings (measured; the suppression is documented in
 // vocabulary.js).
 export function groupLeagueWide(rows, ctx = {}) {
-  const byOrg = new Map()
-  for (const [row, orgId] of assignRowOwners(rows, ctx)) {
-    if (!byOrg.has(orgId)) byOrg.set(orgId, [])
-    byOrg.get(orgId).push(row)
-  }
-
   const byDate = new Map()
-  for (const [orgId, orgRows] of byOrg) {
-    const kept = filterStoryworthy(dedupeTransactions(orgRows), { orgId, debutedIds: ctx.debutedIds })
+  for (const [orgId, kept] of keptRowsByOrg(rows, ctx, ctx.debutedIds)) {
     const days = groupIntoStories(kept, { positions: ctx.positions, orgId, debutedIds: ctx.debutedIds })
     for (const day of days) {
       if (!byDate.has(day.date)) byDate.set(day.date, [])
