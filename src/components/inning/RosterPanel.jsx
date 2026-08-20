@@ -1,4 +1,5 @@
 import { memo, useState } from 'react'
+import { enteredAsOf } from '../../api/select.js'
 import { prospectBadge } from '../../api/prospects.js'
 import { showRookiePill } from '../../api/rookies.js'
 import { headerThemeFor, headerThemeStyle, headerThemeClass, themeKeyFor } from '../../lib/headerTheme.js'
@@ -11,13 +12,19 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 // enter once the rotation's set), the bullpen (with handedness as LHP/RHP),
 // and the bench (with position) as they stood at first pitch, for lookup
 // while scoring. A player who has entered the game is struck through — no
-// longer eligible — but ONLY once his entry sits at or below the reveal mark;
-// a substitution the user hasn't revealed their way to yet renders like any
-// other available player, so the card never hints at a sealed inning.
+// longer eligible — but only as of the half this page is showing AND only
+// once his entry sits at or below the reveal mark. Both ceilings live in
+// `enteredAsOf` (api/select.js); read its header before touching `halfIdx`
+// below. The short of it: the reveal mark keeps the card from hinting at a
+// sealed inning, and `halfIdx` keeps it honest about the half on screen when
+// a reader pages BACK through a game they have already unsealed — a
+// pinch-hitter who bats in the 8th was on the bench in the 1st, and the
+// 1st is what that page is showing.
 // Memoized: this panel's props (the split roster card, the reveal mark, the
-// badge data) change only when the feed or the reveal mark does, but it hangs
-// off InningViewer, which re-renders on every scorebug/step/live report during
-// a live game. Two of these render at once, each a full player list.
+// half on screen, the badge data) change only when the feed, the reveal mark
+// or the page does, but it hangs off InningViewer, which re-renders on every
+// scorebug/step/live report during a live game. Two of these render at once,
+// each a full player list.
 //
 // The collapsed header wears the club's own bar — the SAME curated
 // bar/accent/text triad TeamInfo.jsx, BoxScore.jsx's team cards, the fielding
@@ -44,14 +51,14 @@ import { RookiePill } from '../badges/RookiePill.jsx'
 //    they do not. Names, not counts: a player who has already entered stays
 //    on the list, struck through, because "used" is a fact a scorer wants
 //    just as much as "available" (see `entered` below).
-export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = null, side, treatment, revealedThrough, prospectsData, rookiesData, isMlb, defaultOpen = false, groups = null }) {
+export const RosterPanel = memo(function RosterPanel({ title, roster, teamId = null, side, treatment, revealedThrough, halfIdx = null, prospectsData, rookiesData, isMlb, defaultOpen = false, groups = null }) {
   const [open, setOpen] = useState(defaultOpen)
   const shows = (g) => (groups ? groups.includes(g) : true)
   const empty =
     (!shows('starters') || roster.starters.length === 0) &&
     (!shows('bullpen') || roster.bullpen.length === 0) &&
     (!shows('bench') || roster.bench.length === 0)
-  const entered = (p) => p.enteredIdx != null && p.enteredIdx <= revealedThrough
+  const entered = (p) => enteredAsOf(p, revealedThrough, halfIdx)
   const rowClass = (p) => `roster__row ${entered(p) ? 'is-entered' : ''}`
   const theme = headerThemeFor(teamId, themeKeyFor(teamId, side, treatment))
   return (

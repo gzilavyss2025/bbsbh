@@ -99,6 +99,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | reveal-only.test.js | 21 | derive.js, linescore.js, pitchers.js | ADR-0001 reveal-only contract |
 | reveal-progress-core.test.js | 15 | src/hooks/revealProgressCore.js, select.js | Reveal-progress state machine |
 | rookies.test.js | 18 | src/api/rookies.js | Rookie pill + the sharded reads (compact status map, per-id record shard) |
+| roster-availability.test.js | 3 | src/api/select.js | The bench/bullpen strike-through's two ceilings (`enteredAsOf`) — the reveal mark AND the half on screen, so a replayed inning shows the bench that half opened with |
 | route.test.js | 36 | src/lib/route.js | Full router surface |
 | sac-reached-notation.test.js | 3 | src/api/playbyplay.js | Sac-bunt error/FC notation edge cases |
 | scorecard-game.test.js | 9 | src/api/scorecardGame.js | The live scorecard's reveal clamp, P/TP/LOB agreement with derive/linescore, FINAL block + decisions gating, inning-end diagonals, skipped-half X, pinch-runner run on the origin card — pinned on the captured real feed |
