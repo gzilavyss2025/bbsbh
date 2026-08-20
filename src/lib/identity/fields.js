@@ -31,6 +31,7 @@
 // which vocabulary it is in, the same way the store files do.
 
 import { contrastRatio } from '../contrast.js'
+import { LOGO_VARIANTS } from '../logoCdn.js'
 
 // The one prefix, so a stray key in a Redis hash can never be mistaken for a
 // field id and vice versa.
@@ -104,6 +105,26 @@ const color = () => ({ kind: 'color' })
 const number = (min, max, step) => ({ kind: 'number', min, max, step })
 const pick = (values) => ({ kind: 'pick', values })
 
+// Which CDN mark a club's knockout conversion reads — 'base' plus the same
+// alternates logoCdn.js's LOGO_VARIANTS offers (some MiLB clubs' plain base
+// mark converts worse than an alternate on the same CDN). The one non-scalar
+// dimension in this catalog: `parts` is a shape-index map, not a single value,
+// so it gets its own kind rather than a color/number/pick.
+export const MONO_SOURCE_KEYS = ['base', ...LOGO_VARIANTS.map((v) => v.key)]
+
+// `monoLogoFingerprint`'s own output shape — see logoMono.js.
+const MONO_FINGERPRINT = /^[0-9]{1,7}:[0-9a-f]{1,8}$/
+const MONO_PART_INDEX = /^\d+$/
+const MONO_VERDICTS = new Set(['ink', 'knockout'])
+
+// `{ [partIndex]: 'ink' | 'knockout' }` — the SAME shape mono-ink.json's own
+// `parts` record holds and dev-data-stores.mjs's isMonoInkStore validates, so a
+// value that lands here is one the generator would also accept.
+function isMonoPinsMap(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  return Object.entries(value).every(([k, v]) => MONO_PART_INDEX.test(k) && MONO_VERDICTS.has(v))
+}
+
 // A raw string as it would LAND in the store, or undefined for "not a value for
 // this field". Never throws — a caller distinguishes the two by `undefined`,
 // exactly as sanitizeOverrides distinguishes a dropped id.
@@ -115,6 +136,16 @@ export function coerceIdentityValue(spec, raw) {
   if (spec.kind === 'url') return isHttpsUrl(value) ? value : undefined
   if (spec.kind === 'originY') return ORIGIN_Y.test(value) ? value : undefined
   if (spec.kind === 'pick') return spec.values.includes(value) ? value : undefined
+  if (spec.kind === 'fingerprint') return MONO_FINGERPRINT.test(value) ? value : undefined
+  if (spec.kind === 'monoPins') {
+    let parsed
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      return undefined
+    }
+    return isMonoPinsMap(parsed) ? parsed : undefined
+  }
   if (spec.kind === 'number') {
     const n = Number(value)
     if (!Number.isFinite(n)) return undefined
@@ -285,6 +316,37 @@ export const IDENTITY_DIMENSIONS = {
     keys: [...MLB_TREATMENTS, ...MILB_SIDES],
     leaf: { kind: 'url' },
     path: (teamId, key) => [teamId, key],
+  },
+
+  // The hand-picked correction to a club's knockout (one-color) mark — which
+  // SHAPES of its art are the mark and which are the paper it's drawn against
+  // (src/lib/logoMono.js, ADR-0031). Team-level, like `wpa`/`colors`: a club has
+  // one mark, not one per treatment.
+  //
+  // UNLIKE every other dimension here, this one does not change what a visitor
+  // sees on save. `public/data/logos/mono/{teamId}.svg` is a file
+  // scripts/gen-mono-logos.mjs precomputes; nothing renders this store directly.
+  // The generator fetches the effective (overridden) store on its own schedule
+  // (scripts/lib/mono-logo-art.mjs), so a save here lands on the mark at the
+  // NEXT run of that generator, not instantly — surfaced explicitly in the
+  // drawer rather than promised like every sibling field (issue #767, ADR-0054).
+  //
+  // `parts` is the pin map a shape-click editor writes (a JSON object, the one
+  // non-scalar value this catalog stores); `source` is which CDN mark those
+  // pins were picked against (LOGO_VARIANTS' escape hatch for MiLB clubs whose
+  // base art converts worse than an alternate); `art` is that art's
+  // fingerprint, carried so the generator can drop pins picked against art a
+  // club has since rebranded out of — the same staleness rule
+  // src/lib/monoInk.js already applies to the file-authored pin set.
+  mono: {
+    store: () => 'mono-ink',
+    teamLevel: true,
+    path: (teamId, field) => [teamId, field],
+    fields: {
+      parts: { kind: 'monoPins' },
+      source: pick(MONO_SOURCE_KEYS),
+      art: { kind: 'fingerprint' },
+    },
   },
 }
 

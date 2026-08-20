@@ -36,6 +36,7 @@ import {
 import { MLB_TEAM_COLORS } from '../../../../lib/brandColors.js'
 import { MILB_HEADER_COLOR_OVERRIDES, MILB_LOGO_POS_OVERRIDES } from '../../../../lib/milbColors.js'
 import { stampLogoTuningRecord } from '../../../../lib/stampLogoTuning.js'
+import { monoInkFor } from '../../../../lib/monoInk.js'
 import { BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
 import { parkWashColorOverride, parkWashIntensity, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
 import {
@@ -273,6 +274,46 @@ export function identityGroups(teamId, { isMilb, treatment }) {
     title: 'Win-probability band',
     fields: fieldsFrom('wpa', id, null, { bandColor: BAND_COLOR_OVERRIDES[id] }),
   })
+
+  // The knockout (one-color) mark's hand-picked shape corrections — not
+  // `fieldsFrom`, like the tile/logo groups above: `parts` is a shape-index
+  // map, not a scalar, so its landed text is a JSON string rather than
+  // `text()`'s `String(value)` (which would print "[object Object]").
+  // Not per-treatment: a club has one mark. Rendered with its own component
+  // (IdentityMonoField) rather than the generic Field boxes, same reason the
+  // logo group gets one — see IdentityDrawer.jsx.
+  {
+    const mono = monoInkFor(teamId)
+    const pinCount = mono?.parts ? Object.keys(mono.parts).length : 0
+    groups.push({
+      key: 'mono',
+      title: 'Knockout mark',
+      mono: true,
+      fields: [
+        {
+          id: identityFieldId('mono', id, 'parts'),
+          name: 'parts',
+          label: 'Pinned shapes',
+          spec: IDENTITY_DIMENSIONS.mono.fields.parts,
+          landed: pinCount ? JSON.stringify(mono.parts) : '',
+        },
+        {
+          id: identityFieldId('mono', id, 'source'),
+          name: 'source',
+          label: 'Source art',
+          spec: IDENTITY_DIMENSIONS.mono.fields.source,
+          landed: mono && mono.source !== 'base' ? mono.source : '',
+        },
+        {
+          id: identityFieldId('mono', id, 'art'),
+          name: 'art',
+          label: 'Art fingerprint',
+          spec: IDENTITY_DIMENSIONS.mono.fields.art,
+          landed: mono?.art ?? '',
+        },
+      ],
+    })
+  }
 
   // The slate card's hover/press wash over this club's HOME ballpark photo
   // (06a-gamecard-parkart.css, src/lib/ballpark/parkWash.js). Not `fieldsFrom`, like

@@ -66,6 +66,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | manager-page.test.js | 19 | src/api/managers.js, src/api/careerTimeline.js (fetchManagerPlaying) | The manager detail page's data layer — the /coaches jersey-number duplicates that faked "Shared season" rows, the header's role precedence, and a playing career that agrees with the clubs rail under it |
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
+| mono-logo-art.test.js | 4 | scripts/lib/mono-logo-art.mjs | The nightly generator's mono-ink override merge — degrades to the file alone on any fetch failure, an id for another store, or a malformed value (ADR-0054) |
 | mound-visit-charging.test.js | 7 | src/api/playbyplay.js | Mound-visit pip row |
 | mid-at-bat-batter-change.test.js | 5 | src/api/playbyplay.js (halfInningFeed, shared) | A batter replaced mid-count still owns the strikeout (Rule 9.15(b)) — the card, its name/headshot and its trimmed description follow the CREDITED batter, not `matchup.batter` |
 | multi-leg-advancement.test.js | 3 | src/api/playbyplay.js | Multi-runner-per-play bookkeeping |
