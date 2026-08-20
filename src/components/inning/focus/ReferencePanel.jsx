@@ -4,6 +4,8 @@ import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { rankNotes } from '../../../api/callout-notes.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
+import { useAsync } from '../../../hooks/useAsync.js'
+import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { ChevronLink } from '../../ui/ChevronLink.jsx'
@@ -264,6 +266,11 @@ function Section({
   // return — and inert outside a provider, so this panel still renders
   // standalone. It only ever SUBTRACTS from a list; no gate below moves.
   const ledger = useCalloutLedger()
+  // Same reason, same place: the matchup families' season rates, one
+  // league-wide static file whose request staticJson memoizes — so this panel
+  // and the Between Innings card asking independently cost one fetch between
+  // them (api/staticJson.js). Above the early return, like the ledger.
+  const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   if (tab === 'lineups' && showEntering) {
     return (
       <LineupSection
@@ -420,7 +427,7 @@ function Section({
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
-    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts })
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup })
     : []
   const notes = mergeNotes(preHalf, marginNotes, shownCounts)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)

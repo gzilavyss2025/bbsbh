@@ -380,6 +380,18 @@ don't run these by hand.
   warning first if spoke labels go missing. The raw fetch is never fatal; on
   failure the radar plots its shape with no labels. App reads it via
   `src/api/savantPercentiles.js`.
+- `gen-savant-matchup.mjs` → `public/data/savant-matchup.json` — season Statcast
+  RATES (chase, whiff, hard-hit, pull, ground-ball) for every qualified batter
+  AND pitcher, plus the league mean/SD each is scored against. A sibling of the
+  percentiles file rather than part of it: that board carries percentile ranks
+  for a fixed handful of metrics, and the matchup callouts need raw rates on
+  both sides of one axis, batted-ball direction, and the league SPREAD. Both
+  roles come off the same `custom` leaderboard, which returns identical columns
+  for `type=batter` and `type=pitcher` — the fact the whole family rests on. The
+  run warns if the two boards' league means drift apart, since that would mean
+  the comparison itself has broken. Handedness splits are NOT available: those
+  query params are accepted and silently ignored. MLB only. See
+  `docs/callouts.md`, "Matchup callouts".
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP
   role inference, league mean/SD baselines per role, and winning/losing-record

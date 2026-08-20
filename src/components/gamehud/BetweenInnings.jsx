@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildBetweenInnings } from '../../api/between-innings.js'
+import { fetchSavantMatchup } from '../../api/matchup/savant.js'
+import { useAsync } from '../../hooks/useAsync.js'
 import { halfIndex } from '../../api/select.js'
 import { useCalloutLedger } from '../../hooks/useCalloutLedger.js'
 import { Headshot } from '../player/Headshot.jsx'
@@ -17,6 +19,13 @@ export function BetweenInnings({
   feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
   battingSide, getDerived, phase,
 }) {
+  // The matchup families' season rates. Read HERE rather than threaded down from
+  // useGameData: it is one league-wide static file with no game input of its
+  // own, and staticJson memoizes the REQUEST, so this card and the Arms tab
+  // asking independently still costs exactly one fetch (api/staticJson.js).
+  // Prop-drilling it through GameView -> InningViewer -> ConsoleBand bought
+  // nothing and pushed InningViewer.jsx past its file-size budget.
+  const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   // This card stages the NEXT half (between-innings.js's nextHalfOf), which in
   // half-index terms is simply the one after this — so that is the half the
   // shown ledger reads and writes under. Reading a half the Arms tab has
@@ -33,9 +42,10 @@ export function BetweenInnings({
   const cards = useMemo(
     () => buildBetweenInnings({
       feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
-      shownCounts,
+      shownCounts, savantMatchup,
     }),
-    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts],
+    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts,
+      savantMatchup],
   )
   const [idx, setIdx] = useState(0)
   const advance = () => setIdx((i) => (i + 1) % (cards.length + 1))

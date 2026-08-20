@@ -449,7 +449,7 @@ const BUDGETS = {
   // 87 -> 89 for check-fixture-freshness.mjs and check-feed-shape-drift.mjs,
   // the e2e mock-fixture guards — flat lint/cron scripts, same shape as
   // every other check-*.mjs already counted here.
-  scripts: 92,
+  scripts: 93,
   // +1 for buildInfo.js — a two-line env-var reader in the same vein as the
   // existing clerkConfig.js, not a new subsystem, so it doesn't earn its own
   // subdirectory.
@@ -537,7 +537,7 @@ const BUDGETS = {
   // pages print has to live beside it to be testable at all
   // (test/salaries.test.js). Both landed the same day, each independently
   // bumping the budget from the pre-stack count of 20.
-  'scripts/lib': 22,
+  'scripts/lib': 23,
   // +1 for LogbookCollection.jsx — one open book's whole page (topbar, tray,
   // the passport book, the season grid), split out of LogbookPage.jsx when
   // the multi-book shelf pushed that file past check-file-size.mjs's 600-line
