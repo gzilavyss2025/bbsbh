@@ -60,12 +60,22 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
           on and what it stops short of claiming are the same thought, and they
           used to sit at opposite ends of the card with the three faces between
           them — the caveat in particular read as a stray line of copy that had
-          drifted under the grid. Stated together, before the evidence. */}
+          drifted under the grid. Stated together, before the evidence.
+
+          The terms print as their own chips rather than a middot-joined
+          string: "Pitch mix · Average velo" reads as one run-on phrase at a
+          glance, and a reader skimming past three faces and a match score
+          has no reason to stop and parse it. A chip is a term you can count
+          without reading — the eyebrow above still says what they're for. */}
       <div className="simlike__legend">
-        <p className="simlike__measure">
+        <div className="simlike__measure">
           <span className="simlike__measurelabel">Measured on</span>
-          <span className="simlike__measureterms">{measure.join(' · ')}</span>
-        </p>
+          <ul className="simlike__terms">
+            {measure.map((term) => (
+              <li key={term} className="simlike__term">{term}</li>
+            ))}
+          </ul>
+        </div>
         <p className="simlike__note">{note}</p>
       </div>
       <ul className="simlike__list">

@@ -68,7 +68,7 @@
 .simlike__measure {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 5px;
   margin: 0;
 }
 .simlike__measurelabel {
@@ -78,13 +78,33 @@
   letter-spacing: var(--ls-label);
   color: var(--accent-primary);
 }
-.simlike__measureterms {
+/* Each scored term as its own chip rather than a middot-joined phrase —
+   same pill shape .tierpill uses elsewhere (hairline border, pill radius,
+   bold caps) so a reader can count what went into the score without parsing
+   a sentence. Navy-on-card, not a tier ink: this legend ranks nothing, it
+   only names its inputs. */
+.simlike__terms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.simlike__term {
+  display: inline-block;
+  padding: 2px 8px;
+  border: var(--bw-hair) solid var(--accent-primary);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
   font-family: var(--font-display);
-  font-size: var(--fs-small);
-  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
   letter-spacing: var(--ls-caps);
-  line-height: var(--lh-snug);
-  color: var(--text-caption);
+  text-transform: uppercase;
+  line-height: var(--lh-solid);
+  color: var(--accent-primary);
+  white-space: nowrap;
 }
 
 .simlike__list {
@@ -224,17 +244,20 @@
   font-weight: var(--w-semibold);
   color: var(--text-muted);
 }
-/* The caveat, as the legend's second line. Ruled off from the terms above it
-   so the two read as a claim and its limit rather than one run-on caption, and
-   kept in the interface sans (not the reading serif) because it's app chrome
-   inside a band, not narrative copy. */
+/* The caveat, as the legend's second line — a claim and its limit, read
+   together rather than a ruled-off warning under it. Once the terms above
+   were their own chips, a second hairline rule made the caveat look like a
+   third disclaimer stacked under two others; italic is enough to mark it as
+   an aside on the chips rather than more of the same statement, the way a
+   sportswriter's parenthetical reads lighter than the sentence around it.
+   Kept in the interface sans (not the reading serif) because it's still app
+   chrome inside a band, not narrative copy. */
 .simlike__note {
   margin: 6px 0 0;
-  padding-top: 6px;
-  border-top: var(--bw-hair) solid var(--border-rule);
   font-family: var(--font-body);
   font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
+  font-weight: var(--w-regular);
+  font-style: italic;
   letter-spacing: var(--ls-text);
   line-height: var(--lh-snug);
   color: var(--text-muted);
@@ -248,11 +271,15 @@
   }
   .simlike__measure {
     flex-direction: row;
-    align-items: baseline;
+    align-items: center;
     gap: var(--space-3);
   }
   .simlike__measurelabel {
     flex: none;
+  }
+  .simlike__term {
+    padding: 3px 10px;
+    font-size: var(--fs-small);
   }
   .simlike__note {
     font-size: var(--fs-small);
