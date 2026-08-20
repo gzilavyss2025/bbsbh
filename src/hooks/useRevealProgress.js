@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { halfIndex } from '../api/select.js'
+import { selectCatchUpTarget } from '../api/liveEdge.js'
 import { computeDerivedByInning } from '../api/derive.js'
 import {
   parseRevealMark,
   parseAtBatMark,
   parseBoxRevealMark,
+  catchUpMarkIn,
   mergeMark,
+  offerCatchUp,
   unlockedInnings,
 } from './revealProgressCore.js'
 import {
@@ -79,6 +82,90 @@ export function clearRevealMarks() {
     }
   }
   return cleared.length
+}
+
+// This device's persisted mark for one game, read WITHOUT mounting the hook —
+// for a surface that has to answer "is there anything here to catch up on?"
+// before the innings viewer exists. Its one caller is GameView's lineup page
+// (ADR-0055), which compares it against the live half to decide whether the
+// "Catch up to live" button is worth drawing at all. Returns -1 for an unknown
+// game, an unset key, or a mangled value — the same fail-closed parse every
+// other reader of this key uses, and the same answer as "nothing revealed yet",
+// which makes the offer appear rather than disappear. That is the harmless
+// direction: the worst a spurious offer costs is a tap that lands the reader
+// where they already were.
+export function readRevealMarkFor(gamePk) {
+  return gamePk ? readRevealMark(`${REVEAL_KEY}${gamePk}`) : -1
+}
+
+// CATCH UP TO LIVE (ADR-0055): ratchet one game's mark to `idx` from outside
+// the hook, then let the innings viewer mount and read it.
+//
+// THE RATCHET IS NOT BYPASSED, which is the only thing that matters here. It
+// goes through the same `mergeMark` every other source does — a tap, another
+// tab's storage event, a signed-in device's cloud sync — so it cannot walk the
+// mark backward, and a hostile or stale stored value cannot make it do so
+// either (`parseRevealMark` collapses anything that is not a non-negative
+// integer to -1, and -1 loses the merge). What it skips is only React: there is
+// no mounted `useRevealProgress` to call `mergeRevealedThrough` on, because the
+// reader is still on the lineup page and the innings viewer mounts a moment
+// later and reads this key fresh.
+//
+// The synthetic `storage` echo is the same one `clearRevealMarks` above dispatches
+// and exists for the same reason: the browser fires `storage` only in OTHER
+// tabs, so without it a surface already mounted in THIS tab that listens on
+// this key (the scorecard, a second innings view) would keep rendering from
+// React state that is now behind the stored mark. A value, not a removal — so
+// every listener treats it as the ordinary forward merge it is, never as the
+// re-seal door a `newValue: null` means.
+//
+// Returns the mark now stored, or -1 if storage is unavailable (private mode),
+// where the catch-up simply does not persist and the navigation still happens.
+export function catchUpRevealTo(gamePk, idx) {
+  if (!gamePk) return -1
+  const key = `${REVEAL_KEY}${gamePk}`
+  try {
+    const next = catchUpMarkIn(window.localStorage, key, idx)
+    if (next < 0) return -1
+    try {
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue: String(next) }))
+    } catch {
+      // StorageEvent unavailable — a mounted page picks the mark up on its next
+      // mount instead, which is the same answer one navigation later.
+    }
+    return next
+  } catch {
+    return -1
+  }
+}
+
+// WHETHER "CATCH UP TO LIVE" IS WORTH OFFERING, and where it lands — the whole
+// decision behind the lineup page's second button (ADR-0055), kept here rather
+// than on that screen because both halves of it are about THIS key.
+//
+// It is the one bulk reveal in the scoring flow, so what it does is worth
+// stating exactly: the caller ratchets this game's mark to the half BEFORE the
+// one returned, then navigates to that half still SEALED. Every half up to
+// there opens; the half you arrive in you still step through at-bat by at-bat,
+// which is the whole point — you are picking the pencil up where the game is,
+// not being handed the game. Between halves the target is the half just
+// FINISHED, so the reader lands on the last real baseball that happened rather
+// than on a half with nothing in it yet (selectCatchUpTarget, api/liveEdge.js).
+//
+// OFFERED ONLY WHEN IT WOULD MOVE SOMETHING. A reader already at or past the
+// target gets null and the lineup page's ordinary "Innings ›" alone. So does a
+// game at the top of the 1st: the target IS half 0, there is nothing before it
+// to reveal, and `idx < 1` drops the offer rather than drawing a button that
+// would do nothing.
+//
+// THE RETURNED INNING IS NEVER RENDERED, deliberately, and the one caller must
+// keep it that way. A game in the 12th has to offer the same three words as a
+// game in the 2nd, or the button itself would announce that this one went to
+// extras before the reader ever tapped it — ADR-0008's protection spent by an
+// offer rather than by a choice.
+export function catchUpPlan(feed) {
+  const target = selectCatchUpTarget(feed)
+  return offerCatchUp(target, readRevealMarkFor(feed?.gamePk)) ? target : null
 }
 
 // (`revealMarkFor(gamePk)` used to live here — this device's persisted mark for

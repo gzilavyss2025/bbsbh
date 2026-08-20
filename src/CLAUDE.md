@@ -210,25 +210,25 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   guard both key on `kind === 'atbat'` and stay correct only if a placement doesn't
   answer to it. Never surface the placement above the seal — he is by rule the
   previous half's last batter.
-- **At-bat stepping**: a sealed half's floating-bar button splits into "Next at-bat"
-  / "Rest of half" choices, stepping `PlayByPlay`'s cards one plate appearance at a
-  time via a transient cursor (`atBatCountFor`, `useRevealProgress`) that always
-  collapses into a normal `revealTo` commit rather than becoming a second spoiler
-  boundary (ADR-0016). One step is an at-bat **plus the notes trailing it** — the
-  feed nests a stoppage at the head of the PA that follows it, so those notes are
-  the announcements made after the batter you just charted, not a preface to the
-  next one. The exception is a stoppage between pitches (`midAtBat`), which leads
-  its own at-bat's step. A step therefore ends mid-play, which is why the
-  pinch-runner pencil-in keys on its notice's index rather than the play's
-  `visible` gate — read ADR-0016 before touching `nextStepBoundary`. Either
-  choice's **tap target is the dead space around it**, not just the button:
-  `.pagenav` is click-through, so a missed thumb used to land on a player card
-  under the fade. `.pagenav--innings .btn::after`
-  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button — split
-  between the pair, Refresh excepted — with offsets measured from the button on
-  purpose; anchoring them to the bar re-collapses the area mid-tap under
-  `.btn:active`'s transform. `e2e/reveal-hit-area.spec.js` pins that, and what must
-  stay click-through, at BOTH bar layouts.
+- **At-bat stepping**: a sealed half's floating-bar button splits into "Next at-bat" /
+  "Rest of half", stepping `PlayByPlay`'s cards one plate appearance at a time via a
+  transient cursor (`atBatCountFor`, `useRevealProgress`) that collapses into a normal
+  `revealTo` commit, not a second spoiler boundary (ADR-0016) — but NOT while the half
+  is still being PLAYED (ADR-0055), where the entry list is only the half SO FAR:
+  `stepCommitReady` withholds the commit, the bar drops "Rest of half", and the live edge
+  reads "Caught up" (`selectLiveHalf`, `api/liveEdge.js`). The lineup page's "Catch up to
+  live" (`catchUpPlan`) is its sibling: it ratchets to the half BEFORE the live one and
+  lands there sealed. One step is an at-bat **plus the notes trailing it** — the feed
+  nests a stoppage at the head of the PA that follows it, so they announce what followed
+  the batter you just charted, not a preface to the next. The exception is a stoppage
+  between pitches (`midAtBat`), which leads its own at-bat's step. A step therefore ends
+  mid-play, which is why the pinch-runner pencil-in keys on its notice's index rather
+  than the play's `visible` gate — read ADR-0016 before touching `nextStepBoundary`.
+  Either choice's **tap target is the dead space around it**: `.pagenav` is click-through,
+  so a missed thumb landed on the card under the fade. `.pagenav--innings .btn::after`
+  (`styles/24-floating-nav-and-hud.css`) claims the bar around each button — split between
+  the pair, Refresh excepted — offsets from the button, not the bar (else the area
+  re-collapses mid-tap under `.btn:active`). `e2e/reveal-hit-area.spec.js` pins it.
 - **The console** (ADR-0043): anchored scorebug band, wrapping trail, tabbed
   reference, `RollingLine` demoted but NEVER removed — every half, live or
   historical. Only the play-by-play varies: **windowed** (one at-bat) vs.
