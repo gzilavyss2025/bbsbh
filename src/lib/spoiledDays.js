@@ -23,6 +23,34 @@
 
 export const SPOILED_DAYS_KEY = 'bbsbh:spoiledDays'
 
+// ---------------------------------------------------------------------------
+// WHOSE CONSENT IS THIS? — the shared-device leak
+// ---------------------------------------------------------------------------
+// The day list is keyed by nothing but itself — no account — and nothing cleared
+// it on sign-out. So on a family iPad: A consents to spoil a day, the list syncs
+// down and stays after A signs out (local-first, by design); B signs in, and
+// the slate renders that whole day of baseball PLAINLY for B, while
+// `dayStatesToPublish` reports each of A's days as missing from B's account and
+// publishes them there.
+//
+// Consent is the one thing in this app that must never be inherited. ADR-0026's
+// whole argument for the pass is that it is opt-in and given by the person
+// looking at the screen; a consent that arrives because someone else used this
+// browser is not consent at all.
+//
+// Nulling the sync component's in-memory baseline on sign-out does not prevent
+// it — that guards a STALE baseline, while here the baseline is perfectly good
+// and belongs to the new user. So the device records which account the list was
+// last held for, and `mergeStrategyFor` (src/lib/account/preferences.js) reads
+// it back. Its own key, not a shared one: the channels sync independently, and a
+// device that reached one endpoint but not another must not be recorded as
+// holding both.
+//
+// `adopt` here is simply the empty list — a consent B has not given. The
+// ordinary pull then merges in the days B DID consent to on another device, so
+// nothing of B's own is lost by starting from nothing.
+export const SPOILED_DAYS_OWNER_KEY = 'bbsbh:spoiledDaysOwner'
+
 // A generous ceiling on how many days we keep. Each entry is ~12 bytes, so even
 // the cap is a rounding error in localStorage; it exists so a runaway writer can
 // never grow the value without bound. Two full seasons of daily use.

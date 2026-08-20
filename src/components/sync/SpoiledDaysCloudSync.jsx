@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
-import { useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
+import { readSpoiledDaysOwner, useScoresUnlocked } from '../../hooks/useScoresUnlocked.js'
 import { dayStatesToPublish } from '../../lib/spoiledDays.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
@@ -58,8 +59,19 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // localStorage authoritative. They only stop it being SILENT — which is how
 // ADR-0022's total production failure hid for weeks, and what My Tally's sync
 // receipt exists to make visible.
+//
+// ---------------------------------------------------------------------------
+// WHOSE CONSENT IS THIS? — the shared-device guard (SPOILED_DAYS_OWNER_KEY)
+// ---------------------------------------------------------------------------
+// The list is keyed by nothing but itself, so on a shared
+// device it belongs to whoever last used the browser rather than to whoever is
+// signed in — and a consent that arrives because someone else used this browser
+// is not a consent at all. `OwnerGuards` settles that on the sign-in
+// transition, ahead of this component's pull, because the slate paints from the
+// local list before a request can return. The publish effect below still checks,
+// as a second line: the two are separate mounts with no ordering guarantee.
 export function SpoiledDaysCloudSync() {
-  const { isSignedIn, getToken } = useAuth()
+  const { isSignedIn, userId, getToken } = useAuth()
   const { spoiledDays, mergeRemoteDays } = useScoresUnlocked()
   const report = useSyncReport()
 
@@ -130,6 +142,11 @@ export function SpoiledDaysCloudSync() {
     // compare against. The pull above supplies one and this effect re-runs.
     if (known.current === null) return
 
+    // An adopted list is not this device's to publish. The owner tag is written
+    // by the guard on sign-in, so this only holds for the window before it
+    // lands — after which the list itself is empty anyway.
+    if (mergeStrategyFor(readSpoiledDaysOwner(), userId) === 'adopt') return
+
     const changes = dayStatesToPublish(spoiledDays, known.current, previous)
     if (changes.length === 0) return
 
@@ -167,7 +184,7 @@ export function SpoiledDaysCloudSync() {
         report('spoiledDays', 'error', { reason: 'network' })
       }
     })()
-  }, [isSignedIn, getToken, spoiledDays, report])
+  }, [isSignedIn, userId, getToken, spoiledDays, report])
 
   return null
 }

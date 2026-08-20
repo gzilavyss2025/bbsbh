@@ -6,11 +6,15 @@
 // the reason preferencesStorage.js and localData.js are split the same way: the
 // storage object is passed IN, every access is individually guarded, and no
 // path here throws, so the rules can be pinned by the unit suite
-// (test/box-reveal-owner.test.js) instead of inferred from an effect.
+// (test/box-reveal-owner.test.js) instead of inferred from an effect. The
+// storage mechanics are deviceOwner.js's, shared with every other channel's
+// owner tag; what is here is what is true of THIS channel.
 //
 // WHAT IS NOT IN HERE: any value. This module reads key NAMES and removes them.
 // The bit itself says only THAT a seal was lifted, never how far or on what
 // (ADR-0049), and nothing here even parses it.
+
+import { clearKeysWithPrefixIn, readOwnerIn, writeOwnerIn } from './deviceOwner.js'
 
 // One key per game whose box score has been opened, `bbsbh:boxreveal:{gamePk}`.
 // The source of truth for the prefix — useRevealProgress.js imports it rather
@@ -39,44 +43,12 @@ export const BOX_REVEAL_PREFIX = 'bbsbh:boxreveal:'
 // not be recorded as holding this user's marks.
 export const BOX_REVEAL_OWNER_KEY = 'bbsbh:boxrevealOwner'
 
-function keyAt(storage, i) {
-  try {
-    return storage.key(i)
-  } catch {
-    return null
-  }
-}
-
-// Every box-reveal key currently in this storage, or [] if it cannot be read at
-// all. Snapshotted into an array before anything mutates it — removing while
-// iterating `storage.key(i)` re-indexes the remaining keys underneath you and
-// silently skips every other one. That is localData.js's lesson, restated here
-// because this module deliberately does not import it.
-function boxRevealKeysIn(storage) {
-  if (!storage) return []
-  let length = 0
-  try {
-    length = Number(storage.length) || 0
-  } catch {
-    return []
-  }
-  const out = []
-  for (let i = 0; i < length; i += 1) {
-    const key = keyAt(storage, i)
-    if (typeof key === 'string' && key.startsWith(BOX_REVEAL_PREFIX)) out.push(key)
-  }
-  return out
-}
-
 // The 'adopt' half of the shared-device guard: this device's box-reveal bits
-// are not this user's, so they come off. Returns the keys actually removed, so
-// the caller can announce each one to whatever is mounted (useRevealProgress's
-// `clearBoxRevealMarks` re-seals an open page with it) without re-deriving the
-// list.
-//
-// A key that refuses to be removed is skipped rather than thrown over, the same
-// posture clearTallyDataIn takes: a partial clear that reports what it did is
-// honest, and an exception here would abandon the rest.
+// are not this reader's, so they come off. Returns the keys actually removed,
+// so the caller can announce each one to whatever is mounted
+// (useRevealProgress's `clearBoxRevealMarks` re-seals an open page with it).
+// The sweep itself — and why it snapshots the key list first — is
+// deviceOwner.js's.
 //
 // Deliberately a CLEAR and not "ignore the local bit while adopted". Ignoring
 // would leave A's bits on disk to resurface if A signs back in, which is
@@ -84,17 +56,7 @@ function boxRevealKeysIn(storage) {
 // about the owner tag, and a reader that forgets shows a score. Removing them
 // leaves exactly one rule in one place, and the pull re-establishes B's own.
 export function clearBoxRevealMarksIn(storage) {
-  const keys = boxRevealKeysIn(storage)
-  const cleared = []
-  for (const key of keys) {
-    try {
-      storage.removeItem(key)
-      cleared.push(key)
-    } catch {
-      // Storage refused this key. Keep going — the rest can still go.
-    }
-  }
-  return cleared
+  return clearKeysWithPrefixIn(storage, BOX_REVEAL_PREFIX)
 }
 
 // The account this device's box-reveal bits were last recorded against. Empty
@@ -102,19 +64,9 @@ export function clearBoxRevealMarksIn(storage) {
 // marks and backfills rather than discards — a reader who opened a box score
 // before signing in keeps it open afterwards.
 export function readBoxRevealOwnerIn(storage) {
-  try {
-    return storage?.getItem(BOX_REVEAL_OWNER_KEY) || ''
-  } catch {
-    return ''
-  }
+  return readOwnerIn(storage, BOX_REVEAL_OWNER_KEY)
 }
 
 export function writeBoxRevealOwnerIn(storage, userId) {
-  try {
-    if (!userId) storage?.removeItem(BOX_REVEAL_OWNER_KEY)
-    else storage?.setItem(BOX_REVEAL_OWNER_KEY, String(userId))
-    return true
-  } catch {
-    return false
-  }
+  return writeOwnerIn(storage, BOX_REVEAL_OWNER_KEY, userId)
 }

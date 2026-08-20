@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { gameDayAt, isUnlocked, msUntilReset, nextResetAt } from '../lib/scoresUnlocked.js'
+import { readOwnerIn, writeOwnerIn } from '../lib/account/deviceOwner.js'
 import {
   SPOILED_DAYS_KEY,
+  SPOILED_DAYS_OWNER_KEY,
   addSpoiledDay,
   applyRemoteStates,
   isDaySpoiled,
@@ -81,6 +83,37 @@ function notifyLocalChange(key) {
     // StorageEvent unavailable (very old browsers) — cross-instance updates
     // degrade to next-render/next-load. Nothing is lost, only immediacy.
   }
+}
+
+// The account this device's consent list was last held for, and the clear the
+// shared-device guard needs on it (OwnerGuards.jsx). The leak these
+// close is spoiledDays.js's own header; these three are the storage I/O.
+//
+// `clearSpoiledDays` writes the EMPTY list rather than removing the key, and
+// then announces it on the key every mounted `useScoresUnlocked` is already
+// listening to — so the slate re-seals in this tab, not just the next one. It
+// deliberately does not touch `bbsbh:scoresUnlocked`: an active pass is this
+// device's own running session, never synced and never anybody's account
+// (see preferences.js's "what is deliberately not in here").
+export function readSpoiledDaysOwner() {
+  try {
+    return readOwnerIn(window.localStorage, SPOILED_DAYS_OWNER_KEY)
+  } catch {
+    return ''
+  }
+}
+
+export function writeSpoiledDaysOwner(userId) {
+  try {
+    return writeOwnerIn(window.localStorage, SPOILED_DAYS_OWNER_KEY, userId)
+  } catch {
+    return false
+  }
+}
+
+export function clearSpoiledDays() {
+  writeKey(SPOILED_DAYS_KEY, serializeSpoiledDays([]))
+  notifyLocalChange(SPOILED_DAYS_KEY)
 }
 
 export function useScoresUnlocked() {

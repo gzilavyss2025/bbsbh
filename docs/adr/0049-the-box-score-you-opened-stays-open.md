@@ -223,7 +223,7 @@ re-establishes B's.
 mounts inside the box score and its pull is a network round trip, while
 `useBoxScoreReveal` reads the bit synchronously during that screen's first
 render — so a guard living in the pull would decide whether B may see the page
-only after it had painted. `BoxRevealOwnerGuard` runs on the sign-in transition
+only after it had painted. `OwnerGuards` runs on the sign-in transition
 instead, before any scoring surface is mounted in the ordinary flow.
 `BoxRevealCloudSync`'s publish effect still checks the tag as a second line:
 the two are separate mounts with no ordering guarantee between them.
