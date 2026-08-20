@@ -113,21 +113,37 @@ function takeStories(items, n) {
 // last one whose bottom clears the budget.
 const MIN_ROWS = 3
 const MAX_ROWS = 8
-// What renders before measurement — and what a browser with no layout to
-// measure keeps. Deliberately mid-range rather than MAX_ROWS: too few is a
-// short card for one frame, too many is a jump.
+// The fallback a browser with no layout to measure keeps. Deliberately
+// mid-range rather than MAX_ROWS: on the one surface that can't measure, too
+// few is a stub and too many is the card taking over the slate.
 const DEFAULT_ROWS = 5
 // Room left below the card for the first game card to show through. A card
 // that filled the viewport exactly would read as the page, which this is not.
 const PEEK_PX = 108
 
+// A measurement can only see rows that are IN the list, and the trim takes the
+// ones past the fit back out again — so measuring the list as it stands can
+// only ever shrink the card, never grow it back. Left that way the fit ratchets
+// down from its starting count and stops: a 1180px-tall iPad measured a 868px
+// budget and then used 427px of it, and MAX_ROWS was unreachable at any size.
+//
+// So every measurement runs against the FULL candidate list. `probing` renders
+// MAX_ROWS rows for exactly the frame the measurement needs, and the layout
+// effect trims them back inside that same frame — the long list is measured,
+// never painted (`.wirecard__list` is `overflow: hidden`, so even the clamped
+// frame after a resize cannot show one).
 function useFittedRows(listRef, ready) {
   const [budget, setBudget] = useState(null)
   const [rows, setRows] = useState(DEFAULT_ROWS)
+  const [probing, setProbing] = useState(true)
 
   const measure = useCallback(() => {
     const list = listRef.current
-    if (!list || typeof window === 'undefined') return
+    if (!list || typeof window === 'undefined') {
+      // Nothing to measure — keep DEFAULT_ROWS rather than the probe's count.
+      setProbing(false)
+      return
+    }
     const top = list.getBoundingClientRect().top
     const space = window.innerHeight - top - PEEK_PX
     setBudget(space)
@@ -138,23 +154,27 @@ function useFittedRows(listRef, ready) {
       if (child.dataset.moveRow != null) fits += 1
     }
     setRows(Math.min(MAX_ROWS, Math.max(MIN_ROWS, fits)))
+    setProbing(false)
   }, [listRef])
 
-  // Layout effect, not an effect: the measurement runs before paint, so the
-  // clamp below is already on the list the first time it is drawn and an
-  // over-long list is never briefly visible.
+  // Layout effect, not an effect: the measurement runs before paint, so both
+  // the clamp and the trim are already on the list the first time it is drawn
+  // and an over-long list is never briefly visible.
   useLayoutEffect(() => {
-    if (!ready) return
+    if (!ready || !probing) return
     measure()
-  }, [measure, ready])
+  }, [measure, probing, ready])
 
+  // A resize re-opens the probe rather than measuring in place, for the same
+  // reason: a window that got taller has to be able to give rows back.
   useEffect(() => {
     if (!ready || typeof window === 'undefined') return
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [measure, ready])
+    const reprobe = () => setProbing(true)
+    window.addEventListener('resize', reprobe)
+    return () => window.removeEventListener('resize', reprobe)
+  }, [ready])
 
-  return { budget, rows }
+  return { budget, rows: probing ? MAX_ROWS : rows }
 }
 
 // ---------------------------------------------------------------------------
