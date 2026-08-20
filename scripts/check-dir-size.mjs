@@ -328,7 +328,18 @@ const BUDGETS = {
   // count (93), the same harmless collision 62-/65-/69- already carry;
   // neither is @imported by index.css in a way that depends on the other's
   // position.
-  'src/styles': 96,
+  //
+  // 96 -> 97 for `04a-wire-dock.css`: the phone's bottom-anchored presentation
+  // of the league roster-move feed (components/transactions/WireDock.jsx). A
+  // LETTERED sibling of `04-site-bar.css` rather than the next free integer,
+  // and here the position is genuinely load-bearing: the dock's rows are drawn
+  // by the same MoveRow.jsx and wear the same `.wire__*` classes 04 declares,
+  // so this file's scoped overrides have to cascade AFTER them. Its one
+  // alternative was growing 04-site-bar.css, which sits on exactly
+  // check-file-size.mjs's 600-line ceiling — and that guard's remedy is to
+  // split, not to raise. Same trade the 21/21a, 26/26a and 48/48-stamp-strip
+  // entries above record.
+  'src/styles': 97,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
