@@ -6,10 +6,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { mergeStrategyFor } from '../src/lib/account/preferences.js'
 import {
   COVER_COLORS,
   COVER_MARKS,
   DEFAULT_BOOK_ID,
+  adoptRemoteBooks,
   MAX_BOOKS,
   MAX_BOOK_SUBTITLE_LENGTH,
   MAX_BOOK_TITLE_LENGTH,
@@ -527,4 +529,72 @@ test('a remote re-cover merges, and a tombstone still outranks it on updatedAt',
 test('serializeBooks round-trips the mark and board colour', () => {
   const map = createBook({}, { id: 'p', coverMark: 'milb', coverColor: 'kraft', now: 1000 })
   assert.deepEqual(parseBooks(serializeBooks(map)), map)
+})
+
+// ---------------------------------------------------------------------------
+// THE SHARED-DEVICE LEAK (BOOKS_OWNER_KEY).
+//
+// A local-first shelf plus an account leaks on a family iPad. User A signs in,
+// their books sync down into `bbsbh:books`, A signs out, B signs in. The device
+// still holds A's books as ordinary local state, so `booksToPublish` reports
+// every one of them "missing" from B's remote and pushes A's shelf into B's
+// ACCOUNT — a library one person built appearing in another person's account,
+// on their own device, with no action taken.
+//
+// Nulling the in-memory baseline on sign-out does not stop it: the next pull
+// hands over a perfectly good baseline that happens to belong to the new user.
+// Only knowing WHOSE shelf this is stops it.
+// ---------------------------------------------------------------------------
+test('a shelf belonging to another account is adopted away, never published', () => {
+  const a = {
+    default: { id: 'default', state: 'on', title: '', subtitle: '', coverTeamId: null, coverMark: 'team', coverColor: null, createdAt: 1000, updatedAt: 1000 },
+    trip: { id: 'trip', state: 'on', title: 'Road trip', subtitle: '', coverTeamId: 158, coverMark: 'team', coverColor: null, createdAt: 2000, updatedAt: 2000 },
+  }
+
+  // B signs in on the same device. B's account holds one different book.
+  const bRemote = {
+    default: { id: 'default', state: 'on', title: 'Mine', subtitle: '', coverTeamId: 147, coverMark: 'team', coverColor: null, createdAt: 9000, updatedAt: 9000 },
+  }
+
+  // The leak, stated as the assertion that used to fail: merging keeps A's
+  // named book AND offers it up as B's to publish.
+  const merged = applyRemoteBooks(a, bRemote)
+  assert.ok(
+    booksToPublish(merged, bRemote).includes('trip'),
+    'the merge path really does offer A’s book for publish',
+  )
+
+  // Adopting is what B's sign-in must do instead.
+  const adopted = adoptRemoteBooks(bRemote)
+  assert.deepEqual(Object.keys(adopted), ['default'], 'B gets B’s shelf and nothing else')
+  assert.equal(bookFor(adopted, 'trip'), null, 'A’s book must not sit on B’s shelf')
+  assert.equal(bookFor(adopted, 'default').title, 'Mine', 'and B’s own cover survives intact')
+  assert.deepEqual(booksToPublish(adopted, bRemote), [], 'nothing of A’s travels into B’s account')
+})
+
+// Adopting an EMPTY remote is the case that could break the shelf's own
+// invariant — `useBooks` guarantees at least one live book and there is no
+// zero-books empty state downstream. The pure layer deliberately does not
+// invent one; the hook's `ensureDefaultBook` does, and that split is what this
+// pins so a later refactor cannot quietly move the responsibility.
+test('adopting an empty remote yields an empty map, never an invented book', () => {
+  const a = { default: { id: 'default', state: 'on', title: 'A', subtitle: '', coverTeamId: null, coverMark: 'team', coverColor: null, createdAt: 1, updatedAt: 1 } }
+  const adopted = adoptRemoteBooks({})
+  assert.deepEqual(adopted, {}, 'nothing of A’s survives')
+  assert.equal(bookFor(adopted, 'default'), null)
+  // And the guard is not fooled by junk in place of a map.
+  assert.deepEqual(adoptRemoteBooks(null), {})
+  assert.deepEqual(adoptRemoteBooks([1, 2]), {})
+  assert.deepEqual(adoptRemoteBooks('nope'), {})
+  assert.equal(bookFor(a, 'default').title, 'A', 'the input is left alone')
+})
+
+// The guard must not fire on the ordinary paths, or it would discard a guest's
+// own shelf on their first sign-in — the case the owner tag exists to carry UP,
+// not throw away.
+test('the books owner tag adopts only for a different account', () => {
+  assert.equal(mergeStrategyFor('', 'user_a'), 'backfill', 'a guest’s own books backfill into their new account')
+  assert.equal(mergeStrategyFor('user_a', 'user_a'), 'backfill', 'the same user on the same device is ordinary')
+  assert.equal(mergeStrategyFor('user_a', 'user_b'), 'adopt', 'a different account adopts')
+  assert.equal(mergeStrategyFor('user_a', null), 'none', 'signed out reconciles nothing')
 })

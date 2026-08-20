@@ -179,3 +179,64 @@ lifted.
   reload, the pass and the stamp write nothing, the innings viewer still seals,
   a mangled value fails closed. Unit cases in `test/reveal-progress-core.test.js`
   (the parse) and `test/api-handlers.test.js` (the write plan).
+
+## Amendment (2026-08-19) — the bit needs an owner, and adopting it means removing it
+
+**Status:** accepted.
+
+The decision above gives each game one persisted bit, keyed by gamePk and
+nothing else. "Nothing else" included the account, and nothing cleared the bit
+on sign-out. On a device two people share, that is a spoiler:
+
+1. A signs in and opens a box score. `bbsbh:boxreveal:{gamePk}` is written
+   locally and POSTed to A's account.
+2. A signs out. The bit stays — local-first, by design.
+3. B signs in and opens that game. `opened` is already true from local storage,
+   so the box score renders **open** for B, and the publish effect posts the bit
+   into **B's** account.
+
+The other three channels in this family leak *state*. This one leaks a **render
+override** — the whole point of the bit is that the box score renders unsealed
+with no reveal mark — so B is not inheriting a preference. B is shown a score
+they never asked to see, on a scoring surface. And because `mergeOpened` is
+deliberately one-directional, B cannot get the seal back by signing out again.
+
+The server key (`revealbox:{userId}:{gamePk}`) was always per-user. The leak was
+entirely on the device.
+
+**The bit now carries an owner tag**, `bbsbh:boxrevealOwner` — its own key, not
+shared with the reveal mark, the stamps or the preferences, because the channels
+sync independently and a device that reached one endpoint but not another must
+not be recorded as holding both. `mergeStrategyFor` (src/lib/account/preferences.js)
+is unchanged and generic; the rules for this channel are the React-free
+`src/lib/account/boxReveal.js`.
+
+**`adopt` here means CLEARING the local `bbsbh:boxreveal:*` keys**, not ignoring
+them. The alternative — leaving A's bits on disk and ignoring them while
+adopted — is arguably more correct, since A signing back in would find their
+pages as they left them. It was rejected because it puts the owner tag in the
+path of every *reader* of the bit, and a reader that forgets to consult it shows
+a score. Removing the bits leaves one rule in one place; B's own pull
+re-establishes B's.
+
+**The guard is app-wide, not part of `BoxRevealCloudSync`.** That component
+mounts inside the box score and its pull is a network round trip, while
+`useBoxScoreReveal` reads the bit synchronously during that screen's first
+render — so a guard living in the pull would decide whether B may see the page
+only after it had painted. `OwnerGuards` runs on the sign-in transition
+instead, before any scoring surface is mounted in the ordinary flow.
+`BoxRevealCloudSync`'s publish effect still checks the tag as a second line:
+the two are separate mounts with no ordering guarantee between them.
+
+**The latch gained exactly one door back**, and it is the key being *removed*.
+No stale value can close a page through it, because a removal is not a value:
+nothing writes anything to this key but `'1'`, so its absence can only mean one
+of the two things that take it away deliberately — "erase my Tally data", and
+this guard. Both must re-seal a page that is already open. `clearBoxRevealMarks`
+announces each removal as a `storage` event so a mounted page hears it in the
+tab that made the change, the same echo `useStamps` uses.
+
+- Pinned by `test/box-reveal-owner.test.js`: the sweep takes every box-reveal
+  key and no other channel's, the prefix is exact, a blocked or hostile storage
+  answers "nothing" rather than throwing, the owner tag round-trips, and the
+  guard adopts only for a different account.

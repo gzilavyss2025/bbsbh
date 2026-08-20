@@ -316,3 +316,44 @@ live pass, ADR text above): consent lives on the slate, so the off switch does t
 - **No marker for a locked-in day.** A past day you spoiled renders open with
   nothing indicating that you're the reason. Correct (there's nothing to switch
   off) but a quiet note on that day's slate might read better than silence.
+
+## Amendment (2026-08-19) — consent needs an owner, and it is the one thing that must not be inherited
+
+**Status:** accepted.
+
+`bbsbh:spoiledDays` was keyed by nothing but itself — no account — and nothing
+cleared it on sign-out. So on a shared device, A consents to spoil a day; A signs
+out and the list stays, local-first by design; B signs in, and the slate renders
+that whole day of baseball plainly for B, while `dayStatesToPublish` reports each
+of A's days as missing from B's account and publishes them there.
+
+This one is not account hygiene, and it is not quite the same defect as the other
+three either. The whole argument for this pass is that it is **opt-in, given by
+the person looking at the screen**. A day that renders plainly because someone
+else used this browser is not a consent at all; it is the seal simply being off.
+
+**The list now carries an owner tag**, `bbsbh:spoiledDaysOwner` — its own key, for
+the reason every channel here keeps its own. `adopt` is simply the empty list: a
+consent B has not given. The pull that follows merges in the days B *did* consent
+to on another device, so starting from nothing costs B nothing of their own.
+
+**The guard (`OwnerGuards`) is separate from `SpoiledDaysCloudSync`,
+which is already app-wide.** The adopt cannot live in that component's pull,
+because the pull is a network round trip and the slate paints from the local list
+immediately — B would see A's consented day plainly for as long as the request
+takes. The guard runs on the sign-in transition, with no request in front of it.
+The publish effect still checks the tag as a second line.
+
+**It clears only the consent list, never the pass.** `bbsbh:scoresUnlocked` is
+this device's own running session — never synced, never anyone's account, per the
+"what is deliberately not in here" note in `src/lib/account/preferences.js` — and
+it expires at 8am on its own.
+
+**Nulling the in-memory baseline on sign-out never prevented any of this**, and
+the comment in this component saying it did was the same mistaken reasoning found
+in every channel: it guards a *stale* baseline, while the baseline after a
+sign-in is perfectly good and belongs to the new user. Only knowing whose list
+this is stops it.
+
+- Pinned by `test/reveal-owner.test.js`, together with ADR-0022's half of the
+  same fix.

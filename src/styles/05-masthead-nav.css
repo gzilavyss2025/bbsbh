@@ -670,8 +670,10 @@
 
 /* The Team Identity Lab's per-dimension descriptions (LabShell's shared hint
    plus the Jersey Audit tab's own summary paragraph) are several sentences of
-   explanatory copy, not app chrome — shouted caps make them harder to scan. */
-.screen--identitylab .hint {
+   explanatory copy, not app chrome — shouted caps make them harder to scan.
+   `#root` prefix so the rule out-ranks `#root *` (01-base.css) — without it the
+   exemption loses the cascade and the paragraphs shout anyway. */
+#root .screen--identitylab .hint {
   text-transform: none; /* caps-exempt: identity lab hint paragraphs read as natural sentences */
 }
 

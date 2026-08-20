@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
+import { readBoxRevealOwner } from '../../hooks/useRevealProgress.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
@@ -27,6 +29,16 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // merge on top. A signed-out reader never calls the endpoint at all, and a
 // deploy with no Clerk never loads this file.
 //
+// WHOSE BIT IS THIS. The bit is keyed by gamePk and nothing else, so on a
+// shared device it belongs to whoever last used the browser rather than to
+// whoever is signed in. `OwnerGuards` is what settles that, app-wide on
+// the sign-in transition — it has to be app-wide, because this component's pull
+// is a network round trip and the box score paints from the local bit before it
+// returns. The publish effect below still checks, as a second line: the guard
+// and this component are separate mounts with no ordering guarantee between
+// them, and posting A's bit into B's account is not a mistake worth leaving to
+// mount order.
+//
 // BOTH DIRECTIONS FAIL CLOSED, which is the whole spoiler footing of the wire:
 // a pull that errors, times out, or answers `boxRevealed: false` leaves the
 // seal exactly where it is — an ordinary seal on an ordinary game, one tap from
@@ -34,7 +46,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // is a latch (useRevealProgress.js), so the only thing this component can do to
 // the UI is open a box score its owner already opened somewhere else.
 export function BoxRevealCloudSync({ gamePk, opened, mergeOpened }) {
-  const { isSignedIn, getToken } = useAuth()
+  const { isSignedIn, userId, getToken } = useAuth()
   const report = useSyncReport()
   // Whether this mount has already pushed the bit. There is only ever one value
   // to push, so unlike RevealCloudSync's high-water `lastPosted` this is a
@@ -81,6 +93,10 @@ export function BoxRevealCloudSync({ gamePk, opened, mergeOpened }) {
 
   useEffect(() => {
     if (!isSignedIn || !gamePk || !opened || posted.current) return
+    // An adopted bit is not this device's to publish. The owner tag is written
+    // by the app-wide guard on sign-in, so this only holds for the window
+    // before that lands — after which the bit itself is gone anyway.
+    if (mergeStrategyFor(readBoxRevealOwner(), userId) === 'adopt') return
     let cancelled = false
     ;(async () => {
       try {
@@ -109,7 +125,7 @@ export function BoxRevealCloudSync({ gamePk, opened, mergeOpened }) {
     return () => {
       cancelled = true
     }
-  }, [isSignedIn, gamePk, opened, getToken, report])
+  }, [isSignedIn, userId, gamePk, opened, getToken, report])
 
   return null
 }

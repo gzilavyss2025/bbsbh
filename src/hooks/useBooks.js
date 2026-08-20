@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   BOOKS_KEY,
+  BOOKS_OWNER_KEY,
   DEFAULT_BOOK_ID,
+  adoptRemoteBooks,
   applyRemoteBooks,
   createBook as createBookRecord,
   genBookId,
@@ -74,18 +76,49 @@ function notifyLocalChange() {
 // derived value couldn't cover. Idempotent, so even React StrictMode's
 // double-invoke of initializers costs nothing beyond one harmless extra
 // localStorage write.
-function readBooksMigrated() {
-  const current = readBooks()
-  if (current[DEFAULT_BOOK_ID]?.state === 'on') return current
-  const next = createBookRecord(current, {
+// The invariant itself, as a pure transform: a map with a live `default` book
+// is returned unchanged (same reference, so `commit` can skip a write), and one
+// without gets it synthesized. Split out of readBooksMigrated so the adopt path
+// below can reuse the SAME rule rather than restate it — an adopted empty shelf
+// must land on the same invariant a fresh install does.
+function ensureDefaultBook(map) {
+  if (map[DEFAULT_BOOK_ID]?.state === 'on') return map
+  return createBookRecord(map, {
     id: DEFAULT_BOOK_ID,
     title: '',
     subtitle: '',
     coverTeamId: null,
     now: Date.now(),
   })
+}
+
+function readBooksMigrated() {
+  const current = readBooks()
+  const next = ensureDefaultBook(current)
   if (next !== current) writeBooks(next)
   return next
+}
+
+// The account this device's shelf was last merged from — see BOOKS_OWNER_KEY
+// in src/lib/books.js for the leak it exists to close. Empty string for
+// "nobody's yet", which `mergeStrategyFor` reads as a guest's own shelf and
+// backfills rather than discards.
+export function readBooksOwner() {
+  try {
+    return window.localStorage?.getItem(BOOKS_OWNER_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+export function writeBooksOwner(userId) {
+  try {
+    if (!userId) window.localStorage?.removeItem(BOOKS_OWNER_KEY)
+    else window.localStorage?.setItem(BOOKS_OWNER_KEY, String(userId))
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function useBooks() {
@@ -193,6 +226,23 @@ export function useBooks() {
     [commit],
   )
 
+  // The 'adopt' half of the shared-device guard (BOOKS_OWNER_KEY): this
+  // device's shelf belongs to a DIFFERENT account, so it is replaced outright
+  // rather than merged. Nothing local survives to be published into the new
+  // user's account.
+  //
+  // `ensureDefaultBook` runs on the result because "there is always at least
+  // one live book" is this hook's own invariant (see readBooksMigrated) and
+  // adopting an empty remote — a user who has never opened the Game Log — must
+  // not be the one path that breaks it. There is no zero-books empty state
+  // downstream to land on.
+  const adoptRemoteBooks_ = useCallback(
+    (remote) => {
+      commit(() => ensureDefaultBook(adoptRemoteBooks(remote)))
+    },
+    [commit],
+  )
+
   useEffect(() => {
     function onStorage(e) {
       // `key === null` is a whole-storage clear, which is also our business.
@@ -225,5 +275,6 @@ export function useBooks() {
     updateCover,
     removeBook,
     mergeRemoteBooks,
+    adoptRemoteBooks: adoptRemoteBooks_,
   }
 }
