@@ -235,7 +235,13 @@ export function AbsCard({ feed, inning, half, revealed, awayAbbr, homeAbbr }) {
 // half, and the outcome in words — the same three facts the pips encode as
 // color, spelled out for a tap-to-open reader. Disabled/inert with no
 // affordance when there's nothing to challenge yet (outcomes.length === 0).
-export function AbsRow({ teamId, abbr, outcomes }) {
+//
+// `showOpenPips` (default on) draws the kraft-brown unused-challenge pips.
+// BoxAbs (BoxScore.jsx) turns it off: once the game is final an unused
+// challenge can't be spent, so the open pip is redundant with the "N left"
+// text right after it — it only earns its place live, previewing what's
+// still in the bank.
+export function AbsRow({ teamId, abbr, outcomes, showOpenPips = true }) {
   const [logoBroken, setLogoBroken] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const hasChallenges = outcomes.length > 0
@@ -269,9 +275,10 @@ export function AbsRow({ teamId, abbr, outcomes }) {
               aria-hidden="true"
             />
           ))}
-          {Array.from({ length: remaining }, (_, i) => (
-            <span key={`open-${i}`} className="abs__pip abs__pip--open" aria-hidden="true" />
-          ))}
+          {showOpenPips &&
+            Array.from({ length: remaining }, (_, i) => (
+              <span key={`open-${i}`} className="abs__pip abs__pip--open" aria-hidden="true" />
+            ))}
         </span>
         <span className="abs__rec" aria-hidden="true">
           {won}–{failed} · {left}
