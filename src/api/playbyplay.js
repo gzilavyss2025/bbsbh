@@ -84,6 +84,7 @@ export {
 
 export {
   nextStepBoundary,
+  stepCommitReady,
   focusWindows,
   stepTotals,
   lastVisibleAtBatIndex,

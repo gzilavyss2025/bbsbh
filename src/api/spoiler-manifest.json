@@ -329,7 +329,7 @@
     },
     "liveEdge.js": {
       "class": "progress-only",
-      "why": "Reports only how far the game has progressed (the last play's half-index), never a score, and only under the Scores Unlocked pass. NAVIGATION only — it deliberately feeds no reveal mark (ADR-0026)."
+      "why": "Reports only how far the game has progressed — a half-index, an inning number and which half — never a score. selectLiveEdge is gated on the Scores Unlocked pass and feeds NAVIGATION only (ADR-0026). selectLiveHalf/selectHalfInProgress/selectCatchUpTarget are ungated: they read the linescore live state (currentInning/inningState) to answer whether the half already on screen is still being played, which is what stops a live half committing itself early (ADR-0055). No caller renders the inning they name; both use it to choose which button to draw."
     },
     "loadPlayer.js": {
       "class": "spoiler-free",

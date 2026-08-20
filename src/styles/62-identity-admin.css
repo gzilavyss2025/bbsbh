@@ -344,6 +344,47 @@
   box-shadow: var(--ring);
 }
 
+/* A boolean field's checkbox row (Use wordmark/Use uploaded art, and the WPA
+   band field's own Pinstripe toggle). `.iddrawer__band` is that field's
+   stacked layout — a colour row, the checkbox, then a second colour row
+   only while striped. */
+.iddrawer__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-caption);
+  color: var(--text-body);
+  cursor: pointer;
+}
+.iddrawer__band {
+  gap: 6px;
+}
+
+/* The WPA group's live mockup: three REAL WinProbChart instances
+   (IdentityWpaPreview.jsx, reusing /identity-lab's own WpaScenarios).
+   Restated rather than pulled in via 15-team-color-lab.css, same reasoning
+   as the Header bars group's .idlab__barmock rules below — keep in sync by
+   eye; the shared class names are what stop the two previews drifting. */
+.colorlab__wpascenarios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.colorlab__wpascenario {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+.colorlab__wpascenariolabel {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-compact);
+  font-weight: var(--w-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-caption);
+}
+
 /* ---- the Logo art group ---- */
 
 /* The tile at judging size beside its controls; stacks on a narrow phone. */
