@@ -291,7 +291,7 @@ pipeline, not of the wire.
 
 ## 8. Where the existing implementation sits
 
-Four files along three seams, plus the generator:
+Five files along four seams, plus the generator:
 
 | File | Answers |
 | --- | --- |
@@ -299,6 +299,7 @@ Four files along three seams, plus the generator:
 | `src/api/teamTransactions.js` | Which rows belong in one story? |
 | `src/api/transactions/cutline.js` | What does that story say? |
 | `src/api/transactions/league.js` | Whose story is a row, league-wide? (§11) |
+| `src/api/transactions/leagueFeed.js` | What does a browser fetch to read that live? (§12) |
 
 `scripts/gen-team-transactions.mjs` runs the first three nightly to build the
 team page's Transactions card: per-org, per-season static files. That path is
@@ -341,7 +342,8 @@ Decisions this document deliberately does not make:
   behind, and every rewrite is a place to be wrong).
 
 Two that WERE open here are now answered in §11: a league-wide feed prints one
-event, from the acquiring club, and it reads the wire live.
+event, from the acquiring club, and it reads the wire live. §12 covers what
+reading it live costs, and ADR-0057 which of a row's two dates a window uses.
 
 ## 10. Settled since — the arrival family, and the two kinds of activation
 
@@ -449,3 +451,108 @@ in `vocabulary.js`).
 
 A 48-hour card holds roughly 30 to 45 stories: over the window's last six days,
 31, 14, 21, 16 and 14 per day.
+
+## 12. What a browser has to do — the live 48-hour card
+
+§11 settled what the league-wide pass returns. This section covers the other
+half: what a LIVE reader has to fetch to feed it, which is a different problem
+from the nightly generator's. The generator has all night and asks about all
+39,000 of a season's rows; the card is on the busiest page in the app and has
+one page load.
+
+`src/api/transactions/leagueFeed.js` is that reader. It owns the window
+arithmetic and the fetch chain, and hands the rows straight to
+`groupLeagueWide` — there is no second grouping path.
+
+All numbers below are from a 30-day league-wide pull on **2026-08-20**
+(2026-07-21 to 2026-08-20, 8,211 raw rows). Three probes regenerate every one
+of them: `probe-card-fetch.mjs`, `probe-card-shape.mjs` and `probe-retro-il.mjs`
+in `.scratch/home-transactions/`. Run `probe-card-fetch.mjs` first — it caches
+the pull the other two read.
+
+### 12.1 The window is not the fetch
+
+The endpoint filters on `date`; the grouper buckets by `txnDate`
+(`effectiveDate || date`, §2). **111 of 8,211 rows** carry a different
+`effectiveDate`, skewed both ways — 29 days early to 24 days late. So a card
+showing two days has to fetch more than two days and trim what comes back.
+
+Backtested over 22 consecutive 48-hour windows against an unbounded-back
+reference:
+
+| Fetch width | Windows complete | Stories missed |
+| --- | --- | --- |
+| 2 days | 18 / 22 | 12 |
+| 3 days | 21 / 22 | 1 |
+| **4 days** | **22 / 22** | **0** |
+| 5, 7 days | 22 / 22 | 0 |
+
+Four days is the narrowest that misses nothing, and it is what `FETCH_DAYS`
+holds. The one story a 3-day fetch misses is a Reds shuffle filed four days
+before it took effect; a 2-day fetch loses twelve, mostly options filed the
+evening before their effective date.
+
+**Which date the WINDOW selects on is ADR-0057**, along with the one class of
+row the choice knowingly omits (a move filed inside the window and backdated
+outside it — 4.6 rows per 48 hours, 79 of 102 saying "retroactive", nearly all
+injured-list placements). Read that before changing either constant.
+
+### 12.2 The chain is two round trips, and only the second is worth cutting
+
+`/people` cannot name its ids until the transactions call has answered, so the
+chain is two deep and nothing can flatten it. Timed at a four-day width: 666
+rows in 42 ms, then 116 ids in two batches in 160 ms — about 200 ms in total.
+
+What keeps the second leg short is `leagueCandidateIds`, exported from
+`league.js`. It runs the real storyworthy filter with **no debut set**, which
+makes its output a superset of the final story rows: `debutedIds` only ever
+SUPPRESSES (it is the anonymous-signing filter in `vocabulary.js`), so a row it
+would drop is already in the list and a row it keeps could never be outside it.
+
+| Prefilter | ids | `/people` calls |
+| --- | --- | --- |
+| Every row touching an MLB org | 3,099 | 31 |
+| `leagueCandidateIds` | **1,096** (35%) | **11** |
+
+The stories built from the two are **byte-identical**. That superset property is
+the only thing making the shortcut safe rather than lucky, so
+`test/home-transactions.test.js` pins it directly — not the id count, which
+drifts daily, but the containment.
+
+### 12.3 The affiliate map is already on disk
+
+§11 measured that the pass needs an affiliate-parent map and a debut set. The
+generator fetches both live. A browser needs neither request:
+
+| Affiliate map | Stories |
+| --- | --- |
+| Live pull (291 clubs) | 696 |
+| **`public/data/affiliates.json` (120 clubs)** | **696** |
+| None | 689 (−1%) |
+
+`gen-affiliates.mjs` already writes that file weekly for the team page. It
+covers the four full-season levels only, and the complex-league and DSL clubs it
+leaves out never own a storyworthy row — so the shipped file and a live 291-club
+pull produce exactly the same stories. `leagueFeed.js` therefore reads it and
+**degrades to an empty map**, at a cost of 7 stories: an option or a call-up
+logged only against the Triple-A club stops finding its parent. The card is
+still a card without it.
+
+The debut set stays non-optional, as §11 measured — 696 stories become 990
+(+42%) without it, and nearly all the growth is anonymous minor-league signings.
+It rides along on the same `/people` response as the position fallback, so it
+costs no extra request.
+
+### 12.4 The shape a card has to lay out
+
+The current window (2026-08-20 + 2026-08-19) held **36 stories across 21 clubs**:
+
+- **by type** — roster-move 17, shuffle 13, injured-list 4, trade 1, signing 1
+- **rail size** — 1 face ×19, 2 faces ×15, 3 faces ×2
+- **cutline length** — min 27, median 103, p90 129, max 155 characters
+
+A typical 48 hours runs 30 to 54 stories. **The worst 48 hours of the month held
+125** (2026-08-04, the day after the deadline's paperwork landed). That range is
+why the home card is a vertical ledger that fits itself to the space it has,
+rather than the team page's horizontal deck of cards: `LeagueMovesCard.jsx` has
+that reasoning, and `e2e/league-moves-card.spec.js` measures the fit.
