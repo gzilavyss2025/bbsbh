@@ -23,9 +23,17 @@
 // these SVGs CacheFirst for up to 30 days (vite.config.js); without a
 // version in the URL, a browser that already visited a club would keep
 // serving its stale cached mark until that cache entry expired, long after a
-// corrected file (from the lab, via mono-ink.json) had shipped. Changing the
-// hash changes the URL, so a corrected mark reaches every visitor on the
-// very next deploy instead of waiting on expiry.
+// corrected file (from the lab, via mono-ink.json, OR from the team hub's
+// identity drawer — a `mono` runtime override, ADR-0054) had shipped.
+// Changing the hash changes the URL, so a corrected mark reaches every
+// visitor on the very next deploy instead of waiting on expiry.
+//
+// Pins live in TWO places and this run merges them: the committed
+// mono-ink.json file (the lab's Save) and the live `mono` identity override
+// (the drawer's Save, fetched from /api/identity) — see
+// scripts/lib/mono-logo-art.mjs's readMonoInkStoreWithOverrides. A drawer
+// save is therefore not instant; it lands here, on this generator's own
+// weekly schedule.
 //
 //   node scripts/gen-mono-logos.mjs            # every club in teams.json
 //   node scripts/gen-mono-logos.mjs --ids=158,498   # spot-check a few
@@ -47,7 +55,7 @@ import {
   MONO_LOGO_MANIFEST_PATH,
   monoLogoHash,
   pinsFor,
-  readMonoInkStore,
+  readMonoInkStoreWithOverrides,
   sourceVariantFor,
 } from './lib/mono-logo-art.mjs'
 
@@ -179,7 +187,7 @@ ${cells}</table>`
 }
 
 const teams = await teamList()
-const inkStore = await readMonoInkStore()
+const inkStore = await readMonoInkStoreWithOverrides()
 const rows = await mapConcurrent(teams, CONCURRENCY, (team) => convert(team, inkStore))
 
 await mkdir(outDir, { recursive: true })

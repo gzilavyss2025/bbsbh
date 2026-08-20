@@ -98,7 +98,7 @@ Lab can write an edit straight back instead of handing over a snippet to paste
 | `milb-treatment-tuning.json` | `milbColors.js` |
 | `milb-colors.json` | `brandColors.js` |
 | `mlb-team-colors.json` | `brandColors.js`, `teams.js` |
-| `mono-ink.json` | `monoInk.js` — and `scripts/gen-mono-logos.mjs`, which is what it actually changes |
+| `mono-ink.json` | `monoInk.js` (overlay-aware, ADR-0054) — and `scripts/gen-mono-logos.mjs`, which is what actually changes the served art, on its own schedule |
 | `stamp-logo-tuning.json` | `stampLogoTuning.js` → `components/GameStamp.jsx` — the one store read at RENDER time |
 | `wpa-tuning.json` | `wpa/wpaLogo.js`, `wpa/wpaBandColors.js` — deliberately NOT reachable from the eager entry graph; see `wpa/wpaDefaults.js` |
 

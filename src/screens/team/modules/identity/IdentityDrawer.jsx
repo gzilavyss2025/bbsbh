@@ -7,6 +7,7 @@ import { TeamTreatmentMark } from '../../../../components/logo/TeamTreatmentMark
 import { HeaderBarMock } from '../../../identity-lab/editors/HeaderPreview.jsx'
 import { identityGroups, treatmentLabel, treatmentsForClub } from './identityFields.js'
 import { IdentityLogoField } from './IdentityLogoField.jsx'
+import { IdentityMonoField } from './IdentityMonoField.jsx'
 import { IdentityStampPreview } from './IdentityStampPreview.jsx'
 import '../../../../styles/62-identity-admin.css'
 
@@ -328,6 +329,8 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
               savedValue={draft.saved[group.fields[0].id]}
               onChange={draft.setValue}
             />
+          ) : group.mono ? (
+            <IdentityMonoField teamId={teamId} fields={group.fields} values={draft.values} onChange={draft.setValue} />
           ) : (
             <div className="iddrawer__fields">
               {group.fields.map((field) => (
