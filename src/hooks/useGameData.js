@@ -464,6 +464,7 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   const savantPercentilesData = savantPercentiles.data ?? null
 
 
+
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
   // hand-run backfill (scripts/gen-run-expectancy.mjs) with no game or score
   // information of its own, so it's safe to fetch eagerly like

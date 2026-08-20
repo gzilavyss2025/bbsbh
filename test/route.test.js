@@ -17,6 +17,7 @@ import {
   urlDateToApi,
   apiDateToUrl,
   slatePath,
+  LEAGUE_SLUG,
   matchupSlug,
   gamePath,
   playerPath,
@@ -50,6 +51,74 @@ test('the bare root and empty input are the home slate', () => {
 
 test('a bare 8-digit path is the slate paged to that day', () => {
   assert.deepEqual(parseRoute('/07052026'), { name: 'home', date: '2026-07-05' })
+})
+
+// ADR-0056. MLB and today are each the ABSENCE of a segment, so the two
+// defaults never appear in a URL and the bare '/' is the one canonical home
+// slate. If either default ever started emitting a segment, the same page would
+// have two addresses and the link-sharing this exists for would be undermined.
+test('the home slate carries no league of its own — MLB is the absence of one', () => {
+  assert.equal('sportId' in parseRoute('/'), false)
+  assert.equal('sportId' in parseRoute('/07052026'), false)
+  assert.equal(slatePath(null), '/')
+  assert.equal(slatePath(null, 1), '/')
+  assert.equal(slatePath('2026-07-05', 1), '/07052026')
+})
+
+test('a league prefix picks that league’s slate, with or without a day', () => {
+  assert.deepEqual(parseRoute('/aaa'), { name: 'home', sportId: 11 })
+  assert.deepEqual(parseRoute('/aa/08152026'), {
+    name: 'home',
+    date: '2026-08-15',
+    sportId: 12,
+  })
+  assert.deepEqual(parseRoute('/higha'), { name: 'home', sportId: 13 })
+  assert.deepEqual(parseRoute('/a/07052026'), {
+    name: 'home',
+    date: '2026-07-05',
+    sportId: 14,
+  })
+})
+
+// 'aplus' is the leader board's own spelling of High-A ('/leaders/aplus'). It
+// is accepted so a reader who learned that spelling lands somewhere sensible,
+// but it is never emitted — slatePath writes 'higha'.
+test('the leader board’s aplus spelling is accepted but never emitted', () => {
+  assert.deepEqual(parseRoute('/aplus'), { name: 'home', sportId: 13 })
+  assert.equal(slatePath(null, 13), '/higha')
+})
+
+test('every league slug round-trips through slatePath and parseRoute', () => {
+  for (const [sportId, slug] of Object.entries(LEAGUE_SLUG)) {
+    const built = slatePath('2026-08-15', Number(sportId))
+    assert.equal(built, `/${slug}/08152026`, slug)
+    assert.deepEqual(
+      parseRoute(built),
+      { name: 'home', date: '2026-08-15', sportId: Number(sportId) },
+      slug,
+    )
+  }
+})
+
+// Same shrug the bare-date branch takes: a hand-mangled day degrades to that
+// league's today rather than erroring or dropping the league on the floor.
+test('a league with an impossible day falls back to that league’s today', () => {
+  assert.deepEqual(parseRoute('/aaa/13452026'), { name: 'home', sportId: 11 })
+  assert.deepEqual(parseRoute('/aa/02302026'), { name: 'home', sportId: 12 })
+  assert.deepEqual(parseRoute('/a/nonsense'), { name: 'home', sportId: 14 })
+})
+
+// 'a', 'aa' and 'aaa' are short enough to make a prefix match tempting; this
+// parse does an exact lookup, and these are the routes that would break first
+// if that ever changed.
+test('a league slug never shadows a named route that starts the same way', () => {
+  assert.equal(parseRoute('/about').name, 'about')
+  assert.equal(parseRoute('/admin').name, 'admin')
+  assert.equal(parseRoute('/awards').name, 'awards-history')
+  assert.equal(parseRoute('/attendance').name, 'attendance')
+  assert.equal(parseRoute('/all-star-rosters').name, 'all-star-rosters')
+  assert.equal(parseRoute('/leaders/aaa').name, 'leaders')
+  assert.equal(parseRoute('/leaders/aaa').scope, 'aaa')
 })
 
 // The five routes the Team Identity Lab replaced were unlisted and linked from

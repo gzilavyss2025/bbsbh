@@ -28,7 +28,7 @@ export function SiteHeader() {
       <button
         type="button"
         className="sitebar__home"
-        onClick={goHome}
+        onClick={() => goHome()}
         aria-label="Back to games"
       >
         <TallyLockup height={22} />

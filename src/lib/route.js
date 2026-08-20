@@ -4,8 +4,11 @@
 // game section deep-linkable and shareable.
 //
 // Route shapes:
-//   '/'                                 -> { name: 'home' }
+//   '/'                                 -> { name: 'home' }  (MLB, today)
 //   '/{MMDDYYYY}'                       -> { name: 'home', date: YYYY-MM-DD }
+//   '/{league}'                         -> { name: 'home', sportId }
+//   '/{league}/{MMDDYYYY}'              -> { name: 'home', date, sportId }
+//                                          league is aaa|aa|higha|a — see LEAGUE_SLUG below.
 //   '/logos'                            -> { name: 'logos' }
 //   '/about'                            -> { name: 'about' }
 //   '/more'                             -> { name: 'more' }  (every standalone page, grouped — WCAG 2.4.5's second way in)
@@ -92,6 +95,35 @@
 // URL that may include a `?query`.
 
 import { REPORT_ROUTES } from './reportPages.js'
+import { SPORT_IDS } from './teams.js'
+
+// The slate's league, as a URL prefix. Two things are deliberately missing.
+//
+// MLB has no slug: the bare '/' IS the MLB slate, the same way a missing date
+// IS today (ADR-0056). The home address a reader types, bookmarks or is handed
+// therefore says one thing — today's MLB games — for everybody, which is the
+// whole reason the league moved into the URL. A '/mlb' prefix would be a second
+// address for a page that already has the shortest one in the app.
+//
+// 'A+' is written 'higha', not 'aplus'. High-A is what the level is called out
+// loud, and a shared link is read out loud more often than it is typed. The
+// leader board's own scope vocabulary (api/leaders.js) still spells it 'aplus'
+// — those are already-shared '/leaders/aplus' links and renaming them would
+// break inbound ones for nothing — so 'aplus' is accepted here as an inbound
+// alias and never emitted.
+export const LEAGUE_SLUG = Object.freeze({
+  [SPORT_IDS.AAA]: 'aaa',
+  [SPORT_IDS.AA]: 'aa',
+  [SPORT_IDS['A+']]: 'higha',
+  [SPORT_IDS.A]: 'a',
+})
+const SPORT_ID_BY_SLUG = Object.freeze({
+  aaa: SPORT_IDS.AAA,
+  aa: SPORT_IDS.AA,
+  higha: SPORT_IDS['A+'],
+  aplus: SPORT_IDS['A+'], // inbound alias only — see above
+  a: SPORT_IDS.A,
+})
 
 // The team hub's tabs, as `third URL segment -> route name`. Every one of these
 // is a real address (the URL changes, back/forward work, each tab is
@@ -134,6 +166,21 @@ export function parseRoute(url) {
   if (parts.length === 1 && /^\d{8}$/.test(parts[0])) {
     const date = urlDateToApi(parts[0])
     return isRealDate(date) ? { name: 'home', date } : { name: 'home' }
+  }
+  // The same slate, one league deeper: '/aaa' is today's Triple-A games,
+  // '/aa/08152026' is that Saturday's Double-A ones. Both segments are
+  // optional and both default to the home slate's own answer (MLB, today), so
+  // every one of the four addresses names exactly one page — which is what
+  // makes the league shareable at all (ADR-0056). No slug collides with a
+  // named route: they are all two-to-five letters and every named route below
+  // is a word. A second segment that is not a real date degrades to that
+  // league's TODAY, the same shrug the bare-date branch above takes.
+  if (parts.length <= 2 && SPORT_ID_BY_SLUG[parts[0]]) {
+    const sport = SPORT_ID_BY_SLUG[parts[0]]
+    const date = parts.length === 2 ? urlDateToApi(parts[1]) : null
+    return isRealDate(date)
+      ? { name: 'home', date, sportId: sport }
+      : { name: 'home', sportId: sport }
   }
   if (parts.length === 1 && parts[0] === 'logos') return { name: 'logos' }
   if (parts.length === 1 && parts[0] === 'about') return { name: 'about' }
@@ -459,11 +506,14 @@ function isRealDate(api) {
   return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d
 }
 
-// The slate paged to a specific day. Today's slate is canonically the bare
-// '/' — GameSelect only builds this for a non-today date — so the home URL
-// never grows a redundant date suffix.
-export function slatePath(apiDate) {
-  return `/${apiDateToUrl(apiDate)}`
+// The slate's own address: league first, day second, and each segment present
+// only when it is not the default. `apiDate` is null for today (GameSelect
+// passes null rather than today's date), `sportId` defaults to MLB — so the
+// canonical home slate is the bare '/' and never grows a redundant suffix.
+export function slatePath(apiDate, sportId = SPORT_IDS.MLB) {
+  const league = LEAGUE_SLUG[sportId] ? `/${LEAGUE_SLUG[sportId]}` : ''
+  const day = apiDate ? `/${apiDateToUrl(apiDate)}` : ''
+  return `${league}${day}` || '/'
 }
 
 // Doubleheaders: both games share a date and matchup, so game 2 (and beyond)

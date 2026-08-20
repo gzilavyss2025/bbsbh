@@ -107,6 +107,12 @@ export const FIELDS = Object.freeze({
     // The Brewers — the app's own pinned club (PINNED_TEAM_ID in teams.js).
     fallback: 158,
   },
+  // RETAINED, NOT READ. The slate's league moved into the URL (ADR-0056), so
+  // no screen asks for this field any more and no screen writes one. It stays
+  // in the registry because the document is shared with devices that have not
+  // reloaded yet: dropping the field would make their perfectly valid stored
+  // value a rejected one, and last-write-wins has no way to tell that apart
+  // from an attack. Retire it once nothing publishes it.
   level: {
     validate: (v) => Number.isInteger(v) && LEVEL_SPORT_IDS.includes(v),
     fallback: 1,

@@ -74,6 +74,8 @@ export const SCORE_BASE = {
   ttoSplit: 35, // the pre-half order-turns-over card WITH a season split behind it
   scorelessThrough: 34, // record when this club is scoreless through inning N
   pitchPace: 32, // the starter's pitches-through-N pace vs his season norm
+  matchupSkill: 36, // hitter vs the arm he faces on a chase/whiff/hard-contact axis
+  matchupStyle: 33, // …and on a pull/ground-ball TENDENCY axis, which is a shade less pointed
   comeback: 30,
   scoringFirst: 30,
   inningRunDiff: 30,

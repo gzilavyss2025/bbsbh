@@ -329,7 +329,7 @@
     },
     "liveEdge.js": {
       "class": "progress-only",
-      "why": "Reports only how far the game has progressed (the last play's half-index), never a score, and only under the Scores Unlocked pass. NAVIGATION only — it deliberately feeds no reveal mark (ADR-0026)."
+      "why": "Reports only how far the game has progressed — a half-index, an inning number and which half — never a score. selectLiveEdge is gated on the Scores Unlocked pass and feeds NAVIGATION only (ADR-0026). selectLiveHalf/selectHalfInProgress/selectCatchUpTarget are ungated: they read the linescore live state (currentInning/inningState) to answer whether the half already on screen is still being played, which is what stops a live half committing itself early (ADR-0055). No caller renders the inning they name; both use it to choose which button to draw."
     },
     "loadPlayer.js": {
       "class": "spoiler-free",
@@ -367,6 +367,18 @@
       "importers": [
         "screens/LogbookStatsPage.jsx"
       ]
+    },
+    "matchup/forHalf.js": {
+      "class": "caller-gated",
+      "why": "Resolves WHO is in a matchup for one half — the hitters due up and the arm entering — then hands them to matchup/notes.js. The notes carry nothing from tonight; what needs gating is the lineup and pitching-change read, and that gate is inherited: selectDueUpNow and selectHalfStartingPitcher each enforce their own reveal boundary and return null for a half further out than the reader's own next one (ADR-0003/0010) — whether the starter has been pulled yet is exactly the game-flow spoiler that boundary exists to withhold. This module owns ONE gate of its own, re-applying that same halfIndex <= revealedThrough + 1 test to the first-inning probable-pitcher fallback, which selectHalfStartingPitcher cannot answer because it reads the half's first play."
+    },
+    "matchup/notes.js": {
+      "class": "spoiler-free",
+      "why": "Builds the matchup callouts from matchup/savant.js alone. It is HANDED the two players and their season rates and takes no feed at all, so it cannot read a score, an inning, or tonight's line — which is why these notes need no reveal gate and clear even Between Innings' stricter allowlist."
+    },
+    "matchup/savant.js": {
+      "class": "spoiler-free",
+      "why": "Static savant-matchup.json — season Statcast rates plus the league spread they are scored against, over completed games. Same footing as savantPercentiles.js and war.js. MLB-only, like the file itself."
     },
     "managers.js": {
       "class": "spoiler-free",

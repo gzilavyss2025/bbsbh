@@ -90,6 +90,8 @@ saturation is worth changed. The column below names that saturation point, so
 | inningRunDiff | 30 | a margin of 40 |
 | dayOfWeek | 30 | a spotless record |
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
+| matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
+| matchupStyle | 33 | a 2.0-SD collision on the weaker of its two sides |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
 
@@ -280,6 +282,96 @@ shape: `src/api/callouts.js`).
   being caught," or "Was caught stealing in the 6th, ending a run of 9
   straight steals"; a game with no attempt earns no card, live or in the
   roll-up.
+## Matchup callouts — a hitter against the arm he faces
+
+Two families that read BOTH sides of a matchup on one axis and fire only when
+the two collide. Data is `public/data/savant-matchup.json`
+(`scripts/gen-savant-matchup.mjs`), read through `src/api/matchup/savant.js`;
+the notes are built in `src/api/matchup/notes.js` and resolved to a half by
+`src/api/matchup/forHalf.js`. MLB only — Savant has no minor-league board.
+
+**Why the two sides are comparable at all.** Savant's `custom` leaderboard
+returns the SAME columns for `type=batter` and `type=pitcher`: a batter's
+`pull_percent` is how often HE pulls, a pitcher's is how often hitters pull
+AGAINST him. The two boards agree on the league mean because they count the
+same events from two sides (2026-08-20: pull 39.4 / 39.3, chase 31.4 / 30.5,
+whiff 25.8 / 25.4). The generator checks that agreement on every run and warns
+if it drifts — a drift is the comparison breaking, not a formatting bug.
+
+- **matchupSkill** — chase / whiff / hard contact, where one direction IS
+  better. Fires when both sides sit ≥ 1.15 SD from their own role's league mean.
+  Three readings print (strength vs strength, the pitcher's strength against a
+  hole, the hitter's strength against a hole); weakness against weakness is
+  dropped, because two holes meeting says nothing.
+- **matchupStyle** — pull / ground ball, where neither direction is better.
+  These are TENDENCIES, so the note fires only when the two point OPPOSITE
+  ways; both pulling hard is agreement, not a collision.
+
+Each side is scored against its OWN spread. That is load-bearing: pitchers vary
+far less than hitters (chase SD 3.6 vs 6.9, hard-hit 5.1 vs 9.6), so a shared
+raw-percentage threshold would fire constantly on hitters and almost never on
+pitchers. At most one note per family per matchup — the strongest axis wins.
+
+**Spoiler footing.** The notes read season aggregates only and take no feed, so
+they need no reveal gate and sit on `BETWEEN_INNINGS_ALLOWED_KINDS`. What IS
+gated is resolving WHO is in the matchup: `forHalf.js` goes through
+`selectDueUpNow` and `defenseEntering`, which each enforce `safeToShowEntering`
+themselves, so a half further out than the reader's own next one yields no
+players and therefore no notes (ADR-0003/0010).
+
+### The voice rules, and why they are rules
+
+Two blind copy reviews (a game-notes editor and a beat writer) went over the
+draft wording. Three findings were ERRORS, not style, and each is now pinned by
+a test in `test/matchup-callouts.test.js`:
+
+- **`chase` means "swing at a pitch OUT of the zone" and nothing else.** It is
+  an axis in this very family; the draft also used it for "swing" on a whiff
+  rate, making one word mean two things in one product.
+- **A pitcher is never the subject of `pulled`** — "gets pulled" means removed
+  from the game. The pull clause takes `hitters` as its subject instead.
+- **"hits 29% on the ground" reads as a batting average.** It is "puts 29% of
+  his batted balls on the ground".
+
+The rest, all enforced in `notes.js`:
+
+- **Rates round.** Decimals belong on averages, ERA, mph and pitches per inning
+  — never on a rate percentage. Same `Math.round(rate * 100)` shape
+  `vsTeamNote.js` already uses. A rate near a clean fraction reads as words
+  ("half his batted balls").
+- **One construction for the baseline**: `league average is X`, matching the
+  shipped foul note. Never three phrasings for one move.
+- **Every note is scoped `this season`.**
+- **Surnames in the short form, full name on prose first reference.**
+- **The intensifier is conditional.** `just` is a DIMINUTIVE: it may appear on
+  at most one side, only past 1.5 SD, and only on a value BELOW its own league
+  mean. A word that appears by default is a tic; one conditioned on the number
+  is judgment.
+- **Polarity lives in the turn word**, never in arithmetic the reader has to do.
+- **One interpretive clause per prose form, maximum**, and it must fail a paste
+  test — a gloss that fits every note in its family is filler, so a gloss needs
+  1.75 SD and the hitter being the more extreme side to earn its slot.
+
+### Two renderings, and the shape rotation
+
+Every note carries `text` (short) and `prose` (long); the surface picks. The
+short form caps at `SHORT_MAX` (150) — the measured ceiling of the existing
+strip, set by the times-through note.
+
+Because every note in this family is "two numbers pointing opposite ways", one
+rhetorical figure repeated fifteen times across nine innings stops being read.
+So the SHAPE rotates by note index across three joiners: an em dash (only when
+what follows is CONTEXT, never a second subject), a semicolon (the true
+parallel), and a named turn (the asymmetric case). At most one em dash per note,
+and never a dash plus `but` — the dash already made the turn.
+
+**The short form is length-aware, with a drop order rather than a truncation.**
+The properly-scoped forms run 118–145 characters, and a long name pair
+overflows 150 (Yamamoto / Guerrero Jr. reached 154 in testing). `fitShort` drops
+the league average first, then the emphasis word, then falls back to the
+shortest parallel — the same graceful-degradation discipline the MiLB selectors
+use. The cap does not move.
+
 - **risp / platoon** — season RISP and vs-L/vs-R lines (`situational`,
   ≥ 15 PA per split). Gate: the split average also has to deviate from his
   own season average by ≥ `SPLIT_AVG_DEVIATION` (.05) — an ordinary split

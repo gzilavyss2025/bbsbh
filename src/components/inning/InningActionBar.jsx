@@ -38,6 +38,18 @@ import { ordinal } from '../../lib/format.js'
 //  • UNDER THE SCORES UNLOCKED PASS at the live frontier (ADR-0026), a calm
 //    status instead of either.
 //
+// A SEALED HALF THAT IS STILL BEING PLAYED SPLITS THE FIRST OF THOSE (ADR-0055).
+// `halfLive` says the game is in this exact half right now, and it takes "Rest
+// of half" off the bar — there is no rest of the half yet, and the tap would
+// commit a half on the strength of however many batters happen to have reached
+// the feed, which is the whole defect ADR-0055 exists to fix. "Next at-bat"
+// stands alone and full width. Then `atHalfEdge` — every fetched entry already
+// stepped through — replaces even that with the same calm live status the pass's
+// frontier gets, because a tap there would move nothing. Neither is a fourth
+// state so much as the sealed state told the truth about a half in motion; both
+// end on their own as the next plate appearance reaches the feed, or as the
+// third out turns the half into an ordinary finished one.
+//
 // A half that just finished used to be a FOURTH state, pairing the advance with
 // a "Summary" button. That is still gone: the numbers a scorer wants when a
 // half closes arrive on their own (HalfTally.jsx in the console band, and the
@@ -62,6 +74,8 @@ export function InningActionBar({
   atLiveEdge,
   liveEdgeLabel,
   currentSealed,
+  halfLive,
+  atHalfEdge,
   effInning,
   effHalf,
   onRevealNextAtBat,
@@ -81,6 +95,28 @@ export function InningActionBar({
           <span className="liveedge__dot" aria-hidden="true" />
           <span className="liveedge__label">{liveEdgeLabel}</span>
         </div>
+      ) : currentSealed && atHalfEdge ? (
+        /* Caught up INSIDE a half still being played (ADR-0055) — the same
+           calm status the pass's own frontier gets, and deliberately the same
+           markup, because it is the same fact: the reader has reached the game.
+           `aria-live="polite"` announces it once when the last tap lands you
+           here, and the ordinary Refresh above is what brings the next batter. */
+        <div className="liveedge" role="status" aria-live="polite">
+          <span className="liveedge__dot" aria-hidden="true" />
+          <span className="liveedge__label">Caught up — waiting on the next batter</span>
+        </div>
+      ) : currentSealed && halfLive ? (
+        /* One choice, not two: see `halfLive` in the header. Full width rather
+           than a lone half-width button in a split, so the thumb keeps the
+           target it has when the half finishes and the pair returns. */
+        <button
+          type="button"
+          className="btn btn--reveal"
+          onClick={onRevealNextAtBat}
+          aria-label={`Reveal the next at-bat in the ${halfWord} of the ${ordinal(effInning)} inning`}
+        >
+          Next at-bat
+        </button>
       ) : currentSealed ? (
         <div className="revealsplit">
           <button
