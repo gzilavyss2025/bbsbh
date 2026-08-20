@@ -779,7 +779,11 @@ Re-run only to fold in a new season.
   `src/lib/data/mono-logo-manifest.json` (a `teamId -> content hash` map), which
   `teamLogoUrl` (`teams.js`) appends to the mono URL as `?v=` so a corrected mark's
   changed hash busts that CacheFirst rule immediately instead of waiting on its 30-day
-  expiry — see ADR-0031's amendment.
+  expiry — see ADR-0031's amendment. Pins also arrive live: the team hub's identity
+  drawer can save a `mono` runtime override (ADR-0054), and this run fetches it
+  (`readMonoInkStoreWithOverrides`, a `GET /api/identity` call) and merges it over the
+  file before converting — the one generator that makes a network call to this app's
+  own API. A fetch failure degrades to the file alone, same as an unconfigured deploy.
 - `gen-league-logos.mjs` → `public/data/logos/league/{mlb,milb}.svg` + a viewBox manifest
   — the same knockout conversion run on the two LEAGUE marks, for the Game Log covers
   carrying one instead of a club crest. NOT a loop inside the script above, which prunes

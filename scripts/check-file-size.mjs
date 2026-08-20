@@ -138,6 +138,14 @@ const BUDGETS = {
   // query/row-shaping itself already lives in that lib module, not here.
   'scripts/gen-callouts.mjs': 1600, // 1507
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
+  // GameView is the game's ROUTER — one screen per section, each lazily
+  // imported, plus the chrome every section shares — so a feature that adds a
+  // door lands here by construction rather than by accretion. The catch-up
+  // wiring (ADR-0055) is that: eleven lines, all of them routing. Splitting the
+  // shared chrome out would move the section tabs into a 12th file in
+  // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
+  // trades a real limit for a nominal one.
+  'src/screens/GameView.jsx': 620, // 609
   'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168
@@ -150,7 +158,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1225, // 1212
   'src/lib/route.js': 700, // 602 — one more parse branch and path doc line for '/postseason-race'
   'scripts/gen-fouls.mjs': 1000, // 996
-  'src/api/teamTransactions.js': 1000, // 961
+  'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's

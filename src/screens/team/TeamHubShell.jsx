@@ -252,6 +252,7 @@ export function TeamHubShell({
               name={team.name}
               abbreviation={team.abbreviation}
               venueName={team.venue?.name}
+              sportId={team.sport?.id ?? 1}
               draft={identity}
             />
           </Suspense>

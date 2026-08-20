@@ -89,6 +89,58 @@ test('every tile carries a logo group whose row writes the logo-url store', () =
   assert.equal(parseIdentityFieldId(away.fields[0].id).key, 'away')
 })
 
+test('the mono group is one per club, not per treatment, and offers on MiLB too', () => {
+  const mono = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'city-connect' }), 'mono')
+  assert.equal(mono.mono, true, 'the drawer renders this group with the shape picker, not plain boxes')
+  const parts = fieldNamed(mono, 'parts')
+  const source = fieldNamed(mono, 'source')
+  const art = fieldNamed(mono, 'art')
+  assert.equal(parseIdentityFieldId(parts.id).store, 'mono-ink')
+  assert.deepEqual(parseIdentityFieldId(parts.id).path, ['158', 'parts'])
+  // src/lib/data/mono-ink.json ships Milwaukee with parts but no source pick.
+  assert.deepEqual(JSON.parse(parts.landed), { 0: 'knockout', 2: 'ink', 3: 'knockout' })
+  assert.equal(source.landed, '', 'no source override on file means the placeholder is blank, not "base"')
+  assert.ok(art.landed, 'the shipped fingerprint travels as the landed value')
+
+  const affiliateMono = groupBy(identityGroups(MEMPHIS, { isMilb: true, treatment: 'away' }), 'mono')
+  assert.ok(affiliateMono, 'MiLB clubs get a knockout mark too')
+})
+
+test('the WPA group is per-treatment, and the fallback field only ever offers on Main', () => {
+  const main = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'main' }), 'wpa')
+  assert.equal(main.wpa, true, 'the drawer renders this group with its own live preview and band control')
+  assert.equal(main.title, 'Main win-probability band')
+  assert.equal(fieldNamed(main, 'size').landed, '65', 'src/lib/data/wpa-tuning.json ships a tuned Main layout')
+  assert.deepEqual(parseIdentityFieldId(fieldNamed(main, 'size').id).path, [
+    '158',
+    'treatments',
+    'main',
+    'layout',
+    'size',
+  ])
+  assert.equal(fieldNamed(main, 'band').landed, '"#F3ECD8"')
+  assert.equal(fieldNamed(main, 'wpaWordmark').landed, 'true')
+  assert.ok(fieldNamed(main, 'ownArt'), 'MLB offers the art-source toggle')
+  assert.ok(fieldNamed(main, 'bandColor'), 'the team-level fallback rides beside Main')
+
+  const alt = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'alternate' }), 'wpa')
+  assert.equal(alt.title, 'Alternate win-probability band')
+  assert.deepEqual(JSON.parse(fieldNamed(alt, 'band').landed), { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' })
+  assert.equal(fieldNamed(alt, 'bandColor'), undefined, 'the fallback is inert off Main, so it is not offered')
+
+  const away = groupBy(identityGroups(MEMPHIS, { isMilb: true, treatment: 'away' }), 'wpa')
+  assert.equal(away.title, 'Away win-probability band')
+  assert.equal(fieldNamed(away, 'band').landed, '"#002B5C"')
+  assert.equal(fieldNamed(away, 'ownArt'), undefined, 'MiLB has no art-source toggle')
+  assert.deepEqual(parseIdentityFieldId(fieldNamed(away, 'size').id).path, [
+    '235',
+    'treatments',
+    'away',
+    'wpaLayout',
+    'size',
+  ])
+})
+
 test('an affiliate gets no club-colours group', () => {
   const groups = identityGroups(MEMPHIS, { isMilb: true, treatment: 'home' })
   assert.equal(groupBy(groups, 'club'), undefined)

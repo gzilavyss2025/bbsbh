@@ -329,7 +329,7 @@
     },
     "liveEdge.js": {
       "class": "progress-only",
-      "why": "Reports only how far the game has progressed (the last play's half-index), never a score, and only under the Scores Unlocked pass. NAVIGATION only — it deliberately feeds no reveal mark (ADR-0026)."
+      "why": "Reports only how far the game has progressed — a half-index, an inning number and which half — never a score. selectLiveEdge is gated on the Scores Unlocked pass and feeds NAVIGATION only (ADR-0026). selectLiveHalf/selectHalfInProgress/selectCatchUpTarget are ungated: they read the linescore live state (currentInning/inningState) to answer whether the half already on screen is still being played, which is what stops a live half committing itself early (ADR-0055). No caller renders the inning they name; both use it to choose which button to draw."
     },
     "loadPlayer.js": {
       "class": "spoiler-free",
@@ -749,6 +749,18 @@
     "teamTransactions.js": {
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
+    },
+    "transactions/cutline.js": {
+      "class": "spoiler-free",
+      "why": "The prose half of teamTransactions.js — a finished story draft in, the cutline's segment array out, plus the label helpers the rail half shares. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
+    },
+    "transactions/league.js": {
+      "class": "spoiler-free",
+      "why": "The league-wide grouping pass for the home page's last-48-hours feed (issue #772): every raw wire row gets one owning club, then the club-scoped pipeline runs per owner. Reads /api/v1/transactions live, which carries roster moves and dates and no score at all."
+    },
+    "transactions/vocabulary.js": {
+      "class": "spoiler-free",
+      "why": "The wire vocabulary half of teamTransactions.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
     },
     "teams-static.js": {
       "class": "spoiler-free",

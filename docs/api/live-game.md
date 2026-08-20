@@ -192,7 +192,20 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   before first pitch / on empty play data). Under the Scores Unlocked pass
   (ADR-0026) it keeps a caught-up viewer on the newest half — NAVIGATION only. It
   deliberately feeds no reveal mark: everything already renders open under the
-  pass, so there is nothing to ratchet.
+  pass, so there is nothing to ratchet. Two UNGATED readers sit beside it
+  (ADR-0055), answering a narrower question from the linescore's own live state
+  rather than from the plays: `selectLiveHalf(feed)` — which half is the game IN
+  (or, between halves, which did it just finish), `{ idx, inning, half,
+  inProgress }` or null — and `selectCatchUpTarget(feed)`, the same thing shaped
+  as a destination for the lineup page's "Catch up to live". They need no pass
+  because they report an inning number and which half and nothing else, and
+  neither caller RENDERS the inning: `InningViewer` compares `idx` against the
+  half on screen to stop a still-being-played half committing itself early, and
+  the lineup page uses it to decide whether to draw a button whose label is fixed
+  copy. `inningState` is what the plays cannot supply — a half whose third out
+  has just been recorded and one whose next batter is still walking up look
+  identical in `allPlays`. A feed that posts no live inning state (MiLB) reads as
+  "no live half", which is the pre-ADR-0055 behaviour and the safe way to fail.
 - `challenges.js` — reveal-only ABS (Automated Ball-Strike) challenge history
   for the R/H/E card's third row (`StatBox`), clamped to the reached half. Each
   club's success/fail outcome list from the pitch-event `reviewDetails`

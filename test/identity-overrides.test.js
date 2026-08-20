@@ -39,8 +39,10 @@ import {
   treatmentTile,
 } from '../src/lib/teams.js'
 import { TEAM_COLOR_PAIRS } from '../src/lib/brandColors.js'
-import { milbTreatmentTile } from '../src/lib/milbColors.js'
+import { milbTreatmentTile, milbWpaBandColor, milbWpaLogoLayout, milbWpaWordmark } from '../src/lib/milbColors.js'
 import { stampLogoTuning } from '../src/lib/stampLogoTuning.js'
+import { wpaBandColor, wpaBandPinstripeColor } from '../src/lib/wpa/wpaBandColors.js'
+import { wpaLogoLayout, wpaWordmarkOn } from '../src/lib/wpa/wpaLogo.js'
 import { identityWriteRefusal } from '../api/identity.js'
 
 const BREWERS = '158'
@@ -81,6 +83,23 @@ test('an id resolves to a store, a team, a key and a field', () => {
   assert.equal(bg.store, 'city-connect-colors')
   assert.equal(bg.path, null)
   assert.equal(parseIdentityFieldId('identity.tileBg.158.alternate-3').store, 'alt3-colors')
+
+  // Team-level like colors/wpa, not per-treatment — a club has one mark.
+  const parts = parseIdentityFieldId('identity.mono.158.parts')
+  assert.equal(parts.store, 'mono-ink')
+  assert.deepEqual(parts.path, ['158', 'parts'])
+
+  // The layout numbers nest under their own sub-object (MLB's `layout`,
+  // MiLB's `wpaLayout` — different field NAME, same store both dimensions
+  // share with milbTuning's `position`); band/wpaWordmark/ownArt sit flat.
+  const size = parseIdentityFieldId('identity.wpaTreatment.158.main.size')
+  assert.equal(size.store, 'wpa-tuning')
+  assert.deepEqual(size.path, ['158', 'treatments', 'main', 'layout', 'size'])
+  const band = parseIdentityFieldId('identity.wpaTreatment.158.main.band')
+  assert.deepEqual(band.path, ['158', 'treatments', 'main', 'band'])
+  const milbSize = parseIdentityFieldId('identity.milbWpaTreatment.235.home.size')
+  assert.equal(milbSize.store, 'milb-treatment-tuning')
+  assert.deepEqual(milbSize.path, ['235', 'treatments', 'home', 'wpaLayout', 'size'])
 })
 
 test('an id outside the catalog resolves to nothing', () => {
@@ -93,6 +112,8 @@ test('an id outside the catalog resolves to nothing', () => {
     'identity.colors.abc.primary',
     'identity.colors.158.__proto__',
     'identity.colors.158.primary.extra',
+    'identity.milbWpaTreatment.235.home.ownArt', // MiLB has no upload destination for a WPA-only mark
+    'identity.wpaTreatment.158.road.band', // not a treatment
     'copy.ballpark.name',
     'identity.colors.158',
     '',
@@ -138,6 +159,47 @@ test('a value is coerced to the type its store holds, or refused', () => {
   assert.equal(coerceIdentityValue(originY, 'top'), 'top')
   assert.equal(coerceIdentityValue(originY, '30%'), '30%')
   assert.equal(coerceIdentityValue(originY, 'sideways'), undefined)
+
+  // The one non-scalar kind: a shape-index pin map, JSON-encoded on the wire
+  // like every other value here, decoded into the object the store holds.
+  const pins = IDENTITY_DIMENSIONS.mono.fields.parts
+  assert.deepEqual(coerceIdentityValue(pins, '{"0":"ink","3":"knockout"}'), { 0: 'ink', 3: 'knockout' })
+  assert.deepEqual(coerceIdentityValue(pins, '{}'), {}, 'an empty pin map is a real value — force-automatic')
+  assert.equal(coerceIdentityValue(pins, '{"glove":"ink"}'), undefined, 'not a shape index')
+  assert.equal(coerceIdentityValue(pins, '{"0":"white"}'), undefined, 'not ink/knockout')
+  assert.equal(coerceIdentityValue(pins, '["ink"]'), undefined, 'an array is not a pin map')
+  assert.equal(coerceIdentityValue(pins, 'not json'), undefined)
+
+  const source = IDENTITY_DIMENSIONS.mono.fields.source
+  assert.equal(coerceIdentityValue(source, 'primary'), 'primary')
+  assert.equal(coerceIdentityValue(source, 'base'), 'base')
+  assert.equal(coerceIdentityValue(source, 'mystery'), undefined)
+
+  const fingerprint = IDENTITY_DIMENSIONS.mono.fields.art
+  assert.equal(coerceIdentityValue(fingerprint, '13:52bb6de9'), '13:52bb6de9')
+  assert.equal(coerceIdentityValue(fingerprint, '13-52bb6de9'), undefined)
+  assert.equal(coerceIdentityValue(fingerprint, 'DROP TABLE'), undefined)
+
+  const wordmark = IDENTITY_DIMENSIONS.wpaTreatment.fields.wpaWordmark
+  assert.equal(coerceIdentityValue(wordmark, 'true'), true)
+  assert.equal(coerceIdentityValue(wordmark, 'false'), false)
+  assert.equal(coerceIdentityValue(wordmark, 'yes'), undefined)
+  assert.equal(coerceIdentityValue(wordmark, '1'), undefined)
+
+  // The one other non-scalar kind: a flat fill, OR a pinstripe object — both
+  // JSON-encoded on the wire, like `monoPins`.
+  const band = IDENTITY_DIMENSIONS.wpaTreatment.fields.band
+  assert.equal(coerceIdentityValue(band, '"#F3ECD8"'), '#F3ECD8')
+  assert.deepEqual(
+    coerceIdentityValue(band, '{"pinstripe":true,"color":"rgba(0, 0, 0, 0.16)"}'),
+    { pinstripe: true, color: 'rgba(0, 0, 0, 0.16)' },
+  )
+  assert.deepEqual(coerceIdentityValue(band, '{"pinstripe":true}'), { pinstripe: true }, 'color/bg are optional')
+  assert.equal(coerceIdentityValue(band, '"navy"'), undefined, 'a keyword is not a colour here either')
+  assert.equal(coerceIdentityValue(band, '{"pinstripe":false}'), undefined, 'a flat fill is a string, not this shape')
+  assert.equal(coerceIdentityValue(band, '{"pinstripe":true,"color":"red"}'), undefined)
+  assert.equal(coerceIdentityValue(band, '{"pinstripe":true,"extra":"x"}'), undefined, 'unknown key')
+  assert.equal(coerceIdentityValue(band, 'not json'), undefined)
 })
 
 test('sanitize keeps only known ids with values their field accepts', () => {
@@ -331,6 +393,68 @@ test('an affiliate with no art at all starts wearing its override', () => {
   assert.equal(milbTreatmentTile(SCRATCH, 'home').logoVariant, 'base')
 })
 
+test('a per-treatment WPA override wins over the team-level fallback, and clearing restores what ships', () => {
+  const shippedSize = wpaLogoLayout(158, 'main').size
+  const shippedBand = wpaBandColor(158, 'main')
+  assert.equal(shippedSize, 65, 'fixture assumption: the Brewers ship a tuned Main layout')
+  assert.equal(shippedBand, '#F3ECD8', 'fixture assumption: the Brewers ship a tuned Main band')
+
+  withOverrides(
+    {
+      'identity.wpaTreatment.158.main.size': '80',
+      'identity.wpaTreatment.158.main.band': '"#111111"',
+      // Set alongside it: since Main already has a per-treatment band on
+      // file, this fallback must have NO effect — the whole point of #807.
+      'identity.wpa.158.bandColor': '#EEEEEE',
+    },
+    () => {
+      assert.equal(wpaLogoLayout(158, 'main').size, 80)
+      assert.equal(wpaBandColor(158, 'main'), '#111111', 'the per-treatment override still wins outright')
+    },
+  )
+  assert.equal(wpaLogoLayout(158, 'main').size, shippedSize)
+  assert.equal(wpaBandColor(158, 'main'), shippedBand)
+
+  // A pinstripe object reaches wpaBandPinstripeColor, not just the flat-fill
+  // reader — the Alternate tile ships pinstriped already, so this asserts an
+  // override can flip the LINE COLOUR without disturbing the fill/on-off gate.
+  const shippedStripe = wpaBandPinstripeColor(158, 'alternate')
+  assert.equal(shippedStripe, 'rgba(0, 0, 0, 0.16)', 'fixture assumption: Alternate ships pinstriped')
+  withOverrides({ 'identity.wpaTreatment.158.alternate.band': '{"pinstripe":true,"color":"#ABCDEF"}' }, () => {
+    assert.equal(wpaBandPinstripeColor(158, 'alternate'), '#ABCDEF')
+  })
+  assert.equal(wpaBandPinstripeColor(158, 'alternate'), shippedStripe)
+
+  assert.equal(wpaWordmarkOn(158, 'main'), true, 'fixture assumption: Main ships wearing its wordmark')
+  withOverrides({ 'identity.wpaTreatment.158.main.wpaWordmark': 'false' }, () => {
+    assert.equal(wpaWordmarkOn(158, 'main'), false)
+  })
+  assert.equal(wpaWordmarkOn(158, 'main'), true)
+})
+
+test('the MiLB WPA dimension reaches milbColors.js the same way', () => {
+  const shippedSize = milbWpaLogoLayout(235, 'home').size
+  const shippedBand = milbWpaBandColor(235, 'home')
+  assert.equal(shippedSize, 37, 'fixture assumption')
+  assert.equal(shippedBand, '#D31245', 'fixture assumption')
+
+  withOverrides(
+    {
+      'identity.milbWpaTreatment.235.home.size': '50',
+      'identity.milbWpaTreatment.235.home.band': '"#222222"',
+      'identity.milbWpaTreatment.235.home.wpaWordmark': 'true',
+    },
+    () => {
+      assert.equal(milbWpaLogoLayout(235, 'home').size, 50)
+      assert.equal(milbWpaBandColor(235, 'home'), '#222222')
+      assert.equal(milbWpaWordmark(235, 'home'), true)
+    },
+  )
+  assert.equal(milbWpaLogoLayout(235, 'home').size, shippedSize)
+  assert.equal(milbWpaBandColor(235, 'home'), shippedBand)
+  assert.equal(milbWpaWordmark(235, 'home'), false)
+})
+
 test('the draft preview layer paints but is never an override', () => {
   try {
     setIdentityPreview({ 'identity.mlbTuning.158.city-connect.scale': '2.2' })
@@ -394,11 +518,52 @@ test('a well-formed save is accepted across every dimension', () => {
       'identity.colors.158.defaultHomeTreatment': 'city-connect',
       'identity.stamp.158.home.scale': '1.1',
       'identity.wpa.158.bandColor': '#0C436A',
+      'identity.wpaTreatment.158.main.size': '70',
+      'identity.wpaTreatment.158.main.band': '"#111111"',
+      'identity.wpaTreatment.158.alternate.band': '{"pinstripe":true,"color":"#ABCDEF","bg":"#FFFFFF"}',
+      'identity.wpaTreatment.158.main.wpaWordmark': 'true',
+      'identity.wpaTreatment.158.main.ownArt': 'false',
+      'identity.milbWpaTreatment.235.home.rowShift': '25',
+      'identity.milbWpaTreatment.235.away.band': '"#333333"',
       'identity.logo.158.alternate': 'https://example.public.blob.vercel-storage.com/x.png',
       'identity.logo.235.away': 'https://example.com/mark.png',
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.source': 'primary',
+      'identity.mono.158.art': '13:52bb6de9',
     }),
     null,
   )
+})
+
+test('a mono pins override lands in the mono-ink store, and reads back through monoInkFor', async () => {
+  // mono-ink.json's own validator (dev-data-stores.mjs's isMonoInkStore) is
+  // what api/identity.js re-runs after merging a save — asserting against it
+  // here is the same "both write paths agree" guarantee the stamp test above
+  // pins for a scalar dimension.
+  assert.equal(
+    identityWriteRefusal({
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.art': '13:52bb6de9',
+    }),
+    null,
+  )
+
+  const { monoInkFor } = await import('../src/lib/monoInk.js')
+  withOverrides(
+    {
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.source': 'primary',
+      'identity.mono.158.art': '13:52bb6de9',
+    },
+    () => {
+      const landed = monoInkFor(158)
+      assert.deepEqual(landed.parts, { 0: 'ink', 3: 'knockout' })
+      assert.equal(landed.source, 'primary')
+      assert.equal(landed.art, '13:52bb6de9')
+    },
+  )
+  // Clearing restores the shipped file's own record.
+  assert.equal(monoInkFor(158)?.source ?? 'base', 'base')
 })
 
 test('an http logo URL cannot reach the store from any path', () => {
