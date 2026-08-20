@@ -20,6 +20,17 @@ const ADVANCE_CODES = {
   // this key the leg fell through to advanceCode's ground-out "GO".
   forced_balk: 'BK',
   field_error: 'E', error: 'E', fielders_choice: 'FC', fielders_choice_out: 'FC',
+  // A runner safely advancing (never retired) during a `double_play`-tagged
+  // play — the trailing runner scoring while the defense turns a force
+  // double play elsewhere on the bases. Every runner entry on a double-play
+  // feed carries the play's own overall eventType regardless of that
+  // runner's own fate, so a safe advance here reads the same as the batter's
+  // own fielder's-choice reach above. Without this key legAdvanceCode fell
+  // to advanceCode's ground-out fallback ('GO'), mislabeling a run that
+  // scored on a fielder's choice as if it scored on a groundout. Verified
+  // against gamePk 819449's top 8th (Tyler Howard scores from 3rd on the
+  // same 6-4-5 double play that puts Victor Izturis on 1st).
+  double_play: 'FC',
   // Verified against gamePk 777747's bottom of the 10th (Brice Turang
   // 1B->2B during Jackson Chourio's walk): without this entry,
   // legAdvanceCode fell back to the enclosing play's own result type
