@@ -435,24 +435,6 @@
   font-size: var(--fs-compact);
   color: var(--text-muted);
 }
-.umpmodal__zone {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.umpmodal__zonecap {
-  margin: 0;
-  flex: 1;
-  font-size: var(--fs-caption);
-  color: var(--text-muted);
-  line-height: var(--lh-ui);
-  text-align: left;
-  /* Natural-case explainer prose reads better than shouted caps for a full
-     sentence — same convention as .tscoremodal__body p. */
-  text-transform: none; /* caps-exempt */
-}
 .umpmodal__gtitle {
   margin: 0 0 6px;
   font-family: var(--font-display);

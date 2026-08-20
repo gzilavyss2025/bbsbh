@@ -525,7 +525,7 @@
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
 }
-.bs__potgDesc {
+#root .bs__potgDesc {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-small);
@@ -535,7 +535,8 @@
      narrative: title case reads better for a play-of-the-game sentence than
      shouting it. The nested .bs__potgWhen inning tag and .bs__potgScore below
      aren't affected — #root * still matches them directly and wins over this
-     rule's inherited value. */
+     rule's inherited value. The `#root` prefix on the selector is what lets
+     this rule beat `#root *` in the first place. */
   text-transform: capitalize; /* caps-exempt: approved title case for the box score's play-of-the-game narrative only */
 }
 /* The inning it happened in, inline ahead of the description — same font as

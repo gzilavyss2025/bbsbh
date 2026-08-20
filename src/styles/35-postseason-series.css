@@ -338,8 +338,9 @@
    a play-by-play-style description reads as a natural sentence, not shouted
    chrome. The nested .psseries__potgWhen/.psseries__potgScore aren't
    affected: #root * still matches them directly and wins over this rule's
-   inherited value. */
-.psseries__potgDesc {
+   inherited value. The `#root` prefix on the selector is what lets this rule
+   beat `#root *` in the first place. */
+#root .psseries__potgDesc {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--fs-small);

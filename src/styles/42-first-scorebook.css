@@ -12,7 +12,8 @@
   color: inherit;
 }
 
-.scorebookstory__prose {
+/* `#root` prefix to beat `#root *` (01-base.css); a bare class selector loses. */
+#root .scorebookstory__prose {
   text-transform: none; /* caps-exempt: retrospective narrative and play descriptions read as natural sentences */
 }
 
