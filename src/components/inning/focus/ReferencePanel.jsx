@@ -249,6 +249,7 @@ function Section({
   rosters,
   workload,
   workloadGameDate,
+  savantMatchup,
   stepAtBatIndex,
   managers,
   uniforms,
@@ -420,7 +421,7 @@ function Section({
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
-    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts })
+    ? buildPreHalfCallouts({ feed, bundle: callouts, inning: effInning, half: effHalf, revealedThrough, workload, gameDate: workloadGameDate, shownCounts, savantMatchup })
     : []
   const notes = mergeNotes(preHalf, marginNotes, shownCounts)
   const armsEmpty = !notes.length && !pitcherTeams.some((t) => t.rows?.length)

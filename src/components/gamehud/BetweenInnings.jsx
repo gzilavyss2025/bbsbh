@@ -15,7 +15,7 @@ import { HalfTally } from './HalfTally.jsx'
 // `{showTally && ...}` slot, so `idx` resets to 0 for free on every new half.
 export function BetweenInnings({
   feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
-  battingSide, getDerived, phase,
+  battingSide, getDerived, phase, savantMatchup,
 }) {
   // This card stages the NEXT half (between-innings.js's nextHalfOf), which in
   // half-index terms is simply the one after this — so that is the half the
@@ -33,9 +33,10 @@ export function BetweenInnings({
   const cards = useMemo(
     () => buildBetweenInnings({
       feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate,
-      shownCounts,
+      shownCounts, savantMatchup,
     }),
-    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts],
+    [feed, bundle, marginNotes, inning, half, revealedThrough, workload, gameDate, shownCounts,
+      savantMatchup],
   )
   const [idx, setIdx] = useState(0)
   const advance = () => setIdx((i) => (i + 1) % (cards.length + 1))

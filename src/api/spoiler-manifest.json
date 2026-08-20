@@ -368,6 +368,18 @@
         "screens/LogbookStatsPage.jsx"
       ]
     },
+    "matchup/forHalf.js": {
+      "class": "caller-gated",
+      "why": "Resolves WHO is in a matchup for one half — the hitters due up and the arm entering — then hands them to matchup/notes.js. The notes carry nothing from tonight; what needs gating is the lineup and pitching-change read, and that gate is inherited: selectDueUpNow and selectHalfStartingPitcher each enforce their own reveal boundary and return null for a half further out than the reader's own next one (ADR-0003/0010) — whether the starter has been pulled yet is exactly the game-flow spoiler that boundary exists to withhold. This module owns ONE gate of its own, re-applying that same halfIndex <= revealedThrough + 1 test to the first-inning probable-pitcher fallback, which selectHalfStartingPitcher cannot answer because it reads the half's first play."
+    },
+    "matchup/notes.js": {
+      "class": "spoiler-free",
+      "why": "Builds the matchup callouts from matchup/savant.js alone. It is HANDED the two players and their season rates and takes no feed at all, so it cannot read a score, an inning, or tonight's line — which is why these notes need no reveal gate and clear even Between Innings' stricter allowlist."
+    },
+    "matchup/savant.js": {
+      "class": "spoiler-free",
+      "why": "Static savant-matchup.json — season Statcast rates plus the league spread they are scored against, over completed games. Same footing as savantPercentiles.js and war.js. MLB-only, like the file itself."
+    },
     "managers.js": {
       "class": "spoiler-free",
       "why": "Static manager-history shards — one person's coaching career."

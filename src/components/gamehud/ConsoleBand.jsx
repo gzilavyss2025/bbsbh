@@ -59,6 +59,7 @@ export function ConsoleBand({
   bundle,
   marginNotes,
   workload,
+  savantMatchup,
   gameDate,
 }) {
   const wide = useMediaQuery(WIDE_QUERY)
@@ -135,6 +136,7 @@ export function ConsoleBand({
             revealedThrough={revealedThrough}
             workload={workload}
             gameDate={gameDate}
+            savantMatchup={savantMatchup}
             battingSide={viewHalf === 'top' ? 'away' : 'home'}
             getDerived={getDerived}
             phase={closePhase}

@@ -29,6 +29,7 @@
 // this card ranks exactly as it always did.
 
 import { halfIndex } from './select.js'
+import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   buildStarterTeamRecordNote,
   buildBullpenThinNote,
@@ -51,6 +52,12 @@ export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
   'leverage', 'centuryClub', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
   'cgShutout', 'recentAppearances',
+  // The matchup families (api/matchup/notes.js) — season Statcast rates for a
+  // due-up hitter against the arm he will face. They read no liveData at all,
+  // so they clear this surface's stricter bar without a gate of their own; what
+  // IS gated is resolving WHO those two players are, which rides on the same
+  // caller-gated selectors the lineup and defense cards already use.
+  'matchupSkill', 'matchupStyle',
 ])
 
 // Top of inning N -> bottom of N; bottom of N -> top of N+1 (api/dueup.js
@@ -61,7 +68,7 @@ function nextHalfOf(inning, half) {
 
 export function buildBetweenInnings({
   feed, bundle, marginNotes = [], inning, half, revealedThrough, workload, gameDate,
-  shownCounts = null,
+  shownCounts = null, savantMatchup = null,
 }) {
   if (!bundle) return []
   const { inning: nInning, half: nHalf } = nextHalfOf(inning, half)
@@ -83,6 +90,14 @@ export function buildBetweenInnings({
     pool.push(buildThirdTimeThroughNote(feed, bundle, nInning, nHalf))
     pool.push(buildTtoPitchesNote(feed, bundle, nInning, nHalf))
   }
+
+  // The hitters due up next half against the arm waiting for them. Pushed
+  // unconditionally: these notes read no liveData, and the reveal gate that
+  // matters — WHO those two players are — is enforced inside the selectors
+  // matchupNotesForHalf goes through, not here (ADR-0003/0010).
+  pool.push(...matchupNotesForHalf({
+    feed, data: savantMatchup, inning: nInning, half: nHalf, revealedThrough,
+  }))
 
   // The hard allowlist — a structural filter, not implicit trust in the callers above.
   const allowed = pool.filter((n) => n && BETWEEN_INNINGS_ALLOWED_KINDS.has(n.kind))
