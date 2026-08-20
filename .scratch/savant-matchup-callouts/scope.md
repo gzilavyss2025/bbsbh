@@ -249,9 +249,12 @@ before any tightening.
 
 | Family | Short form (strip, Between Innings) |
 | --- | --- |
-| A skill collision | `Perdomo chases 21.1% of pitches out of the zone — Tolle draws a chase 35.8% of the time` |
-| B style clash | `Crow-Armstrong pulls 50.4% of his batted balls — hitters pull just 33.3% against Newcomb` |
-| C arsenal | `Nola's curveball is a third of his pitches and misses 43.3% of bats — Caissie whiffs on 56.5% of curveballs` |
+| A skill collision | `Perdomo chases just 21% of the pitches he sees out of the zone; league average is 31%. Tolle draws a chase 36% of the time.` |
+| B style clash | `Crow-Armstrong pulls half his batted balls this season — league average is 39%. Hitters pull just 33% against Newcomb.` |
+| C arsenal | `A third of Nola's pitches are curveballs, and they miss 43% of the swings they draw; Caissie misses on 57% of his swings at a curveball.` |
+
+These are the POST-REVIEW forms. See "Copy review" below for what changed and
+why — the originals had two outright errors in them, not just style problems.
 
 ### The full prose adds the "what that means" sentence
 
@@ -276,6 +279,132 @@ Rules for the prose sentence:
 - It never predicts an outcome ("he'll strike out"). It names the tension.
 - League baselines print only in the prose, never in the short form — that is
   what the short form spends its 150 characters avoiding.
+
+## Copy review — two independent passes, 2026-08-20
+
+Reviewed against two stated principles: does it read like a professional
+game-notes nugget (STATS Inc./Elias/club media relations), and does it read as
+beat-writer prose rather than AI, without being hokey. Two reviewers, run blind
+to each other. They converged on almost everything.
+
+### Two real errors, not style
+
+1. **`chase` was used to mean "swing."** Sub-family A is built on `chase`
+   meaning "swing at a pitch OUT of the zone." Family C's prose said a
+   curveball "misses 43.3% of the bats that chase it," where the denominator is
+   all swings. That makes one word mean two things inside one product.
+   **Ban `chase` as a synonym for `swing` everywhere in this family.**
+2. **"Newcomb gets pulled on just 33.3%."** *Get pulled* means removed from the
+   game. Every reader parses it that way for half a beat. **Never use `pulled`
+   with a pitcher as its subject.**
+
+Also broken: `hits 29.9% on the ground` is not English — it reads as a batting
+average for two words. Use `puts 30% of his batted balls on the ground`.
+
+### The rules that came out of it
+
+- **Round rate percentages. No decimals.** Decimals belong on averages, ERA,
+  mph, pitches per inning — which is exactly what shipped copy already does
+  (`21.4 pitches per inning`, `4.1 foul balls a game`). `vsTeamNote.js:56`
+  already ships the helper: `` const pct = (rate) => `${Math.round(rate * 100)}%` ``.
+  Reuse it. Mixing registers inside one sentence (`41.5%`, then `30%`, then
+  `12%`) was the single loudest "this came out of a dataframe" tell in the batch.
+- **One construction for the league baseline**, matching shipped voice:
+  `league average is X`. The draft had three (`against a league mark of`,
+  `well over the league rate`, `the wrong end of a league mark of`). A notes
+  desk has one and reuses it.
+- **Where a rank is available, print the rank instead.** The app already ships
+  `MLB's No. 2 pitch-spoiler` and has `rankWorthPrinting`. A rank beats a league
+  average in this genre every time.
+- **Scope every note `this season`.** Six shipped notes do it; not one draft
+  line did, and there is cap headroom for it.
+- **Surname only in short forms**, full name on prose first reference —
+  `docs/callouts.md:585`. The draft mixed `Perdomo` with `Miguel Vargas`.
+- **Kill the `just`/`only` tic.** It appeared in three of six lines. Allow an
+  intensifier ONLY when the second number runs opposite to what the sentence has
+  set up — make it a condition in the template, not a default word. Then it
+  reads as judgment, because it is.
+- **Signal polarity in the VERB, never by arithmetic.** The draft used an
+  identical construction for a matchup that is bad for the hitter and one that
+  is good for him. `McGonigle does not miss it, whiffing on 12%`.
+- **Print the sample when it is thin.** The app already does this
+  (`Career .312 against the Cardinals (48 AB)`). A rookie's 12% on 40 swings
+  needs `(61 swings)` or suppression.
+- **Never a dash plus `but`** — the dash already made the turn. One em dash per
+  note, maximum.
+
+### Interpretation: allowed, but rationed
+
+The reviewers split here, and the nugget rule won because it matches shipped
+voice — `Bullpen watch:`, `Laboring:`, `MLB's No. 2 pitch-spoiler` all
+editorialize.
+
+**One interpretive clause per prose form, maximum**, and it must pass this
+test: *could this closer be pasted onto any other note in the family?* If yes,
+it is filler and it gets cut.
+
+- `Whoever blinks first decides the at-bat` — **CUT.** Fits every note in A and
+  half of B. It also breaks its own idiom: whoever blinks first *loses*.
+- `One of those two habits has to give` — **CUT.** Same failure, and it is
+  false: both numbers can hold all night.
+- `He's going to see a lot of them` — **KEEP** (contracted; the draft's
+  uncontracted `He is` is not how a note reads). It only works when the
+  pitcher's best pitch is this hitter's worst, so it cannot migrate, and it
+  tells the scorekeeper what to watch in the next three minutes.
+- `he makes a pitcher come to him` — **KEEP** as A's one clause, inside
+  sentence 1. A then gets no closer.
+
+Expect roughly a third of the family to have no third sentence. A note with
+nothing extra to say should stop.
+
+### The drone problem — rotate the SHAPE, not the words
+
+Every note in three sub-families is the same seesaw: subject A, stat A, dash,
+subject B, stat B. Nine innings across two slots plus a between-innings card is
+15+ impressions of one rhetorical figure, and the reader stops reading words and
+starts reading shape. The fix is syntax, not vocabulary. Three joiners, rotated
+deterministically by note index so no two adjacent notes share a shape:
+
+1. **Em dash** — only when the second clause is CONTEXT for the first (a league
+   average, a sample). Never to introduce a second subject.
+2. **Semicolon** — the true parallel, both clauses taking the same verb.
+3. **Two sentences with a named turn** — the asymmetric case, where one side is
+   the outlier. `McGonigle is the exception: he whiffs on 12%.`
+
+Two further variations worth building as alternate templates:
+
+- **Halve the number density.** Give one stat and name the other side's intent:
+  `Perdomo has swung at 21% of the pitches he's seen out of the zone this
+  season. Tolle needs him to.` One number instead of two. Run it on roughly a
+  third of firings.
+- **Label register**, which the app already owns via `Bullpen watch:` /
+  `Laboring:` — `Curveball night: Nola throws it a third of the time, 43%
+  whiff. Caissie whiffs on 57%.` Completely different silhouette on the page.
+
+Supporting mechanic: **vary precision by magnitude** — rates over 50 round to
+whole, a rate near a clean fraction gets words (`a third of the time`). Applying
+one rule uniformly is what makes copy feel templated; keying it to the number's
+own size is what a person does without thinking.
+
+### The cap problem the reviewers could not see
+
+Both reviewed SENTENCES. The app generates TEMPLATES with variable-length name
+slots, and the improved, properly-scoped forms run 118–145 characters against a
+150 cap. Measured against real name pairs, the best C-family shape overflows:
+
+| pitcher / batter | 145-char shape | 136-char shape |
+| --- | --- | --- |
+| Nola / Caissie | 145 | 136 |
+| Skenes / McGonigle | 149 | 140 |
+| Yamamoto / Guerrero Jr. | **154** | 145 |
+| Crow-Armstrong / Witt Jr. | **156** | 147 |
+| Yoshinobu Yamamoto / Vladimir Guerrero Jr. | **173** | **164** |
+
+**So the builder must be length-aware**, with a documented drop order rather
+than a truncation: drop the league-average clause first, then the sample
+parenthetical, then fall back to the short parallel shape. Same graceful-
+degradation discipline the MiLB selectors already use. Do NOT solve this by
+raising the cap — 150 is the measured ceiling of the existing strip.
 
 ### Not doing: a tap-to-open gloss
 
