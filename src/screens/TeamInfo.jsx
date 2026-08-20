@@ -250,7 +250,7 @@ export function TeamInfo({
           className="refreshbtn--float"
         />
         {onCatchUp ? (
-          /* CATCH UP TO LIVE (ADR-0054), on a game already in progress. The
+          /* CATCH UP TO LIVE (ADR-0055), on a game already in progress. The
              pair borrows `.revealsplit` from the innings bar — the same layout,
              and the same reading of which of two side-by-side buttons is the
              quiet one — but NOT its emphasis, and the difference is worth

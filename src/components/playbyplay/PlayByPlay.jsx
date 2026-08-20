@@ -70,7 +70,7 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // full entries list (every entry shown, whether by tapping through or because
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
-// `halfInProgress` (ADR-0054) WITHHOLDS it on the half being PLAYED, where the
+// `halfInProgress` (ADR-0055) WITHHOLDS it on the half being PLAYED, where the
 // entries list is only the half SO FAR: it is held, and reported as
 // `atHalfEdge` for the bar to say so, until the third out lands.
 //
@@ -108,7 +108,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
       : rawEntries
   // May this staged half be promoted to a full commit? Three conditions, one of
   // them the live-half hold — stepCommitReady's own header has all three and why
-  // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0054).
+  // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0055).
   const exhausted = stepping && stepCommitReady(entries, effectiveCap, halfInProgress)
 
   // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
@@ -148,7 +148,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     } else {
       const nextCap = nextStepBoundary(entries, effectiveCap)
       const lastAtBatIndex = lastVisibleAtBatIndex(entries, effectiveCap)
-      // `atHalfEdge`: caught up to a half still in play (ADR-0054).
+      // `atHalfEdge`: caught up to a half still in play (ADR-0055).
       onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex, atHalfEdge: effectiveCap >= entries.length })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps

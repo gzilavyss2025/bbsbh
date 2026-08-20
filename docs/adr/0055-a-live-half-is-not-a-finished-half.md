@@ -1,4 +1,4 @@
-# A live half is not a finished half — the commit waits for the third out, and the lineup page offers to catch you up
+# ADR-0055 — A live half is not a finished half — the commit waits for the third out, and the lineup page offers to catch you up
 
 At-bat stepping (ADR-0016) stages a sealed half one plate appearance at a time
 and then promotes it to an ordinary full commit: `revealedThrough` advances,

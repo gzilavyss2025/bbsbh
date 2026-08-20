@@ -87,7 +87,7 @@ export function clearRevealMarks() {
 // This device's persisted mark for one game, read WITHOUT mounting the hook —
 // for a surface that has to answer "is there anything here to catch up on?"
 // before the innings viewer exists. Its one caller is GameView's lineup page
-// (ADR-0054), which compares it against the live half to decide whether the
+// (ADR-0055), which compares it against the live half to decide whether the
 // "Catch up to live" button is worth drawing at all. Returns -1 for an unknown
 // game, an unset key, or a mangled value — the same fail-closed parse every
 // other reader of this key uses, and the same answer as "nothing revealed yet",
@@ -98,7 +98,7 @@ export function readRevealMarkFor(gamePk) {
   return gamePk ? readRevealMark(`${REVEAL_KEY}${gamePk}`) : -1
 }
 
-// CATCH UP TO LIVE (ADR-0054): ratchet one game's mark to `idx` from outside
+// CATCH UP TO LIVE (ADR-0055): ratchet one game's mark to `idx` from outside
 // the hook, then let the innings viewer mount and read it.
 //
 // THE RATCHET IS NOT BYPASSED, which is the only thing that matters here. It
@@ -140,7 +140,7 @@ export function catchUpRevealTo(gamePk, idx) {
 }
 
 // WHETHER "CATCH UP TO LIVE" IS WORTH OFFERING, and where it lands — the whole
-// decision behind the lineup page's second button (ADR-0054), kept here rather
+// decision behind the lineup page's second button (ADR-0055), kept here rather
 // than on that screen because both halves of it are about THIS key.
 //
 // It is the one bulk reveal in the scoring flow, so what it does is worth

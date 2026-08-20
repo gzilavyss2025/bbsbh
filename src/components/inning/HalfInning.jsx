@@ -46,7 +46,7 @@ export function HalfInning({
   // appearance at a time (the floating bar's "Next at-bat" button) has
   // revealedAtBatCount > 0 before it's fully committed. An already-committed
   // half (revealed) always shows everything regardless.
-  // `halfInProgress` (ADR-0054), resolved by InningViewer once for the half on
+  // `halfInProgress` (ADR-0055), resolved by InningViewer once for the half on
   // screen and handed down rather than re-read here: it decides which pair of
   // buttons the floating bar draws AND whether stepping to the last fetched
   // entry may commit the half, and those two must be one answer, not two.

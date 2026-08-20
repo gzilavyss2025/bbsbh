@@ -214,7 +214,7 @@ hardening** — that is the mistake ADR-0034's "The cutoff is opt-in now" undid.
   "Rest of half", stepping `PlayByPlay`'s cards one plate appearance at a time via a
   transient cursor (`atBatCountFor`, `useRevealProgress`) that collapses into a normal
   `revealTo` commit, not a second spoiler boundary (ADR-0016) — but NOT while the half
-  is still being PLAYED (ADR-0054), where the entry list is only the half SO FAR:
+  is still being PLAYED (ADR-0055), where the entry list is only the half SO FAR:
   `stepCommitReady` withholds the commit, the bar drops "Rest of half", and the live edge
   reads "Caught up" (`selectLiveHalf`, `api/liveEdge.js`). The lineup page's "Catch up to
   live" (`catchUpPlan`) is its sibling: it ratchets to the half BEFORE the live one and

@@ -54,7 +54,7 @@ export function nextStepBoundary(entries, fromCount) {
 }
 
 // MAY A STAGED HALF BE PROMOTED TO A FULL COMMIT? (ADR-0016's `onStepComplete`,
-// amended by ADR-0054.) The commit is one-directional and persisted, so it must
+// amended by ADR-0055.) The commit is one-directional and persisted, so it must
 // only ever mean "this reader has now seen the whole half" — and three separate
 // things have to hold for that sentence to be true.
 //
@@ -63,7 +63,7 @@ export function nextStepBoundary(entries, fromCount) {
 //     can be a leading event note with no plate appearance behind it yet —
 //     extras' automatic placed-runner note is the standing case — and a cap
 //     that has "caught up" to a lone note has caught up to no baseball at all.
-//   • THE HALF IS OVER. This is ADR-0054's addition and the one that is easy to
+//   • THE HALF IS OVER. This is ADR-0055's addition and the one that is easy to
 //     miss, because on a finished half the first two conditions already imply
 //     it. On the half being played they do not: `entries` is the half SO FAR, a
 //     reader scoring along with the game reaches its end within a tap or two of

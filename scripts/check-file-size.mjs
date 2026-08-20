@@ -141,7 +141,7 @@ const BUDGETS = {
   // GameView is the game's ROUTER — one screen per section, each lazily
   // imported, plus the chrome every section shares — so a feature that adds a
   // door lands here by construction rather than by accretion. The catch-up
-  // wiring (ADR-0054) is that: eleven lines, all of them routing. Splitting the
+  // wiring (ADR-0055) is that: eleven lines, all of them routing. Splitting the
   // shared chrome out would move the section tabs into a 12th file in
   // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
   // trades a real limit for a nominal one.

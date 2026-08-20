@@ -145,7 +145,7 @@ export function InningViewer({
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
 
-  // THE HALF THE GAME IS BEING PLAYED IN, or -1 (ADR-0054). Ungated and read at
+  // THE HALF THE GAME IS BEING PLAYED IN, or -1 (ADR-0055). Ungated and read at
   // render top-level, which every other live reading on this screen is not —
   // `selectLiveHalf` reports an inning number and which half and nothing else
   // (see its header in api/liveEdge.js), and no value from it is rendered: the
@@ -444,7 +444,7 @@ export function InningViewer({
   // Next right under the thumb).
   const currentSealed = curIdx > renderRevealedThrough
   // The half on screen is the one being played right now, and the reader has
-  // stepped as far as the feed goes (ADR-0054). Together these swap the sealed
+  // stepped as far as the feed goes (ADR-0055). Together these swap the sealed
   // half's reveal PAIR for a single "Next at-bat" — there is no "rest of half"
   // to reveal while the half is still happening — and, at the edge, for a calm
   // live status rather than a tap that would move nothing.
@@ -517,7 +517,7 @@ export function InningViewer({
 
   const curStepInfo = stepInfo?.forIdx === curIdx ? stepInfo : null
   // Nothing left in the feed to step to, on a half that is still being played
-  // (ADR-0054). Only ever true while `currentHalfLive` — PlayByPlay reports it
+  // (ADR-0055). Only ever true while `currentHalfLive` — PlayByPlay reports it
   // as `capReached && !halfInProgress ? commit : atHalfEdge`, so the two can't
   // disagree — but the `&&` is kept here anyway: this drives a control the
   // reader taps, and a stale report from a half they have since navigated off

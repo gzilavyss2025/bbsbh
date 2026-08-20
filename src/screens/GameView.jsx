@@ -130,7 +130,7 @@ export function GameView({ game, section, onSection }) {
 
   const sketchTeam = sketching ? game[sketching] : null
 
-  // CATCH UP TO LIVE (ADR-0054) — the extra button on the home lineup page for
+  // CATCH UP TO LIVE (ADR-0055) — the extra button on the home lineup page for
   // a reader who opened a game already in progress. `catchUpPlan` decides
   // whether the offer is worth drawing and where it lands (hooks/
   // useRevealProgress.js, beside the ratchet it uses); this screen only does

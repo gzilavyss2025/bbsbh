@@ -114,7 +114,7 @@ export function shouldFollowLiveEdge(edge, prevEdge, prevSeenIdx, curIdx) {
 //
 //   • `selectLiveHalf` — read by InningViewer, which compares its `idx` against
 //     the half on screen to stop a still-being-played half from committing
-//     itself the moment the reader catches up to it. See ADR-0054.
+//     itself the moment the reader catches up to it. See ADR-0055.
 //   • `selectCatchUpTarget` — read on the lineup page, to offer "Catch up to
 //     live" and to name where it lands. The INNING it names never reaches the
 //     screen: the button's label is fixed copy, so a game in the 12th offers
@@ -123,7 +123,7 @@ export function shouldFollowLiveEdge(edge, prevEdge, prevSeenIdx, curIdx) {
 //
 // MiLB DEGRADES GRACEFULLY, AND IN THE SAFE DIRECTION. A feed with no
 // `currentInning`/`inningState` reads as "no live half", so no half is ever
-// treated as in progress — the pre-ADR-0054 behaviour, where catching up to the
+// treated as in progress — the pre-ADR-0055 behaviour, where catching up to the
 // last fetched play commits the half. That is the right way to fail: the
 // alternative (assuming a half is live because we cannot prove otherwise) would
 // leave a half that can never commit, and a reader who can never move forward.

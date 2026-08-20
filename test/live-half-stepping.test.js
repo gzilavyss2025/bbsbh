@@ -1,4 +1,4 @@
-// THE HALF YOU ARE IN IS NOT A HALF THAT IS OVER (ADR-0054).
+// THE HALF YOU ARE IN IS NOT A HALF THAT IS OVER (ADR-0055).
 //
 // At-bat stepping (ADR-0016) stages a sealed half one plate appearance at a
 // time and then, once the cap reaches the end of the entry list, promotes it to
@@ -85,7 +85,7 @@ test('no live half before first pitch, once Final, or on a feed that does not sa
   assert.equal(selectLiveHalf(feedAt('Bottom', 9, 'Final')), null)
   assert.equal(selectCatchUpTarget(feedAt('Bottom', 9, 'Final')), null)
   // A MiLB feed that posts no live inning state degrades to "no live half",
-  // which leaves every half treated as finished — the pre-ADR-0054 behaviour,
+  // which leaves every half treated as finished — the pre-ADR-0055 behaviour,
   // and the safe direction to fail: assuming a half is live because we cannot
   // prove otherwise would leave one that can never commit.
   assert.equal(selectLiveHalf(feedAt(undefined, 4)), null)

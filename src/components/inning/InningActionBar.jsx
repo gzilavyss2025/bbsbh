@@ -38,11 +38,11 @@ import { ordinal } from '../../lib/format.js'
 //  • UNDER THE SCORES UNLOCKED PASS at the live frontier (ADR-0026), a calm
 //    status instead of either.
 //
-// A SEALED HALF THAT IS STILL BEING PLAYED SPLITS THE FIRST OF THOSE (ADR-0054).
+// A SEALED HALF THAT IS STILL BEING PLAYED SPLITS THE FIRST OF THOSE (ADR-0055).
 // `halfLive` says the game is in this exact half right now, and it takes "Rest
 // of half" off the bar — there is no rest of the half yet, and the tap would
 // commit a half on the strength of however many batters happen to have reached
-// the feed, which is the whole defect ADR-0054 exists to fix. "Next at-bat"
+// the feed, which is the whole defect ADR-0055 exists to fix. "Next at-bat"
 // stands alone and full width. Then `atHalfEdge` — every fetched entry already
 // stepped through — replaces even that with the same calm live status the pass's
 // frontier gets, because a tap there would move nothing. Neither is a fourth
@@ -96,7 +96,7 @@ export function InningActionBar({
           <span className="liveedge__label">{liveEdgeLabel}</span>
         </div>
       ) : currentSealed && atHalfEdge ? (
-        /* Caught up INSIDE a half still being played (ADR-0054) — the same
+        /* Caught up INSIDE a half still being played (ADR-0055) — the same
            calm status the pass's own frontier gets, and deliberately the same
            markup, because it is the same fact: the reader has reached the game.
            `aria-live="polite"` announces it once when the last tap lands you

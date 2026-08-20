@@ -130,7 +130,7 @@ export function effectiveReveal({ scoresUnlocked, stamped, revealedThrough, unlo
   }
 }
 
-// THE CATCH-UP RATCHET (ADR-0054), against any storage-like object — the pure
+// THE CATCH-UP RATCHET (ADR-0055), against any storage-like object — the pure
 // half of `catchUpRevealTo` in useRevealProgress.js, which owns the window,
 // the try/catch and the cross-tab echo. It is written here, beside `mergeMark`,
 // so the one thing that matters about it is checkable: catching up to a live
