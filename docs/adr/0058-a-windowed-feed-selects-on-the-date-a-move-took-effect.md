@@ -1,4 +1,4 @@
-# ADR-0057 — A windowed feed selects on the date a move took effect
+# ADR-0058 — A windowed feed selects on the date a move took effect
 
 Status: accepted (2026-08-20)
 

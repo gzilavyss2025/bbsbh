@@ -177,7 +177,7 @@ Related research docs, worth reading before wiring a NEW source:
   never a merge of the thirty per-club files — §11 of the wire doc has the
   measurements, §12 what the live read costs. Two traps there: the fetch is
   WIDER than the window it shows (the endpoint filters on a row's filed date,
-  the grouper buckets by its effective one — ADR-0057), and the `/people`
+  the grouper buckets by its effective one — ADR-0058), and the `/people`
   prefilter is safe only because `leagueCandidateIds` is a superset of the
   final rows.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

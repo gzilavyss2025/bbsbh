@@ -136,9 +136,9 @@ Two things, both small.
   Section 8's file table gained `leagueFeed.js`. Every number was re-measured
   by re-running the three probes rather than copied across, so a few counts
   differ from this note by one or two -- the wire moved.
-- **ADR-0057** — "a windowed feed selects on the date a move took effect" —
+- **ADR-0058** — "a windowed feed selects on the date a move took effect" —
   is decision 2 above, written up with the alternative and why it loses. It
-  took 0057 because main landed 0055 and 0056 while this branch was open.
+  took 0058 because main landed 0055, 0056 and 0057 while this branch was open.
 - **`src/api/CLAUDE.md` and `src/components/CLAUDE.md`** carry the pointers.
   Root `CLAUDE.md` is at 200/200 and `src/CLAUDE.md` is pinned at its budget
   (`check-claude-md.mjs` fails on a nested file going UNDER its budget too),

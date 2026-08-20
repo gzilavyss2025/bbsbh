@@ -343,7 +343,7 @@ Decisions this document deliberately does not make:
 
 Two that WERE open here are now answered in §11: a league-wide feed prints one
 event, from the acquiring club, and it reads the wire live. §12 covers what
-reading it live costs, and ADR-0057 which of a row's two dates a window uses.
+reading it live costs, and ADR-0058 which of a row's two dates a window uses.
 
 ## 10. Settled since — the arrival family, and the two kinds of activation
 
@@ -492,7 +492,7 @@ holds. The one story a 3-day fetch misses is a Reds shuffle filed four days
 before it took effect; a 2-day fetch loses twelve, mostly options filed the
 evening before their effective date.
 
-**Which date the WINDOW selects on is ADR-0057**, along with the one class of
+**Which date the WINDOW selects on is ADR-0058**, along with the one class of
 row the choice knowingly omits (a move filed inside the window and backdated
 outside it — 4.6 rows per 48 hours, 79 of 102 saying "retroactive", nearly all
 injured-list placements). Read that before changing either constant.
