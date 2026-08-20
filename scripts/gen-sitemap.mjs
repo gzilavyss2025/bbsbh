@@ -32,15 +32,15 @@
 //     changes a filter, silently. They do not need the sitemap anyway: a club's
 //     roster page names 26 of them as links now, so a crawler reaching one club
 //     reaches its players by following markup, which is how discovery is meant
-//     to work (ADR-0058). If a player listing is ever genuinely wanted, it needs
+//     to work (ADR-0059). If a player listing is ever genuinely wanted, it needs
 //     its own generator and a cut somebody defended — active 40-man rosters, say
 //     — not a data file borrowed for a second job.
 //
-// Per-CLUB pages ARE listed, as of ADR-0058, and that is a reversal of the line
+// Per-CLUB pages ARE listed, as of ADR-0059, and that is a reversal of the line
 // above rather than an exception to it. There are 150 of them, not thousands;
 // realignment moves that list about once a decade; the ids come from
 // public/data/teams.json, which gen-teams.mjs already refreshes weekly, so this
-// script gains no statsapi call and no build dependency; and since ADR-0058 the
+// script gains no statsapi call and no build dependency; and since ADR-0059 the
 // pages carry a readable body instead of an empty div. The address is spelled by
 // route.js's own entitySegment, so a listed URL is byte-identical to the
 // canonical api/preview.js writes for it — a sitemap naming the OTHER of two

@@ -9,7 +9,7 @@
 // the client (see docs/adr/0012-dynamic-link-previews.md). What it FEEDS is no
 // longer only the link-preview card. Each entity builder now also returns a
 // `crawl` description — the readable body api/_lib/crawl.js renders into the
-// page for the crawlers that run no JavaScript (ADR-0058). That body is built
+// page for the crawlers that run no JavaScript (ADR-0059). That body is built
 // from the payload the card already needed, so the request count per route is
 // unchanged; the player call carries one wider `hydrate` clause and nothing
 // else moved.
@@ -219,7 +219,7 @@ async function teamCard(idSegment, origin, { tab } = {}) {
 // makes today. api/preview.js calls this in parallel with buildCard, so the
 // route's wall-clock is unchanged even though its request count is two.
 //
-// What it buys is the reason ADR-0058 leaves player pages out of the sitemap: a
+// What it buys is the reason ADR-0059 leaves player pages out of the sitemap: a
 // crawler that reaches one club roster page reaches 26 player pages from it, by
 // following links, which is how discovery is supposed to work on a site whose
 // whole player set is five figures. Verified 2026-08-20 against teams 158 (MLB),

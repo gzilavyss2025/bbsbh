@@ -69,7 +69,7 @@ async function mount() {
       </ClerkProvider>
     )
   }
-  // The crawlable body api/preview.js wrote into the shell (ADR-0058), cleared
+  // The crawlable body api/preview.js wrote into the shell (ADR-0059), cleared
   // the moment the app is ready to paint over it. It is a SIBLING of #root
   // rather than its contents — React would clear those itself — because the
   // ALL-CAPS INVARIANT is scoped to `#root *`, and a paragraph of prose inside

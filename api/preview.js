@@ -11,7 +11,7 @@
 // replace the marker block. Any failure — statsapi down, card unresolved — falls
 // through to the static default card, so a shared link can never break.
 //
-// It also writes a READABLE BODY for the spoiler-free routes (ADR-0058). The
+// It also writes a READABLE BODY for the spoiler-free routes (ADR-0059). The
 // head has carried a real card since ADR-0012, but the body underneath it was
 // `<div id="root"></div>`, and the crawlers behind AI assistants run no
 // JavaScript — so a player page was a blank div with a good meta description.
@@ -23,7 +23,7 @@
 // no `crawl` object, so there is nothing here to render and no branch to get
 // wrong. A game route is inside the spoiler scope, and the schedule payload that
 // would answer one carries `teams.away.score` and `isWinner` in the same object
-// as the matchup. ADR-0058 argues it.
+// as the matchup. ADR-0059 argues it.
 
 import { SITE_URL } from '../src/copy/landing/site.js'
 import { buildCard, buildRoster } from './_lib/cards.js'

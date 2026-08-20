@@ -9,7 +9,7 @@
 // description. ADR-0053 fixed that for /learn by rendering those guides as real
 // documents. This is the same move applied to the ~30 routes vercel.json already
 // rewrites, and it reuses their already-resolved payload rather than fetching
-// again. ADR-0058.
+// again. ADR-0059.
 //
 // EVERYTHING HERE IS PURE. No fetch, no Redis, no clock, and one import — the
 // slug helpers in ./entity.js, which fetch nothing either. api/_lib/cards.js
@@ -30,7 +30,7 @@
 // a person's identity is spoiler-free and opens live everywhere else in this
 // app; a game route is inside the spoiler scope, and the schedule payload that
 // would answer one carries `teams.away.score` and `isWinner` in the same object
-// as the matchup. ADR-0058 argues why that is a body worth NOT having.
+// as the matchup. ADR-0059 argues why that is a body worth NOT having.
 //
 // WHERE THE MARKUP GOES, and why it is not inside #root. React clears its
 // container on mount, so markup placed in `#root` would be thrown away when the
@@ -53,7 +53,7 @@ import { clean, entitySegment, niceDate } from './entity.js'
 // --- what the page says ----------------------------------------------------
 //
 // Each builder turns a statsapi payload into a `crawl` description; cards.js
-// hangs that on the card and api/preview.js renders it into the page (ADR-0058).
+// hangs that on the card and api/preview.js renders it into the page (ADR-0059).
 // The shape:
 //
 //   { h1, lead, blurb,
@@ -74,7 +74,7 @@ import { clean, entitySegment, niceDate } from './entity.js'
 // They are EXPORTED so they can be unit-tested against a payload with no network
 // call, the same reason `firstNonNull` and `TEAM_TABS` are — and here it buys
 // more than convenience. What these functions do and do not put in a page IS the
-// spoiler claim ADR-0058 makes, so `teamCrawl` emitting no record has to be
+// spoiler claim ADR-0059 makes, so `teamCrawl` emitting no record has to be
 // assertable rather than merely written down.
 
 // A traded player's season comes back as several splits: one per club, plus a
@@ -241,7 +241,7 @@ function esc(s) {
 // Every body ends with the same short rail. A crawler learns a URL from a link,
 // and until now the only markup this site offered one was a sitemap — so the
 // pages that ARE listed there had nothing pointing onward to the pages that are
-// not. See ADR-0058 on why a club's roster page carries the rest of that graph.
+// not. See ADR-0059 on why a club's roster page carries the rest of that graph.
 const SITE_LINKS = [
   { href: '/', text: "Today's games" },
   { href: '/learn', text: 'Scorekeeping guides' },

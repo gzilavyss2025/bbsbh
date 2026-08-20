@@ -1,5 +1,5 @@
 // The crawlable body api/preview.js writes into the shell for the routes
-// vercel.json rewrites — ADR-0058.
+// vercel.json rewrites — ADR-0059.
 //
 // Read api/_lib/crawl.js first. This body is composed COMPLETE and handed to
 // whoever asked, including an anonymous crawler, with no SealBox in front of it
@@ -150,7 +150,7 @@ test('a pitcher gets a pitching line and a hitter a hitting one', () => {
 
 // --------------------------------------------------------------- the spoiler rule
 
-// The structural half of ADR-0058. Everywhere else in this app a score is safe
+// The structural half of ADR-0059. Everywhere else in this app a score is safe
 // because a SealBox decides when a render function runs. Here the HTML is sent
 // complete, so safety has to come from the layer being unable to reach a score
 // at all.

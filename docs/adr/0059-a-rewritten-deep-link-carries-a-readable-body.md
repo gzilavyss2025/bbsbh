@@ -1,4 +1,4 @@
-# ADR-0058 — A rewritten deep link carries a readable body
+# ADR-0059 — A rewritten deep link carries a readable body
 
 Status: accepted (2026-08-20)
 
