@@ -110,6 +110,23 @@ export function scorebookCode(play, batterRunner) {
   const et = play.result?.eventType
   if (REACH_CODES[et]) return { code: REACH_CODES[et], codeKind: HIT_EVENTS.has(et) ? 'hit' : 'reach' }
 
+  // A batter safe on his OWN plate appearance despite eventType `double_play`
+  // — MLB tags the whole play "double_play" whenever two runners are
+  // retired, whether or not the batter is one of them. A fielder's-choice
+  // double play (the defense takes forces at 2nd/3rd instead of 1st,
+  // conceding the batter) reads this way: his own runners[] entry carries
+  // `end: '1B'`, no `isOut` — same shape REACH_CODES.force_out above
+  // documents, just under a different eventType. Without this, chain =
+  // outChain(batterRunner) came back empty (he has no putout/assist credits
+  // on a play he wasn't retired on) and scorebookCode fell through to the
+  // generic fielding-chain-out branch, returning a blank code — an unlabeled
+  // diamond even though PlayDiamond correctly drew him safe at first.
+  // Verified against gamePk 819449's top 8th (Victor Izturis reaches on a
+  // 6-4-5 double play that scores Tyler Howard).
+  if (et === 'double_play' && batterRunner?.movement?.isOut === false) {
+    return { code: 'FC', codeKind: 'reach' }
+  }
+
   const desc = play.result?.description ?? ''
   const chain = outChain(batterRunner)
 
