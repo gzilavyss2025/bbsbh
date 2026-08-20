@@ -53,6 +53,34 @@ export function nextStepBoundary(entries, fromCount) {
   return entries.length
 }
 
+// MAY A STAGED HALF BE PROMOTED TO A FULL COMMIT? (ADR-0016's `onStepComplete`,
+// amended by ADR-0055.) The commit is one-directional and persisted, so it must
+// only ever mean "this reader has now seen the whole half" — and three separate
+// things have to hold for that sentence to be true.
+//
+//   • The cap has reached the end of `entries`. Every card is on screen.
+//   • At least one of them is an `atbat`. A live half's first fetched content
+//     can be a leading event note with no plate appearance behind it yet —
+//     extras' automatic placed-runner note is the standing case — and a cap
+//     that has "caught up" to a lone note has caught up to no baseball at all.
+//   • THE HALF IS OVER. This is ADR-0055's addition and the one that is easy to
+//     miss, because on a finished half the first two conditions already imply
+//     it. On the half being played they do not: `entries` is the half SO FAR, a
+//     reader scoring along with the game reaches its end within a tap or two of
+//     arriving, and committing there hands them every plate appearance that
+//     lands afterwards already revealed — permanently, and on every device they
+//     own. The at-bat-by-at-bat reveal would end, silently, at the exact moment
+//     the reader caught up to the game they are watching.
+//
+// A half still in play reports `atHalfEdge` instead (PlayByPlay), and the
+// commit lands on the tap that reveals the third out, once the half is real.
+export function stepCommitReady(entries, cap, halfInProgress) {
+  if (halfInProgress) return false
+  if (!Array.isArray(entries) || entries.length === 0) return false
+  if (!Number.isInteger(cap) || cap < entries.length) return false
+  return entries.some((e) => e?.kind === 'atbat')
+}
+
 // Focus mode's display windows — one per revealed AT-BAT, NOT one per reveal
 // tap. The two used to be the same walk (this function iterated
 // nextStepBoundary and the caller counted the boundaries at or under the cap),

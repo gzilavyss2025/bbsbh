@@ -50,6 +50,7 @@
 // exactly as it always did.
 
 import { halfIndex } from './select.js'
+import { matchupNotesForHalf } from './matchup/forHalf.js'
 import {
   cumulativeInnings,
   buildStarterTeamRecordNote,
@@ -75,6 +76,7 @@ const PREHALF_MAX_RECORDS = 1
 
 export function buildPreHalfCallouts({
   feed, bundle, inning, half, revealedThrough, workload, gameDate, shownCounts = null,
+  savantMatchup = null,
 }) {
   if (!bundle) return []
   const notes = []
@@ -180,6 +182,14 @@ export function buildPreHalfCallouts({
     const note = buildStarterPitchPaceNote(feed, bundle, inning, half)
     if (note) notes.push(note)
   }
+
+  // 6. The hitters due up in THIS half against the arm they will face — season
+  // Statcast rates on one shared axis, no liveData at all. Like every builder
+  // above it is offered to the ranker and may lose; unlike them it needs no
+  // gate here, because the selectors that resolve the two players own it.
+  notes.push(...matchupNotesForHalf({
+    feed, data: savantMatchup, inning, half, revealedThrough,
+  }))
 
   // strictCaps: this strip has two slots and a pool that is often nothing but
   // record notes. Letting the turned-down tail backfill would hand both slots

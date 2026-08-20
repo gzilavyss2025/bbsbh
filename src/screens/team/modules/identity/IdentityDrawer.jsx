@@ -9,6 +9,8 @@ import { identityGroups, treatmentLabel, treatmentsForClub } from './identityFie
 import { IdentityLogoField } from './IdentityLogoField.jsx'
 import { IdentityMonoField } from './IdentityMonoField.jsx'
 import { IdentityStampPreview } from './IdentityStampPreview.jsx'
+import { IdentityWpaBandField } from './IdentityWpaBandField.jsx'
+import { IdentityWpaPreview } from './IdentityWpaPreview.jsx'
 import '../../../../styles/62-identity-admin.css'
 
 // The identity drawer, under the team hub's club header.
@@ -80,7 +82,22 @@ function Field({ field, value, onChange }) {
     <label className="iddrawer__field" htmlFor={id}>
       <span className="iddrawer__label">{label}</span>
       {hint && <span className="iddrawer__hint">{hint}</span>}
-      {spec.kind === 'pick' ? (
+      {spec.kind === 'boolean' ? (
+        // A checkbox has no blank "no override" state the way a text box's
+        // empty-string-plus-placeholder does, so this shows the EFFECTIVE
+        // current value (draft, else landed) as its own checked state —
+        // same reasoning IdentityWpaBandField gives for starting from
+        // landed rather than empty. Toggling always writes an explicit
+        // 'true'/'false', never clears back to "no override".
+        <label className="iddrawer__checkbox">
+          <input
+            type="checkbox"
+            checked={shown === 'true' || (shown === '' && landed === 'true')}
+            onChange={(e) => onChange(id, e.target.checked ? 'true' : 'false')}
+          />
+          <span>{shown === 'true' || (shown === '' && landed === 'true') ? 'On' : 'Off'}</span>
+        </label>
+      ) : spec.kind === 'pick' ? (
         <select {...common} className="iddrawer__input">
           {/* An empty option is not "none" — it is "whatever this club already
               does", which for these three picks is a real and different answer
@@ -260,12 +277,22 @@ function ParkWashPreview({ venueName, fields }) {
   )
 }
 
-export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, draft }) {
+export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, sportId, draft }) {
   const treatments = treatmentsForClub(teamId, isMilb)
   // The strip's selection, defaulting to the first tile this club has rather
   // than assuming Main — a MiLB affiliate has no Main.
   const treatment = treatments.includes(draft.treatment) ? draft.treatment : treatments[0]
   const groups = identityGroups(teamId, { isMilb, treatment })
+  // The WPA preview's own header-bar recolor (WpaScenarios' `headerColors`) —
+  // this club's resolved bar triad for the treatment on screen, the same
+  // fields the Bar group's own live mock already reads, so the two previews
+  // can't disagree about what this treatment's chrome looks like.
+  const barFields = groups.find((g) => g.key === 'bar')?.fields ?? []
+  const headerColors = {
+    bar: fieldValue(barFields, 'bar'),
+    accent: fieldValue(barFields, 'accent'),
+    onBar: fieldValue(barFields, 'onBar'),
+  }
 
   return (
     <div className="iddrawer">
@@ -317,6 +344,19 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
           {group.key === 'stamp' && (
             <IdentityStampPreview teamId={teamId} name={name} abbreviation={abbreviation} />
           )}
+          {/* The WPA group's own live mockup — no team page otherwise renders
+              this club's band, so without it every field below would be a
+              control with no visible effect until the page it actually
+              wears (the box score, the innings view) shows a real game. */}
+          {group.wpa && (
+            <IdentityWpaPreview
+              teamId={teamId}
+              sportId={sportId}
+              name={name}
+              treatment={treatment}
+              headerColors={headerColors}
+            />
+          )}
           {group.preview === 'parkwash' && <ParkWashPreview venueName={venueName} fields={group.fields} />}
           {group.logo ? (
             <IdentityLogoField
@@ -331,6 +371,21 @@ export function IdentityDrawer({ teamId, isMilb, name, abbreviation, venueName, 
             />
           ) : group.mono ? (
             <IdentityMonoField teamId={teamId} fields={group.fields} values={draft.values} onChange={draft.setValue} />
+          ) : group.wpa ? (
+            <>
+              <div className="iddrawer__fields">
+                {group.fields
+                  .filter((field) => field.spec.kind !== 'band')
+                  .map((field) => (
+                    <Field key={field.id} field={field} value={draft.values[field.id]} onChange={draft.setValue} />
+                  ))}
+              </div>
+              <IdentityWpaBandField
+                field={group.fields.find((field) => field.spec.kind === 'band')}
+                values={draft.values}
+                onChange={draft.setValue}
+              />
+            </>
           ) : (
             <div className="iddrawer__fields">
               {group.fields.map((field) => (

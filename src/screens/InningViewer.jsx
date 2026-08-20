@@ -12,7 +12,7 @@ import {
   halfIndex,
 } from '../api/select.js'
 import { selectHasFirstPitch } from '../api/playbyplay/firstPitch.js'
-import { selectLiveEdge, shouldFollowLiveEdge } from '../api/liveEdge.js'
+import { selectLiveEdge, selectLiveHalf, shouldFollowLiveEdge } from '../api/liveEdge.js'
 import { useCopy } from '../copy/copyContext.js'
 import { selectWinProbPath, selectWinProbBigPlays } from '../api/winprob.js'
 import { computePitcherLines } from '../api/pitchers.js'
@@ -94,6 +94,7 @@ function sameStepInfo(a, b) {
     a.forIdx === b.forIdx &&
     a.nextCap === b.nextCap &&
     a.isLastStep === b.isLastStep &&
+    a.atHalfEdge === b.atHalfEdge &&
     a.lastAtBatIndex === b.lastAtBatIndex
   )
 }
@@ -143,6 +144,20 @@ export function InningViewer({
   const { t: copy } = useCopy()
   const actualCount = useMemo(() => selectInningCount(feed), [feed])
   const regulation = useMemo(() => selectRegulationInnings(feed), [feed])
+
+  // THE HALF THE GAME IS BEING PLAYED IN, or -1 (ADR-0055). Ungated and read at
+  // render top-level, which every other live reading on this screen is not —
+  // `selectLiveHalf` reports an inning number and which half and nothing else
+  // (see its header in api/liveEdge.js), and no value from it is rendered: the
+  // ONLY things it decides are whether stepping to the last fetched at-bat may
+  // commit this half, and which pair of buttons the floating bar draws. Both
+  // must come from one reading, or the bar could offer a commit the page below
+  // it has already decided to withhold.
+  //
+  // `-1` for "no half is in progress" rather than null, so the per-page test
+  // below compares half-indexes to a half-index, in the same units.
+  const liveHalf = useMemo(() => selectLiveHalf(feed), [feed])
+  const liveHalfIdx = liveHalf?.inProgress ? liveHalf.idx : -1
 
   // Reveal high-water mark, extras-unlock state, and the feed-keyed derived
   // cache — see useRevealProgress. The running line and Pitchers section both
@@ -387,6 +402,7 @@ export function InningViewer({
         vsTeam={vsTeam}
         highlights={highlights}
         atBatCountFor={atBatCountFor}
+        halfInProgress={idx === liveHalfIdx}
         windowed={focus.windowed}
         focusStep={focus.step}
         onFocusInfo={focus.reportSteps}
@@ -427,6 +443,12 @@ export function InningViewer({
   // scroll or focus jump (the results appear above the button, which flips to
   // Next right under the thumb).
   const currentSealed = curIdx > renderRevealedThrough
+  // The half on screen is the one being played right now, and the reader has
+  // stepped as far as the feed goes (ADR-0055). Together these swap the sealed
+  // half's reveal PAIR for a single "Next at-bat" — there is no "rest of half"
+  // to reveal while the half is still happening — and, at the edge, for a calm
+  // live status rather than a tap that would move nothing.
+  const currentHalfLive = curIdx === liveHalfIdx
   // The console chrome is unconditional now (every half gets the anchored
   // band + tabbed reference panel); useFocusMode only decides whether the
   // play-by-play windows to one at-bat or shows the whole half stacked.
@@ -494,6 +516,12 @@ export function InningViewer({
   }, [])
 
   const curStepInfo = stepInfo?.forIdx === curIdx ? stepInfo : null
+  // Nothing left in the feed to step to, on a half that is still being played
+  // (ADR-0055). Only ever true while `currentHalfLive` — PlayByPlay reports it
+  // as `capReached && !halfInProgress ? commit : atHalfEdge`, so the two can't
+  // disagree — but the `&&` is kept here anyway: this drives a control the
+  // reader taps, and a stale report from a half they have since navigated off
+  // must not be able to draw a live status over a historical half.
   // The literal `1` for a fresh half's first tap is a starting guess, not a
   // guarantee: this component has no legitimate way to know whether the
   // half's first entry is a leading event note rather than a plate
@@ -504,6 +532,8 @@ export function InningViewer({
   // (or calls it in some other way) must preserve that correction itself, or
   // the "reveal just a lone note" bug this pairing exists to prevent comes
   // back.
+  const atHalfEdge = currentHalfLive && curStepInfo?.atHalfEdge === true
+
   const revealNextAtBat = () => {
     focus.followLatest() // show the new at-bat even if the reader paged back
     revealAtBat(effInning, effHalf, curAtBatCount === 0 ? 1 : (curStepInfo?.nextCap ?? curAtBatCount + 1))
@@ -937,6 +967,8 @@ export function InningViewer({
         atLiveEdge={atLiveEdge}
         liveEdgeLabel={liveEdgeLabel}
         currentSealed={currentSealed}
+        halfLive={currentHalfLive}
+        atHalfEdge={atHalfEdge}
         effInning={effInning}
         effHalf={effHalf}
         onRevealNextAtBat={revealNextAtBat}
