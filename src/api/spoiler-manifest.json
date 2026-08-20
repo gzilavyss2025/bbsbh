@@ -758,6 +758,10 @@
       "class": "spoiler-free",
       "why": "The league-wide grouping pass for the home page's last-48-hours feed (issue #772): every raw wire row gets one owning club, then the club-scoped pipeline runs per owner. Reads /api/v1/transactions live, which carries roster moves and dates and no score at all."
     },
+    "transactions/leagueFeed.js": {
+      "class": "spoiler-free",
+      "why": "The LIVE reader behind the home slate's 48-hour roster-move card (issue #772, product decision 4): it owns the window arithmetic and the /transactions + /people fetch chain, then hands the rows to transactions/league.js. Everything it touches is a roster move, a club and a date — no linescore, no game feed, no score anywhere on the path."
+    },
     "transactions/vocabulary.js": {
       "class": "spoiler-free",
       "why": "The wire vocabulary half of teamTransactions.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."

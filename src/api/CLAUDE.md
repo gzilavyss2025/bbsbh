@@ -166,10 +166,18 @@ Related research docs, worth reading before wiring a NEW source:
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
   before touching `teamTransactions.js` or building anything league-wide. The
-  pipeline sits in four files along three seams: `transactions/vocabulary.js`
+  pipeline sits in five files along four seams: `transactions/vocabulary.js`
   answers *is this row news, and whose?*; `teamTransactions.js` decides which
   rows belong in one story; `transactions/cutline.js` turns a story into words;
-  and `transactions/league.js` runs the whole thing once per OWNING club over
-  the entire league, for the home feed. A league-wide feed is never a merge of
-  the thirty per-club files — §11 of the wire doc has the measurements.
+  `transactions/league.js` runs the whole thing once per OWNING club over
+  the entire league, for the home feed; and `transactions/leagueFeed.js` is the
+  LIVE reader beside the build-time-fetch pattern above — the home slate's
+  48-hour card reads the wire on page load, because a card headed "the last 48
+  hours" fed from a nightly file is up to a day behind. A league-wide feed is
+  never a merge of the thirty per-club files — §11 of the wire doc has the
+  measurements, §12 what the live read costs. Two traps there: the fetch is
+  WIDER than the window it shows (the endpoint filters on a row's filed date,
+  the grouper buckets by its effective one — ADR-0058), and the `/people`
+  prefilter is safe only because `leagueCandidateIds` is a superset of the
+  final rows.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

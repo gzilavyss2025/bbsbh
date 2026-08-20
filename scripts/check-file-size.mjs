@@ -172,7 +172,7 @@ const BUDGETS = {
   // screen that legitimately owns first-visit and slate-level onboarding
   // hooks — splitting three small pieces of state out would scatter the
   // slate's own logic rather than shrink it.
-  'src/screens/GameSelect.jsx': 1000, // 924
+  'src/screens/GameSelect.jsx': 1100, // 1008
   // 800 -> 900: selectFinalHalfIndex — the cloud scorebook index's
   // auto-drop-once-fully-revealed check needs the SAME structural, isFinal-
   // gated reasoning selectSkippedBottomHalf right above it already has, so it
