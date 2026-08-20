@@ -1,7 +1,8 @@
 # Segment 3 — the home slate's 48-hour roster-move card
 
-**Status: the card is built, mounted, and verified in a browser. Docs are not
-updated yet.** Everything under "What is left" below is the remaining work.
+**Status: built, mounted, verified in a browser, and documented.** The docs
+this note was written to hand off are written; see "What is left" at the foot
+for the two things that genuinely remain.
 
 **Branch** `claude/home-txn-card` · **Worktree** `C:\Users\gzilavy\bbsbh-txn-card`
 · **Based on** `origin/main` at `8f7790cd` (segments 1 and 2 both merged: #806,
@@ -119,32 +120,46 @@ hours of the month held **125** (Aug 3–4). Rails run 1 face (×18), 2 (×15),
 
 ## What is left
 
-1. **Docs — the main outstanding item.**
-   - `docs/transactions-wire.md` — add a §12 (or extend §11's "What a live feed
-     has to fetch") with the fetch-width table, the two-pass `/people` result,
-     the static-vs-live affiliate finding, and decision 2's retroactive-IL
-     omission. §11 currently ends by saying a 48-hour card holds 30–45 stories
-     and stops there.
-   - `src/api/CLAUDE.md` — one line pointing at `leagueFeed.js` as the live
-     reader beside the build-time-fetch pattern.
-   - `src/components/CLAUDE.md` and/or `src/CLAUDE.md` — one line for the card,
-     and for why it does not reuse `TeamTransactionsCard`.
-   - Root `CLAUDE.md` is at 200/200 lines — **do not add to it.**
-2. **An ADR is probably warranted** for decision 2 (which date a windowed feed
-   selects on). Highest ADR taken is **0053**; `check-adr-numbers.mjs` guards
-   collisions.
-3. **No e2e spec yet.** `npm run e2e` was not run. A spec asserting the card
-   renders on today's slate, ends on a whole row, and is absent on a past day
-   would be worth having.
-4. **Not verified on a real phone**, only at phone viewports in Chromium.
-5. **`--wide` / desktop layout** is untested past 1280×900.
+Two things, both small.
+
+1. **Not verified on a real phone.** Checked at phone viewports in Chromium
+   only (375x667, 390x844, 430x932), which cannot see a real thumb, a real
+   notch, or Safari's own layout.
+2. **No `preview` deploy has been looked at.** Non-`main` previews are off for
+   this project, so the card has only ever been seen against a dev server.
+
+### Done since this note was written
+
+- **Docs.** `docs/transactions-wire.md` section 12 holds the fetch-width
+  backtest, the two-pass `/people` result and its superset property, the
+  static-vs-live affiliate finding, and the shape a 48-hour card lays out.
+  Section 8's file table gained `leagueFeed.js`. Every number was re-measured
+  by re-running the three probes rather than copied across, so a few counts
+  differ from this note by one or two -- the wire moved.
+- **ADR-0057** — "a windowed feed selects on the date a move took effect" —
+  is decision 2 above, written up with the alternative and why it loses. It
+  took 0057 because main landed 0055 and 0056 while this branch was open.
+- **`src/api/CLAUDE.md` and `src/components/CLAUDE.md`** carry the pointers.
+  Root `CLAUDE.md` is at 200/200 and `src/CLAUDE.md` is pinned at its budget
+  (`check-claude-md.mjs` fails on a nested file going UNDER its budget too),
+  so neither could take a line.
+- **`e2e/league-moves-card.spec.js`** — six cases. It stubs the wire from real
+  `CU` rows re-dated per run, because a captured response would be stale the
+  day after it was taken and empty every winter.
+- **The fit was wrong above a phone, and is fixed.** Decision 3 said "clamped
+  3-8 rows". It could not reach 8 at any size: the measurement walked the list
+  the trim had already shortened, so the count could only ratchet DOWN from
+  `DEFAULT_ROWS`. A 1180px-tall iPad measured itself 868px of room and used
+  427px of it. Every measurement now runs against the full `MAX_ROWS`
+  candidate list, rendered for the one pre-paint frame the measurement needs.
+  After: 375x667 3 rows, 390x844 5, 430x932 6, 1280x900 6, and 8 at 820x1180,
+  1600x1200, 1920x1080 and 2560x1440. The spec's last two cases are the guard
+  and both fail against the old fit.
 
 ## State of the checks
 
-`npm run lint`, `npm test` (11 new tests + the full suite), and `npm run build`
-were all green as of the last full run. The final commit changed only the
-type-label rendering after that run — **re-run all three before pushing
-anything further.**
+`npm run lint`, `npm test` (2,814 unit tests) and `npm run build` are green,
+re-run after the merge with main and again after every commit above.
 
 ## Dev server
 
