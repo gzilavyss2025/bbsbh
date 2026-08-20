@@ -31,7 +31,7 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 //
 // WHOSE BIT IS THIS. The bit is keyed by gamePk and nothing else, so on a
 // shared device it belongs to whoever last used the browser rather than to
-// whoever is signed in. `BoxRevealOwnerGuard` is what settles that, app-wide on
+// whoever is signed in. `OwnerGuards` is what settles that, app-wide on
 // the sign-in transition — it has to be app-wide, because this component's pull
 // is a network round trip and the box score paints from the local bit before it
 // returns. The publish effect below still checks, as a second line: the guard

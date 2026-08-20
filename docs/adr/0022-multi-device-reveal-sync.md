@@ -146,3 +146,53 @@ request shape production never passes.
 
 Fixed by `api/_lib/nodeHandler.js`, a shape-agnostic adapter shared by all three
 Node functions.
+
+## Amendment (2026-08-19) — the mark needs an owner, and adopting it means removing it
+
+**Status:** accepted.
+
+`bbsbh:reveal:{gamePk}` is keyed by gamePk and nothing else. "Nothing else"
+included the account, and nothing cleared it on sign-out. On a device two people
+share, that is the worst leak in this family, because this is the mark the whole
+spoiler rule rests on:
+
+1. A signs in and scores six innings. The marks are written locally and POSTed.
+2. A signs out. The marks stay — local-first, by design.
+3. B signs in and opens that game. The innings viewer renders **six innings
+   already unsealed**, and `RevealCloudSync` publishes A's frontier into B's
+   account, where the ratchet carries it to every device B owns.
+
+Every scoring surface reads this mark — the innings viewer, the scorecard's ink,
+the slate's "pick up your pencil" strip — and it is a ratchet, so B cannot get
+the seals back by signing out again. The marks have to be removed.
+
+**The mark now carries an owner tag**, `bbsbh:revealOwner` — its own key, for the
+reason every channel in this family keeps its own: the channels sync
+independently, over different endpoints, and a device that reached one but not
+another must not be recorded as holding both. `mergeStrategyFor` is unchanged;
+the channel's rules are the React-free `src/lib/account/revealOwner.js`, over the
+storage mechanics in `src/lib/account/deviceOwner.js`.
+
+**`adopt` means clearing.** Unlike a preference document or a shelf there is
+nothing to *replace* these with — one key per game, and the server holds only the
+games this user actually scored — so adopting is a sweep, and each game's own
+pull re-establishes B's. **The at-bat cursor (`bbsbh:reveal-atbat:*`, ADR-0016)
+goes with it**: it is the same reader's position in the same game, and a cursor
+left pointing into a half that just re-sealed is the leak with an extra step.
+
+**The guard is app-wide (`OwnerGuards`), not part of `RevealCloudSync`.**
+That component mounts inside one game and its pull is a network round trip, while
+`useRevealProgress` reads the mark synchronously as the viewer first paints — and
+the slate and the scorecard read the same mark without mounting it at all. The
+publish effect still checks the tag as a second line, since the two are separate
+mounts with no ordering guarantee.
+
+**The ratchet gained exactly one door back**, and it is the key being *removed*.
+No stale or hostile value can re-seal a half through it, because a removal is not
+a value: this app writes nothing to the key but a non-negative integer, so its
+absence can only mean "erase my Tally data" or this guard. Both must re-seal a
+page that is already open — and without the echo, an open viewer would re-persist
+its in-memory mark and undo the clear.
+
+- Pinned by `test/reveal-owner.test.js`, together with ADR-0026's half of the
+  same fix.

@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAuth } from '@clerk/clerk-react'
+import { readRevealOwner } from '../../hooks/useRevealProgress.js'
+import { mergeStrategyFor } from '../../lib/account/preferences.js'
 import { phaseForResponse, reasonForResponse } from '../../lib/account/syncStatus.js'
 import { useSyncReport } from './SyncStatusProvider.jsx'
 
@@ -30,8 +32,20 @@ import { useSyncReport } from './SyncStatusProvider.jsx'
 // never reported by the time you reach /profile. ProfilePage's
 // `normalizeStatus` is what handles that; read its header before assuming a
 // silent channel means "local".
+//
+// ---------------------------------------------------------------------------
+// WHOSE MARK IS THIS? — the shared-device guard (REVEAL_OWNER_KEY)
+// ---------------------------------------------------------------------------
+// The mark is keyed by gamePk and nothing else, so on a
+// shared device it belongs to whoever last used the browser rather than to
+// whoever is signed in. `OwnerGuards` settles that app-wide on the sign-in
+// transition — it has to be app-wide, because this component mounts inside one
+// game while the mark is read by the slate and the scorecard too. The publish
+// effect below still checks, as a second line: the guard and this component are
+// separate mounts with no ordering guarantee between them, and ratcheting A's
+// frontier into B's account is not a mistake worth leaving to mount order.
 export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough, game = null }) {
-  const { isSignedIn, getToken } = useAuth()
+  const { isSignedIn, userId, getToken } = useAuth()
   const report = useSyncReport()
   const lastPosted = useRef(-1)
 
@@ -76,6 +90,10 @@ export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough,
   useEffect(() => {
     if (!isSignedIn || !gamePk || revealedThrough < 0) return
     if (revealedThrough <= lastPosted.current) return
+    // An adopted mark is not this device's to publish. The owner tag is written
+    // by the app-wide guard on sign-in, so this only holds for the window
+    // before that lands — after which the mark itself is gone anyway.
+    if (mergeStrategyFor(readRevealOwner(), userId) === 'adopt') return
     let cancelled = false
     ;(async () => {
       try {
@@ -101,7 +119,7 @@ export function RevealCloudSync({ gamePk, revealedThrough, mergeRevealedThrough,
     return () => {
       cancelled = true
     }
-  }, [isSignedIn, gamePk, revealedThrough, getToken, game, report])
+  }, [isSignedIn, userId, gamePk, revealedThrough, getToken, game, report])
 
   return null
 }

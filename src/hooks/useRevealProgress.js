@@ -14,11 +14,18 @@ import {
   readBoxRevealOwnerIn,
   writeBoxRevealOwnerIn,
 } from '../lib/account/boxReveal.js'
+import {
+  ATBAT_MARK_PREFIX,
+  REVEAL_MARK_PREFIX,
+  clearRevealMarksIn,
+  readRevealOwnerIn,
+  writeRevealOwnerIn,
+} from '../lib/account/revealOwner.js'
 
 // localStorage key prefix + reader for the per-game reveal high-water mark.
 // The parse/merge/unlock rules are the React-free core in revealProgressCore.js
 // (unit-tested there); this hook owns only the storage I/O and React wiring.
-const REVEAL_KEY = 'bbsbh:reveal:'
+const REVEAL_KEY = REVEAL_MARK_PREFIX
 function readRevealMark(storageKey) {
   if (!storageKey) return -1
   try {
@@ -26,6 +33,52 @@ function readRevealMark(storageKey) {
   } catch {
     return -1
   }
+}
+
+// The account this device's reveal marks belong to, and the two operations the
+// shared-device guard needs on them (OwnerGuards.jsx). The rules — WHY the
+// adopt path removes the marks, and why the at-bat cursor goes with them — are
+// the React-free core in src/lib/account/revealOwner.js; these three are the
+// storage I/O, the same division of labour this file keeps everywhere else.
+export function readRevealOwner() {
+  try {
+    return readRevealOwnerIn(window.localStorage)
+  } catch {
+    return ''
+  }
+}
+
+export function writeRevealOwner(userId) {
+  try {
+    return writeRevealOwnerIn(window.localStorage, userId)
+  } catch {
+    return false
+  }
+}
+
+// Take every reveal mark off this device and tell anything mounted about it.
+//
+// The announcement is the part that is easy to leave out and must not be: the
+// browser fires `storage` only in OTHER tabs, so without this echo an innings
+// viewer already on screen would keep rendering from React state after its key
+// was removed underneath it — and would then re-persist that state, undoing the
+// clear. Same mechanism, and same reason, as useStamps.js's notifyLocalChange.
+export function clearRevealMarks() {
+  let cleared = []
+  try {
+    cleared = clearRevealMarksIn(window.localStorage)
+  } catch {
+    return 0
+  }
+  for (const key of cleared) {
+    try {
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue: null }))
+    } catch {
+      // StorageEvent unavailable — an open page re-seals on its next mount
+      // instead, which is the same answer one frame later.
+    }
+  }
+  return cleared.length
 }
 
 // (`revealMarkFor(gamePk)` used to live here — this device's persisted mark for
@@ -43,7 +96,7 @@ function readRevealMark(storageKey) {
 // half, not just the reveal frontier, so this can't assume "frontier" means
 // "the half being viewed"). A stale value from a half that's since been
 // fully committed is simply ignored rather than misread as live progress.
-const ATBAT_KEY = 'bbsbh:reveal-atbat:'
+const ATBAT_KEY = ATBAT_MARK_PREFIX
 function readAtBatMark(storageKey) {
   if (!storageKey) return { halfIdx: -1, count: 0 }
   try {
@@ -88,6 +141,23 @@ export function useRevealProgress(feed, regulation, actualCount) {
     setRevealedThrough((prev) => mergeMark(prev, idx))
   }, [])
 
+  // The one door back through the ratchet, and it is the key being REMOVED —
+  // never a value. No stale or hostile value can re-seal a half through it,
+  // because a removal is not a value: this app writes nothing to this key but a
+  // non-negative integer, so its absence can only mean one of the two things
+  // that take it away deliberately — "erase my Tally data", and the
+  // shared-device guard finding these marks belong to a different account
+  // (clearRevealMarks above). Both must re-seal a page that is already open;
+  // leaving it open would be a score on screen that its reader never asked for.
+  //
+  // The at-bat cursor resets with it. It is the same reader's position in the
+  // same game, and a cursor left pointing into a half that just re-sealed would
+  // be written straight back to storage by the persist effect below.
+  const resealAll = useCallback(() => {
+    setRevealedThrough(-1)
+    setAtBatMark({ halfIdx: -1, count: 0 })
+  }, [])
+
   const revealTo = useCallback(
     (n, half) => {
       mergeRevealedThrough(halfIndex(n, half))
@@ -119,13 +189,16 @@ export function useRevealProgress(feed, regulation, actualCount) {
     if (!storageKey) return
     function onStorage(e) {
       if (e.key !== storageKey) return
-      // Same parse + forward-only merge as every other reveal source: a null
-      // or malformed newValue parses to -1, which the ratchet ignores.
-      mergeRevealedThrough(parseRevealMark(e.newValue))
+      // A removal — `newValue: null` — is the re-seal door described above. A
+      // MANGLED value is not: it parses to -1, which the ratchet ignores, and
+      // must not additionally close a half that is already open.
+      if (e.newValue == null) resealAll()
+      // Same parse + forward-only merge as every other reveal source.
+      else mergeRevealedThrough(parseRevealMark(e.newValue))
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [storageKey, mergeRevealedThrough])
+  }, [storageKey, mergeRevealedThrough, resealAll])
 
   useEffect(() => {
     if (!atBatStorageKey) return
@@ -201,7 +274,7 @@ function readBoxMark(storageKey) {
 }
 
 // The account this device's box-reveal bits belong to, and the two operations
-// the shared-device guard needs on them (BoxRevealOwnerGuard.jsx). The rules
+// the shared-device guard needs on them (OwnerGuards.jsx). The rules
 // are the React-free core in src/lib/account/boxReveal.js — including WHY the
 // adopt path removes the bits rather than ignoring them; these three are the
 // storage I/O, the same division of labour this file keeps everywhere else.
