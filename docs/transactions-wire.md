@@ -288,22 +288,28 @@ pipeline, not of the wire.
 
 ## 8. Where the existing implementation sits
 
-`src/api/teamTransactions.js` + `scripts/gen-team-transactions.mjs` build the
-team page's Transactions card: per-org, per-season static files, with the raw
-rows grouped into narrative "stories". It is club-scoped by design, and the
-findings in `.scratch/home-transactions/findings.md` are why a league-wide feed
-should not be assembled by merging its thirty outputs.
+`src/api/teamTransactions.js` + `src/api/transactions/vocabulary.js` +
+`scripts/gen-team-transactions.mjs` build the team page's Transactions card:
+per-org, per-season static files, with the raw rows grouped into narrative
+"stories". `vocabulary.js` is the half that reads this document — the type-code
+whitelist, the list predicates and the org scoping; `teamTransactions.js`
+groups and writes prose. It is club-scoped by design, and the findings in
+`.scratch/home-transactions/findings.md` are why a league-wide feed should not
+be assembled by merging its thirty outputs.
 
-Three defects it has today, each measured and each still open:
+Defects, each measured:
 
-1. **A waiver claim reads backwards on the club that lost the player** — the
-   sentence is written from the claiming club's side, and `stripLeadingClub`
-   removes whichever club leads it. 18 rows in three weeks.
+1. ~~**A waiver claim reads backwards on the club that lost the player.**~~
+   Fixed in PR #690 — `rowClause` rebuilds the losing side's lead. `TR` and
+   `CLW` are the only two codes naming two MLB clubs (§7), and both now carry a
+   direction-aware clause, so no third case exists. Re-verified over a 60-day
+   live window: `PUR`, `CP` and `WA` never appear on the wire at all, and every
+   `ACQ`/`OBT` row names one MLB club and one independent-league club.
 2. **One player can appear twice in one story** — a designation plus a release the
    same day, or a trade whose 40-man-clearing move names a player already in the
-   trade.
+   trade. **Still open.**
 3. **A busy club's story runs past 400 characters**, because the shuffle grouper
-   clusters a day's leftovers with no cap.
+   clusters a day's leftovers with no cap. **Still open.**
 
 ## 9. Still open
 
@@ -312,10 +318,34 @@ Decisions this document deliberately does not make:
 - Whether a league-wide feed prints one event or each club's view of it.
 - Whether `NUM` belongs in it at all — 1,570 MLB-touching rows a season, and the
   biggest single club-day of the whole season is 31 Rangers changing to number 42.
-- Whether plain activations, `ACQ`-family arrivals and restricted-list placements
-  are news or noise.
 - Whether the wire's own sentences are printed untouched (they name their club
   redundantly under a club heading) or rewritten (which leaves the wire's words
   behind, and every rewrite is a place to be wrong).
 - Whether a feed reads the nightly precompute, which is up to a day behind, or
   the wire directly.
+
+## 10. Settled since — the arrival family, and the two kinds of activation
+
+Measured over a fresh 60-day league-wide window on 2026-08-20
+(`.scratch/home-transactions/probe-coverage.mjs`,
+`probe-bare-activation.mjs`), and now encoded in
+`src/api/transactions/vocabulary.js`:
+
+- **The `ACQ` family is news.** `ACQ`/`OBT`/`PUR`/`CP` are one event in four
+  wordings (§3). All 31 rows in the window are shaped `fromTeam` a non-MLB
+  club, `toTeam` a major-league club — a single MLB club, no direction to get
+  backwards. Whitelisted. Two cautions the shape imposes: the source club is
+  **not in affiliated ball**, so it carries a real statsapi id that must never
+  be linked to a team page; and `OBT` is the one code the wire writes in the
+  **present tense** ("Cardinals obtain RHP Durbin Feltman").
+- **The paternity, bereavement and restricted lists are news.** 47 MLB rows in
+  the window, split evenly between placements and activations. They fell out
+  only because `mentionsInjuredList` does not match them. Whitelisted, with
+  their own rail banners.
+- **A bare activation is NOT news — it is an echo.** "Chicago White Sox
+  activated RHP Luis Castillo." names no list, and **95 of 110** such
+  MLB rows echo a move the feed already tells: **70** a trade, **12** a waiver
+  claim, **13** a recall, selection or signing. Only two rows in sixty days had
+  no arrival within a week. Admitting them as a class would print the
+  deadline's biggest deals twice. They stay dropped — which is why the fix is a
+  **list whitelist**, not a relaxation of the `/activat/i` test.

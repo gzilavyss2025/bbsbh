@@ -941,3 +941,179 @@ test('loadMoreTeamTransactions retries a transient season-file failure in the sa
     globalThis.fetch = originalFetch
   }
 })
+
+// ---------------------------------------------------------------------------
+// Coverage: the two families the noise filter dropped for structural reasons
+// rather than editorial ones (issue #772 segment 1). Every row below is
+// verbatim from a live 60-day league-wide pull on 2026-08-20; the counts cited
+// in the comments come from .scratch/home-transactions/probe-coverage.mjs and
+// probe-bare-activation.mjs, which regenerate them.
+// ---------------------------------------------------------------------------
+
+const METS = { id: 121, name: 'New York Mets' }
+const BLUE_CRABS = { id: 5433, name: 'Southern Maryland Blue Crabs' }
+const CARDINALS = { id: 138, name: 'St. Louis Cardinals' }
+const MONARCHS = { id: 1885, name: 'Kansas City Monarchs' }
+const YANKEES = { id: 147, name: 'New York Yankees' }
+const MARLINS = { id: 146, name: 'Miami Marlins' }
+const WHITE_SOX = { id: 145, name: 'Chicago White Sox' }
+const MARINERS = { id: 136, name: 'Seattle Mariners' }
+
+const ACQ_DARDEN = {
+  id: 920771, typeCode: 'ACQ', date: '2026-06-21', effectiveDate: '2026-06-21',
+  person: { id: 831590, fullName: 'Taylor Darden' }, fromTeam: BLUE_CRABS, toTeam: METS,
+  description: 'New York Mets acquired 2B Taylor Darden from the Southern Maryland Blue Crabs of the Atlantic League.',
+}
+const OBT_FELTMAN = {
+  id: 926970, typeCode: 'OBT', date: '2026-07-10', effectiveDate: '2026-07-11',
+  person: { id: 664687, fullName: 'Durbin Feltman' }, fromTeam: MONARCHS, toTeam: CARDINALS,
+  description: 'St. Louis Cardinals obtain RHP Durbin Feltman from Kansas City Monarchs.',
+}
+
+const PATERNITY_SANCHEZ = [
+  {
+    id: 921332, typeCode: 'SC', date: '2026-06-23', effectiveDate: '2026-06-23',
+    person: { id: 645305, fullName: 'Ali Sánchez' }, toTeam: YANKEES,
+    description: 'New York Yankees placed C Ali Sánchez on the paternity list.',
+  },
+  {
+    id: 922613, typeCode: 'SC', date: '2026-06-26', effectiveDate: '2026-06-26',
+    person: { id: 645305, fullName: 'Ali Sánchez' }, toTeam: YANKEES,
+    description: 'New York Yankees activated C Ali Sánchez from the paternity list.',
+  },
+]
+const BEREAVEMENT_MEYER = {
+  id: 921007, typeCode: 'SC', date: '2026-06-22', effectiveDate: '2026-06-22',
+  person: { id: 676974, fullName: 'Max Meyer' }, toTeam: MARLINS,
+  description: 'Miami Marlins placed RHP Max Meyer on the bereavement list.',
+}
+const RESTRICTED_ABREU = {
+  id: 921066, typeCode: 'SC', date: '2026-06-22', effectiveDate: '2026-06-22',
+  person: { id: 650556, fullName: 'Bryan Abreu' }, fromTeam: ASTROS, toTeam: ASTROS,
+  description: 'Houston Astros placed RHP Bryan Abreu on the restricted list.',
+}
+
+// 2026-08-02, verbatim: the White Sox activated Luis Castillo the same day
+// they traded for him, and again the next day. The bare "activated X" row
+// names no list and is an ECHO of a move the feed already tells — measured
+// over 60 live days, 95 of 110 such MLB rows echo a trade (70), a waiver claim
+// (12) or a recall/selection/signing (13). It must stay dropped.
+const AUG02_CASTILLO = [
+  {
+    id: 934000, typeCode: 'TR', date: '2026-08-02', effectiveDate: '2026-08-02',
+    person: { id: 622491, fullName: 'Luis Castillo' }, fromTeam: MARINERS, toTeam: WHITE_SOX,
+    description: 'Seattle Mariners traded RHP Luis Castillo to Chicago White Sox for RHP Seranthony Domínguez, C Boston Smith, RF Nolan Jones and cash.',
+  },
+  {
+    id: 934008, typeCode: 'SC', date: '2026-08-02', effectiveDate: '2026-08-02',
+    person: { id: 622491, fullName: 'Luis Castillo' }, toTeam: WHITE_SOX,
+    description: 'Chicago White Sox activated RHP Luis Castillo.',
+  },
+]
+
+test('an independent-league acquisition is a story, and reads as an arrival from outside the org', () => {
+  // `ACQ`/`OBT`/`PUR`/`CP` are one concept in four codes (docs/transactions-
+  // wire.md §3) — a player arriving from outside affiliated ball. None was on
+  // the whitelist. Verified over 60 live days: all 31 rows are shaped
+  // fromTeam=non-MLB, toTeam=MLB, so unlike TR/CLW they name a single major-
+  // league club and carry no direction ambiguity.
+  const days = storiesFor([ACQ_DARDEN], 121)
+  assert.equal(days.length, 1)
+  const [story] = days[0].stories
+  assert.equal(story.type, 'roster-move')
+  // "In", not "Up": he arrives from outside the organisation entirely, so this
+  // is never a rung on the club's own ladder — the same reasoning as a claim.
+  assert.deepEqual(story.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'In', 'Darden']])
+  assert.equal(
+    story.cutline.map((s) => s.text).join(''),
+    'Acquired 2B Taylor Darden from the Southern Maryland Blue Crabs of the Atlantic League.',
+  )
+  // The source club is an independent-league team with no page in this app —
+  // it must never be linkified the way an affiliate or a trade partner is.
+  assert.equal(story.cutline.some((s) => s.teamId === 5433), false)
+})
+
+test('`OBT` is the same event as `ACQ` in a different verb, and groups the same way', () => {
+  const days = storiesFor([OBT_FELTMAN], 138)
+  const [story] = days[0].stories
+  assert.deepEqual(story.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'In', 'Feltman']])
+  // "Obtained", not the wire's own "obtain": `OBT` is the single code written
+  // in the present tense, and every other clause on the card reads past.
+  assert.equal(
+    story.cutline.map((s) => s.text).join(''),
+    'Obtained RHP Durbin Feltman from Kansas City Monarchs.',
+  )
+  assert.equal(story.cutline.some((s) => s.teamId === 1885), false)
+})
+
+test('the paternity, bereavement and restricted lists are stories in both directions', () => {
+  // These take a player off the ACTIVE roster exactly as the injured list
+  // does, but the shared `mentionsInjuredList` test does not match them, so
+  // every one dropped. 47 MLB rows over 60 live days, evenly split between
+  // placements and activations. Each names its own list, so — unlike a bare
+  // activation — none of them can echo a story the feed already tells.
+  const days = storiesFor(PATERNITY_SANCHEZ, 147)
+  assert.deepEqual(days.map((d) => d.date), ['2026-06-26', '2026-06-23'])
+
+  const [activation] = days[0].stories
+  assert.deepEqual(activation.rail.map((r) => [r.role, r.banner, r.surname]), [['in', 'Up', 'Sánchez']])
+  assert.equal(
+    activation.cutline.map((s) => s.text).join(''),
+    'Activated C Ali Sánchez from the paternity list.',
+  )
+
+  const [placement] = days[1].stories
+  // A dedicated banner, for the same reason the injured list gets `IL-15`
+  // rather than "Down": it says WHY he is off the roster, and this is not a
+  // demotion to the minors.
+  assert.deepEqual(placement.rail.map((r) => [r.role, r.banner, r.surname]), [['out', 'PAT', 'Sánchez']])
+  assert.equal(
+    placement.cutline.map((s) => s.text).join(''),
+    'Placed C Ali Sánchez on the paternity list.',
+  )
+})
+
+test('the bereavement and restricted lists carry their own banners too', () => {
+  const [bereavement] = storiesFor([BEREAVEMENT_MEYER], 146)[0].stories
+  assert.deepEqual(bereavement.rail.map((r) => [r.role, r.banner, r.surname]), [['out', 'BRV', 'Meyer']])
+  assert.equal(
+    bereavement.cutline.map((s) => s.text).join(''),
+    'Placed RHP Max Meyer on the bereavement list.',
+  )
+
+  // Verbatim: a restricted-list placement carries the SAME club as fromTeam
+  // and toTeam, which the direct-touch gate and stripLeadingClub both survive.
+  const [restricted] = storiesFor([RESTRICTED_ABREU], 117)[0].stories
+  assert.deepEqual(restricted.rail.map((r) => [r.role, r.banner, r.surname]), [['out', 'RES', 'Abreu']])
+  assert.equal(
+    restricted.cutline.map((s) => s.text).join(''),
+    'Placed RHP Bryan Abreu on the restricted list.',
+  )
+})
+
+test('a bare "activated X" row stays dropped — it echoes the trade it accompanies', () => {
+  // The single most common shape of this row (70 of 110 over 60 live days).
+  // Keeping it would print the deadline's biggest deal twice: once as the
+  // trade, once as a content-free "Activated RHP Luis Castillo."
+  const kept = filterStoryworthy(dedupeTransactions(AUG02_CASTILLO), { orgId: 145 })
+  assert.deepEqual(kept.map((t) => t.typeCode), ['TR'])
+
+  const [story] = storiesFor(AUG02_CASTILLO, 145)[0].stories
+  assert.equal(story.type, 'trade')
+  assert.deepEqual(story.rail.map((r) => r.surname), ['Castillo'])
+})
+
+test('an all-star sweep and an unexplained roster-status row are still not stories', () => {
+  // Guards the widened SC branch against the two shapes it must not admit.
+  const allStars = {
+    id: 3001, typeCode: 'SC', date: '2026-07-14', effectiveDate: '2026-07-14',
+    person: { id: 999020, fullName: 'A Star' }, toTeam: BREWERS,
+    description: 'Milwaukee Brewers all-stars activated.',
+  }
+  const opaque = {
+    id: 3002, typeCode: 'SC', date: '2026-07-14', effectiveDate: '2026-07-14',
+    person: { id: 999021, fullName: 'Nate Pearson' }, toTeam: BREWERS,
+    description: 'RHP Nate Pearson roster status changed by Milwaukee Brewers.',
+  }
+  assert.deepEqual(filterStoryworthy([allStars, opaque], { orgId: 158 }), [])
+})

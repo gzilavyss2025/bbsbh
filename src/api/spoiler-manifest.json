@@ -738,6 +738,10 @@
       "class": "spoiler-free",
       "why": "Roster moves and their dates carry no score — as spoiler-free as rehab.js/rookies.js."
     },
+    "transactions/vocabulary.js": {
+      "class": "spoiler-free",
+      "why": "The wire vocabulary half of teamTransactions.js — the typeCode whitelist, the injured-list and non-injured-list predicates, and the org scoping. Split out under ADR-0038; same footing as its parent, because a roster move and its date carry no score."
+    },
     "teams-static.js": {
       "class": "spoiler-free",
       "why": "The same-origin static club file. Deliberately NOT statsapi — it is what lets /profile issue zero requests to statsapi.mlb.com (ADR-0039)."

@@ -9,7 +9,22 @@
 // Spoiler note: roster moves and their dates carry no score, so nothing here
 // is reveal-only — this module is as spoiler-free as rehab.js/rookies.js.
 
-import { txnDate, mentionsInjuredList } from './rehab-policy.js'
+import { txnDate } from './rehab-policy.js'
+import {
+  OUTSIDE_ARRIVAL_CODES,
+  isIlEndingTxn,
+  isIlPlacementTxn,
+  isIlTransferTxn,
+  isNonIlListEnding,
+  isNonIlListPlacement,
+  nonIlList,
+} from './transactions/vocabulary.js'
+
+// §4's scoping and noise filter live in transactions/vocabulary.js — the
+// wire's vocabulary, split out when this file passed its size budget
+// (ADR-0038). Re-exported here so this module stays the pipeline's single
+// public surface for its existing callers.
+export { bucketToOrg, filterStoryworthy } from './transactions/vocabulary.js'
 
 // ---------------------------------------------------------------------------
 // §2 De-dupe
@@ -103,127 +118,6 @@ export function dedupeTransactions(rows) {
 }
 
 // ---------------------------------------------------------------------------
-// §4 Noise filter
-// ---------------------------------------------------------------------------
-
-// Mirrors person.js's isIlPlacementTxn/isIlEndingTxn keyword logic, split into
-// THREE disjoint categories (placement / activation / IL-to-IL transfer)
-// rather than person.js's two — the story grouper needs to tell a transfer
-// apart from a fresh placement, which person.js's own player-timeline use case
-// never had to. Deliberately a small, self-contained copy rather than an
-// export added to person.js (this pass doesn't touch person.js — same
-// convention as gen-rehab.mjs mirroring detectRehabAssignment).
-//
-// The one thing NOT copied is the list-NAME test: that's mentionsInjuredList
-// (rehab-policy.js), shared with person.js so the pre-2019 "disabled list"
-// wording can't be repaired in one consumer and left broken in the other.
-// Only the verb frames below stay local. Today's generated files start at
-// 2026, so the disabled-list era is out of range in practice — this keeps the
-// two copies honest rather than changing live output.
-function isIlTransferTxn(t) {
-  return (
-    t.typeCode === 'SC' &&
-    /transferred/i.test(t.description || '') &&
-    mentionsInjuredList(t)
-  )
-}
-function isIlPlacementTxn(t) {
-  return (
-    t.typeCode === 'SC' &&
-    /placed/i.test(t.description || '') &&
-    mentionsInjuredList(t) &&
-    !isIlTransferTxn(t)
-  )
-}
-function isIlEndingTxn(t) {
-  return (
-    t.typeCode === 'SC' &&
-    /activat/i.test(t.description || '') &&
-    mentionsInjuredList(t) &&
-    !/all-stars? activated/i.test(t.description || '')
-  )
-}
-
-// The typeCode whitelist (§4 bullet 1). ASG is deliberately absent — every ASG
-// row (a real rehab assignment OR a plain affiliate-to-affiliate promotion)
-// touches only the minors, never the MLB club's active/40-man roster, so none
-// of them are a team-transactions story; bullet 2's specific callout of rehab
-// ASGs is the motivating case, not a second filter on top of this whitelist.
-const STORY_WORTHY_CODES = new Set([
-  'TR', 'SFA', 'SGN', 'IFA', 'SE', 'CU', 'OPT', 'OUT', 'DES', 'REL', 'URL',
-  'CLW', 'PUR', 'WA', 'RET', 'SU', 'DFA',
-])
-
-// `ctx.orgId`, when given, requires a row to touch the MLB club DIRECTLY
-// (fromTeam.id or toTeam.id === orgId), not merely an affiliate bucketToOrg
-// mapped up to this org. Verified against the live feed: a release or
-// suspension can be logged entirely at a single affiliate (e.g. "Wilson
-// Warbirds released RHP Melvin Hernandez," toTeam the Single-A club, no
-// fromTeam, never touching the MLB roster at all) — REL/SU/SFA/SGN/IFA are
-// NOT inherently MLB-anchored the way a trade or a call-up/option is (those
-// always name the MLB club on one side, confirmed against the live feed —
-// see the module header). Rather than special-case which codes can leak,
-// every row must clear this gate.
-// A signing (SFA/SGN/IFA) is the one whitelisted family with no other signal
-// separating a real roster move from anonymous org-filler — a mass minor-
-// league-camp signing spree reads identically to a notable NRI in the raw
-// feed, and (unlike REL/SU) it legitimately carries the MLB club as `toTeam`
-// even when the player is purely organizational depth. `ctx.debutedIds`, when
-// given (a Set of personIds who've appeared in an MLB game — see
-// gen-team-transactions.mjs), is the 80/20 proxy: a signing is suppressed
-// unless its personId is IN the set — a genuinely undebuted signee and a
-// personId this generator run simply couldn't resolve land the same way
-// (suppressed), since there's no way to tell those two apart from a plain Set.
-const SIGNING_CODE_SET = new Set(['SFA', 'SGN', 'IFA'])
-function isUndebutedSigning(t, debutedIds) {
-  if (!debutedIds || !SIGNING_CODE_SET.has(t.typeCode)) return false
-  const pid = t.person?.id
-  return pid != null && !debutedIds.has(pid)
-}
-
-// `DFA` ("elected free agency") is exempt from the direct-touch gate below:
-// verified live across 40 league-wide rows, it's logged with `toTeam` the
-// outrighted/released player's MINOR-LEAGUE club (rarely, if ever, the MLB
-// parent) — the transaction only exists because his MLB-level roster spot
-// is already gone. Treating an affiliate-only DFA row as org-irrelevant
-// noise the way a REL/SU/signing sometimes is would silently drop nearly
-// every real election; a player only reaches free agency via a prior
-// outright/release from the org's own 40-man, so an affiliate-level DFA row
-// IS the MLB-relevant event. `bucketToOrg` (already run before this
-// function — see the generator) is the only org-touch gate this code needs.
-// This exemption is only safe as long as that holds: `filterStoryworthy` has
-// exactly one caller in the codebase (gen-team-transactions.mjs), and it
-// always runs bucketToOrg first. A future second caller MUST do the same, or
-// re-add a direct-touch check scoped to just that caller — don't loosen this
-// gate itself.
-const DIRECT_TOUCH_EXEMPT_CODES = new Set(['DFA'])
-
-export function filterStoryworthy(rows, ctx = {}) {
-  return (rows ?? []).filter((t) => {
-    if (
-      ctx.orgId != null &&
-      !DIRECT_TOUCH_EXEMPT_CODES.has(t.typeCode) &&
-      t.fromTeam?.id !== ctx.orgId &&
-      t.toTeam?.id !== ctx.orgId
-    ) return false
-    if (isUndebutedSigning(t, ctx.debutedIds)) return false
-    if (t.typeCode === 'SC') {
-      return isIlPlacementTxn(t) || isIlEndingTxn(t) || isIlTransferTxn(t)
-    }
-    return STORY_WORTHY_CODES.has(t.typeCode)
-  })
-}
-
-// Keep a row only if it touches this org's own MLB club or one of its
-// affiliates (§4 bullet 3) — drops a pure affiliate-to-affiliate lateral that
-// never involves the parent org. Runs BEFORE dedupe/filter in the generator
-// (a league-wide fetch has to be bucketed to one org first — see §5).
-export function bucketToOrg(rows, orgId, affilToOrg) {
-  const ownsTeam = (id) => id != null && (id === orgId || affilToOrg?.get(id) === orgId)
-  return (rows ?? []).filter((t) => ownsTeam(t.fromTeam?.id) || ownsTeam(t.toTeam?.id))
-}
-
-// ---------------------------------------------------------------------------
 // Shared helpers: position resolution, name/label formatting, prose stitching
 // ---------------------------------------------------------------------------
 
@@ -306,7 +200,14 @@ function rowClause(row, ctx = {}) {
     const claimant = row.toTeam?.name ? ` to the ${row.toTeam.name}` : ''
     return `lost ${player}${claimant} on a waiver claim.`
   }
-  return stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name])
+  const clause = stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name])
+  // `OBT` is the one code the wire writes in the PRESENT tense — "St. Louis
+  // Cardinals obtain RHP Durbin Feltman from Kansas City Monarchs" — against
+  // the past tense every other row and every clause here uses. Both OBT rows
+  // in a 60-day live window read "obtain", so this is the wording, not a
+  // one-off typo. Repaired here rather than in the vocabulary module: it is a
+  // prose fix, and nothing about the row's MEANING changes.
+  return row.typeCode === 'OBT' ? clause.replace(/^obtain\b/i, 'obtained') : clause
 }
 
 // The same clause capitalized for sentence-initial use (trailing period kept).
@@ -354,7 +255,7 @@ function ilReason(description) {
 // neutral (no active-roster body), null (SU, or a TR with no orgId context)
 // doesn't participate in pairing at all.
 const SIGNING_CODES = new Set(['SFA', 'SGN', 'IFA'])
-const IN_CODES = new Set(['CU', 'SE', 'PUR', ...SIGNING_CODES])
+const IN_CODES = new Set(['CU', 'SE', ...OUTSIDE_ARRIVAL_CODES, ...SIGNING_CODES])
 const OUT_CODES = new Set(['OPT', 'DES', 'OUT', 'REL', 'URL', 'WA', 'RET', 'DFA'])
 // TR and CLW are the ONLY two codes naming two different MLB clubs
 // (docs/transactions-wire.md §3); every other names one club plus its own
@@ -377,6 +278,10 @@ function rowDirection(t, orgId) {
     if (isIlTransferTxn(t)) return 'transfer'
     if (isIlPlacementTxn(t)) return 'out'
     if (isIlEndingTxn(t)) return 'in'
+    // The paternity/bereavement/restricted lists move the same direction the
+    // injured list does — off the active roster and back onto it.
+    if (isNonIlListPlacement(t)) return 'out'
+    if (isNonIlListEnding(t)) return 'in'
     return null
   }
   return null
@@ -587,9 +492,17 @@ function bannerFor(storyType, role, row) {
   if (storyType === 'suspension') return 'Out'
   if (storyType === 'injured-list') return role === 'out' ? ilBanner(row) : 'Up'
   if (role === 'transfer') return ilBanner(row)
-  // A waiver claim crosses ORGS (see TWO_CLUB_CODES), so it reads In/Out like a
+  // A non-IL list gets its own banner for the same reason the injured list
+  // gets `IL-15` rather than "Down": it says WHY the player is off the active
+  // roster, and none of these three is a demotion to the minors. The matching
+  // activation keeps the plain "Up" an IL return already reads.
+  if (isNonIlListPlacement(row)) return nonIlList(row).banner
+  // A waiver claim crosses ORGS (see TWO_CLUB_CODES), and an ACQ-family row
+  // comes from outside affiliated ball altogether, so both read In/Out like a
   // trade — never the Up/Down of a move on this club's own ladder.
-  if (row.typeCode === 'CLW') return role === 'in' ? 'In' : 'Out'
+  if (row.typeCode === 'CLW' || OUTSIDE_ARRIVAL_CODES.has(row.typeCode)) {
+    return role === 'in' ? 'In' : 'Out'
+  }
   return role === 'in' ? 'Up' : 'Down'
 }
 
@@ -822,10 +735,18 @@ function cutlineSingle(story, ctx, emphasis) {
 // affiliate a player was optioned to/recalled from, …), longest name first
 // so a shorter name that happens to be another's substring never wins the
 // match first (no real case today, just a defensive ordering).
+//
+// An ACQ-family row's `fromTeam` is the one club here that is NOT in
+// affiliated ball — the Southern Maryland Blue Crabs, the Kansas City
+// Monarchs. It carries a real statsapi id and a real name, so it would
+// linkify exactly like a trade partner and lead to a team page this app
+// cannot build. The typeCode is what says so: these codes MEAN "from outside
+// affiliated ball," so the exclusion needs no roster of independent leagues.
 function teamCandidatesFor(story) {
   const seen = new Map()
   for (const r of story.rows) {
-    for (const t of [r.row.fromTeam, r.row.toTeam]) {
+    const outsideArrival = OUTSIDE_ARRIVAL_CODES.has(r.row.typeCode)
+    for (const t of [outsideArrival ? null : r.row.fromTeam, r.row.toTeam]) {
       if (t?.id != null && t?.name && !seen.has(t.id)) seen.set(t.id, t)
     }
   }
