@@ -52,6 +52,11 @@ export const MILB_SIDES = ['home', 'away']
 // would land a record no resolver ever reads.
 const MLB_BAR_KEYS = ['main', 'city-connect']
 
+// The seven WPA tile-layout numbers (lib/wpa/wpaLogo.js's wpaTilePlacements) —
+// shared by `wpaTreatment` and `milbWpaTreatment` below to decide which
+// sub-object a field nests under.
+const WPA_LAYOUT_FIELDS = new Set(['size', 'rotate', 'offsetX', 'offsetY', 'paddingX', 'paddingY', 'rowShift'])
+
 // Which swatch store a non-Main MLB treatment's tile fill lives in. Main has no
 // entry: its fill is the club's own `bgHex`/`bg` role in the tuning store, which
 // is why `bgHex` is an mlbTuning field and this map has five keys, not six.
@@ -104,6 +109,7 @@ function isHttpsUrl(value) {
 const color = () => ({ kind: 'color' })
 const number = (min, max, step) => ({ kind: 'number', min, max, step })
 const pick = (values) => ({ kind: 'pick', values })
+const boolean = () => ({ kind: 'boolean' })
 
 // Which CDN mark a club's knockout conversion reads — 'base' plus the same
 // alternates logoCdn.js's LOGO_VARIANTS offers (some MiLB clubs' plain base
@@ -123,6 +129,27 @@ const MONO_VERDICTS = new Set(['ink', 'knockout'])
 function isMonoPinsMap(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
   return Object.entries(value).every(([k, v]) => MONO_PART_INDEX.test(k) && MONO_VERDICTS.has(v))
+}
+
+// A WPA band's own value: a flat hex/rgb fill, OR `{ pinstripe: true, color?,
+// bg? }` for the scorebook pinstripe motif (WinProbChart.jsx's
+// PinstripePattern) — the SAME discriminated shape wpa-tuning.json's own
+// `band` key already holds (wpaBandColors.js), so a value saved here is one
+// wpaBandColor/wpaBandPinstripeColor/wpaBandPinstripeBg already know how to
+// read. `color`/`bg` are optional even with pinstripe on — the reader's own
+// DEFAULT_PINSTRIPE_COLOR/white-implied fallback covers an omitted one.
+// `pinstripe: false` is never accepted in object form: nothing this catalog
+// writes produces it (a flat-fill draft is a plain string instead), and
+// admitting it would just be a second, redundant spelling of "not striped".
+const BAND_OBJECT_KEYS = new Set(['pinstripe', 'color', 'bg'])
+function isBandValue(value) {
+  if (typeof value === 'string') return HEX.test(value) || RGB.test(value)
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  if (!Object.keys(value).every((k) => BAND_OBJECT_KEYS.has(k))) return false
+  if (value.pinstripe !== true) return false
+  if (value.color !== undefined && !(HEX.test(value.color) || RGB.test(value.color))) return false
+  if (value.bg !== undefined && !(HEX.test(value.bg) || RGB.test(value.bg))) return false
+  return true
 }
 
 // A raw string as it would LAND in the store, or undefined for "not a value for
@@ -145,6 +172,16 @@ export function coerceIdentityValue(spec, raw) {
       return undefined
     }
     return isMonoPinsMap(parsed) ? parsed : undefined
+  }
+  if (spec.kind === 'boolean') return value === 'true' ? true : value === 'false' ? false : undefined
+  if (spec.kind === 'band') {
+    let parsed
+    try {
+      parsed = JSON.parse(value)
+    } catch {
+      return undefined
+    }
+    return isBandValue(parsed) ? parsed : undefined
   }
   if (spec.kind === 'number') {
     const n = Number(value)
@@ -277,13 +314,93 @@ export const IDENTITY_DIMENSIONS = {
     retroactive: true,
   },
 
-  // The win-probability band's fill for a club. Team-level, like the store's own
-  // `bandColor`.
+  // The win-probability band's team-level FALLBACK fill (wpaBandColors.js's
+  // BAND_COLOR_OVERRIDES) — reached only by a club with no `wpaTreatment`
+  // entry of its own for Main (wpaBandColor's own two-tier chain). Most tuned
+  // clubs carry a full per-treatment record instead (see `wpaTreatment`
+  // below), which always wins outright when present; this field is the
+  // drawer's escape hatch for the clubs that do not (issue #807).
   wpa: {
     store: () => 'wpa-tuning',
     teamLevel: true,
     path: (teamId, field) => [teamId, field],
     fields: { bandColor: color() },
+  },
+
+  // A WPA band's real per-(club, treatment) tuning — `wpa-tuning.json`'s
+  // `treatments.{key}` record, the SAME one wpaLogoLayout/wpaBandColor/
+  // wpaWordmarkOn/WPA_OWN_ART (lib/wpa/wpaLogo.js, lib/wpa/wpaBandColors.js)
+  // already read, and the record most tuned clubs actually carry — see
+  // `wpa` above for the team-level fallback this always wins over. Filed as
+  // issue #807: before this dimension existed, the drawer's only WPA control
+  // was that fallback, which is inert for every club with a per-treatment
+  // record on file.
+  //
+  // The seven layout numbers are siblings on their OWN `layout` sub-object
+  // (mirroring `mlbHeader`'s `header` nesting), while `band`/`wpaWordmark`/
+  // `ownArt` sit directly on the treatment record — `path` branches on the
+  // field name rather than splitting into two dimensions, since both halves
+  // share one store and one key vocabulary.
+  //
+  // `band` is the one non-scalar field (see `isBandValue` above): a flat hex
+  // fill, or a pinstripe object — the discriminated union can't be
+  // decomposed into independent scalar ids the way the layout numbers can,
+  // since a save with `hset` on 3 separate ids has no way to compose them
+  // into one JSON value at one path.
+  //
+  // `ownArt` toggles tiling a separately uploaded WPA-only mark
+  // (WPA_OWN_ART) instead of this treatment's normal art; this drawer has no
+  // upload control for that file, so turning it on with none already
+  // procured is harmless — wpaLogoFor's own resolution chain falls back to
+  // the normal mark when the uploaded file isn't there (ADR-0050 precedent:
+  // an unconfigured escape hatch degrades, it never breaks the render).
+  wpaTreatment: {
+    store: () => 'wpa-tuning',
+    keys: MLB_TREATMENTS,
+    path: (teamId, key, field) =>
+      WPA_LAYOUT_FIELDS.has(field)
+        ? [teamId, 'treatments', key, 'layout', field]
+        : [teamId, 'treatments', key, field],
+    fields: {
+      size: number(5, 200, 1),
+      rotate: number(-180, 180, 1),
+      offsetX: number(-200, 200, 1),
+      offsetY: number(-200, 200, 1),
+      paddingX: number(-100, 100, 1),
+      paddingY: number(-100, 100, 1),
+      rowShift: number(0, 100, 1),
+      band: { kind: 'band' },
+      wpaWordmark: boolean(),
+      ownArt: boolean(),
+    },
+  },
+
+  // The MiLB counterpart, keyed by side rather than treatment and reading a
+  // different store — the same mlbTuning/milbTuning split (see this file's
+  // header). `milb-treatment-tuning.json` names the layout sub-object
+  // `wpaLayout` (not `layout`, which is `milbTuning`'s own `position`
+  // sibling on the same record — see milbColors.js's
+  // MILB_WPA_LOGO_LAYOUT_OVERRIDES), and MiLB has no `ownArt`: milbWpaLogo.js
+  // has no separate upload destination for a WPA-only mark, only the
+  // wordmark toggle.
+  milbWpaTreatment: {
+    store: () => 'milb-treatment-tuning',
+    keys: MILB_SIDES,
+    path: (teamId, key, field) =>
+      WPA_LAYOUT_FIELDS.has(field)
+        ? [teamId, 'treatments', key, 'wpaLayout', field]
+        : [teamId, 'treatments', key, field],
+    fields: {
+      size: number(5, 200, 1),
+      rotate: number(-180, 180, 1),
+      offsetX: number(-200, 200, 1),
+      offsetY: number(-200, 200, 1),
+      paddingX: number(-100, 100, 1),
+      paddingY: number(-100, 100, 1),
+      rowShift: number(0, 100, 1),
+      band: { kind: 'band' },
+      wpaWordmark: boolean(),
+    },
   },
 
   // The slate card's hover/press wash over this club's HOME ballpark photo
