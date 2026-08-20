@@ -226,18 +226,71 @@ is material the reader has ALREADY SEEN — the same footing `foulVolume`,
    card DEPTH would start tracking how eventful the half was, which
    `between-innings.test.js` pins as an invariant.
 
+## Voice spec — DECIDED
+
+**Short form on the strip, full prose on the lineup page.** Decided 2026-08-20.
+
+Every note carries BOTH strings. The builder returns `text` (short) and
+`prose` (long); the surface picks. No surface computes the other one.
+
+### The short form has a measured ceiling
+
+Existing callout templates run a median of **79 characters**, p90 **119**, max
+**150** — that longest one is the times-through note, which is the precedent
+for a two-clause note that names both sides:
+
+> Batters see Imanaga a 3rd time this inning — they're hitting .444 off him the
+> 3rd time through this season (.286 the 1st time)
+
+So: **short form caps at 150 characters**, two clauses joined by an em dash,
+batter fact then pitcher fact. That is the house shape already. It is enough
+for all three families — the prototype's sentences came in at 87–107 characters
+before any tightening.
+
+| Family | Short form (strip, Between Innings) |
+| --- | --- |
+| A skill collision | `Perdomo chases 21.1% of pitches out of the zone — Tolle draws a chase 35.8% of the time` |
+| B style clash | `Crow-Armstrong pulls 50.4% of his batted balls — hitters pull just 33.3% against Newcomb` |
+| C arsenal | `Nola's curveball is a third of his pitches and misses 43.3% of bats — Caissie whiffs on 56.5% of curveballs` |
+
+### The full prose adds the "what that means" sentence
+
+The strip states the collision. The lineup page explains why it matters. Same
+two facts, then one sentence of reading — this is the part the ask was after,
+and it is the part that does not fit on a two-slot strip.
+
+- **A.** *Perdomo chases just 21.1% of the pitches he sees out of the zone,
+  against a league mark of 30.5% — he makes a pitcher come to him. Tolle's game
+  is the opposite: he draws a chase 35.8% of the time. Whoever blinks first
+  decides the at-bat.*
+- **B.** *Crow-Armstrong pulls 50.4% of his batted balls, well over the 39.4%
+  league rate. Newcomb gets pulled on just 33.3% — hitters tend to put his stuff
+  the other way. One of those two habits has to give.*
+- **C.** *Nola throws his curveball a third of the time and misses 43.3% of the
+  bats that chase it. Caissie swings through 56.5% of the curveballs he sees,
+  the wrong end of a league mark of 31.5%. He is going to see a lot of them.*
+
+Rules for the prose sentence:
+
+- It reads the numbers already printed. It never introduces a third statistic.
+- It never predicts an outcome ("he'll strike out"). It names the tension.
+- League baselines print only in the prose, never in the short form — that is
+  what the short form spends its 150 characters avoiding.
+
+### Not doing: a tap-to-open gloss
+
+Considered and dropped. `StatcastPercentiles`' flipped back face works there
+because the gloss is a fixed definition of a metric. Here the gloss is
+per-matchup prose, so it would be a third rendering path for a string the
+lineup page already shows in full.
+
 ## Open decisions
 
-1. **How much explanation?** The ask included a plain-language read ("that
-   means he's swinging at more pitches than he should, but when he connects
-   he's hitting it harder than average"). That is roughly twice the length of
-   any existing callout. Options: full prose everywhere; short form on the
-   strip with prose on the lineup page; or short form plus a tap-to-open gloss
-   like `StatcastPercentiles`' flipped back face.
-2. **Which of the three families ship first?** C (arsenal) is the most striking
+1. **Which of the three families ship first?** C (arsenal) is the most striking
    and the most work. A and B share one code path and are cheap.
-3. **BA display.** Confirm it prints only as color behind a whiff-triggered
-   note, never as its own trigger.
+   **Working default: A and B together, C as a follow-up.**
+2. **BA display.** Confirm it prints only as color behind a whiff-triggered
+   note, never as its own trigger. **Working default: yes.**
 
 ## Reproduction
 
