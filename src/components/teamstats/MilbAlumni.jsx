@@ -29,7 +29,7 @@ export function MilbAlumni({ players, minGames }) {
       <ul className="alum__grid">
         {players.map((p) => (
           <li key={p.id} className="alum__card">
-            <PlayerLink id={p.id} className="alum__portrait" ariaLabel={p.name}>
+            <PlayerLink id={p.id} name={p.name} className="alum__portrait" ariaLabel={p.name}>
               <Headshot
                 personId={p.id}
                 name={p.name}

@@ -119,7 +119,14 @@ function PitcherName({ id, last, first }) {
       type="button"
       ref={ref}
       className="plink pitchers__pname"
-      onClick={() => navigate(playerPath(id, { d: asOf, s: sportId }))}
+      // `first last` for the address, not the 'Trout, Mike' this table shows:
+      // a URL reads the way a name is spoken, and a sorted-column spelling
+      // would slug to 'trout-mike'.
+      onClick={() =>
+        navigate(
+          playerPath(id, { name: first ? `${first} ${last}` : last, d: asOf, s: sportId }),
+        )
+      }
     >
       {text}
     </button>

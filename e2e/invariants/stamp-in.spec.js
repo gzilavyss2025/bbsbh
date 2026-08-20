@@ -173,7 +173,9 @@ test('declining goes back to the schedule and records nothing', async ({ page })
   await page.locator('.consent__btn--dismiss').click()
 
   // Back to the club's Games tab — the page's one and only door (ADR-0042).
-  await expect(page).toHaveURL(new RegExp(`/team/${TEAM}/games`))
+  // The way back is BUILT (teamTabPath), so it carries the club's name even
+  // though PAGE above was entered at the bare id — ADR-0057.
+  await expect(page).toHaveURL(new RegExp(`/team/milwaukee-brewers-${TEAM}/games`))
   await expect(page.locator('.flipback:not(.skel)')).toHaveCount(0)
   expect(await page.evaluate((k) => window.localStorage.getItem(k), CONSENT_KEY)).toBeNull()
   expect(await revealKeys(page)).toEqual([])

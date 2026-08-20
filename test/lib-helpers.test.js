@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ordinal } from '../src/lib/format.js'
+import { nameFromChildren } from '../src/lib/nav.js'
 import { toApiDate, addDays, monthDay, humanDate, scorebookDate, longDate } from '../src/lib/dates.js'
 import { tierForZ, meanAndSd, TIER_LABELS } from '../src/lib/statTiers.js'
 import {
@@ -152,4 +153,42 @@ test('pitchFavor is signed toward the batting team', () => {
   const gifted = pitchFavor(RE_TABLE, 7, 2, 3, 2, true)
   assert.ok(gifted > 0)
   assert.ok(Math.abs(gifted - 1.8) < 1e-9)
+})
+
+// --------------------------------------------------------------------------
+// nameFromChildren — what lets a deep link name its own address (ADR-0057)
+// --------------------------------------------------------------------------
+test('nameFromChildren borrows the name a link is already rendering', () => {
+  assert.equal(nameFromChildren('Mike Trout'), 'Mike Trout')
+  assert.equal(nameFromChildren(['Mike', ' ', 'Trout']), 'Mike Trout')
+  assert.equal(nameFromChildren('  Mike   Trout  '), 'Mike Trout')
+})
+
+test('nameFromChildren flips a scorebook-sorted name into spoken order', () => {
+  // Half this app prints 'Last, First' because that is how a scorebook sorts.
+  // Without the flip those links read '/player/skenes-paul-694973' — backwards,
+  // and not how anybody says or searches the name.
+  assert.equal(nameFromChildren('Skenes, Paul'), 'Paul Skenes')
+  assert.equal(nameFromChildren('Hinch, A.J.'), 'A.J. Hinch')
+  // The suffix belongs to the surname half and stays with it.
+  assert.equal(nameFromChildren('Griffey Jr., Ken'), 'Ken Griffey Jr.')
+  // Split across children, with the comma on its own fragment.
+  assert.equal(nameFromChildren(['Skenes', ', Paul']), 'Paul Skenes')
+  // No comma: returned untouched, which is every club and most people.
+  assert.equal(nameFromChildren('Mike Trout'), 'Mike Trout')
+  assert.equal(nameFromChildren('Tampa Bay Rays'), 'Tampa Bay Rays')
+})
+
+test('nameFromChildren refuses anything that is not a name', () => {
+  // A wrong name in an address is worse than no name, so every one of these
+  // returns '' and the link falls back to the bare-id address.
+  assert.equal(nameFromChildren(null), '')
+  assert.equal(nameFromChildren(undefined), '')
+  assert.equal(nameFromChildren(22), '')          // a uniform number
+  assert.equal(nameFromChildren(['#', 22]), '')   // a number with decoration
+  assert.equal(nameFromChildren('—'), '')
+  // Deliberately shallow: children that are ART carry no string to borrow, and
+  // that caller is expected to pass `name` instead of paying for a recursive
+  // walk on every render.
+  assert.equal(nameFromChildren({ type: 'img', props: {} }), '')
 })

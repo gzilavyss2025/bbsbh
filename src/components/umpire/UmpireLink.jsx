@@ -1,4 +1,4 @@
-import { useNav } from '../../lib/nav.js'
+import { useNav, nameFromChildren } from '../../lib/nav.js'
 import { umpirePath } from '../../lib/route.js'
 
 // Wraps an umpire's name (already rendered as children) in a plain,
@@ -16,7 +16,13 @@ import { umpirePath } from '../../lib/route.js'
 // game, and the answer is one sheet rather than a round trip. The modal's own
 // "Full umpire page" button still reaches the page, so the navigating path is
 // never lost — which is why this is a prop and not a second component.
-export function UmpireLink({ id, className = '', onOpen = null, children }) {
+// `name` is what puts the person's name in the address bar rather than a bare
+// id (route.js, ADR-0057). It defaults to the children when they are already a
+// plain string, which is the ordinary case here — the link IS the name — so
+// almost no caller has to say anything. A caller whose children are ART (a
+// headshot, a club mark) has no string to borrow and should pass `name`
+// explicitly; without it the link still works, just at the bare-id address.
+export function UmpireLink({ id, name, className = '', onOpen = null, children }) {
   const navigate = useNav()
   if (!id) {
     return <span className={className}>{children}</span>
@@ -25,7 +31,7 @@ export function UmpireLink({ id, className = '', onOpen = null, children }) {
     <button
       type="button"
       className={`plink ${className}`}
-      onClick={onOpen ?? (() => navigate(umpirePath(id)))}
+      onClick={onOpen ?? (() => navigate(umpirePath(id, name ?? nameFromChildren(children))))}
     >
       {children}
     </button>

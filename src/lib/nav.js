@@ -54,3 +54,44 @@ export function useRouteLink() {
     }
   }
 }
+
+// The name a link should put in its own address, read off the children it is
+// already rendering. Deep links here wrap a name — `<PlayerLink>Mike
+// Trout</PlayerLink>` — so the slug the URL wants is usually sitting right
+// there, and borrowing it means the address gets a name without ~40 call sites
+// each learning to pass one (route.js `entitySegment`, ADR-0057).
+//
+// Deliberately SHALLOW, and deliberately conservative. It reads a string child,
+// or the string parts of an array of children, and nothing else: it does not
+// walk into elements, because a link whose children are markup is a link whose
+// caller knows the name and can pass `name=` for a fraction of the cost of a
+// recursive walk that runs on every render. Anything with no letters in it (a
+// uniform number, a lone bullet) returns '', and the link falls back to the bare
+// id — a wrong name in an address is worse than no name.
+export function nameFromChildren(children) {
+  const text =
+    typeof children === 'string'
+      ? children
+      : Array.isArray(children)
+        ? children.filter((c) => typeof c === 'string').join(' ')
+        : ''
+  const clean = text.replace(/\s+/g, ' ').trim()
+  return /[a-z]/i.test(clean) ? spokenOrder(clean) : ''
+}
+
+// A scorebook sorts names, so half this app PRINTS 'Skenes, Paul' — the lineup
+// card, the roster panel, the bullpen board, the pitcher handoff. An address is
+// read aloud, and 'skenes-paul' is not how anybody says or searches that name,
+// so the borrow above flips the sorted spelling back.
+//
+// This lives here rather than at each call site because the distortion is
+// SYSTEMATIC: every surface that prints a sorted name is a surface whose link
+// would carry a backwards one, including the next one somebody writes. A name
+// with no comma is returned untouched, which is every club and most people.
+// 'Griffey Jr., Ken' comes back 'Ken Griffey Jr.', because the suffix belongs to
+// the surname half and stays with it.
+const SORTED_NAME = /^([^,]+?)\s*,\s*(.+)$/
+function spokenOrder(name) {
+  const m = SORTED_NAME.exec(name)
+  return m ? `${m[2]} ${m[1]}` : name
+}

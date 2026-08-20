@@ -42,30 +42,41 @@ function esc(s) {
 // This is the only surface that can emit a correct canonical for these routes:
 // the static shell has no idea which route it is about to boot, and vercel.json
 // rewrites ~30 real paths through here WITH the route in hand.
-export function canonicalUrl(params) {
+//
+// A person/club page has TWO working addresses — '/player/545361' and
+// '/player/mike-trout-545361' — because the slugged form had to arrive without
+// breaking any link shared before it existed (route.js, ADR-0057). Two addresses
+// for one page is precisely what rel=canonical is for, and this picks the
+// slugged one: `card.segment`, spelled from the name statsapi just returned
+// rather than from whatever segment the visitor arrived on. So a link carrying
+// a player's OLD club, a truncated slug, or no slug at all still names the same
+// one canonical page. With no card (statsapi down), it falls back to the
+// incoming segment — the address still resolves, and the next crawl fixes it.
+export function canonicalUrl(params, card = null) {
   const route = params.get('route')
+  const entity = card?.segment || params.get('id')
   let path
   switch (route) {
     case 'player':
-      path = `/player/${params.get('id')}`
+      path = `/player/${entity}`
       break
     case 'team':
-      path = `/team/${params.get('id')}`
+      path = `/team/${entity}`
       break
     case 'team-leaders':
-      path = `/team/${params.get('id')}/leaders`
+      path = `/team/${entity}/leaders`
       break
     case 'team-roster':
-      path = `/team/${params.get('id')}/roster`
+      path = `/team/${entity}/roster`
       break
     case 'team-games':
-      path = `/team/${params.get('id')}/games`
+      path = `/team/${entity}/games`
       break
     case 'team-numbers':
-      path = `/team/${params.get('id')}/numbers`
+      path = `/team/${entity}/numbers`
       break
     case 'team-minors':
-      path = `/team/${params.get('id')}/minors`
+      path = `/team/${entity}/minors`
       break
     case 'game':
       path = `/${params.get('date')}/${params.get('matchup')}/${params.get('section')}`
@@ -175,7 +186,7 @@ export default async function handler(req) {
     // The card's IMAGE stays on the request origin (buildCard, above) so a
     // preview deploy renders its own /api/og; the PAGE URL does not, so a
     // preview deploy never advertises itself as canonical.
-    html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams)))
+    html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams, card)))
   }
 
   return new Response(html, {

@@ -1061,7 +1061,7 @@ const posLabel = (pos) => (pos === 'SP' || pos === 'RP' ? 'P' : pos)
 function TeammateHalf({ id, name, pos, teamId }) {
   const { first, last } = splitDisplayName(name)
   return (
-    <PlayerLink id={id} className="teammatecard__half">
+    <PlayerLink id={id} name={name} className="teammatecard__half">
       <span className="teammatecard__shotwrap">
         <Headshot personId={id} name={name} teamId={teamId} className="teammatecard__shot" />
         {pos && <span className="teammatecard__posbadge">{posLabel(pos)}</span>}
@@ -1161,7 +1161,9 @@ function GameNotesButton({ feed, side }) {
 function managerFact(manager) {
   if (!manager) return null
   return (
-    <ManagerLink id={manager.personId} className="fact__person">
+    // The fact PRINTS surname-first; the address takes spoken order
+    // (ADR-0057), which `name` on the same object already is.
+    <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
       {manager.lastFirst}
       {manager.jersey ? (
         <span className="fact__jersey">{manager.jersey}</span>

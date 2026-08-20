@@ -267,7 +267,9 @@ export function TeamHubShell({
           <TeamFilterStrip
             teams={levelTeams.data}
             selectedTeamId={null}
-            onSelect={(navId) => navigate(teamPath(navId, { d: asOf, s: sportId }))}
+            onSelect={(navId, navTeam) =>
+              navigate(teamPath(navId, { name: navTeam?.name, d: asOf, s: sportId }))
+            }
             showMlbPin={false}
             showArrows
             centerTeamId={team.id}

@@ -326,7 +326,10 @@ function LineupName({ entry }) {
         entered ? 'lineupcard__name--in' : ''
       }`}
     >
-      <PlayerLink id={entry.id}>
+      {/* The card PRINTS 'Last, First' — the scorebook's sorted spelling — but
+          the address is spoken order, or the slug would read 'trout-mike'
+          (ADR-0057). */}
+      <PlayerLink id={entry.id} name={[entry.first, entry.last].filter(Boolean).join(' ')}>
         {entry.last}
         {entry.first ? `, ${entry.first}` : ''}
       </PlayerLink>

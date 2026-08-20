@@ -70,7 +70,12 @@ export function RehabPage() {
           <div className="rehabgrid">
             {players.map((p) => (
               <article className="rehabcard" key={p.playerId}>
-                <PlayerLink id={p.playerId} className="rehabcard__portrait" ariaLabel={p.playerName}>
+                <PlayerLink
+                  id={p.playerId}
+                  name={p.playerName}
+                  className="rehabcard__portrait"
+                  ariaLabel={p.playerName}
+                >
                   <Headshot personId={p.playerId} name={p.playerName} teamId={p.orgId} className="rehabcard__shot" />
                 </PlayerLink>
 
@@ -81,7 +86,12 @@ export function RehabPage() {
 
                 <div className="rehabcard__move">
                   {p.orgId ? (
-                    <TeamLink id={p.orgId} className="rehabcard__team" ariaLabel={p.orgName}>
+                    <TeamLink
+                      id={p.orgId}
+                      name={p.orgName}
+                      className="rehabcard__team"
+                      ariaLabel={p.orgName}
+                    >
                       <TeamLogo teamId={p.orgId} name={p.orgName} size={34} />
                     </TeamLink>
                   ) : (
@@ -89,7 +99,12 @@ export function RehabPage() {
                   )}
                   <span className="rehabcard__arrow" aria-hidden="true">→</span>
                   {p.clubId ? (
-                    <TeamLink id={p.clubId} className="rehabcard__team" ariaLabel={p.clubName}>
+                    <TeamLink
+                      id={p.clubId}
+                      name={p.clubName}
+                      className="rehabcard__team"
+                      ariaLabel={p.clubName}
+                    >
                       <TeamLogo teamId={p.clubId} name={p.clubName} size={34} />
                     </TeamLink>
                   ) : (

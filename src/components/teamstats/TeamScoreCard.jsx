@@ -398,7 +398,7 @@ function RankStrip({ league, teamId, compact = false }) {
                 key={r.teamId}
                 type="button"
                 className="rankstrip__chip"
-                onClick={() => navigate(teamPath(r.teamId, { d: asOf, s: sportId }))}
+                onClick={() => navigate(teamPath(r.teamId, { name, d: asOf, s: sportId }))}
                 aria-label={`${name}, ${ordinal(r.rank)} of ${of}`}
               >
                 {logo}

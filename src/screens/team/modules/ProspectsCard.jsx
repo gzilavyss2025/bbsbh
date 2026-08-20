@@ -20,7 +20,12 @@ export function ProspectsCard({ prospects, showAllProspects, onShowAll }) {
       <div className="thub-card__body">
       <div className="prospectshowcase">
         {prospects.slice(0, PROSPECT_SHOWCASE_COUNT).map((p) => (
-          <PlayerLink key={p.playerId} id={p.playerId} className="prospectshowcase__card">
+          <PlayerLink
+            key={p.playerId}
+            id={p.playerId}
+            name={p.name}
+            className="prospectshowcase__card"
+          >
             <span className="prospectshowcase__shotwrap">
               <Headshot personId={p.playerId} name={p.name} teamId={p.affiliateTeamId} className="prospectshowcase__shot" />
               {p.position && <span className="prospectshowcase__posbadge">{p.position}</span>}

@@ -46,7 +46,11 @@ export function DueUpConsole({ feed, inning, half, revealedThrough, stepAtBatInd
           <Headshot personId={b.id} name={b.last} teamId={teamId} className="dueupconsole__shot" />
           <div className="dueupconsole__info">
             <span className="dueupconsole__order">{b.slot}</span>
-            <PlayerLink id={b.id} className="dueupconsole__name">
+            <PlayerLink
+              id={b.id}
+              name={[b.first, b.last].filter(Boolean).join(' ')}
+              className="dueupconsole__name"
+            >
               {b.first && <span className="dueupconsole__first">{b.first}</span>}
               <span className="dueupconsole__last">{b.last}</span>
             </PlayerLink>

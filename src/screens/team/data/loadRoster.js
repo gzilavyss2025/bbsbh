@@ -241,7 +241,7 @@ export async function loadRoster(id, asOf) {
   const recentPreferredLineup = recentForm.preferredLineupIds
     .map(({ position, id }) => {
       const meta = rosterMetaById.get(id)
-      return meta ? { position, id, last: meta.last } : null
+      return meta ? { position, id, last: meta.last, name: meta.name } : null
     })
     .filter(Boolean)
   const recentSubstitutes = recentForm.substituteIds.map((id) => rosterMetaById.get(id)).filter(Boolean)

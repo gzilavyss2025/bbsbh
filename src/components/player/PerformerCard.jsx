@@ -37,7 +37,7 @@ export function PerformerCard({ entry }) {
       </span>
       <div className="playercard__body">
         <div className="playercard__name">
-          <PlayerLink id={entry.id}>
+          <PlayerLink id={entry.id} name={entry.name}>
             {first} {last && <br className="playercard__namebreak" />}
             {last}
           </PlayerLink>
