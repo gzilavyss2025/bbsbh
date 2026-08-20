@@ -150,7 +150,7 @@ const BUDGETS = {
   'src/lib/teams.js': 1225, // 1212
   'src/lib/route.js': 700, // 602 — one more parse branch and path doc line for '/postseason-race'
   'scripts/gen-fouls.mjs': 1000, // 996
-  'src/api/teamTransactions.js': 1000, // 913 — §4's scoping and noise filter moved to transactions/vocabulary.js
+  'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's

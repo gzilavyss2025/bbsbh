@@ -6,9 +6,10 @@ so **every claim here was measured**, not recalled — the window, the sample si
 and the script behind each number are named so a later session can re-run them
 and check whether the wire has changed.
 
-**Status: v1.** It covers the wire's shape, its vocabulary and the roster rules
-that vocabulary encodes. It does not decide what a feed should show; that
-argument is still open, and its current state is at the bottom.
+**Status: v1.** §1–§7 cover the wire's shape, its vocabulary and the roster
+rules that vocabulary encodes. §8 onward record what has been decided on top of
+it and what has not: §10 settles which rows are news, §11 settles whose story a
+row is league-wide, and §9 is what is still argued.
 
 ## How to re-verify anything here
 
@@ -24,6 +25,8 @@ The scripts live in `.scratch/home-transactions/`. They import
 | `probe-resolution-date.mjs` | What `resolutionDate` marks |
 | `probe-roster-verbs.mjs` | The roster-vocabulary claims in §5 |
 | `pull-window.mjs` → `window.json` | The same rows run through the team-page pipeline, for comparison |
+| `probe-coverage.mjs`, `probe-bare-activation.mjs` | §10 — which rows are news |
+| `probe-league-grouping.mjs` | §11 — the league-wide pass, measured against the shipped code |
 
 Three measurement bases are used below and they are **not interchangeable** —
 each table says which it is:
@@ -288,16 +291,21 @@ pipeline, not of the wire.
 
 ## 8. Where the existing implementation sits
 
-`src/api/teamTransactions.js` + `src/api/transactions/vocabulary.js` +
-`scripts/gen-team-transactions.mjs` build the team page's Transactions card:
-per-org, per-season static files, with the raw rows grouped into narrative
-"stories". `vocabulary.js` is the half that reads this document — the type-code
-whitelist, the list predicates and the org scoping; `teamTransactions.js`
-groups and writes prose. It is club-scoped by design, and the findings in
-`.scratch/home-transactions/findings.md` are why a league-wide feed should not
-be assembled by merging its thirty outputs.
+Four files along three seams, plus the generator:
 
-Defects, each measured:
+| File | Answers |
+| --- | --- |
+| `src/api/transactions/vocabulary.js` | Is this row news, and whose? |
+| `src/api/teamTransactions.js` | Which rows belong in one story? |
+| `src/api/transactions/cutline.js` | What does that story say? |
+| `src/api/transactions/league.js` | Whose story is a row, league-wide? (§11) |
+
+`scripts/gen-team-transactions.mjs` runs the first three nightly to build the
+team page's Transactions card: per-org, per-season static files. That path is
+club-scoped by design, and `.scratch/home-transactions/findings.md` is why a
+league-wide feed is not assembled by merging its thirty outputs.
+
+Defects, each measured, all three now closed:
 
 1. ~~**A waiver claim reads backwards on the club that lost the player.**~~
    Fixed in PR #690 — `rowClause` rebuilds the losing side's lead. `TR` and
@@ -305,24 +313,35 @@ Defects, each measured:
    direction-aware clause, so no third case exists. Re-verified over a 60-day
    live window: `PUR`, `CP` and `WA` never appear on the wire at all, and every
    `ACQ`/`OBT` row names one MLB club and one independent-league club.
-2. **One player can appear twice in one story** — a designation plus a release the
-   same day, or a trade whose 40-man-clearing move names a player already in the
-   trade. **Still open.**
-3. **A busy club's story runs past 400 characters**, because the shuffle grouper
-   clusters a day's leftovers with no cap. **Still open.**
+2. ~~**One player can appear twice in one story.**~~ Fixed: a player's rows on
+   one club-day that point the same direction are now one story, ordered so the
+   outcome leads and the paperwork trails (`NEWS_RANK`), and a trade never
+   pulls a 40-man-clearing move naming somebody the deal already names.
+   Measured over 60 live days: 4 such stories before, **0** after.
+3. ~~**A busy club's story runs past 400 characters.**~~ Fixed: the leftover
+   `shuffle` bucket splits at four moves. Longest story over the same window
+   was **413 characters** before and **244** after, with nothing above 250.
+
+A fourth, found while measuring the other two and fixed with them: **a same-day
+arrival plus an option printed only the option**. The double-move cutline could
+fold an arrival in only when it could word it as "(activated … first)", so a
+waiver claim or a contract selection beside an option simply vanished — 20
+player-days in 60 (16 claims, 4 selections). The arrival now leads unless it is
+an activation, which really is bookkeeping for the move beside it.
 
 ## 9. Still open
 
 Decisions this document deliberately does not make:
 
-- Whether a league-wide feed prints one event or each club's view of it.
-- Whether `NUM` belongs in it at all — 1,570 MLB-touching rows a season, and the
-  biggest single club-day of the whole season is 31 Rangers changing to number 42.
+- Whether `NUM` belongs in a feed at all — 1,570 MLB-touching rows a season, and
+  the biggest single club-day of the whole season is 31 Rangers changing to
+  number 42.
 - Whether the wire's own sentences are printed untouched (they name their club
   redundantly under a club heading) or rewritten (which leaves the wire's words
   behind, and every rewrite is a place to be wrong).
-- Whether a feed reads the nightly precompute, which is up to a day behind, or
-  the wire directly.
+
+Two that WERE open here are now answered in §11: a league-wide feed prints one
+event, from the acquiring club, and it reads the wire live.
 
 ## 10. Settled since — the arrival family, and the two kinds of activation
 
@@ -349,3 +368,84 @@ Measured over a fresh 60-day league-wide window on 2026-08-20
   no arrival within a week. Admitting them as a class would print the
   deadline's biggest deals twice. They stay dropped — which is why the fix is a
   **list whitelist**, not a relaxation of the `/activat/i` test.
+
+## 11. The league-wide pass — one owner per row
+
+Measured over a 60-day league-wide window on 2026-08-20 (16,211 raw rows),
+`.scratch/home-transactions/probe-league-grouping.mjs`, written up in
+`segment2-numbers.md` beside it. Re-run the probe to regenerate every number
+below; it caches its pull, so a second run costs no fetches.
+
+**The rule: every raw row gets exactly ONE owning club, before any grouping.**
+Then the club-scoped pipeline runs once per owner. A row is never grouped
+twice, so there is nothing to de-duplicate afterwards.
+
+That is decidable because of §7. Of 16,211 rows, 3,883 name no major-league org
+at all, 12,035 name one, and **293 name two — every one of them a `TR` (253) or
+a `CLW` (40)**. There is no third case to rule on.
+
+| | 30-club merge | league-wide |
+| --- | --- | --- |
+| stories | 1,416 | 1,300 |
+| player-days named | 2,163 | **2,163** |
+| events told by two clubs | 82 (2 of them escape a key-based merge) | **0** |
+
+It costs no coverage: the same 2,163 player-days, 116 fewer stories, because it
+stops telling the same event twice.
+
+### Whose story is a trade?
+
+Both clubs acquire, so "the acquiring club" needs a rule. Two were tested
+against all 92 trade groups in the window:
+
+- **The wire's own sentence.** It always writes "{sender} traded X to
+  {recipient} for Y", so the recipient is the club acquiring.
+- **A headcount** — whoever took more named players.
+
+The sentence rule always decides and is not a heuristic: **253 of 253** `TR`
+rows lead with one of that row's own two clubs; in **92 of 92** groups the
+leading club sends at least one named player; in **0 of 92** does it only
+receive. Note the SENTENCE says so, not the row — every row in a deal carries
+the same sentence whichever way that player went, so `fromTeam` on any one row
+answers a different question.
+
+The headcount is wrong, and often: it **disagrees on 26 of the 60** groups it
+can decide and loses all 26, because the wire names the headline player first
+and the return second. It would have headed the deadline's biggest cards with
+the prospects going the other way — Seattle rather than the club that got Luis
+Castillo, Baltimore rather than the club that got Adley Rutschman.
+
+One group of 92 needs a fallback: on 2026-08-02 the Cubs and the Blue Jays
+traded **twice**, so there are two sentences, two senders, and no acquiring
+side. The grouper already merges the two deals into one story (it keys a trade
+on date plus club pair), so the fallback only picks whose story it is — the
+headcount, then the lower club id.
+
+### What single ownership settles for free
+
+- **A waiver claim** belongs to the club that made it, which is the side the
+  wire's sentence is already written from. `rowClause`'s rebuilt lead for the
+  losing side is never reached. Stories reading "claimed a player off waivers
+  from their own club": 0 of 40.
+- **Every story has a real `orgId`**, so `filterStoryworthy`'s direct-touch gate
+  applies exactly as its own comment requires — which is what keeps the `DFA`
+  exemption safe. An election logged against a Triple-A club still finds its
+  parent; an affiliate-only release still drops.
+
+### What a live feed has to fetch
+
+The pass needs the same two side-loads the nightly generator makes. Measured by
+re-running with each withheld:
+
+| | Stories |
+| --- | --- |
+| Both | 1,353 |
+| No affiliate parent map | 1,332 (−1.6%) |
+| No `mlbDebutDate` set | 1,957 (**+45%**) |
+
+The affiliate map is nearly free to drop. **The debut set is not** — without it
+the feed is 45% anonymous minor-league signings (the suppression is documented
+in `vocabulary.js`).
+
+A 48-hour card holds roughly 30 to 45 stories: over the window's last six days,
+31, 14, 21, 16 and 14 per day.

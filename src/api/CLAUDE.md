@@ -165,8 +165,11 @@ Related research docs, worth reading before wiring a NEW source:
   `/api/v1/transactions`: every field, all 22 type codes and the thirteen
   distinct events hiding inside two of them, how the wire repeats itself, and
   the 40-man/26-man roster rules the sentences encode but never state. Read it
-  before touching `teamTransactions.js` or building anything league-wide. That
-  vocabulary — the code whitelist, the list predicates, the org scoping — lives
-  in `transactions/vocabulary.js`; `teamTransactions.js` only groups and writes
-  prose on top of it.
+  before touching `teamTransactions.js` or building anything league-wide. The
+  pipeline sits in four files along three seams: `transactions/vocabulary.js`
+  answers *is this row news, and whose?*; `teamTransactions.js` decides which
+  rows belong in one story; `transactions/cutline.js` turns a story into words;
+  and `transactions/league.js` runs the whole thing once per OWNING club over
+  the entire league, for the home feed. A league-wide feed is never a merge of
+  the thirty per-club files — §11 of the wire doc has the measurements.
 - `docs/MLB_STATS_API.md` — the endpoint reference.

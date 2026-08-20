@@ -1,15 +1,24 @@
 // Pure shapers for the Team Transactions card's data pipeline: de-dupe the raw
-// statsapi transaction feed, drop noise, pair same-day moves into "stories",
-// and build the cutline prose — plus the reader half that loads the static,
-// per-club season files scripts/gen-team-transactions.mjs precomputes from
-// these same functions (the gen-callouts.mjs "import the app's own shaper so
-// the two can't drift" convention). Full design:
+// statsapi transaction feed, drop noise, and pair same-day moves into
+// "stories" — plus the reader half that loads the static, per-club season
+// files scripts/gen-team-transactions.mjs precomputes from these same
+// functions (the gen-callouts.mjs "import the app's own shaper so the two
+// can't drift" convention). Full design:
 // .scratch/team-transactions/data-layer-scope.md.
+//
+// Two halves live a tier down in transactions/, each split out when this file
+// passed its size budget (ADR-0038), and each along a real seam:
+// vocabulary.js answers "is this row news, and whose?" from a typeCode and a
+// sentence; cutline.js turns a finished story draft into words. What is left
+// here is the pipeline itself — which rows survive, and which of them belong
+// in one story together. transactions/league.js is a second caller of that
+// pipeline, running it once per owning club over the whole league.
 //
 // Spoiler note: roster moves and their dates carry no score, so nothing here
 // is reveal-only — this module is as spoiler-free as rehab.js/rookies.js.
 
 import { txnDate } from './rehab-policy.js'
+import { buildCutline, resolvePosition, surnameOf } from './transactions/cutline.js'
 import {
   OUTSIDE_ARRIVAL_CODES,
   isIlEndingTxn,
@@ -20,11 +29,11 @@ import {
   nonIlList,
 } from './transactions/vocabulary.js'
 
-// §4's scoping and noise filter live in transactions/vocabulary.js — the
-// wire's vocabulary, split out when this file passed its size budget
-// (ADR-0038). Re-exported here so this module stays the pipeline's single
-// public surface for its existing callers.
+// Re-exported so this module stays the pipeline's single public surface for
+// its existing callers — the generator, the team page's reader, and the
+// tests, none of which should have to know where a helper moved to.
 export { bucketToOrg, filterStoryworthy } from './transactions/vocabulary.js'
+export { buildCutline } from './transactions/cutline.js'
 
 // ---------------------------------------------------------------------------
 // §2 De-dupe
@@ -118,136 +127,6 @@ export function dedupeTransactions(rows) {
 }
 
 // ---------------------------------------------------------------------------
-// Shared helpers: position resolution, name/label formatting, prose stitching
-// ---------------------------------------------------------------------------
-
-// Position: parse the "{POS} {Name}" token out of the row's own description
-// first (every observed description embeds it verbatim right before the
-// verb), falling back to the batched /people lookup (ctx.positions) the
-// generator supplies — cheap, and avoids a per-player fetch.
-function extractPosFromDescription(description, fullName) {
-  if (!description || !fullName) return null
-  const idx = description.indexOf(fullName)
-  if (idx <= 0) return null
-  const before = description.slice(0, idx).trimEnd()
-  const m = before.match(/([A-Z0-9]{1,3}(?:\/[A-Z0-9]{1,3})?)$/)
-  return m ? m[1] : null
-}
-function resolvePosition(row, ctx) {
-  const fromDesc = extractPosFromDescription(row.description, row.person?.fullName)
-  if (fromDesc) return fromDesc
-  const pid = row.person?.id
-  return (pid != null && ctx?.positions?.[pid]) || ''
-}
-function nameFor(row) {
-  return row.person?.fullName || ''
-}
-// A plain "{POS} " prefix for the custom trade/injured-list leads below,
-// which build their opening clause from scratch rather than searching an
-// existing raw clause — the position stays in the sentence (e.g. "Acquired
-// RHP Easton McGee…"), just as a plain segment ahead of the player's name,
-// which is the only part that gets linked/emphasized.
-function posPrefix(pos) {
-  return pos ? `${pos} ` : ''
-}
-// First-space split, same convention as person.js's splitDisplayName (a small
-// mirrored copy, not an import — see the module header).
-function surnameOf(fullName) {
-  const s = (fullName || '').trim()
-  const i = s.indexOf(' ')
-  return i === -1 ? s : s.slice(i + 1)
-}
-// Every statsapi transaction description reads "{ActingClub} {verb}…" (or, for
-// a trade, "{OtherClub} traded … to {ThisClub}"), so stripping whichever club
-// name actually leads the string yields a clause that already reads correctly
-// mid-sentence (verb lowercase, e.g. "optioned RHP Craig Yoho to Nashville
-// Sounds.") with no per-typeCode template needed. Falls back to the raw text
-// when no candidate name matches (e.g. a suspension row, which carries no
-// leading club name at all).
-function stripLeadingClub(description, names) {
-  const desc = description || ''
-  for (const name of names) {
-    if (name && desc.startsWith(`${name} `)) return desc.slice(name.length + 1)
-  }
-  return desc
-}
-function upperFirst(s) {
-  return s ? s[0].toUpperCase() + s.slice(1) : s
-}
-function lowerFirst(s) {
-  return s ? s[0].toLowerCase() + s.slice(1) : s
-}
-// Same as lowerFirst, but leaves a leading position abbreviation intact — a
-// clause whose club name couldn't be stripped (no leading club at all, e.g.
-// a DFA/suspension row: "RHP Albert Suárez elected free agency.") starts
-// with the position token, not an ordinary word, so blindly lowering the
-// first character would mangle "RHP" into "rHP".
-function lowerFirstClause(s) {
-  return /^[A-Z0-9]{1,3}(?:\/[A-Z0-9]{1,3})?\s/.test(s || '') ? s : lowerFirst(s)
-}
-function stripPeriod(s) {
-  return s.trim().replace(/\.$/, '')
-}
-// One row's clause, acting club stripped, lower-case lead — for the caller to
-// capitalize or trail after a semicolon. A waiver claim is the one description
-// no stripping fixes for both sides: it is written from the CLAIMING club's
-// ("Athletics claimed LHP Drew Rom off waivers from Milwaukee Brewers"), so
-// stripping "Athletics " on the Brewers' card leaves it saying the Brewers
-// claimed him. The losing side gets a rebuilt lead, as cutlineTrade does.
-function rowClause(row, ctx = {}) {
-  if (row.typeCode === 'CLW' && ctx.orgId != null && row.fromTeam?.id === ctx.orgId) {
-    const player = `${posPrefix(resolvePosition(row, ctx))}${nameFor(row)}`
-    const claimant = row.toTeam?.name ? ` to the ${row.toTeam.name}` : ''
-    return `lost ${player}${claimant} on a waiver claim.`
-  }
-  const clause = stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name])
-  // `OBT` is the one code the wire writes in the PRESENT tense — "St. Louis
-  // Cardinals obtain RHP Durbin Feltman from Kansas City Monarchs" — against
-  // the past tense every other row and every clause here uses. Both OBT rows
-  // in a 60-day live window read "obtain", so this is the wording, not a
-  // one-off typo. Repaired here rather than in the vocabulary module: it is a
-  // prose fix, and nothing about the row's MEANING changes.
-  return row.typeCode === 'OBT' ? clause.replace(/^obtain\b/i, 'obtained') : clause
-}
-
-// The same clause capitalized for sentence-initial use (trailing period kept).
-function soloText(row, ctx) {
-  return upperFirst(rowClause(row, ctx))
-}
-
-// Wraps the substring of `text` matching a player's name in an emphasis
-// segment, splitting the surrounding text into plain segments either side —
-// the cutline segment shape the component renders as an all-caps, bold,
-// linked player name plus plain surrounding prose.
-function emphasizeClause(text, label, emphasis, playerId) {
-  if (!label) return [{ text }]
-  const idx = text.indexOf(label)
-  if (idx === -1) return [{ text }]
-  const segs = []
-  if (idx > 0) segs.push({ text: text.slice(0, idx) })
-  segs.push({ text: label, emphasis, playerId })
-  const rest = text.slice(idx + label.length)
-  if (rest) segs.push({ text: rest })
-  return segs
-}
-// A bare label as its own single emphasized segment — used for the custom
-// "Acquired {label} from the …" / "Placed {label} on the …" leads, where the
-// label isn't being located inside pre-existing text.
-function emphasizeLabel(label, emphasis, playerId) {
-  return [{ text: label, emphasis, playerId }]
-}
-
-// The second sentence of an IL placement's own description, if any — "Right
-// shoulder inflammation." — the feed's own injury note, not invented flavor.
-function ilReason(description) {
-  const parts = (description || '')
-    .split(/\.\s+/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-  return parts.length > 1 ? parts[1] : null
-}
-
-// ---------------------------------------------------------------------------
 // §3 Story grouping
 // ---------------------------------------------------------------------------
 
@@ -295,6 +174,69 @@ function pickPreferred(pool, codes) {
   return null
 }
 
+// Which of one player's own rows leads his story, when a club-day gives him
+// more than one. Ordered by how much of the two rosters the move actually
+// changes (docs/transactions-wire.md §5), so the outcome leads and the
+// paperwork that produced it trails: a claim ahead of the option that
+// followed it, a release ahead of the designation that preceded it, an
+// outright ahead of the election it drew. An activation ranks next to last
+// because it is nearly always bookkeeping for the move beside it, and an
+// election last because it is the player's own act, not the club's.
+const NEWS_RANK = {
+  TR: 0, CLW: 1, SE: 5, REL: 6, DES: 7, OUT: 8, URL: 8, OPT: 9, CU: 10,
+  RET: 13, WA: 13, DFA: 14,
+}
+const NEWS_RANK_OUTSIDE_ARRIVAL = 2
+const NEWS_RANK_SIGNING = 12
+const NEWS_RANK_DEFAULT = 11
+function newsRank(row) {
+  if (OUTSIDE_ARRIVAL_CODES.has(row.typeCode)) return NEWS_RANK_OUTSIDE_ARRIVAL
+  if (SIGNING_CODES.has(row.typeCode)) return NEWS_RANK_SIGNING
+  if (row.typeCode === 'SC') {
+    if (isIlPlacementTxn(row) || isNonIlListPlacement(row)) return 3
+    if (isIlTransferTxn(row)) return 4
+    return NEWS_RANK_DEFAULT
+  }
+  return NEWS_RANK[row.typeCode] ?? NEWS_RANK_DEFAULT
+}
+const leadFirst = (a, b) => newsRank(a.row) - newsRank(b.row)
+
+// The three roster-move subtypes that hold more than one row about ONE
+// player, and so share a rail slot and a cutline shape (cutlineSamePlayer).
+const SAME_PLAYER_SUBTYPES = new Set(['double', 'departure', 'arrival'])
+
+// A shuffle is the grouper's leftover bucket, and it had no cap: the Mets'
+// 2026-08-04 clustered eight unpaired moves into one 413-character story with
+// eight faces in its rail. Past about four moves the "these belong together"
+// claim the bucket makes is fiction anyway, so it splits into equal parts
+// instead of running on. Dealing round-robin over the arrivals and then the
+// departures — cutlineShuffle's own reading order — leaves each part a mix of
+// the two wherever the day has one.
+//
+// Measured over a 60-day live window: a cap of four holds every story under
+// 250 characters and costs 32 extra stories; a cap of five still leaves a
+// 351-character one, and a cap of three strands 14 parts with no mix.
+// Within-day significance order: trade -> injured-list -> shuffle/roster-move
+// -> signing -> suspension. (Ties within a bucket keep discovery order, which
+// is already the raw feed's own id-ascending order.) Exported because the
+// league-wide pass has to interleave thirty clubs' days and wants the same
+// order across them, rather than a second opinion about what matters.
+export const STORY_TYPE_RANK = {
+  trade: 0, 'injured-list': 1, shuffle: 2, 'roster-move': 2, signing: 3, suspension: 4,
+}
+
+const SHUFFLE_CAP = 4
+function splitShuffle(churn) {
+  const ordered = [
+    ...churn.filter((c) => c.dir === 'in'),
+    ...churn.filter((c) => c.dir === 'out'),
+  ]
+  const parts = Math.ceil(ordered.length / SHUFFLE_CAP)
+  const chunks = Array.from({ length: parts }, () => [])
+  ordered.forEach((c, i) => chunks[i % parts].push(c))
+  return chunks
+}
+
 // One day's kept rows -> ordered stories, per the §3 priority order (each
 // step consumes the rows it uses, so nothing is double-counted).
 function buildDayStories(dayRows, ctx) {
@@ -318,16 +260,58 @@ function buildDayStories(dayRows, ctx) {
   }
   remove(suspensions)
 
-  // Step 1: same-player double-move (Crow case) — group by personId, emit one
-  // story when a person has both an in AND an out row today. TR rows are
-  // excluded from candidacy here: statsapi logs every player in a multi-
-  // player trade with the SAME fromTeam/toTeam (the deal's acting clubs),
-  // not that player's own direction, so a player traded in and immediately
-  // optioned/DFA'd the same day (the McCullers Jr./Gordon trade — Gordon's
-  // trade-in leg plus his same-day option to Nashville) would otherwise
-  // read as a Crow-style double-move and get pulled out of the pool before
-  // Step 2's trade grouping ever sees him. A trade leg must always reach
-  // Step 2, however it happened to land on this side of the deal.
+  // Step 1: one player, one story — his rows on this club-day that point the
+  // SAME direction are one departure, or one arrival. A vested veteran is
+  // outrighted and elects free agency; a club designates a player and
+  // releases him; the Pirates sign the player they just acquired out of the
+  // Atlantic League. Left apart, both rows land in the day's shuffle and
+  // print his name, and his face, twice in one story.
+  //
+  // Measured over a 60-day live window: 40 such player-days, 31 of them the
+  // outright-plus-election pair this step grew out of. The rest are why it is
+  // a rule about direction rather than a list of code pairs — including
+  // 2026-08-05, where the wire filed Lou Trivino III's election twice under
+  // two ids AND two different clubs, which no de-duplication rule can see.
+  //
+  // TR rows never take part: statsapi logs every player in a multi-player
+  // trade with the SAME fromTeam/toTeam (the deal's acting clubs), not that
+  // player's own direction, so a trade leg must always reach Step 3, however
+  // that player's own day went.
+  const byPersonDir = new Map()
+  for (const c of remaining()) {
+    const pid = c.row.person?.id
+    if (pid == null || c.row.typeCode === 'TR') continue
+    if (c.dir !== 'in' && c.dir !== 'out') continue
+    const key = `${pid}|${c.dir}`
+    if (!byPersonDir.has(key)) byPersonDir.set(key, [])
+    byPersonDir.get(key).push(c)
+  }
+  for (const group of byPersonDir.values()) {
+    if (group.length < 2) continue
+    const ordered = [...group].sort(leadFirst)
+    drafts.push({
+      storyType: 'roster-move',
+      subtype: ordered[0].dir === 'in' ? 'arrival' : 'departure',
+      rows: ordered.map((c) => ({ row: c.row, role: c.dir })),
+    })
+    remove(ordered.map((c) => c.row))
+  }
+
+  // Step 2: same-player double-move (Crow case) — one story when a person has
+  // both an in AND an out row left today. TR rows are excluded here for the
+  // same reason they are excluded above: a player traded in and immediately
+  // optioned the same day (the McCullers Jr./Gordon trade — Gordon's trade-in
+  // leg plus his same-day option to Nashville) would otherwise read as a
+  // Crow-style double-move and get pulled out of the pool before Step 3's
+  // trade grouping ever sees him.
+  //
+  // The two rows are ordered lead-first, which is the whole news of this
+  // step: when the arrival is an injured-list activation it is bookkeeping
+  // for the option that follows, and the option leads — but when the arrival
+  // is a waiver claim or a contract selection, IT is the news, and leading
+  // with the option buried it. Measured over 60 live days, that happened on
+  // 20 player-days: 16 claims and 4 selections, each printed as nothing but
+  // "Optioned X to {affiliate}."
   const byPerson = new Map()
   for (const c of remaining()) {
     const pid = c.row.person?.id
@@ -342,40 +326,13 @@ function buildDayStories(dayRows, ctx) {
       drafts.push({
         storyType: 'roster-move',
         subtype: 'double',
-        rows: [{ row: inRow.row, role: 'in' }, { row: outRow.row, role: 'out' }],
+        rows: [inRow, outRow].sort(leadFirst).map((c) => ({ row: c.row, role: c.dir })),
       })
       remove([inRow.row, outRow.row])
     }
   }
 
-  // Step 1b: same-player outright/release + free-agency election, same day —
-  // a vested veteran outrighted (or released) very often elects free agency
-  // the same day rather than accept the assignment; without this, the two
-  // rows would otherwise land as two disconnected "Down" cards (both are
-  // `dir: 'out'`, so Step 1 above — which needs one 'in' + one 'out' — never
-  // pairs them). Rebuilds byPerson from `remaining()` rather than reusing
-  // Step 1's map, which may have already consumed one of this person's rows.
-  const byPersonDeparture = new Map()
-  for (const c of remaining()) {
-    const pid = c.row.person?.id
-    if (pid == null) continue
-    if (!byPersonDeparture.has(pid)) byPersonDeparture.set(pid, [])
-    byPersonDeparture.get(pid).push(c)
-  }
-  for (const group of byPersonDeparture.values()) {
-    const dfaRow = group.find((c) => c.row.typeCode === 'DFA')
-    const departRow = group.find((c) => c.row.typeCode === 'OUT' || c.row.typeCode === 'REL')
-    if (dfaRow && departRow) {
-      drafts.push({
-        storyType: 'roster-move',
-        subtype: 'departure',
-        rows: [{ row: departRow.row, role: 'out' }, { row: dfaRow.row, role: 'out' }],
-      })
-      remove([departRow.row, dfaRow.row])
-    }
-  }
-
-  // Step 2: trades — every TR row on the day sharing the same (unordered)
+  // Step 3: trades — every TR row on the day sharing the same (unordered)
   // club pair is ONE trade, however many players are on either side (a real
   // 2-for-1 stays one story, not three) — grouped by the same clubPairKey the
   // dedupe pass already uses. A net add pulls ONE clearing move, tagged
@@ -392,7 +349,15 @@ function buildDayStories(dayRows, ctx) {
     const storyRows = group.map((c) => ({ row: c.row, role: c.dir === 'out' ? 'out' : 'in' }))
     remove(group.map((c) => c.row))
     if (group.some((c) => c.dir === 'in')) {
-      const pick = pickPreferred(remaining().filter((c) => c.dir === 'out'), ['DES', 'OUT', 'REL'])
+      // Never somebody the deal already names. Cleveland genuinely designated
+      // Juan Brito and traded him on one day, and the White Sox did the same
+      // with Duncan Davitt on 2026-08-03 — the clearing clause then repeated
+      // a player the "for" list had just named, in his own trade's story.
+      const inDeal = new Set(group.map((c) => c.row.person?.id).filter((id) => id != null))
+      const pick = pickPreferred(
+        remaining().filter((c) => c.dir === 'out' && !inDeal.has(c.row.person?.id)),
+        ['DES', 'OUT', 'REL'],
+      )
       if (pick) {
         storyRows.push({ row: pick.row, role: 'clear' })
         remove([pick.row])
@@ -401,7 +366,7 @@ function buildDayStories(dayRows, ctx) {
     drafts.push({ storyType: 'trade', rows: storyRows })
   }
 
-  // Step 3: IL placements — each seeds a story; pulls ONE replacement.
+  // Step 4: IL placements — each seeds a story; pulls ONE replacement.
   const placements = remaining().filter((c) => isIlPlacementTxn(c.row))
   for (const pl of placements) {
     const storyRows = [{ row: pl.row, role: 'out' }]
@@ -414,20 +379,23 @@ function buildDayStories(dayRows, ctx) {
     drafts.push({ storyType: 'injured-list', rows: storyRows })
   }
 
-  // Step 4: leftover churn — cluster into ONE shuffle when ≥2 remain with both
+  // Step 5: leftover churn — cluster into shuffles when ≥2 remain with both
   // an add and a subtract; otherwise each leftover is its own solo story.
   // Signings DO participate here (e.g. a same-day option clearing a spot for
   // an unrelated signing reads as one shuffle) — a signing that ends up alone
   // still resolves as its own "signing" story rather than a generic
-  // "roster-move," it just isn't excluded from clustering up front.
+  // "roster-move," it just isn't excluded from clustering up front. A busy
+  // day makes more than one shuffle rather than one long one (splitShuffle).
   const churn = remaining().filter((c) => c.dir === 'in' || c.dir === 'out')
   const hasAdd = churn.some((c) => c.dir === 'in')
   const hasSubtract = churn.some((c) => c.dir === 'out')
   if (churn.length >= 2 && hasAdd && hasSubtract) {
-    drafts.push({
-      storyType: 'shuffle',
-      rows: churn.map((c) => ({ row: c.row, role: c.dir })),
-    })
+    for (const chunk of splitShuffle(churn)) {
+      drafts.push({
+        storyType: 'shuffle',
+        rows: chunk.map((c) => ({ row: c.row, role: c.dir })),
+      })
+    }
     remove(churn.map((c) => c.row))
   } else {
     for (const c of churn) {
@@ -441,7 +409,7 @@ function buildDayStories(dayRows, ctx) {
     }
   }
 
-  // Step 5: leftover transfers — their own story, never folded into a
+  // Step 6: leftover transfers — their own story, never folded into a
   // neighbor's cutline. Still shows a rail slot (the destination IL length as
   // its banner) — a rail-less transfer read as if the player had no photo on
   // file at all, which wasn't the intent.
@@ -455,13 +423,9 @@ function buildDayStories(dayRows, ctx) {
     remove([t.row])
   }
 
-  // Within-day significance order: trade -> injured-list -> shuffle/roster-
-  // move -> signing -> suspension. (Ties within a bucket keep discovery
-  // order, which is already the raw feed's own id-ascending order.)
-  const TYPE_ORDER = { trade: 0, 'injured-list': 1, shuffle: 2, 'roster-move': 2, signing: 3, suspension: 4 }
   const ordered = drafts
     .map((d, i) => ({ d, i }))
-    .sort((a, b) => (TYPE_ORDER[a.d.storyType] - TYPE_ORDER[b.d.storyType]) || (a.i - b.i))
+    .sort((a, b) => (STORY_TYPE_RANK[a.d.storyType] - STORY_TYPE_RANK[b.d.storyType]) || (a.i - b.i))
     .map(({ d }) => d)
 
   return ordered.map((draft) => shapeStory(draft, ctx))
@@ -526,23 +490,21 @@ function buildRail(draft, ctx) {
     const row = draft.rows[0].row
     return [railSlot(row, 'move', ilBanner(row), ctx)]
   }
-  if (draft.storyType === 'roster-move' && draft.subtype === 'double') {
-    // The IL activation is transactional bookkeeping for the option that
-    // follows (see cutlineDouble) — the banner reads "Down" like any other
-    // option, not a neutral "Up/Down".
-    const row = draft.rows.find((r) => r.role === 'out').row
-    return [railSlot(row, 'out', 'Down', ctx)]
+  if (SAME_PLAYER_SUBTYPES.has(draft.subtype) && draft.storyType === 'roster-move') {
+    // One photo, not two: every row in these three is about one player (see
+    // cutlineSamePlayer), and the leading row is the one the story is really
+    // about. An IL activation paired with an option leads with the option and
+    // reads "Down"; a waiver claim paired with one leads with the claim and
+    // reads "In".
+    const { row, role } = draft.rows[0]
+    // ...except that a story ending in a release or a free-agency election
+    // reads "Out" whatever led it. He has left the organisation, not been
+    // sent to the minors, and the banner is the only place that shows.
+    const leavesOrg = draft.rows.some((r) => r.row.typeCode === 'DFA' || r.row.typeCode === 'REL')
+    const banner = leavesOrg && role === 'out' ? 'Out' : bannerFor(draft.storyType, role, row)
+    return [railSlot(row, role, banner, ctx)]
   }
-  if (draft.storyType === 'roster-move' && draft.subtype === 'departure') {
-    // One photo, not two — the outright/release row is the roster-facing
-    // half (see cutlineDeparture); the DFA row is folded into its cutline.
-    // Banner reads "Out" (not the generic "Down" a plain option/outright
-    // gets) — the free-agency election means he's left the org entirely,
-    // not just been sent to the minors.
-    const row = draft.rows[0].row
-    return [railSlot(row, 'out', 'Out', ctx)]
-  }
-  // A trade's pulled 'clear' row (see step 2) renders identically to a real
+  // A trade's pulled 'clear' row (see step 3) renders identically to a real
   // traded-away player in the rail — the distinction only matters to the
   // cutline, which reads draft.rows directly.
   const slots = draft.rows.map(({ row, role }) =>
@@ -550,269 +512,6 @@ function buildRail(draft, ctx) {
   )
   const railOrder = { in: 0, out: 1 }
   return slots.sort((a, b) => (railOrder[a.role] ?? 0) - (railOrder[b.role] ?? 0))
-}
-
-// ---------------------------------------------------------------------------
-// buildCutline — the segment-array prose for one story draft (also exported
-// standalone so the cutline logic unit-tests without re-deriving a whole
-// day's grouping).
-// ---------------------------------------------------------------------------
-
-// {pos, name, playerId} for each row, joined into one clause ("RHP X, LHP Y
-// and OF Z") — a trade can involve more than one player per side, unlike
-// every other story type's single-player clauses.
-function playersClause(players, emphasis) {
-  const segs = []
-  players.forEach(({ pos, name, playerId }, i) => {
-    if (i > 0) segs.push({ text: i === players.length - 1 ? ' and ' : ', ' })
-    segs.push({ text: posPrefix(pos) })
-    segs.push({ text: name, emphasis, playerId })
-  })
-  return segs
-}
-// A trade's own "for {return}" tail (cash, a PTBNL, …) — only when it's NOT
-// simply restating one of the very players this clause already names. A
-// multi-player trade's raw description is written from the OTHER team's
-// perspective ("… to Milwaukee Brewers for OF Jadyn Fielder"), so Fielder's
-// own outgoing row would otherwise self-reference: "Traded OF Jadyn Fielder
-// … for OF Jadyn Fielder."
-function returnDetailFor(row, ownNames) {
-  const detail = (row.description || '').match(/\bfor\s+(.+?)\.?$/i)?.[1]
-  if (!detail) return null
-  if (ownNames.some((n) => detail.includes(n))) return null
-  return stripPeriod(detail)
-}
-
-// A trade story: every TR row sharing the same day + club pair (§3 step 2),
-// however many players are on either side — a real 2-for-1 reads as one
-// story, not three. `role: 'clear'` (the pulled 40-man-clearing move, if
-// any) is a separate trailing clause, never folded into the "for" list.
-function cutlineTrade(story, ctx) {
-  const inPlayers = story.rows
-    .filter((r) => r.role === 'in')
-    .map((r) => ({ pos: resolvePosition(r.row, ctx), name: nameFor(r.row), playerId: r.row.person?.id, row: r.row }))
-  const outPlayers = story.rows
-    .filter((r) => r.role === 'out')
-    .map((r) => ({ pos: resolvePosition(r.row, ctx), name: nameFor(r.row), playerId: r.row.person?.id, row: r.row }))
-  const clearRow = story.rows.find((r) => r.role === 'clear')?.row
-
-  const segs = []
-  if (inPlayers.length) {
-    const otherTeam = inPlayers[0].row.fromTeam?.name || ''
-    segs.push({ text: 'Acquired ' })
-    segs.push(...playersClause(inPlayers, 'primary'))
-    segs.push({ text: ` from the ${otherTeam}` })
-    if (outPlayers.length) {
-      segs.push({ text: ' for ' })
-      segs.push(...playersClause(outPlayers, 'secondary'))
-    } else {
-      const detail = returnDetailFor(inPlayers[0].row, inPlayers.map((p) => p.name))
-      if (detail) segs.push({ text: ` for ${detail}` })
-    }
-  } else {
-    const otherTeam = outPlayers[0].row.toTeam?.name || ''
-    segs.push({ text: 'Traded ' })
-    segs.push(...playersClause(outPlayers, 'primary'))
-    segs.push({ text: ` to the ${otherTeam}` })
-    const detail = returnDetailFor(outPlayers[0].row, outPlayers.map((p) => p.name))
-    if (detail) segs.push({ text: ` for ${detail}` })
-  }
-  if (clearRow) {
-    const cName = nameFor(clearRow)
-    const cClause = stripPeriod(lowerFirstClause(
-      stripLeadingClub(clearRow.description, [clearRow.fromTeam?.name, clearRow.toTeam?.name]),
-    ))
-    segs.push({ text: '; ' })
-    segs.push(...emphasizeClause(cClause, cName, 'secondary', clearRow.person?.id))
-  }
-  segs.push({ text: '.' })
-  return segs
-}
-
-function cutlineInjuredList(story, ctx) {
-  const placed = story.rows.find((r) => r.role === 'out')
-  const replacement = story.rows.find((r) => r.role === 'in')
-  const row = placed.row
-  const name = nameFor(row)
-  const pos = resolvePosition(row, ctx)
-  const days = (row.description || '').match(/(\d+)-day injured list/i)?.[1]
-  const reason = ilReason(row.description)
-  const segs = [
-    { text: 'Placed ' + posPrefix(pos) },
-    ...emphasizeLabel(name, 'primary', row.person?.id),
-    { text: days ? ` on the ${days}-day injured list` : ' on the injured list' },
-  ]
-  if (reason) segs.push({ text: ` (${lowerFirst(stripPeriod(reason))})` })
-  if (replacement) {
-    const rName = nameFor(replacement.row)
-    const rClause = stripPeriod(lowerFirstClause(
-      stripLeadingClub(replacement.row.description, [replacement.row.fromTeam?.name, replacement.row.toTeam?.name]),
-    ))
-    segs.push({ text: '; ' })
-    segs.push(...emphasizeClause(rClause, rName, 'secondary', replacement.row.person?.id))
-  }
-  segs.push({ text: '.' })
-  return segs
-}
-
-// Same-player double-move (the Crow case): the IL activation is purely
-// transactional bookkeeping to clear the way for the option that follows it
-// the same day — the option is the real news (see bannerFor's role: 'out'
-// treatment below). Leads with the option, names the player ONCE, and folds
-// the activation in as a trailing parenthetical rather than repeating his
-// name in a second clause.
-function cutlineDouble(story) {
-  const inRow = story.rows.find((r) => r.role === 'in').row
-  const outRow = story.rows.find((r) => r.role === 'out').row
-  const name = nameFor(outRow)
-  const outClause = stripPeriod(soloText(outRow))
-  const fromFragment = (inRow.description || '').match(/\bfrom the .*?injured list\b/i)?.[0]
-  const segs = [...emphasizeClause(outClause, name, 'primary', outRow.person?.id)]
-  if (fromFragment) segs.push({ text: ` (activated ${fromFragment} first)` })
-  segs.push({ text: '.' })
-  return segs
-}
-
-// A DFA ("elected free agency") row's own description carries no leading
-// club name to strip (`stripLeadingClub` falls back unchanged) — it starts
-// straight from the player's own "{POS} {Name}" label ("LF Greg Jones
-// elected free agency."), so trailing it after the primary clause needs
-// that label stripped instead, or the player's name would repeat.
-function stripLeadingPlayerLabel(description, fullName) {
-  const desc = description || ''
-  if (!fullName) return desc
-  const idx = desc.indexOf(fullName)
-  return idx === -1 ? desc : desc.slice(idx + fullName.length).trimStart()
-}
-
-// Same-player departure (outright/release + elected free agency, same day):
-// the outright/release is the roster-facing half (the rail's photo — see
-// buildRail), the election is folded in as a trailing clause naming the
-// player once, same convention as cutlineDouble's parenthetical but as its
-// own clause (an election is real news in its own right, not bookkeeping).
-function cutlineDeparture(story) {
-  const departRow = story.rows[0].row
-  const dfaRow = story.rows[1].row
-  const name = nameFor(departRow)
-  const departClause = stripPeriod(soloText(departRow))
-  // lowerFirstClause (not lowerFirst): a name-spelling mismatch between this
-  // row's own `person.fullName` and the name embedded in ITS description
-  // (rare but real — verified live, e.g. fullName "José Azócar" vs. a
-  // description reading "Azocar") makes the exact-match strip above fail
-  // silently, leaving the position abbreviation as the leading token.
-  const dfaClause = stripPeriod(lowerFirstClause(stripLeadingPlayerLabel(dfaRow.description, nameFor(dfaRow))))
-  const segs = [...emphasizeClause(departClause, name, 'primary', departRow.person?.id)]
-  segs.push({ text: '; ' })
-  segs.push({ text: dfaClause })
-  segs.push({ text: '.' })
-  return segs
-}
-
-function cutlineShuffle(story, ctx) {
-  const ordered = [
-    ...story.rows.filter((r) => r.role === 'in'),
-    ...story.rows.filter((r) => r.role === 'out'),
-  ]
-  const segs = []
-  ordered.forEach((r, i) => {
-    if (i > 0) segs.push({ text: '; ' })
-    const name = nameFor(r.row)
-    const raw = rowClause(r.row, ctx)
-    const clause = stripPeriod(i === 0 ? upperFirst(raw) : lowerFirstClause(raw))
-    segs.push(...emphasizeClause(clause, name, r.role === 'in' ? 'primary' : 'secondary', r.row.person?.id))
-  })
-  segs.push({ text: '.' })
-  return segs
-}
-
-function cutlineSingle(story, ctx, emphasis) {
-  const { row } = story.rows[0]
-  const name = nameFor(row)
-  return emphasizeClause(soloText(row, ctx), name, emphasis, row.person?.id)
-}
-
-// Every distinct club named on any row in the story (a trade partner, an
-// affiliate a player was optioned to/recalled from, …), longest name first
-// so a shorter name that happens to be another's substring never wins the
-// match first (no real case today, just a defensive ordering).
-//
-// An ACQ-family row's `fromTeam` is the one club here that is NOT in
-// affiliated ball — the Southern Maryland Blue Crabs, the Kansas City
-// Monarchs. It carries a real statsapi id and a real name, so it would
-// linkify exactly like a trade partner and lead to a team page this app
-// cannot build. The typeCode is what says so: these codes MEAN "from outside
-// affiliated ball," so the exclusion needs no roster of independent leagues.
-function teamCandidatesFor(story) {
-  const seen = new Map()
-  for (const r of story.rows) {
-    const outsideArrival = OUTSIDE_ARRIVAL_CODES.has(r.row.typeCode)
-    for (const t of [outsideArrival ? null : r.row.fromTeam, r.row.toTeam]) {
-      if (t?.id != null && t?.name && !seen.has(t.id)) seen.set(t.id, t)
-    }
-  }
-  return [...seen.values()].sort((a, b) => b.name.length - a.name.length)
-}
-
-// Wraps any occurrence of a candidate team's name in plain (not-yet-linked)
-// segments with a teamId — a single post-processing pass over the whole
-// cutline rather than threading team-link logic through every clause
-// builder above, since a club name can turn up in custom-built leads
-// ("from the {team}") just as easily as inside a raw feed clause ("...to
-// Nashville Sounds."). Segments already carrying a playerId are left alone.
-function linkifyTeamsInSegments(segments, teams) {
-  let result = segments
-  for (const team of teams) {
-    const next = []
-    for (const seg of result) {
-      if (seg.playerId || seg.teamId) {
-        next.push(seg)
-        continue
-      }
-      const idx = seg.text.indexOf(team.name)
-      if (idx === -1) {
-        next.push(seg)
-        continue
-      }
-      if (idx > 0) next.push({ text: seg.text.slice(0, idx) })
-      next.push({ text: team.name, teamId: team.id })
-      const rest = seg.text.slice(idx + team.name.length)
-      if (rest) next.push({ text: rest })
-    }
-    result = next
-  }
-  return result
-}
-
-// One story draft -> its cutline segment array. Exported standalone (per the
-// data-layer scope's reader shape) so cutline prose unit-tests independently
-// of the day-grouping walk above.
-export function buildCutline(story, ctx = {}) {
-  let segs
-  switch (story.storyType) {
-    case 'trade':
-      segs = cutlineTrade(story, ctx)
-      break
-    case 'injured-list':
-      segs = cutlineInjuredList(story, ctx)
-      break
-    case 'shuffle':
-      segs = cutlineShuffle(story, ctx)
-      break
-    case 'roster-move':
-      segs = story.subtype === 'double'
-        ? cutlineDouble(story)
-        : story.subtype === 'departure'
-          ? cutlineDeparture(story)
-          : cutlineSingle(story, ctx, story.rows[0].role === 'in' ? 'primary' : undefined)
-      break
-    case 'signing':
-    case 'suspension':
-      segs = cutlineSingle(story, ctx, 'primary')
-      break
-    default:
-      segs = []
-  }
-  return linkifyTeamsInSegments(segs, teamCandidatesFor(story))
 }
 
 function shapeStory(draft, ctx) {
