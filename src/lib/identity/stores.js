@@ -28,6 +28,7 @@ import ALT4_COLORS from '../data/alt4-colors.json' with { type: 'json' }
 import CITY_CONNECT_COLORS from '../data/city-connect-colors.json' with { type: 'json' }
 import LOGO_URL_OVERRIDES from '../data/logo-url-overrides.json' with { type: 'json' }
 import PARK_WASH_TUNING from '../data/park-wash-tuning.json' with { type: 'json' }
+import MONO_INK from '../data/mono-ink.json' with { type: 'json' }
 
 // Keyed by the DEV_DATA_STORES key, which is what a field id resolves to
 // (fields.js's `store`). Same key on both sides means the endpoint picks the
@@ -45,6 +46,7 @@ export const BUNDLED_IDENTITY_STORES = {
   'city-connect-colors': CITY_CONNECT_COLORS,
   'logo-url-overrides': LOGO_URL_OVERRIDES,
   'park-wash-tuning': PARK_WASH_TUNING,
+  'mono-ink': MONO_INK,
 }
 
 // The bundled store for a key, or null. `Object.hasOwn` so a hand-crafted key of

@@ -78,6 +78,7 @@ storing a blank — the same delete semantics `mergeOverrides` has for copy.
 | `stamp` | `stamp-logo-tuning` | `{team}.treatments.{side}.{field}` | `scale`, `offsetX`, `offsetY`, `rotation` |
 | `wpa` | `wpa-tuning` | `{team}.bandColor` | `bandColor` |
 | `logo` | `logo-url-overrides` | `{team}.{slot}` | (no field segment — an https URL per tile mark) |
+| `mono` | `mono-ink` | `{team}.{field}` | `parts` (a shape-index pin map, JSON-encoded), `source`, `art` |
 
 **There are two header dimensions, not one.** MLB clubs are keyed by treatment
 and MiLB affiliates by game side — the split the rest of `src/lib` keeps — and
@@ -109,6 +110,23 @@ not saving*: the URL lands only through the drawer's ordinary Save. Any pasted
 https URL is equally legal, which is also what keeps the field usable on a
 deploy with no blob store (the endpoint answers 501 there).
 
+**`mono` is not named after the `logo` dimension's `mono` variant** — that
+variant (the knockout CDN request `teamLogoUrl(teamId, 'mono')` resolves)
+stays override-blind, as the paragraph above says. This dimension is a
+different thing entirely: the SHAPE PINS behind that variant's precomputed
+file (`src/lib/logoMono.js`, ADR-0031), not a URL. It is also the one
+dimension whose save is not instant — see ADR-0054. `parts` is this
+catalog's one non-scalar value, a `{ shapeIndex: 'ink' | 'knockout' }` map
+carried as a JSON string on the wire like everything else here; `source` is
+which CDN mark those pins were picked against, and `art` is that art's
+fingerprint, carried so a club that rebrands between a drawer save and the
+next generator run drops the stale pins instead of re-inking wrong shapes —
+the same staleness rule `src/lib/monoInk.js` already applies to
+lab-authored pins. `scripts/gen-mono-logos.mjs` fetches this override on its
+own weekly schedule (`scripts/lib/mono-logo-art.mjs`'s
+`readMonoInkStoreWithOverrides`) and merges it in exactly the way a page
+render would.
+
 ## Adding a field
 
 1. Add it to the dimension's `fields` in `src/lib/identity/fields.js`, with a
@@ -118,7 +136,10 @@ deploy with no blob store (the endpoint answers 501 there).
    `test/identity-overrides.test.js`.
 3. Give it a label in `identityFields.js`'s `FIELD_LABELS`, and put it in the
    right group.
-4. If the value is not visible on `/team/{id}`, **do not add it.** See below.
+4. If the value is not visible on `/team/{id}`, **do not add it.** See below —
+   `mono` is the one exception, and it earns it by carrying its own preview
+   (`IdentityMonoField.jsx` client-converts the pins live, the same math the
+   generator runs) rather than nothing at all.
 
 ## What is deliberately not here
 

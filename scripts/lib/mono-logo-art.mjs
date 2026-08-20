@@ -17,6 +17,8 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { logoCdnUrl } from '../../src/lib/logoCdn.js'
 import { monoLogoFingerprint, monoLogoSvg } from '../../src/lib/logoMono.js'
+import { applyIdentityOverrides } from '../../src/lib/identity/apply.js'
+import { SITE_URL } from '../../src/copy/landing/site.js'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repoRoot = join(here, '..', '..')
@@ -61,6 +63,11 @@ export async function writeMonoLogoManifestEntry(teamId, hash) {
   await writeFile(MONO_LOGO_MANIFEST_PATH, `${JSON.stringify(sorted, null, 2)}\n`)
 }
 
+// File only — no network. Used by the dev regenerate-one-club route (via
+// writeMonoLogo below), which must stay byte-for-byte what the lab's Save
+// wrote to disk (docs/identity-overrides.md: "in dev the overlay is always
+// empty"). The nightly generator wants the live override layered in too —
+// see readMonoInkStoreWithOverrides.
 export async function readMonoInkStore() {
   try {
     return JSON.parse(await readFile(inkStorePath, 'utf8'))
@@ -69,6 +76,29 @@ export async function readMonoInkStore() {
     // every club just converts automatically, which is where they all started.
     return {}
   }
+}
+
+// The `mono` runtime override every club's drawer can save
+// (src/lib/identity/fields.js, ADR-0054) — a pin set an admin approved from
+// `/team/{id}` but that never touches this file, so it's invisible to a plain
+// disk read. Layered onto the file exactly like a page render does
+// (applyIdentityOverrides('mono-ink', …), the SAME function api/identity.js's
+// own write-validator uses), so what the NIGHTLY GENERATOR converts is what
+// the drawer's preview last showed. A fetch failure (no network in a
+// sandboxed run, or an unconfigured deploy answering an empty map) degrades
+// to the file alone — the same "inert when unconfigured" rule every other
+// identity exception keeps, not a reason to fail the whole run.
+export async function readMonoInkStoreWithOverrides() {
+  const file = await readMonoInkStore()
+  let overrides
+  try {
+    const res = await fetch(`${SITE_URL}/api/identity`)
+    overrides = res.ok ? (await res.json())?.identity : null
+  } catch {
+    overrides = null
+  }
+  if (!overrides || typeof overrides !== 'object' || !Object.keys(overrides).length) return file
+  return applyIdentityOverrides('mono-ink', file, overrides)
 }
 
 // The pins to apply to this art, or null. A saved set whose fingerprint doesn't

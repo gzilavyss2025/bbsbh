@@ -89,6 +89,23 @@ test('every tile carries a logo group whose row writes the logo-url store', () =
   assert.equal(parseIdentityFieldId(away.fields[0].id).key, 'away')
 })
 
+test('the mono group is one per club, not per treatment, and offers on MiLB too', () => {
+  const mono = groupBy(identityGroups(BREWERS, { isMilb: false, treatment: 'city-connect' }), 'mono')
+  assert.equal(mono.mono, true, 'the drawer renders this group with the shape picker, not plain boxes')
+  const parts = fieldNamed(mono, 'parts')
+  const source = fieldNamed(mono, 'source')
+  const art = fieldNamed(mono, 'art')
+  assert.equal(parseIdentityFieldId(parts.id).store, 'mono-ink')
+  assert.deepEqual(parseIdentityFieldId(parts.id).path, ['158', 'parts'])
+  // src/lib/data/mono-ink.json ships Milwaukee with parts but no source pick.
+  assert.deepEqual(JSON.parse(parts.landed), { 0: 'knockout', 2: 'ink', 3: 'knockout' })
+  assert.equal(source.landed, '', 'no source override on file means the placeholder is blank, not "base"')
+  assert.ok(art.landed, 'the shipped fingerprint travels as the landed value')
+
+  const affiliateMono = groupBy(identityGroups(MEMPHIS, { isMilb: true, treatment: 'away' }), 'mono')
+  assert.ok(affiliateMono, 'MiLB clubs get a knockout mark too')
+})
+
 test('an affiliate gets no club-colours group', () => {
   const groups = identityGroups(MEMPHIS, { isMilb: true, treatment: 'home' })
   assert.equal(groupBy(groups, 'club'), undefined)

@@ -81,6 +81,11 @@ test('an id resolves to a store, a team, a key and a field', () => {
   assert.equal(bg.store, 'city-connect-colors')
   assert.equal(bg.path, null)
   assert.equal(parseIdentityFieldId('identity.tileBg.158.alternate-3').store, 'alt3-colors')
+
+  // Team-level like colors/wpa, not per-treatment — a club has one mark.
+  const parts = parseIdentityFieldId('identity.mono.158.parts')
+  assert.equal(parts.store, 'mono-ink')
+  assert.deepEqual(parts.path, ['158', 'parts'])
 })
 
 test('an id outside the catalog resolves to nothing', () => {
@@ -138,6 +143,26 @@ test('a value is coerced to the type its store holds, or refused', () => {
   assert.equal(coerceIdentityValue(originY, 'top'), 'top')
   assert.equal(coerceIdentityValue(originY, '30%'), '30%')
   assert.equal(coerceIdentityValue(originY, 'sideways'), undefined)
+
+  // The one non-scalar kind: a shape-index pin map, JSON-encoded on the wire
+  // like every other value here, decoded into the object the store holds.
+  const pins = IDENTITY_DIMENSIONS.mono.fields.parts
+  assert.deepEqual(coerceIdentityValue(pins, '{"0":"ink","3":"knockout"}'), { 0: 'ink', 3: 'knockout' })
+  assert.deepEqual(coerceIdentityValue(pins, '{}'), {}, 'an empty pin map is a real value — force-automatic')
+  assert.equal(coerceIdentityValue(pins, '{"glove":"ink"}'), undefined, 'not a shape index')
+  assert.equal(coerceIdentityValue(pins, '{"0":"white"}'), undefined, 'not ink/knockout')
+  assert.equal(coerceIdentityValue(pins, '["ink"]'), undefined, 'an array is not a pin map')
+  assert.equal(coerceIdentityValue(pins, 'not json'), undefined)
+
+  const source = IDENTITY_DIMENSIONS.mono.fields.source
+  assert.equal(coerceIdentityValue(source, 'primary'), 'primary')
+  assert.equal(coerceIdentityValue(source, 'base'), 'base')
+  assert.equal(coerceIdentityValue(source, 'mystery'), undefined)
+
+  const fingerprint = IDENTITY_DIMENSIONS.mono.fields.art
+  assert.equal(coerceIdentityValue(fingerprint, '13:52bb6de9'), '13:52bb6de9')
+  assert.equal(coerceIdentityValue(fingerprint, '13-52bb6de9'), undefined)
+  assert.equal(coerceIdentityValue(fingerprint, 'DROP TABLE'), undefined)
 })
 
 test('sanitize keeps only known ids with values their field accepts', () => {
@@ -396,9 +421,43 @@ test('a well-formed save is accepted across every dimension', () => {
       'identity.wpa.158.bandColor': '#0C436A',
       'identity.logo.158.alternate': 'https://example.public.blob.vercel-storage.com/x.png',
       'identity.logo.235.away': 'https://example.com/mark.png',
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.source': 'primary',
+      'identity.mono.158.art': '13:52bb6de9',
     }),
     null,
   )
+})
+
+test('a mono pins override lands in the mono-ink store, and reads back through monoInkFor', async () => {
+  // mono-ink.json's own validator (dev-data-stores.mjs's isMonoInkStore) is
+  // what api/identity.js re-runs after merging a save — asserting against it
+  // here is the same "both write paths agree" guarantee the stamp test above
+  // pins for a scalar dimension.
+  assert.equal(
+    identityWriteRefusal({
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.art': '13:52bb6de9',
+    }),
+    null,
+  )
+
+  const { monoInkFor } = await import('../src/lib/monoInk.js')
+  withOverrides(
+    {
+      'identity.mono.158.parts': '{"0":"ink","3":"knockout"}',
+      'identity.mono.158.source': 'primary',
+      'identity.mono.158.art': '13:52bb6de9',
+    },
+    () => {
+      const landed = monoInkFor(158)
+      assert.deepEqual(landed.parts, { 0: 'ink', 3: 'knockout' })
+      assert.equal(landed.source, 'primary')
+      assert.equal(landed.art, '13:52bb6de9')
+    },
+  )
+  // Clearing restores the shipped file's own record.
+  assert.equal(monoInkFor(158)?.source ?? 'base', 'base')
 })
 
 test('an http logo URL cannot reach the store from any path', () => {
