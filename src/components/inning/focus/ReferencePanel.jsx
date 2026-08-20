@@ -4,6 +4,8 @@ import { safeToShowEntering } from '../../../api/enteringHalf.js'
 import { buildPreHalfCallouts } from '../../../api/prehalf-callouts.js'
 import { rankNotes } from '../../../api/callout-notes.js'
 import { useCalloutLedger } from '../../../hooks/useCalloutLedger.js'
+import { useAsync } from '../../../hooks/useAsync.js'
+import { fetchSavantMatchup } from '../../../api/matchup/savant.js'
 import { useMediaQuery, WIDE_QUERY } from '../../../hooks/useMediaQuery.js'
 import { ModalPortal } from '../../ui/ModalPortal.jsx'
 import { ChevronLink } from '../../ui/ChevronLink.jsx'
@@ -249,7 +251,6 @@ function Section({
   rosters,
   workload,
   workloadGameDate,
-  savantMatchup,
   stepAtBatIndex,
   managers,
   uniforms,
@@ -418,6 +419,8 @@ function Section({
   // they share one ledger read (`shownCounts`) and one diversity pass. The
   // ledger counts distinct HALVES, and never the half being staged, so nothing
   // below can decay itself out from under the reader mid-half.
+  // Same one-file, one-fetch read BetweenInnings.jsx does — see its note there.
+  const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering

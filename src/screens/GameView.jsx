@@ -77,7 +77,6 @@ export function GameView({ game, section, onSection }) {
     rookiesData,
     feverRadarData,
     savantPercentilesData,
-    savantMatchupData,
     gameCallouts,
     broadcast,
     formerTeammatesData,
@@ -355,7 +354,6 @@ export function GameView({ game, section, onSection }) {
           highlights={highlightsData}
           runExpectancy={runExpectancyData}
           workload={workloadData}
-          savantMatchup={savantMatchupData}
           managers={managers.data}
           uniforms={uniformBrief}
           scorebookWeather={weather.data}

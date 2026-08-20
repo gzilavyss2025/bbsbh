@@ -20,7 +20,6 @@ import { fetchTopProspects } from '../api/prospects.js'
 import { fetchRookiesData } from '../api/rookies.js'
 import { fetchFeverRadar } from '../api/feverRadar.js'
 import { fetchSavantPercentiles } from '../api/savantPercentiles.js'
-import { fetchSavantMatchup } from '../api/matchup/savant.js'
 import { fetchCallouts, calloutsForGame } from '../api/callouts.js'
 import { fetchVsTeamSplitsForTeams } from '../api/vsTeamSplits.js'
 import { loadFormerTeammates } from '../api/formerTeammates.js'
@@ -464,19 +463,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
   )
   const savantPercentilesData = savantPercentiles.data ?? null
 
-  // Season Statcast RATES (Baseball Savant), the matchup callouts' own file —
-  // a sibling of the percentiles above rather than the same fetch: that board
-  // carries percentile RANKS for a fixed handful of metrics, and these notes
-  // need raw rates on both sides of one axis, batted-ball direction, and the
-  // league SPREAD to tell "extreme" from "merely above average"
-  // (scripts/gen-savant-matchup.mjs). Same footing — season aggregates, no
-  // per-game result — so it is fetched eagerly alongside the rest, and a MiLB
-  // game simply finds no rows.
-  const savantMatchup = useAsync(
-    () => (enrichmentReady ? fetchSavantMatchup() : Promise.resolve(null)),
-    [enrichmentReady],
-  )
-  const savantMatchupData = savantMatchup.data ?? null
 
 
   // The league-wide run-expectancy (RE288) table — a static, same-origin,
@@ -566,7 +552,6 @@ export function useGameData(game, spoilersOff = false, activeStep = null) {
     rookiesData,
     feverRadarData,
     savantPercentilesData,
-    savantMatchupData,
     gameCallouts,
     broadcast,
     formerTeammatesData,

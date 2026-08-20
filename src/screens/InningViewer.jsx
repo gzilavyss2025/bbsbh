@@ -131,7 +131,6 @@ export function InningViewer({
   highlights,
   runExpectancy,
   workload,
-  savantMatchup,
   // Staging facts, resolved once by GameView and shared with the box score and
   // both lineup pages. Used only by focus mode's EXTRAS tab (ExtrasFacts.jsx)
   // — all three are spoiler-free, none is fetched on this screen's account.
@@ -741,7 +740,6 @@ export function InningViewer({
     revealedThrough: renderRevealedThrough,
     workload,
     workloadGameDate,
-    savantMatchup,
     stepAtBatIndex: curStepInfo?.lastAtBatIndex ?? null,
     managers,
     uniforms,
@@ -842,7 +840,6 @@ export function InningViewer({
           marginNotes={marginNotes}
           workload={workload}
           gameDate={workloadGameDate}
-          savantMatchup={savantMatchup}
         />
 
         {/* `.innings__stage` is a real box in the grid's first column at wide
