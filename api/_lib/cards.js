@@ -4,82 +4,42 @@
 // of display strings here, so the words on the card and the picture behind it
 // can't drift.
 //
-// This is the ONE place the app talks to statsapi from the server side; it
-// exists only to feed crawler link-previews (iMessage/Slack/Discord/Twitter),
-// never the app itself — the SPA still fetches every byte of game data directly
-// from the client (see docs/adr/0012-dynamic-link-previews.md). Everything here
-// degrades to `null` on any failure, and the caller falls back to the app's
-// static home-page card, so a statsapi hiccup can never break a shared link.
+// This is still the ONE place the app talks to statsapi from the server side,
+// never the app itself — the SPA fetches every byte of game data directly from
+// the client (see docs/adr/0012-dynamic-link-previews.md). What it FEEDS is no
+// longer only the link-preview card. Each entity builder now also returns a
+// `crawl` description — the readable body api/_lib/crawl.js renders into the
+// page for the crawlers that run no JavaScript (ADR-0058). That body is built
+// from the payload the card already needed, so the request count per route is
+// unchanged; the player call carries one wider `hydrate` clause and nothing
+// else moved.
 //
-// The pure route/slug helpers below are deliberate small copies of their
-// src/lib counterparts (route.js `matchupSlug`/`urlDateToApi`/`slugify`/
-// `idFromSlug`, teams.js `teamAbbr`) — the edge runtime can't import the app's
-// ESM module graph, and these are near-immutable. Keep them byte-for-byte in
-// sync.
+// `buildRoster` is the single exception, and it is deliberately not part of
+// `buildCard`: a club's active roster is what makes /team/{id}/roster worth
+// crawling and is the link graph the rest of this site has never had, but the
+// card and its image do not need it. So it is a separate export that
+// api/preview.js alone calls, in parallel with buildCard, and api/og.js goes on
+// making exactly the one request it makes today.
+//
+// Everything here degrades to `null` on any failure, and the caller falls back
+// to the app's static home-page card, so a statsapi hiccup can never break a
+// shared link.
+//
+// The pure route/slug helpers this file used to carry now live in
+// `./entity.js`, which crawl.js reads too — see that file's header on why the
+// copies exist and why they must stay in step with src/lib.
 
+import { playerCrawl, teamCrawl } from './crawl.js'
+import { clean, entitySegment, idFromSlug, matchupSlug, niceDate, teamAbbr, urlDateToApi } from './entity.js'
 import { fetchWithTimeout } from './http.js'
 
 const MLB = 'https://statsapi.mlb.com'
 const SEARCHABLE_SPORT_IDS = [1, 11, 12, 13, 14]
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 // sportId → level abbreviation, mirrored from src/lib/teams.js SPORT_LABEL. Used
 // to build the team card's "LEVEL | LEAGUE" line (e.g. "MLB | NATIONAL LEAGUE",
 // "AAA | INTERNATIONAL LEAGUE").
 const SPORT_LEVEL = { 1: 'MLB', 11: 'AAA', 12: 'AA', 13: 'A+', 14: 'A', 16: 'ROK' }
-
-// Collapse runs of whitespace so a name the API hands back with a stray double
-// space (e.g. "Milwaukee  Brewers") renders clean on the card.
-const clean = (s) => String(s ?? '').replace(/\s+/g, ' ').trim()
-
-// --- pure helpers, mirrored from src/lib (see header) ----------------------
-
-export function urlDateToApi(d) {
-  if (!/^\d{8}$/.test(d || '')) return null
-  return `${d.slice(4, 8)}-${d.slice(0, 2)}-${d.slice(2, 4)}`
-}
-
-function niceDate(apiDate) {
-  const [y, m, d] = (apiDate || '').split('-').map(Number)
-  if (!y || !m || !d) return ''
-  return `${MONTHS[m - 1]} ${d}, ${y}`
-}
-
-function teamAbbr(team) {
-  return (
-    team?.abbreviation ||
-    (team?.teamName || team?.name || '').replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
-  )
-}
-
-function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
-  const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
-  return gameNumber > 1 ? `${base}-${gameNumber}` : base
-}
-
-// A '/player/{slug}-{id}' address arrives here with the whole segment in `id`,
-// because vercel.json's rewrite captures one segment and cannot know which part
-// of it is the number. Everything below fetches by the number, and the CANONICAL
-// this page emits is rebuilt from the resolved name — so the slug that came in
-// is only ever a hint, and a stale or wrong one (a traded player, a hand-typed
-// link) still resolves and still self-corrects. route.js is the twin. ADR-0057.
-export function idFromSlug(segment) {
-  const s = String(segment ?? '')
-  if (/^\d+$/.test(s)) return s
-  const m = s.match(/-(\d+)$/)
-  return m ? m[1] : s
-}
-
-export function slugify(name) {
-  return String(name ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48)
-    .replace(/-+$/, '')
-}
 
 // --- statsapi fetch (server side, crawler-only) ----------------------------
 
@@ -155,9 +115,16 @@ function ogUrl(origin, params) {
   return `${origin}/api/og?${q}`
 }
 
+// The one wider hydrate this work added, and the reason the request COUNT for a
+// player page is still one: `stats(type=season)` rides the call the card already
+// makes. Verified 2026-08-20 against people 545361 / 694973 / 671218 — statsapi
+// defaults the season to the current one (no `season=` needed) and picks the
+// group from the player's position, so a hitter comes back with hitting and a
+// pitcher with pitching. It costs about a kilobyte of response and no round
+// trip. api/og.js makes the same call and ignores the extra field.
 async function playerCard(idSegment, origin) {
   const id = idFromSlug(idSegment)
-  const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam`)
+  const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam,stats(type=season)`)
   const p = data.people?.[0]
   if (!p) return null
   const name = clean(p.fullName || p.firstLastName || p.lastFirstName || `Player ${id}`)
@@ -177,7 +144,8 @@ async function playerCard(idSegment, origin) {
     alt: sub ? `${name} — ${sub}` : name,
     // What canonicalUrl re-spells the address with. Built from the name statsapi
     // just returned, never from the segment the request arrived on.
-    segment: slugify(name) ? `${slugify(name)}-${id}` : String(id),
+    segment: entitySegment(id, name),
+    crawl: playerCrawl(p, { id, name, pos, team }),
   }
 }
 
@@ -239,7 +207,48 @@ async function teamCard(idSegment, origin, { tab } = {}) {
         : `Roster, leaders, and schedule — a spoiler-safe scorecard companion.`,
     image: ogUrl(origin, { type: 'team', id: String(id), name, sub, eyebrow }),
     alt: `${name}${sub ? ` — ${sub}` : ''}`,
-    segment: slugify(name) ? `${slugify(name)}-${id}` : String(id),
+    segment: entitySegment(id, name),
+    crawl: teamCrawl(t, { id, name, level, league, tab }),
+  }
+}
+
+// The one extra upstream call this work added, on the one route that earns it.
+//
+// It is NOT part of buildCard: api/og.js draws a club's mark and its level line
+// and has no use for 26 names, so it goes on making exactly the one request it
+// makes today. api/preview.js calls this in parallel with buildCard, so the
+// route's wall-clock is unchanged even though its request count is two.
+//
+// What it buys is the reason ADR-0058 leaves player pages out of the sitemap: a
+// crawler that reaches one club roster page reaches 26 player pages from it, by
+// following links, which is how discovery is supposed to work on a site whose
+// whole player set is five figures. Verified 2026-08-20 against teams 158 (MLB),
+// 512 (AAA) and 5015 (A) — the endpoint answers at every level this app serves.
+//
+// Nothing in the response is a score: person id, name, jersey number, position
+// and roster status, which is what the app's own Roster tab shows openly.
+export async function buildRoster(params) {
+  if (params.get('route') !== 'team-roster') return null
+  try {
+    const id = idFromSlug(params.get('id'))
+    const data = await getJson(`/api/v1/teams/${id}/roster?rosterType=active`)
+    const items = (data.roster ?? [])
+      .map((entry) => {
+        const person = entry.person ?? {}
+        const playerName = clean(person.fullName || '')
+        if (!person.id || !playerName) return null
+        const note = [entry.jerseyNumber ? `#${clean(entry.jerseyNumber)}` : '', clean(entry.position?.abbreviation || '')]
+          .filter(Boolean)
+          .join(' · ')
+        return { href: `/player/${entitySegment(person.id, playerName)}`, text: playerName, note }
+      })
+      .filter(Boolean)
+    return items.length ? { heading: 'Active roster', items } : null
+  } catch {
+    // Same degrade as everything else here: the body renders without the list
+    // rather than the page failing. A MiLB club whose feed has not landed is the
+    // common case, not an error.
+    return null
   }
 }
 
@@ -327,6 +336,18 @@ function genericCard(route, origin) {
   const g = GENERIC[route]
   if (!g) return null
   return {
+    constant: true,
+    // These routes cost no statsapi call at all, which api/preview.js reads to
+    // cache them for a day instead of an hour. Their body is a constant —
+    // which is also why api/preview.js caches them far longer than an entity
+    // page. Thin next to a player's, and still the difference between a page an
+    // answer engine can describe and a blank div with a good meta description.
+    // Every one of them is already in the sitemap.
+    crawl: {
+      h1: g.title,
+      lead: g.sub,
+      blurb: g.desc && g.desc !== g.sub ? g.desc : '',
+    },
     // `metaTitle` overrides the suffixed default. /about's card title IS the
     // site name, so the default suffix printed "Tally Baseball — Tally
     // Baseball" as the <title> and the og:title both.
