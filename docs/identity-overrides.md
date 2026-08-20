@@ -76,7 +76,9 @@ storing a blank — the same delete semantics `mergeOverrides` has for copy.
 | `tileBg` | one of the five `*-colors` stores | the `bg: true` swatch | (no field segment) |
 | `colors` | `mlb-team-colors` | `{team}.{field}` | `primary`, `secondary`, `accent`, `accent2`, `offDayTreatment`, `defaultHomeTreatment`, `defaultAwayTreatment` |
 | `stamp` | `stamp-logo-tuning` | `{team}.treatments.{side}.{field}` | `scale`, `offsetX`, `offsetY`, `rotation` |
-| `wpa` | `wpa-tuning` | `{team}.bandColor` | `bandColor` |
+| `wpa` | `wpa-tuning` | `{team}.bandColor` | `bandColor` (team-level fallback) |
+| `wpaTreatment` | `wpa-tuning` | `{team}.treatments.{treatment}.{layout.field \| field}` | `size`, `rotate`, `offsetX`, `offsetY`, `paddingX`, `paddingY`, `rowShift` (all under `layout`), `band`, `wpaWordmark`, `ownArt` |
+| `milbWpaTreatment` | `milb-treatment-tuning` | `{team}.treatments.{side}.{wpaLayout.field \| field}` | same seven layout numbers (under `wpaLayout`, not `layout`), `band`, `wpaWordmark` (no `ownArt`) |
 | `logo` | `logo-url-overrides` | `{team}.{slot}` | (no field segment — an https URL per tile mark) |
 | `mono` | `mono-ink` | `{team}.{field}` | `parts` (a shape-index pin map, JSON-encoded), `source`, `art` |
 
@@ -127,10 +129,33 @@ own weekly schedule (`scripts/lib/mono-logo-art.mjs`'s
 `readMonoInkStoreWithOverrides`) and merges it in exactly the way a page
 render would.
 
+**`wpaTreatment`/`milbWpaTreatment` are the real per-(club, treatment) WPA
+tuning** — the record most tuned clubs actually carry, and the one
+`wpaBandColor`/`wpaLogoLayout`/`wpaWordmarkOn` (and their MiLB counterparts)
+read FIRST. `wpa`'s team-level `bandColor` is the fallback those resolvers
+fall through to only for `main`, and only when a club has no per-treatment
+`band` of its own — before this dimension existed (issue #807), the drawer
+edited only that fallback, which was inert for every club with a
+per-treatment record on file. `path` branches on the field NAME to nest the
+seven layout numbers under their own sub-object; `band`/`wpaWordmark`/
+`ownArt` sit flat on the treatment record. `band` is this catalog's other
+non-scalar kind (`isBandValue` in `fields.js`): a flat hex/rgb fill, or
+`{ pinstripe: true, color?, bg? }`, JSON-encoded on the wire like `mono`'s
+`parts`. `ownArt` (MLB only — MiLB has no separate WPA-art upload
+destination) toggles tiling a separately uploaded WPA-only mark; this drawer
+has no upload control for that file, so turning it on with none procured
+just falls back to the treatment's normal mark. Rendered with its own live
+preview (`IdentityWpaPreview.jsx`, reusing `/identity-lab`'s real
+`WinProbChart` mockups against this club's last completed opponent) and its
+own compound control (`IdentityWpaBandField.jsx`) — see the two "not visible
+on `/team/{id}`" rules below; both exist because a flat text box can't judge
+a tiled band or compose a discriminated-union value.
+
 ## Adding a field
 
 1. Add it to the dimension's `fields` in `src/lib/identity/fields.js`, with a
-   kind (`color`, `number(min,max,step)`, `pick([…])`, `originY`).
+   kind (`color`, `number(min,max,step)`, `pick([…])`, `originY`, `boolean`,
+   or a non-scalar one like `band`/`monoPins` — see `coerceIdentityValue`).
 2. If the store's own validator in `scripts/lib/dev-data-stores.mjs` has a range
    for it, restate the SAME range and pin the two against each other in
    `test/identity-overrides.test.js`.

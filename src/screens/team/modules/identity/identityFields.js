@@ -34,10 +34,17 @@ import {
   treatmentTuningRecord,
 } from '../../../../lib/teams.js'
 import { MLB_TEAM_COLORS } from '../../../../lib/brandColors.js'
-import { MILB_HEADER_COLOR_OVERRIDES, MILB_LOGO_POS_OVERRIDES } from '../../../../lib/milbColors.js'
+import {
+  MILB_HEADER_COLOR_OVERRIDES,
+  MILB_LOGO_POS_OVERRIDES,
+  MILB_WPA_BAND_COLOR_OVERRIDES,
+  MILB_WPA_LOGO_LAYOUT_OVERRIDES,
+  MILB_WPA_WORDMARK_OVERRIDES,
+} from '../../../../lib/milbColors.js'
 import { stampLogoTuningRecord } from '../../../../lib/stampLogoTuning.js'
 import { monoInkFor } from '../../../../lib/monoInk.js'
-import { BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
+import { BAND_COLOR_OVERRIDES, WPA_TREATMENT_BAND_COLOR_OVERRIDES } from '../../../../lib/wpa/wpaBandColors.js'
+import { WPA_LOGO_LAYOUT_OVERRIDES, WPA_OWN_ART, WPA_WORDMARK_OVERRIDES } from '../../../../lib/wpa/wpaLogo.js'
 import { parkWashColorOverride, parkWashIntensity, tileColorFor } from '../../../../lib/ballpark/parkWash.js'
 import {
   IDENTITY_DIMENSIONS,
@@ -110,6 +117,11 @@ function fieldsFrom(dimension, teamId, key, record, only) {
 // touch screen never sees.
 const FIELD_HINTS = {
   originY: 'Where the logo scales and rotates from, vertically: top, center, bottom, or a percent down the tile.',
+  bandColor: 'Used only when this treatment has no band of its own below — most tuned clubs already have one.',
+  rowShift:
+    "Percent of a tile's width each row steps sideways from the one above it. 0 is a plain grid; 50 staggers rows like brickwork.",
+  wpaWordmark: "Tiles this club's wordmark instead of its normal mark.",
+  ownArt: "Tiles a separately uploaded WPA-only mark. With none on file, this treatment's normal mark keeps showing.",
 }
 
 const FIELD_LABELS = {
@@ -129,10 +141,18 @@ const FIELD_LABELS = {
   primary: 'Primary',
   secondary: 'Secondary',
   accent2: 'Fourth colour',
-  bandColor: 'Band fill',
+  bandColor: 'Fallback band',
   offDayTreatment: 'Off-day jersey',
   defaultHomeTreatment: 'Default home',
   defaultAwayTreatment: 'Default away',
+  size: 'Tile size',
+  rotate: 'Tile rotation',
+  paddingX: 'Tile gap across',
+  paddingY: 'Tile gap down',
+  rowShift: 'Row shift %',
+  band: 'Band',
+  wpaWordmark: 'Use wordmark',
+  ownArt: 'Use uploaded art',
 }
 
 // The stamp group holds both sides at once (the two slots are not mirror
@@ -145,6 +165,11 @@ const STAMP_FIELD_SUFFIX = {
   offsetY: 'nudge down',
   rotation: 'rotation',
 }
+
+// The WPA band's seven tile-layout numbers — the same list fields.js's
+// WPA_LAYOUT_FIELDS names, restated here since this module cannot import a
+// private const from that one.
+const WPA_LAYOUT_FIELD_NAMES = ['size', 'rotate', 'offsetX', 'offsetY', 'paddingX', 'paddingY', 'rowShift']
 
 // What the tile for (club, key) resolves as its mark URL today, through the
 // same chain the page renders with — which is what makes it an honest
@@ -269,11 +294,53 @@ export function identityGroups(teamId, { isMilb, treatment }) {
     ),
   })
 
-  groups.push({
-    key: 'wpa',
-    title: 'Win-probability band',
-    fields: fieldsFrom('wpa', id, null, { bandColor: BAND_COLOR_OVERRIDES[id] }),
-  })
+  // The win-probability band's per-treatment tuning (issue #807) — the
+  // record most tuned clubs actually carry, and the one the real chart reads
+  // FIRST: wpaBandColors.js's WPA_TREATMENT_BAND_COLOR_OVERRIDES always wins
+  // outright over the team-level fallback appended below, which is why a
+  // drawer that only edited the fallback used to be inert for those clubs.
+  // `band` is not `fieldsFrom`, like the mono group's `parts`: it is the one
+  // non-scalar field here (a flat hex, or a pinstripe object), so its landed
+  // text is a JSON string rather than `text()`'s `String(value)`. Rendered
+  // with its own live preview (IdentityWpaPreview) and its own compound
+  // control (IdentityWpaBandField) — see IdentityDrawer.jsx.
+  {
+    const dimension = isMilb ? 'milbWpaTreatment' : 'wpaTreatment'
+    const layoutOverrides = isMilb ? MILB_WPA_LOGO_LAYOUT_OVERRIDES : WPA_LOGO_LAYOUT_OVERRIDES
+    const bandOverrides = isMilb ? MILB_WPA_BAND_COLOR_OVERRIDES : WPA_TREATMENT_BAND_COLOR_OVERRIDES
+    const wordmarkOverrides = isMilb ? MILB_WPA_WORDMARK_OVERRIDES : WPA_WORDMARK_OVERRIDES
+    const record = {
+      ...layoutOverrides[id]?.[treatment],
+      wpaWordmark: wordmarkOverrides[id]?.[treatment],
+      ...(isMilb ? null : { ownArt: WPA_OWN_ART[id]?.[treatment] }),
+    }
+    const band = bandOverrides[id]?.[treatment]
+    const fields = fieldsFrom(dimension, id, treatment, record, [
+      ...WPA_LAYOUT_FIELD_NAMES,
+      'wpaWordmark',
+      ...(isMilb ? [] : ['ownArt']),
+    ])
+    fields.push({
+      id: identityFieldId(dimension, id, treatment, 'band'),
+      name: 'band',
+      label: FIELD_LABELS.band,
+      spec: IDENTITY_DIMENSIONS[dimension].fields.band,
+      landed: band !== undefined ? JSON.stringify(band) : '',
+    })
+    // The team-level fallback only ever reaches Main, and only for a club
+    // with no per-treatment override of its own (wpaBandColor's own
+    // two-tier chain) — offering it on every other tile would be exactly
+    // the inert control this group exists to replace.
+    if (!isMilb && treatment === 'main') {
+      fields.push(...fieldsFrom('wpa', id, null, { bandColor: BAND_COLOR_OVERRIDES[id] }))
+    }
+    groups.push({
+      key: 'wpa',
+      title: `${treatmentLabel(treatment)} win-probability band`,
+      wpa: true,
+      fields,
+    })
+  }
 
   // The knockout (one-color) mark's hand-picked shape corrections — not
   // `fieldsFrom`, like the tile/logo groups above: `parts` is a shape-index
