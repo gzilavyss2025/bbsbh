@@ -429,7 +429,7 @@
 #root .pbp__notetext,
 #root .pbp__callout,
 #root .pitchernotice__eventtext,
-#root .pitchernotice__eventtext .plink {
+#root .pitchernotice__eventtext :is(.plink, b) {
   text-transform: none; /* caps-exempt: play-by-play copy reads as sentences */
 }
 

@@ -23,6 +23,12 @@
 //    — so the reason a half stopped never appeared anywhere, including the
 //    injury delay that explains a pinch-hitter arriving mid-count (gamePk
 //    816170's top 1).
+//
+//    Which of those stoppages is worth a card is a SECOND question, settled
+//    later and separately: only the ones that produced a personnel change or
+//    ran long enough to matter (ADR-0060, and test/delay-advisory.test.js).
+//    The two tests below pin the part this file is about — that a delay which
+//    does reach the feed lands in the right place, in the right order.
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildFeed } from './fixtures/mini-game.js'
@@ -79,7 +85,12 @@ test("the card's own baserunningNotes are unchanged — callout-notes.js reads t
   )
 })
 
-test('a delay advisory becomes its own note, in place', () => {
+// Top 1's second plate appearance, interrupted at 0-1 by an injury delay that
+// takes the home left fielder out of the game — the gamePk 824319 shape (a
+// stoppage and the substitution it caused, side by side, before the next
+// pitch). The delay's own `player` is the BATTER, exactly as the feed writes
+// it, so this fixture also pins that the note is not carded to him.
+function feedWithConsequentialDelay() {
   const feed = buildFeed()
   const play = feed.liveData.plays.allPlays.find(
     (p) => p.about.inning === 1 && p.about.halfInning === 'top' && p.matchup.batter.id === 2,
@@ -87,19 +98,38 @@ test('a delay advisory becomes its own note, in place', () => {
   play.playEvents = [
     { isPitch: true, pitchNumber: 1, details: { call: { code: 'C' } } },
     { details: { eventType: 'game_advisory', description: 'Injury Delay.' }, player: { id: 2 } },
+    {
+      details: {
+        eventType: 'defensive_substitution',
+        description: 'Defensive Substitution: Tom Toro replaces left fielder Oli Ott.',
+      },
+      position: { abbreviation: 'LF' },
+      player: { id: 20 },
+      replacedPlayer: { id: 15 },
+    },
     { isPitch: true, pitchNumber: 2, details: { call: { code: 'X' } } },
   ]
+  return feed
+}
 
-  const entries = computeHalfInningFeed(feed, 1, 'top', 'away')
+test('a delay advisory becomes its own note, in place', () => {
+  const entries = computeHalfInningFeed(feedWithConsequentialDelay(), 1, 'top', 'away')
   const note = entries.find((e) => e.eventType === 'game_advisory')
   assert.ok(note, 'the injury delay must reach the feed')
   assert.equal(note.kind, 'event')
-  assert.equal(note.playerId, 2)
   assert.equal(note.segments.map((s) => s.text).join(''), 'Injury Delay.')
   // It landed between pitches, so it interrupted this at-bat rather than
   // trailing the previous one — which is what decides its step (ADR-0016).
   assert.equal(note.midAtBat, true)
   assert.ok(entries.indexOf(note) < entries.findIndex((e) => e.kind === 'atbat' && e.batterId === 2))
+})
+
+test('the delay note leads the substitution it caused, not the other way round', () => {
+  const entries = computeHalfInningFeed(feedWithConsequentialDelay(), 1, 'top', 'away')
+  const delay = entries.findIndex((e) => e.eventType === 'game_advisory')
+  const sub = entries.findIndex((e) => e.eventType === 'defensive_substitution')
+  assert.ok(delay !== -1 && sub !== -1)
+  assert.ok(delay < sub, `the stoppage must precede its own consequence (got ${delay} vs ${sub})`)
 })
 
 test("the feed's lifecycle 'Status Change' advisories stay out of the feed", () => {
