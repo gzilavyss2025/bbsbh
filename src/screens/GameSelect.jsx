@@ -10,7 +10,6 @@ import { useAsync } from '../hooks/useAsync.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useFavoriteTeam } from '../hooks/preferences/useFavoriteTeam.js'
 import { useIntroFlag } from '../hooks/preferences/useIntroFlag.js'
-import { usePreferences } from '../hooks/preferences/usePreferences.js'
 import { usePromptDismiss } from '../hooks/preferences/usePromptDismiss.js'
 import { toApiDate, addDays, humanDate } from '../lib/dates.js'
 import { SPORT_IDS, LEVELS } from '../lib/teams.js'
@@ -63,14 +62,12 @@ const MergeReceiptStrip = isClerkEnabled
     )
   : null
 
-// The chosen level survives leaving the slate (someone scoring an A+ affiliate
-// all season shouldn't reset to MLB every time they come back). It lives in the
-// My Tally preference document (`usePreferences`) rather than its own
-// `bbsbh:level` key — that old key is still read once as a migration seed, and
-// the value now travels between a signed-in user's devices. The date
-// deliberately does NOT persist anywhere — it lives in the URL ('/{MMDDYYYY}',
-// bare '/' = today), so a paged-to day is shareable and "today" is always the
-// right place a fresh visit starts.
+// Neither the league nor the date persists anywhere. Both live in the URL
+// ('/aaa/08152026'; a missing league means MLB and a missing date means today,
+// so bare '/' is both), which is what lets one link name one slate for whoever
+// opens it — ADR-0056. The league used to be a My Tally preference instead, and
+// that made the app's shortest address mean a different day's league to every
+// reader; a link to "today's Triple-A games" could not be sent at all.
 
 // Testing escape hatch: `?nointro` on any slate URL suppresses the first-visit
 // welcome modal for that load, so an automated test (or a manual spot-check)
@@ -90,21 +87,15 @@ function welcomeSuppressed() {
 // soonest → latest (the favorite team pinned to the top), with a LIVE pill on
 // any game in progress. Level is toggled with the thin buttons up top; no
 // more search box.
-export function GameSelect({ date = null, onPick, onShowLogos }) {
+export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onShowLogos }) {
   useDocumentTitle(null)
   const navigate = useNav()
-  // The level is a field of the My Tally preference document now, so it
-  // travels between a signed-in user's devices along with the club. Reading it
-  // through the hook rather than holding a second copy in local state is what
-  // keeps a change made on another device from being ignored until a reload.
-  const { level: sportId, set: setPreference } = usePreferences()
   const { favoriteTeamId, hasClubOpinion, setFavoriteTeam } = useFavoriteTeam()
   // Replaces the old "has a club opinion" proxy for first-visit detection —
   // see src/lib/account/intro.js for why the two questions had to be
   // decoupled once the welcome modal grew a second step.
   const [introSeen, markIntroSeen] = useIntroFlag(hasClubOpinion)
   const [showWelcome, setShowWelcome] = useState(!introSeen && !welcomeSuppressed())
-  const pickLevel = (id) => setPreference('level', id)
 
   // The displayed date comes from the URL (see App.jsx): bare '/' means today.
   // Paging navigates to the neighboring day's URL rather than bumping local
@@ -139,8 +130,14 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
   const [justEnabledPass, setJustEnabledPass] = useState(false)
   const [passScopeNoteDismissed, dismissPassScopeNote] = usePromptDismiss('scores-unlocked-local')
   const resetLabel = formatResetTime(resetAt ?? nextResetAt())
-  const goToDate = (apiDate) =>
-    navigate(apiDate === todayStr ? '/' : slatePath(apiDate))
+  // Every slate move rewrites the whole address, league and day together, so
+  // whichever one you changed the URL still names the exact page on screen.
+  // Today is passed as null, which is how slatePath knows to leave the date
+  // off (see its header).
+  const goToSlate = (apiDate, level) =>
+    navigate(slatePath(apiDate === todayStr ? null : apiDate, level))
+  const goToDate = (apiDate) => goToSlate(apiDate, sportId)
+  const pickLevel = (level) => goToSlate(dateStr, level)
   const pageDay = (n) => {
     const [y, m, d] = dateStr.split('-').map(Number)
     goToDate(toApiDate(addDays(new Date(y, m - 1, d), n)))
@@ -507,11 +504,13 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
 
   return (
     <div className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}`}>
-      {/* Title + level toggle + search share one row: the Tally wordmark taps
-          home (a full reload — see lib/home.js) on the left, the condensed
-          MLB/AAA/… buttons and the search trigger ride together to its
-          right (grouped so `justify-content: space-between` splits only
-          title vs. that cluster, not each button individually). A direct
+      {/* Title + league toggle + search share one row: the Tally wordmark
+          reloads THIS league's slate for today on the left (a full page load —
+          see lib/home.js), the condensed MLB/AAA/… buttons — the URL's own
+          league segment now, not a stored preference (ADR-0056) — and the
+          search trigger ride together to its right (grouped so
+          `justify-content: space-between` splits only title vs. that cluster,
+          not each button individually). A direct
           child of .screen (not .slatehead below) so a sticky containing
           block spans the whole scrollable page on desktop/iPad — nested one
           level deeper, position: sticky could only hold it in view for the
@@ -522,7 +521,7 @@ export function GameSelect({ date = null, onPick, onShowLogos }) {
         <button
           type="button"
           className="topbar__title topbar__home"
-          onClick={goHome}
+          onClick={() => goHome(slatePath(null, sportId))}
           aria-label="Reload games"
         >
           <TallyLockup height={20} />

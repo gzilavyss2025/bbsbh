@@ -73,23 +73,17 @@ test('the club is picked on the page and survives a reload', async ({ page }) =>
   )
 })
 
-test('the level the slate opens on is set here and persists', async ({ page }) => {
+// "Level the slate opens on" used to live under the club strip. It is gone,
+// with its preference, because the slate's league is a URL segment now
+// (ADR-0056) and a setting cannot answer a question the address already
+// answers. Pinned as an ABSENCE: the failure this guards against is the
+// control quietly coming back as a tap that changes nothing.
+test('there is no slate-league setting here any more — the URL carries it', async ({ page }) => {
   await page.goto('/profile')
 
-  const aa = page.getByRole('group', { name: 'Level the slate opens on' }).getByRole('button', {
-    name: 'AA',
-    exact: true,
-  })
-  await aa.click()
-  await expect(aa).toHaveAttribute('aria-pressed', 'true')
-
-  await page.reload()
-  await expect(
-    page.getByRole('group', { name: 'Level the slate opens on' }).getByRole('button', {
-      name: 'AA',
-      exact: true,
-    }),
-  ).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('heading', { name: 'Baseball' })).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Level the slate opens on' })).toHaveCount(0)
+  await expect(page.getByText('Level the slate opens on')).toHaveCount(0)
 })
 
 test('Keep Awake is a real switch and remembers its position', async ({ page }) => {
