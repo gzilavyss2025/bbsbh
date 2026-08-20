@@ -468,13 +468,17 @@ export default function App() {
       />
     )
   } else {
-    // `route.date` is only set by the '/{MMDDYYYY}' home shape (null = today);
-    // GameSelect pages between days by navigating those URLs itself (useNav),
-    // so a browsed-to day is a real, shareable address and Back/Forward walk
-    // the days you visited.
+    // `route.date` and `route.sportId` are only set when the URL says so — a
+    // missing date is today and a missing league is MLB, which together make
+    // the bare '/' the one canonical home slate (ADR-0055). GameSelect
+    // navigates those URLs itself (useNav) when you page a day or tap a league,
+    // so both are real, shareable addresses and Back/Forward walk what you
+    // visited. `sportId` is left undefined rather than defaulted here — the
+    // default lives on GameSelect's own signature, in one place.
     content = (
       <GameSelect
         date={route.date ?? null}
+        sportId={route.sportId}
         onPick={openGame}
         onShowLogos={() => go('/logos')}
       />

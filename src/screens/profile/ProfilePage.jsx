@@ -74,7 +74,7 @@ const ProfileAccount = isClerkEnabled
 export function ProfilePage() {
   useDocumentTitle('My Tally')
 
-  const { club, level, keepAwake, motion, set } = usePreferences()
+  const { club, keepAwake, motion, set } = usePreferences()
   const { stamps } = useStamps()
   const { spoiledDays, passActive, resetAt, disable } = useScoresUnlocked()
   const { recent, clear: clearRecent } = useRecentSearches()
@@ -121,13 +121,7 @@ export function ProfilePage() {
           </div>
         </header>
 
-        <ClubSection
-          teams={teams}
-          club={club}
-          level={level}
-          onPickClub={(id) => set('club', id)}
-          onPickLevel={(sportId) => set('level', sportId)}
-        />
+        <ClubSection teams={teams} club={club} onPickClub={(id) => set('club', id)} />
 
         <DeviceSection
           keepAwake={keepAwake}
