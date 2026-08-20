@@ -266,6 +266,11 @@ function Section({
   // return — and inert outside a provider, so this panel still renders
   // standalone. It only ever SUBTRACTS from a list; no gate below moves.
   const ledger = useCalloutLedger()
+  // Same reason, same place: the matchup families' season rates, one
+  // league-wide static file whose request staticJson memoizes — so this panel
+  // and the Between Innings card asking independently cost one fetch between
+  // them (api/staticJson.js). Above the early return, like the ledger.
+  const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   if (tab === 'lineups' && showEntering) {
     return (
       <LineupSection
@@ -419,8 +424,6 @@ function Section({
   // they share one ledger read (`shownCounts`) and one diversity pass. The
   // ledger counts distinct HALVES, and never the half being staged, so nothing
   // below can decay itself out from under the reader mid-half.
-  // Same one-file, one-fetch read BetweenInnings.jsx does — see its note there.
-  const savantMatchup = useAsync(fetchSavantMatchup, []).data ?? null
   const armsHalfIdx = halfIndex(effInning, effHalf)
   const shownCounts = ledger.countsFor(armsHalfIdx)
   const preHalf = showEntering
