@@ -129,3 +129,30 @@ export function effectiveReveal({ scoresUnlocked, stamped, revealedThrough, unlo
     commitReveals: false,
   }
 }
+
+// THE CATCH-UP RATCHET (ADR-0054), against any storage-like object — the pure
+// half of `catchUpRevealTo` in useRevealProgress.js, which owns the window,
+// the try/catch and the cross-tab echo. It is written here, beside `mergeMark`,
+// so the one thing that matters about it is checkable: catching up to a live
+// game goes THROUGH the ratchet like every other source. It cannot walk a mark
+// backward — a reader who has already scored past the live half keeps their
+// place — and a hand-mangled stored value cannot make it, since parseRevealMark
+// collapses anything that is not a non-negative integer to -1 and -1 loses.
+// Returns the mark now stored.
+export function catchUpMarkIn(storage, key, idx) {
+  if (!key || !Number.isInteger(idx) || idx < 0) return -1
+  const next = mergeMark(parseRevealMark(storage.getItem(key)), idx)
+  storage.setItem(key, String(next))
+  return next
+}
+
+// Is "Catch up to live" worth putting on the lineup page at all? Only when the
+// tap would move something: there has to BE a half before the target one to
+// reveal (a game in the top of the 1st has none — its target is half 0), and
+// the reader must not already be at or past it. A reader who has scored further
+// than the game has got — which happens on a suspended game resumed later, and
+// on any feed whose live half briefly reads behind the plays — gets no offer
+// rather than a button that would silently do nothing.
+export function offerCatchUp(target, revealedThrough) {
+  return target != null && target.idx >= 1 && revealedThrough < target.idx - 1
+}

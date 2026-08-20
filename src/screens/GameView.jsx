@@ -1,10 +1,11 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { useGameData } from '../hooks/useGameData.js'
 import { useDocumentTitle } from '../hooks/useDocumentTitle.js'
 import { useWakeLock } from '../hooks/useWakeLock.js'
 import { useKeepAwakePreference } from '../hooks/preferences/useKeepAwakePreference.js'
 import { sectionToStep, stepToSection } from '../lib/route.js'
 import { selectGameStatus } from '../api/select.js'
+import { catchUpPlan, catchUpRevealTo } from '../hooks/useRevealProgress.js'
 import { TeamTreatmentMark } from '../components/logo/TeamTreatmentMark.jsx'
 import { LogoModal } from '../components/logo/LogoModal.jsx'
 import { SiteHeader } from '../components/chrome/SiteHeader.jsx'
@@ -128,6 +129,20 @@ export function GameView({ game, section, onSection }) {
   }
 
   const sketchTeam = sketching ? game[sketching] : null
+
+  // CATCH UP TO LIVE (ADR-0054) — the extra button on the home lineup page for
+  // a reader who opened a game already in progress. `catchUpPlan` decides
+  // whether the offer is worth drawing and where it lands (hooks/
+  // useRevealProgress.js, beside the ratchet it uses); this screen only does
+  // the two things it already owns, the reveal and the navigation.
+  const catchUp = useMemo(() => catchUpPlan(feed), [feed])
+
+  const onCatchUp = catchUp
+    ? () => {
+        catchUpRevealTo(feed.gamePk, catchUp.idx - 1)
+        onSection(stepToSection(2, catchUp.inning, catchUp.half))
+      }
+    : null
 
   // The section tabs (LINEUPS / INNINGS / BOX). Rendered in place for the lineup
   // and box-score sections; for the innings view it's handed to InningViewer
@@ -322,6 +337,7 @@ export function GameView({ game, section, onSection }) {
           callouts={gameCallouts}
           onNext={() => onSection('top1')}
           nextLabel="Innings ›"
+          onCatchUp={onCatchUp}
           onPrintSheet={() => onSection('sheet')}
           onPreview={() => onSection('preview')}
           onReload={feedState.reload}

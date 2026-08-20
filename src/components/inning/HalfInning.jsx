@@ -34,6 +34,7 @@ export function HalfInning({
   vsTeam,
   highlights,
   revealedAtBatCount,
+  halfInProgress,
   windowed,
   focusStep,
   onFocusInfo,
@@ -45,6 +46,10 @@ export function HalfInning({
   // appearance at a time (the floating bar's "Next at-bat" button) has
   // revealedAtBatCount > 0 before it's fully committed. An already-committed
   // half (revealed) always shows everything regardless.
+  // `halfInProgress` (ADR-0054), resolved by InningViewer once for the half on
+  // screen and handed down rather than re-read here: it decides which pair of
+  // buttons the floating bar draws AND whether stepping to the last fetched
+  // entry may commit the half, and those two must be one answer, not two.
   const stepping = !revealed && revealedAtBatCount > 0
   // True from the FIRST at-bat step onward, not just once the half is fully
   // committed — the lineups/defense reference (below) moves into its own
@@ -435,6 +440,7 @@ export function HalfInning({
                 vsTeam={vsTeam}
                 highlightsMap={highlightsMap}
                 stepCap={stepping ? revealedAtBatCount : null}
+                halfInProgress={halfInProgress}
                 windowed={windowed}
                 focusStep={focusStep}
                 onFocusInfo={onFocusInfo}

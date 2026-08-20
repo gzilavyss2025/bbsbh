@@ -138,6 +138,14 @@ const BUDGETS = {
   // query/row-shaping itself already lives in that lib module, not here.
   'scripts/gen-callouts.mjs': 1600, // 1507
   'src/screens/identity-lab/profiles/mlb.jsx': 1500, // 1470
+  // GameView is the game's ROUTER — one screen per section, each lazily
+  // imported, plus the chrome every section shares — so a feature that adds a
+  // door lands here by construction rather than by accretion. The catch-up
+  // wiring (ADR-0054) is that: eleven lines, all of them routing. Splitting the
+  // shared chrome out would move the section tabs into a 12th file in
+  // src/components/chrome (at ITS own MAX_FILES) to save this one 45, which
+  // trades a real limit for a nominal one.
+  'src/screens/GameView.jsx': 620, // 609
   'src/screens/TeamInfo.jsx': 1300, // 1299
   'src/screens/BoxScore.jsx': 1300, // 1203 — the hit chart's 3-line mount; the card itself is screens/boxscore/HitChartCard.jsx
   'src/screens/FoulTrackerPage.jsx': 1200, // 1168

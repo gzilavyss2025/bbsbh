@@ -13,6 +13,7 @@ import {
   pinchRunningPlayers,
   pinchHittingBatter,
   nextStepBoundary,
+  stepCommitReady,
   focusWindows,
   stepTotals,
   lastVisibleAtBatIndex,
@@ -69,13 +70,16 @@ import { HighlightSheet } from './HighlightSheet.jsx'
 // full entries list (every entry shown, whether by tapping through or because
 // the very first step happened to be the whole half), `onStepComplete()` once,
 // so the caller can promote this half to a normal full commit.
+// `halfInProgress` (ADR-0054) WITHHOLDS it on the half being PLAYED, where the
+// entries list is only the half SO FAR: it is held, and reported as
+// `atHalfEdge` for the bar to say so, until the third out lands.
 //
 // `windowed` narrows that revealed PREFIX to ONE step's window; a stacked
 // half (`!windowed`) shows every entry. `focusStep` picks which step (null =
 // newest, windowed only); `onFocusInfo(count)` says how many exist.
 // Presentation only — `stepCap` stays the single reveal boundary regardless
 // of `windowed`.
-export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo }) {
+export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitchingTeamId, battingName, battingTeamId, callouts, vsTeam, highlightsMap, stepCap = null, halfInProgress = false, onStepInfo, onStepComplete, onRunsSoFar, onLiveState, windowed = false, focusStep = null, onFocusInfo }) {
   const stepping = stepCap != null
   // Pass stepCap through so any runner advancement/out that happens on a
   // later, not-yet-revealed play isn't retroactively written onto an earlier
@@ -102,18 +106,10 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     effectiveCap > stepCap
       ? computeHalfInningFeed(feed, inning, half, battingSide, effectiveCap)
       : rawEntries
-  // A live, still-updating half can have its ONLY currently-fetched content
-  // be a leading event note with no plate appearance yet (e.g. extra innings'
-  // automatic placed-runner note, posted before the leadoff batter's own PA
-  // has resolved in the feed) — entries.length catching up to effectiveCap in
-  // that state must not read as "the whole half, done," or onStepComplete
-  // below fires a one-directional, localStorage-persisted commit of the
-  // entire half before any real result exists. Require at least one genuine
-  // at-bat card anywhere in entries first; a truly finished half always has
-  // one (an inning needs at least one batter), so this only ever holds back
-  // the live, still-populating edge case.
-  const hasAtBat = entries.some((e) => e.kind === 'atbat')
-  const exhausted = stepping && entries.length > 0 && hasAtBat && effectiveCap >= entries.length
+  // May this staged half be promoted to a full commit? Three conditions, one of
+  // them the live-half hold — stepCommitReady's own header has all three and why
+  // each is load-bearing (api/playbyplay/entriesView.js, ADR-0016/0054).
+  const exhausted = stepping && stepCommitReady(entries, effectiveCap, halfInProgress)
 
   // Focus mode: one window per revealed AT-BAT (focusWindows), the notices
   // staging it at its head, every window clamped to the cap. NOT one window
@@ -152,7 +148,8 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
     } else {
       const nextCap = nextStepBoundary(entries, effectiveCap)
       const lastAtBatIndex = lastVisibleAtBatIndex(entries, effectiveCap)
-      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex })
+      // `atHalfEdge`: caught up to a half still in play (ADR-0054).
+      onStepInfo?.({ nextCap, isLastStep: nextCap >= entries.length, lastAtBatIndex, atHalfEdge: effectiveCap >= entries.length })
     }
   }, [stepping, exhausted, effectiveCap, entries.length]) // eslint-disable-line react-hooks/exhaustive-deps
 

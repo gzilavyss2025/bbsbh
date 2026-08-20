@@ -54,6 +54,7 @@ export const InningPage = memo(function InningPage({
   vsTeam,
   highlights,
   atBatCountFor,
+  halfInProgress = false,
   windowed = false,
   focusStep = null,
   onFocusInfo,
@@ -92,6 +93,7 @@ export const InningPage = memo(function InningPage({
         vsTeam={vsTeam}
         highlights={highlights}
         revealedAtBatCount={atBatCountFor(inning, half)}
+        halfInProgress={halfInProgress}
         windowed={windowed}
         focusStep={focusStep}
         onFocusInfo={presentationOnly ? undefined : onFocusInfo}

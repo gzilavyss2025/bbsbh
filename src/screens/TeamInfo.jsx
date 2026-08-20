@@ -100,6 +100,7 @@ export function TeamInfo({
   callouts,
   onNext,
   nextLabel,
+  onCatchUp = null,
   onPrintSheet,
   onPreview,
   onReload,
@@ -248,9 +249,33 @@ export function TeamInfo({
           lastUpdated={lastUpdated}
           className="refreshbtn--float"
         />
-        <button className="btn btn--next" onClick={onNext}>
-          {nextLabel}
-        </button>
+        {onCatchUp ? (
+          /* CATCH UP TO LIVE (ADR-0054), on a game already in progress. The
+             pair borrows `.revealsplit` from the innings bar — the same layout,
+             and the same reading of which of two side-by-side buttons is the
+             quiet one — but NOT its emphasis, and the difference is worth
+             saying out loud so the two are not made to match later. There the
+             quiet half is the skip, demoted because revealing is
+             one-directional. Here the quiet half is the ordinary advance, and
+             it is the SAFE one: "Innings ›" from a live game's lineup page
+             means "start at the top of the 1st and walk", which reveals
+             nothing at all. What earns the kraft seal on the left is that it
+             is the reveal — same texture, and so the same warning, that every
+             other reveal in this app wears. The two skins are enough on their
+             own; `--quiet` is a focus-mode rule and does not reach this bar. */
+          <div className="revealsplit">
+            <button className="btn btn--reveal revealsplit__btn" onClick={onCatchUp}>
+              Catch up to live ›
+            </button>
+            <button className="btn btn--next revealsplit__btn" onClick={onNext}>
+              {nextLabel}
+            </button>
+          </div>
+        ) : (
+          <button className="btn btn--next" onClick={onNext}>
+            {nextLabel}
+          </button>
+        )}
       </div>
     </div>
   )

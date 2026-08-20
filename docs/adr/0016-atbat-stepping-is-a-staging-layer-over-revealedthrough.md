@@ -74,3 +74,13 @@ revealed (`renderRevealedThrough`), so `currentSealed` is false and the split
 through. The cursor itself is untouched: it keys on the real half being shown
 and resumes exactly where it was when the pass is turned off or expires, because
 the pass never wrote to `revealedThrough` or the at-bat mark.
+
+**Amended by ADR-0054 (the commit waits for the third out).** "Every entry
+shown" and "the half is over" are the same sentence only for a half that has
+already finished. On the half the game is being PLAYED in, the entry list is the
+half so far, so `onStepComplete` fired as soon as a reader caught up to the live
+edge and committed the whole half on the strength of a few batters — after which
+every plate appearance that landed arrived already revealed. `stepCommitReady`
+now takes a third condition, "the half is not in progress"; a live half reports
+`atHalfEdge` instead, and the floating bar drops "Rest of half" for it. See
+ADR-0054, which also adds the lineup page's "Catch up to live" button.
