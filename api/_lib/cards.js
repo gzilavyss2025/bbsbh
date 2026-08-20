@@ -12,9 +12,10 @@
 // static home-page card, so a statsapi hiccup can never break a shared link.
 //
 // The pure route/slug helpers below are deliberate small copies of their
-// src/lib counterparts (route.js `matchupSlug`/`urlDateToApi`, teams.js
-// `teamAbbr`) — the edge runtime can't import the app's ESM module graph, and
-// these three are near-immutable. Keep them byte-for-byte in sync.
+// src/lib counterparts (route.js `matchupSlug`/`urlDateToApi`/`slugify`/
+// `idFromSlug`, teams.js `teamAbbr`) — the edge runtime can't import the app's
+// ESM module graph, and these are near-immutable. Keep them byte-for-byte in
+// sync.
 
 import { fetchWithTimeout } from './http.js'
 
@@ -54,6 +55,30 @@ function teamAbbr(team) {
 function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
   const base = `${(awayAbbr || '').toLowerCase()}${(homeAbbr || '').toLowerCase()}`
   return gameNumber > 1 ? `${base}-${gameNumber}` : base
+}
+
+// A '/player/{slug}-{id}' address arrives here with the whole segment in `id`,
+// because vercel.json's rewrite captures one segment and cannot know which part
+// of it is the number. Everything below fetches by the number, and the CANONICAL
+// this page emits is rebuilt from the resolved name — so the slug that came in
+// is only ever a hint, and a stale or wrong one (a traded player, a hand-typed
+// link) still resolves and still self-corrects. route.js is the twin. ADR-0057.
+export function idFromSlug(segment) {
+  const s = String(segment ?? '')
+  if (/^\d+$/.test(s)) return s
+  const m = s.match(/-(\d+)$/)
+  return m ? m[1] : s
+}
+
+export function slugify(name) {
+  return String(name ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+    .replace(/-+$/, '')
 }
 
 // --- statsapi fetch (server side, crawler-only) ----------------------------
@@ -130,7 +155,8 @@ function ogUrl(origin, params) {
   return `${origin}/api/og?${q}`
 }
 
-async function playerCard(id, origin) {
+async function playerCard(idSegment, origin) {
+  const id = idFromSlug(idSegment)
   const data = await getJson(`/api/v1/people/${id}?hydrate=currentTeam`)
   const p = data.people?.[0]
   if (!p) return null
@@ -149,6 +175,9 @@ async function playerCard(id, origin) {
       : `Bio, career register, and season stats — a spoiler-safe scorecard companion.`,
     image: ogUrl(origin, { type: 'player', id: String(id), name, sub, team: String(colorTeam) }),
     alt: sub ? `${name} — ${sub}` : name,
+    // What canonicalUrl re-spells the address with. Built from the name statsapi
+    // just returned, never from the segment the request arrived on.
+    segment: slugify(name) ? `${slugify(name)}-${id}` : String(id),
   }
 }
 
@@ -185,7 +214,8 @@ export const TEAM_TABS = {
   },
 }
 
-async function teamCard(id, origin, { tab } = {}) {
+async function teamCard(idSegment, origin, { tab } = {}) {
+  const id = idFromSlug(idSegment)
   const data = await getJson(`/api/v1/teams/${id}`)
   const t = data.teams?.[0]
   if (!t) return null
@@ -209,6 +239,7 @@ async function teamCard(id, origin, { tab } = {}) {
         : `Roster, leaders, and schedule — a spoiler-safe scorecard companion.`,
     image: ogUrl(origin, { type: 'team', id: String(id), name, sub, eyebrow }),
     alt: `${name}${sub ? ` — ${sub}` : ''}`,
+    segment: slugify(name) ? `${slugify(name)}-${id}` : String(id),
   }
 }
 

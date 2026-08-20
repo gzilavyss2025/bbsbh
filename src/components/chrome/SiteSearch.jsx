@@ -194,7 +194,11 @@ export function SiteSearchModal({ onClose }) {
       if (!row) return
       remember({ kind: row.kind, id: row.id, name: row.name, sub: row.sub })
       onClose()
-      navigate(row.kind === 'team' ? teamPath(row.id) : playerPath(row.id))
+      navigate(
+        row.kind === 'team'
+          ? teamPath(row.id, { name: row.name })
+          : playerPath(row.id, { name: row.name }),
+      )
     },
     [navigate, onClose, remember],
   )

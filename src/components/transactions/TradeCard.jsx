@@ -50,7 +50,7 @@ function PlayerStatLines({ stats }) {
 function PlayerRow({ player, teamId }) {
   return (
     <li className="tradecard__player">
-      <PlayerLink id={player.playerId} className="tradecard__playerlink">
+      <PlayerLink id={player.playerId} name={player.name} className="tradecard__playerlink">
         <Headshot
           personId={player.playerId}
           name={player.name}

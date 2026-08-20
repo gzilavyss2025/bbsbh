@@ -1186,6 +1186,12 @@ export function teamClubNameShort(teamId) {
 
 // "Pittsburgh Pirates" — the full club name. Collapses the relocating
 // Athletics' duplicated halves to a single "Athletics". Null for a MiLB id.
+//
+// Also what a club is CALLED IN AN ADDRESS ('/team/pittsburgh-pirates-134',
+// route.js `teamSegment`), which is why every MLB club's URL names itself with
+// no caller passing anything. The two halves above exist for prose, where a club
+// is one or the other and never both; a URL is read cold, with no sentence
+// around it, so it gets the whole name.
 export function teamFullName(teamId) {
   const t = MLB_TEAM_NAMES[teamId]
   if (!t) return null

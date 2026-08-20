@@ -10,7 +10,14 @@ import { readFileSync } from 'node:fs'
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
+import {
+  firstNonNull,
+  buildCard,
+  TEAM_TABS,
+  slugify as edgeSlugify,
+  idFromSlug as edgeIdFromSlug,
+} from '../api/_lib/cards.js'
+import { slugify, idFromSlug } from '../src/lib/route.js'
 import { canonicalUrl, renderHead } from '../api/preview.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
 
@@ -165,6 +172,46 @@ test('every route vercel.json rewrites through api/preview has its own canonical
   assert.deepEqual(homed, [], `these routes canonicalise to the home page: ${homed.join(', ')}`)
 })
 
+test('the canonical names the SLUGGED address, spelled from the resolved name', () => {
+  // The point of the whole scheme. Both '/player/545361' and
+  // '/player/mike-trout-545361' resolve (route.js keeps every pre-slug link
+  // working), so it is rel=canonical that decides which one a search engine
+  // counts — and if it kept naming the bare id, the slug would earn nothing.
+  const params = new URLSearchParams({ route: 'player', id: '545361' })
+  const card = { segment: 'mike-trout-545361' }
+  assert.equal(canonicalUrl(params, card), `${SITE_URL}/player/mike-trout-545361`)
+
+  const team = new URLSearchParams({ route: 'team-roster', id: '158' })
+  assert.equal(
+    canonicalUrl(team, { segment: 'milwaukee-brewers-158' }),
+    `${SITE_URL}/team/milwaukee-brewers-158/roster`,
+  )
+})
+
+test('a stale or absent slug on the way IN is re-spelled on the way OUT', () => {
+  // A link carrying a player's old club, a truncated slug, or no slug at all
+  // must still name the one canonical page — which is why the segment is built
+  // from what statsapi just returned, never from what the visitor arrived on.
+  const card = { segment: 'mike-trout-545361' }
+  for (const arrived of ['545361', 'mike-trout-545361', 'completely-wrong-545361']) {
+    const params = new URLSearchParams({ route: 'player', id: arrived })
+    assert.equal(canonicalUrl(params, card), `${SITE_URL}/player/mike-trout-545361`, arrived)
+  }
+})
+
+test('with no card resolved the canonical still names a working address', () => {
+  // statsapi down, or a card that would not build: the page falls back to the
+  // static default block, and the canonical falls back to the segment the
+  // request arrived on. It must stay a real address — the next crawl, with
+  // statsapi back, re-spells it.
+  const params = new URLSearchParams({ route: 'player', id: 'mike-trout-545361' })
+  assert.equal(canonicalUrl(params, null), `${SITE_URL}/player/mike-trout-545361`)
+  assert.equal(
+    canonicalUrl(new URLSearchParams({ route: 'team', id: '158' }), null),
+    `${SITE_URL}/team/158`,
+  )
+})
+
 test('the injected head carries a rel=canonical, and it agrees with og:url', () => {
   const card = {
     title: 'Christian Yelich | Tally Baseball',
@@ -201,5 +248,45 @@ test('every team-hub tab has a distinct, non-empty eyebrow and description', () 
     eyebrows.add(cfg.eyebrow)
     const desc = cfg.description('Milwaukee Brewers')
     assert.ok(desc.includes('Milwaukee Brewers'), `${tab}'s description should mention the team name`)
+  }
+})
+
+// ------------------------------------------------ the mirrored slug helpers
+//
+// cards.js keeps its own copies of route.js's slugify/idFromSlug, because the
+// edge runtime cannot import the app's ESM module graph, and its header says to
+// keep them in sync. Saying so is what every drifted copy in this repo's history
+// also did, so this asserts it instead: the two must agree on the same battery
+// of inputs, or the client links to one address while the canonical names
+// another — which is the exact failure the slug scheme exists to avoid.
+test('the edge copies of slugify/idFromSlug match the app’s', () => {
+  const names = [
+    'Mike Trout',
+    'José Ramírez',
+    'Yoán Moncada',
+    "D'Angelo Ortiz Jr.",
+    'St. Louis Cardinals',
+    'Rocket City Trash Pandas',
+    'Athletics',
+    'A'.repeat(60),
+    '—',
+    '',
+    null,
+    undefined,
+  ]
+  for (const name of names) {
+    assert.equal(edgeSlugify(name), slugify(name), `slugify(${String(name)})`)
+  }
+
+  const segments = [
+    '545361',
+    'mike-trout-545361',
+    'area-code-51-5015',
+    'completely-wrong-158',
+    'not-an-id',
+    '',
+  ]
+  for (const seg of segments) {
+    assert.equal(edgeIdFromSlug(seg), idFromSlug(seg), `idFromSlug(${seg})`)
   }
 })

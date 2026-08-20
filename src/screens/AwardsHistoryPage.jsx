@@ -133,7 +133,7 @@ function AwardCard({ r, favoriteTeamId, dense = false }) {
       </span>
       <div className="playercard__body">
         <div className={`playercard__name ${nameClass}`}>
-          <PlayerLink id={r.playerId}>
+          <PlayerLink id={r.playerId} name={r.name}>
             {dense ? (
               <>
                 {first}
