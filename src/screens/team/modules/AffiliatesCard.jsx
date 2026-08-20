@@ -13,7 +13,9 @@ export function AffiliatesCard({ affiliates }) {
       <div className="thub-card__body">
       <div className="thub-affiliates">
         {affiliates.map((a) => (
-          <TeamLink key={a.id} id={a.id} className="thub-affiliate">
+          // A MiLB club is not in the static name table, so its address takes
+          // the name its own feed gave us (ADR-0057).
+          <TeamLink key={a.id} id={a.id} name={a.name} className="thub-affiliate">
             <span className="thub-affiliate__level">{SPORT_LABEL[a.sportId] ?? DASH}</span>
             <TeamLogo teamId={a.id} name={a.name} size={48} />
             <span className="thub-affiliate__name">{a.name}</span>

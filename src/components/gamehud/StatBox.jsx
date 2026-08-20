@@ -447,7 +447,7 @@ function WorstCallCard({ data }) {
           </div>
           {batterName && (
             <div className="wcall__locator">
-              <PlayerLink id={batterId}>
+              <PlayerLink id={batterId} name={batterName}>
                 <b>{batterName}</b>
               </PlayerLink>{' '}
               · {half === 'top' ? '▲' : '▼'}

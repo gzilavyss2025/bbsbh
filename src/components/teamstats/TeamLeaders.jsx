@@ -99,7 +99,10 @@ function FeaturedLeader({
             same idiom as PlayerPage's splitDisplayName hero — so a long
             surname gets its own full-width line instead of competing with
             the stat value for room on one shared row. */}
-        <PlayerLink id={entry.id} className="tlead__name">
+        {/* The hero splits the name across two lines, so its children are markup
+            and there is no string for the link to borrow for the address —
+            `entry.name` is the whole name it was split from (ADR-0057). */}
+        <PlayerLink id={entry.id} name={entry.name} className="tlead__name">
           {first && <span className="tlead__name-first">{first}</span>}
           <span className="tlead__name-last">
             {last}

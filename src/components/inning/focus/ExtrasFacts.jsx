@@ -109,7 +109,9 @@ function clubTag(meta, side) {
 function managerFact(manager) {
   if (!manager) return null
   return (
-    <ManagerLink id={manager.personId} className="fact__person">
+    // The fact PRINTS surname-first; the address takes spoken order
+    // (ADR-0057), which `name` on the same object already is.
+    <ManagerLink id={manager.personId} name={manager.name} className="fact__person">
       {manager.lastFirst}
       {manager.jersey ? <span className="fact__jersey">{manager.jersey}</span> : null}
       {manager.interim ? <span className="fact__note">interim</span> : null}

@@ -29,7 +29,7 @@ export function OffDaySection({ teams, favoriteTeamId, favoriteAffiliateIds }) {
             <OffDayCard
               team={team}
               pinned={team.id === favoriteTeamId || !!favoriteAffiliateIds?.has(team.id)}
-              onOpen={() => navigate(teamPath(team.id))}
+              onOpen={() => navigate(teamPath(team.id, { name: team.name }))}
             />
           </li>
         ))}

@@ -46,7 +46,9 @@ test('a player link out of a started game carries no as-of cutoff', async ({ pag
   await expect(name).toBeVisible()
   await name.click()
 
-  await expect(page).toHaveURL(/\/player\/\d+/)
+  // '{slug}-{id}' or a bare id, depending on whether the lineup card had a
+  // name to spell it with (ADR-0057); either way the address ends in the id.
+  await expect(page).toHaveURL(/\/player\/(?:[a-z0-9-]+-)?\d+/)
   // The assertion that IS the change: no `d=` on the way out.
   expect(new URL(page.url()).searchParams.get('d')).toBeNull()
   // And so the page must not be claiming to be a historical view.
@@ -60,7 +62,7 @@ test('a club link out of a started game carries no as-of cutoff either', async (
   await expect(club).toBeVisible()
   await club.click()
 
-  await expect(page).toHaveURL(/\/team\/\d+/)
+  await expect(page).toHaveURL(/\/team\/(?:[a-z0-9-]+-)?\d+/)
   expect(new URL(page.url()).searchParams.get('d')).toBeNull()
   await expectLiveBanner(page)
 })
@@ -81,7 +83,7 @@ test('a hand-dated team URL still freezes, survives a tab switch, offers the way
   // that is unchanged: a tab switch must not silently drop the cutoff, or one
   // visit would answer two different ways.
   await page.locator('.teamtabs').getByRole('button', { name: 'Roster' }).click()
-  await expect(page).toHaveURL(/\/team\/158\/roster\?d=2026-04-10/)
+  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster\?d=2026-04-10/)
   await expect(page.locator('.asof-banner')).toBeVisible()
 
   // "Change date" reopens the same picker, pre-filled with the date already
@@ -90,12 +92,12 @@ test('a hand-dated team URL still freezes, survives a tab switch, offers the way
   await expect(page.locator('.asof-banner__input')).toHaveValue('2026-04-10')
   await page.locator('.asof-banner__input').fill('2026-05-01')
   await page.getByRole('button', { name: 'Go' }).click()
-  await expect(page).toHaveURL(/\/team\/158\/roster\?d=2026-05-01/)
+  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster\?d=2026-05-01/)
   await expect(page.locator('.asof-banner')).toContainText(/Stats entering/i)
 
   // And back to current, without hand-editing the URL.
   await page.getByRole('button', { name: 'Show current' }).click()
-  await expect(page).toHaveURL(/\/team\/158\/roster$/)
+  await expect(page).toHaveURL(/\/team\/milwaukee-brewers-158\/roster$/)
   await expectLiveBanner(page)
 })
 

@@ -297,6 +297,10 @@ export function preferredLineupFrom(fullRoster, teamId) {
       position: pos,
       id: best.person.id,
       last: lastName(best.person),
+      // The diamond PRINTS the surname (that is what a scorebook does) but its
+      // link ADDRESSES the whole name — ADR-0057. Two different jobs, so both
+      // spellings ride along rather than one being derived from the other.
+      name: firstLast(best.person),
       gs: gsAt(best, pos),
     }
     claimed.add(best.person.id)
@@ -308,7 +312,8 @@ export function preferredLineupFrom(fullRoster, teamId) {
       const pid = r.person?.id
       if (!pid || claimed.has(pid)) continue
       const gs = gsAt(r, pos)
-      if (gs > 0 && (!best || gs > best.gs)) best = { position: pos, id: pid, last: lastName(r.person), gs }
+      if (gs > 0 && (!best || gs > best.gs))
+        best = { position: pos, id: pid, last: lastName(r.person), name: firstLast(r.person), gs }
     }
     if (best) {
       bestByPosition[pos] = best
@@ -324,6 +329,7 @@ export function lineupDefenseFrom(preferredLineup, injuredIds) {
   return preferredLineup.map((p) => ({
     position: p.position,
     last: p.last,
+    name: p.name,
     id: p.id,
     hurt: injuredIds.has(p.id),
   }))

@@ -156,7 +156,12 @@ const BUDGETS = {
   // that would shadow it, and mainOverrideLogoUrl's, which is what routes
   // Main's tile through 'main-recolor'.
   'src/lib/teams.js': 1225, // 1212
-  'src/lib/route.js': 700, // 602 — one more parse branch and path doc line for '/postseason-race'
+  // 700 -> 800: the slug helpers that put a name in front of an id
+  // (slugify/idFromSlug/entitySegment, ADR-0057). They belong to routing and to
+  // nothing else — a one-file src/lib/url/ existing only to dodge this number
+  // would hide the rule halfway down a directory instead of beside the parse
+  // branches and the builders that are its only two callers.
+  'src/lib/route.js': 800, // 744
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
   'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them

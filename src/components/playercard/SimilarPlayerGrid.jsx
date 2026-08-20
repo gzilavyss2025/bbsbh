@@ -74,7 +74,7 @@ export function SimilarPlayerGrid({ rows, measure, note }) {
           const club = teamClubNameShort(p.teamId)
           return (
             <li className="simlike__item" key={p.personId}>
-              <PlayerLink id={p.personId} className="simlike__link">
+              <PlayerLink id={p.personId} name={p.name} className="simlike__link">
                 <Headshot
                   personId={p.personId}
                   name={p.name}

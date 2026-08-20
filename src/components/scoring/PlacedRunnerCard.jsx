@@ -42,7 +42,10 @@ export function PlacedRunnerCard({ entry }) {
           <div className="pbp__top">
             <span className="pbp__batter">
               <span className={`pbp__batline ${replaced ? 'pbp__replaced' : ''}`}>
-                <PlayerLink id={runner.id}>
+                <PlayerLink
+                  id={runner.id}
+                  name={[runner.first, runner.last].filter(Boolean).join(' ')}
+                >
                   {runner.last}
                   {runner.first ? `, ${runner.first}` : ''}
                 </PlayerLink>
@@ -53,7 +56,7 @@ export function PlacedRunnerCard({ entry }) {
                   key={pr.id}
                   className={`pbp__batline ${i < pinchRunners.length - 1 ? 'pbp__replaced' : ''}`}
                 >
-                  <PlayerLink id={pr.id}>
+                  <PlayerLink id={pr.id} name={[pr.first, pr.last].filter(Boolean).join(' ')}>
                     {pr.last}
                     {pr.first ? `, ${pr.first}` : ''}
                   </PlayerLink>

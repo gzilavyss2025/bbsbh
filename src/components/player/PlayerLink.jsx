@@ -1,4 +1,4 @@
-import { useNav, useLinkScope } from '../../lib/nav.js'
+import { useNav, useLinkScope, nameFromChildren } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
 
 // Wraps a player's name (already rendered as children) in a plain, no-underline
@@ -21,7 +21,13 @@ import { playerPath } from '../../lib/route.js'
 // same reason, as TeamLink's — which had it from the start; this one didn't,
 // so its logo-only callers had no way to name themselves even if they tried.
 // e2e/invariants/accessible-names.spec.js is the guard.
-export function PlayerLink({ id, className = '', ariaLabel, children }) {
+// `name` is what puts the person's name in the address bar rather than a bare
+// id (route.js, ADR-0057). It defaults to the children when they are already a
+// plain string, which is the ordinary case here — the link IS the name — so
+// almost no caller has to say anything. A caller whose children are ART (a
+// headshot, a club mark) has no string to borrow and should pass `name`
+// explicitly; without it the link still works, just at the bare-id address.
+export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
   const navigate = useNav()
   const { asOf, sportId } = useLinkScope()
   if (!id) {
@@ -32,7 +38,9 @@ export function PlayerLink({ id, className = '', ariaLabel, children }) {
       type="button"
       className={`plink ${className}`}
       aria-label={ariaLabel}
-      onClick={() => navigate(playerPath(id, { d: asOf, s: sportId }))}
+      onClick={() =>
+        navigate(playerPath(id, { name: name ?? nameFromChildren(children), d: asOf, s: sportId }))
+      }
     >
       {children}
     </button>

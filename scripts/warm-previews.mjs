@@ -12,8 +12,10 @@
 // dependency for anything downstream. MLB only (sportId 1): the vast
 // majority of shared links, and where the bug this warms against was found.
 //
-// Self-contained (own small copies of the date/slug helpers), same
-// convention as gen-rehab.mjs mirroring person.js's transaction-scan logic
+// Self-contained (own small copies of the date/slug helpers, including the
+// entity slug of ADR-0057 — warm the address a crawler will actually request,
+// which is the slugged one the canonical names, not the bare id it used to be),
+// same convention as gen-rehab.mjs mirroring person.js's transaction-scan logic
 // for anything that lives under src/ — but api/_lib/http.js has no such
 // boundary (plain fetch/AbortController, no edge-runtime-only API), so its
 // fetchWithTimeout is imported directly rather than re-copied a third time.
@@ -67,6 +69,26 @@ function teamAbbr(team) {
     team?.abbreviation ||
     (team?.teamName || team?.name || '').replace(/[^a-z]/gi, '').slice(0, 3).toUpperCase()
   )
+}
+
+// route.js / api/_lib/cards.js twins. A page about a person or a club is
+// addressed '{slug}-{id}', and that is the URL the crawler follows, so it is the
+// URL worth warming — the bare form resolves too, but it is a different edge
+// cache key and nobody is going to request it.
+function slugify(name) {
+  return String(name ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48)
+    .replace(/-+$/, '')
+}
+
+function entitySegment(id, name) {
+  const slug = slugify(name)
+  return slug ? `${slug}-${id}` : String(id)
 }
 
 function matchupSlug(awayAbbr, homeAbbr, gameNumber = 1) {
@@ -140,28 +162,37 @@ async function main() {
     return
   }
 
-  const teamIds = new Set()
+  // id -> full club name, so a club page is warmed at the slugged address it is
+  // linked and canonicalised at.
+  const teamNames = new Map()
   const pageUrls = []
   for (const g of games) {
     const away = g.teams?.away?.team
     const home = g.teams?.home?.team
     if (!away?.id || !home?.id) continue
-    teamIds.add(away.id)
-    teamIds.add(home.id)
+    teamNames.set(away.id, away.name)
+    teamNames.set(home.id, home.name)
     const slug = matchupSlug(teamAbbr(away), teamAbbr(home), g.gameNumber ?? 1)
     for (const section of GAME_SECTIONS) {
       pageUrls.push(`${APP_ORIGIN}/${urlDate}/${slug}/${section}`)
     }
   }
-  for (const id of teamIds) pageUrls.push(`${APP_ORIGIN}/team/${id}`)
+  const teamIds = [...teamNames.keys()]
+  for (const id of teamIds) {
+    pageUrls.push(`${APP_ORIGIN}/team/${entitySegment(id, teamNames.get(id))}`)
+  }
 
-  const rosterResults = await mapConcurrent([...teamIds], CONCURRENCY, async (id) => {
+  const rosterResults = await mapConcurrent(teamIds, CONCURRENCY, async (id) => {
     const data = await getJson(`${STATSAPI}/api/v1/teams/${id}/roster?rosterType=active`)
-    return (data.roster ?? []).map((r) => r.person?.id).filter(Boolean)
+    return (data.roster ?? [])
+      .filter((r) => r.person?.id)
+      .map((r) => ({ id: r.person.id, name: r.person.fullName }))
   })
-  for (const ids of rosterResults) {
-    if (!ids) continue
-    for (const personId of ids) pageUrls.push(`${APP_ORIGIN}/player/${personId}`)
+  for (const people of rosterResults) {
+    if (!people) continue
+    for (const p of people) {
+      pageUrls.push(`${APP_ORIGIN}/player/${entitySegment(p.id, p.name)}`)
+    }
   }
 
   const seenImages = new Set()

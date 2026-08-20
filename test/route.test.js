@@ -12,6 +12,11 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   parseRoute,
+  slugify,
+  idFromSlug,
+  entitySegment,
+  teamSegment,
+  managerPath,
   sectionToStep,
   stepToSection,
   urlDateToApi,
@@ -285,22 +290,23 @@ test('the 3-segment leaders/team branches win over the generic game branch', () 
 // teamTabPath / parseRoute — the team hub's five tabs
 // --------------------------------------------------------------------------
 test('teamTabPath builds each tab path and carries the spoiler cutoff through', () => {
-  assert.equal(teamTabPath(158, 'overview'), '/team/158')
-  assert.equal(teamTabPath(158, 'roster'), '/team/158/roster')
-  assert.equal(teamTabPath(158, 'games'), '/team/158/games')
-  assert.equal(teamTabPath(158, 'numbers'), '/team/158/numbers')
-  assert.equal(teamTabPath(158, 'minors'), '/team/158/minors')
-  assert.equal(teamTabPath(158, 'leaders'), '/team/158/leaders')
+  const BREW = '/team/milwaukee-brewers-158'
+  assert.equal(teamTabPath(158, 'overview'), BREW)
+  assert.equal(teamTabPath(158, 'roster'), `${BREW}/roster`)
+  assert.equal(teamTabPath(158, 'games'), `${BREW}/games`)
+  assert.equal(teamTabPath(158, 'numbers'), `${BREW}/numbers`)
+  assert.equal(teamTabPath(158, 'minors'), `${BREW}/minors`)
+  assert.equal(teamTabPath(158, 'leaders'), `${BREW}/leaders`)
   // The spoiler-relevant case: a tab switch must reproduce the same ?d=/?s=
   // a dated team link arrived with — dropping either would show a visitor
   // mid-scoring stats past the half-inning they've reached (PRD non-negotiable 1).
   assert.equal(
     teamTabPath(158, 'roster', { d: '2026-07-05', s: 11 }),
-    '/team/158/roster?d=2026-07-05&s=11',
+    `${BREW}/roster?d=2026-07-05&s=11`,
   )
   assert.equal(
     teamTabPath(158, 'overview', { d: '2026-07-05', s: 11 }),
-    '/team/158?d=2026-07-05&s=11',
+    `${BREW}?d=2026-07-05&s=11`,
   )
 })
 
@@ -344,10 +350,10 @@ test('a team tab segment is not mistaken for a date-first game route', () => {
 // teamStampInPath / parseRoute — the Stamp In page (ADR-0042)
 // --------------------------------------------------------------------------
 test('teamStampInPath builds the page path and carries the cutoff query', () => {
-  assert.equal(teamStampInPath(158), '/team/158/stamp-in')
+  assert.equal(teamStampInPath(158), '/team/milwaukee-brewers-158/stamp-in')
   assert.equal(
     teamStampInPath(158, { d: '2026-07-05', s: 11 }),
-    '/team/158/stamp-in?d=2026-07-05&s=11',
+    '/team/milwaukee-brewers-158/stamp-in?d=2026-07-05&s=11',
   )
 })
 
@@ -428,10 +434,10 @@ test('the old team-records URL remains an inbound alias', () => {
 // teamPhotosPath / parseRoute — the season photos page
 // --------------------------------------------------------------------------
 test('teamPhotosPath builds the page path and carries the cutoff query', () => {
-  assert.equal(teamPhotosPath(158), '/team/158/photos')
+  assert.equal(teamPhotosPath(158), '/team/milwaukee-brewers-158/photos')
   assert.equal(
     teamPhotosPath(158, { d: '2026-07-05', s: 11 }),
-    '/team/158/photos?d=2026-07-05&s=11',
+    '/team/milwaukee-brewers-158/photos?d=2026-07-05&s=11',
   )
 })
 
@@ -550,15 +556,18 @@ test('a built game path parses back to the same matchup and section', () => {
 test('link builders carry the spoiler cutoff query only when given one', () => {
   assert.equal(playerPath(123), '/player/123')
   assert.equal(playerPath(123, { d: '2026-07-05', s: 11 }), '/player/123?d=2026-07-05&s=11')
-  assert.equal(teamPath(158, { d: '2026-07-05' }), '/team/158?d=2026-07-05')
-  assert.equal(teamLeadersPath(158), '/team/158/leaders')
+  assert.equal(
+    teamPath(158, { d: '2026-07-05' }),
+    '/team/milwaukee-brewers-158?d=2026-07-05',
+  )
+  assert.equal(teamLeadersPath(158), '/team/milwaukee-brewers-158/leaders')
   assert.equal(umpirePath(427), '/umpire/427')
 })
 
 test('leadersPath uses the bare /leaders for mlb and keys every other scope', () => {
   assert.equal(leadersPath('mlb'), '/leaders')
   assert.equal(leadersPath('al'), '/leaders/al')
-  assert.equal(orgLeadersPath(158), '/leaders/org/158')
+  assert.equal(orgLeadersPath(158), '/leaders/org/milwaukee-brewers-158')
 })
 
 test('a built player path with a cutoff parses back to the same cutoff', () => {
@@ -764,4 +773,154 @@ test('an unknown /profile sub-segment degrades to the slate rather than a game',
 // on every e2e URL (e2e/fixtures.js) and must not change what parses.
 test('/profile ignores a query string', () => {
   assert.deepEqual(parseRoute('/profile?nointro'), { name: 'profile' })
+})
+
+
+// --------------------------------------------------------------------------
+// Addresses that carry a name (ADR-0057)
+//
+// The whole point of the scheme is that it is ADDITIVE: the slug is new, and
+// every address that existed before it must still resolve to exactly the same
+// page. That is what most of this section pins.
+// --------------------------------------------------------------------------
+test('slugify folds diacritics rather than dropping them', () => {
+  // The bug this exists to prevent: strip the combining marks WITHOUT
+  // decomposing first and 'José Ramírez' becomes 'jos-ram-rez', an address no
+  // reader would ever connect to the plain spelling of his name.
+  assert.equal(slugify('José Ramírez'), 'jose-ramirez')
+  assert.equal(slugify('Yoán Moncada'), 'yoan-moncada')
+  assert.equal(slugify('Jung Hoo Lee'), 'jung-hoo-lee')
+})
+
+test('slugify collapses punctuation and never leaves a stray hyphen', () => {
+  assert.equal(slugify("D'Angelo Ortiz Jr."), 'd-angelo-ortiz-jr')
+  assert.equal(slugify('  St. Louis  Cardinals '), 'st-louis-cardinals')
+  assert.equal(slugify('Rocket City Trash Pandas'), 'rocket-city-trash-pandas')
+  // Capped, and the cap may not leave the slug ending on a hyphen.
+  const long = slugify('A'.repeat(30) + ' ' + 'B'.repeat(30))
+  assert.ok(long.length <= 48)
+  assert.doesNotMatch(long, /-$/)
+})
+
+test('slugify returns empty for a name with nothing sluggable in it', () => {
+  for (const name of [null, undefined, '', '—', '   ', '###']) {
+    assert.equal(slugify(name), '', String(name))
+  }
+})
+
+test('idFromSlug reads the id off either address shape', () => {
+  assert.equal(idFromSlug('545361'), '545361')
+  assert.equal(idFromSlug('mike-trout-545361'), '545361')
+  // The id is the LAST hyphen group, so a club whose own name ends in a number
+  // cannot be mistaken for it.
+  assert.equal(idFromSlug('area-code-51-5015'), '5015')
+  // Neither shape: handed back untouched, so a mangled URL fails where it
+  // always did (at the fetch) rather than somewhere new.
+  assert.equal(idFromSlug('not-an-id'), 'not-an-id')
+  assert.equal(idFromSlug(''), '')
+})
+
+test('entitySegment emits the bare id when it cannot spell a name', () => {
+  assert.equal(entitySegment(545361, 'Mike Trout'), 'mike-trout-545361')
+  assert.equal(entitySegment(545361, null), '545361')
+  assert.equal(entitySegment(545361, '—'), '545361')
+  // A half-loaded row must never mint 'mike-trout-undefined'.
+  assert.equal(entitySegment(undefined, 'Mike Trout'), '')
+  assert.equal(entitySegment('abc', 'Mike Trout'), 'abc')
+})
+
+test('every MLB club names its own address with no caller passing one', () => {
+  // The reason the team hub needed no per-caller change: a tab button knows an
+  // id and a tab key and nothing else, and the static table fills in the rest.
+  assert.equal(teamSegment(158), 'milwaukee-brewers-158')
+  assert.equal(teamSegment(134), 'pittsburgh-pirates-134')
+  // The relocating Athletics' duplicated halves collapse (teams.js
+  // teamFullName), so the address is not 'athletics-athletics-133'.
+  assert.equal(teamSegment(133), 'athletics-133')
+  // A MiLB club is not in that table: bare until its own feed supplies a name.
+  assert.equal(teamSegment(5015), '5015')
+  assert.equal(teamSegment(5015, 'Biloxi Shuckers'), 'biloxi-shuckers-5015')
+})
+
+test('for a club the static table knows, the table beats the passed name', () => {
+  // The opposite precedence to every other builder here, and deliberate. A club
+  // is called several things across this site — the standings row says 'Rays',
+  // the off-day tile says 'D-backs', the hub says 'Tampa Bay Rays' — and a link
+  // borrows whichever spelling it happens to be rendering. One club must have
+  // ONE address, so the table decides for the 30 it knows. Without this, the
+  // standings linked '/team/rays-139' while the hub linked
+  // '/team/tampa-bay-rays-139' and the canonical named a third thing.
+  assert.equal(teamSegment(139, 'Rays'), 'tampa-bay-rays-139')
+  assert.equal(teamSegment(109, 'D-backs'), 'arizona-diamondbacks-109')
+  assert.equal(teamTabPath(139, 'numbers', { name: 'Rays' }), '/team/tampa-bay-rays-139/numbers')
+  // A club it does NOT know still takes the caller's word.
+  assert.equal(teamSegment(5015, 'Biloxi Shuckers'), 'biloxi-shuckers-5015')
+})
+
+test('a slugged address parses to exactly what the bare id parses to', () => {
+  const cases = [
+    ['/player/545361', '/player/mike-trout-545361'],
+    ['/team/158', '/team/milwaukee-brewers-158'],
+    ['/team/158/roster', '/team/milwaukee-brewers-158/roster'],
+    ['/team/158/leaders', '/team/milwaukee-brewers-158/leaders'],
+    ['/team/158/stamp-in', '/team/milwaukee-brewers-158/stamp-in'],
+    ['/team/158/photos', '/team/milwaukee-brewers-158/photos'],
+    ['/umpire/427044', '/umpire/pat-hoberg-427044'],
+    ['/manager/117277', '/manager/pat-murphy-117277'],
+    ['/leaders/org/158', '/leaders/org/milwaukee-brewers-158'],
+  ]
+  for (const [bare, slugged] of cases) {
+    assert.deepEqual(parseRoute(slugged), parseRoute(bare), slugged)
+  }
+})
+
+test('an old bare-id link keeps resolving, query hints included', () => {
+  // The compatibility promise: no redirect, no lookup table, forever. Every
+  // link shared, bookmarked or stamped before the slug existed is this shape.
+  assert.deepEqual(parseRoute('/player/545361?d=2026-07-05&s=11'), {
+    name: 'player',
+    id: '545361',
+    asOf: '2026-07-05',
+    sportId: 11,
+  })
+  assert.deepEqual(parseRoute('/team/158?d=2026-07-05'), {
+    name: 'team',
+    id: '158',
+    asOf: '2026-07-05',
+    sportId: null,
+  })
+})
+
+test('a WRONG slug still resolves to the id it carries', () => {
+  // A traded player's old link, a hand-edited address, a name we spelled
+  // differently last season: the id decides, the slug is decoration. This is
+  // what lets the canonical re-spell the address without breaking anything.
+  assert.equal(parseRoute('/player/completely-wrong-545361').id, '545361')
+  assert.equal(parseRoute('/team/chicago-cubs-158/roster').id, '158')
+})
+
+test('built slugged paths round-trip through parseRoute', () => {
+  assert.deepEqual(parseRoute(playerPath(545361, { name: 'Mike Trout' })), {
+    name: 'player',
+    id: '545361',
+    asOf: null,
+    sportId: null,
+  })
+  assert.equal(parseRoute(teamTabPath(158, 'numbers')).id, '158')
+  assert.equal(parseRoute(umpirePath(427044, 'Pat Hoberg')).id, '427044')
+  assert.equal(parseRoute(managerPath(117277, 'Pat Murphy')).id, '117277')
+})
+
+test('a name only changes the spelling of an address, never the page', () => {
+  assert.equal(playerPath(545361, { name: 'Mike Trout' }), '/player/mike-trout-545361')
+  assert.equal(playerPath(545361), '/player/545361')
+  assert.equal(umpirePath(427044, 'Pat Hoberg'), '/umpire/pat-hoberg-427044')
+  assert.equal(umpirePath(427044), '/umpire/427044')
+  assert.equal(managerPath(117277, 'Pat Murphy'), '/manager/pat-murphy-117277')
+  assert.equal(managerPath(117277), '/manager/117277')
+  // …and it rides in front of the query, never inside it.
+  assert.equal(
+    playerPath(545361, { name: 'Mike Trout', d: '2026-07-05', s: 11 }),
+    '/player/mike-trout-545361?d=2026-07-05&s=11',
+  )
 })

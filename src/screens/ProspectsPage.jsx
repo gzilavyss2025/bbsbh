@@ -62,7 +62,12 @@ function AssignmentCell({ player }) {
     <span className="prospectboard__assignment">
       <span className="prospectboard__position">{player.position || DASH}</span>
       <span className="prospectboard__level">{player.levelLabel || DASH}</span>
-      <TeamLink id={player.teamId} className="prospectboard__club" ariaLabel={player.team}>
+      <TeamLink
+        id={player.teamId}
+        name={player.team}
+        className="prospectboard__club"
+        ariaLabel={player.team}
+      >
         <TeamLogo teamId={player.teamId} name={player.team} size={18} />
         <span>{player.team}</span>
       </TeamLink>

@@ -30,15 +30,15 @@
 //   '/fouls'                            -> { name: 'fouls' }
 //   '/admin'                            -> { name: 'admin' }  (copy editor, Clerk-admin gated, unlinked)
 //   '/profile'                          -> { name: 'profile' }  (My Tally — your club, this device, your account)
-//   '/player/{id}'                      -> { name: 'player', id, asOf, sportId }
-//   '/team/{id}'                        -> { name: 'team', id, asOf, sportId }
-//   '/umpire/{id}'                      -> { name: 'umpire', id }
+//   '/player/{name-id}'                 -> { name: 'player', id, asOf, sportId }
+//   '/team/{name-id}'                   -> { name: 'team', id, asOf, sportId }
+//   '/umpire/{name-id}'                 -> { name: 'umpire', id }
 //   '/umpires'                          -> { name: 'umpire-rankings' }
 //   '/situational-records'              -> { name: 'situational-records', asOf, sportId, metric, half }
 //                                          (one situational record, every club at one level, ranked.
 //                                           '?metric=' and '?half=' set the page's OPENING state only,
 //                                           not a live mirror of its controls — same as standings.)
-//   '/manager/{id}'                     -> { name: 'manager', id }
+//   '/manager/{name-id}'                -> { name: 'manager', id }
 //   '/scorecard-lab'                    -> { name: 'scorecard-lab' }  (dev only, unlinked)
 //   '/identity-lab'                     -> { name: 'identity-lab' }  (dev-only curation lab)
 //   '/uniform-names'                    -> { name: 'uniform-names' }  (dev-only curation page)
@@ -83,6 +83,11 @@
 // the top half).
 // Example: /07052026/milari/bottom3
 //
+// A page ABOUT SOMEBODY carries their name in its address: a player, a club, an
+// umpire and a manager are all '{slug}-{id}' — '/player/mike-trout-545361',
+// '/team/milwaukee-brewers-158/roster'. See entitySegment() below for the whole
+// rule, and ADR-0057 for why the id stays.
+//
 // Player/team pages are game-independent (resolvable by id on a cold link) and
 // show CURRENT stats by default, however you reached them. Two optional hints:
 // `?d={officialDate}` shows the page as it stood entering that day, and
@@ -95,7 +100,7 @@
 // URL that may include a `?query`.
 
 import { REPORT_ROUTES } from './reportPages.js'
-import { SPORT_IDS } from './teams.js'
+import { SPORT_IDS, teamFullName } from './teams.js'
 
 // The slate's league, as a URL prefix. Two things are deliberately missing.
 //
@@ -138,6 +143,79 @@ const TEAM_TAB_ROUTES = {
   numbers: 'team-numbers',
   contracts: 'team-contracts',
   minors: 'team-minors',
+}
+
+// --- Addresses that carry a name -------------------------------------------
+//
+// A page about a PERSON or a CLUB is addressed by their name AND their MLB id:
+// '/player/mike-trout-545361', '/team/milwaukee-brewers-158/roster'. The id
+// resolves the page; the slug in front of it is for the reader, the search
+// engine, and whoever pastes the link into a message.
+//
+// READING IS LOOSE, WRITING IS STRICT. parseRoute takes the trailing digits and
+// ignores everything in front of them, so '/player/545361' — every link shared
+// before this existed — resolves unchanged, with no redirect, forever. Builders
+// emit the slug whenever the caller hands them a name, the bare id when not.
+// Because BOTH forms resolve, rel=canonical decides which one a search engine
+// counts; api/preview.js writes it at the slugged form and keeps its own copy of
+// these helpers, since the edge runtime can't import this module graph. Change
+// one, change both. ADR-0057 has the why the id stays.
+
+// Longest slug we will put in front of an id: long enough for any real club or
+// person ('rocket-city-trash-pandas' is 24), short enough that a MiLB club with
+// a sponsor in its name can't run away with the address bar.
+const SLUG_MAX = 48
+
+// A name -> a URL-safe slug. Diacritics are FOLDED, not dropped: 'José Ramírez'
+// has to become 'jose-ramirez', because stripping the marks without decomposing
+// first gives 'jos-ram-rez', which no reader would match to the plain spelling.
+export function slugify(name) {
+  return String(name ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, SLUG_MAX)
+    .replace(/-+$/, '')
+}
+
+// The id inside a '{slug}-{id}' segment, and the whole segment when there is no
+// slug on it. The id is always the LAST hyphen-separated group, so a name that
+// itself ends in a number cannot be mistaken for one. Anything matching neither
+// shape is handed back untouched, so a mangled URL still fails where it used to
+// — at the fetch — rather than somewhere new.
+export function idFromSlug(segment) {
+  const s = String(segment ?? '')
+  if (/^\d+$/.test(s)) return s
+  const m = s.match(/-(\d+)$/)
+  return m ? m[1] : s
+}
+
+// The counterpart every path builder below goes through. No name, or an id that
+// is not a plain number (an undefined off a half-loaded row): emit the bare id
+// and let the address stay short rather than mint 'undefined-158'.
+export function entitySegment(id, name) {
+  const slug = /^\d+$/.test(String(id ?? '')) ? slugify(name) : ''
+  return slug ? `${slug}-${id}` : String(id ?? '')
+}
+
+// Clubs get their name for free. All 30 MLB clubs are already named in a static
+// table (teams.js MLB_TEAM_NAMES), so every '/team/...' address slugs itself
+// whether or not the caller had a name to hand — which is most of the team hub,
+// where a tab button knows an id and a tab key and nothing else. A MiLB club is
+// not in that table: only its own feed knows its name, so those callers pass it,
+// and an affiliate whose feed hasn't landed yet keeps the bare-id address it has
+// always had (the MiLB degrade in root CLAUDE.md).
+//
+// The static table WINS over a passed name, which is the opposite of everywhere
+// else here and is the point: a club is called several things on this site — the
+// standings say "Rays", the off-day tile says "D-backs", the hub says "Tampa Bay
+// Rays" — and a link picks up whichever one it happens to be rendering. One club
+// must have ONE address, so for the 30 the table knows, the table decides. Only
+// a club it does not know takes the caller's word.
+export function teamSegment(id, name) {
+  return entitySegment(id, teamFullName(Number(id)) || name)
 }
 
 export function parseRoute(url) {
@@ -372,9 +450,9 @@ export function parseRoute(url) {
     }
   }
   if (parts.length === 2 && parts[0] === 'player')
-    return { name: 'player', id: parts[1], asOf, sportId }
+    return { name: 'player', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 2 && parts[0] === 'team')
-    return { name: 'team', id: parts[1], asOf, sportId }
+    return { name: 'team', id: idFromSlug(parts[1]), asOf, sportId }
   // A series id (e.g. '2025-division-112-158') already matches
   // postseason-history.json's own `series.id` 1:1 — no separate slug scheme.
   if (parts.length === 2 && parts[0] === 'postseason')
@@ -390,11 +468,11 @@ export function parseRoute(url) {
   // Umpires carry no spoiler-cutoff hint: assignments/dates are never
   // score-revealing, so unlike player/team links there's no `?d=`/`?s=` to parse.
   if (parts.length === 2 && parts[0] === 'umpire')
-    return { name: 'umpire', id: parts[1] }
+    return { name: 'umpire', id: idFromSlug(parts[1]) }
   // Managers carry no spoiler-cutoff hint either — a coaching career/awards
   // record is never score-revealing, same footing as umpires above.
   if (parts.length === 2 && parts[0] === 'manager')
-    return { name: 'manager', id: parts[1] }
+    return { name: 'manager', id: idFromSlug(parts[1]) }
   if (parts.length === 1 && parts[0] === 'leaders')
     return { name: 'leaders', scope: 'mlb', asOf, sportId }
   if (parts.length === 2 && parts[0] === 'leaders')
@@ -403,7 +481,7 @@ export function parseRoute(url) {
   // 3-segment game branch below, which would otherwise swallow them as a game
   // (date='leaders'/'team').
   if (parts.length === 3 && parts[0] === 'leaders' && parts[1] === 'org')
-    return { name: 'leaders', scope: 'org', orgId: Number(parts[2]), asOf, sportId }
+    return { name: 'leaders', scope: 'org', orgId: Number(idFromSlug(parts[2])), asOf, sportId }
   // Stamp In (ADR-0042) — a club's played season with every result showing, so
   // the reader can press a stamp for each game they watched. Deliberately NOT
   // in TEAM_TAB_ROUTES above: it is a standalone page with exactly one entry
@@ -412,14 +490,14 @@ export function parseRoute(url) {
   // shape as the tabs, so it needs the same placement above the generic game
   // branch below, which would otherwise read it as date='team'.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'stamp-in')
-    return { name: 'team-stamp-in', id: parts[1], asOf, sportId }
+    return { name: 'team-stamp-in', id: idFromSlug(parts[1]), asOf, sportId }
   // A club's professional photos, merged across its whole season — reached
   // from exactly one place (the Photos rail's own "Full season" door), not a
   // sixth tab, same reasoning and same placement as stamp-in just above.
   if (parts.length === 3 && parts[0] === 'team' && parts[2] === 'photos')
-    return { name: 'team-photos', id: parts[1], asOf, sportId }
+    return { name: 'team-photos', id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3 && parts[0] === 'team' && TEAM_TAB_ROUTES[parts[2]])
-    return { name: TEAM_TAB_ROUTES[parts[2]], id: parts[1], asOf, sportId }
+    return { name: TEAM_TAB_ROUTES[parts[2]], id: idFromSlug(parts[1]), asOf, sportId }
   if (parts.length === 3) {
     const [date, matchup, section] = parts
     return {
@@ -545,11 +623,14 @@ export function linkQuery({ d, s } = {}) {
   const qs = q.toString()
   return qs ? `?${qs}` : ''
 }
+// `name` joins `d`/`s` as an optional hint on every one of these: it changes
+// only the SPELLING of the address, never which page it opens, so a caller that
+// hasn't loaded the name yet builds a working link without it.
 export function playerPath(id, opts = {}) {
-  return `/player/${id}${linkQuery(opts)}`
+  return `/player/${entitySegment(id, opts.name)}${linkQuery(opts)}`
 }
 export function teamPath(id, opts = {}) {
-  return `/team/${id}${linkQuery(opts)}`
+  return `/team/${teamSegment(id, opts.name)}${linkQuery(opts)}`
 }
 export function postseasonSeriesPath(seriesId) {
   return `/postseason/${seriesId}`
@@ -560,8 +641,8 @@ export function tradeDeadlinePath() {
 export function tradeDeadlineSeasonPath(year) {
   return `/trade-deadline/${year}`
 }
-export function umpirePath(id) {
-  return `/umpire/${id}`
+export function umpirePath(id, name) {
+  return `/umpire/${entitySegment(id, name)}`
 }
 // The league-wide view of ONE situational record. `metric` is a row id from
 // teamRecords.js's RECORD_GROUPS / COUNT_METRICS, `half` a HALVES key — this is
@@ -579,8 +660,8 @@ export function situationalRecordsPath({ category, metric, half, sort, order, ..
   const qs = q.toString()
   return `/situational-records${qs ? `?${qs}` : ''}`
 }
-export function managerPath(id) {
-  return `/manager/${id}`
+export function managerPath(id, name) {
+  return `/manager/${entitySegment(id, name)}`
 }
 export function foulsPath() {
   return '/fouls'
@@ -631,7 +712,7 @@ export function profilePath() {
   return '/profile'
 }
 export function teamLeadersPath(id, opts = {}) {
-  return `/team/${id}/leaders${linkQuery(opts)}`
+  return `/team/${teamSegment(id, opts.name)}/leaders${linkQuery(opts)}`
 }
 // Any team-hub tab, by its URL segment ('roster' / 'games' / 'numbers' /
 // 'contracts' / 'minors' / 'leaders'), plus 'overview' for the bare '/team/{id}'
@@ -640,7 +721,9 @@ export function teamLeadersPath(id, opts = {}) {
 // dated URL must keep `?d=`/`?s=` across a tab switch, or the same visit would
 // answer "entering April 1" on one tab and "today" on the next.
 export function teamTabPath(id, tab, opts = {}) {
-  return tab === 'overview' ? teamPath(id, opts) : `/team/${id}/${tab}${linkQuery(opts)}`
+  return tab === 'overview'
+    ? teamPath(id, opts)
+    : `/team/${teamSegment(id, opts.name)}/${tab}${linkQuery(opts)}`
 }
 // Stamp In — the club's played season, one stamp per game you watched
 // (ADR-0042). Built in exactly one place, the Schedule card's button on the
@@ -649,20 +732,23 @@ export function teamTabPath(id, tab, opts = {}) {
 // the page's consent gate is the address's own, and every other surface in the
 // app is sealed by default.
 export function teamStampInPath(id, opts = {}) {
-  return `/team/${id}/stamp-in${linkQuery(opts)}`
+  return `/team/${teamSegment(id, opts.name)}/stamp-in${linkQuery(opts)}`
 }
 // A club's professional photos, merged across its whole season (unsealed,
 // same footing as gamePhotosPath). Built in exactly one place today — the
 // Photos rail's own "Full season" door — and carried through linkQuery like
 // every other team link.
 export function teamPhotosPath(id, opts = {}) {
-  return `/team/${id}/photos${linkQuery(opts)}`
+  return `/team/${teamSegment(id, opts.name)}/photos${linkQuery(opts)}`
 }
 // The broader leader pages. `mlb` is the bare `/leaders` (the top-level entry);
 // every other league/level scope carries its key. Org leaders take a club id.
 export function leadersPath(scope = 'mlb', opts = {}) {
   return `${scope === 'mlb' ? '/leaders' : `/leaders/${scope}`}${linkQuery(opts)}`
 }
+// A farm system's leader board is a page about a CLUB, so its address names one
+// the same way '/team/...' does — teamSegment, not entitySegment, so the org
+// names itself off the static table without the caller passing anything.
 export function orgLeadersPath(orgId, opts = {}) {
-  return `/leaders/org/${orgId}${linkQuery(opts)}`
+  return `/leaders/org/${teamSegment(orgId, opts.name)}${linkQuery(opts)}`
 }

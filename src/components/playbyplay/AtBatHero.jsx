@@ -35,7 +35,7 @@ import { BallGlyph } from '../game/BoxScoreSkeleton.jsx'
 // hiding it on mobile doesn't leave a stray gap before the surname.
 function NameParts({ id, first, last }) {
   return (
-    <PlayerLink id={id}>
+    <PlayerLink id={id} name={[first, last].filter(Boolean).join(' ')}>
       {first && <span className="abhero__namefirst">{first} </span>}
       <span className="abhero__namelast">{last}</span>
     </PlayerLink>

@@ -351,7 +351,7 @@ function FoulFeatured({ player, favoriteTeamId, positions }) {
       <div className="foulboard__herotop">
         <Headshot personId={player.id} name={player.name} teamId={player.teamId} className="foulboard__heroshot" />
         <div className="foulboard__heroident">
-          <PlayerLink id={player.id} className="foulboard__heroname">
+          <PlayerLink id={player.id} name={player.name} className="foulboard__heroname">
             {first && <span className="foulboard__heroname-first">{first}</span>}
             <span className="foulboard__heroname-last">{last}</span>
           </PlayerLink>

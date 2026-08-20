@@ -570,7 +570,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           <TeamFilterStrip
             teams={levelTeams.data}
             selectedTeamId={null}
-            onSelect={(id) => navigate(teamPath(id))}
+            onSelect={(id, team) => navigate(teamPath(id, { name: team?.name }))}
             showMlbPin={false}
             showArrows
             centerTeamId={favoriteTeamId}

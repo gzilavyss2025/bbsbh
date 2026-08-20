@@ -116,7 +116,11 @@ export function TeamFilterStrip({
                 data-team-id={t.id}
                 ref={active ? activeRef : null}
                 className={`vsteam__team${active ? ' is-active' : ''}`}
-                onClick={() => onSelect(t.id)}
+                // The club itself rides along as a second argument: the two
+                // callers that NAVIGATE on a pick need its name for the
+                // address (route.js `entitySegment`), and the several that
+                // merely filter ignore it exactly as they did before.
+                onClick={() => onSelect(t.id, t)}
               >
                 <TeamLogo teamId={t.id} name={t.name} size={36} />
               </button>
