@@ -68,6 +68,9 @@
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose)
+     - the slate's roster-move card, same split as the team card above —
+       `.wire__cutline`, and its club-name link `.wire__cutline .plink`
+       (a player's `.wire__namelink` stays uppercase)
      - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
      - the spoiler-consent modal's explainer prose — `.consent__body`,
        `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
