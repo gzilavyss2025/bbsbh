@@ -69,6 +69,18 @@ async function mount() {
       </ClerkProvider>
     )
   }
+  // The crawlable body api/preview.js wrote into the shell (ADR-0059), cleared
+  // the moment the app is ready to paint over it. It is a SIBLING of #root
+  // rather than its contents — React would clear those itself — because the
+  // ALL-CAPS INVARIANT is scoped to `#root *`, and a paragraph of prose inside
+  // #root paints in capitals for as long as the shell is on screen.
+  //
+  // Removed HERE and not at module top level: this runs one statement before
+  // the first paint, so the reader keeps a readable page for the whole gap
+  // rather than watching it blank out while the Clerk import resolves. On every
+  // route but the ~30 vercel.json rewrites, and on every navigation an
+  // installed reader makes, there is no such element and this is a no-op.
+  document.getElementById('crawl')?.remove()
   root.render(
     <StrictMode>
       {content}

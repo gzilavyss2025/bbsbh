@@ -21,21 +21,43 @@
 //   - The dev and lab routes (/identity-lab, /scorecard-lab, and friends), which
 //     robots.txt also disallows.
 //   - /admin and anything with ?edit.
-//   - Per-player and per-team pages. There are thousands, they turn over every
-//     season, and a sitemap full of URLs that 404 next spring is worse than a
-//     short one that stays true.
+//   - Per-PLAYER pages, and the reason is not the one this comment used to give.
+//     It said those URLs 404 next spring. They do not: an id resolves forever,
+//     a retired player's page still renders his career register, and since
+//     ADR-0057 the address carries his name as well. The real reasons are that
+//     there are five figures of them — twenty-five times the rest of this
+//     sitemap put together — and that no precompute in this repo means "the
+//     players worth listing". war.json and salaries.json each hold a bounded
+//     set, and each would be a repurpose that shrinks the day its own generator
+//     changes a filter, silently. They do not need the sitemap anyway: a club's
+//     roster page names 26 of them as links now, so a crawler reaching one club
+//     reaches its players by following markup, which is how discovery is meant
+//     to work (ADR-0059). If a player listing is ever genuinely wanted, it needs
+//     its own generator and a cut somebody defended — active 40-man rosters, say
+//     — not a data file borrowed for a second job.
+//
+// Per-CLUB pages ARE listed, as of ADR-0059, and that is a reversal of the line
+// above rather than an exception to it. There are 150 of them, not thousands;
+// realignment moves that list about once a decade; the ids come from
+// public/data/teams.json, which gen-teams.mjs already refreshes weekly, so this
+// script gains no statsapi call and no build dependency; and since ADR-0059 the
+// pages carry a readable body instead of an empty div. The address is spelled by
+// route.js's own entitySegment, so a listed URL is byte-identical to the
+// canonical api/preview.js writes for it — a sitemap naming the OTHER of two
+// working addresses would list a page that points somewhere else.
 //
 // `lastmod` for a guide comes from that page's own `updated` field, so it is a
 // statement about the content rather than about when this script last ran.
 // Emitting today's date for every URL on every build is the most common way a
 // sitemap becomes noise a crawler learns to ignore.
 
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 import { LANDING_PAGES } from '../src/copy/landing/pages/index.js'
 import { SITE_URL } from '../src/copy/landing/site.js'
+import { entitySegment } from '../src/lib/route.js'
 
 // Stable public app routes. Hand-kept ON PURPOSE rather than derived from
 // route.js: that file's table includes dev labs, unlisted QA pages and every
@@ -75,6 +97,56 @@ const APP_ROUTES = [
   { path: '/fouls', priority: '0.4', changefreq: 'daily' },
 ]
 
+// The six doors of the team hub (ADR-0034). MLB-only on four of them: an
+// affiliate's Numbers, Games, Minors and Leaders tabs are the thinnest pages on
+// this site — minor-league feeds routinely carry no standings, no jerseys and no
+// prospects (the MiLB degrade in root CLAUDE.md) — and listing 480 URLs where
+// 330 are substantive is how a sitemap earns a reputation. The hub and the
+// roster are the two every club genuinely fills.
+const CLUB_TABS = [
+  { suffix: '', priority: '0.6', changefreq: 'weekly', mlbOnly: false },
+  { suffix: '/roster', priority: '0.6', changefreq: 'daily', mlbOnly: false },
+  { suffix: '/games', priority: '0.5', changefreq: 'daily', mlbOnly: true },
+  { suffix: '/numbers', priority: '0.5', changefreq: 'daily', mlbOnly: true },
+  { suffix: '/leaders', priority: '0.5', changefreq: 'daily', mlbOnly: true },
+  { suffix: '/minors', priority: '0.4', changefreq: 'weekly', mlbOnly: true },
+]
+
+// Every club at every level this app serves, from the file gen-teams.mjs already
+// writes. Read at CALL time, not at import — same reason the write below is
+// guarded: importing this module must not touch the filesystem for a test that
+// only wants buildSitemap's shape.
+//
+// A missing or unreadable file yields no clubs rather than a thrown build. This
+// script runs inside `npm run build`, and a sitemap that lists fewer URLs is a
+// far better failure than a deploy that does not happen.
+export function readClubs() {
+  try {
+    const raw = readFileSync(new URL('../public/data/teams.json', import.meta.url), 'utf8')
+    const bySportId = JSON.parse(raw).bySportId ?? {}
+    return Object.entries(bySportId)
+      .flatMap(([sportId, clubs]) =>
+        (clubs ?? []).map((club) => ({ id: club.id, name: club.name, sportId: Number(sportId) })),
+      )
+      .filter((club) => club.id && club.name)
+  } catch {
+    return []
+  }
+}
+
+function clubUrls(clubs) {
+  return clubs.flatMap((club) => {
+    const segment = entitySegment(club.id, club.name)
+    return CLUB_TABS.filter((tab) => !tab.mlbOnly || club.sportId === 1).map((tab) =>
+      url({
+        path: `/team/${segment}${tab.suffix}`,
+        priority: tab.priority,
+        changefreq: tab.changefreq,
+      }),
+    )
+  })
+}
+
 function url({ path, lastmod, priority, changefreq }) {
   return [
     '  <url>',
@@ -88,7 +160,7 @@ function url({ path, lastmod, priority, changefreq }) {
     .join('\n')
 }
 
-export function buildSitemap(pages = LANDING_PAGES) {
+export function buildSitemap(pages = LANDING_PAGES, clubs = readClubs()) {
   const entries = [
     ...APP_ROUTES.map(url),
     url({ path: '/learn', priority: '0.8', changefreq: 'monthly' }),
@@ -100,6 +172,7 @@ export function buildSitemap(pages = LANDING_PAGES) {
         changefreq: 'monthly',
       }),
     ),
+    ...clubUrls(clubs),
   ]
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -115,6 +188,7 @@ ${entries.join('\n')}
 // artifact appearing in `git status` after running tests is the kind of small
 // mystery that costs somebody an afternoon.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  writeFileSync(resolve('public/sitemap.xml'), buildSitemap())
-  console.log(`✓ sitemap.xml — ${APP_ROUTES.length + 1 + LANDING_PAGES.length} urls`)
+  const xml = buildSitemap()
+  writeFileSync(resolve('public/sitemap.xml'), xml)
+  console.log(`✓ sitemap.xml — ${xml.match(/<loc>/g)?.length ?? 0} urls`)
 }

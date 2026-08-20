@@ -85,5 +85,12 @@ the reader, for the link preview, and for the share — but the larger part of t
 problem is still open, along with a sitemap that lists no player or club page at
 all.
 
+> **Closed by ADR-0059 (2026-08-20), in part.** The rewritten routes now carry a
+> readable body, built from the payload the card already fetched, and the sitemap
+> lists every club. Player pages are still not listed and are reached instead
+> from the club roster pages, which name them as links — that ADR argues why.
+> Umpire and manager pages have no rewrite at all and remain as this section
+> describes.
+
 Game addresses are unchanged. `/07052026/milari/bottom3` still spells its
 matchup as concatenated abbreviations, doubleheader suffix and all.

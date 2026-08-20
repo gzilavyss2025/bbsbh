@@ -10,15 +10,38 @@
 // the hashed asset references stay correct on every deploy/preview URL) and
 // replace the marker block. Any failure — statsapi down, card unresolved — falls
 // through to the static default card, so a shared link can never break.
+//
+// It also writes a READABLE BODY for the spoiler-free routes (ADR-0059). The
+// head has carried a real card since ADR-0012, but the body underneath it was
+// `<div id="root"></div>`, and the crawlers behind AI assistants run no
+// JavaScript — so a player page was a blank div with a good meta description.
+// The markup is built by api/_lib/crawl.js from the payload buildCard already
+// fetched, goes in as a SIBLING of #root (see that file on why not inside it),
+// and src/main.jsx removes it when the app boots.
+//
+// GAME ROUTES GET NO BODY, by construction rather than by care: gameCard returns
+// no `crawl` object, so there is nothing here to render and no branch to get
+// wrong. A game route is inside the spoiler scope, and the schedule payload that
+// would answer one carries `teams.away.score` and `isWinner` in the same object
+// as the matchup. ADR-0059 argues it.
 
 import { SITE_URL } from '../src/copy/landing/site.js'
-import { buildCard } from './_lib/cards.js'
+import { buildCard, buildRoster } from './_lib/cards.js'
+import { CRAWL_STYLE, renderCrawlBody } from './_lib/crawl.js'
 
 export const config = { runtime: 'edge' }
 
 // The default OG block in index.html is wrapped in these markers; we swap
 // everything between them.
 const MARKER = /<!-- OG:BEGIN[\s\S]*?OG:END -->/
+
+// Where the crawlable body and its stylesheet go in the shell. Both are exact
+// strings from index.html rather than loose patterns, and a miss on either one
+// means the body is simply not written — the same fail-safe discipline MARKER
+// has. If a future index.html spells the mount point differently, a shared link
+// still serves the card it serves today.
+const ROOT_DIV = '<div id="root"></div>'
+const HEAD_END = '</head>'
 
 function esc(s) {
   return String(s ?? '')
@@ -155,15 +178,37 @@ export function renderHead(card, url) {
     <!-- OG:END -->`
 }
 
+// Put the body in the shell, or hand the shell back untouched.
+//
+// Replacements go through a function rather than a string, because a
+// replacement STRING treats `$&` and friends as references — and the text
+// flowing through here is a person's name, which this app does not get to
+// assume the shape of.
+export function withCrawlBody(html, card, roster) {
+  if (!card?.crawl) return html
+  const body = renderCrawlBody(roster ? { ...card.crawl, list: roster } : card.crawl)
+  if (!body || !html.includes(ROOT_DIV)) return html
+  const withBody = html.replace(ROOT_DIV, () => `${body}\n    ${ROOT_DIV}`)
+  return withBody.includes(HEAD_END)
+    ? withBody.replace(HEAD_END, () => `${CRAWL_STYLE}${HEAD_END}`)
+    : withBody
+}
+
 export default async function handler(req) {
   const url = new URL(req.url)
   const origin = url.origin
 
-  let card
+  // Two requests at most, and never in series. buildRoster answers null for
+  // every route but /team/{id}/roster, so this is one upstream call on ~29 of
+  // the ~30 rewritten routes and two — concurrent, so the same wall-clock — on
+  // the one whose body is a list of names.
+  let card = null
+  let roster = null
   try {
-    card = await buildCard(url.searchParams, origin)
+    ;[card, roster] = await Promise.all([buildCard(url.searchParams, origin), buildRoster(url.searchParams)])
   } catch {
     card = null
+    roster = null
   }
 
   // Fetch our own static shell (a filesystem file — served directly, never
@@ -189,6 +234,8 @@ export default async function handler(req) {
     html = html.replace(MARKER, renderHead(card, canonicalUrl(url.searchParams, card)))
   }
 
+  html = withCrawlBody(html, card, roster)
+
   return new Response(html, {
     headers: {
       'content-type': 'text/html; charset=utf-8',
@@ -200,9 +247,20 @@ export default async function handler(req) {
       // link's first, one-time fetch by iMessage/a chat client) bakes the
       // static fallback in for anyone opening that URL for the rest of the
       // hour, long after the underlying hiccup has passed.
-      'cache-control': card
-        ? 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400'
-        : 'public, max-age=0, s-maxage=30',
+      //
+      // A CONSTANT route sits in a third band. The ~25 report routes are built
+      // by genericCard with no statsapi call, so neither their card nor their
+      // body can change between two requests — only a deploy changes them, and a
+      // deploy is a new edge cache anyway. Revalidating those hourly bought
+      // nothing; a day, stale-servable for a week, is the honest number. The
+      // entity routes keep the hour, because the body they now carry is built
+      // from the same payload as the card and goes stale on the same event: a
+      // trade.
+      'cache-control': !card
+        ? 'public, max-age=0, s-maxage=30'
+        : card.constant
+          ? 'public, max-age=0, s-maxage=86400, stale-while-revalidate=604800'
+          : 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
     },
   })
 }

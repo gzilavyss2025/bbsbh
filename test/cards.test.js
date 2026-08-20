@@ -10,13 +10,11 @@ import { readFileSync } from 'node:fs'
 
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  firstNonNull,
-  buildCard,
-  TEAM_TABS,
-  slugify as edgeSlugify,
-  idFromSlug as edgeIdFromSlug,
-} from '../api/_lib/cards.js'
+import { firstNonNull, buildCard, TEAM_TABS } from '../api/_lib/cards.js'
+// The slug helpers moved to api/_lib/entity.js when the crawlable body gave them
+// a second caller (ADR-0059). Still the edge-side copies this asserts against
+// the app's own — the file changed, the claim did not.
+import { slugify as edgeSlugify, idFromSlug as edgeIdFromSlug } from '../api/_lib/entity.js'
 import { slugify, idFromSlug } from '../src/lib/route.js'
 import { canonicalUrl, renderHead } from '../api/preview.js'
 import { SITE_URL } from '../src/copy/landing/site.js'

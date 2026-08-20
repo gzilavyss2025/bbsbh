@@ -20,7 +20,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | broadcast.test.js | 6 | src/api/broadcast.js | ESPN broadcast lookup drops the subscription packages (MLB.TV, ESPN Unlmtd) from the displayed summary/national-icon fact |
 | callout-ledger.test.js | 8 | src/hooks/useCalloutLedger.js, prehalf-callouts.js, between-innings.js | The shown ledger (distinct halves, never the half a note sits on) and the two capped surfaces that read it — one record note per strip, once-per-game facts dropped |
 | callout-repetition.test.js | 9 | src/api/callout-notes/shared.js | rankNotes' three repetition rules (decay, once-per-game, diversity) + the one 0–MAGNITUDE_MAX bonus scale |
-| cards.test.js | 5 | api/_lib/cards.js | OG preview card resolveGame race-condition fix |
+| cards.test.js | 38 | api/_lib/cards.js, api/_lib/entity.js, api/preview.js | OG preview card resolveGame race-condition fix, the per-route card set, and the one canonical origin — plus the edge copies of the app's slug helpers, asserted against route.js's own (ADR-0057) |
 | career-matchups.test.js | 16 | src/api/careerMatchups.js | Batting order's career-vs-starter notes (TeamInfo) |
 | career-register.test.js | 12 | src/api/loadPlayer.js, src/api/person.js | Current-season stat blending across levels + chronological multi-org register rows/subtotals + the Team history rail's org order |
 | challenges.test.js | 7 | src/api/challenges.js | ABS challenge tracking |
@@ -28,6 +28,7 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | compute-batter-line.test.js | 4 | src/api/boxscore.js | Spoiler-safe batter line (never live pre-reveal) |
 | condensed-day-index.test.js | 14 | scripts/lib/highlights.mjs, src/api/gamePhotos.js | Day-index generation policy: condensed-cut selection (never the recap) + hero-photo pick for the slate's revealed result cards |
 | copy-registry.test.js | 36 | src/copy/registry.js | Admin-editable consent copy (ADR-0025/0026), MLB + MiLB ballpark field derivation |
+| crawl-body.test.js | 18 | api/_lib/crawl.js, api/_lib/cards.js, api/preview.js, scripts/gen-sitemap.mjs | The readable body a rewritten deep link now carries (ADR-0059) — what a player and a club page say, that the layer cannot reach a game and a game route gets no body at all, where the markup sits relative to #root, and the sitemap's club listing |
 | dates.test.js | 10 | src/lib/dates.js | Date window/formatting helpers |
 | day-highlights.test.js | 46 | src/api/dayHighlights.js, src/lib/resultCards.js | Day Recap signals (multi-HR, game score, cycle, etc.) + the slate's four display tiers (favorite → live → national scheduled → rest) |
 | derive-live-state.test.js | 9 | src/api/playbyplay.js | Core spoiler-safe HUD state (cap, bases, batterDone) |
