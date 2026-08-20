@@ -65,7 +65,7 @@ const MergeReceiptStrip = isClerkEnabled
 // Neither the league nor the date persists anywhere. Both live in the URL
 // ('/aaa/08152026'; a missing league means MLB and a missing date means today,
 // so bare '/' is both), which is what lets one link name one slate for whoever
-// opens it — ADR-0055. The league used to be a My Tally preference instead, and
+// opens it — ADR-0056. The league used to be a My Tally preference instead, and
 // that made the app's shortest address mean a different day's league to every
 // reader; a link to "today's Triple-A games" could not be sent at all.
 
@@ -507,7 +507,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
       {/* Title + league toggle + search share one row: the Tally wordmark
           reloads THIS league's slate for today on the left (a full page load —
           see lib/home.js), the condensed MLB/AAA/… buttons — the URL's own
-          league segment now, not a stored preference (ADR-0055) — and the
+          league segment now, not a stored preference (ADR-0056) — and the
           search trigger ride together to its right (grouped so
           `justify-content: space-between` splits only title vs. that cluster,
           not each button individually). A direct

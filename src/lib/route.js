@@ -100,7 +100,7 @@ import { SPORT_IDS } from './teams.js'
 // The slate's league, as a URL prefix. Two things are deliberately missing.
 //
 // MLB has no slug: the bare '/' IS the MLB slate, the same way a missing date
-// IS today (ADR-0055). The home address a reader types, bookmarks or is handed
+// IS today (ADR-0056). The home address a reader types, bookmarks or is handed
 // therefore says one thing — today's MLB games — for everybody, which is the
 // whole reason the league moved into the URL. A '/mlb' prefix would be a second
 // address for a page that already has the shortest one in the app.
@@ -171,7 +171,7 @@ export function parseRoute(url) {
   // '/aa/08152026' is that Saturday's Double-A ones. Both segments are
   // optional and both default to the home slate's own answer (MLB, today), so
   // every one of the four addresses names exactly one page — which is what
-  // makes the league shareable at all (ADR-0055). No slug collides with a
+  // makes the league shareable at all (ADR-0056). No slug collides with a
   // named route: they are all two-to-five letters and every named route below
   // is a word. A second segment that is not a real date degrades to that
   // league's TODAY, the same shrug the bare-date branch above takes.

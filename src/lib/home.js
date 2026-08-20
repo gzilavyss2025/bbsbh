@@ -5,7 +5,7 @@
 //
 // `path` exists for the slate's own wordmark, which has to land on today's
 // games in the league you are already reading rather than dropping you back to
-// MLB: the league is part of the address now (ADR-0055), so "home" has to be
+// MLB: the league is part of the address now (ADR-0056), so "home" has to be
 // built rather than assumed. Everywhere else calls it bare and gets '/'.
 export function goHome(path = '/') {
   window.location.assign(path)

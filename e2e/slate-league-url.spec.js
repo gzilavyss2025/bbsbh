@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js'
 
-// The slate's league is a URL segment (ADR-0055), so that a link can name the
+// The slate's league is a URL segment (ADR-0056), so that a link can name the
 // exact page its sender was reading: `/aaa/08152026` is Triple-A on that
 // Saturday, and the bare `/` is MLB today for everybody. `test/route.test.js`
 // pins the parse and the builder; these are the wiring a unit test cannot see

@@ -53,7 +53,7 @@ test('a bare 8-digit path is the slate paged to that day', () => {
   assert.deepEqual(parseRoute('/07052026'), { name: 'home', date: '2026-07-05' })
 })
 
-// ADR-0055. MLB and today are each the ABSENCE of a segment, so the two
+// ADR-0056. MLB and today are each the ABSENCE of a segment, so the two
 // defaults never appear in a URL and the bare '/' is the one canonical home
 // slate. If either default ever started emitting a segment, the same page would
 // have two addresses and the link-sharing this exists for would be undermined.

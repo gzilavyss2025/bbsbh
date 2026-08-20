@@ -1,4 +1,4 @@
-# ADR-0055 — The slate's league lives in the URL, and MLB is the absence of it
+# ADR-0056 — The slate's league lives in the URL, and MLB is the absence of it
 
 Status: accepted (2026-08-20)
 

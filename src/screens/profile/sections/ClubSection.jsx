@@ -10,7 +10,7 @@ import { ClubPicker } from '../../../components/account/ClubPicker.jsx'
 // PreferencesCloudSync publishes it on the next comparison.
 //
 // "Level the slate opens on" used to sit below the club strip and is gone. The
-// slate's league lives in the URL now (ADR-0055) so that a link can name it,
+// slate's league lives in the URL now (ADR-0056) so that a link can name it,
 // which leaves no question for a setting to answer — the address already
 // answers it, out loud, for whoever opens it. The stored `level` field is kept
 // in the preference registry for older devices still publishing one; nothing

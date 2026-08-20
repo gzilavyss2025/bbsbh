@@ -75,7 +75,7 @@ test('the club is picked on the page and survives a reload', async ({ page }) =>
 
 // "Level the slate opens on" used to live under the club strip. It is gone,
 // with its preference, because the slate's league is a URL segment now
-// (ADR-0055) and a setting cannot answer a question the address already
+// (ADR-0056) and a setting cannot answer a question the address already
 // answers. Pinned as an ABSENCE: the failure this guards against is the
 // control quietly coming back as a tap that changes nothing.
 test('there is no slate-league setting here any more — the URL carries it', async ({ page }) => {

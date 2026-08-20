@@ -60,7 +60,7 @@ gets a way in." Same component on the player page and both leader-board pages.
 
 A tiny dependency-free layer over the History API (deliberately *not* react-router).
 Anchored on `/` (today's MLB slate; a league prefix and/or `/{MMDDYYYY}` name
-any other — `/aaa`, `/aa/08152026`, both defaulting by absence, ADR-0055, and
+any other — `/aaa`, `/aa/08152026`, both defaulting by absence, ADR-0056, and
 `GameSelect` navigates them) and `/{MMDDYYYY}/{matchup}/{section}` (a deep-linkable
 game section), plus many standalone pages (`/logos`, `/leaders`, `/standings`,
 player/team/umpire/manager, postseason, …) — `route.js`'s `parseRoute` header is

@@ -470,7 +470,7 @@ export default function App() {
   } else {
     // `route.date` and `route.sportId` are only set when the URL says so — a
     // missing date is today and a missing league is MLB, which together make
-    // the bare '/' the one canonical home slate (ADR-0055). GameSelect
+    // the bare '/' the one canonical home slate (ADR-0056). GameSelect
     // navigates those URLs itself (useNav) when you page a day or tap a league,
     // so both are real, shareable addresses and Back/Forward walk what you
     // visited. `sportId` is left undefined rather than defaulted here — the
