@@ -1,8 +1,18 @@
-// The hover/press tint over a slate card's ballpark backdrop — normally the
-// home club's own tile colour at a fixed opacity (GameCardParts.jsx's
-// `tileColorFor`, 06a-gamecard-parkart.css's hard-coded 0.55) — overridable
-// per club from the team hub's identity drawer, the same runtime-override
-// shape every other identity field uses (ADR-0050).
+// The tint over a slate card's ballpark backdrop — the home club's own tile
+// colour (GameCardParts.jsx's `tileColorFor`), laid over the grayscale
+// photograph at FULL strength (06a-gamecard-parkart.css's `opacity: 1`) — with
+// the colour itself overridable per club from the team hub's identity drawer,
+// the same runtime-override shape every other identity field uses (ADR-0050).
+//
+// ONE STRENGTH FOR EVERY CLUB, and that is deliberate rather than a default
+// nobody got round to tuning. The wash used to carry a per-club `intensity`
+// field beside the colour, landed at 0.55 and tuned to ~0.8 for most of the
+// thirty; the site owner asked for a single full-strength wash instead, so the
+// field left the closed catalog in fields.js and the stored per-club values
+// went inert with it (an id the catalog does not name is dropped by
+// sanitizeIdentityOverrides on both the read and the write). The colour stays
+// per-club, because WHICH colour a park wears is a fact about the club; how
+// hard it is pressed is a fact about the app.
 //
 // A team-level store with no `treatments` nesting, like wpa-tuning.json's
 // `bandColor`: the wash is a fact about the CLUB, not about which jersey it's
@@ -36,24 +46,11 @@ export function tileColorFor(teamId, treatment, side) {
 
 const PARK_WASH_STORE = registerIdentityStore('park-wash-tuning', PARK_WASH_TUNING)
 
-// 06a-gamecard-parkart.css's own hard-coded hover opacity, restated here so
-// the drawer's landed default and the CSS custom property's fallback can't
-// drift apart. Change the CSS rule and this constant together.
-export const PARK_WASH_DEFAULT_INTENSITY = 0.55
-
 const PARK_WASH_COLOR_OVERRIDES = byTeam(PARK_WASH_STORE, (e) => e.color)
-const PARK_WASH_INTENSITY_OVERRIDES = byTeam(PARK_WASH_STORE, (e) => e.intensity)
 
 // An explicit wash colour for this club, or null to keep the automatic one
 // (the home tile colour `tileColorFor` already resolves — GameCard.jsx picks
 // between the two).
 export function parkWashColorOverride(teamId) {
   return PARK_WASH_COLOR_OVERRIDES[teamId] ?? null
-}
-
-// This club's wash opacity on hover/press — an explicit override, or the
-// app's own default.
-export function parkWashIntensity(teamId) {
-  const v = PARK_WASH_INTENSITY_OVERRIDES[teamId]
-  return Number.isFinite(v) ? v : PARK_WASH_DEFAULT_INTENSITY
 }
