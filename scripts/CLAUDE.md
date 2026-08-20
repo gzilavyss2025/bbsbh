@@ -126,7 +126,13 @@ process automatically.
 ## Lint guards (run by `npm run lint`, CI-enforced via `ci.yml`)
 
 - `check-caps.mjs` — guards the global ALL-CAPS invariant (no CSS `text-transform`
-  sneaks a caps-defeating value back in). See the block comment in `src/styles/01-base.css`.
+  sneaks a caps-defeating value back in). Two assertions, because the marker alone
+  was never enough: a caps-defeating declaration needs a `caps-exempt` marker, AND
+  the rule carrying it must out-rank the blanket uppercase it sits under. A marked
+  rule that loses the cascade is a silent no-op — the marker reads as "deliberate"
+  while the text shouts anyway, which is how five paragraphs shipped shouted (issue
+  #769). Practically: prefix an exemption with `#root`. See the block comment in
+  `src/styles/01-base.css`.
 - `check-name-casing.mjs` — the JS half of the same invariant: fails if a
   component calls `.toUpperCase()`/`.toLowerCase()` on rendered text (redundant
   with the CSS invariant, and can drift from it on real Unicode names) without

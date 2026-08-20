@@ -29,13 +29,20 @@
    mixed-case from statsapi (e.g. "Jackson Chourio"). This one rule is the
    single source of truth; the per-component `text-transform: uppercase`
    rules elsewhere are now redundant with it. Its `#root *` specificity
-   (1,0,1) beats any plain class selector, so nothing downstream can quietly
-   undo it. NEVER add `text-transform: none | lowercase | capitalize` — the
-   guard in `scripts/check-caps.mjs` (run by `npm run lint`) fails the build
-   if you do. The sanctioned exceptions, each opting out with a `caps-exempt`
-   marker the guard recognizes (don't add another without the same
-   deliberate marker), all read as natural-case sentences rather than
-   shouted app chrome:
+   beats any plain class selector, so nothing downstream can quietly undo it.
+   NEVER add `text-transform: none | lowercase | capitalize` — the guard in
+   `scripts/check-caps.mjs` (run by `npm run lint`) fails the build if you do.
+   The sanctioned exceptions, each opting out with a `caps-exempt` marker the
+   guard recognizes (don't add another without the same deliberate marker),
+   all read as natural-case sentences rather than shouted app chrome.
+   **An exemption must also PREFIX its selector with `#root`**, or it loses to
+   `#root *` and is a silent no-op — the marker reads as "deliberate" while the
+   cascade shouts anyway. The guard checks that too now: it compares each
+   exempt rule's specificity against the blanket it sits under, which is how
+   five long-shouting paragraphs were finally found (issue #769). The one
+   exemption WITHOUT `#root` is `.focusrail__sheet .marginnotes__text`, and it
+   is correct: ModalPortal renders that sheet outside #root, so it answers to
+   `.focusrail__sheet *` instead (focus/reference.css). The exceptions:
      - play-by-play copy and its feed-sourced siblings — `.pbp__desc`,
        `.pbp__subnote`, `.pbp__note`, `.pbp__notetext`, `.pbp__callout`,
        `.pitchernotice__eventtext` (mound visit / ejection / baserunning
@@ -61,7 +68,6 @@
      - the Team Transactions card's cutline prose — `.txstory__cutline` — and,
        within it, the club-name link specifically — `.txstory__cutline .plink`
        (a player's `.txstory__namelink` stays uppercase on purpose)
-     - the umpire accuracy modal's zone-map caption — `.umpmodal__zonecap`
      - the win-probability chart's biggest-swings ledger — `.winprob__ledger-desc`
      - the spoiler-consent modal's explainer prose — `.consent__body`,
        `.consent__changes`, `.consent__reset`, `.consent__humor` (the title +
