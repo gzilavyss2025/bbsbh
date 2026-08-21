@@ -337,6 +337,26 @@ export function selectBench(feed, side) {
     .sort((a, b) => a.nameLastFirst.localeCompare(b.nameLastFirst))
 }
 
+// Every personId on either team's box score roster — starters, bench, and
+// bullpen alike, whether or not they've appeared yet. Membership only, same
+// footing as selectBullpen/selectBench above: it says who's on the roster,
+// never anything about what's happened, so it's spoiler-free to read at
+// render top-level. Built for InningViewer's headshot prefetch (warm the CDN
+// cache for every face that could show up in the at-bat feed before the
+// reader taps into it) — a plain id list rather than a name/jersey/position
+// row, since a cache warm has no card to render.
+export function selectGameRosterIds(feed) {
+  const ids = new Set()
+  for (const side of ['away', 'home']) {
+    const boxPlayers = feed?.liveData?.boxscore?.teams?.[side]?.players ?? {}
+    for (const key of Object.keys(boxPlayers)) {
+      const id = Number(key.slice(2))
+      if (id) ids.add(id)
+    }
+  }
+  return [...ids]
+}
+
 // Is a bench/bullpen card entry crossed off — already IN the game — as the half
 // on screen stands? The two card selectors above hand every entry an
 // `enteredIdx`; this is the one place that decides what to do with it, and it

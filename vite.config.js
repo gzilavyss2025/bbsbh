@@ -576,6 +576,53 @@ export default defineConfig({
             },
           },
           {
+            // The mlbstatic CDN's own base team-logo SVGs (teams.js's
+            // teamLogoUrl 'base' variant / logoCdn.js) — the mark every
+            // decorative, no-treatment-context surface draws (standings,
+            // leader boards, player/team bios, Headshot.jsx's own logo
+            // fallback rung). One small vector per club, so CacheFirst costs
+            // almost nothing and saves a CDN round trip on every one of those
+            // surfaces after the first visit.
+            urlPattern: ({ url }) => url.hostname === 'www.mlbstatic.com',
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-cdn-logos',
+              expiration: {
+                maxEntries: 120,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
+            // Player headshots (teams.js's realHeadshotUrl / HEADSHOT_BASE) —
+            // decorative art keyed by personId, not game data. CacheFirst so
+            // the same face recurring across every AtBatCard in the at-bat
+            // feed (batter, pitcher, and every notification card — see
+            // src/components/playbyplay/) paints from disk after the first
+            // fetch; InningViewer's prefetchHeadshots warms a game's whole
+            // roster the moment stepping begins, so this rule is what makes
+            // that warm actually stick. Scoped to the mlb-photos path
+            // specifically (not the whole img.mlbstatic.com host) so it
+            // never picks up gamePhotos.js's mlb-images originals, which run
+            // several MB each and belong to a standalone, unsealed page with
+            // no reason to burn a shared cache budget on CacheFirst.
+            urlPattern: ({ url }) =>
+              url.hostname === 'img.mlbstatic.com' && url.pathname.startsWith('/mlb-photos/'),
+            handler: 'CacheFirst',
+            method: 'GET',
+            options: {
+              cacheName: 'bbsbh-headshots',
+              expiration: {
+                // Two full 26-man-ish rosters a game, several games a
+                // session — headroom for a slate's worth of browsing without
+                // letting the cache grow unbounded.
+                maxEntries: 400,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
+          },
+          {
             // The on-demand SPLITS VS TEAM shards and their index (excluded
             // from precache above). NetworkFirst so a fresh nightly copy wins
             // when online but the card still works offline from the last good

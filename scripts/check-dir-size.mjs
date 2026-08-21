@@ -516,7 +516,11 @@ const BUDGETS = {
   // same React-free-core-under-a-hook shape as stamps.js/books.js beside it.
   // +2 for playerHoverStore.js (external store, SyncStatusProvider shape) and
   // playerHoverPosition.js (pure clamp/flip geometry, sealTear.js's reason).
-  'src/lib': 57,
+  // +1 for prefetchHeadshots.js — a leaf warm-the-CDN-cache helper (one
+  // function, one import of teams.js's realHeadshotUrl) InningViewer calls
+  // when at-bat stepping begins, same small-utility-beside-its-caller shape
+  // as logoCdn.js/buildInfo.js above. Not a new subsystem.
+  'src/lib': 58,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
@@ -602,7 +606,10 @@ const BUDGETS = {
   // callout surfaces rank against. React wiring (a context over a Map) with its
   // rules pure in api/callout-notes/shared.js, the same split one more time.
   // 22 -> 23 for usePlayerHoverStats.js — the hover card's cached fetch hook.
-  'src/hooks': 23,
+  // 23 -> 24 for useHeadshotPrefetch.js — InningViewer's headshot-CDN warm-up,
+  // the same React-wiring-(useEffect/useRef)-over-a-pure-selector shape as
+  // usePlayerHoverStats.js beside it.
+  'src/hooks': 24,
   'src/screens/identity-lab': 15,
   // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
   // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.
