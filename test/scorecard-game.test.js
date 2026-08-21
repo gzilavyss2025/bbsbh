@@ -61,7 +61,11 @@ test('nothing on the sheet before the first reveal', () => {
   const sb = scorecardScoreboard(FEED, { through: -1 })
   assert.equal(sb.done, false)
   assert.equal(sb.away.final, null)
-  assert.deepEqual(sb.decisions, { wp: '', wpNote: '', lp: '', lpNote: '', sv: '', svNote: '' })
+  assert.deepEqual(sb.decisions, {
+    wp: '', wpId: null, wpNote: '',
+    lp: '', lpId: null, lpNote: '',
+    sv: '', svId: null, svNote: '',
+  })
   for (const i of sb.innings) {
     assert.equal(i.away, '')
     assert.equal(i.home, '')
@@ -169,15 +173,20 @@ test('the finished scoreboard fills the FINAL block from the linescore totals', 
   assert.equal(home.runs, 2)
   // The real decisions, by name; a 10–2 final has no save, and the label
   // degrades blank rather than inventing one.
+  // SURNAME ONLY, the way a scorer writes a pitcher onto this sheet and the way
+  // the pitcher table above it already does.
   assert.deepEqual(sb.decisions, {
-    wp: 'Robert Gasser',
+    wp: 'Gasser',
+    wpId: 688107,
     // The trimmed fixture keeps no boxscore seasonStats, so the parenthetical
     // degrades to nothing rather than inventing a record. The synthetic feed
     // below is what pins the figure itself.
     wpNote: '',
-    lp: 'Hunter Dobbins',
+    lp: 'Dobbins',
+    lpId: 690928,
     lpNote: '',
     sv: '',
+    svId: null,
     svNote: '',
   })
 })
@@ -358,12 +367,17 @@ test('a skipped final bottom reads X once the game is done — and not before', 
   assert.equal(done.done, true)
   assert.equal(done.innings[8].home, 'X')
   assert.equal(done.innings[8].away, 0)
+  // A feed with no player records still gets a surname, split off the full
+  // name — the fallback that keeps a lean MiLB decision from printing blank.
   assert.deepEqual(done.decisions, {
-    wp: 'Winnie Winner',
+    wp: 'Winner',
+    wpId: 10,
     wpNote: '',
-    lp: 'Louie Loser',
+    lp: 'Loser',
+    lpId: 11,
     lpNote: '',
     sv: '',
+    svId: null,
     svNote: '',
   })
   assert.deepEqual(done.home.final, { r: 2, h: 5, e: 0, lob: 3 })
@@ -387,6 +401,9 @@ test('a skipped final bottom reads X once the game is done — and not before', 
 test('the decisions carry the record and the save count, from seasonStats', () => {
   const feed = skippedBottomFeed()
   feed.liveData.decisions.save = { id: 12, fullName: 'Sal Savior' }
+  // The feed's own name parts win over splitting the full name, so a two-part
+  // surname or a "Jr." survives.
+  feed.gameData.players = { ID12: { lastName: 'Savior' } }
   feed.liveData.boxscore.teams = {
     away: {
       players: {
@@ -416,8 +433,11 @@ test('the decisions carry the record and the save count, from seasonStats', () =
   // there is a figure — see Scorecard.jsx's `decision`).
   delete feed.liveData.boxscore.teams.home.players.ID10
   const bare = scorecardScoreboard(feed, { through: Infinity })
-  assert.equal(bare.decisions.wp, 'Winnie Winner')
+  assert.equal(bare.decisions.wp, 'Winner')
   assert.equal(bare.decisions.wpNote, '')
+  // The id rides along whatever the figure does — it is what hangs the man's
+  // hover card off his name on the sheet.
+  assert.equal(bare.decisions.wpId, 10)
 
   // Nothing here outruns the FINAL block it sits under: a game still sealed
   // short of its end has no decisions at all, notes included.
@@ -698,4 +718,92 @@ test('a caller that forgets `through` gets nothing revealed, not everything', ()
   const sb = scorecardScoreboard(FEED)
   assert.equal(sb.innings.every((cell) => cell?.runs == null), true, 'no scoreboard cell inks')
   assert.deepEqual(scorecardPitchers(FEED, 'top'), [])
+})
+
+// ---- The two pages' headers ----
+// The #22 does not reprint the umpire crew on its second page; it prints where
+// the game was played and what it was played in. scorecardView carries those
+// three for the screen to choose between (see Scorecard.jsx's ScorecardHeader).
+test('the view carries the bottom page’s own header block, and not the game’s length', async () => {
+  const { scorecardView } = await import('../src/api/loadScorecard.js')
+  const feed = JSON.parse(JSON.stringify(FEED))
+  feed.gameData.venue = { name: 'American Family Field' }
+  feed.gameData.weather = { temp: '78', condition: 'Sunny', wind: '7 mph, In From CF' }
+  feed.liveData.boxscore.info = [
+    { label: 'Weather', value: 'ignored — gameData.weather wins' },
+    { label: 'Att', value: '35,909' },
+    { label: 'T', value: '2:41' },
+    { label: 'First pitch', value: '1:10' },
+  ]
+  const view = scorecardView({ feed }, 'bottom')
+  assert.equal(view.venue, 'American Family Field')
+  assert.equal(view.weather, '78°, Sunny · 7 mph, In From CF')
+  assert.equal(view.attendance, '35,909')
+
+  // THE FINAL OUT'S TIME IS NOT ON THIS VIEW, and must never be. It is the one
+  // line in the family with a tell — against first pitch it gives the game's
+  // length, and a long one says extra innings (ADR-0008) — so it rides the
+  // reveal-gated scoreboard instead. Nothing spoiler-free may carry it, nor the
+  // duration it is derived from, under any name.
+  assert.equal(JSON.stringify(view).includes('2:41'), false)
+  assert.equal(JSON.stringify(view).includes('finalOut'), false)
+
+  // Both pages read the same block off the feed; which of them the header
+  // PRINTS is the screen's call, so the top page must carry it too rather than
+  // the api half guessing.
+  const top = scorecardView({ feed }, 'top')
+  assert.equal(top.venue, 'American Family Field')
+  assert.equal(top.attendance, '35,909')
+
+  // MiLB degrades to blanks, never to a crash or a stray "undefined".
+  const bare = scorecardView({ feed: { ...feed, gameData: { ...feed.gameData, venue: undefined, weather: undefined }, liveData: { ...feed.liveData, boxscore: { ...feed.liveData.boxscore, info: [] } } } }, 'bottom')
+  assert.equal(bare.venue, '')
+  assert.equal(bare.weather, '')
+  assert.equal(bare.attendance, '')
+})
+
+// The final out's time is a WHOLE-GAME fact with a tell in it: read against
+// first pitch it gives the game's length, and a long one says extra innings. So
+// it waits for exactly what the FINAL line waits for.
+test('the final out’s time fills only once the whole game is revealed', async () => {
+  const { finalOutClock } = await import('../src/api/scorecard/finalout.js')
+  const feed = JSON.parse(JSON.stringify(FEED))
+  feed.gameData.venue = { ...feed.gameData.venue, timeZone: { id: 'America/Chicago' } }
+
+  // The last play IS the final out, and its own timestamp already carries every
+  // delay and every extra inning rather than needing them added back.
+  feed.liveData.plays.allPlays.at(-1).about.endTime = '2026-07-07T21:09:00.000Z'
+  assert.equal(finalOutClock(feed, true), '4:09 PM')
+
+  // THE GATE. Not done, not a word — this is the assertion that matters.
+  assert.equal(finalOutClock(feed, false), '')
+
+  // Through the scoreboard, which owns `done`: sealed and part-revealed games
+  // leave the line blank, and it fills alongside the FINAL block, never before.
+  const sealed = scorecardScoreboard(feed, { through: -1 })
+  assert.equal(sealed.finalOut, '')
+  assert.equal(sealed.done, false)
+  const partial = scorecardScoreboard(feed, { through: halfIndex(5, 'top') })
+  assert.equal(partial.finalOut, '')
+  const done = scorecardScoreboard(feed, { through: Infinity })
+  assert.equal(done.done, true)
+  assert.equal(done.finalOut, '4:09 PM')
+
+  // A lean feed with no play timestamps falls back to first pitch + playing
+  // time + delay, which is the same instant by another route.
+  const lean = JSON.parse(JSON.stringify(feed))
+  delete lean.liveData.plays.allPlays.at(-1).about.endTime
+  lean.gameData.gameInfo = {
+    firstPitch: '2026-07-07T18:10:00.000Z',
+    gameDurationMinutes: 149,
+    delayDurationMinutes: 30,
+  }
+  assert.equal(finalOutClock(lean, true), '4:09 PM')
+
+  // And a MiLB feed with neither degrades to a blank writing line, never a
+  // crash and never "Invalid Date".
+  const bare = JSON.parse(JSON.stringify(lean))
+  delete bare.gameData.gameInfo
+  delete bare.gameData.venue
+  assert.equal(finalOutClock(bare, true), '')
 })

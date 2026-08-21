@@ -46,6 +46,7 @@ import { computePitcherLines } from './pitchers.js'
 import { NON_AB_EVENTS, classifyOut, scorecardCenterCode } from './scorecard/notation.js'
 import { battingChangeMarks, pitchingChangeMarks } from './scorecard/handover.js'
 import { decisionLines } from './scorecard/decisions.js'
+import { finalOutClock } from './scorecard/finalout.js'
 
 // The sheet's pure notation rules live a file away (scorecard/notation.js) and
 // are re-exported here, so a caller still reaches them through this module.
@@ -540,7 +541,14 @@ export function scorecardScoreboard(feed, { through = -1 } = {}) {
   // holds: which pitcher won is as score-revealing as the score.
   const decisions = decisionLines(feed, done)
 
-  return { innings, away: side('away'), home: side('home'), decisions, done }
+  // The bottom page's header prints the time of the FINAL OUT. It rides HERE,
+  // with the FINAL line and the decisions, rather than on the spoiler-free view
+  // beside the ballpark and the weather: read against first pitch it gives the
+  // game's LENGTH, and a long one says extras (ADR-0008). Same `done`, same
+  // blank line to write on until it holds.
+  const finalOut = finalOutClock(feed, done)
+
+  return { innings, away: side('away'), home: side('home'), decisions, finalOut, done }
 }
 
 // The fielding club's pitching lines for one side of the sheet — the arms

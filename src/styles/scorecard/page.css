@@ -5,7 +5,7 @@
    manager, the crew pairs, KEEPING SCORE BY, FIRST PITCH), the footer trio
    (defense diamond, pitcher table, scoreboard + FINAL block + decisions),
    the notation editor's bottom sheet, the Top/Bottom control bar, and the
-   Lab's own load row. Split out of grid.css at the 600-line file cap
+   Lab's own load row. The footer trio under the grid is footer.css. Split out of grid.css at the 600-line file cap
    (ADR-0038); imported by index.css last of the three, so the cascade order is
    exactly what one file's top-to-bottom order was.
    ============================================================ */
@@ -307,8 +307,9 @@
   min-height: 12px;
 }
 
-/* FIRST PITCH: the time on its line, the AM/PM rings beside it — the one the
-   posted time names is inked solid. */
+/* A WRITE-IN TIME: the time on its line, the AM/PM rings beside it, the one the
+   posted time names inked solid. The sheet asks for two — FIRST PITCH on the
+   visitors' page, FINAL OUT on the home club's — and they share this block. */
 .sc-firstpitch {
   display: flex;
   flex-direction: column;
@@ -325,7 +326,21 @@
 .sc-firstpitch__ampm {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
+}
+.sc-firstpitch__opt {
+  display: flex;
+  align-items: center;
   gap: 3px;
+}
+/* AM over PM instead of side by side. FIRST PITCH has the width of its own
+   page's band and reads across; FINAL OUT shares the home club's page with the
+   ballpark, the weather and the crowd, and stacking its pair is what lets it
+   sit beside its own line rather than pushing the whole block wider. */
+.sc-firstpitch__ampm--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
 }
 .sc-firstpitch__mlabel {
   font-family: var(--font-display);
@@ -333,158 +348,6 @@
   font-weight: var(--w-semibold);
   letter-spacing: var(--ls-label);
   color: var(--text-caption);
-}
-
-/* ---- Footer: defense diamond, pitcher table, scoreboard ---- */
-.sc-footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5);
-  margin-top: var(--space-5);
-  padding-top: var(--space-4);
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  border-top: var(--bw-rule) solid var(--border-rule);
-}
-/* The three blocks are NOT interchangeable widths. The pitcher table is the
-   hungry one — a written surname-first name, a uniform number, and nine
-   numeric columns — so it gets the largest basis and the biggest share of
-   the slack; squeezed to an even third it ran its IP into its pitch count.
-   The footer wraps rather than squeezes when all three can't be served. */
-.sc-footer__block {
-  flex: 1 1 260px;
-  min-width: 0;
-}
-.sc-footer__pitcher {
-  flex: 2 1 380px;
-}
-/* Capped so that when the footer wraps and this block lands on a line of its
-   own, the two team rows keep a scoreboard's proportions instead of stretching
-   a 26% name column across the whole page. */
-.sc-footer__scoreboard {
-  max-width: 520px;
-}
-/* The defense diamond used to be pinned to 160px here, which is narrower
-   than the graphic was drawn for: eight surnames, each on its own writing
-   line with a position number under it, collided into one unreadable knot.
-   Give it the room the diamond needs (it draws at up to 340px elsewhere in
-   the app) and let it take a full column of the footer. */
-.sc-footer__defense {
-  flex: 0 1 300px;
-  max-width: 340px;
-}
-.sc-footer__defense .defdiamond {
-  width: 100%;
-}
-.sc-footer__title {
-  margin: 0 0 var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  color: var(--text-heading);
-}
-
-/* The pitcher table reuses .pitchers__grid; the sheet only sets its blank-row
-   height so an empty template keeps writing room. */
-.sc-pitchers tbody td {
-  height: 22px;
-}
-/* A wider name column than the shared table's 36%: this one writes the
-   pitcher surname-first with his first name AND his uniform number, where
-   the box score's copy writes an initial. The nine numeric columns split
-   what's left, and they hold single digits. */
-.sc-pitchers .pitchers__pitcher {
-  width: 44%;
-}
-/* A hair of side padding on the numeric columns so IP does not run into P. */
-.sc-pitchers th,
-.sc-pitchers td {
-  padding-left: 2px;
-  padding-right: 2px;
-}
-/* Surname-first name on the left, uniform number pinned right — the name
-   clips rather than wraps, since a wrapped line here would push the nine
-   numeric columns beside it out of alignment. */
-.sc-pitchers__name {
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.sc-pitchers__jersey {
-  flex: 0 0 auto;
-  font-weight: var(--w-semibold);
-  color: var(--accent-positive);
-}
-
-/* Scoreboard: two team lines across the innings, then the R/H/E/LOB final. */
-.sc-scoreboard {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-.sc-scoreboard th,
-.sc-scoreboard td {
-  height: 22px;
-  text-align: center;
-  border: var(--bw-hair) solid var(--rule-grid);
-}
-.sc-scoreboard thead th {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-semibold);
-  letter-spacing: var(--ls-title);
-  color: var(--text-caption);
-}
-.sc-scoreboard__team {
-  width: 26%;
-  /* `table-layout: fixed` gives this cell its share no matter the club, so a
-     long name has to be made to fit rather than allowed to paint over the
-     first inning's runs. It is WRITTEN SMALLER, not clipped — see FitText in
-     Scorecard.jsx; "Diamondb…" names no team. The hidden overflow here is
-     the floor under FitText's 0.55em limit, not the usual answer. */
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: left;
-  padding-left: var(--space-1);
-}
-/* FitText's measured node: a block so its scrollWidth reports the name's
-   true width against the cell it has to fit inside. */
-.sc-fit {
-  display: block;
-  white-space: nowrap;
-  text-align: left;
-}
-/* R/H/E totals ride the right edge, emphasized over the per-inning run cells. */
-.sc-scoreboard__rhe {
-  font-weight: var(--w-bold);
-  color: var(--text-heading);
-  background: var(--surface-inset);
-}
-/* The FINAL block under the innings grid: R/H/E/LOB beside the decisions,
-   filled only once the game is over and fully revealed (see
-   scorecardScoreboard's `done`). */
-.sc-finalblock {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
-.sc-final {
-  flex: 1 1 180px;
-  width: auto;
-}
-.sc-final .sc-scoreboard__team {
-  width: 34%;
-}
-.sc-decisions {
-  flex: 1 1 140px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
 }
 
 /* ---- The notation editor ---- */
@@ -589,9 +452,10 @@
     margin-inline: calc(50% - 50vw + var(--app-gutter));
   }
   /* The pane can give the grid more height too, now that it is not competing
-     with a phone's browser chrome for the viewport. */
+     with a phone's browser chrome for the viewport — but never less than the
+     batting order needs (see .sc-sheet__scroll's own rule for why). */
   .scorecard .sc-sheet__scroll {
-    max-height: calc(100vh - 96px);
-    max-height: calc(100dvh - 96px);
+    max-height: max(calc(100vh - 96px), var(--sc-order-h));
+    max-height: max(calc(100dvh - 96px), var(--sc-order-h));
   }
 }

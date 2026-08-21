@@ -84,7 +84,24 @@ export function scorecardView(loaded, side /* 'top' | 'bottom' */) {
       uniformSummary(uniforms?.[battingSide], battingSide, batMeta.clubName),
     firstPitch: info.firstPitch,
     umpiresByRole,
+    // The BOTTOM page's own header block. The #22 does not reprint the crew on
+    // its second page — it prints where the game was played and what it was
+    // played in, which is the club's own page to record it on. All four come
+    // off selectGameInfo, which is spoiler-free: a ballpark and a wind reading
+    // are known before first pitch, and a turnstile count is not a score.
+    // The block's fourth field — the time of the FINAL OUT — is deliberately
+    // not here. It is the one line in the family with a tell (against first
+    // pitch it gives the game's length, and a long one says extras), so it
+    // rides the reveal-gated scoreboard instead, behind the same `done` as the
+    // FINAL line: scorecardGame.js + scorecard/finalout.js.
+    venue: info.venue,
+    weather: info.weather,
+    attendance: info.attendance,
     lineup: selectLineup(feed, battingSide).map((r) => ({
+      // `id` is what lets the rail hang a player's hover card off his name on a
+      // sheet that has not been revealed yet — the pre-pitch lineup is the only
+      // name source on this view that had no id of its own.
+      id: r.id,
       pos: r.position,
       name: r.nameLastFirst,
       jersey: r.jersey,

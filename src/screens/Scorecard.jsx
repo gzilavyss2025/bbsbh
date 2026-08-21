@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ScorecardSheet } from '../components/scoring/ScorecardSheet.jsx'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
+import { PlayerLink } from '../components/player/PlayerLink.jsx'
 
 // The Numbers Game "22" scorecard sheet, drawn in the paper-scorebook system
 // and laid out the way the paper sheet is: the header band (TOP/BOTTOM, the
@@ -143,6 +144,9 @@ function FitText({ children }) {
 
 // A single write-in field: a caption over a pencil line. A filled value inks the
 // line; a blank one leaves it empty to write on, exactly as the template did.
+// `value` may be a NODE as well as a string — the WP/LP/SV lines pass a linked
+// surname, so a decision's name opens its hover card like every other player
+// name on the sheet.
 function Field({ label, value = '', wide = false }) {
   return (
     <div className={`sc-field ${wide ? 'sc-field--wide' : ''}`}>
@@ -152,13 +156,57 @@ function Field({ label, value = '', wide = false }) {
   )
 }
 
+// A WRITE-IN TIME with its two pencil rings — the sheet asks for a clock time
+// twice, and both are the same field: the time on its own line, AM and PM
+// beside it, the one the posted time names inked solid and its partner left
+// empty. Neither ring fills without a time, so a blank field is a blank field.
+//
+// `stacked` puts AM over PM instead of side by side. FIRST PITCH gets the whole
+// width of the band's first page and reads across; FINAL OUT shares the home
+// club's page with the ballpark and the crowd, and stacking its pair is what
+// lets it sit beside its own line rather than pushing the block wider.
+function ClockField({ label, time = '', stacked = false }) {
+  const meridiem = /\bAM\b/i.test(time) ? 'AM' : /\bPM\b/i.test(time) ? 'PM' : null
+  return (
+    <div className="sc-firstpitch">
+      <span className="sc-field__label">{label}</span>
+      <span className="sc-firstpitch__row">
+        <span className="sc-field__line sc-firstpitch__time">
+          {time.replace(/\s*[AP]M\b/i, '')}
+        </span>
+        <span
+          className={`sc-firstpitch__ampm ${stacked ? 'sc-firstpitch__ampm--stacked' : ''}`}
+          aria-hidden={meridiem == null}
+        >
+          {['AM', 'PM'].map((m) => (
+            <span key={m} className="sc-firstpitch__opt">
+              <span
+                className={`sc-scoreby__ring ${meridiem === m ? 'sc-scoreby__ring--inked' : ''}`}
+              />
+              <span className="sc-firstpitch__mlabel">{m}</span>
+            </span>
+          ))}
+        </span>
+      </span>
+    </div>
+  )
+}
+
 // A pitcher of record, written the way a box score writes him: the name, then
 // his figure in parentheses. No name means the game hasn't been revealed to
 // its end (or nobody earned the save), and the field stays a blank line to
 // write on — never an empty pair of brackets.
-function decision(name, note) {
+// The name is the LINK and the figure is not: a hover card belongs on the man,
+// not on his record. A line with no name is a blank line to write on, and never
+// an empty pair of brackets.
+function decision(id, name, note) {
   if (!name) return ''
-  return note ? `${name} (${note})` : name
+  return (
+    <>
+      <PlayerLink id={id}>{name}</PlayerLink>
+      {note ? ` (${note})` : ''}
+    </>
+  )
 }
 
 // One of the KEEPING SCORE BY choices — a small ring you'd fill with a pencil,
@@ -181,9 +229,6 @@ function ScorecardHeader({ side, view }) {
   const bottom = side === 'bottom'
   const ump = view?.umpiresByRole ?? {}
   const firstPitch = view?.firstPitch ?? ''
-  // The AM/PM dot the first-pitch time itself names, inked; its partner stays
-  // an empty ring to match the printed sheet. Neither fills without a time.
-  const meridiem = /\bAM\b/i.test(firstPitch) ? 'AM' : /\bPM\b/i.test(firstPitch) ? 'PM' : null
   return (
     <header className="sc-header">
       <div className="sc-header__half">{bottom ? 'Bottom' : 'Top'}</div>
@@ -210,41 +255,59 @@ function ScorecardHeader({ side, view }) {
         <div className="sc-header__stack">
           <Field label="Uniforms" value={view?.uniforms ?? ''} />
         </div>
-        {/* The crew in the #22's two stacked pairs: HP over 2B, 1B over 3B. */}
-        <div className="sc-header__stack">
-          <Field label="HP ump" value={ump.HP ?? ''} />
-          <Field label="2B ump" value={ump['2B'] ?? ''} />
-        </div>
-        <div className="sc-header__stack">
-          <Field label="1B ump" value={ump['1B'] ?? ''} />
-          <Field label="3B ump" value={ump['3B'] ?? ''} />
-        </div>
-        {/* KEEPING SCORE BY, the sheet's three pencil-ring options. */}
-        <div className="sc-scoreby">
-          <span className="sc-field__label">Keeping score by</span>
-          <ScoreByOption label="Attending the game" />
-          <ScoreByOption label="Watching on screen" />
-          <ScoreByOption />
-        </div>
-        {/* FIRST PITCH with its AM/PM dots; the named one inks solid. */}
-        <div className="sc-firstpitch">
-          <span className="sc-field__label">First pitch</span>
-          <span className="sc-firstpitch__row">
-            <span className="sc-field__line sc-firstpitch__time">
-              {firstPitch.replace(/\s*[AP]M\b/i, '')}
-            </span>
-            <span className="sc-firstpitch__ampm" aria-hidden={meridiem == null}>
-              <span
-                className={`sc-scoreby__ring ${meridiem === 'AM' ? 'sc-scoreby__ring--inked' : ''}`}
-              />
-              <span className="sc-firstpitch__mlabel">AM</span>
-              <span
-                className={`sc-scoreby__ring ${meridiem === 'PM' ? 'sc-scoreby__ring--inked' : ''}`}
-              />
-              <span className="sc-firstpitch__mlabel">PM</span>
-            </span>
-          </span>
-        </div>
+        {/* THE TWO PAGES CARRY DIFFERENT HEADERS, as the #22 does. The crew is
+            printed once, on the visitors' page where the sheet starts; the home
+            club's page takes the game's own particulars instead — where it was
+            played, in front of how many, in what weather, and the time of the
+            final out. Both pages keep the club/manager/uniform block, since
+            each page is one club's; nothing printed once appears twice. */}
+        {bottom ? (
+          <>
+            <div className="sc-header__stack sc-header__stack--wide">
+              <Field label="Ballpark" value={view?.venue ?? ''} wide />
+              <Field label="Weather" value={view?.weather ?? ''} wide />
+            </div>
+            <div className="sc-header__stack">
+              <Field label="Attendance" value={view?.attendance ?? ''} />
+            </div>
+            {/* THE FINAL OUT — the time of it, written in the same field FIRST
+                PITCH uses on the other page, rings and all, with its AM/PM pair
+                stacked so it fits beside its own line. It waits for what the
+                FINAL line waits for: read against first pitch it gives the
+                game's length, and a long one says extras, so it is gated on the
+                scoreboard's `done` (Final AND every played half revealed)
+                rather than sitting open beside the ballpark. Until then it is a
+                blank line to write on, which is this sheet's own way of saying
+                you haven't got there yet. */}
+            <ClockField label="Final out" time={view?.scoreboard?.finalOut ?? ''} stacked />
+          </>
+        ) : (
+          <>
+            {/* The crew in the #22's two stacked pairs: HP over 2B, 1B over 3B. */}
+            <div className="sc-header__stack">
+              <Field label="HP ump" value={ump.HP ?? ''} />
+              <Field label="2B ump" value={ump['2B'] ?? ''} />
+            </div>
+            <div className="sc-header__stack">
+              <Field label="1B ump" value={ump['1B'] ?? ''} />
+              <Field label="3B ump" value={ump['3B'] ?? ''} />
+            </div>
+            {/* KEEPING SCORE BY and FIRST PITCH are printed ONCE, here on the
+                page the sheet starts on. Both are declarations you make at the
+                top of a game and never again — how you are watching it, and
+                when it began — so the #22 asks for them on its first page and
+                the home club's page gets on with the game. FIRST PITCH's
+                opposite number, GAME ENDED, is on that other page: the pair
+                brackets the sheet rather than crowding one band. */}
+            <div className="sc-scoreby">
+              <span className="sc-field__label">Keeping score by</span>
+              <ScoreByOption label="Attending the game" />
+              <ScoreByOption label="Watching on screen" />
+              <ScoreByOption />
+            </div>
+            <ClockField label="First pitch" time={firstPitch} />
+          </>
+        )}
       </div>
     </header>
   )
@@ -290,7 +353,9 @@ function ScorecardFooter({ view }) {
                     the box score's own pitcher table use. */}
                 <td className="pitchers__pitcher">
                   <span className="pitchers__cell">
-                    <span className="sc-pitchers__name">{p.name}</span>
+                    <PlayerLink id={p.id} className="sc-pitchers__name">
+                      {p.name}
+                    </PlayerLink>
                     <span className="sc-pitchers__jersey">{p.jersey}</span>
                   </span>
                 </td>
@@ -426,9 +491,18 @@ function FinalBlock({ board }) {
           his own boxscore seasonStats and include tonight, so the line reads
           the way it will read in the morning paper. */}
       <div className="sc-decisions">
-        <Field label="WP" value={decision(board?.decisions?.wp, board?.decisions?.wpNote)} />
-        <Field label="LP" value={decision(board?.decisions?.lp, board?.decisions?.lpNote)} />
-        <Field label="SV" value={decision(board?.decisions?.sv, board?.decisions?.svNote)} />
+        <Field
+          label="WP"
+          value={decision(board?.decisions?.wpId, board?.decisions?.wp, board?.decisions?.wpNote)}
+        />
+        <Field
+          label="LP"
+          value={decision(board?.decisions?.lpId, board?.decisions?.lp, board?.decisions?.lpNote)}
+        />
+        <Field
+          label="SV"
+          value={decision(board?.decisions?.svId, board?.decisions?.sv, board?.decisions?.svNote)}
+        />
       </div>
     </div>
   )

@@ -31,9 +31,12 @@
    The BATTING ORDER change stands DOWN THE LEFT EDGE. Every man who fills a
    slot shares its one row of boxes, so the rule closes off the man before him
    ALONG that row — left to right, trip by trip, which is the direction the row
-   is read. His number rides the rule at mid-height, on a small paper chip so it
-   stays legible where the diamond's left vertex reaches under it (the same
-   trick .sc-ab__center uses to sit over the diamond).
+   is read. His number rides the rule at mid-height on the OUTGOING side of it,
+   hanging left into the box he is taking the row over from — the same side of
+   its own rule the pitching change's number takes, and the same reason: a
+   handover number belongs with the line, not inside the notation the line is
+   there to separate. It keeps a small paper chip so it stays legible over
+   whatever it lands on (the same trick .sc-ab__center uses over the diamond).
 
    The PITCHING change lies ACROSS THE TOP EDGE, cutting across the order rather
    than along it, with the number above the rule — hanging into the bottom-left
@@ -88,13 +91,16 @@
 }
 
 /* The batting-order change: down the left edge, number on the rule at
-   mid-height. */
+   mid-height. `width: 0` with the item justified to its end is what carries the
+   number LEFT of the rule and clear of the box — the mirror of the pitching
+   change's `height: 0` above. */
 .sc-sub--batter {
   top: 0;
   bottom: 0;
   left: 0;
   width: 0;
   align-items: center;
+  justify-content: flex-end;
 }
 .sc-sub--batter .sc-sub__rule {
   top: 0;
@@ -103,7 +109,7 @@
   width: 2px;
 }
 .sc-sub__num--batter {
-  left: 3px;
+  right: 3px;
   padding: 0 1px;
   border-radius: var(--radius-xs);
   background: var(--surface-inset);

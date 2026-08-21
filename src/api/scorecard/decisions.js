@@ -19,7 +19,27 @@
 //    save 656730 -> { saves: 23 } reads "23". Season stats on a boxscore
 //    player INCLUDE tonight's game, so the figure reads the way it will read
 //    in the morning paper.
-const EMPTY = { wp: '', wpNote: '', lp: '', lpNote: '', sv: '', svNote: '' }
+const EMPTY = {
+  wp: '', wpId: null, wpNote: '',
+  lp: '', lpId: null, lpNote: '',
+  sv: '', svId: null, svNote: '',
+}
+
+// SURNAME ONLY, the way a scorer writes a pitcher onto this sheet and the way
+// the pitcher table above it already does ("Gasser, Robert" -> "Gasser"). The
+// line has room for a first name and is worse for carrying one: three decisions
+// read as three names, and it is the surname that identifies the man on a
+// scorecard. Read off the feed's own name parts rather than split from the full
+// name, so "Jr." and two-part surnames survive; the split is the fallback for a
+// lean feed that carries no player record for him.
+function surname(feed, person) {
+  if (!person) return ''
+  const rec = feed?.gameData?.players?.[`ID${person.id}`]
+  const known = rec?.useLastName || rec?.lastName
+  if (known) return known
+  const full = person.fullName ?? ''
+  return full.slice(full.lastIndexOf(' ') + 1) || full
+}
 
 // A pitcher's season pitching line off the boxscore. He is on exactly one of
 // the two clubs and the caller has no reason to know which, so both are tried.
@@ -45,18 +65,23 @@ function saves(feed, person) {
   return st?.saves == null ? '' : String(st.saves)
 }
 
-// The three lines. A missing figure degrades to '' rather than to a zero, and
-// the screen builds the parentheses only around a figure that exists — so an
-// unknown record prints a bare name, never an empty pair of brackets.
+// The three lines, each a surname and its figure — plus the man's id, so the
+// screen can hang his hover card off the name like every other player name on
+// the sheet. A missing figure degrades to '' rather than to a zero, and the
+// screen builds the parentheses only around a figure that exists, so an unknown
+// record prints a bare name and never an empty pair of brackets.
 export function decisionLines(feed, done) {
   if (!done) return { ...EMPTY }
   const d = feed?.liveData?.decisions ?? {}
   return {
-    wp: d.winner?.fullName ?? '',
+    wp: surname(feed, d.winner),
+    wpId: d.winner?.id ?? null,
     wpNote: d.winner ? record(feed, d.winner) : '',
-    lp: d.loser?.fullName ?? '',
+    lp: surname(feed, d.loser),
+    lpId: d.loser?.id ?? null,
     lpNote: d.loser ? record(feed, d.loser) : '',
-    sv: d.save?.fullName ?? '',
+    sv: surname(feed, d.save),
+    svId: d.save?.id ?? null,
     svNote: d.save ? saves(feed, d.save) : '',
   }
 }

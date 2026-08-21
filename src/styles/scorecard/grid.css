@@ -41,6 +41,16 @@
 }
 
 /* ---- Main grid: a pannable window onto the sheet ---- */
+/* ALL NINE SLOTS, ALWAYS. The pane's vertical bound is whichever is BIGGER: the
+   room the window has, or the height the batting order actually needs. A cap of
+   viewport-minus-chrome alone meant that on an ordinary desktop window the
+   grid came up a row or two short and you scrolled INSIDE the lineup to reach
+   the 8 and 9 hitters — which is the one thing a scorer should never have to do
+   with a sheet in front of them. The order is a fixed nine rows, so its height
+   is knowable in CSS: nine cells plus the inning header and the foot row.
+   Where the window is taller, the window wins and the pane keeps its own
+   scroll; where it is shorter, the sheet stands full height and the PAGE
+   scrolls around it. Either way the nine are together. */
 /* The pane is bounded on BOTH axes so the frame pins on three sides while
    you pan: the Player/Pos rail (sticky left), the inning numbers (sticky
    top), and the foot row + TOTALS bar (a sticky <tfoot>). Without the vertical
@@ -53,8 +63,9 @@
 }
 .sc-sheet__scroll {
   overflow: auto;
-  max-height: calc(100vh - 120px);
-  max-height: calc(100dvh - 120px);
+  --sc-order-h: calc(9 * var(--sc-cell-h) + 64px);
+  max-height: max(calc(100vh - 120px), var(--sc-order-h));
+  max-height: max(calc(100dvh - 120px), var(--sc-order-h));
   -webkit-overflow-scrolling: touch;
   border: var(--bw-hair) solid var(--border-rule);
   /* No bars. The sheet is paper you slide, and the zoom control above is

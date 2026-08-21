@@ -89,12 +89,14 @@ test('full reveal: the completed sheet, its totals, decisions, marks and PR case
   await expect(page.locator('.sc-sheet__totbar')).toHaveText(['38', '11', '10', '10'])
   // FINAL: MIL 10, STL 2, with LOB 8/4; decisions named.
   await expect(page.locator('.sc-final tbody tr').first()).toContainText('10')
-  await expect(page.locator('.sc-decisions')).toContainText('Robert Gasser')
-  await expect(page.locator('.sc-decisions')).toContainText('Hunter Dobbins')
-  // Each pitcher of record reads with his figure in parentheses — his season
-  // record, or the save count for the man who finished it. This fixture is
-  // trimmed of boxscore seasonStats, so the figures degrade away; what must
-  // never appear is the bracket without one.
+  // SURNAME AND FIGURE, the way a box score writes a pitcher of record: the
+  // season record for the two starters of record, the save count for the man
+  // who finished it. A first name is not what identifies him on a scorecard.
+  await expect(page.locator('.sc-decisions')).toContainText('Gasser (2-3)')
+  await expect(page.locator('.sc-decisions')).toContainText('Dobbins (1-1)')
+  await expect(page.locator('.sc-decisions')).not.toContainText('Robert')
+  // A 10–2 final earns nobody a save, so SV stays a blank line to write on —
+  // never a bare name, and never an empty pair of brackets.
   await expect(page.locator('.sc-decisions')).not.toContainText('()')
   // The end-of-inning slash closes each half's own last box: nine halves,
   // nine slashed boxes, on a fully revealed 9-inning sheet. It is the sheet's
@@ -143,6 +145,14 @@ test('a slot is one row: the sub takes a written line, not a band of empty boxes
   expect(edges.tall).toBe(true)
   expect(edges.atLeft).toBeLessThanOrEqual(1)
   expect(edges.spans).toBeLessThanOrEqual(1)
+  // The number sits on the OUTGOING side of its rule — clear of the box
+  // entirely, hanging left into the one the row is being taken over from, the
+  // same side of its own line the pitching change's number takes.
+  const num = await arriving.evaluate((box) => {
+    const b = box.getBoundingClientRect()
+    return Math.round(box.querySelector('.sc-sub__num--batter').getBoundingClientRect().right - b.left)
+  })
+  expect(num).toBeLessThanOrEqual(0)
 
   // And the pitching change takes the same mark on the sheet of the club that
   // has to face it: one per RELIEVER (the starter takes none), each on the box
@@ -231,6 +241,108 @@ test('a called third strike reads SO in the box and a backwards K in the diamond
     .and(page.locator(':not(.sc-ab__center--looking)'))
   await expect(swinging.first()).toBeVisible()
   expect(await swinging.first().evaluate((el) => getComputedStyle(el).transform)).toBe('none')
+})
+
+test('the two pages carry different header material, as the #22 does', async ({ page }) => {
+  await openWithMark(page, FULL)
+  const labels = () => page.locator('.sc-header .sc-field__label').allTextContents()
+
+  // The visitors' page, where the sheet starts, carries the crew — printed
+  // once, as on paper.
+  // The visitors' page, where the sheet starts, carries the crew — printed
+  // once, as on paper — and the two declarations you make at the top of a game
+  // and never again: how you are watching it, and when it began.
+  const top = await labels()
+  expect(top).toContain('Visiting team')
+  expect(top).toEqual(
+    expect.arrayContaining([
+      'HP ump',
+      '1B ump',
+      '2B ump',
+      '3B ump',
+      'Keeping score by',
+      'First pitch',
+    ]),
+  )
+  expect(top).not.toContain('Ballpark')
+  expect(top).not.toContain('Final out')
+
+  await page.getByRole('button', { name: /^Bottom$/i }).first().click()
+  await expect(page.locator('.sc-header')).toContainText('Home team')
+
+  // The home club's page takes the game's own particulars instead: where it was
+  // played, in front of how many, in what weather, and when the final out
+  // was recorded.
+  const bottom = await labels()
+  expect(bottom).toEqual(
+    expect.arrayContaining(['Home team', 'Ballpark', 'Weather', 'Attendance', 'Final out']),
+  )
+  // Nothing printed once may appear twice: not the crew, and not the two
+  // write-in surfaces the first page already asked for. FIRST PITCH's opposite
+  // number, FINAL OUT, is the only one of that pair here — together they
+  // bracket the sheet rather than crowding one band.
+  const printedOnce = ['HP ump', '1B ump', '2B ump', '3B ump', 'Keeping score by', 'First pitch']
+  for (const label of printedOnce) expect(bottom).not.toContain(label)
+
+  // What both pages DO keep: the club it belongs to, its manager, its uniform.
+  // Each page is one club's, so the band still reads as one form on either.
+  for (const shared of ['Logo', 'Manager', 'Uniforms']) {
+    expect(top).toContain(shared)
+    expect(bottom).toContain(shared)
+  }
+
+  // FINAL OUT is a write-in TIME, the same field FIRST PITCH is — rings and all
+  // — with its AM/PM pair stacked so it sits beside its own line instead of
+  // pushing the block wider.
+  const rings = page.locator('.sc-firstpitch__ampm--stacked')
+  await expect(rings).toHaveCount(1)
+  await expect(rings.locator('.sc-scoreby__ring')).toHaveCount(2)
+  const stacked = await rings.evaluate((el) => {
+    const [am, pm] = [...el.querySelectorAll('.sc-firstpitch__opt')].map((o) => o.getBoundingClientRect())
+    return { belowNotBeside: pm.top >= am.bottom - 1, sameLeft: Math.abs(pm.left - am.left) <= 1 }
+  })
+  expect(stacked.belowNotBeside).toBe(true)
+  expect(stacked.sameLeft).toBe(true)
+})
+
+test('every player name on the sheet opens his hover card', async ({ page }) => {
+  await openWithMark(page, FULL)
+  // The rail (a line per man who batted, subs included), the pitcher table, and
+  // the three decisions. Each is a real PlayerLink, so each is also a door to
+  // his page — the card is what a mouse gets on the way.
+  await expect(page.locator('.sc-sheet__who.plink')).toHaveCount(
+    await page.locator('.sc-sheet__line').count(),
+  )
+  await expect(page.locator('.sc-pitchers__name.plink').first()).toBeVisible()
+  await expect(page.locator('.sc-decisions .plink')).toHaveCount(2) // no save in a 10–2
+
+  // The card itself, off the first name in the order — DESKTOP ONLY, which is
+  // the app's own rule for it (HOVER_CARD_QUERY: a real mouse at the wide
+  // breakpoint). On a touch screen the same name is still a link to his page,
+  // which is what a tap should do there.
+  const hoverCapable = await page.evaluate(
+    () => window.matchMedia('(min-width: 740px) and (hover: hover) and (pointer: fine)').matches,
+  )
+  await page.locator('.sc-sheet__who.plink').first().hover()
+  if (!hoverCapable) {
+    await expect(page.locator('.phcard')).toHaveCount(0)
+    return
+  }
+  await expect(page.locator('.phcard')).toBeVisible({ timeout: 5000 })
+  await expect(page.locator('.phcard')).toContainText('Yelich')
+})
+
+test('the whole batting order fits without scrolling inside it', async ({ page }) => {
+  await openWithMark(page, FULL)
+  await expect(page.locator('.sc-sheet__row--slot')).toHaveCount(9)
+  // The pane's vertical bound is the LARGER of the room the window has and the
+  // height nine slots need, so a scorer never pans inside the lineup to reach
+  // the 8 and 9 hitters. At the default zoom the sheet is exactly its content.
+  const pane = await page.evaluate(() => {
+    const p = document.querySelector('.sc-sheet__scroll')
+    return { client: Math.round(p.clientHeight), scroll: Math.round(p.scrollHeight) }
+  })
+  expect(pane.scroll).toBeLessThanOrEqual(pane.client + 1)
 })
 
 test('the foot row names its readings and stays pinned to the pane', async ({ page }) => {

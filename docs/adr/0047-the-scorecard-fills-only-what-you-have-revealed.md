@@ -422,3 +422,63 @@ is never squeezed on a narrow row, which on a wide one made it absorb all the
 spare space and run two writing lines halfway across the band under a club name
 and a surname. Capped at what the longest of them needs; the slack goes to
 UNIFORMS beside it, whose line genuinely wants the room.
+
+## Amendment (2026-08-21): two pages, two headers
+
+The #22 does not print the same band twice, and the sheet now does not either.
+
+**The visitors' page keeps what is declared once**: the umpire crew, KEEPING
+SCORE BY, and FIRST PITCH — how you are watching this game and when it began,
+neither of which is worth asking for a second time.
+
+**The home club's page takes the game's own particulars**: BALLPARK, WEATHER,
+ATTENDANCE, and the time of the FINAL OUT. Both pages keep the club/manager/
+uniform block, since each page is one club's.
+
+Three of those four are spoiler-free and sit on `scorecardView` beside the
+lineup: a ballpark and a wind reading are known before first pitch, and a
+turnstile count is not a score. **The final out is not**, and the difference is
+worth stating because it is the kind of field that looks harmless. Read against
+FIRST PITCH on the facing page it gives the game's LENGTH, and a long one says
+extra innings — which is the exact fact ADR-0008 spends the whole sheet
+withholding, unlocking one extra column at a time. So it lives in
+`api/scorecard/finalout.js`, **caller-gated**, and takes `scorecardScoreboard`'s
+own `done` — Final AND every played half at or under `through`, the same flag
+the FINAL line waits on. Until then it is a blank line to write on. By the time
+it fills, the reader has walked every half and there is nothing left to tell.
+
+It reads the LAST PLAY's own timestamp, which is literally the final out and
+already carries every rain delay and every extra inning rather than needing them
+added back; a lean feed falls back to first pitch plus playing time plus delay.
+The park's clock, never the reader's — the same game read from another time zone
+must not say a different hour. `boxscore.js` resolves its own end time the same
+way and is reveal-only, so this is a deliberate second reader on one feed path
+rather than an import across the gate.
+
+FINAL OUT is the same write-in field FIRST PITCH is, rings and all, sharing one
+`ClockField`. Its AM/PM pair stacks rather than reading across, which is what
+lets it sit beside its own line instead of pushing the block wider.
+
+**Three smaller things in the same pass.**
+
+- **WP/LP/SV print a surname**, the way the pitcher table above them already
+  does and the way a scorer writes a pitcher onto this sheet. Read off the
+  feed's own name parts, not split from the full name, so a "Jr." or a two-part
+  surname survives; the split is the fallback for a lean feed.
+- **Every player name on the sheet is a `PlayerLink`** — the rail's line per man
+  who batted, the pitcher table, and the three decisions (the defense diamond
+  already was). Each is a door to his page, and on a desktop a hover opens his
+  card on the way. The name itself carries the link class, so the rail keeps the
+  truncation it depends on, and a row with no id falls back to a plain span.
+  `scorecardView`'s pre-pitch lineup gained an `id` for this: it was the one
+  name source on the sheet without one.
+- **The whole batting order fits.** The pane's vertical bound is now whichever
+  is BIGGER: the room the window has, or the height nine slots need. A cap of
+  viewport-minus-chrome alone left an ordinary desktop window a row or two
+  short, so you scrolled INSIDE the lineup to reach the 8 and 9 hitters — the
+  one thing a scorer should never do with a sheet in front of them. The order is
+  a fixed nine rows, so its height is knowable in CSS.
+
+`src/styles/scorecard/` gained `footer.css` at the file cap: page.css now holds
+the header band, the zoom control and the editor, and the footer trio is its
+own partial.

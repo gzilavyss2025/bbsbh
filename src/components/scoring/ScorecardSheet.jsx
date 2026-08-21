@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AtBatBox } from './AtBatBox.jsx'
 import { cellNote } from '../../lib/scorecardNotes.js'
+import { PlayerLink } from '../player/PlayerLink.jsx'
 
 // The main scorecard grid, in the #22 sheet's own column order: a sticky
 // PLAYER column (each row led by its batting-order number, closed by the
@@ -244,7 +245,14 @@ export function ScorecardSheet({
                         className={`sc-sheet__line ${li > 0 ? 'sc-sheet__line--sub' : ''}`}
                       >
                         {li === 0 && <span className="sc-sheet__slotnum">{slot}</span>}
-                        <span className="sc-sheet__who">{line.name}</span>
+                        {/* The name is the link, so the truncation the rail
+                            depends on stays on the element that IS the name —
+                            PlayerLink passes the class straight through to the
+                            button, and falls back to a plain span with the same
+                            class when a row has no id to link to. */}
+                        <PlayerLink id={line.id} className="sc-sheet__who">
+                          {line.name}
+                        </PlayerLink>
                         <span className="sc-sheet__jersey">{line.jersey}</span>
                       </span>
                     ))}
