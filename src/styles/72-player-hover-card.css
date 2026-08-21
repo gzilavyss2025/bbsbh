@@ -1,0 +1,170 @@
+/* ============================================================
+   PLAYER HOVER CARD
+   The global desktop popover PlayerLink opens on hover/focus —
+   a compact season-stat card in the app's paper-scorebook system.
+   Rendered by the one <PlayerHoverCard> (components/player/), which
+   ModalPortal puts in <body>, OUTSIDE #root — so this file also
+   re-states the ALL-CAPS INVARIANT for its own subtree (01-base.css's
+   `#root *` cannot reach a body-portalled node; same reason
+   focus/reference.css re-states it for `.focusrail__sheet`).
+   ============================================================ */
+.phcard * {
+  text-transform: uppercase;
+}
+
+.phcard {
+  position: fixed;
+  z-index: 100;
+  width: 300px;
+  background: var(--surface-card);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  font-family: var(--font-body);
+}
+
+.phcard__spine {
+  height: 3px;
+  border-radius: calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0 0;
+  /* A flat wash of the club's own color, never the kraft-amber --seal — this
+     card identifies a CLUB, it is not a spoiler cover (ADR-0030's "a club
+     may colour a card that identifies the club"). No known color (an
+     unaffiliated MiLB id) just leaves the spine the card's own paper. */
+  background: var(--phcard-accent, var(--rule-soft));
+}
+
+.phcard__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+}
+
+.shot.phcard__photo {
+  width: var(--shot-sm-w);
+  height: var(--shot-sm-h);
+  border-radius: var(--radius-sm);
+}
+.shot.phcard__photo.shot--fallback {
+  font-size: var(--fs-title-md);
+}
+
+.phcard__id {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.phcard__name {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-title-md);
+  line-height: var(--lh-tight);
+  color: var(--text-heading);
+}
+
+.phcard__meta {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-compact);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.phcard__tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  margin-top: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-caps);
+  background: var(--surface-inset);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phcard__tag--level {
+  border: var(--bw-hair) solid var(--border-rule);
+  color: var(--text-body);
+}
+.phcard__tag--rehab {
+  border: var(--bw-hair) dashed var(--graphite-soft);
+  color: var(--text-caption);
+}
+
+.phcard__crest {
+  flex: 0 0 auto;
+}
+
+.phcard__rule {
+  height: var(--bw-hair);
+  background: var(--border-hairline);
+  margin: 0 var(--space-4);
+}
+
+.phcard__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+.phcard__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-2) 2px;
+  text-align: center;
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--inset-cell);
+}
+
+.phcard__tilev {
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-body);
+  color: var(--text-heading);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-num);
+}
+
+.phcard__tilek {
+  font-family: var(--font-display);
+  font-weight: var(--w-semibold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-label);
+  color: var(--text-caption);
+}
+
+.phcard__loading {
+  height: 148px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    90deg,
+    var(--surface-card) 0%,
+    var(--surface-inset) 50%,
+    var(--surface-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: phcard-shimmer 1.1s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .phcard__loading {
+    animation: none;
+  }
+}
+@keyframes phcard-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -329,6 +329,9 @@ const BUDGETS = {
   // neither is @imported by index.css in a way that depends on the other's
   // position.
   //
+  // 97 -> 98 for `72-player-hover-card.css`: the global hover popover's
+  // rules, core (not per-route) since PlayerLink, its trigger, is core.
+  //
   // 96 -> 97 for `04a-wire-dock.css`: the phone's bottom-anchored presentation
   // of the league roster-move feed (components/transactions/WireDock.jsx). A
   // LETTERED sibling of `04-site-bar.css` rather than the next free integer,
@@ -339,7 +342,7 @@ const BUDGETS = {
   // check-file-size.mjs's 600-line ceiling — and that guard's remedy is to
   // split, not to raise. Same trade the 21/21a, 26/26a and 48/48-stamp-strip
   // entries above record.
-  'src/styles': 97,
+  'src/styles': 98,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.
@@ -398,7 +401,9 @@ const BUDGETS = {
   // two new money pages. Flat for the manifest reason above: check-spoiler-
   // manifest classifies the flat set, and a subdirectory would quietly take a
   // new module out of the thing that proves it carries a classification at all.
-  'src/api': 100,
+  // +1 for playerHoverCard.js — the hover card's lean data loader. Flat for
+  // the check-spoiler-manifest reason above.
+  'src/api': 101,
   // +1 for check-dead-exports.mjs — another flat lint guard, same shape as
   // its siblings already here.
   // +2 for gen-highlights.mjs and gen-highlights-backfill.mjs — a nightly
@@ -500,7 +505,9 @@ const BUDGETS = {
   // module, not a new subsystem.
   // +1 for scorecardNotes.js — the scorecard's per-cell override store, the
   // same React-free-core-under-a-hook shape as stamps.js/books.js beside it.
-  'src/lib': 55,
+  // +2 for playerHoverStore.js (external store, SyncStatusProvider shape) and
+  // playerHoverPosition.js (pure clamp/flip geometry, sealTear.js's reason).
+  'src/lib': 57,
   // New entry (was under the default 12-file cap): +1 for
   // prospectPercentile.mjs, the pure percentile math gen-prospect-trend.mjs
   // imports — scripts/CLAUDE.md's testable-helper convention (lib/roster.mjs
@@ -585,8 +592,12 @@ const BUDGETS = {
   // 21 -> 22 for useCalloutLedger.js — the per-game "already shown" memory the
   // callout surfaces rank against. React wiring (a context over a Map) with its
   // rules pure in api/callout-notes/shared.js, the same split one more time.
-  'src/hooks': 22,
+  // 22 -> 23 for usePlayerHoverStats.js — the hover card's cached fetch hook.
+  'src/hooks': 23,
   'src/screens/identity-lab': 15,
+  // New entry: +1 for PlayerHoverCard.jsx — a player-identity primitive like
+  // Headshot/PlayerLink beside it, not one of this bucket's ten player-PAGE cards.
+  'src/components/player': 13,
 }
 
 const IGNORE_DIRS = new Set(['node_modules', 'dist', '.git'])

@@ -1,5 +1,8 @@
+import { useRef } from 'react'
 import { useNav, useLinkScope, nameFromChildren } from '../../lib/nav.js'
 import { playerPath } from '../../lib/route.js'
+import { useMediaQuery, HOVER_CARD_QUERY } from '../../hooks/useMediaQuery.js'
+import { scheduleHoverShow, scheduleHoverHide } from '../../lib/playerHoverStore.js'
 
 // Wraps a player's name (already rendered as children) in a plain, no-underline
 // button that navigates to their page. SPOILER-SAFE for the reason that
@@ -30,17 +33,36 @@ import { playerPath } from '../../lib/route.js'
 export function PlayerLink({ id, name, className = '', ariaLabel, children }) {
   const navigate = useNav()
   const { asOf, sportId } = useLinkScope()
+  const btnRef = useRef(null)
+  // Desktop-only (see HOVER_CARD_QUERY's own header): a real mouse, at the
+  // app's own "wide" width. Read once per render rather than gating inside
+  // the handlers below — the handlers still no-op on a stale `true` from the
+  // instant before a resize, since the global card requires an active id it
+  // never receives from a query that's already false by then.
+  const hoverCapable = useMediaQuery(HOVER_CARD_QUERY)
   if (!id) {
     return <span className={className}>{children}</span>
   }
+  const displayName = name ?? nameFromChildren(children)
+  const showHoverCard = (opts) => {
+    if (!hoverCapable || !btnRef.current) return
+    scheduleHoverShow(id, displayName, btnRef.current.getBoundingClientRect(), opts)
+  }
+  const hideHoverCard = () => {
+    if (!hoverCapable) return
+    scheduleHoverHide(id)
+  }
   return (
     <button
+      ref={btnRef}
       type="button"
       className={`plink ${className}`}
       aria-label={ariaLabel}
-      onClick={() =>
-        navigate(playerPath(id, { name: name ?? nameFromChildren(children), d: asOf, s: sportId }))
-      }
+      onClick={() => navigate(playerPath(id, { name: displayName, d: asOf, s: sportId }))}
+      onMouseEnter={() => showHoverCard()}
+      onMouseLeave={hideHoverCard}
+      onFocus={() => showHoverCard({ immediate: true })}
+      onBlur={hideHoverCard}
     >
       {children}
     </button>
