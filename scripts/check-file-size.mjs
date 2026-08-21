@@ -82,7 +82,7 @@ const BUDGETS = {
   'src/styles/15-team-color-lab.css': 700, // 691
   'src/styles/17-identity-lab-workbench.css': 1300, // 1229 — stamp-ink rules
   'src/styles/20-charts.css': 700, // 684
-  'src/styles/21-box-score.css': 800, // 771 — the Three Stars card split out to 21a-box-score-stars.css,
+  'src/styles/21-box-score.css': 900, // 800 -> 869: the Coverage card's lead-story treatment (.gamestory__lead*) — a full-bleed photo, team badge, headline and blurb for the first enriched story, same .gamestory namespace the compact-row rules already live in here. 771 — the Three Stars card split out to 21a-box-score-stars.css,
   //                                    the by-inning tally to 21b-box-score-tally.css
   'src/styles/22-box-score-tables.css': 800, // 789
   'src/styles/23-box-score-detail.css': 800, // 637 -> 721: the team hub's leader ledger (.tledg), which lands here beside the .tlead card board it renders instead of. It cannot be its own partial: src/styles is AT its directory budget (check-dir-size.mjs), the same squeeze 68-around-the-game.css records. Paid for in part by deleting the horizontal deck, its header-actions row and two dead .ilmark sizings.

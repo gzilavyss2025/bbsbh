@@ -79,6 +79,96 @@
   letter-spacing: var(--ls-caps);
 }
 
+/* The lead story: a full-bleed 16:9 photo (falls back to the plain hairline
+   fill below it while loading or if the crop 404s — never a broken-image
+   glyph) with a team-identity badge over its lower-left corner, headline and
+   blurb in a padded block underneath. Only ever rendered for the story
+   GameStoryCard picked as the lead — see that file's header for the
+   fallback rule when the first story has no photo/blurb to lead with. */
+.gamestory__lead {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gamestory__leadphoto {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--border-hairline);
+}
+
+.gamestory__leadphoto img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gamestory__leadbadge {
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px var(--space-2) 4px 4px;
+  background: rgba(255, 253, 246, 0.94);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: 999px;
+}
+
+.gamestory__leadbadgelabel {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-caps);
+  color: var(--text-heading);
+}
+
+.gamestory__leadbody {
+  padding: var(--space-3);
+}
+
+.gamestory__leadhead {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--fs-title-sm);
+  font-weight: var(--w-bold);
+  line-height: var(--lh-tight);
+  color: var(--text-body);
+}
+
+#root .gamestory__leadhead {
+  text-transform: none; /* caps-exempt: a real MLB.com headline, same idiom as .gamestory__headline */
+}
+
+.gamestory__leadblurb {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-ui);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-prose);
+  color: var(--text-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#root .gamestory__leadblurb {
+  text-transform: none; /* caps-exempt: a real MLB.com preview paragraph, same idiom as .gamestory__headline/.gamestory__leadhead */
+}
+
+/* A hairline divider only when a lead story sits above the list — the
+   plain, no-lead fallback list needs no seam under the section head. */
+.gamestory__lead + .gamestory__list {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--bw-hair) solid var(--border-hairline);
+}
+
 .gamestory__list {
   list-style: none;
   margin: 0;
