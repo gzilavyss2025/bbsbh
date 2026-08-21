@@ -115,6 +115,37 @@ function stripPlayerLabel(text, fullName) {
     .trim()
 }
 
+// The row's OWN club names — the only ones already implied by the page/story
+// context and therefore safe to elide from the front of its raw sentence.
+// Before the MiLB-level wire (#847) `ctx.orgId` always equalled whichever
+// club led these two-sided descriptions, because a call-up/option/selection
+// row is always authored from the ACTIVE-roster (MLB) side
+// (docs/transactions-wire.md) and a story could only be owned by that same
+// MLB club. A MiLB-level story can now be owned by the AFFILIATE side of that
+// same row instead — the wire's sentence still opens with the MLB parent, who
+// isn't a member of that level's own thirty clubs — so eliding "whichever
+// name leads" started eliding the one club actually doing something, leaving
+// a sentence like "Recalled LHP X from Salt Lake Bees." with no subject and
+// only the LOSING club named. Eliding only the owner's own name leaves the
+// other club's name in the sentence whenever it isn't otherwise implied.
+function ownClubNames(row, ctx) {
+  const names = []
+  if (row.fromTeam?.id === ctx.orgId && row.fromTeam?.name) names.push(row.fromTeam.name)
+  if (row.toTeam?.id === ctx.orgId && row.toTeam?.name) names.push(row.toTeam.name)
+  return names
+}
+// Whether `stripLeadingClub` would actually elide one of `names` off this
+// row's description — the same startsWith check it runs internally, computed
+// separately because the caller needs to know BEFORE deciding whether the
+// remainder should be re-cased with lowerFirstClause. An unelided clause
+// still opens with its own capitalized subject (a club name, never a common
+// word), so lowering its first letter would turn "Los Angeles Angels…" into
+// "los Angeles Angels…".
+function leadsWithOwnClub(row, ctx) {
+  const desc = row.description || ''
+  return ownClubNames(row, ctx).some((name) => desc.startsWith(`${name} `))
+}
+
 // One row's clause, acting club stripped, lower-case lead — for the caller to
 // capitalize or trail after a semicolon. A waiver claim is the one description
 // no stripping fixes for both sides: it is written from the CLAIMING club's
@@ -131,7 +162,7 @@ function rowClause(row, ctx = {}) {
     const claimant = row.toTeam?.name ? ` to the ${row.toTeam.name}` : ''
     return `lost ${player}${claimant} on a waiver claim.`
   }
-  const clause = stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name])
+  const clause = stripLeadingClub(row.description, ownClubNames(row, ctx))
   // `OBT` is the one code the wire writes in the PRESENT tense — "St. Louis
   // Cardinals obtain RHP Durbin Feltman from Kansas City Monarchs" — against
   // the past tense every other row and every clause here uses. Both OBT rows
@@ -248,9 +279,8 @@ function cutlineTrade(story, ctx) {
   }
   if (clearRow) {
     const cName = nameFor(clearRow)
-    const cClause = stripPeriod(lowerFirstClause(
-      stripLeadingClub(clearRow.description, [clearRow.fromTeam?.name, clearRow.toTeam?.name]),
-    ))
+    const cRaw = stripLeadingClub(clearRow.description, ownClubNames(clearRow, ctx))
+    const cClause = stripPeriod(leadsWithOwnClub(clearRow, ctx) ? lowerFirstClause(cRaw) : cRaw)
     segs.push({ text: '; ' })
     segs.push(...emphasizeClause(cClause, cName, 'secondary', clearRow.person?.id))
   }
@@ -274,9 +304,8 @@ function cutlineInjuredList(story, ctx) {
   if (reason) segs.push({ text: ` (${lowerFirst(stripPeriod(reason))})` })
   if (replacement) {
     const rName = nameFor(replacement.row)
-    const rClause = stripPeriod(lowerFirstClause(
-      stripLeadingClub(replacement.row.description, [replacement.row.fromTeam?.name, replacement.row.toTeam?.name]),
-    ))
+    const rRaw = stripLeadingClub(replacement.row.description, ownClubNames(replacement.row, ctx))
+    const rClause = stripPeriod(leadsWithOwnClub(replacement.row, ctx) ? lowerFirstClause(rRaw) : rRaw)
     segs.push({ text: '; ' })
     segs.push(...emphasizeClause(rClause, rName, 'secondary', replacement.row.person?.id))
   }
@@ -317,12 +346,11 @@ function cutlineSamePlayer(story, ctx) {
   const written = new Set([leadClause])
   for (const { row } of rest) {
     const fragment = activationFragment(row)
+    const stripped = stripLeadingClub(row.description, ownClubNames(row, ctx))
+    const labeled = stripPlayerLabel(stripped, nameFor(row))
     const clause = fragment
       ? `(activated ${fragment} first)`
-      : stripPeriod(lowerFirstClause(stripPlayerLabel(
-        stripLeadingClub(row.description, [row.fromTeam?.name, row.toTeam?.name]),
-        nameFor(row),
-      )))
+      : stripPeriod(leadsWithOwnClub(row, ctx) ? lowerFirstClause(labeled) : labeled)
     if (!clause || written.has(clause)) continue
     written.add(clause)
     segs.push({ text: fragment ? ` ${clause}` : `; ${clause}` })
@@ -341,7 +369,13 @@ function cutlineShuffle(story, ctx) {
     if (i > 0) segs.push({ text: '; ' })
     const name = nameFor(r.row)
     const raw = rowClause(r.row, ctx)
-    const clause = stripPeriod(i === 0 ? upperFirst(raw) : lowerFirstClause(raw))
+    // A club-elided clause opens with a lower-case verb and needs re-casing
+    // for its position (sentence-initial vs. trailing a semicolon); one that
+    // kept its own subject (leadsWithOwnClub false) is already a complete,
+    // correctly-capitalized clause either way.
+    const clause = stripPeriod(
+      !leadsWithOwnClub(r.row, ctx) ? raw : i === 0 ? upperFirst(raw) : lowerFirstClause(raw),
+    )
     segs.push(...emphasizeClause(clause, name, r.role === 'in' ? 'primary' : 'secondary', r.row.person?.id))
   })
   segs.push({ text: '.' })
