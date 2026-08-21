@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback } from 'react'
-import { rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
+import { ordinal, rankedDimensions } from '../../../../lib/ballpark/ballparkData.js'
 import { fieldIds, resolveParkName, resolvePhoto, venueKey } from '../../../../lib/ballpark/ballparkArt.js'
 import { isClerkEnabled } from '../../../../lib/clerkConfig.js'
 import { useCopy } from '../../../../copy/copyContext.js'
@@ -22,7 +22,8 @@ import { useBallparkDraft, useFocalPick } from './useBallparkDraft.js'
 // nothing when there is no venue name at all — a lean feed row, same graceful
 // degrade every MiLB selector uses.
 //
-// `attendance` (season avg/high/low + league rank, MLB only) is the one piece
+// `attendance` (season avg/high/low/total, sellouts and three league ranks,
+// MLB only) is the one piece
 // of this card built from completed games rather than hand-authored geometry —
 // still spoiler-free (a season aggregate over Final games, same footing as
 // WAR), precomputed by the nightly gen-attendance.mjs (src/api/attendance.js).
@@ -122,6 +123,55 @@ function ParkPhoto({ name, photo, onPickFocus }) {
     >
       {img}
     </a>
+  )
+}
+
+// The attendance half of the details column: what this club draws, and where
+// each of those figures stands in the league. Two strips of three under the
+// park's own opened/roof/capacity strip.
+//
+// EVERY RANK CARRIES ITS OWN NOTE, because a bare ordinal is not a fact anyone
+// can hold — the same argument outlierNote() makes for the dimension strip.
+// "2nd" under Total says nothing; "2nd / 3,157,434" says what was ranked. The
+// three ranks disagree with each other on purpose (see attendance.js's
+// header), so each one has to show the figure it was ordered on.
+//
+// A rank the file could not compute prints an em dash through `Facts`, which
+// is the whole reason the season high/low pair above needs no null guard: a
+// club with no capacity on file (a park not in BALLPARKS) still shows its
+// crowds and simply cannot show its fill.
+function AttendanceFacts({ attendance }) {
+  const { rank, of, total, totalRank, totalOf, sellouts, selloutOf, selloutPct } = attendance
+  const { fill, fillRank, fillOf } = attendance
+  return (
+    <>
+      <dl className="bpsheet__facts">
+        <Facts
+          label="Avg attendance"
+          value={attendance.avg.toLocaleString()}
+          note={rank ? `${ordinal(rank)} of ${of}` : null}
+        />
+        <Facts label="Season high" value={attendance.high.toLocaleString()} />
+        <Facts label="Season low" value={attendance.low.toLocaleString()} />
+      </dl>
+      <dl className="bpsheet__facts">
+        <Facts
+          label="Sellouts"
+          value={sellouts == null ? '' : `${sellouts} of ${selloutOf}`}
+          note={selloutPct ? `${selloutPct}%+ full` : null}
+        />
+        <Facts
+          label="Total rank"
+          value={totalRank ? `${ordinal(totalRank)} of ${totalOf}` : ''}
+          note={total != null ? total.toLocaleString() : null}
+        />
+        <Facts
+          label="Fill rank"
+          value={fillRank ? `${ordinal(fillRank)} of ${fillOf}` : ''}
+          note={fill != null ? `${fill}% full` : null}
+        />
+      </dl>
+    </>
   )
 }
 
@@ -230,18 +280,7 @@ export function BallparkCard({ team, attendance }) {
                 <Facts label="Roof" value={park.roof} />
                 <Facts label="Capacity" value={park.capacity?.toLocaleString()} />
               </dl>
-              {attendance && (
-                <dl className="bpsheet__facts">
-                  <Facts label="Avg attendance" value={attendance.avg.toLocaleString()} />
-                  <Facts label="Season high" value={attendance.high.toLocaleString()} />
-                  <Facts label="Season low" value={attendance.low.toLocaleString()} />
-                </dl>
-              )}
-              {attendance && (
-                <p className="ballparkcard__note">
-                  Attendance rank: {attendance.rank} of {attendance.of}
-                </p>
-              )}
+              {attendance && <AttendanceFacts attendance={attendance} />}
               {note && <p className="ballparkcard__note">{note}</p>}
               <div className="bpsheet__ranks">
                 <RankGroup

@@ -445,14 +445,21 @@ for each generator; the reader modules:
   only when the club has at least one comeback win.
 - `attendance.js` — the Ballpark card's attendance stats, from
   `public/data/attendance.json` (`gen-attendance.mjs`). Per-team, per-season
-  HOME-game attendance: `games`/`avg`/`high`/`low`, computed from the
-  boxscore's `Att` figure only (an away game folds in nothing — attendance is
-  a fact about the HOME club's own park). `attendanceRatesFor(data, teamId,
-  season)` is what the card uses: the club's own `avg`/`high`/`low` plus its
-  `rank`/`of`/`tied` among every club with a row this season (by average,
-  ties sharing the best rank). `attendanceFor` selects the raw row. MLB only
-  — the generator is. Spoiler-free (a Final-games aggregate, same footing as
-  WAR) — no `SealBox`; the Facts rows render only when the club has one.
+  HOME-game attendance: `games`/`total`/`avg`/`high`/`low`, plus the
+  capacity-derived `sellouts`/`capGames`/`seats`/`seated` (an away game folds
+  in nothing — attendance is a fact about the HOME club's own park).
+  `attendanceRatesFor(data, teamId, season)` is what the card uses: the club's
+  own figures plus THREE ranks among every club with a row this season —
+  `rank`/`of`/`tied` by average, `totalRank`/`totalOf`/`totalTied` by season
+  total, and `fillRank`/`fillOf`/`fillTied` by fill rate (`seated`/`seats`,
+  one decimal, never clamped at 100 — capacity is a listed figure, not a
+  turnstile cap). Ties share the best rank; the fill pool holds only the clubs
+  whose park has a listed capacity, so its `of` can be smaller. The sellout
+  count is the one figure the GENERATOR derives (it needs the per-game gates);
+  it ships the threshold it counted at, which the reader passes through as
+  `selloutPct`. `attendanceFor` selects the raw row. MLB only — the generator
+  is. Spoiler-free (a Final-games aggregate, same footing as WAR) — no
+  `SealBox`; the Facts rows render only when the club has one.
 - `around-the-game/gate.js` — the reader behind BOTH broadcast report boards that
   `gen-gate.mjs` feeds: `/attendance` (The Gate) and `/pace-of-play` (The Clock).
   The file holds each club's own totals and nothing about the other 29;

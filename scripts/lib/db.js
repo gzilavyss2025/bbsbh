@@ -80,12 +80,6 @@ export const GROUPS = {
     file: join(dataDir, 'pitch-arsenal.sql'),
     tables: ['pitch_arsenal_totals', 'pitch_arsenal_ingested_games'],
   },
-  // Both tables are written by the one nightly gen-attendance.mjs — its own
-  // group, same as jerseys/pitch-arsenal above.
-  attendance: {
-    file: join(dataDir, 'attendance.sql'),
-    tables: ['attendance_team_totals', 'attendance_ingested_games'],
-  },
   // Both tables are written by the one nightly gen-team-records.mjs — its own
   // group, same as jerseys/pitch-arsenal above. The largest group by row count
   // (one row per club per game, at five levels — roughly 20,600 rows a

@@ -5,11 +5,18 @@ import { ordinal } from '../../lib/ballpark/ballparkData.js'
 // Shared between BallparkModal (the lineup page's full sheet) and
 // BallparkCard (the team hub's inline pairing with the diagram) so the two
 // surfaces can't drift on how a rank reads.
-export function Facts({ label, value }) {
+// `note` is the optional second line under the value — where a figure needs
+// the thing that makes it mean something (a rank's own league, the definition
+// a count was taken at, the rate a rank was ordered on). It is a caption, not
+// a value: a fact that reads fine alone leaves it off.
+export function Facts({ label, value, note }) {
   return (
     <div className="bpfact">
       <dt className="bpfact__label">{label}</dt>
-      <dd className="bpfact__value">{value || '—'}</dd>
+      <dd className="bpfact__value">
+        {value || '—'}
+        {note && <span className="bpfact__note">{note}</span>}
+      </dd>
     </div>
   )
 }

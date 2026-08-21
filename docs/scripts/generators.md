@@ -304,20 +304,24 @@ don't run these by hand.
   covering the season to date, same as `gen-pitch-arsenal.mjs` needs for a
   new level.
 - `gen-attendance.mjs` → `public/data/attendance.json` — per-team, per-season
-  HOME-game attendance: games counted, season average, high, and low gate. An
-  away game folds in nothing — attendance is a fact about the HOME club's own
-  park. Source is the lightweight `/api/v1/game/{gamePk}/boxscore` endpoint's
-  existing `info[]` array (`Att`, comma-grouped with a trailing period, e.g.
-  `"15,952."`) rather than the full live feed — far cheaper per game than
-  `gen-fouls.mjs`/`gen-comeback-wins.mjs`, since no play-by-play is needed.
-  SQLite-backed (`attendance` group, ADR-0021) APPEND-ONLY incremental sweep of
-  Final MLB regular-season games like `gen-comeback-wins.mjs` (`--days`
-  trailing window / `--since`/`--until` backfill); `attendance_ingested_games`
-  is the idempotency guard — a game with no parseable `Att` is still marked
-  (a Final game's attendance never changes, so it isn't worth retrying
-  forever). MLB only — a league rank needs the whole 30-team pool. App reads
-  it via `src/api/attendance.js` (the Ballpark card's avg/high/low + league
-  rank).
+  HOME-game attendance: games counted, season total, average, high, low, and a
+  SELLOUT count. An away game folds in nothing — attendance is a fact about the
+  HOME club's own park. Stateless: it reads the gate off the SCHEDULE
+  endpoint's `hydrate=gameInfo` (the same feed `gen-gate.mjs` sweeps, and the
+  same `toRow` reducer), so a whole season is about a dozen requests and it
+  rebuilds from scratch every night. It used to fetch one boxscore per game
+  (~1,900 requests) behind a SQLite ingested-games table; that sweep, its two
+  tables and its committed dump are gone, and the two sources were verified to
+  agree club for club before it went. `--season=`/`--seasons=` for a past year.
+  A SELLOUT is a date whose crowd reached `SELLOUT_FILL` (95%) of the LISTED
+  capacity of the park it was played in (`src/lib/ballpark/ballparkData.js`) —
+  the one figure this generator derives rather than reports, because it needs
+  the per-game gates that never leave the script; the threshold ships in the
+  file so the card can label the count. A date at a park with no listed
+  capacity counts toward the total and toward no sellout. MLB only — a league
+  rank needs the whole 30-team pool. App reads it via `src/api/attendance.js`
+  (the Ballpark card's figures plus its rank by average, by season total and
+  by fill rate).
 - `gen-doubleheaders.mjs` → `public/data/doubleheaders.json` — every completed
   MLB regular-season DOUBLEHEADER from 2004 to now, the file behind
   `/doubleheaders`. One row per PAIR — `[date, teamA, teamB,
@@ -336,12 +340,12 @@ don't run these by hand.
 - `gen-gate.mjs` → `public/data/gate.json` — per-club attendance AND game
   DURATION, the two facts behind `/attendance` (The Gate) and `/pace-of-play`
   (The Clock). Deliberately NOT an extension of `gen-attendance.mjs`, which owns the
-  Ballpark card's own file: this one reads the same figures off the SCHEDULE
-  endpoint's `hydrate=gameInfo` (`{ attendance, firstPitch,
-  gameDurationMinutes, delayDurationMinutes }`), which is roughly a dozen
-  requests for a whole season instead of one boxscore per game — so it needs no
-  SQLite, no ingested-games table and no incremental window, and rebuilds from
-  scratch every night. TWO DENOMINATORS on purpose: attendance is counted for
+  Ballpark card's own much smaller file: both now read the SCHEDULE endpoint's
+  `hydrate=gameInfo` (`{ attendance, firstPitch, gameDurationMinutes,
+  delayDurationMinutes }`), roughly a dozen requests for a whole season, so
+  neither needs SQLite, an ingested-games table or an incremental window, and
+  both rebuild from scratch every night. This one owns the shared row reducer
+  (`toRow`). TWO DENOMINATORS on purpose: attendance is counted for
   the HOME club only (a gate is a fact about that club's park), game length for
   BOTH clubs (it is made by the two rosters on the field, not by the park).
   Ships per-club aggregates only — month splits, day/night, weekend/weekday,
