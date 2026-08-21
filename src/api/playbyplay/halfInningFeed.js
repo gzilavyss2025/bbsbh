@@ -31,6 +31,11 @@ import { sentenceCaseEventText, runnerLastName, delayNoteFields } from './notifi
 import { uncoveredRunnerNotes } from './runnerNotes.js'
 import { pitchCardInfo, matchupPitcher } from './pitchInfo.js'
 import { scorebookCode } from './scorebookCode.js'
+// The play's own batted ball, projected into the ballpark drawing's space.
+// Reached directly rather than through the barrel for the same reason
+// scorebookCode is: the at-bat card's diamond opens the flight card, and the
+// dot the hit chart plots for that same play has to sit on the same spot.
+import { selectPlayBattedBall } from '../hitchart.js'
 import {
   interruptedCode,
   legAdvanceCode,
@@ -58,6 +63,10 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
   const plays = (feed?.liveData?.plays?.allPlays ?? []).filter(
     (p) => p?.about?.inning === inningNum && p?.about?.halfInning === half,
   )
+  // The park these balls were hit in, carried onto each at-bat card's batted
+  // ball below. Identity, not a result — it is on the masthead of every page
+  // this feed renders under.
+  const venueName = feed?.gameData?.venue?.name ?? ''
 
   // Each batting-side player's own fielding position as of entering THIS
   // half (see resolveBatter's doc) — a player on this side can only gain a
@@ -444,6 +453,7 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
       )
       const { pitchEvents, pitches, pitchDetails } = pitchCardInfo(feed, play)
       const pitcher = matchupPitcher(feed, play)
+      const battedBall = selectPlayBattedBall(play)
 
       // A baserunning event nested in THIS play's own events (a steal, wild
       // pitch, passed ball…) happened DURING this plate appearance, before its
@@ -502,6 +512,13 @@ export function computeHalfInningFeed(feed, inningNum, half, battingSide, stepCa
         ),
         // Scorebook denotation drawn above the diamond (1B, F8, 6-3…).
         ...scorebookCode(play, batterRunner),
+        // Where this ball in play came down, or null for a plate appearance
+        // that never put one there (a strikeout, a walk) and for a park that
+        // tracked no coordinates. The diamond on the card opens it as a flight
+        // over the field; `venue` rides along because the drawing is a
+        // PARTICULAR park's, and the card that reads this is handed the ball
+        // and nothing else.
+        battedBall: battedBall && { ...battedBall, venue: venueName },
         // Prose for any baserunning event (a steal, a caught stealing, a wild
         // pitch…) that occurred during this plate appearance.
         baserunningNotes,

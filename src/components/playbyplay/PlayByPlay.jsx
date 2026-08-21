@@ -26,6 +26,7 @@ import { buildCallouts, computeCalloutProgress } from '../../api/callout-notes.j
 import { INK_SET_MS, INK_SET_OVERSHOOT } from '../inning/focus/beats.js'
 import { useDenotationBeat } from '../inning/focus/useDenotationBeat.js'
 import { PlayDiamond } from '../scoring/PlayDiamond.jsx'
+import { BallFlight } from '../charts/BallFlight.jsx'
 import { PitchLadder } from '../scoring/PitchLadder.jsx'
 import { CalloutNote } from './CalloutNote.jsx'
 import { PitcherNotice, PitcherPhoto } from './PitcherNotice.jsx'
@@ -503,7 +504,7 @@ export function PlayByPlay({ feed, inning, half, battingSide, pitchingName, pitc
 const INK_SET_STYLE = { '--ink-set': `${INK_SET_MS}ms`, '--ink-overshoot': INK_SET_OVERSHOOT }
 
 function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight, windowed = false, beatKey = null }) {
-  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, live } = entry
+  const { batter, pitcher, pitches, pitchDetails, batSide, rbi, code, calledLooking, codeKind, outNumber, outAt, outCode, descSegments, reached, scored, earned, legNotations, pinchRunners, baserunningNotes, battedBall, live } = entry
   const [zoneOpen, setZoneOpen] = useState(false)
   const [highlightOpen, setHighlightOpen] = useState(false)
   // THE BEAT (ADR-0046), windowed cards only: the denotation cells below hold
@@ -668,6 +669,11 @@ function AtBatCard({ entry, battingTeamId, pitchingTeamId, calloutCtx, highlight
                 {outNumber}
               </span>
             )}
+            {/* A ball that was actually put in play makes the diamond a
+                handle: where it went, over this park, with the exit velocity
+                and launch angle under it. Last child so its target lies over
+                every mark in the cell. */}
+            <BallFlight ball={battedBall} batter={batter} code={code} />
           </div>
         </div>
       </div>

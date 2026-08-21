@@ -11,9 +11,16 @@
 // scorekeeper. Classified `reveal-only` in spoiler-manifest.json, which also
 // carries the importer allowlist.
 //
+// Two selectors over one projection: `selectBattedBalls` walks a whole game for
+// the chart, and `selectPlayBattedBall` answers for ONE play, which is what the
+// play-by-play diamond's flight card draws. Both are reveal-only, and sharing
+// the projection is the point — the same play's dot and its own flight are the
+// same picture at two scales and may never disagree about where the ball came
+// down.
+//
 // `hitCoordToSvg` and the three constants are pure geometry — they read no
 // feed and reveal nothing on their own — but they live here rather than in
-// lib/ so the projection and the selector that feeds it stay in one file.
+// lib/ so the projection and the selectors that feed it stay in one file.
 //
 // MiLB DEGRADES, IT DOESN'T CRASH. Most minor-league parks send no `hitData`
 // at all (docs/data-enrichment.md's MiLB table), so `selectBattedBalls` simply
@@ -159,4 +166,52 @@ export function selectBattedBalls(feed, { teamId = null, throughHalfIndex = null
     }
   }
   return out
+}
+
+// REVEAL-ONLY, same footing as the walk above (it reads a play's own result).
+// ONE play's batted ball, for the ball-flight card the play-by-play diamond
+// opens — the same projection and the same fields `selectBattedBalls` gives a
+// dot, plus the two result flags the card inks the landing mark with.
+//
+// THE LAST TRACKED EVENT ON THE PLAY, not the first. A plate appearance can
+// carry more than one `hitData` block — a park that tracks a foul ball records
+// it the same way it records the ball that ended the at-bat — and it is the
+// TERMINAL one that the play's result describes. Across gamePk 823427's 62
+// batted balls no play carried two, so this is a guard against a park that
+// reports more rather than an observed case; taking the last one is right
+// either way, since the feed lists a play's events in the order they happened.
+//
+// Returns null for a play that never put a ball in play (a strikeout, a walk)
+// and for one at a park that tracked no coordinates — a MiLB game, where the
+// card simply never offers itself.
+export function selectPlayBattedBall(play) {
+  const events = play?.playEvents ?? []
+  for (let i = events.length - 1; i >= 0; i--) {
+    const hitData = events[i]?.hitData
+    const point = hitCoordToSvg(
+      hitData?.coordinates?.coordX ?? null,
+      hitData?.coordinates?.coordY ?? null,
+    )
+    if (!point) continue
+    const eventType = play?.result?.eventType ?? null
+    return {
+      hit: HIT_EVENT_TYPES.has(eventType),
+      homeRun: eventType === HOME_RUN_EVENT_TYPE,
+      // The feed's own short phrase for what the play WAS — "Single",
+      // "Groundout", "Grounded Into DP", "Sac Fly" (`result.event`, verified
+      // against gamePk 823427's fourteen distinct values). The card leads with
+      // it because a scorebook denotation is a shorthand you have to already
+      // read: "1B" means nothing to someone who has not kept score, and the
+      // whole point of this card is that it can be pointed at and understood.
+      // The denotation still rides beside it, for the reader who does.
+      result: play?.result?.event ?? '',
+      exitVelo: hitData?.launchSpeed ?? null,
+      launchAngle: hitData?.launchAngle ?? null,
+      distance: hitData?.totalDistance ?? null,
+      trajectory: hitData?.trajectory ?? null,
+      x: point.x,
+      y: point.y,
+    }
+  }
+  return null
 }

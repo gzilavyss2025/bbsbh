@@ -2,7 +2,7 @@ import { useId, useMemo, useState } from 'react'
 import { BallparkDiagram } from '../ballpark/BallparkDiagram.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 import { ballparkFor } from '../../lib/ballpark/ballparkData.js'
-import { VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
+import { VIEWBOX, PLOT_SKY_CROP, PLOT_VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 
 // The Hit chart: every ball put in play, plotted where it was fielded on the
 // park's own field drawing. Purely presentational — it fetches nothing, derives
@@ -17,15 +17,10 @@ import { VIEWBOX } from '../../lib/ballpark/ballparkGeometry.js'
 //   'half' — one half inning: no club to choose, dots numbered against a list
 //            of that half's batters underneath.
 
-// Only the drawing's dead sky is cropped away; the fixed 620x560 viewBox is the
-// coordinate space `balls` x/y already live in, so the crop is a WINDOW onto it
-// and never a rescale. This number is the ONE place the crop is stated: it sets
-// both the viewBox handed to the diagram and the percentages the half's dot
-// numbers are positioned by, which would otherwise drift apart. Set it to 0 if
-// the diagram ever goes back to drawing its full frame.
-const SKY_CROP = 50
-const PLOT_H = VIEWBOX.h - SKY_CROP
-const CROPPED_VIEWBOX = `0 ${SKY_CROP} ${VIEWBOX.w} ${PLOT_H}`
+// The crop and the box it leaves are ballparkGeometry.js's now — the flight
+// card the play-by-play diamond opens plots onto the same window, and a second
+// spelling of the number would slide one card's marks against the other's.
+const PLOT_H = VIEWBOX.h - PLOT_SKY_CROP
 
 // The half's dot numbers ride beside their dot rather than on it — to its
 // right normally, and to its LEFT once the dot is far enough over that the
@@ -39,7 +34,10 @@ const RIGHT_EDGE = VIEWBOX.w * 0.78
 // it down. It is repeated here rather than imported because that module is
 // reveal-only: importing it for one number would put a spoiler-bearing module
 // in this file's graph at render top-level, which ADR-0001 forbids outright.
-const DEFAULT_HARD_HIT_MPH = 95
+// Exported for the flight card (./BallFlight.jsx), which rings a hard-hit ball
+// the same way this chart does — a THIRD spelling of the number is what the
+// export exists to prevent.
+export const DEFAULT_HARD_HIT_MPH = 95
 
 const DASH = '—'
 
@@ -214,7 +212,7 @@ export function HitChart({
             dist={park.dist}
             wall={park.wall}
             arc={park.arc}
-            viewBox={CROPPED_VIEWBOX}
+            viewBox={PLOT_VIEWBOX}
             label={fieldLabel}
           >
             <defs>
@@ -306,7 +304,7 @@ export function HitChart({
                   className={`hitchart__dotnum${flip ? ' hitchart__dotnum--flip' : ''}`}
                   style={{
                     left: `${((x / VIEWBOX.w) * 100).toFixed(2)}%`,
-                    top: `${(((ball.y - SKY_CROP) / PLOT_H) * 100).toFixed(2)}%`,
+                    top: `${(((ball.y - PLOT_SKY_CROP) / PLOT_H) * 100).toFixed(2)}%`,
                   }}
                 >
                   {i + 1}

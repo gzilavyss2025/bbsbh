@@ -18,6 +18,16 @@
 
 export const VIEWBOX = { w: 620, h: 560 }
 export const HOME = { x: 310, y: 505 }
+
+// THE PLOT WINDOW. Every card that uses this drawing as a GROUND to mark balls
+// on — the hit chart, the flight card the play-by-play diamond opens — crops
+// the dead sky off the top so the field fills the card. It is a WINDOW onto the
+// fixed viewBox above and never a rescale, so a mark's coordinates mean the same
+// thing cropped or not. Stated once, here, because two consumers positioning
+// HTML over the SVG in percentages of this box would otherwise drift apart. Set
+// the crop to 0 to go back to the full frame.
+export const PLOT_SKY_CROP = 50
+export const PLOT_VIEWBOX = `0 ${PLOT_SKY_CROP} ${VIEWBOX.w} ${VIEWBOX.h - PLOT_SKY_CROP}`
 const ANGLE = { lf: -45, lc: -22.5, cf: 0, rc: 22.5, rf: 45 }
 const TRACK_FT = 14 // warning-track width, feet
 const FOUL_FT = 26 // stylized foul-ground margin beyond the wall/lines

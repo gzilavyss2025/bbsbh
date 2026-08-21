@@ -112,6 +112,7 @@ const BUDGETS = {
   // caps-exempt method-note prose, whose `#root` prefix is the whole reason
   // it works. Both notes prevented a real regression. Trimming them to hit a
   // line count would be deleting the reason the rules are correct.
+  'src/styles/69-hit-chart.css': 900, // 811 — the ball-flight card, the chart's per-play sibling: same marks, same heat ring, same drawing, so one partial rather than two that can drift
   'src/styles/68-around-the-game.css': 1000, // 642 -> 954: the doubleheader report's year slider (.yrange, two stacked native range inputs), its board cells and its year drawer. The sixth partial this would otherwise be cannot exist: src/styles is AT its directory budget (check-dir-size.mjs), which is the reason this package keeps one sheet for all five of its pages in the first place.
   // The directory-budget table itself. Every entry in it carries an inline
   // rationale BY DESIGN — that is the whole convention, and it means the file
@@ -203,7 +204,7 @@ const BUDGETS = {
   // five were the part of this file with no reveal reasoning in them at all,
   // which is what made them the right thing to lift out; the markup, classes
   // and comments moved verbatim.
-  'src/components/playbyplay/PlayByPlay.jsx': 700, // 607
+  'src/components/playbyplay/PlayByPlay.jsx': 800, // 705 — the at-bat card's third opener: a ball in play makes the base diamond a handle on where it went (components/charts/BallFlight.jsx)
   'src/api/loadPlayer.js': 800, // 722 — +1 band: fetching prospect-trend and assembling the Prospect Card's view model
   'src/api/tradeDeadline.js': 700, // 629
   'src/components/charts/WinProbChart.jsx': 700, // 612

@@ -276,6 +276,18 @@ Siblings: `docs/api/static-data.md` (the precomputed `public/data/*.json` reader
   selectors, because a batted ball is the result rather than the staging for one
   (ADR-0051). A park that sends no `hitData` yields an empty array and the card
   renders nothing.
+  `selectPlayBattedBall(play)` is the same answer for ONE play, for the ball
+  flight the play-by-play diamond opens (`components/charts/BallFlight.jsx`):
+  the same projection and the same Statcast fields, plus the two result flags
+  the landing mark is inked with. It needs no clamp of its own — its caller,
+  `playbyplay/halfInningFeed.js`, only ever runs inside its own half's SealBox
+  reveal. It reads the LAST tracked ball on the play, since a park that records
+  a foul ball's `hitData` too would otherwise draw the wrong one; the terminal
+  ball is what the play's result describes. Null for a plate appearance that
+  put no ball in play, and null again at a park with no coordinates — the
+  diamond then simply offers no handle. The path itself is pure geometry a tier
+  down in `src/lib/ballpark/ballFlight.js`, whose bow depth is the ball's own
+  apex height in feet (`test/ball-flight.test.js`).
   Constants shared across the reveal-only modules (`NON_PA_EVENT_TYPES`,
   `WHIFF_CODES`, `pitchCallCode`) live in `playbyplay.js`: baserunning-only
   top-level plays are NOT plate appearances for PA/BF counts, but their pitches

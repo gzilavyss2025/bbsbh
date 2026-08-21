@@ -291,10 +291,11 @@
     },
     "hitchart.js": {
       "class": "reveal-only",
-      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed, but ships in this file so the geometry and its one consumer cannot drift. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051).",
+      "why": "The hit chart's batted balls. A dot IS a play outcome — one in the left-field seats is a home run, a cluster on the grass is a rally — so selectBattedBalls runs only inside a SealBox reveal or behind an explicit reveal gate. Its `throughHalfIndex` option is the clamp an inning page passes its own revealedThrough into, so the chart can never run ahead of the scorekeeper. The projection half (hitCoordToSvg and the three constants) reads no feed, but ships in this file so the geometry and its one consumer cannot drift. Both call sites are gated, each in the way its own page already gates everything else: the box score's is inside the single seal that page already lifts over the whole game (ADR-0049), and the inning page's passes its render-time revealedThrough as the clamp, so it can only ever draw halves the reader has committed (ADR-0051). The third importer takes ONE play's ball rather than a walk of the game (selectPlayBattedBall, for the flight card the play-by-play diamond opens) and needs no clamp of its own: computeHalfInningFeed already runs only inside its own half's SealBox reveal, and a ball from that half is the very result the reveal just handed over.",
       "importers": [
         "screens/boxscore/revealBoxScore.js",
-        "components/inning/HalfInning.jsx"
+        "components/inning/HalfInning.jsx",
+        "api/playbyplay/halfInningFeed.js"
       ]
     },
     "hitterForm.js": {
