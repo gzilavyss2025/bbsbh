@@ -235,3 +235,105 @@ test('a day sorts its clubs by what happened, not by club id', () => {
     [145, 'trade'],
   ])
 })
+
+// ---------------------------------------------------------------------------
+// MiLB-level ownership (#847) — a level's own thirty clubs never include the
+// MLB parent, so a call-up/option row crossing that boundary can now be OWNED
+// by the affiliate while its raw sentence is still authored from the parent's
+// side. Verbatim shape from the Angels' (108) real 2026-08-07 feed: Salt Lake
+// Bees (AAA) lost George Klassen to a recall and gained Mitch Farris on an
+// option, the same day the Angels claimed Ryan Watson off waivers from Boston
+// — a row that touches neither club in the Angels' own AAA affiliate's level.
+// ---------------------------------------------------------------------------
+
+const ANGELS = { id: 108, name: 'Los Angeles Angels' }
+const RED_SOX = { id: 111, name: 'Boston Red Sox' }
+const SALT_LAKE_BEES = { id: 460, name: 'Salt Lake Bees' }
+
+// The MLB-level scope for this fixture set — a separate ctx from the file's
+// own `ctx` above, which doesn't carry the Angels/Red Sox/Bees ids at all.
+const angelsCtx = {
+  mlbTeamIds: [ANGELS.id, RED_SOX.id],
+  affilToOrg: new Map([[SALT_LAKE_BEES.id, ANGELS.id]]),
+  positions: {},
+}
+// A level's own scope has no `affilToOrg` at all (leagueFeed.js's `scopeFor`
+// omits it for a MiLB sportId) — its own thirty clubs are already the top of
+// the set `assignRowOwners` walks, so there is nothing to fold up further.
+const aaaCtx = { mlbTeamIds: [SALT_LAKE_BEES.id, 411, 412], positions: {} }
+
+const AUG7_KLASSEN_CU = {
+  id: 936045, typeCode: 'CU', date: '2026-08-07', effectiveDate: '2026-08-07',
+  person: { id: 992001, fullName: 'George Klassen' }, fromTeam: SALT_LAKE_BEES, toTeam: ANGELS,
+  description: 'Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.',
+}
+const AUG7_WATSON_CLW = {
+  id: 936046, typeCode: 'CLW', date: '2026-08-07', effectiveDate: '2026-08-07',
+  person: { id: 992002, fullName: 'Ryan Watson' }, fromTeam: RED_SOX, toTeam: ANGELS,
+  description: 'Los Angeles Angels claimed RHP Ryan Watson off waivers from Boston Red Sox.',
+}
+const AUG7_FARRIS_OPT = {
+  id: 936047, typeCode: 'OPT', date: '2026-08-07', effectiveDate: '2026-08-07',
+  person: { id: 992003, fullName: 'Mitch Farris' }, fromTeam: ANGELS, toTeam: SALT_LAKE_BEES,
+  description: 'Los Angeles Angels optioned LHP Mitch Farris to Salt Lake Bees.',
+}
+const AUG7_ROWS = [AUG7_KLASSEN_CU, AUG7_WATSON_CLW, AUG7_FARRIS_OPT]
+
+test('at the MLB level this day still reads exactly as the live club page does — no regression', () => {
+  const { stories } = groupLeagueWide(AUG7_ROWS, angelsCtx)[0]
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].teamId, ANGELS.id)
+  assert.equal(
+    textOf(stories[0]),
+    'Recalled RHP George Klassen from Salt Lake Bees; claimed RHP Ryan Watson off waivers'
+      + ' from Boston Red Sox; optioned LHP Mitch Farris to Salt Lake Bees.',
+  )
+})
+
+test('at the AAA level the same day is owned by Salt Lake Bees, and names the Angels in full', () => {
+  const days = groupLeagueWide(AUG7_ROWS, aaaCtx)
+  assert.equal(days.length, 1)
+  const { stories } = days[0]
+  // The waiver claim touches neither club in this level's own 30-club set, so
+  // it tells no story here — only the two rows that actually touch the Bees.
+  assert.equal(stories.length, 1)
+  assert.equal(stories[0].teamId, SALT_LAKE_BEES.id)
+  assert.equal(stories[0].type, 'shuffle')
+  // `role` also drives the rail banner (Up/Down) — before the direction fix,
+  // CU/OPT read their arrival/departure off the typeCode ALONE (unconditional
+  // "CU is always 'in'"), which is only right when `orgId` is the ACTIVE-
+  // roster side. Owned by the Bees instead, that read Farris (optioned TO
+  // them, a real gain) as 'out'/Down and Klassen (recalled AWAY from them, a
+  // real loss) as 'in'/Up — exactly backwards.
+  assert.deepEqual(stories[0].rail.map((r) => [r.role, r.banner, r.surname]), [
+    ['in', 'Up', 'Farris'],
+    ['out', 'Down', 'Klassen'],
+  ])
+  // Before the fix this read "Optioned LHP Mitch Farris to Salt Lake Bees;
+  // recalled RHP George Klassen from Salt Lake Bees." — the Angels, the only
+  // club actually doing anything, named nowhere, and Salt Lake Bees left
+  // looking like the story's own actor despite losing a player in it.
+  assert.equal(
+    textOf(stories[0]),
+    'Los Angeles Angels optioned LHP Mitch Farris to Salt Lake Bees;'
+      + ' Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.',
+  )
+})
+
+test('a lone up-then-down: each half of a yo-yo call-up still names the Angels on its own', () => {
+  // Two independent days rather than one — the ordinary shape of a short
+  // MLB stint, not a same-day round trip.
+  const upDay = groupLeagueWide([AUG7_KLASSEN_CU], aaaCtx)[0]
+  assert.equal(upDay.stories[0].teamId, SALT_LAKE_BEES.id)
+  assert.equal(textOf(upDay.stories[0]), 'Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.')
+
+  const downRow = {
+    ...AUG7_KLASSEN_CU,
+    id: 936200, typeCode: 'OPT', date: '2026-08-12', effectiveDate: '2026-08-12',
+    fromTeam: ANGELS, toTeam: SALT_LAKE_BEES,
+    description: 'Los Angeles Angels optioned RHP George Klassen to Salt Lake Bees.',
+  }
+  const downDay = groupLeagueWide([downRow], aaaCtx)[0]
+  assert.equal(downDay.stories[0].teamId, SALT_LAKE_BEES.id)
+  assert.equal(textOf(downDay.stories[0]), 'Los Angeles Angels optioned RHP George Klassen to Salt Lake Bees.')
+})

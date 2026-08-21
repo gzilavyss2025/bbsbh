@@ -144,12 +144,28 @@ const OUT_CODES = new Set(['OPT', 'DES', 'OUT', 'REL', 'URL', 'WA', 'RET', 'DFA'
 // announced Drew Rom "claimed off waivers" over an "Up" banner, the day the
 // Athletics claimed him AWAY from them.
 const TWO_CLUB_CODES = new Set(['TR', 'CLW'])
+// CU/SE (onto the active roster) and OPT/OUT (off it) also name a real
+// affiliate on their OTHER side (docs/transactions-wire.md §3: "a player
+// moving between two clubs"), unlike a signing or a release, which touch only
+// the club acting. Reading direction off the code alone (`IN_CODES`/
+// `OUT_CODES` below) was equivalent to asking which side `orgId` was on only
+// because `orgId` was always the ACTIVE-roster side — every story-owning club
+// was an MLB club. The MiLB-level wire (#847) can now own the SAME row from
+// the affiliate's side, where the two answers diverge: a recalled player is
+// 'in' by code alone even on the affiliate's own story, where he is the one
+// being LOST — the same shape of bug CLW's own header describes above, found
+// a second way.
+const AFFILIATE_SWAPPABLE_CODES = new Set(['CU', 'SE', 'OPT', 'OUT'])
 function rowDirection(t, orgId) {
   const code = t.typeCode
   if (TWO_CLUB_CODES.has(code)) {
     if (orgId != null && t.toTeam?.id === orgId) return 'in'
     if (orgId != null && t.fromTeam?.id === orgId) return 'out'
     return null
+  }
+  if (AFFILIATE_SWAPPABLE_CODES.has(code) && orgId != null) {
+    if (t.toTeam?.id === orgId) return 'in'
+    if (t.fromTeam?.id === orgId) return 'out'
   }
   if (IN_CODES.has(code)) return 'in'
   if (OUT_CODES.has(code)) return 'out'

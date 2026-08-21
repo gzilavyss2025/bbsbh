@@ -865,6 +865,77 @@ test('buildCutline: a real injury reason still survives the same club name', () 
   )
 })
 
+// A recall/option's raw sentence is always authored from the MLB parent's
+// side (docs/transactions-wire.md), which is also who owns the story on that
+// parent's own page — so eliding "whichever club leads" used to always agree
+// with `ctx.orgId`. The MiLB-level wire (#847) can own the SAME row from the
+// affiliate's side instead, where the leading club is no longer implied by
+// context at all.
+const SALT_LAKE_BEES = { id: 460, name: 'Salt Lake Bees' }
+const LA_ANGELS = { id: 108, name: 'Los Angeles Angels' }
+const KLASSEN_CU_ROW = {
+  id: 936045,
+  person: { id: 992001, fullName: 'George Klassen' },
+  fromTeam: SALT_LAKE_BEES, toTeam: LA_ANGELS,
+  date: '2026-08-07', effectiveDate: '2026-08-07', typeCode: 'CU',
+  description: 'Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.',
+}
+const FARRIS_OPT_ROW = {
+  id: 936047,
+  person: { id: 992003, fullName: 'Mitch Farris' },
+  fromTeam: LA_ANGELS, toTeam: SALT_LAKE_BEES,
+  date: '2026-08-07', effectiveDate: '2026-08-07', typeCode: 'OPT',
+  description: 'Los Angeles Angels optioned LHP Mitch Farris to Salt Lake Bees.',
+}
+
+test('buildCutline: a recall owned by the parent still elides the parent — no regression', () => {
+  const segs = buildCutline(
+    { storyType: 'roster-move', rows: [{ row: KLASSEN_CU_ROW, role: 'in' }] },
+    { orgId: LA_ANGELS.id },
+  )
+  assert.equal(segs.map((s) => s.text).join(''), 'Recalled RHP George Klassen from Salt Lake Bees.')
+})
+
+test('buildCutline: the SAME recall owned by the affiliate names the parent in full', () => {
+  const segs = buildCutline(
+    { storyType: 'roster-move', rows: [{ row: KLASSEN_CU_ROW, role: 'out' }] },
+    { orgId: SALT_LAKE_BEES.id },
+  )
+  assert.equal(
+    segs.map((s) => s.text).join(''),
+    'Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.',
+  )
+})
+
+test('buildCutline: an option owned by the affiliate names the parent in full, sent DOWN a level', () => {
+  const segs = buildCutline(
+    { storyType: 'roster-move', rows: [{ row: FARRIS_OPT_ROW, role: 'in' }] },
+    { orgId: SALT_LAKE_BEES.id },
+  )
+  assert.equal(
+    segs.map((s) => s.text).join(''),
+    'Los Angeles Angels optioned LHP Mitch Farris to Salt Lake Bees.',
+  )
+})
+
+test('buildCutline: a same-day up-then-down shuffle owned by the affiliate names the parent on both clauses', () => {
+  const segs = buildCutline(
+    {
+      storyType: 'shuffle',
+      rows: [
+        { row: FARRIS_OPT_ROW, role: 'in' },
+        { row: KLASSEN_CU_ROW, role: 'out' },
+      ],
+    },
+    { orgId: SALT_LAKE_BEES.id },
+  )
+  assert.equal(
+    segs.map((s) => s.text).join(''),
+    'Los Angeles Angels optioned LHP Mitch Farris to Salt Lake Bees;'
+      + ' Los Angeles Angels recalled RHP George Klassen from Salt Lake Bees.',
+  )
+})
+
 // ---------------------------------------------------------------------------
 // §5 Reader — per-club, per-season pagination over a mocked fetch
 // ---------------------------------------------------------------------------
