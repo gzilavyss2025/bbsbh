@@ -115,9 +115,70 @@
     font-size: var(--fs-caption);
   }
 
+  /* ---- the slate's two columns: the games, and the league's roster wire
+     beside them (WireRail.jsx). The wire used to stand ABOVE this grid and, at
+     1440 x 900, took 658px of a 900px window — every game card started below
+     the fold. It takes horizontal space now instead, which costs the games
+     nothing, and it takes it out of margin the 960px shell was already
+     wasting inside a 1440px window.
+
+     Three numbers decide the whole layout, and they are related, so change
+     them together: the rail is 288 wide, the gutter is 24, and the shell's cap
+     below is 928 + 24 + 288. 928 is what the games column measures inside the
+     unwidened 960px shell — so the game grid keeps EXACTLY the size and
+     column count it has today, and the rail is added beside it rather than
+     taken out of it. */
+  .slatebody {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  /* min-width: 0 or a long cutline in the rail sets this column's floor and
+     the grid stops shrinking — the standard flex-item overflow trap. */
+  .slatebody__main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Only the slate widens, and only when a rail is actually there to fill it
+     (GameSelect adds the class; WireRail reports the quiet-48-hours case back
+     so it comes off again). `.screen`'s own 960px cap is global — every other
+     page in the app reads at that measure and must keep it. */
+  .screen--slate.screen--wirerail {
+    max-width: 1272px;
+  }
+
+  .wirerail {
+    flex: 0 0 auto;
+    width: 288px;
+    /* .gamelist's own top margin (06-loader-and-cards.css), restated so the
+       rail's head starts level with the first card's top edge instead of 14px
+       above it. The two move together — change one, change the other. */
+    margin-top: 14px;
+    /* Sticky, so the 48 hours stay beside the reader for the whole scroll —
+       which is the rail earning its width rather than just occupying it. Held
+       clear of the pinned .topbar--slate (48px) above it. */
+    position: sticky;
+    top: 56px;
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+    /* A busy day (a measured month's worst held 125 stories) scrolls in here;
+       `contain` keeps that scroll from chaining into the slate behind it once
+       the rail bottoms out. */
+    overscroll-behavior: contain;
+  }
+
+  /* auto-fit, not a fixed 2: the games column is 928 with a rail beside it and
+     the full width without one, and it narrows as the window does. Asking for
+     "as many cards as fit, none under 360" lets the grid drop to a single
+     column on its own once the rail leaves too little for two — no second
+     breakpoint, and it gives way continuously as the window is dragged rather
+     than snapping at a number someone picked. At 928 this resolves to exactly
+     the 2 columns of 458 the fixed rule produced, so the wide slate is
+     unchanged wherever there is room for it. */
   .gamelist {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 12px;
   }
 

@@ -1,6 +1,15 @@
 # ADR-0061 — The wire docks to the thumb on a phone, and the games keep the top
 
-Status: accepted (2026-08-20)
+Status: accepted (2026-08-20) — **superseded in part by [ADR-0062](0062-the-wire-runs-beside-the-games-not-above-them.md)**
+
+> The phone half of this decision stands exactly as written: the wire docks
+> to the thumb and the games keep the top. What ADR-0062 revisits is the
+> claim below that the in-flow card is "correct" on a tablet or a desktop.
+> Measured, it was not — at 1440x900 it ran 658px of a 900px window and put
+> every game card below the fold, which is this ADR's own complaint at a
+> different width. The wide surface is now a rail beside the games
+> (`WireRail.jsx`); `LeagueMovesCard` and its fitted-row spec are gone.
+> Read the Context below as the reasoning of its day.
 
 ## Context
 
@@ -128,6 +137,7 @@ be broken, not calmer.
 asserted `.wirecard` at 390px, where the dock now renders instead. The two
 "must not appear" cases stayed narrow and gained a matching assertion for the
 dock, so neither presentation can leak onto a past day or a Triple-A slate.
+(That spec is `e2e/wire-rail.spec.js` now, and asserts the rail — ADR-0062.)
 
 **The dock is deliberately still a LEDGER and not a card deck.** The obvious
 bottom-anchored idiom is a horizontally swiped deck, and it was rejected for the

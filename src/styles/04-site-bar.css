@@ -385,23 +385,26 @@
 }
 
 /* ----------------------------------------------------- around the league
-   The slate's roster-move card (components/transactions/LeagueMovesCard.jsx,
-   issue #772): every club's moves from the last 48 hours, read live off the
-   wire. A vertical WIRE LEDGER, not the team page's horizontal deck of paper
-   story cards: a real 48 hours holds about 35 stories across 20 clubs and the
-   worst of a measured month held 125 — the wrong shape for a swipe on the
+   The league's roster moves from the last 48 hours, read live off the wire
+   (issue #772). A vertical WIRE LEDGER, not the team page's horizontal deck of
+   paper story cards: a real 48 hours holds about 35 stories across 20 clubs and
+   the worst of a measured month held 125 — the wrong shape for a swipe on the
    page the reader came to for games.
+
+   THIS BLOCK IS THE LEDGER'S APPEARANCE ONLY — a row, a dateline, a cutline —
+   and every surface shares it: the wide rail (WireRail.jsx), the phone's dock
+   (WireDock.jsx, 04a beside this file). Where the rail SITS is a wide-layout
+   question and lives in 25-wide-layout.css with .slatebody and .gamelist, which
+   are the rules it trades width with.
+
    It lives here beside .continuebar rather than in a partial of its own:
    src/styles is at its own directory ratchet (check-dir-size) and
    29-team-transactions.css is at its file budget (check-file-size), so the
-   honest home is the partial that already owns the slate's above-the-list
-   chrome. The .banner and .plink rules it leans on come from
-   29-team-transactions.css and 01-base.css and are deliberately not restated;
-   the two scoped overrides below win on specificity, not on order. */
-.wirecard {
-  margin: var(--space-3) var(--app-gutter) var(--space-4);
-}
-.wirecard__head {
+   honest home is the partial that already owns the slate's own chrome. The
+   .banner and .plink rules it leans on come from 29-team-transactions.css and
+   01-base.css and are deliberately not restated; the two scoped overrides below
+   win on specificity, not on order. */
+.wirerail__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -409,8 +412,8 @@
   padding-bottom: 6px;
   border-bottom: var(--bw-hair) solid var(--rule-soft);
 }
-.wirecard__title,
-.wirecard__note {
+.wirerail__title,
+.wirerail__note {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-label);
@@ -419,19 +422,14 @@
   text-transform: uppercase;
   color: var(--text-caption);
 }
-.wirecard__note {
+.wirerail__note {
   font-weight: var(--w-semibold);
   color: var(--graphite-soft);
 }
-
-/* Clamped to the height LeagueMovesCard measured for it (an inline max-height,
-   collapsed only) — which is what stops the frame BEFORE that measurement
-   painting a longer list than the fit is about to allow. */
-.wirecard__list {
+.wirerail__list {
   list-style: none;
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
 .wire__date {
@@ -571,30 +569,27 @@
   color: var(--text-heading);
 }
 
-.wirecard__door {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* The RAIL's row (MoveRow's `compact`). Same spine, same kicker, same cutline
+   voice — the photo rail is what goes, because at 288px a 33px face column plus
+   its gap leaves about 220px for a sentence that runs to 104 characters. The
+   grid above exists only to seat those faces, so with them gone the row is a
+   plain block and the body takes the full width.
+
+   Everything else here is one step down in size, which is what a column a third
+   the ledger's width asks for. The cutline stays Lora: a narrower measure is a
+   reason to set prose smaller, never a reason to stop setting it as prose. */
+.wire__row--compact {
+  display: block;
+  padding: var(--space-2) 0 var(--space-2) 10px;
+}
+.wire__row--compact .wire__kicker {
   gap: 6px;
-  width: 100%;
-  min-height: var(--tap-min);
-  margin-top: var(--space-2);
-  padding: 0 var(--space-3);
-  border: var(--bw-hair) solid var(--border-rule);
-  border-radius: var(--radius-sm);
-  background: none;
-  cursor: pointer;
-  font-family: var(--font-display);
-  font-size: var(--fs-label);
-  font-weight: var(--w-bold);
-  letter-spacing: var(--ls-label);
-  text-transform: uppercase;
-  color: var(--accent-link);
 }
-.wirecard__door:active {
-  background: var(--surface-inset);
+.wire__row--compact .wire__cutline {
+  font-size: var(--fs-compact);
 }
-.wirecard__chevron {
-  font-size: var(--fs-body);
-  line-height: var(--lh-solid);
+/* The banner rides in the kicker here rather than over a headshot, so it needs
+   the kicker's own baseline rather than the face column's centring. */
+.wire__row--compact .banner {
+  flex: 0 0 auto;
 }

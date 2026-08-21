@@ -18,10 +18,12 @@ import {
 //
 // The problem it solves is one of billing. The slate is what the reader opened
 // the app for; the wire is what they will glance at between innings. Rendered
-// in the flow (LeagueMovesCard, which is still what a tablet and a desktop get)
-// the wire is CORRECT but it is also ABOVE the games — up to eight rows of
-// other clubs' paperwork standing between a thumb and the thing the page is
-// named after. On a 390pt phone that is most of the first screen.
+// in the flow the wire is CORRECT but it is also ABOVE the games — up to eight
+// rows of other clubs' paperwork standing between a thumb and the thing the page
+// is named after. On a 390pt phone that is most of the first screen. (A tablet
+// and a desktop had the same complaint and answered it differently, by moving
+// the wire sideways instead — WireRail.jsx, ADR-0062. Sideways is not on offer
+// at 390pt, which is why this file still exists.)
 //
 // So on a phone the wire leaves the flow and docks to the bottom edge, where
 // the four-button tab bars of other apps live. It rests as a one-line rail

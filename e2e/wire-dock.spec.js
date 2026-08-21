@@ -7,7 +7,7 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 // browser and is exactly what this spec covers:
 //
 //  1. **The split.** Below WIDE_QUERY the feed is the dock and the in-flow
-//     .wirecard is absent; at and above it, the reverse. Two presentations of
+//     .wirerail is absent; at and above it, the reverse. Two presentations of
 //     one feed, and never both at once.
 //  2. **The floor.** The slate pads its bottom by the rail's MEASURED height,
 //     so nothing the reader needs — the last game card, the footer, and above
@@ -20,7 +20,7 @@ import { installMockApi, ANCHOR_DATE } from './fixtures/mock-api.js'
 //  4. **It stays a dock, not a modal.** The slate behind it is still there,
 //     and a link inside the ledger still navigates.
 //
-// The wire is stubbed for the same reason the card's spec stubs it: this shows
+// The wire is stubbed for the same reason the rail's spec stubs it: this shows
 // today and yesterday, so a captured response is one day stale the day after it
 // was taken and empty every winter. Rows are real shapes with the ids, names
 // and dates rewritten per run.
@@ -140,10 +140,10 @@ async function dockReady(page) {
     .toBeLessThanOrEqual(1)
 }
 
-test('a phone gets the dock and never the in-flow card', async ({ page }) => {
+test('a phone gets the dock and never the rail', async ({ page }) => {
   await openSlate(page)
   await dockReady(page)
-  await expect(page.locator('.wirecard')).toHaveCount(0)
+  await expect(page.locator('.wirerail')).toHaveCount(0)
   await expect(page.locator('.wiredock')).toHaveAttribute('data-state', 'rail')
 
   // At rest it is one move and a count — not a ledger, and not nothing.
@@ -153,9 +153,12 @@ test('a phone gets the dock and never the in-flow card', async ({ page }) => {
   expect(await page.locator('.wiredock__list .wire__row').count()).toBe(count)
 })
 
-test('a desktop gets the in-flow card and never the dock', async ({ page }) => {
+test('a desktop gets the rail beside the games and never the dock', async ({ page }) => {
   await openSlate(page, '/', DESKTOP)
-  await expect(page.locator('.wirecard')).toBeVisible()
+  // The wide half of this split is WireRail.jsx now, not the in-flow card the
+  // rail replaced — e2e/wire-rail.spec.js owns what it must look like. All this
+  // test needs is that the two presentations stay mutually exclusive.
+  await expect(page.locator('.wirerail')).toBeVisible()
   await expect(page.locator('.wiredock')).toHaveCount(0)
   // And the slate is not left padding a floor that is not there.
   await expect(page.locator('.screen--slate')).not.toHaveClass(/screen--wiredock/)
