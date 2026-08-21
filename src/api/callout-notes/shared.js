@@ -76,6 +76,7 @@ export const SCORE_BASE = {
   pitchPace: 32, // the starter's pitches-through-N pace vs his season norm
   matchupSkill: 36, // hitter vs the arm he faces on a chase/whiff/hard-contact axis
   matchupStyle: 33, // …and on a pull/ground-ball TENDENCY axis, which is a shade less pointed
+  matchupArsenal: 38, // …and on ONE PITCH TYPE — a shade above matchupSkill, since a pitch-specific collision is more pointed than a season-wide one
   comeback: 30,
   scoringFirst: 30,
   inningRunDiff: 30,

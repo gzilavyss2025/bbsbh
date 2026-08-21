@@ -394,7 +394,15 @@ don't run these by hand.
   for `type=batter` and `type=pitcher` — the fact the whole family rests on. The
   run warns if the two boards' league means drift apart, since that would mean
   the comparison itself has broken. Handedness splits are NOT available: those
-  query params are accepted and silently ignored. MLB only. See
+  query params are accepted and silently ignored. MLB only. Also writes the
+  file's `arsenal` block — a hitter against ONE PITCH TYPE, joined on Savant's
+  `pitch-arsenal-stats` board (`player_id`, `pitch_type`, identical columns
+  both roles). Gates the pitch (pitcher usage ≥ 15%, ≥ 150 thrown) and the
+  batter (40+ PA against the type), then regresses whiff toward that pitch
+  type's own league mean (`WHIFF_REGRESS_K` = 50 pitches) rather than applying
+  a second, stricter sample floor — a flat floor tuned for four-seamers would
+  starve the splitter and sweeper notes, which is most of this family's value.
+  `ba` is carried on the batter row for display color only, never scored. See
   `docs/callouts.md`, "Matchup callouts".
 - `gen-workload.mjs` → `public/data/workload.json` — per-pitcher recent
   workload: last-12 appearance list (date/pitches/started), season totals, SP/RP

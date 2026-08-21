@@ -1,6 +1,7 @@
 import { halfIndex, selectHalfStartingPitcher } from '../select.js'
 import { selectDueUpNow } from '../dueup.js'
 import { buildMatchupNotes } from './notes.js'
+import { buildArsenalNote } from './arsenal.js'
 
 // Matchup notes for ONE half — the hitters due up in it against the arm who
 // will be on the mound for it. The shared step both surfaces need: the pre-half
@@ -61,14 +62,12 @@ export function matchupNotesForHalf({ feed, data, inning, half, revealedThrough 
   const base = halfIndex(inning, half)
   const notes = []
   for (const b of dueUp.batters) {
-    notes.push(...buildMatchupNotes({
-      data,
-      batter: nameOf(feed, b.id, b.last),
-      pitcher,
-      // Rotate the sentence shape by BOTH the slot and the half, so neither two
-      // hitters in one strip nor the same hitter across innings repeats a shape.
-      index: base + (b.slot ?? 0),
-    }))
+    const batter = nameOf(feed, b.id, b.last)
+    // Rotate the sentence shape by BOTH the slot and the half, so neither two
+    // hitters in one strip nor the same hitter across innings repeats a shape.
+    const shapeIndex = base + (b.slot ?? 0)
+    notes.push(...buildMatchupNotes({ data, batter, pitcher, index: shapeIndex }))
+    notes.push(...buildArsenalNote({ data, batter, pitcher, index: shapeIndex }))
   }
   return notes
 }

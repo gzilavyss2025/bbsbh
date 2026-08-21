@@ -65,6 +65,8 @@ a test file is added, renamed, or removed — a stale index is worse than none.
 | logo-upload.test.js | 26 | src/lib/logoArt.js, scripts/lib/dev-logo-upload.mjs | Dev logo upload endpoint (ADR-0029) |
 | manager.test.js | 4 | src/api/game.js (fetchManager) | Interim-manager precedence |
 | manager-page.test.js | 19 | src/api/managers.js, src/api/careerTimeline.js (fetchManagerPlaying) | The manager detail page's data layer — the /coaches jersey-number duplicates that faked "Shared season" rows, the header's role precedence, and a playing career that agrees with the clubs rail under it |
+| matchup-arsenal.test.js | 26 | src/api/matchup/arsenal.js, src/api/matchup/savant.js (arsenal readers) | Matchup callouts Family C — a hitter against one pitch type: the four whiff quadrants (one dropped), the pitch-usage/thrown/PA gates living in the generator not the builder, BA as color only past the PA floor, and the shared voice.js mechanics reused rather than reimplemented |
+| matchup-callouts.test.js | 24 | src/api/matchup/notes.js, src/api/matchup/savant.js, src/api/matchup/forHalf.js | Matchup callouts Families A/B — a hitter vs. the arm he faces on a chase/whiff/hard-contact or pull/ground-ball axis, the shape rotation and length-aware short form, and the due-up/starting-pitcher resolution for one half |
 | milb-color-chain.test.js | 11 | brandColors.js, teams.js, milbColors.js | Affiliate→parent-org→neutral color fallback |
 | milb-team-wiring.test.js | 7 | milbColors.js | MiLB tile/logoVariant wiring |
 | mono-logo-art.test.js | 4 | scripts/lib/mono-logo-art.mjs | The nightly generator's mono-ink override merge — degrades to the file alone on any fetch failure, an id for another store, or a malformed value (ADR-0054) |

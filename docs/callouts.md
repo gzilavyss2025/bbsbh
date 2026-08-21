@@ -92,6 +92,7 @@ saturation is worth changed. The column below names that saturation point, so
 | foulSpoiler | 30 | rank 1; the roll-up restatement adds a second bonus, full at 18 fouls tonight |
 | matchupSkill | 36 | a 2.0-SD collision on the weaker of its two sides |
 | matchupStyle | 33 | a 2.0-SD collision on the weaker of its two sides |
+| matchupArsenal | 38 | a 2.0-SD collision on the weaker of its two sides |
 | risp / platoon | 25 | — |
 | tto (plain trip fact) | 20 | — |
 
@@ -284,10 +285,13 @@ shape: `src/api/callouts.js`).
   roll-up.
 ## Matchup callouts — a hitter against the arm he faces
 
-Two families that read BOTH sides of a matchup on one axis and fire only when
-the two collide. Data is `public/data/savant-matchup.json`
+Three families that read BOTH sides of a matchup on one axis and fire only
+when the two collide. Data is `public/data/savant-matchup.json`
 (`scripts/gen-savant-matchup.mjs`), read through `src/api/matchup/savant.js`;
-the notes are built in `src/api/matchup/notes.js` and resolved to a half by
+the season-axis notes (matchupSkill/matchupStyle) are built in
+`src/api/matchup/notes.js`, the pitch-type note (matchupArsenal) in
+`src/api/matchup/arsenal.js`, both sharing rendering mechanics from
+`src/api/matchup/voice.js` — and all three are resolved to a half by
 `src/api/matchup/forHalf.js`. MLB only — Savant has no minor-league board.
 
 **Why the two sides are comparable at all.** Savant's `custom` leaderboard
@@ -371,6 +375,55 @@ overflows 150 (Yamamoto / Guerrero Jr. reached 154 in testing). `fitShort` drops
 the league average first, then the emphasis word, then falls back to the
 shortest parallel — the same graceful-degradation discipline the MiLB selectors
 use. The cap does not move.
+
+### matchupArsenal — a hitter against ONE PITCH
+
+A level deeper than matchupSkill/matchupStyle: the same two people, on one
+pitch type, joined on Savant's `pitch-arsenal-stats` board (`player_id`,
+`pitch_type` — identical columns for both roles, same as the `custom` board).
+It also covers relievers, which the season-axis families effectively do not —
+the arsenal board carries 683 pitchers against the custom board's 445.
+
+**Whiff is the only trigger.** A hitter has a median 36 PA against one pitch
+type; batting average there is ~12% real skill by an exact binomial model,
+because BA's denominator is PA. Whiff is ~84%, because its denominator is
+pitches SEEN (median 149) — four times the trials. `ba` prints as color only,
+on a note whiff already earned, past the generator's own PA floor — never as a
+trigger, never scored, never compared to a baseline of its own.
+
+**Gates, all in `gen-savant-matchup.mjs`, not the note builder.** A pitcher's
+own pitch row counts only past `usage ≥ 15%` and `pitches ≥ 150` thrown — a
+pitch he throws 4% of the time isn't what the at-bat is about. A batter's row
+counts only past `40 PA` against the type. Whiff is regressed toward that PITCH
+TYPE's own league mean (weight `K=50` pitches — whiff is already ~94% stable,
+and a heavier weight was tried and collapsed the family to a third of its
+notes). A single global "pitches seen" floor would make the family all-fastball
+— splitters and sweepers have far smaller samples than four-seamers — so the
+regression, not an extra exclusion floor, is what keeps a thin secondary-pitch
+row honest instead of dropping it outright.
+
+**Four quadrants, one dropped.** Both sides' whiff must clear 1.15 SD from
+their own pitch-type baseline; past that, classification is the raw sign —
+high whiff is a STRENGTH for the pitcher (he gets misses on it) and a
+WEAKNESS for the batter (he misses when he swings at it):
+
+- pitcher HIGH + batter HIGH → **mismatch** — his best pitch, this hitter's
+  hole. The strongest note in the family.
+- pitcher HIGH + batter LOW → **standoff** — his out pitch, the one this
+  hitter covers.
+- pitcher LOW + batter HIGH → **weak but printable** — the hitter is exposed
+  to a pitch that isn't actually a bat-misser for this arm.
+- pitcher LOW + batter LOW → **dropped.** Neither side has a demonstrated
+  edge on whiff, the only thing this family trusts. An earlier prototype
+  labelled this "hitter edge" and was wrong to.
+
+Same voice rules as matchupSkill/matchupStyle (`chase` never means "swing";
+rates round; one baseline construction; surnames short, full names in prose;
+the shape rotation and length-aware short form via `voice.js`), plus one
+addition: the pitch usage clause reuses `quantity()` for "a third of the
+time"-style wording, and the batting-average color clause prints its sample
+count — `(N PA)` — only when the batter's PA against the type is under 80
+(the low-sample bucket the family's own research used).
 
 - **risp / platoon** — season RISP and vs-L/vs-R lines (`situational`,
   ≥ 15 PA per split). Gate: the split average also has to deviate from his

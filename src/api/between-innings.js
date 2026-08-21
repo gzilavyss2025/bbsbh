@@ -52,12 +52,13 @@ export const BETWEEN_INNINGS_ALLOWED_KINDS = new Set([
   'laboring', 'veloVariety', 'veloDecay', 'penFatigue', 'workload', 'backToBack',
   'leverage', 'centuryClub', 'tenK', 'scorelessStreak', 'sixIp', 'homeAway',
   'cgShutout', 'recentAppearances',
-  // The matchup families (api/matchup/notes.js) — season Statcast rates for a
-  // due-up hitter against the arm he will face. They read no liveData at all,
-  // so they clear this surface's stricter bar without a gate of their own; what
-  // IS gated is resolving WHO those two players are, which rides on the same
-  // caller-gated selectors the lineup and defense cards already use.
-  'matchupSkill', 'matchupStyle',
+  // The matchup families (api/matchup/notes.js, api/matchup/arsenal.js) —
+  // season Statcast rates for a due-up hitter against the arm he will face.
+  // They read no liveData at all, so they clear this surface's stricter bar
+  // without a gate of their own; what IS gated is resolving WHO those two
+  // players are, which rides on the same caller-gated selectors the lineup and
+  // defense cards already use.
+  'matchupSkill', 'matchupStyle', 'matchupArsenal',
 ])
 
 // Top of inning N -> bottom of N; bottom of N -> top of N+1 (api/dueup.js
