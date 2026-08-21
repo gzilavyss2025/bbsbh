@@ -36,6 +36,7 @@ import { effectiveReveal } from '../hooks/revealProgressCore.js'
 import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { useStampUnseal } from '../hooks/useStamps.js'
 import { CalloutLedgerProvider, useCalloutLedgerValue } from '../hooks/useCalloutLedger.js'
+import { useHeadshotPrefetch } from '../hooks/useHeadshotPrefetch.js'
 
 // RevealCloudSync.jsx imports @clerk/clerk-react at its top, so it's only
 // dynamically imported (and only then does that SDK ever reach a user's
@@ -258,6 +259,10 @@ export function InningViewer({
   // showRookiePill, api/rookies.js).
   const isMlb = (meta.away.sportId ?? 1) === 1
   const firstPitchThrown = useMemo(() => selectHasFirstPitch(feed), [feed])
+
+  // Warm the headshot CDN for both rosters as soon as there's an at-bat feed
+  // to step through — see useHeadshotPrefetch's own header.
+  useHeadshotPrefetch(feed, firstPitchThrown)
 
   // In-game delays (rain, etc.), spoiler-free (see selectDelays) — surfaced as a
   // between-half-innings notice on the affected half's page. Almost always empty.

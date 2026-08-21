@@ -165,7 +165,7 @@ const BUDGETS = {
   'src/lib/route.js': 800, // 744
   'scripts/gen-fouls.mjs': 1000, // 996
   'src/api/teamTransactions.js': 700, // 619 — the prose half moved to transactions/cutline.js, the vocabulary before it
-  'src/screens/InningViewer.jsx': 1000, // 931 — unified focus/stacked layout: dropped the unfocused ReferenceBand/ScorebugMount-dock branches and the pastLine/cornerIdx state that only served them
+  'src/screens/InningViewer.jsx': 1100, // 1003 — wired in useHeadshotPrefetch (one hook call + its doc comment) so at-bat stepping warms both rosters' headshot CDN URLs up front; the hook's own logic lives in src/hooks/useHeadshotPrefetch.js, not here
   'src/api/boxscore.js': 800, // 762 — the info block moved to boxscore/gameNotes.js
   // 900 -> 1000: phase 4 of the My Tally program added the two-step intro's
   // wiring, the merge-receipt slate strip, and the scores-unlocked-local
