@@ -15,6 +15,23 @@
 //     venue endpoint's fieldInfo for 29 of the 30 parks; Rogers Centre is the
 //     one deliberate exception, and its own comment says why.
 //
+// CAPACITY WAS AUDITED AGAINST FIVE SEASONS OF GATES (2022-2026, August 2026).
+// The test: a park's 95th-percentile crowd each season, against its listed
+// figure. A number that describes a building that no longer exists shows up as
+// a ceiling that sits far below it and does not move; Rogers Centre was the
+// only park that failed that way, and it is fixed below. Every other row is the
+// figure published for the CURRENT configuration, so leave them alone even
+// where the gates disagree with them, because announced attendance counts
+// tickets distributed and a listed capacity counts seats:
+//   - Petco's ceiling has sat 10-13% OVER its 40,222 for five straight seasons
+//     (standing room and the outfield party decks), which is why San Diego is
+//     the one club over 100% full for a season. Not an error; do not "fix" it.
+//   - Dodger Stadium (~53,700 against 56,000) and Sutter Health Park (~12,500
+//     against 14,014, whose figure counts the outfield berm) sell a stable
+//     ceiling UNDER their listed seats. Also not an error.
+//   - Camden Yards, Busch, Target Field and Kauffman sit well under theirs on a
+//     ceiling that swings thousands year to year. That is demand, not capacity.
+//
 // Covers the 30 current MLB parks (the Athletics' temporary Sutter Health Park is
 // the one gap — small Triple-A footprint, distances not yet snapshotted; it
 // degrades gracefully to "not on file" via ballparkFor() returning null, per the
