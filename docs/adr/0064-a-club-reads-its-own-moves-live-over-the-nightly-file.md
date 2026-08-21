@@ -1,4 +1,4 @@
-# ADR-0063 — A club reads its own moves live, over the nightly file
+# ADR-0064 — A club reads its own moves live, over the nightly file
 
 Status: accepted (2026-08-21)
 
