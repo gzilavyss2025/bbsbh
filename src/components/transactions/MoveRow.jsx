@@ -6,10 +6,11 @@ import { TeamLink } from '../team/TeamLink.jsx'
 import { TeamLogo } from '../logo/TeamLogo.jsx'
 
 // One roster-move story, and the day-grouping helpers around it. Extracted from
-// LeagueMovesCard.jsx when the phone got a SECOND presentation of the same feed
-// (WireDock.jsx, the bottom-anchored dock): the two surfaces differ in where the
-// ledger sits and how it is opened, never in what a move looks like — so a move
-// is drawn in exactly one place. Both import from here; neither re-derives.
+// the slate's wide surface when the phone got a SECOND presentation of the
+// same feed: the two differ in where the ledger sits and how it is opened, never
+// in what a move looks like — so a move is drawn in exactly one place. The wide
+// surface is now WireRail.jsx (beside the games) and the phone's is WireDock.jsx
+// (the bottom-anchored sheet). Both import from here; neither re-derives.
 //
 // Everything below is spoiler-free by construction — a roster move and its date
 // carry no score (see api/transactions/leagueFeed.js) — so nothing here is
@@ -54,8 +55,8 @@ export function dateline(iso) {
 }
 
 // The days flattened into one ordered run of datelines and stories, so a
-// fitted-row trim can cut anywhere without having to reason about which day a
-// row belongs to.
+// surface can render, scroll or clip anywhere in the run without having to
+// reason about which day a row belongs to.
 export function flattenDays(days) {
   const items = []
   for (const day of days ?? []) {
@@ -69,8 +70,9 @@ export function flattenDays(days) {
 }
 
 // The first `n` stories, with their datelines — and never a dateline left
-// standing over nothing, which is what a naive slice produces whenever the
-// cut lands on a day's first story.
+// standing over nothing, which is what a naive slice produces whenever the cut
+// lands on a day's first story. The rail's collapsed state is the only caller;
+// the dock shows every story it has.
 export function takeStories(items, n) {
   const out = []
   let seen = 0
@@ -140,24 +142,46 @@ function Face({ slot }) {
 // tab the club's own Transactions card lives on — TeamLink's header asks a
 // caller whose subject IS one tab's content to say so, instead of landing the
 // reader on an Overview preview of what they just tapped out of.
-export function MoveRow({ story }) {
+//
+// `compact` is the WIRE RAIL's row (WireRail.jsx): the same story with the
+// photo rail dropped and the leading banner moved up beside the club. It is a
+// width decision, not a taste one — the rail is 288px, and a 33px face column
+// plus its gap leaves about 220px for a sentence that runs to 104 characters.
+// The photo is what gives way because it is the only part carrying nothing the
+// cutline does not already say: the cutline still bolds every name. The banner
+// moves rather than goes, because "did he come up or go down?" is the one thing
+// a reader wants before reading the sentence, and it survives in one chip.
+//
+// Only the FIRST banner rides along. A shuffle's second slot loses its chip and
+// keeps its type label — "Roster shuffle" beside one Up chip reads correctly,
+// and two chips plus a mark plus an abbreviation plus a label do not fit 288px
+// without wrapping the kicker onto a second line.
+export function MoveRow({ story, compact = false }) {
   const tone = TYPE_TONE[story.type]
   const abbr = teamAbbr({ id: story.teamId })
+  const lead = compact ? story.rail?.[0] : null
   return (
     <li
-      className="wire__row"
+      className={`wire__row${compact ? ' wire__row--compact' : ''}`}
       data-move-row=""
       // The spine is the club's own colour, decorative and text-free — no
       // contrast floor applies to it, and none of the row's copy sits on it.
       style={{ '--wire-club': teamPrimaryColor(story.teamId) || 'var(--graphite)' }}
     >
-      <div className="wire__faces">
-        {story.rail.slice(0, FACES_PER_ROW).map((slot, i) => (
-          <Face key={slot.playerId ?? i} slot={slot} />
-        ))}
-      </div>
+      {!compact && (
+        <div className="wire__faces">
+          {story.rail.slice(0, FACES_PER_ROW).map((slot, i) => (
+            <Face key={slot.playerId ?? i} slot={slot} />
+          ))}
+        </div>
+      )}
       <div className="wire__body">
         <div className="wire__kicker">
+          {lead && (
+            <span className={`banner ${BANNER_TONE[lead.role] ?? 'banner--move'}`}>
+              {lead.banner}
+            </span>
+          )}
           <TeamLink
             id={story.teamId}
             tab="games"
@@ -177,10 +201,11 @@ export function MoveRow({ story }) {
   )
 }
 
-// The ordered run of datelines and stories, drawn identically on both surfaces.
+// The ordered run of datelines and stories, drawn identically on every surface.
 // The caller owns the <ul> — its ref, its clamp, its scrolling; only what goes
-// INSIDE it is shared, which is the whole point of this module.
-export function MoveItems({ items }) {
+// INSIDE it is shared, which is the whole point of this module. `compact` is
+// passed straight through to MoveRow; a dateline is the same either way.
+export function MoveItems({ items, compact = false }) {
   return items.map((item) =>
     item.kind === 'date' ? (
       <li className="wire__date" key={item.key}>
@@ -189,7 +214,7 @@ export function MoveItems({ items }) {
         <span className="wire__count">{item.count}</span>
       </li>
     ) : (
-      <MoveRow key={item.key} story={item.story} />
+      <MoveRow key={item.key} story={item.story} compact={compact} />
     ),
   )
 }

@@ -1,7 +1,7 @@
 /* ------------------------------------------------------------- wire dock
    components/transactions/WireDock.jsx — the PHONE's presentation of the
    league's roster moves. A lettered sibling of 04-site-bar.css (precedent:
-   21/21a, 26/26a) because that partial owns .wirecard, the same feed's wide
+   21/21a, 26/26a) because that partial owns the shared .wire__* ledger rules
    surface, and it sits at its own file-size ceiling. Cascading immediately
    after it is load-bearing: every row inside the dock is drawn by the same
    MoveRow.jsx and wears the same .wire__* classes, so those rules must already
@@ -267,9 +267,9 @@
    a tap that lands in the sliver below the rail on a short viewport. */
 .wiredock[data-state='rail'] .wiredock__list { pointer-events: none; }
 
-/* The dock's own rows want a little more air than the wide card's, because a
-   thumb rather than a mouse is picking a club name out of them. Scoped so the
-   in-flow .wirecard is untouched. */
+/* The dock's own rows want a little more air than the wide surface's, because
+   a thumb rather than a mouse is picking a club name out of them. Scoped so the
+   rail's rows (.wirerail__list) are untouched. */
 .wiredock__list .wire__row {
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
@@ -311,8 +311,8 @@
 }
 
 /* ----------------------------------------------------------- wide layout
-   The dock is a phone idiom. GameSelect already swaps it for the in-flow
-   .wirecard at WIDE_QUERY so this should never mount here, but a stale
+   The dock is a phone idiom. GameSelect already swaps it for the beside-the-
+   games .wirerail at WIDE_QUERY so this should never mount here, but a stale
    --wire-rail-h left on the document element by a resize mid-session would
    still pad the slate for a rail that is gone. Belt and braces. */
 @media (min-width: 740px) {

@@ -28,8 +28,8 @@ import { isClerkEnabled } from '../lib/clerkConfig.js'
 import { SiteFooter } from '../components/chrome/SiteFooter.jsx'
 import { FavoriteTeamModal } from '../components/account/FavoriteTeamModal.jsx'
 import { OffDaySection } from '../components/team/OffDaySection.jsx'
-import { LeagueMovesCard } from '../components/transactions/LeagueMovesCard.jsx'
 import { WireDock } from '../components/transactions/WireDock.jsx'
+import { WireRail } from '../components/transactions/WireRail.jsx'
 import { useMediaQuery, WIDE_QUERY } from '../hooks/useMediaQuery.js'
 import { AsyncStatus } from '../components/ui/AsyncGate.jsx'
 import { useDayCardMeta } from '../hooks/useDayCardMeta.js'
@@ -110,20 +110,34 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   const isToday = dateStr === todayStr
 
   // The league's roster moves have two presentations of the SAME feed, split at
-  // the app's one layout breakpoint. Wide, the in-flow LeagueMovesCard fits
-  // itself to the space above the game list. On a phone that space is the whole
-  // first screen, so the wire docks to the bottom edge instead (WireDock) and
-  // the games get the top back — which is the entire point of the split. Both
-  // draw a move through MoveRow.jsx.
+  // the app's one layout breakpoint. Neither one stands above the game list any
+  // more, which is the whole shape of the split: wide, the wire runs down the
+  // RIGHT of the games as a sticky rail (WireRail); on a phone there is no
+  // sideways room to give it, so it docks to the bottom edge instead
+  // (WireDock). Either way the games keep the fold. Both draw a move through
+  // MoveRow.jsx — the rail asks for its compact variant.
   const wide = useMediaQuery(WIDE_QUERY)
   const showWire = isToday && sportId === SPORT_IDS.MLB
-  // The dock renders nothing on a quiet 48 hours, and only IT knows that (the
+  // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
   // 04a-wire-dock.css, and note the padding is what keeps the dock off the
   // Reveal all results bar.
   const [dockPresent, setDockPresent] = useState(false)
   const docked = showWire && !wide && dockPresent
+  // The rail's copy of that arrangement, with the default flipped. The dock
+  // opts IN to bottom padding once it knows it exists; the rail's shell has to
+  // be wide from first paint, because widening it a beat later would slide the
+  // whole game grid sideways under the reader. So this starts true — the room
+  // is reserved on what is known synchronously — and WireRail reports back only
+  // to take it away, on a quiet window or a failed fetch. See WireRail.jsx.
+  const [railPresent, setRailPresent] = useState(true)
+  const railed = showWire && wide && railPresent
+  // The rail ends where the games end (WireRail.jsx's fit). It measures this
+  // column rather than the viewport, so the ref is handed down explicitly — a
+  // querySelector inside the rail would hide the dependency from the one file
+  // that renders both halves.
+  const gamesColRef = useRef(null)
 
   // Site-wide "Scores Unlocked" pass. The toggle is only OFFERED on today's
   // slate — you can't retroactively consent to a day you've paged back to — but
@@ -525,7 +539,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
     <div
       className={`screen screen--slate${coldLoad ? ' screen--coldload' : ''}${
         docked ? ' screen--wiredock' : ''
-      }`}
+      }${railed ? ' screen--wirerail' : ''}`}
     >
       {/* Title + league toggle + search share one row: the Tally wordmark
           reloads THIS league's slate for today on the left (a full page load —
@@ -751,129 +765,141 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
         </Suspense>
       )}
 
-      {/* Roster moves from the last 48 hours, live off the wire (issue #772).
-          TODAY's MLB slate only — "the last 48 hours" is a claim about now, so
-          on a browsed-to past day it would read as a bug, not as news. Renders
-          null while loading, on failure, and on a quiet 48 hours. WIDE ONLY:
-          the phone's copy of this feed is the dock at the foot of this screen.
-          See LeagueMovesCard.jsx. */}
-      {showWire && wide && <LeagueMovesCard endDate={dateStr} />}
-
-      <AsyncStatus
-        loading={loading}
-        error={error}
-        hasData={sorted.length > 0}
-        errorMessage="Couldn’t load games. Check your connection and try again."
-        onRetry={slate.reload}
-        // Suppressed for a day the break window or Off Day banner will claim
-        // (below) — briefly while either lookup is still in flight too, so
-        // neither flashes "No games scheduled." before the fetch resolves.
-        emptyMessage={
-          allStarInfo.loading || breakWindow || resumeLookupPending || showOffDayBanner
-            ? null
-            : 'No games scheduled.'
-        }
-      />
-
-      {showBreakBanner && (
-        <div className="break-banner" role="note">
-          <span className="break-banner__text">All-Star Break</span>
-          <span className="break-banner__detail">Games resume {humanDate(resumeDate)}</span>
-        </div>
-      )}
-
-      {showOffDayBanner && (
-        <div className="offday-banner" role="note">
-          <span className="offday-banner__text">Off Day</span>
-          <span className="offday-banner__detail">Games resume {humanDate(resumeDate)}</span>
-        </div>
-      )}
-
-      {finals.length > 0 && !slateRevealAll && revealChipOutOfView && (
-        <RevealAllBar onReveal={() => setRevealedAll(true)} />
-      )}
-
-      {availableFilters.length > 0 && (
-        <ResultFilterBar
-          chips={availableFilters}
-          active={activeFilters}
-          onToggle={toggleFilter}
-          shown={visibleGames.length}
-          total={gamesForDisplay.length}
-        />
-      )}
-
-      {/* role="region" (not a bare div) so the aria-label is actually
-          honored and ResultFilterBar's aria-controls has a real target —
-          an aria-label on a role-less generic element is discarded. */}
-      <div className="slate-main" id="slate-games" role="region" aria-label="Games">
-        <ul className="gamelist">
-          {sorted.length === 0 && isDerbyDay && (
-            <li>
-              <DerbyCard />
-            </li>
-          )}
-          {visibleGames.map((g, idx) => {
-            const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
-              ? favoriteTeamId
-              : null
-            const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
-            // The first cards' marks are the slate's largest above-the-fold
-            // images — its LCP candidate — so they skip TeamLogo's default
-            // lazy loading (which would defer exactly the images the first
-            // paint is waiting on). Two cards ≈ one phone viewport.
-            const eager = idx < 2
-            const isPastFinal =
-              showPastDayTreatment &&
-              g.abstractState === 'Final' &&
-              !selectGameStatus(g).isPostponed
-            // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
-            const isSuspended = selectGameStatus(g).isSuspended
-            return (
-              <li key={`${g.sportId}-${g.gamePk}`}>
-                {isPastFinal ? (
-                  <PastGameFlipCard
-                    game={g}
-                    dateStr={dateStr}
-                    revealed={slateRevealAll}
-                    pinnedTeamId={pinnedTeamId}
-                    prospectCount={pCount}
-                    cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
-                    video={dayVideos.data?.games?.[g.gamePk] ?? null}
-                    liveJerseys={liveJerseys.data}
-                    national={nationalBroadcasts[g.gamePk]}
-                    eager={eager}
-                    onSelect={() => onPick(g, dateStr)}
-                    onBoxScore={() => onPick(g, dateStr, 'boxscore')}
-                  />
-                ) : (
-                  <GameCard
-                    game={g}
-                    pinnedTeamId={pinnedTeamId}
-                    prospectCount={pCount}
-                    liveLine={liveLineFor(g)}
-                    liveJerseys={liveJerseys.data}
-                    national={nationalBroadcasts[g.gamePk]}
-                    eager={eager}
-                    stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
-                    onSelect={() => onPick(g, dateStr)}
-                    onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
-                  />
-                )}
-              </li>
-            )
-          })}
-        </ul>
-
-        {/* Any idle club — including the whole-league case on an All-Star
-            break or (MLB) All-Star Game day, where there are no club games
-            and the full grid is the point (something to browse). */}
-        {offDayTeams.length > 0 && (
-          <OffDaySection
-            teams={offDayTeams}
-            favoriteTeamId={favoriteTeamId}
-            favoriteAffiliateIds={favoriteAffiliateIds}
+      {/* The slate's two columns, wide: the games, and the league's roster
+          wire beside them. Below WIDE_QUERY this wrapper is a plain block and
+          the rail is not rendered at all — the phone gets the dock at the foot
+          of this screen instead. See .slatebody in 25-wide-layout.css. */}
+      <div className="slatebody">
+        <div className="slatebody__main" ref={gamesColRef}>
+          <AsyncStatus
+            loading={loading}
+            error={error}
+            hasData={sorted.length > 0}
+            errorMessage="Couldn’t load games. Check your connection and try again."
+            onRetry={slate.reload}
+            // Suppressed for a day the break window or Off Day banner will claim
+            // (below) — briefly while either lookup is still in flight too, so
+            // neither flashes "No games scheduled." before the fetch resolves.
+            emptyMessage={
+              allStarInfo.loading || breakWindow || resumeLookupPending || showOffDayBanner
+                ? null
+                : 'No games scheduled.'
+            }
           />
+
+          {showBreakBanner && (
+            <div className="break-banner" role="note">
+              <span className="break-banner__text">All-Star Break</span>
+              <span className="break-banner__detail">Games resume {humanDate(resumeDate)}</span>
+            </div>
+          )}
+
+          {showOffDayBanner && (
+            <div className="offday-banner" role="note">
+              <span className="offday-banner__text">Off Day</span>
+              <span className="offday-banner__detail">Games resume {humanDate(resumeDate)}</span>
+            </div>
+          )}
+
+          {finals.length > 0 && !slateRevealAll && revealChipOutOfView && (
+            <RevealAllBar onReveal={() => setRevealedAll(true)} />
+          )}
+
+          {availableFilters.length > 0 && (
+            <ResultFilterBar
+              chips={availableFilters}
+              active={activeFilters}
+              onToggle={toggleFilter}
+              shown={visibleGames.length}
+              total={gamesForDisplay.length}
+            />
+          )}
+
+          {/* role="region" (not a bare div) so the aria-label is actually
+              honored and ResultFilterBar's aria-controls has a real target —
+              an aria-label on a role-less generic element is discarded. */}
+          <div className="slate-main" id="slate-games" role="region" aria-label="Games">
+            <ul className="gamelist">
+              {sorted.length === 0 && isDerbyDay && (
+                <li>
+                  <DerbyCard />
+                </li>
+              )}
+              {visibleGames.map((g, idx) => {
+                const pinnedTeamId = isPinned(g, favoriteTeamId, favoriteAffiliateIds)
+                  ? favoriteTeamId
+                  : null
+                const pCount = (prospectCounts[g.away.id] ?? 0) + (prospectCounts[g.home.id] ?? 0)
+                // The first cards' marks are the slate's largest above-the-fold
+                // images — its LCP candidate — so they skip TeamLogo's default
+                // lazy loading (which would defer exactly the images the first
+                // paint is waiting on). Two cards ≈ one phone viewport.
+                const eager = idx < 2
+                const isPastFinal =
+                  showPastDayTreatment &&
+                  g.abstractState === 'Final' &&
+                  !selectGameStatus(g).isPostponed
+                // Suspended: a paused checkpoint (like a Final's box score) that still gets the ordinary GameCard, so it needs its own onBoxScore.
+                const isSuspended = selectGameStatus(g).isSuspended
+                return (
+                  <li key={`${g.sportId}-${g.gamePk}`}>
+                    {isPastFinal ? (
+                      <PastGameFlipCard
+                        game={g}
+                        dateStr={dateStr}
+                        revealed={slateRevealAll}
+                        pinnedTeamId={pinnedTeamId}
+                        prospectCount={pCount}
+                        cardMeta={cardMetaByGamePk.get(g.gamePk) ?? null}
+                        video={dayVideos.data?.games?.[g.gamePk] ?? null}
+                        liveJerseys={liveJerseys.data}
+                        national={nationalBroadcasts[g.gamePk]}
+                        eager={eager}
+                        onSelect={() => onPick(g, dateStr)}
+                        onBoxScore={() => onPick(g, dateStr, 'boxscore')}
+                      />
+                    ) : (
+                      <GameCard
+                        game={g}
+                        pinnedTeamId={pinnedTeamId}
+                        prospectCount={pCount}
+                        liveLine={liveLineFor(g)}
+                        liveJerseys={liveJerseys.data}
+                        national={nationalBroadcasts[g.gamePk]}
+                        eager={eager}
+                        stackedGame={stackedDh.stackedBehind.get(g.gamePk) ?? stackedSuspended.stackedBehind.get(g.gamePk) ?? null}
+                        onSelect={() => onPick(g, dateStr)}
+                        onBoxScore={isSuspended ? () => onPick(g, dateStr, 'boxscore') : null}
+                      />
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+
+            {/* Any idle club — including the whole-league case on an All-Star
+                break or (MLB) All-Star Game day, where there are no club games
+                and the full grid is the point (something to browse). */}
+            {offDayTeams.length > 0 && (
+              <OffDaySection
+                teams={offDayTeams}
+                favoriteTeamId={favoriteTeamId}
+                favoriteAffiliateIds={favoriteAffiliateIds}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* The league's roster moves from the last three days, live off the wire
+            (issue #772). TODAY's MLB slate only — a rolling window is a claim
+            about now, so on a browsed-to past day it would read as a bug rather
+            than as news. Renders null while loading, on failure, and on a quiet
+            window, and reports
+            which back so the shell can give the reserved width up. WIDE ONLY:
+            the phone's copy of this feed is the dock at the foot of this
+            screen. See WireRail.jsx. */}
+        {showWire && wide && (
+          <WireRail endDate={dateStr} onPresence={setRailPresent} fitTo={gamesColRef} />
         )}
       </div>
 

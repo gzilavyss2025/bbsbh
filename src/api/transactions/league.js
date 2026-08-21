@@ -1,5 +1,5 @@
 // The league-wide grouping pass — one feed of roster moves across all thirty
-// clubs, for the home page's last-48-hours card (issue #772).
+// clubs, for the home page's rolling roster wire (issue #772).
 //
 // It is NOT a merge of the thirty per-club story files, and it cannot be. The
 // study measured 193 rows landing in two clubs' stories; de-duplicating on a
@@ -27,8 +27,8 @@
 // because a claim always belongs to the club that made it.
 //
 // Freshness: this reads the wire live rather than the nightly per-club files
-// (product decision 4). A "last 48 hours" card fed from a nightly precompute
-// is up to a day behind.
+// (product decision 4). A rolling-window feed fed from a nightly precompute is
+// up to a day behind.
 //
 // Spoiler note: roster moves and their dates carry no score, so nothing here
 // is reveal-only — as spoiler-free as the pipeline it calls.

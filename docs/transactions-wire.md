@@ -552,7 +552,16 @@ The current window (2026-08-20 + 2026-08-19) held **36 stories across 21 clubs**
 - **cutline length** — min 27, median 103, p90 129, max 155 characters
 
 A typical 48 hours runs 30 to 54 stories. **The worst 48 hours of the month held
-125** (2026-08-04, the day after the deadline's paperwork landed). That range is
-why the home card is a vertical ledger that fits itself to the space it has,
-rather than the team page's horizontal deck of cards: `LeagueMovesCard.jsx` has
-that reasoning, and `e2e/league-moves-card.spec.js` measures the fit.
+125** (2026-08-04, the day after the deadline's paperwork landed). The window is
+three days rather than two (ADR-0062: two days is 48 hours only late in the
+evening), which measured 41 to 65 stories over 12 consecutive windows, median
+~55.
+
+That range is why the home slate draws this feed as a vertical ledger rather
+than the team page's horizontal deck of cards — 125 cards is not a swipe, it is
+a chore — and it is also why neither of the ledger's two surfaces stands in the
+slate's flow. Wide, it is a rail down the right of the games (`WireRail.jsx`),
+fitted to the games column so the wire fills the page and never lengthens it,
+with the remainder behind one control; on a phone it is the bottom-anchored dock
+(`WireDock.jsx`, ADR-0061). `e2e/wire-rail.spec.js` and `e2e/wire-dock.spec.js`
+hold the two apart.

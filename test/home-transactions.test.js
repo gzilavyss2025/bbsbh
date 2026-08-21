@@ -137,21 +137,40 @@ const ctx = {
 // feedWindow — how far back to fetch, and how far back to show
 // ---------------------------------------------------------------------------
 
-test('feedWindow shows two days and fetches four', () => {
+test('feedWindow shows three days and fetches five', () => {
   const w = feedWindow('2026-08-20')
   assert.equal(w.endDate, '2026-08-20')
-  // "The last 48 hours" can only mean today and yesterday: the wire carries
-  // dates, never a time (docs/transactions-wire.md §1).
-  assert.equal(w.windowStart, '2026-08-19')
-  // Three days further back than the window, because the endpoint filters on
-  // `date` and the grouper buckets by `effectiveDate`.
-  assert.equal(w.fetchStart, '2026-08-17')
+  // Three, not two. The wire carries dates and never a time
+  // (docs/transactions-wire.md §1), so the window is counted in whole days —
+  // and two days is "the last 48 hours" only late in the evening. Three is the
+  // narrowest that clears 48 hours at every hour (it runs 48 to 72).
+  assert.equal(w.windowStart, '2026-08-18')
+  // Two days further back than the window, because the endpoint filters on
+  // `date` and the grouper buckets by `effectiveDate`. Backtested, not derived
+  // — see leagueFeed.js.
+  assert.equal(w.fetchStart, '2026-08-16')
 })
 
 test('feedWindow crosses a month boundary without drifting', () => {
   const w = feedWindow('2026-09-01')
-  assert.equal(w.windowStart, '2026-08-31')
-  assert.equal(w.fetchStart, '2026-08-29')
+  assert.equal(w.windowStart, '2026-08-30')
+  assert.equal(w.fetchStart, '2026-08-28')
+})
+
+test('the window reaches two days back, not one', () => {
+  // The behaviour the widening exists for, pinned on a row that a two-day
+  // window would drop: filed and effective on the 18th, read on the 20th.
+  // Measured on a Friday morning, the old window showed 10 stories while the
+  // day it excluded held 31.
+  const twoDaysBack = { ...EMANUEL_OUTRIGHT, date: '2026-08-18', effectiveDate: '2026-08-18' }
+  const days = shapeLeagueFeed([twoDaysBack], ctx, feedWindow('2026-08-20'))
+  assert.equal(days.length, 1)
+  assert.equal(days[0].date, '2026-08-18')
+  assert.equal(days[0].stories.length, 1)
+
+  // ...and the day before that is still out, so the window has an edge.
+  const threeDaysBack = { ...EMANUEL_OUTRIGHT, date: '2026-08-17', effectiveDate: '2026-08-17' }
+  assert.deepEqual(shapeLeagueFeed([threeDaysBack], ctx, feedWindow('2026-08-20')), [])
 })
 
 // ---------------------------------------------------------------------------
@@ -160,7 +179,7 @@ test('feedWindow crosses a month boundary without drifting', () => {
 
 test('a row filed before the window but effective inside it is kept', () => {
   // Blake Perkins, filed 08-01 and effective 08-02. A window ending 08-02
-  // must carry him; the fetch that found him reached back to 07-30.
+  // must carry him; the fetch that found him reached back to 07-29.
   const days = shapeLeagueFeed([PERKINS_OPTION], ctx, feedWindow('2026-08-02'))
   const stories = days.flatMap((d) => d.stories)
   assert.equal(stories.length, 1)
@@ -170,8 +189,8 @@ test('a row filed before the window but effective inside it is kept', () => {
 
 test('a row filed inside the window but effective before it is dropped', () => {
   // Hunter Goodman, filed 08-18 and backdated to 08-15. A window ending 08-19
-  // reaches back to 08-18 by `date` and finds the row, and must still leave it
-  // out: it belongs to 08-15, which is not in the last 48 hours.
+  // fetches back to 08-15 by `date` and finds the row, and must still leave it
+  // out: it belongs to 08-15, one day before the window's own start of 08-17.
   const days = shapeLeagueFeed([GOODMAN_RETRO_IL], ctx, feedWindow('2026-08-19'))
   assert.deepEqual(days, [])
 })
