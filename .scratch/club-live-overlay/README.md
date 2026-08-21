@@ -1,6 +1,6 @@
 # The club's own moves, live over the nightly file
 
-Working notes and probes behind **ADR-0063** and §13 of `docs/transactions-wire.md`.
+Working notes and probes behind **ADR-0064** and §13 of `docs/transactions-wire.md`.
 
 The club Transactions surfaces read `public/data/team-transactions/{season}/{teamId}.json`,
 written by the cron at 07:00 UTC. The home slate's wire reads the endpoint live.

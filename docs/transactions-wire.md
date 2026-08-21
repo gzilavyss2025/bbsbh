@@ -570,7 +570,7 @@ hold the two apart.
 
 ## 13. The club's own page, live over the file — measured 2026-08-21
 
-Settled in ADR-0063. The club surfaces read the nightly file for the season and
+Settled in ADR-0064. The club surfaces read the nightly file for the season and
 lay a **live three-day window** over its newest days, so a move filed at noon
 reaches the club's own page as fast as it reaches the home wire. The cron writes
 those files at 07:00 UTC, so the gap being closed is up to a full day.

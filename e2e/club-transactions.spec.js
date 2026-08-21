@@ -22,7 +22,7 @@ import { test, expect } from './fixtures.js'
 //     back to the Games tab would still pass every content assertion.
 //
 // Data-driven rather than pinned to a club and a date: the file behind it is
-// regenerated nightly, and a live three-day window is laid over it (ADR-0063),
+// regenerated nightly, and a live three-day window is laid over it (ADR-0064),
 // so any hardcoded day ages out.
 
 // Mirrors TeamTransactionsPage.jsx's INITIAL_DAYS.
