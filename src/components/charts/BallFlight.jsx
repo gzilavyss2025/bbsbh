@@ -49,7 +49,11 @@ const carried = (ball) => ball.trajectory !== 'ground_ball' && ball.distance != 
 
 const isHard = (ball) => ball.exitVelo != null && ball.exitVelo >= DEFAULT_HARD_HIT_MPH
 
+// What the play WAS, in words. The feed's own phrase when it sent one; a plain
+// three-way fallback when it did not, so this line is never blank — an empty
+// slot under the name would read as a card that failed to load.
 function outcomeWord(ball) {
+  if (ball.result) return ball.result
   if (ball.homeRun) return 'Home run'
   return ball.hit ? 'Hit' : 'Out'
 }
@@ -153,12 +157,39 @@ function FlightFacts({ ball }) {
   )
 }
 
-function FlightBody({ ball, park, name, code }) {
+// THE HEAD READS DOWNWARD: who, then what he did. The result used to sit
+// opposite the name as the bare denotation alone — "RODRÍGUEZ … 1B" — which
+// puts the one word the card exists to explain in a shorthand you have to
+// already know, at the far end of the line from the name it belongs to. The
+// scorer's mark stays, as a chip beside the plain word rather than instead of
+// it.
+//
+// `onClose` is a REAL flex item in this row, never an absolutely positioned
+// corner: floated over the head it sat on the rule underneath and crowded
+// whatever the result line ended with. The popover passes none, and the row
+// simply closes up.
+function FlightBody({ ball, park, name, code, closeRef, onClose }) {
   return (
     <>
       <div className="bflight__head">
-        <span className="bflight__who">{name}</span>
-        <span className="bflight__code">{code || outcomeWord(ball)}</span>
+        <span className="bflight__ttl">
+          <span className="bflight__who">{name}</span>
+          <span className="bflight__result">
+            <span className="bflight__outcome">{outcomeWord(ball)}</span>
+            {code && <span className="bflight__code">{code}</span>}
+          </span>
+        </span>
+        {onClose && (
+          <button
+            ref={closeRef}
+            type="button"
+            className="bflight__close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        )}
       </div>
       <FlightPlot ball={ball} park={park} />
       <FlightFacts ball={ball} />
@@ -234,7 +265,7 @@ export function BallFlight({ ball, batter, code = '' }) {
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setAnchor(null), HIDE_DELAY_MS)
   }
-  const label = `Ball flight for ${name || 'this at-bat'}${code ? `, ${code}` : ''}`
+  const label = `Ball flight for ${name || 'this at-bat'}, ${outcomeWord(ball)}`
   const pos = anchor
     ? hoverCardPosition(anchor, { width: window.innerWidth, height: window.innerHeight }, {
         width: CARD_WIDTH,
@@ -286,16 +317,14 @@ export function BallFlight({ ball, batter, code = '' }) {
               for a keyboard, which needs a real focus target. */}
           <div className="scrim scrim--center" onClick={() => setOpen(false)}>
             <div className="bflight bflight--modal" role="dialog" aria-modal="true" aria-label={label}>
-              <button
-                ref={closeRef}
-                type="button"
-                className="bflight__close"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-              <FlightBody ball={ball} park={park} name={name} code={code} />
+              <FlightBody
+                ball={ball}
+                park={park}
+                name={name}
+                code={code}
+                closeRef={closeRef}
+                onClose={() => setOpen(false)}
+              />
             </div>
           </div>
         </ModalPortal>

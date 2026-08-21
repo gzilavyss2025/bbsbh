@@ -392,3 +392,34 @@ test('the flight reads the LAST tracked ball on the play, not the first', () => 
   assert.equal(ball.hit, true)
   assert.deepEqual({ x: ball.x, y: ball.y }, hitCoordToSvg(60.5, 90.25))
 })
+
+// The card LEADS with the plain word, because a scorebook denotation is a
+// shorthand the reader has to already know — "1B" says nothing to someone who
+// has never kept score, and a card you point at to understand a play cannot
+// answer in cipher. The feed's own `result.event` is that word, so nothing here
+// invents a vocabulary that could drift from the prose on the at-bat card.
+test('the flight carries the feed\'s own words for the play', () => {
+  const plays = FEED.liveData.plays.allPlays
+  const results = new Set()
+  for (const play of plays) {
+    const one = selectPlayBattedBall(play)
+    if (!one) continue
+    assert.equal(one.result, play.result.event)
+    assert.ok(one.result, `every batted ball should name its result, ${play.result.eventType} did not`)
+    results.add(one.result)
+  }
+  // The fourteen distinct phrases this real game sends — plain English, every
+  // one of them, and short enough to sit on one line beside the denotation.
+  assert.equal(results.size, 14)
+  for (const word of ['Single', 'Groundout', 'Home Run', 'Grounded Into DP', 'Sac Fly']) {
+    assert.ok(results.has(word), `expected the game to include a ${word}`)
+  }
+
+  // A feed that sends no phrase still gets a card; the component's own fallback
+  // is what speaks then, and this is the null it has to handle.
+  const bare = selectPlayBattedBall({
+    result: {},
+    playEvents: [{ hitData: { coordinates: { coordX: 60.5, coordY: 90.25 } } }],
+  })
+  assert.equal(bare.result, '')
+})

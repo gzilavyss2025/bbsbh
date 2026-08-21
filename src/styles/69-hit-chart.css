@@ -648,26 +648,90 @@
 }
 
 .bflight--modal {
-  position: relative;
   /* Wider than the popover: a sheet is the whole screen's attention, and the
-     drawing is the point of it. The head reserves the corner the close button
-     sits in, so a long denotation can never end up underneath it. */
+     drawing is the point of it. */
   width: 340px;
   animation: fade var(--dur-med) var(--ease-out);
 }
 
-.bflight--modal .bflight__head {
-  padding-right: 30px;
+/* THE HEAD IS A ROW OF REAL ITEMS — title block, then the close button. Nothing
+   in it is floated over anything else: the close button used to be absolutely
+   positioned in the corner, which put a 28px circle down on the rule under the
+   head and hard against whatever the result line ended with. As a flex item it
+   sits IN the row, the rule runs clear underneath all of it, and the popover —
+   which has no close button — simply closes the row up. */
+.bflight__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-bottom: var(--bw-hair) solid var(--border-hairline);
+  padding-bottom: 9px;
 }
 
-/* Small, and out of the drawing's way. Tapping anywhere on the sheet already
-   dismisses it (BallFlight.jsx); this is the affordance for a pointer that
-   expects a corner control, and the real focus target a keyboard needs. */
+.bflight__ttl {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bflight__who {
+  font-family: var(--font-display);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-small);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-solid);
+  color: var(--text-heading);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* What he did, under his name: the plain word first, the scorer's mark beside
+   it. A denotation alone ("1B") is a shorthand the reader has to already know,
+   and this card exists to be understood at a glance. */
+.bflight__result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bflight__outcome {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--ls-label);
+  line-height: var(--lh-solid);
+  color: var(--text-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The scorer's own denotation, in his own hand — the mono face every other
+   scorebook mark in the app is set in, on the paper chip the scorecard sheet
+   gives it. */
+.bflight__code {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: var(--w-bold);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--ls-title);
+  line-height: var(--lh-solid);
+  color: var(--text-body);
+  background: var(--surface-inset);
+  border: var(--bw-hair) solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  padding: 2px 5px;
+}
+
+/* Tapping anywhere on the sheet already dismisses it (BallFlight.jsx); this is
+   the affordance for a pointer that expects a corner control, and the real
+   focus target a keyboard needs. */
 .bflight__close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
+  flex: 0 0 auto;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -677,38 +741,6 @@
   font-size: var(--fs-small);
   line-height: var(--lh-solid);
   cursor: pointer;
-}
-
-.bflight__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-  border-bottom: var(--bw-hair) solid var(--border-hairline);
-  padding-bottom: 8px;
-}
-
-.bflight__who {
-  font-family: var(--font-display);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-small);
-  letter-spacing: var(--ls-title);
-  color: var(--text-heading);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* The scorer's own denotation, in his own hand — the mono face every other
-   scorebook mark in the app is set in. */
-.bflight__code {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-weight: var(--w-bold);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--ls-title);
-  color: var(--text-caption);
 }
 
 .bflight .bflight__field {

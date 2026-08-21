@@ -197,6 +197,14 @@ export function selectPlayBattedBall(play) {
     return {
       hit: HIT_EVENT_TYPES.has(eventType),
       homeRun: eventType === HOME_RUN_EVENT_TYPE,
+      // The feed's own short phrase for what the play WAS — "Single",
+      // "Groundout", "Grounded Into DP", "Sac Fly" (`result.event`, verified
+      // against gamePk 823427's fourteen distinct values). The card leads with
+      // it because a scorebook denotation is a shorthand you have to already
+      // read: "1B" means nothing to someone who has not kept score, and the
+      // whole point of this card is that it can be pointed at and understood.
+      // The denotation still rides beside it, for the reader who does.
+      result: play?.result?.event ?? '',
       exitVelo: hitData?.launchSpeed ?? null,
       launchAngle: hitData?.launchAngle ?? null,
       distance: hitData?.totalDistance ?? null,
