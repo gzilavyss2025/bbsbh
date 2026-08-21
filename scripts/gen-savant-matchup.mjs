@@ -33,7 +33,7 @@
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { writeJsonAtomic } from './lib/io.js'
-import { fetchCustomBoard, meanSd, num, round1 } from './lib/savant.mjs'
+import { fetchCustomBoard, fetchArsenalBoard, meanSd, meanSdGrouped, num, round1 } from './lib/savant.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const out = join(here, '..', 'public', 'data', 'savant-matchup.json')
@@ -141,8 +141,113 @@ if (!Object.keys(bat).length || !Object.keys(pit).length) {
   process.exit(1)
 }
 
-await writeJsonAtomic(out, { season, generatedAt: new Date().toISOString(), minPa: MIN_PA, league, bat, pit })
+// ---------------------------------------------------------------------------
+// Family C — the arsenal matchup. A level deeper than the two axes above: the
+// same hitter and pitcher, on ONE PITCH TYPE, joined on Savant's
+// pitch-arsenal-stats board (player_id, pitch_type) — identical columns for
+// both roles, same as the custom board. See docs/callouts.md, "Matchup
+// callouts", and src/api/matchup/arsenal.js's header for the note builder.
+//
+// WHIFF IS THE ONLY SCORED METRIC. A hitter has a median 36 PA against one
+// pitch type — batting average there is 12% real skill by an exact binomial
+// model; whiff is ~84%, because its denominator is PITCHES SEEN (median 149),
+// not PA. `ba` is carried on the batter row for display color only, never
+// scored and never compared to a baseline.
+const PITCH_USAGE_MIN = 15 // percent of a pitcher's OWN pitches — "a pitch he throws 4% of the time isn't what this at-bat is about"
+const PITCH_THROWN_MIN = 150 // pitches thrown, gates a pitcher's own pitch rows
+const BATTER_PA_MIN = 40 // plate appearances vs one pitch type, gates a hitter's rows (the payload-size floor, docs/scratch spec)
+// Regression weight, in PITCHES SEEN — whiff is already ~94% stable, so it
+// barely needs regressing toward the pitch type's own league mean. K=200
+// collapsed the prototype to 3 notes across 6 games and lost every good one;
+// K=50 gave 9, about 1.5 a game — the right volume for a 2-5 slot surface.
+const WHIFF_REGRESS_K = 50
+
+const regress = (raw, n, leagueMean) =>
+  leagueMean == null ? raw : (raw * n + leagueMean * WHIFF_REGRESS_K) / (n + WHIFF_REGRESS_K)
+
+const [pitArsenalRows, batArsenalRows] = [
+  await fetchArsenalBoard('pitcher', { season }),
+  await fetchArsenalBoard('batter', { season }),
+]
+
+// Per-pitch-type league whiff baseline, one board per role — computed from
+// Savant's own min=10 population, NOT the app's stricter gates below, same
+// "each side scored against its own board" rule the skill/style families use.
+const arsenalLeague = {
+  pit: meanSdGrouped(pitArsenalRows, 'pitch_type', 'whiff_percent'),
+  bat: meanSdGrouped(batArsenalRows, 'pitch_type', 'whiff_percent'),
+}
+
+// Gate the PITCH, not just the players: a pitcher's own row for a pitch type
+// only counts once it's a real part of his repertoire.
+function pitcherArsenalMap(rows) {
+  const map = {}
+  for (const r of rows) {
+    const id = r.player_id
+    const type = r.pitch_type
+    if (!id || !type) continue
+    const usage = num(r.pitch_usage)
+    const pitches = num(r.pitches)
+    const whiff = num(r.whiff_percent)
+    if (usage == null || pitches == null || whiff == null) continue
+    if (usage < PITCH_USAGE_MIN || pitches < PITCH_THROWN_MIN) continue
+    const lg = arsenalLeague.pit[type]?.m
+    if (!map[id]) map[id] = {}
+    map[id][type] = { usage: round1(usage), whiff: round1(regress(whiff, pitches, lg)) }
+  }
+  return map
+}
+
+// A single global "pitches seen" floor makes this ALL FASTBALL — a splitter
+// specialist's batters never clear a floor tuned for four-seamers. The
+// regression above (toward the TYPE's own mean, weighted by pitches seen)
+// is what keeps a thin-sample curveball or sweeper row honest instead of
+// excluding it outright; the flat PA_MIN here is the payload-size floor only.
+function batterArsenalMap(rows) {
+  const map = {}
+  for (const r of rows) {
+    const id = r.player_id
+    const type = r.pitch_type
+    if (!id || !type) continue
+    const pa = num(r.pa)
+    const pitches = num(r.pitches)
+    const whiff = num(r.whiff_percent)
+    const ba = num(r.ba)
+    if (pa == null || pitches == null || whiff == null || pa < BATTER_PA_MIN) continue
+    const lg = arsenalLeague.bat[type]?.m
+    if (!map[id]) map[id] = {}
+    map[id][type] = {
+      whiff: round1(regress(whiff, pitches, lg)),
+      ba: ba == null ? null : Math.round(ba * 1000) / 1000,
+      pa,
+    }
+  }
+  return map
+}
+
+const arsenal = { pit: pitcherArsenalMap(pitArsenalRows), bat: batterArsenalMap(batArsenalRows) }
+
+let arsenalThin = 0
+for (const [group, rows] of [['pit', pitArsenalRows], ['bat', batArsenalRows]]) {
+  const filled = rows.filter((r) => num(r.whiff_percent) != null).length
+  if (filled < rows.length / 2) {
+    console.error(`WARNING: arsenal.${group}.whiff is ${filled}/${rows.length} filled — selection id may have changed`)
+    arsenalThin++
+  }
+}
+
+if (!Object.keys(arsenal.pit).length || !Object.keys(arsenal.bat).length) {
+  console.error('no qualified arsenal rows on one or both boards — leaving the previous file alone')
+  process.exit(1)
+}
+
+league.arsenal = arsenalLeague
+
+await writeJsonAtomic(out, {
+  season, generatedAt: new Date().toISOString(), minPa: MIN_PA, league, bat, pit, arsenal,
+})
 console.log(
   `wrote ${out} (${Object.keys(bat).length} batters, ${Object.keys(pit).length} pitchers, ` +
-  `${thin} thin metrics, ${drifted} drifted)`,
+  `${Object.keys(arsenal.bat).length} arsenal batters, ${Object.keys(arsenal.pit).length} arsenal pitchers, ` +
+  `${thin} thin metrics, ${drifted} drifted, ${arsenalThin} thin arsenal metrics)`,
 )

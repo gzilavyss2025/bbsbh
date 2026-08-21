@@ -103,6 +103,24 @@ export async function fetchCustomBoard(type, { season, selections, min = 25, att
   })
 }
 
+// Savant's `pitch-arsenal-stats` leaderboard — a direct per-pitch-type join,
+// one row per (player_id, pitch_type), identical columns for both roles. Feeds
+// gen-savant-matchup.mjs's Family C (a hitter against one specific pitch).
+// `min` is Savant's own PA/pitches floor on the response; the generator
+// re-applies its own, stricter, per-role floors on top of what comes back.
+export async function fetchArsenalBoard(type, { season, min = 10, attempts = 4 }) {
+  const url =
+    `https://baseballsavant.mlb.com/leaderboard/pitch-arsenal-stats` +
+    `?type=${type}&pitchType=&year=${season}&team=&min=${min}&csv=true`
+  return withRetry(`Savant arsenal ${type}`, attempts, async () => {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const rows = csvObjects(await res.text())
+    if (!rows.length) throw new Error('empty response')
+    return rows
+  })
+}
+
 // Savant refuses a cold connection often enough that a single-shot nightly job
 // fails on it — observed repeatedly on 2026-08-20 as a 10s connect timeout that
 // succeeded on the immediate retry. Linear backoff, and the LAST failure is
@@ -133,6 +151,28 @@ export function meanSd(rows, key, minRows = 50) {
   const m = v.reduce((a, b) => a + b, 0) / v.length
   const sd = Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / v.length)
   return sd > 0 ? { m: round1(m), sd: round1(sd), n: v.length } : null
+}
+
+// meanSd, GROUPED by another column — the arsenal board's per-pitch-type
+// league baseline, one meanSd() per group. A lower default minRows than
+// meanSd's own 50: split-finger has only ~79 qualified pitchers leaguewide, and
+// a per-type baseline has to exist for the thin pitch types or their notes can
+// never build — the exact "all fastball" trap gen-savant-matchup.mjs's own
+// tuning constants exist to avoid.
+export function meanSdGrouped(rows, groupKey, valueKey, minRows = 15) {
+  const byGroup = new Map()
+  for (const r of rows) {
+    const g = r[groupKey]
+    if (!g) continue
+    if (!byGroup.has(g)) byGroup.set(g, [])
+    byGroup.get(g).push(r)
+  }
+  const out = {}
+  for (const [g, groupRows] of byGroup) {
+    const stat = meanSd(groupRows, valueKey, minRows)
+    if (stat) out[g] = stat
+  }
+  return out
 }
 
 // One decimal is the storage precision. DISPLAY rounds to whole percentages
