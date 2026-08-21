@@ -46,7 +46,11 @@ export function SimilarPitchers({ similar }) {
     <SimilarPlayerGrid
       rows={rows}
       measure={MEASURE}
-      note="What he throws, not how he fares with it."
+      // What the ranking deliberately leaves out: his ARSENAL, not his
+      // OUTCOMES. Used to be a full sentence ("What he throws, not how he
+      // fares with it.") that read as ad copy beside two terse chips — one
+      // word says the same thing in the legend's own idiom.
+      excludes="Results"
     />
   )
 }

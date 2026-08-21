@@ -106,6 +106,20 @@
   color: var(--accent-primary);
   white-space: nowrap;
 }
+/* The second legend row — what the ranking leaves out — sits right under the
+   first with less air between the two than the block above the pair, so
+   "Measured on" and "Not" read as one two-line legend rather than a chip row
+   plus an unrelated caption. */
+.simlike__measure--excludes {
+  margin-top: 4px;
+}
+/* Graphite, not navy: this is the one chip that names an EXCLUDED term, and
+   giving it the same ink as the scored terms above would say the model
+   weighs it too. */
+.simlike__term--muted {
+  border-color: var(--border-rule);
+  color: var(--text-muted);
+}
 
 .simlike__list {
   list-style: none;
@@ -244,25 +258,6 @@
   font-weight: var(--w-semibold);
   color: var(--text-muted);
 }
-/* The caveat, as the legend's second line — a claim and its limit, read
-   together rather than a ruled-off warning under it. Once the terms above
-   were their own chips, a second hairline rule made the caveat look like a
-   third disclaimer stacked under two others; italic is enough to mark it as
-   an aside on the chips rather than more of the same statement, the way a
-   sportswriter's parenthetical reads lighter than the sentence around it.
-   Kept in the interface sans (not the reading serif) because it's still app
-   chrome inside a band, not narrative copy. */
-.simlike__note {
-  margin: 6px 0 0;
-  font-family: var(--font-body);
-  font-size: var(--fs-caption);
-  font-weight: var(--w-regular);
-  font-style: italic;
-  letter-spacing: var(--ls-text);
-  line-height: var(--lh-snug);
-  color: var(--text-muted);
-}
-
 /* Past the player page's own breakpoint (see 26-player-page.css) a third of
    the column is ~300px, not ~115px. Everything steps up a rung together. */
 @media (min-width: 740px) {
@@ -279,9 +274,6 @@
   }
   .simlike__term {
     padding: 3px 10px;
-    font-size: var(--fs-small);
-  }
-  .simlike__note {
     font-size: var(--fs-small);
   }
   .simlike__list {
