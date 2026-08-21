@@ -170,12 +170,17 @@ function emphasizeLabel(label, emphasis, playerId) {
 
 // The second sentence of an IL placement's own description, if any — "Right
 // shoulder inflammation." — the feed's own injury note, not invented flavor.
+//
+// Splits on the FIRST SENTENCE'S OWN END ("injured list.") rather than on
+// every ". " in the description — a naive split breaks on any abbreviation
+// period in the leading club's own name ("St. Louis Cardinals", "St. Paul
+// Saints", "St. Lucie Mets" — three affiliates spread across three levels),
+// which reads "St." as sentence one and turns the club's own remaining name
+// into a fabricated "reason": "(louis Cardinals placed RHP Some Guy on the
+// 15-day injured list)" instead of the real injury note, or nothing at all.
 function ilReason(description) {
-  const parts = (description || '')
-    .split(/\.\s+/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-  return parts.length > 1 ? parts[1] : null
+  const reason = (description || '').match(/injured list\.\s*(.+)/i)?.[1]?.trim()
+  return reason || null
 }
 
 // ---------------------------------------------------------------------------

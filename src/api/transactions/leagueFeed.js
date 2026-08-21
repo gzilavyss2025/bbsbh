@@ -38,6 +38,8 @@
 // hours" (probe-retro-il.mjs).
 import { getJson } from '../statsapi.js'
 import { addDays, toApiDate } from '../../lib/dates.js'
+import { fetchTeams } from '../schedule.js'
+import { SPORT_IDS } from '../../lib/teams.js'
 import { groupLeagueWide, leagueCandidateIds } from './league.js'
 // The thirty club ids, bundled rather than fetched — this is the same table
 // every logo and colour in the app already reads, and its `identity/overlay.js`
@@ -69,6 +71,31 @@ import MLB_TEAM_COLORS_JSON from '../../lib/data/mlb-team-colors.json' with { ty
 export const WINDOW_DAYS = 3
 export const FETCH_DAYS = 5
 
+// A MiLB level has the same thirty clubs an MLB level does, but far fewer of
+// its rows clear `filterStoryworthy` — an undebuted signing isn't suppressed
+// there (see `windowConfigFor` below), yet AA/A+/A still run a fifth of MLB's
+// volume: `.scratch/milb-wire/backtest.md` replays a live 25-day pull through
+// this module's own `groupLeagueWide` and finds AAA already close to MLB's
+// three-day range (37 vs. 43 stories) but AA/A+/A well short of it (13-16).
+// Widening only those three levels to 7/9 pulls them within reach (45/34/31)
+// without lengthening AAA past what it needs. Re-run that backtest before
+// changing either level's window, same rule `WINDOW_DAYS`'s own header sets.
+const MILB_WINDOW_DAYS = 7
+const MILB_FETCH_DAYS = 9
+const WIDE_WINDOW_SPORT_IDS = new Set([SPORT_IDS.AA, SPORT_IDS['A+'], SPORT_IDS.A])
+
+function windowConfigFor(sportId) {
+  return WIDE_WINDOW_SPORT_IDS.has(sportId)
+    ? { windowDays: MILB_WINDOW_DAYS, fetchDays: MILB_FETCH_DAYS }
+    : { windowDays: WINDOW_DAYS, fetchDays: FETCH_DAYS }
+}
+
+// The number the two presentations' copy reads off — "Last N days" — so
+// neither hardcodes MLB's 3 and both stay correct on the wider AA/A+/A window.
+export function windowDaysFor(sportId) {
+  return windowConfigFor(sportId).windowDays
+}
+
 const MLB_TEAM_IDS = Object.keys(MLB_TEAM_COLORS_JSON).map(Number)
 
 // Same manual y/m/d parse and local-midnight normalisation the rest of
@@ -80,13 +107,16 @@ function shiftApiDate(apiDate, n) {
 }
 
 // `{ fetchStart, windowStart, endDate }` — what to ask the endpoint for, and
-// what to keep once it answers. Exported so the trim and the request can be
-// tested without a network.
-export function feedWindow(endDate) {
+// what to keep once it answers. `sportId` defaults to MLB so `clubFeed.js`
+// (always an MLB org's own page) and the existing tests keep reading the 3/5
+// day window with no second argument. Exported so the trim and the request
+// can be tested without a network.
+export function feedWindow(endDate, sportId = SPORT_IDS.MLB) {
+  const { windowDays, fetchDays } = windowConfigFor(sportId)
   return {
     endDate,
-    windowStart: shiftApiDate(endDate, -(WINDOW_DAYS - 1)),
-    fetchStart: shiftApiDate(endDate, -(FETCH_DAYS - 1)),
+    windowStart: shiftApiDate(endDate, -(windowDays - 1)),
+    fetchStart: shiftApiDate(endDate, -(fetchDays - 1)),
   }
 }
 
@@ -152,6 +182,22 @@ export async function fetchPeople(ids, signal) {
   return { positions, debutedIds }
 }
 
+// The club-id set a level's stories are owned by, plus the affiliate fold-up
+// (MLB only). At MLB, a row owned by an affiliate rolls up to its parent org
+// (`assignRowOwners`'s `affilToOrg`) — that's the whole reason the wire reads
+// as thirty ORGANIZATIONS' news. A MiLB level has no parent to roll up TO: its
+// own thirty clubs are already the top of the set `assignRowOwners` walks, so
+// `affilToOrg` is omitted rather than reused — passing the MLB map here would
+// fold a Triple-A club's own story up into its big-league parent, which is
+// backwards for a page headed by that Triple-A club's own slate.
+async function scopeFor(sportId) {
+  if (sportId === SPORT_IDS.MLB) {
+    return { mlbTeamIds: MLB_TEAM_IDS, affilToOrg: await fetchAffiliateParentMap() }
+  }
+  const teams = await fetchTeams(sportId)
+  return { mlbTeamIds: teams.map((t) => t.id) }
+}
+
 // The card's whole load. Two round trips deep, because the `/people` call
 // cannot name its ids until the transactions call has answered — measured at
 // 52 ms + 106 ms for a four-day window (640 rows, 114 ids, two batches).
@@ -160,17 +206,28 @@ export async function fetchPeople(ids, signal) {
 // rows that survive the storyworthy filter takes the id list to about a third
 // of a naive prefilter's, and builds exactly the same stories (see its own
 // header for why that is safe rather than merely lucky).
-export async function fetchLeagueMoves(endDate, { signal } = {}) {
-  const window = feedWindow(endDate)
-  const [rows, affilToOrg] = await Promise.all([
+//
+// `debutedIds` rides along on the same `/people` batch at every level (it
+// costs nothing extra — `fetchPeople` already reads it off the response for
+// the position fallback), but it's folded into the org-scoped ctx ONLY for
+// MLB. `isUndebutedSigning` (vocabulary.js) suppresses a signing whose person
+// has no MLB debut — the right call when the alternative is anonymous
+// organizational filler on the MLB-org-scoped wire, and the wrong one at a
+// MiLB level, where an undebuted signee IS the level's actual roster and
+// suppressing him would silence nearly every SFA/SGN/IFA row.
+export async function fetchLeagueMoves(endDate, sportId = SPORT_IDS.MLB, { signal } = {}) {
+  const window = feedWindow(endDate, sportId)
+  const [rows, scope] = await Promise.all([
     getJson(
       `/api/v1/transactions?startDate=${window.fetchStart}&endDate=${window.endDate}`,
       { signal },
     ).then((data) => data.transactions ?? []),
-    fetchAffiliateParentMap(),
+    scopeFor(sportId),
   ])
 
-  const scope = { mlbTeamIds: MLB_TEAM_IDS, affilToOrg }
   const people = await fetchPeople([...leagueCandidateIds(rows, scope)], signal)
-  return shapeLeagueFeed(rows, { ...scope, ...people }, window)
+  const ctx = sportId === SPORT_IDS.MLB
+    ? { ...scope, ...people }
+    : { ...scope, positions: people.positions }
+  return shapeLeagueFeed(rows, ctx, window)
 }

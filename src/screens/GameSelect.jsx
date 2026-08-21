@@ -117,7 +117,10 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
   // (WireDock). Either way the games keep the fold. Both draw a move through
   // MoveRow.jsx — the rail asks for its compact variant.
   const wide = useMediaQuery(WIDE_QUERY)
-  const showWire = isToday && sportId === SPORT_IDS.MLB
+  // Every level gets the wire, not just MLB (issue #772's own scope grew to
+  // cover it) — a level's own thirty clubs own their stories directly rather
+  // than rolling up to an MLB parent; see leagueFeed.js's `scopeFor`.
+  const showWire = isToday
   // The dock renders nothing on a quiet window, and only IT knows that (the
   // answer arrives with the fetch). It reports back so the slate pads its floor
   // for a rail that actually exists — see .screen--wiredock in
@@ -899,7 +902,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
             the phone's copy of this feed is the dock at the foot of this
             screen. See WireRail.jsx. */}
         {showWire && wide && (
-          <WireRail endDate={dateStr} onPresence={setRailPresent} fitTo={gamesColRef} />
+          <WireRail endDate={dateStr} sportId={sportId} onPresence={setRailPresent} fitTo={gamesColRef} />
         )}
       </div>
 
@@ -947,7 +950,7 @@ export function GameSelect({ date = null, sportId = SPORT_IDS.MLB, onPick, onSho
           which keeps the slate's own content ahead of it for a screen reader.
           It publishes --wire-rail-h and reports whether it rendered at all;
           `docked` above turns that into the screen's bottom padding. */}
-      {showWire && !wide && <WireDock endDate={dateStr} onPresence={setDockPresent} />}
+      {showWire && !wide && <WireDock endDate={dateStr} sportId={sportId} onPresence={setDockPresent} />}
     </div>
   )
 }
