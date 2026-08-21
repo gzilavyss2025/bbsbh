@@ -223,3 +223,262 @@ now default `through` to `-1`: nothing revealed. A forgotten option draws the
 blank card, which is the product anyway. The Lab says `{ through: Infinity }` out
 loud, and `test/scorecard-game.test.js` pins both halves — that a caller with no
 clamp gets an empty card, and that the full card still draws when asked for.
+
+## Amendment (2026-08-21): one row per slot, and the marks a scorer actually draws
+
+Six changes, all from reading the live sheet against a real game (gamePk
+823747, 2026-08-20 SEA@MIL) and against a #22 in hand. Four are notation, two
+are the page.
+
+**A slot is ONE row, however many men bat in it.** The sheet used to open a
+fresh row of the grid for every occupant — the starter, then a row of his own
+for each substitute. That is not what a scorer does and it read badly: every
+starter who was ever lifted left a full-height band of empty boxes under his
+line, and his replacement's at-bats sat a row below the inning they belong to.
+The rail STACKS a written line per occupant instead (`slot.lines` — his name,
+his position, his number, his own AB/H/R/RBI, stacked in step in the Pos and
+summary columns through a shared `--sc-line-h`), and the boxes stay one row. A
+column holds one card for the slot no matter who batted it, so `slot.cells` was
+always the right shape; the per-occupant `rows` split was the mistake.
+
+`ScorecardSheet` renders `SLOTS.map` to exactly nine `<tr>`, and the frontier
+seal no longer needs an `isLast` test to find the current occupant's row —
+there is only one.
+
+**Two handover marks, both on the ARRIVING box.** With one row per slot there
+is no outgoing row left to rule off, so the mark moved to where the change
+takes effect, which is also where a scorer draws it:
+
+- the **substitution mark** (`subMarks`) — the incoming batter's number, on the
+  first box he bats in;
+- the **pitching change** (`pitcherMarks`) — new, and the sheet was simply
+  missing it. The opposing club's arms changed several times a game and nothing
+  said so. The incoming pitcher's number, on the box of the first batter he
+  faces.
+
+Both draw the same way (`.sc-sub`): a red rule across the box's top edge with
+the number above it, pitcher's first. The mark takes NO layout — the box under
+it is a real plate appearance now — so it is absolutely positioned and the
+numbers hang into the bottom-left of the box above, which is blank on every box
+the sheet draws (the out circle and the end-of-inning slash both live in the
+bottom RIGHT). A double switch sets both on one box and they read left to
+right.
+
+The pitching change is found by walking every card on the side **in
+`atBatIndex` order, never column order** — an inning that batted around widens
+into sub-columns whose left-to-right order is per-slot, and walking columns
+hands a reliever's mark to whichever sub-column sorted first rather than to the
+batter who actually led off against him. The starter takes no mark (the first
+card only sets the comparison), and a placed runner carries no pitcher, so he
+neither draws one nor breaks the chain across the half he opens.
+
+Both live in `api/scorecard/handover.js`, classified **spoiler-free** and
+meaning it: they are pure functions over cards the caller has already clamped,
+and neither can produce a mark for a card it was not handed. A sealed half
+yields no marks by construction, not by a check either function has to
+remember.
+
+**The out circle inks red.** Counting outs is what you do most on a live sheet,
+so the ringed 1/2/3 takes the app's second ink (`--accent-negative`, 5.05:1 on
+`--surface-card`) and the notation around it stays pencil.
+
+**WP/LP/SV carry their figure.** Each pitcher of record now reads the way a box
+score writes him — `Chad Patrick (7-4)`, `Trevor Megill (23)` — off his own
+boxscore `seasonStats.pitching`, which include tonight.
+`api/scorecard/decisions.js` is **caller-gated**: it takes
+`scorecardScoreboard`'s own `done` (Final AND fully revealed, the same flag the
+FINAL block waits on) and returns empty strings until then. Which pitcher won
+is as score-revealing as the score. A missing line degrades to a bare name; the
+screen builds the brackets only around a figure that exists, so `()` can never
+render.
+
+**The sheet runs the window on desktop.** A #22 in your hands is a wide piece of
+paper — you take the whole order and most of the game in at once, and the zoom
+control exists because a phone cannot. From 740px up the whole scorecard (header
+band, grid and footer trio — one printed page, not a grid with chrome around it)
+steps out of the app's 960px reading column and runs gutter to gutter. Classic
+negative-margin full-bleed; `+ var(--app-gutter)` both keeps a page margin and
+covers the classic scrollbar's share of `100vw`, without which the PAGE gained a
+horizontal scrollbar, which is the one thing a sheet must never do. The phone is
+untouched.
+
+**The page is a page, and it is centred.** The full-bleed alone left the
+scorecard reading as a banner laid across a desk: the header's two heavy rules
+and the footer trio ran on past the last summary column, and the whole thing sat
+pinned to the left gutter. A #22's printed rules stop where its COLUMNS stop, so
+the grid now reports the width it drew — Player + Pos + the innings +
+AB/H/R/RBI, hairlines included, at whatever zoom is showing — and the header
+band, the footer trio and the grid's own frame all cap to it and take `auto`
+side margins.
+
+Measured, not calculated from the `--sc-*` tokens, for exactly the reason the
+zoom floor is: the per-column hairlines are not in the tokens. `ScorecardSheet`
+already measured the table for the floor, so it reports the same rect up through
+an `onWidth` callback and `Scorecard.jsx` sets `--sc-sheet-w` on `.scorecard`.
+Capped `min(var(--sc-sheet-w), 100%)`, which is what keeps the phone out of it:
+there the grid is far WIDER than the column it is read in — that is what the
+zoom control is for — and a band held to the grid's width would run off the
+screen. Below the breakpoint the cap resolves to 100% and the auto margins have
+nothing to divide.
+
+**The backwards K moved to the middle of the diamond.** A called third strike is
+still a strikeout: the outcome box reads SO like every other one, and what tells
+it apart is the ꓘ drawn where the K goes. It used to take the outcome box
+INSTEAD of the SO, which left the sheet's one column of out categories with a
+hole in it and put the strikeout's own notation nowhere. Written in `atBatMarks`
+rather than read off the feed, since `code` is often empty on a called strike
+(entriesView's `atbat.code || 'K'` is the same workaround one layer up).
+
+**The AB/H/R/RBI figures centre in their columns**, tabular and hung off the
+row's top edge like the rail beside them, so a slot's stacked lines read
+straight across: name, position, then his four figures, each on his own line.
+
+**A CSS trap, and it was a real bug.** `.sc-sheet__name` was `display: flex`. A
+flexed `<td>` stops behaving like a cell — it shrinks to its content's height
+instead of stretching to the row's — and since this is the STICKY rail, the
+part of the row its background no longer covered was a window the inning
+columns scrolled *through*: pan right and the grid visibly ran under the names.
+The cell is a plain table cell again and the written lines inside it do the
+flexing. Same family as the strip/slash trap above: a rule that computes fine
+and paints wrong.
+
+Two file caps came due in the same work (ADR-0038). `scorecardGame.js` shed
+`scorecard/handover.js` and `scorecard/decisions.js`; `41-scorecard.css` split
+three ways and moved to `src/styles/scorecard/` (`grid.css`, `box.css`,
+`page.css`, imported in that order, which is the order the one file read top to
+bottom), which also took `src/styles` back under its own directory budget.
+
+## Amendment (2026-08-21): the page, the foot row, and a type audit
+
+A second read of the live sheet, same game (823747). Five more.
+
+**The two handover marks rule different edges.** Both were drawn across the top
+in the round above, which was wrong about the batting-order one. A slot's men
+share ONE row of boxes, so the change between them cuts ALONG that row — left to
+right, trip by trip — and a scorer closes the previous man off with a rule down
+the LEFT EDGE of the box the new man takes over. That is where it stands now
+(`.sc-sub--batter`), the incoming number riding the rule at mid-height on a
+small paper chip so it stays legible where the diamond's left vertex reaches
+under it. The PITCHING change cuts across the order rather than along it, so it
+keeps the top edge (`.sc-sub--pitcher`), number above the rule. A double switch
+sets both on one box and they cannot collide: one is vertical at the left, the
+other horizontal along the top.
+
+**The foot row is a real `<tfoot>`, and only now does it pin.** The comment
+above it had claimed for months that it was "pinned to the pane's bottom edge";
+it never was. It was the last `<tr>` of the tbody with `position: sticky; bottom:
+0` on its cells, and a sticky table CELL is clamped by its own ROW — there was
+nowhere for `bottom: 0` to move it to, so the line simply scrolled away with the
+grid. Sticking the ROW GROUP is the shape browsers honour. Where a browser does
+not, the row still renders in place unpinned, which is what it did before.
+
+**It says what it counts.** P / WH / FO across a three-column grid in the rail
+became PITCHES · WHIFFS · FOULS, one run of small caps. The initials were the
+printed sheet's shorthand for a scorer who already knows the sheet, and the
+3-column grid was matched to the three figures in each inning column — which
+never lined up anyway, the rail and an inning column being different widths.
+
+**THE PAGE is one cream plate.** `.scorecard` is now only the ROOM the sheet may
+run into; `.scorecard__page` inside it is the sheet — capped to the grid's drawn
+width, centred, and painted `--bg-page`, the app's own "standard page" cream and
+already what the grid's sticky top and foot bands use. It is a shade deeper than
+the cells above it, so the grid still reads as raised. Opaque is the point: the
+body's 24px graph-paper ruling showed through every gap between header, grid and
+footer, and the three read as three cards on a desk rather than one printed
+page. Two arithmetic notes on the cap, both found by measuring: `box-sizing` is
+border-box here, so the plate's own padding has to be added back or the grid
+loses that much width; and so does the pane's hairline frame, without which the
+last summary column sat 2px over the edge and the sheet panned on a screen it
+otherwise fits.
+
+**A type audit, and it found three real divergences.** Every rule already used
+the `--font-*` role tokens — the drift was in what those roles were given
+alongside them.
+
+- **The backwards K was set in a different FONT.** It was the ꓘ character
+  (U+A4D8, a Lisu letter). JetBrains Mono has no glyph there, so it fell back to
+  whatever system face did, and one mark on a sheet of mono notation was in
+  another typeface. The app's own way of drawing it is a real "K" mirrored in
+  CSS (`.pbp__klooking`, the play-by-play card's same mark), which is what the
+  sheet does now. Its centring had to move from `transform` to the standalone
+  `translate` property first, so the flip has `transform` to itself — the
+  play-by-play's copy learned the same lesson, and its rule says so.
+- **Figures were missing `--ls-num`.** Every numeric run on the sheet — the
+  uniform numbers, the AB/H/R/RBI columns, the foot figures, the TOTALS bar, the
+  pitch pips, the handover numbers — set `--font-mono` without the letter-
+  spacing the app's numeric role carries (`.t-num`, and the shared mono-figure
+  helper the lineup and roster jerseys ride). That is why the sheet's numbers
+  read a shade tighter than the same numbers everywhere else.
+- **The out circle invented its own treatment.** The play-by-play draws this
+  exact mark as `--clay-deep` on a `--clay-soft` plate inside a `--clay` ring;
+  the sheet had clay ink on bare paper. Two surfaces drawing one notation should
+  not each invent a dress for it. 6.2:1.
+
+The outcome codes also took `--ls-title`, matching `.pbp__code`, which renders
+the same scorebook codes one surface over.
+
+And the header's team/manager pair stopped growing: it carries `flex: 1` so it
+is never squeezed on a narrow row, which on a wide one made it absorb all the
+spare space and run two writing lines halfway across the band under a club name
+and a surname. Capped at what the longest of them needs; the slack goes to
+UNIFORMS beside it, whose line genuinely wants the room.
+
+## Amendment (2026-08-21): two pages, two headers
+
+The #22 does not print the same band twice, and the sheet now does not either.
+
+**The visitors' page keeps what is declared once**: the umpire crew, KEEPING
+SCORE BY, and FIRST PITCH — how you are watching this game and when it began,
+neither of which is worth asking for a second time.
+
+**The home club's page takes the game's own particulars**: BALLPARK, WEATHER,
+ATTENDANCE, and the time of the FINAL OUT. Both pages keep the club/manager/
+uniform block, since each page is one club's.
+
+Three of those four are spoiler-free and sit on `scorecardView` beside the
+lineup: a ballpark and a wind reading are known before first pitch, and a
+turnstile count is not a score. **The final out is not**, and the difference is
+worth stating because it is the kind of field that looks harmless. Read against
+FIRST PITCH on the facing page it gives the game's LENGTH, and a long one says
+extra innings — which is the exact fact ADR-0008 spends the whole sheet
+withholding, unlocking one extra column at a time. So it lives in
+`api/scorecard/finalout.js`, **caller-gated**, and takes `scorecardScoreboard`'s
+own `done` — Final AND every played half at or under `through`, the same flag
+the FINAL line waits on. Until then it is a blank line to write on. By the time
+it fills, the reader has walked every half and there is nothing left to tell.
+
+It reads the LAST PLAY's own timestamp, which is literally the final out and
+already carries every rain delay and every extra inning rather than needing them
+added back; a lean feed falls back to first pitch plus playing time plus delay.
+The park's clock, never the reader's — the same game read from another time zone
+must not say a different hour. `boxscore.js` resolves its own end time the same
+way and is reveal-only, so this is a deliberate second reader on one feed path
+rather than an import across the gate.
+
+FINAL OUT is the same write-in field FIRST PITCH is, rings and all, sharing one
+`ClockField`. Its AM/PM pair stacks rather than reading across, which is what
+lets it sit beside its own line instead of pushing the block wider.
+
+**Three smaller things in the same pass.**
+
+- **WP/LP/SV print a surname**, the way the pitcher table above them already
+  does and the way a scorer writes a pitcher onto this sheet. Read off the
+  feed's own name parts, not split from the full name, so a "Jr." or a two-part
+  surname survives; the split is the fallback for a lean feed.
+- **Every player name on the sheet is a `PlayerLink`** — the rail's line per man
+  who batted, the pitcher table, and the three decisions (the defense diamond
+  already was). Each is a door to his page, and on a desktop a hover opens his
+  card on the way. The name itself carries the link class, so the rail keeps the
+  truncation it depends on, and a row with no id falls back to a plain span.
+  `scorecardView`'s pre-pitch lineup gained an `id` for this: it was the one
+  name source on the sheet without one.
+- **The whole batting order fits.** The pane's vertical bound is now whichever
+  is BIGGER: the room the window has, or the height nine slots need. A cap of
+  viewport-minus-chrome alone left an ordinary desktop window a row or two
+  short, so you scrolled INSIDE the lineup to reach the 8 and 9 hitters — the
+  one thing a scorer should never do with a sheet in front of them. The order is
+  a fixed nine rows, so its height is knowable in CSS.
+
+`src/styles/scorecard/` gained `footer.css` at the file cap: page.css now holds
+the header band, the zoom control and the editor, and the footer trio is its
+own partial.

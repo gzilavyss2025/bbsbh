@@ -345,7 +345,7 @@ const BUDGETS = {
   // +1 for 72-club-transactions.css, the club roster-move ledger page. Page-only
   // rules, so folding them into 29-team-transactions.css would put them in the
   // core sheet every other page loads.
-  'src/styles': 99,
+  'src/styles': 97,
   // +1 for gamehighlights.js — the thin static-file reader for the per-team
   // highlight archives, sibling to the live-fetch highlights.js already here.
   // Same reader-next-to-its-topic shape as war.js/jerseys.js/rookies.js.

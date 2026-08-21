@@ -688,6 +688,18 @@
       "class": "cutoff-gated",
       "why": "Every row it returns carries `won`, `runs` and `oppRuns` — one game's line. It adds no fetch of its own and inherits schedule.js's `resultsCutoff`, which is exactly what makes it cutoff-gated rather than spoiler-free: the safety is the DATE the caller asks for, never a property of these rows. Its own header already said so ('gated by fetchTeamSchedule's own resultsCutoff') while the class here claimed the rows were safe at render top-level on any surface. They are not — a caller that renders decided games on a scoring surface prints last night's finals, and nothing here would have objected."
     },
+    "scorecard/decisions.js": {
+      "class": "caller-gated",
+      "why": "The #22 sheet's WP/LP/SV lines — each pitcher of record with his season figure in parentheses. Split off scorecardGame.js at the file cap. Which pitcher won is as score-revealing as the score, so this is safe only for the half its caller has already decided: it takes scorecardScoreboard's own `done` (Final AND every played half at or under `through`, the same flag the FINAL block waits on) and returns nothing but empty strings until that is true. It decides nothing itself; call it with a truthy `done` you have not earned and it will tell the reader who won."
+    },
+    "scorecard/finalout.js": {
+      "class": "caller-gated",
+      "why": "The wall-clock time of the FINAL OUT, for the #22's bottom-page header. Unlike the ballpark, the weather and the attendance beside it — all spoiler-free, all knowable before or during the game — this one read against FIRST PITCH gives the game's LENGTH, and a long one says extra innings, which ADR-0008 spends the whole sheet withholding. It takes scorecardScoreboard's own `done` (Final AND every played half at or under `through`, the same flag the FINAL line waits on) and returns '' until that holds. It decides nothing itself; call it with a `done` you have not earned and it tells the reader the game went long."
+    },
+    "scorecard/handover.js": {
+      "class": "spoiler-free",
+      "why": "The #22 sheet's two handover marks — the red rule and uniform number a scorer draws where the batting order changed, and where the club in the field changed arms. Split off scorecardGame.js at the file cap. Pure functions over cards the CALLER has already clamped: neither reads the feed, the linescore or a reveal mark, and neither can produce a mark for a card it was not handed, so a sealed half yields no marks by construction. A jersey number is not a score."
+    },
     "scorecard/notation.js": {
       "class": "spoiler-free",
       "why": "The scorecard's pure notation rules, split off scorecardGame.js at the file cap: the non-at-bat event set, the out-kind classifier, and the diamond-center chip's single-line code. Every input is an eventType, a description sentence or an already-derived scorebook code — no feed, no linescore, no reveal mark."

@@ -21,9 +21,20 @@ import { PlayDiamond } from './PlayDiamond.jsx'
 //    this sheet's center chip is single-line (see scorecardCenterCode)
 //  • rbi, reached/scored/legNotations/outAt/outCode/outNumber — the diamond
 //
-// A substitution leaves NO mark on this box. The scorer draws the change on
-// the line of the man LEAVING, not the man arriving, so the sheet paints it
-// on the outgoing row instead (ScorecardSheet's `subMarks`).
+// TWO HANDOVER MARKS can land on this box. Both are a red rule with a uniform
+// number in red beside it, and both mean "past this line it was a different
+// man" — but they are ruled on DIFFERENT EDGES, because they cut across
+// different things.
+//  • `subJersey` — the batting order changed here. Every man who fills a slot
+//    shares its one row of boxes (his name goes on a written line of its own in
+//    the rail), so the rule stands DOWN THE LEFT EDGE of the first box the
+//    incoming batter bats in: it closes off the man before him along the row he
+//    is taking over, which is how the row reads — left to right, trip by trip.
+//  • `pitcherJersey` — the club in the field changed arms. That cuts across the
+//    ORDER, not along it, so its rule lies ACROSS THE TOP EDGE of the box of
+//    the first batter the new arm faces, his number above it.
+// A double switch sets both on one box and they never collide: one is vertical
+// at the left, the other horizontal along the top.
 //
 // Three marks the paper sheet carries that this box also draws:
 //  • `note` — the scorer's own override (lib/scorecardNotes.js): the outcome
@@ -54,39 +65,57 @@ const STRIKE_COL_CAP = 7
 // editor (ScorecardCellEditor), which opens its drafts on exactly what the
 // box shows so the two can never derive them differently.
 //
-// Outcome: the out category for an out (a called third strike reads a
-// backwards K), the result code itself for a hit / error / reach, blank for
-// an interrupted at-bat (its carry-over mark goes mid-diamond instead), and
-// "AR" for the placed automatic runner — the mark scorers put where a
-// batting result would go, same pill PlacedRunnerCard shows live.
+// Outcome: the out CATEGORY for an out — SO, GO, FO, LO, DP — the result code
+// itself for a hit / error / reach, blank for an interrupted at-bat (its
+// carry-over mark goes mid-diamond instead), and "AR" for the placed automatic
+// runner, the mark scorers put where a batting result would go (same pill
+// PlacedRunnerCard shows live).
 // Center: the fielding chain for an out — 4-3, F7, L3, 6-4-3 — or the
 // interrupted carry-over ("CS →"). `centerCode`, not the raw `code`, so a
 // GIDP's two-line play-by-play mark doesn't arrive as one unwrappable run —
 // the outcome box above already reads "DP".
+//
+// THE BACKWARDS K IS A CENTER MARK, not an outcome. A called third strike is
+// still a strikeout, so the box reads SO like any other; what tells it apart is
+// the backwards K a scorer draws where the K would go, in the middle of the
+// diamond. It used to sit in the outcome box INSTEAD of the SO, which left the
+// sheet's one column of out categories with a hole in it and put the
+// strikeout's own notation nowhere. Its `code` is often empty on a called
+// strike (see entriesView's `atbat.code || 'K'`), so the mark is decided here
+// rather than read off the feed.
+//
+// A REAL "K", MIRRORED — never the ꓘ character (U+A4D8, a Lisu letter). This
+// is the app's own way of drawing it (`.pbp__klooking`, the play-by-play card's
+// same mark) and the reason is type, not taste: JetBrains Mono has no glyph at
+// U+A4D8, so the character silently fell back to whatever system face did, and
+// one mark on a sheet of mono notation was set in a different font. `looking`
+// is returned as a flag so the CALLER flips it in CSS.
 export function atBatMarks(atbat) {
   const isPlaced = atbat?.kind === 'placed'
   const kind = atbat?.codeKind ?? ''
+  const looking = kind === 'out' && Boolean(atbat?.calledLooking)
   const outcome = isPlaced
     ? 'AR'
     : kind === 'out'
-      ? atbat?.calledLooking
-        ? 'ꓘ'
-        : atbat?.outType ?? ''
+      ? atbat?.outType ?? ''
       : kind === 'interrupted'
         ? ''
         : atbat?.code ?? ''
   const centerText = atbat?.centerCode ?? atbat?.code ?? ''
   const center =
-    kind === 'out' && !atbat?.calledLooking
-      ? centerText
-      : kind === 'interrupted'
-        ? centerText
-        : ''
+    kind === 'out' ? (looking ? 'K' : centerText) : kind === 'interrupted' ? centerText : ''
   const rbi = !isPlaced && atbat?.rbi ? String(atbat.rbi) : ''
-  return { isPlaced, kind, outcome, center, rbi }
+  return { isPlaced, kind, outcome, center, rbi, looking }
 }
 
-export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = false }) {
+export function AtBatBox({
+  atbat = null,
+  note = null,
+  onEdit = null,
+  fresh = false,
+  subJersey = null,
+  pitcherJersey = null,
+}) {
   const marks = atBatMarks(atbat)
   const { isPlaced, kind } = marks
   // The pitch ladder split into its three columns: balls (white), then two
@@ -115,12 +144,26 @@ export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = fal
   const prJersey = pinchRunners?.length ? pinchRunners[pinchRunners.length - 1].jersey : null
   const editable = Boolean(onEdit && atbat && !isPlaced)
 
+  const handover = subJersey != null || pitcherJersey != null
+
   return (
     <div
       className={`sc-ab ${note ? 'sc-ab--noted' : ''} ${
         atbat?.endsHalf ? 'sc-ab--halfend' : ''
-      } ${fresh ? 'sc-ab--fresh' : ''}`}
+      } ${fresh ? 'sc-ab--fresh' : ''} ${handover ? 'sc-ab--handover' : ''}`}
     >
+      {pitcherJersey != null && (
+        <span className="sc-sub sc-sub--pitcher" aria-hidden="true">
+          <span className="sc-sub__num sc-sub__num--pitcher">{pitcherJersey}</span>
+          <span className="sc-sub__rule" />
+        </span>
+      )}
+      {subJersey != null && (
+        <span className="sc-sub sc-sub--batter" aria-hidden="true">
+          <span className="sc-sub__rule" />
+          <span className="sc-sub__num sc-sub__num--batter">{subJersey}</span>
+        </span>
+      )}
       <div className="sc-ab__main">
         <div className="sc-ab__head">
           <span
@@ -155,6 +198,11 @@ export function AtBatBox({ atbat = null, note = null, onEdit = null, fresh = fal
                 kind === 'interrupted' && note?.center == null
                   ? 'sc-ab__center--interrupted'
                   : 'sc-ab__center--out'
+              } ${
+                /* Only the DERIVED called strike is mirrored. A scorer who
+                   pencils his own mark over this box gets the letters he
+                   typed, the right way round. */
+                marks.looking && note?.center == null ? 'sc-ab__center--looking' : ''
               }`}
             >
               {center}

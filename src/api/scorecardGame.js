@@ -44,6 +44,9 @@ import { revealInning, revealTotals } from './linescore.js'
 import { computeDerivedByInning, revealDerived } from './derive.js'
 import { computePitcherLines } from './pitchers.js'
 import { NON_AB_EVENTS, classifyOut, scorecardCenterCode } from './scorecard/notation.js'
+import { battingChangeMarks, pitchingChangeMarks } from './scorecard/handover.js'
+import { decisionLines } from './scorecard/decisions.js'
+import { finalOutClock } from './scorecard/finalout.js'
 
 // The sheet's pure notation rules live a file away (scorecard/notation.js) and
 // are re-exported here, so a caller still reaches them through this module.
@@ -128,8 +131,15 @@ function visibleInnings(feed, through) {
 // stay aligned). Reuses the game view's own per-half feed builder
 // (computeHalfInningFeed) so each cell is a real `atbat` card in exactly the
 // shape AtBatBox renders — diamond, scorebook code, RBIs, outs all free.
-// Each card is enriched with `outType` (top-left corner); a slot's handover is
-// recorded on the OUTGOING man's row instead (`subMarks`, see below).
+// Each card is enriched with `outType` (top-left corner).
+//
+// ONE ROW PER SLOT, however many men filled it. Each slot carries `lines` —
+// one written line per occupant, starter first, each with his own name,
+// position, number and AB/H/R/RBI — which the rail stacks the way a scorer
+// adds a line under the man he lifted. The boxes stay one row: a column holds
+// one card for the slot no matter who batted it. The two handover marks are
+// keyed by column and drawn ON the arriving box (`subMarks`, the incoming
+// batter's number; `pitcherMarks`, the incoming pitcher's).
 //
 // Alongside the cards, the grid carries the #22 sheet's own footer row —
 // per-inning P (pitches this side's batters saw), WH (swings and misses) and
@@ -377,65 +387,60 @@ export function scorecardPlays(feed, side /* 'top' | 'bottom' */, { through = -1
     if (colIndex >= 0) leadoffMarks.push({ slot: nextSlot, colIndex, inning })
   }
 
-  const slots = slotData.map((s) => {
+  // Each slot's cards under the shared columns — the map the sheet renders,
+  // and the input both handover marks are read off (scorecard/handover.js).
+  // Clamped for free: only revealed halves put cards in `byInning`, so a
+  // sealed half yields no cells and therefore no marks.
+  const cellsBySlot = slotData.map((s) => {
     const cells = {} // columnIndex -> card
     columns.forEach((col, ci) => {
       const card = s.byInning[col.inning]?.[col.sub]
       if (card) cells[ci] = card
     })
-    // The SUBSTITUTION MARK, and whose row it belongs on. A scorer draws the
-    // change on the line of the man LEAVING — a rule down the column where he
-    // stopped batting, with the incoming man's uniform number beside it — not
-    // on the line of the man coming in. So the boundary is detected on the
-    // arriving card (its batter differs from the slot's previous trip) but
-    // recorded against the OUTGOING occupant, keyed by the column the new man
-    // first bats in. That box is always empty on the outgoing row (a column
-    // holds one card for the whole slot, and the newcomer owns this one), so
-    // the mark never competes with notation.
-    let prevOcc = null
-    const subMarksByOcc = new Map() // occupant index -> { colIndex: jersey }
-    columns.forEach((_, ci) => {
-      const card = cells[ci]
-      if (!card) return
-      if (prevOcc != null && card.occIndex !== prevOcc) {
-        const marks = subMarksByOcc.get(prevOcc) ?? {}
-        marks[ci] = card.batter?.jersey ?? ''
-        subMarksByOcc.set(prevOcc, marks)
-      }
-      prevOcc = card.occIndex
-    })
+    return cells
+  })
+  const pitcherMarksBySlot = pitchingChangeMarks(cellsBySlot, columns)
+
+  const slots = slotData.map((s, si) => {
+    const cells = cellsBySlot[si]
+    const subMarks = battingChangeMarks(cells, columns)
     // The leadoff boxes that land on this slot's row, keyed by the shared
     // column index and valued by the INNING that ended (never a bare `true` —
     // the turn handoff has to tell the newest from every older one). They
-    // ride the slot's FIRST display row: the box sat unused, so no occupant's
-    // card competes for it.
+    // ride the slot's one row: the box sat unused, so no occupant's card
+    // competes for it.
     const leadoffCells = {}
     for (const m of leadoffMarks) {
       if (m.slot === s.slot) leadoffCells[m.colIndex] = m.inning
     }
-    // One display row per occupant (starter first), each with only his own
-    // cards under the shared columns and his own line — so a pinch-hitter gets
-    // his own sub-line beneath the starter instead of sharing one name label.
-    const rows = s.occupants.map((occ) => {
-      const occCells = {}
-      for (const ci in cells) {
-        if (cells[ci].occIndex === occ.index) occCells[ci] = cells[ci]
-      }
-      return {
-        id: occ.id,
-        name: occ.name,
-        pos: occ.pos,
-        jersey: occ.jersey,
-        cells: occCells,
-        // Where THIS man handed the slot over, and to whose number.
-        subMarks: subMarksByOcc.get(occ.index) ?? null,
-        ab: occ.ab,
-        h: occ.h,
-        r: occ.r,
-        rbi: occ.rbi,
-      }
-    })
-    return { slot: s.slot, cells, rows, leadoffCells, ab: s.ab, h: s.h, r: s.r, rbi: s.rbi }
+    // One WRITTEN LINE per occupant (starter first) — the rail's stack, not
+    // rows of the grid. A pinch-hitter gets his own name, position and number
+    // on a line under the starter's, and his own AB/H/R/RBI beside it, but he
+    // bats in the SAME row of boxes: a slot holds one card per column no
+    // matter who filled it, and splitting the grid by occupant left a
+    // full-height band of empty boxes under every starter who was lifted.
+    const lines = s.occupants.map((occ) => ({
+      id: occ.id,
+      name: occ.name,
+      pos: occ.pos,
+      jersey: occ.jersey,
+      ab: occ.ab,
+      h: occ.h,
+      r: occ.r,
+      rbi: occ.rbi,
+    }))
+    return {
+      slot: s.slot,
+      cells,
+      lines,
+      subMarks,
+      pitcherMarks: pitcherMarksBySlot.get(s.slot) ?? null,
+      leadoffCells,
+      ab: s.ab,
+      h: s.h,
+      r: s.r,
+      rbi: s.rbi,
+    }
   })
 
   // The #22's own row under the grid: P (pitches this side's batters saw that
@@ -529,17 +534,21 @@ export function scorecardScoreboard(feed, { through = -1 } = {}) {
     }
   }
 
-  // Pitchers of record, by scorebook label. Field path verified against gamePk
-  // 823035 (2026-07-07 MIL@STL g2): liveData.decisions carries winner/loser/
-  // save as { id, fullName }, and is absent until the game is Final.
-  const d = done ? feed?.liveData?.decisions ?? {} : {}
-  const decisions = {
-    wp: d.winner?.fullName ?? '',
-    lp: d.loser?.fullName ?? '',
-    sv: d.save?.fullName ?? '',
-  }
+  // Pitchers of record, by scorebook label, each with the figure a box score
+  // prints after his name — the season record for the two starters of record,
+  // the count of saves for the man who finished it. `done` is this builder's
+  // own gate (Final AND fully revealed), and the whole block is empty until it
+  // holds: which pitcher won is as score-revealing as the score.
+  const decisions = decisionLines(feed, done)
 
-  return { innings, away: side('away'), home: side('home'), decisions, done }
+  // The bottom page's header prints the time of the FINAL OUT. It rides HERE,
+  // with the FINAL line and the decisions, rather than on the spoiler-free view
+  // beside the ballpark and the weather: read against first pitch it gives the
+  // game's LENGTH, and a long one says extras (ADR-0008). Same `done`, same
+  // blank line to write on until it holds.
+  const finalOut = finalOutClock(feed, done)
+
+  return { innings, away: side('away'), home: side('home'), decisions, finalOut, done }
 }
 
 // The fielding club's pitching lines for one side of the sheet — the arms
