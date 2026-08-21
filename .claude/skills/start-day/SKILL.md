@@ -19,7 +19,7 @@ explicit yes.
 
 ## Steps
 
-Run these in order, in the primary checkout (`C:\Users\gzilavy\bbsbh`).
+Run these in order, in the primary checkout (the repo root, not a task worktree).
 
 1. **Refresh remote state.** `git fetch origin --prune`. Everything below reads
    this, so it must come first.

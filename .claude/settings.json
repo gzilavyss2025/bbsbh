@@ -73,5 +73,8 @@
       "Bash(npm run lint)",
       "mcp__github__pull_request_read"
     ]
+  },
+  "enabledPlugins": {
+    "codex@openai-codex": true
   }
 }
