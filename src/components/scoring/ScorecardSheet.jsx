@@ -103,6 +103,13 @@ export function ScorecardSheet({
   onFrontierTap = null,
   fresh = null,
   flip = null,
+  // `onWidth` reports the grid's own drawn width up, so the rest of the sheet
+  // can hold to it — Scorecard.jsx caps the header band and footer trio at
+  // exactly this, because a printed page's rules stop where its columns stop.
+  // KEEP IT STABLE (a useCallback with no deps, as that caller does): it is a
+  // dependency of `measure` below, which the ResizeObserver is subscribed with,
+  // so a fresh arrow every render re-attaches the observer every render.
+  onWidth = null,
 }) {
   // Normalize both modes to a flat column list: each column knows its header
   // label (an inning number on its first sub-column, else blank), whether it
@@ -148,11 +155,15 @@ export function ScorecardSheet({
     const pane = paneRef.current
     const table = tableRef.current
     if (!pane || !table) return
-    const natural = table.getBoundingClientRect().width / zoom
+    const drawn = table.getBoundingClientRect().width
+    const natural = drawn / zoom
     if (!natural || !pane.clientWidth) return
     const next = Math.min(1, Math.max(pane.clientWidth - FIT_SLACK, 1) / natural)
     setFloor((was) => (Math.abs(was - next) > 0.005 ? next : was))
-  }, [zoom])
+    // The DRAWN width, not the natural one: the header holds to the columns as
+    // they are being read, so pulling the zoom back pulls the band in with it.
+    onWidth?.(drawn)
+  }, [zoom, onWidth])
   // No dependency list: the sheet's width also changes when an inning widens
   // or a reveal adds a column, neither of which resizes the pane.
   useLayoutEffect(measure)

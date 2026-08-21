@@ -64,31 +64,40 @@ const STRIKE_COL_CAP = 7
 // editor (ScorecardCellEditor), which opens its drafts on exactly what the
 // box shows so the two can never derive them differently.
 //
-// Outcome: the out category for an out (a called third strike reads a
-// backwards K), the result code itself for a hit / error / reach, blank for
-// an interrupted at-bat (its carry-over mark goes mid-diamond instead), and
-// "AR" for the placed automatic runner — the mark scorers put where a
-// batting result would go, same pill PlacedRunnerCard shows live.
+// Outcome: the out CATEGORY for an out — SO, GO, FO, LO, DP — the result code
+// itself for a hit / error / reach, blank for an interrupted at-bat (its
+// carry-over mark goes mid-diamond instead), and "AR" for the placed automatic
+// runner, the mark scorers put where a batting result would go (same pill
+// PlacedRunnerCard shows live).
 // Center: the fielding chain for an out — 4-3, F7, L3, 6-4-3 — or the
 // interrupted carry-over ("CS →"). `centerCode`, not the raw `code`, so a
 // GIDP's two-line play-by-play mark doesn't arrive as one unwrappable run —
 // the outcome box above already reads "DP".
+//
+// THE BACKWARDS K IS A CENTER MARK, not an outcome. A called third strike is
+// still a strikeout, so the box reads SO like any other; what tells it apart is
+// the ꓘ a scorer draws where the K would go, in the middle of the diamond. It
+// used to sit in the outcome box INSTEAD of the SO, which left the sheet's one
+// column of out categories with a hole in it and put the strikeout's own
+// notation nowhere. Its `code` is often empty on a called strike (see
+// entriesView's `atbat.code || 'K'`), so the glyph is written here rather than
+// read off the feed.
 export function atBatMarks(atbat) {
   const isPlaced = atbat?.kind === 'placed'
   const kind = atbat?.codeKind ?? ''
   const outcome = isPlaced
     ? 'AR'
     : kind === 'out'
-      ? atbat?.calledLooking
-        ? 'ꓘ'
-        : atbat?.outType ?? ''
+      ? atbat?.outType ?? ''
       : kind === 'interrupted'
         ? ''
         : atbat?.code ?? ''
   const centerText = atbat?.centerCode ?? atbat?.code ?? ''
   const center =
-    kind === 'out' && !atbat?.calledLooking
-      ? centerText
+    kind === 'out'
+      ? atbat?.calledLooking
+        ? 'ꓘ'
+        : centerText
       : kind === 'interrupted'
         ? centerText
         : ''

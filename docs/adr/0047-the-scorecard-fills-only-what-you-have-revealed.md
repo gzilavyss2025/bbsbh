@@ -302,6 +302,37 @@ covers the classic scrollbar's share of `100vw`, without which the PAGE gained a
 horizontal scrollbar, which is the one thing a sheet must never do. The phone is
 untouched.
 
+**The page is a page, and it is centred.** The full-bleed alone left the
+scorecard reading as a banner laid across a desk: the header's two heavy rules
+and the footer trio ran on past the last summary column, and the whole thing sat
+pinned to the left gutter. A #22's printed rules stop where its COLUMNS stop, so
+the grid now reports the width it drew — Player + Pos + the innings +
+AB/H/R/RBI, hairlines included, at whatever zoom is showing — and the header
+band, the footer trio and the grid's own frame all cap to it and take `auto`
+side margins.
+
+Measured, not calculated from the `--sc-*` tokens, for exactly the reason the
+zoom floor is: the per-column hairlines are not in the tokens. `ScorecardSheet`
+already measured the table for the floor, so it reports the same rect up through
+an `onWidth` callback and `Scorecard.jsx` sets `--sc-sheet-w` on `.scorecard`.
+Capped `min(var(--sc-sheet-w), 100%)`, which is what keeps the phone out of it:
+there the grid is far WIDER than the column it is read in — that is what the
+zoom control is for — and a band held to the grid's width would run off the
+screen. Below the breakpoint the cap resolves to 100% and the auto margins have
+nothing to divide.
+
+**The backwards K moved to the middle of the diamond.** A called third strike is
+still a strikeout: the outcome box reads SO like every other one, and what tells
+it apart is the ꓘ drawn where the K goes. It used to take the outcome box
+INSTEAD of the SO, which left the sheet's one column of out categories with a
+hole in it and put the strikeout's own notation nowhere. Written in `atBatMarks`
+rather than read off the feed, since `code` is often empty on a called strike
+(entriesView's `atbat.code || 'K'` is the same workaround one layer up).
+
+**The AB/H/R/RBI figures centre in their columns**, tabular and hung off the
+row's top edge like the rail beside them, so a slot's stacked lines read
+straight across: name, position, then his four figures, each on his own line.
+
 **A CSS trap, and it was a real bug.** `.sc-sheet__name` was `display: flex`. A
 flexed `<td>` stops behaving like a cell — it shrinks to its content's height
 instead of stretching to the row's — and since this is the STICKY rail, the

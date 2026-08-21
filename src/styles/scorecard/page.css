@@ -114,6 +114,29 @@
    into a ragged stack at 390px — a fixed two-up reads like a form). The
    wide breakpoint restores the #22's one-band flow, TOP standing at the
    left of the whole row. */
+/* THE BAND STOPS WHERE THE COLUMNS STOP. `--sc-sheet-w` is the grid's own drawn
+   width, measured by ScorecardSheet and set on .scorecard by Scorecard.jsx —
+   Player + Pos + the innings + AB/H/R/RBI, hairlines included, at whatever zoom
+   is showing. On a wide screen the scorecard runs the whole window (ADR-0047's
+   full-bleed) and without this the header's two heavy rules ran on past the
+   last summary column, which reads as a banner laid across a desk rather than
+   as the top of a printed page.
+
+   `min(…, 100%)` is what keeps the phone out of it: there the grid is WIDER
+   than the column it is read in — that is what the zoom control is for — and a
+   band held to the grid's width would run off the screen. The fallback covers
+   the first paint, before the grid has been measured. */
+.sc-header,
+.sc-footer,
+.sc-sheet__frame {
+  max-width: min(var(--sc-sheet-w, 100%), 100%);
+  /* CENTRED, always. The sheet is a page on a desk, not a column pinned to the
+     left of one — so once the three bands are held to the grid's width, the
+     spare room on a wide screen falls equally either side of them. Below the
+     breakpoint the cap resolves to 100% and auto margins have nothing to
+     divide, so the phone is untouched. */
+  margin-inline: auto;
+}
 .sc-header {
   display: flex;
   flex-direction: column;

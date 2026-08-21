@@ -218,8 +218,19 @@
   vertical-align: top;
   background: var(--surface-inset);
 }
+/* The four figures a scorer totals down the right edge. Centred in their
+   columns and hung off the row's top edge like the rail beside them, so a
+   slot's stacked lines read straight across: name, position, then his AB, H, R
+   and RBI, each on his own line. Tabular figures so the columns line up
+   whatever the digits. */
 .sc-sheet__sum {
+  padding-top: 3px;
+  vertical-align: top;
   background: var(--surface-inset);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
 }
 
 /* An inning's first column carries a heavier left rule, so the eye can still

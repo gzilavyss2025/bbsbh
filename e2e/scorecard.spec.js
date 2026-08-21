@@ -143,6 +143,60 @@ test('a slot is one row: the sub takes a written line, not a band of empty boxes
   for (const n of arms) await expect(page.locator('.sc-pitchers')).toContainText(n)
 })
 
+test('the header band and footer trio stop where the columns stop', async ({ page }) => {
+  await openWithMark(page, FULL)
+  await expect(page.locator('.sc-sheet')).toBeVisible()
+  const w = await page.evaluate(() => {
+    const width = (s) => Math.round(document.querySelector(s).getBoundingClientRect().width)
+    return {
+      table: width('.sc-sheet'),
+      header: width('.sc-header'),
+      footer: width('.sc-footer'),
+      pane: width('.sc-sheet__scroll'),
+    }
+  })
+  // Neither band ever runs past the reading column it is in — this is the half
+  // that keeps the phone, where the grid is far wider than the screen, from
+  // gaining a page-wide horizontal scroll.
+  expect(w.header).toBeLessThanOrEqual(w.pane)
+  expect(w.footer).toBeLessThanOrEqual(w.pane)
+  // And where the whole sheet fits (the wide breakpoint's full-bleed), the
+  // bands hold to the grid's own drawn width rather than the window's, so the
+  // header's heavy rule ends at the RBI column.
+  if (w.table <= w.pane) {
+    expect(w.header).toBe(w.table)
+    expect(w.footer).toBe(w.table)
+    expect(w.table).toBeLessThan(w.pane)
+    // And the spare room falls equally either side — a page on a desk, not a
+    // column pinned to the left of one.
+    const gaps = await page.evaluate(() => {
+      const card = document.querySelector('.scorecard').getBoundingClientRect()
+      const band = document.querySelector('.sc-header').getBoundingClientRect()
+      return { left: Math.round(band.left - card.left), right: Math.round(card.right - band.right) }
+    })
+    expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(1)
+    expect(gaps.left).toBeGreaterThan(0)
+  }
+})
+
+test('a called third strike reads SO in the box and a backwards K in the diamond', async ({ page }) => {
+  await openWithMark(page, FULL)
+  // The ꓘ is a CENTRE mark — it belongs where the fielding chain goes, which is
+  // where a swinging K's own mark sits. It used to take the outcome box
+  // instead, which left the sheet's column of out categories with a hole in it.
+  const called = page.locator('.sc-ab', { has: page.locator('.sc-ab__center', { hasText: 'ꓘ' }) })
+  await expect(called.first()).toBeVisible()
+  await expect(called.first().locator('.sc-ab__type')).toHaveText('SO')
+  // Every one of them, not just the first — and no outcome box anywhere on the
+  // sheet carries the glyph.
+  for (const t of await called.locator('.sc-ab__type').allTextContents()) expect(t).toBe('SO')
+  expect((await page.locator('.sc-ab__type').allTextContents()).join('')).not.toContain('ꓘ')
+  // A swinging strikeout still reads SO over its own K, so the two are told
+  // apart by the centre mark alone.
+  const swinging = page.locator('.sc-ab', { has: page.locator('.sc-ab__center', { hasText: /^K$/ }) })
+  await expect(swinging.first().locator('.sc-ab__type')).toHaveText('SO')
+})
+
 test('the sticky rail stays opaque for the whole row height', async ({ page }) => {
   await openWithMark(page, FULL)
   // A flexed <td> shrank to one line of text and let the inning columns show

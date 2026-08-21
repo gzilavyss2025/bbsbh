@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ScorecardSheet } from '../components/scoring/ScorecardSheet.jsx'
 import { DefenseDiamond } from '../components/scoring/DefenseDiamond.jsx'
 import { TeamLogo } from '../components/logo/TeamLogo.jsx'
@@ -47,8 +47,33 @@ export function Scorecard({
   fresh = null,
   flip = null,
 }) {
+  // THE SHEET'S OWN WIDTH, measured by the grid and held to by everything
+  // around it. On a wide screen the scorecard runs the whole window (ADR-0047's
+  // full-bleed), but a #22's printed rules stop where its COLUMNS stop — the
+  // header band and the footer trio are part of the same page, not a banner and
+  // a caption stretched across the desk it is lying on. So the grid reports the
+  // width it drew (Player + Pos + the innings + AB/H/R/RBI, hairlines included,
+  // at whatever zoom is showing) and the two bands cap to it.
+  //
+  // Measured rather than calculated from the --sc-* tokens for the same reason
+  // the zoom floor is: the per-column hairline borders are not in the tokens,
+  // and a calculation that ignores them comes up short by a summary column or
+  // three. The epsilon stops a sub-pixel difference from ping-ponging setState;
+  // React bails out on an unchanged value, so the render-measure-render loop
+  // settles on the first pass.
+  const [sheetWidth, setSheetWidth] = useState(null)
+  const holdToSheet = useCallback((w) => {
+    setSheetWidth((was) => (was == null || Math.abs(was - w) > 0.5 ? w : was))
+  }, [])
+
   return (
-    <div className="scorecard">
+    // Capped with min(…, 100%) so the phone is untouched: there the grid is
+    // WIDER than the column it is read in (that is what the zoom control is
+    // for), and a band held to the grid's width would run off the screen.
+    <div
+      className="scorecard"
+      style={sheetWidth ? { '--sc-sheet-w': `${Math.round(sheetWidth)}px` } : undefined}
+    >
       <ScorecardHeader side={side} view={view} />
       <ScorecardSheet
         lineup={view?.lineup ?? []}
@@ -58,6 +83,7 @@ export function Scorecard({
         onFrontierTap={onFrontierTap}
         fresh={fresh}
         flip={flip}
+        onWidth={holdToSheet}
       />
       <ScorecardFooter view={view} />
     </div>
