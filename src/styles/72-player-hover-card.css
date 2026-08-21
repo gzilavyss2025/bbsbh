@@ -21,6 +21,15 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-raised);
   font-family: var(--font-body);
+  /* The card takes NO pointer. It is read-only — a headshot, a name, four
+     stat tiles, nothing to click or reach — so a reader travelling DOWN a
+     lineup passes straight through it onto the next name, which re-anchors
+     the card, instead of having to steer around it first. The card still
+     COVERS the row under it; it just no longer holds the road.
+     Anything clickable added in here turns this back on and re-creates that
+     block, so it has to earn it — and it then owes the trigger-to-card
+     travel gap a safe polygon, not a plain grace period. */
+  pointer-events: none;
 }
 
 .phcard__spine {

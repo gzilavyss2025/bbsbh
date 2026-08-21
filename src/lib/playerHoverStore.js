@@ -14,8 +14,13 @@
 // The show/hide calls are debounced through one shared timer rather than
 // firing immediately, so a fast mouse pass over a dense list of names (a
 // leaderboard, a box score) doesn't fire a request per name it glides over.
+//
+// The show delay is also HOVER INTENT, which is why it is the longer of the
+// two: a pointer travelling down a batting order to reach the name below
+// crosses several on the way, and at 150ms each of them opened a card. A
+// reader who WANTS one rests on the name; a reader in transit does not.
 
-const SHOW_DELAY_MS = 150
+const SHOW_DELAY_MS = 300
 const HIDE_DELAY_MS = 150
 
 let state = { id: null, name: null, rect: null }
@@ -52,19 +57,15 @@ export function scheduleHoverShow(id, name, rect, { immediate = false } = {}) {
 
 // Only clears state that still belongs to `id` — a leave event queued from a
 // trigger the pointer already left for a DIFFERENT one (fast mouse travel
-// between two adjacent names) must not clobber the newer hover.
+// between two adjacent names) must not clobber the newer hover. That gap
+// jitter is the WHOLE job of the hide delay now: the card itself takes no
+// pointer (72-player-hover-card.css), so there is no trigger-to-card travel
+// left to hold it open for.
 export function scheduleHoverHide(id) {
   clearTimeout(timer)
   timer = setTimeout(() => {
     if (state.id === id) commit({ id: null, name: null, rect: null })
   }, HIDE_DELAY_MS)
-}
-
-// Cancels a pending hide — the card's own onMouseEnter calls this, so moving
-// the pointer off the trigger and onto the card itself doesn't close it
-// mid-hover.
-export function cancelHoverSchedule() {
-  clearTimeout(timer)
 }
 
 // Closes immediately, no grace period — Escape, an outside click/tap, or a
