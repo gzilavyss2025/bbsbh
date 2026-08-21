@@ -11,7 +11,9 @@
 //     the whole app already uses — snapshotted here so the modal needs no fetch.
 //   - Wall heights (lf/cf/rf, feet) are NOT in statsapi; they're public
 //     measurements (the 37' Green Monster, PNC's 21' Clemente Wall, etc.).
-//   - built / roof / capacity round out the facts strip.
+//   - built / roof / capacity round out the facts strip. Capacity matches the
+//     venue endpoint's fieldInfo for 29 of the 30 parks; Rogers Centre is the
+//     one deliberate exception, and its own comment says why.
 //
 // Covers the 30 current MLB parks (the Athletics' temporary Sutter Health Park is
 // the one gap — small Triple-A footprint, distances not yet snapshotted; it
@@ -60,7 +62,16 @@ export const BALLPARKS = {
   pncpark: { name: 'PNC Park', dist: { lf: 325, lc: 410, cf: 399, rc: 375, rf: 320 }, wall: { lf: 6, cf: 10, rf: 21 }, built: 2001, roof: 'Open', capacity: 38753 },
   progressivefield: { name: 'Progressive Field', dist: { lf: 325, lc: 410, cf: 405, rc: 375, rf: 325 }, wall: { lf: 19, cf: 9, rf: 9 }, built: 1994, roof: 'Open', capacity: 34788 },
   ratefield: { name: 'Rate Field', dist: { lf: 330, lc: 377, cf: 400, rc: 372, rf: 335 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1991, roof: 'Open', capacity: 40241 },
-  rogerscentre: { name: 'Rogers Centre', dist: { lf: 328, lc: 375, cf: 404, rc: 375, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 49282 },
+  // CAPACITY DELIBERATELY NOT statsapi's. The venue endpoint still returns
+  // 49,282 for Rogers Centre — the pre-renovation, multipurpose-era listing.
+  // The $300M rebuild demolished and rebuilt the lower bowl, and the park has
+  // not come near that number since: the best regular-season night of 2026 was
+  // 43,442, the biggest crowd of the 2025 World Series 44,814, and even 2022,
+  // before the work started, topped out at 45,311. 41,500 is the figure
+  // published for the current configuration. Every other park in this table
+  // matches statsapi; this one row does not, on purpose, so a refresh of the
+  // distances must not quietly restore it.
+  rogerscentre: { name: 'Rogers Centre', dist: { lf: 328, lc: 375, cf: 404, rc: 375, rf: 328 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1989, roof: 'Retractable', capacity: 41500 },
   targetfield: { name: 'Target Field', dist: { lf: 339, lc: 377, cf: 404, rc: 367, rf: 328 }, wall: { lf: 8, cf: 8, rf: 23 }, built: 2010, roof: 'Open', capacity: 38544 },
   tmobilepark: { name: 'T-Mobile Park', dist: { lf: 331, lc: 390, cf: 405, rc: 387, rf: 327 }, wall: { lf: 8, cf: 8, rf: 8 }, built: 1999, roof: 'Retractable', capacity: 47929 },
   tropicanafield: { name: 'Tropicana Field', dist: { lf: 315, lc: 410, cf: 404, rc: 404, rf: 322 }, wall: { lf: 9, cf: 9, rf: 9 }, built: 1990, roof: 'Dome', capacity: 25025 },
