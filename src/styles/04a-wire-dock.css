@@ -1,0 +1,322 @@
+/* ------------------------------------------------------------- wire dock
+   components/transactions/WireDock.jsx — the PHONE's presentation of the
+   league's roster moves. A lettered sibling of 04-site-bar.css (precedent:
+   21/21a, 26/26a) because that partial owns .wirecard, the same feed's wide
+   surface, and it sits at its own file-size ceiling. Cascading immediately
+   after it is load-bearing: every row inside the dock is drawn by the same
+   MoveRow.jsx and wears the same .wire__* classes, so those rules must already
+   be in the sheet before the two scoped overrides at the foot of this file.
+
+   THE SHAPE. A sheet pinned to the bottom edge with three rest positions —
+   rail (a one-line peek), half (the working height) and full — that the reader
+   drags between. The games keep the top of the screen, which is the point:
+   in the flow this card stood between the reader's thumb and the thing the
+   page is named after.
+
+   WHAT JS OWNS AND WHAT CSS OWNS, because getting this backwards is how a
+   sheet ends up fighting itself:
+     * --wire-sheet-h  the sheet's height, published by WireDock's measure()
+                       rather than written as 92dvh here, so the number the
+                       drag snaps to and the number the layout uses are the
+                       same number by construction.
+     * --wire-rail-h   the rail's measured height, published onto the document
+                       element because its other consumer is the SLATE, which
+                       pads its bottom by exactly this so no game card can hide
+                       under the dock.
+     * transform / opacity  written straight onto the elements during a drag,
+                       never through a custom property — a var invalidates
+                       inherited style down the whole subtree every frame,
+                       which is the documented way to make a long list drag
+                       badly. Nothing in this file animates them by default;
+                       the transition is set per-gesture from JS.
+   ------------------------------------------------------------------------ */
+
+.wiredock {
+  position: fixed;
+  inset: 0 0 0 0;
+  z-index: 40;
+  /* The frame is a pass-through: only the sheet and (at full) the scrim take
+     taps, so at the rail the whole slate stays live behind it. This is what
+     separates a dock from a modal. */
+  pointer-events: none;
+}
+
+/* Present at every detent so it can fade continuously with the drag, and inert
+   until the sheet is actually at FULL — at the working height the dock sits
+   BESIDE the slate, and dimming the games there would break the flow the dock
+   exists to preserve. */
+.wiredock__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--navy);
+  opacity: 0;
+  pointer-events: none;
+}
+.wiredock[data-state='full'] .wiredock__scrim {
+  pointer-events: auto;
+  /* Swallows the page scroll behind it rather than locking the document: a
+     dock takes no focus trap and steals no scroll position, so there is
+     nothing to restore when it collapses. */
+  touch-action: none;
+}
+
+.wiredock__sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--wire-sheet-h, 92vh);
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+  background: var(--surface-card);
+  border-top: var(--bw-hair) solid var(--border-rule);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-raised);
+  /* The sheet is only ever moved by transform, so promote it once instead of
+     letting each gesture re-layer it. */
+  will-change: transform;
+  transform: translate3d(0, 100%, 0);
+}
+
+/* ---------------------------------------------------------------- the rail
+   The drag surface AND the resting peek. touch-action: none because the
+   browser must not claim a vertical gesture that starts here — the whole
+   gesture belongs to the sheet.
+
+   The bottom padding carries the home-indicator inset, and it stays on at
+   every detent rather than collapsing when the sheet opens. That is
+   deliberate: --wire-rail-h is measured from this element, the slate pads
+   itself by that measurement, and a rail that changed height on open would
+   silently move the slate's floor out from under a game card. */
+.wiredock__rail {
+  flex: 0 0 auto;
+  padding: var(--space-2) var(--app-gutter) calc(var(--space-2) + env(safe-area-inset-bottom));
+  touch-action: none;
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.wiredock--dragging .wiredock__rail { cursor: grabbing; }
+
+/* The one universally-read "this drags" affordance. */
+.wiredock__grabber {
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--rule-soft);
+}
+
+/* The rail's headline and the open sheet's section head occupy the SAME box
+   and cross-fade as the sheet rises, so the header re-labels itself
+   continuously instead of swapping at a boundary. Both are absolutely
+   positioned over a grid cell that holds the height open. */
+.wiredock__headbox {
+  display: grid;
+  grid-template-areas: 'head';
+  align-items: center;
+  min-height: 34px;
+}
+.wiredock__latest,
+.wiredock__head {
+  grid-area: head;
+  min-width: 0;
+}
+
+/* ----------------------------------------------------------- resting state
+   The newest move, unlinked, with the whole strip as one expand control. The
+   club's colour spine and mark answer "whose move?" before a word is read —
+   the same job they do on a ledger row, compressed into one line. */
+.wiredock__latest {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.wiredock[data-state='half'] .wiredock__latest,
+.wiredock[data-state='full'] .wiredock__latest {
+  pointer-events: none;
+}
+
+/* Decorative and text-free — no contrast floor applies, and no copy sits on
+   it. Takes the club colour of the newest move, so the dock quietly wears the
+   league's most recent news. */
+.wiredock__spine {
+  flex: 0 0 auto;
+  width: 3px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--wire-club, var(--graphite));
+}
+.wiredock__mark { flex: 0 0 auto; }
+
+.wiredock__line {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+.wiredock__club {
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+/* One line, clipped — the ledger below is where a long move gets its room.
+   Set in the reading serif like every other cutline in the app. */
+.wiredock__cut {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-read);
+  font-size: var(--fs-small);
+  line-height: var(--lh-snug);
+  color: var(--text-body);
+}
+.wiredock__count {
+  flex: 0 0 auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--bg-canvas);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-caption);
+  color: var(--text-caption);
+}
+.wiredock__chevron {
+  flex: 0 0 auto;
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+  color: var(--graphite-soft);
+}
+
+/* ------------------------------------------------------------- open state */
+.wiredock__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+.wiredock[data-state='half'] .wiredock__head,
+.wiredock[data-state='full'] .wiredock__head {
+  pointer-events: auto;
+}
+.wiredock__title,
+.wiredock__note {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-label);
+  font-weight: var(--w-bold);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-heading);
+}
+.wiredock__note {
+  font-weight: var(--w-semibold);
+  color: var(--graphite-soft);
+}
+.wiredock__close {
+  margin-left: auto;
+  min-width: var(--tap-min);
+  min-height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--bg-canvas);
+  color: var(--text-caption);
+  font-size: var(--fs-body);
+  line-height: var(--lh-solid);
+  cursor: pointer;
+}
+
+.wiredock__latest:focus-visible,
+.wiredock__close:focus-visible {
+  outline: var(--bw-heavy) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- the list
+   Scrolls on its own. `overscroll-behavior: contain` is what lets the sheet
+   own a downward drag from scrollTop 0 without the page bouncing behind it,
+   and `pan-y` leaves the upward scroll to the browser — together they are the
+   whole scroll-versus-drag resolution, with no timer involved. */
+.wiredock__list {
+  flex: 1 1 auto;
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--app-gutter) calc(var(--space-6) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+/* At the rail the list is off-screen anyway; hiding it from the pointer stops
+   a tap that lands in the sliver below the rail on a short viewport. */
+.wiredock[data-state='rail'] .wiredock__list { pointer-events: none; }
+
+/* The dock's own rows want a little more air than the wide card's, because a
+   thumb rather than a mouse is picking a club name out of them. Scoped so the
+   in-flow .wirecard is untouched. */
+.wiredock__list .wire__row {
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+.wiredock__list .wire__row:last-child { border-bottom: none; }
+
+/* #root ties the ID component of #root *'s specificity — a plain selector
+   loses to the ALL-CAPS INVARIANT and is a silent no-op. Same technique and
+   the same split as #root .wire__cutline (04-site-bar.css). */
+#root .wiredock__cut {
+  text-transform: none; /* caps-exempt: the rail's cutline reads as a natural sentence */
+}
+
+/* ------------------------------------------------------------ the slate's
+   floor. Published by the dock, consumed here: the screen pads its bottom by
+   exactly the rail's measured height so the last game card, the footer and —
+   the one that actually matters — the Reveal all results bar are never under
+   the dock. A scoring surface may not have its seal control covered. */
+.screen--slate.screen--wiredock {
+  padding-bottom: calc(var(--wire-rail-h, 62px) + var(--space-4));
+}
+.screen--slate.screen--wiredock .pagenav--revealall {
+  bottom: var(--wire-rail-h, 62px);
+}
+
+/* --------------------------------------------------------- reduced motion
+   The 1:1 drag stays — direct manipulation is not decoration, and a sheet that
+   stopped following the finger would be broken, not calmer. Only the settle
+   goes, and it goes in JS (settleMs is skipped, so the transition is never
+   set); this block is the belt to that braces, covering the transitions the
+   rules above declare. */
+@media (prefers-reduced-motion: reduce) {
+  .wiredock__sheet,
+  .wiredock__scrim,
+  .wiredock__latest,
+  .wiredock__head {
+    transition: none !important;
+  }
+}
+
+/* ----------------------------------------------------------- wide layout
+   The dock is a phone idiom. GameSelect already swaps it for the in-flow
+   .wirecard at WIDE_QUERY so this should never mount here, but a stale
+   --wire-rail-h left on the document element by a resize mid-session would
+   still pad the slate for a rail that is gone. Belt and braces. */
+@media (min-width: 740px) {
+  .wiredock { display: none; }
+  .screen--slate.screen--wiredock { padding-bottom: 0; }
+  .screen--slate.screen--wiredock .pagenav--revealall { bottom: 0; }
+}
