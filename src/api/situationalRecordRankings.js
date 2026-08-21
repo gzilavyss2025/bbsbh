@@ -129,14 +129,22 @@ export function buildRankingIndex(entries, { cutoff = null, half = 'all' } = {})
 // Ranking one metric
 // ---------------------------------------------------------------------------
 
-// What "best first" means depends on the metric, which is the whole reason
-// COUNT_METRICS carries `better`. Fewest losses after leading is an
-// achievement and most is not, so that column opens ASCENDING while the one
-// beside it opens descending. A W-L split always reads best-first as the
-// highest win percentage, and its "how often" sort reads most-often first — a
-// neutral question (scoring 4+ often is a good sign, being shut out often is
-// not), so both of those simply start high.
-export function defaultOrder(metric) {
+// The board always opens biggest-number-first, whatever the metric — most
+// days in 5th place, most times swept, the longest losing streak. That is a
+// browsing default, not a judgment; a "low is better" count reads odd sorted
+// big-first, but leading with a small, mostly-zero column reads as an empty
+// board. `bestOrder` below is the separate, quality-aware direction the flip
+// label compares against.
+export function defaultOrder() {
+  return 'desc'
+}
+
+// Which direction is the GOOD end, for the metrics where that question has an
+// answer. Fewest losses after leading is an achievement and most is not, so
+// this reads ASCENDING for a "low is better" count while `defaultOrder` still
+// opens it descending. A W-L split always reads best-first as the highest win
+// percentage.
+export function bestOrder(metric) {
   if (metric?.kind === 'count' && metric.better === 'low') return 'asc'
   return 'desc'
 }
@@ -169,7 +177,7 @@ function sortKey(row, metric, sortBy) {
 export function rankMetric(index, metricId, { sortBy = 'pct', order } = {}) {
   const metric = index.metrics.get(metricId)
   if (!metric) return null
-  const dir = order ?? defaultOrder(metric)
+  const dir = order ?? defaultOrder()
   const present = index.byMetric.get(metricId) ?? []
   const have = new Set(present.map((r) => r.teamId))
 

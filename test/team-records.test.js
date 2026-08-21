@@ -26,7 +26,7 @@ import {
   isGetawayDay,
   dailyDivisionRanks,
 } from '../scripts/lib/team-records.mjs'
-import { teamRecordsFor, longestStreaks, sweepCounts, daysAtPlace } from '../src/api/teamRecords.js'
+import { teamRecordsFor, longestStreaks, sweepCounts, seriesRecordCounts, daysAtPlace } from '../src/api/teamRecords.js'
 
 // A linescore's innings array, from `[away, home]` pairs. `null` home means
 // that side did not bat.
@@ -288,6 +288,14 @@ test('a split with no games is dropped rather than printed as 0-0', () => {
   assert.equal(rowsOf(result, 'Hits and homers', 'Not hitting a home run'), undefined)
 })
 
+test('leading/trailing/tied rows name the inning and cover all three states after 6', () => {
+  const result = teamRecordsFor(shard([row({ l6: 0 }), row({ d: '2026-04-02', l6: 1, r: 'L' })]))
+  assert.equal(rowsOf(result, 'Leading and trailing', 'Tied after 6 innings').v, '1-0')
+  assert.equal(rowsOf(result, 'Leading and trailing', 'Leading after 6 innings').v, '0-1')
+  assert.equal(rowsOf(result, 'Leading and trailing', 'Trailing after 6 innings'), undefined)
+  assert.equal(rowsOf(result, 'Leading and trailing', 'Leading after 6'), undefined)
+})
+
 test('an unresolved starting hand counts in neither the RHS nor the LHS row', () => {
   const result = teamRecordsFor(shard([row({ oh: 'L' }), row({ d: '2026-04-02' })]))
   assert.equal(rowsOf(result, 'Starting pitching', 'Vs. left-handed starter').v, '1-0')
@@ -372,6 +380,28 @@ test('a one-game series is not a sweep', () => {
     swept: 0,
     sweptBy: 0,
   })
+})
+
+test('a series win/loss counts every complete series, not just sweeps', () => {
+  const series = [
+    // Won, not swept: 2-1.
+    { d: '2026-04-01', o: 10, r: 'W', sg: 1, sl: 3 },
+    { d: '2026-04-02', o: 10, r: 'W', sg: 2, sl: 3 },
+    { d: '2026-04-03', o: 10, r: 'L', sg: 3, sl: 3 },
+    // Lost, not swept: 1-2.
+    { d: '2026-04-08', o: 11, r: 'L', sg: 1, sl: 3 },
+    { d: '2026-04-09', o: 11, r: 'W', sg: 2, sl: 3 },
+    { d: '2026-04-10', o: 11, r: 'L', sg: 3, sl: 3 },
+    // Split down the middle: neither a series win nor a series loss.
+    { d: '2026-04-15', o: 12, r: 'W', sg: 1, sl: 4 },
+    { d: '2026-04-16', o: 12, r: 'L', sg: 2, sl: 4 },
+    { d: '2026-04-17', o: 12, r: 'W', sg: 3, sl: 4 },
+    { d: '2026-04-18', o: 12, r: 'L', sg: 4, sl: 4 },
+  ]
+  assert.deepEqual(seriesRecordCounts(series), { won: 1, lost: 1 })
+  // Cut the last game of the first set — a series straddling the filter
+  // belongs to neither total.
+  assert.deepEqual(seriesRecordCounts(series.slice(0, 2)), { won: 0, lost: 0 })
 })
 
 test('days at a place respect the cutoff and the chosen half', () => {

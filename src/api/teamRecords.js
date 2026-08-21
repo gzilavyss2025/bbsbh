@@ -94,14 +94,15 @@ export const RECORD_GROUPS = [
   {
     title: 'Leading and trailing',
     rows: [
-      { id: 'lead-6', k: 'Leading after 6', p: (g) => g.l6 === 1 },
-      { id: 'trail-6', k: 'Trailing after 6', p: (g) => g.l6 === -1 },
-      { id: 'lead-7', k: 'Leading after 7', p: (g) => g.l7 === 1 },
-      { id: 'trail-7', k: 'Trailing after 7', p: (g) => g.l7 === -1 },
-      { id: 'tied-7', k: 'Tied after 7', p: (g) => g.l7 === 0 },
-      { id: 'lead-8', k: 'Leading after 8', p: (g) => g.l8 === 1 },
-      { id: 'trail-8', k: 'Trailing after 8', p: (g) => g.l8 === -1 },
-      { id: 'tied-8', k: 'Tied after 8', p: (g) => g.l8 === 0 },
+      { id: 'lead-6', k: 'Leading after 6 innings', p: (g) => g.l6 === 1 },
+      { id: 'trail-6', k: 'Trailing after 6 innings', p: (g) => g.l6 === -1 },
+      { id: 'tied-6', k: 'Tied after 6 innings', p: (g) => g.l6 === 0 },
+      { id: 'lead-7', k: 'Leading after 7 innings', p: (g) => g.l7 === 1 },
+      { id: 'trail-7', k: 'Trailing after 7 innings', p: (g) => g.l7 === -1 },
+      { id: 'tied-7', k: 'Tied after 7 innings', p: (g) => g.l7 === 0 },
+      { id: 'lead-8', k: 'Leading after 8 innings', p: (g) => g.l8 === 1 },
+      { id: 'trail-8', k: 'Trailing after 8 innings', p: (g) => g.l8 === -1 },
+      { id: 'tied-8', k: 'Tied after 8 innings', p: (g) => g.l8 === 0 },
     ],
   },
   {
@@ -225,12 +226,15 @@ export function longestStreaks(games) {
 // middle game cannot invent a series that never happened. A series is only
 // counted when ALL of its games are inside the filter — a set straddling the
 // All-Star break belongs to neither half.
-export function sweepCounts(games) {
+// The complete series in the filtered games, grouped by opponent and the
+// date of the series opener (unique per club, since `sg` counts up from 1
+// within each series). A series straddling the filter's edge — a rained-out
+// middle game, a set split by the All-Star break — never appears whole here,
+// which is what "complete" means below.
+function completeSeries(games) {
   const bySeries = new Map()
   for (const g of games) {
     if (!g.sl || g.sl < 2) continue
-    // A series is keyed by its opponent and the date of its opener, which is
-    // unique per club: `sg` counts up from 1 within each series.
     const openerIndex = games.indexOf(g) - (g.sg - 1)
     const opener = games[openerIndex]
     if (!opener) continue
@@ -238,14 +242,33 @@ export function sweepCounts(games) {
     if (!bySeries.has(key)) bySeries.set(key, { len: g.sl, rows: [] })
     bySeries.get(key).rows.push(g)
   }
+  return [...bySeries.values()].filter((s) => s.rows.length === s.len)
+}
+
+export function sweepCounts(games) {
   let swept = 0
   let sweptBy = 0
-  for (const s of bySeries.values()) {
-    if (s.rows.length !== s.len) continue
+  for (const s of completeSeries(games)) {
     if (s.rows.every((r) => r.r === 'W')) swept++
     else if (s.rows.every((r) => r.r === 'L')) sweptBy++
   }
   return { swept, sweptBy }
+}
+
+// The plain series result — won more games than lost, whether or not it was a
+// sweep. An even-length series split down the middle (2-2 in a 4-game set) is
+// neither a series win nor a series loss, the same way a tied W-L split has no
+// winning side.
+export function seriesRecordCounts(games) {
+  let won = 0
+  let lost = 0
+  for (const s of completeSeries(games)) {
+    const wins = s.rows.filter((r) => r.r === 'W').length
+    const losses = s.rows.filter((r) => r.r === 'L').length
+    if (wins > losses) won++
+    else if (losses > wins) lost++
+  }
+  return { won, lost }
 }
 
 // Days spent at each division place, 1st through 5th, from the generator's
@@ -273,7 +296,9 @@ export function daysAtPlace(dailyRank, { cutoff, half, allStarDate }) {
 // bullpen in the league at the top of a list titled the same way as the best.
 //
 //   high    — the leader is first when the list is sorted best-first
-//   low     — the leader is LAST; fewest is the achievement
+//   low     — fewest is the achievement, even though the ranking page's
+//             browse default still opens every count biggest-first
+//             (situationalRecordRankings.js's defaultOrder vs. bestOrder)
 //   neutral — an honest ordering exists but neither end is praise. Days in 2nd
 //             and 3rd place are the case: a lot of them can mean a good club
 //             that never caught the division or a bad one that never fell out
@@ -303,6 +328,10 @@ export const COUNT_METRICS = [
   { id: 'count-batted-around', k: 'Times batted around', better: 'high', get: (c) => c.battedAround },
   { id: 'count-sweeps', k: 'Series sweeps', better: 'high', get: (c) => c.swept },
   { id: 'count-swept', k: 'Series swept', better: 'low', get: (c) => c.sweptBy },
+  // The plain series result, sweep or not — won more games in the set than it
+  // lost. A series split down the middle counts toward neither.
+  { id: 'count-series-won', k: 'Series wins', better: 'high', get: (c) => c.seriesWon },
+  { id: 'count-series-lost', k: 'Series losses', better: 'low', get: (c) => c.seriesLost },
   { id: 'count-win-streak', k: 'Longest win streak', better: 'high', get: (c) => c.streaks.wins },
   { id: 'count-losing-streak', k: 'Longest losing streak', better: 'low', get: (c) => c.streaks.losses },
   ...PLACES.map((place, i) => ({
@@ -402,6 +431,8 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
     if (leagueRows.length) opponentGroups.push({ title: 'By league', rows: leagueRows })
   }
 
+  const seriesRecord = seriesRecordCounts(games)
+
   return {
     allStarDate,
     gamesCounted: games.length,
@@ -415,6 +446,8 @@ export function teamRecordsFor(data, { cutoff = null, half = 'all' } = {}) {
       shutoutsThrown: games.filter((g) => g.ra === 0).length,
       shutoutsSuffered: games.filter((g) => g.rs === 0).length,
       ...sweepCounts(games),
+      seriesWon: seriesRecord.won,
+      seriesLost: seriesRecord.lost,
       streaks: longestStreaks(games),
       daysAtPlace: daysAtPlace(data.dailyRank, { cutoff, half, allStarDate }),
     },

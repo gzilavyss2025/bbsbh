@@ -2,14 +2,15 @@
 // (src/api/situationalRecordRankings.js): one situational split, every club at a
 // level, in rank order.
 //
-// The cases here are the ones where "sort it highest first" is the wrong
-// answer — a count whose good end is the low one, a club that has never been in
-// the split at all, a shared rank, and a split that exists at MLB but not below
-// it. The tally itself is teamRecords.js's and is pinned in
-// test/team-records.test.js; nothing is re-tested here.
+// The cases here are the ones where the browse default and the quality
+// framing point different ways — a count whose good end is the low one still
+// opens biggest-first, a club that has never been in the split at all, a
+// shared rank, and a split that exists at MLB but not below it. The tally
+// itself is teamRecords.js's and is pinned in test/team-records.test.js;
+// nothing is re-tested here.
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { buildRankingIndex, rankMetric, defaultOrder } from '../src/api/situationalRecordRankings.js'
+import { buildRankingIndex, rankMetric, defaultOrder, bestOrder } from '../src/api/situationalRecordRankings.js'
 
 const row = (over) => ({ d: '2026-04-01', o: 10, r: 'W', rs: 4, ra: 2, hi: 9, ha: 7, ...over })
 
@@ -71,16 +72,20 @@ test('months sort by the calendar, not by whichever club opened its season first
 // Which end is the good one
 // ---------------------------------------------------------------------------
 
-test('a count whose good end is the low one opens ascending, not highest-first', () => {
+test('a count whose good end is the low one still opens biggest-first by default', () => {
   const index = buildRankingIndex([
     entry(1, 'Alphas', [row({ ll: 1 }), row({ d: '2026-04-02', ll: 1, r: 'L' })]),
     entry(2, 'Betas', [row({})]),
   ])
   const result = rankMetric(index, 'count-losses-after-leading')
-  assert.equal(result.order, 'asc')
-  // Fewest first: the club that has never blown a lead leads the column.
-  assert.deepEqual(ranked(result), [['Betas', 1], ['Alphas', 2]])
+  assert.equal(result.order, 'desc')
+  // Biggest first: the browse default leads with the most, even on a count
+  // where fewest is the achievement — bestOrder, not defaultOrder, is what
+  // knows fewest is good here.
+  assert.deepEqual(ranked(result), [['Alphas', 1], ['Betas', 2]])
   assert.ok(result.byQuality)
+  assert.equal(defaultOrder(), 'desc')
+  assert.equal(bestOrder(result.metric), 'asc')
 })
 
 test('the same shape read the other way round still opens with the leader on top', () => {
@@ -111,9 +116,9 @@ test('an explicit order overrides the metric’s own default', () => {
     entry(1, 'Alphas', [row({ ll: 1 })]),
     entry(2, 'Betas', [row({})]),
   ])
-  const flipped = rankMetric(index, 'count-losses-after-leading', { order: 'desc' })
-  assert.deepEqual(ranked(flipped), [['Alphas', 1], ['Betas', 2]])
-  assert.equal(defaultOrder(flipped.metric), 'asc')
+  const flipped = rankMetric(index, 'count-losses-after-leading', { order: 'asc' })
+  assert.deepEqual(ranked(flipped), [['Betas', 1], ['Alphas', 2]])
+  assert.equal(defaultOrder(), 'desc')
 })
 
 // ---------------------------------------------------------------------------

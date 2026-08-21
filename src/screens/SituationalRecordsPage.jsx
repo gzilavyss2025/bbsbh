@@ -1,7 +1,7 @@
 import '../styles/66-situational-records.css'
 import '../styles/situational-records/66a-detail.css'
 import { useMemo } from 'react'
-import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, defaultOrder } from '../api/situationalRecordRankings.js'
+import { fetchLevelTeamRecords, buildRankingIndex, rankMetric, bestOrder } from '../api/situationalRecordRankings.js'
 import { HALVES } from '../api/teamRecords.js'
 import { seasonOf, cutoffFor } from './team/data/shared.js'
 import { SPORT_LABEL, offDayTreatmentFor } from '../lib/teams.js'
@@ -250,7 +250,7 @@ export function SituationalRecordsPage({
   const showHalves = (data ?? []).some((entry) => entry.data?.allStarDate)
   const dir = result?.order ?? 'desc'
   const flipLabel = result?.byQuality
-    ? dir === defaultOrder(metric)
+    ? dir === bestOrder(metric)
       ? 'Best first'
       : 'Worst first'
     : dir === 'desc'
