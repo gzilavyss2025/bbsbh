@@ -93,3 +93,28 @@ test('a wheel closes the card even when nothing scrolls', async ({ page }) => {
   await page.evaluate(() => window.dispatchEvent(new WheelEvent('wheel', { deltaY: 120, bubbles: true })))
   await expect(page.locator(CARD)).toHaveCount(0)
 })
+
+// The close-on-wheel listener above mounts only while a card is open, and that
+// scoping is load-bearing rather than incidental: a Mac trackpad flick keeps
+// firing scroll and wheel events for up to a second after the fingers lift, so
+// a listener that ran all the time would clear the PENDING show of a card the
+// reader is deliberately pointing at — `hideHoverNow` kills the open timer
+// whether or not anything is showing yet. Hoisting it out of the `active` gate
+// would look like a tidy-up and would cost the card every time someone lands
+// on a name while the page is still coasting.
+test('a trailing inertia tick does not cancel a card the reader is asking for', async ({ page }) => {
+  await openLineup(page)
+
+  const name = page.locator('.lineup__name').first()
+  await name.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(SETTLE_MS)
+  await name.hover()
+
+  // Inside the open delay, which is what makes this test the pending-show case
+  // rather than a repeat of the one above. Asserted, not assumed — if the card
+  // is already up, the wheel below is testing close-while-open instead.
+  await expect(page.locator(CARD)).toHaveCount(0)
+  await page.evaluate(() => window.dispatchEvent(new WheelEvent('wheel', { deltaY: 4, bubbles: true })))
+
+  await expect(page.locator(CARD)).toBeVisible()
+})
