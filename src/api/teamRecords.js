@@ -123,6 +123,12 @@ export const RECORD_GROUPS = [
       { id: 'starter-under-6', k: 'Starter goes under 6', p: (g) => starterOuts(g) != null && g.si < 18 },
       { id: 'opp-starter-6-plus', k: 'Opposing starter 6+', p: (g) => oppStarterOuts(g) != null && g.oi >= 18 },
       { id: 'opp-starter-under-6', k: 'Opposing starter under 6', p: (g) => oppStarterOuts(g) != null && g.oi < 18 },
+      // No statsapi field marks a start as a planned "opener" rather than an
+      // ace's bad night — this is a length heuristic, same tolerance the
+      // quality-start row already accepts. Five outs covers the common
+      // 1-2 inning opener stint, not just a bare single inning.
+      { id: 'used-opener', k: 'Started a game with an opener', p: (g) => starterOuts(g) != null && g.si <= 5 },
+      { id: 'faced-opener', k: 'Faced an opener', p: (g) => oppStarterOuts(g) != null && g.oi <= 5 },
       { id: 'vs-rhs', k: 'Vs. right-handed starter', p: (g) => g.oh === 'R' },
       { id: 'vs-lhs', k: 'Vs. left-handed starter', p: (g) => g.oh === 'L' },
     ],

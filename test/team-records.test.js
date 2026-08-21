@@ -302,6 +302,15 @@ test('an unresolved starting hand counts in neither the RHS nor the LHS row', ()
   assert.equal(rowsOf(result, 'Starting pitching', 'Vs. right-handed starter'), undefined)
 })
 
+test('an opener row is a length heuristic, not a role flag — 5 outs or fewer either side', () => {
+  const result = teamRecordsFor(shard([
+    row({ si: 5, oi: 21 }),
+    row({ d: '2026-04-02', si: 21, oi: 3, r: 'L' }),
+  ]))
+  assert.equal(rowsOf(result, 'Starting pitching', 'Started a game with an opener').v, '1-0')
+  assert.equal(rowsOf(result, 'Starting pitching', 'Faced an opener').v, '0-1')
+})
+
 test('the cutoff drops later games entirely, so a dated page cannot look ahead', () => {
   const result = teamRecordsFor(
     shard([row({ d: '2026-04-01' }), row({ d: '2026-04-09', r: 'L' })]),
